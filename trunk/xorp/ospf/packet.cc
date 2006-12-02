@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.35 2006/12/01 23:10:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.36 2006/12/02 00:00:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -32,6 +32,7 @@
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 #include "libproto/checksum.h"
+#include "libproto/packet.hh"
 
 #include <map>
 #include <list>
@@ -49,6 +50,69 @@ uint16_t
 checksum(uint8_t *ptr, size_t len)
 {
     return htons(inet_checksum(ptr, len));
+}
+
+template <>
+void
+check_ipv6_pseudo_header_checksum<IPv6>(const IPv6& src, const IPv6& dst,
+					uint8_t *data, size_t len,
+					size_t checksum_offset,
+					uint8_t protocol)
+{
+    debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+	      cstring(src), cstring(dst),
+	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+	      protocol);
+
+    if (len < checksum_offset)
+	xorp_throw(InvalidPacket,
+		   c_format("Checksum offset %u greater than packet length %u",
+			    XORP_UINT_CAST(checksum_offset),
+			    XORP_UINT_CAST(len)));
+
+    uint8_t pseudo_header[16	/* Source address */ 
+			  + 16	/* Destination address */
+			  + 4 	/* Upper-layer packet length */
+			  + 3 	/* Zero */
+			  + 1	/* Upper-layer protocol number */
+			  ];
+
+    //    memset(&pseudo_header[0], 0, sizef(pseudo_header));
+
+    src.copy_out(&pseudo_header[0]);
+    dst.copy_out(&pseudo_header[16]);
+    embed_32(&pseudo_header[16 + 16], len);
+    embed_24(&pseudo_header[16 + 16 + 4], 0);
+    pseudo_header[16 + 16 + 4 + 3] = protocol;
+
+    // Save a copy of the checksum
+    uint16_t checksum_inpacket = extract_16(&data[checksum_offset]);
+    // Zero the checksum location.
+    embed_16(&data[checksum_offset], 0);
+    uint16_t checksum_actual = 
+	inet_checksum_add(checksum(&pseudo_header[0],sizeof(pseudo_header)),
+			  checksum(data, len));
+    // Put the checksum back
+    embed_16(&data[checksum_offset], checksum_inpacket);
+						 ;
+    if (checksum_inpacket != checksum_actual)
+	xorp_throw(InvalidPacket,
+		   c_format("Checksum mismatch expected %#x received %#x",
+			    checksum_actual,
+			    checksum_inpacket));
+}
+
+template <>
+void
+check_ipv6_pseudo_header_checksum<IPv4>(const IPv4& src, const IPv4& dst,
+					uint8_t *data, size_t len,
+					size_t checksum_offset,
+					uint8_t protocol)
+{
+    debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+	      cstring(src), cstring(dst),
+	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+	      protocol);
 }
 
 #ifdef	DEBUG_RAW_PACKETS
@@ -159,6 +223,8 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 	break;
     case OspfTypes::V3:
 	set_instance_id(ptr[14]);
+	// For OSPFv3 the checksum has already been checked.
+	return get_standard_header_length();
 	break;
     }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.77 2006/11/23 01:25:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.78 2006/12/02 00:00:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -76,6 +76,9 @@ Ospf<A>::receive(const string& interface, const string& vif,
 
     Packet *packet;
     try {
+	check_ipv6_pseudo_header_checksum<A>(src, dst, data, len,
+					     Packet::CHECKSUM_OFFSET,
+					     _io->get_ip_protocol_number());
 	packet = _packet_decoder.decode(data, len);
     } catch(InvalidPacket& e) {
 	XLOG_ERROR("%s", cstring(e));

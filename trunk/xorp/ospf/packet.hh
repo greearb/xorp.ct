@@ -13,12 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.33 2006/12/02 00:00:30 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.34 2006/12/02 00:53:58 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
-
-#include "libproto/packet.hh"
 
 /**
  * All packet decode routines must inherit from this interface.
@@ -769,5 +767,12 @@ class Options {
      OspfTypes::Version _version;
      uint32_t _options;
 };
+
+template <typename A> 
+void
+check_ipv6_pseudo_header_checksum(const A& src, const A& dst,
+				  uint8_t *data, size_t len,
+				  size_t checksum_offset,
+				  uint8_t protocol);
 
 #endif // __OSPF_PACKET_HH__
