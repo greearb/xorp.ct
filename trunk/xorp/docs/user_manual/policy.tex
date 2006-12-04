@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.17 2006/11/06 23:04:07 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.18 2006/11/06 23:51:10 pavlin Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -467,6 +467,30 @@ Instead, the {\tt network4 <= 10.0.0.0/4} statement alone should be used
 for that purpose.
 The same applies for the {\tt network6} and {\tt prefix-length6}
 statements as well.
+
+The following comparison operators or keywords can be used to match network
+prefixes:
+
+\begin{itemize}
+  \item {\tt ==} or {\tt exact} to match the given network prefix.
+
+  \item {\tt <} or {\tt longer} to match all network prefixes that are
+  covered by the given network prefix (that prefix excluded).
+
+  \item {\tt <=} or {\tt orlonger} to match all network prefixes that
+  are covered by the given network prefix (that prefix included).
+
+  \item {\tt >} or {\tt shorter} to match all network prefixes that cover
+  the given network prefix (that prefix excluded).
+
+  \item {\tt >=} or {\tt orshorter} to match all network prefixes that
+  cover the given network prefix (that prefix included).
+
+  \item {\tt !=} or {\tt not} to match all network prefixes except the
+  given one.
+
+\end{itemize}
+
 
 The match conditions for the {\tt to} block are identical in syntax and
 semantics as the {\tt from} block except for one case.  It is illegal to specify
