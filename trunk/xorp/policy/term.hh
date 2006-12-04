@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.12 2006/05/12 02:21:38 pavlin Exp $
+// $XORP: xorp/policy/term.hh,v 1.13 2006/09/08 18:44:36 mjh Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
@@ -131,6 +131,21 @@ public:
      */
     static string block2str(uint32_t num); 
 
+    /**
+     * Get the protocol name (in the "from" block).
+     *
+     * @return the protocol name (in the "from" block) if set, otherwise
+     * an empty string.
+     */
+    const string& from_protocol() const { return (_from_protocol); }
+
+    /**
+     * Set the protocol name (in the "from" block).
+     *
+     * @param v the protocol name (in the "from" block).
+     */
+    void set_from_protocol(const string& v) { _from_protocol = v; }
+
 private:
     list<pair<ConfigNodeId, Node*> >::iterator find_out_of_order_node(
 	const uint32_t& block, const ConfigNodeId& order);
@@ -143,6 +158,8 @@ private:
     Nodes*& _source_nodes; 
     Nodes*& _dest_nodes;
     Nodes*& _action_nodes;
+
+    string  _from_protocol;	// The protocol (in the "from" block)
 
     // not impl
     Term(const Term&);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.11 2006/09/08 18:44:35 mjh Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.12 2006/12/02 01:01:47 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -113,8 +113,10 @@ SourceMatchCodeGenerator::visit_term(Term& term)
     // statements.
     //
     for(i = source.begin(); i != source.end(); ++i) {
-	if ((i->second)->is_protocol_statement())
+	if ((i->second)->is_protocol_statement()) {
 	    (i->second)->accept(*this);
+	    term.set_from_protocol(_protocol);
+	}
     }
 
     //
