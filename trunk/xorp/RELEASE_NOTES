@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.150 2006/11/12 23:52:05 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.151 2006/11/14 21:29:08 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -73,6 +73,17 @@ Release 1.4-WIP (2006/??/??)
               network 3333::/64
           }
       }
+
+    - The following keywords are supported inside the policy
+      configuration when comparing IPv4 or IPv6 network prefixes:
+      exact, longer, orlonger, shorter, orshorter, not. For example:
+
+      "network4 exact 10.0.0.0/8"     SAME AS "network4 == 10.0.0.0/8"
+      "network4 longer 10.0.0.0/8"    SAME AS "network4 < 10.0.0.0/8"
+      "network4 orlonger 10.0.0.0/8"  SAME AS "network4 <= 10.0.0.0/8"
+      "network4 shorter 10.0.0.0/8"   SAME AS "network4 > 10.0.0.0/8"
+      "network4 orshorter 10.0.0.0/8" SAME AS "network4 >= 10.0.0.0/8"
+      "network4 not 10.0.0.0/8"       SAME AS "network4 != 10.0.0.0/8"
 
   LIBXORP:
     - 
