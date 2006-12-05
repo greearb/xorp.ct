@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.35 2006/12/02 02:12:26 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.36 2006/12/05 19:58:40 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -785,7 +785,8 @@ class Options {
  */
 template <typename A> 
 void
-ipv6_checksum_verify(const A& src, const A& dst, uint8_t *data, size_t len,
+ipv6_checksum_verify(const A& src, const A& dst,
+		     const uint8_t *data, size_t len,
 		     size_t checksum_offset, uint8_t protocol)
     throw(InvalidPacket);
 

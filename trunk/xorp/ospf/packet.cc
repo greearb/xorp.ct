@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.37 2006/12/02 02:12:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.38 2006/12/05 19:58:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -55,7 +55,7 @@ checksum(uint8_t *ptr, size_t len)
 template <>
 void
 ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
-			   uint8_t *data, size_t len,
+			   const uint8_t *data, size_t len,
 			   size_t checksum_offset,
 			   uint8_t protocol) throw(InvalidPacket)
 {
@@ -83,27 +83,33 @@ ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
     embed_24(&pseudo_header[16 + 16 + 4], 0);
     pseudo_header[16 + 16 + 4 + 3] = protocol;
 
-    // Save a copy of the checksum
-    uint16_t checksum_inpacket = extract_16(&data[checksum_offset]);
-    // Zero the checksum location.
-    embed_16(&data[checksum_offset], 0);
-    uint16_t checksum_actual = 
+    if (0 == inet_checksum_add(checksum(&pseudo_header[0],
+					sizeof(pseudo_header)),
+			       checksum(const_cast<uint8_t *>(data), len)))
+	return;
+
+    // If we get here there is a problem with the checksum. Compute
+    // the expected checksum to aid in debugging.
+    uint8_t *temp = new uint8_t[len];
+    memcpy(&temp[0], &data[0], len);
+    uint16_t checksum_inpacket = extract_16(&temp[checksum_offset]);
+    embed_16(&temp[checksum_offset], 0);
+    uint16_t checksum_computed = 
 	inet_checksum_add(checksum(&pseudo_header[0],sizeof(pseudo_header)),
-			  checksum(data, len));
-    // Put the checksum back
-    embed_16(&data[checksum_offset], checksum_inpacket);
+			  checksum(temp, len));
+    delete []temp;
 						 ;
-    if (checksum_inpacket != checksum_actual)
+    if (checksum_inpacket != checksum_computed)
 	xorp_throw(InvalidPacket,
 		   c_format("Checksum mismatch expected %#x received %#x",
-			    checksum_actual,
+			    checksum_computed,
 			    checksum_inpacket));
 }
 
 template <>
 void
 ipv6_checksum_verify<IPv4>(const IPv4& src, const IPv4& dst,
-			   uint8_t *data, size_t len,
+			   const uint8_t *data, size_t len,
 			   size_t checksum_offset,
 			   uint8_t protocol) throw(InvalidPacket)
 {
