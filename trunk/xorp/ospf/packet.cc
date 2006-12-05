@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.36 2006/12/02 00:00:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.37 2006/12/02 02:12:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,10 +54,10 @@ checksum(uint8_t *ptr, size_t len)
 
 template <>
 void
-check_ipv6_pseudo_header_checksum<IPv6>(const IPv6& src, const IPv6& dst,
-					uint8_t *data, size_t len,
-					size_t checksum_offset,
-					uint8_t protocol)
+ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
+			   uint8_t *data, size_t len,
+			   size_t checksum_offset,
+			   uint8_t protocol) throw(InvalidPacket)
 {
     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
 	      cstring(src), cstring(dst),
@@ -76,8 +76,6 @@ check_ipv6_pseudo_header_checksum<IPv6>(const IPv6& src, const IPv6& dst,
 			  + 3 	/* Zero */
 			  + 1	/* Upper-layer protocol number */
 			  ];
-
-    //    memset(&pseudo_header[0], 0, sizef(pseudo_header));
 
     src.copy_out(&pseudo_header[0]);
     dst.copy_out(&pseudo_header[16]);
@@ -104,10 +102,10 @@ check_ipv6_pseudo_header_checksum<IPv6>(const IPv6& src, const IPv6& dst,
 
 template <>
 void
-check_ipv6_pseudo_header_checksum<IPv4>(const IPv4& src, const IPv4& dst,
-					uint8_t *data, size_t len,
-					size_t checksum_offset,
-					uint8_t protocol)
+ipv6_checksum_verify<IPv4>(const IPv4& src, const IPv4& dst,
+			   uint8_t *data, size_t len,
+			   size_t checksum_offset,
+			   uint8_t protocol) throw(InvalidPacket)
 {
     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
 	      cstring(src), cstring(dst),
@@ -223,7 +221,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 	break;
     case OspfTypes::V3:
 	set_instance_id(ptr[14]);
-	// For OSPFv3 the checksum has already been checked.
+	// For OSPFv3 the checksum has already been verified.
 	return get_standard_header_length();
 	break;
     }

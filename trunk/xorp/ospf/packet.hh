@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.34 2006/12/02 00:53:58 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.35 2006/12/02 02:12:26 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -768,11 +768,25 @@ class Options {
      uint32_t _options;
 };
 
+/**
+ * Verify the checksum of an IPv6 PDU, throw an exception if the
+ * checksum doesn't match.
+ *
+ * In IPv6 the payload is not checksummed it is up to the protocol to
+ * checksum its own payload. The checksum includes a pseduo header
+ * that is described in RFC 2460 section 8.1
+ * 
+ * @param src Source address of packet.
+ * @param dst Destination address of packet.
+ * @param data pointer to payload.
+ * @param len length of payload.
+ * @param checksum_offset offset of checksum in the payload.
+ * @param protocol protocol number.
+ */
 template <typename A> 
 void
-check_ipv6_pseudo_header_checksum(const A& src, const A& dst,
-				  uint8_t *data, size_t len,
-				  size_t checksum_offset,
-				  uint8_t protocol);
+ipv6_checksum_verify(const A& src, const A& dst, uint8_t *data, size_t len,
+		     size_t checksum_offset, uint8_t protocol)
+    throw(InvalidPacket);
 
 #endif // __OSPF_PACKET_HH__
