@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code.hh,v 1.3 2006/03/16 00:04:57 pavlin Exp $
+// $XORP: xorp/policy/code.hh,v 1.4 2006/12/02 01:01:47 pavlin Exp $
 
 #ifndef __POLICY_CODE_HH__
 #define __POLICY_CODE_HH__
@@ -80,7 +80,7 @@ public:
 	 *
 	 * @return the filter type.
 	 */
-	const filter::Filter filter() const { return _filter; }
+	filter::Filter filter() const { return _filter; }
 
 	/**
 	 * Set the filter type.
