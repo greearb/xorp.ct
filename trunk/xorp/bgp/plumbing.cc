@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.96 2006/10/12 01:24:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.97 2006/10/27 09:27:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -319,11 +319,19 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				      _master.main().eventloop());
     _decision_table->set_next_table(_policy_sourcematch_table);
 
+    CacheTable<A>* cache_decision = 
+	new CacheTable<A>(_ribname + "IpcChannelDecisionCache",
+			  _master.safi(),
+			  _policy_sourcematch_table,
+			  _master.rib_handler());
+    _policy_sourcematch_table->set_next_table(cache_decision);
+    _tables.insert(cache_decision);
+
     _aggregation_table =
 	new AggregationTable<A>(ribname + "AggregationTable",
 				_master,
-				_policy_sourcematch_table);
-    _policy_sourcematch_table->set_next_table(_aggregation_table);
+				cache_decision);
+    cache_decision->set_next_table(_aggregation_table);
 
     _fanout_table =
 	new FanoutTable<A>(ribname + "FanoutTable",
