@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.39 2006/12/05 22:51:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.40 2006/12/06 00:19:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -268,11 +268,11 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
     case OspfTypes::V2:
 	// Verify the auth structure is the correct size.
 	static_assert(sizeof(_auth) == (64 / 8));
-	set_auth_type(extract_16(&ptr[14]));
-	memcpy(&_auth[0], &ptr[16], sizeof(_auth));
+	set_auth_type(extract_16(&ptr[Packet::AUTH_TYPE_OFFSET]));
+	memcpy(&_auth[0], &ptr[Packet::AUTH_PAYLOAD_OFFSET], sizeof(_auth));
 	// The authentication field is expected to be zero for the
 	// checksumming.
-	memset(&ptr[16], 0, sizeof(_auth));
+	memset(&ptr[Packet::AUTH_PAYLOAD_OFFSET], 0, sizeof(_auth));
 	break;
     case OspfTypes::V3:
 	set_instance_id(ptr[14]);
@@ -282,20 +282,20 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
     }
 
     // Extract the checksum and check the packet.
-    uint16_t checksum_inpacket = extract_16(&ptr[12]);
+    uint16_t checksum_inpacket = extract_16(&ptr[Packet::CHECKSUM_OFFSET]);
     // Zero the checksum location.
-    embed_16(&ptr[12], 0);
+    embed_16(&ptr[Packet::CHECKSUM_OFFSET], 0);
     uint16_t checksum_actual = checksum(ptr, len);
 
     // Restore the zero'd fields.
     switch(version) {
     case OspfTypes::V2:
-	memcpy(&ptr[16], &_auth[0], sizeof(_auth));
+	memcpy(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_auth[0], sizeof(_auth));
 	break;
     case OspfTypes::V3:
 	break;
     }
-    embed_16(&ptr[12], checksum_inpacket);
+    embed_16(&ptr[Packet::CHECKSUM_OFFSET], checksum_inpacket);
 
     if (0 == checksum_inpacket &&
 	OspfTypes::CRYPTOGRAPHIC_AUTHENTICATION == get_auth_type())
@@ -336,7 +336,7 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
     
     switch(version) {
     case OspfTypes::V2:
-	embed_16(&ptr[14], get_auth_type());
+	embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], get_auth_type());
 	break;
     case OspfTypes::V3:
 	ptr[14] = get_instance_id();
@@ -345,12 +345,12 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
 	break;
     }
 
-    embed_16(&ptr[12], checksum(ptr, len));
+    embed_16(&ptr[Packet::CHECKSUM_OFFSET], checksum(ptr, len));
 
     // OSPFv2 only copy the authentication data out.
     switch(version) {
     case OspfTypes::V2:
-	memcpy(&ptr[16], &_auth[0], sizeof(_auth));
+	memcpy(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_auth[0], sizeof(_auth));
 	break;
     case OspfTypes::V3:
 	break;
