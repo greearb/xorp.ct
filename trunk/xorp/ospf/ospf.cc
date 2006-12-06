@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.79 2006/12/02 02:12:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.80 2006/12/05 19:58:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -204,6 +204,11 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 {
     debug_msg("Interface %s Vif %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(), data, len);
+
+    // If the transport is IPv6 then the checksum has to include the
+    // pseudo header. In the IPv4 case this function is a noop.
+    ipv6_checksum_apply<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
+			   _io->get_ip_protocol_number());
 #ifdef	DEBUG_LOGGING
     try {
 	// Decode the packet in order to pretty print it.

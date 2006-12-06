@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.38 2006/12/05 19:58:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.39 2006/12/05 22:51:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +52,30 @@ checksum(uint8_t *ptr, size_t len)
     return htons(inet_checksum(ptr, len));
 }
 
+/**
+ * Return the IPv6 pseudo header checksum in network order.
+ */
+inline
+uint16_t
+ipv6_pseudo_header_checksum(const IPv6& src, const IPv6& dst, size_t len,
+			    uint8_t protocol)
+{
+    uint8_t pseudo_header[16	/* Source address */ 
+			  + 16	/* Destination address */
+			  + 4 	/* Upper-layer packet length */
+			  + 3 	/* Zero */
+			  + 1	/* Upper-layer protocol number */
+			  ];
+
+    src.copy_out(&pseudo_header[0]);
+    dst.copy_out(&pseudo_header[16]);
+    embed_32(&pseudo_header[16 + 16], len);
+    embed_24(&pseudo_header[16 + 16 + 4], 0);
+    pseudo_header[16 + 16 + 4 + 3] = protocol;
+
+    return checksum(&pseudo_header[0], sizeof(pseudo_header));
+}
+
 template <>
 void
 ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
@@ -70,21 +94,8 @@ ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
 			    XORP_UINT_CAST(checksum_offset),
 			    XORP_UINT_CAST(len)));
 
-    uint8_t pseudo_header[16	/* Source address */ 
-			  + 16	/* Destination address */
-			  + 4 	/* Upper-layer packet length */
-			  + 3 	/* Zero */
-			  + 1	/* Upper-layer protocol number */
-			  ];
-
-    src.copy_out(&pseudo_header[0]);
-    dst.copy_out(&pseudo_header[16]);
-    embed_32(&pseudo_header[16 + 16], len);
-    embed_24(&pseudo_header[16 + 16 + 4], 0);
-    pseudo_header[16 + 16 + 4 + 3] = protocol;
-
-    if (0 == inet_checksum_add(checksum(&pseudo_header[0],
-					sizeof(pseudo_header)),
+    if (0 == inet_checksum_add(ipv6_pseudo_header_checksum(src, dst, len,
+							   protocol),
 			       checksum(const_cast<uint8_t *>(data), len)))
 	return;
 
@@ -95,7 +106,8 @@ ipv6_checksum_verify<IPv6>(const IPv6& src, const IPv6& dst,
     uint16_t checksum_inpacket = extract_16(&temp[checksum_offset]);
     embed_16(&temp[checksum_offset], 0);
     uint16_t checksum_computed = 
-	inet_checksum_add(checksum(&pseudo_header[0],sizeof(pseudo_header)),
+	inet_checksum_add(ipv6_pseudo_header_checksum(src, dst, len,
+							   protocol),
 			  checksum(temp, len));
     delete []temp;
 						 ;
@@ -112,6 +124,43 @@ ipv6_checksum_verify<IPv4>(const IPv4& src, const IPv4& dst,
 			   const uint8_t *data, size_t len,
 			   size_t checksum_offset,
 			   uint8_t protocol) throw(InvalidPacket)
+{
+    debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+	      cstring(src), cstring(dst),
+	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+	      protocol);
+}
+
+template <>
+void
+ipv6_checksum_apply<IPv6>(const IPv6& src, const IPv6& dst,
+			  uint8_t *data, size_t len,
+			  size_t checksum_offset,
+			  uint8_t protocol) throw(InvalidPacket)
+{
+    debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
+	      cstring(src), cstring(dst),
+	      data, XORP_UINT_CAST(len), XORP_UINT_CAST(checksum_offset),
+	      protocol);
+
+    if (len < checksum_offset)
+	xorp_throw(InvalidPacket,
+		   c_format("Checksum offset %u greater than packet length %u",
+			    XORP_UINT_CAST(checksum_offset),
+			    XORP_UINT_CAST(len)));
+
+    embed_16(&data[checksum_offset],
+	     inet_checksum_add(ipv6_pseudo_header_checksum(src, dst, len,
+							   protocol),
+			       checksum(data, len)));
+}
+
+template <>
+void
+ipv6_checksum_apply<IPv4>(const IPv4& src, const IPv4& dst,
+			  uint8_t *data, size_t len,
+			  size_t checksum_offset,
+			  uint8_t protocol) throw(InvalidPacket)
 {
     debug_msg("src %s dst data %p %s len %u chsum offset %u protocol %u\n",
 	      cstring(src), cstring(dst),
@@ -291,6 +340,8 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
 	break;
     case OspfTypes::V3:
 	ptr[14] = get_instance_id();
+	// For OSPFv3 the checksum will be written later.
+	return get_standard_header_length();
 	break;
     }
 
