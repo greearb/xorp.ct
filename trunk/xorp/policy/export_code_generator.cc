@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.9 2006/10/12 01:25:04 pavlin Exp $"
+#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.10 2006/12/02 01:01:47 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -53,9 +53,19 @@ ExportCodeGenerator::visit_term(Term& term)
         _os << "PUSH u32 " << (ti.second) << endl;
         _os << "<=\n";
         _os << "ONFALSE_EXIT" << endl;
-    
+
+	bool is_redist_tag = true;
+	if (term.from_protocol() == protocol()) {
+	    //
+	    // XXX: If we have an export policy that exports routes
+	    // from a protocol to itself, then don't tag those routes
+	    // for redistribution from the RIB back to the protocol.
+	    //
+	    is_redist_tag = false;
+	}
+
 	// update tags used by the code
-	_code.add_tag(ti.second);
+	_code.add_tag(ti.second, is_redist_tag);
     }
 
     // do dest block

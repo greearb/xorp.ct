@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.12 2006/12/02 01:01:47 pavlin Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.13 2006/12/04 23:00:45 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -150,7 +150,31 @@ SourceMatchCodeGenerator::visit_term(Term& term)
     // ignore actions too...
 
 
-    // as an action, store policy tags...
+    //
+    // As an action, store policy tags...
+    // XXX: Note that we store the policy tags only if the route
+    // doesn't carry some other protocol's tags.
+    //
+    _tags.push_back(Taginfo(true, _currtag));
+    _protocol_tags[_protocol].insert(_currtag);
+
+    // Create the set of the tags known (so far) to belong to this protocol
+    ElemSetU32 element_set;
+    const set<uint32_t>& protocol_tags = _protocol_tags[_protocol];
+    for (set<uint32_t>::const_iterator iter = protocol_tags.begin();
+	 iter != protocol_tags.end();
+	 ++iter) {
+	ElemU32 e(*iter);
+	element_set.insert(e);
+    }
+
+    // Check that the route's tags are subset of this protocol's tags
+    _os << "PUSH set_u32 " << element_set.str() << endl;
+    _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
+    _os << "<=\n";
+    _os << "ONFALSE_EXIT" << endl;
+
+    // Add another tag to the route
     _os << "PUSH u32 " << _currtag << endl;
     _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
     _os << "+\n";
@@ -158,8 +182,6 @@ SourceMatchCodeGenerator::visit_term(Term& term)
 
 
     _os << "TERM_END\n";
-
-    _tags.push_back(Taginfo(true, _currtag));
 
     // FIXME: integer overflow
     _currtag++;

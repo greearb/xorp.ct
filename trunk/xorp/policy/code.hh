@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code.hh,v 1.4 2006/12/02 01:01:47 pavlin Exp $
+// $XORP: xorp/policy/code.hh,v 1.5 2006/12/06 17:26:56 pavlin Exp $
 
 #ifndef __POLICY_CODE_HH__
 #define __POLICY_CODE_HH__
@@ -202,18 +202,32 @@ public:
     }
 
     /**
-     * Get the tags.
+     * Get the set with all tags.
      *
-     * @return a reference to the tags.
+     * @return a reference to the set with all tags.
      */
-    const Code::TagSet& tags() const { return _tags; }
+    const Code::TagSet& all_tags() const { return _all_tags; }
+
+    /**
+     * Get the set with the tags used for route redistribution to other
+     * protocols.
+     *
+     * @return a reference to the set with tags used for route redistribution.
+     */
+    const Code::TagSet& redist_tags() const { return _redist_tags; }
 
     /**
      * Add a tag.
      *
      * @param tag the tag to add.
+     * @is_redist_tag if true, the tag is used for route redistribution
+     * to other protocols.
      */
-    void add_tag(uint32_t tag) { _tags.insert(tag); }
+    void add_tag(uint32_t tag, bool is_redist_tag) {
+	_all_tags.insert(tag);
+	if (is_redist_tag)
+	    _redist_tags.insert(tag);
+    }
 
     /**
      * @return string representation of code.
@@ -239,7 +253,8 @@ private:
     // send routes to the target
     set<string>	_source_protocols;
 
-    TagSet	_tags;
+    TagSet	_all_tags;
+    TagSet	_redist_tags;	// The tags used for route redistribution
 };
 
 #endif // __POLICY_CODE_HH__

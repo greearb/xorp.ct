@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.18 2006/11/12 23:37:37 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.19 2006/12/02 01:01:47 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -402,9 +402,9 @@ Configuration::update_tagmap(const string& protocol)
 
     PolicyList* pl = (*i).second;
 
-    // Get the policytags for the protocol
+    // Get the redist policytags for the protocol
     TagSet* tagset = new TagSet();
-    pl->get_tags(protocol, *tagset);
+    pl->get_redist_tags(protocol, *tagset);
 
     if(tagset->size()) {
 	_tagmap[protocol] = tagset;

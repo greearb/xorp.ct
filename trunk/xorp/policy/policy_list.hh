@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_list.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
+// $XORP: xorp/policy/policy_list.hh,v 1.3 2006/03/16 00:04:58 pavlin Exp $
 
 #ifndef __POLICY_POLICY_LIST_HH__
 #define __POLICY_POLICY_LIST_HH__
@@ -110,12 +110,13 @@ public:
     void get_targets(Code::TargetSet& targets);
 
     /**
-     * Return all policy tags for a specific protocol.
+     * Return the policy tags used by a specific protocol for route
+     * redistribution.
      *
-     * @param protocol protocol for which tags are requesdted.
+     * @param protocol protocol for which tags are requested.
      * @param ts set filled with policy-tags used by the protocol.
      */
-    void get_tags(const string& protocol, Code::TagSet& ts);
+    void get_redist_tags(const string& protocol, Code::TagSet& ts);
 
 private:
     typedef pair<string,CodeList*> PolicyCode;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code.cc,v 1.6 2006/11/12 23:37:37 pavlin Exp $"
+#ident "$XORP: xorp/policy/code.cc,v 1.7 2006/12/02 01:01:47 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -117,9 +117,13 @@ Code::operator+=(const Code& rhs)
     }
 
     // add tags
-    for (TagSet::const_iterator i = rhs._tags.begin();
-	 i != rhs._tags.end(); ++i) {
-	_tags.insert(*i);
+    for (TagSet::const_iterator i = rhs._all_tags.begin();
+	 i != rhs._all_tags.end(); ++i) {
+	_all_tags.insert(*i);
+    }
+    for (TagSet::const_iterator i = rhs._redist_tags.begin();
+	 i != rhs._redist_tags.end(); ++i) {
+	_redist_tags.insert(*i);
     }
 
     // add protos

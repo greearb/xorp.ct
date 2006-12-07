@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.7 2006/08/09 16:00:07 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.8 2006/12/02 01:01:47 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -169,7 +169,7 @@ PolicyList::get_targets(Code::TargetSet& targets)
 }
 
 void 
-PolicyList::get_tags(const string& protocol, Code::TagSet& ts)
+PolicyList::get_redist_tags(const string& protocol, Code::TagSet& ts)
 {
     // go through all policies and return tags associated with the requested
     // protocol.
@@ -178,7 +178,7 @@ PolicyList::get_tags(const string& protocol, Code::TagSet& ts)
     
 	CodeList* cl = (*i).second;
 
-	cl->get_tags(protocol,ts);
+	cl->get_redist_tags(protocol,ts);
     }    
 }
 
