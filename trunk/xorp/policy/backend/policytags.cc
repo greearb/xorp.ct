@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.9 2006/09/08 18:44:37 mjh Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.10 2006/11/12 23:37:38 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -104,8 +104,8 @@ PolicyTags::element() const
 {
     ElemSetU32* s = new ElemSetU32;
     for (Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) {
-	ElemU32* e = new ElemU32(*i);
-	s->insert(*e);
+	ElemU32 e(*i);
+	s->insert(e);
     }
     return s;
 }
