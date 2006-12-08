@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.210 2006/06/21 23:36:36 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.211 2006/10/12 01:24:58 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -802,7 +802,9 @@ void
 AreaRouter<IPv6>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
 					      IPNet<IPv6> net)
 {
-    snlsa->set_network(net);
+    IPv6Prefix prefix(_ospf.get_version());
+    prefix.set_network(net);
+    snlsa->set_ipv6prefix(prefix);
 }
 
 template <typename A>
@@ -1153,8 +1155,8 @@ AreaRouter<IPv6>::external_copy_net_nexthop(IPv6,
 					    ASExternalLsa *dst,
 					    ASExternalLsa *src)
 {
-    IPNet<IPv6> addr = src->get_network();
-    dst->set_network(addr);
+    IPv6Prefix prefix = src->get_ipv6prefix();
+    dst->set_ipv6prefix(prefix);
     dst->set_forwarding_address_ipv6(src->get_forwarding_address_ipv6());
 }
 

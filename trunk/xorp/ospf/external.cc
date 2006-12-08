@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.23 2006/06/12 18:19:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.24 2006/10/12 01:24:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -208,7 +208,9 @@ void
 External<IPv6>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv6> net,
 				IPv6 nexthop)
 {
-    aselsa->set_network(net);
+    IPv6Prefix prefix(_ospf.get_version());
+    prefix.set_network(net);
+    aselsa->set_ipv6prefix(prefix);
     aselsa->set_forwarding_address_ipv6(nexthop);
 }
 

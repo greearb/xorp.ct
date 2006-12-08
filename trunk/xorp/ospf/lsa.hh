@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.80 2006/03/28 03:06:54 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.81 2006/12/02 00:00:30 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -641,6 +641,108 @@ class LsaDecoder {
 };
 
 /**
+ * RFC 2470 A.4.1 IPv6 Prefix Representation
+ * OSPFv3 only
+ */
+class IPv6Prefix {
+public:
+    IPv6Prefix(OspfTypes::Version version)
+	: _version(version), _prefix_options(0)
+    {
+    }
+
+    IPv6Prefix(const IPv6Prefix& rhs) : _version(rhs._version) {
+	copy(rhs);
+    }
+
+    IPv6Prefix operator=(const IPv6Prefix& rhs) {
+	if(&rhs == this)
+	    return *this;
+	copy(rhs);
+	return *this;
+    }
+
+#define	ipv6prefix_copy(var)	var = rhs.var;
+
+    void copy(const IPv6Prefix& rhs) {
+	ipv6prefix_copy(_network);
+	ipv6prefix_copy(_prefix_options);
+    }
+#undef	ipv6prefix_copy
+
+    /**
+     * @return the number of bytes the encoded data will occupy.
+     */
+    size_t length() const;
+
+     /**
+     * Decode a IPv6Prefix.
+     *
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     * @param prefixlen prefix length
+     * @param option prefix option
+     *
+     * @return A IPv6Prefix.
+     */
+    IPv6Prefix decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
+		      uint8_t option) const
+	throw(InvalidPacket);
+
+    /**
+     * Copy a wire format representation to the pointer provided.
+     *
+     * length() should be called by the caller to verify enough space
+     * is available.
+     * @return the number of bytes written.
+     */
+    size_t copy_out(uint8_t *to_uint8) const;
+
+    /**
+     * @return Number of bytes that will be occupied by this prefix.
+     */
+    static size_t bytes_per_prefix(uint8_t prefix) {
+	return ((prefix + 31) / 32) * 4;
+    }
+
+    OspfTypes::Version get_version() const {
+	return _version;
+    }
+
+    void set_network(IPNet<IPv6>& network) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_network = network;
+    }
+
+    IPNet<IPv6> get_network() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _network;
+    }
+
+    void set_prefix_options(uint8_t prefix_options) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_prefix_options = prefix_options;
+    }
+
+    uint8_t get_prefix_options() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _prefix_options;
+    }
+    
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
+
+private:
+    const OspfTypes::Version 	_version;
+
+    IPNet<IPv6> _network;
+    uint8_t _prefix_options;
+};
+
+/**
  * Defines a link/interface, carried in a RouterLsa.
  */
 class RouterLink {
@@ -1078,14 +1180,16 @@ class NetworkLsa : public Lsa {
  */
 class SummaryNetworkLsa : public Lsa {
  public:
+    static const size_t IPV6_PREFIX_OFFSET = 28;
+
     SummaryNetworkLsa(OspfTypes::Version version)
-	: Lsa(version)
+	: Lsa(version), _ipv6prefix(version)
     {
 	_header.set_ls_type(get_ls_type());
     }
 
     SummaryNetworkLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
-	: Lsa(version, buf, len)
+	: Lsa(version, buf, len), _ipv6prefix(version)
     {}
 
     /**
@@ -1147,24 +1251,14 @@ class SummaryNetworkLsa : public Lsa {
 	return _network_mask;
     }
 
-    void set_network(IPNet<IPv6>& network) {
+    void set_ipv6prefix(IPv6Prefix& ipv6prefix) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	_network = network;
+	_ipv6prefix = ipv6prefix;
     }
 
-    IPNet<IPv6> get_network() const {
+    IPv6Prefix get_ipv6prefix() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	return _network;
-    }
-
-    void set_prefix_options(uint8_t prefix_options) {
-	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	_prefix_options = prefix_options;
-    }
-
-    uint8_t get_prefix_options() const {
-	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	return _prefix_options;
+	return _ipv6prefix;;
     }
 
     /**
@@ -1181,11 +1275,8 @@ class SummaryNetworkLsa : public Lsa {
     
  private:
     uint32_t _metric;
-
     uint32_t _network_mask;		// OSPFv2 only.
-    uint8_t _prefix_options;		// OSPFv3 only.
-
-    IPNet<IPv6> _network;		// OSPFv3 only.
+    IPv6Prefix _ipv6prefix;		// OSPFv3 only.
 };
 
 /**
@@ -1311,16 +1402,18 @@ class SummaryRouterLsa : public Lsa {
  */
 class ASExternalLsa : public Lsa {
  public:
+    static const size_t IPV6_PREFIX_OFFSET = 28;
+
     ASExternalLsa(OspfTypes::Version version)
 	: Lsa(version), _network_mask(0), _e_bit(false), _f_bit(false),
-	  _t_bit(false), _prefix_options(0), _referenced_ls_type(0),
+	  _t_bit(false), _ipv6prefix(version), _referenced_ls_type(0),
 	  _metric(0), _external_route_tag(0), _referenced_link_state_id(0)
     {
 	_header.set_ls_type(get_ls_type());
     }
 
     ASExternalLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
-	: Lsa(version, buf, len)
+	: Lsa(version, buf, len), _ipv6prefix(version)
     {}
 
     /**
@@ -1379,14 +1472,14 @@ class ASExternalLsa : public Lsa {
 	return _network_mask;
     }
 
-    void set_network(IPNet<IPv6>& network) {
+    void set_ipv6prefix(IPv6Prefix& ipv6prefix) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	_network = network;
+	_ipv6prefix = ipv6prefix;
     }
 
-    IPNet<IPv6> get_network() const {
+    IPv6Prefix get_ipv6prefix() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	return _network;
+	return _ipv6prefix;;
     }
 
     void set_e_bit(bool bit) {
@@ -1415,16 +1508,6 @@ class ASExternalLsa : public Lsa {
     bool get_t_bit() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	return _t_bit;
-    }
-
-    void set_prefix_options(uint8_t prefix_options) {
-	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	_prefix_options = prefix_options;
-    }
-
-    uint8_t get_prefix_options() const {
-	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	return _prefix_options;
     }
 
     void set_referenced_ls_type(uint16_t referenced_ls_type) {
@@ -1544,12 +1627,12 @@ class ASExternalLsa : public Lsa {
     
  private:
     uint32_t _network_mask;		// OSPFv2 only.
-    IPNet<IPv6> _network;		// OSPFv3 only.
     bool _e_bit;
     bool _f_bit;			// OSPFv3 only.
     bool _t_bit;			// OSPFv3 only.
 
-    uint8_t _prefix_options;		// OSPFv3 only.
+    IPv6Prefix _ipv6prefix;		// OSPFv3 only.
+
     uint16_t _referenced_ls_type;	// OSPFv3 only.
     IPv6 _forwarding_address;		// OSPFv3 only.
     

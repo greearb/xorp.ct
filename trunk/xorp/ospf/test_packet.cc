@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.43 2006/10/16 09:15:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.44 2006/12/02 00:00:30 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -27,6 +27,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/tokenize.hh"
 
 #include <map>
 #include <list>
@@ -62,6 +63,44 @@ compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
 		DOUT(info) << "bytes " <<
 		    (int)pkt1[i] << " " << (int)pkt2[i] << endl;
 		break;
+	    }
+	}
+	return false;
+    }
+
+    return true;
+}
+
+/*
+ * Compare the string renditions of packets
+ *
+ * @return true when they are equal
+ */
+inline
+bool
+compare_packet_strings(TestInfo& info, string str1, string str2)
+{
+    if (str1 != str2) {
+	if (info.verbose()) {
+	    vector<string> token1;
+	    vector<string> token2;
+	    tokenize(str1, token1, "\n");
+	    tokenize(str2, token2, "\n");
+	    vector<string>::iterator i1 = token1.begin();
+	    vector<string>::iterator i2 = token2.begin();
+	    for(;;) {
+		if (token1.end() == i1 || token2.end() == i2) {
+		    DOUT(info) << "Ran out of tokens\n";
+		    break;
+		}
+		if (*i1 != *i2) {
+		    DOUT(info) << *i1
+			       << " *** DOES NOT MATCH ***" 
+			       << *i2 << endl;
+		    break;
+		}
+		i1++;
+		i2++;
 	    }
 	}
 	return false;
@@ -325,8 +364,10 @@ populate_summary_network_lsa(SummaryNetworkLsa *snlsa,
 	break;
     case OspfTypes::V3:
 	IPNet<IPv6> net("2001:468:e21:c800:220:edff:fe61:f033", 64);
-	snlsa->set_network(net);
-	snlsa->set_prefix_options(0x5);
+	IPv6Prefix prefix(version);
+	prefix.set_network(net);
+	prefix.set_prefix_options(0x5);
+	snlsa->set_ipv6prefix(prefix);
 	break;
     }
 
@@ -376,10 +417,12 @@ populate_as_external_lsa(ASExternalLsa *aelsa,
 	aelsa->set_e_bit(true);
 	aelsa->set_f_bit(true);
 	aelsa->set_t_bit(true);
-	aelsa->set_prefix_options(0x5);
 	aelsa->set_referenced_ls_type(2);
 	IPNet<IPv6> net("2001:468:e21:c800:220:edff:fe61:f033", 64);
-	aelsa->set_network(net);
+	IPv6Prefix prefix(version);
+	prefix.set_network(net);
+	prefix.set_prefix_options(0x5);
+	aelsa->set_ipv6prefix(prefix);
 	aelsa->set_forwarding_address_ipv6(
 			      IPv6("2001:468:e21:c800:220:edff:fe61:f033"));
 	aelsa->set_referenced_link_state_id(0x10);
@@ -501,6 +544,9 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
     if (!compare_packets(info, pkt1, pkt2))
 	return false;
 
+    if (!compare_packet_strings(info, hello1->str(), hello3->str()))
+	return false;
+
     delete hello1;
     delete hello2;
     delete hello3;
@@ -572,6 +618,9 @@ data_description_packet_compare(TestInfo& info, OspfTypes::Version version)
     ddp3->encode(pkt2);
     
     if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, ddp1->str(), ddp3->str()))
 	return false;
 
     delete ddp1;
@@ -655,6 +704,9 @@ link_state_update_packet_compare(TestInfo& info, OspfTypes::Version version)
     if (!compare_packets(info, pkt1, pkt2))
 	return false;
 
+    if (!compare_packet_strings(info, lsup1->str(), lsup3->str()))
+	return false;
+
     delete lsup1;
     delete lsup2;
     delete lsup3;
@@ -729,6 +781,9 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
     lsrp3->encode(pkt2);
     
     if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, lsrp1->str(), lsrp3->str()))
 	return false;
 
     delete lsrp1;
@@ -807,6 +862,9 @@ link_state_acknowledgement_packet_compare(TestInfo& info,
     lsrp3->encode(pkt2);
     
     if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, lsrp1->str(), lsrp3->str()))
 	return false;
 
     delete lsrp1;
@@ -1086,6 +1144,9 @@ router_lsa_compare(TestInfo& info, OspfTypes::Version version)
     if (!compare_packets(info, pkt1, pkt2))
 	return false;
 
+    if (!compare_packet_strings(info, rlsa1->str(), rlsa3->str()))
+	return false;
+
     delete rlsa1;
     delete rlsa2;
 
@@ -1127,6 +1188,9 @@ network_lsa_compare(TestInfo& info, OspfTypes::Version version)
     fill_vector(pkt2, ptr2, len2);
 
     if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, nlsa1->str(), nlsa3->str()))
 	return false;
 
     delete nlsa1;
@@ -1172,6 +1236,9 @@ summary_network_lsa_compare(TestInfo& info, OspfTypes::Version version)
     if (!compare_packets(info, pkt1, pkt2))
 	return false;
 
+    if (!compare_packet_strings(info, snlsa1->str(), snlsa3->str()))
+	return false;
+
     delete snlsa1;
     delete snlsa2;
 
@@ -1213,6 +1280,9 @@ summary_router_lsa_compare(TestInfo& info, OspfTypes::Version version)
     fill_vector(pkt2, ptr2, len2);
 
     if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, srlsa1->str(), srlsa3->str()))
 	return false;
 
     delete srlsa1;
@@ -1258,6 +1328,9 @@ as_external_lsa_compare(TestInfo& info, OspfTypes::Version version)
     if (!compare_packets(info, pkt1, pkt2))
 	return false;
 
+    if (!compare_packet_strings(info, aelsa1->str(), aelsa3->str()))
+	return false;
+
     delete aelsa1;
     delete aelsa2;
 
@@ -1299,6 +1372,9 @@ type7_lsa_compare(TestInfo& info, OspfTypes::Version version)
     fill_vector(pkt2, ptr2, len2);
 
     if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, type71->str(), type73->str()))
 	return false;
 
     delete type71;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.21 2006/10/12 01:25:00 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.22 2006/10/14 18:07:38 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -196,7 +196,6 @@ create_summary_lsa(OspfTypes::Version version, uint32_t link_state_id,
 	break;
     case OspfTypes::V3:
 	XLOG_WARNING("TBD");
-	snlsa->set_prefix_options(0x0);
 	break;
     }
 

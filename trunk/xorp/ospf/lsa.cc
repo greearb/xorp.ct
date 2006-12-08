@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.73 2006/12/02 00:00:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.74 2006/12/02 02:12:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,7 +39,6 @@
 #include "ospf.hh"
 #include "lsa.hh"
 #include "fletcher_checksum.hh"
-
 
 /**
  * Verify the checksum of an LSA.
@@ -72,54 +71,6 @@ compute_checksum(uint8_t *buf, size_t len, size_t offset)
     fletcher_checksum(buf, len, offset, x, y);
 
     return (x << 8) | (y);
-}
-
-/**
- * RFC 2470 A.4.1 IPv6 Prefix Representation
- * Given an IPv6 prefix how many bytes will be occupied.
- */
-inline
-size_t
-bytes_per_prefix(uint8_t prefix)
-{
-    return ((prefix + 31) / 32) * 4;
-}
-
-/**
- * RFC 2470 A.4.1 IPv6 Prefix Representation
- */
-inline
-IPNet<IPv6>
-get_ipv6_net(const char *caller, uint8_t *ptr, uint8_t prefix) throw(InvalidPacket)
-{
-    uint8_t addr[IPv6::ADDR_BITLEN / 8];
-    uint32_t bytes = bytes_per_prefix(prefix);
-    if (bytes > sizeof(addr)) 
-	xorp_throw(InvalidPacket,
-		   c_format("%s prefix length %u larger than 16",
-			    caller,
-			    bytes));
-    
-    memset(&addr[0], 0, IPv6::ADDR_BITLEN / 8);
-    memcpy(&addr[0], ptr, bytes);
-    IPv6 v6;
-    v6.set_addr(&addr[0]);
-    IPNet<IPv6> v6net(v6, prefix);
-    
-    return v6net;
-}
-
-inline
-size_t
-put_ipv6_net(IPNet<IPv6>& v6net, uint8_t *ptr)
-{
-    IPv6 v6 = v6net.masked_addr();
-    uint8_t buf[IPv6::ADDR_BITLEN / 8];
-    v6.copy_out(&buf[0]);
-    size_t bytes = bytes_per_prefix(v6net.prefix_len());
-    memcpy(ptr, &buf[0], bytes);
-
-    return bytes;
 }
 
 /**
@@ -493,6 +444,82 @@ LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
     Lsa *lsa = i->second;
 
     return lsa->decode(ptr, len);
+}
+
+/* IPv6Prefix */
+
+size_t
+IPv6Prefix::length() const
+{
+    XLOG_ASSERT(OspfTypes::V3 == get_version());
+
+    return bytes_per_prefix(get_network().prefix_len());
+}
+
+IPv6Prefix
+IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
+		   uint8_t option) const
+    throw(InvalidPacket)
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    IPv6Prefix prefix(version);
+    prefix.set_prefix_options(option);
+    
+    uint8_t addr[IPv6::ADDR_BITLEN / 8];
+    uint32_t bytes = bytes_per_prefix(prefixlen);
+    if (bytes > sizeof(addr)) 
+	xorp_throw(InvalidPacket,
+		   c_format("Prefix length %u larger than %u", bytes,
+			    sizeof(addr)));
+
+    if (bytes > len)
+	xorp_throw(InvalidPacket,
+		   c_format("Prefix length %u larger than packet %u", bytes,
+			    len));
+
+    memset(&addr[0], 0, IPv6::ADDR_BITLEN / 8);
+    memcpy(&addr[0], ptr, bytes);
+    IPv6 v6;
+    v6.set_addr(&addr[0]);
+    IPNet<IPv6> v6net(v6, prefixlen);
+    
+    prefix.set_network(v6net);
+    len = bytes;
+
+    return prefix;
+}
+
+/**
+ * The caller should have called length() to pre-allocate the space
+ * required.
+ */
+size_t
+IPv6Prefix::copy_out(uint8_t *ptr) const
+{
+    XLOG_ASSERT(OspfTypes::V3 == get_version());
+
+    IPv6 v6 = get_network().masked_addr();
+    uint8_t buf[IPv6::ADDR_BITLEN / 8];
+    v6.copy_out(&buf[0]);
+    size_t bytes = bytes_per_prefix(get_network().prefix_len());
+    memcpy(ptr, &buf[0], bytes);
+
+    return bytes;
+}
+
+string
+IPv6Prefix::str() const
+{
+    XLOG_ASSERT(OspfTypes::V3 == get_version());
+
+    string output;
+
+    output = c_format("Options %#x", get_prefix_options());
+    output += c_format(" Address %s", cstring(get_network()));
+
+    return output;
 }
 
 /* RouterLink */
@@ -1062,12 +1089,18 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    break;
 	case OspfTypes::V3:
 	    lsa->set_metric(extract_24(&buf[header_length + 1]));
- 	    lsa->set_prefix_options(buf[header_length + 5]);
-
-	    IPNet<IPv6> v6net = get_ipv6_net("Summary-LSA",
-					     &buf[header_length + 8],
-					     buf[header_length + 4]);
-	    lsa->set_network(v6net);
+	    IPv6Prefix prefix(version);
+	    size_t space = len - IPV6_PREFIX_OFFSET;
+	    IPv6Prefix prefix_decoder(version);
+	    prefix = prefix_decoder.decode(&buf[header_length + 8],
+					   space,
+					   buf[header_length + 4],
+					   buf[header_length + 5]);
+	    size_t space_left = (len - (IPV6_PREFIX_OFFSET + space));
+	    if (0 != space_left) 
+		xorp_throw(InvalidPacket,
+			   c_format("Space left in LSA %u bytes", space_left));
+	    lsa->set_ipv6prefix(prefix);
 	    break;
 	}
 
@@ -1078,7 +1111,6 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 
     return Lsa::LsaRef(lsa);
 }
-
 
 bool
 SummaryNetworkLsa::encode()
@@ -1092,8 +1124,7 @@ SummaryNetworkLsa::encode()
  	len = _header.length() + 8;
 	break;
     case OspfTypes::V3:
-	len = _header.length() + 8 + 
-	    bytes_per_prefix(get_network().prefix_len());
+	len = _header.length() + 8 + get_ipv6prefix().length();
 	break;
     }
 
@@ -1117,11 +1148,10 @@ SummaryNetworkLsa::encode()
 	break;
     case OspfTypes::V3:
 	embed_24(&ptr[header_length + 1], get_metric());
-	IPNet<IPv6> v6net = get_network();
-	ptr[header_length + 4] = v6net.prefix_len();
-	ptr[header_length + 5] = get_prefix_options();
-	uint32_t bytes = put_ipv6_net(v6net, &ptr[header_length + 8]);
-	index = header_length + 8 + bytes;
+	IPv6Prefix prefix = get_ipv6prefix();
+	ptr[header_length + 4] = prefix.get_network().prefix_len();
+	ptr[header_length + 5] = prefix.get_prefix_options();
+	index = header_length + 8 + prefix.copy_out(&ptr[header_length + 8]);
 	break;
     }
 
@@ -1161,8 +1191,7 @@ SummaryNetworkLsa::str() const
 	break;
     case OspfTypes::V3:
 	output += c_format("\n\tMetric %d", get_metric());
-	output += c_format("\n\tPrefixOptions %#x", get_prefix_options());
-	output += c_format("\n\tNetwork %s", cstring(get_network()));
+	output += c_format("\n\tIPv6Prefix %s", cstring(get_ipv6prefix()));
 	break;
     }
 
@@ -1351,26 +1380,40 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    lsa->set_f_bit(flag & 0x2);
 	    lsa->set_t_bit(flag & 0x1);
 	    lsa->set_metric(extract_24(&buf[header_length + 1]));
-	    lsa->set_prefix_options(buf[header_length + 5]);
-	    lsa->set_referenced_ls_type(extract_16(&buf[header_length + 6]));
-	    
-	    IPNet<IPv6> v6net = get_ipv6_net("AS-External-LSA",
-					     &buf[header_length + 8],
-					     buf[header_length + 4]);
-	    lsa->set_network(v6net);
-	    size_t index = header_length + 8 + 
-		bytes_per_prefix(buf[header_length + 4]);
+ 	    lsa->set_referenced_ls_type(extract_16(&buf[header_length + 6]));
+	    IPv6Prefix prefix(version);
+	    size_t space = len - IPV6_PREFIX_OFFSET;
+	    IPv6Prefix prefix_decoder(version);
+	    prefix = prefix_decoder.decode(&buf[header_length + 8],
+					   space,
+					   buf[header_length + 4],
+					   buf[header_length + 5]);
+	    lsa->set_ipv6prefix(prefix);
+	    size_t index = header_length + 8 + space;
 	    if (lsa->get_f_bit()) {
+		if (index + (IPv6::ADDR_BITLEN / 8) > len)
+		    xorp_throw(InvalidPacket,
+			       c_format("AS-External-LSA"
+					" bit F set packet too short"));
 		IPv6 address;
 		address.copy_in(&buf[index]);
 		lsa->set_forwarding_address_ipv6(address);
 		index += IPv6::ADDR_BITLEN / 8;
 	    }
 	    if (lsa->get_t_bit()) {
+		if (index + 4 > len)
+		    xorp_throw(InvalidPacket,
+			       c_format("AS-External-LSA"
+					" bit T set packet too short"));
 		lsa->set_external_route_tag(extract_32(&buf[index]));
 		index += 4;
 	    }
 	    if (0 != lsa->get_referenced_ls_type()) {
+		if (index + 5 > len)
+		    xorp_throw(InvalidPacket,
+			       c_format("AS-External-LSA"
+					" Referenced LS Tye set "
+					"packet too short"));
 		lsa->set_referenced_link_state_id(extract_32(&buf[index]));
 	    }
 	    break;
@@ -1397,7 +1440,7 @@ ASExternalLsa::encode()
 	break;
     case OspfTypes::V3:
 	len = _header.length() + 8 +
-	    bytes_per_prefix(get_network().prefix_len()) +
+	    get_ipv6prefix().length() +
 	    (get_f_bit() ? IPv6::ADDR_BITLEN / 8 : 0) +
 	    (get_t_bit() ? 4 : 0) +
 	    (0 != get_referenced_ls_type() ? 4 : 0);
@@ -1439,11 +1482,11 @@ ASExternalLsa::encode()
 	    flag |= 0x1;
 	ptr[header_length] = flag;
 	embed_24(&ptr[header_length + 1], get_metric());
-	IPNet<IPv6> v6net = get_network();
-	ptr[header_length + 4] = v6net.prefix_len();
-	ptr[header_length + 5] = get_prefix_options();
-	embed_16(&ptr[header_length + 6], get_referenced_ls_type());
-	index = header_length +8+ put_ipv6_net(v6net, &ptr[header_length + 8]);
+  	embed_16(&ptr[header_length + 6], get_referenced_ls_type());
+	IPv6Prefix prefix = get_ipv6prefix();
+	ptr[header_length + 4] = prefix.get_network().prefix_len();
+	ptr[header_length + 5] = prefix.get_prefix_options();
+	index = header_length + 8 + prefix.copy_out(&ptr[header_length + 8]);
 	if (get_f_bit()) {
 	    IPv6 forwarding_address = get_forwarding_address_ipv6();
 	    forwarding_address.copy_out(&ptr[index]);
@@ -1501,10 +1544,9 @@ ASExternalLsa::str() const
 	output += c_format("\n\tMetric %d %#x", get_metric(), get_metric());
 	if (get_metric() == OspfTypes::LSInfinity)
 	    output += c_format(" LSInfinity");
-	output += c_format("\n\tPrefixOptions %#x", get_prefix_options());
+	output += c_format("\n\tIPv6Prefix %s", cstring(get_ipv6prefix()));
 	output += c_format("\n\tReferenced LS Type %#x",
 			   get_referenced_ls_type());
-	output += c_format("\n\tNetwork %s", cstring(get_network()));
 	if (get_f_bit())
 	    output += c_format("\n\tForwarding address %s",
 			       cstring(get_forwarding_address_ipv6()));
