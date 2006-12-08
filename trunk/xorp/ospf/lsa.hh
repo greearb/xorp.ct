@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.81 2006/12/02 00:00:30 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.82 2006/12/08 08:50:41 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -646,6 +646,12 @@ class LsaDecoder {
  */
 class IPv6Prefix {
 public:
+    static const uint8_t NU_bit = 0x1;
+    static const uint8_t LA_bit = 0x2;
+    static const uint8_t MC_bit = 0x4;
+    static const uint8_t P_bit = 0x8;
+    static const uint8_t DN_bit = 0x10;
+
     IPv6Prefix(OspfTypes::Version version)
 	: _version(version), _prefix_options(0)
     {
@@ -730,6 +736,35 @@ public:
 	return _prefix_options;
     }
     
+     void set_bit(bool set, uint8_t bit) {
+	 XLOG_ASSERT(OspfTypes::V3 == get_version());
+	 if (set)
+	     _prefix_options |= bit;
+	 else
+	     _prefix_options &= ~bit;
+	
+     }
+
+     bool get_bit(uint8_t bit) const {
+	 XLOG_ASSERT(OspfTypes::V3 == get_version());
+	 return _prefix_options & bit ? true : false;
+     }
+
+    void set_nu_bit(bool set) { set_bit(set, NU_bit); }
+    bool get_nu_bit() const { return get_bit(NU_bit); }
+    
+    void set_la_bit(bool set) { set_bit(set, LA_bit); }
+    bool get_la_bit() const { return get_bit(LA_bit); }
+
+    void set_mc_bit(bool set) { set_bit(set, MC_bit); }
+    bool get_mc_bit() const { return get_bit(MC_bit); }
+
+    void set_p_bit(bool set) { set_bit(set, P_bit); }
+    bool get_p_bit() const { return get_bit(P_bit); }
+
+    void set_dn_bit(bool set) { set_bit(set, DN_bit); }
+    bool get_dn_bit() const { return get_bit(DN_bit); }
+
     /**
      * Generate a printable representation.
      */

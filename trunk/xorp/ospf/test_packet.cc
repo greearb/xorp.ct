@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.44 2006/12/02 00:00:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.45 2006/12/08 08:50:41 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -366,7 +366,11 @@ populate_summary_network_lsa(SummaryNetworkLsa *snlsa,
 	IPNet<IPv6> net("2001:468:e21:c800:220:edff:fe61:f033", 64);
 	IPv6Prefix prefix(version);
 	prefix.set_network(net);
-	prefix.set_prefix_options(0x5);
+	prefix.set_nu_bit(false);
+	prefix.set_la_bit(false);
+	prefix.set_mc_bit(false);
+	prefix.set_p_bit(false);
+	prefix.set_dn_bit(false);
 	snlsa->set_ipv6prefix(prefix);
 	break;
     }
@@ -421,7 +425,11 @@ populate_as_external_lsa(ASExternalLsa *aelsa,
 	IPNet<IPv6> net("2001:468:e21:c800:220:edff:fe61:f033", 64);
 	IPv6Prefix prefix(version);
 	prefix.set_network(net);
-	prefix.set_prefix_options(0x5);
+	prefix.set_nu_bit(true);
+	prefix.set_la_bit(true);
+	prefix.set_mc_bit(true);
+	prefix.set_p_bit(true);
+	prefix.set_dn_bit(true);
 	aelsa->set_ipv6prefix(prefix);
 	aelsa->set_forwarding_address_ipv6(
 			      IPv6("2001:468:e21:c800:220:edff:fe61:f033"));
