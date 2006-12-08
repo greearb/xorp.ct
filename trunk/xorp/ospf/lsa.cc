@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.74 2006/12/02 02:12:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.75 2006/12/08 08:50:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1394,7 +1394,7 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 		if (index + (IPv6::ADDR_BITLEN / 8) > len)
 		    xorp_throw(InvalidPacket,
 			       c_format("AS-External-LSA"
-					" bit F set packet too short"));
+					" bit F set, packet too short"));
 		IPv6 address;
 		address.copy_in(&buf[index]);
 		lsa->set_forwarding_address_ipv6(address);
@@ -1404,15 +1404,15 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 		if (index + 4 > len)
 		    xorp_throw(InvalidPacket,
 			       c_format("AS-External-LSA"
-					" bit T set packet too short"));
+					" bit T set, packet too short"));
 		lsa->set_external_route_tag(extract_32(&buf[index]));
 		index += 4;
 	    }
 	    if (0 != lsa->get_referenced_ls_type()) {
-		if (index + 5 > len)
+		if (index + 4 > len)
 		    xorp_throw(InvalidPacket,
 			       c_format("AS-External-LSA"
-					" Referenced LS Tye set "
+					" Referenced LS Type set, "
 					"packet too short"));
 		lsa->set_referenced_link_state_id(extract_32(&buf[index]));
 	    }
