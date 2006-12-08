@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.13 2006/10/12 01:25:05 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.14 2006/10/31 05:26:26 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -188,8 +188,9 @@ PolicyTarget::death(const string& tclass, const string& /* tinstance */)
     list<string> no_policy;
 
     // Remove the "import" and "export" dependencies for the protocol
-    _conf.update_imports(tclass, no_policy);
-    _conf.update_exports(tclass, no_policy);
+    string protocol = _pmap.protocol(tclass);
+    _conf.update_imports(protocol, no_policy);
+    _conf.update_exports(protocol, no_policy);
 
     _process_watch.death(tclass);
 }
