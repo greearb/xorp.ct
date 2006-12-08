@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.97 2006/10/27 09:27:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.98 2006/12/06 02:53:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -402,6 +402,13 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     _tables.insert(filter_out);
 
     XLOG_ASSERT(_master.rib_handler());
+
+#if 0
+    //
+    // XXX: don't plug a policy table on the RIB output branch, because
+    // the routes send to the RIB shouldn't be modified by the export
+    // policy rules.
+    //
     PolicyTable<A>* policy_filter_out =
 	new PolicyTableExport<A>(ribname + "IpcChannelOutputPolicyFilter",
 			         _master.safi(),
@@ -410,6 +417,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				 _master.rib_handler()->id().str());
     filter_out->set_next_table(policy_filter_out);
     _tables.insert(policy_filter_out);
+#endif // 0
 
     // Drop in an aggregation filter - beheave like an IBGP peering
     filter_out->add_aggregation_filter(true);
@@ -417,9 +425,9 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     CacheTable<A> *cache_out =
 	new CacheTable<A>(ribname + "IpcChannelOutputCache",
 			  _master.safi(),
-			  policy_filter_out,
+			  filter_out,
 			  _master.rib_handler());
-    policy_filter_out->set_next_table(cache_out);
+    filter_out->set_next_table(cache_out);
     _tables.insert(cache_out);
 
     _ipc_rib_out_table =
