@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.83 2006/12/08 11:12:45 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.84 2006/12/11 20:18:59 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1757,7 +1757,7 @@ public:
      * @return the minimum length of a Link-LSA.
      */
     size_t min_length() const {
-	return 48;
+	return 24;
     }
     
     uint16_t get_ls_type() const {
