@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.16 2006/10/12 01:25:03 pavlin Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.17 2006/12/06 01:34:35 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -295,8 +295,16 @@ public:
 
     bool begin_area(string area) {
 	print_area(area);
-	printf(" Type       ID               Adv "
-	       "Rtr           Seq      Age  Opt  Cksum  Len\n");
+	switch(_version) {
+	case OspfTypes::V2:
+	    printf(" Type       ID               Adv "
+		   "Rtr           Seq      Age  Opt  Cksum  Len\n");
+	    break;
+	case OspfTypes::V3:
+	    printf(" Type       ID               Adv "
+		   "Rtr           Seq      Age  Cksum  Len\n");
+	    break;
+	}
 
 	return true;
     }
@@ -309,7 +317,14 @@ public:
 	printf("%-17s", pr_id(header.get_advertising_router()).c_str());
 	printf("%-#12x", header.get_ls_sequence_number());
 	printf("%4d", header.get_ls_age());
-	printf("  %-#5x", header.get_options());
+	switch(_version) {
+	case OspfTypes::V2:
+	    printf("  %-#5x", header.get_options());
+	    break;
+	case OspfTypes::V3:
+	    printf("  ");
+	    break;
+	}
 	printf("%-#7x", header.get_ls_checksum());
 	printf("%3d", header.get_length());
 	printf("\n");
