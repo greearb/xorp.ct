@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.33 2006/10/12 01:24:53 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.34 2006/11/07 18:55:41 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -689,6 +689,11 @@ public:
      * Number of bits in address as a constant.
      */
     static const uint32_t ADDR_BITLEN = 32;
+
+    /**
+     * Number of bytes in address as a constant.
+     */
+    static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
 
 private:
     uint32_t _addr;		// The address value (in network-order)
