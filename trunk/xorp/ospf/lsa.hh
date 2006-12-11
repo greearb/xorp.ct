@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.82 2006/12/08 08:50:41 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.83 2006/12/08 11:12:45 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1735,6 +1735,97 @@ class Type7Lsa : public ASExternalLsa {
     }
 };
 
+/**
+ * OSPFv3 only: Link-LSA
+ */
+class LinkLsa : public Lsa {
+public:
+    LinkLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_header.set_ls_type(get_ls_type());
+    }
+
+    LinkLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+    }
+
+    /**
+     * @return the minimum length of a Link-LSA.
+     */
+    size_t min_length() const {
+	return 48;
+    }
+    
+    uint16_t get_ls_type() const {
+	return 8;
+    }
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
+
+    bool encode();
+
+    void set_rtr_priority(uint8_t rtr_priority) {
+	_rtr_priority = rtr_priority;
+    }
+
+    uint8_t get_rtr_priority() const {
+	return _rtr_priority;
+    }
+
+    void set_options(uint32_t options) {
+	if (options  > 0xffffff)
+	    XLOG_WARNING("Attempt to set %#x in a 24 bit field", options);
+	_options = options & 0xffffff;
+    }
+
+    uint32_t get_options() const {
+	return _options;
+    }
+
+    void set_link_local_address(IPv6 link_local_address) {
+	_link_local_address = link_local_address;
+    }
+
+    IPv6 get_link_local_address() const {
+	return _link_local_address;
+    }
+
+    list<IPv6Prefix>& get_prefixes() {
+	return _prefixes;
+    }
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "Link";
+    }
+
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
+    
+private:
+    uint8_t _rtr_priority;
+    uint32_t _options;
+    IPv6 _link_local_address;
+    
+    list<IPv6Prefix> _prefixes;
+};
+
 #if	0
 class LsaTransmit : class Transmit {
  public:
@@ -1872,6 +1963,13 @@ initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
     lsa_decoder.register_decoder(new SummaryRouterLsa(version));
     lsa_decoder.register_decoder(new ASExternalLsa(version));
     lsa_decoder.register_decoder(new Type7Lsa(version));
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+ 	lsa_decoder.register_decoder(new LinkLsa(version));
+	break;
+    }
 }
 
 /**

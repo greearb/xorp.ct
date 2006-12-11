@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.77 2006/12/08 11:12:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.78 2006/12/11 08:02:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1564,6 +1564,148 @@ ASExternalLsa::str() const
 	    
 	break;
     }
+
+    return output;
+}
+
+Lsa::LsaRef
+LinkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
+
+    if (len < required)
+	xorp_throw(InvalidPacket,
+		   c_format("Link-LSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Link-LSA", buf, len, required);
+
+    // Verify the checksum.
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
+
+    LinkLsa *lsa = 0;
+    try {
+	lsa = new LinkLsa(version, buf, len);
+
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	uint8_t *start = 0;
+
+	lsa->set_rtr_priority(extract_8(&buf[header_length + 0]));
+	lsa->set_options(extract_24(&buf[header_length + 1]));
+	IPv6 address;
+	address.copy_in(&buf[header_length + 4]);
+	lsa->set_link_local_address(address);
+	size_t prefix_num = extract_32(&buf[header_length + 4 +
+					    (IPv6::ADDR_BITLEN / 8)]);
+
+	start = &buf[header_length + 4 + (IPv6::ADDR_BITLEN / 8) + 4];
+	uint8_t *end = &buf[len];
+	IPv6Prefix decoder(version);
+	while(start < end) {
+	    if (!(start + 2 < end))
+		xorp_throw(InvalidPacket, c_format("Link-LSA too short"));
+	    size_t space = end - (start + 4);
+	    IPv6Prefix prefix = decoder.decode(start + 4, space,
+					       extract_8(start),
+					       extract_8(start + 1));
+ 	    lsa->get_prefixes().push_back(prefix);
+	    start += space;
+	    if (0 == --prefix_num) {
+		if (start != end)
+		    xorp_throw(InvalidPacket,
+			       c_format("Link-LSA # prefixes read data left"));
+		break;
+	    }
+	}
+	if (0 != prefix_num)
+	    if (start != end)
+		xorp_throw(InvalidPacket,
+			   c_format("Link-LSA # %d left buffer depleted",
+				    XORP_UINT_CAST(prefix_num)));
+
+    } catch(InvalidPacket& e) {
+	delete lsa;
+	throw e;
+    }
+
+    return Lsa::LsaRef(lsa);
+}
+
+bool
+LinkLsa::encode()
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    size_t len = _header.length() + 4 + IPv6::ADDR_BYTELEN + 4;
+
+    list<IPv6Prefix> &ps = get_prefixes();
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
+	len += i->length();
+
+    _pkt.resize(len);
+    uint8_t *ptr = &_pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Copy the header into the packet
+    _header.set_ls_checksum(0);
+    _header.set_length(len);
+    size_t header_length = _header.copy_out(ptr);
+    XLOG_ASSERT(len > header_length);
+
+    size_t index = 0;
+
+    embed_8(&ptr[header_length ], get_rtr_priority());
+    embed_24(&ptr[header_length + 1], get_options());
+    get_link_local_address().copy_out(&ptr[header_length + 4]);
+    embed_32(&ptr[header_length + 4 + IPv6::ADDR_BYTELEN], ps.size());
+
+    index = header_length + 4 + IPv6::ADDR_BYTELEN + 4;
+
+    // Copy out the IPv6 Prefixes.
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
+	index += i->copy_out(&ptr[index]);
+
+    XLOG_ASSERT(index == len);
+
+    // Compute the checksum and write the whole header out again.
+    _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
+    _header.copy_out(ptr);
+
+    return true;
+}
+
+string
+LinkLsa::str() const
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    string output;
+
+    output += "Link-LSA:\n";
+    if (!valid())
+	output += "INVALID\n";
+    output += _header.str();
+
+    output += c_format("\n\tRtr Priority %d", get_rtr_priority());
+    output += c_format("\n\tOptions %#x %s", get_options(),
+		       cstring(Options(get_version(), get_options())));
+    output += c_format("\n\tLink-local Interface Address %s",
+		       cstring(get_link_local_address()));
+
+    list<IPv6Prefix> ps = _prefixes;
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
+	output += "\nIPv6 Prefix " + i->str();
 
     return output;
 }
