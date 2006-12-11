@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.79 2006/12/11 20:18:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.80 2006/12/11 20:34:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -467,7 +467,7 @@ IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
     IPv6Prefix prefix(version);
     prefix.set_prefix_options(option);
     
-    uint8_t addr[IPv6::ADDR_BITLEN / 8];
+    uint8_t addr[IPv6::ADDR_BYTELEN];
     uint32_t bytes = bytes_per_prefix(prefixlen);
     if (bytes > sizeof(addr)) 
 	xorp_throw(InvalidPacket,
@@ -479,7 +479,7 @@ IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
 		   c_format("Prefix length %u larger than packet %u", bytes,
 			    XORP_UINT_CAST(len)));
 
-    memset(&addr[0], 0, IPv6::ADDR_BITLEN / 8);
+    memset(&addr[0], 0, IPv6::ADDR_BYTELEN);
     memcpy(&addr[0], ptr, bytes);
     IPv6 v6;
     v6.set_addr(&addr[0]);
@@ -501,7 +501,7 @@ IPv6Prefix::copy_out(uint8_t *ptr) const
     XLOG_ASSERT(OspfTypes::V3 == get_version());
 
     IPv6 v6 = get_network().masked_addr();
-    uint8_t buf[IPv6::ADDR_BITLEN / 8];
+    uint8_t buf[IPv6::ADDR_BYTELEN];
     v6.copy_out(&buf[0]);
     size_t bytes = bytes_per_prefix(get_network().prefix_len());
     memcpy(ptr, &buf[0], bytes);
@@ -1394,14 +1394,14 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    lsa->set_ipv6prefix(prefix);
 	    size_t index = header_length + 8 + space;
 	    if (lsa->get_f_bit()) {
-		if (index + (IPv6::ADDR_BITLEN / 8) > len)
+		if (index + IPv6::ADDR_BYTELEN > len)
 		    xorp_throw(InvalidPacket,
 			       c_format("AS-External-LSA"
 					" bit F set, packet too short"));
 		IPv6 address;
 		address.copy_in(&buf[index]);
 		lsa->set_forwarding_address_ipv6(address);
-		index += IPv6::ADDR_BITLEN / 8;
+		index += IPv6::ADDR_BYTELEN;
 	    }
 	    if (lsa->get_t_bit()) {
 		if (index + 4 > len)
@@ -1444,7 +1444,7 @@ ASExternalLsa::encode()
     case OspfTypes::V3:
 	len = _header.length() + 8 +
 	    get_ipv6prefix().length() +
-	    (get_f_bit() ? IPv6::ADDR_BITLEN / 8 : 0) +
+	    (get_f_bit() ? IPv6::ADDR_BYTELEN : 0) +
 	    (get_t_bit() ? 4 : 0) +
 	    (0 != get_referenced_ls_type() ? 4 : 0);
 	break;
@@ -1493,7 +1493,7 @@ ASExternalLsa::encode()
 	if (get_f_bit()) {
 	    IPv6 forwarding_address = get_forwarding_address_ipv6();
 	    forwarding_address.copy_out(&ptr[index]);
-	    index += IPv6::ADDR_BITLEN / 8;
+	    index += IPv6::ADDR_BYTELEN;
 	}
 	if (get_t_bit()) {
 	    embed_32(&ptr[index], get_external_route_tag());
@@ -1602,9 +1602,9 @@ LinkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	address.copy_in(&buf[header_length + 4]);
 	lsa->set_link_local_address(address);
 	size_t prefix_num = extract_32(&buf[header_length + 4 +
-					    (IPv6::ADDR_BITLEN / 8)]);
+					    IPv6::ADDR_BYTELEN]);
 
-	start = &buf[header_length + 4 + (IPv6::ADDR_BITLEN / 8) + 4];
+	start = &buf[header_length + 4 + IPv6::ADDR_BYTELEN + 4];
 	uint8_t *end = &buf[len];
 	IPv6Prefix decoder(version);
 	while(start < end) {
