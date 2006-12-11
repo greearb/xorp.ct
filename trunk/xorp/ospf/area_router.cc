@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.211 2006/10/12 01:24:58 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.212 2006/12/08 08:50:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -285,7 +285,7 @@ AreaRouter<A>::remove_virtual_link(OspfTypes::RouterID rid)
     _vlinks.erase(_vlinks.find(rid));
 
     // Note this call is async if it was sync it would cause a delete
-    // link upcall to the peer_manager, possibly surprsing it.
+    // link upcall to the peer_manager, possibly surprising it.
     routing_schedule_total_recompute();
 
     return true;
