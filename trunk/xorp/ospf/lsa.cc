@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.78 2006/12/11 08:02:22 pavlin Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.79 2006/12/11 20:18:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -751,7 +751,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    lsa->set_v_bit(flag & 0x4);
 	    lsa->set_e_bit(flag & 0x2);
 	    lsa->set_b_bit(flag & 0x1);
-	    lsa->set_options(extract_32(&buf[header_length]) & 0xffffff);
+	    lsa->set_options(extract_24(&buf[header_length + 1]));
 	    break;
 	}
 
@@ -832,8 +832,7 @@ RouterLsa::encode()
 	    flag |= 0x2;
 	if (get_b_bit())
 	    flag |= 0x1;
-	// Careful Options occupy 3 bytes, four bytes are written out.
-	embed_32(&ptr[header_length], get_options());
+	embed_24(&ptr[header_length + 1], get_options());
 	break;
     }
     ptr[header_length] = flag;
@@ -937,7 +936,7 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    start = &buf[header_length + 4];
 	    break;
 	case OspfTypes::V3:
-	    lsa->set_options(extract_32(&buf[header_length]) & 0xffffff);
+	    lsa->set_options(extract_24(&buf[header_length + 1]));
 	    start = &buf[header_length + 4];
 	    break;
 	}
@@ -992,8 +991,7 @@ NetworkLsa::encode()
 	index = header_length + 4;
 	break;
     case OspfTypes::V3:
-	// Careful Options occupy 3 bytes, four bytes are written out.
-	embed_32(&ptr[header_length], get_options());
+	embed_24(&ptr[header_length + 1], get_options());
 	index = header_length + 4;
 	break;
     }
