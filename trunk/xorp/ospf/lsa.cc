@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.76 2006/12/08 09:12:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.77 2006/12/08 11:12:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -472,12 +472,12 @@ IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
     if (bytes > sizeof(addr)) 
 	xorp_throw(InvalidPacket,
 		   c_format("Prefix length %u larger than %u", bytes,
-			    sizeof(addr)));
+			    XORP_UINT_CAST(sizeof(addr))));
 
     if (bytes > len)
 	xorp_throw(InvalidPacket,
 		   c_format("Prefix length %u larger than packet %u", bytes,
-			    len));
+			    XORP_UINT_CAST(len)));
 
     memset(&addr[0], 0, IPv6::ADDR_BITLEN / 8);
     memcpy(&addr[0], ptr, bytes);
