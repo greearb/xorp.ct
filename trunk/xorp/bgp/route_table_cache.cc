@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.37 2006/09/20 22:10:50 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.38 2006/09/22 07:12:54 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -347,10 +347,21 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     } else {
 
 	if (rtmsg.changed()) {
-	    //we don't flush the cache, so this should simply never happen.
-	    crash_dump();
-	    XLOG_UNREACHABLE();
-	};
+	    //
+	    // XXX: If we get here, it appears we received delete_route()
+	    // operation for a modified route without a matching
+	    // add_route() operation for that route.
+	    // This could happen, say, if an export policy that
+	    // rejects a route has been deleted. In that case the add_route()
+	    // with the policy in place would never reach the CacheTable on
+	    // the output branch. Deleting the policy however will re-originate
+	    // all routes by generating delete_route() followed by add_route().
+	    // Such delete_route() without the export policy to reject it
+	    // will reach the CacheTable exactly at this part of the code.
+	    // Hence we silently return and indicate success.
+	    //
+	    return result;
+	}
 
 	//If we get here, route was not cached and was not modified.
 	result = this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
