@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.80 2006/12/11 20:34:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.81 2006/12/11 20:43:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1703,7 +1703,7 @@ LinkLsa::str() const
 
     list<IPv6Prefix> ps = _prefixes;
     for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
-	output += "\nIPv6 Prefix " + i->str();
+	output += "\n\tIPv6 Prefix " + i->str();
 
     return output;
 }
