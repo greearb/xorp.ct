@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.46 2006/12/08 11:12:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.47 2006/12/11 21:35:30 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -452,6 +452,24 @@ populate_link_lsa(LinkLsa *llsa, OspfTypes::Version version)
     llsa->set_rtr_priority(42);
     llsa->set_options(compute_options(version, OspfTypes::NORMAL));
     llsa->set_link_local_address(IPv6("fe80::202:b3ff:fe19:be47"));
+    IPNet<IPv6> net1("2001:468:e21:c800:220:edff:fe61:f033", 64);
+    IPv6Prefix prefix1(version);
+    prefix1.set_network(net1);
+    prefix1.set_nu_bit(true);
+    prefix1.set_la_bit(true);
+    prefix1.set_mc_bit(true);
+    prefix1.set_p_bit(true);
+    prefix1.set_dn_bit(true);
+    llsa->get_prefixes().push_back(prefix1);
+    IPNet<IPv6> net2("2001:700:0:fff1::2", 64);
+    IPv6Prefix prefix2(version);
+    prefix2.set_network(net2);
+    prefix2.set_nu_bit(false);
+    prefix2.set_la_bit(false);
+    prefix2.set_mc_bit(false);
+    prefix2.set_p_bit(false);
+    prefix2.set_dn_bit(false);
+    llsa->get_prefixes().push_back(prefix2);
 }
 
 inline
