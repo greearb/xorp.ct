@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.81 2006/12/11 20:43:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.82 2006/12/12 02:40:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1615,7 +1615,7 @@ LinkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 					       extract_8(start),
 					       extract_8(start + 1));
  	    lsa->get_prefixes().push_back(prefix);
-	    start += space;
+	    start += (space + 4);
 	    if (0 == --prefix_num) {
 		if (start != end)
 		    xorp_throw(InvalidPacket,
@@ -1647,7 +1647,7 @@ LinkLsa::encode()
 
     list<IPv6Prefix> &ps = get_prefixes();
     for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
-	len += i->length();
+	len += i->length() + 4;
 
     _pkt.resize(len);
     uint8_t *ptr = &_pkt[0];
@@ -1670,8 +1670,11 @@ LinkLsa::encode()
     index = header_length + 4 + IPv6::ADDR_BYTELEN + 4;
 
     // Copy out the IPv6 Prefixes.
-    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
-	index += i->copy_out(&ptr[index]);
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++) {
+	embed_8(&ptr[index], i->get_network().prefix_len());
+	embed_8(&ptr[index + 1], i->get_prefix_options());
+	index += i->copy_out(&ptr[index + 4]) + 4;
+    }
 
     XLOG_ASSERT(index == len);
 
