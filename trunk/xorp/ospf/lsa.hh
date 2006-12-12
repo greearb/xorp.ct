@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.84 2006/12/11 20:18:59 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.85 2006/12/11 21:09:48 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1826,6 +1826,94 @@ private:
     list<IPv6Prefix> _prefixes;
 };
 
+/**
+ * OSPFv3 only: Inter-Area-Prefix-LSA
+ */
+class InterAreaPrefixLsa : public Lsa {
+public:
+    InterAreaPrefixLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_header.set_ls_type(get_ls_type());
+    }
+
+    InterAreaPrefixLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+    }
+
+    /**
+     * @return the minimum length of a Link-LSA.
+     */
+    size_t min_length() const {
+	return 12;
+    }
+    
+    uint16_t get_ls_type() const {
+	return 0x2009;
+    }
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
+
+    bool encode();
+
+    void set_referenced_ls_type(uint16_t referenced_ls_type) {
+	_referenced_ls_type = referenced_ls_type;
+    }
+
+    uint16_t get_referenced_ls_type() const {
+	return _referenced_ls_type;
+    }
+
+    void set_referenced_link_state_id(uint32_t referenced_link_state_id) {
+	_referenced_link_state_id = referenced_link_state_id;
+    }
+
+    uint32_t get_referenced_link_state_id() const {
+	return _referenced_link_state_id;
+    }
+
+    void set_referenced_advertising_router(uint32_t referenced_adv_router) {
+	_referenced_advertising_router = referenced_adv_router;
+    }
+
+    uint32_t get_referenced_advertising_router() const {
+	return _referenced_advertising_router;
+    }
+
+    list<IPv6Prefix>& get_prefixes() {
+	return _prefixes;
+    }
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "Inter-Area-Prefix";
+    }
+
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
+    
+private:
+    uint16_t _referenced_ls_type;
+    uint32_t _referenced_link_state_id;
+    uint32_t _referenced_advertising_router;
+    list<IPv6Prefix> _prefixes;
+};
+
 #if	0
 class LsaTransmit : class Transmit {
  public:
@@ -1968,6 +2056,7 @@ initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
 	break;
     case OspfTypes::V3:
  	lsa_decoder.register_decoder(new LinkLsa(version));
+ 	lsa_decoder.register_decoder(new InterAreaPrefixLsa(version));
 	break;
     }
 }

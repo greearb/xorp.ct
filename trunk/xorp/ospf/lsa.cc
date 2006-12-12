@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.82 2006/12/12 02:40:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.83 2006/12/12 03:16:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1662,7 +1662,7 @@ LinkLsa::encode()
 
     size_t index = 0;
 
-    embed_8(&ptr[header_length ], get_rtr_priority());
+    embed_8(&ptr[header_length], get_rtr_priority());
     embed_24(&ptr[header_length + 1], get_options());
     get_link_local_address().copy_out(&ptr[header_length + 4]);
     embed_32(&ptr[header_length + 4 + IPv6::ADDR_BYTELEN], ps.size());
@@ -1703,6 +1703,152 @@ LinkLsa::str() const
 		       cstring(Options(get_version(), get_options())));
     output += c_format("\n\tLink-local Interface Address %s",
 		       cstring(get_link_local_address()));
+
+    list<IPv6Prefix> ps = _prefixes;
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
+	output += "\n\tIPv6 Prefix " + i->str();
+
+    return output;
+}
+
+Lsa::LsaRef
+InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const 
+    throw(InvalidPacket)
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
+
+    if (len < required)
+	xorp_throw(InvalidPacket,
+		   c_format("Inter-Area-Prefix-LSA too short %u, "
+			    "must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Inter-Area-Prefix-LSA", buf, len, required);
+
+    // Verify the checksum.
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
+
+    InterAreaPrefixLsa *lsa = 0;
+    try {
+	lsa = new InterAreaPrefixLsa(version, buf, len);
+
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	uint8_t *start = 0;
+
+	size_t prefix_num = extract_16(&buf[header_length]);
+	lsa->set_referenced_ls_type(extract_16(&buf[header_length + 2]));
+	lsa->set_referenced_link_state_id(extract_32(&buf[header_length + 4]));
+	lsa->set_referenced_advertising_router(extract_32(&buf[header_length +
+							       8]));
+
+	start = &buf[header_length + 2 + 2 + 4 + 4];
+	uint8_t *end = &buf[len];
+	IPv6Prefix decoder(version);
+	while(start < end) {
+	    if (!(start + 2 < end))
+		xorp_throw(InvalidPacket, c_format("Inter-Area-Prefix-LSA "
+						   "too short"));
+	    size_t space = end - (start + 4);
+	    IPv6Prefix prefix = decoder.decode(start + 4, space,
+					       extract_8(start),
+					       extract_8(start + 1));
+ 	    lsa->get_prefixes().push_back(prefix);
+	    start += (space + 4);
+	    if (0 == --prefix_num) {
+		if (start != end)
+		    xorp_throw(InvalidPacket,
+			       c_format("Inter-Area-Prefix-LSA # prefixes "
+					"read data left"));
+		break;
+	    }
+	}
+	if (0 != prefix_num)
+	    if (start != end)
+		xorp_throw(InvalidPacket,
+			   c_format("Inter-Area-Prefix-LSA # %d left "
+				    "buffer depleted",
+				    XORP_UINT_CAST(prefix_num)));
+
+    } catch(InvalidPacket& e) {
+	delete lsa;
+	throw e;
+    }
+
+    return Lsa::LsaRef(lsa);
+}
+
+bool
+InterAreaPrefixLsa::encode()
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    size_t len = _header.length() + 2 + 2 + 4 + 4;
+
+    list<IPv6Prefix> &ps = get_prefixes();
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
+	len += i->length() + 4;
+
+    _pkt.resize(len);
+    uint8_t *ptr = &_pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Copy the header into the packet
+    _header.set_ls_checksum(0);
+    _header.set_length(len);
+    size_t header_length = _header.copy_out(ptr);
+    XLOG_ASSERT(len > header_length);
+
+    embed_16(&ptr[header_length], ps.size());
+    embed_16(&ptr[header_length + 2], get_referenced_ls_type());
+    embed_32(&ptr[header_length + 4], get_referenced_link_state_id());
+    embed_32(&ptr[header_length + 8], get_referenced_advertising_router());
+
+    size_t index = header_length + 4 + IPv6::ADDR_BYTELEN + 4;
+
+    // Copy out the IPv6 Prefixes.
+    for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++) {
+	embed_8(&ptr[index], i->get_network().prefix_len());
+	embed_8(&ptr[index + 1], i->get_prefix_options());
+	index += i->copy_out(&ptr[index + 4]) + 4;
+    }
+
+    XLOG_ASSERT(index == len);
+
+    // Compute the checksum and write the whole header out again.
+    _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
+    _header.copy_out(ptr);
+
+    return true;
+}
+
+string
+InterAreaPrefixLsa::str() const
+{
+    OspfTypes::Version version = get_version();
+    XLOG_ASSERT(OspfTypes::V3 == version);
+
+    string output;
+
+    output += "Inter-Area-Prefix-LSA:\n";
+    if (!valid())
+	output += "INVALID\n";
+    output += _header.str();
+
+    output += c_format("\n\tReferenced LS type %#x", get_referenced_ls_type());
+    output += c_format("\n\tReferenced Link State ID %#x",
+		       get_referenced_link_state_id());
+    output += c_format("\n\tReferenced Advertising Router %#x",
+		       get_referenced_advertising_router());
 
     list<IPv6Prefix> ps = _prefixes;
     for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
