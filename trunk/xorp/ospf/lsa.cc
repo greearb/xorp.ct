@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.83 2006/12/12 03:16:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.84 2006/12/12 04:11:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1102,7 +1102,8 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    size_t space_left = (len - (IPV6_PREFIX_OFFSET + space));
 	    if (0 != space_left) 
 		xorp_throw(InvalidPacket,
-			   c_format("Space left in LSA %u bytes", space_left));
+			   c_format("Space left in LSA %u bytes",
+				    XORP_UINT_CAST(space_left)));
 	    lsa->set_ipv6prefix(prefix);
 	    break;
 	}
