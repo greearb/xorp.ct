@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.19 2006/04/26 04:16:44 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.20 2006/11/07 01:57:12 pavlin Exp $
  */
 
 
@@ -253,7 +253,7 @@
  */
 /* XXX: family2addr_size should be defined somewhere */
 #ifndef FAMILY2ADDRSIZE
-#define FAMILY2ADDRSIZE(ip_family) family2addr_size(ip_family)
+#define FAMILY2ADDRSIZE(ip_family) family2addr_bytelen(ip_family)
 #endif
 #ifndef FAMILY2PREFIXLEN
 #define FAMILY2PREFIXLEN(ip_family) family2addr_bitlen(ip_family)

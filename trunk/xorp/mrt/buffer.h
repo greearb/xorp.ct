@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/buffer.h,v 1.5 2005/03/25 02:53:56 pavlin Exp $
+ * $XORP: xorp/mrt/buffer.h,v 1.6 2006/03/16 00:04:47 pavlin Exp $
  */
 
 
@@ -289,17 +289,17 @@ do {									      \
 /* C++ version of IP addresses */
 #define _BUFFER_GET_IPADDR_CPP(family, ipvx, buffer)			      \
 do {									      \
-	if (BUFFER_DATA_SIZE(buffer) < family2addr_size((family)))	      \
+	if (BUFFER_DATA_SIZE(buffer) < family2addr_bytelen((family)))	      \
 		goto rcvlen_error;					      \
 	(ipvx).copy_in(family, BUFFER_DATA_HEAD((buffer)));		      \
-	BUFFER_GET_SKIP(family2addr_size((family)), (buffer));		      \
+	BUFFER_GET_SKIP(family2addr_bytelen((family)), (buffer));		      \
 } while (0)
 #define _BUFFER_PUT_IPADDR_CPP(ipvx, buffer)				      \
 do {									      \
-	if (BUFFER_AVAIL_TAIL((buffer))	< (ipvx).addr_size())		      \
+	if (BUFFER_AVAIL_TAIL((buffer))	< (ipvx).addr_bytelen())		      \
 		goto buflen_error;					      \
 	(ipvx).copy_out(BUFFER_DATA_TAIL((buffer)));			      \
-	BUFFER_PUT_SKIP((ipvx).addr_size(), (buffer));			      \
+	BUFFER_PUT_SKIP((ipvx).addr_bytelen(), (buffer));			      \
 } while (0)
 
 /*

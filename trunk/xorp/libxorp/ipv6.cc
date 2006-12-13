@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.26 2006/10/12 01:24:53 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.27 2006/11/29 08:13:37 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -79,8 +79,8 @@ IPv6::IPv6(const char* from_cstring) throw (InvalidString)
 size_t
 IPv6::copy_out(uint8_t* to_uint8) const
 {
-    memcpy(to_uint8, _addr, addr_size());
-    return addr_size();
+    memcpy(to_uint8, _addr, addr_bytelen());
+    return addr_bytelen();
 }
 
 /**
@@ -146,8 +146,8 @@ IPv6::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 size_t
 IPv6::copy_in(const uint8_t* from_uint8)
 {
-    memcpy(_addr, from_uint8, addr_size());
-    return (addr_size());
+    memcpy(_addr, from_uint8, addr_bytelen());
+    return (addr_bytelen());
 }
 
 /**

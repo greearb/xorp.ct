@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.24 2006/08/18 22:14:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.25 2006/10/12 01:24:54 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -750,7 +750,7 @@ test_ipv4_address_const()
     //
     // Test the address octet-size.
     //
-    verbose_assert(IPv4::addr_size() == 4, "addr_size()");
+    verbose_assert(IPv4::addr_bytelen() == 4, "addr_bytelen()");
 
     //
     // Test the address bit-length.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.31 2006/08/30 16:46:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.32 2006/10/24 22:35:33 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -208,7 +208,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     rtmsg->rtm_flags = RTM_F_NOTIFY;
 
     // Add the destination address as an attribute
-    rta_len = RTA_LENGTH(fte.net().masked_addr().addr_size());
+    rta_len = RTA_LENGTH(fte.net().masked_addr().addr_bytelen());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		   XORP_UINT_CAST(sizeof(buffer)),
@@ -223,7 +223,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 
     // Add the nexthop address as an attribute
     if (fte.nexthop() != IPvX::ZERO(family)) {
-	rta_len = RTA_LENGTH(fte.nexthop().addr_size());
+	rta_len = RTA_LENGTH(fte.nexthop().addr_bytelen());
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		       XORP_UINT_CAST(sizeof(buffer)),
@@ -396,7 +396,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     rtmsg->rtm_flags = RTM_F_NOTIFY;
 
     // Add the destination address as an attribute
-    rta_len = RTA_LENGTH(fte.net().masked_addr().addr_size());
+    rta_len = RTA_LENGTH(fte.net().masked_addr().addr_bytelen());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		   XORP_UINT_CAST(sizeof(buffer)),

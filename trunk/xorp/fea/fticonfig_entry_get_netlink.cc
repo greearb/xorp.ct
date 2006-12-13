@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.35 2006/08/29 22:42:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.36 2006/08/30 16:46:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -269,7 +269,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = IPvX::addr_bitlen(family);
     // Add the 'ipaddr' address as an attribute
-    rta_len = RTA_LENGTH(IPvX::addr_size(family));
+    rta_len = RTA_LENGTH(IPvX::addr_bytelen(family));
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		   XORP_UINT_CAST(sizeof(buffer)),

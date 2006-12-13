@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.46 2006/03/16 00:04:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.47 2006/05/25 01:22:52 pavlin Exp $"
 
 
 //
@@ -2163,7 +2163,7 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
     uint8_t stored_addr_array[sizeof(my_addr)];
     double my_addr_double, stored_addr_double;
     size_t addr_bitlen = IPvX::addr_bitlen(_pim_bsr.family());
-    size_t addr_size = IPvX::addr_size(_pim_bsr.family());
+    size_t addr_bytelen = IPvX::addr_bytelen(_pim_bsr.family());
     
     // Get the address values
     my_addr.copy_out(my_addr_array);
@@ -2172,7 +2172,7 @@ BsrZone::randomized_override_interval(const IPvX& my_addr,
     // Get the (double) value of the addresses
     my_addr_double = 0.0;
     stored_addr_double = 0.0;
-    for (size_t i = 0; i < addr_size; i++) {
+    for (size_t i = 0; i < addr_bytelen; i++) {
 	my_addr_double = my_addr_double * 256 + (double)my_addr_array[i];
 	stored_addr_double = stored_addr_double * 256 + (double)stored_addr_array[i];
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.26 2006/08/18 22:14:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.27 2006/10/12 01:24:53 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -71,8 +71,8 @@ IPv4::IPv4(const char *from_cstring) throw (InvalidString)
 size_t
 IPv4::copy_out(uint8_t *to_uint8) const
 {
-    memcpy(to_uint8, &_addr, addr_size());
-    return addr_size();
+    memcpy(to_uint8, &_addr, addr_bytelen());
+    return addr_bytelen();
 }
 
 /**
@@ -120,8 +120,8 @@ IPv4::copy_out(struct sockaddr_in& to_sockaddr_in) const
 size_t
 IPv4::copy_in(const uint8_t *from_uint8)
 {
-    memcpy(&_addr, from_uint8, addr_size());
-    return (addr_size());
+    memcpy(&_addr, from_uint8, addr_bytelen());
+    return (addr_bytelen());
 }
 
 /**

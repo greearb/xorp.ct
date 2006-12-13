@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.24 2006/08/18 22:14:49 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.25 2006/10/12 01:24:55 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -1277,9 +1277,9 @@ test_ipvx_address_const()
     //
     // Test the address octet-size.
     //
-    verbose_assert(IPvX::addr_size(AF_INET) == 4, "addr_size()");
+    verbose_assert(IPvX::addr_bytelen(AF_INET) == 4, "addr_bytelen()");
 
-    verbose_assert(IPvX::addr_size(AF_INET6) == 16, "addr_size()");
+    verbose_assert(IPvX::addr_bytelen(AF_INET6) == 16, "addr_bytelen()");
 
     //
     // Test the address bit-length.

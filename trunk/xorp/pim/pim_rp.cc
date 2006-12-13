@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_rp.cc,v 1.15 2005/05/12 10:42:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_rp.cc,v 1.16 2006/03/16 00:04:55 pavlin Exp $"
 
 
 //
@@ -283,12 +283,12 @@ RpTable::compare_rp(const IPvX& group_addr, PimRp *rp1, PimRp *rp2) const
 uint32_t
 RpTable::derived_addr(const IPvX& addr) const
 {
-    size_t addr_size = addr.addr_size()/sizeof(uint32_t);
+    size_t addr_bytelen = addr.addr_bytelen()/sizeof(uint32_t);
     uint32_t addr_array[sizeof(addr)];	// XXX: give us plenty of extra space
     uint32_t result = 0;
 	    
     addr.copy_out((uint8_t *)addr_array);
-    for (size_t i = 0; i < addr_size; i++)
+    for (size_t i = 0; i < addr_bytelen; i++)
 	result ^= addr_array[i];
     
     return (result);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.77 2006/08/10 23:14:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.78 2006/10/12 01:24:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -985,7 +985,7 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     /*
     ** Due to alignment problems I can't use a structure overlay.
     */
-    uint8_t viewbuf[18 + A::addr_size()], *ptr;
+    uint8_t viewbuf[18 + A::addr_bytelen()], *ptr;
 
     mrt_header header;
     header.time = /*htonl(tv.sec())*/0;
@@ -1015,7 +1015,7 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
 
     // Prefix
     net.masked_addr().copy_out(ptr);
-    ptr += A::addr_size();
+    ptr += A::addr_bytelen();
 
     // Prefix length
     *reinterpret_cast<uint8_t *>(ptr) = net.prefix_len();

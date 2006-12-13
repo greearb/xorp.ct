@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.32 2006/08/30 16:46:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.33 2006/10/24 22:35:34 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -846,7 +846,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     ifaddrmsg->ifa_index = if_index;
 
     // Add the address as an attribute
-    rta_len = RTA_LENGTH(addr.addr_size());
+    rta_len = RTA_LENGTH(addr.addr_bytelen());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		   XORP_UINT_CAST(sizeof(buffer)),
@@ -861,7 +861,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 
     if (is_broadcast || is_p2p) {
 	// Set the p2p or broadcast address	
-	rta_len = RTA_LENGTH(dst_or_bcast.addr_size());
+	rta_len = RTA_LENGTH(dst_or_bcast.addr_bytelen());
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		       XORP_UINT_CAST(sizeof(buffer)),
@@ -975,7 +975,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     ifaddrmsg->ifa_index = if_index;
 
     // Add the address as an attribute
-    rta_len = RTA_LENGTH(addr.addr_size());
+    rta_len = RTA_LENGTH(addr.addr_bytelen());
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		   XORP_UINT_CAST(sizeof(buffer)),

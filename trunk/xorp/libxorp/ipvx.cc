@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.25 2006/08/18 22:22:30 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.26 2006/11/29 08:13:37 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -52,7 +52,7 @@ IPvX::IPvX(int family, const uint8_t *from_uint8) throw (InvalidFamily)
 
     _af = family;
     memset(_addr, 0, sizeof(_addr));
-    memcpy(_addr, from_uint8, addr_size());
+    memcpy(_addr, from_uint8, addr_bytelen());
 }
 
 IPvX::IPvX(const IPv4& ipv4)
@@ -279,8 +279,8 @@ IPvX::mask_len() const
 size_t
 IPvX::copy_out(uint8_t *to_uint8) const
 {
-    memcpy(to_uint8, _addr, addr_size());
-    return (addr_size());
+    memcpy(to_uint8, _addr, addr_bytelen());
+    return (addr_bytelen());
 }
 
 /**
@@ -406,8 +406,8 @@ IPvX::copy_in(int family, const uint8_t *from_uint8) throw (InvalidFamily)
     case AF_INET:
 	// FALLTHROUGH
     case AF_INET6:
-	memcpy(_addr, from_uint8, addr_size());
-	return (addr_size());
+	memcpy(_addr, from_uint8, addr_bytelen());
+	return (addr_bytelen());
     default:
 	xorp_throw(InvalidFamily, _af);
     }
@@ -602,12 +602,12 @@ IPvX::ip_version_str() const throw (InvalidFamily)
 }
 
 size_t
-IPvX::addr_size(int family) throw (InvalidFamily)
+IPvX::addr_bytelen(int family) throw (InvalidFamily)
 {
     if (family == AF_INET)
-	return (IPv4::addr_size());
+	return (IPv4::addr_bytelen());
     if (family == AF_INET6)
-	return (IPv6::addr_size());
+	return (IPv6::addr_bytelen());
     xorp_throw(InvalidFamily, family);
 
     return ((size_t)-1);

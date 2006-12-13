@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.44 2006/07/06 08:18:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.45 2006/10/20 02:03:05 pavlin Exp $"
 
 
 //
@@ -307,7 +307,7 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
     //
     // Check the remaining size of the message
     //
-    if (BUFFER_DATA_SIZE(buffer) < sources_n * IPvX::addr_size(family())) {
+    if (BUFFER_DATA_SIZE(buffer) < sources_n * IPvX::addr_bytelen(family())) {
 	error_msg = c_format("RX %s from %s to %s on vif %s: "
 			     "source addresses array size too short"
 			     "(received %u expected at least %u)",
@@ -315,7 +315,7 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
 			     cstring(src), cstring(dst),
 			     name().c_str(),
 			     XORP_UINT_CAST(BUFFER_DATA_SIZE(buffer)),
-			     XORP_UINT_CAST(sources_n * IPvX::addr_size(family())));
+			     XORP_UINT_CAST(sources_n * IPvX::addr_bytelen(family())));
 	XLOG_WARNING("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.17 2006/11/07 21:53:17 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.18 2006/11/08 19:43:43 pavlin Exp $"
 
 
 //
@@ -131,7 +131,7 @@ MribTable::insert(const Mrib& mrib)
     size_t	 prefix_len = mrib.dest_prefix().prefix_len();
     uint32_t	 mem_lookup_addr[sizeof(IPvX)];
     const size_t lookup_addr_size_words
-	= lookup_addr.addr_size()/sizeof(mem_lookup_addr[0]);
+	= lookup_addr.addr_bytelen()/sizeof(mem_lookup_addr[0]);
     
     // Copy the destination address prefix to memory
     lookup_addr.copy_out((uint8_t *)mem_lookup_addr);
@@ -313,7 +313,7 @@ MribTable::find(const IPvX& lookup_addr) const
 {
     uint32_t	 mem_lookup_addr[sizeof(IPvX)];
     const size_t lookup_addr_size_words
-	= lookup_addr.addr_size()/sizeof(mem_lookup_addr[0]);
+	= lookup_addr.addr_bytelen()/sizeof(mem_lookup_addr[0]);
     
     // Copy the destination address prefix to memory
     lookup_addr.copy_out((uint8_t *)mem_lookup_addr);
@@ -391,7 +391,7 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
     size_t	 prefix_len = addr_prefix.prefix_len();
     uint32_t	 mem_lookup_addr[sizeof(IPvX)];
     const size_t lookup_addr_size_words
-	= lookup_addr.addr_size()/sizeof(mem_lookup_addr[0]);
+	= lookup_addr.addr_bytelen()/sizeof(mem_lookup_addr[0]);
     
     // Copy the destination address prefix to memory
     lookup_addr.copy_out((uint8_t *)mem_lookup_addr);

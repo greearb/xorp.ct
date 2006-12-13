@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.25 2006/08/04 23:21:16 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.26 2006/08/18 22:14:48 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -467,25 +467,25 @@ public:
      *
      * Note that this is a static function and is to be used without
      * a particular object. Example:
-     *   size_t my_size = IPvX::addr_size(my_family);
+     *   size_t my_size = IPvX::addr_bytelen(my_family);
      *
      * @param family the address family.
      * @return address size in number of octets for an address of
      * address family of @ref family.
      */
-    static size_t addr_size(int family) throw (InvalidFamily);
+    static size_t addr_bytelen(int family) throw (InvalidFamily);
 
     /**
      * Get the address octet-size for this address.
      *
      * Note that this is not a static function, hence it has to be used with
      * a particular object. Example:
-     *   size_t my_size = ipvx.addr_size();
+     *   size_t my_size = ipvx.addr_bytelen();
      *
      * @param family the address family.
      * @return address size in number of octets for this IPvX address.
      */
-    size_t addr_size() const { return IPvX::addr_size(_af); }
+    size_t addr_bytelen() const { return IPvX::addr_bytelen(_af); }
 
     /**
      * Get the address bit-length.
@@ -499,7 +499,7 @@ public:
      * address family of @ref family.
      */
     inline static uint32_t addr_bitlen(int family) throw (InvalidFamily) {
-	return uint32_t(8 * sizeof(uint8_t) * addr_size(family));
+	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen(family));
     }
 
     /**
@@ -513,7 +513,7 @@ public:
      * @return address size in number of bits for this IPvX address.
      */
     inline uint32_t addr_bitlen() const {
-	return uint32_t(8 * sizeof(uint8_t) * addr_size());
+	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen());
     }
 
     /**
@@ -896,9 +896,9 @@ IPvX::leading_zero_count() const
 // We need a system for exporting API to C programs.
 //
 inline size_t
-family2addr_size(const int family)
+family2addr_bytelen(const int family)
 {
-    return IPvX::addr_size(family);
+    return IPvX::addr_bytelen(family);
 }
 
 inline uint32_t

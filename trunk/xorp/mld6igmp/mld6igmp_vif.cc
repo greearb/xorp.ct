@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.79 2006/08/15 02:36:54 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.80 2006/08/18 22:14:49 pavlin Exp $"
 
 
 //
@@ -786,7 +786,7 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
 	    - 8		// IPv6 Hop-by-hop Ext. Header with Router Alert option
 	    - MLD_V2_QUERY_MINLEN;	// MLDv2 Query pre-source fields
     }
-    max_sources_n = min(max_sources_n, max_payload / IPvX::addr_size(family()));
+    max_sources_n = min(max_sources_n, max_payload / IPvX::addr_bytelen(family()));
 
     //
     // XXX: According to RFC 3810 (MLDv2), Section 8.3.2, the Querier

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.82 2006/08/10 08:32:26 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.83 2006/10/12 01:24:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -205,7 +205,7 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 	xorp_throw(CorruptMessage,
 		   c_format("Bad Flags in NextHop attribute %#x", flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
-    if (length(d) != A::addr_size())
+    if (length(d) != A::addr_bytelen())
 	xorp_throw(CorruptMessage, "Bad size in NextHop address",
 		   UPDATEMSGERR, ATTRLEN);
 
@@ -223,7 +223,7 @@ template<class A>
 void
 NextHopAttribute<A>::encode()
 {
-    uint8_t *d = set_header(_next_hop.addr_size());
+    uint8_t *d = set_header(A::addr_bytelen());
     _next_hop.copy_out(d);
 }
 
@@ -655,7 +655,7 @@ MPReachNLRIAttribute<IPv6>::encode()
 
     XLOG_ASSERT(AFI_IPV6 == _afi);
     XLOG_ASSERT((SAFI_UNICAST  == _safi) || (SAFI_MULTICAST == _safi));
-    XLOG_ASSERT(16 == IPv6::addr_size());
+    XLOG_ASSERT(16 == IPv6::addr_bytelen());
 
     /*
     ** Figure out how many bytes we need to allocate.
@@ -664,9 +664,9 @@ MPReachNLRIAttribute<IPv6>::encode()
     len = 2;	// AFI
     len += 1;	// SAFI
     len += 1;	// Length of Next Hop Address
-    len += IPv6::addr_size();	// Next Hop
+    len += IPv6::addr_bytelen();	// Next Hop
     if (!_link_local_next_hop.is_zero())
-	len += IPv6::addr_size();
+	len += IPv6::addr_bytelen();
     len += 1;	// Number of SNPAs
 
     const_iterator i;
@@ -686,15 +686,15 @@ MPReachNLRIAttribute<IPv6>::encode()
     *d++ = _safi;		// SAFIs
 
     if (_link_local_next_hop.is_zero()) {
-	*d++ = IPv6::addr_size();
+	*d++ = IPv6::addr_bytelen();
 	nexthop().copy_out(d);
-	d += IPv6::addr_size();
+	d += IPv6::addr_bytelen();
     } else {
-	*d++ = IPv6::addr_size() * 2;
+	*d++ = IPv6::addr_bytelen() * 2;
 	nexthop().copy_out(d);
-	d += IPv6::addr_size();
+	d += IPv6::addr_bytelen();
 	_link_local_next_hop.copy_out(d);
-	d += IPv6::addr_size();
+	d += IPv6::addr_bytelen();
     }
     
     *d++ = 0;	// Number of SNPAs
@@ -702,7 +702,7 @@ MPReachNLRIAttribute<IPv6>::encode()
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	int bytes = (i->prefix_len() + 7)/ 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
-	uint8_t buf[IPv6::addr_size()];
+	uint8_t buf[IPv6::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
 
 	*d++ = i->prefix_len();
@@ -718,7 +718,7 @@ MPReachNLRIAttribute<IPv4>::encode()
     delete[] _data;	// Zap any old allocation.
 
     XLOG_ASSERT(AFI_IPV4 == _afi && SAFI_MULTICAST == _safi);
-    XLOG_ASSERT(4 == IPv4::addr_size());
+    XLOG_ASSERT(4 == IPv4::addr_bytelen());
 
     /*
     ** Figure out how many bytes we need to allocate.
@@ -727,7 +727,7 @@ MPReachNLRIAttribute<IPv4>::encode()
     len = 2;	// AFI
     len += 1;	// SAFI
     len += 1;	// Length of Next Hop Address
-    len += IPv4::addr_size();	// Next Hop
+    len += IPv4::addr_bytelen();	// Next Hop
     len += 1;	// Number of SNPAs
 
     const_iterator i;
@@ -746,16 +746,16 @@ MPReachNLRIAttribute<IPv4>::encode()
     
     *d++ = _safi;		// SAFIs
 
-    *d++ = IPv4::addr_size();
+    *d++ = IPv4::addr_bytelen();
     nexthop().copy_out(d);
-    d += IPv4::addr_size();
+    d += IPv4::addr_bytelen();
     
     *d++ = 0;	// Number of SNPAs
 
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	int bytes = (i->prefix_len() + 7) / 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
-	uint8_t buf[IPv4::addr_size()];
+	uint8_t buf[IPv4::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
 
 	*d++ = i->prefix_len();
@@ -846,21 +846,21 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     */
     uint8_t len = *data++;
 
-    XLOG_ASSERT(16 == IPv6::addr_size());
+    XLOG_ASSERT(16 == IPv6::addr_bytelen());
     IPv6 temp;
 
     switch(len) {
     case 16:
 	temp.copy_in(data);
 	set_nexthop(temp);
-	data += IPv6::addr_size();
+	data += IPv6::addr_bytelen();
 	break;
     case 32:
 	temp.copy_in(data);
 	set_nexthop(temp);
-	data += IPv6::addr_size();
+	data += IPv6::addr_bytelen();
 	_link_local_next_hop.copy_in(data);
-	data += IPv6::addr_size();
+	data += IPv6::addr_bytelen();
 	break;
     default:
 	xorp_throw(CorruptMessage,
@@ -897,11 +897,11 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
     while(data < end) {
 	uint8_t prefix_length = *data++;
 	size_t bytes = (prefix_length + 7)/ 8;
-	if (bytes > IPv6::addr_size())
+	if (bytes > IPv6::addr_bytelen())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
-	uint8_t buf[IPv6::addr_size()];
+	uint8_t buf[IPv6::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv6 nlri;
@@ -969,14 +969,14 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     */
     uint8_t len = *data++;
 
-    XLOG_ASSERT(4 == IPv4::addr_size());
+    XLOG_ASSERT(4 == IPv4::addr_bytelen());
     IPv4 temp;
 
     switch(len) {
     case 4:
 	temp.copy_in(data);
 	set_nexthop(temp);
-	data += IPv4::addr_size();
+	data += IPv4::addr_bytelen();
 	break;
     default:
 	xorp_throw(CorruptMessage,
@@ -1013,11 +1013,11 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     while(data < end) {
 	uint8_t prefix_length = *data++;
 	size_t bytes = (prefix_length + 7) / 8;
-	if (bytes > IPv4::addr_size())
+	if (bytes > IPv4::addr_bytelen())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
-	uint8_t buf[IPv4::addr_size()];
+	uint8_t buf[IPv4::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv4 nlri;
@@ -1054,7 +1054,7 @@ MPUNReachNLRIAttribute<IPv6>::encode()
 
     XLOG_ASSERT(AFI_IPV6 == _afi);
     XLOG_ASSERT((SAFI_UNICAST  == _safi) || (SAFI_MULTICAST == _safi));
-    XLOG_ASSERT(16 == IPv6::addr_size());
+    XLOG_ASSERT(16 == IPv6::addr_bytelen());
 
     /*
     ** Figure out how many bytes we need to allocate.
@@ -1082,7 +1082,7 @@ MPUNReachNLRIAttribute<IPv6>::encode()
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	int bytes = (i->prefix_len() + 7)/ 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
-	uint8_t buf[IPv6::addr_size()];
+	uint8_t buf[IPv6::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
 
 	*d++ = i->prefix_len();
@@ -1098,7 +1098,7 @@ MPUNReachNLRIAttribute<IPv4>::encode()
     delete[] _data;	// Zap any old allocation.
 
     XLOG_ASSERT(AFI_IPV4 == _afi && SAFI_MULTICAST == _safi);
-    XLOG_ASSERT(4 == IPv4::addr_size());
+    XLOG_ASSERT(4 == IPv4::addr_bytelen());
 
     /*
     ** Figure out how many bytes we need to allocate.
@@ -1126,7 +1126,7 @@ MPUNReachNLRIAttribute<IPv4>::encode()
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	int bytes = (i->prefix_len() + 7) / 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
-	uint8_t buf[IPv4::addr_size()];
+	uint8_t buf[IPv4::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
 
 	*d++ = i->prefix_len();
@@ -1218,12 +1218,12 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
 	uint8_t prefix_length = *data++;
 	debug_msg("decode prefix length = %d\n", prefix_length);
 	size_t bytes = (prefix_length + 7)/ 8;
-	if (bytes > IPv6::addr_size())
+	if (bytes > IPv6::addr_bytelen())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
 	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
-	uint8_t buf[IPv6::addr_size()];
+	uint8_t buf[IPv6::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv6 nlri;
@@ -1291,12 +1291,12 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
 	uint8_t prefix_length = *data++;
 	debug_msg("decode prefix length = %d\n", prefix_length);
 	size_t bytes = (prefix_length + 7)/ 8;
-	if (bytes > IPv4::addr_size())
+	if (bytes > IPv4::addr_bytelen())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
 		       UPDATEMSGERR, OPTATTR);
 	debug_msg("decode bytes = %u\n", XORP_UINT_CAST(bytes));
-	uint8_t buf[IPv4::addr_size()];
+	uint8_t buf[IPv4::addr_bytelen()];
 	memset(buf, 0, sizeof(buf));
 	memcpy(buf, data, bytes);
 	IPv4 nlri;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.34 2006/11/07 18:55:41 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.35 2006/12/11 15:56:04 atanu Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -462,12 +462,12 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_size = IPv4::addr_size();
-     *   size_t my_size = ipv4.addr_size();
+     *   size_t my_size = IPv4::addr_bytelen();
+     *   size_t my_size = ipv4.addr_bytelen();
      *
      * @return address size in number of octets.
      */
-    inline static size_t addr_size() {
+    inline static size_t addr_bytelen() {
 	static_assert(sizeof(IPv4) == sizeof(uint32_t));
 	return sizeof(IPv4);
     }
@@ -483,7 +483,7 @@ public:
      * @return address size in number of bits.
      */
     inline static uint32_t addr_bitlen() {
-	return uint32_t(8 * sizeof(uint8_t) * addr_size());
+	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen());
     }
 
     /**
