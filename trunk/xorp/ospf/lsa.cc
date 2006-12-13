@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.84 2006/12/12 04:11:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.85 2006/12/13 00:17:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1713,7 +1713,7 @@ LinkLsa::str() const
 }
 
 Lsa::LsaRef
-InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const 
+IntraAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const 
     throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
@@ -1724,21 +1724,21 @@ InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 
     if (len < required)
 	xorp_throw(InvalidPacket,
-		   c_format("Inter-Area-Prefix-LSA too short %u, "
+		   c_format("Intra-Area-Prefix-LSA too short %u, "
 			    "must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
 
     // This guy throws an exception of there is a problem.
-    len = get_lsa_len_from_header("Inter-Area-Prefix-LSA", buf, len, required);
+    len = get_lsa_len_from_header("Intra-Area-Prefix-LSA", buf, len, required);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
 
-    InterAreaPrefixLsa *lsa = 0;
+    IntraAreaPrefixLsa *lsa = 0;
     try {
-	lsa = new InterAreaPrefixLsa(version, buf, len);
+	lsa = new IntraAreaPrefixLsa(version, buf, len);
 
 	// Decode the LSA Header.
 	lsa->_header.decode_inline(buf);
@@ -1755,7 +1755,7 @@ InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 	IPv6Prefix decoder(version);
 	while(start < end) {
 	    if (!(start + 2 < end))
-		xorp_throw(InvalidPacket, c_format("Inter-Area-Prefix-LSA "
+		xorp_throw(InvalidPacket, c_format("Intra-Area-Prefix-LSA "
 						   "too short"));
 	    size_t space = end - (start + 4);
 	    IPv6Prefix prefix = decoder.decode(start + 4, space,
@@ -1766,7 +1766,7 @@ InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 	    if (0 == --prefix_num) {
 		if (start != end)
 		    xorp_throw(InvalidPacket,
-			       c_format("Inter-Area-Prefix-LSA # prefixes "
+			       c_format("Intra-Area-Prefix-LSA # prefixes "
 					"read data left"));
 		break;
 	    }
@@ -1774,7 +1774,7 @@ InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 	if (0 != prefix_num)
 	    if (start != end)
 		xorp_throw(InvalidPacket,
-			   c_format("Inter-Area-Prefix-LSA # %d left "
+			   c_format("Intra-Area-Prefix-LSA # %d left "
 				    "buffer depleted",
 				    XORP_UINT_CAST(prefix_num)));
 
@@ -1787,7 +1787,7 @@ InterAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 }
 
 bool
-InterAreaPrefixLsa::encode()
+IntraAreaPrefixLsa::encode()
 {
     OspfTypes::Version version = get_version();
     XLOG_ASSERT(OspfTypes::V3 == version);
@@ -1833,14 +1833,14 @@ InterAreaPrefixLsa::encode()
 }
 
 string
-InterAreaPrefixLsa::str() const
+IntraAreaPrefixLsa::str() const
 {
     OspfTypes::Version version = get_version();
     XLOG_ASSERT(OspfTypes::V3 == version);
 
     string output;
 
-    output += "Inter-Area-Prefix-LSA:\n";
+    output += "Intra-Area-Prefix-LSA:\n";
     if (!valid())
 	output += "INVALID\n";
     output += _header.str();
