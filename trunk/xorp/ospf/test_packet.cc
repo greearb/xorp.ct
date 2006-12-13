@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.47 2006/12/11 21:35:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.48 2006/12/12 03:17:45 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -470,6 +470,36 @@ populate_link_lsa(LinkLsa *llsa, OspfTypes::Version version)
     prefix2.set_p_bit(false);
     prefix2.set_dn_bit(false);
     llsa->get_prefixes().push_back(prefix2);
+}
+
+inline
+void
+populate_intra_area_prefix_lsa(IntraAreaPrefixLsa *iaplsa,
+			       OspfTypes::Version version)
+{
+    populate_lsa_header(iaplsa->get_header(), version);
+
+    iaplsa->set_referenced_ls_type(0x2001);
+    iaplsa->set_referenced_link_state_id(1);
+    iaplsa->set_referenced_advertising_router(set_id("192.1.1.2"));
+    IPNet<IPv6> net1("2001:468:e21:c800:220:edff:fe61:f033", 64);
+    IPv6Prefix prefix1(version);
+    prefix1.set_network(net1);
+    prefix1.set_nu_bit(true);
+    prefix1.set_la_bit(true);
+    prefix1.set_mc_bit(true);
+    prefix1.set_p_bit(true);
+    prefix1.set_dn_bit(true);
+    iaplsa->get_prefixes().push_back(prefix1);
+    IPNet<IPv6> net2("2001:700:0:fff1::2", 64);
+    IPv6Prefix prefix2(version);
+    prefix2.set_network(net2);
+    prefix2.set_nu_bit(false);
+    prefix2.set_la_bit(false);
+    prefix2.set_mc_bit(false);
+    prefix2.set_p_bit(false);
+    prefix2.set_dn_bit(false);
+    iaplsa->get_prefixes().push_back(prefix2);
 }
 
 inline
@@ -1158,6 +1188,19 @@ link_lsa_print(TestInfo& info)
 }
 
 bool
+intra_area_prefix_lsa_print(TestInfo& info)
+{
+    IntraAreaPrefixLsa *iaplsa = new IntraAreaPrefixLsa(OspfTypes::V3);
+    populate_intra_area_prefix_lsa(iaplsa, OspfTypes::V3);
+
+    DOUT(info) << iaplsa->str() << endl;
+
+    delete iaplsa;
+
+    return true;
+}
+
+bool
 router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 {
     RouterLsa *rlsa1= new RouterLsa(version);
@@ -1480,6 +1523,52 @@ link_lsa_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+intra_area_prefix_lsa_compare(TestInfo& info, OspfTypes::Version version)
+{
+    IntraAreaPrefixLsa *iaplsa1= new IntraAreaPrefixLsa(version);
+    populate_intra_area_prefix_lsa(iaplsa1, version);
+
+    DOUT(info) << iaplsa1->str() << endl;
+
+    // Encode the Link-LSA.
+    iaplsa1->encode();
+    size_t len1;
+    uint8_t *ptr1 = iaplsa1->lsa(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    IntraAreaPrefixLsa *iaplsa2= new IntraAreaPrefixLsa(version);
+
+    Lsa::LsaRef iaplsa3 = iaplsa2->decode(ptr1, len1);
+
+    DOUT(info) << iaplsa3->str() << endl;
+
+    // Encode the second packet and compare.
+    iaplsa3->encode();
+
+    DOUT(info) << iaplsa3->str() << endl;
+
+    size_t len2;
+    uint8_t *ptr2 = iaplsa3->lsa(len2);
+    
+    vector<uint8_t> pkt1;
+    fill_vector(pkt1, ptr1, len1);
+    vector<uint8_t> pkt2;
+    fill_vector(pkt2, ptr2, len2);
+
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    if (!compare_packet_strings(info, iaplsa1->str(), iaplsa3->str()))
+	return false;
+
+    delete iaplsa1;
+    delete iaplsa2;
+
+    return true;
+}
+
+bool
 lsa_decoder1(TestInfo& info, OspfTypes::Version version)
 {
     LsaDecoder dec(version);
@@ -1557,6 +1646,7 @@ main(int argc, char **argv)
 	{"as_external_lsa_print", callback(as_external_lsa_print)},
 	{"type7_lsa_print", callback(type7_lsa_print)},
 	{"link_lsa_print", callback(link_lsa_print)},
+	{"intra_area_prefix_lsa_print", callback(intra_area_prefix_lsa_print)},
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
@@ -1633,6 +1723,8 @@ main(int argc, char **argv)
 	{"type7_lsa_compareV2",	 callback(type7_lsa_compare, OspfTypes::V2)},
 	{"type7_lsa_compareV3",	 callback(type7_lsa_compare, OspfTypes::V3)},
 	{"link_lsa_compareV3",	 callback(link_lsa_compare, OspfTypes::V3)},
+	{"intra_area_prefix_lsa_compareV3", 
+	 callback(intra_area_prefix_lsa_compare, OspfTypes::V3)},
 
 	{"lsa_decoder1V2", callback(lsa_decoder1, OspfTypes::V2)},
 	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},
