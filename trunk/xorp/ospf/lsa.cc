@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.85 2006/12/13 00:17:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.86 2006/12/13 03:11:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1814,7 +1814,7 @@ IntraAreaPrefixLsa::encode()
     embed_32(&ptr[header_length + 4], get_referenced_link_state_id());
     embed_32(&ptr[header_length + 8], get_referenced_advertising_router());
 
-    size_t index = header_length + 4 + IPv6::ADDR_BYTELEN + 4;
+    size_t index = header_length + 2 + 2 + 4 + 4;
 
     // Copy out the IPv6 Prefixes.
     for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++) {
