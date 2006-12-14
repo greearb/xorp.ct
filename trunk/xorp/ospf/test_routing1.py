@@ -12,13 +12,19 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.3 2006/04/07 16:08:13 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.4 2006/10/12 20:20:36 atanu Exp $
 
 import sys
 import os
 
-TESTS_NOT_FIXED=['test3']
-TESTS=['test1', 'test2']
+TESTS=[
+    # Fields:
+    # 0: Test function
+    # 1: True if this test works
+    ['test1', True],
+    ['test2', True],
+    ['test3', True],
+    ]
 
 def test1():
     """
@@ -110,16 +116,15 @@ compute 0.0.0.0
 
 def main():
 
-    global TESTS, TESTS_NOT_FIXED
-
     for i in TESTS:
-        test = i + '()'
-        print i,
-        if not eval(test):
-            print "FAILED"
-            sys.exit(-1)
-        else:
-            print "SUCEEDED"
+        if i[1]:
+            test = i[0] + '()'
+            print test,
+            if not eval(test):
+                print "FAILED"
+                sys.exit(-1)
+            else:
+                print "SUCEEDED"
 
     sys.exit(0)
 
