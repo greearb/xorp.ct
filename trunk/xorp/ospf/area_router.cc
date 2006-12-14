@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.212 2006/12/08 08:50:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.213 2006/12/11 21:44:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2898,6 +2898,12 @@ template <> void AreaRouter<IPv4>::routing_inter_areaV2();
 template <> void AreaRouter<IPv4>::routing_transit_areaV2();
 template <> void AreaRouter<IPv4>::routing_as_externalV2();
 
+template <> void AreaRouter<IPv6>::
+routing_area_rangesV3(list<RouteCmd<Vertex> >& r);
+template <> void AreaRouter<IPv6>::routing_inter_areaV3();
+template <> void AreaRouter<IPv6>::routing_transit_areaV3();
+template <> void AreaRouter<IPv6>::routing_as_externalV3();
+
 template <>
 void 
 AreaRouter<IPv4>::routing_total_recomputeV2()
@@ -3091,11 +3097,202 @@ AreaRouter<IPv6>::routing_total_recomputeV2()
     XLOG_FATAL("OSPFv2 with IPv6 not valid");
 }
 
-template <typename A>
+template <>
 void 
-AreaRouter<A>::routing_total_recomputeV3()
+AreaRouter<IPv4>::routing_total_recomputeV3()
 {
-    XLOG_WARNING("TBD - routing computation for V3");
+    XLOG_FATAL("OSPFv3 with IPv4 not valid");
+}
+
+template <>
+void 
+AreaRouter<IPv6>::routing_total_recomputeV3()
+{
+#ifdef	DEBUG_LOGGING
+    testing_print_link_state_database();
+#endif
+
+    // RFC 2328 16.1.  Calculating the shortest-path tree for an area
+
+    Spt<Vertex> spt(_ospf.trace()._spt);
+    bool transit_capability = false;
+
+    // Add this router to the SPT table.
+    Vertex rv;
+    RouterVertex(rv);
+    spt.add_node(rv);
+    spt.set_origin(rv);
+
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage())
+	    continue;
+
+	RouterLsa *rlsa;
+	
+	if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+
+	    if (rlsa->get_v_bit())
+		transit_capability = true;
+	    
+	    Vertex v;
+
+	    v.set_version(_ospf.get_version());
+	    v.set_type(OspfTypes::Router);
+	    v.set_nodeid(rlsa->get_header().get_link_state_id());
+  	    v.set_lsa(lsar);
+
+	    // Don't add this router back again.
+	    if (spt.exists_node(v)) {
+		debug_msg("%s Router %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(v));
+		if (rv == v)
+		    v.set_origin(rv.get_origin());
+	    } else {
+		debug_msg("%s Add %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(v));
+		spt.add_node(v);
+	    }
+
+	    debug_msg("%s Router-Lsa %s\n",
+		   pr_id(_ospf.get_router_id()).c_str(),
+		   cstring(*rlsa));
+
+	    switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		routing_router_lsaV2(spt, v, rlsa);
+		break;
+	    case OspfTypes::V3:
+		routing_router_lsaV3(spt, v, rlsa);
+		break;
+	    }
+	}
+    }
+
+    // If the backbone area is configured to generate summaries and
+    // the transit capability of this area just changed then all the
+    // candidate summary routes need to be pushed through this area again.
+    if (get_transit_capability() != transit_capability) {
+	set_transit_capability(transit_capability);
+	PeerManager<IPv6>& pm = _ospf.get_peer_manager();
+	if (pm.area_range_configured(OspfTypes::BACKBONE))
+	    pm.summary_push(_area);
+    }
+
+    RoutingTable<IPv6>& routing_table = _ospf.get_routing_table();
+    routing_table.begin(_area);
+
+    // Compute the SPT.
+    list<RouteCmd<Vertex> > r;
+    spt.compute(r);
+
+    // Compute the area range summaries.
+    routing_area_rangesV3(r);
+
+    start_virtual_link();
+
+    list<RouteCmd<Vertex> >::const_iterator ri;
+    for(ri = r.begin(); ri != r.end(); ri++) {
+	debug_msg("Add route: Node: %s -> Nexthop %s\n",
+		  cstring(ri->node()), cstring(ri->nexthop()));
+	
+	Vertex node = ri->node();
+
+	Lsa::LsaRef lsar = node.get_lsa();
+#if	0
+	RouterLsa *rlsa;
+	NetworkLsa *nlsa;
+#endif
+	RouteEntry<IPv6> route_entry;
+	IPNet<IPv6> net;
+	route_entry.set_destination_type(node.get_type());
+#if	0
+	if (OspfTypes::Router == node.get_type()) {
+	    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+	    XLOG_ASSERT(rlsa);
+	    check_for_virtual_link((*ri), _router_lsa);
+	    if (!(rlsa->get_e_bit() || rlsa->get_b_bit()))
+		continue;
+	    // Originating routers Router ID.
+	    route_entry.set_router_id(rlsa->get_header().get_link_state_id());
+	    IPv4 addr;
+	    XLOG_ASSERT(find_interface_address(ri->prevhop().get_lsa(), lsar,
+					       addr));
+	    net = IPNet<IPv4>(addr, IPv4::ADDR_BITLEN);
+	    route_entry.set_area_border_router(rlsa->get_b_bit());
+	    route_entry.set_as_boundary_router(rlsa->get_e_bit());
+	} else {
+	    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+	    XLOG_ASSERT(nlsa);
+// 	    route_entry.set_router_id(nlsa->get_header().
+// 				      get_advertising_router());
+	    route_entry.set_address(nlsa->get_header().get_link_state_id());
+	    IPv4 addr = IPv4(htonl(route_entry.get_address()));
+	    IPv4 mask = IPv4(htonl(nlsa->get_network_mask()));
+	    net = IPNet<IPv4>(addr, mask.mask_len());
+	}
+#endif
+	// If nexthop point back to the node itself then it it
+	// directly connected.
+	route_entry.set_directly_connected(ri->node() == ri->nexthop());
+	route_entry.set_path_type(RouteEntry<IPv6>::intra_area);
+	route_entry.set_cost(ri->weight());
+	route_entry.set_type_2_cost(0);
+
+#if	0
+	IPv6 nexthop = IPv6(htonl(ri->nexthop().get_address()));
+	route_entry.set_nexthop(nexthop);
+#endif
+	route_entry.set_advertising_router(lsar->get_header().
+					   get_advertising_router());
+	route_entry.set_area(_area);
+	route_entry.set_lsa(lsar);
+
+	// Stub links in router-LSAs are processed in this loop. The
+	// RFC suggests dealing with them later. Either due to
+	// misconfiguration or races a Network-LSA and a stub link in
+	// a Router-LSA can point to the same network. Therefore it is
+	// necessary to check that a route is not already in the table.
+	RouteEntry<IPv6> current_route_entry;
+	if (routing_table.lookup_entry(_area, net, current_route_entry)) {
+	    if (current_route_entry.get_cost() > route_entry.get_cost()) {
+		routing_table.replace_entry(_area, net, route_entry);
+	    } else if (current_route_entry.get_cost() ==
+		       route_entry.get_cost()) {
+		if (route_entry.get_advertising_router() <
+		    current_route_entry.get_advertising_router())
+		    routing_table.replace_entry(_area, net, route_entry);
+	    }
+	} else {
+	    routing_table.add_entry(_area, net, route_entry);
+	}
+    }
+
+    end_virtual_link();
+
+    // RFC 2328 Section 16.2.  Calculating the inter-area routes
+    if (_ospf.get_peer_manager().internal_router_p() ||
+	(backbone() && _ospf.get_peer_manager().area_border_router_p()))
+	routing_inter_areaV3();
+
+    // RFC 2328 Section 16.3.  Examining transit areas' summary-LSAs
+    if (transit_capability &&
+	_ospf.get_peer_manager().area_border_router_p())
+	routing_transit_areaV3();
+
+    // RFC 2328 Section 16.4.  Calculating AS external routes
+
+    routing_as_externalV3();
+
+    routing_table.end();
+
+    // XXX
+    // This is a temporary hack to make sure that transit area routes
+    // are re-applied.
+    if (backbone())
+	_ospf.get_peer_manager().routing_recompute_all_areas_except_backbone();
 }
 
 template <>
@@ -3173,6 +3370,13 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
 	RouteEntry<IPv4> route_entry = i->second;
 	routing_table.add_entry(_area, net, route_entry);
     }
+}
+
+template <>
+void 
+AreaRouter<IPv6>::routing_area_rangesV3(list<RouteCmd<Vertex> >& /*r*/)
+{
+    XLOG_WARNING("TBD: Routing Area Ranges OSPFv3");
 }
 
 template <>
@@ -3281,6 +3485,13 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 
 template <>
 void 
+AreaRouter<IPv6>::routing_inter_areaV3()
+{
+    XLOG_WARNING("TBD: Routing Inter Area OSPFv3");
+}
+
+template <>
+void 
 AreaRouter<IPv4>::routing_transit_areaV2()
 {
     // RFC 2328 Section 16.3.  Examining transit areas' summary-LSAs
@@ -3360,6 +3571,13 @@ AreaRouter<IPv4>::routing_transit_areaV2()
 	// away the route will be removed.
 	routing_table.replace_entry(rtnet.get_area(), n, rtnet);
     }
+}
+
+template <>
+void 
+AreaRouter<IPv6>::routing_transit_areaV3()
+{
+    XLOG_WARNING("TBD: Routing Transit Area OSPFv3");
 }
 
 template <>
@@ -3512,6 +3730,13 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	    routing_table.replace_entry(_area, n, rtentry);
 	
     }
+}
+
+template <>
+void 
+AreaRouter<IPv6>::routing_as_externalV3()
+{
+    XLOG_WARNING("TBD: Routing AS External OSPFv3");
 }
 
 template <typename A>
