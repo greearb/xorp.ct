@@ -108,6 +108,8 @@ by create_xml -->
 		<mac name="f2" port="d4" cable='309' type="fxp" man="">
 			00:02:b3:10:e2:ed
 		</mac>
+
+		<!-- Temporary move the next four cables from xorp3 to xorp8
 		<mac name="t0" port="h4" cable='485' type="tulip" man="quad">
 			00:80:c8:cf:ac:51
 		</mac>
@@ -120,6 +122,8 @@ by create_xml -->
 		<mac name="t3" port="c4" cable='310' type="tulip" man="quad">
 			00:80:c8:cf:ac:54
 		</mac>
+		-->
+
 		<mac name="d0" port="i4" cable='492' type="dfe" man="dfe530tx">
 			<!-- Currently we don't have a driver for this -->
 			<!-- card. Hence no mac address -->
@@ -206,6 +210,21 @@ by create_xml -->
 		</mac>
 		<mac name="t3" port="c8" cable='493' type="tulip" man="quad">
 			00:80:c8:b9:61:04
+		</mac>
+        </host> 
+	<host name="xorp8">
+		<!-- The next four cables are temp. on loan from xorp3 -->
+		<mac name="t0" port="h4" cable='485' type="tulip" man="quad">
+			00:80:c8:b9:35:25
+		</mac>
+		<mac name="t1" port="g4" cable='489' type="tulip" man="quad">
+			00:80:c8:b9:35:26
+		</mac>
+		<mac name="t2" port="b4" cable='315' type="tulip" man="quad">
+			00:80:c8:b9:35:27
+		</mac>
+		<mac name="t3" port="c4" cable='310' type="tulip" man="quad">
+			00:80:c8:b9:35:28
 		</mac>
         </host> 
 	<host name="xorp12">
