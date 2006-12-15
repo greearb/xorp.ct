@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.7 2006/12/15 01:51:00 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.8 2006/12/15 08:29:52 atanu Exp $
 
 import getopt
 import sys
@@ -28,7 +28,7 @@ TESTS=[
     ['test4', True],
     ]
 
-def test1():
+def test1(verbose):
     """
     Run the build lsa program with all the known LSAs and
     settings. Verifies that the program has been built and gives
@@ -74,12 +74,15 @@ def test1():
 
     return True
 
-def test2():
+def test2(verbose):
     """
     Create an area and then destroy it.
     """
 
-    fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+    if verbose:
+        fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+    else:
+        fp = os.popen(os.path.abspath('test_routing_interactive'), "w")
 
     command = """
 create 0.0.0.0 normal
@@ -95,12 +98,15 @@ destroy 0.0.0.0
     else:
         return False
 
-def test3():
+def test3(verbose):
     """
     Introduce a RouterLsa and a NetworkLsa
     """
 
-    fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+    if verbose:
+        fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+    else:
+        fp = os.popen(os.path.abspath('test_routing_interactive'), "w")
 
     command = """
 create 0.0.0.0 normal
@@ -117,13 +123,16 @@ compute 0.0.0.0
     else:
         return False
 
-def test4():
+def test4(verbose):
     """
     Some of the routers from Figure 2. in RFC 2328. Single area.
     This router is R6.
     """
 
-    fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+    if verbose:
+        fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+    else:
+        fp = os.popen(os.path.abspath('test_routing_interactive'), "w")
 
     RT6 = "RouterLsa E-bit lsid 0.0.0.6 adv 0.0.0.6 \
     p2p lsid 0.0.0.3 ldata 0.0.0.4 metric 6 \
@@ -143,8 +152,7 @@ select 0.0.0.0
 replace %s
 add %s
 compute 0.0.0.0
-verify_routing_table_size 1
-verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
+verify_routing_table_size 1 verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
 """ % (RT6,RT3)
 
     print >>fp, command
@@ -157,13 +165,14 @@ verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
 def main():
     def usage():
         us = \
-           "usage: %s [-h|--help] [-t|--test] [-b|--bad]"
+           "usage: %s [-h|--help] [-v|--verbose] ][-t|--test] [-b|--bad]"
         print us % sys.argv[0]
         
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "h:t:b", \
+        opts, args = getopt.getopt(sys.argv[1:], "hvt:b", \
                                    ["help", \
+                                    "verbose", \
                                     "test=", \
                                     "bad", \
                                     ])
@@ -174,10 +183,13 @@ def main():
 
     bad = False
     tests = []
+    verbose = False
     for o, a in opts:
 	if o in ("-h", "--help"):
 	    usage()
 	    sys.exit()
+	if o in ("-v", "--verbose"):
+            verbose = True
         if o in ("-t", "--test"):
             tests.append(a)
         if o in ("-b", "--bad"):
@@ -191,7 +203,7 @@ def main():
     print tests
 
     for i in tests:
-        test = i + '()'
+        test = i + '(verbose)'
         print test,
         if not eval(test):
             print "FAILED"
