@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.1 2006/10/12 20:19:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.2 2006/12/15 02:27:13 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -181,6 +181,17 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
 		xorp_throw(InvalidString,
 			   c_format("Failed to delete area <%s> [%s]",
 				    pr_id(area).c_str(),
+				    args.original_line().c_str()));
+	} else if ("verify_routing_table_size" == word) {
+	    // CMD: verify_routing_table_size <count>
+	    uint32_t expected_count = 
+		get_next_number(args, "verify_routing_table_size");
+	    uint32_t actual_count = _io.routing_table_size();
+	    if (expected_count != actual_count)
+		xorp_throw(InvalidString,
+			   c_format("Routing table size expected %d actual %d"
+				    " [%s]",
+				    expected_count, actual_count,
 				    args.original_line().c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown command <%s>. [%s]",
