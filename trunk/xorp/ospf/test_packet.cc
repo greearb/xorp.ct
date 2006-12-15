@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.48 2006/12/12 03:17:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.49 2006/12/13 03:44:24 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -302,21 +302,66 @@ populate_router_lsa(RouterLsa *rlsa, OspfTypes::Version version)
 	break;
     }
     
-    RouterLink rl(version);
-    rl.set_type(RouterLink::p2p);
-    rl.set_metric(2);
+    RouterLink rl1(version);
+    rl1.set_type(RouterLink::p2p);
+    rl1.set_metric(2);
     switch(version) {
     case OspfTypes::V2:
-	rl.set_link_id(3);
-	rl.set_link_data(4);
+	rl1.set_link_id(3);
+	rl1.set_link_data(4);
 	break;
     case OspfTypes::V3:
-	rl.set_interface_id(3);
-	rl.set_neighbour_interface_id(4);
-	rl.set_neighbour_router_id(5);
+	rl1.set_interface_id(3);
+	rl1.set_neighbour_interface_id(4);
+	rl1.set_neighbour_router_id(5);
 	break;
     }
-    rlsa->get_router_links().push_back(rl);
+    rlsa->get_router_links().push_back(rl1);
+
+    RouterLink rl2(version);
+    rl2.set_type(RouterLink::transit);
+    rl2.set_metric(2);
+    switch(version) {
+    case OspfTypes::V2:
+	rl2.set_link_id(3);
+	rl2.set_link_data(4);
+	break;
+    case OspfTypes::V3:
+	rl2.set_interface_id(3);
+	rl2.set_neighbour_interface_id(4);
+	rl2.set_neighbour_router_id(5);
+	break;
+    }
+    rlsa->get_router_links().push_back(rl2);
+
+    RouterLink rl3(version);
+    switch(version) {
+    case OspfTypes::V2:
+	rl3.set_metric(2);
+	rl3.set_type(RouterLink::stub);
+	rl3.set_link_id(3);
+	rl3.set_link_data(4);
+	rlsa->get_router_links().push_back(rl3);
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+
+    RouterLink rl4(version);
+    rl4.set_type(RouterLink::vlink);
+    rl4.set_metric(2);
+    switch(version) {
+    case OspfTypes::V2:
+	rl4.set_link_id(3);
+	rl4.set_link_data(4);
+	break;
+    case OspfTypes::V3:
+	rl4.set_interface_id(3);
+	rl4.set_neighbour_interface_id(4);
+	rl4.set_neighbour_router_id(5);
+	break;
+    }
+    rlsa->get_router_links().push_back(rl4);
 
     // This will set the checksum and the length.
     rlsa->encode();
