@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.4 2006/10/12 20:20:36 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.5 2006/12/14 21:56:44 atanu Exp $
 
 import sys
 import os
@@ -38,6 +38,7 @@ def test1():
                    options
 
     RouterLsa='RouterLsa %s bit-NT bit-V bit-E bit-B' % common_header
+    RouterLsa=RouterLsa + ' p2p lsid 10.10.10.10 ldata 11.11.11.11 metric 42'
 
     NetworkLsa='NetworkLsa %s netmask 0xffffff00' % common_header
 

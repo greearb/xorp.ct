@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.4 2006/10/12 01:25:00 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.5 2006/10/12 20:13:55 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -147,6 +147,53 @@ BuildLsa::common_header(Lsa *lsa, const string& word, Args& args)
     return true;
 }
 
+bool
+BuildLsa::router_link(RouterLsa *rlsa, const string& word, Args& args)
+{
+    RouterLink rl(_version);
+    if ("p2p" == word) {
+	rl.set_type(RouterLink::p2p);
+    } else if ("transit" == word) {
+	rl.set_type(RouterLink::transit);
+    } else if ("stub" == word) {
+	rl.set_type(RouterLink::stub);
+    } else if ("vlink" == word) {
+	rl.set_type(RouterLink::vlink);
+    } else {
+	return false;
+    }
+
+    string nword;
+    while(args.get_next(nword)) {
+	if ("lsid" == nword) {	// OSPFv2
+	    rl.set_link_id(set_id(get_next_word(args, "lsid").c_str()));
+	    continue;
+	} else if ("ldata" == nword) {	// OSPFv2
+	    rl.set_link_data(set_id(get_next_word(args, "ldata").c_str()));
+	    continue;
+	} else if ("metric" == nword) {
+	    rl.set_metric(get_next_number(args, "ldata"));
+	    continue;
+	} else if ("iid" == nword) {	// OSPFv3
+	    rl.set_interface_id(get_next_number(args, "iid"));
+	    continue;
+	} else if ("nid" == nword) {	// OSPFv3
+	    rl.set_neighbour_interface_id(get_next_number(args, "nid"));
+	    continue;
+	} else if ("nrid" == nword) {	// OSPFv3
+	    rl.set_neighbour_router_id(get_next_number(args, "nrid"));
+	    continue;
+	} else {
+	    args.push_back();
+	    break;
+	}
+    }
+
+    rlsa->get_router_links().push_back(rl);
+
+    return true;
+}
+
 Lsa *
 BuildLsa::router_lsa(Args& args)
 {
@@ -155,6 +202,8 @@ BuildLsa::router_lsa(Args& args)
     string word;
     while(args.get_next(word)) {
 	if (common_header(lsa, word, args))
+	    continue;
+	if (router_link(lsa, word, args))
 	    continue;
 	if ("bit-NT" == word) {
 	    lsa->set_nt_bit(true);
