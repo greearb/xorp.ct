@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.6 2006/03/16 00:03:47 pavlin Exp $
+// $XORP: xorp/ospf/test_args.hh,v 1.1 2006/10/12 20:11:19 atanu Exp $
 
 #ifndef __OSPF_TEST_ARGS_HH__
 #define __OSPF_TEST_ARGS_HH__
@@ -40,6 +40,11 @@ class Args {
 	word = _words[_pos++];
 
 	return true;
+    }
+
+    void push_back() {
+	if (_pos > 1)
+	    _pos--;
     }
 
     const string& original_line() const {
