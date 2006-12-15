@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.80 2006/11/12 23:52:05 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.81 2006/11/16 01:43:36 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -494,12 +494,6 @@ gmake check
       machine is capable of running the cross-compiled binaries for the
       target architecture.
  
-  * XScale
-    - The code is known to cross-compile on Linux, but it is unknown
-      whether the internal tests succeed.
-      XORP appears to run on Linux MontaVista-3.1, but it hasn't been
-      tested thoughtfully.
-
   * IA-64
     - The code is known to cross-compile on Linux, but it is unknown
       whether the internal tests succeed.
@@ -512,11 +506,17 @@ gmake check
       XORP itself hasn't been tested on Linksys WRT54, so it is unknown
       whether it will run properly.
 
-  * sparc64
+  * Sparc64
     - The code is known to cross-compile on Linux, but it is unknown
       whether the internal tests succeed.
-      XORP itself hasn't been tested on sparc64 machine, so it is unknown
+      XORP itself hasn't been tested on Sparc64 machine, so it is unknown
       whether it will run properly.
+
+  * XScale
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP appears to run on Linux MontaVista-3.1, but it hasn't been
+      tested thoughtfully.
 
   * Instructions for installing crosstool-based cross-compilation tools.
 
@@ -530,24 +530,6 @@ gmake check
        cd crosstool-0.42
 
     b) Apply one of the following patches:
-
-       - XScale
-         patch < demo-armv5b-softfloat.sh.patch
-
-----------------------------------------------------------------------
---- demo-armv5b-softfloat.sh.org	2005-03-07 16:34:34.000000000 -0800
-+++ demo-armv5b-softfloat.sh	2006-10-18 15:24:05.000000000 -0700
-@@ -13,7 +13,8 @@
- # Build the toolchain.  Takes a couple hours and a couple gigabytes.
- 
- #eval `cat armv5b-softfloat.dat gcc-3.4.0-glibc-2.3.2.dat` sh all.sh --notest
-- eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-2.3.3.dat` sh all.sh --notest
-+# eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-2.3.3.dat` sh all.sh --notest
- #eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-20040827.dat` sh all.sh --notest
-+ eval `cat armv5b-softfloat.dat gcc-3.4.5-glibc-2.3.6.dat` sh all.sh --notest
- 
- echo Done.
-----------------------------------------------------------------------
 
        - IA-64
          patch < demo-ia64.sh.patch
@@ -585,7 +567,7 @@ gmake check
  echo Done.
 ----------------------------------------------------------------------
 
-       - sparc64
+       - Sparc64
          patch < demo-sparc64.sh.patch
 
 ----------------------------------------------------------------------
@@ -603,6 +585,24 @@ gmake check
  echo Done.
 ----------------------------------------------------------------------
 
+       - XScale
+         patch < demo-armv5b-softfloat.sh.patch
+
+----------------------------------------------------------------------
+--- demo-armv5b-softfloat.sh.org	2005-03-07 16:34:34.000000000 -0800
++++ demo-armv5b-softfloat.sh	2006-10-18 15:24:05.000000000 -0700
+@@ -13,7 +13,8 @@
+ # Build the toolchain.  Takes a couple hours and a couple gigabytes.
+ 
+ #eval `cat armv5b-softfloat.dat gcc-3.4.0-glibc-2.3.2.dat` sh all.sh --notest
+- eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-2.3.3.dat` sh all.sh --notest
++# eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-2.3.3.dat` sh all.sh --notest
+ #eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-20040827.dat` sh all.sh --notest
++ eval `cat armv5b-softfloat.dat gcc-3.4.5-glibc-2.3.6.dat` sh all.sh --notest
+ 
+ echo Done.
+----------------------------------------------------------------------
+
     c) Compile the toolchain and install it:
 
        sudo mkdir /opt/crosstool
@@ -614,17 +614,17 @@ gmake check
 
        # Perform the compilation (it tay take a while)
 
-       - XScale
-         sh demo-armv5b-softfloat.sh
-
        - IA-64
          sh demo-ia64.sh
 
        - MIPS (Broadcom for Linksys WRT54G)
          sh demo-mipsel.sh
 
-       - sparc64
+       - Sparc64
          sh demo-sparc64.sh
+
+       - XScale
+         sh demo-armv5b-softfloat.sh
 
        # Restore the original LD_LIBRARY_PATH environmetal variable
        cd ..
@@ -634,11 +634,6 @@ gmake check
     d) Set some environmetal variables that will be used later.
        The values need to be modified appropriately if the tools
        are installed in different directory.
-
-       - XScale
-         setenv CROSS_ARCH armv5b-softfloat-linux
-         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
 
        - IA-64
          setenv CROSS_ARCH ia64-unknown-linux-gnu
@@ -650,8 +645,13 @@ gmake check
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
          setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
 
-       - sparc64
+       - Sparc64
          setenv CROSS_ARCH sparc64-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+       - XScale
+         setenv CROSS_ARCH armv5b-softfloat-linux
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
          setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
 
@@ -666,17 +666,17 @@ gmake check
        to be modified to match the exact path name of the installed
        cross-compiler.
 
-       - XScale
-"armv5b-softfloat-linux",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux/bin/armv5b-softfloat-linux-gcc:-DB_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
-
        - IA-64
 "ia64-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu/bin/ia64-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK:${ia64_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
        - MIPS (Broadcom for Linksys WRT54G)
 "mipsel-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
-       - sparc64
+       - Sparc64
 "sparc64-unknown-linux-gnu",    "/opt/crosstool/gcc-3.4.5-glibc-2.3.6/sparc64-unknown-linux-gnu/bin/sparc64-unknown-linux-gnu-gcc:-DB_ENDIAN -DTERMIOS -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
+       - XScale
+"armv5b-softfloat-linux",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux/bin/armv5b-softfloat-linux-gcc:-DB_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
     g) Cross-compile openssl and install it:
 
@@ -687,17 +687,17 @@ gmake check
        The first three commands can be skipped if they were done in
        step (d):
 
-       - XScale
-         setenv CROSS_ARCH armv5b-softfloat-linux
-
        - IA-64
          setenv CROSS_ARCH ia64-unknown-linux-gnu
 
        - MIPS (Broadcom for Linksys WRT54G)
          setenv CROSS_ARCH mipsel-unknown-linux-gnu
 
-       - sparc64
+       - Sparc64
          setenv CROSS_ARCH sparc64-unknown-linux-gnu
+
+       - XScale
+         setenv CROSS_ARCH armv5b-softfloat-linux
 
        setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
        setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
