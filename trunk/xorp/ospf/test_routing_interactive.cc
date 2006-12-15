@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.2 2006/12/15 02:27:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.3 2006/12/15 08:00:55 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -192,6 +192,20 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
 			   c_format("Routing table size expected %d actual %d"
 				    " [%s]",
 				    expected_count, actual_count,
+				    args.original_line().c_str()));
+	} else if ("verify_routing_entry" == word) {
+	    // CMD: verify_routing_entry <net> <nexthop> <metric> <equal> <discard>
+	    IPNet<A> net(get_next_word(args, "verify_routing_entry").c_str());
+	    A nexthop(get_next_word(args, "verify_routing_entry").c_str());
+	    uint32_t metric = get_next_number(args, "verify_routing_entry");
+	    bool equal = get_next_word(args, "verify_routing_entry") 
+		== "true"? true : false;
+	    bool discard = get_next_word(args, "verify_routing_entry") == 
+		"true" ? true : false;
+	    if (!_io.routing_table_verify(net, nexthop, metric, equal,discard))
+		xorp_throw(InvalidString,
+			   c_format("Matching routing table entry not found"
+				    " [%s]",
 				    args.original_line().c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown command <%s>. [%s]",
