@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.1 2006/10/12 20:19:05 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -99,6 +99,10 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
 	if ("#" == word.substr(0,1)) {
 	    // CMD: #
 	    return true;
+	} else if ("set_router_id" == word) {
+	    // CMD: set_router_id <router id>
+	    _ospf.set_router_id(set_id(get_next_word(args, "set_router_id").
+				       c_str()));
 	} else if ("create" == word) {
 	    // CMD: create <area id> <area type>
 	    OspfTypes::AreaID area =
