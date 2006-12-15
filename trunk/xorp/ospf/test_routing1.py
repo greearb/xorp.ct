@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.6 2006/12/15 00:50:19 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.7 2006/12/15 01:51:00 atanu Exp $
 
 import getopt
 import sys
@@ -25,6 +25,7 @@ TESTS=[
     ['test1', True],
     ['test2', True],
     ['test3', True],
+    ['test4', True],
     ]
 
 def test1():
@@ -108,6 +109,43 @@ replace RouterLsa
 add NetworkLsa
 compute 0.0.0.0
     """
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def test4():
+    """
+    Some of the routers from Figure 2. in RFC 2328. Single area.
+    This router is R6.
+    """
+
+    fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
+
+    RT6 = "RouterLsa E-bit lsid 0.0.0.6 adv 0.0.0.6 \
+    p2p lsid 0.0.0.3 ldata 0.0.0.4 metric 6 \
+    p2p lsid 0.0.0.5 ldata 0.0.0.6 metric 6 \
+    p2p lsid 0.0.0.10 ldata 0.0.0.11 metric 7 \
+    "
+
+    RT3 = "RouterLsa E-bit lsid 0.0.0.3 adv 0.0.0.3 \
+    p2p lsid 0.0.0.6 ldata 0.0.0.7 metric 8 \
+    stub lsid 0.4.0.0 ldata 255.255.0.0 metric 2 \
+    "
+
+    command = """
+set_router_id 0.0.0.6
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
+""" % (RT6,RT3)
 
     print >>fp, command
 
