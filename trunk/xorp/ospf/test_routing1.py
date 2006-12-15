@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.8 2006/12/15 08:29:52 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.9 2006/12/15 09:04:11 atanu Exp $
 
 import getopt
 import sys
@@ -22,13 +22,13 @@ TESTS=[
     # Fields:
     # 0: Test function
     # 1: True if this test works
+    ['print_lsasV2', True],
     ['test1', True],
     ['test2', True],
-    ['test3', True],
-    ['test4', True],
+    ['r1V2', True],
     ]
 
-def test1(verbose):
+def print_lsasV2(verbose):
     """
     Run the build lsa program with all the known LSAs and
     settings. Verifies that the program has been built and gives
@@ -74,7 +74,7 @@ def test1(verbose):
 
     return True
 
-def test2(verbose):
+def test1(verbose):
     """
     Create an area and then destroy it.
     """
@@ -98,7 +98,7 @@ destroy 0.0.0.0
     else:
         return False
 
-def test3(verbose):
+def test2(verbose):
     """
     Introduce a RouterLsa and a NetworkLsa
     """
@@ -123,7 +123,7 @@ compute 0.0.0.0
     else:
         return False
 
-def test4(verbose):
+def r1V2(verbose):
     """
     Some of the routers from Figure 2. in RFC 2328. Single area.
     This router is R6.
