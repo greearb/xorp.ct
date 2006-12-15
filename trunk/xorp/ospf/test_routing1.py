@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.9 2006/12/15 09:04:11 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.10 2006/12/15 09:12:09 atanu Exp $
 
 import getopt
 import sys
@@ -204,12 +204,12 @@ def main():
 
     for i in tests:
         test = i + '(verbose)'
-        print test,
+        print 'Running: ' + i,
         if not eval(test):
             print "FAILED"
             sys.exit(-1)
         else:
-            print "SUCEEDED"
+            print
         
     sys.exit(0)
 
