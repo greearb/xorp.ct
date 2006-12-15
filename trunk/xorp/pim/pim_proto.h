@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.20 2006/11/07 01:57:12 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.21 2006/12/13 02:30:54 atanu Exp $
  */
 
 
@@ -251,7 +251,7 @@
  * The also assume that function family() is defined (to return
  * the IP address family within the current context.
  */
-/* XXX: family2addr_size should be defined somewhere */
+/* XXX: family2addr_bytelen should be defined somewhere */
 #ifndef FAMILY2ADDRSIZE
 #define FAMILY2ADDRSIZE(ip_family) family2addr_bytelen(ip_family)
 #endif
