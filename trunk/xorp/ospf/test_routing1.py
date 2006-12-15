@@ -12,8 +12,9 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.5 2006/12/14 21:56:44 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.6 2006/12/15 00:50:19 atanu Exp $
 
+import getopt
 import sys
 import os
 
@@ -116,17 +117,50 @@ compute 0.0.0.0
         return False
 
 def main():
+    def usage():
+        us = \
+           "usage: %s [-h|--help] [-t|--test] [-b|--bad]"
+        print us % sys.argv[0]
+        
 
-    for i in TESTS:
-        if i[1]:
-            test = i[0] + '()'
-            print test,
-            if not eval(test):
-                print "FAILED"
-                sys.exit(-1)
-            else:
-                print "SUCEEDED"
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "h:t:b", \
+                                   ["help", \
+                                    "test=", \
+                                    "bad", \
+                                    ])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(1)
 
+
+    bad = False
+    tests = []
+    for o, a in opts:
+	if o in ("-h", "--help"):
+	    usage()
+	    sys.exit()
+        if o in ("-t", "--test"):
+            tests.append(a)
+        if o in ("-b", "--bad"):
+            bad = True
+
+    if not tests:
+        for i in TESTS:
+            if bad != i[1]:
+                tests.append(i[0])
+
+    print tests
+
+    for i in tests:
+        test = i + '()'
+        print test,
+        if not eval(test):
+            print "FAILED"
+            sys.exit(-1)
+        else:
+            print "SUCEEDED"
+        
     sys.exit(0)
 
 main()
