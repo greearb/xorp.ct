@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.81 2006/11/16 01:43:36 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.82 2006/12/15 01:00:59 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -506,6 +506,12 @@ gmake check
       XORP itself hasn't been tested on Linksys WRT54, so it is unknown
       whether it will run properly.
 
+  * PowerPC-603
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP itself hasn't been tested on PowerPC-603 machine, so it is
+      unknown whether it will run properly.
+
   * Sparc64
     - The code is known to cross-compile on Linux, but it is unknown
       whether the internal tests succeed.
@@ -567,6 +573,28 @@ gmake check
  echo Done.
 ----------------------------------------------------------------------
 
+       - PowerPC-603
+         cp -p demo-ppc604.sh demo-ppc603.sh
+         patch < demo-ppc603.sh.patch
+
+----------------------------------------------------------------------
+--- demo-ppc603.sh.org	2005-03-07 16:34:34.000000000 -0800
++++ demo-ppc603.sh	2006-12-14 17:13:18.000000000 -0800
+@@ -11,8 +11,9 @@
+ mkdir -p $RESULT_TOP
+ 
+ # Build the toolchain.  Takes a couple hours and a couple gigabytes.
+-#eval `cat powerpc-604.dat gcc-3.4.0-glibc-2.3.2.dat` sh all.sh --builduserland --notest
+- eval `cat powerpc-604.dat gcc-3.4.1-glibc-2.3.3.dat`  sh all.sh --notest
+-#eval `cat powerpc-604.dat gcc-3.4.1-glibc-20040827.dat` sh all.sh --notest
++#eval `cat powerpc-603.dat gcc-3.4.0-glibc-2.3.2.dat` sh all.sh --builduserland --notest
++# eval `cat powerpc-603.dat gcc-3.4.1-glibc-2.3.3.dat`  sh all.sh --notest
++#eval `cat powerpc-603.dat gcc-3.4.1-glibc-20040827.dat` sh all.sh --notest
++eval `cat powerpc-603.dat gcc-4.1.0-glibc-2.3.6.dat`  sh all.sh --notest
+ 
+ echo Done.
+----------------------------------------------------------------------
+
        - Sparc64
          patch < demo-sparc64.sh.patch
 
@@ -620,6 +648,9 @@ gmake check
        - MIPS (Broadcom for Linksys WRT54G)
          sh demo-mipsel.sh
 
+       - PowerPC-603
+         sh demo-ppc603.sh
+
        - Sparc64
          sh demo-sparc64.sh
 
@@ -643,6 +674,11 @@ gmake check
        - MIPS (Broadcom for Linksys WRT54G)
          setenv CROSS_ARCH mipsel-unknown-linux-gnu
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+       - PowerPC-603
+         setenv CROSS_ARCH powerpc-603-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-4.1.0-glibc-2.3.6/${CROSS_ARCH}
          setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
 
        - Sparc64
@@ -672,6 +708,9 @@ gmake check
        - MIPS (Broadcom for Linksys WRT54G)
 "mipsel-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
+       - PowerPC-603
+"powerpc-603-linux-gnu",	"/opt/crosstool/gcc-4.1.0-glibc-2.3.6/powerpc-603-linux-gnu/bin/powerpc-603-linux-gnu-gcc:-DB_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG RC4_CHAR RC4_CHUNK DES_RISC1 DES_UNROLL::${no_asm}::::::::::dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
        - Sparc64
 "sparc64-unknown-linux-gnu",    "/opt/crosstool/gcc-3.4.5-glibc-2.3.6/sparc64-unknown-linux-gnu/bin/sparc64-unknown-linux-gnu-gcc:-DB_ENDIAN -DTERMIOS -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
@@ -689,17 +728,24 @@ gmake check
 
        - IA-64
          setenv CROSS_ARCH ia64-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
 
        - MIPS (Broadcom for Linksys WRT54G)
          setenv CROSS_ARCH mipsel-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+
+       - PowerPC-603
+         setenv CROSS_ARCH powerpc-603-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-4.1.0-glibc-2.3.6/${CROSS_ARCH}
 
        - Sparc64
          setenv CROSS_ARCH sparc64-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
 
        - XScale
          setenv CROSS_ARCH armv5b-softfloat-linux
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
 
-       setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
        setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
        setenv CC ${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc
        setenv CXX ${CROSS_ROOT}/bin/${CROSS_ARCH}-g++
