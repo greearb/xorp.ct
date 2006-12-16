@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.6 2006/12/15 00:50:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.7 2006/12/16 00:16:45 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -63,6 +63,19 @@ BuildLsa::generate(Args& args)
     return lsa;
 }
 
+template <typename A>
+bool
+getit(Lsa *lsa, OspfTypes::Version version, Options& options)
+{
+    A *alsa = dynamic_cast<A *>(lsa);
+    if (alsa) {
+	options = Options(version, alsa->get_options());
+	return true;
+    }
+
+    return false;
+}
+
 Options
 BuildLsa::get_options(Lsa *lsa)
 {
@@ -70,14 +83,33 @@ BuildLsa::get_options(Lsa *lsa)
     case OspfTypes::V2:
 	return Options(_version, lsa->get_header().get_options());
 	break;
-    case OspfTypes::V3:
-	RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsa);
-	if (rlsa)
-	    return Options(_version, rlsa->get_options());
+    case OspfTypes::V3: {
+	Options options(_version, 0);
+	if (getit<RouterLsa>(lsa, _version, options))
+	    return options;
+	if (getit<NetworkLsa>(lsa, _version, options))
+	    return options;
+	xorp_throw(InvalidString,
+		   c_format("%s LSA does not have an options field (get)",
+			    lsa->name()));
+    }
 	break;
     }
 
     return Options(_version, 0);
+}
+
+template <typename A>
+bool
+setit(Lsa *lsa, Options& options)
+{
+    A *alsa = dynamic_cast<A *>(lsa);
+    if (alsa) {
+	alsa->set_options(options.get_options());
+	return true;
+    }
+
+    return false;
 }
 
 void
@@ -87,12 +119,16 @@ BuildLsa::set_options(Lsa *lsa, Options& options)
     case OspfTypes::V2:
 	lsa->get_header().set_options(options.get_options());
 	break;
-    case OspfTypes::V3:
-	RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsa);
-	if (rlsa) {
-	    rlsa->set_options(options.get_options());
+    case OspfTypes::V3: {
+	if (setit<RouterLsa>(lsa, options))
 	    return;
-	}
+	if (setit<NetworkLsa>(lsa, options))
+	    return;
+
+	xorp_throw(InvalidString,
+		   c_format("%s LSA does not have an options field (set)",
+			    lsa->name()));
+    }
 	break;
     }
 }
@@ -252,7 +288,7 @@ BuildLsa::network_lsa(Args& args)
 	    lsa->set_network_mask(get_next_number(args, "netmask"));
 	} else if ("add-router" == word) {
 	    lsa->get_attached_routers().
-		push_back(set_id(get_next_word(args, "router").c_str()));
+		push_back(set_id(get_next_word(args, "add-router").c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
