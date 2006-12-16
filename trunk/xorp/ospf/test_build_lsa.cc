@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.7 2006/12/16 00:16:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.8 2006/12/16 01:01:46 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -140,7 +140,7 @@ BuildLsa::common_header(Lsa *lsa, const string& word, Args& args)
     // header. it reduces the amount of code to process the options
     // for the OSPFv3 case here. The get_options() and set_options()
     // will perform the relevant magic. If an attempt is made to set
-    // an option on an OSPFv3 LSA that does nto support options an
+    // an option on an OSPFv3 LSA that does not support options an
     // exception will be thrown. Some options are version specific in
     // the case of a version mismatch the option code will abort().
 
