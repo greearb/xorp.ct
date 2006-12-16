@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.5 2006/10/12 20:13:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.6 2006/12/15 00:50:19 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -71,7 +71,9 @@ BuildLsa::get_options(Lsa *lsa)
 	return Options(_version, lsa->get_header().get_options());
 	break;
     case OspfTypes::V3:
-	XLOG_UNFINISHED();
+	RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsa);
+	if (rlsa)
+	    return Options(_version, rlsa->get_options());
 	break;
     }
 
@@ -86,7 +88,11 @@ BuildLsa::set_options(Lsa *lsa, Options& options)
 	lsa->get_header().set_options(options.get_options());
 	break;
     case OspfTypes::V3:
-	XLOG_UNFINISHED();
+	RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsa);
+	if (rlsa) {
+	    rlsa->set_options(options.get_options());
+	    return;
+	}
 	break;
     }
 }
@@ -94,6 +100,14 @@ BuildLsa::set_options(Lsa *lsa, Options& options)
 bool
 BuildLsa::common_header(Lsa *lsa, const string& word, Args& args)
 {
+    // Note: OSPFv3 LSAs do not have an options field in the common
+    // header. it reduces the amount of code to process the options
+    // for the OSPFv3 case here. The get_options() and set_options()
+    // will perform the relevant magic. If an attempt is made to set
+    // an option on an OSPFv3 LSA that does nto support options an
+    // exception will be thrown. Some options are version specific in
+    // the case of a version mismatch the option code will abort().
+
     if ("age" == word) {
 	string age;
 	if (!args.get_next(age))
@@ -113,7 +127,7 @@ BuildLsa::common_header(Lsa *lsa, const string& word, Args& args)
 	Options options = get_options(lsa);
 	options.set_mc_bit(true);
 	set_options(lsa, options);
-    } else if ("N/P-bit" == word) {
+    } else if ("N/P-bit" == word || "N-bit" == word) {
 	Options options = get_options(lsa);
 	options.set_n_bit(true);
 	set_options(lsa, options);
@@ -207,6 +221,8 @@ BuildLsa::router_lsa(Args& args)
 	    continue;
 	if ("bit-NT" == word) {
 	    lsa->set_nt_bit(true);
+	} else if ("bit-W" == word) {
+	    lsa->set_w_bit(true);
 	} else if ("bit-V" == word) {
 	    lsa->set_v_bit(true);
 	} else if ("bit-E" == word) {
