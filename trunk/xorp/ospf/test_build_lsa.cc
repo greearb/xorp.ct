@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.15 2006/12/17 04:49:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.16 2006/12/17 04:59:44 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -56,6 +56,8 @@ BuildLsa::generate(Args& args)
 	lsa = type_7_lsa(args);
     } else if ("LinkLsa" == word) {
 	lsa = link_lsa(args);
+    } else if ("IntraAreaPrefixLsa" == word) {
+	lsa = intra_area_prefix_lsa(args);
     } else {
 	xorp_throw(InvalidString, c_format("Unknown LSA name <%s>. [%s]",
 					   word.c_str(),
@@ -479,6 +481,36 @@ BuildLsa::link_lsa(Args& args)	// OSPFv3 only
   	    lsa->set_rtr_priority(get_next_number(args, word));
 	} else if ("link-local-address" == word) {
   	    lsa->set_link_local_address(get_next_word(args, word).c_str());
+	} else if ("IPv6Prefix" == word) {
+	    lsa->get_prefixes().push_back(ipv6prefix(args));
+	} else {
+	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+					       word.c_str(),
+					       args.original_line().c_str()));
+	}
+    }
+
+    return lsa;
+}
+
+Lsa *
+BuildLsa::intra_area_prefix_lsa(Args& args)	// OSPFv3 only
+{
+    IntraAreaPrefixLsa *lsa = new IntraAreaPrefixLsa(_version);
+
+    string word;
+    while(args.get_next(word)) {
+	if (common_header(lsa, word, args))
+	    continue;
+	if ("rlstype" == word) {		// OSPFv3
+	    lsa->set_referenced_ls_type(get_next_number(args, word));
+	} else if ("rlsid" == word) {
+	    lsa->set_referenced_link_state_id(set_id(get_next_word(args, word)
+						     .c_str()));
+	} else if ("radv" == word) {
+	    lsa->set_referenced_advertising_router(set_id(get_next_word(args,
+									word)
+							  .c_str()));
 	} else if ("IPv6Prefix" == word) {
 	    lsa->get_prefixes().push_back(ipv6prefix(args));
 	} else {
