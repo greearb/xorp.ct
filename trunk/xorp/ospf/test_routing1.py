@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.10 2006/12/15 09:12:09 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.11 2006/12/15 09:25:34 atanu Exp $
 
 import getopt
 import sys
@@ -23,6 +23,7 @@ TESTS=[
     # 0: Test function
     # 1: True if this test works
     ['print_lsasV2', True],
+    ['print_lsasV3', True],
     ['test1', True],
     ['test2', True],
     ['r1V2', True],
@@ -43,6 +44,7 @@ def print_lsasV2(verbose):
     RouterLsa=RouterLsa + ' p2p lsid 10.10.10.10 ldata 11.11.11.11 metric 42'
 
     NetworkLsa='NetworkLsa %s netmask 0xffffff00' % common_header
+    NetworkLsa=NetworkLsa + ' add-router 1.2.3.4'
 
     SummaryNetworkLsa='SummaryNetworkLsa %s \
     netmask 0xffffff00 \
@@ -69,6 +71,73 @@ def print_lsasV2(verbose):
 
     for i in lsas:
         if 0 != os.system('%s --OSPFv2 -l "%s"' % \
+                          (os.path.abspath('test_build_lsa_main'), i)):
+            return False
+
+    return True
+
+def print_lsasV3(verbose):
+    """
+    Run the build lsa program with all the known LSAs and
+    settings. Verifies that the program has been built and gives
+    examples of how to define LSAs.
+    """
+
+    common_header='age 1800 lsid 1.2.3.4 adv 5.6.7.8 seqno 1 cksum 1'
+    options='DC-bit R-bit N-bit MC-bit E-bit V6-bit'
+
+    RouterLsa='RouterLsa %s bit-NT bit-W bit-B bit-E bit-V' % common_header
+    RouterLsa=RouterLsa + ' ' + options
+    RouterLsa=RouterLsa + ' p2p iid 1 nid 2 nrid 3 metric 42'
+
+    NetworkLsa='NetworkLsa %s' % common_header
+    NetworkLsa=NetworkLsa + ' ' + options
+    NetworkLsa=NetworkLsa + ' add-router 1.2.3.4'
+
+    SummaryNetworkLsa='SummaryNetworkLsa %s metric 42 ' % common_header
+    IPv6Prefix='IPv6Prefix 5f00:0000:c001::/48 DN-bit \
+    P-bit MC-bit LA-bit NU-bit'
+    SummaryNetworkLsa=SummaryNetworkLsa + ' ' + IPv6Prefix
+
+    SummaryRouterLsa='SummaryRouterLsa %s' % common_header
+    SummaryRouterLsa=SummaryRouterLsa + ' ' + options
+    SummaryRouterLsa=SummaryRouterLsa + ' metric 42 drid 1.2.3.4'
+
+    ASExternalLsa='ASExternalLsa %s' % common_header
+    ASExternalLsa=ASExternalLsa + ' bit-E bit-F bit-T metric 45'
+    ASExternalLsa=ASExternalLsa + ' ' + IPv6Prefix
+    ASExternalLsa=ASExternalLsa + ' ' + 'rlstype 2'
+    ASExternalLsa=ASExternalLsa + ' ' + 'forward6 5f00:0000:c001::00'
+    ASExternalLsa=ASExternalLsa + ' ' + 'tag 0x40'
+    ASExternalLsa=ASExternalLsa + ' ' + 'rlsid 1.2.3.4'
+
+    Type7Lsa='Type7Lsa %s' % common_header
+    Type7Lsa=Type7Lsa + ' bit-E bit-F bit-T metric 45'
+    Type7Lsa=Type7Lsa + ' ' + IPv6Prefix
+    Type7Lsa=Type7Lsa + ' ' + 'rlstype 2'
+    Type7Lsa=Type7Lsa + ' ' + 'forward6 5f00:0000:c001::00'
+    Type7Lsa=Type7Lsa + ' ' + 'tag 0x40'
+    Type7Lsa=Type7Lsa + ' ' + 'rlsid 1.2.3.4'
+
+    LinkLsa='LinkLsa %s' % common_header
+    LinkLsa=LinkLsa + ' rtr-priority 42'
+    LinkLsa=LinkLsa + ' ' + options
+    LinkLsa=LinkLsa + ' link-local-address fe80:0001::'
+    LinkLsa=LinkLsa + ' ' + IPv6Prefix
+    LinkLsa=LinkLsa + ' ' + IPv6Prefix
+    
+    IntraAreaPrefixLsa='IntraAreaPrefixLsa %s' % common_header
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlstype 2'
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlsid 1.2.3.4'
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' radv 9.8.7.6'
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix
+
+    lsas = [RouterLsa, NetworkLsa, SummaryNetworkLsa, SummaryRouterLsa, \
+            ASExternalLsa, Type7Lsa, LinkLsa, IntraAreaPrefixLsa]
+
+    for i in lsas:
+        if 0 != os.system('%s --OSPFv3 -l "%s"' % \
                           (os.path.abspath('test_build_lsa_main'), i)):
             return False
 
@@ -152,7 +221,8 @@ select 0.0.0.0
 replace %s
 add %s
 compute 0.0.0.0
-verify_routing_table_size 1 verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
+verify_routing_table_size 1
+verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
 """ % (RT6,RT3)
 
     print >>fp, command
