@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.14 2006/12/17 04:28:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.15 2006/12/17 04:49:55 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -192,15 +192,15 @@ BuildLsa::common_header(Lsa *lsa, const string& word, Args& args)
 	set_options(lsa, options);
     } else if ("lsid" == word) {
 	lsa->get_header().
-	    set_link_state_id(set_id(get_next_word(args, "lsid").c_str()));
+	    set_link_state_id(set_id(get_next_word(args, word).c_str()));
     } else if ("adv" == word) {
 	lsa->get_header().
-	    set_advertising_router(set_id(get_next_word(args, "adv").c_str()));
+	    set_advertising_router(set_id(get_next_word(args, word).c_str()));
     } else if ("seqno" == word) {
 	lsa->get_header().
-	    set_ls_sequence_number(get_next_number(args, "seqno"));
+	    set_ls_sequence_number(get_next_number(args, word));
     } else if ("cksum" == word) {
-	lsa->get_header().set_ls_checksum(get_next_number(args, "cksum"));
+	lsa->get_header().set_ls_checksum(get_next_number(args, word));
     } else {
 	return false;
     }
@@ -227,17 +227,17 @@ BuildLsa::router_link(RouterLsa *rlsa, const string& word, Args& args)
     string nword;
     while(args.get_next(nword)) {
 	if ("lsid" == nword) {	// OSPFv2
-	    rl.set_link_id(set_id(get_next_word(args, "lsid").c_str()));
+	    rl.set_link_id(set_id(get_next_word(args, nword).c_str()));
 	} else if ("ldata" == nword) {	// OSPFv2
-	    rl.set_link_data(set_id(get_next_word(args, "ldata").c_str()));
+	    rl.set_link_data(set_id(get_next_word(args, nword).c_str()));
 	} else if ("metric" == nword) {
-	    rl.set_metric(get_next_number(args, "ldata"));
+	    rl.set_metric(get_next_number(args, nword));
 	} else if ("iid" == nword) {	// OSPFv3
-	    rl.set_interface_id(get_next_number(args, "iid"));
+	    rl.set_interface_id(get_next_number(args, nword));
 	} else if ("nid" == nword) {	// OSPFv3
-	    rl.set_neighbour_interface_id(get_next_number(args, "nid"));
+	    rl.set_neighbour_interface_id(get_next_number(args, nword));
 	} else if ("nrid" == nword) {	// OSPFv3
-	    rl.set_neighbour_router_id(get_next_number(args, "nrid"));
+	    rl.set_neighbour_router_id(get_next_number(args, nword));
 	} else {
 	    args.push_back();
 	    break;
@@ -290,10 +290,10 @@ BuildLsa::network_lsa(Args& args)
 	if (common_header(lsa, word, args))
 	    continue;
 	if ("netmask" == word) {
-	    lsa->set_network_mask(get_next_number(args, "netmask"));
+	    lsa->set_network_mask(get_next_number(args, word));
 	} else if ("add-router" == word) {
 	    lsa->get_attached_routers().
-		push_back(set_id(get_next_word(args, "add-router").c_str()));
+		push_back(set_id(get_next_word(args, word).c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
@@ -342,9 +342,9 @@ BuildLsa::summary_network_lsa(Args& args)
 	if (common_header(lsa, word, args))
 	    continue;
 	if ("netmask" == word) {	// OSPFv2
- 	    lsa->set_network_mask(get_next_number(args, "netmask"));
+ 	    lsa->set_network_mask(get_next_number(args, word));
 	} else if ("metric" == word) {
- 	    lsa->set_metric(get_next_number(args, "metric"));
+ 	    lsa->set_metric(get_next_number(args, word));
 	} else if ("IPv6Prefix" == word) {	// OSPFv3
 	    lsa->set_ipv6prefix(ipv6prefix(args));
 	} else {
@@ -367,12 +367,11 @@ BuildLsa::summary_router_lsa(Args& args)
 	if (common_header(lsa, word, args))
 	    continue;
 	if ("netmask" == word) {	// OSPFv2
- 	    lsa->set_network_mask(get_next_number(args, "netmask"));
+ 	    lsa->set_network_mask(get_next_number(args, word));
 	} else if ("metric" == word) {
- 	    lsa->set_metric(get_next_number(args, "metric"));
+ 	    lsa->set_metric(get_next_number(args, word));
 	} else if ("drid" == word) {	// OSPFv3
- 	    lsa->set_destination_id(set_id(get_next_word(args,
-							 "drid").c_str()));
+ 	    lsa->set_destination_id(set_id(get_next_word(args, word).c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
@@ -393,7 +392,7 @@ BuildLsa::as_external_lsa(Args& args)
 	if (common_header(lsa, word, args))
 	    continue;
 	if ("netmask" == word) {
-  	    lsa->set_network_mask(get_next_number(args, "netmask"));
+  	    lsa->set_network_mask(get_next_number(args, word));
 	} else if ("bit-E" == word) {
 	    lsa->set_e_bit(true);
 	} else if ("bit-F" == word) {	// OSPFv3 only
@@ -401,21 +400,20 @@ BuildLsa::as_external_lsa(Args& args)
 	} else if ("bit-T" == word) {	// OSPFv3 only
 	    lsa->set_t_bit(true);
 	} else if ("metric" == word) {
-	    lsa->set_metric(get_next_number(args, "metric"));
+	    lsa->set_metric(get_next_number(args, word));
 	} else if ("IPv6Prefix" == word) {	// OSPFv3
 	    lsa->set_ipv6prefix(ipv6prefix(args));
 	} else if ("rlstype" == word) {		// OSPFv3
-	    lsa->set_referenced_ls_type(get_next_number(args, "rlstype"));
+	    lsa->set_referenced_ls_type(get_next_number(args, word));
 	} else if ("forward4" == word) {
-	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward4").
-					     c_str());
+	    lsa->set_forwarding_address_ipv4(get_next_word(args,word).c_str());
 	} else if ("forward6" == word) {
-	    lsa->set_forwarding_address_ipv6(get_next_word(args, "forward6").
-					     c_str());
+	    lsa->set_forwarding_address_ipv6(get_next_word(args,word).c_str());
 	} else if ("tag" == word) {
-	    lsa->set_external_route_tag(get_next_number(args, "tag"));
+	    lsa->set_external_route_tag(get_next_number(args, word));
 	} else if ("rlsid" == word) {
-	    lsa->set_referenced_link_state_id(set_id(get_next_word(args,"rlsid").c_str()));
+	    lsa->set_referenced_link_state_id(set_id(get_next_word(args, word)
+						     .c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
@@ -436,7 +434,7 @@ BuildLsa::type_7_lsa(Args& args)
 	if (common_header(lsa, word, args))
 	    continue;
 	if ("netmask" == word) {
-  	    lsa->set_network_mask(get_next_number(args, "netmask"));
+  	    lsa->set_network_mask(get_next_number(args, word));
 	} else if ("bit-E" == word) {
 	    lsa->set_e_bit(true);
 	} else if ("bit-F" == word) {	// OSPFv3 only
@@ -444,21 +442,20 @@ BuildLsa::type_7_lsa(Args& args)
 	} else if ("bit-T" == word) {	// OSPFv3 only
 	    lsa->set_t_bit(true);
 	} else if ("metric" == word) {
-	    lsa->set_metric(get_next_number(args, "metric"));
+	    lsa->set_metric(get_next_number(args, word));
 	} else if ("IPv6Prefix" == word) {	// OSPFv3
 	    lsa->set_ipv6prefix(ipv6prefix(args));
 	} else if ("rlstype" == word) {		// OSPFv3
-	    lsa->set_referenced_ls_type(get_next_number(args, "rlstype"));
+	    lsa->set_referenced_ls_type(get_next_number(args, word));
 	} else if ("forward4" == word) {
-	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward4").
-					     c_str());
+	    lsa->set_forwarding_address_ipv4(get_next_word(args,word).c_str());
 	} else if ("forward6" == word) {
-	    lsa->set_forwarding_address_ipv6(get_next_word(args, "forward6").
-					     c_str());
+	    lsa->set_forwarding_address_ipv6(get_next_word(args,word).c_str());
 	} else if ("tag" == word) {
-	    lsa->set_external_route_tag(get_next_number(args, "tag"));
+	    lsa->set_external_route_tag(get_next_number(args, word));
 	} else if ("rlsid" == word) {
-	    lsa->set_referenced_link_state_id(set_id(get_next_word(args,"rlsid").c_str()));
+	    lsa->set_referenced_link_state_id(set_id(get_next_word(args, word)
+						     .c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
