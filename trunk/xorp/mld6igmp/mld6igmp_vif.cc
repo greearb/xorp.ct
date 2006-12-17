@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.80 2006/08/18 22:14:49 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.81 2006/12/13 02:30:53 atanu Exp $"
 
 
 //
@@ -991,6 +991,66 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	       proto_message_type2ascii(message_type),
 	       cstring(src), cstring(dst),
 	       name().c_str());
+
+    //
+    // Ignore messages that are not recognized by older protocol version.
+    //
+    // XXX: Unrecognized message types MUST be silently ignored.
+    //
+    if (proto_is_igmp()) {
+	switch (message_type) {
+	case IGMP_MEMBERSHIP_QUERY:
+	    // Recognized by IGMPv1, IGMPv2, IGMPv3
+	    break;
+	case IGMP_V1_MEMBERSHIP_REPORT:
+	    // Recognized by IGMPv1, IGMPv2, IGMPv3
+	    break;
+	case IGMP_V2_MEMBERSHIP_REPORT:
+	    // Recognized by IGMPv2, IGMPv3
+	    if (is_igmpv1_mode())
+		return (XORP_ERROR);
+	    break;
+	case IGMP_V2_LEAVE_GROUP:
+	    // Recognized by IGMPv2, IGMPv3
+	    if (is_igmpv1_mode())
+		return (XORP_ERROR);
+	    break;
+	case IGMP_V3_MEMBERSHIP_REPORT:
+	    // Recognized by IGMPv3
+	    if (is_igmpv1_mode() || is_igmpv2_mode())
+		return (XORP_ERROR);
+	    break;
+	case IGMP_DVMRP:
+	case IGMP_MTRACE:
+	    break;
+	default:
+	    // Unrecognized message
+	    return (XORP_ERROR);
+	}
+    }
+    if (proto_is_mld6()) {
+	switch (message_type) {
+	case MLD_LISTENER_QUERY:
+	    // Recognized by MLDv1, MLDv2
+	    break;
+	case MLD_LISTENER_REPORT:
+	    // Recognized by MLDv1, MLDv2
+	    break;
+	case MLD_LISTENER_DONE:
+	    // Recognized by MLDv1, MLDv2
+	    break;
+	case MLDV2_LISTENER_REPORT:
+	    // Recognized by MLDv2
+	    if (is_mldv1_mode())
+		return (XORP_ERROR);
+	    break;
+	case MLD_MTRACE:
+	    break;
+	default:
+	    // Unrecognized message
+	    return (XORP_ERROR);
+	}
+    }
 
     //
     // Assign various flags what needs to be checked, based on the
