@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.8 2006/12/16 01:01:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.9 2006/12/16 01:06:18 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -299,6 +299,34 @@ BuildLsa::network_lsa(Args& args)
     return lsa;
 }
 
+IPv6Prefix
+BuildLsa::ipv6prefix(Args& args)
+{
+    IPv6Prefix prefix(_version);
+
+    prefix.set_network(IPNet<IPv6>(get_next_word(args, "IPv6Prefix").c_str()));
+
+    string nword;
+    while(args.get_next(nword)) {
+	if ("DN-bit" == nword) {
+	    prefix.set_dn_bit(true);
+	} else if ("P-bit" == nword) {
+	    prefix.set_p_bit(true);
+	} else if ("MC-bit" == nword) {
+	    prefix.set_mc_bit(true);
+	} else if ("LA-bit" == nword) {
+	    prefix.set_la_bit(true);
+	} else if ("NU-bit" == nword) {
+	    prefix.set_nu_bit(true);
+	} else {
+	    args.push_back();
+	    break;
+	}
+    }
+
+    return prefix;
+}
+
 Lsa *
 BuildLsa::summary_network_lsa(Args& args)
 {
@@ -311,7 +339,9 @@ BuildLsa::summary_network_lsa(Args& args)
 	if ("netmask" == word) {
  	    lsa->set_network_mask(get_next_number(args, "netmask"));
 	} else if ("metric" == word) {
- 	    lsa->set_metric(get_next_number(args, "netmask"));
+ 	    lsa->set_metric(get_next_number(args, "metric"));
+	} else if ("IPv6Prefix" == word) {
+	    lsa->set_ipv6prefix(ipv6prefix(args));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),

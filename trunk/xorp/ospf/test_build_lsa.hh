@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/test_build_lsa.hh,v 1.2 2006/10/12 20:13:55 atanu Exp $
+// $XORP: xorp/ospf/test_build_lsa.hh,v 1.3 2006/12/15 00:50:19 atanu Exp $
 
 #ifndef __OSPF_TEST_BUILD_LSA_HH__
 #define __OSPF_TEST_BUILD_LSA_HH__
@@ -45,6 +45,8 @@ class BuildLsa {
     Lsa *router_lsa(Args& args);
 
     Lsa *network_lsa(Args& args);
+
+    IPv6Prefix ipv6prefix(Args& args);
 
     Lsa *summary_network_lsa(Args& args);
 
