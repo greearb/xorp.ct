@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.13 2006/12/17 04:17:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.14 2006/12/17 04:28:41 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -54,6 +54,8 @@ BuildLsa::generate(Args& args)
 	lsa = as_external_lsa(args);
     } else if ("Type7Lsa" == word) {
 	lsa = type_7_lsa(args);
+    } else if ("LinkLsa" == word) {
+	lsa = link_lsa(args);
     } else {
 	xorp_throw(InvalidString, c_format("Unknown LSA name <%s>. [%s]",
 					   word.c_str(),
@@ -91,6 +93,9 @@ BuildLsa::get_options(Lsa *lsa)
 	    return options;
 	if (getit<SummaryRouterLsa>(lsa, _version, options))
 	    return options;
+	if (getit<LinkLsa>(lsa, _version, options))
+	    return options;
+
 	xorp_throw(InvalidString,
 		   c_format("%s LSA does not have an options field (get)",
 			    lsa->name()));
@@ -127,6 +132,8 @@ BuildLsa::set_options(Lsa *lsa, Options& options)
 	if (setit<NetworkLsa>(lsa, options))
 	    return;
 	if (setit<SummaryRouterLsa>(lsa, options))
+	    return;
+	if (setit<LinkLsa>(lsa, options))
 	    return;
 
 	xorp_throw(InvalidString,
@@ -452,6 +459,31 @@ BuildLsa::type_7_lsa(Args& args)
 	    lsa->set_external_route_tag(get_next_number(args, "tag"));
 	} else if ("rlsid" == word) {
 	    lsa->set_referenced_link_state_id(set_id(get_next_word(args,"rlsid").c_str()));
+	} else {
+	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
+					       word.c_str(),
+					       args.original_line().c_str()));
+	}
+    }
+
+    return lsa;
+}
+
+Lsa *
+BuildLsa::link_lsa(Args& args)	// OSPFv3 only
+{
+    LinkLsa *lsa = new LinkLsa(_version);
+
+    string word;
+    while(args.get_next(word)) {
+	if (common_header(lsa, word, args))
+	    continue;
+	if ("rtr-priority" == word) {
+  	    lsa->set_rtr_priority(get_next_number(args, word));
+	} else if ("link-local-address" == word) {
+  	    lsa->set_link_local_address(get_next_word(args, word).c_str());
+	} else if ("IPv6Prefix" == word) {
+	    lsa->get_prefixes().push_back(ipv6prefix(args));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
