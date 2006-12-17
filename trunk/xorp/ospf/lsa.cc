@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.90 2006/12/17 03:30:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.91 2006/12/17 05:22:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1397,7 +1397,6 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 	    lsa->set_t_bit(flag & 0x1);
 	    lsa->set_metric(extract_24(&buf[header_length + 1]));
  	    lsa->set_referenced_ls_type(extract_16(&buf[header_length + 6]));
-	    IPv6Prefix prefix(version);
 	    size_t space = len - IPV6_PREFIX_OFFSET;
 	    IPv6Prefix prefix_decoder(version);
 	    lsa->set_ipv6prefix(prefix_decoder.decode(&buf[header_length + 8],
