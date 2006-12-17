@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.12 2006/12/17 03:15:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.13 2006/12/17 04:17:32 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -432,13 +432,26 @@ BuildLsa::type_7_lsa(Args& args)
   	    lsa->set_network_mask(get_next_number(args, "netmask"));
 	} else if ("bit-E" == word) {
 	    lsa->set_e_bit(true);
+	} else if ("bit-F" == word) {	// OSPFv3 only
+	    lsa->set_f_bit(true);
+	} else if ("bit-T" == word) {	// OSPFv3 only
+	    lsa->set_t_bit(true);
 	} else if ("metric" == word) {
 	    lsa->set_metric(get_next_number(args, "metric"));
+	} else if ("IPv6Prefix" == word) {	// OSPFv3
+	    lsa->set_ipv6prefix(ipv6prefix(args));
+	} else if ("rlstype" == word) {		// OSPFv3
+	    lsa->set_referenced_ls_type(get_next_number(args, "rlstype"));
 	} else if ("forward4" == word) {
 	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward4").
 					     c_str());
+	} else if ("forward6" == word) {
+	    lsa->set_forwarding_address_ipv6(get_next_word(args, "forward6").
+					     c_str());
 	} else if ("tag" == word) {
 	    lsa->set_external_route_tag(get_next_number(args, "tag"));
+	} else if ("rlsid" == word) {
+	    lsa->set_referenced_link_state_id(set_id(get_next_word(args,"rlsid").c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
