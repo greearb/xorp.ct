@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.89 2006/12/17 03:08:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.90 2006/12/17 03:30:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1569,8 +1569,8 @@ ASExternalLsa::str() const
 	    output += c_format("\n\tExternal Route Tag %#x",
 			       get_external_route_tag());
 	if (0 != get_referenced_ls_type())
-	    output += c_format("\n\tReferenced Link State ID %#x",
-			       get_referenced_link_state_id());
+	    output += c_format("\n\tReferenced Link State ID %s",
+			       pr_id(get_referenced_link_state_id()).c_str());
 	    
 	break;
     }
@@ -1857,10 +1857,10 @@ IntraAreaPrefixLsa::str() const
     output += _header.str();
 
     output += c_format("\n\tReferenced LS type %#x", get_referenced_ls_type());
-    output += c_format("\n\tReferenced Link State ID %#x",
-		       get_referenced_link_state_id());
-    output += c_format("\n\tReferenced Advertising Router %#x",
-		       get_referenced_advertising_router());
+    output += c_format("\n\tReferenced Link State ID %s",
+		       pr_id(get_referenced_link_state_id()).c_str());
+    output += c_format("\n\tReferenced Advertising Router %s",
+		       pr_id(get_referenced_advertising_router()).c_str());
 
     list<IPv6Prefix> ps = _prefixes;
     for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++)
