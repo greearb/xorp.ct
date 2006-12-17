@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.87 2006/12/13 03:43:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.88 2006/12/14 23:18:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1337,7 +1337,8 @@ SummaryRouterLsa::str() const
 	output += c_format("\n\tMetric %d", get_metric());
 	break;
     case OspfTypes::V3:
-	output += c_format("\n\tOptions %#x", get_options());
+	output += c_format("\n\tOptions %#x %s", get_options(),
+			   cstring(Options(get_version(), get_options())));
 	output += c_format("\n\tMetric %d", get_metric());
 	output += c_format("\n\tDestination Router ID %s",
 			   pr_id(get_destination_id()).c_str());
