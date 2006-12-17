@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.86 2006/12/12 04:11:14 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.87 2006/12/13 03:11:30 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -716,7 +716,7 @@ public:
 	return _version;
     }
 
-    void set_network(IPNet<IPv6>& network) {
+    void set_network(const IPNet<IPv6>& network) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	_network = network;
     }
@@ -1286,7 +1286,7 @@ class SummaryNetworkLsa : public Lsa {
 	return _network_mask;
     }
 
-    void set_ipv6prefix(IPv6Prefix& ipv6prefix) {
+    void set_ipv6prefix(const IPv6Prefix& ipv6prefix) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	_ipv6prefix = ipv6prefix;
     }
