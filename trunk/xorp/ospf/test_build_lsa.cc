@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.9 2006/12/16 01:06:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.10 2006/12/17 02:52:34 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -89,6 +89,8 @@ BuildLsa::get_options(Lsa *lsa)
 	    return options;
 	if (getit<NetworkLsa>(lsa, _version, options))
 	    return options;
+	if (getit<SummaryRouterLsa>(lsa, _version, options))
+	    return options;
 	xorp_throw(InvalidString,
 		   c_format("%s LSA does not have an options field (get)",
 			    lsa->name()));
@@ -123,6 +125,8 @@ BuildLsa::set_options(Lsa *lsa, Options& options)
 	if (setit<RouterLsa>(lsa, options))
 	    return;
 	if (setit<NetworkLsa>(lsa, options))
+	    return;
+	if (setit<SummaryRouterLsa>(lsa, options))
 	    return;
 
 	xorp_throw(InvalidString,
@@ -364,7 +368,10 @@ BuildLsa::summary_router_lsa(Args& args)
 	if ("netmask" == word) {
  	    lsa->set_network_mask(get_next_number(args, "netmask"));
 	} else if ("metric" == word) {
- 	    lsa->set_metric(get_next_number(args, "netmask"));
+ 	    lsa->set_metric(get_next_number(args, "metric"));
+	} else if ("drid" == word) {
+ 	    lsa->set_destination_id(set_id(get_next_word(args,
+							 "drid").c_str()));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
