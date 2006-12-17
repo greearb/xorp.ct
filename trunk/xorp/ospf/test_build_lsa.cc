@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.10 2006/12/17 02:52:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.11 2006/12/17 03:10:09 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -261,7 +261,7 @@ BuildLsa::router_lsa(Args& args)
 	    continue;
 	if ("bit-NT" == word) {
 	    lsa->set_nt_bit(true);
-	} else if ("bit-W" == word) {
+	} else if ("bit-W" == word) {	// OSPFv3
 	    lsa->set_w_bit(true);
 	} else if ("bit-V" == word) {
 	    lsa->set_v_bit(true);
@@ -340,11 +340,11 @@ BuildLsa::summary_network_lsa(Args& args)
     while(args.get_next(word)) {
 	if (common_header(lsa, word, args))
 	    continue;
-	if ("netmask" == word) {
+	if ("netmask" == word) {	// OSPFv2
  	    lsa->set_network_mask(get_next_number(args, "netmask"));
 	} else if ("metric" == word) {
  	    lsa->set_metric(get_next_number(args, "metric"));
-	} else if ("IPv6Prefix" == word) {
+	} else if ("IPv6Prefix" == word) {	// OSPFv3
 	    lsa->set_ipv6prefix(ipv6prefix(args));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
@@ -365,11 +365,11 @@ BuildLsa::summary_router_lsa(Args& args)
     while(args.get_next(word)) {
 	if (common_header(lsa, word, args))
 	    continue;
-	if ("netmask" == word) {
+	if ("netmask" == word) {	// OSPFv2
  	    lsa->set_network_mask(get_next_number(args, "netmask"));
 	} else if ("metric" == word) {
  	    lsa->set_metric(get_next_number(args, "metric"));
-	} else if ("drid" == word) {
+	} else if ("drid" == word) {	// OSPFv3
  	    lsa->set_destination_id(set_id(get_next_word(args,
 							 "drid").c_str()));
 	} else {
