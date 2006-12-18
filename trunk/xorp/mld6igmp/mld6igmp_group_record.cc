@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.28 2006/07/10 08:20:40 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.29 2006/07/10 08:50:03 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -906,6 +906,13 @@ Mld6igmpGroupRecord::group_query_periodic_timeout()
     Mld6igmpSourceSet::iterator source_iter;
     TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
     bool do_send_group_query = true;
+
+    //
+    // XXX: Don't send Group-Specific or Group-and-Source-Specific Queries
+    // for entries that are in IGMPv1 mode.
+    //
+    if (is_igmpv1_mode())
+	return (false);
 
     //
     // XXX: The IGMPv3/MLDv2 spec doesn't say what to do here if we changed
