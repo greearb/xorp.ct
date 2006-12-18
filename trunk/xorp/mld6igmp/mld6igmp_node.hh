@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.28 2006/03/16 00:04:44 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.29 2006/07/03 23:33:38 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -533,6 +533,21 @@ public:
 				  const IPvX& source,
 				  const IPvX& group,
 				  action_jp_t action_jp);
+
+    /**
+     * Test if an address is directly connected to a specified virtual
+     * interface.
+     * 
+     * Note that the virtual interface the address is directly connected to
+     * must be UP.
+     * 
+     * @param mld6igmp_vif the virtual interface to test against.
+     * @param ipaddr_test the address to test.
+     * @return true if @ref ipaddr_test is directly connected to @ref vif,
+     * otherwise false.
+     */
+    bool is_directly_connected(const Mld6igmpVif& mld6igmp_vif,
+			       const IPvX& ipaddr_test) const;
 
     //
     // Configuration methods

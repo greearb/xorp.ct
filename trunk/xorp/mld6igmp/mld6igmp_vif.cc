@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.81 2006/12/13 02:30:53 atanu Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.82 2006/12/17 21:47:06 pavlin Exp $"
 
 
 //
@@ -1191,6 +1191,16 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 		     cstring(src), cstring(dst),
 		     name().c_str(),
 		     src.af(), family());
+    }
+    // Source address must be directly connected
+    if (! mld6igmp_node().is_directly_connected(*this, src)) {
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "source must be directly connected",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
     }
     if (check_src_linklocal_unicast) {
 	if (src.is_linklocal_unicast()

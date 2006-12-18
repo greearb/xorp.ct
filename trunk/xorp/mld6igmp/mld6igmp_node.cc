@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.49 2006/06/22 15:58:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.50 2006/07/03 23:33:38 pavlin Exp $"
 
 
 //
@@ -1161,4 +1161,43 @@ Mld6igmpNode::join_prune_notify_routing(const string& module_instance_name,
     }
     
     return (XORP_OK);
+}
+
+/**
+ * Mld6igmpNode::is_directly_connected:
+ * @mld6igmp_vif: The virtual interface to test against.
+ * @ipaddr_test: The address to test.
+ * 
+ * Note that the virtual interface the address is directly connected to
+ * must be UP.
+ * 
+ * Return value: True if @ipaddr_test is directly connected to @mld6igmp_vif,
+ * otherwise false.
+ **/
+bool
+Mld6igmpNode::is_directly_connected(const Mld6igmpVif& mld6igmp_vif,
+				    const IPvX& ipaddr_test) const
+{
+    if (! mld6igmp_vif.is_up())
+	return (false);
+
+#if 0	// TODO: not implemented yet
+    //
+    // Test the alternative subnets
+    //
+    list<IPvXNet>::const_iterator iter;
+    for (iter = mld6igmp_vif.alternative_subnet_list().begin();
+	 iter != mld6igmp_vif.alternative_subnet_list().end();
+	 ++iter) {
+	const IPvXNet& ipvxnet = *iter;
+	if (ipvxnet.contains(ipaddr_test))
+	    return true;
+    }
+#endif
+
+    //
+    // Test the same subnet addresses, or the P2P addresses
+    //
+    return (mld6igmp_vif.is_same_subnet(ipaddr_test)
+	    || mld6igmp_vif.is_same_p2p(ipaddr_test));
 }
