@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea6.tp,v 1.14 2006/02/22 02:26:10 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea6.tp,v 1.15 2006/04/19 19:59:26 pavlin Exp $ */
 
 plumbing {
     mfea6 {
@@ -65,10 +65,12 @@ plumbing {
 
 	interface @ {
 	    %help:	short "Configure IPv6 MFEA on a network interface";
+	    %delete: xrl "$(mfea6.targetname)/mfea/0.1/stop_vif?vif_name:txt=$(interface.@)";
 	    vif @ {
 		%help:	short "Configure IPv6 MFEA on a virtual interface";
 		%activate: xrl "$(mfea6.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
 		%update: xrl "$(mfea6.targetname)/mfea/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%delete: xrl "$(mfea6.targetname)/mfea/0.1/stop_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable IPv6 MFEA on an interface";

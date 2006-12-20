@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.19 2006/04/19 19:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.20 2006/07/03 06:52:37 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -65,10 +65,12 @@ protocols {
 
 	interface @ {
 	    %help:	short "Configure IGMP on a network interface";
+	    %delete: xrl "$(igmp.targetname)/mld6igmp/0.1/stop_vif?vif_name:txt=$(interface.@)";
 	    vif @ {
 		%help:	short "Configure IGMP on a virtual interface";
 		%activate: xrl "$(igmp.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
 		%update: xrl "$(igmp.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%delete: xrl "$(igmp.targetname)/mld6igmp/0.1/stop_vif?vif_name:txt=$(vif.@)";
 
 		disable {
 		    %help:	short "Disable IGMP on an interface";
