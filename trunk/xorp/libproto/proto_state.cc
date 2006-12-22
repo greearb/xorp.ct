@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.11 2005/03/25 02:53:24 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.12 2006/03/16 00:04:12 pavlin Exp $"
 
 
 //
@@ -177,7 +177,7 @@ ProtoState::shutdown()
 void
 ProtoState::disable()
 {
-    ProtoState::shutdown();
+    (void)ProtoState::shutdown();
     _flags &= ~XORP_ENABLED;
 }
 
