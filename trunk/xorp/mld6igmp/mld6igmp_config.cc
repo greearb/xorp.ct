@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.14 2006/07/03 23:33:38 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.15 2006/10/06 22:58:58 pavlin Exp $"
 
 
 //
@@ -34,8 +34,8 @@ int
 Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 {
     map<string, Vif>::iterator vif_iter;
-    string err;
     map<string, Vif>& configured_vifs = ProtoNode<Mld6igmpVif>::configured_vifs();
+    string dummy_error_msg;
 
     //
     // Add new vifs and update existing ones
@@ -53,7 +53,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 	// Add a new vif
 	//
 	if (node_vif == NULL) {
-	    add_vif(*vif, err);
+	    add_vif(*vif, dummy_error_msg);
 	    continue;
 	}
 	
@@ -64,7 +64,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 		      vif->is_loopback(), vif->is_multicast_capable(),
 		      vif->is_broadcast_capable(), vif->is_underlying_vif_up(),
 		      vif->mtu(),
-		      err);
+		      dummy_error_msg);
     }
 
     //
@@ -91,7 +91,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 			 vif_addr.subnet_addr(),
 			 vif_addr.broadcast_addr(),
 			 vif_addr.peer_addr(),
-			 err);
+			 dummy_error_msg);
 	}
 
 	//
@@ -112,7 +112,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
-		delete_vif_addr(vif->name(), ipvx, err);
+		delete_vif_addr(vif->name(), ipvx, dummy_error_msg);
 	    }
 	}
     }
@@ -127,7 +127,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
-	    delete_vif(vif_name, err);
+	    delete_vif(vif_name, dummy_error_msg);
 	    continue;
 	}
     }

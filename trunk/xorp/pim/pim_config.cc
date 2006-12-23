@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.47 2006/07/03 23:33:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.48 2006/10/06 22:58:59 pavlin Exp $"
 
 
 //
@@ -37,7 +37,6 @@ int
 PimNode::set_config_all_vifs_done(string& error_msg)
 {
     map<string, Vif>::iterator vif_iter;
-    string err;
     map<string, Vif>& configured_vifs = ProtoNode<PimVif>::configured_vifs();
     set<string> send_pim_hello_vifs;
     string dummy_error_msg;
@@ -55,7 +54,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 	// Add a new vif
 	//
 	if (node_vif == NULL) {
-	    add_vif(*vif, err);
+	    add_vif(*vif, dummy_error_msg);
 	    continue;
 	}
 	
@@ -65,7 +64,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 	set_vif_flags(vif->name(), vif->is_pim_register(), vif->is_p2p(),
 		      vif->is_loopback(), vif->is_multicast_capable(),
 		      vif->is_broadcast_capable(), vif->is_underlying_vif_up(),
-		      vif->mtu(), err);
+		      vif->mtu(), dummy_error_msg);
     }
 
     //
@@ -94,7 +93,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 			 vif_addr.broadcast_addr(),
 			 vif_addr.peer_addr(),
 			 should_send_pim_hello,
-			 err);
+			 dummy_error_msg);
 	    if (should_send_pim_hello)
 		send_pim_hello_vifs.insert(vif->name());
 	}
@@ -118,7 +117,8 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
 		bool should_send_pim_hello = false;
-		delete_vif_addr(vif->name(), ipvx, should_send_pim_hello, err);
+		delete_vif_addr(vif->name(), ipvx, should_send_pim_hello,
+				dummy_error_msg);
 		if (should_send_pim_hello)
 		    send_pim_hello_vifs.insert(vif->name());
 	    }
@@ -137,7 +137,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
-	    delete_vif(vif_name, err);
+	    delete_vif(vif_name, dummy_error_msg);
 	    continue;
 	}
     }

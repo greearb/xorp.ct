@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.15 2006/03/16 00:03:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.16 2006/07/03 23:33:36 pavlin Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
@@ -297,8 +297,8 @@ int
 MfeaNode::set_config_all_vifs_done(string& error_msg)
 {
     map<string, Vif>::iterator vif_iter;
-    string err;
     map<string, Vif>& configured_vifs = ProtoNode<MfeaVif>::configured_vifs();
+    string dummy_error_msg;
     
     //
     // Add new vifs, and update existing ones
@@ -313,7 +313,7 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	// Add a new vif
 	//
 	if (node_vif == NULL) {
-	    add_vif(*vif, err);
+	    add_vif(*vif, dummy_error_msg);
 	    continue;
 	}
 	
@@ -384,7 +384,7 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
 	    // Delete the interface
 	    string vif_name = node_vif->name();
-	    delete_vif(vif_name, err);
+	    delete_vif(vif_name, dummy_error_msg);
 	    continue;
 	}
     }
