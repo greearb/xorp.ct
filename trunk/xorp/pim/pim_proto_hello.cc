@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.23 2006/01/23 21:03:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.24 2006/03/16 00:04:54 pavlin Exp $"
 
 
 //
@@ -77,17 +77,6 @@ PimVif::pim_hello_stop()
     hello_holdtime().set(0);		// XXX: timeout immediately
     pim_hello_send(dummy_error_msg);
     hello_holdtime().set(save_holdtime);
-}
-
-void
-PimVif::pim_hello_stop_dr()
-{
-    uint32_t save_dr_priority = dr_priority().get();
-    string dummy_error_msg;
-    
-    dr_priority().set(PIM_HELLO_DR_PRIORITY_LOWEST);		// XXX: lowest
-    pim_hello_send(dummy_error_msg);
-    dr_priority().set(save_dr_priority);
 }
 
 /**

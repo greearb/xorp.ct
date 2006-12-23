@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.62 2006/08/15 02:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.63 2006/11/14 21:05:45 pavlin Exp $"
 
 
 //
@@ -392,12 +392,6 @@ PimVif::stop(string& error_msg)
 	// Delete MLD6/IGMP membership tracking
 	//
 	pim_node().delete_protocol_mld6igmp(vif_index());
-	
-	// XXX: if the DR-priority Hello option is not in use, then we cannot
-	// stop ourselves being the DR. In that case, there could be a
-	// period of "missing-DR" until we completely stop this
-	// vif (if it was the DR).
-	pim_hello_stop_dr();
 	
 	set_i_am_dr(false);
     }

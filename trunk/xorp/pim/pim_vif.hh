@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.39 2006/03/16 00:04:55 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.40 2006/07/28 06:07:58 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -195,12 +195,6 @@ public:
      * Stop the PIM Hello operation.
      */
     void	pim_hello_stop();
-    
-    /**
-     * Attempt to inform other PIM neighbors that this interface is not more
-     * the Designated Router.
-     */
-    void	pim_hello_stop_dr();
     
     /**
      * Elect a Designated Router on this interface.
