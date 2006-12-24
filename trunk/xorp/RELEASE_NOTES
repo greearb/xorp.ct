@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.154 2006/12/07 20:37:18 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.155 2006/12/15 03:24:56 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -100,7 +100,7 @@ Release 1.4-WIP (2006/??/??)
     - 
 
   RTRMGR:
-    - 
+    - Bug fix in the semantics of the rtrmgr template %activate keyword.
 
   XORPSH:
     - 
@@ -143,6 +143,15 @@ Release 1.4-WIP (2006/??/??)
     - Bug fix related to atomically modifying the IP address of an
       interface.
 
+    - Bug fix related to ignoring protocol messages that are not
+      recognized by the configured protocol version on an interface.
+
+    - Ignore control messages if the source address is not directly
+      connected.
+
+    - Don't send the periodic Group-Specific or Group-and-Source-Specific
+      Queries for entries that are in IGMPv1 mode.
+
   PIM-SM:
     - Bug fix related to atomically modifying the IP address of an
       interface.
@@ -151,6 +160,10 @@ Release 1.4-WIP (2006/??/??)
       option anymore, because it has been included from the newer
       revisions of the PIM-SM protocol specification (RFC 4601 and
       draft-ietf-pim-sm-bsr-09.txt,.ps).
+
+    - Don't send PIM Hello message with DR Priority of 0 when shutting
+      down an interface, because this is not part of the protocol
+      specification.
 
   FIB2MRIB:
     - Bug fix related to updating the interface and vif name of a
