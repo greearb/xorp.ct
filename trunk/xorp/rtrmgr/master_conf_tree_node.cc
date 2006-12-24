@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.22 2006/04/06 00:03:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.23 2006/04/26 04:33:43 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -347,6 +347,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 				     bool do_commit,
 				     int depth, int last_depth,
 				     string& error_msg,
+				     bool& needs_activate,
 				     bool& needs_update)
 {
     bool success = true;
@@ -543,6 +544,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	success = child->commit_changes(task_manager, do_commit,
 					depth + 1, last_depth, 
 					child_error_msg,
+					needs_activate,
 					needs_update);
 	error_msg += child_error_msg;
 	if (success == false) {
@@ -560,11 +562,15 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    break;
 
 	// The %activate command
-	if (_existence_committed == false) {
+	if (needs_activate || (_existence_committed == false)) {
 	    base_cmd = _template_tree_node->const_command("%activate");
-	    if (base_cmd != NULL) {
+	    if (base_cmd == NULL) {
+		if (_existence_committed == false)
+		    needs_activate = true;
+	    } else {
 		cmd = reinterpret_cast<const Command*>(base_cmd);
 		debug_msg("found commands: %s\n", cmd->str().c_str());
+		needs_activate = false;
 		int actions = cmd->execute(*this, task_manager);
 		if (actions < 0) {
 		    error_msg = c_format("Parameter error for \"%s\"\n",
