@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.34 2006/10/04 00:59:38 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.35 2006/10/06 20:33:25 pavlin Exp $"
 
 
 //
@@ -599,7 +599,7 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	ip4.set_ip_src(source_addr.get_ipv4());
 	ip4.set_ip_dst(group_addr.get_ipv4());
 	ip4.set_ip_sum(0);
-	ip4.set_ip_sum(inet_checksum(ip4.data(), ip4.size()));
+	ip4.set_ip_sum(ntohs(inet_checksum(ip4.data(), ip4.size())));
 	
 	BUFFER_PUT_DATA(ip_header4_buffer, buffer, IpHeader4::SIZE);
 	break;
