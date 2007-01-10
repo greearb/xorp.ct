@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.7 2006/03/16 00:04:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.8 2006/03/27 01:04:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -329,7 +329,7 @@ PaIpfw2Backend::move_ruleset4(int src_index, int dst_index)
     cmds |= (CMD_MOVE_RULESET << 24);
     cmds |= ((dst_index << 16) & 0xFF);
     cmds |= src_index & 0xFFFF;
-    return (docmd4(IP_FW_DEL, (void*)cmds, sizeof(cmds)));
+    return (docmd4(IP_FW_DEL, (void*)(uintptr_t)cmds, sizeof(cmds)));
 }
 
 // Swap the contents of the two rulesets.
@@ -344,7 +344,7 @@ PaIpfw2Backend::swap_ruleset4(int first_index, int second_index)
     cmds |= (CMD_SWAP_RULESETS << 24);
     cmds |= ((first_index << 16) & 0xFF);
     cmds |= second_index & 0xFFFF;
-    return (docmd4(IP_FW_DEL, (void*)cmds, sizeof(cmds)));
+    return (docmd4(IP_FW_DEL, (void*)(uintptr_t)cmds, sizeof(cmds)));
 }
 
 // Flush the contents of a given ruleset.
@@ -355,7 +355,7 @@ PaIpfw2Backend::flush_ruleset4(int index)
     uint32_t cmds = 0;
     cmds |= (CMD_DEL_RULES_WITH_SET << 24);
     cmds |= index & 0xFFFF;
-    return (docmd4(IP_FW_DEL, (void*)cmds, sizeof(cmds)));
+    return (docmd4(IP_FW_DEL, (void*)(uintptr_t)cmds, sizeof(cmds)));
 }
 
 // Micro-assemble an IPFW2 instruction sequence for the specified
