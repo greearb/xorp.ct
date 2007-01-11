@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.182 2006/11/09 01:22:08 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.183 2006/11/11 16:05:34 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.4-WIP], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.182 2006/11/09 01:22:08 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.183 2006/11/11 16:05:34 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -991,6 +991,7 @@ dnl Add files to under-go substitution here.
 dnl ---------------------------------------------------------------------------
 
 AC_OUTPUT(
+	Jamrules
 	Makefile
 	MakefileRootCheck
 	bgp/Makefile
