@@ -1,0 +1,9 @@
+#
+# $XORP$
+#
+
+SubDir TOP xrl ;
+
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP xrl tests ;
