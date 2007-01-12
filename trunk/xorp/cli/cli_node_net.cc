@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.53 2006/08/21 19:38:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.54 2006/11/08 19:49:49 pavlin Exp $"
 
 
 //
@@ -42,6 +42,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/c_format.hh"
+#include "libxorp/time_slice.hh"
 #include "libxorp/token.hh"
 
 #include "libcomm/comm_api.h"
@@ -365,8 +366,10 @@ CliNode::delete_connection(CliClient *cli_client, string& error_msg)
 	// XXX: delete the client only if this was a network connection
 	_client_list.erase(iter);
 	delete cli_client;
+    } else {
+	eventloop().remove_ioevent_cb(cli_client->input_fd(), IOT_READ);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -770,12 +773,12 @@ CliClient::process_input_data()
     //
     _pending_input_data.clear();
 
+    TimeSlice time_slice(1000000, 1); // 1s, test every iteration
+
     // Process the input data
     vector<uint8_t>::iterator iter;
     for (iter = input_data.begin(); iter != input_data.end(); ++iter) {
 	uint8_t val = *iter;
-	bool stop_processing_tmp = false;
-	bool save_input = false;
 	bool ignore_current_character = false;
 	
 	if (is_telnet()) {
@@ -797,12 +800,6 @@ CliClient::process_input_data()
 		continue;
 	    }
 	}
-	
-	preprocess_char(val, stop_processing_tmp, ignore_current_character);
-	if (stop_processing_tmp && (! stop_processing)) {
-	    stop_processing = true;
-	    save_input = true;
-	}
 
 	if (val == CHAR_TO_CTRL('c')) {
 	    //
@@ -811,6 +808,16 @@ CliClient::process_input_data()
 	    interrupt_command();
 	    _pending_input_data.clear();
 	    return;
+	}
+
+	if (stop_processing)
+	    continue;
+
+	preprocess_char(val, stop_processing);
+
+	if (is_waiting_for_data()) {
+	    stop_processing = true;
+	    ignore_current_character = true;
 	}
 
 	if (! stop_processing) {
@@ -833,13 +840,7 @@ CliClient::process_input_data()
 		    ret_value = process_char_page_mode(val);
 		    break;
 		}
-		ret_value = process_char(string(line), val,
-					 stop_processing_tmp,
-					 ignore_current_character);
-		if (stop_processing_tmp && (! stop_processing)) {
-		    stop_processing = true;
-		    save_input = true;
-		}
+		ret_value = process_char(string(line), val, stop_processing);
 		break;
 	    } while (false);
 
@@ -851,7 +852,11 @@ CliClient::process_input_data()
 	    }
 	}
 
-	if (save_input) {
+	if (time_slice.is_expired()) {
+	    stop_processing = true;
+	}
+
+	if (stop_processing) {
 	    //
 	    // Stop processing and save the remaining input data for later
 	    // processing.
@@ -859,24 +864,38 @@ CliClient::process_input_data()
 	    // primarily to look for Ctrl-C input.
 	    //
 	    vector<uint8_t>::iterator iter2 = iter;
-	    if (ignore_current_character)
+
+	    if (! ignore_current_character)
 		++iter2;
 	    if (iter2 != input_data.end())
 		_pending_input_data.assign(iter2, input_data.end());
 	}
     }
+    if (! _pending_input_data.empty())
+	schedule_process_input_data();
+	
     cli_flush();		// Flush-out the output
+}
+
+//
+// Schedule a timer to process (pending) input data
+//
+void
+CliClient::schedule_process_input_data()
+{
+    EventLoop& eventloop = cli_node().eventloop();
+    OneoffTaskCallback cb = callback(this, &CliClient::process_input_data);
+
+    _process_pending_input_data_task = eventloop.new_oneoff_task(cb);
 }
 
 //
 // Preprocess a character before 'libtecla' get its hand on it
 //
 int
-CliClient::preprocess_char(uint8_t val, bool& stop_processing,
-			   bool& ignore_current_character)
+CliClient::preprocess_char(uint8_t val, bool& stop_processing)
 {
     stop_processing = false;
-    ignore_current_character = false;
 
     if ((val == '\n') || (val == '\r')) {
 	// New command
