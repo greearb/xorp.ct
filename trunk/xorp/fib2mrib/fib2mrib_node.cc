@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.30 2006/03/16 00:04:09 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.31 2006/08/18 05:23:16 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -756,12 +756,30 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     }
 
     //
-    // Find the route and replace it
+    // Find the route and replace it.
+    // If there is a route with the same ifname and vifname, then update
+    // its value. Otherwise, update the first route for the same subnet.
     //
-    multimap<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter;
     iter = _fib2mrib_routes.find(updated_route.network());
-    if ((iter == _fib2mrib_routes.end())
-	|| (iter->second.network() != updated_route.network())) {
+    for ( ; iter != _fib2mrib_routes.end(); ++iter) {
+	Fib2mribRoute& orig_route = iter->second;
+	if (orig_route.network() != updated_route.network())
+	    break;
+
+	if ((orig_route.ifname() != updated_route.ifname())
+	    || (orig_route.vifname() != updated_route.vifname())) {
+	    if (route_to_replace_ptr == NULL) {
+		// First route for same subnet
+		route_to_replace_ptr = &orig_route;
+	    }
+	    continue;
+	}
+
+	route_to_replace_ptr = &orig_route;
+	break;
+    }
+    if (route_to_replace_ptr == NULL) {
 	//
 	// Couldn't find the route to replace
 	//
@@ -772,41 +790,9 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     }
 
     //
-    // First check if there is a route with the same ifname and vifname.
-    // If there is such route, then update its value. Otherwise,
-    // update the first route for the same subnet.
-    //
-    for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
-	Fib2mribRoute& orig_route = iter2->second;
-	if (orig_route.network() != updated_route.network())
-	    break;
-	if ((orig_route.ifname() != updated_route.ifname())
-	    || (orig_route.vifname() != updated_route.vifname())) {
-	    continue;
-	}
-
-	//
-	// Route found.
-	//
-	route_to_replace_ptr = &orig_route;
-	break;
-    }
-
-    if (route_to_replace_ptr == NULL) {
-	//
-	// No route found with the same ifname and vifname.
-	// Update the first route for the same subnet.
-	//
-	Fib2mribRoute& orig_route = iter->second;
-
-	route_to_replace_ptr = &orig_route;
-    }
-
-    //
     // Route found. Overwrite its value.
     //
     do {
-	XLOG_ASSERT(route_to_replace_ptr != NULL);
 	Fib2mribRoute& orig_route = *route_to_replace_ptr;
 
 	bool was_accepted = orig_route.is_accepted_by_rib();
@@ -858,6 +844,7 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 			   string& error_msg)
 {
     Fib2mribRoute updated_route = fib2mrib_route;
+    multimap<IPvXNet, Fib2mribRoute>::iterator route_to_delete_iter = _fib2mrib_routes.end();
 
     //
     // Update the route
@@ -875,12 +862,32 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     }
 
     //
-    // Find the route and delete it
+    // Find the route and delete it.
+    // If there is a route with the same ifname and vifname, then delete it.
+    // Otherwise, if the route to delete is not interface-specific,
+    // delete the first route for the same subnet.
     //
-    multimap<IPvXNet, Fib2mribRoute>::iterator iter, iter2;
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter;
     iter = _fib2mrib_routes.find(updated_route.network());
-    if ((iter == _fib2mrib_routes.end())
-	|| (iter->second.network() != updated_route.network())) {
+    for ( ; iter != _fib2mrib_routes.end(); ++iter) {
+	Fib2mribRoute& orig_route = iter->second;
+	if (orig_route.network() != updated_route.network())
+	    break;
+
+	if ((orig_route.ifname() != updated_route.ifname())
+	    || (orig_route.vifname() != updated_route.vifname())) {
+	    if (route_to_delete_iter == _fib2mrib_routes.end()) {
+		// First route for same subnet
+		if (! updated_route.is_interface_route())
+		    route_to_delete_iter = iter;
+	    }
+	    continue;
+	}
+
+	route_to_delete_iter = iter;
+	break;
+    }
+    if (route_to_delete_iter == _fib2mrib_routes.end()) {
 	//
 	// Couldn't find the route to delete
 	//
@@ -891,51 +898,15 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     }
 
     //
-    // First check if there is a route with the same ifname and vifname.
-    // If there is such route, then delete it. Otherwise,
-    // delete the first route for the same subnet.
+    // Route found. Create a copy of it and erase it.
     //
-    for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
-	Fib2mribRoute& orig_route = iter2->second;
-	if (orig_route.network() != updated_route.network())
-	    break;
-	if ((orig_route.ifname() != updated_route.ifname())
-	    || (orig_route.vifname() != updated_route.vifname())) {
-	    continue;
-	}
-
-	//
-	// Route found
-	//
-	break;
-    }
-
-    if (iter2 == _fib2mrib_routes.end()
-	|| (iter2->second.network() != updated_route.network())) {
-	//
-	// No route found with the same ifname and vifname.
-	// If this is an interface-specific route, then this is an error.
-	// Otherwise, delete the first route for the same subnet.
-	//
-	if (updated_route.is_interface_route()) {
-	    error_msg = c_format("Cannot delete route for %s: "
-				 "no such route",
-				 updated_route.network().str().c_str());
-	    return XORP_ERROR;
-	}
-	iter2 = iter;
-    }
-
     do {
-	//
-	// Route found. Create a copy of it and erase it.
-	//
-	Fib2mribRoute& orig_route = iter2->second;
+	Fib2mribRoute& orig_route = route_to_delete_iter->second;
 
 	bool was_accepted = orig_route.is_accepted_by_rib();
 	Fib2mribRoute copy_route = orig_route;
 	prepare_route_for_transmission(orig_route, copy_route);
-	_fib2mrib_routes.erase(iter2);
+	_fib2mrib_routes.erase(route_to_delete_iter);
 
 	copy_route.set_delete_route();
 
@@ -950,7 +921,6 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 	// Inform the RIB about the change
 	//
 	inform_rib(copy_route);
-
     } while (false);
 
     return XORP_OK;
