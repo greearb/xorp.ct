@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.35 2005/03/25 02:54:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register_xrls.cc,v 1.36 2006/03/16 00:05:41 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -394,7 +394,7 @@ main(int /* argc */, char* argv[])
     }
 
     ribclienttarget.verify_invalidated("9.0.0.0/24");
-    ribclienttarget.verify_no_info();
+    (void)ribclienttarget.verify_no_info();
 
     printf("====================================================\n");
 
@@ -407,7 +407,7 @@ main(int /* argc */, char* argv[])
     }
 
     ribclienttarget.verify_invalidated("9.0.1.0/24");
-    ribclienttarget.verify_no_info();
+    (void)ribclienttarget.verify_no_info();
 
     //
     // Gracefully stop and exit xlog
