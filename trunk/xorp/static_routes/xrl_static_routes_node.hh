@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.17 2005/03/25 02:54:43 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.18 2006/03/16 00:06:07 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -262,6 +262,22 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const uint32_t&	metric);
+
+    XrlCmdError static_routes_0_1_delete_interface_route4(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv4Net&	network,
+	const string&	ifname,
+	const string&	vifname);
+
+    XrlCmdError static_routes_0_1_delete_interface_route6(
+	// Input values,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6Net&	network,
+	const string&	ifname,
+	const string&	vifname);
 
     /**
      *  Enable/disable the StaticRoutes trace log for all operations.

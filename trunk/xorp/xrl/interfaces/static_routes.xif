@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/static_routes.xif,v 1.1 2004/02/12 20:02:43 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/static_routes.xif,v 1.2 2004/03/30 03:22:03 pavlin Exp $ */
 
 /*
  * Static Routes XRL interface.
@@ -77,6 +77,12 @@ interface static_routes/0.1 {
 	replace_interface_route6 ? unicast:bool & multicast:bool	\
 				& network:ipv6net & nexthop:ipv6	\
 				& ifname:txt & vifname:txt & metric:u32
+
+	delete_interface_route4	? unicast:bool & multicast:bool		\
+				& network:ipv4net & ifname:txt & vifname:txt
+
+	delete_interface_route6	? unicast:bool & multicast:bool		\
+				& network:ipv6net & ifname:txt & vifname:txt
 
 	/**
 	 * Enable/disable the StaticRoutes trace log for all operations.

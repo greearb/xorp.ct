@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.22 2006/03/02 23:55:47 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.23 2006/03/16 00:06:07 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -529,11 +529,16 @@ public:
      * (Multicast Routing Information Base) for multicast purpose (e.g.,
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route4(bool unicast, bool multicast,
-		      const IPv4Net& network, string& error_msg);
+    int delete_route4(bool unicast, bool multicast, const IPv4Net& network,
+		      const string& ifname, const string& vifname,
+		      string& error_msg);
 
     /**
      * Delete a static IPv6 route.
@@ -544,11 +549,16 @@ public:
      * (Multicast Routing Information Base) for multicast purpose (e.g.,
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
+     * @param ifname of the name of the physical interface toward the
+     * destination.
+     * @param vifname of the name of the virtual interface toward the
+     * destination.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_route6(bool unicast, bool multicast,
-		      const IPv6Net& network, string& error_msg);
+    int delete_route6(bool unicast, bool multicast, const IPv6Net& network,
+		      const string& ifname, const string& vifname,
+		      string& error_msg);
 
     //
     // Debug-related methods
@@ -790,7 +800,13 @@ private:
     const string	_protocol_name;		// The protocol name
     bool		_is_enabled;		// Flag whether node is enabled
 
-    list<StaticRoute>	_static_routes;		// The routes
+    //
+    // The routes are stored in a multimap, because we allow more than one
+    // route for the same subnet destination. We need this to support
+    // floating static routes: routes to same destination but different
+    // next-hop router and metric.
+    //
+    multimap<IPvXNet, StaticRoute>	_static_routes;		// The routes
 
     //
     // Status-related state

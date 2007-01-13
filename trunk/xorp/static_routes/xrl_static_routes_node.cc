@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.33 2006/03/02 23:55:47 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.34 2006/03/16 00:06:07 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -1181,7 +1181,8 @@ XrlStaticRoutesNode::static_routes_0_1_delete_route4(
 {
     string error_msg;
 
-    if (StaticRoutesNode::delete_route4(unicast, multicast, network, error_msg)
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network,
+					"", "", error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1198,7 +1199,8 @@ XrlStaticRoutesNode::static_routes_0_1_delete_route6(
 {
     string error_msg;
 
-    if (StaticRoutesNode::delete_route6(unicast, multicast, network, error_msg)
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network,
+					"", "", error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1297,20 +1299,59 @@ XrlStaticRoutesNode::static_routes_0_1_replace_interface_route4(
 
 XrlCmdError
 XrlStaticRoutesNode::static_routes_0_1_replace_interface_route6(
-	// Input values,
-	const bool&	unicast,
-	const bool&	multicast,
-	const IPv6Net&	network,
-	const IPv6&	nexthop,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	metric)
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
 {
-
     string error_msg;
 
     if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
 					 ifname, vifname, metric, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_delete_interface_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const string&	ifname,
+    const string&	vifname)
+{
+    string error_msg;
+
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network,
+					ifname, vifname, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_delete_interface_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const string&	ifname,
+    const string&	vifname)
+{
+    string error_msg;
+
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network,
+					ifname, vifname,error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
