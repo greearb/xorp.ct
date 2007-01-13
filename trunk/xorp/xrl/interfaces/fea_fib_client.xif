@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_fib_client.xif,v 1.3 2004/10/26 01:29:51 bms Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fib_client.xif,v 1.4 2004/11/05 04:29:24 bms Exp $ */
 
 /*
  * FEA Forwarding Information Base Client XRL interface.
@@ -60,6 +60,7 @@ interface fea_fib_client/0.1 {
 	 * @param ifname the name of the physical interface toward the
 	 * destination.
 	 * @param vifname the name of the virtual interface toward the
+	 * destination.
 	 */
 	delete_route4	? network:ipv4net & ifname:txt & vifname: txt
 	delete_route6	? network:ipv6net & ifname:txt & vifname: txt

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.16 2005/03/25 02:53:21 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.17 2006/03/16 00:04:10 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -229,6 +229,7 @@ protected:
      *  destination.
      *
      *  @param vifname the name of the virtual interface toward the
+     *  destination.
      */
     XrlCmdError fea_fib_client_0_1_delete_route4(
 	// Input values,
