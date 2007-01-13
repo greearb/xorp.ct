@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.1 2007/01/11 21:53:47 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.2 2007/01/13 11:03:32 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -384,3 +384,175 @@ actions piecemeal XorpUnitTest1
 # case * :	ECHO "unknown suffix on" $(>) ;
 # }
 #}
+
+############################################################################
+#
+# The following rules are lifted from FTJam's Jambase file, for UNIX
+# only, and have been prefixed with a Z.
+#
+
+SUFOBJSHR   ?= .lo ;
+SUFLIBSHR   ?= .la ;
+PICFLAGS    ?= -fpic ;
+
+# /ZSharedLibrary  library : sources : def : import ;
+#
+# Compiles _sources_ and generates a shared _library_ (i.e. DLL on Windows,
+# or shared object on Unix). Calls @ZSharedObjects and @ZSharedLibraryFromObjects
+#
+# If @ZSharedLibrary is invoked with no suffix on _library_, then
+# $(SUFLIBSHR) suffix is used
+#
+# _def_ is the name of the corresponding definition file used to generate
+# the library on Windows and OS/2 (ignored otherwise). If undefined, it
+# will default to _library_ with the .def suffix
+#
+# _import_ is the name of the corresponding import library for Windows
+# and OS/2 platforms (ignored otherwise). If undefined, it will default
+# to _library_ with the .dll.lib suffix.
+#
+rule ZSharedLibrary
+{
+  ZSharedLibraryFromObjects $(<) : $(>:S=$(SUFOBJSHR)) : $(3) : $(4) ;
+  ZSharedObjects            $(>) ;
+}
+
+if $(UNIX)
+{
+  # this rule is used to find the 'libtool' script in the current
+  # path, this is required when compiling shared objects on Unix
+  #
+  rule ZLibToolFind
+  {
+    if $(LIBTOOL) { return $(LIBTOOL) ; }
+
+    local  matches = [ Glob $(PATH) : libtool ] ;
+
+    if ! $(matches)
+    {
+      Exit "could not find 'libtool' program in current path. Aborting !" ;
+    }
+    LIBTOOL = $(matches[1]) ;
+
+    return $(LIBTOOL) ;
+  }
+}
+
+# /SharedLibraryFromObjects  library : objects : def : import ;
+#
+# Equivalent of @LibraryFromObjects for shared libraries.
+#
+# Called by @SharedLibrary. Most people shouldn't call this rule
+# directly
+#
+# XXX This currently doesn't seem to do anything.. and needs fixing!
+rule ZSharedLibraryFromObjects
+{
+    local _i _l _lg _s ;
+
+    # Add grist to file names
+    _s = [ FGristFiles $(>) ] ;
+    _l = $(<:S=$(SUFLIBSHR)) ; # XXX: not gristed
+    _lg = [ FGristFiles $(_l) ] ;
+
+    Echo "Library is $(_l)"    ;
+    Echo "Library gristed is $(_lg)"    ;
+    # library depends on its member objects
+
+    if $(KEEPOBJS)
+    {
+      Depends obj : $(_s) ;
+    }
+    else
+    {
+      Depends lib : $(_l) ;
+    }
+
+    # Set LOCATE for the library and its contents.  The bound
+    # value shows up as $(NEEDLIBS) on the Link actions.
+    # For compatibility, we only do this if the library doesn't
+    # already have a path.
+
+    if ! $(_l:D)
+    {
+        MakeLocate $(_l) : $(LOCATE_TARGET) ;
+    }
+
+    # we never scan shared libraries for member objects
+    Depends $(_l) : $(_s) ;
+
+    Clean clean : $(_l) ;
+
+    # I don't know if VMS supports shared libraries, so I prefer
+    # to disable the following right now
+    #
+    #if $(CRELIB) { CreLib $(_l) : $(_s[1]) ; }
+
+    # creating the library is so much fun on Unix :-)
+    if $(UNIX)
+    {
+      #local  libtool = [ ZLibToolFind ] ;  # find the right libtool
+      LIBTOOL = [ ZLibToolFind ] ;  # find the right libtool
+      # XXX grist?
+      #AR on $(_l) = "$(LIBTOOL) --mode=link $(AR)" ;
+      AR on $(_lg) = "$(LIBTOOL) --mode=link $(AR)" ;
+    } else {
+      Echo "Sorry, I don't know how to make a shared library on your system" ;
+      Exit "Please contact the FTJam maintainer for help" ;
+    }
+}
+
+# /ZSharedObjects
+#
+# this rule is used to compile one or more sources into 'shared object
+# files'. This means object files used to build either DLLs or Unix shared
+# libraries.
+#
+# do not call this rule directly, it is called by SharedLibrary automatically
+#
+# XXX: This is considerably hacked from ftjam's version,
+# and appears to invoke libtool and build the .lo's
+# correctly (at least on FreeBSD) -bms
+#
+rule ZSharedObjects
+{
+  # temporarily override SUFOBJ with $(SUFOBJSHR)
+  local SUFOBJ = $(SUFOBJSHR) ;
+  # XXX: Explicit grist seems to be needed here.
+  local gristed = [ FGristFiles $(<:S=$(SUFOBJSHR)) ] ;
+
+  Objects $(<) ;
+
+  # Change the compiler invocation for all these objects
+  # to use libtool on UNIX-like systems.
+  # We explicitly disable the generation of static objects here.
+  if $(UNIX)
+  {
+   # XXX: Can't make this local; it doesn't propagate otherwise
+   LIBTOOL = [ ZLibToolFind ] ;
+   #ECHO "libtool is" $(libtool) ;
+   CC on $(gristed) = "$(LIBTOOL) --mode=compile $(CC) -shared" ;
+   C++ on $(gristed) = "$(LIBTOOL) --mode=compile $(C++) -shared" ;
+  } else {
+   # building without libtool; flags explicitly required
+   CCFLAGS on $(gristed) += $(PICFLAGS) ;
+   C++FLAGS on $(gristed) += $(PICFLAGS) ;
+  }
+}
+
+# /LinkSharedLibraries image : libraries :
+#
+# Same as @LinkLibraries, but to link _image_ with shared libraries
+# generated through the @SharedLibrary rule
+#
+rule ZLinkSharedLibraries
+{
+    # make library dependencies of target
+    # set NEEDLIBS variable used by 'actions Main'
+
+    local _t   = [ FAppendSuffix $(<) : $(SUFEXE) ] ;
+    local _ext = $(SUFLIBSHR) ;
+
+    Depends $(_t) : $(>:S=$(_ext))  ;
+    NEEDLIBS on $(_t) += $(>:S=$(_ext)) ;
+}
