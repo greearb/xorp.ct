@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/Jamrules.in,v 1.1 2007/01/11 21:53:47 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -289,6 +289,43 @@ rule SubIncludeOnce
             ECHO "SubInclude: already included" $(JAMFILE:D=$(path)) ;
         }
     }
+}
+
+############################################################################
+#
+# XorpUnitTests
+# Usage: XorpUnitTests test_foo .. test_bar ;
+#
+# Rudimentary support for running regression tests.
+# Strictly UNIX only for the time being.
+# Use jam -sRUN_CHECK=1 check to use this.
+#
+rule XorpUnitTests
+{
+ if $(RUN_CHECK) {
+	#NOTFILE check ;
+
+	local thisdir = $(SEARCH_SOURCE) ;
+	SEARCH on $(<) = $(SEARCH_SOURCE) ;
+	#SEARCH on $(<) = $(LOCATE_TARGET) ;	# XXX should really use this
+
+	ECHO "XorpUnitTests: executing tests in" $(thisdir) ;
+
+	DEPENDS check : $(<) ;
+	ALWAYS $(<) ;
+
+	for test-file in $(<)
+	{
+		ECHO "XorpUnitTests: executing" $(test-file) ;
+		SEARCH on $(test-file) = $(SEARCH_SOURCE) ;
+		XorpUnitTest1 $(test-file) ;
+	}
+ }
+}
+actions piecemeal XorpUnitTest1
+{
+	PATH="$PATH:."
+	$(<)
 }
 
 ############################################################################
