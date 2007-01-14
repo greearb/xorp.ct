@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.2 2007/01/13 11:03:32 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.3 2007/01/13 13:05:16 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -177,12 +177,17 @@ rule XorpXrlTgt
  _hh = $(<[2]) ;
  _xrls = $(<[3]) ;
 
+ HDRRULE on $(>) = HdrRule ;
+ HDRSCAN on $(>) = $(HDRPATTERN) ;
+ HDRSEARCH on $(>) = $(SEARCH_SOURCE:E) $(SUBDIRHDRS) $(HDRS) $(STDHDRS) ;
+ HDRGRIST on $(>) = $(HDRGRIST) ;
+
  Includes $(_cc) : $(_hh) ;
  DEPENDS $(<) : $(>) ;
 
  # problems with this on win32:
- #Includes $(_cc) : $(_xrls) ; # lie to squelch warning
- #DEPENDS install : $(_xrls) ; # the correct dependency
+ Includes $(_cc) : $(_xrls) ; # lie to squelch warning
+ DEPENDS install : $(_xrls) ; # the correct dependency
 
  Clean xrlclean : $(<) ;
 }
