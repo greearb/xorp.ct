@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.13 2006/03/27 07:56:43 pavlin Exp $
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.14 2006/08/02 05:31:48 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -56,46 +56,95 @@ protocols \{\\
 \>\>disable: {\it bool}\\
 \>\>route {\it IPv4-addr}/{\it int(0..32)} \{\\
 \>\>\>next-hop: {\it IPv4-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-hop {\it IPv4-addr} \{\\
+\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\}\\
 \>\>\}\\
 \>\>route {\it IPv6-addr}/{\it int(0..128)} \{\\
 \>\>\>next-hop: {\it IPv6-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-hop {\it IPv6-addr} \{\\
+\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\}\\
 \>\>\}\\
 \\
 \>\>mrib-route {\it IPv4-addr}/{\it int(0..32)} \{\\
 \>\>\>next-hop: {\it IPv4-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-hop {\it IPv4-addr} \{\\
+\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\}\\
 \>\>\}\\
 \>\>mrib-route {\it IPv6-addr}/{\it int(0..128)} \{\\
 \>\>\>next-hop: {\it IPv6-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-hop {\it IPv6-addr} \{\\
+\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\}\\
 \>\>\}\\
-\\
 \>\>interface-route {\it IPv4-addr}/{\it int(0..32)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
 \>\>\>next-hop-router: {\it IPv4-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-interface {\it text} \{\\
+\>\>\>\>qualified-next-vif {\it text} \{\\
+\>\>\>\>\>next-hop-router: {\it IPv4-addr}\\
+\>\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
 \>\>\}\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\\
 \>\>interface-route {\it IPv6-addr}/{\it int(0..128)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
 \>\>\>next-hop-router: {\it IPv6-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-interface {\it text} \{\\
+\>\>\>\>qualified-next-vif {\it text} \{\\
+\>\>\>\>\>next-hop-router: {\it IPv6-addr}\\
+\>\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
 \>\>\}\\
 \\
 \>\>mrib-interface-route {\it IPv4-addr}/{\it int(0..32)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
 \>\>\>next-hop-router: {\it IPv4-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-interface {\it text} \{\\
+\>\>\>\>qualified-next-vif {\it text} \{\\
+\>\>\>\>\>next-hop-router: {\it IPv4-addr}\\
+\>\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
 \>\>\}\\
 \>\>mrib-interface-route {\it IPv6-addr}/{\it int(0..128)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
 \>\>\>next-hop-router: {\it IPv6-addr}\\
-\>\>\>metric: {\it uint}\\
+\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>qualified-next-interface {\it text} \{\\
+\>\>\>\>qualified-next-vif {\it text} \{\\
+\>\>\>\>\>next-hop-router: {\it IPv6-addr}\\
+\>\>\>\>\>metric: {\it uint(1..65535)}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
 \>\>\}\\
 \>\}\\
 \}
@@ -144,8 +193,24 @@ The configuration parameters are used as follows:
   indirectly use this information.  For example, BGP uses the IGP
   metric to the nexthop to decide between alternative routes as part
   of its decision process.  As with all routing metrics, lower values
-  indicate better routes.
+  indicate better routes. The default is 1.
+\item{\tt qualified-next-hop}: this specifies an alternative nexthop
+  router for the route, but with a different metric. Typically it is
+  used to install a backup static route that will be used in case the
+  original next hop becomes unreachable.
+
+  Each {\stt qualified-next-hop}: specification takes the following
+  attributes:
+
+\begin{description}
+\item{\tt metric}: this specifies the routing metric or cost for this
+  qualified route.  It is a non-negative integer.  Typically its value
+  is larger than the metric for the primary next-hop.
+  The default is 10.
 \end{description}
+
+\end{description}
+
 \item{\tt mrib-route}: this specifies an multicast route to be installed
   in the Multicast RIB~\footnote{Note that prior to the XORP
   Release-1.3, mrib-route4 and mrib-route6 statements were used for IPv4
@@ -169,6 +234,7 @@ The configuration parameters are used as follows:
   interface.
 
   Each {\stt interface-route}: specification takes the following attributes:
+
 \begin{description}
 \item{\tt next-hop-interface}: this specifies the name of the nexthop
   interface towards the destination subnet. It is mandatory.
@@ -176,9 +242,38 @@ The configuration parameters are used as follows:
   vif towards the destination subnet. It is mandatory.
 \item{\tt next-hop-router}: this specifies the IPv4 or IPv6 address (in
   case of IPv4 or IPv6 destination respectively) of the nexthop router
+  towards the destination subnet. The default is 0.0.0.0 or :: (for
+  IPv4 and IPv6 respectively).
+\item{\tt metric}: this specifies the routing metric or cost for this
+  route.  See {\stt route metric} for details. The default is 1.
+\item{\tt qualified-next-hop-interface}: this specifies an alternative
+  nexthop interface for the route, but with a different
+  metric. Typically it is used to install a backup static route that
+  will be used in case the original next hop becomes unreachable.
+
+  Each {\stt qualified-next-hop-interface}: specification takes the
+  following attributes:
+
+\begin{description}
+
+\item{\tt qualified-next-hop-vif}: this specifies an alternative
+  nexthop vif for the route, but with a different metric.
+
+  Each {\stt qualified-next-hop-vif}: specification takes the following
+  attributes:
+
+\begin{description}
+\item{\tt next-hop-router}: this specifies the IPv4 or IPv6 address (in
+  case of IPv4 or IPv6 destination respectively) of the nexthop router
   towards the destination subnet.
 \item{\tt metric}: this specifies the routing metric or cost for this
-  route.  See {\stt route metric} for details.
+  qualified route.  It is a non-negative integer.  Typically its value
+  is larger than the metric for the primary next-hop.
+  The default is 10.
+\end{description}
+
+\end{description}
+
 \end{description}
 
 \end{description}
@@ -187,7 +282,7 @@ The {\tt mrib-interface-route} specification is same as the {\tt
 interface-route} specification, except that it is used to configure
 routes that are to be installed in the Multicast RIB.
 
-%\newpage
+\newpage
 \subsection{Example Configurations}
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
@@ -200,6 +295,9 @@ protocols \{\\
 \>\>route 10.20.0.0/16 \{\\
 \>\>\>next-hop: 10.10.10.20\\
 \>\>\>metric: 1\\
+\>\>\>qualified-next-hop 172.17.0.2 \{\\
+\>\>\>\>metric: 10\\
+\>\>\>\}\\
 \>\>\}\\
 \>\>route 20:20:20:20::/64 \{\\
 \>\>\>next-hop: 10:10:10:10:10:10:10:20\\
@@ -219,6 +317,11 @@ protocols \{\\
 \>\>\>next-hop-interface: rl0\\
 \>\>\>next-hop-vif: rl0\\
 \>\>\>metric: 1\\
+\>\>\>qualified-next-hop-interface rl1 \{\\
+\>\>\>\>qualified-next-hop-vif rl1 \{\\
+\>\>\>\>\>metric: 10\\
+\>\>\>\>\}\\
+\>\>\>\}\\
 \>\>\}\\
 \>\>interface-route 30:30:30:30::/64 \{\\
 \>\>\>next-hop-interface: rl0\\
