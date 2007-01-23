@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.155 2006/12/15 03:24:56 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.156 2006/12/24 00:43:03 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -18,8 +18,8 @@ Release 1.4-WIP (2006/??/??)
     - XORP now can be cross-compiled for IA-64, MIPS (Broadcom for
       Linksys WRT54G), PowerPC-603, Sparc64, and XScale processors.
 
-    - The Makefile internal variable PY_BUILD has been renamed to
-      PYTHON_BUILD.
+    - Implementation of floating static routes (i.e., static routes
+      for the same prefix with different next hop and metrics).
 
   CONFIGURATION:
     - Allow static routes to have "nexthop4" and "nexthop6" policy
@@ -86,6 +86,33 @@ Release 1.4-WIP (2006/??/??)
       "network4 not 10.0.0.0/8"       SAME AS "network4 != 10.0.0.0/8"
 
       The original operators are supported as well.
+
+    - A floating static route (also called "qualified" by some router
+      vendors) can be added with a configuration like:
+
+      protocols {
+          static {
+              route 10.10.0.0/16 {
+                  next-hop: 172.16.0.1
+                  metric: 1
+                  qualified-next-hop 172.17.0.2 {
+                      metric: 10
+                  }
+              }
+              interface-route 10.30.30.0/24 {
+                  next-hop-interface: "rl0"
+                  next-hop-vif: "rl0"
+                  next-hop-router: 172.16.0.1
+                  metric: 1
+                  qualified-next-hop-interface rl1 {
+                      qualified-next-hop-vif rl1 {
+                          next-hop-router: 172.17.0.2
+                          metric: 10
+                      }
+                  }
+              }
+          }
+      }
 
   LIBXORP:
     - 
