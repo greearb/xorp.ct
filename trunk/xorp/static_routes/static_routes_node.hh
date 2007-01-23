@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.23 2006/03/16 00:06:07 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.24 2007/01/13 04:57:32 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -57,15 +57,16 @@ public:
      * @param vifname of the name of the virtual interface toward the
      * destination.
      * @param metric the metric distance for this route.
+     * @param is_backup_route if true, then this is a backup route.
      */
     StaticRoute(bool unicast, bool multicast,
 		const IPv4Net& network, const IPv4& nexthop,
 		const string& ifname, const string& vifname,
-		uint32_t metric)
+		uint32_t metric, bool is_backup_route)
 	: _unicast(unicast), _multicast(multicast),
 	  _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric), 
+	  _metric(metric), _is_backup_route(is_backup_route),
 	  _route_type(IDLE_ROUTE), _is_ignored(false),
 	  _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
@@ -84,15 +85,16 @@ public:
      * @param vifname of the name of the virtual interface toward the
      * destination.
      * @param metric the metric distance for this route.
+     * @param is_backup_route if true, then this is a backup route.
      */
     StaticRoute(bool unicast, bool multicast,
 		const IPv6Net& network, const IPv6& nexthop,
 		const string& ifname, const string& vifname,
-		uint32_t metric)
+		uint32_t metric, bool is_backup_route)
 	: _unicast(unicast), _multicast(multicast),
 	  _network(network), _nexthop(nexthop),
 	  _ifname(ifname), _vifname(vifname),
-	  _metric(metric),
+	  _metric(metric), _is_backup_route(is_backup_route),
 	  _route_type(IDLE_ROUTE), _is_ignored(false),
 	  _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
@@ -103,16 +105,27 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    bool operator==(const StaticRoute& other) {
+    bool operator==(const StaticRoute& other) const {
+	return (is_same_route(other)
+		&& (_route_type == other._route_type)
+		&& (_policytags == other._policytags));
+    }
+
+    /**
+     * Test whether both routes contain same routing information.
+     *
+     * @param other the route to compare against.
+     * @return true if both routes contain same routing information,
+     * otherwise false.
+     */
+    bool is_same_route(const StaticRoute& other) const {
 	return ((_unicast == other.unicast())
 		&& (_multicast == other.multicast())
 		&& (_network == other.network())
 		&& (_nexthop == other.nexthop())
 		&& (_ifname == other.ifname())
 		&& (_vifname == other.vifname())
-		&& (_metric == other.metric())
-		&& (_route_type == other._route_type)
-		&& (_policytags == other._policytags));
+		&& (_metric == other.metric()));
     }
 
     /**
@@ -200,6 +213,13 @@ public:
      * @return the metric distance for this route.
      */
     uint32_t metric() const { return _metric; }
+
+    /**
+     * Test if this is a backup route.
+     *
+     * @return truf if this is a backup route, otherwise false.
+     */
+    bool is_backup_route() const { return _is_backup_route; }
 
     /**
      * Test if this is a route to add.
@@ -336,6 +356,7 @@ private:
     string	_ifname;
     string	_vifname;
     uint32_t	_metric;
+    bool	_is_backup_route;
     enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
     bool	_is_ignored;	// True if the route is to be ignored
@@ -354,6 +375,8 @@ class StaticRoutesNode : public IfMgrHintObserver,
 			 public ServiceBase,
 			 public ServiceChangeObserverBase {
 public:
+    typedef multimap<IPvXNet, StaticRoute> Table;
+
     /**
      * Constructor for a given event loop.
      * 
@@ -443,13 +466,14 @@ public:
      * @param vifname of the name of the virtual interface toward the
      * destination.
      * @param metric the metric distance for this route.
+     * @param is_backup_route if true, then this is a backup route operation.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route4(bool unicast, bool multicast,
 		   const IPv4Net& network, const IPv4& nexthop,
 		   const string& ifname, const string& vifname,
-		   uint32_t metric, string& error_msg);
+		   uint32_t metric, bool is_backup_route, string& error_msg);
 
     /**
      * Add a static IPv6 route.
@@ -466,13 +490,14 @@ public:
      * @param vifname of the name of the virtual interface toward the
      * destination.
      * @param metric the metric distance for this route.
+     * @param is_backup_route if true, then this is a backup route operation.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_route6(bool unicast, bool multicast,
 		   const IPv6Net& network, const IPv6& nexthop,
 		   const string& ifname, const string& vifname,
-		   uint32_t metric, string& error_msg);
+		   uint32_t metric, bool is_backup_route, string& error_msg);
 
     /**
      * Replace a static IPv4 route.
@@ -489,13 +514,15 @@ public:
      * @param vifname of the name of the virtual interface toward the
      * destination.
      * @param metric the metric distance for this route.
+     * @param is_backup_route if true, then this is a backup route operation.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int replace_route4(bool unicast, bool multicast,
 		       const IPv4Net& network, const IPv4& nexthop,
 		       const string& ifname, const string& vifname,
-		       uint32_t metric, string& error_msg);
+		       uint32_t metric, bool is_backup_route,
+		       string& error_msg);
 
     /**
      * Replace a static IPv6 route.
@@ -512,13 +539,15 @@ public:
      * @param vifname of the name of the virtual interface toward the
      * destination.
      * @param metric the metric distance for this route.
+     * @param is_backup_route if true, then this is a backup route operation.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int replace_route6(bool unicast, bool multicast,
 		       const IPv6Net& network, const IPv6& nexthop,
 		       const string& ifname, const string& vifname,
-		       uint32_t metric, string& error_msg);
+		       uint32_t metric, bool is_backup_route,
+		       string& error_msg);
 
     /**
      * Delete a static IPv4 route.
@@ -529,15 +558,18 @@ public:
      * (Multicast Routing Information Base) for multicast purpose (e.g.,
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
      * @param ifname of the name of the physical interface toward the
      * destination.
      * @param vifname of the name of the virtual interface toward the
      * destination.
+     * @param is_backup_route if true, then this is a backup route operation.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route4(bool unicast, bool multicast, const IPv4Net& network,
-		      const string& ifname, const string& vifname,
+		      const IPv4& nexthop, const string& ifname,
+		      const string& vifname, bool is_backup_route,
 		      string& error_msg);
 
     /**
@@ -549,16 +581,42 @@ public:
      * (Multicast Routing Information Base) for multicast purpose (e.g.,
      * computing the Reverse-Path Forwarding information).
      * @param network the network address prefix this route applies to.
+     * @param nexthop the address of the next-hop router for this route.
      * @param ifname of the name of the physical interface toward the
      * destination.
      * @param vifname of the name of the virtual interface toward the
      * destination.
+     * @param is_backup_route if true, then this is a backup route operation.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int delete_route6(bool unicast, bool multicast, const IPv6Net& network,
-		      const string& ifname, const string& vifname,
+		      const IPv6& nexthop, const string& ifname,
+		      const string& vifname, bool is_backup_route,
 		      string& error_msg);
+
+    /**
+     * Find a route from the routing table.
+     *
+     * @param table the routing table to seach.
+     * @param key_route the route information to search for.
+     * @return a table iterator to the route. If the route is not found,
+     * the iterator will point to the end of the table.
+     */
+    StaticRoutesNode::Table::iterator find_route(StaticRoutesNode::Table& table,
+						 const StaticRoute& key_route);
+
+    /**
+     * Find the best accepted route from the routing table.
+     *
+     * @param table the routing table to seach.
+     * @param key_route the route information to search for.
+     * @return a table iterator to the route. If the route is not found,
+     * the iterator will point to the end of the table.
+     */
+    StaticRoutesNode::Table::iterator
+    StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
+					       const StaticRoute& key_route);
 
     //
     // Debug-related methods
@@ -806,7 +864,11 @@ private:
     // floating static routes: routes to same destination but different
     // next-hop router and metric.
     //
-    multimap<IPvXNet, StaticRoute>	_static_routes;		// The routes
+    StaticRoutesNode::Table	_static_routes;		// The routes
+
+    // The winning routes
+    map<IPvXNet, StaticRoute>	_winning_routes_unicast;
+    map<IPvXNet, StaticRoute>	_winning_routes_multicast;
 
     //
     // Status-related state

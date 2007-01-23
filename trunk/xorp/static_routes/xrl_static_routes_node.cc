@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.34 2006/03/16 00:06:07 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.35 2007/01/13 04:57:32 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -1100,10 +1100,12 @@ XrlStaticRoutesNode::static_routes_0_1_add_route4(
     const IPv4&		nexthop,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::add_route4(unicast, multicast, network, nexthop,
-				     "", "", metric, error_msg)
+				     "", "", metric, is_backup_route,
+				     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1120,17 +1122,18 @@ XrlStaticRoutesNode::static_routes_0_1_add_route6(
     const IPv6&		nexthop,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::add_route6(unicast, multicast, network, nexthop,
-				     "", "", metric, error_msg)
+				     "", "", metric, is_backup_route,
+				     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
 }
-
 
 XrlCmdError
 XrlStaticRoutesNode::static_routes_0_1_replace_route4(
@@ -1141,10 +1144,12 @@ XrlStaticRoutesNode::static_routes_0_1_replace_route4(
     const IPv4&		nexthop,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::replace_route4(unicast, multicast, network, nexthop,
-					 "", "", metric, error_msg)
+					 "", "", metric, is_backup_route,
+					 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1161,10 +1166,12 @@ XrlStaticRoutesNode::static_routes_0_1_replace_route6(
     const IPv6&		nexthop,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
-					 "", "", metric, error_msg)
+					 "", "", metric, is_backup_route,
+					 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1177,12 +1184,14 @@ XrlStaticRoutesNode::static_routes_0_1_delete_route4(
     // Input values,
     const bool&		unicast,
     const bool&		multicast,
-    const IPv4Net&	network)
+    const IPv4Net&	network,
+    const IPv4&		nexthop)
 {
+    bool is_backup_route = false;
     string error_msg;
 
-    if (StaticRoutesNode::delete_route4(unicast, multicast, network,
-					"", "", error_msg)
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network, nexthop,
+					"", "", is_backup_route, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1195,12 +1204,158 @@ XrlStaticRoutesNode::static_routes_0_1_delete_route6(
     // Input values,
     const bool&		unicast,
     const bool&		multicast,
-    const IPv6Net&	network)
+    const IPv6Net&	network,
+    const IPv6&		nexthop)
 {
+    bool is_backup_route = false;
     string error_msg;
 
-    if (StaticRoutesNode::delete_route6(unicast, multicast, network,
-					"", "", error_msg)
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network, nexthop,
+					"", "", is_backup_route, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Add/replace/delete a backup static route.
+ *
+ *  @param unicast if true, then the route would be used for unicast
+ *  routing.
+ *
+ *  @param multicast if true, then the route would be used in the MRIB
+ *  (Multicast Routing Information Base) for multicast purpose (e.g.,
+ *  computing the Reverse-Path Forwarding information).
+ *
+ *  @param network the network address prefix this route applies to.
+ *
+ *  @param nexthop the address of the next-hop router for this route.
+ *
+ *  @param metric the metric distance for this route.
+ */
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_add_backup_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::add_route4(unicast, multicast, network, nexthop,
+				     "", "", metric, is_backup_route,
+				     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_add_backup_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::add_route6(unicast, multicast, network, nexthop,
+				     "", "", metric, is_backup_route,
+				     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_replace_backup_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::replace_route4(unicast, multicast, network, nexthop,
+					 "", "", metric, is_backup_route,
+					 error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_replace_backup_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
+					 "", "", metric, is_backup_route,
+					 error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_delete_backup_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network, nexthop,
+					"", "", is_backup_route, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_delete_backup_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network, nexthop,
+					"", "", is_backup_route, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1242,10 +1397,12 @@ XrlStaticRoutesNode::static_routes_0_1_add_interface_route4(
     const string&	vifname,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::add_route4(unicast, multicast, network, nexthop,
-				     ifname, vifname, metric, error_msg)
+				     ifname, vifname, metric, is_backup_route,
+				     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1264,10 +1421,12 @@ XrlStaticRoutesNode::static_routes_0_1_add_interface_route6(
     const string&	vifname,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::add_route6(unicast, multicast, network, nexthop,
-				     ifname, vifname, metric, error_msg)
+				     ifname, vifname, metric, is_backup_route,
+				     error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1286,10 +1445,12 @@ XrlStaticRoutesNode::static_routes_0_1_replace_interface_route4(
     const string&	vifname,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::replace_route4(unicast, multicast, network, nexthop,
-					 ifname, vifname, metric, error_msg)
+					 ifname, vifname, metric,
+					 is_backup_route, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1308,10 +1469,12 @@ XrlStaticRoutesNode::static_routes_0_1_replace_interface_route6(
     const string&	vifname,
     const uint32_t&	metric)
 {
+    bool is_backup_route = false;
     string error_msg;
 
     if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
-					 ifname, vifname, metric, error_msg)
+					 ifname, vifname, metric,
+					 is_backup_route, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1325,13 +1488,16 @@ XrlStaticRoutesNode::static_routes_0_1_delete_interface_route4(
     const bool&		unicast,
     const bool&		multicast,
     const IPv4Net&	network,
+    const IPv4&		nexthop,
     const string&	ifname,
     const string&	vifname)
 {
+    bool is_backup_route = false;
     string error_msg;
 
-    if (StaticRoutesNode::delete_route4(unicast, multicast, network,
-					ifname, vifname, error_msg)
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network, nexthop,
+					ifname, vifname, is_backup_route,
+					error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1345,13 +1511,181 @@ XrlStaticRoutesNode::static_routes_0_1_delete_interface_route6(
     const bool&		unicast,
     const bool&		multicast,
     const IPv6Net&	network,
+    const IPv6&		nexthop,
     const string&	ifname,
     const string&	vifname)
 {
+    bool is_backup_route = false;
     string error_msg;
 
-    if (StaticRoutesNode::delete_route6(unicast, multicast, network,
-					ifname, vifname,error_msg)
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network, nexthop,
+					ifname, vifname, is_backup_route,
+					error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Add/replace/delete a backup static route by explicitly specifying the
+ *  network interface toward the destination.
+ *
+ *  @param unicast if true, then the route would be used for unicast
+ *  routing.
+ *
+ *  @param multicast if true, then the route would be used in the MRIB
+ *  (Multicast Routing Information Base) for multicast purpose (e.g.,
+ *  computing the Reverse-Path Forwarding information).
+ *
+ *  @param network the network address prefix this route applies to.
+ *
+ *  @param nexthop the address of the next-hop router for this route.
+ *
+ *  @param ifname of the name of the physical interface toward the
+ *  destination.
+ *
+ *  @param vifname of the name of the virtual interface toward the
+ *  destination.
+ *
+ *  @param metric the metric distance for this route.
+ */
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_add_backup_interface_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::add_route4(unicast, multicast, network, nexthop,
+				     ifname, vifname, metric, is_backup_route,
+				     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_add_backup_interface_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::add_route6(unicast, multicast, network, nexthop,
+				     ifname, vifname, metric, is_backup_route,
+				     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_replace_backup_interface_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::replace_route4(unicast, multicast, network, nexthop,
+					 ifname, vifname, metric,
+					 is_backup_route, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_replace_backup_interface_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::replace_route6(unicast, multicast, network, nexthop,
+					 ifname, vifname, metric,
+					 is_backup_route, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_delete_backup_interface_route4(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv4Net&	network,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::delete_route4(unicast, multicast, network, nexthop,
+					ifname, vifname, is_backup_route,
+					error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlStaticRoutesNode::static_routes_0_1_delete_backup_interface_route6(
+    // Input values,
+    const bool&		unicast,
+    const bool&		multicast,
+    const IPv6Net&	network,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname)
+{
+    bool is_backup_route = true;
+    string error_msg;
+
+    if (StaticRoutesNode::delete_route6(unicast, multicast, network, nexthop,
+					ifname, vifname, is_backup_route,
+					error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

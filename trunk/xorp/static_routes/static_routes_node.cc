@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.33 2006/03/16 00:06:07 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.34 2007/01/13 04:57:32 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -298,7 +298,7 @@ StaticRoutesNode::tree_complete()
 void
 StaticRoutesNode::updates_made()
 {
-    multimap<IPvXNet, StaticRoute>::iterator route_iter;
+    StaticRoutesNode::Table::iterator route_iter;
     list<StaticRoute *> add_routes, replace_routes, delete_routes;
     list<StaticRoute *>::iterator pending_iter;
 
@@ -480,6 +480,7 @@ StaticRoutesNode::set_enabled(bool enable)
  * @param vifname of the name of the virtual interface toward the
  * destination.
  * @param metric the metric distance for this route.
+ * @param is_backup_route if true, then this is a backup route operation.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -487,10 +488,11 @@ int
 StaticRoutesNode::add_route4(bool unicast, bool multicast,
 			     const IPv4Net& network, const IPv4& nexthop,
 			     const string& ifname, const string& vifname,
-			     uint32_t metric, string& error_msg)
+			     uint32_t metric, bool is_backup_route,
+			     string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric);
+			     ifname, vifname, metric, is_backup_route);
 
     static_route.set_add_route();
 
@@ -512,6 +514,7 @@ StaticRoutesNode::add_route4(bool unicast, bool multicast,
  * @param vifname of the name of the virtual interface toward the
  * destination.
  * @param metric the metric distance for this route.
+ * @param is_backup_route if true, then this is a backup route operation.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -519,10 +522,11 @@ int
 StaticRoutesNode::add_route6(bool unicast, bool multicast,
 			     const IPv6Net& network, const IPv6& nexthop,
 			     const string& ifname, const string& vifname,
-			     uint32_t metric, string& error_msg)
+			     uint32_t metric, bool is_backup_route,
+			     string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric);
+			     ifname, vifname, metric, is_backup_route);
 
     static_route.set_add_route();
 
@@ -544,6 +548,7 @@ StaticRoutesNode::add_route6(bool unicast, bool multicast,
  * @param vifname of the name of the virtual interface toward the
  * destination.
  * @param metric the metric distance for this route.
+ * @param is_backup_route if true, then this is a backup route operation.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -551,10 +556,11 @@ int
 StaticRoutesNode::replace_route4(bool unicast, bool multicast,
 				 const IPv4Net& network, const IPv4& nexthop,
 				 const string& ifname, const string& vifname,
-				 uint32_t metric, string& error_msg)
+				 uint32_t metric, bool is_backup_route,
+				 string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric);
+			     ifname, vifname, metric, is_backup_route);
 
     static_route.set_replace_route();
 
@@ -576,6 +582,7 @@ StaticRoutesNode::replace_route4(bool unicast, bool multicast,
  * @param vifname of the name of the virtual interface toward the
  * destination.
  * @param metric the metric distance for this route.
+ * @param is_backup_route if true, then this is a backup route operation.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -583,10 +590,11 @@ int
 StaticRoutesNode::replace_route6(bool unicast, bool multicast,
 				 const IPv6Net& network, const IPv6& nexthop,
 				 const string& ifname, const string& vifname,
-				 uint32_t metric, string& error_msg)
+				 uint32_t metric, bool is_backup_route,
+				 string& error_msg)
 {
     StaticRoute static_route(unicast, multicast, network, nexthop,
-			     ifname, vifname, metric);
+			     ifname, vifname, metric, is_backup_route);
 
     static_route.set_replace_route();
 
@@ -602,21 +610,23 @@ StaticRoutesNode::replace_route6(bool unicast, bool multicast,
  * (Multicast Routing Information Base) for multicast purpose (e.g.,
  * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
+ * @param nexthop the address of the next-hop router for this route.
  * @param ifname of the name of the physical interface toward the
  * destination.
  * @param vifname of the name of the virtual interface toward the
  * destination.
+ * @param is_backup_route if true, then this is a backup route operation.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 StaticRoutesNode::delete_route4(bool unicast, bool multicast,
-				const IPv4Net& network,
+				const IPv4Net& network, const IPv4& nexthop,
 				const string& ifname, const string& vifname,
-				string& error_msg)
+				bool is_backup_route, string& error_msg)
 {
-    StaticRoute static_route(unicast, multicast, network,
-			     network.masked_addr().ZERO(), ifname, vifname, 0);
+    StaticRoute static_route(unicast, multicast, network, nexthop,
+			     ifname, vifname, 0, is_backup_route);
 
     static_route.set_delete_route();
 
@@ -632,25 +642,120 @@ StaticRoutesNode::delete_route4(bool unicast, bool multicast,
  * (Multicast Routing Information Base) for multicast purpose (e.g.,
  * computing the Reverse-Path Forwarding information).
  * @param network the network address prefix this route applies to.
+ * @param nexthop the address of the next-hop router for this route.
  * @param ifname of the name of the physical interface toward the
  * destination.
  * @param vifname of the name of the virtual interface toward the
  * destination.
+ * @param is_backup_route if true, then this is a backup route operation.
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 StaticRoutesNode::delete_route6(bool unicast, bool multicast,
-				const IPv6Net& network,
+				const IPv6Net& network, const IPv6& nexthop,
 				const string& ifname, const string& vifname,
-				string& error_msg)
+				bool is_backup_route, string& error_msg)
 {
-    StaticRoute static_route(unicast, multicast, network,
-			     network.masked_addr().ZERO(), ifname, vifname, 0);
+    StaticRoute static_route(unicast, multicast, network, nexthop,
+			     ifname, vifname, 0, is_backup_route);
 
     static_route.set_delete_route();
 
     return (delete_route(static_route, error_msg));
+}
+
+/**
+ * Find a route from the routing table.
+ *
+ * @param table the routing table to seach.
+ * @param key_route the route information to search for.
+ * @return a table iterator to the route. If the route is not found,
+ * the iterator will point to the end of the table.
+ */
+StaticRoutesNode::Table::iterator
+StaticRoutesNode::find_route(StaticRoutesNode::Table& table,
+			     const StaticRoute& key_route)
+{
+    StaticRoutesNode::Table::iterator iter;
+
+    iter = table.find(key_route.network());
+    for ( ; iter != table.end(); ++iter) {
+	StaticRoute& orig_route = iter->second;
+	if (orig_route.network() != key_route.network())
+	    break;
+
+	// Check whether the route attributes match
+	if ((orig_route.unicast() != key_route.unicast())
+	    || (orig_route.multicast() != key_route.multicast())) {
+	    continue;
+	}
+	if (orig_route.is_backup_route() != key_route.is_backup_route()) {
+	    continue;
+	}
+
+	if (! key_route.is_backup_route()) {
+	    // XXX: There can be a single (primary) route to a destination
+	    return (iter);
+	}
+
+	// A backup route: check the next-hop information
+	if ((orig_route.ifname() == key_route.ifname())
+	    && (orig_route.vifname() == key_route.vifname())
+	    && (orig_route.nexthop() == key_route.nexthop())) {
+	    // XXX: Exact route found
+	    return (iter);
+	}
+    }
+
+    return (table.end());		// XXX: Nothing found
+}
+
+/**
+ * Find the best accepted route from the routing table.
+ *
+ * @param table the routing table to seach.
+ * @param key_route the route information to search for.
+ * @return a table iterator to the route. If the route is not found,
+ * the iterator will point to the end of the table.
+ */
+StaticRoutesNode::Table::iterator
+StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
+					   const StaticRoute& key_route)
+{
+    StaticRoutesNode::Table::iterator iter, best_iter = table.end();
+
+    iter = table.find(key_route.network());
+    for ( ; iter != table.end(); ++iter) {
+	StaticRoute& orig_route = iter->second;
+	if (orig_route.network() != key_route.network())
+	    break;
+
+	// Check whether the route attributes match
+	if ((orig_route.unicast() != key_route.unicast())
+	    || (orig_route.multicast() != key_route.multicast())) {
+	    continue;
+	}
+
+	// Consider only routes that are accepted by the RIB
+	if (! orig_route.is_accepted_by_rib())
+	    continue;
+
+	if (best_iter == table.end()) {
+	    // The first matching route
+	    best_iter = iter;
+	    continue;
+	}
+
+	// Select the route with the better metric
+	StaticRoute& best_route = best_iter->second;
+	if (orig_route.metric() < best_route.metric()) {
+	    best_iter = iter;
+	    continue;
+	}
+    }
+
+    return (best_iter);
 }
 
 /**
@@ -685,17 +790,9 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     //
     // Check if the route was added already
     //
-    multimap<IPvXNet, StaticRoute>::iterator iter;
-    iter = _static_routes.find(updated_route.network());
-    for ( ; iter != _static_routes.end(); ++iter) {
-	StaticRoute& orig_route = iter->second;
-	if (orig_route.network() != updated_route.network())
-	    break;
-
-	if ((orig_route.unicast() != updated_route.unicast())
-	    || (orig_route.multicast() != updated_route.multicast())) {
-	    continue;
-	}
+    StaticRoutesNode::Table::iterator iter = find_route(_static_routes,
+							updated_route);
+    if (iter != _static_routes.end()) {
 	error_msg = c_format("Cannot add %s route for %s: "
 			     "the route already exists",
 			     (updated_route.unicast())?
@@ -738,7 +835,6 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 				string& error_msg)
 {
     StaticRoute updated_route = static_route;
-    StaticRoute* route_to_replace_ptr = NULL;
 
     //
     // Update the route
@@ -757,34 +853,10 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
 
     //
     // Find the route and replace it.
-    // If there is a route with the same ifname and vifname, then update
-    // its value. Otherwise, update the first route for the same subnet.
     //
-    multimap<IPvXNet, StaticRoute>::iterator iter;
-    iter = _static_routes.find(updated_route.network());
-    for ( ; iter != _static_routes.end(); ++iter) {
-	StaticRoute& orig_route = iter->second;
-	if (orig_route.network() != updated_route.network())
-	    break;
-
-	if ((orig_route.unicast() != updated_route.unicast())
-	    || (orig_route.multicast() != updated_route.multicast())) {
-	    continue;
-	}
-
-	if ((orig_route.ifname() != updated_route.ifname())
-	    || (orig_route.vifname() != updated_route.vifname())) {
-	    if (route_to_replace_ptr == NULL) {
-		// First route for same subnet
-		route_to_replace_ptr = &orig_route;
-	    }
-	    continue;
-	}
-
-	route_to_replace_ptr = &orig_route;
-	break;
-    }
-    if (route_to_replace_ptr == NULL) {
+    StaticRoutesNode::Table::iterator iter = find_route(_static_routes,
+							updated_route);
+    if (iter == _static_routes.end()) {
 	//
 	// Couldn't find the route to replace
 	//
@@ -798,7 +870,7 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     // Route found. Overwrite its value.
     //
     do {
-	StaticRoute& orig_route = *route_to_replace_ptr;
+	StaticRoute& orig_route = iter->second;
 
 	bool was_accepted = orig_route.is_accepted_by_rib();
 	orig_route = updated_route;
@@ -849,7 +921,6 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
 			       string& error_msg)
 {
     StaticRoute updated_route = static_route;
-    multimap<IPvXNet, StaticRoute>::iterator route_to_delete_iter = _static_routes.end();
 
     //
     // Update the route
@@ -868,36 +939,12 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
 
     //
     // Find the route and delete it.
-    // If there is a route with the same ifname and vifname, then delete it.
-    // Otherwise, if the route to delete is not interface-specific,
-    // delete the first route for the same subnet.
+    // XXX: If this is a primary route (i.e., not a backup route), then
+    // delete all routes to the same destination.
     //
-    multimap<IPvXNet, StaticRoute>::iterator iter;
-    iter = _static_routes.find(updated_route.network());
-    for ( ; iter != _static_routes.end(); ++iter) {
-	StaticRoute& orig_route = iter->second;
-	if (orig_route.network() != updated_route.network())
-	    continue;
-
-	if ((orig_route.unicast() != updated_route.unicast())
-	    || (orig_route.multicast() != updated_route.multicast())) {
-	    continue;
-	}
-
-	if ((orig_route.ifname() != updated_route.ifname())
-	    || (orig_route.vifname() != updated_route.vifname())) {
-	    if (route_to_delete_iter == _static_routes.end()) {
-		// First route for same subnet
-		if (! updated_route.is_interface_route())
-		    route_to_delete_iter = iter;
-	    }
-	    continue;
-	}
-
-	route_to_delete_iter = iter;
-	break;
-    }
-    if (route_to_delete_iter == _static_routes.end()) {
+    StaticRoutesNode::Table::iterator iter = find_route(_static_routes,
+							updated_route);
+    if (iter == _static_routes.end()) {
 	//
 	// Couldn't find the route to delete
 	//
@@ -909,15 +956,53 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     }
 
     //
-    // Route found. Create a copy of it and erase it.
+    // XXX: We need to remove from the table all routes that are to be
+    // deleted and then propagate the deletes to the RIB. Otherwise,
+    // deleting the best route might add the second best route right
+    // before that route is also deleted.
     //
-    do {
-	StaticRoute& orig_route = route_to_delete_iter->second;
+    list<StaticRoute> delete_routes;
+
+    iter = _static_routes.find(updated_route.network());
+    while (iter != _static_routes.end()) {
+	StaticRoutesNode::Table::iterator orig_iter = iter;
+	StaticRoute& orig_route = orig_iter->second;
+	++iter;
+	
+	if (orig_route.network() != updated_route.network())
+	    break;
+
+	if ((orig_route.unicast() != updated_route.unicast())
+	    || (orig_route.multicast() != updated_route.multicast())) {
+	    continue;
+	}
+
+	if (updated_route.is_backup_route()) {
+	    if ((orig_route.is_backup_route() != updated_route.is_backup_route())
+		|| (orig_route.ifname() != updated_route.ifname())
+		|| (orig_route.vifname() != updated_route.vifname())
+		|| (orig_route.nexthop() != updated_route.nexthop())) {
+		continue;
+	    }
+	}
+
+	//
+	// Route found. Add a copy to the list of routes to be deleted
+	// and delete the original route;
+	//
+	delete_routes.push_back(orig_route);
+	_static_routes.erase(orig_iter);
+    }
+
+    list<StaticRoute>::iterator delete_iter;
+    for (delete_iter = delete_routes.begin();
+	 delete_iter != delete_routes.end();
+	 ++delete_iter) {
+	StaticRoute& orig_route = *delete_iter;		// XXX: actually a copy
 
 	bool was_accepted = orig_route.is_accepted_by_rib();
 	StaticRoute copy_route = orig_route;
 	prepare_route_for_transmission(orig_route, copy_route);
-	_static_routes.erase(route_to_delete_iter);
 
 	copy_route.set_delete_route();
 
@@ -926,13 +1011,13 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
 	// know about it.
 	//
 	if (! was_accepted)
-	    return XORP_OK;
+	    continue;
 
 	//
 	// Inform the RIB about the change
 	//
 	inform_rib(copy_route);
-    } while (false);
+    }
 
     return XORP_OK;
 }
@@ -987,7 +1072,7 @@ StaticRoutesNode::reset_filter(const uint32_t& filter) {
 void
 StaticRoutesNode::push_routes()
 {
-    multimap<IPvXNet, StaticRoute>::iterator iter;
+    StaticRoutesNode::Table::iterator iter;
 
     // XXX: not a background task
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
@@ -1028,7 +1113,7 @@ StaticRoutesNode::push_routes()
 void
 StaticRoutesNode::push_pull_rib_routes(bool is_push)
 {
-    multimap<IPvXNet, StaticRoute>::iterator iter;
+    StaticRoutesNode::Table::iterator iter;
 
     // XXX: not a background task
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
@@ -1111,19 +1196,99 @@ StaticRoutesNode::prepare_route_for_transmission(StaticRoute& orig_route,
 void
 StaticRoutesNode::inform_rib(const StaticRoute& route)
 {
+    StaticRoute modified_route(route);
+    StaticRoutesNode::Table::iterator best_iter;
+    map<IPvXNet, StaticRoute> *winning_routes_ptr;
+    map<IPvXNet, StaticRoute>::iterator old_winning_iter;
+
     if (! is_enabled())
 	return;
 
     //
+    // Set the pointer to the appropriate table with the winning routes
+    //
+    if (route.unicast()) {
+	winning_routes_ptr = &_winning_routes_unicast;
+    } else {
+	winning_routes_ptr = &_winning_routes_multicast;
+    }
+
+    //
+    // Find the iterators for the current best route and the old winning route
+    //
+    best_iter = find_best_accepted_route(_static_routes, route);
+    old_winning_iter = winning_routes_ptr->find(route.network());
+
+    //
+    // Decide whether we need to inform the RIB about the change.
+    // If yes, then update the table with the winning routes.
+    //
+    bool do_inform = false;
+    if (route.is_add_route() || route.is_replace_route()) {
+	if (route.is_accepted_by_rib()) {
+	    XLOG_ASSERT(best_iter != _static_routes.end());
+	    StaticRoute& best_route = best_iter->second;
+
+	    if (route.is_same_route(best_route)) {
+		//
+		// If there was already a route sent to the RIB, then
+		// an "add" route should become a "replace" route.
+		//
+		if (old_winning_iter != winning_routes_ptr->end()) {
+		    if (route.is_add_route()) {
+			modified_route.set_replace_route();
+		    }
+		    winning_routes_ptr->erase(old_winning_iter);
+		}
+		winning_routes_ptr->insert(make_pair(modified_route.network(),
+						     modified_route));
+		do_inform = true;
+	    } else {
+		//
+		// Check whether the best route is now different. If yes, then
+		// send the current best route instead (as a "replace" route).
+		//
+		if (old_winning_iter != winning_routes_ptr->end()) {
+		    const StaticRoute& old_winning_route = old_winning_iter->second;
+		    if (! best_route.is_same_route(old_winning_route)) {
+			winning_routes_ptr->erase(old_winning_iter);
+			modified_route = best_route;
+			modified_route.set_replace_route();
+			winning_routes_ptr->insert(make_pair(modified_route.network(),
+							     modified_route));
+			do_inform = true;
+		    }
+		}
+	    }
+	}
+    }
+
+    if (route.is_delete_route()) {
+	if (old_winning_iter != winning_routes_ptr->end()) {
+	    StaticRoute& old_winning_route = old_winning_iter->second;
+	    if (route.is_same_route(old_winning_route)) {
+		winning_routes_ptr->erase(old_winning_iter);
+		do_inform = true;
+		//
+		// Check whether there is another best route. If yes, then
+		// send the current best route instead (as a "replace" route).
+		//
+		if (best_iter != _static_routes.end()) {
+		    StaticRoute& best_route = best_iter->second;
+		    modified_route = best_route;
+		    modified_route.set_replace_route();
+		    winning_routes_ptr->insert(make_pair(modified_route.network(),
+							 modified_route));
+		}
+	    }
+	}
+    }
+    
+    //
     // Inform the RIB about the change
     //
-    if (route.is_add_route() || route.is_replace_route()) {
-	if (route.is_accepted_by_rib())
-	    inform_rib_route_change(route);
-    }
-    if (route.is_delete_route()) {
-	inform_rib_route_change(route);
-    }
+    if (do_inform)
+	inform_rib_route_change(modified_route);
 }
 
 /**
