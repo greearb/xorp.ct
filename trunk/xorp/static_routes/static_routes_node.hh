@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.24 2007/01/13 04:57:32 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.25 2007/01/23 01:57:37 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -603,8 +603,9 @@ public:
      * @return a table iterator to the route. If the route is not found,
      * the iterator will point to the end of the table.
      */
-    StaticRoutesNode::Table::iterator find_route(StaticRoutesNode::Table& table,
-						 const StaticRoute& key_route);
+    StaticRoutesNode::Table::iterator find_route(
+	StaticRoutesNode::Table& table,
+	const StaticRoute& key_route);
 
     /**
      * Find the best accepted route from the routing table.
@@ -614,9 +615,9 @@ public:
      * @return a table iterator to the route. If the route is not found,
      * the iterator will point to the end of the table.
      */
-    StaticRoutesNode::Table::iterator
-    StaticRoutesNode::find_best_accepted_route(StaticRoutesNode::Table& table,
-					       const StaticRoute& key_route);
+    StaticRoutesNode::Table::iterator find_best_accepted_route(
+	StaticRoutesNode::Table& table,
+	const StaticRoute& key_route);
 
     //
     // Debug-related methods
