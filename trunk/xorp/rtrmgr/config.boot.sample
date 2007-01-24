@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.41 2006/06/30 00:43:05 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.42 2006/10/17 22:26:10 pavlin Exp $ */
 
 
 interfaces {
@@ -122,6 +122,11 @@ protocols {
 	route 10.20.0.0/16 {
 	    next-hop: 10.10.10.20
 	    metric: 1
+/*
+	    qualified-next-hop 172.17.0.2 {
+		metric: 10
+	    }
+*/
 	}
 	mrib-route 10.20.0.0/16 {
 	    next-hop: 10.10.10.30
