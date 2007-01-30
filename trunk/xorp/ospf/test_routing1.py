@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.11 2006/12/15 09:25:34 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.12 2006/12/17 05:34:30 atanu Exp $
 
 import getopt
 import sys
@@ -22,14 +22,36 @@ TESTS=[
     # Fields:
     # 0: Test function
     # 1: True if this test works
+    # 2: Protocol under test (optional), allowed values 'v2' or 'v3'
     ['print_lsasV2', True],
     ['print_lsasV3', True],
-    ['test1', True],
-    ['test2', True],
-    ['r1V2', True],
+    ['test1', True, 'v2'],
+    ['test2', True, 'v2'],
+    ['r1V2', True, 'v2'],
+    ['r1V3', False, 'v3'],
     ]
 
-def print_lsasV2(verbose):
+def start_routing_interactive(verbose, protocol):
+    """
+    Helper function to start the test_routing_interactive program
+    """
+
+    if protocol == 'v2':
+        flags = ' --OSPFv2'
+    elif protocol == 'v3':
+        flags = ' --OSPFv3'
+    else:
+        print "unknown protocol " + protocol
+        sys.exit(-1)
+
+    if verbose:
+        flags = flags + ' -v'
+
+    fp = os.popen(os.path.abspath('test_routing_interactive') + flags, "w")
+
+    return fp
+    
+def print_lsasV2(verbose, protocol):
     """
     Run the build lsa program with all the known LSAs and
     settings. Verifies that the program has been built and gives
@@ -76,7 +98,7 @@ def print_lsasV2(verbose):
 
     return True
 
-def print_lsasV3(verbose):
+def print_lsasV3(verbose, protocol):
     """
     Run the build lsa program with all the known LSAs and
     settings. Verifies that the program has been built and gives
@@ -88,7 +110,7 @@ def print_lsasV3(verbose):
 
     RouterLsa='RouterLsa %s bit-NT bit-W bit-B bit-E bit-V' % common_header
     RouterLsa=RouterLsa + ' ' + options
-    RouterLsa=RouterLsa + ' p2p iid 1 nid 2 nrid 3 metric 42'
+    RouterLsa=RouterLsa + ' p2p iid 1 nid 2 nrid 0.0.0.3 metric 42'
 
     NetworkLsa='NetworkLsa %s' % common_header
     NetworkLsa=NetworkLsa + ' ' + options
@@ -143,15 +165,12 @@ def print_lsasV3(verbose):
 
     return True
 
-def test1(verbose):
+def test1(verbose, protocol):
     """
     Create an area and then destroy it.
     """
 
-    if verbose:
-        fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
-    else:
-        fp = os.popen(os.path.abspath('test_routing_interactive'), "w")
+    fp = start_routing_interactive(verbose, protocol)
 
     command = """
 create 0.0.0.0 normal
@@ -167,15 +186,12 @@ destroy 0.0.0.0
     else:
         return False
 
-def test2(verbose):
+def test2(verbose, protocol):
     """
     Introduce a RouterLsa and a NetworkLsa
     """
 
-    if verbose:
-        fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
-    else:
-        fp = os.popen(os.path.abspath('test_routing_interactive'), "w")
+    fp = start_routing_interactive(verbose, protocol)
 
     command = """
 create 0.0.0.0 normal
@@ -192,16 +208,13 @@ compute 0.0.0.0
     else:
         return False
 
-def r1V2(verbose):
+def r1V2(verbose, protocol):
     """
     Some of the routers from Figure 2. in RFC 2328. Single area.
     This router is R6.
     """
 
-    if verbose:
-        fp = os.popen(os.path.abspath('test_routing_interactive') + ' -v', "w")
-    else:
-        fp = os.popen(os.path.abspath('test_routing_interactive'), "w")
+    fp = start_routing_interactive(verbose, protocol)
 
     RT6 = "RouterLsa E-bit lsid 0.0.0.6 adv 0.0.0.6 \
     p2p lsid 0.0.0.3 ldata 0.0.0.4 metric 6 \
@@ -232,6 +245,40 @@ verify_routing_entry 0.4.0.0/16 0.0.0.7 8 false false
     else:
         return False
 
+def r1V3(verbose, protocol):
+    """
+    This test is the OSPFv3 version of the r1V2 although the OSPF for
+    IPV6 RFC does not have a point to point link in Figure 1.
+    """
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT6 = "RouterLsa E-bit lsid 0.0.0.6 adv 0.0.0.6 \
+    p2p iid 1 nid 1 nrid 0.0.0.3 metric 6 \
+    "
+
+    RT3 = "RouterLsa E-bit lsid 0.0.0.3 adv 0.0.0.3 \
+    p2p iid 1 nid 1 nrid 0.0.0.6 metric 8 \
+    "
+
+    command = """
+set_router_id 0.0.0.6
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::3 6 false false
+""" % (RT6,RT3)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
 def main():
     def usage():
         us = \
@@ -249,7 +296,6 @@ def main():
     except getopt.GetoptError:
         usage()
         sys.exit(1)
-
 
     bad = False
     tests = []
@@ -273,7 +319,12 @@ def main():
     print tests
 
     for i in tests:
-        test = i + '(verbose)'
+        protocol = 'unknown'
+        for j in TESTS:
+            if j[0] == i:
+                if len(j) > 2:
+                    protocol = j[2]
+        test = i + '(verbose,protocol)'
         print 'Running: ' + i,
         if not eval(test):
             print "FAILED"
