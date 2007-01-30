@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.16 2006/12/17 04:59:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.17 2006/12/17 05:30:20 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -239,7 +239,8 @@ BuildLsa::router_link(RouterLsa *rlsa, const string& word, Args& args)
 	} else if ("nid" == nword) {	// OSPFv3
 	    rl.set_neighbour_interface_id(get_next_number(args, nword));
 	} else if ("nrid" == nword) {	// OSPFv3
-	    rl.set_neighbour_router_id(get_next_number(args, nword));
+	    rl.set_neighbour_router_id(set_id(get_next_word(args, nword).
+					      c_str()));
 	} else {
 	    args.push_back();
 	    break;
