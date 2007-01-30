@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/common.cc,v 1.6 2006/03/16 00:05:56 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/common.cc,v 1.7 2006/06/21 23:36:38 pavlin Exp $"
 
 #include <string>
 
@@ -41,7 +41,7 @@ default_xrl_target(uint32_t ip_version)
 uint32_t
 rip_name_to_ip_version(const char* rip_name)
 {
-    static const char* m = "ripng";
+    static const char m[] = "ripng";
     size_t n_m = sizeof(m) / sizeof(m[0]);
 
     uint16_t i = 0;
