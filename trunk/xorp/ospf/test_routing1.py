@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.12 2006/12/17 05:34:30 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.13 2007/01/30 23:31:49 atanu Exp $
 
 import getopt
 import sys
@@ -253,11 +253,11 @@ def r1V3(verbose, protocol):
 
     fp = start_routing_interactive(verbose, protocol)
 
-    RT6 = "RouterLsa E-bit lsid 0.0.0.6 adv 0.0.0.6 \
+    RT6 = "RouterLsa E-bit lsid 0.0.0.1 adv 0.0.0.6 \
     p2p iid 1 nid 1 nrid 0.0.0.3 metric 6 \
     "
 
-    RT3 = "RouterLsa E-bit lsid 0.0.0.3 adv 0.0.0.3 \
+    RT3 = "RouterLsa E-bit lsid 0.0.0.1 adv 0.0.0.3 \
     p2p iid 1 nid 1 nrid 0.0.0.6 metric 8 \
     "
 
