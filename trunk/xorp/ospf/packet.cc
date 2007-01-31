@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.40 2006/12/06 00:19:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.41 2006/12/06 00:33:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,17 +43,17 @@
 #include "packet.hh"
 
 /**
- * Return the IP checksum in network order.
+ * Return the IP checksum in host order.
  */
 inline
 uint16_t
 checksum(uint8_t *ptr, size_t len)
 {
-    return htons(inet_checksum(ptr, len));
+    return ntohs(inet_checksum(ptr, len));
 }
 
 /**
- * Return the IPv6 pseudo header checksum in network order.
+ * Return the IPv6 pseudo header checksum in host order.
  */
 inline
 uint16_t
