@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.102 2006/03/28 03:06:53 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.103 2007/01/31 00:58:49 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -510,8 +510,14 @@ class AreaRouter : public ServiceBase {
 	RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	XLOG_ASSERT(rlsa);
 	XLOG_ASSERT(rlsa->get_self_originating());
-	XLOG_ASSERT(_ospf.get_router_id() ==
-		    rlsa->get_header().get_link_state_id());
+	switch (_ospf.get_version()) {
+	case OspfTypes::V2:
+	    XLOG_ASSERT(_ospf.get_router_id() ==
+			rlsa->get_header().get_link_state_id());
+	    break;
+	case OspfTypes::V3:
+	    break;
+	}
 	XLOG_ASSERT(_ospf.get_router_id() ==
 		    rlsa->get_header().get_advertising_router());
 
