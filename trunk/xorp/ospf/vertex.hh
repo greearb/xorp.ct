@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.5 2005/09/13 18:27:27 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.6 2006/03/16 00:04:49 pavlin Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -83,6 +83,7 @@ class Vertex {
      * Set the LSA that is responsible for this vertex.
      */
     void set_lsa(Lsa::LsaRef lsar) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
 	_lsar = lsar;
     }
 
@@ -90,6 +91,7 @@ class Vertex {
      * Get the LSA that is responsible for this vertex.
      */
     Lsa::LsaRef get_lsa() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
 	return _lsar;
     }
 
