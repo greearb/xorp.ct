@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.101 2006/02/28 00:30:50 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.102 2006/03/28 03:06:53 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -1090,9 +1090,14 @@ class AreaRouter : public ServiceBase {
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.
      */
-    void routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
+    void routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& src,
 			      RouterLsa *rlsa);
 
+    void routing_router_link_p2p_vlinkV3(Spt<Vertex>& spt, const Vertex& src,
+					 RouterLsa *rlsa, RouterLink rl);
+
+    void routing_router_link_transitV3(Spt<Vertex>& spt, const Vertex& src,
+				       RouterLsa *rlsa, RouterLink rl);
 };
 
 /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.213 2006/12/11 21:44:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.214 2006/12/14 16:36:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2826,7 +2826,13 @@ AreaRouter<A>::RouterVertex(Vertex& v)
     v.set_type(OspfTypes::Router);
     v.set_nodeid(_ospf.get_router_id());
     v.set_origin(true);
-    v.set_lsa(_router_lsa);
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	v.set_lsa(_router_lsa);
+	break;
+    case OspfTypes::V3:
+	break;
+    }
 }
 
 template <typename A>
@@ -3139,8 +3145,12 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 
 	    v.set_version(_ospf.get_version());
 	    v.set_type(OspfTypes::Router);
-	    v.set_nodeid(rlsa->get_header().get_link_state_id());
-  	    v.set_lsa(lsar);
+	    // In OSPFv3 a router may generate multiple Router-LSAs,
+	    // use the router ID as the nodeid.
+	    v.set_nodeid(rlsa->get_header().get_advertising_router());
+	    // XXX - Don't set the responsible LSA as there may be
+	    // more than one.
+// 	    v.set_lsa(lsar);
 
 	    // Don't add this router back again.
 	    if (spt.exists_node(v)) {
@@ -4111,14 +4121,51 @@ AreaRouter<A>::routing_router_link_stubV2(Spt<Vertex>& spt,
 
 template <typename A>
 void
-AreaRouter<A>::routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
+AreaRouter<A>::routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& src,
 				    RouterLsa *rlsa)
 {
-    debug_msg("Spt %s Vertex %s \n%s\n", cstring(spt), cstring(v),
+    debug_msg("Spt %s Vertex %s \n%s\n", cstring(spt), cstring(src),
 	      cstring(*rlsa));
 
-    XLOG_WARNING("TBD - add to SPT");
+    const list<RouterLink> &rl = rlsa->get_router_links();
+    list<RouterLink>::const_iterator l = rl.begin();
+    for(; l != rl.end(); l++) {
+// 	fprintf(stderr, "RouterLink %s\n", cstring(*l));
+	switch(l->get_type()) {
+	case RouterLink::p2p:
+	case RouterLink::vlink:
+ 	    routing_router_link_p2p_vlinkV3(spt, src, rlsa, *l);
+	    break;
+	case RouterLink::transit:
+ 	    routing_router_link_transitV3(spt, src, rlsa, *l);
+	    break;
+	case RouterLink::stub:
+	    XLOG_FATAL("OSPFv3 does not support type stub");
+	    break;
+	}
+    }
 }
+
+template <typename A>
+void
+AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& /*spt*/,
+					       const Vertex& /*src*/,
+					       RouterLsa */*rlsa*/,
+					       RouterLink /*rl*/)
+{
+    XLOG_WARNING("TBD: Router Link p2p or vlink OSPFv3");
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& /*spt*/,
+					       const Vertex& /*src*/,
+					       RouterLsa */*rlsa*/,
+					       RouterLink /*rl*/)
+{
+    XLOG_WARNING("TBD: Router Link transit OSPFv3");
+}
+
 /*************************************************************************/
 
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
