@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.103 2007/01/31 00:58:49 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.104 2007/01/31 03:50:22 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -812,6 +812,21 @@ class AreaRouter : public ServiceBase {
      * @return true if an LSA was found. 
      */
     bool find_network_lsa(uint32_t link_state_id, size_t& index) const;
+
+    /**
+     * Find Router-LSA. OSPFv3 only
+     *
+     * In OSPFv3 a router may generate more that one Router-LSA. In
+     * order to find all the Router-LSAs that a router may have
+     * generated the index must be seeded.
+     *
+     * @param advertising_router
+     * @param index into LSA database if search succeeded. On input
+     * the index should be set to one past the last search result.
+     *
+     * @return true if an LSA was found. 
+     */
+    bool find_router_lsa(uint32_t advertising_router, size_t& index) const;
 
     /**
      * Compare this LSA to 
