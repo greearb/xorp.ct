@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.6 2006/03/16 00:04:49 pavlin Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.7 2007/01/31 00:57:38 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -80,19 +80,32 @@ class Vertex {
     }
 
     /**
+     * OSPFv2 only.
      * Set the LSA that is responsible for this vertex.
      */
     void set_lsa(Lsa::LsaRef lsar) {
 	XLOG_ASSERT(OspfTypes::V2 == get_version());
-	_lsar = lsar;
+	XLOG_ASSERT(0 == _lsars.size());
+	_lsars.push_back(lsar);
     }
 
     /**
+     * OSPFv2 only.
      * Get the LSA that is responsible for this vertex.
      */
     Lsa::LsaRef get_lsa() const {
 	XLOG_ASSERT(OspfTypes::V2 == get_version());
-	return _lsar;
+	XLOG_ASSERT(1 == _lsars.size());
+	return *(_lsars.begin());
+    }
+
+    /**
+     * OSPFv3 only.
+     * Return the list of LSAs that may be responsible for this vertex.
+     */
+    list<Lsa::LsaRef>& get_lsas() {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _lsars;
     }
 
     void set_interface_id(uint32_t interface_id) {
@@ -164,7 +177,8 @@ class Vertex {
     bool _origin;		// Is this the vertex of the router.
     uint32_t _address;		// The address of the Vertex that
 				// should be used as the nexthop by the origin.
-    Lsa::LsaRef _lsar;
+
+    list<Lsa::LsaRef> _lsars;
 
     // RFC 2328 Section 16.1.  Calculating the shortest-path tree for an area:
     // Vertex (node) ID
