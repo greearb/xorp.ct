@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.126 2006/06/13 20:54:20 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.127 2006/11/23 01:55:22 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1239,7 +1239,7 @@ class Neighbour {
 	  _data_description_packet(ospf.get_version()),
 	  _rxmt_wrapper(0)
     {
-	// No neigbhour should ever have this ID.
+	// No neighbour should ever have this ID.
 	XLOG_ASSERT(OspfTypes::ALLNEIGHBOURS != neighbourid);
 
 	TimeVal t;
