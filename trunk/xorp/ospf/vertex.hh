@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.8 2007/02/02 02:26:47 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.9 2007/02/02 03:37:33 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -24,7 +24,7 @@
 
 class Vertex {
  public:
-    Vertex() : _origin(false), _address(0)
+    Vertex() : _origin(false)
     {}
 
     bool operator<(const Vertex& other) const {
@@ -125,11 +125,23 @@ class Vertex {
     }
 
     void set_address(uint32_t address) {
-	_address = address;
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_address_ipv4 = IPv4(htonl(address));
     }
 
-    uint32_t get_address() const {
-	return _address;
+    IPv4 get_address_ipv4() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _address_ipv4;
+    }
+
+    void set_address(IPv6 address) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_address_ipv6 = address;
+    }
+
+    IPv6 get_address_ipv6() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _address_ipv6;
     }
 
     string str() const {
@@ -148,7 +160,8 @@ class Vertex {
 		break;
 	    }
 	    output += c_format(" %s(%#x) %s(%#x)", pr_id(_nodeid).c_str(), 
-			       _nodeid, pr_id(_address).c_str(), _address);
+			       _nodeid, cstring(_address_ipv4),
+			       _address_ipv4.addr());
 	    break;
 	case OspfTypes::V3:
 	    output = "OSPFv3";
@@ -160,6 +173,7 @@ class Vertex {
 		output += c_format(" Transit %#x %#x", _nodeid, _interface_id);
 		break;
 	    }
+	    output += c_format(" %s", cstring(_address_ipv6));
 	    break;
 	}
 	return output;
@@ -173,8 +187,11 @@ class Vertex {
     uint32_t _interface_id;	// OSPFv3 Only
 
     bool _origin;		// Is this the vertex of the router.
-    uint32_t _address;		// The address of the Vertex that
-				// should be used as the nexthop by the origin.
+
+    // The address of the Vertex that should be used as the nexthop by
+    // the origin.
+    IPv4 _address_ipv4;		
+    IPv6 _address_ipv6;
 
     list<Lsa::LsaRef> _lsars;
 

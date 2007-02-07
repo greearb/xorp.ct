@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.215 2007/01/31 00:58:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.216 2007/02/01 22:49:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3071,8 +3071,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	route_entry.set_cost(ri->weight());
 	route_entry.set_type_2_cost(0);
 
-	IPv4 nexthop = IPv4(htonl(ri->nexthop().get_address()));
-	route_entry.set_nexthop(nexthop);
+	route_entry.set_nexthop(ri->nexthop().get_address_ipv4());
 
 	route_entry.set_advertising_router(lsar->get_header().
 					   get_advertising_router());
@@ -3383,7 +3382,7 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
 	route_entry.set_cost(ri->weight());
 	route_entry.set_type_2_cost(0);
 
-	route_entry.set_nexthop(IPv4(htonl(ri->nexthop().get_address())));
+	route_entry.set_nexthop(ri->nexthop().get_address_ipv4());
 
 	route_entry.set_advertising_router(lsar->get_header().
 					   get_advertising_router());
