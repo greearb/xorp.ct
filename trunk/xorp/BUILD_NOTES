@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.82 2006/12/15 01:00:59 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.83 2006/12/15 03:23:26 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -70,6 +70,11 @@ gmake check
     - The code compiles with the default compiler, and the internal tests
       appear to succeed:
       gcc (GCC) 3.4.5 20050809 (prerelease) [DragonFly] (propolice, visibility)
+
+  * DragonFlyBSD-1.8
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 3.4.6 [DragonFly] (propolice, visibility)
 
 3.2. FreeBSD
 ============
