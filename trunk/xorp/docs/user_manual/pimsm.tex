@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.25 2006/06/30 00:43:04 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.26 2006/08/02 05:31:48 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -389,7 +389,7 @@ echo 1 > /proc/sys/net/ipv4/ip_forward
 \end{verbatim}
 
     If the unicast Reverse Path Forwarding information is different from the
-    multicast Reverse Path Forwarding information, the Reverse Path Filtering
+    multicast Reverse Path Forwarding information, the Return Path Filtering
     should be disabled:
 
 \begin{verbatim}
@@ -416,6 +416,108 @@ multicast_router=YES
 \end{verbatim}
 
   \end{itemize}
+
+\end{itemize}
+
+\subsection{Configuring Multicast Tunnels on UNIX Systems}
+
+All PIM routers need to be directly connected so they can exchange
+control messages. Occasionally this might not be possible (\eg if
+someone wants to forward multicast traffic to a remote host, and the
+routers in the middle are not running PIM).
+
+In that case a tunnel between two remote routers can be used to create
+an artificial adjacency.
+
+\begin{itemize}
+
+  \item Creating a GRE tunnel.
+
+  The GRE (Generic Routing Encapsulation) mechanism is described in RFC
+  1701 and RFC 1702. It is implemented on a variety of systems and is
+  widely used for routing tunnels.
+
+  Below is an example how to configure a GRE tunnel between two Linux
+  systems.
+
+\begin{verbatim}
+# GRE tunnel between two machines (host 11.11.11.11 and 33.33.33.33)
+#
+# Physical interfaces:    [11.11.11.11]         [33.33.33.33]
+# GRE tunnel:              22.22.22.11<--------->22.22.22.33
+#
+
+# ==== host 11.11.11.11 (GRE interface 22.22.22.11)
+ip link set gre1 down
+ip tunnel del gre1
+ip tunnel add gre1 mode gre remote 33.33.33.33 local 11.11.11.11 ttl 127
+ip addr add 22.22.22.11/24 peer 22.22.22.33/24 dev gre1
+ip link set gre1 up multicast on
+
+# ==== host 33.33.33.33 (GRE interface 22.22.22.33)
+ip link set gre1 down
+ip tunnel del gre1
+ip tunnel add gre1 mode gre remote 11.11.11.11 local 33.33.33.33 ttl 127
+ip addr add 22.22.22.33/24 peer 22.22.22.11/24 dev gre1
+ip link set gre1 up multicast on
+\end{verbatim}
+
+
+  \item Creating an OpenVPN tunnel.
+
+  OpenVPN (http://openvpn.net/) is free software to create a VPN tunnel.
+  It is very popular and works on a variety of systems.
+  One of the advantages of OpenVPN is that it is over TCP or UDP,
+  hence unlike GRE it does not require special support from NAT devices
+  that might be in the middle.
+
+  Below is an example how to configure an OpenVPN tunnel.
+
+\begin{verbatim}
+# OpenVPN tunnel between two machines (host 11.11.11.11 and 33.33.33.33)
+#
+# Physical interfaces:    [11.11.11.11]         [33.33.33.33]
+# OpenVPN tunnel:          22.22.22.11<--------->22.22.22.33
+#
+
+# ==== host 11.11.11.11 (OpenVPN interface 22.22.22.11)
+openvpn --local 11.11.11.11 --remote 33.33.33.33 --ifconfig 22.22.22.11
+    22.22.22.33 --dev tun0
+
+# ==== host 33.33.33.33 (OpenVPN interface 22.22.22.33)
+openvpn --local 33.33.33.33 --remote 11.11.11.11 --ifconfig 22.22.22.33
+    22.22.22.11 --dev tun0
+\end{verbatim}
+
+  \item Reverse Path Forwarding (RPF) information setup.
+
+  It is important that the Reverse Path Forwarding (RPF) information
+  is set to consider the tunnel for PIM-SM to operate properly.
+
+  On Linux systems the following UNIX command needs to be used to
+  disable the Return Path filtering:
+
+\begin{verbatim}
+echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+\end{verbatim}
+
+  In addition, the RPF information must be set appropriately for all
+  systems that are suppose to be reached via the tunnel (\eg RPs and
+  remote sources). This can be achieved by adding MRIB-specific static
+  routing entries in the XORP configuration. For example, if the IP
+  address of the other side of the tunnel is 22.22.22.33, then the
+  following XORP configuration can be used to specify that the tunnel is
+  the default route for all destinations:
+
+\begin{verbatim}
+protocols {
+    static {
+        mrib-route 0.0.0.0/0 {
+            next-hop 22.22.22.33
+        }
+    }
+}
+\end{verbatim}
 
 \end{itemize}
 
