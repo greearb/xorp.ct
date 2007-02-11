@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.216 2007/02/01 22:49:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.217 2007/02/07 04:07:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4084,7 +4084,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
 	    // This can probably never happen
 	    if (lsapeer->maxage()) {
 		XLOG_WARNING("LSA in database MaxAge\n%s", cstring(*lsapeer));
-		return;
+		continue;
 	    }
 
 	    uint32_t interface_address;
