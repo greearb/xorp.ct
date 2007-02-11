@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.104 2007/01/31 03:50:22 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.105 2007/02/01 22:49:33 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -110,6 +110,14 @@ class AreaRouter : public ServiceBase {
      */
     bool find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
 				A& interface)const;
+
+    /**
+     * OSPFv3 only.
+     * Given a Router ID and interface ID find the associated Link-LSA
+     * if present and return the Link-local Interface Address.
+     */
+    bool find_interface_address(OspfTypes::RouterID rid, uint32_t interface_id,
+				IPv6& interface);
 
     /**
      * Add area range.
@@ -552,7 +560,7 @@ class AreaRouter : public ServiceBase {
     }
 
     /**
-     * Testing enty point to force a toal routing computation.
+     * Testing entry point to force a total routing computation.
      */
     void testing_routing_total_recompute() {
 	routing_total_recompute();
@@ -1079,8 +1087,13 @@ class AreaRouter : public ServiceBase {
     /**
      * Does this Network-LSA point back to the router link that points
      * at it.
+     *
+     * @param link_state_id_or_adv OSPFv2 Link State ID, OSPFv3
+     * Advertising Router.
+     *
      */
-    bool bidirectional(const uint32_t link_state_id, const RouterLink& rl,
+    bool bidirectional(const uint32_t link_state_id_or_adv,
+		       const RouterLink& rl,
 		       NetworkLsa *nlsa) const;
 
     /**
@@ -1092,6 +1105,36 @@ class AreaRouter : public ServiceBase {
      */
     bool bidirectional(RouterLsa *rlsa, NetworkLsa *nlsa,
 		       uint32_t& interface_address);
+
+    /**
+     * Does the Router-LSA point at the Network-LSA that points at it,
+     * OSPFv3.
+     *
+     * @param interface_id (out argument) interface ID if
+     * the Router-LSA points at the Network-LSA.
+     * 
+     * @return true if Router-LSA points at the Network-LSA.
+     */
+    bool bidirectionalV3(RouterLsa *rlsa, NetworkLsa *nlsa,
+		       uint32_t& interface_id);
+
+    /**
+     * Does this Router-LSA point back to the router link that points
+     * at it, OSPFv3.
+     *
+     * @param rl_type type of link p2p or vlink
+     * @param advertising_router
+     * @param rlsa that is searched for a router link pointing at the
+     * advertising router.
+     * @param metric (out argument) from rlsa back to advertising
+     * router if the back pointer exists.
+     *
+     * @return true if the Router-LSA points to the advertising router.
+     */
+    bool bidirectionalV3(RouterLink::Type rl_type,
+			 uint32_t advertising_router,
+			 RouterLsa *rlsa,
+			 uint16_t& metric);
 
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.217 2007/02/07 04:07:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.218 2007/02/11 04:32:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,7 +42,6 @@
 #include "delay_queue.hh"
 #include "vertex.hh"
 #include "area_router.hh"
-
 
 template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
@@ -424,7 +423,7 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
     if (nlsa)
 	return false;
     
-    // There is a special case to deal with which in not part of the
+    // There is a special case to deal with which is not part of the
     // normal adjacency check. Under normal circumstances two
     // Router-LSAs can be checked for adjacency by checking for p2p or
     // vlink. If the router link type is transit then the adjacency
@@ -466,6 +465,38 @@ AreaRouter<IPv6>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
     XLOG_UNFINISHED();
 
     return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::find_interface_address(OspfTypes::RouterID rid,
+				      uint32_t interface_id,
+				      IPv6& interface)
+{
+    XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
+
+    // Try and find the router link that this one points at.
+    Ls_request lsr(_ospf.get_version(),
+		   LinkLsa(_ospf.get_version()).get_header().get_ls_type(),
+		   interface_id,
+		   rid);
+
+    size_t index;
+    if (find_lsa(lsr, index)) {
+	Lsa::LsaRef lsa = _db[index];
+	// This can probably never happen
+	if (lsa->maxage()) {
+	    XLOG_WARNING("LSA in database MaxAge\n%s",
+			 cstring(*lsa));
+	    return false;
+	}
+	LinkLsa *llsa = dynamic_cast<LinkLsa *>(lsa.get());
+	XLOG_ASSERT(llsa);
+	interface = llsa->get_link_local_address();
+	return true;
+    }
+
+    return false;
 }
 
 template <typename A>
@@ -2859,6 +2890,7 @@ AreaRouter<A>::RouterVertex(Vertex& v)
 	v.set_lsa(_router_lsa);
 	break;
     case OspfTypes::V3:
+	v.get_lsas().push_back(_router_lsa);
 	break;
     }
 }
@@ -3175,17 +3207,20 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	    // In OSPFv3 a router may generate multiple Router-LSAs,
 	    // use the router ID as the nodeid.
 	    v.set_nodeid(rlsa->get_header().get_advertising_router());
-	    // XXX - Don't set the responsible LSA as there may be
-	    // more than one.
-// 	    v.set_lsa(lsar);
+ 	    v.get_lsas().push_back(lsar);
 
 	    // Don't add this router back again.
 	    if (spt.exists_node(v)) {
 		debug_msg("%s Router %s\n",
 		       pr_id(_ospf.get_router_id()).c_str(),
 		       cstring(v));
-		if (rv == v)
+		if (rv == v) {
 		    v.set_origin(rv.get_origin());
+		} else {
+		    XLOG_WARNING("TBD: Add LSA to vertex");
+// 		    v = spt.get_node(v);
+// 		    v.get_lsas().push_back(lsar);
+		}
 	    } else {
 		debug_msg("%s Add %s\n",
 		       pr_id(_ospf.get_router_id()).c_str(),
@@ -3237,7 +3272,24 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	
 	Vertex node = ri->node();
 
-	Lsa::LsaRef lsar = node.get_lsa();
+	// A router can have multiple Router-LSAs associated with it,
+	// the options fields in all the Router-LSAs should all be the
+	// same, however if they aren't the LSA with the lowest Link
+	// State ID takes precedence. Unconditionally find and use the
+	// Router-LSA with the lowest Link State ID.
+	list<Lsa::LsaRef>& lsars = node.get_lsas();
+	list<Lsa::LsaRef>::iterator i = lsars.begin();
+	XLOG_ASSERT(i != lsars.end());
+	Lsa::LsaRef lsar = *i++;
+	if (OspfTypes::Router == node.get_type()) {
+	    for (; i != lsars.end(); i++)
+		if ((*i)->get_header().get_link_state_id() <
+		    lsar->get_header().get_link_state_id())
+		    lsar = *i;
+	} else {
+	    XLOG_ASSERT(1 == lsars.size());
+	}
+
 #if	0
 	RouterLsa *rlsa;
 	NetworkLsa *nlsa;
@@ -3278,10 +3330,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	route_entry.set_cost(ri->weight());
 	route_entry.set_type_2_cost(0);
 
-#if	0
-	IPv6 nexthop = IPv6(htonl(ri->nexthop().get_address()));
-	route_entry.set_nexthop(nexthop);
-#endif
+	route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
 	route_entry.set_advertising_router(lsar->get_header().
 					   get_advertising_router());
 	route_entry.set_area(_area);
@@ -3836,7 +3885,7 @@ AreaRouter<A>::bidirectional(RouterLink::Type rl_type,
 
 template <typename A>
 bool 
-AreaRouter<A>::bidirectional(const uint32_t link_state_id, 
+AreaRouter<A>::bidirectional(const uint32_t link_state_id_or_adv, 
 			     const RouterLink& rl, NetworkLsa *nlsa)
     const
 {
@@ -3844,13 +3893,25 @@ AreaRouter<A>::bidirectional(const uint32_t link_state_id,
     XLOG_ASSERT(rl.get_type() == RouterLink::transit);
 
     // This is the edge from the Router-LSA to the Network-LSA.
-    XLOG_ASSERT(rl.get_link_id() == nlsa->get_header().get_link_state_id());
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	
+	XLOG_ASSERT(rl.get_link_id() ==
+		    nlsa->get_header().get_link_state_id());
+	break;
+    case OspfTypes::V3:
+	XLOG_ASSERT(rl.get_neighbour_interface_id() ==
+		    nlsa->get_header().get_link_state_id());
+	XLOG_ASSERT(rl.get_neighbour_router_id() ==
+		    nlsa->get_header().get_advertising_router());
+	break;
+    }
 
     // Does the Network-LSA know about the Router-LSA.
     list<OspfTypes::RouterID>& routers = nlsa->get_attached_routers();
     list<OspfTypes::RouterID>::const_iterator i;
     for (i = routers.begin(); i != routers.end(); i++)
-	if (link_state_id == *i)
+	if (link_state_id_or_adv == *i)
 	    return true;
 
     return false;
@@ -3873,6 +3934,54 @@ AreaRouter<A>::bidirectional(RouterLsa *rlsa,
 	if (l->get_link_id() == link_state_id &&
 	    l->get_type() == RouterLink::transit) {
 	    interface_address = l->get_link_data();
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+template <typename A>
+bool 
+AreaRouter<A>::bidirectionalV3(RouterLsa *rlsa, NetworkLsa *nlsa,
+			       uint32_t& interface_id)
+{
+    XLOG_ASSERT(rlsa);
+    XLOG_ASSERT(nlsa);
+
+    const uint32_t link_state_id = nlsa->get_header().get_link_state_id();
+    const uint32_t adv = nlsa->get_header().get_advertising_router();
+    
+    const list<RouterLink> &rlinks = rlsa->get_router_links();
+    list<RouterLink>::const_iterator l = rlinks.begin();
+    for(; l != rlinks.end(); l++) {
+	if (l->get_neighbour_interface_id() == link_state_id &&
+	    l->get_neighbour_router_id() == adv &&
+	    l->get_type() == RouterLink::transit) {
+	    interface_id = l->get_interface_id();
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+template <typename A>
+bool 
+AreaRouter<A>::bidirectionalV3(RouterLink::Type rl_type,
+			     const uint32_t advertising_router, 
+			     RouterLsa *rlsa,
+			     uint16_t& metric)
+{
+    XLOG_ASSERT(rlsa);
+    XLOG_ASSERT(rl_type == RouterLink::p2p || rl_type == RouterLink::vlink);
+
+    const list<RouterLink> &rlinks = rlsa->get_router_links();
+    list<RouterLink>::const_iterator l = rlinks.begin();
+    for(; l != rlinks.end(); l++) {
+	if (l->get_neighbour_router_id() == advertising_router &&
+	    l->get_type() == rl_type) {
+	    metric = l->get_metric();
 	    return true;
 	}
     }
@@ -4157,7 +4266,7 @@ AreaRouter<A>::routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& src,
     const list<RouterLink> &rl = rlsa->get_router_links();
     list<RouterLink>::const_iterator l = rl.begin();
     for(; l != rl.end(); l++) {
-// 	fprintf(stderr, "RouterLink %s\n", cstring(*l));
+//  	fprintf(stderr, "RouterLink %s\n", cstring(*l));
 	switch(l->get_type()) {
 	case RouterLink::p2p:
 	case RouterLink::vlink:
@@ -4175,22 +4284,255 @@ AreaRouter<A>::routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& src,
 
 template <typename A>
 void
-AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& /*spt*/,
-					       const Vertex& /*src*/,
-					       RouterLsa */*rlsa*/,
-					       RouterLink /*rl*/)
+AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& spt,
+					       const Vertex& src,
+					       RouterLsa *rlsa,
+					       RouterLink rl)
 {
-    XLOG_WARNING("TBD: Router Link p2p or vlink OSPFv3");
+    // Find the Router-LSA that is pointed at by this router link.
+    // Remember that an OSPSv3 router can generate multiple
+    // Router-LSAs so it is necessary to search all of them for the
+    // corresponding router link.
+    bool found = false;
+    Lsa::LsaRef lsapeer;    
+    RouterLsa *rlsapeer = 0;
+    uint16_t metric;
+    for(size_t index = 0;; index++) {
+	if (!find_router_lsa(rl.get_neighbour_router_id(), index))
+	    return;
+	lsapeer = _db[index];
+	// This can probably never happen
+	if (lsapeer->maxage()) {
+	    XLOG_WARNING("LSA in database MaxAge\n%s", cstring(*lsapeer));
+	    continue;
+	}
+// 	fprintf(stderr, "peer %s\n", cstring(*lsapeer));
+	// Check that this Router-LSA points back to the original.
+	rlsapeer = dynamic_cast<RouterLsa *>(lsapeer.get());
+	XLOG_ASSERT(0 != rlsapeer);
+	if (bidirectionalV3(rl.get_type(),
+			     rlsa->get_header().get_advertising_router(),
+			     rlsapeer,
+			     metric)) {
+	    found = true;
+	    break;
+	}
+    }
+
+    if (!found)
+	return;
+
+    // The coressponding router link has been found but should it be used?
+    Options options(_ospf.get_version(), rlsapeer->get_options());
+    if (!options.get_v6_bit())
+	return;
+    if (!options.get_r_bit())
+	return;
+
+    // The destination node may not exist if it doesn't
+    // create it. Half the time it will exist
+    Vertex dst;
+    dst.set_version(_ospf.get_version());
+    dst.set_type(OspfTypes::Router);
+    dst.set_nodeid(lsapeer->get_header().get_advertising_router());
+    dst.get_lsas().push_back(lsapeer);
+    // If the src is the origin then set the address of the
+    // dest. This is the nexthop address from the origin.
+    if (src.get_origin()) {
+	// Find the nexthop address from the router's Link-LSA. If the
+	// nexthop can't be found then there is no point putting
+	// this router into the graph.
+	if (RouterLink::p2p == rl.get_type()) {
+	    IPv6 interface_address;
+	    if (!find_interface_address(rl.get_neighbour_router_id(),
+					rl.get_neighbour_interface_id(),
+					interface_address))
+		return;
+	    dst.set_address(interface_address);
+	}
+    }
+    if (!spt.exists_node(dst)) {
+	spt.add_node(dst);
+    }
+    update_edge(spt, src, rl.get_metric(), dst);
+    update_edge(spt, dst, metric, src);
 }
 
 template <typename A>
 void
-AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& /*spt*/,
-					       const Vertex& /*src*/,
-					       RouterLsa */*rlsa*/,
-					       RouterLink /*rl*/)
+AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& spt,
+					     const Vertex& src,
+					     RouterLsa *rlsa,
+					     RouterLink rl)
 {
-    XLOG_WARNING("TBD: Router Link transit OSPFv3");
+    OspfTypes::Version version = _ospf.get_version();
+
+    // Find the Network-LSA that this router link points at.
+    Ls_request lsr(version,
+		   NetworkLsa(version).get_header().get_ls_type(),
+		   rl.get_neighbour_interface_id(),
+		   rl.get_neighbour_router_id());
+    size_t index;
+    if (!find_lsa(lsr, index)) {
+	return;
+    }
+
+    Lsa::LsaRef lsan = _db[index];
+    // This can probably never happen
+    if (lsan->maxage()) {
+	XLOG_WARNING("LSA in database MaxAge\n%s", cstring(*lsan));
+	return;
+    }
+
+    // Both nodes exist check for
+    // bi-directional connectivity.
+    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsan.get());
+    XLOG_ASSERT(nlsa);
+    if (!bidirectional(rlsa->get_header().get_advertising_router(), rl,
+		       nlsa)) {
+	return;
+    }
+
+    // Put both links back. If the network
+    // vertex is not in the SPT put it in.
+    // Create a destination node.
+    Vertex dst;
+    dst.set_version(_ospf.get_version());
+    dst.set_type(OspfTypes::Network);
+    dst.set_nodeid(lsan->get_header().get_advertising_router());
+    dst.set_interface_id(lsan->get_header().get_link_state_id());
+    dst.get_lsas().push_back(lsan);
+
+    // If the src is the origin then set the address of the
+    // dest. This is the nexthop address from the origin.
+    if (src.get_origin()) {
+	// Find the nexthop address from the router's Link-LSA. If the
+	// nexthop can't be found then there is no point putting
+	// this router into the graph.
+	IPv6 interface_address;
+	if (!find_interface_address(rl.get_neighbour_router_id(),
+				    rl.get_neighbour_interface_id(),
+				    interface_address))
+	    return;
+  	dst.set_address(interface_address);
+    }
+
+    if (!spt.exists_node(dst)) {
+	spt.add_node(dst);
+    }
+
+    uint32_t rladv = rlsa->get_header().get_advertising_router();
+    bool dr = rladv == nlsa->get_header().get_advertising_router();
+
+    update_edge(spt, src, rl.get_metric(), dst);
+    // Reverse edge
+    update_edge(spt, dst, 0, src);
+
+    if (!src.get_origin() || !dr) {
+	return;
+    }
+
+    // If we reached here then this router originated the Network-LSA
+    // and is hence the designated router.
+
+    // Make an edge to all the members of the Network-LSA that are
+    // bidirectionally connected. If these extra edges are not made
+    // all nexthops will be the Network-LSA which in the end is the
+    // router itself.
+
+    // Even though the extra edges have been made an edge to the
+    // Network-LSA was also made. If this edge did not exist it would
+    // appear that the network represented by the Network-LSA was not
+    // directly connected because the route to it would be via one of
+    // the neighbours. Therefore the original edge is left in, if for
+    // some reason the edge to the Network-LSA starts to win over the
+    // direct edge to a neighbour, then don't put an edge pointing to
+    // the Network-LSA and put a marker into the vertex itself
+    // stopping any nodes with the marker being installed in the
+    // routing table. The comparator in the vertex is biased towards
+    // router vertexs over network vertexs, so there should not be a
+    // problem
+
+    XLOG_ASSERT(src.get_origin());
+    XLOG_ASSERT(dr);
+
+    list<OspfTypes::RouterID>& attached_routers = nlsa->get_attached_routers();
+    list<OspfTypes::RouterID>::iterator i;
+    for (i = attached_routers.begin(); i != attached_routers.end(); i++) {
+	// Don't make an edge back to this router.
+	if (*i == rladv)
+	    continue;
+
+	// Find the Router-LSA that points back to this Network-LSA.
+	// Remember that an OSPSv3 router can generate multiple
+	// Router-LSAs so it is necessary to search all of them for the
+	// corresponding router link.
+	bool found = false;
+	Lsa::LsaRef lsapeer;    
+	RouterLsa *rlsapeer = 0;
+	uint32_t interface_id;
+	for(size_t index = 0;; index++) {
+	    if (!find_router_lsa(*i, index))
+		break;
+	    lsapeer = _db[index];
+	    // This can probably never happen
+	    if (lsapeer->maxage()) {
+		XLOG_WARNING("LSA in database MaxAge\n%s", cstring(*lsapeer));
+		continue;
+	    }
+// 	    fprintf(stderr, "peer %s\n", cstring(*lsapeer));
+
+	    rlsapeer = dynamic_cast<RouterLsa *>(lsapeer.get());
+	    XLOG_ASSERT(0 != rlsapeer);
+	    if (!bidirectionalV3(rlsapeer, nlsa, interface_id)) {
+		found = true;
+		break;
+	    }
+	}
+
+	if (!found)
+	    continue;
+
+	// The coressponding router link has been found but should it
+	// be used?
+	Options options(_ospf.get_version(), rlsapeer->get_options());
+	if (!options.get_v6_bit())
+	    continue;
+	if (!options.get_r_bit())
+	    continue;
+
+	uint32_t adv = lsapeer->get_header().get_advertising_router();
+
+	// Router-LSA <=> Network-LSA <=> Router-LSA.
+	// There is bidirectional connectivity from the original
+	// Router-LSA through to this one found in the
+	// Network-LSA, make an edge.
+	    
+	// The destination node may not exist if it doesn't
+	// create it. Half the time it will exist
+	Vertex dst;
+	dst.set_version(_ospf.get_version());
+	dst.set_type(OspfTypes::Router);
+	dst.set_nodeid(adv);
+	dst.get_lsas().push_back(lsapeer);
+	// If the src is the origin then set the address of the
+	// dest. This is the nexthop address from the origin.
+	if (src.get_origin()) {
+	    // Find the nexthop address from the router's Link-LSA. If the
+	    // nexthop can't be found then there is no point putting
+	    // this router into the graph.
+	    IPv6 interface_address;
+	    if (!find_interface_address(adv, interface_id,
+					interface_address))
+		continue;
+	    dst.set_address(interface_address);
+
+	}
+	if (!spt.exists_node(dst)) {
+	    spt.add_node(dst);
+	}
+	update_edge(spt, src, rl.get_metric(), dst);
+    }
 }
 
 /*************************************************************************/
