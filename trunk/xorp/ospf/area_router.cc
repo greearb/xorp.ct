@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.220 2007/02/11 10:29:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.221 2007/02/11 11:08:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4478,7 +4478,7 @@ AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& spt,
 
 	    rlsapeer = dynamic_cast<RouterLsa *>(lsapeer.get());
 	    XLOG_ASSERT(0 != rlsapeer);
-	    if (!bidirectionalV3(rlsapeer, nlsa, interface_id)) {
+	    if (bidirectionalV3(rlsapeer, nlsa, interface_id)) {
 		found = true;
 		break;
 	    }
