@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.218 2007/02/11 04:32:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.219 2007/02/11 10:11:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3854,11 +3854,11 @@ AreaRouter<A>::routing_compare_externals(Lsa::LsaRef current,
 
 template <typename A>
 bool 
-AreaRouter<A>::bidirectional(RouterLink::Type rl_type,
-			     const uint32_t link_state_id, 
-			     const RouterLink& rl, RouterLsa *rlsa,
-			     uint16_t& metric,
-			     uint32_t& interface_address)
+AreaRouter<A>::bidirectionalV2(RouterLink::Type rl_type,
+			       const uint32_t link_state_id, 
+			       const RouterLink& rl, RouterLsa *rlsa,
+			       uint16_t& metric,
+			       uint32_t& interface_address)
 {
     XLOG_ASSERT(0 != rlsa);
     XLOG_ASSERT(rl_type == RouterLink::p2p || rl_type == RouterLink::vlink);
@@ -3919,9 +3919,9 @@ AreaRouter<A>::bidirectional(const uint32_t link_state_id_or_adv,
 
 template <typename A>
 bool 
-AreaRouter<A>::bidirectional(RouterLsa *rlsa,
-			     NetworkLsa *nlsa,
-			     uint32_t& interface_address)
+AreaRouter<A>::bidirectionalV2(RouterLsa *rlsa,
+			       NetworkLsa *nlsa,
+			       uint32_t& interface_address)
 {
     XLOG_ASSERT(rlsa);
     XLOG_ASSERT(nlsa);
@@ -4066,12 +4066,12 @@ AreaRouter<A>::routing_router_link_p2p_vlinkV2(Spt<Vertex>& spt,
 	// original.
 	uint16_t metric;
 	uint32_t interface_address;
-	if (!bidirectional(rl.get_type(),
-			   rlsa->get_header().get_link_state_id(),
-			   rl,
-			   dynamic_cast<RouterLsa *>(lsapeer.get()),
-			   metric,
-			   interface_address)) {
+	if (!bidirectionalV2(rl.get_type(),
+			     rlsa->get_header().get_link_state_id(),
+			     rl,
+			     dynamic_cast<RouterLsa *>(lsapeer.get()),
+			     metric,
+			     interface_address)) {
 	    return;
 	}
 	// The destination node may not exist if it doesn't
@@ -4197,8 +4197,9 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
 	    }
 
 	    uint32_t interface_address;
-	    if (!bidirectional(dynamic_cast<RouterLsa *>(lsapeer.get()), nlsa,
-			       interface_address))
+	    if (!bidirectionalV2(dynamic_cast<RouterLsa *>(lsapeer.get()),
+				 nlsa,
+				 interface_address))
 		continue;
 
 	    // Router-LSA <=> Network-LSA <=> Router-LSA.

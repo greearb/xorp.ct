@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.105 2007/02/01 22:49:33 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.106 2007/02/11 10:11:27 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -1077,12 +1077,12 @@ class AreaRouter : public ServiceBase {
      * and interface address.
      * value.
      */
-    bool bidirectional(RouterLink::Type rl_type,
-		       const uint32_t link_state_id,
-		       const RouterLink& rl,
-		       RouterLsa *rlsa,
-		       uint16_t& metric,
-		       uint32_t& interface_address);
+    bool bidirectionalV2(RouterLink::Type rl_type,
+			 const uint32_t link_state_id,
+			 const RouterLink& rl,
+			 RouterLsa *rlsa,
+			 uint16_t& metric,
+			 uint32_t& interface_address);
 
     /**
      * Does this Network-LSA point back to the router link that points
@@ -1103,8 +1103,8 @@ class AreaRouter : public ServiceBase {
      *
      * @return true if Router-LSA points at the Network-LSA.
      */
-    bool bidirectional(RouterLsa *rlsa, NetworkLsa *nlsa,
-		       uint32_t& interface_address);
+    bool bidirectionalV2(RouterLsa *rlsa, NetworkLsa *nlsa,
+			 uint32_t& interface_address);
 
     /**
      * Does the Router-LSA point at the Network-LSA that points at it,
