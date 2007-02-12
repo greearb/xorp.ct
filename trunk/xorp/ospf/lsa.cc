@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.93 2007/02/02 00:36:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.94 2007/02/12 07:13:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -464,7 +464,7 @@ IPv6Prefix::decode(uint8_t *ptr, size_t& len, uint8_t prefixlen,
     OspfTypes::Version version = get_version();
     XLOG_ASSERT(OspfTypes::V3 == version);
 
-    IPv6Prefix prefix(version);
+    IPv6Prefix prefix(version, use_metric());
     prefix.set_prefix_options(option);
     
     uint8_t addr[IPv6::ADDR_BYTELEN];
@@ -1764,7 +1764,7 @@ IntraAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 
 	start = &buf[header_length + 2 + 2 + 4 + 4];
 	uint8_t *end = &buf[len];
-	IPv6Prefix decoder(version);
+	IPv6Prefix decoder(version, true);
 	while(start < end) {
 	    if (!(start + 2 < end))
 		xorp_throw(InvalidPacket, c_format("Intra-Area-Prefix-LSA "
@@ -1773,6 +1773,7 @@ IntraAreaPrefixLsa::decode(uint8_t *buf, size_t& len) const
 	    IPv6Prefix prefix = decoder.decode(start + 4, space,
 					       extract_8(start),
 					       extract_8(start + 1));
+	    prefix.set_metric(extract_16(start + 2));
  	    lsa->get_prefixes().push_back(prefix);
 	    start += (space + 4);
 	    if (0 == --prefix_num) {
@@ -1832,6 +1833,7 @@ IntraAreaPrefixLsa::encode()
     for(list<IPv6Prefix>::iterator i = ps.begin(); i != ps.end(); i++) {
 	embed_8(&ptr[index], i->get_network().prefix_len());
 	embed_8(&ptr[index + 1], i->get_prefix_options());
+	embed_16(&ptr[index + 2], i->get_metric());
 	index += i->copy_out(&ptr[index + 4]) + 4;
     }
 
