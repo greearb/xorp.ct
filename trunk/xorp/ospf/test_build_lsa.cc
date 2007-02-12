@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.17 2006/12/17 05:30:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.18 2007/01/30 23:31:00 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -308,9 +308,9 @@ BuildLsa::network_lsa(Args& args)
 }
 
 IPv6Prefix
-BuildLsa::ipv6prefix(Args& args)
+BuildLsa::ipv6prefix(Args& args, bool use_metric)
 {
-    IPv6Prefix prefix(_version);
+    IPv6Prefix prefix(_version, use_metric);
 
     prefix.set_network(IPNet<IPv6>(get_next_word(args, "IPv6Prefix").c_str()));
 
@@ -326,6 +326,8 @@ BuildLsa::ipv6prefix(Args& args)
 	    prefix.set_la_bit(true);
 	} else if ("NU-bit" == nword) {
 	    prefix.set_nu_bit(true);
+	} else if (prefix.use_metric() && "metric" == nword) {
+	    prefix.set_metric(get_next_number(args, nword));
 	} else {
 	    args.push_back();
 	    break;
@@ -513,7 +515,7 @@ BuildLsa::intra_area_prefix_lsa(Args& args)	// OSPFv3 only
 									word)
 							  .c_str()));
 	} else if ("IPv6Prefix" == word) {
-	    lsa->get_prefixes().push_back(ipv6prefix(args));
+	    lsa->get_prefixes().push_back(ipv6prefix(args, true));
 	} else {
 	    xorp_throw(InvalidString, c_format("Unknown option <%s>. [%s]",
 					       word.c_str(),
