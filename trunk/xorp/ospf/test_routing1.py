@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.15 2007/02/04 23:06:45 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.16 2007/02/10 23:13:37 atanu Exp $
 
 import getopt
 import sys
@@ -152,8 +152,8 @@ def print_lsasV3(verbose, protocol):
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlstype 2'
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlsid 1.2.3.4'
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' radv 9.8.7.6'
-    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix
-    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix + ' metric 1'
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix + ' metric 2'
 
     lsas = [RouterLsa, NetworkLsa, SummaryNetworkLsa, SummaryRouterLsa, \
             ASExternalLsa, Type7Lsa, LinkLsa, IntraAreaPrefixLsa]
