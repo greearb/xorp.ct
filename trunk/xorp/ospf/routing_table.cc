@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.54 2006/10/12 01:25:00 pavlin Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.55 2006/11/06 19:48:40 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -354,8 +354,8 @@ bool
 RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 			   uint32_t metric, RouteEntry<A>& rt)
 {
-    debug_msg("ADD ROUTE area %s net %s nexthop %s\n", pr_id(area).c_str(),
-	      cstring(net), cstring(nexthop));
+    debug_msg("ADD ROUTE area %s net %s nexthop %s metric %u\n",
+	      pr_id(area).c_str(), cstring(net), cstring(nexthop), metric);
 
     bool result = true;
     if (!rt.get_discard()) {
