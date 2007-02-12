@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.18 2007/01/30 23:31:00 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.19 2007/02/12 07:44:29 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -505,8 +505,17 @@ BuildLsa::intra_area_prefix_lsa(Args& args)	// OSPFv3 only
     while(args.get_next(word)) {
 	if (common_header(lsa, word, args))
 	    continue;
-	if ("rlstype" == word) {		// OSPFv3
-	    lsa->set_referenced_ls_type(get_next_number(args, word));
+	if ("rlstype" == word) {
+	    string nword = get_next_word(args, word);
+	    uint16_t referenced_ls_type;
+	    if ("RouterLsa" == nword) {
+		referenced_ls_type = RouterLsa(_version).get_ls_type();
+	    } else if ("NetworkLsa" == nword) {
+		referenced_ls_type = NetworkLsa(_version).get_ls_type();
+	    } else {
+		referenced_ls_type = get_number(nword);
+	    }
+	    lsa->set_referenced_ls_type(referenced_ls_type);
 	} else if ("rlsid" == word) {
 	    lsa->set_referenced_link_state_id(set_id(get_next_word(args, word)
 						     .c_str()));

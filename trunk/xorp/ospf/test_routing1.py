@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.16 2007/02/10 23:13:37 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.17 2007/02/12 07:50:25 atanu Exp $
 
 import getopt
 import sys
@@ -149,14 +149,37 @@ def print_lsasV3(verbose, protocol):
     LinkLsa=LinkLsa + ' ' + IPv6Prefix
     
     IntraAreaPrefixLsa='IntraAreaPrefixLsa %s' % common_header
-    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlstype 2'
+    IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlstype 0x2001'
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' rlsid 1.2.3.4'
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' radv 9.8.7.6'
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix + ' metric 1'
     IntraAreaPrefixLsa=IntraAreaPrefixLsa + ' ' + IPv6Prefix + ' metric 2'
 
+    IntraAreaPrefixLsa_r='IntraAreaPrefixLsa %s' % common_header
+    IntraAreaPrefixLsa_r=IntraAreaPrefixLsa_r + ' rlstype RouterLsa'
+    IntraAreaPrefixLsa_r=IntraAreaPrefixLsa_r + ' rlsid 1.2.3.4'
+    IntraAreaPrefixLsa_r=IntraAreaPrefixLsa_r + ' radv 9.8.7.6'
+    IntraAreaPrefixLsa_r=IntraAreaPrefixLsa_r + ' ' + IPv6Prefix + ' metric 1'
+    IntraAreaPrefixLsa_r=IntraAreaPrefixLsa_r + ' ' + IPv6Prefix + ' metric 2'
+
+    IntraAreaPrefixLsa_n='IntraAreaPrefixLsa %s' % common_header
+    IntraAreaPrefixLsa_n=IntraAreaPrefixLsa_n + ' rlstype NetworkLsa'
+    IntraAreaPrefixLsa_n=IntraAreaPrefixLsa_n + ' rlsid 1.2.3.4'
+    IntraAreaPrefixLsa_n=IntraAreaPrefixLsa_n + ' radv 9.8.7.6'
+    IntraAreaPrefixLsa_n=IntraAreaPrefixLsa_n + ' ' + IPv6Prefix + ' metric 1'
+    IntraAreaPrefixLsa_n=IntraAreaPrefixLsa_n + ' ' + IPv6Prefix + ' metric 2'
+
+    IntraAreaPrefixLsa_u='IntraAreaPrefixLsa %s' % common_header
+    IntraAreaPrefixLsa_u=IntraAreaPrefixLsa_u + ' rlstype 42'
+    IntraAreaPrefixLsa_u=IntraAreaPrefixLsa_u + ' rlsid 1.2.3.4'
+    IntraAreaPrefixLsa_u=IntraAreaPrefixLsa_u + ' radv 9.8.7.6'
+    IntraAreaPrefixLsa_u=IntraAreaPrefixLsa_u + ' ' + IPv6Prefix + ' metric 1'
+    IntraAreaPrefixLsa_u=IntraAreaPrefixLsa_u + ' ' + IPv6Prefix + ' metric 2'
+
     lsas = [RouterLsa, NetworkLsa, SummaryNetworkLsa, SummaryRouterLsa, \
-            ASExternalLsa, Type7Lsa, LinkLsa, IntraAreaPrefixLsa]
+            ASExternalLsa, Type7Lsa, LinkLsa, \
+            IntraAreaPrefixLsa, IntraAreaPrefixLsa_r, IntraAreaPrefixLsa_n, \
+            IntraAreaPrefixLsa_u]
 
     for i in lsas:
         if 0 != os.system('%s --OSPFv3 -l "%s"' % \
