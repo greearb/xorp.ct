@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.49 2006/12/13 03:44:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.50 2006/12/15 00:00:36 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -528,8 +528,9 @@ populate_intra_area_prefix_lsa(IntraAreaPrefixLsa *iaplsa,
     iaplsa->set_referenced_link_state_id(1);
     iaplsa->set_referenced_advertising_router(set_id("192.1.1.2"));
     IPNet<IPv6> net1("2001:468:e21:c800:220:edff:fe61:f033", 64);
-    IPv6Prefix prefix1(version);
+    IPv6Prefix prefix1(version, true);
     prefix1.set_network(net1);
+    prefix1.set_metric(256);
     prefix1.set_nu_bit(true);
     prefix1.set_la_bit(true);
     prefix1.set_mc_bit(true);
@@ -537,8 +538,9 @@ populate_intra_area_prefix_lsa(IntraAreaPrefixLsa *iaplsa,
     prefix1.set_dn_bit(true);
     iaplsa->get_prefixes().push_back(prefix1);
     IPNet<IPv6> net2("2001:700:0:fff1::2", 64);
-    IPv6Prefix prefix2(version);
+    IPv6Prefix prefix2(version, true);
     prefix2.set_network(net2);
+    prefix2.set_metric(3841);
     prefix2.set_nu_bit(false);
     prefix2.set_la_bit(false);
     prefix2.set_mc_bit(false);
