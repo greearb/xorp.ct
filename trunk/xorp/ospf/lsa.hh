@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.89 2006/12/17 03:30:37 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.90 2006/12/17 04:32:49 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -652,12 +652,15 @@ public:
     static const uint8_t P_bit = 0x8;
     static const uint8_t DN_bit = 0x10;
 
-    IPv6Prefix(OspfTypes::Version version)
-	: _version(version), _prefix_options(0)
+    IPv6Prefix(OspfTypes::Version version, bool use_metric = false)
+	: _version(version), _use_metric(use_metric), _metric(0),
+	  _prefix_options(0)
     {
     }
 
-    IPv6Prefix(const IPv6Prefix& rhs) : _version(rhs._version) {
+    IPv6Prefix(const IPv6Prefix& rhs)
+	: _version(rhs._version), _use_metric(rhs._use_metric)
+    {
 	copy(rhs);
     }
 
@@ -672,6 +675,7 @@ public:
 
     void copy(const IPv6Prefix& rhs) {
 	ipv6prefix_copy(_network);
+	ipv6prefix_copy(_metric);
 	ipv6prefix_copy(_prefix_options);
     }
 #undef	ipv6prefix_copy
@@ -726,6 +730,20 @@ public:
 	return _network;
     }
 
+    bool use_metric() const {
+	return _use_metric;
+    }
+
+    void set_metric(uint16_t metric) {
+	XLOG_ASSERT(_use_metric);
+	_metric = metric;
+    }
+
+    uint16_t get_metric() const {
+	XLOG_ASSERT(_use_metric);
+	return _metric;
+    }
+
     void set_prefix_options(uint8_t prefix_options) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	_prefix_options = prefix_options;
@@ -771,9 +789,11 @@ public:
     string str() const;
 
 private:
-    const OspfTypes::Version 	_version;
+    const OspfTypes::Version _version;
+    const bool _use_metric;
 
     IPNet<IPv6> _network;
+    uint16_t _metric;
     uint8_t _prefix_options;
 };
 
