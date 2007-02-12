@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.92 2006/12/17 20:15:09 pavlin Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.93 2007/02/02 00:36:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -522,6 +522,8 @@ IPv6Prefix::str() const
     output += c_format(" MC-bit: %d", get_mc_bit());
     output += c_format(" LA-bit: %d", get_la_bit());
     output += c_format(" NU-bit: %d", get_nu_bit());
+    if (use_metric())
+	output += c_format(" Metric %u", get_metric());
     output += c_format(" Address %s", cstring(get_network()));
 
     return output;
