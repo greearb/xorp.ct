@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.94 2007/02/12 07:13:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.95 2007/02/12 07:25:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1860,6 +1860,13 @@ IntraAreaPrefixLsa::str() const
     output += _header.str();
 
     output += c_format("\n\tReferenced LS type %#x", get_referenced_ls_type());
+    if (get_referenced_ls_type() == RouterLsa(version).get_ls_type()) {
+	output += c_format(" Router-LSA");
+    } else if (get_referenced_ls_type() == NetworkLsa(version).get_ls_type()) {
+	output += c_format(" Network-LSA");
+    } else {
+	output += c_format(" Unknown");
+    }
     output += c_format("\n\tReferenced Link State ID %s",
 		       pr_id(get_referenced_link_state_id()).c_str());
     output += c_format("\n\tReferenced Advertising Router %s",
