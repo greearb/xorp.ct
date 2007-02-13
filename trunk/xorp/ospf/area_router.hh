@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.107 2007/02/11 10:29:17 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.108 2007/02/11 11:08:41 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -1212,6 +1212,44 @@ class DataBaseHandle {
     uint32_t _last_entry;	// One past last entry, for an empty
 				// database value would be 0.
     bool _valid;		// True if this handle is valid.
+};
+
+/**
+ * Router-LSA and Intra-Area-Prefix-LSA store.
+ *
+ * In OSPFv3 a router can generate multiple Router-LSAs and
+ * Intra-Area-Prefix-LSAs, hold a store of the LSAs indexed by router
+ * ID.
+ * NOTE: LsaTempStore should only be used as temporary storage during
+ * the routing computation.
+ */
+class LsaTempStore {
+public:
+    void add_router_lsa(RouterLsa *rlsa) {
+	XLOG_ASSERT(rlsa);
+	_router_lsas[rlsa->get_header().get_advertising_router()].
+	    push_back(rlsa);
+    }
+
+    list<RouterLsa *>& get_router_lsas(OspfTypes::RouterID rid) {
+	return _router_lsas[rid];
+    }
+
+    void add_intra_area_prefix_lsa(IntraAreaPrefixLsa *iaplsa) {
+	XLOG_ASSERT(iaplsa);
+	_intra_area_prefix_lsas[iaplsa->get_header().get_advertising_router()].
+	    push_back(iaplsa);
+    }
+
+    list<IntraAreaPrefixLsa *>& 
+    get_intra_area_prefix_lsas(OspfTypes::RouterID rid) {
+	return _intra_area_prefix_lsas[rid];
+    }
+
+private:
+    map<OspfTypes::RouterID, list<RouterLsa *> > _router_lsas;
+    map<OspfTypes::RouterID, list<IntraAreaPrefixLsa *> > 
+    _intra_area_prefix_lsas;
 };
 
 #endif // __OSPF_AREA_ROUTER_HH__
