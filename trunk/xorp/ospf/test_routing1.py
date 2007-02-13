@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.17 2007/02/12 07:50:25 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.18 2007/02/12 20:09:07 atanu Exp $
 
 import getopt
 import sys
@@ -28,7 +28,9 @@ TESTS=[
     ['test1', True, 'v2'],
     ['test2', True, 'v2'],
     ['r1V2', True, 'v2'],
-    ['r1V3', False, 'v3'],
+    ['r1V3', True, 'v3'],
+    ['r2V3', True, 'v3'],
+    ['r3V3', True, 'v3'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -284,9 +286,13 @@ def r1V3(verbose, protocol):
     p2p iid 1 nid 1 nrid 0.0.0.6 metric 8 \
     "
 
-    RT3LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.3 \
+    RT3_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.3 \
     link-local-address fe80:0001::3"
 
+    RT3_INTRA = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.3 \
+    rlstype 0x2001 rlsid 0.0.0.0 radv 0.0.0.3 \
+    IPv6Prefix 5f00:0000:c001:0200::/56 metric 3 \
+    "
     command = """
 set_router_id 0.0.0.6
 create 0.0.0.0 normal
@@ -294,10 +300,183 @@ select 0.0.0.0
 replace %s
 add %s
 add %s
+add %s
 compute 0.0.0.0
 verify_routing_table_size 1
-verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::3 6 false false
-""" % (RT6,RT3,RT3LINK)
+verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::3 9 false false
+""" % (RT6,RT3,RT3_LINK,RT3_INTRA)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r2V3(verbose, protocol):
+    """
+    This test is based on Figure 1 in RFC2740.
+    This router it RT1, RT1 is also the designated router for N3.
+    """
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 1.0.0.1 adv 0.0.0.1 \
+    transit iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    "
+
+    RT1_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    link-local-address fe80:0002::1"
+
+    # N1 - Not used as RT1 is this router.
+    RT1_INTRA_R = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    rlstype NetworkLsa rlsid 0.0.0.0 radv 0.0.0.1 \
+    IPv6Prefix 5f00:0000:c001:0200::/56 metric 1 \
+    "
+
+    # N3 - Not used as RT1 is this router.
+    RT1_INTRA_N = "IntraAreaPrefixLsa lsid 0.0.0.2 adv 0.0.0.1 \
+    rlstype NetworkLsa rlsid 0.0.0.1 radv 0.0.0.1 \
+    IPv6Prefix 5f00:0000:c001:0100::/56 metric 1 \
+    "
+
+    RT1_NETWORK = "NetworkLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    add-router 0.0.0.1 \
+    add-router 0.0.0.2 \
+    add-router 0.0.0.3 \
+    add-router 0.0.0.4 \
+    "
+
+    RT2 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.2 \
+    transit iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    "
+
+    RT2_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    link-local-address fe80:0002::2"
+
+    # N2
+    RT2_INTRA = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.2 \
+    IPv6Prefix 5f00:0000:c001:0300::/56 metric 3 \
+    "
+
+    RT3 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.3 \
+    transit iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    "
+
+    RT3_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.3 \
+    link-local-address fe80:0001::3"
+
+    # N4
+    RT3_INTRA = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.3 \
+    rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.3 \
+    IPv6Prefix 5f00:0000:c001:0400::/56 metric 2 \
+    "
+
+    RT4 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.4 \
+    transit iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    "
+
+    RT4_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.4 \
+    link-local-address fe80:0001::4"
+
+    command = """
+set_router_id 0.0.0.1
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 2
+verify_routing_entry 5f00:0000:c001:0300::/56 fe80:0002::2 4 false false
+verify_routing_entry 5f00:0000:c001:0400::/56 fe80:0001::3 3 false false
+""" % (RT1,RT1_LINK,RT1_INTRA_R,RT1_INTRA_N,RT1_NETWORK,
+       RT2,RT2_LINK,RT2_INTRA,
+       RT3,RT3_LINK,RT3_INTRA,
+       RT4,RT4_LINK)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r3V3(verbose, protocol):
+    """
+    Verify the correct processing of Network-LSAs from non-directly connected
+    interface.
+    """
+
+    # RT1 is this router, RT2 in connected to RT1 via p2p, RT2 generates a
+    # Network-LSA for N1. The LSAs from the other routers N1 are not required.
+
+    #                            +
+    #     +---+1       1+---+5   |
+    #     |RT1|---------|RT2|----|N1
+    #     +---+         +---+    |
+    #                            +
+
+    # Network   IPv6 prefix
+    # -----------------------------------
+    # N1	5f00:0000:c001:0200::/56
+
+    # Router	Interface   Interface ID   link-local address
+    # -------------------------------------------------------
+    # RT1	to RT2	    1		   fe80:0001::1
+    # RT2	to RT1	    1		   fe80:0001::2
+    #           to N3	    20		   fe80:0002::2
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.1 \
+    p2p iid 1 nid 1 nrid 0.0.0.2 metric 1 \
+    "
+    RT1_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    link-local-address fe80:0001::1"
+
+    RT2 = "RouterLsa V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.2 \
+    p2p iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    transit iid 20 nid 20 nrid 0.0.0.2 metric 5 \
+    "
+    RT2_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    link-local-address fe80:0001::2"
+
+    RT2_INTRA = "IntraAreaPrefixLsa lsid 42.0.0.2 adv 0.0.0.2 \
+    rlstype NetworkLsa rlsid 0.0.0.20 radv 0.0.0.2 \
+    IPv6Prefix 5f00:0000:c001:0200::/56 metric 1 \
+    "
+
+    RT2_NETWORK = "NetworkLsa lsid 0.0.0.20 adv 0.0.0.2 \
+    add-router 0.0.0.2 \
+    "
+
+    command = """
+set_router_id 0.0.0.1
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
+""" % (RT1,RT1_LINK,
+       RT2,RT2_LINK,RT2_INTRA,RT2_NETWORK)
 
     print >>fp, command
 
