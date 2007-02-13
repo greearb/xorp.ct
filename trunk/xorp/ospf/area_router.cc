@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.221 2007/02/11 11:08:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.222 2007/02/11 12:30:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3171,6 +3171,8 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
     spt.add_node(rv);
     spt.set_origin(rv);
 
+    LsaTempStore lsa_temp_store;
+
     for (size_t index = 0 ; index < _last_entry; index++) {
 	Lsa::LsaRef lsar = _db[index];
 	if (!lsar->valid() || lsar->maxage())
@@ -3179,6 +3181,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	RouterLsa *rlsa;
 	
 	if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+ 	    lsa_temp_store.add_router_lsa(rlsa);
 
 	    if (rlsa->get_v_bit())
 		transit_capability = true;
@@ -3223,6 +3226,10 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		routing_router_lsaV3(spt, v, rlsa);
 		break;
 	    }
+	} else {
+	    IntraAreaPrefixLsa *iaplsa;
+	    if (0 != (iaplsa = dynamic_cast<IntraAreaPrefixLsa *>(lsar.get())))
+		lsa_temp_store.add_intra_area_prefix_lsa(iaplsa);
 	}
     }
 
@@ -3273,14 +3280,116 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	    XLOG_ASSERT(1 == lsars.size());
 	}
 
+	if (OspfTypes::Router == node.get_type()) {
+	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+	    XLOG_ASSERT(rlsa);
+// 	    check_for_virtual_link((*ri), _router_lsa);
+	    XLOG_WARNING("TBD: Find Router-LSA with the lowest link state ID");
+	    list<IntraAreaPrefixLsa *>& lsai = 
+		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
+	    if (!lsai.empty()) {
+		RouteEntry<IPv6> route_entry;
+		route_entry.set_destination_type(OspfTypes::Network);
+// 		route_entry.set_router_id(rlsa->get_header().
+// 					  get_advertising_router());
+// 		route_entry.set_directly_connected(ri->node() == 
+// 						   ri->nexthop());
+		route_entry.set_directly_connected(false);
+		route_entry.set_path_type(RouteEntry<IPv6>::intra_area);
+// 		route_entry.set_cost(ri->weight());
+		route_entry.set_type_2_cost(0);
+
+		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		route_entry.set_advertising_router(lsar->get_header().
+						   get_advertising_router());
+		route_entry.set_area(_area);
+		route_entry.set_lsa(lsar);
+		list<IntraAreaPrefixLsa *>::iterator i;
+		for (i = lsai.begin(); i != lsai.end(); i++) {
+		    if ((*i)->get_referenced_ls_type() != rlsa->get_ls_type())
+			continue;
+		    if ((*i)->get_referenced_link_state_id() != 0) {
+			XLOG_WARNING("Referenced Link State ID "
+				     "should be zero %s", cstring(*(*i)));
+			continue;
+		    }
+		    if ((*i)->get_referenced_advertising_router() != 
+			(*i)->get_header().get_advertising_router()) {
+			XLOG_WARNING("Advertising router and Referenced "
+				     "Advertising router don't match %s",
+				     cstring(*(*i)));
+			continue;
+		    }
+		    list<IPv6Prefix>& prefixes = (*i)->get_prefixes();
+		    list<IPv6Prefix>::iterator j;
+		    for (j = prefixes.begin(); j != prefixes.end(); j++) {
+			if (j->get_nu_bit())
+			    continue;
+			route_entry.set_cost(ri->weight() + j->get_metric());
+			routing_table_add_entry(routing_table,
+						j->get_network(),
+						route_entry);
+		    }
+		}
+	    }
+	} else {
+	    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+	    XLOG_ASSERT(nlsa);
+	    list<IntraAreaPrefixLsa *>& lsai = 
+		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
+	    if (!lsai.empty()) {
+		RouteEntry<IPv6> route_entry;
+		route_entry.set_destination_type(OspfTypes::Network);
+// 		route_entry.set_router_id(rlsa->get_header().
+// 					  get_advertising_router());
+ 		route_entry.set_directly_connected(ri->node() == 
+						   ri->nexthop());
+		route_entry.set_path_type(RouteEntry<IPv6>::intra_area);
+// 		route_entry.set_cost(ri->weight());
+		route_entry.set_type_2_cost(0);
+
+		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		route_entry.set_advertising_router(lsar->get_header().
+						   get_advertising_router());
+		route_entry.set_area(_area);
+		route_entry.set_lsa(lsar);
+		list<IntraAreaPrefixLsa *>::iterator i;
+		for (i = lsai.begin(); i != lsai.end(); i++) {
+		    if ((*i)->get_referenced_ls_type() != nlsa->get_ls_type())
+			continue;
+		    if ((*i)->get_referenced_link_state_id() != 
+			nlsa->get_header().get_link_state_id()) {
+			continue;
+		    }
+		    if ((*i)->get_referenced_advertising_router() != 
+			(*i)->get_header().get_advertising_router()) {
+			XLOG_WARNING("Advertising router and Referenced "
+				     "Advertising router don't match %s",
+				     cstring(*(*i)));
+			continue;
+		    }
+		    list<IPv6Prefix>& prefixes = (*i)->get_prefixes();
+		    list<IPv6Prefix>::iterator j;
+		    for (j = prefixes.begin(); j != prefixes.end(); j++) {
+			if (j->get_nu_bit())
+			    continue;
+			route_entry.set_cost(ri->weight() + j->get_metric());
+			routing_table_add_entry(routing_table,
+						j->get_network(),
+						route_entry);
+		    }
+		}
+	    }
+	}
+
 #if	0
 	RouterLsa *rlsa;
 	NetworkLsa *nlsa;
-#endif
+
 	RouteEntry<IPv6> route_entry;
 	IPNet<IPv6> net;
 	route_entry.set_destination_type(node.get_type());
-#if	0
+
 	if (OspfTypes::Router == node.get_type()) {
 	    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
@@ -3305,7 +3414,6 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	    IPv4 mask = IPv4(htonl(nlsa->get_network_mask()));
 	    net = IPNet<IPv4>(addr, mask.mask_len());
 	}
-#endif
 	// If nexthop point back to the node itself then it it
 	// directly connected.
 	route_entry.set_directly_connected(ri->node() == ri->nexthop());
@@ -3320,6 +3428,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	route_entry.set_lsa(lsar);
 
 	routing_table_add_entry(routing_table, net, route_entry);
+#endif
     }
 
     end_virtual_link();
