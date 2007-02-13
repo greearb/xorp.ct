@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.95 2006/11/23 00:29:09 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.96 2006/11/23 01:25:31 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -806,6 +806,16 @@ class Ospf {
     EventLoop& get_eventloop() { return _eventloop; }
 
     /**
+     * The test status of OSPF.
+     */
+    void set_testing(bool testing) {_testing = testing; }
+
+    /**
+     * @return true if OSPF is being tested.
+     */
+    bool get_testing() const { return _testing; }
+
+    /**
      * @return a reference to the PeerManager.
      */
     PeerManager<A>& get_peer_manager() { return _peer_manager; }
@@ -871,6 +881,8 @@ class Ospf {
  private:
     const OspfTypes::Version _version;	// OSPF version.
     EventLoop& _eventloop;
+
+    bool _testing;		// True when testing.
 
     IO<A>* _io;			// Indirection for sending and
 				// receiving packets, as well as

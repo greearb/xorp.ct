@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.80 2006/12/05 19:58:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.81 2006/12/06 00:19:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,6 +40,7 @@
 template <typename A>
 Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     : _version(version), _eventloop(eventloop),
+      _testing(false),
       _io(io), _reason("Waiting for IO"), _process_status(PROC_STARTUP),
       _lsa_decoder(version), _peer_manager(*this), _routing_table(*this),
       _instance_id(0), _router_id(0),
