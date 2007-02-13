@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.9 2007/02/02 03:37:33 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.10 2007/02/07 04:07:54 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -35,6 +35,8 @@ class Vertex {
 		return _t < other.get_type();
 	    break;
 	case OspfTypes::V3:
+	    if (_nodeid == other.get_nodeid() && _t != other.get_type())
+		return _t < other.get_type();
 	    switch(_t) {
 	    case OspfTypes::Router:
 		break;
@@ -167,10 +169,13 @@ class Vertex {
 	    output = "OSPFv3";
 	    switch(_t) {
 	    case OspfTypes::Router:
-		output += c_format(" Router %#x", _nodeid);
+		output += c_format(" Router %s(%#x)", pr_id(_nodeid).c_str(),
+				   _nodeid);
 		break;
 	    case OspfTypes::Network:
-		output += c_format(" Transit %#x %#x", _nodeid, _interface_id);
+		output += c_format(" Transit %s(%#x) %u", 
+				   pr_id(_nodeid).c_str(), _nodeid,
+				   _interface_id);
 		break;
 	    }
 	    output += c_format(" %s", cstring(_address_ipv6));
