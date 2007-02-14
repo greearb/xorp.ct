@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.18 2007/02/12 20:09:07 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.19 2007/02/13 01:22:04 atanu Exp $
 
 import getopt
 import sys
@@ -31,6 +31,7 @@ TESTS=[
     ['r1V3', True, 'v3'],
     ['r2V3', True, 'v3'],
     ['r3V3', True, 'v3'],
+    ['r4V3', True, 'v3'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -330,7 +331,7 @@ def r2V3(verbose, protocol):
 
     # N1 - Not used as RT1 is this router.
     RT1_INTRA_R = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.1 \
-    rlstype NetworkLsa rlsid 0.0.0.0 radv 0.0.0.1 \
+    rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.1 \
     IPv6Prefix 5f00:0000:c001:0200::/56 metric 1 \
     "
 
@@ -348,10 +349,10 @@ def r2V3(verbose, protocol):
     "
 
     RT2 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.2 \
-    transit iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    transit iid 2 nid 1 nrid 0.0.0.1 metric 1 \
     "
 
-    RT2_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    RT2_LINK = "LinkLsa lsid 0.0.0.2 adv 0.0.0.2 \
     link-local-address fe80:0002::2"
 
     # N2
@@ -477,6 +478,105 @@ verify_routing_table_size 1
 verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
 """ % (RT1,RT1_LINK,
        RT2,RT2_LINK,RT2_INTRA,RT2_NETWORK)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r4V3(verbose, protocol):
+    """
+    This test is based on Figure 1 in RFC2740.
+    This router it RT1, RT2 is the designated router for N3.
+    """
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 1.0.0.1 adv 0.0.0.1 \
+    transit iid 1 nid 2 nrid 0.0.0.2 metric 1 \
+    "
+
+    RT1_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    link-local-address fe80:0002::1"
+
+    # N1
+    RT1_INTRA = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.1 \
+    IPv6Prefix 5f00:0000:c001:0200::/56 metric 1 \
+    "
+
+    RT2 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.2 \
+    transit iid 2 nid 2 nrid 0.0.0.2 metric 1 \
+    "
+
+    RT2_LINK = "LinkLsa lsid 0.0.0.2 adv 0.0.0.2 \
+    link-local-address fe80:0002::2"
+
+    # N2
+    RT2_INTRA_R = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.2 \
+    IPv6Prefix 5f00:0000:c001:0300::/56 metric 3 \
+    "
+    # N3
+    RT2_INTRA_N = "IntraAreaPrefixLsa lsid 0.0.0.2 adv 0.0.0.2 \
+    rlstype NetworkLsa rlsid 0.0.0.2 radv 0.0.0.2 \
+    IPv6Prefix 5f00:0000:c001:0100::/56 metric 1 \
+    "
+
+    RT2_NETWORK = "NetworkLsa lsid 0.0.0.2 adv 0.0.0.2 \
+    add-router 0.0.0.1 \
+    add-router 0.0.0.2 \
+    add-router 0.0.0.3 \
+    add-router 0.0.0.4 \
+    "
+
+    RT3 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.3 \
+    transit iid 1 nid 2 nrid 0.0.0.2 metric 1 \
+    "
+
+    RT3_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.3 \
+    link-local-address fe80:0001::3"
+
+    # N4
+    RT3_INTRA = "IntraAreaPrefixLsa lsid 0.0.0.1 adv 0.0.0.3 \
+    rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.3 \
+    IPv6Prefix 5f00:0000:c001:0400::/56 metric 2 \
+    "
+
+    RT4 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.1 adv 0.0.0.4 \
+    transit iid 1 nid 2 nrid 0.0.0.2 metric 1 \
+    "
+
+    RT4_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.4 \
+    link-local-address fe80:0001::4"
+
+    command = """
+set_router_id 0.0.0.1
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 2
+verify_routing_entry 5f00:0000:c001:0300::/56 fe80:0002::2 4 false false
+verify_routing_entry 5f00:0000:c001:0400::/56 fe80:0001::3 3 false false
+""" % (RT1,RT1_LINK,RT1_INTRA,
+       RT2,RT2_LINK,RT2_INTRA_R,RT2_INTRA_N,RT2_NETWORK,
+       RT3,RT3_LINK,RT3_INTRA,
+       RT4,RT4_LINK)
 
     print >>fp, command
 
