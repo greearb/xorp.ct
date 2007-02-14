@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.4 2006/12/15 08:23:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.5 2006/12/15 08:58:40 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -87,6 +87,7 @@ Routing<A>::Routing(OspfTypes::Version version,
 {
     _io.startup();
     _ospf.trace().all(verbose);
+    _ospf.set_testing(true);
 }
 
 template <typename A>
