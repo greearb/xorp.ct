@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.77 2006/10/13 20:26:52 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.78 2006/11/23 00:29:09 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -270,6 +270,22 @@ class PeerManager {
      */
     bool neighbours_exchange_or_loading(const PeerID peerid,
 					OspfTypes::AreaID area);
+
+    /**
+     * Is the state of the neighbour with the specified Router ID at
+     * least 2-Way.
+     *
+     * @param peerid
+     * @param area
+     * @param rid Router ID
+     * @param twoway if the neighbour is found true means the
+     * neighbour is at least twoway.
+     *
+     * @return true if the neighbour is found.
+     */
+    bool neighbour_at_least_two_way(const PeerID peerid,
+				    OspfTypes::AreaID area,
+				    OspfTypes::RouterID rid, bool& twoway);
 
     /**
      * Is this LSA on this neighbours link state request list.

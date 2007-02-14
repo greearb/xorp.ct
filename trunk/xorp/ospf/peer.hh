@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.127 2006/11/23 01:55:22 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.128 2007/02/06 01:55:10 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -22,7 +22,6 @@ template <typename A> class Ospf;
 template <typename A> class Peer;
 
 #include "auth.hh"
-
 
 /**
  * In OSPF terms this class represents an interface/link; interface is
@@ -244,6 +243,20 @@ class PeerOut {
      * @return true if any of the neighbours are in state exchange or loading.
      */
     bool neighbours_exchange_or_loading(OspfTypes::AreaID area);
+
+    /**
+     * Is the state of the neighbour with the specified Router ID at
+     * least 2-Way.
+     *
+     * @param area
+     * @param rid Router ID
+     * @param twoway if the neighbour is found true means the
+     * neighbour is at least twoway.
+     *
+     * @return true if the neighbour is found.
+     */
+    bool neighbour_at_least_two_way(OspfTypes::AreaID area,
+				    OspfTypes::RouterID rid, bool& twoway);
 
     /**
      * Is this LSA on this neighbours link state request list.
@@ -663,6 +676,17 @@ class Peer {
      * @return true if any of the neighbours are in state exchange or loading.
      */
     bool neighbours_exchange_or_loading() const;
+
+    /**
+     * Get the state of the neighbour with the specified router ID.
+     *
+     * @param rid Router ID
+     * @param twoway if the neighbour is found true means the
+     * neighbour is at least twoway.
+     *
+     * @return true if the neighbour is found.
+     */
+    bool neighbour_at_least_two_way(OspfTypes::RouterID rid, bool& twoway);
 
     /**
      * Is this LSA on this neighbours link state request list.

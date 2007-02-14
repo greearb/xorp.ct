@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.108 2007/02/11 11:08:41 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.109 2007/02/13 01:15:54 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -912,6 +912,14 @@ class AreaRouter : public ServiceBase {
      * @return true if any of the neigbours are in state Exchange or Loading.
      */
     bool neighbours_exchange_or_loading() const;
+
+    /**
+     * @param rid Router ID of neighbouring router.
+     *
+     * @return true if this router is at least twoway with the
+     * specified router.
+     */
+    bool neighbour_at_least_two_way(OspfTypes::RouterID rid) const;
 
     /**
      * Is this LSA on this neighbours link state request list.
