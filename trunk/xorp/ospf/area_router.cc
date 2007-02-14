@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.223 2007/02/13 01:19:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.224 2007/02/14 09:27:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -467,11 +467,19 @@ AreaRouter<IPv6>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
     return true;
 }
 
-template <typename A>
+template <>
 bool
-AreaRouter<A>::find_interface_address(OspfTypes::RouterID rid,
-				      uint32_t interface_id,
-				      IPv6& interface)
+AreaRouter<IPv4>::find_interface_address(OspfTypes::RouterID, uint32_t, IPv4&)
+{
+    XLOG_FATAL("Only valid for OSPFv3");
+    return false;
+}
+
+template <>
+bool
+AreaRouter<IPv6>::find_interface_address(OspfTypes::RouterID rid,
+					 uint32_t interface_id,
+					 IPv6& interface)
 {
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
 
@@ -495,6 +503,9 @@ AreaRouter<A>::find_interface_address(OspfTypes::RouterID rid,
 	interface = llsa->get_link_local_address();
 	return true;
     }
+
+    if (get_neighbour_address(rid, interface_id, interface))
+	 return true;
 
     return false;
 }
@@ -2787,6 +2798,24 @@ AreaRouter<A>::neighbour_at_least_two_way(OspfTypes::RouterID rid) const
 
 template <typename A>
 bool
+AreaRouter<A>::get_neighbour_address(OspfTypes::RouterID rid,
+				     uint32_t interface_id,
+				     A& neighbour_address) const
+{
+    typename PeerMap::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	if (_ospf.get_peer_manager().get_neighbour_address(i->first, _area,
+							   rid,
+							   interface_id,
+							   neighbour_address))
+	    return true;
+    }
+
+    return false;
+}
+
+template <typename A>
+bool
 AreaRouter<A>::on_link_state_request_list(const PeerID peerid,
 					  const OspfTypes::NeighbourID nid,
 					  Lsa::LsaRef lsar) const
@@ -4201,7 +4230,7 @@ AreaRouter<A>::routing_router_link_p2p_vlinkV2(Spt<Vertex>& spt,
 	// If the src is the origin then set the address of the
 	// dest. This is the nexthop address from the origin.
 	if (src.get_origin()) {
-	    dst.set_address(interface_address);
+	    dst.set_address(IPv4(htonl(interface_address)));
 	}
 	if (!spt.exists_node(dst)) {
 	    spt.add_node(dst);
@@ -4252,7 +4281,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
     // If the src is the origin then set the address of the
     // dest. This is the nexthop address from the origin.
     if (src.get_origin()) {
- 	dst.set_address(nlsid);
+ 	dst.set_address(IPv4(htonl(nlsid)));
     }
 
     if (!spt.exists_node(dst)) {
@@ -4334,7 +4363,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
 	    // If the src is the origin then set the address of the
 	    // dest. This is the nexthop address from the origin.
 	    if (src.get_origin()) {
-		dst.set_address(interface_address);
+		dst.set_address(IPv4(htonl(interface_address)));
 	    }
 	    if (!spt.exists_node(dst)) {
 		spt.add_node(dst);
@@ -4461,7 +4490,7 @@ AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& spt,
 	// nexthop can't be found then there is no point putting
 	// this router into the graph.
 	if (RouterLink::p2p == rl.get_type()) {
-	    IPv6 interface_address;
+	    A interface_address;
 	    if (!find_interface_address(rl.get_neighbour_router_id(),
 					rl.get_neighbour_interface_id(),
 					interface_address))
@@ -4527,7 +4556,7 @@ AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& spt,
 	// Find the nexthop address from the router's Link-LSA. If the
 	// nexthop can't be found then there is no point putting
 	// this router into the graph.
-	IPv6 interface_address;
+	A interface_address;
 	if (!find_interface_address(rl.get_neighbour_router_id(),
 				    rl.get_neighbour_interface_id(),
 				    interface_address))
@@ -4639,7 +4668,7 @@ AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& spt,
 	    // Find the nexthop address from the router's Link-LSA. If the
 	    // nexthop can't be found then there is no point putting
 	    // this router into the graph.
-	    IPv6 interface_address;
+	    A interface_address;
 	    if (!find_interface_address(adv, interface_id,
 					interface_address))
 		continue;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.125 2006/11/23 01:55:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.126 2007/02/14 09:27:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -725,6 +725,23 @@ PeerManager<A>::neighbour_at_least_two_way(const PeerID peerid,
     }
 
     return _peers[peerid]->neighbour_at_least_two_way(area, rid, twoway);
+}
+
+template <typename A>
+bool
+PeerManager<A>::get_neighbour_address(const PeerID peerid,
+				      OspfTypes::AreaID area,
+				      OspfTypes::RouterID rid,
+				      uint32_t interface_id,
+				      A& neighbour_address)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->
+	get_neighbour_address(area, rid, interface_id, neighbour_address);
 }
 
 template <typename A>

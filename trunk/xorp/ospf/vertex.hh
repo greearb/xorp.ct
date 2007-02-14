@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.10 2007/02/07 04:07:54 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.11 2007/02/13 00:47:58 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -126,9 +126,9 @@ class Vertex {
 	return _origin;
     }
 
-    void set_address(uint32_t address) {
+    void set_address(IPv4 address) {
 	XLOG_ASSERT(OspfTypes::V2 == get_version());
-	_address_ipv4 = IPv4(htonl(address));
+	_address_ipv4 = address;
     }
 
     IPv4 get_address_ipv4() const {

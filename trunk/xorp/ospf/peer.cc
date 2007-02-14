@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.243 2006/12/01 22:38:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.244 2007/02/14 09:27:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -394,6 +394,22 @@ PeerOut<A>::neighbour_at_least_two_way(OspfTypes::AreaID area,
     }
 
     return _areas[area]->neighbour_at_least_two_way(rid, twoway);
+}
+
+template <typename A>
+bool 
+PeerOut<A>::get_neighbour_address(OspfTypes::AreaID area,
+				  OspfTypes::RouterID rid,
+				  uint32_t interface_id,
+				  A& neighbour_address)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->
+	get_neighbour_address(rid, interface_id, neighbour_address);
 }
 
 template <typename A>
@@ -1040,6 +1056,27 @@ Peer<A>::neighbour_at_least_two_way(OspfTypes::RouterID rid, bool& twoway)
 	if ((*n)->get_router_id() == rid) {
 	    twoway = (*n)->get_state() >= Neighbour<A>::TwoWay;
 	    return true;
+	}
+
+    return false;
+}
+
+template <typename A>
+bool 
+Peer<A>::get_neighbour_address(OspfTypes::RouterID rid, uint32_t interface_id,
+			       A& neighbour_address)
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if ((*n)->get_router_id() == rid) {
+	    const HelloPacket *hello = (*n)->get_hello_packet();
+	    if (0 == hello)
+		return false;
+	    if (hello->get_interface_id() == interface_id) {
+		neighbour_address = (*n)->get_neighbour_address();
+		return true;
+	    }
+	    return false;
 	}
 
     return false;

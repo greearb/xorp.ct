@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.109 2007/02/13 01:15:54 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.110 2007/02/14 09:27:30 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -117,7 +117,7 @@ class AreaRouter : public ServiceBase {
      * if present and return the Link-local Interface Address.
      */
     bool find_interface_address(OspfTypes::RouterID rid, uint32_t interface_id,
-				IPv6& interface);
+				A& interface);
 
     /**
      * Add area range.
@@ -920,6 +920,20 @@ class AreaRouter : public ServiceBase {
      * specified router.
      */
     bool neighbour_at_least_two_way(OspfTypes::RouterID rid) const;
+
+    /**
+     * OSPFv3 Only
+     * Neighbour's source address.
+     *
+     * @param rid Router ID
+     * @param interface_id Interface ID.
+     * @param neighbour_address set if neighbour is found.
+     *
+     * @return true if the neighbour is found.
+     */
+    bool get_neighbour_address(OspfTypes::RouterID rid, uint32_t interface_id,
+			       A& neighbour_address)
+	const;
 
     /**
      * Is this LSA on this neighbours link state request list.

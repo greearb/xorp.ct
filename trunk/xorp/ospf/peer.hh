@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.128 2007/02/06 01:55:10 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.129 2007/02/14 09:27:31 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -257,6 +257,21 @@ class PeerOut {
      */
     bool neighbour_at_least_two_way(OspfTypes::AreaID area,
 				    OspfTypes::RouterID rid, bool& twoway);
+
+    /**
+     * Neighbour's source address.
+     *
+     * @param area
+     * @param rid Router ID
+     * @param interface_id Interface ID.
+     * @param neighbour_address set if neighbour is found.
+     *
+     * @return true if the neighbour is found.
+     */
+    bool get_neighbour_address(OspfTypes::AreaID area,
+			       OspfTypes::RouterID rid,
+			       uint32_t interface_id,
+			       A& neighbour_address);
 
     /**
      * Is this LSA on this neighbours link state request list.
@@ -687,6 +702,18 @@ class Peer {
      * @return true if the neighbour is found.
      */
     bool neighbour_at_least_two_way(OspfTypes::RouterID rid, bool& twoway);
+
+    /**
+     * Neighbour's source address.
+     *
+     * @param rid Router ID
+     * @param interface_id Interface ID.
+     * @param neighbour_address set if neighbour is found.
+     *
+     * @return true if the neighbour is found.
+     */
+    bool get_neighbour_address(OspfTypes::RouterID rid, uint32_t interface_id,
+			       A& neighbour_address);
 
     /**
      * Is this LSA on this neighbours link state request list.
@@ -1296,7 +1323,7 @@ class Neighbour {
     OspfTypes::RouterID get_router_id() const { return _router_id; }
 
     /**
-     * Neighbours source address.
+     * Neighbour's source address.
      */
     A get_neighbour_address() const { return _neighbour_address; }
 
