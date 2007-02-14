@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.224 2007/02/14 09:27:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.225 2007/02/14 11:27:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -307,8 +307,8 @@ AreaRouter<A>::start_virtual_link()
 
 template <typename A>
 void
-AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
-				      Lsa::LsaRef r)
+AreaRouter<A>::check_for_virtual_linkV2(const RouteCmd<Vertex>& rc,
+					Lsa::LsaRef r)
 {
     Vertex node = rc.node();
     Lsa::LsaRef lsar = node.get_lsa();
@@ -352,6 +352,14 @@ AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
     _ospf.get_peer_manager().up_virtual_link(rid, routers_interface_address,
 					     rc.weight(),
 					     neighbour_interface_address);
+}
+
+template <typename A>
+void
+AreaRouter<A>::check_for_virtual_linkV3(const RouteCmd<Vertex>& /*rc*/,
+					Lsa::LsaRef /*r*/)
+{
+    XLOG_WARNING("TBD: Routing check for virtual link OSPFv3");
 }
 
 template <typename A>
@@ -3119,7 +3127,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	if (OspfTypes::Router == node.get_type()) {
 	    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
-	    check_for_virtual_link((*ri), _router_lsa);
+	    check_for_virtual_linkV2((*ri), _router_lsa);
 	    if (!(rlsa->get_e_bit() || rlsa->get_b_bit()))
 		continue;
 	    // Originating routers Router ID.
@@ -3327,7 +3335,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	if (OspfTypes::Router == node.get_type()) {
 	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
-// 	    check_for_virtual_link((*ri), _router_lsa);
+ 	    check_for_virtual_linkV3((*ri), _router_lsa);
 	    XLOG_WARNING("TBD: Find Router-LSA with the lowest link state ID");
 	    list<IntraAreaPrefixLsa *>& lsai = 
 		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());

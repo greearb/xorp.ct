@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.110 2007/02/14 09:27:30 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.111 2007/02/14 11:27:17 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -96,7 +96,17 @@ class AreaRouter : public ServiceBase {
      * @param rc node under consideration.
      * @param router this router's Router-LSA.
      */
-    void check_for_virtual_link(const RouteCmd<Vertex>& rc, Lsa::LsaRef lsar);
+    void check_for_virtual_linkV2(const RouteCmd<Vertex>& rc,
+				  Lsa::LsaRef lsar);
+
+    /**
+     * Check this node to see if its a virtual link endpoint.
+     *
+     * @param rc node under consideration.
+     * @param router this router's Router-LSA.
+     */
+    void check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
+				  Lsa::LsaRef lsar);
 
     /**
      * End looking through the list of routers for a virtual link endpoint.
