@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.244 2007/02/14 09:27:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.245 2007/02/14 11:27:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2203,8 +2203,8 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
     case Loopback:
     case Waiting:
     case Point2Point:
-    case Backup:
 	break;
+    case Backup:
     case DR_other: {
 	// Scan through the neighbours until we find the DR.
 	list<Neighbour<IPv6> *>::const_iterator n;
@@ -2223,7 +2223,7 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 	break;
     }
     XLOG_FATAL("Designated router interface ID "
-	       "available in states DR and DR Other not %s",
+	       "available in states DR, DR Other and Backup not %s",
 	       pp_interface_state(get_state()).c_str());
 
     return 0;
@@ -2496,6 +2496,7 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 	    break;
 	case Point2Point:
 	    break;
+	case Backup:	// XXX - Is this correct for the backup state?
 	case DR_other: {
 	    // Do we have an adjacency with the DR?
 	    list<Neighbour<IPv6> *>::iterator n;
@@ -2529,8 +2530,6 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 		router_links.push_back(router_link);
 	    }
 	}
-	    break;
-	case Backup:
 	    break;
 	}
     }
