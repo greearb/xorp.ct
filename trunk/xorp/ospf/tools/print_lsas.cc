@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.17 2006/12/06 01:34:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.18 2006/12/11 21:32:14 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -516,7 +516,13 @@ main(int argc, char **argv)
 	    area = optarg;
 	    break;
 	case 'f':
-	    filter.add(atoi(optarg));
+	    char *endptr;
+	    uint32_t number = strtoul(optarg, &endptr, 0);
+	    if (0 != *endptr) {
+		XLOG_ERROR("<%s> is not a number", optarg);
+		return -1;
+	    }
+	    filter.add(number);
 	    break;
 	case 's':
 	    pstyle = SUMMARY;
