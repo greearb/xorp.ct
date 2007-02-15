@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.227 2007/02/14 13:21:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.228 2007/02/14 14:01:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -479,7 +479,7 @@ template <>
 bool
 AreaRouter<IPv4>::find_interface_address(OspfTypes::RouterID, uint32_t, IPv4&)
 {
-    XLOG_FATAL("Only valid for OSPFv3");
+    XLOG_FATAL("Only IPv6 not IPv4");
     return false;
 }
 
@@ -2868,7 +2868,7 @@ template <>
 bool
 AreaRouter<IPv6>::self_originated_by_interface(Lsa::LsaRef, IPv6) const
 {
-    XLOG_FATAL("Not required for OSPFv3");
+    XLOG_FATAL("Only IPv4 not IPv6");
     return false;
 }
 
