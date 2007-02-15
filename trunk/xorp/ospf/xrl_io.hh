@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.21 2006/03/28 03:06:55 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.22 2006/11/23 01:25:31 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -256,6 +256,19 @@ class XrlIO : public IO<A>,
      */
     bool is_address_enabled(const string& interface, const string& vif,
 			    const A& address) const;
+
+    /**
+     * Get a link local address for this interface/vif if available.
+     *
+     * @param interface the name of the interface
+     * @param vif the name of the vif
+     * @param address (out argument) set if address is found.
+     *
+     * @return true if a link local address is available.
+     *
+     */
+    bool get_link_local_address(const string& interface, const string& vif,
+				A& address);
 
     /**
      * Get the interface ID.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.96 2006/11/23 01:25:31 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.97 2007/02/13 22:16:43 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -460,6 +460,19 @@ class Ospf {
     void register_address_status(typename IO<A>::AddressStatusCb cb) {
 	_io->register_address_status(cb);
     }
+
+    /**
+     * Get a link local address for this interface/vif if available.
+     *
+     * @param interface the name of the interface
+     * @param vif the name of the vif
+     * @param address (out argument) set if address is found.
+     *
+     * @return true if a link local address is available.
+     *
+     */
+    bool get_link_local_address(const string& interface, const string& vif,
+				A& address);
 
     /**
      * Get the interface ID required for OSPFv3.

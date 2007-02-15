@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.17 2006/11/23 01:25:31 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.18 2006/12/02 00:00:30 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -165,6 +165,30 @@ class DebugIO : public IO<A> {
     {
 	DOUT(_info) << "enabled(" << interface << "," << vif << ","
 		    << cstring(address) << ")\n";
+
+	return true;
+    }
+
+    // It should be safe to return the same address for each interface
+    // as it is link local.
+
+    bool get_link_local_address(const string& interface, const string& vif,
+				IPv4& address) {
+
+	DOUT(_info) << "enabled(" << interface << "," << vif << ")\n";
+
+	// RFC 3330
+	address = IPv4("169.254.0.1");
+	
+	return true;
+    }
+
+    bool get_link_local_address(const string& interface, const string& vif,
+				IPv6& address) {
+
+	DOUT(_info) << "enabled(" << interface << "," << vif << ")\n";
+	
+	address = IPv6("fc00::1");
 
 	return true;
     }
