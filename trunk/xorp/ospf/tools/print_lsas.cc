@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.18 2006/12/11 21:32:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.19 2007/02/15 22:57:30 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -302,7 +302,7 @@ public:
 	    break;
 	case OspfTypes::V3:
 	    printf(" Type       ID               Adv "
-		   "Rtr           Seq      Age  Cksum  Len\n");
+		   "Rtr           Seq         Age  Cksum  Len\n");
 	    break;
 	}
 
@@ -310,7 +310,14 @@ public:
     }
 
     bool print(Lsa::LsaRef lsar) {
-	printf("%-8s", lsar->name());
+	switch(_version) {
+	case OspfTypes::V2:
+	    printf("%-8s", lsar->name());
+	    break;
+	case OspfTypes::V3:
+	    printf("%-11s", lsar->name());
+	    break;
+	}
 	printf("%c", lsar->get_self_originating() ? '*' : ' ');
 	Lsa_header& header = lsar->get_header();
 	printf("%-17s", pr_id(header.get_link_state_id()).c_str());
