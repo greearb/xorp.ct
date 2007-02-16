@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.230 2007/02/16 04:43:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.231 2007/02/16 09:58:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2678,6 +2678,15 @@ AreaRouter<A>::publish(const OspfTypes::PeerID peerid,
 		       Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (lsar->link_local_scope() && lsar->get_peerid() != peerid)
+	    return;
+	break;
+    }
 
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
