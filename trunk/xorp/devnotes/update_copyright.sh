@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.4 2007/02/16 22:10:33 pavlin Exp $
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.5 2007/02/16 22:28:23 pavlin Exp $
 #
 
 #
@@ -29,10 +29,10 @@
 #
 # Note the hack in defining the string so the script doesn't update itself.
 #
-#OLD_YEAR="(c) 2006"
-#NEW_YEAR="(c) 2006-2007"
-OLD_YEAR="-2006"
-NEW_YEAR="-2007"
+#OLD_YEAR="(c) 2007"
+#NEW_YEAR="(c) 2007-2008"
+OLD_YEAR="-2007"
+NEW_YEAR="-2008"
 OLD_STRING="${OLD_YEAR} International Computer Science Institute"
 NEW_STRING="${NEW_YEAR} International Computer Science Institute"
 
