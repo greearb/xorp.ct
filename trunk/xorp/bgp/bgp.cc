@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.78 2006/10/12 01:24:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.79 2006/11/08 20:05:36 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1594,7 +1594,7 @@ BGPMain::get_peer_as(const Iptuple& iptuple, uint32_t& peer_as)
 
     // XXX is it appropriate to return an extended AS number in this
     // context?
-    peer_as = pd->as().as32();
+    peer_as = pd->as().as4();
 
     return true;
 }

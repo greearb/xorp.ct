@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.25 2006/03/16 00:03:27 pavlin Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.26 2006/04/28 17:11:17 zec Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -243,10 +243,10 @@ protected:
 
 
 /* subsclass of AsSegment to handle encoding and decoding of 4-byte AS
-   numbers from a NEW_AS_PATH attribute */
-class NewAsSegment : public AsSegment {
+   numbers from a AS4_PATH attribute */
+class As4Segment : public AsSegment {
 public:
-    NewAsSegment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
+    As4Segment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
     /**
      * Convert the external representation into the internal one.
      * _type is d[0], _entries is d[1], entries follow.
@@ -412,19 +412,19 @@ private:
 };
 
 /* subclass to handle 4-byte AS encoding and decoding */
-class NewAsPath : public AsPath {
+class As4Path : public AsPath {
 public:
     /**
      * construct from received data.  This needs to take the regular
-     * AsPath in addition to the NEW_AS_PATH data, because it needs to
+     * AsPath in addition to the AS4_PATH data, because it needs to
      * cross-validate the two.
      */
-    NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path)
+    As4Path(const uint8_t* d, size_t len, const AsPath& as_path)
 	throw(CorruptMessage);
 
     /**
      * Convert from internal to external representation, with the
-     * correct representation for the original NEW_AS_PATH attribute.
+     * correct representation for the original AS4_PATH attribute.
      *
      * If we do not pass a buffer (buf = 0), then the routine will
      * allocate a new one; otherwise, len indicates the size of the

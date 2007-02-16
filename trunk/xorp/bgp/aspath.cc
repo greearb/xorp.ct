@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.36 2006/04/30 07:49:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.37 2006/10/12 01:24:36 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -302,17 +302,17 @@ AsSegment::two_byte_compatible() const
     return true;
 }
 
-/* *************** NewAsSegment ***************** */
+/* *************** As4Segment ***************** */
 
 
 /**
  * Convert the external representation into the internal one. This is
- * used when decoding a NEW_AS_PATH attribute.
+ * used when decoding a AS4_PATH attribute.
  *
  * _type is d[0], _entries is d[1], entries follow.
  */
 void
-NewAsSegment::decode(const uint8_t *d) throw(CorruptMessage)
+As4Segment::decode(const uint8_t *d) throw(CorruptMessage)
 {
     size_t n = d[1];
     clear();
@@ -343,10 +343,10 @@ NewAsSegment::decode(const uint8_t *d) throw(CorruptMessage)
 }
 
 /**
- * Convert from internal to external NEW_AS_PATH representation.
+ * Convert from internal to external AS4_PATH representation.
  */
 const uint8_t *
-NewAsSegment::encode(size_t &len, uint8_t *data) const
+As4Segment::encode(size_t &len, uint8_t *data) const
 {
     debug_msg("AsSegment encode\n");
     XLOG_ASSERT(_entries <= 255);
@@ -365,8 +365,8 @@ NewAsSegment::encode(size_t &len, uint8_t *data) const
     data[1] = _entries;
 
     for (i = 2, as = _aslist.begin(); as != _aslist.end(); i += 4, ++as) {
-	debug_msg("Encoding 32-bit As %d\n", as->as());
-	uint32_t as_num = htonl(as->as32());
+	debug_msg("Encoding 4-byte As %d\n", as->as());
+	uint32_t as_num = htonl(as->as4());
 	memcpy(data + i, &as_num, 4);
     }
 
@@ -825,7 +825,7 @@ AsPath::two_byte_compatible() const
 }
 
 
-NewAsPath::NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path)
+As4Path::As4Path(const uint8_t* d, size_t len, const AsPath& as_path)
      throw(CorruptMessage)
 {
     decode(d, len);
@@ -834,10 +834,10 @@ NewAsPath::NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path)
 
 /**
  * populate a AsPath from the received data representation from a
- * NEW_AS_PATH attribute.
+ * AS4_PATH attribute.
  */
 void
-NewAsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
+As4Path::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 {
     _num_segments = 0;
     _path_len = 0;
@@ -845,7 +845,7 @@ NewAsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 	size_t len = 2 + d[1]*4;	// XXX length in bytes for 32bit AS's
 	XLOG_ASSERT(len <= l);
 
-	NewAsSegment s(d);
+	As4Segment s(d);
 	add_segment(s);
 	d += len;
 	l -= len;
@@ -854,14 +854,14 @@ NewAsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 
 /**
  * the AS_PATH attribute may have had new ASes added since the
- * NEW_AS_PATH was last updated.  We need to copy across anything that
+ * AS4_PATH was last updated.  We need to copy across anything that
  * is missing 
  */
 
-void NewAsPath::cross_validate(const AsPath& as_path)
+void As4Path::cross_validate(const AsPath& as_path)
 {
     if (as_path.path_length() < path_length() ) {
-	// This is illegal.  The spec says to ignore the NEW_AS_PATH
+	// This is illegal.  The spec says to ignore the AS4_PATH
 	// attribute and use the data from the AS_PATH attribute throw
 	// away the data we had.
 	while (!_segments.empty()) {
@@ -875,18 +875,18 @@ void NewAsPath::cross_validate(const AsPath& as_path)
     }
 
     // The AS_PATH attribute may contain ASes that were added by an
-    // old BGP speaker that are missing from the NEW_AS_PATH attribute.
+    // old BGP speaker that are missing from the AS4_PATH attribute.
 
     if (as_path.path_length() > path_length()) {
 	if (as_path.num_segments() < num_segments()) {
 	    // Now we're in trouble!  The AS_PATH has more ASes but
-	    // fewer segments than the NEW_AS_PATH.
+	    // fewer segments than the AS4_PATH.
 	    do_patchup(as_path);
 	    return;
 	}
 
 	// The AS_PATH has at least as many segments as the
-	// NEW_AS_PATH find where they differ, and copy across.
+	// AS4_PATH find where they differ, and copy across.
 	for (uint32_t i = 1; i <= num_segments(); i++) {
 	    const AsSegment *old_seg;
 	    AsSegment *new_seg;
@@ -920,7 +920,7 @@ void NewAsPath::cross_validate(const AsPath& as_path)
     }
 }
 
-void NewAsPath::pad_segment(const AsSegment& old_seg, AsSegment& new_seg) 
+void As4Path::pad_segment(const AsSegment& old_seg, AsSegment& new_seg) 
 {
     if (new_seg.type() == AS_SET) {
 	// find everything in the old seg that's not in the new seg,
@@ -971,14 +971,14 @@ void NewAsPath::pad_segment(const AsSegment& old_seg, AsSegment& new_seg)
     return;
 }
 
-void NewAsPath::do_patchup(const AsPath& as_path)
+void As4Path::do_patchup(const AsPath& as_path)
 {
     // we get here when the cross validation fails, and we need to do
     // something that isn't actually illegal.
 
     // There's no good way to deal with this, but simplest is to pad
-    // the NEW_AS_PATH with an AS_SET containing anything that wasn't
-    // previously in the NEW_AS_PATH.  This at least should prevent
+    // the AS4_PATH with an AS_SET containing anything that wasn't
+    // previously in the AS4_PATH.  This at least should prevent
     // loops forming, but it's really ugly.
 
     AsSegment new_set(AS_SET);
@@ -1017,7 +1017,7 @@ void NewAsPath::do_patchup(const AsPath& as_path)
 }
 
 const uint8_t *
-NewAsPath::encode(size_t &len, uint8_t *buf) const
+As4Path::encode(size_t &len, uint8_t *buf) const
 {
     XLOG_ASSERT(_num_segments == _segments.size());	// XXX expensive
     const_iterator i;
@@ -1032,7 +1032,7 @@ NewAsPath::encode(size_t &len, uint8_t *buf) const
 
     // encode into the buffer
     for (pos = 0, i = _segments.begin(); i != _segments.end(); ++i) {
-	const NewAsSegment *new_seg = (const NewAsSegment*)(&(*i));
+	const As4Segment *new_seg = (const As4Segment*)(&(*i));
 	l = new_seg->wire_size();
 	new_seg->encode(l, buf + pos);
 	pos += l;
@@ -1042,13 +1042,13 @@ NewAsPath::encode(size_t &len, uint8_t *buf) const
 
 
 size_t
-NewAsPath::wire_size() const
+As4Path::wire_size() const
 {
     size_t l = 0;
     const_iterator i;
 
     for (i = _segments.begin(); i != _segments.end(); ++i) {
-	const NewAsSegment *new_seg = (const NewAsSegment*)(&(*i));
+	const As4Segment *new_seg = (const As4Segment*)(&(*i));
 	l += new_seg->wire_size();
     }
     return l;

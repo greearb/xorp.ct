@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.13 2006/03/16 00:04:25 pavlin Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.14 2006/10/12 01:24:50 pavlin Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -29,19 +29,28 @@
 /**
  * @short A class for storing an AS number used by protocols such as BGP
  * 
- * This class can be used to store an AS number that can be either
- * 16 or 32 bits.  Originally, the AS numbers were defined as 16-bit
+ * This class can be used to store an AS number that can be either 16
+ * or 32 bits.  Originally, the AS numbers were defined as 16-bit
  * unsigned numbers.  Later the "extended" AS numbers were introduced,
- * which are unsigned 32-bit numbers.
+ * which are unsigned 32-bit numbers.  Conventional terminology refers
+ * to the 32-bit version as 4-byte AS numbers rather than 32-bit AS
+ * numbers, so we'll try and stick with that where it makes sense.
  *
- * 16-bit numbers are expanded to 32-bit by extending them with 0's in front.
- * 32-bit numbers are represented in a 16-bit path, by a special 16-bit value,
- * AS_TRAN, which will be allocated by IANA.
- * Together with any AsPath containing AS_TRAN, we will always see a NEW_AS_PATH
- * attribute which contains the full 32-bit representation of the path.
- * So there is no loss of information.
+ * 2-byte numbers are expanded to 32-bits by extending them with 0's in front.
+ * 4-byte numbers are represented in a 2-byte AS path, by a special
+ * 16-bit value, AS_TRAN, which will be allocated by IANA.
+ * Together with any AsPath containing AS_TRAN, we will always see a
+ * AS4_PATH attribute which contains the full 32-bit representation
+ * of the path.  So there is no loss of information.
+ *
+ * IANA refers to NEW_AS_PATH, but the latest internet drafts refer to
+ * AS4_PATH.  They're the same thing, but I the latter is preferred so
+ * we'll use that.
  *
  * The internal representation of an AsNum is 32-bit in host order.
+ *
+ * The canonical string form of a 4-byte AS number is <high>.<low>, so
+ * decimal 65536 ends up being printed as "1.0".
  *
  * An AsNum must always be initialized, so the default constructor
  * is never called.
@@ -56,8 +65,6 @@ public:
      * @param value the value to assign to this AS number.
      */
     explicit AsNum(const uint32_t value) : _as(value)	{
-	// XXX remove when we support 32-bit AS
-	//assert(value <= 0xffff);
     }
  
     explicit AsNum(const uint16_t value) : _as(value)	{}
@@ -75,6 +82,24 @@ public:
     }
 
     /**
+     * construct from a 2-byte buffer in memory or a 4 byte buffer (in
+     * net byte order).
+     *
+     * The 4byte parameter is mostly to distinguish this from the
+     * 2-byte constructor above.
+     */
+    explicit AsNum(const uint8_t *d, bool fourbyte)	{
+	if (fourbyte) {
+	    // 4 byte version
+	    memcpy(&_as, d, 4);
+	    _as = htonl(_as);
+	} else {
+	    // 2 byte version
+	    _as = (d[0] << 8) + d[1];
+	}
+    }
+
+    /**
      * Get the non-extended AS number value.
      * 
      * @return the non-extended AS number value.
@@ -88,7 +113,7 @@ public:
      * 
      * @return the extended AS number value.
      */
-    uint32_t as32() const				{ return _as; }
+    uint32_t as4() const				{ return _as; }
 
     /**
      * copy the 16-bit value into a 2-byte memory buffer
@@ -97,6 +122,15 @@ public:
 	uint16_t x = as();
 	d[0] = (x >> 8) & 0xff;
 	d[1] = x & 0xff;
+    }
+
+    /**
+     * copy the 32-bit value into a 4-byte network byte order memory buffer
+     */
+    void copy_out4(uint8_t *d) const			{
+	// note - buffer may be unaligned, so use memcpy
+	uint32_t x = htonl(_as);
+	memcpy(d, &x, 4);
     }
 
     /**
@@ -129,11 +163,22 @@ public:
      * of the AS number.
      */
     string str() const					{
-	return c_format("AS/%d", XORP_INT_CAST(_as));
+	if (extended())
+	    return c_format("AS/%u.%u", (_as >> 16)&&0xffff, _as&&0xff);
+	else 
+	    return c_format("AS/%u", XORP_UINT_CAST(_as));
     }
 
     string short_str() const					{
-	return c_format("%d", XORP_INT_CAST(_as));
+	if (extended())
+	    return c_format("%u.%u", (_as >> 16)&&0xffff, _as&&0xff);
+	else
+	    return c_format("%u", XORP_UINT_CAST(_as));
+    }
+
+    string fourbyte_str() const {
+	// this version forces the long canonical format
+	return c_format("%u.%u", (_as >> 16)&&0xffff, _as&&0xff);
     }
     
 private:
