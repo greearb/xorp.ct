@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.232 2007/02/16 10:11:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.233 2007/02/16 12:53:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2502,7 +2502,7 @@ AreaRouter<A>::get_lsas(const list<Ls_request>& reqs,
 
 template <typename A>
 DataBaseHandle
-AreaRouter<A>::open_database(bool& empty)
+AreaRouter<A>::open_database(OspfTypes::PeerID peerid, bool& empty)
 {
     // While there are readers no entries can be add to the database
     // before the _last_entry.
@@ -2512,7 +2512,7 @@ AreaRouter<A>::open_database(bool& empty)
     // Snapshot the current last entry position. While the database is
     // open (_readers > 0) new entries will be added past _last_entry.
 
-    DataBaseHandle dbh = DataBaseHandle(true, _last_entry);
+    DataBaseHandle dbh = DataBaseHandle(true, _last_entry, peerid);
 
     empty = !subsequent(dbh);
 
@@ -2521,7 +2521,7 @@ AreaRouter<A>::open_database(bool& empty)
 
 template <typename A>
 bool
-AreaRouter<A>::valid_entry_database(size_t index)
+AreaRouter<A>::valid_entry_database(OspfTypes::PeerID peerid, size_t index)
 {
     Lsa::LsaRef lsar = _db[index];
 
@@ -2533,6 +2533,15 @@ AreaRouter<A>::valid_entry_database(size_t index)
 	TimeVal now;
 	_ospf.get_eventloop().current_time(now);
 	lsar->update_age(now);
+    }
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (lsar->link_local_scope() && lsar->get_peerid() != peerid)
+	    return false;
+	break;
     }
 
     if (lsar->maxage()) {
@@ -2561,7 +2570,7 @@ AreaRouter<A>::subsequent(DataBaseHandle& dbh)
 {
     bool another = false;
     for (size_t index = dbh.position(); index < dbh.last(); index++) {
-	if (!valid_entry_database(index))
+	if (!valid_entry_database(dbh.get_peerid(), index))
 	    continue;
 	another = true;
 	break;
@@ -2586,7 +2595,7 @@ AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
 		       XORP_INT_CAST(_db.size()));
 
 	dbh.advance(last);
-    } while(!valid_entry_database(position));
+    } while(!valid_entry_database(dbh.get_peerid(), position));
 
     // If this is not the last entry make sure there is a subsequent
     // valid entry.

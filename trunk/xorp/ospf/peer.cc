@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.248 2007/02/16 12:56:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.249 2007/02/16 13:02:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3337,7 +3337,8 @@ Neighbour<A>::build_data_description_packet()
     // Open the database if the handle is invalid.
     if (!_database_handle.valid()) {
 	bool empty;
-	_database_handle = get_area_router()->open_database(empty);
+	_database_handle = get_area_router()->open_database(_peer.get_peerid(),
+							    empty);
 	if (empty)
 	    goto out;
     }

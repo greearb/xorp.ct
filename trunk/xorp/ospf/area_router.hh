@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.113 2007/02/16 04:43:52 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.114 2007/02/16 12:53:21 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -477,10 +477,11 @@ class AreaRouter : public ServiceBase {
      *
      * Used only by the peer to generate the database description packets.
      *
+     * @param peerid
      * @param empty true if the database is empty.
      * @return Database Handle
      */
-    DataBaseHandle open_database(bool& empty);
+    DataBaseHandle open_database(OspfTypes::PeerID peerid, bool& empty);
 
     /**
      * Is this a valid entry to be returned by the database.
@@ -489,7 +490,7 @@ class AreaRouter : public ServiceBase {
      *
      * @return true if this entry is valid.
      */
-    bool valid_entry_database(size_t index);
+    bool valid_entry_database(OspfTypes::PeerID peerid, size_t index);
 
     /**
      * Is there another database entry following this one.
@@ -1235,11 +1236,13 @@ class AreaRouter : public ServiceBase {
  */
 class DataBaseHandle {
  public:
-    DataBaseHandle() : _position(0), _last_entry(0), _valid(false)
+    DataBaseHandle() : _position(0), _last_entry(0), _valid(false),
+		       _peerid(OspfTypes::ALLPEERS)
     {}
 
-    DataBaseHandle(bool v, uint32_t last_entry)
-	: _position(0), _last_entry(last_entry), _valid(v)
+    DataBaseHandle(bool v, uint32_t last_entry, OspfTypes::PeerID peerid)
+	: _position(0), _last_entry(last_entry), _valid(v),
+	  _peerid(peerid)
     {}
 
     uint32_t position() const {
@@ -1263,11 +1266,14 @@ class DataBaseHandle {
 
     void invalidate() { _valid = false; }
 
+    OspfTypes::PeerID get_peerid() const { return _peerid; }
+
  private:
     uint32_t _position;		// Position in database.
     uint32_t _last_entry;	// One past last entry, for an empty
 				// database value would be 0.
     bool _valid;		// True if this handle is valid.
+    OspfTypes::PeerID _peerid;	// The Peer ID that opened the database.
 };
 
 /**
