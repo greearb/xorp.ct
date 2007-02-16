@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.90 2006/12/17 04:32:49 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.91 2007/02/12 06:53:09 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1921,7 +1921,7 @@ public:
      * Printable name of this LSA.
      */
     const char *name() const {
-	return "Intra-Area-Prefix";
+	return "IntraArPfx";
     }
 
     /**
