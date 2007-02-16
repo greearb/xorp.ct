@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.47 2006/10/17 23:49:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.48 2006/10/19 18:47:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -512,7 +512,7 @@ XrlOspfV2Target::ospfv2_0_1_delete_peer(const string& ifname,
 {
     debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -530,7 +530,7 @@ XrlOspfV3Target::ospfv3_0_1_delete_peer(const string& ifname,
 {
     debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -550,7 +550,7 @@ XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
     debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
 	      vifname.c_str(), pb(enable));
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -570,7 +570,7 @@ XrlOspfV3Target::ospfv3_0_1_set_peer_state(const string& ifname,
     debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
 	      vifname.c_str(), pb(enable));
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -595,7 +595,7 @@ XrlOspfV2Target::ospfv2_0_1_add_neighbour(const string&	ifname,
 	      vifname.c_str(), pr_id(area).c_str(), 
 	      cstring(neighbour_address),pr_id(rid).c_str());
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -623,7 +623,7 @@ XrlOspfV3Target::ospfv3_0_1_add_neighbour(const string&	ifname,
 	      vifname.c_str(), pr_id(area).c_str(), 
 	      cstring(neighbour_address),pr_id(rid).c_str());
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -651,7 +651,7 @@ XrlOspfV2Target::ospfv2_0_1_remove_neighbour(const string& ifname,
 	      vifname.c_str(), pr_id(area).c_str(), 
 	      cstring(neighbour_address),pr_id(rid).c_str());
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {
@@ -679,7 +679,7 @@ XrlOspfV3Target::ospfv3_0_1_remove_neighbour(const string& ifname,
 	      vifname.c_str(), pr_id(area).c_str(), 
 	      cstring(neighbour_address),pr_id(rid).c_str());
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
     } catch(XorpException& e) {

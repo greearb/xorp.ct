@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/vlink.cc,v 1.8 2006/03/16 00:04:49 pavlin Exp $"
+#ident "$XORP: xorp/ospf/vlink.cc,v 1.9 2006/10/12 01:25:01 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -195,7 +195,7 @@ Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
 
 template <typename A>
 bool
-Vlink<A>::add_peerid(OspfTypes::RouterID rid, PeerID peerid)
+Vlink<A>::add_peerid(OspfTypes::RouterID rid, OspfTypes::PeerID peerid)
 {
     if (0 == _vlinks.count(rid)) {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
@@ -211,12 +211,12 @@ Vlink<A>::add_peerid(OspfTypes::RouterID rid, PeerID peerid)
 }
 
 template <typename A>
-PeerID
+OspfTypes::PeerID
 Vlink<A>::get_peerid(OspfTypes::RouterID rid) const
 {
     if (0 == _vlinks.count(rid)) {
 	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
-	return ALLPEERS;
+	return OspfTypes::ALLPEERS;
     }
 
     typename map <OspfTypes::RouterID, Vstate>::const_iterator i = 
@@ -266,7 +266,7 @@ Vlink<A>::get_physical_interface_vif(A source, A destination,
 }
 
 template <typename A>
-PeerID
+OspfTypes::PeerID
 Vlink<A>::get_peerid(A source, A destination) const
 {
     typename map<OspfTypes::RouterID, Vstate>::const_iterator i;
@@ -277,7 +277,7 @@ Vlink<A>::get_peerid(A source, A destination) const
 	}
     }
 
-    return ALLPEERS;
+    return OspfTypes::ALLPEERS;
 }
 
 template <typename A>

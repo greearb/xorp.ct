@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.228 2007/02/14 14:01:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.229 2007/02/15 22:32:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -131,7 +131,7 @@ AreaRouter<A>::shutdown()
 
 template <typename A>
 void
-AreaRouter<A>::add_peer(PeerID peerid)
+AreaRouter<A>::add_peer(OspfTypes::PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
     // The peer starts in the down state.
@@ -140,7 +140,7 @@ AreaRouter<A>::add_peer(PeerID peerid)
 
 template <typename A>
 void
-AreaRouter<A>::delete_peer(PeerID peerid)
+AreaRouter<A>::delete_peer(OspfTypes::PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
 
@@ -154,7 +154,7 @@ AreaRouter<A>::delete_peer(PeerID peerid)
 
 template <typename A>
 bool
-AreaRouter<A>::peer_up(PeerID peerid)
+AreaRouter<A>::peer_up(OspfTypes::PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
 
@@ -175,7 +175,7 @@ AreaRouter<A>::peer_up(PeerID peerid)
 
 template <typename A>
 bool
-AreaRouter<A>::peer_down(PeerID peerid)
+AreaRouter<A>::peer_down(OspfTypes::PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
 
@@ -1337,7 +1337,8 @@ AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/, bool redist)
     }
     add_lsa(lsar);
     bool multicast_on_peer;
-    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar, multicast_on_peer);
+    publish(OspfTypes::ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar,
+	    multicast_on_peer);
 }
 
 template <typename A>
@@ -1380,7 +1381,8 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
     }
     XLOG_ASSERT(lsar == _db[index]);
     bool multicast_on_peer;
-    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar, multicast_on_peer);
+    publish(OspfTypes::ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar,
+	    multicast_on_peer);
     push_lsas();
 }
 
@@ -1419,7 +1421,7 @@ AreaRouter<A>::external_withdraw(Lsa::LsaRef lsar)
 
 template <typename A>
 bool 
-AreaRouter<A>::new_router_links(PeerID peerid,
+AreaRouter<A>::new_router_links(OspfTypes::PeerID peerid,
 				const list<RouterLink>& router_links)
 {
     if (0 == _peers.count(peerid)) {
@@ -1441,7 +1443,7 @@ AreaRouter<A>::new_router_links(PeerID peerid,
 
 template <typename A>
 bool 
-AreaRouter<A>::generate_network_lsa(PeerID peerid,
+AreaRouter<A>::generate_network_lsa(OspfTypes::PeerID peerid,
 				    OspfTypes::RouterID link_state_id,
 				    list<OspfTypes::RouterID>& routers,
 				    uint32_t network_mask)
@@ -1478,7 +1480,7 @@ AreaRouter<A>::generate_network_lsa(PeerID peerid,
 
 template <typename A>
 bool 
-AreaRouter<A>::update_network_lsa(PeerID peerid,
+AreaRouter<A>::update_network_lsa(OspfTypes::PeerID peerid,
 				  OspfTypes::RouterID link_state_id,
 				  list<OspfTypes::RouterID>& routers,
 				  uint32_t network_mask)
@@ -1537,7 +1539,7 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
 
 template <typename A>
 bool 
-AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
+AreaRouter<A>::withdraw_network_lsa(OspfTypes::PeerID peerid,
 				    OspfTypes::RouterID link_state_id)
 {
     debug_msg("PeerID %u link state id %s\n", peerid,
@@ -1563,7 +1565,8 @@ AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
 
 template <typename A>
 void
-AreaRouter<A>::refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar, bool timer)
+AreaRouter<A>::refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
+				   bool timer)
 {
     NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
     XLOG_ASSERT(nlsa);
@@ -1777,7 +1780,7 @@ pp_lsas(const list<Lsa::LsaRef>& lsas)
 
 template <typename A>
 void
-AreaRouter<A>::receive_lsas(PeerID peerid,
+AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 			    OspfTypes::NeighbourID nid,
 			    list<Lsa::LsaRef>& lsas, 
 			    list<Lsa_header>& direct_ack,
@@ -2658,7 +2661,8 @@ AreaRouter<A>::refresh_router_lsa(bool timer)
 
 template <typename A>
 void
-AreaRouter<A>::publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
+AreaRouter<A>::publish(const OspfTypes::PeerID peerid,
+		       const OspfTypes::NeighbourID nid,
 		       Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
@@ -2697,7 +2701,8 @@ AreaRouter<A>::publish_all(Lsa::LsaRef lsar)
 {
     debug_msg("Publish: %s\n", cstring(*lsar));
     bool multicast_on_peer;
-    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar, multicast_on_peer);
+    publish(OspfTypes::ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar,
+	    multicast_on_peer);
 
     push_lsas();	// NOTE: a push after every LSA.
 }
@@ -2827,7 +2832,7 @@ AreaRouter<A>::get_neighbour_address(OspfTypes::RouterID rid,
 
 template <typename A>
 bool
-AreaRouter<A>::on_link_state_request_list(const PeerID peerid,
+AreaRouter<A>::on_link_state_request_list(const OspfTypes::PeerID peerid,
 					  const OspfTypes::NeighbourID nid,
 					  Lsa::LsaRef lsar) const
 {
@@ -2837,7 +2842,7 @@ AreaRouter<A>::on_link_state_request_list(const PeerID peerid,
 
 template <typename A>
 bool
-AreaRouter<A>::event_bad_link_state_request(const PeerID peerid,
+AreaRouter<A>::event_bad_link_state_request(const OspfTypes::PeerID peerid,
 				    const OspfTypes::NeighbourID nid) const
 {
     return _ospf.get_peer_manager().
@@ -2846,7 +2851,7 @@ AreaRouter<A>::event_bad_link_state_request(const PeerID peerid,
 
 template <typename A>
 bool
-AreaRouter<A>::send_lsa(const PeerID peerid,
+AreaRouter<A>::send_lsa(const OspfTypes::PeerID peerid,
 			const OspfTypes::NeighbourID nid,
 			Lsa::LsaRef lsar) const
 {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.245 2007/02/14 11:27:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.246 2007/02/15 22:20:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -89,7 +89,7 @@ do_multicast(OspfTypes::LinkType linktype)
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
-		     const PeerID peerid,
+		     const OspfTypes::PeerID peerid,
 		     const A interface_address,
 		     const uint16_t interface_prefix_length,
 		     const uint16_t interface_mtu,
@@ -343,7 +343,7 @@ PeerOut<A>::send_lsa(OspfTypes::AreaID area, const OspfTypes::NeighbourID nid,
 
 template <typename A>
 bool
-PeerOut<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+PeerOut<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 		      Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
@@ -939,7 +939,7 @@ Peer<A>::send_lsa(const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar) const
 
 template <typename A>
 bool
-Peer<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+Peer<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 		   Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     debug_msg("lsa %s nid %d \n", cstring(*lsar), nid);
@@ -4258,7 +4258,7 @@ Neighbour<A>::send_lsa(Lsa::LsaRef lsar)
 
 template <typename A>
 bool
-Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+Neighbour<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 			Lsa::LsaRef lsar, bool& multicast_on_peer)
 {
     // RFC 2328 Section 13.3.  Next step in the flooding procedure

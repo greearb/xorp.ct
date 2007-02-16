@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.82 2007/02/13 22:16:43 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.83 2007/02/15 02:46:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -412,7 +412,7 @@ Ospf<A>::set_simple_authentication_key(const string&		interface,
 				       const string&		password,
 				       string&			error_msg)
 {
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
 
     try {
 	peerid = _peer_manager.get_peerid(interface, vif);
@@ -439,7 +439,7 @@ Ospf<A>::delete_simple_authentication_key(const string&		interface,
 					  OspfTypes::AreaID	area,
 					  string&		error_msg)
 {
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
 
     try {
 	peerid = _peer_manager.get_peerid(interface, vif);
@@ -471,7 +471,7 @@ Ospf<A>::set_md5_authentication_key(const string&	interface,
 				    string&		error_msg)
 
 {
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
 
     try {
 	peerid = _peer_manager.get_peerid(interface, vif);
@@ -501,7 +501,7 @@ Ospf<A>::delete_md5_authentication_key(const string&		interface,
 				       uint8_t			key_id,
 				       string&			error_msg)
 {
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
 
     try {
 	peerid = _peer_manager.get_peerid(interface, vif);

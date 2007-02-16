@@ -13,20 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.79 2007/02/14 09:27:31 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.80 2007/02/14 11:27:18 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
-
-/**
- * An opaque handle that identifies a peer.
- */
-typedef uint32_t PeerID;
-
-/**
- * An identifier meaning all peers. No single peer can have this identifier.
- */
-static const PeerID ALLPEERS = 0;
 
 template <typename A> class Ospf;
 template <typename A> class PeerOut;
@@ -51,7 +41,8 @@ template <typename A>
 class PeerManager {
  public:
     PeerManager(Ospf<A>& ospf)
-	: _ospf(ospf), _next_peerid(ALLPEERS + 1), _external(ospf, _areas)
+	: _ospf(ospf), _next_peerid(OspfTypes::ALLPEERS + 1),
+	  _external(ospf, _areas)
     {}
 
     ~PeerManager();
@@ -143,7 +134,7 @@ class PeerManager {
      * Convert an interface/vif to a PeerID.
      * Throw an exception if no mapping is found.
      */
-    PeerID get_peerid(const string& interface, const string& vif) 
+    OspfTypes::PeerID get_peerid(const string& interface, const string& vif) 
 	throw(BadPeer);
 
     /**
@@ -156,25 +147,26 @@ class PeerManager {
      *
      * @return PeerID on success otherwise throw an exception.
      */
-    PeerID create_peer(const string& interface, const string& vif,
-		       const A source,
-		       OspfTypes::LinkType linktype, OspfTypes::AreaID area)
+    OspfTypes::PeerID create_peer(const string& interface, const string& vif,
+				  const A source,
+				  OspfTypes::LinkType linktype,
+				  OspfTypes::AreaID area)
 	throw(BadPeer);
 	
     /**
      * Delete a peer.
      */
-    bool delete_peer(const PeerID);
+    bool delete_peer(const OspfTypes::PeerID);
 
     /**
      * Take a peer up or down.
      */
-    bool set_state_peer(const PeerID, bool state);
+    bool set_state_peer(const OspfTypes::PeerID, bool state);
 
     /**
      * Set the link status of the peer.
      */
-    bool set_link_status_peer(const PeerID, bool state);
+    bool set_link_status_peer(const OspfTypes::PeerID, bool state);
 
     /**
      * Track the state of an address.
@@ -186,14 +178,14 @@ class PeerManager {
     /**
      * Add a neighbour to the peer.
      */
-    bool add_neighbour(const PeerID,
+    bool add_neighbour(const OspfTypes::PeerID,
 		       OspfTypes::AreaID area, A neighbour_address,
 		       OspfTypes::RouterID);
 
     /**
      * Remove a neighbour from the peer.
      */
-    bool remove_neighbour(const PeerID,
+    bool remove_neighbour(const OspfTypes::PeerID,
 			  OspfTypes::AreaID area, A neighbour_address,
 			  OspfTypes::RouterID rid);
 
@@ -230,14 +222,15 @@ class PeerManager {
      *
      * @return true on success.
      */
-    bool queue_lsa(const PeerID peerid, const PeerID peer,
+    bool queue_lsa(const OspfTypes::PeerID peerid,
+		   const OspfTypes::PeerID peer,
 		   OspfTypes::NeighbourID nid, Lsa::LsaRef lsar,
 		   bool &multicast_on_peer);
 
     /**
      * Send (push) any queued LSAs.
      */
-    bool push_lsas(const PeerID peerid);
+    bool push_lsas(const OspfTypes::PeerID peerid);
 
     /*
      * Does this address fall into a configured OSPF network making it
@@ -268,7 +261,7 @@ class PeerManager {
      *
      * @return true if any of the neighbours are in state exchange or loading.
      */
-    bool neighbours_exchange_or_loading(const PeerID peerid,
+    bool neighbours_exchange_or_loading(const OspfTypes::PeerID peerid,
 					OspfTypes::AreaID area);
 
     /**
@@ -283,7 +276,7 @@ class PeerManager {
      *
      * @return true if the neighbour is found.
      */
-    bool neighbour_at_least_two_way(const PeerID peerid,
+    bool neighbour_at_least_two_way(const OspfTypes::PeerID peerid,
 				    OspfTypes::AreaID area,
 				    OspfTypes::RouterID rid, bool& twoway);
 
@@ -298,7 +291,7 @@ class PeerManager {
      *
      * @return true if the neighbour is found.
      */
-    bool get_neighbour_address(const PeerID peerid,
+    bool get_neighbour_address(const OspfTypes::PeerID peerid,
 			       OspfTypes::AreaID area,
 			       OspfTypes::RouterID rid,
 			       uint32_t interface_id, A& neighbour_address);
@@ -311,7 +304,7 @@ class PeerManager {
      *
      * @return true if it is.
      */
-    bool on_link_state_request_list(const PeerID peerid,
+    bool on_link_state_request_list(const OspfTypes::PeerID peerid,
 				    OspfTypes::AreaID area,
 				    const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar);
@@ -325,7 +318,7 @@ class PeerManager {
      *
      * @return true if it is.
      */
-    bool event_bad_link_state_request(const PeerID peerid,
+    bool event_bad_link_state_request(const OspfTypes::PeerID peerid,
 				      OspfTypes::AreaID area,
 				      const OspfTypes::NeighbourID nid);
 
@@ -340,7 +333,7 @@ class PeerManager {
      *
      * @return true on success
      */
-    bool send_lsa(const PeerID peerid, OspfTypes::AreaID area,
+    bool send_lsa(const OspfTypes::PeerID peerid, OspfTypes::AreaID area,
 		  const OspfTypes::NeighbourID nid,
 		  Lsa::LsaRef lsar);
 
@@ -353,7 +346,8 @@ class PeerManager {
      * @param up true if the adjacency has become full, false if a
      * full adjacency has been lost.
      */
-    void adjacency_changed(const PeerID peerid, OspfTypes::RouterID rid,
+    void adjacency_changed(const OspfTypes::PeerID peerid,
+			   OspfTypes::RouterID rid,
 			   bool up);
 
     /**
@@ -481,42 +475,44 @@ class PeerManager {
     /**
      * Set the interface address of this peer.
      */
-    bool set_interface_address(const PeerID, A address);
+    bool set_interface_address(const OspfTypes::PeerID, A address);
 
     /**
      * Set the hello interval in seconds.
      */
-    bool set_hello_interval(const PeerID, OspfTypes::AreaID area,
+    bool set_hello_interval(const OspfTypes::PeerID, OspfTypes::AreaID area,
 			    uint16_t hello_interval);
 
     /**
      * Set router priority.
      */
-    bool set_router_priority(const PeerID, OspfTypes::AreaID area,
+    bool set_router_priority(const OspfTypes::PeerID, OspfTypes::AreaID area,
 			     uint8_t priority);
 
     /**
      * Set the router dead interval in seconds.
      */
-    bool set_router_dead_interval(const PeerID, OspfTypes::AreaID area,
+    bool set_router_dead_interval(const OspfTypes::PeerID,
+				  OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
 
     /**
      * Set interface cost
      */
-    bool set_interface_cost(const PeerID, OspfTypes::AreaID area,
+    bool set_interface_cost(const OspfTypes::PeerID, OspfTypes::AreaID area,
 			    uint16_t interface_cost);
 
     /**
      * Set RxmtInterval
      */
-    bool set_retransmit_interval(const PeerID, OspfTypes::AreaID area,
+    bool set_retransmit_interval(const OspfTypes::PeerID,
+				 OspfTypes::AreaID area,
 				 uint16_t retransmit_interval);
 
     /**
      * Set InfTransDelay
      */
-    bool set_inftransdelay(const PeerID, OspfTypes::AreaID area,
+    bool set_inftransdelay(const OspfTypes::PeerID, OspfTypes::AreaID area,
 			   uint16_t inftransdelay);
 
     /**
@@ -531,7 +527,7 @@ class PeerManager {
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
-    bool set_simple_authentication_key(const PeerID peerid,
+    bool set_simple_authentication_key(const OspfTypes::PeerID peerid,
 				       OspfTypes::AreaID area,
 				       const string& password,
 				       string& error_msg);
@@ -547,7 +543,7 @@ class PeerManager {
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
-    bool delete_simple_authentication_key(const PeerID peerid,
+    bool delete_simple_authentication_key(const OspfTypes::PeerID peerid,
 					  OspfTypes::AreaID area,
 					  string& error_msg);
 
@@ -567,7 +563,7 @@ class PeerManager {
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
-    bool set_md5_authentication_key(const PeerID peerid,
+    bool set_md5_authentication_key(const OspfTypes::PeerID peerid,
 				    OspfTypes::AreaID area, uint8_t key_id,
 				    const string& password,
 				    const TimeVal& start_timeval,
@@ -588,14 +584,14 @@ class PeerManager {
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
-    bool delete_md5_authentication_key(const PeerID peerid,
+    bool delete_md5_authentication_key(const OspfTypes::PeerID peerid,
 				       OspfTypes::AreaID area, uint8_t key_id,
 				       string& error_msg);
 
     /**
      * Toggle the passive status of an interface.
      */
-    bool set_passive(const PeerID, OspfTypes::AreaID area,
+    bool set_passive(const OspfTypes::PeerID, OspfTypes::AreaID area,
 		     bool passive);
 
     /**
@@ -734,10 +730,10 @@ class PeerManager {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     
-    PeerID _next_peerid;		// Next PeerID to allocate.
-    map<string, PeerID> _pmap;		// Map from interface/vif to PeerID.
+    OspfTypes::PeerID _next_peerid;	// Next PeerID to allocate.
+    map<string, OspfTypes::PeerID> _pmap;// Map from interface/vif to PeerID.
 
-    map<PeerID, PeerOut<A> *> _peers;	// All of our peers
+    map<OspfTypes::PeerID, PeerOut<A> *> _peers;	// All of our peers
 
     map<OspfTypes::AreaID, AreaRouter<A> *> _areas;	// All the areas
 
@@ -754,7 +750,7 @@ class PeerManager {
      * interface/vif.
      * Throw an exception a mapping already exists.
      */
-    PeerID create_peerid(const string& interface, const string& vif)
+    OspfTypes::PeerID create_peerid(const string& interface, const string& vif)
 	throw(BadPeer);
 
     /**

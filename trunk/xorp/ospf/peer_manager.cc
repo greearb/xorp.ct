@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.126 2007/02/14 09:27:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.127 2007/02/14 11:27:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,7 +187,7 @@ PeerManager<A>::change_area_router_type(OspfTypes::AreaID area,
     // area to peer mapping is not held so all peers must be notified.
     // When the correct area is found set the new options for the
     // hello packet.
-    typename map<PeerID, PeerOut<A> *>::iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	if ((*i).second->change_area_router_type(area, area_type))
 	    (*i).second->set_options(area, compute_options(area_type));
@@ -214,7 +214,7 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
     // Notify the peers that this area is being removed. If this is
     // the only area that the peer belonged to the peer can signify
     // this and the peer can be removed.
-    typename map<PeerID, PeerOut<A> *>::iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::iterator i;
     for(i = _peers.begin(); i != _peers.end();)
 	if ((*i).second->remove_area(area)) {
 	    delete_peer((*i).first);
@@ -332,7 +332,7 @@ bool
 PeerManager<A>::get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours)
     const
 {
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	(*i).second->get_neighbour_list(neighbours);
 
@@ -346,7 +346,7 @@ PeerManager<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
 {
     list<OspfTypes::NeighbourID> neighbours;
 
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	(*i).second->get_neighbour_list(neighbours);
 	list<OspfTypes::NeighbourID>::const_iterator j;
@@ -362,7 +362,7 @@ PeerManager<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
 }
 
 template <typename A>
-PeerID
+OspfTypes::PeerID
 PeerManager<A>::create_peerid(const string& interface, const string& vif)
     throw(BadPeer)
 {
@@ -373,14 +373,14 @@ PeerManager<A>::create_peerid(const string& interface, const string& vif)
 	xorp_throw(BadPeer,
 		   c_format("Mapping for %s already exists", concat.c_str()));
 			    
-    PeerID peerid = _next_peerid++;
+    OspfTypes::PeerID peerid = _next_peerid++;
     _pmap[concat] = peerid;
 
     return peerid;
 }
 
 template <typename A>
-PeerID
+OspfTypes::PeerID
 PeerManager<A>::get_peerid(const string& interface, const string& vif)
     throw(BadPeer)
 {
@@ -410,7 +410,7 @@ PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
 }
 
 template <typename A>
-PeerID
+OspfTypes::PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
 			    const A source,
 			    OspfTypes::LinkType linktype, 
@@ -428,7 +428,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 	xorp_throw(BadPeer, 
 		   c_format("Unknown Area %s", pr_id(area).c_str()));
 
-    PeerID peerid = create_peerid(interface, vif);
+    OspfTypes::PeerID peerid = create_peerid(interface, vif);
 
     // Get the prefix length.
     uint16_t interface_prefix_length;
@@ -491,7 +491,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
 template <typename A>
 bool
-PeerManager<A>::delete_peer(const PeerID peerid)
+PeerManager<A>::delete_peer(const OspfTypes::PeerID peerid)
 {
     debug_msg("PeerID %u\n", peerid);
 
@@ -510,7 +510,7 @@ PeerManager<A>::delete_peer(const PeerID peerid)
 	(*i).second->delete_peer(peerid);
 
     // Remove the interface/vif to PeerID mapping
-    typename map<string, PeerID>::iterator pi;
+    typename map<string, OspfTypes::PeerID>::iterator pi;
     for(pi = _pmap.begin(); pi != _pmap.end(); pi++)
 	if ((*pi).second == peerid) {
 	    _pmap.erase(pi);
@@ -522,7 +522,7 @@ PeerManager<A>::delete_peer(const PeerID peerid)
 
 template <typename A>
 bool
-PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
+PeerManager<A>::set_state_peer(const OspfTypes::PeerID peerid, bool state)
 {
     debug_msg("PeerID %u\n", peerid);
 
@@ -538,7 +538,8 @@ PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
 
 template <typename A>
 bool
-PeerManager<A>::set_link_status_peer(const PeerID peerid, bool state)
+PeerManager<A>::set_link_status_peer(const OspfTypes::PeerID peerid,
+				     bool state)
 {
     debug_msg("PeerID %u\n", peerid);
 
@@ -561,7 +562,7 @@ PeerManager<A>::address_status_change(const string& interface,
     debug_msg("interface %s vif %s address %s state %s\n",
 	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
 
     // All interface/vif/address changes on the host come through
     // here, ignore the changes that are not for OSPF.
@@ -583,7 +584,8 @@ PeerManager<A>::address_status_change(const string& interface,
 
 template <typename A>
 bool
-PeerManager<A>::add_neighbour(const PeerID peerid, OspfTypes::AreaID area,
+PeerManager<A>::add_neighbour(const OspfTypes::PeerID peerid,
+			      OspfTypes::AreaID area,
 			      A neighbour_address, OspfTypes::RouterID rid)
 {
     if (0 == _peers.count(peerid)) {
@@ -596,7 +598,8 @@ PeerManager<A>::add_neighbour(const PeerID peerid, OspfTypes::AreaID area,
 
 template <typename A>
 bool
-PeerManager<A>::remove_neighbour(const PeerID peerid, OspfTypes::AreaID area,
+PeerManager<A>::remove_neighbour(const OspfTypes::PeerID peerid,
+				 OspfTypes::AreaID area,
 				 A neighbour_address, OspfTypes::RouterID rid)
 {
     if (0 == _peers.count(peerid)) {
@@ -636,14 +639,15 @@ PeerManager<A>::receive(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s src %s dst %s %s\n", interface.c_str(),
 	      vif.c_str(), cstring(dst), cstring(src), cstring((*packet)));
 
-    PeerID peerid = get_peerid(interface, vif);
+    OspfTypes::PeerID peerid = get_peerid(interface, vif);
     XLOG_ASSERT(0 != _peers.count(peerid));
     return _peers[peerid]->receive(dst, src, packet);
 }
 
 template <typename A>
 bool
-PeerManager<A>::queue_lsa(const PeerID peerid, const PeerID peer,
+PeerManager<A>::queue_lsa(const OspfTypes::PeerID peerid,
+			  const OspfTypes::PeerID peer,
 			  OspfTypes::NeighbourID nid, Lsa::LsaRef lsar,
 			  bool &multicast_on_peer)
 {
@@ -657,7 +661,7 @@ PeerManager<A>::queue_lsa(const PeerID peerid, const PeerID peer,
 
 template <typename A>
 bool
-PeerManager<A>::push_lsas(const PeerID peerid)
+PeerManager<A>::push_lsas(const OspfTypes::PeerID peerid)
 {
     if (0 == _peers.count(peerid)) {
 	XLOG_ERROR("Unknown PeerID %u", peerid);
@@ -671,7 +675,7 @@ template <typename A>
 bool
 PeerManager<A>::configured_network(const A address) const
 {
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	IPNet<A> net((*i).second->get_interface_address(),
 		     (*i).second->get_interface_prefix_length());
@@ -691,7 +695,7 @@ PeerManager<A>::known_interface_address(const A address) const
     // configured peers. We should be checking the interface addresses
     // with the FEA.
 
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	if ((*i).second->get_interface_address() == address) 
 	    return true;
@@ -701,7 +705,7 @@ PeerManager<A>::known_interface_address(const A address) const
 
 template <typename A>
 bool
-PeerManager<A>::neighbours_exchange_or_loading(const PeerID peerid,
+PeerManager<A>::neighbours_exchange_or_loading(const OspfTypes::PeerID peerid,
 					       OspfTypes::AreaID area)
 {
     if (0 == _peers.count(peerid)) {
@@ -714,7 +718,7 @@ PeerManager<A>::neighbours_exchange_or_loading(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::neighbour_at_least_two_way(const PeerID peerid,
+PeerManager<A>::neighbour_at_least_two_way(const OspfTypes::PeerID peerid,
 					   OspfTypes::AreaID area,
 					   OspfTypes::RouterID rid,
 					   bool& twoway)
@@ -729,7 +733,7 @@ PeerManager<A>::neighbour_at_least_two_way(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::get_neighbour_address(const PeerID peerid,
+PeerManager<A>::get_neighbour_address(const OspfTypes::PeerID peerid,
 				      OspfTypes::AreaID area,
 				      OspfTypes::RouterID rid,
 				      uint32_t interface_id,
@@ -746,7 +750,7 @@ PeerManager<A>::get_neighbour_address(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::on_link_state_request_list(const PeerID peerid,
+PeerManager<A>::on_link_state_request_list(const OspfTypes::PeerID peerid,
 					   OspfTypes::AreaID area,
 					   const OspfTypes::NeighbourID nid,
 					   Lsa::LsaRef lsar)
@@ -761,7 +765,7 @@ PeerManager<A>::on_link_state_request_list(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::event_bad_link_state_request(const PeerID peerid,
+PeerManager<A>::event_bad_link_state_request(const OspfTypes::PeerID peerid,
 					     OspfTypes::AreaID area,
 					     const OspfTypes::NeighbourID nid)
 {
@@ -775,7 +779,8 @@ PeerManager<A>::event_bad_link_state_request(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::send_lsa(const PeerID peerid, OspfTypes::AreaID area,
+PeerManager<A>::send_lsa(const OspfTypes::PeerID peerid,
+			 OspfTypes::AreaID area,
 			 const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar)
 {
     if (0 == _peers.count(peerid)) {
@@ -788,7 +793,7 @@ PeerManager<A>::send_lsa(const PeerID peerid, OspfTypes::AreaID area,
 
 template <typename A>
 void
-PeerManager<A>::adjacency_changed(const PeerID peerid,
+PeerManager<A>::adjacency_changed(const OspfTypes::PeerID peerid,
 				  OspfTypes::RouterID rid,
 				  bool up)
 {
@@ -809,8 +814,8 @@ PeerManager<A>::adjacency_changed(const PeerID peerid,
     uint32_t fully_adjacent_virtual_links = 0;
     typename list<OspfTypes::RouterID>::const_iterator i;
     for(i = rids.begin(); i != rids.end(); i++) {
-	PeerID peerid = _vlink.get_peerid(*i);
-	typename map<PeerID, PeerOut<A> *>::const_iterator j;
+	OspfTypes::PeerID peerid = _vlink.get_peerid(*i);
+	typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator j;
 	j = _peers.find(peerid);
 	if(j == _peers.end()) {
 	    // A peerid can be removed and the vlink database is not notified.
@@ -876,7 +881,7 @@ PeerManager<A>::create_virtual_peer(OspfTypes::RouterID rid)
 	return false;
     }
 
-    PeerID peerid;
+    OspfTypes::PeerID peerid;
     try {
 	peerid = create_peer(ifname, vifname, A::ZERO(),
 			     OspfTypes::VirtualLink, OspfTypes::BACKBONE);
@@ -897,8 +902,8 @@ template <typename A>
 bool
 PeerManager<A>::delete_virtual_peer(OspfTypes::RouterID rid)
 {
-    PeerID peerid = _vlink.get_peerid(rid);
-    if (ALLPEERS != peerid) {
+    OspfTypes::PeerID peerid = _vlink.get_peerid(rid);
+    if (OspfTypes::ALLPEERS != peerid) {
 	try {
 	    delete_peer(peerid);
 	} catch(XorpException& e) {
@@ -909,7 +914,7 @@ PeerManager<A>::delete_virtual_peer(OspfTypes::RouterID rid)
 	// this virtual link, but is is possible that in the future
 	// removing the virtual link from the area router may cause an
 	// upcall.
-	_vlink.add_peerid(rid, ALLPEERS);
+	_vlink.add_peerid(rid, OspfTypes::ALLPEERS);
     }
 
     return true;
@@ -924,8 +929,8 @@ PeerManager<A>::virtual_link_endpoint(OspfTypes::AreaID area) const
 
     typename list<OspfTypes::RouterID>::const_iterator i;
     for(i = rids.begin(); i != rids.end(); i++) {
-	PeerID peerid = _vlink.get_peerid(*i);
-	typename map<PeerID, PeerOut<A> *>::const_iterator j;
+	OspfTypes::PeerID peerid = _vlink.get_peerid(*i);
+	typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator j;
 	j = _peers.find(peerid);
 	if(j == _peers.end()) {
 	    // A peerid can be removed and the vlink database is not notified.
@@ -1059,11 +1064,11 @@ PeerManager<A>::up_virtual_link(OspfTypes::RouterID rid, A source,
 	return;
     }
 
-    PeerID peerid = _vlink.get_peerid(rid);
+    OspfTypes::PeerID peerid = _vlink.get_peerid(rid);
 
     // Scan through the peers and find the interface and vif that
     // match the source address.
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	if ((*i).second->match(source, ifname, vifname)) {
 	    if (!_vlink.set_physical_interface_vif(rid, ifname, vifname))
@@ -1096,8 +1101,8 @@ PeerManager<A>::down_virtual_link(OspfTypes::RouterID rid)
     XLOG_TRACE(_ospf.trace()._virtual_link,
 	       "Virtual link down rid %s\n", pr_id(rid).c_str());
 
-    PeerID peerid = _vlink.get_peerid(rid);
-    if (ALLPEERS == peerid) {
+    OspfTypes::PeerID peerid = _vlink.get_peerid(rid);
+    if (OspfTypes::ALLPEERS == peerid) {
 	XLOG_WARNING("No peer found when dropping virtual link %s",
 		     pr_id(rid).c_str());
 	return;
@@ -1124,8 +1129,8 @@ PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
 	       "Virtual link receive dest %s src %s packet %s\n",
 	       cstring(dst), cstring(src), cstring(*packet));
 
-    PeerID peerid = _vlink.get_peerid(dst, src);
-    if (ALLPEERS == peerid)
+    OspfTypes::PeerID peerid = _vlink.get_peerid(dst, src);
+    if (OspfTypes::ALLPEERS == peerid)
 	return false;
     XLOG_ASSERT(0 != _peers.count(peerid));
     return _peers[peerid]->receive(dst, src, packet);
@@ -1169,7 +1174,8 @@ PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
 #if	0
 template <typename A> 
 bool
-PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
+PeerManager<A>::set_options(const OspfTypes::PeerID peerid,
+			    OspfTypes::AreaID area,
 			    uint32_t options)
 {
     if (0 == _peers.count(peerid)) {
@@ -1185,14 +1191,15 @@ template <typename A>
 void
 PeerManager<A>::router_id_changing()
 {
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	(*i).second->router_id_changing();
 }
 
 template <typename A> 
 bool
-PeerManager<A>::set_interface_address(const PeerID peerid, A address)
+PeerManager<A>::set_interface_address(const OspfTypes::PeerID peerid,
+				      A address)
 {
     if (0 == _peers.count(peerid)) {
 	XLOG_ERROR("Unknown PeerID %u", peerid);
@@ -1204,7 +1211,8 @@ PeerManager<A>::set_interface_address(const PeerID peerid, A address)
 
 template <typename A>
 bool
-PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
+PeerManager<A>::set_hello_interval(const OspfTypes::PeerID peerid,
+				   OspfTypes::AreaID area,
 				   uint16_t hello_interval)
 {
     if (0 == _peers.count(peerid)) {
@@ -1217,7 +1225,7 @@ PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
 
 template <typename A> 
 bool
-PeerManager<A>::set_router_priority(const PeerID peerid,
+PeerManager<A>::set_router_priority(const OspfTypes::PeerID peerid,
 				    OspfTypes::AreaID area,
 				    uint8_t priority)
 {
@@ -1231,7 +1239,7 @@ PeerManager<A>::set_router_priority(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_router_dead_interval(const PeerID peerid,
+PeerManager<A>::set_router_dead_interval(const OspfTypes::PeerID peerid,
 					 OspfTypes::AreaID area, 
 					 uint32_t router_dead_interval)
 {
@@ -1246,7 +1254,7 @@ PeerManager<A>::set_router_dead_interval(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_interface_cost(const PeerID peerid, 
+PeerManager<A>::set_interface_cost(const OspfTypes::PeerID peerid, 
 				   OspfTypes::AreaID /*area*/,
 				   uint16_t interface_cost)
 {
@@ -1260,7 +1268,7 @@ PeerManager<A>::set_interface_cost(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_retransmit_interval(const PeerID peerid, 
+PeerManager<A>::set_retransmit_interval(const OspfTypes::PeerID peerid, 
 					OspfTypes::AreaID area,
 					uint16_t retransmit_interval)
 {
@@ -1274,7 +1282,7 @@ PeerManager<A>::set_retransmit_interval(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_inftransdelay(const PeerID peerid, 
+PeerManager<A>::set_inftransdelay(const OspfTypes::PeerID peerid, 
 				   OspfTypes::AreaID /*area*/,
 				   uint16_t inftransdelay)
 {
@@ -1288,7 +1296,7 @@ PeerManager<A>::set_inftransdelay(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_simple_authentication_key(const PeerID	peerid,
+PeerManager<A>::set_simple_authentication_key(const OspfTypes::PeerID peerid,
 					      OspfTypes::AreaID	area,
 					      const string&	password,
 					      string&		error_msg)
@@ -1304,7 +1312,8 @@ PeerManager<A>::set_simple_authentication_key(const PeerID	peerid,
 
 template <typename A>
 bool
-PeerManager<A>::delete_simple_authentication_key(const PeerID	peerid,
+PeerManager<A>::delete_simple_authentication_key(const OspfTypes::PeerID
+						 peerid,
 						 OspfTypes::AreaID area,
 						 string&	error_msg)
 {
@@ -1318,7 +1327,7 @@ PeerManager<A>::delete_simple_authentication_key(const PeerID	peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_md5_authentication_key(const PeerID		peerid,
+PeerManager<A>::set_md5_authentication_key(const OspfTypes::PeerID peerid,
 					   OspfTypes::AreaID	area,
 					   uint8_t		key_id,
 					   const string&	password,
@@ -1341,7 +1350,7 @@ PeerManager<A>::set_md5_authentication_key(const PeerID		peerid,
 
 template <typename A>
 bool
-PeerManager<A>::delete_md5_authentication_key(const PeerID	peerid,
+PeerManager<A>::delete_md5_authentication_key(const OspfTypes::PeerID peerid,
 					      OspfTypes::AreaID	area,
 					      uint8_t		key_id,
 					      string&		error_msg)
@@ -1357,7 +1366,8 @@ PeerManager<A>::delete_md5_authentication_key(const PeerID	peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_passive(const PeerID peerid, OspfTypes::AreaID area,
+PeerManager<A>::set_passive(const OspfTypes::PeerID peerid,
+			    OspfTypes::AreaID area,
 			    bool passive)
 {
     if (0 == _peers.count(peerid)) {

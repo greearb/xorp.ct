@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.129 2007/02/14 09:27:31 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.130 2007/02/14 11:27:18 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -41,7 +41,7 @@ class PeerOut {
  public:
 
     PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
-	    PeerID peerid,
+	    OspfTypes::PeerID peerid,
 	    const A source, const uint16_t prefix_length,
 	    const uint16_t interface_mtu,
 	    OspfTypes::LinkType linktype, OspfTypes::AreaID area,
@@ -71,7 +71,7 @@ class PeerOut {
      * Get Peer ID.
      *
      */
-    PeerID get_peerid() const { return _peerid; }
+    OspfTypes::PeerID get_peerid() const { return _peerid; }
 
     /**
      * Set the address of this interface/vif
@@ -226,7 +226,7 @@ class PeerOut {
      *
      * @return true on success.
      */
-    bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+    bool queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 		   Lsa::LsaRef lsar, bool &multicast_on_peer) const;
     
     /**
@@ -447,7 +447,7 @@ class PeerOut {
 
     const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
-    const PeerID _peerid;		// The peers ID.
+    const OspfTypes::PeerID _peerid;	// The peers ID.
     A _interface_address;		// Interface address.
     const uint16_t _interface_prefix_length;	// Interface prefix length
     const uint16_t _interface_mtu;	// MTU of this interface.
@@ -543,7 +543,7 @@ class Peer {
      * Get Peer ID.
      *
      */
-    PeerID get_peerid() const { return _peerout.get_peerid(); }
+    OspfTypes::PeerID get_peerid() const { return _peerout.get_peerid(); }
 
     /**
      * Address of this interface/vif.
@@ -655,7 +655,7 @@ class Peer {
      *
      * @return true on success.
      */
-    bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+    bool queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 		   Lsa::LsaRef lsar, bool& multicast_on_peer) const;
 
     /**
@@ -1406,7 +1406,7 @@ class Neighbour {
      *
      * @return true on success.
      */
-    bool queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
+    bool queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 		   Lsa::LsaRef lsar, bool& multicast_on_peer);
 
     /**

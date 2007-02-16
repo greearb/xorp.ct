@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vlink.hh,v 1.5 2005/11/23 11:30:45 atanu Exp $
+// $XORP: xorp/ospf/vlink.hh,v 1.6 2006/03/16 00:04:50 pavlin Exp $
 
 #ifndef __OSPF_VLINK_HH__
 #define __OSPF_VLINK_HH__
@@ -77,12 +77,12 @@ class Vlink {
     /**
      * Save the peerid that has been allocted to this virtual link.
      */
-    bool add_peerid(OspfTypes::RouterID rid, PeerID peerid);
+    bool add_peerid(OspfTypes::RouterID rid, OspfTypes::PeerID peerid);
 
     /**
      * Get the associated peerid.
      */
-    PeerID get_peerid(OspfTypes::RouterID rid) const;
+    OspfTypes::PeerID get_peerid(OspfTypes::RouterID rid) const;
 
     /**
      * The phyical interface and vif that should be used for transmission.
@@ -101,7 +101,7 @@ class Vlink {
      * Given the source and destination address find the PeerID of the
      * relevant virtual link.
      */
-    PeerID get_peerid(A source, A destination) const;
+    OspfTypes::PeerID get_peerid(A source, A destination) const;
 
     /**
      * Get the list of virtual links (router ids) that flow through
@@ -122,12 +122,12 @@ class Vlink {
      */
     struct Vstate {
 	Vstate() : 
-	    _peerid(ALLPEERS),	// An illegal value for a PeerID.
+	    _peerid(OspfTypes::ALLPEERS),	// Illegal value for a PeerID.
 	    _transit_area(OspfTypes::BACKBONE), // Again an illegal value.
 	    _notified(false)
 	{}
 
-	PeerID _peerid;				// PeerID of virtual link
+	OspfTypes::PeerID _peerid;		// PeerID of virtual link
 	OspfTypes::AreaID _transit_area;	// Transit area for the link
 	// True if the transit area has been notified.
 	bool _notified;

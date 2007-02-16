@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.23 2006/12/08 08:50:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.24 2007/02/14 14:01:23 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -355,7 +355,7 @@ routing1(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    PeerID peerid = pm.
+    OspfTypes::PeerID peerid = pm.
 	create_peer(interface, vif, src, OspfTypes::BROADCAST, area);
 
     // Bring the peering up
@@ -459,7 +459,7 @@ routing2(TestInfo& info)
     const string interface = "eth0";
     const string vif = "vif0";
 
-    PeerID peerid = pm.
+    OspfTypes::PeerID peerid = pm.
 	create_peer(interface, vif, src, OspfTypes::BROADCAST, area);
 
     // Bring the peering up

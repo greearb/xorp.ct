@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.53 2006/10/12 01:25:00 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.54 2006/10/14 18:07:38 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -225,7 +225,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    PeerID peerid = pm.
+    OspfTypes::PeerID peerid = pm.
 	create_peer(interface, vif, src, OspfTypes::BROADCAST, area);
 
     if (!ospf.set_hello_interval(interface, vif, area, hello_interval)) {
@@ -371,9 +371,9 @@ two_peers(TestInfo& info, OspfTypes::Version version,
 	break;
     }
 
-    PeerID peerid_1 = pm_1.
+    OspfTypes::PeerID peerid_1 = pm_1.
 	create_peer(interface_1, vif_1, src_1, linktype, area);
-    PeerID peerid_2 = pm_2.
+    OspfTypes::PeerID peerid_2 = pm_2.
 	create_peer(interface_2, vif_2, src_2, linktype, area);
 
     switch(linktype) {

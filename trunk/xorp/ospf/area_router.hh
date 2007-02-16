@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.111 2007/02/14 11:27:17 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.112 2007/02/14 11:42:19 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -45,22 +45,22 @@ class AreaRouter : public ServiceBase {
     /**
      * Add peer
      */
-    void add_peer(PeerID peer);
+    void add_peer(OspfTypes::PeerID peer);
 
     /**
      * Delete peer
      */
-    void delete_peer(PeerID peer);
+    void delete_peer(OspfTypes::PeerID peer);
 
     /**
      * Peer came up
      */
-    bool peer_up(PeerID peer);
+    bool peer_up(OspfTypes::PeerID peer);
 
     /**
      * Peer went down
      */
-    bool peer_down(PeerID peer);
+    bool peer_down(OspfTypes::PeerID peer);
 
     /**
      * Track border router transitions.
@@ -187,7 +187,8 @@ class AreaRouter : public ServiceBase {
     /**
      * A new set of router links.
      */
-    bool new_router_links(PeerID peer, const list<RouterLink>& router_link);
+    bool new_router_links(OspfTypes::PeerID peer,
+			  const list<RouterLink>& router_link);
 
     /**
      * Refresh Router-LSA.
@@ -287,7 +288,7 @@ class AreaRouter : public ServiceBase {
     /**
      * Generate a Network-LSA for this peer.
      */
-    bool generate_network_lsa(PeerID peer,
+    bool generate_network_lsa(OspfTypes::PeerID peer,
 			      OspfTypes::RouterID link_state_id,
 			      list<OspfTypes::RouterID>& attached_routers,
 			      uint32_t network_mask);
@@ -295,7 +296,7 @@ class AreaRouter : public ServiceBase {
     /**
      * Update the Network-LSA for this peer.
      */
-    bool update_network_lsa(PeerID peer,
+    bool update_network_lsa(OspfTypes::PeerID peer,
 			    OspfTypes::RouterID link_state_id,
 			    list<OspfTypes::RouterID>& attached_routers,
 			    uint32_t network_mask);
@@ -303,7 +304,8 @@ class AreaRouter : public ServiceBase {
     /**
      * Withdraw the Network-LSA for this peer by prematurely aging.
      */
-    bool withdraw_network_lsa(PeerID peer, OspfTypes::RouterID link_state_id);
+    bool withdraw_network_lsa(OspfTypes::PeerID peer,
+			      OspfTypes::RouterID link_state_id);
 
     /**
      * Refresh the Network-LSAs.
@@ -313,7 +315,7 @@ class AreaRouter : public ServiceBase {
      * @param timer is the Network-LSA being refreshed due to the
      * timer firing?
      */
-    void refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar,
+    void refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
 			     bool timer = false);
 
     /**
@@ -361,12 +363,12 @@ class AreaRouter : public ServiceBase {
     /**
      * Add a network to be announced.
      */
-//     void add_network(PeerID peer, IPNet<A> network);
+//     void add_network(OspfTypes::PeerID peer, IPNet<A> network);
 
     /**
      * Remove a network to be announced.
      */
-//     void remove_network(PeerID peer, IPNet<A> network);
+//     void remove_network(OspfTypes::PeerID peer, IPNet<A> network);
 
     /**
      * @return the type of this area.
@@ -393,7 +395,7 @@ class AreaRouter : public ServiceBase {
      * @param backup true if the receiving interface was in state backup.
      * @param dr true if the LSA was received from the designated router.
      */
-    void receive_lsas(PeerID peerid, OspfTypes::NeighbourID nid,
+    void receive_lsas(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 		      list<Lsa::LsaRef>& lsas, 
 		      list<Lsa_header>& direct_ack,
 		      list<Lsa_header>& delayed_ack,
@@ -658,7 +660,7 @@ class AreaRouter : public ServiceBase {
     };
 
     typedef ref_ptr<PeerState> PeerStateRef;
-    typedef map<PeerID, PeerStateRef> PeerMap;
+    typedef map<OspfTypes::PeerID, PeerStateRef> PeerMap;
     PeerMap _peers;		// Peers of this area.
 
     uint32_t _routing_recompute_delay;	// How many seconds to wait
@@ -874,7 +876,8 @@ class AreaRouter : public ServiceBase {
      * @param lsar The LSA to publish
      * @param multicast_on_peer Did this LSA get multicast on this peer.
      */
-    void publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
+    void publish(const OspfTypes::PeerID peerid,
+		 const OspfTypes::NeighbourID nid,
 		 Lsa::LsaRef lsar, bool& multicast_on_peer) const;
 
     /*
@@ -952,7 +955,7 @@ class AreaRouter : public ServiceBase {
      *
      * @return true if it is.
      */
-    bool on_link_state_request_list(const PeerID peerid,
+    bool on_link_state_request_list(const OspfTypes::PeerID peerid,
 				    const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar) const;
 
@@ -962,7 +965,7 @@ class AreaRouter : public ServiceBase {
      * @param peerid
      * @param nid
      */
-    bool event_bad_link_state_request(const PeerID peerid,
+    bool event_bad_link_state_request(const OspfTypes::PeerID peerid,
 				      const OspfTypes::NeighbourID nid) const;
 
     /**
@@ -975,7 +978,8 @@ class AreaRouter : public ServiceBase {
      *
      * @return true on success
      */
-    bool send_lsa(const PeerID peerid, const OspfTypes::NeighbourID nid,
+    bool send_lsa(const OspfTypes::PeerID peerid,
+		  const OspfTypes::NeighbourID nid,
 		  Lsa::LsaRef lsar) const;
 
     /**

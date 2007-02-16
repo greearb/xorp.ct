@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.97 2007/02/13 22:16:43 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.98 2007/02/15 02:46:32 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -102,6 +102,11 @@ struct OspfTypes {
     static const AreaID BACKBONE = 0;
 
     /**
+     * An opaque handle that identifies a peer.
+     */
+    typedef uint32_t PeerID;
+
+    /**
      * An opaque handle that identifies a neighbour.
      */
     typedef uint32_t NeighbourID;
@@ -110,6 +115,12 @@ struct OspfTypes {
      * The IP protocol number used by OSPF.
      */
     static const uint16_t IP_PROTOCOL_NUMBER = 89;
+
+    /**
+     * An identifier meaning all peers. No single peer can have this
+     * identifier.
+     */
+    static const PeerID ALLPEERS = 0;
 
     /** 
      * An identifier meaning all neighbours. No single neighbour can
