@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.2 2006/03/15 23:35:49 pavlin Exp $
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.3 2006/08/12 01:05:02 pavlin Exp $
 #
 
 #
@@ -45,7 +45,7 @@ TMP_SUFFIX="debog"
 find . -type f -print | 
 while read FILENAME
 do
-    grep "${OLD_STRING}" ${FILENAME} > /dev/null
+    grep -e "${OLD_STRING}" ${FILENAME} > /dev/null
     if [ $? -ne 0 ] ; then
 	# XXX: no match found
 	continue
