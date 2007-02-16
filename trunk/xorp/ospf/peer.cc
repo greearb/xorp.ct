@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.251 2007/02/16 19:39:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.252 2007/02/16 20:02:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -752,6 +752,9 @@ template <typename A>
 bool
 Peer<A>::initV3()
 {
+    if (OspfTypes::VirtualLink == get_linktype())
+	return true;
+
     // Never need to delete this as the ref_ptr will tidy up.
     LinkLsa *llsa = new LinkLsa(_ospf.get_version());
     llsa->set_self_originating(true);
@@ -768,6 +771,9 @@ template <typename A>
 bool
 Peer<A>::goV3()
 {
+    if (OspfTypes::VirtualLink == get_linktype())
+	return true;
+
     populate_link_lsa();
 
     get_area_router()->add_link_lsa(get_peerid(), _link_lsa);
@@ -785,6 +791,8 @@ template <>
 void
 Peer<IPv6>::populate_link_lsa()
 {
+    XLOG_ASSERT(OspfTypes::VirtualLink != get_linktype());
+
     LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
     XLOG_ASSERT(llsa);
     llsa->get_header().set_link_state_id(get_interface_id());
@@ -2818,6 +2826,8 @@ template <typename A>
 bool
 Peer<A>::add_advertise_net(IPNet<A> net)
 {
+    XLOG_ASSERT(OspfTypes::VirtualLink != get_linktype());
+
     LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
     XLOG_ASSERT(llsa);
 
@@ -2848,11 +2858,12 @@ Peer<A>::set_options(uint32_t options)
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	break;
-    case OspfTypes::V3: {
-        LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
-	XLOG_ASSERT(llsa);
-	llsa->set_options(options);
-    }
+    case OspfTypes::V3:
+	if (OspfTypes::VirtualLink != get_linktype()) {
+	    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+	    XLOG_ASSERT(llsa);
+	    llsa->set_options(options);
+	}
 	break;
     }
 
@@ -2875,11 +2886,12 @@ Peer<A>::set_router_priority(uint8_t priority)
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	break;
-    case OspfTypes::V3: {
-        LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
-	XLOG_ASSERT(llsa);
-	llsa->set_rtr_priority(priority);
-    }
+    case OspfTypes::V3:
+	if (OspfTypes::VirtualLink != get_linktype()) {
+	    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+	    XLOG_ASSERT(llsa);
+	    llsa->set_rtr_priority(priority);
+	}
 	break;
     }
 
