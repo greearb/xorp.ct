@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.6 2006/10/12 01:25:03 pavlin Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.7 2006/10/19 19:34:46 atanu Exp $"
 
 // Print information about OSPF neighbours
 
@@ -245,6 +245,10 @@ private:
  */ 
 class Output {
 public:
+    Output(OspfTypes::Version version)
+	: _version(version)
+    {}
+
     virtual ~Output()
     {}
 
@@ -255,27 +259,51 @@ public:
     }
 
     void print_first_line(const NeighbourInfo& ninfo) {
-	printf("%-17s", ninfo._address.c_str());
+	string address = "";
+	switch(_version) {
+	case OspfTypes::V2:
+	    address = ninfo._address;
+	    break;
+	case OspfTypes::V3:
+	    break;
+	}
+	printf("%-17s", address.c_str());
 	printf("%-23s", ninfo._interface.c_str());
 	printf("%-10s", ninfo._state.c_str());
 	printf("%-16s", ninfo._rid.str().c_str());
 	printf("%4d", ninfo._priority);
 	printf("%6d", ninfo._deadtime);
 	printf("\n");
+	switch(_version) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    printf("%-17s", ninfo._address.c_str());
+	    printf("\n");
+	    break;
+	}
     }
 
     virtual bool print(const NeighbourInfo& ninfo) {
 	print_first_line(ninfo);
 	return true;
     }
+ protected:
+     OspfTypes::Version _version;
 };
 
 class Brief : public Output {
 public:
+    Brief(OspfTypes::Version version)
+	: Output(version)
+    {}
 };
 
 class Detail : public Output {
 public:
+    Detail(OspfTypes::Version version)
+	: Output(version)
+    {}
 
     string uptime(uint32_t t) {
 	const uint32_t mins_in_hour = 3600;
@@ -360,10 +388,10 @@ main(int argc, char **argv)
     Output *output = 0;
     switch (pstyle) {
     case BRIEF:
-	output = new Brief();
+	output = new Brief(version);
 	break;
     case DETAIL:
-	output = new Detail();
+	output = new Detail(version);
 	break;
     }
 
