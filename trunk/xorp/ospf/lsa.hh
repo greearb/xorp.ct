@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.91 2007/02/12 06:53:09 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.92 2007/02/16 02:06:03 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -268,7 +268,7 @@ class Lsa {
     Lsa(OspfTypes::Version version)
 	:  _header(version), _version(version), _valid(true),
 	   _self_originating(false),  _initial_age(0), _transmitted(false),
-	   _trace(false)
+	   _trace(false), _peerid(OspfTypes::ALLPEERS)
     {}
 
     /**
@@ -278,7 +278,7 @@ class Lsa {
     Lsa(OspfTypes::Version version, uint8_t *buf, size_t len)
 	:  _header(version), _version(version), _valid(true),
 	   _self_originating(false),  _initial_age(0), _transmitted(false),
-	   _trace(false)
+	   _trace(false), _peerid(OspfTypes::ALLPEERS)
     {
 	_pkt.resize(len);
 	memcpy(&_pkt[0], buf, len);
@@ -518,6 +518,26 @@ class Lsa {
     bool tracing() const { return _trace; }
 
     /**
+     * For OSPFv3 only LSAs with Link-local flooding scope save the
+     * ingress PeerID.
+     */
+    void set_peerid(OspfTypes::PeerID peerid) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	XLOG_ASSERT(OspfTypes::ALLPEERS == _peerid);
+	_peerid = peerid;
+    }
+
+    /**
+     * For OSPFv3 only LSAs with Link-local flooding scope get the
+     * ingress PeerID.
+     */
+    OspfTypes::PeerID get_peerid() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	XLOG_ASSERT(OspfTypes::ALLPEERS != _peerid);
+	return _peerid;
+    }
+
+    /**
      * Printable name of this LSA.
      */
     virtual const char *name() const = 0;
@@ -560,6 +580,13 @@ class Lsa {
      * Set the age and update the stored packet if it exists.
      */
     void set_ls_age(uint16_t ls_age);
+
+    /**
+     * If this is an OSPFv3 LSA and the flooding scope is Link-local
+     * then the PeerID should be set to the peer that the LSA is
+     * associated with.
+     */
+    OspfTypes::PeerID _peerid;
 };
 
 /**
