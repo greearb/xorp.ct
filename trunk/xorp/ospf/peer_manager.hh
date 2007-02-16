@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.80 2007/02/14 11:27:18 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.81 2007/02/16 04:43:53 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -148,7 +148,7 @@ class PeerManager {
      * @return PeerID on success otherwise throw an exception.
      */
     OspfTypes::PeerID create_peer(const string& interface, const string& vif,
-				  const A source,
+				  A source,
 				  OspfTypes::LinkType linktype,
 				  OspfTypes::AreaID area)
 	throw(BadPeer);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.127 2007/02/14 11:27:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.128 2007/02/16 04:43:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -412,7 +412,7 @@ PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
 template <typename A>
 OspfTypes::PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
-			    const A source,
+			    A source,
 			    OspfTypes::LinkType linktype, 
 			    OspfTypes::AreaID area)
     throw(BadPeer)
@@ -429,6 +429,30 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 		   c_format("Unknown Area %s", pr_id(area).c_str()));
 
     OspfTypes::PeerID peerid = create_peerid(interface, vif);
+
+    IPNet<A> advertised_net;
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	uint16_t interface_prefix_length;
+	if (!_ospf.get_prefix_length(interface, vif, source,
+				     interface_prefix_length)) {
+	    destroy_peerid(interface, vif);
+	    xorp_throw(BadPeer, 
+		       c_format("Unable to get prefix length for %s/%s/%s",
+				interface.c_str(), vif.c_str(),
+				cstring(source)));
+	}
+	advertised_net = IPNet<A>(source, interface_prefix_length);
+	if (!_ospf.get_link_local_address(interface, vif, source)) {
+	    destroy_peerid(interface, vif);
+	    xorp_throw(BadPeer, 
+		       c_format("Unable to get link local addres for %s/%s",
+				interface.c_str(), vif.c_str()));
+	}
+	break;
+    }
 
     // Get the prefix length.
     uint16_t interface_prefix_length;
@@ -468,6 +492,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 				interface.c_str()));
 	}
 	_peers[peerid]->set_interface_id(interface_id);
+ 	_peers[peerid]->add_advertise_net(area, advertised_net);
     }
 	break;
     }
@@ -485,6 +510,9 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 					   address_status_change));
 
     area_router->add_peer(peerid);
+
+    // The peer has now been fully configured so initialise it.
+    _peers[peerid]->go(area);
 
     return peerid;
 }

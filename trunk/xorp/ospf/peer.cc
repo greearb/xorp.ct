@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.249 2007/02/16 13:02:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.250 2007/02/16 13:42:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -525,6 +525,18 @@ PeerOut<A>::set_interface_id(uint32_t interface_id)
     }
 
     return true;
+}
+
+template <typename A>
+bool
+PeerOut<A>::add_advertise_net(OspfTypes::AreaID area, IPNet<A> net)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->add_advertise_net(net);
 }
 
 template <typename A>
@@ -2791,6 +2803,29 @@ uint32_t
 Peer<A>::get_interface_id() const
 {
     return _hello_packet.get_interface_id();
+}
+
+template <>
+bool
+Peer<IPv4>::add_advertise_net(IPNet<IPv4> /*net*/)
+{
+    XLOG_FATAL("Only IPv6 not IPv4");
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::add_advertise_net(IPNet<A> net)
+{
+    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+    XLOG_ASSERT(llsa);
+
+    IPv6Prefix prefix(_ospf.get_version());
+    prefix.set_network(net);
+    llsa->get_prefixes().push_back(prefix);
+    
+    return true;
 }
 
 template <typename A>
