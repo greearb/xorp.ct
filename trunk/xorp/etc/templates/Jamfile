@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/etc/templates/Jamfile,v 1.1 2007/01/11 22:30:45 bms Exp $
 #
 
 SubDir TOP etc templates ;
@@ -40,6 +40,7 @@ COMMAND_FILES =
 	misc.cmds
 	mld.cmds
 	ospfv2.cmds
+	ospfv3.cmds
 	pim.cmds
 	pim6.cmds
 	rib.cmds
