@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.3 2006/08/12 01:05:02 pavlin Exp $
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.4 2007/02/16 22:10:33 pavlin Exp $
 #
 
 #
@@ -45,22 +45,22 @@ TMP_SUFFIX="debog"
 find . -type f -print | 
 while read FILENAME
 do
-    grep -e "${OLD_STRING}" ${FILENAME} > /dev/null
+    grep -e "${OLD_STRING}" "${FILENAME}" > /dev/null
     if [ $? -ne 0 ] ; then
 	# XXX: no match found
 	continue
     fi
 
-    cat ${FILENAME} | sed "${SED_COMMAND}" > ${FILENAME}.${TMP_SUFFIX}
+    cat "${FILENAME}" | sed "${SED_COMMAND}" > "${FILENAME}"."${TMP_SUFFIX}"
     if [ $? -ne 0 ] ; then
 	echo "Error updating ${FILENAME}"
 	exit 1
     fi
-    cmp ${FILENAME} ${FILENAME}.${TMP_SUFFIX} >/dev/null
+    cmp "${FILENAME}" "${FILENAME}"."${TMP_SUFFIX}" >/dev/null
     if [ $? -ne 0 ] ; then
-	mv ${FILENAME}.${TMP_SUFFIX} ${FILENAME}
+	mv "${FILENAME}"."${TMP_SUFFIX}" "${FILENAME}"
 	echo "Updating ${FILENAME}"
     else
-	rm ${FILENAME}.${TMP_SUFFIX}
+	rm "${FILENAME}"."${TMP_SUFFIX}"
     fi
 done
