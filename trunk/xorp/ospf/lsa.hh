@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.92 2007/02/16 02:06:03 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.93 2007/02/16 09:17:14 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -535,6 +535,30 @@ class Lsa {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	XLOG_ASSERT(OspfTypes::ALLPEERS != _peerid);
 	return _peerid;
+    }
+
+    /**
+     * OSPFv3 only Link-local scope.
+     */
+    bool link_local_scope() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return 0 == (get_ls_type() & 0x6000);
+    }
+
+    /**
+     * OSPFv3 only area scope.
+     */
+    bool area_scope() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return 0x2000 == (get_ls_type() & 0x6000);
+    }
+
+    /**
+     * OSPFv3 only AS scope.
+     */
+    bool as_scope() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return 0x4000 == (get_ls_type() & 0x6000);
     }
 
     /**
