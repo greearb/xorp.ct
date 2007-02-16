@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2006 International Computer Science Institute
+ * Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.14 2006/10/01 07:10:09 pavlin Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.15 2006/10/02 18:04:18 pavlin Exp $
  */
 
 /* Ethernet manipulation compatibility functions */

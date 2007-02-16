@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.7 2006/03/16 00:05:54 pavlin Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.8 2006/10/12 01:25:10 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__

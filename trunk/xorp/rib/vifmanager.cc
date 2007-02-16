@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.42 2006/03/16 00:05:42 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.43 2006/07/03 23:33:40 pavlin Exp $"
 
 #include "rib_module.h"
 

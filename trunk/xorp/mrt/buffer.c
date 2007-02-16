@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2006 International Computer Science Institute
+ * Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/mrt/buffer.c,v 1.4 2005/03/25 02:53:56 pavlin Exp $"
+#ident "$XORP: xorp/mrt/buffer.c,v 1.5 2006/03/16 00:04:47 pavlin Exp $"
 
 
 /*

@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2006 International Computer Science Institute
+ * Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/win_io.h,v 1.5 2006/03/16 00:04:38 pavlin Exp $
+ * $XORP: xorp/libxorp/win_io.h,v 1.6 2006/06/29 11:03:56 bms Exp $
  */
 
 #ifndef __LIBXORP_WIN_IO_H__

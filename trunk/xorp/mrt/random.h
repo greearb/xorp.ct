@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2006 International Computer Science Institute
+ * Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/random.h,v 1.2 2005/06/01 23:45:46 pavlin Exp $
+ * $XORP: xorp/mrt/random.h,v 1.3 2006/03/16 00:04:47 pavlin Exp $
  */
 
 

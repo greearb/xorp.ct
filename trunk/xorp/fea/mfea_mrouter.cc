@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.48 2006/08/25 01:04:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.49 2006/08/28 23:20:26 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.

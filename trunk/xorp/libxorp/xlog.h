@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2006 International Computer Science Institute
+ * Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.13 2006/10/12 01:24:56 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.14 2006/11/08 15:27:45 pavlin Exp $
  */
 
 

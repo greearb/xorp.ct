@@ -1,6 +1,6 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
-/* Copyright (c) 2001-2006 International Computer Science Institute
+/* Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.20 2006/11/07 22:07:44 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.21 2006/11/08 15:27:45 pavlin Exp $"
 
 /*
  * Message logging utility.

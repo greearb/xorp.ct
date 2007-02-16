@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2006 International Computer Science Institute
+# Copyright (c) 2001-2007 International Computer Science Institute
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.19 2007/02/13 01:22:04 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.20 2007/02/14 13:21:16 atanu Exp $
 
 import getopt
 import sys

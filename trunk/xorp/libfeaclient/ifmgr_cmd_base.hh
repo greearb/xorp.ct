@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_base.hh,v 1.3 2005/03/25 02:53:22 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_base.hh,v 1.4 2006/03/16 00:04:10 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMD_BASE_HH__
 #define __LIBFEACLIENT_IFMGR_CMD_BASE_HH__

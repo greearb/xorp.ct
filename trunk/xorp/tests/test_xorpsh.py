@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2006 International Computer Science Institute
+# Copyright (c) 2001-2007 International Computer Science Institute
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_xorpsh.py,v 1.3 2006/04/10 18:56:15 atanu Exp $
+# $XORP: xorp/tests/test_xorpsh.py,v 1.4 2006/06/17 02:59:49 atanu Exp $
 
 import popen2
 

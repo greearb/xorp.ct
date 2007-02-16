@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peers.cc,v 1.6 2005/08/18 15:58:11 bms Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peers.cc,v 1.7 2006/03/16 00:03:42 pavlin Exp $"
 
 #include "print_peer.hh"
 

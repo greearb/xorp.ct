@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_assert.hh,v 1.7 2005/05/04 01:53:01 pavlin Exp $
+// $XORP: xorp/pim/pim_proto_assert.hh,v 1.8 2006/03/16 00:04:54 pavlin Exp $
 
 
 #ifndef __PIM_PIM_PROTO_ASSERT_HH__

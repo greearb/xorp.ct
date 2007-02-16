@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2006 International Computer Science Institute
+ * Copyright (c) 2001-2007 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.11 2006/03/01 12:55:33 bms Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.12 2006/03/16 00:04:10 pavlin Exp $"
 
 
 /*

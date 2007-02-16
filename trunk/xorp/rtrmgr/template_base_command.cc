@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2001-2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.21 2006/03/16 00:06:02 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.22 2006/07/05 18:59:27 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
