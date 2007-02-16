@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.130 2007/02/14 11:27:18 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.131 2007/02/16 04:43:52 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -55,6 +55,11 @@ class PeerOut {
     string get_if_name() const { return _interface + "/" + _vif; }
 
     /**
+     * Called after the peer has been initialised.
+     */
+    bool go(OspfTypes::AreaID area);
+
+    /**
      * If the source address matches the interface address return the
      * interface and vif.
      */
@@ -69,7 +74,6 @@ class PeerOut {
 
     /**
      * Get Peer ID.
-     *
      */
     OspfTypes::PeerID get_peerid() const { return _peerid; }
 
@@ -525,6 +529,8 @@ class Peer {
 	_hello_packet.
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
 	_rxmt_interval = 5;
+
+	init();
     }
 
     ~Peer() {
@@ -533,6 +539,48 @@ class Peer {
 	    delete (*n);
 	_neighbours.clear();
     }
+
+    bool init() {
+	bool status = true;
+	switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		status = initV3();
+		break;
+	}
+	return status;
+    }
+
+    /**
+     * Called after all the state has been configured in the peer.
+     */
+    bool go() {
+	bool status = true;
+	switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		status = goV3();
+		break;
+	}
+	return status;
+    }
+
+    /**
+     * OSPFv3 specific initialisation.
+     */
+    bool initV3();
+
+    /**
+     * OSPFv3 specific go
+     */
+    bool goV3();
+
+    /*
+     * OSPFv3 set all the fields for the peers Link-LSA.
+     */
+    void populate_link_lsa();
 
     /**
      * For debugging only printable rendition of this interface/vif.
@@ -1141,6 +1189,8 @@ class Peer {
     list<Neighbour<A> *> _neighbours;	// List of discovered neighbours.
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
+
+    Lsa::LsaRef _link_lsa;		// This interfaces OSPFv3 Link-LSA. 
 
     list<RouterLink> _router_links;	// Router links for this peer
 

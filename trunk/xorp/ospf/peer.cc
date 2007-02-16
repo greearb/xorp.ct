@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.246 2007/02/15 22:20:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.247 2007/02/16 04:43:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -115,6 +115,18 @@ PeerOut<A>::~PeerOut()
 
     for(i = _areas.begin(); i != _areas.end(); i++)
 	delete (*i).second;
+}
+
+template <typename A>
+bool 
+PeerOut<A>::go(OspfTypes::AreaID area)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->go();
 }
 
 template <typename A>
@@ -723,6 +735,53 @@ PeerOut<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
 }
 
 /****************************************/
+
+template <typename A>
+bool
+Peer<A>::initV3()
+{
+    // Never need to delete this as the ref_ptr will tidy up.
+    LinkLsa *llsa = new LinkLsa(_ospf.get_version());
+    llsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    llsa->record_creation_time(now);
+    llsa->set_peerid(get_peerid());
+    _link_lsa = Lsa::LsaRef(llsa);    
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::goV3()
+{
+    populate_link_lsa();
+
+    _link_lsa->set_tracing(true);
+    get_area_router()->add_link_lsa(get_peerid(), _link_lsa);
+
+    return true;
+}
+
+template <>
+void
+Peer<IPv4>::populate_link_lsa()
+{
+}
+
+template <>
+void
+Peer<IPv6>::populate_link_lsa()
+{
+    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+    XLOG_ASSERT(llsa);
+    llsa->get_header().set_link_state_id(get_interface_id());
+    llsa->get_header().set_advertising_router(_ospf.get_router_id());
+    // The router priority is set in the set_router_priority method.
+    llsa->set_options(0);
+    llsa->set_link_local_address(get_interface_address());
+}
 
 template <typename A>
 bool
@@ -2752,6 +2811,17 @@ Peer<A>::set_options(uint32_t options)
 {
     _hello_packet.set_options(options);
 
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3: {
+        LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+	XLOG_ASSERT(llsa);
+	llsa->set_options(options);
+    }
+	break;
+    }
+
     return true;
 }
 
@@ -2767,6 +2837,17 @@ bool
 Peer<A>::set_router_priority(uint8_t priority)
 {
     _hello_packet.set_router_priority(priority);
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3: {
+        LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+	XLOG_ASSERT(llsa);
+	llsa->set_rtr_priority(priority);
+    }
+	break;
+    }
 
     return true;
 }
