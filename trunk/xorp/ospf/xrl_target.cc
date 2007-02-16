@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.48 2006/10/19 18:47:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.49 2007/02/16 04:43:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -151,7 +151,7 @@ XrlOspfV2Target::common_0_1_shutdown()
 XrlCmdError
 XrlOspfV3Target::common_0_1_shutdown()
 {
-    XLOG_UNFINISHED();
+    _ospf_ipv6.shutdown();
 
     return XrlCmdError::OKAY();
 }
