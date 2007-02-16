@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.229 2007/02/15 22:32:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.230 2007/02/16 04:43:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1792,6 +1792,8 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	      backup ? "true" : "false",
 	      dr ? "true" : "false");
 
+    OspfTypes::Version version = _ospf.get_version();
+
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
 
@@ -1808,6 +1810,16 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	// Record the creation time and initial age.
 	(*i)->record_creation_time(now);
 
+	// For OSPFv3 LSAs with Link-local scope store the incoming PeerID.
+	switch(version) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    if ((*i)->link_local_scope())
+		(*i)->set_peerid(peerid);
+	    break;
+	}
+		   
 	// (1) Validate the LSA's LS checksum. 
 	// (2) Check that the LSA's LS type is known.
 	// Both checks already performed in the packet/LSA decoding process.
