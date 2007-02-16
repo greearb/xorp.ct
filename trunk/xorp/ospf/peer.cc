@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.250 2007/02/16 13:42:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.251 2007/02/16 19:39:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -790,7 +790,7 @@ Peer<IPv6>::populate_link_lsa()
     llsa->get_header().set_link_state_id(get_interface_id());
     llsa->get_header().set_advertising_router(_ospf.get_router_id());
     // The router priority is set in the set_router_priority method.
-    llsa->set_options(0);
+    // The options are set in the set_options method.
     llsa->set_link_local_address(get_interface_address());
 }
 
