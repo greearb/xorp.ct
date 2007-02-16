@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.231 2007/02/16 09:58:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.232 2007/02/16 10:11:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1439,6 +1439,64 @@ AreaRouter<A>::new_router_links(OspfTypes::PeerID peerid,
     refresh_router_lsa();
 
     return true;
+}
+
+template <typename A>
+bool 
+AreaRouter<A>::add_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar)
+{
+    debug_msg("PeerID %u %s\n", peerid, cstring(*lsar));
+    XLOG_ASSERT(lsar->get_peerid() == peerid);
+
+    add_lsa(lsar);
+
+    update_link_lsa(peerid, lsar);
+
+    return true;
+}
+
+template <typename A>
+bool 
+AreaRouter<A>::update_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar)
+{
+    debug_msg("PeerID %u %s\n", peerid, cstring(*lsar));
+    XLOG_ASSERT(lsar->get_peerid() == peerid);
+
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    update_age_and_seqno(lsar, now);
+    
+    lsar->get_timer() = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
+			 callback(this, &AreaRouter<A>::refresh_link_lsa,
+				  peerid,
+				  lsar));
+
+    publish_all(lsar);
+
+    return true;
+}
+
+template <typename A>
+bool 
+AreaRouter<A>::withdraw_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar)
+{
+    debug_msg("PeerID %u %s\n", peerid, cstring(*lsar));
+    XLOG_ASSERT(lsar->get_peerid() == peerid);
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::refresh_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar)
+{
+    debug_msg("PeerID %u %s\n", peerid, cstring(*lsar));
+    XLOG_ASSERT(lsar->get_peerid() == peerid);
+
+    update_link_lsa(peerid, lsar);
 }
 
 template <typename A>

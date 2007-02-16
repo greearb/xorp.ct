@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.112 2007/02/14 11:42:19 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.113 2007/02/16 04:43:52 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -284,6 +284,26 @@ class AreaRouter : public ServiceBase {
      * @param lsar the AS-External-LSA
      */
     void external_withdraw(Lsa::LsaRef lsar);
+
+    /**
+     * Add a Link-LSA for this peer.
+     */
+    bool add_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar);
+
+    /**
+     * Update the Link-LSA for this peer.
+     */
+    bool update_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar);
+
+    /**
+     * Withdraw the Link-LSA for this peer.
+     */
+    bool withdraw_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar);
+
+    /**
+     * Refresh the Link-LSA for this peer.
+     */
+    void refresh_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar);
 
     /**
      * Generate a Network-LSA for this peer.
