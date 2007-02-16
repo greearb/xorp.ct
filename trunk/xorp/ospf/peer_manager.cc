@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.129 2007/02/16 19:39:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.130 2007/02/16 19:51:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1195,6 +1195,11 @@ PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
+	// XXX - Unconditionally set the router bit which means that
+	// we want to participate in the routing, the passive and
+	// loopback settings should be taken into account, when
+	// setting this value.
+	options.set_r_bit(true);
 	options.set_v6_bit(true);
 	break;
     }
