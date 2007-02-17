@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.56 2006/08/03 22:32:23 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.57 2007/02/17 02:34:43 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -174,6 +174,7 @@ the login shell is csh or tcsh):
 1000.	TASK: Update the status Web page in www/html_src/status.html
 	WHO:  Everyone
 	WHEN: 1 day before the release date
+	MISC: Can be omitted for a release candidate.
 
 ========================================================================
 1100.	TASK: Edit the Web pages in www/html_src/
@@ -191,7 +192,7 @@ the login shell is csh or tcsh):
 		and in the process delete its "Overview" URL in the
 		Documentation column.
 		Also, update the status on that page.
-                However, if the new entry is a release candidate,
+                However, if the new entry is a release candidate, then only
                 uncomment and update the "Release Candidate" section, but
                 keep the original "Latest Release" section.
 	      - Update www/html_src/getting_started.html with information
@@ -239,7 +240,7 @@ the login shell is csh or tcsh):
 	the problem will be identified and fixed.
 
 ========================================================================
-1170.	TASK: Update the Web pages in the XORP test web server
+1170.	TASK: Update the Web pages in the XORP test Web server
 	http://test.xorp.org/
 	WHO:  Release manager
 	WHEN: 1 day before the release date
@@ -249,7 +250,7 @@ the login shell is csh or tcsh):
  cvs update -d -P
 
 ========================================================================
-1180.	TASK: Verify that the web pages on the test web server
+1180.	TASK: Verify that the Web pages on the test Web server
 	http://test.xorp.org/ are OK.
 	WHO:  Everyone
 	WHEN: 1 day before the release date
@@ -317,19 +318,24 @@ the login shell is csh or tcsh):
  # Check the documentation building only on the primary development platform: 
  cd docs
  gmake
- # Note: the source-code compilation can be skipped if the XORP tinderbox
- # has been running for a reasonable amount of time without errors.
+ # Note: the source-code compilation and running the tests can be skipped if
+ # the XORP tinderbox  has been running for a reasonable amount of time
+ # without errors.
 
 ========================================================================
 2300.	TASK: Add CVS tag to the source code
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
- # In the command below, if the new release is, say, 0.5,
- # then $ReleaseTag must be RELEASE_0_5
- # The release tag is defined in the third command below.
- # If you make a mistake and you need to re-tag, then use flag -F after "rtag"
- # to move the tag.
+ # - In the command below, if the new release is, say, 1.4,
+ #   then $ReleaseTag must be RELEASE_1_4
+ #   However, if this is a release candidate, say, 1.4-RC,
+ #   then $ReleaseTag must be RELEASE_1_4_RC
+ # - The release tag is defined in the third command below.
+ # - If you make a mistake and you need to re-tag, then use flag -F
+ #   after "rtag" to move the tag.
+ # - If you make a mistake and you need to delete the tag, then use flag -d
+ #   after "rtag".
  mkdir xorp_release.tmp
  cd xorp_release.tmp
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp/VERSION
@@ -345,10 +351,12 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
- # In the command below, if the new release is, say, 0.5,
- # then $ReleaseVersion must be 0.5
- # The release version defined in the first line below:
- # Commands continue from the previous task
+ # - In the command below, if the new release is, say, 1.4,
+ #   then $ReleaseVersion must be 1.4
+ #   However, if this is a release candidate, say, 1.4-RC,
+ #   then $ReleaseVersion must be 1.4-RC
+ # - The release version defined in the first line below
+ # - Commands continue from the previous task
  setenv ReleaseVersion `cat xorp/VERSION`
  echo $ReleaseVersion
  mkdir tmp
@@ -391,11 +399,13 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
- # See xorp/devnotes/windows-release-process.txt and
- # xorp/contrib/win32/installer/README for instructions.
+ # - See xorp/devnotes/windows-release-process.txt and
+ #   xorp/contrib/win32/installer/README for instructions.
+ # - If necessary, list any new files (e.g., new binary files)
+ #    that need to be installed.
 
 ========================================================================
-2500.	TASK: Copy the tarballs to the web server
+2500.	TASK: Copy the tarballs to the Web server
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
@@ -420,7 +430,7 @@ the login shell is csh or tcsh):
  mv docs-$ReleaseVersion docs
 
 ========================================================================
-2550.	TASK: Copy the LiveCD ISO image and the Windows binary to the web
+2550.	TASK: Copy the LiveCD ISO image and the Windows binary to the Web
               server
 	WHO:  Release manager
 	WHEN: Release time
@@ -441,7 +451,7 @@ the login shell is csh or tcsh):
  ls -lAFgh LiveCD.iso.gz
 
 ========================================================================
-2625.	TASK: Update the links in the web server to the current release
+2625.	TASK: Update the links in the Web server to the current release
 	WHO:  Release manager
 	WHEN: Release time
 	MISC: Should be omitted for a release candidate.
@@ -462,7 +472,7 @@ the login shell is csh or tcsh):
 		of the Windows binary.
 
 ========================================================================
-2675.	TASK: Regenerate the Web pages in www
+2675.	TASK: Regenerate the Web pages in the www directory
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
@@ -475,7 +485,7 @@ the login shell is csh or tcsh):
 	the problem will be identified and fixed.
 
 ========================================================================
-2700.	TASK: Update the XORP web page on the main Web server www.xorp.org
+2700.	TASK: Update the XORP Web page on the main Web server www.xorp.org
 	      from the CVS repository
 	WHO:  Release manager
 	WHEN: Right after the release
@@ -600,9 +610,9 @@ the login shell is csh or tcsh):
  # - The new version should have "-WIP" (Work-In-Progress) as a suffix.
  #   If the exact release date is not known, then use "?" or "??" for the
  #   unknown parts of the date.
- # - For example, if the next release would be 1.4, then the release and
+ # - For example, if the next release would be 1.5, then the release and
  #   the date might look like:
- #      Release 1.4-WIP (2006/??/??)
+ #      Release 1.5-WIP (2006/??/??)
 
 ========================================================================
 3200.	TASK: Update the "Work-In-Progress" version number
@@ -610,8 +620,8 @@ the login shell is csh or tcsh):
 	WHEN: Right after the release
 	MISC: Should be omitted for a release candidate.
 	MISC: The version name should have "-WIP" (Work-In-Progress)
-	      as a suffix. For example, if the next release would be 1.4,
-	      then the version would be "1.4-WIP".
+	      as a suffix. For example, if the next release would be 1.5,
+	      then the version would be "1.5-WIP".
 	COMMANDS:
  # Edit xorp/README
  # Edit xorp/RELEASE_NOTES (or verify that it contains the right version)
@@ -634,7 +644,7 @@ the login shell is csh or tcsh):
 	COMMANDS:
  ssh www.xorp.org
  cd /home/www/u1/www/data/xorp-releases
- # Remove the Release Candidate directory (e.g., 1.3-RC)
+ # Remove the Release Candidate directory (e.g., 1.4-RC)
 
 ========================================================================
 3400.	TASK: Jupiter
