@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.157 2007/01/23 03:58:26 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.158 2007/02/10 02:13:47 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.4-WIP (2006/??/??)
+Release 1.4-RC (2006/??/??)
 =========================
   ALL:
     - XORP now builds on DragonFlyBSD-1.8, Linux Fedora Core6,
@@ -115,22 +115,22 @@ Release 1.4-WIP (2006/??/??)
       }
 
   LIBXORP:
-    - 
+    - The XORP scheduler now has support for priority-based tasks.
 
   LIBXIPC:
-    - 
+    - No significant changes.
 
   LIBFEACLIENT:
-    - 
+    - No significant changes.
 
   XRL:
-    - 
+    - No significant changes.
 
   RTRMGR:
     - Bug fix in the semantics of the rtrmgr template %activate keyword.
 
   XORPSH:
-    - 
+    - No significant changes.
 
   POLICY:
     - Bug fix related to creating export policies that match protocol's
@@ -151,10 +151,12 @@ Release 1.4-WIP (2006/??/??)
     - Bug fix related to atomically modifying the IP address of an interface.
 
   RIB:
-    - 
+    - Bug fix related to (not) installing redundant host-specific
+      entries for the other side of a point-to-point interface if the
+      netmask for the interface covers the host-specific entry.
 
   RIP:
-    - 
+    - No significant changes.
 
   OSPF:
     - 
@@ -197,7 +199,10 @@ Release 1.4-WIP (2006/??/??)
       forwarding entry received from the FEA.
 
   CLI:
-    - 
+    - Performance improvement if the CLI is processing a large amount
+      of data. E.g., if xorpsh is used in a pipe like:
+
+      cat commands.txt | xorpsh
 
   SNMP:
     - Bug fix with the snmpd arguments when sampling whether snmpd
