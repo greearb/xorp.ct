@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/contrib/win32/installer/README,v 1.1 2006/03/09 08:00:32 pavlin Exp $
 #
 
 Those are the instructions for building the XORP Installer for Windows:
@@ -11,5 +11,7 @@ Those are the instructions for building the XORP Installer for Windows:
   - Check out the xorp/contrib/win32/installer/xorp.nsi script.
   - Fiddle with the SRCDIR and DLLDIR settings if you have to, to
     point to where you have built the source and installed MinGW.
+  - If necessary, list any new files (e.g., new binary files)
+    that need to be installed.
   - Run makensis xorp.nsi.
   - Test the installer.
