@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.253 2007/02/16 22:20:00 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.254 2007/02/16 22:46:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2627,28 +2627,30 @@ void
 Peer<A>::designated_router_changed(bool yes)
 {
     list<OspfTypes::RouterID> routers;
-    uint32_t network_mask = 0;
-
-    switch(_ospf.get_version()) {
-    case OspfTypes::V2:
-	network_mask = get_network_mask();
-	break;
-    case OspfTypes::V3:
-	break;
-    }
 
     get_attached_routers(routers);
     if (routers.empty())
 	return;
 
+    uint32_t network_mask = 0;
+    uint32_t link_state_id;
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	network_mask = get_network_mask();
+	link_state_id = get_candidate_id();
+	break;
+    case OspfTypes::V3:
+	link_state_id = get_interface_id();
+	break;
+    }
+
     // Yipee we just became the DR.
     if (yes) {
-	get_area_router()->generate_network_lsa(get_peerid(),
-						get_candidate_id(),
+	get_area_router()->generate_network_lsa(get_peerid(), link_state_id,
 						routers, network_mask);
     } else {
-	get_area_router()->withdraw_network_lsa(get_peerid(),
-						get_candidate_id());
+	get_area_router()->withdraw_network_lsa(get_peerid(), link_state_id);
     }
 }
 
@@ -2661,12 +2663,15 @@ Peer<A>::adjacency_change(bool up)
 
     list<OspfTypes::RouterID> routers;
     uint32_t network_mask = 0;
+    uint32_t link_state_id;
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	network_mask = get_network_mask();
+	link_state_id = get_candidate_id();
 	break;
     case OspfTypes::V3:
+	link_state_id = get_interface_id();
 	break;
     }
 
@@ -2675,22 +2680,22 @@ Peer<A>::adjacency_change(bool up)
     if (up) {
 	if (1 == routers.size()) {
 	    get_area_router()->generate_network_lsa(get_peerid(),
-						    get_candidate_id(),
+						    link_state_id,
 						    routers,
 						    network_mask);
 	} else {
 	    get_area_router()->update_network_lsa(get_peerid(),
-						  get_candidate_id(),
+						  link_state_id,
 						  routers,
 						  network_mask);
 	}
     } else {
 	if (routers.empty()) {
 	    get_area_router()->withdraw_network_lsa(get_peerid(),
-						    get_candidate_id());
+						    link_state_id);
 	} else {
 	    get_area_router()->update_network_lsa(get_peerid(),
-						  get_candidate_id(),
+						  link_state_id,
 						  routers,
 						  network_mask);
 	}
@@ -2776,8 +2781,19 @@ Peer<A>::router_id_changing()
 	get_attached_routers(routers);
 	if (routers.empty())
 	    return;
-	get_area_router()->withdraw_network_lsa(get_peerid(),
-						get_candidate_id());
+
+	uint32_t link_state_id;
+
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    link_state_id = get_candidate_id();
+	    break;
+	case OspfTypes::V3:
+	    link_state_id = get_interface_id();
+	    break;
+	}
+
+	get_area_router()->withdraw_network_lsa(get_peerid(), link_state_id);
     }
 }
 
