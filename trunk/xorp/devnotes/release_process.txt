@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.55 2006/08/03 19:12:01 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.56 2006/08/03 22:32:23 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -20,8 +20,8 @@ the login shell is csh or tcsh):
 	      of features it should have.
 	WHO:  Everyone
 	WHEN: Approximately one week after the previous release
-	MISC: Write the wish-list to xorp/devnotes/WORKPLAN
-	      (under section "Next Release")
+	MISC: - Write the wish-list to xorp/devnotes/WORKPLAN
+	        (under section "Next Release")
 
 ========================================================================
 0200.	TASK: Status check. If necessary, revise the set of features to
@@ -33,6 +33,16 @@ the login shell is csh or tcsh):
 0300.	TASK: Stop adding new features.
 	WHO:  Everyone
 	WHEN: 1 week before the release date
+
+========================================================================
+0325.	TASK: Decide the next version number
+	WHO:  All
+	WHEN: 1 week before the release date
+	MISC: - Typically, the numbering increment is like 1.3 -> 1.4,
+		unless there is major change in XORP (e.g., 1.8 -> 2.0)
+              - If this is a release candidate, then the version number
+		has the -RC suffix. E.g., the 1.4 release candidate
+		version number is 1.4-RC
 
 ========================================================================
 0350.	TASK: Send email to xorp-mirrors@xorp.org to tell all mirror
@@ -72,16 +82,52 @@ the login shell is csh or tcsh):
 0720.	TASK: Update XORP_MODULE_VERSION in all foo_module.h files
 	WHO:  Release manager
 	WHEN: 1 day before the release date
-        MISC: For the time being, do not do this, until we
-	      have a better idea about the particular purpose, if any,
-	      of XORP_MODULE_VERSION.
+        MISC: - For the time being, do not do this, until we have a
+		better idea about the particular purpose, if any, of
+		XORP_MODULE_VERSION.
 
 ========================================================================
 0730.	TASK: Add a new year to the copyright license (only if
 	      necessary)
 	WHO:  Release manager
 	WHEN: 1 day before the release date
-	MISC: All files in xorp/
+	MISC: - This affects all files in the following top-level
+                directories: xorp, www, other, data.
+	COMMANDS:
+ # Check-out a new copy of all files
+ mkdir xorp.tmp
+ cd xorp.tmp
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co data
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co other
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co www
+ cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
+ # Prepare the script for updating the copyright message
+ cp xorp/devnotes/update_copyright.sh .
+
+ # Edit the update_copyright.sh script using the instructions inside
+ # that script.
+ vi update_copyright.sh
+
+ # Run the modified update_copyright.sh script inside each of the
+ # checked-out directory, check the modifications and then commit them.
+ # The CVS commit message should be something like:
+ # "Update the ICSI copyright year to 2008."
+ cd data
+ ../update_copyright.sh
+ cvs diff -u -p | less
+ cvs commit
+ cd ../other
+ ../update_copyright.sh
+ cvs diff -u -p | less
+ cvs commit
+ cd ../www
+ ../update_copyright.sh
+ cvs diff -u -p | less
+ cvs commit
+ cd ../xorp
+ ../update_copyright.sh
+ cvs diff -u -p | less
+ cvs commit
 
 ========================================================================
 0740.	TASK: Update xorp/docs/kdoc/gen-kdoc.sh
@@ -92,6 +138,9 @@ the login shell is csh or tcsh):
 	      - Fix all kdoc-related compilation issues that may be
 		discovered by running the xorp/docs/kdoc/gen-kdoc.sh
 		script.
+	COMMANDS:
+ cd xorp/docs/kdoc
+ ./gen-kdoc.sh
 
 ========================================================================
 0750.	TASK: Update the release version number
@@ -209,29 +258,29 @@ the login shell is csh or tcsh):
 1200.	TASK: Update xorp/RELEASE_NOTES
 	WHO:  Everyone
 	WHEN: 1 day before the release date
-	MISC: - If there are no changes to a module, then just add
-		"No changes." or "No significant changes."
+	MISC: If there are no changes to a module, then just add
+	      "No changes." or "No significant changes."
 
 ========================================================================
 1250.	TASK: Update xorp/BUILD_NOTES
 	WHO:  Everyone
 	WHEN: 1 day before the release date
-	MISC: - Add/update the information about building XORP on
-                various platforms.
+	MISC: Add/update the information about building XORP on
+              various platforms.
 
 ========================================================================
 1270.	TASK: Update xorp/ERRATA
 	WHO:  Everyone
 	WHEN: 1 day before the release date
-	MISC: - If there are no known issues for a module, then just add
-		"No known issues."
+	MISC: If there are no known issues for a module, then just add
+	      "No known issues."
 
 ========================================================================
 1300.	TASK: Modify the date on the front page on all documents in
 	      xorp/docs to be set to the release date
 	WHO:  Release manager
 	WHEN: 1 day before the release date
-	MISC: - Can be omitted for a release candidate.
+	MISC: Can be omitted for a release candidate.
  # Commands to verify the date.
  cd xorp/docs
  egrep '\\date' */*.tex
@@ -457,12 +506,12 @@ the login shell is csh or tcsh):
 2770.	TASK: Add a Bugzilla "Version" entry for the new version.
 	WHO:  Release manager
 	WHEN: Right after the release
-	MISC: Login to the XORP Bugzilla site, and then click on
-	      - "Edit products" (at the bottom of the page)
-	      - "Edit product: XORP"
-	      - "Edit versions:" (at the bottom of the page)
-	      - "Edit version ...: Add a new version"
-	MISC: Should be omitted for a release candidate.
+	MISC: - Login to the XORP Bugzilla site, and then click on
+	        "Edit products" (at the bottom of the page)
+	        "Edit product: XORP"
+	        "Edit versions:" (at the bottom of the page)
+	        "Edit version ...: Add a new version"
+	      - Should be omitted for a release candidate.
 
 ========================================================================
 2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
