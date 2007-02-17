@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.20 2006/10/13 00:41:48 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.21 2006/10/13 01:02:31 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -12,14 +12,14 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.20 2006/10/13 00:41:48 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.21 2006/10/13 01:02:31 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
 dnl ----------------------------
 dnl automake options
 dnl ----------------------------
-AM_INIT_AUTOMAKE(mibs, 1.4-WIP)
+AM_INIT_AUTOMAKE(mibs, 1.4-RC)
 AM_MAINTAINER_MODE
 
 dnl ---------------------------------------------------------------------------
