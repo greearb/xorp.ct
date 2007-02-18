@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.116 2007/02/16 22:46:40 pavlin Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.117 2007/02/18 01:40:27 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -337,6 +337,77 @@ class AreaRouter : public ServiceBase {
      */
     void refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
 			     bool timer = false);
+
+    /**
+     * Generate a Intra-Area-Prefix-LSA for this peer OSPFv3 only and
+     * add it to the database.
+     *
+     * @param peerid the peer that the generated Intra-Area-Prefix-LSA
+     * belongs to.
+     * @param lsar the LSA that is referenced by the
+     * Intra-Area-Prefix-LSA.
+     * @param interface_id that the generated Intra-Area-Prefix-LSA
+     * belongs to.
+     */
+    bool generate_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
+					Lsa::LsaRef lsar,
+					uint32_t interface_id);
+
+    /**
+     * OSPFv3 only.
+     * Find the Link-LSA (if it exists) specified by the the tuple LS
+     * type, Link State ID and Router ID, and add to the prefix
+     * list. If the prefix is already on the list just or in the
+     * options field.
+     */
+    bool
+    AreaRouter<A>::populate_prefix(OspfTypes::PeerID peeridid,
+				   uint32_t interface_id, 
+				   OspfTypes::RouterID router_id,
+				   list<IPv6Prefix>& prefixes);
+    
+    /**
+     * Update the Intra-Area-Prefix-LSA for this peer OSPFv3 only.
+     *
+     * @param peerid the peer that needs its Intra-Area-Prefix-LSA refreshed.
+     * @param referenced_ls_type
+     * @param interface_id that the generated Intra-Area-Prefix-LSA
+     * belongs to.
+     * @param atached_router list of fully attached routers.
+     */
+    bool update_intra_area_prefix_lsa(OspfTypes::PeerID peer,
+				      uint16_t referenced_ls_type,
+				      OspfTypes::RouterID interface_id,
+				      const list<RouterInfo>& 
+				      attached_routers);
+
+    /**
+     * Withdraw the Intra-Area-Prefix-LSA for this peer by prematurely
+     * aging OSPFv3 only.
+     *
+     * @param peerid the peer that needs its Intra-Area-Prefix-LSA refreshed.
+     * @param referenced_ls_type
+     * @param interface_id that the generated Intra-Area-Prefix-LSA
+     * belongs to.
+     */
+    bool withdraw_intra_area_prefix_lsa(OspfTypes::PeerID peer,
+					uint16_t referenced_ls_type,
+					uint32_t interface_id);
+					
+
+    /**
+     * Refresh the Intra-Area-Prefix-LSA OSPFv3 only.
+     *
+     * NOT IMPLEMENTED.
+     *
+     * @param peerid the peer that needs its Intra-Area-Prefix-LSA refreshed.
+     * @param referenced_ls_type
+     * @param interface_id that the generated Intra-Area-Prefix-LSA
+     * belongs to.
+     */
+    void refresh_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
+				       uint16_t referenced_ls_type,
+				       uint32_t interface_id);
 
     /**
      * Create an LSA that will be used to announce the default route
