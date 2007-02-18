@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.51 2007/02/12 07:26:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.52 2007/02/16 22:46:43 pavlin Exp $"
 
 #include "ospf_module.h"
 
@@ -194,7 +194,7 @@ populate_helloV3(HelloPacket *hello)
     hello->set_area_id(set_id("4.3.2.1"));
     hello->set_instance_id(5);
 
-    hello->set_interface_id(0x12345678);
+    hello->set_interface_id(12345678);
     hello->set_hello_interval(9876);
     hello->set_options(compute_options(OspfTypes::V3, OspfTypes::NORMAL));
     hello->set_router_priority(42);
