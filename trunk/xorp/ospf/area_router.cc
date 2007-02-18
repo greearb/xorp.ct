@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.234 2007/02/16 13:42:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.235 2007/02/16 22:46:40 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1503,7 +1503,7 @@ template <typename A>
 bool 
 AreaRouter<A>::generate_network_lsa(OspfTypes::PeerID peerid,
 				    OspfTypes::RouterID link_state_id,
-				    list<OspfTypes::RouterID>& routers,
+				    list<RouterInfo>& routers,
 				    uint32_t network_mask)
 {
     debug_msg("PeerID %u link state id %s\n", peerid,
@@ -1540,7 +1540,7 @@ template <typename A>
 bool 
 AreaRouter<A>::update_network_lsa(OspfTypes::PeerID peerid,
 				  OspfTypes::RouterID link_state_id,
-				  list<OspfTypes::RouterID>& routers,
+				  list<RouterInfo>& routers,
 				  uint32_t network_mask)
 {
     debug_msg("PeerID %u link state id %s\n", peerid,
@@ -1560,12 +1560,15 @@ AreaRouter<A>::update_network_lsa(OspfTypes::PeerID peerid,
     NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(_db[index].get());
     XLOG_ASSERT(nlsa);
 
-    list<OspfTypes::RouterID>& attached_routers = nlsa->get_attached_routers();
-    if (&routers != &attached_routers) {
+    // If routers is empty this is a retransmission.
+    if (!routers.empty()) {
+	list<OspfTypes::RouterID>& attached_routers = 
+	    nlsa->get_attached_routers();
 	attached_routers.clear();
-	attached_routers.push_back(_ospf.get_router_id()); // Add this router.
-	attached_routers.insert(attached_routers.begin(),
-				routers.begin(), routers.end());
+	attached_routers.push_back(_ospf.get_router_id());// Add this router
+	list<RouterInfo>::iterator i;
+	for (i = routers.begin(); i != routers.end(); i++)
+	    attached_routers.push_back(i->_router_id);
     }
 
     switch (version) {
@@ -1640,9 +1643,11 @@ AreaRouter<A>::refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
 	break;
     }
 
+    list<RouterInfo> routers;
+
     update_network_lsa(peerid,
 		       nlsa->get_header().get_link_state_id(),
-		       nlsa->get_attached_routers(),
+		       routers,
 		       network_mask);
 
     if (!timer)

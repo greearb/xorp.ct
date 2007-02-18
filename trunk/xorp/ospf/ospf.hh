@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.99 2007/02/16 04:43:52 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.100 2007/02/16 22:46:41 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -356,6 +356,22 @@ pb(const bool val)
 {
     return val ? "true" : "false";
 }
+
+/**
+ * Router ID and associated interface ID. 
+ */
+struct RouterInfo {
+    RouterInfo(OspfTypes::RouterID router_id) 
+	: _router_id(router_id), _interface_id(0)
+    {}
+
+    RouterInfo(OspfTypes::RouterID router_id, uint32_t interface_id) 
+	: _router_id(router_id), _interface_id(interface_id)
+    {}
+
+    OspfTypes::RouterID _router_id;	// Neighbour Router ID. 
+    uint32_t _interface_id;		// Neighbour interface ID OSPFv3 only.
+};
 
 /**
  * Neighbour information that is returned by XRLs.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.255 2007/02/17 00:53:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.256 2007/02/18 00:47:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2626,7 +2626,7 @@ template <typename A>
 void
 Peer<A>::designated_router_changed(bool yes)
 {
-    list<OspfTypes::RouterID> routers;
+    list<RouterInfo> routers;
 
     get_attached_routers(routers);
     if (routers.empty())
@@ -2661,7 +2661,7 @@ Peer<A>::adjacency_change(bool up)
     XLOG_ASSERT(do_dr_or_bdr());
     XLOG_ASSERT(is_DR());
 
-    list<OspfTypes::RouterID> routers;
+    list<RouterInfo> routers;
     uint32_t network_mask = 0;
     uint32_t link_state_id;
 
@@ -2730,12 +2730,13 @@ Peer<A>::get_neighbour_info(OspfTypes::NeighbourID nid, NeighbourInfo& ninfo)
 
 template <typename A>
 void
-Peer<A>::get_attached_routers(list<OspfTypes::RouterID>& routers)
+Peer<A>::get_attached_routers(list<RouterInfo>& routers)
 {
     typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	if (Neighbour<A>::Full == (*n)->get_state())
-	    routers.push_back((*n)->get_router_id());
+	if (Neighbour<A>::Full == (*n)->get_state()) {
+	    routers.push_back(RouterInfo((*n)->get_router_id()));
+	}
 }
 
 template <typename A>
@@ -2777,7 +2778,7 @@ Peer<A>::router_id_changing()
     // The router ID is about to change so flush out any Network-LSAs
     // originated by this router.
     if (Peer<A>::DR == get_state()) {
-	list<OspfTypes::RouterID> routers;
+	list<RouterInfo> routers;
 	get_attached_routers(routers);
 	if (routers.empty())
 	    return;

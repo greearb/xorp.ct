@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.115 2007/02/16 13:42:23 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.116 2007/02/16 22:46:40 pavlin Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -310,7 +310,7 @@ class AreaRouter : public ServiceBase {
      */
     bool generate_network_lsa(OspfTypes::PeerID peer,
 			      OspfTypes::RouterID link_state_id,
-			      list<OspfTypes::RouterID>& attached_routers,
+			      list<RouterInfo>& attached_routers,
 			      uint32_t network_mask);
 
     /**
@@ -318,7 +318,7 @@ class AreaRouter : public ServiceBase {
      */
     bool update_network_lsa(OspfTypes::PeerID peer,
 			    OspfTypes::RouterID link_state_id,
-			    list<OspfTypes::RouterID>& attached_routers,
+			    list<RouterInfo>& attached_routers,
 			    uint32_t network_mask);
 
     /**
