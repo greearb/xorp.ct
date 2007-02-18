@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.94 2007/02/16 09:41:19 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.95 2007/02/16 22:46:41 pavlin Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1966,6 +1966,35 @@ public:
 
     list<IPv6Prefix>& get_prefixes() {
 	return _prefixes;
+    }
+
+    /**
+     * Given a referenced LS type and an interface ID generate a candidate Link
+     * State ID. This is *NOT* part of the protocol, just a way to
+     * create a unique mapping.
+     *
+     * The underlying assumption is that for every area only one
+     * Intra-Area-Prefix-LSA will be generated per Router-LSA and
+     * Network-LSA. More importantly one Router-LSA will be generated
+     * per area although it is legal to generate many. The size of the
+     * Router-LSA is a function of the number of interfaces on the
+     * generating router and for the time being we only generate one
+     * Router-LSA. If the number of interfaces exceeds the capacity of
+     * a single Router-LSA then this method and the Router-LSA code
+     * will need to be re-visited.
+     */
+    uint32_t create_link_state_id(uint16_t ls_type, uint32_t interface_id)
+	const
+    {
+	if (RouterLsa(get_version()).get_ls_type() == ls_type) {
+	    return 0x2a000000;
+	} else if (NetworkLsa(get_version()).get_ls_type() == ls_type) {
+	    return interface_id;
+	} else {
+	    XLOG_FATAL("Unknown LS Type %#x\n", ls_type);
+	}
+
+	return 0;
     }
 
     /**
