@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.97 2007/02/12 21:37:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.98 2007/02/16 22:46:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -708,10 +708,20 @@ RouterLink::str() const
 	break;
     case OspfTypes::V3:
 	output += c_format(" Interface ID %u", get_interface_id());
-	output += c_format(" Neighbour Interface ID %u",
-			   get_neighbour_interface_id());
-	output += c_format(" Neighbour Router ID %s",
-			   pr_id(get_neighbour_router_id()).c_str());
+	switch(get_type()) {
+	case transit:
+	    output += c_format(" Designated Router Interface ID %u",
+			       get_neighbour_interface_id());
+	    output += c_format(" Designated Router ID %s",
+			       pr_id(get_neighbour_router_id()).c_str());
+	    break;
+	default:
+	    output += c_format(" Neighbour Interface ID %u",
+			       get_neighbour_interface_id());
+	    output += c_format(" Neighbour Router ID %s",
+			       pr_id(get_neighbour_router_id()).c_str());
+	    break;
+	}
 	break;
     }
 
