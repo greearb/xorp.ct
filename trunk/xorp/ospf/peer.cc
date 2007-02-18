@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.256 2007/02/18 00:47:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.257 2007/02/18 01:40:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2735,7 +2735,16 @@ Peer<A>::get_attached_routers(list<RouterInfo>& routers)
     typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	if (Neighbour<A>::Full == (*n)->get_state()) {
-	    routers.push_back(RouterInfo((*n)->get_router_id()));
+	    switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		routers.push_back(RouterInfo((*n)->get_router_id()));
+		break;
+	    case OspfTypes::V3:
+		routers.push_back(RouterInfo((*n)->get_router_id(),
+					     (*n)->get_hello_packet()->
+					     get_interface_id()));
+		break;
+	    }
 	}
 }
 
