@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.254 2007/02/16 22:46:41 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.255 2007/02/17 00:53:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2633,7 +2633,7 @@ Peer<A>::designated_router_changed(bool yes)
 	return;
 
     uint32_t network_mask = 0;
-    uint32_t link_state_id;
+    uint32_t link_state_id = 0;
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
