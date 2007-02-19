@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.236 2007/02/18 01:40:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.237 2007/02/18 12:47:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3634,32 +3634,16 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 						   get_advertising_router());
 		route_entry.set_area(_area);
 		route_entry.set_lsa(lsar);
-		list<IntraAreaPrefixLsa *>::iterator i;
-		for (i = lsai.begin(); i != lsai.end(); i++) {
-		    if ((*i)->get_referenced_ls_type() != rlsa->get_ls_type())
+
+		list<IPv6Prefix> prefixes;
+		associated_prefixesV3(rlsa->get_ls_type(), 0, lsai, prefixes);
+		list<IPv6Prefix>::iterator j;
+		for (j = prefixes.begin(); j != prefixes.end(); j++) {
+		    if (j->get_nu_bit())
 			continue;
-		    if ((*i)->get_referenced_link_state_id() != 0) {
-			XLOG_WARNING("Referenced Link State ID "
-				     "should be zero %s", cstring(*(*i)));
-			continue;
-		    }
-		    if ((*i)->get_referenced_advertising_router() != 
-			(*i)->get_header().get_advertising_router()) {
-			XLOG_WARNING("Advertising router and Referenced "
-				     "Advertising router don't match %s",
-				     cstring(*(*i)));
-			continue;
-		    }
-		    list<IPv6Prefix>& prefixes = (*i)->get_prefixes();
-		    list<IPv6Prefix>::iterator j;
-		    for (j = prefixes.begin(); j != prefixes.end(); j++) {
-			if (j->get_nu_bit())
-			    continue;
-			route_entry.set_cost(ri->weight() + j->get_metric());
-			routing_table_add_entry(routing_table,
-						j->get_network(),
-						route_entry);
-		    }
+		    route_entry.set_cost(ri->weight() + j->get_metric());
+		    routing_table_add_entry(routing_table, j->get_network(),
+					    route_entry);
 		}
 	    }
 	} else {
@@ -3683,31 +3667,18 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 						   get_advertising_router());
 		route_entry.set_area(_area);
 		route_entry.set_lsa(lsar);
-		list<IntraAreaPrefixLsa *>::iterator i;
-		for (i = lsai.begin(); i != lsai.end(); i++) {
-		    if ((*i)->get_referenced_ls_type() != nlsa->get_ls_type())
+
+		list<IPv6Prefix> prefixes;
+		associated_prefixesV3(nlsa->get_ls_type(),
+				      nlsa->get_header().get_link_state_id(),
+				      lsai, prefixes);
+		list<IPv6Prefix>::iterator j;
+		for (j = prefixes.begin(); j != prefixes.end(); j++) {
+		    if (j->get_nu_bit())
 			continue;
-		    if ((*i)->get_referenced_link_state_id() != 
-			nlsa->get_header().get_link_state_id()) {
-			continue;
-		    }
-		    if ((*i)->get_referenced_advertising_router() != 
-			(*i)->get_header().get_advertising_router()) {
-			XLOG_WARNING("Advertising router and Referenced "
-				     "Advertising router don't match %s",
-				     cstring(*(*i)));
-			continue;
-		    }
-		    list<IPv6Prefix>& prefixes = (*i)->get_prefixes();
-		    list<IPv6Prefix>::iterator j;
-		    for (j = prefixes.begin(); j != prefixes.end(); j++) {
-			if (j->get_nu_bit())
-			    continue;
-			route_entry.set_cost(ri->weight() + j->get_metric());
-			routing_table_add_entry(routing_table,
-						j->get_network(),
-						route_entry);
-		    }
+		    route_entry.set_cost(ri->weight() + j->get_metric());
+		    routing_table_add_entry(routing_table, j->get_network(),
+					    route_entry);
 		}
 	    }
 	}
@@ -4255,6 +4226,107 @@ void
 AreaRouter<IPv6>::routing_as_externalV3()
 {
     XLOG_WARNING("TBD: Routing AS External OSPFv3");
+}
+
+#if	0
+template <typename A>
+bool 
+AreaRouter<A>::associated_prefixesV3(const RouterLsa *rlsa,
+				     const list<IntraAreaPrefixLsa *>& lsai,
+				     list<IPv6Prefix>& prefixes)
+{
+    list<IntraAreaPrefixLsa *>::const_iterator i;
+    for (i = lsai.begin(); i != lsai.end(); i++) {
+	if ((*i)->get_referenced_ls_type() != rlsa->get_ls_type())
+	    continue;
+	if ((*i)->get_referenced_link_state_id() != 0) {
+	    XLOG_WARNING("Referenced Link State ID "
+			 "should be zero %s", cstring(*(*i)));
+	    continue;
+	}
+	if ((*i)->get_referenced_advertising_router() != 
+	    (*i)->get_header().get_advertising_router()) {
+	    XLOG_WARNING("Advertising router and Referenced "
+			 "Advertising router don't match %s",
+			 cstring(*(*i)));
+	    continue;
+	}
+	list<IPv6Prefix>& p = (*i)->get_prefixes();
+	list<IPv6Prefix>::const_iterator j;
+	for (j = p.begin(); j != p.end(); j++) {
+	    prefixes.push_back(*j);
+	}
+    }
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::associated_prefixesV3(NetworkLsa *nlsa,
+				     const list<IntraAreaPrefixLsa *>& lsai,
+				     list<IPv6Prefix>& prefixes)
+{
+    list<IntraAreaPrefixLsa *>::const_iterator i;
+    for (i = lsai.begin(); i != lsai.end(); i++) {
+	if ((*i)->get_referenced_ls_type() != nlsa->get_ls_type())
+	    continue;
+	if ((*i)->get_referenced_link_state_id() != 
+	    nlsa->get_header().get_link_state_id()) {
+	    continue;
+	}
+	if ((*i)->get_referenced_advertising_router() != 
+	    (*i)->get_header().get_advertising_router()) {
+	    XLOG_WARNING("Advertising router and Referenced "
+			 "Advertising router don't match %s",
+			 cstring(*(*i)));
+	    continue;
+	}
+	list<IPv6Prefix>& p = (*i)->get_prefixes();
+	list<IPv6Prefix>::const_iterator j;
+	for (j = p.begin(); j != p.end(); j++) {
+	    prefixes.push_back(*j);
+	}
+    }
+
+    return true;
+}
+#endif
+
+template <typename A>
+bool
+AreaRouter<A>::associated_prefixesV3(uint16_t ls_type,
+				     uint32_t referenced_link_state_id,
+				     const list<IntraAreaPrefixLsa *>& lsai,
+				     list<IPv6Prefix>& prefixes)
+{
+    list<IntraAreaPrefixLsa *>::const_iterator i;
+    for (i = lsai.begin(); i != lsai.end(); i++) {
+	if ((*i)->get_referenced_ls_type() != ls_type)
+	    continue;
+	if ((*i)->get_referenced_link_state_id() != referenced_link_state_id) {
+	    if (RouterLsa(_ospf.get_version()).get_ls_type() == ls_type) {
+		XLOG_ASSERT(0 == referenced_link_state_id);
+		XLOG_WARNING("Referenced Link State ID "
+			     "should be zero %s", cstring(*(*i)));
+	    }
+	    continue;
+	}
+	if ((*i)->get_referenced_advertising_router() != 
+	    (*i)->get_header().get_advertising_router()) {
+	    XLOG_WARNING("Advertising router and Referenced "
+			 "Advertising router don't match %s",
+			 cstring(*(*i)));
+	    continue;
+	}
+	list<IPv6Prefix>& p = (*i)->get_prefixes();
+	list<IPv6Prefix>::const_iterator j;
+	for (j = p.begin(); j != p.end(); j++) {
+	    prefixes.push_back(*j);
+	}
+    }
+
+    return true;
 }
 
 template <typename A>
