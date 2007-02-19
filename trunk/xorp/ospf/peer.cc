@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.257 2007/02/18 01:40:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.258 2007/02/18 01:47:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4266,8 +4266,10 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 #ifndef	MAX_AGE_IN_DATABASE
     // MaxAge LSAs are in the retransmission list with no connection
     // to the database. The LSAs can either be removed due to an ACK
-    // or because of a new LSA. If an incomming LSA matches a MaxAge
-    // LSA remove the MaxAge LSA.
+    // or because of a new LSA. If an incoming LSA matches a MaxAge
+    // LSA remove the MaxAge LSA. An incoming LSA can be rewritten and
+    // placed on the retransmission list, leave these alone.
+    // 
  again:
     for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	 i != _lsa_rxmt.end(); i++) {
@@ -4278,8 +4280,12 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 	list<Lsa::LsaRef>& lsas = lsup->get_lsas();
 	list<Lsa::LsaRef>::const_iterator j;
 	for (j = lsas.begin(); j != lsas.end(); j++) {
+	    // Possibly rewritten
+	    if (*i == *j) {
+		continue;
+	    }
 	    if ((*i).get()->get_header() == (*j).get()->get_header()) {
-		XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
+// 		XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
 		_lsa_rxmt.erase(i);
 		goto again;
 	    }
