@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.237 2007/02/18 12:47:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.238 2007/02/19 22:10:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3289,13 +3289,14 @@ AreaRouter<A>::routing_total_recompute()
 }
 
 template <> void AreaRouter<IPv4>::
-routing_area_rangesV2(list<RouteCmd<Vertex> >& r);
+routing_area_rangesV2(const list<RouteCmd<Vertex> >& r);
 template <> void AreaRouter<IPv4>::routing_inter_areaV2();
 template <> void AreaRouter<IPv4>::routing_transit_areaV2();
 template <> void AreaRouter<IPv4>::routing_as_externalV2();
 
 template <> void AreaRouter<IPv6>::
-routing_area_rangesV3(list<RouteCmd<Vertex> >& r);
+routing_area_rangesV3(const list<RouteCmd<Vertex> >& r,
+		      LsaTempStore& lsa_temp_store);
 template <> void AreaRouter<IPv6>::routing_inter_areaV3();
 template <> void AreaRouter<IPv6>::routing_transit_areaV3();
 template <> void AreaRouter<IPv6>::routing_as_externalV3();
@@ -3581,7 +3582,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
     spt.compute(r);
 
     // Compute the area range summaries.
-    routing_area_rangesV3(r);
+    routing_area_rangesV3(r, lsa_temp_store);
 
     start_virtual_link();
 
@@ -3615,7 +3616,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	    XLOG_ASSERT(rlsa);
  	    check_for_virtual_linkV3((*ri), _router_lsa);
 	    XLOG_WARNING("TBD: Find Router-LSA with the lowest link state ID");
-	    list<IntraAreaPrefixLsa *>& lsai = 
+	    const list<IntraAreaPrefixLsa *>& lsai = 
 		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
 	    if (!lsai.empty()) {
 		RouteEntry<IPv6> route_entry;
@@ -3649,7 +3650,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	} else {
 	    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
 	    XLOG_ASSERT(nlsa);
-	    list<IntraAreaPrefixLsa *>& lsai = 
+	    const list<IntraAreaPrefixLsa *>& lsai = 
 		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
 	    if (!lsai.empty()) {
 		RouteEntry<IPv6> route_entry;
@@ -3786,7 +3787,7 @@ AreaRouter<A>::routing_table_add_entry(RoutingTable<A>& routing_table,
 
 template <>
 void 
-AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
+AreaRouter<IPv4>::routing_area_rangesV2(const list<RouteCmd<Vertex> >& r)
 {
     // If there is only one area there are no other areas for which to
     // compute summaries.
@@ -3863,9 +3864,94 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
 
 template <>
 void 
-AreaRouter<IPv6>::routing_area_rangesV3(list<RouteCmd<Vertex> >& /*r*/)
+AreaRouter<IPv6>::routing_area_rangesV3(const list<RouteCmd<Vertex> >& r,
+					LsaTempStore& lsa_temp_store)
 {
-    XLOG_WARNING("TBD: Routing Area Ranges OSPFv3");
+    // If there is only one area there are no other areas for which to
+    // compute summaries.
+    if (_ospf.get_peer_manager().internal_router_p())
+ 	return;
+
+    // Do any of our intra area path fall within the summary range and
+    // if they do is it an advertised range. If a network falls into
+    // an advertised range then use the largest cost of the covered
+    // networks.
+
+    map<IPNet<IPv6>, RouteEntry<IPv6> > ranges;
+
+    list<RouteCmd<Vertex> >::const_iterator ri;
+    for(ri = r.begin(); ri != r.end(); ri++) {
+// 	if (ri->node() == ri->nexthop())
+// 	    continue;
+	if (ri->node().get_type() == OspfTypes::Router)
+	    continue;
+	Vertex node = ri->node();
+	Lsa::LsaRef lsar = node.get_lsa();
+	RouteEntry<IPv6> route_entry;
+	route_entry.set_destination_type(OspfTypes::Network);
+	IPNet<IPv6> net;
+	NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+	XLOG_ASSERT(nlsa);
+#if	0
+	route_entry.set_address(nlsa->get_header().get_link_state_id());
+	IPv6 addr = IPv6(htonl(route_entry.get_address()));
+	IPv6 mask = IPv6(htonl(nlsa->get_network_mask()));
+	net = IPNet<IPv6>(addr, mask.mask_len());
+#endif
+	list<IntraAreaPrefixLsa *>& lsai = lsa_temp_store.
+	    get_intra_area_prefix_lsas(node.get_nodeid());
+	list<IPv6Prefix> prefixes;
+	associated_prefixesV3(nlsa->get_ls_type(),
+			      nlsa->get_header().get_link_state_id(), lsai,
+			      prefixes);
+	list<IPv6Prefix>::const_iterator i;
+	for (i = prefixes.begin(); i != prefixes.end(); i++) {
+	    if (i->get_nu_bit())
+		continue;
+	    net = i->get_network();
+	    // Does this network fall into an area range?
+	    bool advertise;
+	    if (!area_range_covered(net, advertise))
+		continue;
+	    if (!advertise)
+		continue;
+	    IPNet<IPv6> sumnet;
+	    if (!area_range_covering(net, sumnet)) {
+		XLOG_FATAL("Net %s does not have a covering net",
+			   cstring(net));
+		continue;
+	    }
+	    route_entry.set_directly_connected(ri->node() == ri->nexthop());
+	    route_entry.set_path_type(RouteEntry<IPv6>::intra_area);
+	    route_entry.set_cost(ri->weight() + i->get_metric());
+	    route_entry.set_type_2_cost(0);
+
+	    route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+
+	    route_entry.set_advertising_router(lsar->get_header().
+					       get_advertising_router());
+	    route_entry.set_area(_area);
+	    route_entry.set_lsa(lsar);
+
+	    // Mark this as a discard route.
+	    route_entry.set_discard(true);
+	    if (0 != ranges.count(sumnet)) {
+		RouteEntry<IPv6> r = ranges[sumnet];
+		if (route_entry.get_cost() < r.get_cost())
+		    continue;
+	    } 
+	    ranges[sumnet] = route_entry;
+	}
+    }
+ 
+    // Send in the discard routes.
+    RoutingTable<IPv6>& routing_table = _ospf.get_routing_table();
+    map<IPNet<IPv6>, RouteEntry<IPv6> >::const_iterator i;
+    for (i = ranges.begin(); i != ranges.end(); i++) {
+	IPNet<IPv6> net = i->first;
+	RouteEntry<IPv6> route_entry = i->second;
+	routing_table.add_entry(_area, net, route_entry);
+    }
 }
 
 template <>

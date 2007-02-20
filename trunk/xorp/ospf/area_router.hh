@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.118 2007/02/18 12:47:26 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.119 2007/02/19 22:10:32 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
 
 class DataBaseHandle;
+class LsaTempStore;
 
 /**
  * Area Router
@@ -1163,8 +1164,9 @@ class AreaRouter : public ServiceBase {
      * Compute the discard routes related to area ranges.
      */
     void routing_area_ranges(list<RouteCmd<Vertex> >& r);
-    void routing_area_rangesV2(list<RouteCmd<Vertex> >& r);
-    void routing_area_rangesV3(list<RouteCmd<Vertex> >& r);
+    void routing_area_rangesV2(const list<RouteCmd<Vertex> >& r);
+    void routing_area_rangesV3(const list<RouteCmd<Vertex> >& r,
+			       LsaTempStore& lsa_temp_store);
 
     /**
      * Compute the inter-area routes.
