@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.258 2007/02/18 01:47:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.259 2007/02/19 13:18:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2663,7 +2663,7 @@ Peer<A>::adjacency_change(bool up)
 
     list<RouterInfo> routers;
     uint32_t network_mask = 0;
-    uint32_t link_state_id;
+    uint32_t link_state_id = 0;
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
@@ -2792,7 +2792,7 @@ Peer<A>::router_id_changing()
 	if (routers.empty())
 	    return;
 
-	uint32_t link_state_id;
+	uint32_t link_state_id = 0;
 
 	switch(_ospf.get_version()) {
 	case OspfTypes::V2:
