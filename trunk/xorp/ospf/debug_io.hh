@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.19 2007/02/15 02:46:32 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.20 2007/02/16 22:46:40 pavlin Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -175,7 +175,7 @@ class DebugIO : public IO<A> {
     bool get_link_local_address(const string& interface, const string& vif,
 				IPv4& address) {
 
-	DOUT(_info) << "enabled(" << interface << "," << vif << ")\n";
+	DOUT(_info) << "link_local(" << interface << "," << vif << ")\n";
 
 	// RFC 3330
 	address = IPv4("169.254.0.1");
@@ -186,9 +186,19 @@ class DebugIO : public IO<A> {
     bool get_link_local_address(const string& interface, const string& vif,
 				IPv6& address) {
 
-	DOUT(_info) << "enabled(" << interface << "," << vif << ")\n";
+	DOUT(_info) << "link_local(" << interface << "," << vif << ")\n";
 	
-	address = IPv6("fc00::1");
+	// XXX
+	// Nasty hack to generate a different link local address for
+	// each vif. Assumes that the last character of the vif name
+	// is a number, solves a problem with test_peering. Should
+	// really hash the whole interface and vid and use the name
+	// from the info structure.
+	string addr = "fc00::";
+	addr.push_back(vif[vif.size() -1]);
+	DOUT(_info) << "address = " << addr << ")\n";
+
+	address = IPv6(addr.c_str());
 
 	return true;
     }
