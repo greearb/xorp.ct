@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.259 2007/02/19 13:18:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.260 2007/02/20 18:58:52 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4502,7 +4502,7 @@ Neighbour<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
 	if (lsar != (*i) &&
 	    (*i).get()->get_header() == lsar.get()->get_header()) {
 // 	    XLOG_ASSERT((*i)->maxage());
-	    XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*lsar));
+// 	    XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*lsar));
 	    _lsa_rxmt.erase(i);
 	    break;
 	}
