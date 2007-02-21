@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.56 2007/02/12 10:26:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.57 2007/02/16 22:46:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -97,9 +97,23 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
     XLOG_ASSERT(rt.get_directly_connected() || rt.get_nexthop() != A::ZERO());
+    bool status = true;
 
-    if (rt.get_destination_type() == OspfTypes::Router)
-	_adv.add_entry(area, rt.get_router_id(), rt);
+    if (rt.get_destination_type() == OspfTypes::Router) {
+	status = _adv.add_entry(area, rt.get_router_id(), rt);
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+// 	    XLOG_ASSERT(!net.is_valid());
+	    if (net.is_valid()) {
+		XLOG_WARNING("Net should be zero %s", cstring(net));
+		status = false;
+	    }
+	    return status;
+	    break;
+	}
+    }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -112,7 +126,7 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     InternalRouteEntry<A>& irentry = i.payload();
     irentry.add_entry(area, rt);
 
-    return true;
+    return status;
 }
 
 template <typename A>
@@ -122,6 +136,23 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 {
     debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
     XLOG_ASSERT(_in_transaction);
+    bool status = true;
+
+    if (rt.get_destination_type() == OspfTypes::Router) {
+	status = _adv.replace_entry(area, rt.get_router_id(), rt);
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+// 	    XLOG_ASSERT(!net.is_valid());
+	    if (net.is_valid()) {
+		XLOG_WARNING("Net should be zero %s", cstring(net));
+		status = false;
+	    }
+	    return status;
+	    break;
+	}
+    }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -132,7 +163,7 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
     InternalRouteEntry<A>& irentry = i.payload();
     irentry.replace_entry(area, rt);
 
-    return true;
+    return status;
 }
 
 template <typename A>
@@ -648,7 +679,7 @@ Adv<A>::clear_area(OspfTypes::AreaID area)
 }
 
 template <typename A>
-void
+bool
 Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
 		  const RouteEntry<A>& rt)
 {
@@ -662,25 +693,59 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
 	AREA a;
 	a[adv] = rt;
 	_adv[area] = a;
-	return;
+	return true;
     }
 
     typename ADV::iterator i = _adv.find(area);
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
-    // In OSPFv2 each router should generate only one Router-LSA in
-    // OSPFv3 each router is allowed to generate more than one
-    // Router-LSA, in which case it may become necessary to store all
-    // the Router-LSAs. Another option may be to add all router links to a
-    // single Router-LSA (its never going to be transmitted).
     if (i->second.end() != j) {
-	XLOG_WARNING("More than one Router-LSA seen with same adv %s",
+	XLOG_WARNING("An entry with this advertising router already exists %s",
 		     cstring(*rt.get_lsa()));
-	return;
+	return false;
     }
 
     AREA& aref = _adv[area];
     aref[adv] = rt;
+
+    return true;
+}
+
+template <typename A>
+bool
+Adv<A>::replace_entry(OspfTypes::AreaID area, uint32_t adv,
+		      const RouteEntry<A>& rt)
+{
+    debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
+	   pr_id(adv).c_str());
+
+    XLOG_ASSERT(dynamic_cast<RouterLsa *>(rt.get_lsa().get())||
+		dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
+
+    if (0 == _adv.count(area)) {
+	XLOG_WARNING("There should already be an entry for this area %s",
+		     cstring(*rt.get_lsa()));
+	AREA a;
+	a[adv] = rt;
+	_adv[area] = a;
+	return false;
+    }
+
+    bool status = true;
+
+    typename ADV::iterator i = _adv.find(area);
+    XLOG_ASSERT(_adv.end() != i);
+    typename AREA::iterator j = i->second.find(adv);
+    if (i->second.end() == j) {
+	XLOG_WARNING("There should already be an entry with this adv %s",
+		     cstring(*rt.get_lsa()));
+	status = false;
+    }
+
+    AREA& aref = _adv[area];
+    aref[adv] = rt;
+
+    return status;
 }
 
 template <typename A>

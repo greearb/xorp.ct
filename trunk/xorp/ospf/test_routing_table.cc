@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.7 2006/10/12 01:25:01 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.8 2007/02/16 22:46:43 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -142,7 +142,7 @@ ire2(TestInfo& info, OspfTypes::Version /*version*/)
  */
 template <typename A> 
 bool
-trie1(TestInfo& info, OspfTypes::Version /*version*/)
+trie1(TestInfo& info, OspfTypes::Version version)
 {
     Trie<A, InternalRouteEntry<A> > *current;
     current = new Trie<A, InternalRouteEntry<A> >;
@@ -172,13 +172,18 @@ trie1(TestInfo& info, OspfTypes::Version /*version*/)
 	return false;
     }
 
+    RouterLsa *rlsa = new RouterLsa(version);
+    Lsa::LsaRef lsar(rlsa);
+
     InternalRouteEntry<A>& irentry1 = i.payload();
     A nexthop;
     RouteEntry<A> rt1;
+    rt1.set_lsa(lsar);
     rt1.set_cost(1);
     nexthop = rt1.get_nexthop();
     rt1.set_nexthop(++nexthop);
     RouteEntry<A> rt2;
+    rt2.set_lsa(lsar);
     rt2.set_cost(2);
     rt2.set_nexthop(++nexthop);
 
@@ -307,6 +312,187 @@ routing1(TestInfo& info, OspfTypes::Version /*version*/)
     return true;
 }
 
+/**
+ * At the time of writing OSPFv3 behaved differently to OSPFv2 with
+ * respect to router entries. In OSPFv2 router entries are added as
+ * host routes as well as being indexed by the advertising router. In
+ * OSPFv3 router entries are only in the Adv database. Just verify
+ * that add and replace work correctly for OSPFv3
+ */
+template <typename A>
+bool
+routing2(TestInfo& info, OspfTypes::Version /*version*/)
+{
+    OspfTypes::Version version = OspfTypes::V3;
+
+    EventLoop eventloop;
+    DebugIO<IPv6> io(info, version, eventloop);
+    io.startup();
+
+    Ospf<IPv6> ospf(version, eventloop, &io);
+    ospf.trace().all(info.verbose());
+
+    OspfTypes::AreaID az = set_id("0.0.0.0");
+    OspfTypes::AreaID a1 = set_id("0.0.0.1");
+    
+    RoutingTable<A>& routing_table = ospf.get_routing_table();
+
+    RouterLsa *rlsa = new RouterLsa(version);
+    Lsa::LsaRef lsar(rlsa);
+
+    IPNet<IPv6> netv("5f00:0000:c001:0200::/56");
+
+    IPNet<IPv6> net;
+
+    RouteEntry<A> route_entry1;
+    RouteEntry<A> route_entry2;
+
+    route_entry1.set_directly_connected(true);
+    route_entry2.set_directly_connected(true);
+
+    route_entry1.set_destination_type(OspfTypes::Router);
+    route_entry2.set_destination_type(OspfTypes::Router);
+
+    route_entry1.set_router_id(set_id("0.0.0.1"));
+    route_entry2.set_router_id(set_id("0.0.0.1"));
+
+    /****************************************/
+    routing_table.begin(a1);
+
+    route_entry1.set_area(a1);
+    route_entry1.set_lsa(lsar);
+
+    // Add an entry with a non zero net
+    if (routing_table.add_entry(a1, netv, route_entry1)) {
+	DOUT(info) << "Accepted an entry with a non-zero net " <<
+	    route_entry1.str() <<
+	    endl;
+	return false;
+    }
+
+    route_entry2.set_area(a1);
+    route_entry2.set_lsa(lsar);
+
+    // Replace an entry with a non zero net
+    if (routing_table.replace_entry(a1, netv, route_entry2)) {
+	DOUT(info) << "Accepted an entry with a non-zero net " <<
+	    route_entry1.str() <<
+	    endl;
+	return false;
+    }
+	
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(a1);
+
+    route_entry1.set_area(a1);
+    route_entry1.set_lsa(lsar);
+
+    // Add an ordinary entry should work
+    if (!routing_table.add_entry(a1, net, route_entry1)) {
+	DOUT(info) << "Failed to add a simple entry " << route_entry1.str() <<
+	    endl;
+	return false;
+    }
+	
+    route_entry2.set_area(a1);
+    route_entry2.set_lsa(lsar);
+
+    // Add an entry with an existing advertising router this should generate
+    // an error.
+    if (routing_table.add_entry(a1, net, route_entry2)) {
+	DOUT(info) << "Accepted an entry with the same advertising router "
+		   << route_entry2.str() << endl;
+	return false;
+    }
+
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(a1);
+
+    route_entry1.set_area(a1);
+    route_entry1.set_lsa(lsar);
+
+    // Add an ordinary entry should work
+    if (!routing_table.add_entry(a1, net, route_entry1)) {
+	DOUT(info) << "Failed to add a simple entry " << route_entry1.str() <<
+	    endl;
+	return false;
+    }
+	
+    route_entry2.set_area(a1);
+    route_entry2.set_lsa(lsar);
+
+    // Replace entry
+    if (!routing_table.replace_entry(a1, net, route_entry2)) {
+	DOUT(info) << "Replacing entry failed " << route_entry2.str() << endl;
+	return false;
+    }
+
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(a1);
+
+    route_entry1.set_area(a1);
+    route_entry1.set_lsa(lsar);
+
+    // Perform a replace with nothing to replace.
+    if (routing_table.replace_entry(a1, net, route_entry1)) {
+	DOUT(info) << "Replaced an entry that didn't exist " <<
+	    route_entry1.str() <<
+	    endl;
+	return false;
+    }
+
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(a1);
+
+    route_entry1.set_area(a1);
+    route_entry1.set_lsa(lsar);
+
+    routing_table.add_entry(a1, net, route_entry1);
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(a1);
+
+    route_entry1.set_area(a1);
+    route_entry1.set_lsa(lsar);
+
+    routing_table.add_entry(a1, net, route_entry1);
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(az);
+
+    route_entry2.set_area(az);
+    route_entry2.set_lsa(lsar);
+
+    routing_table.add_entry(az, net, route_entry2);
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(a1);
+    routing_table.end();
+
+    /****************************************/
+    routing_table.begin(az);
+    routing_table.end();
+
+    if (0 != io.routing_table_size()) {
+	DOUT(info) << "Routing table should be empty not " << 
+	    io.routing_table_size() << endl;
+	return false;
+    }
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -339,6 +525,8 @@ main(int argc, char **argv)
 	{"trie2v3", callback(trie2<IPv6>, OspfTypes::V3)},
 	{"r1v2", callback(routing1<IPv4>, OspfTypes::V2)},
 // 	{"r1v3", callback(routing1<IPv6>, OspfTypes::V3)},
+//	{"r2v2", callback(routing1<IPv4>, OspfTypes::V2)},
+ 	{"r2v3", callback(routing2<IPv6>, OspfTypes::V3)},
     };
 
     try {

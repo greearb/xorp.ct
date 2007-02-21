@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.40 2006/03/16 00:04:49 pavlin Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.41 2007/02/16 22:46:42 pavlin Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -346,14 +346,24 @@ class Adv {
     void clear_area(OspfTypes::AreaID area);
 
     /**
-     * Add an entry for this routing entry.
+     * Add an entry for this routing entry keyed on advertising router
      *
      * @param area to add entry.
      * @param adv advertising router.
      * @param rt associated routing entry.
      */
-    void add_entry(OspfTypes::AreaID area, uint32_t adv,
+    bool add_entry(OspfTypes::AreaID area, uint32_t adv,
 		   const RouteEntry<A>& rt);
+
+    /**
+     * Replace entry with new entry keyed on advertising router.
+     *
+     * @param area to add entry.
+     * @param adv advertising router.
+     * @param rt associated routing entry.
+     */
+    bool replace_entry(OspfTypes::AreaID area, uint32_t adv,
+		       const RouteEntry<A>& rt);
 
     /**
      * Lookup an entry by advertising router.
