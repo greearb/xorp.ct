@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.239 2007/02/20 02:09:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.240 2007/02/21 00:29:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3666,7 +3666,9 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 
 		route_entry.set_area_border_router(rlsa->get_b_bit());
 		route_entry.set_as_boundary_router(rlsa->get_e_bit());
-		routing_table_add_entry(routing_table, IPNet<IPv6>(), 
+// 		IPNet<IPv6> net(ri->nexthop().get_address_ipv6(),
+// 				IPv6::ADDR_BITLEN);
+		routing_table_add_entry(routing_table, IPNet<IPv6>(),
 					route_entry);
 	    }
 	} else {
@@ -4098,6 +4100,9 @@ AreaRouter<IPv6>::routing_inter_areaV3()
 	if (0 != (snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get()))) {
 	    if (snlsa->get_ipv6prefix().get_nu_bit())
 		continue;
+	    if (snlsa->get_ipv6prefix().get_network().masked_addr().
+		is_linklocal_unicast())
+		continue;
 	    metric = snlsa->get_metric();
 	    n = snlsa->get_ipv6prefix().get_network();
 	}
@@ -4442,7 +4447,165 @@ template <>
 void 
 AreaRouter<IPv6>::routing_as_externalV3()
 {
-    XLOG_WARNING("TBD: Routing AS External OSPFv3");
+    // RFC 2328 Section 16.4.  Calculating AS external routes
+    // RFC 3101 Section 2.5.   Calculating Type-7 AS external routes
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage() || lsar->get_self_originating())
+	    continue;
+
+	// Note that Type7Lsa is derived from ASExternalLsa so will
+	// pass this test.
+	ASExternalLsa *aselsa;
+	if (0 == (aselsa = dynamic_cast<ASExternalLsa *>(lsar.get()))) {
+	    continue;
+	}
+
+	if (OspfTypes::LSInfinity == aselsa->get_metric())
+	    continue;
+
+	if (aselsa->get_ipv6prefix().get_nu_bit())
+	    continue;
+	
+	if (aselsa->get_ipv6prefix().get_network().masked_addr().
+	    is_linklocal_unicast())
+	    continue;
+
+// 	IPv4 mask = IPv4(htonl(aselsa->get_network_mask()));
+// 	uint32_t lsid = lsar->get_header().get_link_state_id();
+	uint32_t adv = lsar->get_header().get_advertising_router();
+// 	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
+	IPNet<IPv6> n = aselsa->get_ipv6prefix().get_network();
+	
+	// (3)
+	RoutingTable<IPv6>& routing_table = _ospf.get_routing_table();
+	RouteEntry<IPv6> rt;
+ 	if (!routing_table.lookup_entry_by_advertising_router(_area, adv, rt))
+ 	    continue;
+
+	if (!rt.get_as_boundary_router())
+	    return;
+
+	// If a routing entry has been found it must be from this area.
+	XLOG_ASSERT(rt.get_area() == _area);
+
+	if (aselsa->type7() && 0 == n.prefix_len()) {
+	    if (_ospf.get_peer_manager().area_border_router_p()) {
+		if (!external_propagate_bit(lsar))
+		    continue;
+		if (!_summaries)
+		    continue;
+	    }
+	}
+
+	IPv6 forwarding;
+	RouteEntry<IPv6> rtf;
+	if (aselsa->get_f_bit()) {
+	    forwarding = aselsa->get_forwarding_address_ipv6();
+	    if (!routing_table.longest_match_entry(forwarding, rtf))
+		continue;
+	    if (!rtf.get_directly_connected())
+		forwarding = rtf.get_nexthop();
+	    if (aselsa->external()) {
+		if (RouteEntry<IPv6>::intra_area != rtf.get_path_type() &&
+		    RouteEntry<IPv6>::inter_area != rtf.get_path_type())
+		    continue;
+	    }
+	    if (aselsa->type7()) {
+		if (RouteEntry<IPv6>::intra_area != rtf.get_path_type())
+		    continue;
+	    }
+	} else {
+	    forwarding = rt.get_nexthop();
+	    rtf = rt;
+	}
+
+	// (4)
+	uint32_t x = rtf.get_cost();	// Cost specified by
+					// ASBR/forwarding address
+	uint32_t y = aselsa->get_metric();
+
+	// (5)
+	RouteEntry<IPv6> rtentry;
+	if (!aselsa->get_e_bit()) {	// Type 1
+	    rtentry.set_path_type(RouteEntry<IPv6>::type1);
+	    rtentry.set_cost(x + y);
+	} else {			// Type 2
+	    rtentry.set_path_type(RouteEntry<IPv6>::type2);
+	    rtentry.set_cost(x);
+	    rtentry.set_type_2_cost(y);
+	}
+
+	// (6)
+	bool add_entry = false;
+	bool replace_entry = false;
+	bool identical = false;
+	RouteEntry<IPv6> rtnet;
+	if (routing_table.lookup_entry(n, rtnet)) {
+	    switch(rtnet.get_path_type()) {
+	    case RouteEntry<IPv6>::intra_area:
+#if	0
+		if (!_ospf.get_rfc1583_compatibility()) {
+		    if (RouteEntry<IPv6>::intra_area == rtf.get_path_type()) {
+			if (!backbone(rtf.get_area()) &&
+			    backbone(rtnet.get_area())) {
+				replace_entry = true;
+			    }
+		    }
+		}
+#endif
+		break;
+	    case RouteEntry<IPv6>::inter_area:
+		break;
+	    case RouteEntry<IPv6>::type1:
+		if (RouteEntry<IPv6>::type2 == rtentry.get_path_type()) {
+		    break;
+		}
+		if (rtentry.get_cost() < rtnet.get_cost()) {
+		    replace_entry = true;
+		    break;
+		}
+		if (rtentry.get_cost() == rtnet.get_cost())
+		    identical = true;
+		break;
+	    case RouteEntry<IPv6>::type2:
+		if (RouteEntry<IPv6>::type1 == rtentry.get_path_type()) {
+		    replace_entry = true;
+		    break;
+		}
+		if (rtentry.get_type_2_cost() < rtnet.get_type_2_cost()) {
+		    replace_entry = true;
+		    break;
+		}
+		if (rtentry.get_type_2_cost() == rtnet.get_type_2_cost())
+		    identical = true;
+		break;
+	    }
+	    // (e)
+	    if (identical) {
+		replace_entry = routing_compare_externals(rtnet.get_lsa(),
+							  lsar);
+	    }
+	} else {
+	    add_entry = true;
+	}
+	if (!add_entry && !replace_entry)
+	    continue;
+
+	rtentry.set_lsa(lsar);
+	rtentry.set_destination_type(OspfTypes::Network);
+// 	rtentry.set_address(lsid);
+	rtentry.set_area(_area);
+	rtentry.set_nexthop(forwarding);
+	rtentry.set_advertising_router(aselsa->get_header().
+				       get_advertising_router());
+
+	if (add_entry)
+	    routing_table.add_entry(_area, n, rtentry);
+	if (replace_entry)
+	    routing_table.replace_entry(_area, n, rtentry);
+	
+    }
 }
 
 #if	0

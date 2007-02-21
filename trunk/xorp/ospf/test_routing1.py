@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.21 2007/02/16 22:46:43 pavlin Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.22 2007/02/21 00:29:34 atanu Exp $
 
 import getopt
 import sys
@@ -33,6 +33,7 @@ TESTS=[
     ['r3V3', True, 'v3'],
     ['r4V3', True, 'v3'],
     ['r5V3', True, 'v3'],
+    ['r6V3', True, 'v3'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -627,6 +628,73 @@ def r5V3(verbose, protocol):
     link-local-address fe80:0001::2"
 
     RT2_INTER = "SummaryNetworkLsa lsid 42.0.0.2 adv 0.0.0.2 \
+    metric 6 \
+    IPv6Prefix 5f00:0000:c001:0200::/56 \
+    "
+
+    command = """
+set_router_id 0.0.0.1
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
+""" % (RT1,RT1_LINK,
+       RT2,RT2_LINK,RT2_INTER)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r6V3(verbose, protocol):
+    """
+    Verify the correct processing of AS-External-LSAs.
+    """
+
+    # RT1 is this router.
+    # RT2 is an AS boundary router that generates an AS-External-LSA
+    # RT1 is connected to RT2 via p2p.
+
+    #                            
+    #     +---+1       1+---+5   
+    #     |RT1|---------|RT2|
+    #     +---+         +---+    
+    #                            
+
+    # Network           IPv6 prefix
+    # -----------------------------------
+    # External address	5f00:0000:c001:0200::/56
+
+    # Router	Interface   Interface ID   link-local address
+    # -------------------------------------------------------
+    # RT1	to RT2	    1		   fe80:0001::1
+    # RT2	to RT1	    1		   fe80:0001::2
+
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.1 \
+    p2p iid 1 nid 1 nrid 0.0.0.2 metric 1 \
+    "
+
+    RT1_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    link-local-address fe80:0001::1"
+
+    RT2 = "RouterLsa bit-E V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.2 \
+    p2p iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    "
+    RT2_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    link-local-address fe80:0001::2"
+
+    RT2_INTER = "ASExternalLsa lsid 42.0.0.2 adv 0.0.0.2 \
     metric 6 \
     IPv6Prefix 5f00:0000:c001:0200::/56 \
     "
