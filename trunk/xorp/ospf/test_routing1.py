@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.20 2007/02/14 13:21:16 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.21 2007/02/16 22:46:43 pavlin Exp $
 
 import getopt
 import sys
@@ -32,6 +32,7 @@ TESTS=[
     ['r2V3', True, 'v3'],
     ['r3V3', True, 'v3'],
     ['r4V3', True, 'v3'],
+    ['r5V3', True, 'v3'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -577,6 +578,73 @@ verify_routing_entry 5f00:0000:c001:0400::/56 fe80:0001::3 3 false false
        RT2,RT2_LINK,RT2_INTRA_R,RT2_INTRA_N,RT2_NETWORK,
        RT3,RT3_LINK,RT3_INTRA,
        RT4,RT4_LINK)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r5V3(verbose, protocol):
+    """
+    Verify the correct processing of Inter-Area-Prefix-LSAs.
+    """
+
+    # RT1 is this router.
+    # RT2 is an area border router that generates an inter-area-prefix-LSAs.
+    # RT1 is connected to RT2 via p2p.
+
+    #                            +
+    #     +---+1       1+---+5   |
+    #     |RT1|---------|RT2|----| Other Area
+    #     +---+         +---+    |
+    #                            +
+
+    # Network           IPv6 prefix
+    # -----------------------------------
+    # Other Area	5f00:0000:c001:0200::/56
+
+    # Router	Interface   Interface ID   link-local address
+    # -------------------------------------------------------
+    # RT1	to RT2	    1		   fe80:0001::1
+    # RT2	to RT1	    1		   fe80:0001::2
+    #           to N3	    20		   fe80:0002::2
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.1 \
+    p2p iid 1 nid 1 nrid 0.0.0.2 metric 1 \
+    "
+    RT1_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.1 \
+    link-local-address fe80:0001::1"
+
+    RT2 = "RouterLsa bit-B V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.2 \
+    p2p iid 1 nid 1 nrid 0.0.0.1 metric 1 \
+    transit iid 20 nid 20 nrid 0.0.0.2 metric 5 \
+    "
+    RT2_LINK = "LinkLsa lsid 0.0.0.1 adv 0.0.0.2 \
+    link-local-address fe80:0001::2"
+
+    RT2_INTER = "SummaryNetworkLsa lsid 42.0.0.2 adv 0.0.0.2 \
+    metric 6 \
+    IPv6Prefix 5f00:0000:c001:0200::/56 \
+    "
+
+    command = """
+set_router_id 0.0.0.1
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 5f00:0000:c001:0200::/56 fe80:0001::2 7 false false
+""" % (RT1,RT1_LINK,
+       RT2,RT2_LINK,RT2_INTER)
 
     print >>fp, command
 

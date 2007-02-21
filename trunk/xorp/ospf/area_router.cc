@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.238 2007/02/19 22:10:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.239 2007/02/20 02:09:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3647,6 +3647,28 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 					    route_entry);
 		}
 	    }
+	    if (rlsa->get_e_bit() || rlsa->get_b_bit()) {
+		RouteEntry<IPv6> route_entry;
+		route_entry.set_destination_type(OspfTypes::Router);
+ 		route_entry.set_router_id(rlsa->get_header().
+ 					  get_advertising_router());
+ 		route_entry.set_directly_connected(ri->node() == 
+ 						   ri->nexthop());
+		route_entry.set_path_type(RouteEntry<IPv6>::intra_area);
+ 		route_entry.set_cost(ri->weight());
+		route_entry.set_type_2_cost(0);
+
+		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		route_entry.set_advertising_router(lsar->get_header().
+						   get_advertising_router());
+		route_entry.set_area(_area);
+		route_entry.set_lsa(lsar);
+
+		route_entry.set_area_border_router(rlsa->get_b_bit());
+		route_entry.set_as_boundary_router(rlsa->get_e_bit());
+		routing_table_add_entry(routing_table, IPNet<IPv6>(), 
+					route_entry);
+	    }
 	} else {
 	    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
 	    XLOG_ASSERT(nlsa);
@@ -4062,7 +4084,116 @@ template <>
 void 
 AreaRouter<IPv6>::routing_inter_areaV3()
 {
-    XLOG_WARNING("TBD: Routing Inter Area OSPFv3");
+    // RFC 2328 Section 16.2.  Calculating the inter-area routes
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage())
+	    continue;
+
+	SummaryNetworkLsa *snlsa;	// Type 3
+	SummaryRouterLsa *srlsa;	// Type 4
+	uint32_t metric = 0;
+	IPNet<IPv6> n;
+
+	if (0 != (snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get()))) {
+	    if (snlsa->get_ipv6prefix().get_nu_bit())
+		continue;
+	    metric = snlsa->get_metric();
+	    n = snlsa->get_ipv6prefix().get_network();
+	}
+	if (0 != (srlsa = dynamic_cast<SummaryRouterLsa *>(lsar.get()))) {
+	    metric = srlsa->get_metric();
+	}
+	if (0 == snlsa && 0 == srlsa)
+	    continue;
+	if (OspfTypes::LSInfinity == metric)
+	    continue;
+
+	// (2)
+	if (lsar->get_self_originating())
+	    continue;
+
+	// (3) 
+	if (snlsa) {
+	    bool active;
+	    if (area_range_covered(n, active)) {
+		if (active)
+		    continue;
+	    }
+	}
+
+	// (4)
+	uint32_t adv = lsar->get_header().get_advertising_router();
+	RoutingTable<IPv6>& routing_table = _ospf.get_routing_table();
+	RouteEntry<IPv6> rt;
+	if (!routing_table.lookup_entry_by_advertising_router(_area, adv, rt))
+	    continue;
+
+	if (rt.get_advertising_router() != adv || rt.get_area() != _area)
+	    continue;
+
+	uint32_t iac = rt.get_cost() + metric;
+
+	// (5)
+	bool add_entry = false;
+	bool replace_entry = false;
+	RouteEntry<IPv6> rtnet;
+	bool found = false;
+	OspfTypes::RouterID dest;
+	if (snlsa) {
+	    if (routing_table.lookup_entry(n, rtnet))
+		found = true;
+	} else if (srlsa) {
+	    dest = srlsa->get_destination_id();
+	    if (routing_table.lookup_entry_by_advertising_router(_area,
+								 dest,
+								 rtnet))
+		found = true;
+	} else
+	    XLOG_UNREACHABLE();
+
+	if (found) {
+	    switch(rtnet.get_path_type()) {
+	    case RouteEntry<IPv6>::intra_area:
+		break;
+	    case RouteEntry<IPv6>::inter_area:
+		// XXX - Should be dealing with equal cost here.
+		if (iac < rtnet.get_cost())
+		    replace_entry = true;
+		break;
+	    case RouteEntry<IPv6>::type1:
+	    case RouteEntry<IPv6>::type2:
+		replace_entry = true;
+		break;
+	    }
+	} else {
+	    add_entry = true;
+	}
+	if (!add_entry && !replace_entry)
+	    continue;
+
+	RouteEntry<IPv6> rtentry;
+	if (snlsa) {
+	    rtentry.set_destination_type(OspfTypes::Network);
+// 	    rtentry.set_address(lsid);
+	} else if (srlsa) {
+	    rtentry.set_destination_type(OspfTypes::Router);
+	    rtentry.set_router_id(dest);
+	    rtentry.set_as_boundary_router(true);
+	} else
+	    XLOG_UNREACHABLE();
+	rtentry.set_area(_area);
+	rtentry.set_path_type(RouteEntry<IPv6>::inter_area);
+	rtentry.set_cost(iac);
+	rtentry.set_nexthop(rt.get_nexthop());
+	rtentry.set_advertising_router(rt.get_advertising_router());
+	rtentry.set_lsa(lsar);
+
+	if (add_entry)
+	    routing_table.add_entry(_area, n, rtentry);
+	if (replace_entry)
+	    routing_table.replace_entry(_area, n, rtentry);
+    }
 }
 
 template <>
