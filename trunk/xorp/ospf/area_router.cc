@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.240 2007/02/21 00:29:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.241 2007/02/21 03:20:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4243,6 +4243,9 @@ AreaRouter<IPv4>::routing_transit_areaV2()
 	if (!routing_table.lookup_entry(n, rtnet))
 	    continue;
 
+	if (!backbone(rtnet.get_area()))
+	    continue;
+
 	bool match = true;
 	switch(rtnet.get_path_type()) {
 	case RouteEntry<IPv4>::intra_area:
@@ -4288,7 +4291,95 @@ template <>
 void 
 AreaRouter<IPv6>::routing_transit_areaV3()
 {
-    XLOG_WARNING("TBD: Routing Transit Area OSPFv3");
+    // RFC 2328 Section 16.3.  Examining transit areas' summary-LSAs
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage())
+	    continue;
+
+	SummaryNetworkLsa *snlsa;	// Type 3
+	SummaryRouterLsa *srlsa;	// Type 4
+	uint32_t metric = 0;
+	IPNet<IPv6> n;
+
+	if (0 != (snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get()))) {
+	    metric = snlsa->get_metric();
+	    n = snlsa->get_ipv6prefix().get_network();
+	}
+	if (0 != (srlsa = dynamic_cast<SummaryRouterLsa *>(lsar.get()))) {
+	    metric = srlsa->get_metric();
+	}
+	if (0 == snlsa && 0 == srlsa)
+	    continue;
+	if (OspfTypes::LSInfinity == metric)
+	    continue;
+
+	// (2)
+	if (lsar->get_self_originating())
+	    continue;
+
+// 	uint32_t lsid = lsar->get_header().get_link_state_id();
+// 	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
+
+	// (3)
+	// Lookup this route first 
+	RoutingTable<IPv6>& routing_table = _ospf.get_routing_table();
+	RouteEntry<IPv6> rtnet;
+	OspfTypes::RouterID dest;
+	if (snlsa) {
+	    if (!routing_table.lookup_entry(n, rtnet))
+		continue;
+	} else if (srlsa) {
+	    dest = srlsa->get_destination_id();
+	    if (!routing_table.lookup_entry_by_advertising_router(_area,
+								 dest,
+								 rtnet))
+		continue;
+	} else
+	    XLOG_UNREACHABLE();
+
+	if (!backbone(rtnet.get_area()))
+	    continue;
+
+	bool match = true;
+	switch(rtnet.get_path_type()) {
+	case RouteEntry<IPv6>::intra_area:
+	case RouteEntry<IPv6>::inter_area:
+	    break;
+	case RouteEntry<IPv6>::type1:
+	case RouteEntry<IPv6>::type2:
+	    match = false;
+	    break;
+	}
+
+	if (!match)
+	    continue;
+
+	// (4)
+	// Is the BR reachable?
+	uint32_t adv = lsar->get_header().get_advertising_router();
+	RouteEntry<IPv6> rtrtr;
+	if (!routing_table.
+	    lookup_entry_by_advertising_router(rtnet.get_area(), adv, rtrtr))
+	    continue;
+
+	uint32_t iac = rtrtr.get_cost() + metric;
+
+	// (5)
+	if (rtnet.get_cost() <= iac)
+	    continue;
+
+// 	rtnet.set_area(_area);
+// 	rtnet.set_path_type(RouteEntry<IPv6>::inter_area);
+	rtnet.set_cost(iac);
+	rtnet.set_nexthop(rtrtr.get_nexthop());
+	rtnet.set_advertising_router(rtrtr.get_advertising_router());
+	rtnet.set_lsa(lsar);
+
+	// Change the existing route, so if the original route goes
+	// away the route will be removed.
+	routing_table.replace_entry(rtnet.get_area(), n, rtnet);
+    }
 }
 
 template <>
