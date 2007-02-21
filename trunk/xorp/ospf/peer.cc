@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.261 2007/02/21 00:21:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.262 2007/02/21 21:24:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2613,8 +2613,19 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
     }
 	
     	break;
-    case OspfTypes::PointToMultiPoint:
-	XLOG_UNFINISHED();
+    case OspfTypes::PointToMultiPoint: {
+	list<Neighbour<IPv6> *>::iterator n;
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	    if (Neighbour<IPv6>::Full == (*n)->get_state()) {
+		router_link.set_type(RouterLink::p2p);
+		router_link.
+		    set_neighbour_interface_id((*n)->get_hello_packet()->
+					       get_interface_id());
+		router_link.set_neighbour_router_id((*n)->get_router_id());
+		router_links.push_back(router_link);
+	    }
+	}
+    }
 	break;
     case OspfTypes::VirtualLink:
 	// At the time of writing virtual links had only one neighbour.
