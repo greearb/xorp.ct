@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.84 2007/02/16 04:43:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.85 2007/02/16 22:46:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -149,10 +149,14 @@ Ospf<A>::get_link_local_address(const string& interface, const string& vif,
 
 template <typename A>
 bool
-Ospf<A>::get_interface_id(const string& interface, uint32_t& interface_id)
+Ospf<A>::get_interface_id(const string& interface, const string& vif, 
+			  uint32_t& interface_id)
 {
-    debug_msg("Interface %s\n", interface.c_str());
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
+    if (string(VLINK) == interface)
+	return _peer_manager.get_interface_id_virtual_link(interface, vif,
+							   interface_id);
     return _io->get_interface_id(interface, interface_id);
 }
 

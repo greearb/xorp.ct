@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.82 2007/02/16 19:39:33 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.83 2007/02/16 22:46:42 pavlin Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -423,6 +423,14 @@ class PeerManager {
      * virtual link candidate.
      */
     bool receive_virtual_link(A dst, A src, Packet *packet);
+
+    /**
+     * OSPFv3 only, get a pseudo interface ID to be used by this virtual
+     * link.
+     */
+    bool get_interface_id_virtual_link(const string& interface,
+				       const string& vif,
+				       uint32_t interface_id) const;
 
     /**
      * Return the number of areas of the specified type.

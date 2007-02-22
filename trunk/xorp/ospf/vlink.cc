@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/vlink.cc,v 1.10 2007/02/16 04:43:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/vlink.cc,v 1.11 2007/02/16 22:46:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,6 +33,11 @@
 #include "ospf.hh"
 #include "vlink.hh"
 
+/**
+ * OSPFv3 only, the starting value should be above any possible real
+ * interface ID.
+ */
+template <typename A> uint32_t Vlink<A>::_pseudo_interface_id_allocator = 1000;
 
 template <typename A>
 bool
@@ -190,6 +195,28 @@ Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
     interface = VLINK;
     vif = pr_id(rid);
 
+    return true;
+}
+
+template <typename A>
+bool
+Vlink<A>::get_interface_id(const string& interface, const string& vif,
+			   uint32_t& interface_id) const
+{
+    XLOG_ASSERT(string(VLINK) == interface);
+
+    OspfTypes::RouterID rid = ntohl(IPv4(vif.c_str()).addr());
+
+    if (0 == _vlinks.count(rid)) {
+	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
+	return false;
+    }
+
+    typename map <OspfTypes::RouterID, Vstate>::const_iterator i =
+	_vlinks.find(rid);
+    XLOG_ASSERT(_vlinks.end() != i);
+
+    interface_id = i->second._pseudo_interface_id;
     return true;
 }
 

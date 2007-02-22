@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.131 2007/02/16 20:11:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.132 2007/02/16 22:46:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -487,7 +487,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 	break;
     case OspfTypes::V3: {
 	uint32_t interface_id;
-	if (!_ospf.get_interface_id(interface, interface_id)) {
+	if (!_ospf.get_interface_id(interface, vif, interface_id)) {
 	    delete_peer(peerid);
 	    xorp_throw(BadPeer, 
 		       c_format("Unable to get interface ID for %s",
@@ -1167,6 +1167,19 @@ PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
     return _peers[peerid]->receive(dst, src, packet);
 
     return false;
+}
+
+template <typename A> 
+bool
+PeerManager<A>::get_interface_id_virtual_link(const string& interface,
+					      const string& vif,
+					      uint32_t interface_id) const
+{
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Virtual link get interface ID interface %s vif %s\n",
+	       interface.c_str(), vif.c_str());
+
+    return _vlink.get_interface_id(interface, vif, interface_id);
 }
 
 template <typename A> 

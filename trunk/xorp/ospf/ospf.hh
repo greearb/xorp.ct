@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.100 2007/02/16 22:46:41 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.101 2007/02/18 01:40:27 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -503,8 +503,10 @@ class Ospf {
 
     /**
      * Get the interface ID required for OSPFv3.
+     * The vif argument is required for virtual links.
      */
-    bool get_interface_id(const string& interface, uint32_t& interface_id);
+    bool get_interface_id(const string& interface, const string& vif,
+			  uint32_t& interface_id);
 
     /**
      * @return prefix length for this address.
