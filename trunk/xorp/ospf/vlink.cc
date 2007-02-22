@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/vlink.cc,v 1.11 2007/02/16 22:46:43 pavlin Exp $"
+#ident "$XORP: xorp/ospf/vlink.cc,v 1.12 2007/02/22 09:36:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -34,10 +34,12 @@
 #include "vlink.hh"
 
 /**
- * OSPFv3 only, the starting value should be above any possible real
- * interface ID.
+ * OSPFv3 only.
+ * Start with the maximum possible vaule for an interface ID and then
+ * decrement.
  */
-template <typename A> uint32_t Vlink<A>::_pseudo_interface_id_allocator = 1000;
+template <typename A> uint32_t Vlink<A>::_pseudo_interface_id_allocator =
+    0xffffffff;
 
 template <typename A>
 bool

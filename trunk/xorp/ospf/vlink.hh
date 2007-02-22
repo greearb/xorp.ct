@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vlink.hh,v 1.8 2007/02/16 22:46:43 pavlin Exp $
+// $XORP: xorp/ospf/vlink.hh,v 1.9 2007/02/22 09:36:45 atanu Exp $
 
 #ifndef __OSPF_VLINK_HH__
 #define __OSPF_VLINK_HH__
@@ -135,7 +135,7 @@ class Vlink {
 	    _transit_area(OspfTypes::BACKBONE), // Again an illegal value.
 	    _notified(false)
 	{
-	    _pseudo_interface_id = _pseudo_interface_id_allocator++;
+	    _pseudo_interface_id = _pseudo_interface_id_allocator--;
 	}
 
 	OspfTypes::PeerID _peerid;		// PeerID of virtual link
