@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.68 2006/03/10 03:33:28 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.69 2006/08/15 01:39:57 atanu Exp $
 #
 
 TODO
@@ -161,6 +161,15 @@ taught about this type of transit derived route.
   
 51) OSPF has its own IP checksum routine switch to using the routine
 in libproto.
+
+52) When implementing OSPFv3 the Vertex class was modified to hold a
+list of all the Router-LSAs that a router had generated. Currently
+only one entry is ever placed on the list. In order to support
+updating the list the SPT code will have to be modified to return a
+node. The list of Router-LSAs is actually held in LsaTempStore. Either
+the list should be updated in the Vertex class or it should be
+reverted to holding a single entry. My preference is reverting to
+holding a single entry.
 
 Possible issues
 ~~~~~~~~~~~~~~~

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.243 2007/02/22 07:50:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.244 2007/02/22 10:08:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3590,7 +3590,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	RouterLsa *rlsa;
 	
 	if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
- 	    lsa_temp_store.add_router_lsa(rlsa);
+ 	    lsa_temp_store.add_router_lsa(lsar);
 
 	    if (rlsa->get_v_bit())
 		transit_capability = true;
@@ -3612,7 +3612,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		if (rv == v) {
 		    v.set_origin(rv.get_origin());
 		} else {
-		    XLOG_WARNING("TBD: Add LSA to vertex");
+//		    XLOG_WARNING("TBD: Add LSA to vertex");
 // 		    v = spt.get_node(v);
 // 		    v.get_lsas().push_back(lsar);
 		}
@@ -3671,15 +3671,11 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	
 	Vertex node = ri->node();
 
-	// A router can have multiple Router-LSAs associated with it,
-	// the options fields in all the Router-LSAs should all be the
-	// same, however if they aren't the LSA with the lowest Link
-	// State ID takes precedence. Unconditionally find and use the
-	// Router-LSA with the lowest Link State ID.
 	list<Lsa::LsaRef>& lsars = node.get_lsas();
 	list<Lsa::LsaRef>::iterator i = lsars.begin();
 	XLOG_ASSERT(i != lsars.end());
 	Lsa::LsaRef lsar = *i++;
+#if	0
 	if (OspfTypes::Router == node.get_type()) {
 	    for (; i != lsars.end(); i++)
 		if ((*i)->get_header().get_link_state_id() <
@@ -3688,12 +3684,13 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	} else {
 	    XLOG_ASSERT(1 == lsars.size());
 	}
+#endif
 
 	if (OspfTypes::Router == node.get_type()) {
+	    lsar = lsa_temp_store.get_router_lsa_lowest(node.get_nodeid());
 	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
  	    check_for_virtual_linkV3((*ri), _router_lsa, lsa_temp_store);
-	    XLOG_WARNING("TBD: Find Router-LSA with the lowest link state ID");
 	    const list<IntraAreaPrefixLsa *>& lsai = 
 		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
 	    if (!lsai.empty()) {
