@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.121 2007/02/22 07:50:59 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.122 2007/02/22 11:19:23 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -1415,23 +1415,6 @@ public:
 
     list<Lsa::LsaRef>& get_router_lsas(OspfTypes::RouterID rid) {
 	return _router_lsas[rid];
-    }
-
-    Lsa::LsaRef get_router_lsa_lowest(OspfTypes::RouterID rid) {
-	// A router can have multiple Router-LSAs associated with it,
-	// the options fields in all the Router-LSAs should all be the
-	// same, however if they aren't the LSA with the lowest Link
-	// State ID takes precedence. Unconditionally find and use the
-	// Router-LSA with the lowest Link State ID.
-	list<Lsa::LsaRef>& lsars = get_router_lsas(rid);
-	list<Lsa::LsaRef>::iterator i = lsars.begin();
-	XLOG_ASSERT(i != lsars.end());
-	Lsa::LsaRef lsar = *i++;
-	for (; i != lsars.end(); i++)
-	    if ((*i)->get_header().get_link_state_id() <
-		lsar->get_header().get_link_state_id())
-		lsar = *i;
-	return lsar;
     }
 
     void add_intra_area_prefix_lsa(IntraAreaPrefixLsa *iaplsa) {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.244 2007/02/22 10:08:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.245 2007/02/22 11:19:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3561,6 +3561,30 @@ AreaRouter<IPv4>::routing_total_recomputeV3()
     XLOG_FATAL("OSPFv3 with IPv4 not valid");
 }
 
+/**
+ * Given a list of LSAs return the one with the lowest link state ID.
+ */
+inline
+Lsa::LsaRef
+get_router_lsa_lowest(const list<Lsa::LsaRef>& lsars)
+{
+    // A router can have multiple Router-LSAs associated with it,
+    // the options fields in all the Router-LSAs should all be the
+    // same, however if they aren't the LSA with the lowest Link
+    // State ID takes precedence. Unconditionally find and use the
+    // Router-LSA with the lowest Link State ID.
+
+    list<Lsa::LsaRef>::const_iterator i = lsars.begin();
+    XLOG_ASSERT(i != lsars.end());
+    Lsa::LsaRef lsar = *i++;
+    for (; i != lsars.end(); i++)
+	if ((*i)->get_header().get_link_state_id() <
+	    lsar->get_header().get_link_state_id())
+	    lsar = *i;
+
+    return lsar;
+}
+
 template <>
 void 
 AreaRouter<IPv6>::routing_total_recomputeV3()
@@ -3687,7 +3711,8 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 #endif
 
 	if (OspfTypes::Router == node.get_type()) {
-	    lsar = lsa_temp_store.get_router_lsa_lowest(node.get_nodeid());
+	    lsar = get_router_lsa_lowest(lsa_temp_store.
+					 get_router_lsas(node.get_nodeid()));
 	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
  	    check_for_virtual_linkV3((*ri), _router_lsa, lsa_temp_store);
