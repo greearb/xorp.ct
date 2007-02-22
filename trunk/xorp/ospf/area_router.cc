@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.242 2007/02/21 20:21:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.243 2007/02/22 07:50:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -369,7 +369,10 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
 					   LsaTempStore& lsa_temp_store)
 {
     Vertex node = rc.node();
-    Lsa::LsaRef lsar = node.get_lsa();
+    list<Lsa::LsaRef>& lsars = node.get_lsas();
+    list<Lsa::LsaRef>::iterator l = lsars.begin();
+    XLOG_ASSERT(l != lsars.end());
+    Lsa::LsaRef lsar = *l++;
     RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
     XLOG_ASSERT(rlsa);
     OspfTypes::RouterID rid = rlsa->get_header().get_advertising_router();
