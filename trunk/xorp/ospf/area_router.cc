@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.241 2007/02/21 03:20:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.242 2007/02/21 20:21:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -354,12 +354,93 @@ AreaRouter<A>::check_for_virtual_linkV2(const RouteCmd<Vertex>& rc,
 					     neighbour_interface_address);
 }
 
-template <typename A>
+template <>
 void
-AreaRouter<A>::check_for_virtual_linkV3(const RouteCmd<Vertex>& /*rc*/,
-					Lsa::LsaRef /*r*/)
+AreaRouter<IPv4>::check_for_virtual_linkV3(const RouteCmd<Vertex>&,
+					   Lsa::LsaRef,
+					   LsaTempStore&)
 {
-    XLOG_WARNING("TBD: Routing check for virtual link OSPFv3");
+}
+
+template <>
+void
+AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
+					   Lsa::LsaRef r,
+					   LsaTempStore& lsa_temp_store)
+{
+    Vertex node = rc.node();
+    Lsa::LsaRef lsar = node.get_lsa();
+    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    OspfTypes::RouterID rid = rlsa->get_header().get_advertising_router();
+
+    // If this router ID is in the tmp set then it is already up, just
+    // remove it from the set and return;
+    set<OspfTypes::RouterID>::iterator i = _tmp.find(rid);
+    if (i != _tmp.end()) {
+	_tmp.erase(i);
+	return;
+    }
+
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Checking for virtual links %s\n", cstring(*rlsa));
+
+    if (0 == _vlinks.count(rid))
+	return;	// Not a candidate endpoint.
+
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Found virtual link endpoint %s\n", pr_id(rid).c_str());
+
+    // Find the interface address of the neighbour that should be used.
+    IPv6 neighbour_interface_address;
+    const list<IntraAreaPrefixLsa *>& nlsai = 
+	lsa_temp_store.get_intra_area_prefix_lsas(rid);
+    list<IPv6Prefix> nprefixes;
+    associated_prefixesV3(rlsa->get_ls_type(), 0, nlsai, nprefixes);
+    list<IPv6Prefix>::const_iterator ni;
+    for (ni = nprefixes.begin(); ni != nprefixes.end(); i++) {
+	if (ni->get_la_bit() && 
+	    ni->get_network().prefix_len() == IPv6::ADDR_BITLEN) {
+	    IPv6 addr = ni->get_network().masked_addr();
+	    if (!addr.is_linklocal_unicast()) {
+		neighbour_interface_address = addr;
+		break;
+	    }
+	}
+    }
+    if (neighbour_interface_address.is_zero())
+	return;
+
+    // Find this routers own interface address use the LSA database
+    // because if the global address is not being advertised there is
+    // not point in trying to bring up the virtual link.
+    IPv6 routers_interface_address;
+    const list<IntraAreaPrefixLsa *>& rlsai = 
+	lsa_temp_store.get_intra_area_prefix_lsas(r->get_header().
+						  get_advertising_router());
+    list<IPv6Prefix> rprefixes;
+    associated_prefixesV3(rlsa->get_ls_type(), 0, rlsai, rprefixes);
+    list<IPv6Prefix>::iterator ri;
+    for (ri = rprefixes.begin(); ri != rprefixes.end(); ri++) {
+	if (ri->get_la_bit() &&
+	    ni->get_network().prefix_len() == IPv6::ADDR_BITLEN) {
+	    IPv6 addr = ri->get_network().masked_addr();
+	    if (!addr.is_linklocal_unicast()) {
+		routers_interface_address = addr;
+		break;
+	    }
+	}
+    }
+    if (routers_interface_address.is_zero())
+	return;
+
+    // Now that everything has succeeded mark the virtual link as up.
+    XLOG_ASSERT(0 != _vlinks.count(rid));
+    _vlinks[rid] = true;
+
+    _ospf.get_peer_manager().up_virtual_link(rid, routers_interface_address,
+					     rc.weight(),
+					     neighbour_interface_address);
 }
 
 template <typename A>
@@ -463,16 +544,10 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
 
 template <>
 bool
-AreaRouter<IPv6>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
-					 IPv6& interface) const
+AreaRouter<IPv6>::find_interface_address(Lsa::LsaRef, Lsa::LsaRef, IPv6&) const
 {
-    UNUSED(src);
-    UNUSED(dst);
-    UNUSED(interface);
-
-    XLOG_UNFINISHED();
-
-    return true;
+    XLOG_FATAL("Only IPv4 not IPv6");
+    return false;
 }
 
 template <>
@@ -3614,7 +3689,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 	if (OspfTypes::Router == node.get_type()) {
 	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
- 	    check_for_virtual_linkV3((*ri), _router_lsa);
+ 	    check_for_virtual_linkV3((*ri), _router_lsa, lsa_temp_store);
 	    XLOG_WARNING("TBD: Find Router-LSA with the lowest link state ID");
 	    const list<IntraAreaPrefixLsa *>& lsai = 
 		lsa_temp_store.get_intra_area_prefix_lsas(node.get_nodeid());
