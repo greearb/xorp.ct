@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.246 2007/02/22 23:58:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.247 2007/02/23 01:56:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4010,7 +4010,10 @@ AreaRouter<IPv6>::routing_area_rangesV3(const list<RouteCmd<Vertex> >& r,
 	if (ri->node().get_type() == OspfTypes::Router)
 	    continue;
 	Vertex node = ri->node();
-	Lsa::LsaRef lsar = node.get_lsa();
+	list<Lsa::LsaRef>& lsars = node.get_lsas();
+	list<Lsa::LsaRef>::iterator l = lsars.begin();
+	XLOG_ASSERT(l != lsars.end());
+	Lsa::LsaRef lsar = *l++;
 	RouteEntry<IPv6> route_entry;
 	route_entry.set_destination_type(OspfTypes::Network);
 	IPNet<IPv6> net;
