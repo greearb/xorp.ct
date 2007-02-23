@@ -1,10 +1,15 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.7 2006/10/17 00:06:08 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.8 2006/10/17 23:49:16 atanu Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
  */
 
 interface ospfv3/0.1 {
+
+    /**
+     * Set instance id 
+     */
+    set_instance_id ? id:u32
 
     /**
      * Set router id 

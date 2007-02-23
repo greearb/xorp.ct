@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.50 2007/02/16 22:14:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.51 2007/02/16 22:46:44 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -320,6 +320,14 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
     if (!_ospf.withdraw_route(network)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_set_instance_id(const uint32_t& id)
+{
+    _ospf_ipv6.set_instance_id(id);
 
     return XrlCmdError::OKAY();
 }

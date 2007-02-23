@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.5 2006/10/19 19:21:28 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.6 2007/02/22 23:00:07 atanu Exp $ */
 
 protocols {
     ospf6 @: u32 {
@@ -102,6 +102,8 @@ protocols {
 	%modinfo: default_targetname "ospfv3";
 	%modinfo: status_method xrl "$(ospf6.@.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(ospf6.@.targetname)/common/0.1/shutdown";
+
+	%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_instance_id?id:u32=$(ospf6.@)";
 
 	%mandatory: $(@.router-id);
 	%mandatory: $(@.targetname);
