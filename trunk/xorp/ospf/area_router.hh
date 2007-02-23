@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.122 2007/02/22 11:19:23 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.123 2007/02/22 23:58:43 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -362,11 +362,9 @@ class AreaRouter : public ServiceBase {
      * list. If the prefix is already on the list just or in the
      * options field.
      */
-    bool
-    AreaRouter<A>::populate_prefix(OspfTypes::PeerID peeridid,
-				   uint32_t interface_id, 
-				   OspfTypes::RouterID router_id,
-				   list<IPv6Prefix>& prefixes);
+    bool populate_prefix(OspfTypes::PeerID peeridid, uint32_t interface_id, 
+			 OspfTypes::RouterID router_id,
+			 list<IPv6Prefix>& prefixes);
     
     /**
      * Update the Intra-Area-Prefix-LSA for this peer OSPFv3 only.
