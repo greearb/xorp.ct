@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.51 2007/02/16 22:46:44 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.52 2007/02/23 01:54:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -260,6 +260,22 @@ XrlOspfV2Target::policy_backend_0_1_configure(const uint32_t& filter,
 }
 
 XrlCmdError
+XrlOspfV3Target::policy_backend_0_1_configure(const uint32_t& filter,
+					      const string& conf)
+{
+    debug_msg("policy filter: %u conf: %s\n", filter, conf.c_str());
+
+    try {
+	_ospf_ipv6.configure_filter(filter,conf);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+					   e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& filter)
 {
     debug_msg("policy filter reset: %u\n", filter);
@@ -275,11 +291,36 @@ XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& filter)
 }
 
 XrlCmdError
+XrlOspfV3Target::policy_backend_0_1_reset(const uint32_t& filter)
+{
+    debug_msg("policy filter reset: %u\n", filter);
+
+    try {
+	_ospf_ipv6.reset_filter(filter);
+    } catch(const PolicyException& e){ 
+	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+					   e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::policy_backend_0_1_push_routes()
 {
     debug_msg("policy route push\n");
 
     _ospf.push_routes();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::policy_backend_0_1_push_routes()
+{
+    debug_msg("policy route push\n");
+
+    _ospf_ipv6.push_routes();
 
     return XrlCmdError::OKAY();
 }
@@ -307,6 +348,28 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
 }
 
 XrlCmdError
+XrlOspfV3Target::policy_redist6_0_1_add_route6(const IPv6Net& network,
+					       const bool& unicast,
+					       const bool& multicast,
+					       const IPv6& nexthop,
+					       const uint32_t& metric,
+					       const XrlAtomList& policytags)
+{
+    debug_msg("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
+	      cstring(network), cstring(nexthop), pb(unicast), pb(multicast),
+	      metric);
+
+    if (!unicast)
+	return XrlCmdError::OKAY();
+
+    if (!_ospf_ipv6.originate_route(network, nexthop, metric, policytags)) {
+	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
 						  const bool& unicast,
 						  const bool& multicast)
@@ -318,6 +381,24 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
 	return XrlCmdError::OKAY();
 
     if (!_ospf.withdraw_route(network)) {
+	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::policy_redist6_0_1_delete_route6(const IPv6Net& network,
+						  const bool& unicast,
+						  const bool& multicast)
+{
+    debug_msg("Net: %s Unicast: %s Multicast %s\n",
+	      cstring(network), pb(unicast), pb(multicast));
+
+    if (!unicast)
+	return XrlCmdError::OKAY();
+
+    if (!_ospf_ipv6.withdraw_route(network)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
 

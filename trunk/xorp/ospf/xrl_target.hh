@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.36 2007/02/16 22:46:44 pavlin Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.37 2007/02/23 01:54:24 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -719,6 +719,71 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	const XrlAtomList&	ext_headers_type,
 	const XrlAtomList&	ext_headers_payload,
 	const vector<uint8_t>&	payload);
+
+    /**
+     *  Pure-virtual function that needs to be implemented to:
+     *
+     *  Configure a policy filter.
+     *
+     *  @param filter the identifier of the filter to configure.
+     *
+     *  @param conf the configuration of the filter.
+     */
+    XrlCmdError policy_backend_0_1_configure(
+	// Input values,
+	const uint32_t&	filter,
+	const string&	conf);
+
+    /**
+     *  @param filter the identifier of the filter to reset.
+     */
+    XrlCmdError policy_backend_0_1_reset(
+	// Input values,
+	const uint32_t&	filter);
+
+    /**
+     *  Push all available routes through all filters for re-filtering.
+     */
+    XrlCmdError policy_backend_0_1_push_routes();
+
+    /**
+     *  Start route redistribution for an IPv6 route.
+     *
+     *  @param network the route to advertise.
+     *
+     *  @param unicast whether the route is unicast.
+     *
+     *  @param multicast whether the route is multicast.
+     *
+     *  @param nexthop the nexthop of the route.
+     *
+     *  @param metric the metric of the route.
+     *
+     *  @param policytags the set of policy-tags associated with the route.
+     */
+    XrlCmdError policy_redist6_0_1_add_route6(
+	// Input values,
+	const IPv6Net&	network,
+	const bool&	unicast,
+	const bool&	multicast,
+	const IPv6&	nexthop,
+	const uint32_t&	metric,
+	const XrlAtomList&	policytags);
+
+    /**
+     *  Terminate route redistribution for an IPv6 route.
+     *
+     *  @param network the route for which advertisements should cease.
+     *
+     *  @param unicast whether the route is unicast.
+     *
+     *  @param multicast whether the route is multicast.
+     */
+    XrlCmdError policy_redist6_0_1_delete_route6(
+	// Input values,
+	const IPv6Net&	network,
+	const bool&	unicast,
+	const bool&	multicast);
 
     /**
      *  Set instance id
