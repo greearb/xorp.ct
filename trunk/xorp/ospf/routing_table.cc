@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.57 2007/02/16 22:46:42 pavlin Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.58 2007/02/21 00:24:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -510,7 +510,9 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
     try {
 	bool e_bit;
 	uint32_t tag;
-	OspfVarRW<A> varrw(net, nexthop, metric, e_bit, tag, policytags);
+	bool tag_set;
+	OspfVarRW<A> varrw(net, nexthop, metric, e_bit, tag, tag_set,
+			   policytags);
 
 	// Import filtering
 	bool accepted;
@@ -528,7 +530,8 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 	if (!accepted) 
 	    return accepted;
 
-	OspfVarRW<A> varrw2(net, nexthop, metric, e_bit, tag, policytags);
+	OspfVarRW<A> varrw2(net, nexthop, metric, e_bit, tag, tag_set,
+			    policytags);
 
 	// Export source-match filtering
 	debug_msg("[OSPF] Running filter: %s on route: %s\n",

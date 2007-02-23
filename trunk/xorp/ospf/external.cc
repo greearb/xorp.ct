@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.26 2007/02/16 22:46:40 pavlin Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.27 2007/02/23 20:29:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -231,6 +231,7 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 
     bool ebit = true;
     uint32_t tag = 0;
+    bool tag_set = false;
 
     /**
      * If the nexthop address is not configured for OSPF then it won't
@@ -239,7 +240,7 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     if (!_ospf.get_peer_manager().configured_network(nexthop))
 	nexthop = A::ZERO();
 
-    if (!do_filtering(net, nexthop, metric, ebit, tag, policytags))
+    if (!do_filtering(net, nexthop, metric, ebit, tag, tag_set, policytags))
 	return true;
 
     OspfTypes::Version version = _ospf.version();
@@ -254,9 +255,14 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     case OspfTypes::V2:
 	header.set_options(_ospf.get_peer_manager().
 			   compute_options(OspfTypes::NORMAL));
+	aselsa->set_external_route_tag(tag);
 	break;
     case OspfTypes::V3:
 	XLOG_WARNING("TBD - AS-External-LSA set field values");
+	if (tag_set) {
+	    aselsa->set_t_bit(true);
+	    aselsa->set_external_route_tag(tag);
+	}
 	break;
     }
 
@@ -264,7 +270,6 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     header.set_advertising_router(_ospf.get_router_id());
     aselsa->set_metric(metric);
     aselsa->set_e_bit(ebit);
-    aselsa->set_external_route_tag(tag);
     aselsa->set_self_originating(true);
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
@@ -297,12 +302,12 @@ External<A>::push_routes()
 template <typename A>
 bool
 External<A>::do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
-			  bool& e_bit, uint32_t& tag,
+			  bool& e_bit, uint32_t& tag, bool& tag_set,
 			  const PolicyTags& policytags)
 {
     try {
 	PolicyTags ptags = policytags;
-	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag, ptags);
+	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag,tag_set,ptags);
 	XLOG_TRACE(_ospf.trace()._export_policy,
 		   "[OSPF] Running filter: %s on route: %s\n",
 		   filter::filter2str(filter::EXPORT).c_str(),

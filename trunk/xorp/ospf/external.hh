@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.14 2006/03/16 00:04:49 pavlin Exp $
+// $XORP: xorp/ospf/external.hh,v 1.15 2007/02/16 22:46:40 pavlin Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -166,7 +166,7 @@ class External {
      * Pass this outbound AS-External-LSA through the policy filter.
      */
     bool do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
-		      bool& e_bit, uint32_t& tag,
+		      bool& e_bit, uint32_t& tag, bool& tag_set,
 		      const PolicyTags& policytags);
 };
 
