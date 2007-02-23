@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.85 2007/02/16 22:46:41 pavlin Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.86 2007/02/22 09:36:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -154,10 +154,29 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
-    if (string(VLINK) == interface)
-	return _peer_manager.get_interface_id_virtual_link(interface, vif,
-							   interface_id);
-    return _io->get_interface_id(interface, interface_id);
+    string concat = interface + "/" + vif;
+
+    if (0 == _iidmap.count(concat)) {
+	if (string(VLINK) == interface)
+	    interface_id = 100000;
+	else
+	    _io->get_interface_id(interface, interface_id);
+
+	bool match;
+	do {
+	    match = false;
+	    typename map<string, uint32_t>::iterator i;
+	    for(i = _iidmap.begin(); i != _iidmap.end(); i++)
+		if ((*i).second == interface_id++) {
+		    match = true;
+		    break;
+		}
+	} while(match);
+	_iidmap[concat] = interface_id;
+    }
+
+    interface_id = _iidmap[concat];
+    return true;
 }
 
 template <typename A>

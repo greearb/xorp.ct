@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vlink.hh,v 1.9 2007/02/22 09:36:45 atanu Exp $
+// $XORP: xorp/ospf/vlink.hh,v 1.10 2007/02/22 10:10:33 atanu Exp $
 
 #ifndef __OSPF_VLINK_HH__
 #define __OSPF_VLINK_HH__
@@ -75,13 +75,6 @@ class Vlink {
 			   string& vif) const;
 
     /**
-     * OSPFv3 only return a pseudo interface ID that is mapped to this
-     * interface and vif.
-     */
-    bool get_interface_id(const string& interface, const string& vif,
-			  uint32_t& interface_id) const;
-
-    /**
      * Save the peerid that has been allocted to this virtual link.
      */
     bool add_peerid(OspfTypes::RouterID rid, OspfTypes::PeerID peerid);
@@ -124,8 +117,6 @@ class Vlink {
     void area_removed(OspfTypes::AreaID area);
 
  private:
-    static uint32_t _pseudo_interface_id_allocator;
-
     /**
      * State about each virtual link.
      */
@@ -134,9 +125,7 @@ class Vlink {
 	    _peerid(OspfTypes::ALLPEERS),	// Illegal value for a PeerID.
 	    _transit_area(OspfTypes::BACKBONE), // Again an illegal value.
 	    _notified(false)
-	{
-	    _pseudo_interface_id = _pseudo_interface_id_allocator--;
-	}
+	{}
 
 	OspfTypes::PeerID _peerid;		// PeerID of virtual link
 	OspfTypes::AreaID _transit_area;	// Transit area for the link
@@ -147,12 +136,6 @@ class Vlink {
 	// Required for transmission.
 	string _physical_interface;		// Actual interface
 	string _physical_vif;			// Actual vif
-
-	// OSPFv3 only
-	// Like all other IPv6 OSPF interfaces, virtual links are assigned
-	// unique (within the router) Interface IDs.  These are advertised in
-	// Hellos sent over the virtual link and in the router's router-LSAs.
-	uint32_t _pseudo_interface_id;
     };
 
     map <OspfTypes::RouterID, Vstate> _vlinks;

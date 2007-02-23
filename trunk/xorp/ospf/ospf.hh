@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.101 2007/02/18 01:40:27 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.102 2007/02/22 09:36:45 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -944,6 +944,9 @@ class Ospf {
     bool _rfc1583_compatibility;	// Preference rules for route
 					// selection. 
 
+    map<string, uint32_t> _iidmap;	// OSPFv3 only mapping of
+					// interface/vif to Instance IDs.
+    
     Trace _trace;		// Trace variables.
 };
 

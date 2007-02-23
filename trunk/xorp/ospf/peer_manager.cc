@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.132 2007/02/16 22:46:42 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.133 2007/02/22 09:36:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1167,19 +1167,6 @@ PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
     return _peers[peerid]->receive(dst, src, packet);
 
     return false;
-}
-
-template <typename A> 
-bool
-PeerManager<A>::get_interface_id_virtual_link(const string& interface,
-					      const string& vif,
-					      uint32_t interface_id) const
-{
-    XLOG_TRACE(_ospf.trace()._virtual_link,
-	       "Virtual link get interface ID interface %s vif %s\n",
-	       interface.c_str(), vif.c_str());
-
-    return _vlink.get_interface_id(interface, vif, interface_id);
 }
 
 template <typename A> 
