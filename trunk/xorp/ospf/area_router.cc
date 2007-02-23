@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.245 2007/02/22 11:19:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.246 2007/02/22 23:58:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4244,7 +4244,7 @@ AreaRouter<IPv6>::routing_inter_areaV3()
 	bool replace_entry = false;
 	RouteEntry<IPv6> rtnet;
 	bool found = false;
-	OspfTypes::RouterID dest;
+	OspfTypes::RouterID dest = 0;
 	if (snlsa) {
 	    if (routing_table.lookup_entry(n, rtnet))
 		found = true;
