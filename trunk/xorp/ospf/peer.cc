@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.262 2007/02/21 21:24:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.263 2007/02/21 21:31:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -879,6 +879,19 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 
     debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
 	      cstring(*packet));
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (packet->get_instance_id() != _ospf.get_instance_id()) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Instance ID does not match %d\n%s",
+		       _ospf.get_instance_id(), cstring(*packet));
+	    return false;
+	}
+	break;
+    }
 
     // RFC 2328 Section 8.2. Receiving protocol packets
 
