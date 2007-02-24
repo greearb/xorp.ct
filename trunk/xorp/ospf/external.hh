@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.15 2007/02/16 22:46:40 pavlin Exp $
+// $XORP: xorp/ospf/external.hh,v 1.16 2007/02/23 21:08:08 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -106,6 +106,8 @@ class External {
     ASExternalDatabase _lsas;		// Stored AS-External-LSAs.
     uint32_t _originating;		// Number of AS-External-LSAs
 					// that are currently being originated.
+    uint32_t _lsid;			// OSPFv3 only next Link State ID.
+    map<IPNet<IPv6>, uint32_t> _lsmap; 	// OSPFv3 only
 
     /**
      * Find this LSA
@@ -150,7 +152,10 @@ class External {
     ASExternalDatabase::iterator unique_find_lsa(Lsa::LsaRef lsar,
 						 const IPNet<A>& net);
 
-    void set_net_nexthop(ASExternalLsa *aselsa, IPNet<A> net, A nexthop);
+    /**
+     * Set the network, nexthop and link state ID.
+     */
+    void set_net_nexthop_lsid(ASExternalLsa *aselsa, IPNet<A> net, A nexthop);
 
     /**
      * Start the refresh timer.

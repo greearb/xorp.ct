@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.27 2007/02/23 20:29:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.28 2007/02/23 21:08:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,11 +42,10 @@
 #include "external.hh"
 #include "policy_varrw.hh"
 
-
 template <typename A>
 External<A>::External(Ospf<A>& ospf,
 		      map<OspfTypes::AreaID, AreaRouter<A> *>& areas)
-    : _ospf(ospf), _areas(areas), _originating(0)
+    : _ospf(ospf), _areas(areas), _originating(0), _lsid(1)
 {
 }
 
@@ -194,19 +193,20 @@ External<IPv6>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv6>& /*net*/)
 
 template <>
 void 
-External<IPv4>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv4> net,
-				IPv4 nexthop)
+External<IPv4>::set_net_nexthop_lsid(ASExternalLsa *aselsa, IPNet<IPv4> net,
+				     IPv4 nexthop)
 {
-    Lsa_header& header = aselsa->get_header();
-    header.set_link_state_id(ntohl(net.masked_addr().addr()));
     aselsa->set_network_mask(ntohl(net.netmask().addr()));
     aselsa->set_forwarding_address_ipv4(nexthop);
+
+    Lsa_header& header = aselsa->get_header();
+    header.set_link_state_id(ntohl(net.masked_addr().addr()));
 }
 
 template <>
 void 
-External<IPv6>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv6> net,
-				IPv6 nexthop)
+External<IPv6>::set_net_nexthop_lsid(ASExternalLsa *aselsa, IPNet<IPv6> net,
+				     IPv6 nexthop)
 {
     IPv6Prefix prefix(_ospf.get_version());
     prefix.set_network(net);
@@ -215,6 +215,22 @@ External<IPv6>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv6> net,
 	aselsa->set_f_bit(true);
 	aselsa->set_forwarding_address_ipv6(nexthop);
     }
+
+    // Note entries in the _lsmap are never removed, this guarantees
+    // for the life of OSPF that the same network to link state ID
+    // mapping exists. If this is a problem on a withdraw remove the
+    // entry, will need to add another argument. Note that it is
+    // possible to receive a withdraw from the policy manager with no
+    // preceding announce.
+    uint32_t lsid = 0;
+    if (0 == _lsmap.count(net)) {
+	lsid = _lsid++;
+	_lsmap[net] = lsid;
+    } else {
+	lsid = _lsmap[net];
+    }
+    Lsa_header& header = aselsa->get_header();
+    header.set_link_state_id(lsid);
 }
 
 template <typename A>
@@ -258,7 +274,6 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 	aselsa->set_external_route_tag(tag);
 	break;
     case OspfTypes::V3:
-	XLOG_WARNING("TBD - AS-External-LSA set field values");
 	if (tag_set) {
 	    aselsa->set_t_bit(true);
 	    aselsa->set_external_route_tag(tag);
@@ -266,7 +281,7 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 	break;
     }
 
-    set_net_nexthop(aselsa, net, nexthop);
+    set_net_nexthop_lsid(aselsa, net, nexthop);
     header.set_advertising_router(_ospf.get_router_id());
     aselsa->set_metric(metric);
     aselsa->set_e_bit(ebit);
@@ -359,6 +374,8 @@ template <typename A>
 bool
 External<A>::withdraw(const IPNet<A>& net)
 {
+    debug_msg("net %s\n", cstring(net));
+
     _originating--;
     if (0 == _originating)
 	_ospf.get_peer_manager().refresh_router_lsas();
@@ -368,15 +385,7 @@ External<A>::withdraw(const IPNet<A>& net)
     ASExternalLsa *aselsa = new ASExternalLsa(version);
     Lsa_header& header = aselsa->get_header();
 
-    switch(version) {
-    case OspfTypes::V2:
-	set_net_nexthop(aselsa, net, A::ZERO());
-	break;
-    case OspfTypes::V3:
-	XLOG_WARNING("TBD - Set link state id");
-	break;
-    }
-
+    set_net_nexthop_lsid(aselsa, net, A::ZERO());
     header.set_advertising_router(_ospf.get_router_id());
     
     Lsa::LsaRef searchlsar = aselsa;
