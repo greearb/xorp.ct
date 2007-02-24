@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.98 2007/02/16 22:46:41 pavlin Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.99 2007/02/18 11:01:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -248,7 +248,7 @@ void
 Lsa::update_age_and_seqno(const TimeVal& now)
 {
     XLOG_ASSERT(get_self_originating());
-    XLOG_ASSERT(get_header().get_ls_age() != OspfTypes::MaxAge);
+//     XLOG_ASSERT(get_header().get_ls_age() != OspfTypes::MaxAge);
 
     // If this LSA has been transmitted then its okay to bump the
     // sequence number.
