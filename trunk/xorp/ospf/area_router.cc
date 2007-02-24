@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.247 2007/02/23 01:56:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.248 2007/02/23 21:06:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -53,6 +53,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
       _queue(ospf.get_eventloop(),
 	     OspfTypes::MinLSInterval,
 	     callback(this, &AreaRouter<A>::publish_all)),
+      _lsid(1),
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
       _TransitCapability(0),
 #else
@@ -917,22 +918,37 @@ AreaRouter<IPv6>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv6>& /*net*/,
 
 template <>
 void 
-AreaRouter<IPv4>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
-					      IPNet<IPv4> net)
+AreaRouter<IPv4>::summary_network_lsa_set_net_lsid(SummaryNetworkLsa *snlsa,
+						   IPNet<IPv4> net)
 {
+    snlsa->set_network_mask(ntohl(net.netmask().addr()));
+
     Lsa_header& header = snlsa->get_header();
     header.set_link_state_id(ntohl(net.masked_addr().addr()));
-    snlsa->set_network_mask(ntohl(net.netmask().addr()));
 }
 
 template <>
 void 
-AreaRouter<IPv6>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
-					      IPNet<IPv6> net)
+AreaRouter<IPv6>::summary_network_lsa_set_net_lsid(SummaryNetworkLsa *snlsa,
+						   IPNet<IPv6> net)
 {
     IPv6Prefix prefix(_ospf.get_version());
     prefix.set_network(net);
     snlsa->set_ipv6prefix(prefix);
+
+    // Note entries in the _lsmap are never removed, this guarantees
+    // for the life of OSPF that the same network to link state ID
+    // mapping exists. If this is a problem on a withdraw remove the
+    // entry, will need to add another argument.
+    uint32_t lsid = 0;
+    if (0 == _lsmap.count(net)) {
+	lsid = _lsid++;
+	_lsmap[net] = lsid;
+    } else {
+	lsid = _lsmap[net];
+    }
+    Lsa_header& header = snlsa->get_header();
+    header.set_link_state_id(lsid);
 }
 
 template <typename A>
@@ -944,8 +960,7 @@ AreaRouter<A>::summary_network_lsa(IPNet<A> net, RouteEntry<A>& rt)
     SummaryNetworkLsa *snlsa = new SummaryNetworkLsa(version);
     Lsa_header& header = snlsa->get_header();
 
-    // Note for OSPFv2 the link state id is reset in here.
-    summary_network_lsa_set_net(snlsa, net);
+    summary_network_lsa_set_net_lsid(snlsa, net);
     snlsa->set_metric(rt.get_cost());
 
     switch (version) {
@@ -953,9 +968,9 @@ AreaRouter<A>::summary_network_lsa(IPNet<A> net, RouteEntry<A>& rt)
 	header.set_options(get_options());
 	break;
     case OspfTypes::V3:
-	// XXX - The setting of all the OSPFv3 fields needs
-	// close attention.
-	XLOG_WARNING("TBD: Inter-Area-Prefix-LSA set field values");
+	if (net.masked_addr().is_linklocal_unicast())
+	    XLOG_WARNING("Advertising a Link-local address in %s",
+			 cstring(*snlsa));
 	break;
     }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.123 2007/02/22 23:58:43 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.124 2007/02/23 16:45:14 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -714,6 +714,9 @@ class AreaRouter : public ServiceBase {
 					// the sequence number has
 					// reached MaxSequenceNumber.
 
+    uint32_t _lsid;			// OSPFv3 only next Link State ID.
+    map<IPNet<IPv6>, uint32_t> _lsmap; 	// OSPFv3 only
+
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
     uint32_t _TransitCapability;	// Used by the spt computation.
 
@@ -791,9 +794,10 @@ class AreaRouter : public ServiceBase {
     bool unique_find_lsa(Lsa::LsaRef lsar, const IPNet<A>& net, size_t& index);
 
     /**
-     * Set the network components of the LSA.
+     * Set network and link state ID in a Summary-LSA/Inter-Area-Prefix-LSA.
      */
-    void summary_network_lsa_set_net(SummaryNetworkLsa *snlsa, IPNet<A> net);
+    void summary_network_lsa_set_net_lsid(SummaryNetworkLsa *snlsa,
+					  IPNet<A> net);
 
 
     Lsa::LsaRef summary_network_lsa(IPNet<A> net, RouteEntry<A>& rt);
