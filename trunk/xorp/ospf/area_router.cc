@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.248 2007/02/23 21:06:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.249 2007/02/24 11:39:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1088,7 +1088,8 @@ AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
 	SummaryRouterLsa *srlsa = new SummaryRouterLsa(version);
 
 	Lsa_header& header = srlsa->get_header();
-	// AS  boundary router's Router ID
+	// AS  boundary router's Router ID, for OSPFv3 we can choose
+	// any unique value so lets leave it as the the Router ID.
 	header.set_link_state_id(rt.get_router_id());
 // 	header.set_advertising_router(_ospf.get_router_id());
 
@@ -1098,11 +1099,13 @@ AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
 	    header.set_options(get_options());
 	    break;
 	case OspfTypes::V3:
-	    // XXX - The setting of all the OSPFv3 fields need close attention.
-	    XLOG_WARNING("setting destination ID "
-			 "to router ID is this correct?");
 	    srlsa->set_destination_id(rt.get_router_id());
-	    srlsa->set_options(get_options());
+	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(rt.get_lsa().get());
+	    XLOG_ASSERT(rlsa);
+	    // In OSPFv3 the options field is set to the options from
+	    // the original Router-LSA in OSPFv2 as far as I can tell
+	    // it should be this routers options.
+	    srlsa->set_options(rlsa->get_options());
 	    break;
 	}
 
