@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.249 2007/02/24 11:39:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.250 2007/02/25 23:20:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,9 +80,17 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     rlsa->record_creation_time(now);
 
     Lsa_header& header = rlsa->get_header();
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	// This is a router LSA so the link state ID is the Router ID.
+	header.set_link_state_id(_ospf.get_router_id());
+	break;
+    case OspfTypes::V3:
+	header.set_link_state_id(0);
+	break;
+    }
     
-    // This is a router LSA so the link state ID is the Router ID.
-    header.set_link_state_id(_ospf.get_router_id());
     header.set_advertising_router(_ospf.get_router_id());
 
     _router_lsa = Lsa::LsaRef(rlsa);
