@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.263 2007/02/21 21:31:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.264 2007/02/23 02:40:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,6 +96,7 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif), _peerid(peerid),
+      _interface_id(0),
       _interface_address(interface_address),
       _interface_prefix_length(interface_prefix_length),
       _interface_mtu(interface_mtu),
@@ -519,6 +520,8 @@ template <typename A>
 bool
 PeerOut<A>::set_interface_id(uint32_t interface_id)
 {
+    _interface_id = interface_id;
+
     typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
     for(i = _areas.begin(); i != _areas.end(); i++) {
 	(*i).second->set_interface_id(interface_id);

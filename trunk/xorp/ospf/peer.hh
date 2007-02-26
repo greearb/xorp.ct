@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.134 2007/02/16 22:46:42 pavlin Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.135 2007/02/18 01:40:27 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -322,6 +322,11 @@ class PeerOut {
     bool set_interface_id(uint32_t interface_id);
 
     /**
+     * Get the interface ID OSPFv3 only.
+     */
+    uint32_t get_interface_id() const { return _interface_id; }
+	
+    /**
      * Set a network to advertise OSPFv3 only.
      */
     bool add_advertise_net(OspfTypes::AreaID area, IPNet<A> net);
@@ -457,6 +462,7 @@ class PeerOut {
     const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
     const OspfTypes::PeerID _peerid;	// The peers ID.
+    uint32_t _interface_id;		// Inferface ID OSPFv3 only.
     A _interface_address;		// Interface address.
     const uint16_t _interface_prefix_length;	// Interface prefix length
     const uint16_t _interface_mtu;	// MTU of this interface.
