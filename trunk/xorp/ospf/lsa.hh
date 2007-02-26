@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.95 2007/02/16 22:46:41 pavlin Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.96 2007/02/18 12:42:17 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1969,9 +1969,10 @@ public:
     }
 
     /**
-     * Given a referenced LS type and an interface ID generate a candidate Link
-     * State ID. This is *NOT* part of the protocol, just a way to
-     * create a unique mapping.
+     * Given a referenced LS type and an interface ID generate a
+     * candidate Link State ID for Intra-Area-Prefix-LSAs. This is
+     * *NOT* part of the protocol, just a way to create a unique
+     * mapping.
      *
      * The underlying assumption is that for every area only one
      * Intra-Area-Prefix-LSA will be generated per Router-LSA and
@@ -1986,8 +1987,10 @@ public:
     uint32_t create_link_state_id(uint16_t ls_type, uint32_t interface_id)
 	const
     {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+
 	if (RouterLsa(get_version()).get_ls_type() == ls_type) {
-	    return 0x2a000000;
+	    return OspfTypes::UNUSED_INTERFACE_ID;
 	} else if (NetworkLsa(get_version()).get_ls_type() == ls_type) {
 	    return interface_id;
 	} else {
