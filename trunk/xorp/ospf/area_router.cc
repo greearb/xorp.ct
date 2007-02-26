@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.251 2007/02/26 02:50:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.252 2007/02/26 10:12:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -420,8 +420,12 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
 	    }
 	}
     }
-    if (neighbour_interface_address.is_zero())
+    if (neighbour_interface_address.is_zero()) {
+	XLOG_TRACE(_ospf.trace()._virtual_link,
+		   "No global address for virtual link endpoint %s\n",
+		   pr_id(rid).c_str());
 	return;
+    }
 
     // Find this routers own interface address use the LSA database
     // because if the global address is not being advertised there is
