@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.84 2007/02/22 09:36:45 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.85 2007/02/23 00:01:13 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -231,6 +231,11 @@ class PeerManager {
      * Send (push) any queued LSAs.
      */
     bool push_lsas(const OspfTypes::PeerID peerid);
+
+    /**
+     * Get the interface ID of this peer OSPFv3 only.
+     */
+    uint32_t get_interface_id(const OspfTypes::PeerID peerid);
 
     /*
      * Does this address fall into a configured OSPF network making it
