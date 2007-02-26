@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.265 2007/02/26 04:04:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.266 2007/02/26 23:01:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2895,9 +2895,19 @@ Peer<IPv6>::add_advertise_net(IPv6 addr, uint32_t prefix_length)
     LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
     XLOG_ASSERT(llsa);
 
+    if (addr.is_linklocal_unicast())
+	return false;
+
     IPv6Prefix prefix(_ospf.get_version());
     prefix.set_network(IPNet<IPv6>(addr, prefix_length));
     llsa->get_prefixes().push_back(prefix);
+
+    // Add a host route that can be used if necessary to advertise a
+    // virtual link endpoint.
+    IPv6Prefix host_prefix(_ospf.get_version());
+    host_prefix.set_network(IPNet<IPv6>(addr, IPv6::ADDR_BITLEN));
+    host_prefix.set_la_bit(true);
+    llsa->get_prefixes().push_back(host_prefix);
     
     return true;
 }
