@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.87 2007/02/23 00:01:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.88 2007/02/26 02:42:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -170,7 +170,8 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
 	    match = false;
 	    typename map<string, uint32_t>::iterator i;
 	    for(i = _iidmap.begin(); i != _iidmap.end(); i++)
-		if ((*i).second == interface_id++) {
+		if ((*i).second == interface_id) {
+		    interface_id++;
 		    match = true;
 		    break;
 		}
@@ -181,6 +182,9 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
     interface_id = _iidmap[concat];
 
     XLOG_ASSERT(OspfTypes::UNUSED_INTERFACE_ID != interface_id);
+
+    debug_msg("Interface %s Vif %s ID = %u\n", interface.c_str(), vif.c_str(),
+	      interface_id);
 
     return true;
 }
