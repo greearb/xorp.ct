@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.96 2007/02/18 12:42:17 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.97 2007/02/26 03:06:05 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -805,19 +805,19 @@ public:
 	return _prefix_options;
     }
     
-     void set_bit(bool set, uint8_t bit) {
+    void set_bit(bool set, uint8_t bit) {
 	 XLOG_ASSERT(OspfTypes::V3 == get_version());
 	 if (set)
 	     _prefix_options |= bit;
 	 else
 	     _prefix_options &= ~bit;
 	
-     }
+    }
 
-     bool get_bit(uint8_t bit) const {
-	 XLOG_ASSERT(OspfTypes::V3 == get_version());
-	 return _prefix_options & bit ? true : false;
-     }
+    bool get_bit(uint8_t bit) const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _prefix_options & bit ? true : false;
+    }
 
     void set_nu_bit(bool set) { set_bit(set, NU_bit); }
     bool get_nu_bit() const { return get_bit(NU_bit); }
