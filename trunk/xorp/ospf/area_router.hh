@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.124 2007/02/23 16:45:14 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.125 2007/02/24 11:39:15 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -200,6 +200,13 @@ class AreaRouter : public ServiceBase {
      * @param timer true if called by the timer.
      */
     void refresh_router_lsa(bool timer = false);
+
+    /**
+     * For OSPFv3 only there are no router links describing stub
+     * networks, Intra-Area-Prefix-LSAs that reference the Router-LSA
+     * have to be generated.
+     */
+    void stub_networksV3(bool timer);
 
     /**
      * A new route has been added to the routing table it is being

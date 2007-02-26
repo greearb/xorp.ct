@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.250 2007/02/25 23:20:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.251 2007/02/26 02:50:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1794,9 +1794,19 @@ AreaRouter<A>::generate_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
 							  interface_id));
     header.set_advertising_router(_ospf.get_router_id());
 
-    iaplsa->set_referenced_ls_type(lsar->get_ls_type());
-    iaplsa->set_referenced_link_state_id(lsar->get_header().
-					 get_link_state_id());
+	iaplsa->set_referenced_ls_type(lsar->get_ls_type());
+
+    OspfTypes::Version version = _ospf.get_version();
+    if (RouterLsa(version).get_ls_type() == lsar->get_ls_type()) {
+	iaplsa->set_referenced_link_state_id(0);
+    } else if (NetworkLsa(version).get_ls_type() == lsar->get_ls_type()) {
+	iaplsa->set_referenced_link_state_id(lsar->get_header().
+					     get_link_state_id());
+    } else {
+	XLOG_FATAL("Unknown LS Type %#x %s\n", lsar->get_ls_type(),
+		   cstring(*lsar));
+    }
+
     iaplsa->set_referenced_advertising_router(lsar->get_header().
 					      get_advertising_router());
     
@@ -3016,12 +3026,180 @@ AreaRouter<A>::refresh_router_lsa(bool timer)
 	// publish the router LSA.
 	_queue.add(_router_lsa);
 
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    stub_networksV3(timer);
+	    break;
+	}
+
 	// This new Router-LSA is being announced, hence something has
 	// changed in a link or a transit capability has
 	// changed. Therefore the routing table needs to be recomputed.
 	if (!timer)
 	    routing_schedule_total_recompute();
     }
+}
+
+inline
+bool
+operator==(const IPv6Prefix& lhs, const IPv6Prefix& rhs)
+{
+    // We could check for lhs == rhs this will be such a rare
+    // occurence why bother.
+    if (lhs.use_metric() != rhs.use_metric())
+	return false;
+
+    if (lhs.get_network() != rhs.get_network())
+	return false;
+
+    if (lhs.get_prefix_options() != rhs.get_prefix_options())
+	return false;
+
+    if (lhs.use_metric() && lhs.get_metric() != rhs.get_metric())
+	return false;
+
+    return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::stub_networksV3(bool timer)
+{
+    debug_msg("timer %s\n", pb(timer));
+
+    OspfTypes::Version version = _ospf.get_version();
+    Ls_request lsr(version,
+		   IntraAreaPrefixLsa(version).get_ls_type(),
+		   IntraAreaPrefixLsa(version).
+		   create_link_state_id(_router_lsa->get_ls_type(), 0),
+		   _ospf.get_router_id());
+
+    // If the timer fired find that LSA update it and retransmit.
+    if (timer) {
+	size_t index;
+	if (!find_lsa(lsr, index))
+	    return;
+
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+	update_age_and_seqno(_db[index], now);
+
+	_queue.add(_db[index]);
+
+	return;
+    }
+
+    // Generate the list of prefixes that should be sent.
+    list<IPv6Prefix> prefixes;
+    PeerManager<A>& pm = _ospf.get_peer_manager();
+    typename PeerMap::iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	PeerStateRef temp_psr = i->second;
+	if (temp_psr->_up && temp_psr->_router_links.empty()) {
+ 	    uint32_t interface_id = pm.get_interface_id(i->first);
+	    Ls_request lsr(version, LinkLsa(version).get_ls_type(),
+			   interface_id, _ospf.get_router_id());
+	    size_t index;
+	    if (find_lsa(lsr, index)) {
+		LinkLsa *llsa = dynamic_cast<LinkLsa *>(_db[index].get());
+		XLOG_ASSERT(llsa);
+		debug_msg("%s\n", cstring(*llsa));
+		const list<IPv6Prefix>& link_prefixes = llsa->get_prefixes();
+		list<IPv6Prefix>::const_iterator i;
+		for (i = link_prefixes.begin(); i != link_prefixes.end(); i++){
+		    IPv6Prefix prefix(version, true);
+		    prefix = *i;
+		    if (prefix.get_nu_bit() /*|| prefix.get_la_bit()*/)
+			continue;
+		    if (prefix.get_network().masked_addr().
+			is_linklocal_unicast())
+			continue;
+		    prefix.set_metric(0);
+		    prefixes.push_back(prefix);
+		}
+	    }
+	}
+    }
+
+    // If there are no prefixes to send then remove the LSA if it was
+    // previously sending anything.
+    if (prefixes.empty()) {
+	debug_msg("No prefixes computed\n");
+	size_t index;
+	if (!find_lsa(lsr, index))
+	    return;
+
+	premature_aging(_db[index], index);
+
+	return;
+    }
+
+    // If there is no Intra-Area-Prefix-LSA then generate one.
+    size_t index;
+    if (!find_lsa(lsr, index)) {
+
+	if (!generate_intra_area_prefix_lsa(OspfTypes::ALLPEERS, _router_lsa,
+					    0)) {
+	    XLOG_WARNING("Unable to generate an Intra-Area-Prefix-LSA");
+	    return;
+	}
+
+	if (!find_lsa(lsr, index))
+	    XLOG_FATAL("Unable to find %s", cstring(lsr));
+
+	Lsa::LsaRef lsar = _db[index];
+
+	IntraAreaPrefixLsa *iaplsa = 
+	    dynamic_cast<IntraAreaPrefixLsa *>(lsar.get());
+	XLOG_ASSERT(iaplsa);
+
+	list<IPv6Prefix>& nprefixes = iaplsa->get_prefixes();
+	nprefixes.insert(nprefixes.begin(), prefixes.begin(), prefixes.end());
+
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+	update_age_and_seqno(lsar, now);
+
+	_queue.add(lsar);
+
+	return;
+    }
+
+    // An Intra-Area-Prefix-LSA exists if it different to the one we
+    // would like to generate then publish it.
+    Lsa::LsaRef lsar = _db[index];
+    IntraAreaPrefixLsa *iaplsa = 
+	dynamic_cast<IntraAreaPrefixLsa *>(lsar.get());
+    XLOG_ASSERT(iaplsa);
+
+    list<IPv6Prefix>& oprefixes = iaplsa->get_prefixes();
+    list<IPv6Prefix>::iterator j, k;
+    bool found;
+    for (j = oprefixes.begin(); j != oprefixes.end(); j++) {
+	for (k = prefixes.begin(); k != prefixes.end(); k++) {
+	    if (*j == *k) {
+		found = true;
+		break;
+	    }
+	}
+	if (!found)
+	    break;
+    }
+	
+    // They are identical nothing to do.
+    if (found)
+	return;
+
+    oprefixes.clear();
+    oprefixes.insert(oprefixes.begin(), prefixes.begin(), prefixes.end());
+
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    update_age_and_seqno(lsar, now);
+
+    _queue.add(lsar);
 }
 
 template <typename A>
