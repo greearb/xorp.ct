@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.86 2007/02/22 09:36:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.87 2007/02/23 00:01:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -55,6 +55,9 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     _io->register_receive(callback(this,&Ospf<A>::receive));
 
     // The peer manager will solicit packets from the various interfaces.
+
+    // Make sure that this value can never be allocated as an interface ID.
+    _iidmap[""] = OspfTypes::UNUSED_INTERFACE_ID;
 }
 
 /**
@@ -176,6 +179,9 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
     }
 
     interface_id = _iidmap[concat];
+
+    XLOG_ASSERT(OspfTypes::UNUSED_INTERFACE_ID != interface_id);
+
     return true;
 }
 

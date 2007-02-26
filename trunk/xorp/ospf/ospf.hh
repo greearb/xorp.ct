@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.102 2007/02/22 09:36:45 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.103 2007/02/23 00:01:13 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -127,6 +127,11 @@ struct OspfTypes {
      * have this identifier.
      */
     static const NeighbourID ALLNEIGHBOURS = 0;
+
+    /**
+     * An interface ID that will never be allocated OSPFv3 only.
+     */
+    static const uint32_t UNUSED_INTERFACE_ID = 0;
 
     /**
      *
