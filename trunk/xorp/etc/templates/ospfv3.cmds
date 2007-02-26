@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.cmds,v 1.3 2007/02/26 10:45:51 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.cmds,v 1.4 2007/02/26 10:48:28 atanu Exp $ */
 
 show ospf6 {
     %command: "" %help: "Display information about OSPFv2";
@@ -163,6 +163,26 @@ show ospf6 database link detail {
     %tag: HELP "Display detailed output";
 }
 
+/* Intra-Area-Prefix-LSA */
+
+show ospf6 database intra-area-prefix {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
+show ospf6 database intra-area-prefix brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database intra-area-prefix detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
 /* AREA */
 
 show ospf6 database area $(protocols.ospf6.*.area.*) {
@@ -323,6 +343,26 @@ show ospf6 database area $(protocols.ospf6.*.area.*) link detail {
     %tag: HELP "Display detailed output";
 }
 
+/* Intra-Area-Prefix-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) intra-area-prefix {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) intra-area-prefix brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) intra-area-prefix detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
 /* SUMMARY */
 
 show ospf6 database summary {
@@ -373,6 +413,12 @@ show ospf6 database summary link {
     %tag: HELP "Show Link-LSA database";
 }
 
+show ospf6 database summary intra-area-prefix {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
 show ospf6 database summary area $(protocols.ospf6.*.area.*) {
     %command: "ospf/tools/print_lsas -3 -a $6 -s" %help: HELP;
     %module: ospf6;
@@ -419,6 +465,12 @@ show ospf6 database summary area $(protocols.ospf6.*.area.*) link {
     %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x0008" %help: HELP;
     %module: ospf6;
     %tag: HELP "Show Link-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) intra-area-prefix{
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
 }
 
 /* Neighbor commands */
