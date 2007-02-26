@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/etc/templates/rib.cmds,v 1.7 2005/10/27 07:13:46 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.8 2005/10/29 05:51:10 pavlin Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -619,7 +619,56 @@ show route table ipv4 unicast ospf winners terse {
      %tag: HELP "Show OSPFv2 that reach forwarding engine (terse format)";
 }
 
+/*
+ * OSPFv3 show route commands
+ */
+show route table ipv6 unicast ospf {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3";
+}
 
+show route table ipv6 unicast ospf winners {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine";
+}
+
+show route table ipv6 unicast ospf brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3 (brief format)";
+}
+
+show route table ipv6 unicast ospf winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine (brief format)";
+}
+
+show route table ipv6 unicast ospf detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3 (detailed format)";
+}
+
+show route table ipv6 unicast ospf winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine (detailed format)";
+}
+
+show route table ipv6 unicast ospf terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OSPFv3 (terse format)";
+}
+
+show route table ipv6 unicast ospf winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OSPFv3 that reach forwarding engine (terse format)";
+}
 
 /*
  * Show winning routes (unfiltered output from "all" routing table).
