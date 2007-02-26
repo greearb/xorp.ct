@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.264 2007/02/23 02:40:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.265 2007/02/26 04:04:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -532,14 +532,14 @@ PeerOut<A>::set_interface_id(uint32_t interface_id)
 
 template <typename A>
 bool
-PeerOut<A>::add_advertise_net(OspfTypes::AreaID area, IPNet<A> net)
+PeerOut<A>::add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix)
 {
     if (0 == _areas.count(area)) {
 	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
-    return _areas[area]->add_advertise_net(net);
+    return _areas[area]->add_advertise_net(addr, prefix);
 }
 
 template <typename A>
@@ -2879,16 +2879,16 @@ Peer<A>::get_interface_id() const
 
 template <>
 bool
-Peer<IPv4>::add_advertise_net(IPNet<IPv4> /*net*/)
+Peer<IPv4>::add_advertise_net(IPv4 /*addr*/, uint32_t /*prefix_length*/)
 {
     XLOG_FATAL("Only IPv6 not IPv4");
 
     return true;
 }
 
-template <typename A>
+template <>
 bool
-Peer<A>::add_advertise_net(IPNet<A> net)
+Peer<IPv6>::add_advertise_net(IPv6 addr, uint32_t prefix_length)
 {
     XLOG_ASSERT(OspfTypes::VirtualLink != get_linktype());
 
@@ -2896,7 +2896,7 @@ Peer<A>::add_advertise_net(IPNet<A> net)
     XLOG_ASSERT(llsa);
 
     IPv6Prefix prefix(_ospf.get_version());
-    prefix.set_network(net);
+    prefix.set_network(IPNet<IPv6>(addr, prefix_length));
     llsa->get_prefixes().push_back(prefix);
     
     return true;

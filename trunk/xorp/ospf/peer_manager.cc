@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.134 2007/02/23 00:01:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.135 2007/02/26 05:05:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -430,7 +430,8 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
     OspfTypes::PeerID peerid = create_peerid(interface, vif);
 
-    IPNet<A> advertised_net;
+    A global_address;
+    uint32_t global_prefix_length;
     switch (_ospf.get_version()) {
     case OspfTypes::V2:
 	break;
@@ -446,7 +447,10 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 				interface.c_str(), vif.c_str(),
 				cstring(source)));
 	}
-	advertised_net = IPNet<A>(source, interface_prefix_length);
+	global_address = source;
+	global_prefix_length = interface_prefix_length;
+	// Note that the source address is going to be replaced with
+	// the link local address.
 	if (!_ospf.get_link_local_address(interface, vif, source)) {
 	    destroy_peerid(interface, vif);
 	    xorp_throw(BadPeer, 
@@ -495,7 +499,8 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 	}
 	_peers[peerid]->set_interface_id(interface_id);
 	if (OspfTypes::VirtualLink != linktype)
-	    _peers[peerid]->add_advertise_net(area, advertised_net);
+	    _peers[peerid]->add_advertise_net(area, global_address,
+					      global_prefix_length);
     }
 	break;
     }
