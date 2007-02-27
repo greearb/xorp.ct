@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.136 2007/02/26 04:04:47 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.137 2007/02/26 23:01:34 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -63,14 +63,7 @@ class PeerOut {
      * If the source address matches the interface address return the
      * interface and vif.
      */
-    bool match(A source, string& interface, string& vif) {
-	if (get_interface_address() == source) {
-	    interface = _interface;
-	    vif = _vif;
-	    return true;
-	}
-	return false;
-    }
+    bool match(A source, string& interface, string& vif);
 
     /**
      * Get Peer ID.
@@ -592,6 +585,11 @@ class Peer {
      * OSPFv3 set all the fields for the peers Link-LSA.
      */
     void populate_link_lsa();
+
+    /**
+     * If the source address matches a global address return true.
+     */
+    bool match(IPv6 source) const;
 
     /**
      * For debugging only printable rendition of this interface/vif.

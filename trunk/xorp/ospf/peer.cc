@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.266 2007/02/26 23:01:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.267 2007/02/26 23:28:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -128,6 +128,34 @@ PeerOut<A>::go(OspfTypes::AreaID area)
     }
 
     return _areas[area]->go();
+}
+
+template <>
+bool 
+PeerOut<IPv4>::match(IPv4 source, string& interface, string& vif)
+{
+    if (get_interface_address() == source) {
+	interface = _interface;
+	vif = _vif;
+	return true;
+    }
+    return false;
+}
+
+template <>
+bool 
+PeerOut<IPv6>::match(IPv6 source, string& interface, string& vif)
+{
+    map<OspfTypes::AreaID, Peer<IPv6> *>::const_iterator i;
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	if ((*i).second->match(source)) {
+	    interface = _interface;
+	    vif = _vif;
+	    return true;
+	}
+    }
+
+    return false;
 }
 
 template <typename A>
@@ -803,6 +831,25 @@ Peer<IPv6>::populate_link_lsa()
     // The router priority is set in the set_router_priority method.
     // The options are set in the set_options method.
     llsa->set_link_local_address(get_interface_address());
+}
+
+template <typename A>
+bool
+Peer<A>::match(IPv6 source) const
+{
+    if (OspfTypes::VirtualLink == get_linktype())
+	return false;
+
+    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+    XLOG_ASSERT(llsa);
+
+    const list<IPv6Prefix>& link_prefixes = llsa->get_prefixes();
+    list<IPv6Prefix>::const_iterator i;
+    for (i = link_prefixes.begin(); i != link_prefixes.end(); i++)
+	if (i->get_network().masked_addr() == source)
+	    return true;
+
+    return false;
 }
 
 template <typename A>
