@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.158 2007/02/10 02:13:47 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.159 2007/02/17 02:30:05 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,8 +9,8 @@ This file contains XORP release notes (most recent releases first).
 Release 1.4-RC (2006/??/??)
 =========================
   ALL:
-    - XORP now builds on DragonFlyBSD-1.8, Linux Fedora Core6,
-      Linux Debian-3.1 (sarge) and OpenBSD-4.0.
+    - XORP now builds on DragonFlyBSD-1.8, FreeBSD-6.2, Linux Fedora
+      Core6, Linux Debian-3.1 (sarge), NetBSD-3.1 and OpenBSD-4.0.
 
     - XORP now can be compiled with the Intel C/C++ compiler 9.* on
       Linux.

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.83 2006/12/15 03:23:26 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.84 2007/02/10 02:13:47 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -137,10 +137,15 @@ gmake check
       gcc (GCC) 3.4.4 [FreeBSD] 20050518 (default)
       gcc42 (GCC) 4.2.0 20060218 (experimental)
 
+  * FreeBSD-6.2 on i386
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 3.4.6 [FreeBSD] 20060305
+
 3.3. NetBSD
 ===========
 
-  * NetBSD-2.0, NetBSD-3.0 and NetBSD-3.0.1:
+  * NetBSD-2.0, NetBSD-3.0, NetBSD-3.0.1, and NetBSD-3.1
     - The SNMP support inside the "mibs" directory may fail to compile.
     - The rest of code compiles, and the internal tests appear to succeed:
       gcc (GCC) 3.3.3 (NetBSD nb3 20040520)
