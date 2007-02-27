@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.20 2007/02/16 22:46:40 pavlin Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.21 2007/02/20 01:14:34 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -260,11 +260,13 @@ class DebugIO : public IO<A> {
     /**
      * Add route to RIB.
      */
-    bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard, const PolicyTags& policytags)
+    bool add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id, 
+		   uint32_t metric, bool equal, bool discard,
+		   const PolicyTags& policytags)
     {
 	DOUT(_info) << "Net: " << net.str() <<
 	    " nexthop: " << nexthop.str() <<
+	    " nexthop_id: " << nexthop_id <<
 	    " metric: " << metric <<
 	    " equal: " << pb(equal) <<
 	    " discard: " << pb(discard) << 
@@ -286,11 +288,13 @@ class DebugIO : public IO<A> {
     /**
      * Replace route in RIB.
      */
-    bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		       bool discard, const PolicyTags& policytags)
+    bool replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
+		       uint32_t metric, bool equal, bool discard,
+		       const PolicyTags& policytags)
     {
 	DOUT(_info) << "Net: " << net.str() <<
 	    " nexthop: " << nexthop.str() <<
+	    " nexthop_id: " << nexthop_id <<
 	    " metric: " << metric <<
 	    " equal: " << pb(equal) <<
 	    " discard: " << pb(discard) <<
@@ -299,7 +303,8 @@ class DebugIO : public IO<A> {
 	if (!delete_route(net))
 	    return false;
 
-	return add_route(net, nexthop, metric, equal, discard, policytags);
+	return add_route(net, nexthop, nexthop_id, metric, equal, discard,
+			 policytags);
     }
 
     /**

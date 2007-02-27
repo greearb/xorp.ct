@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.12 2007/02/14 11:27:18 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.13 2007/02/16 22:46:43 pavlin Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -24,7 +24,7 @@
 
 class Vertex {
  public:
-    Vertex() : _origin(false)
+    Vertex() : _origin(false), _nexthop_id(OspfTypes::UNUSED_INTERFACE_ID)
     {}
 
     bool operator<(const Vertex& other) const {
@@ -146,6 +146,16 @@ class Vertex {
 	return _address_ipv6;
     }
 
+    void set_nexthop_id(uint32_t nexthop_id) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_nexthop_id = nexthop_id;
+    }
+
+    uint32_t get_nexthop_id() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _nexthop_id;
+    }
+
     string str() const {
 	string output;
 	switch(_version) {
@@ -197,6 +207,10 @@ class Vertex {
     // the origin.
     IPv4 _address_ipv4;		
     IPv6 _address_ipv6;
+
+    // If this vertex is directly connected to the origin this is the
+    // interface ID that should be used with the nexthop.
+    uint32_t _nexthop_id;
 
     list<Lsa::LsaRef> _lsars;
 

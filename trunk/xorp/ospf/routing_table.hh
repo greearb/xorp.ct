@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.41 2007/02/16 22:46:42 pavlin Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.42 2007/02/21 00:24:33 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -48,6 +48,7 @@ class RouteEntry {
 		   _cost(0),
 		   _type_2_cost(0),
 		   _nexthop(A::ZERO()),
+		   _nexthop_id(OspfTypes::UNUSED_INTERFACE_ID),
 		   _advertising_router(0),
 		   _filtered(false)
     {}
@@ -156,6 +157,14 @@ class RouteEntry {
 	return _nexthop;
     }
 
+    void set_nexthop_id(uint32_t nexthop_id) {
+	_nexthop_id = nexthop_id;
+    }
+
+    uint32_t get_nexthop_id() {
+	return _nexthop_id;
+    }
+
     void set_advertising_router(uint32_t advertising_router) {
 	_advertising_router = advertising_router;
     }
@@ -248,6 +257,7 @@ class RouteEntry {
     uint32_t _type_2_cost;
 
     A _nexthop;
+    uint32_t _nexthop_id;
     uint32_t _advertising_router;	// The router ID from the LSA
 					// that generated this route.
 

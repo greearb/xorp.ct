@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.88 2007/02/26 02:42:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.89 2007/02/26 09:04:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -186,7 +186,29 @@ Ospf<A>::get_interface_id(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s ID = %u\n", interface.c_str(), vif.c_str(),
 	      interface_id);
 
+    _io->set_interface_mapping(interface_id, interface, vif);
+
     return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::get_interface_vif_by_interface_id(uint32_t interface_id,
+					   string& interface, string& vif)
+{
+    typename map<string, uint32_t>::iterator i;
+    for(i = _iidmap.begin(); i != _iidmap.end(); i++) {
+	if ((*i).second == interface_id) {
+	    string concat = (*i).first;
+	    interface = concat.substr(0, concat.find('/'));
+	    vif = concat.substr(concat.find('/') + 1, concat.size() - 1);
+// 	    fprintf(stderr, "interface <%s> vif <%s>\n", interface.c_str(),
+// 		    vif.c_str());
+	    return true;
+	}
+    }
+    
+    return false;
 }
 
 template <typename A>
@@ -672,8 +694,9 @@ Ospf<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
 
 template <typename A>
 bool
-Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard, const PolicyTags& policytags)
+Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
+		   uint32_t metric, bool equal, bool discard,
+		   const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, pb(equal),
@@ -685,13 +708,15 @@ Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 	      cstring(net), cstring(nexthop), metric, pb(equal),
 	      pb(discard), cstring(policytags));
 
-    return _io->add_route(net, nexthop, metric, equal, discard, policytags);
+    return _io->add_route(net, nexthop, nexthop_id, metric, equal, discard,
+			  policytags);
 }
 
 template <typename A>
 bool
-Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-			bool discard, const PolicyTags& policytags)
+Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id, 
+		       uint32_t metric, bool equal, bool discard,
+		       const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, pb(equal),
@@ -703,7 +728,7 @@ Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 	      cstring(net), cstring(nexthop), metric, pb(equal),
 	      pb(discard), cstring(policytags));
 
-    return _io->replace_route(net, nexthop, metric, equal, discard,
+    return _io->replace_route(net, nexthop, nexthop_id, metric, equal, discard,
 			      policytags);
 }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.36 2007/02/15 02:46:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.37 2007/02/16 22:46:44 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -788,22 +788,25 @@ XrlIO<A>::rib_command_done(const XrlError& error, bool up,
 
 template <typename A>
 bool
-XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		    bool discard, const PolicyTags& policytags)
+XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id, 
+		    uint32_t metric, bool equal, bool discard,
+		    const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
 	      discard ? "true" : "false", cstring(policytags));
 
-    _rib_queue.queue_add_route(_ribname, net, nexthop, metric, policytags);
+    _rib_queue.queue_add_route(_ribname, net, nexthop, nexthop_id, metric,
+			       policytags);
 
     return true;
 }
 
 template <typename A>
 bool
-XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-			bool discard, const PolicyTags& policytags)
+XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
+			uint32_t metric, bool equal, bool discard,
+			const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
@@ -811,7 +814,8 @@ XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 
     // XXX - The queue should support replace see TODO 36.
     _rib_queue.queue_delete_route(_ribname, net);
-    _rib_queue.queue_add_route(_ribname, net, nexthop, metric, policytags);
+    _rib_queue.queue_add_route(_ribname, net, nexthop, nexthop_id, metric,
+			       policytags);
 
     return true;
 }
@@ -829,7 +833,7 @@ XrlIO<A>::delete_route(IPNet<A> net)
 
 template<class A>
 XrlQueue<A>::XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router)
-    : _eventloop(eventloop), _xrl_router(xrl_router), _flying(0)
+    : _io(0), _eventloop(eventloop), _xrl_router(xrl_router), _flying(0)
 {
 }
 
@@ -843,8 +847,8 @@ XrlQueue<A>::eventloop() const
 template<class A>
 void
 XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
-			     const A& nexthop, uint32_t metric,
-			     const PolicyTags& policytags)
+			     const A& nexthop, uint32_t nexthop_id,
+			     uint32_t metric, const PolicyTags& policytags)
 {
     Queued q;
 
@@ -858,6 +862,7 @@ XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
     q.ribname = ribname;
     q.net = net;
     q.nexthop = nexthop;
+    q.nexthop_id = nexthop_id;
     q.metric = metric;
     q.comment = 
 	c_format("add_route: ribname %s net %s nexthop %s",
@@ -1027,14 +1032,37 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
 	    _bgp.profile().log(profile_route_rpc_out, 
 			       c_format("add %s", q.net.str().c_str()));
 #endif
-	sent = rib.
-	    send_add_route6(q.ribname.c_str(),
-			    protocol,
-			    unicast, multicast,
-			    q.net, q.nexthop, q.metric, 
-			    q.policytags.xrl_atomlist(),
-			    callback(this, &XrlQueue::route_command_done,
-				     q.comment));
+	if (OspfTypes::UNUSED_INTERFACE_ID == q.nexthop_id) {
+	    sent = rib.
+		send_add_route6(q.ribname.c_str(),
+				protocol,
+				unicast, multicast,
+				q.net, q.nexthop, q.metric, 
+				q.policytags.xrl_atomlist(),
+				callback(this, &XrlQueue::route_command_done,
+					 q.comment));
+	} else {
+	    string interface;
+	    string vif;
+	    XLOG_ASSERT(_io);
+	    if (!_io->get_interface_vif_by_interface_id(q.nexthop_id,
+							interface, vif)) {
+		XLOG_ERROR("Unable to find interface/vif associated with %u",
+			   q.nexthop_id);
+		return false;
+	    }
+	    sent = rib.
+		send_add_interface_route6(q.ribname.c_str(),
+					  protocol,
+					  unicast, multicast,
+					  q.net, q.nexthop,
+					  interface, vif,
+					  q.metric, 
+					  q.policytags.xrl_atomlist(),
+					  callback(this,
+					    &XrlQueue::route_command_done,
+						   q.comment));
+	}
 	if (!sent)
 	    XLOG_WARNING("scheduling add route %s failed",
 			 q.net.str().c_str());

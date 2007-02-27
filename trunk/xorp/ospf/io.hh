@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.23 2007/02/15 02:46:32 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.24 2007/02/16 22:46:41 pavlin Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -196,6 +196,7 @@ class IO : public ServiceBase {
      *
      * @param net network
      * @param nexthop
+     * @param nexthop_id interface ID towards the nexthop
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
@@ -203,6 +204,7 @@ class IO : public ServiceBase {
      */
     virtual bool add_route(IPNet<A> net,
 			   A nexthop,
+			   uint32_t nexthop_id,
 			   uint32_t metric,
 			   bool equal,
 			   bool discard, const PolicyTags& policytags) = 0;
@@ -212,6 +214,7 @@ class IO : public ServiceBase {
      *
      * @param net network
      * @param nexthop
+     * @param nexthop_id interface ID towards the nexthop
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
@@ -219,6 +222,7 @@ class IO : public ServiceBase {
      */
     virtual bool replace_route(IPNet<A> net,
 			       A nexthop,
+			       uint32_t nexthop_id,
 			       uint32_t metric,
 			       bool equal,
 			       bool discard, const PolicyTags& policytags) = 0;
@@ -228,11 +232,33 @@ class IO : public ServiceBase {
      */
     virtual bool delete_route(IPNet<A> net) = 0;
 
+    void set_interface_mapping(uint32_t interface_id, const string& interface,
+			       const string& vif) {
+	_interface_name[interface_id] = interface;
+	_vif_name[interface_id] = vif;
+    }
+
+    bool get_interface_vif_by_interface_id(uint32_t interface_id,
+					   string& interface, string& vif) {
+	if (0 == _interface_name.count(interface_id))
+	    return false;
+	if (0 == _vif_name.count(interface_id))
+	    return false;
+
+	interface = _interface_name[interface_id];
+	vif = _vif_name[interface_id];
+
+	return true;
+    }
+
  protected:
     ReceiveCallback	_receive_cb;
     InterfaceStatusCb	_interface_status_cb;
     VifStatusCb		_vif_status_cb;
     AddressStatusCb	_address_status_cb;
     bool _ip_router_alert;
+
+    map<uint32_t, string> _interface_name;
+    map<uint32_t, string> _vif_name;
 };
 #endif // __OSPF_IO_HH__

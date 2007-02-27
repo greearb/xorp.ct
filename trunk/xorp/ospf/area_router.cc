@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.253 2007/02/26 22:59:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.254 2007/02/27 06:28:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3975,6 +3975,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		route_entry.set_type_2_cost(0);
 
 		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
 		route_entry.set_advertising_router(lsar->get_header().
 						   get_advertising_router());
 		route_entry.set_area(_area);
@@ -4003,6 +4004,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		route_entry.set_type_2_cost(0);
 
 		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
 		route_entry.set_advertising_router(lsar->get_header().
 						   get_advertising_router());
 		route_entry.set_area(_area);
@@ -4032,6 +4034,7 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		route_entry.set_type_2_cost(0);
 
 		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
 		route_entry.set_advertising_router(lsar->get_header().
 						   get_advertising_router());
 		route_entry.set_area(_area);
@@ -4298,6 +4301,7 @@ AreaRouter<IPv6>::routing_area_rangesV3(const list<RouteCmd<Vertex> >& r,
 	    route_entry.set_type_2_cost(0);
 
 	    route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+	    route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
 
 	    route_entry.set_advertising_router(lsar->get_header().
 					       get_advertising_router());
@@ -4538,6 +4542,7 @@ AreaRouter<IPv6>::routing_inter_areaV3()
 	rtentry.set_path_type(RouteEntry<IPv6>::inter_area);
 	rtentry.set_cost(iac);
 	rtentry.set_nexthop(rt.get_nexthop());
+	rtentry.set_nexthop_id(rt.get_nexthop_id());
 	rtentry.set_advertising_router(rt.get_advertising_router());
 	rtentry.set_lsa(lsar);
 
@@ -4720,6 +4725,7 @@ AreaRouter<IPv6>::routing_transit_areaV3()
 // 	rtnet.set_path_type(RouteEntry<IPv6>::inter_area);
 	rtnet.set_cost(iac);
 	rtnet.set_nexthop(rtrtr.get_nexthop());
+	rtnet.set_nexthop_id(rtrtr.get_nexthop_id());
 	rtnet.set_advertising_router(rtrtr.get_advertising_router());
 	rtnet.set_lsa(lsar);
 
@@ -4937,13 +4943,16 @@ AreaRouter<IPv6>::routing_as_externalV3()
 	}
 
 	IPv6 forwarding;
+	uint32_t forwarding_id;
 	RouteEntry<IPv6> rtf;
 	if (aselsa->get_f_bit()) {
 	    forwarding = aselsa->get_forwarding_address_ipv6();
 	    if (!routing_table.longest_match_entry(forwarding, rtf))
 		continue;
-	    if (!rtf.get_directly_connected())
+	    if (!rtf.get_directly_connected()) {
 		forwarding = rtf.get_nexthop();
+		forwarding_id = rtf.get_nexthop_id();
+	    }
 	    if (aselsa->external()) {
 		if (RouteEntry<IPv6>::intra_area != rtf.get_path_type() &&
 		    RouteEntry<IPv6>::inter_area != rtf.get_path_type())
@@ -4955,6 +4964,7 @@ AreaRouter<IPv6>::routing_as_externalV3()
 	    }
 	} else {
 	    forwarding = rt.get_nexthop();
+	    forwarding_id = rt.get_nexthop_id();
 	    rtf = rt;
 	}
 
@@ -5035,6 +5045,7 @@ AreaRouter<IPv6>::routing_as_externalV3()
 // 	rtentry.set_address(lsid);
 	rtentry.set_area(_area);
 	rtentry.set_nexthop(forwarding);
+	rtentry.set_nexthop_id(forwarding_id);
 	rtentry.set_advertising_router(aselsa->get_header().
 				       get_advertising_router());
 
@@ -5690,6 +5701,7 @@ AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& spt,
 					interface_address))
 		return;
 	    dst.set_address(interface_address);
+	    dst.set_nexthop_id(rl.get_interface_id());
 	}
     }
     if (!spt.exists_node(dst)) {
@@ -5756,6 +5768,7 @@ AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& spt,
 				    interface_address))
 	    return;
   	dst.set_address(interface_address);
+	dst.set_nexthop_id(rl.get_interface_id());
     }
 
     if (!spt.exists_node(dst)) {
@@ -5884,7 +5897,7 @@ AreaRouter<A>::routing_router_link_transitV3(Spt<Vertex>& spt,
 					interface_address))
 		continue;
 	    dst.set_address(interface_address);
-
+	    dst.set_nexthop_id(rl.get_interface_id());
 	}
 	if (!spt.exists_node(dst)) {
 	    spt.add_node(dst);

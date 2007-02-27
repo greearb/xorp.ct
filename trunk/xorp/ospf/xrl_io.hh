@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.23 2007/02/15 02:46:32 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.24 2007/02/16 22:46:44 pavlin Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -26,6 +26,7 @@
 #include "io.hh"
 
 class EventLoop;
+template <typename A> class XrlIO;
 
 /**
  * XXX - This should be moved to its own file.
@@ -37,9 +38,13 @@ class XrlQueue {
 public:
     XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router);
 
+    void set_io(XrlIO<A> *io) {
+	_io = io;
+    }
+
     void queue_add_route(string ribname, const IPNet<A>& net,
-			 const A& nexthop, uint32_t metric,
-			 const PolicyTags& policytags);
+			 const A& nexthop, uint32_t nexthop_id, 
+			 uint32_t metric, const PolicyTags& policytags);
 
     void queue_delete_route(string ribname, const IPNet<A>& net);
 
@@ -48,6 +53,7 @@ private:
     static const size_t WINDOW = 100;	// Maximum number of XRLs
 					// allowed in flight.
 
+    XrlIO<A>    *_io;
     EventLoop& _eventloop;
     XrlRouter& _xrl_router;
 
@@ -56,6 +62,7 @@ private:
 	string ribname;
 	IPNet<A> net;
 	A nexthop;
+	uint32_t nexthop_id;
 	uint32_t metric;
 	string comment;
 	PolicyTags policytags;
@@ -114,7 +121,7 @@ class XrlIO : public IO<A>,
     {
 	_ifmgr.set_observer(this);
 	_ifmgr.attach_hint_observer(this);
-
+	_rib_queue.set_io(this);
 	//
 	// TODO: for now startup inside the constructor. Ideally, we want
 	// to startup after the FEA birth event.
@@ -327,6 +334,7 @@ class XrlIO : public IO<A>,
      *
      * @param net network
      * @param nexthop
+     * @param nexthop_id interface ID towards the nexthop
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
@@ -334,6 +342,7 @@ class XrlIO : public IO<A>,
      */
     bool add_route(IPNet<A> net,
 		   A nexthop,
+		   uint32_t nexthop_id,
 		   uint32_t metric,
 		   bool equal,
 		   bool discard,
@@ -344,6 +353,7 @@ class XrlIO : public IO<A>,
      *
      * @param net network
      * @param nexthop
+     * @param nexthop_id interface ID towards the nexthop
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
@@ -351,6 +361,7 @@ class XrlIO : public IO<A>,
      */
     bool replace_route(IPNet<A> net,
 		       A nexthop,
+		       uint32_t nexthop_id,
 		       uint32_t metric,
 		       bool equal,
 		       bool discard,

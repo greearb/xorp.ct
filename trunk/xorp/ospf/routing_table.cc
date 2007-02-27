@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.58 2007/02/21 00:24:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.59 2007/02/23 21:08:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -394,7 +394,7 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 	bool accepted = do_filtering(net, nexthop, metric, rt, policytags);
 	rt.set_filtered(!accepted);
 	if (accepted)
-	    result = _ospf.add_route(net, nexthop, metric,
+	    result = _ospf.add_route(net, nexthop, rt.get_nexthop_id(), metric,
 				     false /* equal */,
 				     false /* discard */,
 				     policytags);
@@ -465,18 +465,19 @@ RoutingTable<A>::push_routes()
 	PolicyTags policytags;
 	IPNet<A> net = tic.key();
 	A nexthop = rt.get_nexthop();
+	uint32_t nexthop_id = rt.get_nexthop_id();
 	uint32_t metric = rt.get_cost();
 	bool accepted = do_filtering(net, nexthop, metric, rt, policytags);
 
 	if (accepted) {
 	    if (!rt.get_filtered()) {
-		_ospf.replace_route(net, nexthop, metric,
+		_ospf.replace_route(net, nexthop, nexthop_id, metric,
 				    false /* equal */,
 				    false /* discard */,
 				    policytags);
 				    
 	    } else {
-		_ospf.add_route(net, nexthop, metric,
+		_ospf.add_route(net, nexthop, nexthop_id, metric,
 				false /* equal */,
 				false /* discard */,
 				policytags);

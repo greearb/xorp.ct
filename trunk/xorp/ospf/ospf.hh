@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.103 2007/02/23 00:01:13 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.104 2007/02/26 02:42:47 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -514,6 +514,12 @@ class Ospf {
 			  uint32_t& interface_id);
 
     /**
+     * Given an interface ID return the interface and vif.
+     */
+    bool get_interface_vif_by_interface_id(uint32_t interface_id,
+					   string& interface, string& vif);
+    
+    /**
      * @return prefix length for this address.
      */
     bool get_prefix_length(const string& interface, const string& vif,
@@ -774,25 +780,29 @@ class Ospf {
      *
      * @param net network
      * @param nexthop
+     * @param nexthop_id interface ID towards the nexthop
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
      * @param policytags policy info to the RIB.
      */
-    bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard, const PolicyTags& policytags);
+    bool add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
+		   uint32_t metric, bool equal, bool discard,
+		   const PolicyTags& policytags);
     /**
      * Replace route
      *
      * @param net network
      * @param nexthop
+     * @param nexthop_id interface ID towards the nexthop
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
      * @param policytags policy info to the RIB.
      */
-    bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		       bool discard, const PolicyTags& policytags);
+    bool replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
+		       uint32_t metric, bool equal, bool discard,
+		       const PolicyTags& policytags);
 
     /**
      * Delete route
