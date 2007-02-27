@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.258 2007/02/27 22:16:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.259 2007/02/27 22:28:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2122,7 +2122,6 @@ AreaRouter<A>::refresh_default_route()
 	snlsa->get_header().set_options(get_options());
 	break;
     case OspfTypes::V3:
-	XLOG_WARNING("TBD: set prefix options");
 	break;
     }
     
