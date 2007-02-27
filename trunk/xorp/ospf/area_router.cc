@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.257 2007/02/27 22:08:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.258 2007/02/27 22:16:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2007,9 +2007,8 @@ AreaRouter<A>::generate_default_route()
 	snlsa->set_network_mask(0);
 	break;
     case OspfTypes::V3:
-	// It is probably the case that the IPNet<IPv6> initialisation
-	// has done the correct thing.
-	XLOG_WARNING("TBD: Set to the default route");
+	// The IPv6Prefix will have the default route by default.
+	XLOG_ASSERT(0 == snlsa->get_ipv6prefix().get_network().prefix_len());
 	break;
     }
 
