@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.252 2007/02/26 10:12:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.253 2007/02/26 22:59:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -240,6 +240,13 @@ AreaRouter<A>::change_area_router_type(OspfTypes::AreaType area_type)
 
     // Put the Summary-LSAs and (AS-External-LSAs or Type7-LSAs) back
     startup();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::configured_virtual_link() const
+{
+    return !_vlinks.empty();
 }
 
 template <typename A>
@@ -3101,27 +3108,56 @@ AreaRouter<A>::stub_networksV3(bool timer)
     typename PeerMap::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	PeerStateRef temp_psr = i->second;
-	if (temp_psr->_up && temp_psr->_router_links.empty()) {
- 	    uint32_t interface_id = pm.get_interface_id(i->first);
-	    Ls_request lsr(version, LinkLsa(version).get_ls_type(),
-			   interface_id, _ospf.get_router_id());
-	    size_t index;
-	    if (find_lsa(lsr, index)) {
-		LinkLsa *llsa = dynamic_cast<LinkLsa *>(_db[index].get());
-		XLOG_ASSERT(llsa);
-		debug_msg("%s\n", cstring(*llsa));
-		const list<IPv6Prefix>& link_prefixes = llsa->get_prefixes();
-		list<IPv6Prefix>::const_iterator i;
-		for (i = link_prefixes.begin(); i != link_prefixes.end(); i++){
-		    IPv6Prefix prefix(version, true);
-		    prefix = *i;
-		    if (prefix.get_nu_bit() /*|| prefix.get_la_bit()*/)
-			continue;
-		    if (prefix.get_network().masked_addr().
-			is_linklocal_unicast())
-			continue;
-		    prefix.set_metric(0);
-		    prefixes.push_back(prefix);
+	if (temp_psr->_up) {
+	    if (temp_psr->_router_links.empty()) {
+		uint32_t interface_id = pm.get_interface_id(i->first);
+		Ls_request lsr(version, LinkLsa(version).get_ls_type(),
+			       interface_id, _ospf.get_router_id());
+		size_t index;
+		if (find_lsa(lsr, index)) {
+		    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_db[index].get());
+		    XLOG_ASSERT(llsa);
+		    debug_msg("%s\n", cstring(*llsa));
+		    const list<IPv6Prefix>& link_prefixes =
+			llsa->get_prefixes();
+		    list<IPv6Prefix>::const_iterator i;
+		    for (i = link_prefixes.begin(); i != link_prefixes.end(); 
+			 i++){
+			IPv6Prefix prefix(version, true);
+			prefix = *i;
+			if (prefix.get_nu_bit() /*|| prefix.get_la_bit()*/)
+			    continue;
+			if (prefix.get_network().masked_addr().
+			    is_linklocal_unicast())
+			    continue;
+			prefix.set_metric(0);
+			prefixes.push_back(prefix);
+		    }
+		}
+	    } else if (configured_virtual_link()) {
+		uint32_t interface_id = pm.get_interface_id(i->first);
+		Ls_request lsr(version, LinkLsa(version).get_ls_type(),
+			       interface_id, _ospf.get_router_id());
+		size_t index;
+		if (find_lsa(lsr, index)) {
+		    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_db[index].get());
+		    XLOG_ASSERT(llsa);
+		    debug_msg("%s\n", cstring(*llsa));
+		    const list<IPv6Prefix>& link_prefixes =
+			llsa->get_prefixes();
+		    list<IPv6Prefix>::const_iterator i;
+		    for (i = link_prefixes.begin(); i != link_prefixes.end(); 
+			 i++){
+			IPv6Prefix prefix(version, true);
+			prefix = *i;
+			if (!prefix.get_la_bit())
+			    continue;
+			if (prefix.get_network().masked_addr().
+			    is_linklocal_unicast())
+			    continue;
+			prefix.set_metric(0);
+			prefixes.push_back(prefix);
+		    }
 		}
 	    }
 	}

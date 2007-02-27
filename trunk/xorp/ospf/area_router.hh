@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.125 2007/02/24 11:39:15 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.126 2007/02/26 10:12:50 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -75,6 +75,11 @@ class AreaRouter : public ServiceBase {
      * Change the type of this area.
      */
     void change_area_router_type(OspfTypes::AreaType area_type);
+
+    /**
+     * @return true if any virtual links are configured through this area.
+     */
+    bool configured_virtual_link() const;
 
     /**
      * Add a virtual link endpoint.
