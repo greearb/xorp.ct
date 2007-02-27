@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.268 2007/02/27 08:12:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.269 2007/02/27 23:03:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -919,6 +919,23 @@ Peer<A>::remove_neighbour(A neighbour_address, OspfTypes::RouterID rid)
     return false;
 }
 
+template <>
+bool
+Peer<IPv4>::belongs(IPv4 addr) const
+{
+    return addr == get_interface_address();
+}
+
+template <>
+bool
+Peer<IPv6>::belongs(IPv6 addr) const
+{
+    if (addr == get_interface_address())
+	return true;
+
+    return match(addr);
+}
+
 template <typename A>
 bool
 Peer<A>::receive(A dst, A src, Packet *packet)
@@ -948,7 +965,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     // As the packet has reached this far a bunch of the tests have
     // already been performed.
 
-    if (dst != get_interface_address() &&
+    if (!belongs(dst) && 
 	dst != A::OSPFIGP_ROUTERS() &&
 	dst != A::OSPFIGP_DESIGNATED_ROUTERS()) {
 	XLOG_TRACE(_ospf.trace()._input_errors,

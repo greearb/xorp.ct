@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.137 2007/02/26 23:01:34 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.138 2007/02/27 08:12:32 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -678,6 +678,11 @@ class Peer {
      * Remove neighbour
      */
     bool remove_neighbour(A neighbour_address, OspfTypes::RouterID rid);
+
+    /**
+     * Address belongs to this router used for destination address validation.
+     */
+    bool belongs(A addr) const;
 
     /**
      * Packets for this peer are received here.
