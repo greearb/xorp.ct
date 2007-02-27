@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.254 2007/02/27 06:28:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.255 2007/02/27 18:33:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3207,8 +3207,8 @@ AreaRouter<A>::stub_networksV3(bool timer)
 	return;
     }
 
-    // An Intra-Area-Prefix-LSA exists if it different to the one we
-    // would like to generate then publish it.
+    // An Intra-Area-Prefix-LSA already exists if it is different to
+    // the newly computed one then update the old one and publish.
     Lsa::LsaRef lsar = _db[index];
     IntraAreaPrefixLsa *iaplsa = 
 	dynamic_cast<IntraAreaPrefixLsa *>(lsar.get());
