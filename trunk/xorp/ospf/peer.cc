@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.267 2007/02/26 23:28:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.268 2007/02/27 08:12:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -971,12 +971,18 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
-	if (IPNet<A>(get_interface_address(), plen) != IPNet<A>(src, plen)) {
-	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "Dropping packet from foreign network %s\n",
-		       cstring(IPNet<A>(src, plen)));
-	    
-	    return false;
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    if (IPNet<A>(get_interface_address(), plen) != 
+		IPNet<A>(src, plen)) {
+		XLOG_TRACE(_ospf.trace()._input_errors,
+			   "Dropping packet from foreign network %s\n",
+			   cstring(IPNet<A>(src, plen)));
+		return false;
+	    }
+	    break;
+	case OspfTypes::V3:
+	    break;
 	}
 	break;
     case OspfTypes::VirtualLink:
