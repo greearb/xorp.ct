@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.256 2007/02/27 21:49:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.257 2007/02/27 22:08:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1400,9 +1400,16 @@ AreaRouter<A>::external_generate_external(Lsa::LsaRef lsar)
     switch(version) {
     case OspfTypes::V2:
 	header.set_options(get_options());
+	aselsa->set_external_route_tag(type7->get_external_route_tag());
 	break;
     case OspfTypes::V3:
-	XLOG_WARNING("TBD - AS-External-LSA set field values");
+	aselsa->set_f_bit(type7->get_f_bit());
+	if (aselsa->get_f_bit())
+	    aselsa->set_forwarding_address_ipv6(type7->
+						get_forwarding_address_ipv6());
+	aselsa->set_t_bit(type7->get_t_bit());
+	if (aselsa->get_t_bit())
+	    aselsa->set_external_route_tag(type7->get_external_route_tag());
 	break;
     }
 
@@ -1411,7 +1418,6 @@ AreaRouter<A>::external_generate_external(Lsa::LsaRef lsar)
 	set_advertising_router(type7->get_header().get_advertising_router());
     aselsa->set_metric(type7->get_metric());
     aselsa->set_e_bit(type7->get_e_bit());
-    aselsa->set_external_route_tag(type7->get_external_route_tag());
     aselsa->set_self_originating(true);
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
