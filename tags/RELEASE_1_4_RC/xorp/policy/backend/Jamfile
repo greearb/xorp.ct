@@ -1,0 +1,16 @@
+#
+# $XORP$
+#
+
+SubDir TOP policy backend ;
+
+# XXX: Jam does not allow us to simply take one .a archive and
+# roll it into another; libpolicybackend consumers also need to
+# link against libpolicycommon explicitly.
+Library libpolicybackend : 
+	iv_exec.cc
+	policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc
+	set_manager.cc single_varrw.cc
+	version_filter.cc version_filters.cc
+	lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc
+	;

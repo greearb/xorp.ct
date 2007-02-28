@@ -1,0 +1,98 @@
+=============================================================================
+XORP_SA_06:01.ospf				            Security Advisory
+						             The XORP Project
+
+
+Topic:		An LSA with invalid length will crash OSPFv2
+
+Module:		OSPF
+Announced:	2006-10-17
+Credits:	http://www.musecurity.com/
+Affects:	XORP 1.2 and XORP 1.3 Releases
+Corrected:	2006-10-16 06:50:04 UTC (Release 1.4-WIP)
+
+I.	Background
+
+OSPFv2 is a link-state routing protocol defined in RFC 2328,
+implemented by the XORP project.
+
+II.	Problem Description
+
+The OSPF protocol carries link state information in Link State
+Advertisements (LSAs). One or more LSAs can be carried in a Link State
+Update Packet. Each LSA has its own length field and checksum amongst
+other fields.
+
+One of the first checks made when processing an LSA is to verify the
+checksum. The checksum verification routine takes into account the
+LSA length field. If the length field has certain invalid values, then
+OSPF might crash.
+
+III.	Impact
+
+An attacker sending specially crafted packets with certain invalid LSA
+length value will be able to terminate the XORP OSPF process.
+
+It should be noted that the attacker does not need to be on the same
+network segment as the XORP router.
+
+IV.	Workaround
+
+One possible workaround is to filter all external IP packets with protocol
+number 89 (OSPF) at the border router.
+
+V.	Solution
+
+Apply the relevant patch to your XORP system and restart OSPF.
+
+1) To patch your present system:
+
+[XORP 1.2]
+# wget http://www.xorp.org/patches/SA-06:01/xorp_sa_06:01.ospf_1.2.patch
+
+[XORP 1.3]
+# wget http://www.xorp.org/patches/SA-06:01/xorp_sa_06:01.ospf_1.3.patch
+
+2) Execute the following commands (only the last one has to be as root):
+
+# cd xorp
+# patch -p0 < /path/to/patch
+# gmake
+# cd ospf
+# gmake install
+
+3) Restart OSPFv2
+
+a) Save the current configuration to a file.
+
+# xorpsh
+Xorp> configure
+XORP# save /tmp/xorp.boot
+
+b) Delete ospf4 from the configuration and commit. OSPFv2 should no
+longer be running.
+
+XORP# delete protocols ospf4
+XORP# commit
+
+c) Reload the saved configuration, which will restart OSPFv2
+XORP# load /tmp/xorp.boot
+
+VI.	Correction details
+
+The following list contains the revision numbers of each file that was
+corrected in XORP.
+
+Branch                                                           Revision
+  Path
+-------------------------------------------------------------------------
+HEAD
+  xorp/ospf/lsa.cc                                                   1.72
+-------------------------------------------------------------------------
+
+VII.	References
+
+The latest revision of this advisory is available at:
+http://www.xorp.org/advisories/XORP_SA_06:01.ospf.txt
+
+=============================================================================

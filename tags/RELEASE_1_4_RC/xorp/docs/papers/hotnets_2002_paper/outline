@@ -1,0 +1,11 @@
+The problem of Internet experiments
+  Simulation and testbeds are not sufficient
+  Current options for experimentation
+
+Open Extensible Router Platform
+  Modular Architecture
+     User-space: multi-process.  XRLs.  Security.  
+     Kernel-path: click.
+
+Towards a unified platform for simulation, testing and routing.
+

@@ -1,0 +1,288 @@
+#
+# $XORP: xorp/bgp/harness/NOTES,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
+#
+
+#
+# Example Scripting language for a BGP test harness.
+#
+
+# The testing system is composed of three components:
+# 1) The BGP process (BGP "target") that is being tested.
+# 2) One or more BGP session end points (BGP "test peers") that can be used
+# to send or receive packets from the BGP target. The "test peers" are
+# "dumb" entities that know nothing about BGP. They are just endpoints
+# that can be controlled via XRLs. When testing foreign BGP
+# implementations it may be necessary to have processes running on
+# separate machines.
+# 3) The BGP test coordinator (BGP "coordinator"). This process crafts
+# BGP packets and introduces them via the "test peers". When testing
+# the xorp BGP process it is not necessary to send packets via the
+# "test peers", they can be sent directly from the "coordinator".
+
+# A BGP process is being tested by creating one or more sessions to
+# it. Two modes of operation will be supported. 
+# 1) Testing a xorp BGP process in which case there is no need to use
+# "test peers".
+# 2) Testing a foreign BGP hence the requirement to communicate via
+# "test peers".
+
+# Init stage. Either make TCP connections directly from the "coord"
+# process or wait for the "test peers" to start and register with the
+# "coord".
+
+target tigger.icir.org 179
+
+# Reset all the state in the coordinator.
+reset
+
+# The "coordinator" should start the bgp "target" process. 
+xorp bgp[AS num, other config ...]
+
+initialise attach/create peer1
+initialise attach/create peer2
+initialise attach/create peer3
+
+# Make the TCP connection.
+peer1 connect target port[179]
+peer2 connect target port[179]
+peer3 connect target port[179]
+
+# 
+# There are two options at this point:
+
+# 1) Explicitly construct packets and send them via the "test peer".
+#
+peer1 send packet open[Parameters - Possibly bad]
+peer1 expect packet open[Parameters]
+peer1 send packet keepalive[Parameters]
+
+# 2) The commands can be totally BGP aware. For example bring up the
+# peering. This case we can used to test the actual routing code.
+peer1 establish keepalive true
+peer2 establish keepalive true
+peer3 establish keepalive true
+# Totally bring up a peering and generate keepalives when appropriate
+# to preserve the peering.
+
+# Send a route in via one peer and verify that it appears on the other
+# peerings.
+peer1 send packet update[Parameters]
+# Each peer can have a queue of expected packets. Arriving packets are
+# tested against this queue. If the packets match then all is fine and
+# the packet is removed from the queue. If an error occurs then an
+# error is flagged and the offending packet is saved. Subsequent
+# interrogation will return the error.
+# 
+peer2 expect packet update[Parameters]
+peer3 expect packet update[Parameters]
+peer3 expect check queue 0
+
+# Save all updates from peer1 and peer2 into files in mrtd format.
+# Read from an mrtd trace file and feed it in through peer 3.
+peer1 save mrtd[mrtd output file]
+peer2 save mrtd[mrtd output file]
+peer3 send mrtd[mrtd format trace file]
+
+# Perform some form of verification of the peer3 inputs against the
+# peer1 and peer2 outputs. Not sure quite how to do do this.
+verify peer3 peer1 peer2
+
+# Drop the peering
+peer1 notify cease
+peer1 disconnect
+peer2 notify cease
+peer2 disconnect
+peer3 notify cease
+peer3 disconnect
+
+# Terminate the coordination process
+terminate
+
+# Terminate the coordination process as well as the test peers.
+terminate all
+
+ISSUES
+======
+
+1) Standalone tests should be possible.
+2) Timing:
+	a) It should be possible to test that the peer actually sends
+           keepalive at the prescribed time. Also that a connection is
+           correctly dropped by the peer if we don't send
+           keepalives. The scripting language must either allow
+           reasoning about time, or export timing information.
+
+
+Problem Statement
+=================
+Build a framework that allows the scripting of tests. Which can be run
+totally from a makefile (for example, to perform regression tests). It
+should be possible to totally in isolation test the xorp bgp process.
+       
+
+TEST PEER XRLs
+==============
+Commands that are accepted by the test peer.
+
+Register("coord"): 
+	This is an external registration to the test peer. All
+        packets received by the test peer are sent to the "coord".
+
+Packetisation("bgp"):
+	Tell the test peer to treat incoming packets as BGP packets
+	packetize them accordingly. Otherwise just packetise the the
+	packets the way they appear from the connection.
+	
+Connect("host", "port"):	           
+	Connect to the named host and port.
+
+Listen("address", "port");
+	Listen for connections on this address and port.
+
+Send("Data"):
+	Send data on the tcp connection.	
+
+Disconnect():
+	Drop the current tcp connection.
+
+Terminate:	   
+	Terminate the process.
+
+TEST PEER CLIENT XRLs
+=====================
+Packet("peer", "status", "time", "data"):
+	"peer" - The peer that the packet came from. 
+	"status" - If the remote peer had been asked to perform
+                   packetisation. Then if a bad message is received
+                   signify this. Also after a bad is received
+                   packetisation is disabled.
+	"time" - The time when the packet was received in micro seconds
+	         since 1970-1-1.
+	"data" - The raw data that was read on the connection.
+
+COORD XRLs
+==========
+
+Command("command string"):
+	Accept commands via XRLs.
+
+
+Packet Format
+=============
+{
+	[ b4 0x3ce035f7 ] 	TIME: 05/13/02 15:08:51
+	[ b2 10, b2 1]		TYPE: BGP4MP/MESSAGE/Update
+	[ b4 0x43] 		LENGTH: 0x43
+	[] 			FROM: 198.32.200.50 AS6066
+	[] 			TO: 198.32.200.157 AS12654
+	[] 			ORIGIN: IGP
+	[] 			ASPATH: 6066 3549 5511 4689 7513
+	[] 			NEXT_HOP: 198.32.200.50
+	[] 			ANNOUNCE
+	[] 			202.222.192.0/18
+}
+
+Commands currently accepted by coord
+====================================
+
+* reset
+  Reset all the state in the coordinating process.
+
+* target <hostname> <port>
+  The bgp process under test.
+
+* initialise attach/create peername
+  Form an association with a test_peer. If the second argument is attach then
+  it is assumed that the test_peer is already running. If the second
+  argument is create then the test_peer is started (not currently
+  supported).
+
+Peer specific commands
+======================
+
+* connect
+  Connect to the target
+
+* listen 
+  Listen for a connection from the target.
+
+* establish
+  	active <true/false>
+	AS <value>
+	keepalive <true/false>
+	holdtime <value> 
+	id <ipv4>
+
+  The active, AS, keepalive, holdtime and id arguments are
+  optional. Active defaults to being true and actively makes a
+  connection, setting active to false sets up a listener. The AS value
+  is recommended if a connection is wanted.
+
+* send packet update 
+	            origin <num> 
+	            aspath <path> 
+	            nexthop <ip> 
+		    localpref <num>
+	            nlri <net>
+	            withdraw <net>
+
+* send dump mrtd update filename
+  Given a file in mrtd dump format send the update packets in this file. 
+
+* trie <recv/sent> lookup <net> aspath <path>
+
+* expect packet notify <error code> <sub error code>
+  Place a notification packet on the expect queue. The <error code> is
+  mandatory. The <sub error code> is optional.
+  
+* expect packet update 
+	            origin <num> 
+	            aspath <path> 
+	            nexthop <ip> 
+		    localpref <num>
+	            nlri <net>
+	            withdraw <net>
+
+  Place an update packet on the expect queue.
+
+* expect packet open asnum <value> bgpid <ipv4> holdtime <value>
+
+  Place an open packet on the expect queue. All fields shown are mandatory.
+
+* expect packet notify
+
+  Place a notify packet on the expect queue.
+
+* assert queue <queue length>
+  Check the queue length of the expect queue. Every message that
+  matches removes an entry from the queue. If an error has previously
+  occured then this call will return the error. The length of the
+  queue check is optional.
+
+* assert established
+  Verify that a session has actually been established. Some tests can pass
+  without a bgp process being present. These tests require this interface.
+
+* dump <recv/sent> <mtrd/text> <traffic/routeview/current/debug> <filename>
+  A mechanism for saving conversations or dumping routing tables. The
+  received and sent cases can be dealt with independently. Four types
+  of dumps are supported:
+	1) Traffic.
+	The is basically all the traffic which is sent and
+        received. The dumping can be disabled by making a call with
+        the <filename> argument removed.
+	2) Routeview.
+	The current state of the routing table.
+	3) Current.
+	Trawls through the routing table and dumps all the update
+        packets that have caused entries in the routing table. The
+        packets are dumped in the order in which they arrived. This is
+        only an approximation as update packets containing only
+        withdraws will not be saved.
+	4) Debug.
+	Visit all nodes in the trie and dump the update packet that
+        was responsible for this entry. Update packets can have
+        multiple NLRIs associated with them so a packet can be in the
+        dump many times.
+
+  The save file can be either in mtrd dump format or in xorp text format.

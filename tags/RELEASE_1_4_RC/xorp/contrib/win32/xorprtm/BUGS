@@ -1,0 +1,80 @@
+Known issues:
+
+ - Routes appear in the RTM routing table but do not propagate to
+   the FIB.
+   This can be verified by comparing the output of 'route print' 
+   with that of 'netsh routing ip show rtmroutes'.
+
+ * Feedback from Microsoft is needed to fix this issue.
+
+ - We use WriteFile() to broadcast data to multiple clients.
+   If one of the clients does not read the data, then the server thread
+   will hang as a result.
+   The alternative is to use overlapped I/O, but this means
+   recording lots of state for each write.
+
+ * Therefore, clients MUST read from the pipe after issuing commands.
+   This should not affect XORP, as we do not rely on the SO_USELOOPBACK
+   socket option when dealing with routing sockets, and the socket is
+   polled for input as part of the FEA's event loop.
+
+ - The use of the BSD routing socket message format is not completely
+   identical.
+
+ * We only accept a DST, GATEWAY and NETMASK for RTM_ADD.
+ * We only accept a DST and a NETMASK for RTM_DELETE.
+ * Any other combinations are not acceptable.
+
+ * RTM_IFANNOUNCE messages DO NOT contain the interface name for deletions.
+   Microsoft's Router Manager does not provide this, only the index.
+
+ * The InterfaceStatus() callback does not get called when link sense
+   changes on the media, therefore, RTM_IFINFO messages are not sent
+   when carrier is dropped or regained.
+
+ * RTM_NEWADDR messages are sent whenever the interface address list
+   changes. This is incomplete and the semantics are not the same as
+   that of the BSD routing socket; it would be necessary to record all
+   the state to just send the deltas, as InterfaceStatus() has the
+   entire address list for each interface passed to it on a change.
+
+ - The regression tests read the first 'reply' which is actually
+   the echo of the command they sent. The next 'reply' is the kernel's.
+
+ * PF_ROUTE is a broadcast domain in BSD, with specific semantics.
+   The DLL does not always broadcast the client's inbound command message first.
+   It should do so, and do it separately, following by broadcasting
+   the and separately; followed by the kernel's reply. This maintains POLA.
+
+   On BSD, the option SO_USELOOPBACK can be used to squelch the inbound
+   command message from being echoed to the process which is sending it,
+   thus maintaining the assumption of 'write once, read twice'.
+
+   Given that the DLL can block if client's don't read, this is particularly
+   important!
+
+ - Routing and Remote Access will signal that all interfaces are going
+   away when it shuts down. Client processes will see these notifications.
+
+ - Currently we squelch notifications about all-1s broadcast and multicast
+   destinations. This is because they show up as equal-cost multihop
+   rules in the table, although this doesn't tell the whole story.
+
+ * Separate DLLs for IPv4 and IPv6 shim support are needed because of
+   how DLLs are loaded. The image is loaded once into the MS Router Manager.
+   There is no copy-on-write for data sections because everything runs in
+   a single NT process. A common global instance variable is needed. We
+   can't use thread-local storage because we may be reentered by multiple
+   pool threads, and we can't tell them apart usefully at initialization.
+
+ * XXX: The following identifiers seem to be missing from the Windows SDK
+   build 5284 headers:
+	IPV6_ADDRESS_LEN_IN_BYTES
+	ConvertAddressAndLengthToNetAddress()
+	ConvertNetAddressToAddressAndLength()
+   referenced by:
+	RTM_IPV6_SET_ADDR_AND_LEN()
+	RTM_IPV6_GET_ADDR_AND_LEN()
+   There also seems to be no RTM_IPV6_MASK_FROM_LEN() function, which
+   we'd need for converting our IPv6 prefix lengths to socket address
+   structures for the modified BSD message format we currently use.

@@ -1,0 +1,7 @@
+# List of acceptable shells for chpass(1).
+
+/bin/sh
+/bin/csh
+/bin/tcsh
+/usr/local/xorp/bin/xorpsh
+

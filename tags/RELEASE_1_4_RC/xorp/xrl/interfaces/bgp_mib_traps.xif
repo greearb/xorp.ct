@@ -1,0 +1,23 @@
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.10 2003/07/25 02:12:24 atanu Exp $ */
+
+/*
+** XRL interface to send SNMP traps for BGP MIB (RFC 1657)
+*/
+
+interface bgp_mib_traps/0.1 {
+	/**
+	 *  Send bgpEstablished trap
+	 */
+	send_bgp_established_trap \
+		? \
+		bgp_last_error:txt \
+		& bgp_state:u32
+
+	/**
+	 * Send bgpBackwardTransition trap
+	 */
+        send_bgp_backward_transition_trap \
+		? \
+		bgp_last_error:txt \
+		& bgp_state:u32
+}

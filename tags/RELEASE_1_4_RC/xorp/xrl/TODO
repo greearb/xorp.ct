@@ -1,0 +1,8 @@
+#
+# $XORP: xorp/xrl/TODO,v 1.2 2003/11/06 22:13:56 hodson Exp $
+#
+
+* Add transport preferences to client methods: ordered vs unordered,
+  reliable vs unreliable, etc.
+
+* Add support for enumerations in interface specifications.

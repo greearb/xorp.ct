@@ -1,0 +1,35 @@
+#!/bin/sh
+
+while [ $# -ne 0 ] ; do
+      SOURCE=$1
+      shift
+
+      printf "Checking if text version of file exists..."
+      TXTFILE=${SOURCE}.txt
+      if [ ! -f ${TXTFILE} ] ; then
+	  printf "   no\nGenerating ${TXTFILE}.\n"
+	  ./zebra-dump-parser.pl < ${SOURCE} > ${TXTFILE}
+      else
+	  printf "   yes\n"
+      fi
+
+      printf "Extracting prefixes from text version of file"
+      PRFILE=${SOURCE}.PREFIXES
+      cat ${TXTFILE} | grep PREFIX | uniq | awk '// { print $2; }' | sort | uniq > $PRFILE
+#
+#       printf "Checking if timestamp data file exists..."
+#       TSFILE=${SOURCE}.ts
+#       if [ ! -f ${TSFILE} ] ; then
+# 	  printf "   no\nGenerating ${TSFILE}\n"
+# 	  cat ${TXTFILE} | grep TIME | uniq > ${TSFILE}
+#       else
+# 	  printf "   yes\n"
+#       fi
+
+#       cat ${TSFILE} | while read ts ; do
+# 	  SUBFILE=${TXTFILE}.`echo $ts | tr ' ' '-'`
+# 	  echo "Extracting entries with timestamp $ts to ${SUBFILE}"
+# 	  cat ${TXTFILE} | sed -e '/^$/ { p' -e 'p' -e 'p' -e 'p' -e 'p' -e 'p' -e 'p' -e '}' | grep -A 10 "${ts}" > ${SUBFILE}
+#       done
+
+done

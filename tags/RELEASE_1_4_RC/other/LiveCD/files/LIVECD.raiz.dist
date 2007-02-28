@@ -1,0 +1,29 @@
+/set type=dir uname=root gname=wheel mode=0755
+.
+    cdrom
+    ..
+    home
+    ..
+    mfs
+    ..
+    mnt
+        floppy
+        ..
+    ..
+    stand
+    ..
+    usr
+        local
+            etc
+            ..
+        ..
+        xorp
+            etc
+            ..
+            bin
+            ..
+            xrl
+            ..
+        ..
+    ..
+..

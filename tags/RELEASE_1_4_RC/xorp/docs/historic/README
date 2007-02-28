@@ -1,0 +1,9 @@
+#
+# $XORP: xorp/docs/historic/README,v 1.2 2004/06/15 00:21:00 pavlin Exp $
+#
+
+This directory contains documents that are no longer be relevant to
+XORP, but may have wider interest.  The files include:
+
+dfd.ps:		Data flow diagram for a best-effort IP router.
+piglogo.ps:	The proof-of-concept logo.

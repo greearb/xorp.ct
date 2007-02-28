@@ -1,0 +1,27 @@
+#
+# $XORP: xorp/rtrmgr/Notes,v 1.2 2002/12/09 11:13:06 pavlin Exp $
+#
+
+Notes
+-----
+
+Saving files.  We want a XORP user to be able to save the config to a
+file, and another XORP user to be able to load that config.  The
+question is what we do regarding file ownership and permissions, and
+whether the xorpsh or rtrmgr process actually does the save.
+
+The simplest solution appears to be for the rtrmgr to do the save.
+This prevents file ownership problems.  The risk is that as the rtrmgr
+runs as root, it might be possible to maliciously overwrite files on
+the router system.
+
+There are a number of steps we can take to prevent this.  The simplest
+is to allow the user to specify only the root of the filename, but not
+the extension.  This prevents the user having enough control to
+overwrite most files on the system.  In addition, we might check that
+the file being overwritten is a xorp config file, either through
+tagging the start of xorp config files, or by attempting to parse
+them.  The former is probably better, as it allows the config
+templates to evolve.  We can also check the file permissions - perhaps
+making xorp config files xorp/wheel with permissions 664, and refusing
+to overwrite a file that isn't owned by root and wheel writable.

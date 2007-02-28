@@ -1,0 +1,38 @@
+# $XORP: other/testbed/config/config2.xt,v 1.4 2001/11/12 20:10:55 atanu Exp $
+#
+#
+#			  xorp1.t2 --- s0.xorp5
+#                           t3              s1
+#			    |   	    |
+#                           |               |
+#	        	    |               |
+#                           t3  	    t2
+#         xorp4.t2 --- t0.xorp0.t1 --- t3.xorp2
+#			    t2
+#			    |
+#                           |
+#			    |
+# 			    t2
+#                         xorp3
+
+# Install this kernel on xorp[1-4]
+kernel[/home/xorpc/u2/freebsd.kernels/kernel] = 
+	xorp0, xorp1, xorp2, xorp3, xorp4
+
+
+# A special kernel that boots through interface sis0
+kernel[/home/xorpc/u2/freebsd.kernels/kernel-sis0] = xorp5
+
+# Designate xorp0 as the router
+router = xorp0
+
+# Star around xorp0 using tulips only
+vlan = xorp0.t3, xorp1.t3
+vlan = xorp0.t1, xorp2.t3
+vlan = xorp0.t2, xorp3.t2
+vlan = xorp0.t0, xorp4.t2
+
+# Connect xorp5 into the mesh. These connections are currently hardwired
+# with crossover cables.
+vlan = xorp1.t2, xorp5.s0
+vlan = xorp2.t2, xorp5.s1

@@ -1,0 +1,22 @@
+Options for XORP Configuration
+
+
+What's the problem?
+
+ - need to have startup configuration for all the daemons stored somewhere.
+
+   + some of the startup config needs to be shared (eg interface list).
+
+ - want to be able to change the config of daemons on the fly via CLI, 
+   SNMP or whatever.
+
+   + some of these changes need to be shared (eg bringing up an interface)
+
+   + would like to be able to look somewhere and see the current config
+
+   + need to be able to save these changes so the router comes up in 
+     this state next time
+
+ - some of the daemons are written (or modified) by us; some are not.
+
+

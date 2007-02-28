@@ -1,0 +1,7 @@
+#
+# $XORP$
+#
+
+SubDir TOP utils ;
+
+Main runit : runit.cc ;
