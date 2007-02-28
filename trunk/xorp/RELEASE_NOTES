@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.163 2007/02/28 00:27:10 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.164 2007/02/28 00:37:27 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -183,6 +183,11 @@ Release 1.4-RC (2006/02/28)
     - Bug fix related to the processing of previously generated LSAs
       on startup has been fixed. Restarting a router that was the
       designated router could exhibit this problem.
+      
+    - Bug fix on a broadcast interface if the router was not the
+      designated router then the nexthop was incorrectly
+      unconditionally set to the designated router; introducing an
+      unnecessary extra hop.
 
   BGP:
     - BGP has taken advantage of the priority-based tasks in the XORP
