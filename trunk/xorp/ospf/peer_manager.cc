@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.135 2007/02/26 05:05:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.136 2007/02/26 23:01:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -431,7 +431,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     OspfTypes::PeerID peerid = create_peerid(interface, vif);
 
     A global_address;
-    uint32_t global_prefix_length;
+    uint32_t global_prefix_length = 0;
     switch (_ospf.get_version()) {
     case OspfTypes::V2:
 	break;
