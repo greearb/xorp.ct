@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.160 2007/02/27 19:46:34 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.161 2007/02/28 00:02:13 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -181,7 +181,9 @@ Release 1.4-RC (2006/??/??)
       designated router could exhibit this problem.
 
   BGP:
-    - 
+    - BGP has taken advantage of the priority-based tasks in the XORP
+      scheduler and background tasks are run at a low priority;
+      leading to improved performance.
 
   STATIC_ROUTES:
     - Bug fix related to declaring some of the policy matching
