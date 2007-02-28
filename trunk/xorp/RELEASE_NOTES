@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.161 2007/02/28 00:02:13 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.162 2007/02/28 00:11:41 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -160,6 +160,10 @@ Release 1.4-RC (2006/??/??)
 
   OSPF:
     - OSPFv3 is now available.
+
+    - The OSPFv3 protocol requires that link-local addresses are used,
+      therefore it is necessary to configure a link-local address for
+      each interface, this restriction will be removed in the future.
 
     - The OSPFv3 configuration allows multiple instances to be configured
       however only one instance will be created..
