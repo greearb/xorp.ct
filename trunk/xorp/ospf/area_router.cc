@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.260 2007/02/27 22:48:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.261 2007/02/28 00:54:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4953,7 +4953,7 @@ AreaRouter<IPv6>::routing_as_externalV3()
 	}
 
 	IPv6 forwarding;
-	uint32_t forwarding_id;
+	uint32_t forwarding_id = OspfTypes::UNUSED_INTERFACE_ID;
 	RouteEntry<IPv6> rtf;
 	if (aselsa->get_f_bit()) {
 	    forwarding = aselsa->get_forwarding_address_ipv6();
