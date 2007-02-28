@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.259 2007/02/27 22:28:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.260 2007/02/27 22:48:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3226,7 +3226,7 @@ AreaRouter<A>::stub_networksV3(bool timer)
 
     list<IPv6Prefix>& oprefixes = iaplsa->get_prefixes();
     list<IPv6Prefix>::iterator j, k;
-    bool found;
+    bool found = false;
     for (j = oprefixes.begin(); j != oprefixes.end(); j++) {
 	for (k = prefixes.begin(); k != prefixes.end(); k++) {
 	    if (*j == *k) {
