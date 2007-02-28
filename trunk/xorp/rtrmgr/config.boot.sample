@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.42 2006/10/17 22:26:10 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.43 2007/01/24 00:42:39 pavlin Exp $ */
 
 
 interfaces {
@@ -16,6 +16,12 @@ interfaces {
 	    }
 /*
 	    address 10:10:10:10:10:10:10:10 {
+		prefix-length: 64
+		disable: false
+	    }
+*/
+/*
+	    address fe80::1 { /* Link-local address */
 		prefix-length: 64
 		disable: false
 	    }
@@ -304,6 +310,112 @@ protocols {
 	    interface dc3 {
 		vif dc3 {
 		    address 10.10.13.10 {
+		    }
+		}
+	    }
+	}
+*/
+
+    }
+}
+
+protocols {
+    ospf6 0 {	/* Instance ID */
+	router-id: 10.10.10.10
+
+	/* export: "static" */
+
+/*
+	traceoptions {
+	    flag {
+		all {
+		    disable: false
+		}
+	    }
+	}
+*/
+	
+	area 0.0.0.0 {
+
+/*
+	    virtual-link 20.20.20.20 {
+		transit-area: 0.0.0.1
+	    }
+*/
+
+/*
+	    area-range: 20:20:20:20::/64 {
+		advertise: true
+	    }
+*/
+
+	    interface dco0 {
+		/* link-type: "broadcast" */
+		vif dc0 {
+		    address 10:10:10:10:10:10:10:10 {
+			/* priority: 128 */
+			/* hello-interval: 10 */
+			/* router-dead-interval: 40 */
+			/* interface-cost: 1 */
+			/* retransmit-interval: 5 */
+			/* transit-delay: 1 */
+
+			/* passive: false */
+
+			/* disable: false */			
+
+		    }
+		}
+	    }
+	}
+
+	area 0.0.0.1 {
+	    /* area-type: "normal" */	
+
+	    interface dc1 {
+		vif dc1 {
+		    address 20:20:20:20:20:20:20:20 {
+		    }
+		}
+	    }
+	}
+
+/*
+	area 0.0.0.2 {
+	    area-type: "stub"
+
+	    default-lsa {
+		metric: 0
+	    }
+
+	    summaries {
+		disable: false
+	    }
+	
+	    interface dc2 {
+		vif dc2 {
+		    address 30:30:30:30:30:30:30:30 {
+		    }
+		}
+	    }
+	}
+*/
+
+/*
+	area 0.0.0.3 {
+	    area-type: "nssa"
+
+	    default-lsa {
+		metric: 0
+	    }
+
+	    summaries {
+		disable: true
+	    }
+	
+	    interface dc3 {
+		vif dc3 {
+		    address fe80::1 {
 		    }
 		}
 	    }
