@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.24 2007/02/16 22:46:41 pavlin Exp $
+// $XORP: xorp/ospf/io.hh,v 1.25 2007/02/27 18:33:13 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -232,21 +232,31 @@ class IO : public ServiceBase {
      */
     virtual bool delete_route(IPNet<A> net) = 0;
 
+    /**
+     * Store a mapping of the OSPF internal interface ID to
+     * interface/vif. This will be required by when installing a route. 
+     */
     void set_interface_mapping(uint32_t interface_id, const string& interface,
 			       const string& vif) {
-	_interface_name[interface_id] = interface;
-	_vif_name[interface_id] = vif;
+	interface_vif iv;
+	iv._interface_name = interface;
+	iv._vif_name = vif;
+
+	_interface_vif[interface_id] = iv;
     }
 
+    /**
+     * Given an OSPF internal interface ID return the interface/vif.
+     */
     bool get_interface_vif_by_interface_id(uint32_t interface_id,
 					   string& interface, string& vif) {
-	if (0 == _interface_name.count(interface_id))
-	    return false;
-	if (0 == _vif_name.count(interface_id))
+	if (0 == _interface_vif.count(interface_id))
 	    return false;
 
-	interface = _interface_name[interface_id];
-	vif = _vif_name[interface_id];
+	interface_vif iv = _interface_vif[interface_id];
+
+	interface = iv._interface_name;
+	vif = iv._vif_name;
 
 	return true;
     }
@@ -258,7 +268,11 @@ class IO : public ServiceBase {
     AddressStatusCb	_address_status_cb;
     bool _ip_router_alert;
 
-    map<uint32_t, string> _interface_name;
-    map<uint32_t, string> _vif_name;
+    struct interface_vif {
+	string _interface_name;
+	string _vif_name;
+    };
+
+    map<uint32_t, interface_vif> _interface_vif;
 };
 #endif // __OSPF_IO_HH__
