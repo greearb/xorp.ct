@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.43 2007/01/24 00:42:39 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.44 2007/02/28 00:24:01 atanu Exp $ */
 
 
 interfaces {
@@ -21,7 +21,7 @@ interfaces {
 	    }
 */
 /*
-	    address fe80::1 { /* Link-local address */
+	    address fe80::1 {
 		prefix-length: 64
 		disable: false
 	    }
