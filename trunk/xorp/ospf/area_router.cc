@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.261 2007/02/28 00:54:13 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.262 2007/02/28 02:26:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4430,6 +4430,7 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	} else
 	    XLOG_UNREACHABLE();
 	rtentry.set_area(_area);
+	rtentry.set_directly_connected(rt.get_directly_connected());
 	rtentry.set_path_type(RouteEntry<IPv4>::inter_area);
 	rtentry.set_cost(iac);
 	rtentry.set_nexthop(rt.get_nexthop());
@@ -4549,6 +4550,7 @@ AreaRouter<IPv6>::routing_inter_areaV3()
 	} else
 	    XLOG_UNREACHABLE();
 	rtentry.set_area(_area);
+	rtentry.set_directly_connected(rt.get_directly_connected());
 	rtentry.set_path_type(RouteEntry<IPv6>::inter_area);
 	rtentry.set_cost(iac);
 	rtentry.set_nexthop(rt.get_nexthop());
