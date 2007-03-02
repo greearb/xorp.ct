@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/bgp.tex,v 1.20 2006/04/12 02:44:52 pavlin Exp $
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.21 2006/04/15 07:10:36 atanu Exp $
 %
 
 \chapter{BGP}
@@ -537,3 +537,25 @@ The format of the output is one route per line.  On each line:
 
 XORP includes SNMP support for BGP, though the BGP-4 MIB defined in
 RFC 1657.
+
+\section{BGP path selection}
+
+BGP can receive mutiple paths to the same destination, there are a
+complicated set of rules to determine which path should be used. At
+this time there are no configuration options that modify the behaviour
+of the the path selection process, apart from policy that explicity
+drops or modifies a path.
+
+\subsection{Reasons for ignoring a path}
+
+BGP requires that there is an Interior Gateway Protocol (IGP) route to
+the NEXT\_HOP, if no route exists the route is ignored. It is expected
+in release 1.5 that a switch will be available to toggle this
+requirement.
+
+If the NEXT\_HOP in a path belongs to the router itself then the path
+is ignored.
+
+\subsection{BGP decision process}
+
+The BGP decision process is performed exactly as defined by RFC 4271.
