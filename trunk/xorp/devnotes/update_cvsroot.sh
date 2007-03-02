@@ -1,12 +1,12 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: xorp/devnotes/update_cvsroot.sh,v 1.1 2007/03/02 02:27:15 pavlin Exp $
 #
 
 #
 # This is a script to update the CVS/Root files.
-# It must be run in the top directory of a a fresh checked-out copy
+# It must be run from the top directory of a checked-out copy
 # of the source code, otherwise it may overwrite something else.
 #
 # Note: Before running the script you might want to modify the
