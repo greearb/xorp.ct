@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/kernel_utils.hh,v 1.6 2006/11/29 08:21:28 pavlin Exp $
+// $XORP: xorp/fea/kernel_utils.hh,v 1.7 2007/02/16 22:45:45 pavlin Exp $
 
 #ifndef __FEA_KERNEL_UTILS_HH__
 #define __FEA_KERNEL_UTILS_HH__
@@ -20,6 +20,8 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
+
+#include "libproto/packet.hh"
 
 
 //
@@ -69,20 +71,46 @@ kernel_adjust_ipvx_recv(const IPvX& ipvx)
 //
 #ifdef HAVE_IPV6
 inline void
-kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zoneid)
+kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 {
 #ifdef HAVE_SIN6_SCOPE_ID
 #ifdef IPV6_STACK_KAME
     if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr)
 	|| IN6_IS_ADDR_MC_LINKLOCAL(&sin6.sin6_addr)
 	|| IN6_IS_ADDR_MC_NODELOCAL(&sin6.sin6_addr)) {
-	sin6.sin6_scope_id = zoneid;
+	sin6.sin6_scope_id = zone_id;
     }
 #endif // IPV6_STACK_KAME
 #endif // HAVE_SIN6_SCOPE_ID
 
     UNUSED(sin6);
-    UNUSED(zoneid);
+    UNUSED(zone_id);
+}
+#endif // HAVE_IPV6
+
+//
+// XXX: In case of KAME sometimes the local interface index is encoded
+// in the third and fourth octet of an IPv6 address (for link-local
+// unicast/multicast addresses) when we add an unicast route to the kernel.
+// E.g., see /usr/src/sbin/route/route.c on FreeBSD-6.2 and search for
+// the __KAME__ marker.
+//
+#ifdef HAVE_IPV6
+inline void
+kernel_adjust_sockaddr_in6_route(struct sockaddr_in6& sin6, uint16_t iface_id)
+{
+#ifdef IPV6_STACK_KAME
+    if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr)
+	|| IN6_IS_ADDR_MC_LINKLOCAL(&sin6.sin6_addr)) {
+	embed_16(&sin6.sin6_addr.s6_addr[2], iface_id);
+#ifdef HAVE_SIN6_SCOPE_ID
+	sin6.sin6_scope_id = 0;
+#endif // HAVE_SIN6_SCOPE_ID
+    }
+#endif // IPV6_STACK_KAME
+
+    UNUSED(sin6);
+    UNUSED(iface_id);
 }
 #endif // HAVE_IPV6
 

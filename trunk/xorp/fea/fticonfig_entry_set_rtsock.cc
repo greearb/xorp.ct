@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.37 2006/10/24 22:35:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.38 2007/02/16 22:45:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,6 +29,7 @@
 
 #include "fticonfig.hh"
 #include "fticonfig_entry_set.hh"
+#include "kernel_utils.hh"
 
 
 //
@@ -332,6 +333,38 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	// This is an interface-specific route.
 	// Set the interface-related information.
 	//
+	uint32_t pif_index = 0;
+
+	// Get the physical interface index
+	do {
+	    const IfTree& iftree = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	    if (ii == iftree.ifs().end()) {
+		XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
+		return false;
+	    }
+	    pif_index = ii->second.pif_index();
+	} while (false);
+
+	// Adjust the nexthop address (if necessary)
+	if (sin_nexthop != NULL) {
+	    switch (family) {
+	    case AF_INET:
+		break;
+#ifdef HAVE_IPV6
+	    case AF_INET6:
+	    {
+		struct sockaddr_in6* sin6_nexthop;
+		sin6_nexthop = reinterpret_cast<struct sockaddr_in6*>(sin_nexthop);
+		kernel_adjust_sockaddr_in6_route(*sin6_nexthop, pif_index);
+	    }
+	    break;
+#endif // HAVE_IPV6
+	    default:
+		XLOG_UNREACHABLE();
+		break;
+	    }
+	}
 
 #ifdef AF_LINK
 	if (sdl == NULL) {
@@ -349,13 +382,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 #ifdef HAVE_SDL_LEN
 	sdl->sdl_len = sdl_len;
 #endif
-	const IfTree& iftree = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	if (ii == iftree.ifs().end()) {
-	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
-	    return false;
-	}
-	sdl->sdl_index = ii->second.pif_index();
+	sdl->sdl_index = pif_index;
 	strncpy(sdl->sdl_data, fte.ifname().c_str(), sizeof(sdl->sdl_data));
 	if (fte.ifname().size() < sizeof(sdl->sdl_data)) {
 	    sdl->sdl_nlen = fte.ifname().size();
