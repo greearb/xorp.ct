@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.73 2006/03/27 12:46:04 zec Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.74 2007/02/16 22:45:15 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -753,7 +753,11 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 	break;
 
     case BAD_ARGS:
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
     case COMMAND_FAILED:
+	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
     case INTERNAL_ERROR:
 	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
 	break;
