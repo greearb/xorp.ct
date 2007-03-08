@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.20 2006/10/12 01:24:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.21 2007/02/16 22:46:18 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -115,7 +115,6 @@ EventLoop::run()
 		&& (selector_priority <= task_priority) ) {
 
 	// the most important thing to run next is a selector
-	_timer_list.run();
 #ifdef HOST_OS_WINDOWS
 	_win_dispatcher.wait_and_dispatch(&t);
 #else
@@ -129,7 +128,7 @@ EventLoop::run()
 
     } else {
 	// there's nothing immediate to run, so go to sleep until the
-	// next seletor or timer goes off
+	// next selector or timer goes off
 #ifdef HOST_OS_WINDOWS
 	_win_dispatcher.wait_and_dispatch(&t);
 #else
