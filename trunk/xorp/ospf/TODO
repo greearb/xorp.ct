@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.69 2006/08/15 01:39:57 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.70 2007/02/22 11:19:22 atanu Exp $
 #
 
 TODO
@@ -10,9 +10,6 @@ against their own type field. Could probably put the approriate check
 in the standard header decode code.
 
 2) I don't think that the LSA routines check their own type field either.
-
-7) Can an interface a peer in our code have more than one subnet
-associated with it?
 
 16) A data description packet carries a number of LSA headers. There
 is a count in the packet of the number of LSA header. We don't store
@@ -360,3 +357,7 @@ to change an area type is to save and reload the config.
 
 [DONE]
 
+7) Can an interface a peer in our code have more than one subnet
+associated with it?
+
+[Yes for OSPFv3]
