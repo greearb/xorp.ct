@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.37 2007/02/16 22:46:44 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.38 2007/02/27 18:33:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -409,6 +409,42 @@ XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
 	return false;
 
     return (fa->enabled());
+}
+
+template <>
+bool
+XrlIO<IPv4>::get_addresses(const string& interface, const string& vif,
+			   list<IPv4>& addresses) const
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
+    if (fv == NULL)
+	return false;
+
+    IfMgrVifAtom::V4Map::const_iterator i;
+    for (i = fv->ipv4addrs().begin(); i != fv->ipv4addrs().end(); i++)
+	addresses.push_back(i->second.addr());
+
+    return true;
+}
+
+template <>
+bool
+XrlIO<IPv6>::get_addresses(const string& interface, const string& vif,
+			   list<IPv6>& addresses) const
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
+    if (fv == NULL)
+	return false;
+
+    IfMgrVifAtom::V6Map::const_iterator i;
+    for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++)
+	addresses.push_back(i->second.addr());
+
+    return true;
 }
 
 template <>

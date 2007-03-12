@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.138 2007/02/27 08:12:32 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.139 2007/02/27 23:32:24 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -133,6 +133,11 @@ class PeerOut {
     uint16_t get_inftransdelay() const {
 	return _inftransdelay;
     }
+
+    /**
+     * Get the list of areas associated with this peer.
+     */
+    bool get_areas(list<OspfTypes::AreaID>& areas) const;
 
     /**
      * Add another Area for this peer to be in, should only be allowed
@@ -325,6 +330,18 @@ class PeerOut {
     bool add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix);
 
     /**
+     * Remove all the networks that are being advertised OSPFv3 only.
+     */
+    bool remove_all_nets(OspfTypes::AreaID area);
+
+    /**
+     * Calls to add_advertise_net() and remove_all_nets() must be
+     * followed by a call to update nets to force a new Link-LSA to be
+     * sent out OSPFv3 only.
+     */
+    bool update_nets(OspfTypes::AreaID area);
+
+    /**
      * Set the hello interval in seconds.
      */
     bool set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval);
@@ -449,6 +466,11 @@ class PeerOut {
     bool get_neighbour_info(OspfTypes::NeighbourID nid,
 			    NeighbourInfo& ninfo) const;
 
+    /**
+     * Get the set of addresses that should be advertised OSPFv3 only.
+     */
+    set<AddressInfo<A> >& get_address_info(OspfTypes::AreaID area);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
@@ -477,6 +499,10 @@ class PeerOut {
 					// configured up.
     bool _status;			// True if the peer has been
 					// configured up.
+
+    set<AddressInfo<A> > _dummy;	// If get_address_info fails
+					// return a reference to this
+					// dummy entry 
 
     /**
      * If this IPv4 then set the mask in the hello packet.
@@ -1036,6 +1062,18 @@ class Peer {
     bool add_advertise_net(A addr, uint32_t prefix);
 
     /**
+     * Remove all the networks that are being advertised OSPFv3 only.
+     */
+    bool remove_all_nets();
+
+    /**
+     * Calls to add_advertise_net() and remove_all_nets() must be
+     * followed by a call to update nets to force a new Link-LSA to be
+     * sent out OSPFv3 only.
+     */
+    bool update_nets();
+
+    /**
      * Set the hello interval in seconds.
      */
     bool set_hello_interval(uint16_t hello_interval);
@@ -1185,6 +1223,11 @@ class Peer {
     bool get_neighbour_info(OspfTypes::NeighbourID nid,
 			    NeighbourInfo& ninfo) const;
 
+    /**
+     * Get this list of addresses that should be advertised OSPFv3 only.
+     */
+    set<AddressInfo<A> >& get_address_info();
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -1234,6 +1277,12 @@ class Peer {
     };
 
     list<string> _scheduled_events;	// List of deferred events.
+
+    set<AddressInfo<A> > _address_info;	// Set of addresses that have
+					// been configured with this
+					// peer. Only the peer manager
+					// should access this data
+					// structure. 
 
     /**
      * Change state, use this not set_state when changing states.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.85 2007/02/23 00:01:13 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.86 2007/02/26 05:05:02 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -138,6 +138,12 @@ class PeerManager {
 	throw(BadPeer);
 
     /**
+     * Given a PeerID convert it back to an interface and vif.
+     */
+    bool get_interface_vif_by_peerid(OspfTypes::PeerID peerid,
+				     string& interface, string& vif) const;
+
+    /**
      * Create a peer.
      * @param interface
      * @param vif
@@ -167,6 +173,46 @@ class PeerManager {
      * Set the link status of the peer.
      */
     bool set_link_status_peer(const OspfTypes::PeerID, bool state);
+
+    /**
+     * Add an address to this peer OSPFv3 only.
+     */
+    bool add_address_peer(const string& interface, const string& vif,
+			  OspfTypes::AreaID area, A addr);
+
+    /**
+     * Remove an address from this peer OSPFv3 only.
+     */
+    bool remove_address_peer(const OspfTypes::PeerID, OspfTypes::AreaID area,
+			     A addr);
+
+    /**
+     * Set the state of the address on this peer OSPFv3 only.
+     */
+    bool set_address_state_peer(const OspfTypes::PeerID,
+				OspfTypes::AreaID area, A addr, bool enable);
+
+    /**
+     * Activate this peer OSPFv3 only.
+     * Called once after the peer is created and every time a new
+     * address is added, but not when an address is deleted.
+     */
+    bool activate_peer(const string& interface, const string& vif,
+		       OspfTypes::AreaID area);
+
+    /**
+     * Update this peer OSPFv3 only.
+     * Called every time a variable related to this peer is changed.
+     */
+    bool update_peer(const string& interface, const string& vif,
+		     OspfTypes::AreaID area);
+
+    /**
+     * Update this peer OSPFv3 only.
+     * Reset the addresses that should be advertised by this peer.
+     */
+    bool recompute_addresses_peer(const OspfTypes::PeerID,
+				  OspfTypes::AreaID area);
 
     /**
      * Track the state of an address.

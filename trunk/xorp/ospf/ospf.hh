@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.104 2007/02/26 02:42:47 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.105 2007/02/27 18:33:13 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -397,6 +397,24 @@ struct NeighbourInfo {
     uint32_t _adjacent;		// Time peering has been adjacent.
 };
 
+/**
+ * OSPFv3 only, the information stored about an interface address.
+ */
+template <typename A>
+struct AddressInfo {
+    AddressInfo(A address, uint32_t prefix = 0, bool enabled = false)
+	: _address(address), _prefix(prefix), _enabled(enabled)
+    {}
+
+    bool operator<(const AddressInfo<A>& other) const {
+	return _address < other._address;
+    }
+
+    A _address;		// The address.
+    uint32_t _prefix;	// Prefix length associated with this address.
+    bool _enabled;	// True if the address should be used.
+};
+
 #include "policy_varrw.hh"
 #include "io.hh"
 #include "exceptions.hh"
@@ -492,6 +510,18 @@ class Ospf {
     void register_address_status(typename IO<A>::AddressStatusCb cb) {
 	_io->register_address_status(cb);
     }
+
+    /**
+     * Get all addresses associated with this interface/vif.
+     *
+     * @param interface the name of the interface
+     * @param vif the name of the vif
+     * @param addresses (out argument) list of associated addresses
+     *
+     * @return true if there are no errors.
+     */
+    bool get_addresses(const string& interface, const string& vif,
+		       list<A>& addresses) const;
 
     /**
      * Get a link local address for this interface/vif if available.

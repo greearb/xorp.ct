@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.52 2007/02/23 01:54:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.53 2007/02/23 21:09:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -575,7 +575,6 @@ XrlOspfV2Target::ospfv2_0_1_create_peer(const string& ifname,
 XrlCmdError
 XrlOspfV3Target::ospfv3_0_1_create_peer(const string& ifname,
 					const string& vifname,
-					const IPv6& addr,
 					const string& type,
 					const IPv4& a)
 {
@@ -586,8 +585,8 @@ XrlOspfV3Target::ospfv3_0_1_create_peer(const string& ifname,
 	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
 
     try {
-	_ospf_ipv6.get_peer_manager().create_peer(ifname, vifname, addr,
-					     linktype, area);
+	_ospf_ipv6.get_peer_manager().create_peer(ifname, vifname, IPv6(),
+						  linktype, area);
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
@@ -667,6 +666,102 @@ XrlOspfV3Target::ospfv3_0_1_set_peer_state(const string& ifname,
     }
     if (!_ospf_ipv6.get_peer_manager().set_state_peer(peerid, enable))
 	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_add_address_peer(const string& ifname,
+					     const string& vifname,
+					     const IPv4& a,
+					     const IPv6& addr)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s address %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), cstring(addr));
+
+    if (!_ospf_ipv6.get_peer_manager().add_address_peer(ifname, vifname, area,
+							addr))
+	return XrlCmdError::COMMAND_FAILED("Failed to add address");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_remove_address_peer(const string& ifname,
+						const string& vifname,
+						const IPv4& a,
+						const IPv6& addr)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s address %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), cstring(addr));
+
+    OspfTypes::PeerID peerid;
+    try {
+	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf_ipv6.get_peer_manager().remove_address_peer(peerid, area, addr))
+	return XrlCmdError::COMMAND_FAILED("Failed to remove address");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_set_address_state_peer(const string& ifname,
+						   const string& vifname,
+						   const IPv4& a,
+						   const IPv6& addr,
+						   const bool& enable)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s address %s enable %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
+	      cstring(addr), pb(enable));
+
+    OspfTypes::PeerID peerid;
+    try {
+	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf_ipv6.get_peer_manager().
+	set_address_state_peer(peerid, area, addr, enable))
+	return XrlCmdError::COMMAND_FAILED("Failed to set address state");
+
+    return XrlCmdError::OKAY();
+}
+
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_activate_peer(const string&	ifname,
+					  const string&	vifname,
+					  const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str());
+
+    if (!_ospf_ipv6.get_peer_manager().activate_peer(ifname, vifname, area))
+	return XrlCmdError::COMMAND_FAILED("Failed to activate peer");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_update_peer(const string& ifname,
+					const string& vifname,
+					const IPv4& a)
+
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str());
+
+    if (!_ospf_ipv6.get_peer_manager().update_peer(ifname, vifname, area))
+	return XrlCmdError::COMMAND_FAILED("Failed to update peer");
 
     return XrlCmdError::OKAY();
 }

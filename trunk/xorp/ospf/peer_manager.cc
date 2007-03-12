@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.136 2007/02/26 23:01:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.137 2007/02/28 00:52:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -395,6 +395,27 @@ PeerManager<A>::get_peerid(const string& interface, const string& vif)
 }
 
 template <typename A>
+bool
+PeerManager<A>::get_interface_vif_by_peerid(OspfTypes::PeerID peerid,
+					    string& interface, string& vif)
+    const
+{
+    debug_msg("PeerID %u\n", peerid);
+
+    typename map<string, OspfTypes::PeerID>::const_iterator pi;
+    for(pi = _pmap.begin(); pi != _pmap.end(); pi++) {
+	if ((*pi).second == peerid) {
+	    string concat = (*pi).first;
+	    interface = concat.substr(0, concat.find('/'));
+	    vif = concat.substr(concat.find('/') + 1, concat.size() - 1);
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+template <typename A>
 void
 PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
     throw(BadPeer)
@@ -430,32 +451,20 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
     OspfTypes::PeerID peerid = create_peerid(interface, vif);
 
-    A global_address;
-    uint32_t global_prefix_length = 0;
     switch (_ospf.get_version()) {
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
-	if (OspfTypes::VirtualLink == linktype)
-	    break;
-	uint16_t interface_prefix_length;
-	if (!_ospf.get_prefix_length(interface, vif, source,
-				     interface_prefix_length)) {
-	    destroy_peerid(interface, vif);
-	    xorp_throw(BadPeer, 
-		       c_format("Unable to get prefix length for %s/%s/%s",
-				interface.c_str(), vif.c_str(),
-				cstring(source)));
-	}
-	global_address = source;
-	global_prefix_length = interface_prefix_length;
-	// Note that the source address is going to be replaced with
-	// the link local address.
-	if (!_ospf.get_link_local_address(interface, vif, source)) {
-	    destroy_peerid(interface, vif);
-	    xorp_throw(BadPeer, 
-		       c_format("Unable to get link local addres for %s/%s",
-				interface.c_str(), vif.c_str()));
+	if (OspfTypes::VirtualLink != linktype) {
+	    // Note that the source address is going to be replaced with
+	    // the link local address, unless this is a virtual link.
+	    if (!_ospf.get_link_local_address(interface, vif, source)) {
+		destroy_peerid(interface, vif);
+		xorp_throw(BadPeer, 
+			   c_format("Unable to get link local address for "
+				    "%s/%s",
+				    interface.c_str(), vif.c_str()));
+	    }
 	}
 	break;
     }
@@ -498,9 +507,6 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 				interface.c_str()));
 	}
 	_peers[peerid]->set_interface_id(interface_id);
-	if (OspfTypes::VirtualLink != linktype)
-	    _peers[peerid]->add_advertise_net(area, global_address,
-					      global_prefix_length);
     }
 	break;
     }
@@ -509,7 +515,21 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     _peers[peerid]->set_options(area,
 				compute_options(area_router->get_area_type()));
 
-    _peers[peerid]->set_link_status(_ospf.enabled(interface, vif, source));
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	_peers[peerid]->set_link_status(_ospf.enabled(interface, vif, source));
+	break;
+    case OspfTypes::V3:
+#if	0
+	// If this is a virtual link bring it up now, otherwise
+	// wait for the call to activate.
+	if (OspfTypes::VirtualLink == linktype) {
+	    _peers[peerid]->set_link_status(_ospf.enabled(interface, vif,
+							  source));
+	}
+#endif
+	break;
+    }
 
     // This call needs to be made only once per invocation of OSPF but
     // at this point we know that the interface mirror is up and running.
@@ -590,6 +610,186 @@ PeerManager<A>::set_link_status_peer(const OspfTypes::PeerID peerid,
 }
 
 template <typename A>
+bool
+PeerManager<A>::add_address_peer(const string& interface, const string& vif,
+				 OspfTypes::AreaID area, A addr)
+{
+    debug_msg("interface %s vif %s area %s address %s\n", interface.c_str(),
+	      vif.c_str(), pr_id(area).c_str(), cstring(addr));
+
+    // Get the prefix length.
+    uint16_t prefix;
+    if (!_ospf.get_prefix_length(interface, vif, addr, prefix)) {
+	XLOG_WARNING("Unable to get prefix for %s ", cstring(addr));
+	return false;
+    }
+
+    // An exception will be thrown if there is a problem.
+    OspfTypes::PeerID peerid = get_peerid(interface, vif);
+
+    set<AddressInfo<A> >& info = _peers[peerid]->get_address_info(area);
+
+    info.insert(AddressInfo<A>(addr, prefix));
+
+    recompute_addresses_peer(peerid, area);
+
+    return true;
+}
+
+template <typename A>
+bool 
+PeerManager<A>::remove_address_peer(const OspfTypes::PeerID peerid,
+				    OspfTypes::AreaID area, A addr)
+{
+    debug_msg("PeerID %u, area %s address %s\n", peerid, pr_id(area).c_str(),
+	      cstring(addr));
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    set<AddressInfo<A> >& info = _peers[peerid]->get_address_info(area);
+
+    info.erase(AddressInfo<A>(addr));
+
+    recompute_addresses_peer(peerid, area);
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_address_state_peer(const OspfTypes::PeerID peerid,
+				       OspfTypes::AreaID area, A addr,
+				       bool enable)
+{
+    debug_msg("PeerID %u, area %s address %s enable %s\n",
+	      peerid, pr_id(area).c_str(), cstring(addr), pb(enable));
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    set<AddressInfo<A> >& info = _peers[peerid]->get_address_info(area);
+    typename set<AddressInfo<A> >:: iterator i = 
+	info.find(AddressInfo<A>(addr));
+
+    if (i == info.end()) {
+	XLOG_ERROR("Couldn't find %s", cstring(addr));
+	return false;
+    }
+    
+    AddressInfo<A> naddr((*i)._address, (*i)._prefix, enable);
+
+    info.erase(i);
+    info.insert(naddr);
+
+    recompute_addresses_peer(peerid, area);
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::activate_peer(const string& interface, const string& vif,
+			      OspfTypes::AreaID area)
+{
+    debug_msg("interface %s vif %s area %s\n", interface.c_str(),
+	      vif.c_str(), pr_id(area).c_str());
+
+    // An exception will be thrown if there is a problem.
+    OspfTypes::PeerID peerid = get_peerid(interface, vif);
+
+    recompute_addresses_peer(peerid, area);
+
+    A source = _peers[peerid]->get_interface_address();
+    _peers[peerid]->set_link_status(_ospf.enabled(interface, vif, source));
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::update_peer(const string& interface, const string& vif,
+			    OspfTypes::AreaID area)
+{
+    debug_msg("interface %s vif %s area %s\n", interface.c_str(),
+	      vif.c_str(), pr_id(area).c_str());
+
+    // Not currently required.
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::recompute_addresses_peer(const OspfTypes::PeerID peerid,
+					 OspfTypes::AreaID area)
+{
+    debug_msg("PeerID %u area %s\n", peerid, pr_id(area).c_str());
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    set<AddressInfo<A> >& info = _peers[peerid]->get_address_info(area);
+    
+    // Unconditionally remove all the global addresses that are being
+    // advertised.
+    _peers[peerid]->remove_all_nets(area);
+
+    // If no addresses have been configured then advertise all the
+    // configured addresses.
+    if (info.empty()) {
+	string interface, vif;
+	if (!get_interface_vif_by_peerid(peerid, interface, vif)) {
+	    XLOG_ERROR("Unable to find interface/vif associated with "
+		       "PeerID %u", peerid);
+	    return false;
+	}
+	list<A> addresses;
+	if (!_ospf.get_addresses(interface, vif, addresses)) {
+	    XLOG_ERROR("Unable to find addresses on %s/%s ", interface.c_str(),
+		       vif.c_str());
+	    return false;
+	}
+	typename list<A>::iterator i;
+	for (i = addresses.begin(); i != addresses.end(); i++) {
+	    if ((*i).is_linklocal_unicast())
+		continue;
+	    uint16_t interface_prefix_length;
+	    if (!_ospf.get_prefix_length(interface, vif, *i,
+					 interface_prefix_length)) {
+		XLOG_ERROR("Unable to get prefix length for %s", cstring(*i));
+		continue;
+	    }
+	    if (!_peers[peerid]->add_advertise_net(area, (*i),
+						   interface_prefix_length)) {
+		XLOG_WARNING("Unable to advertise %s in Link-LSA\n",
+			     cstring(*i));
+	    }
+	}
+    } else {
+	typename set<AddressInfo<A> >::iterator i;
+	for (i = info.begin(); i != info.end(); i++) {
+	    if ((*i)._enabled) {
+		if (!_peers[peerid]->add_advertise_net(area, (*i)._address,
+						      (*i)._prefix)) {
+		    XLOG_WARNING("Unable to advertise %s in Link-LSA\n",
+				 cstring((*i)._address));
+		}
+	    }
+	}
+    }
+
+    // Force out a new Link-LSA.
+    return _peers[peerid]->update_nets(area);
+}
+
+template <typename A>
 void
 PeerManager<A>::address_status_change(const string& interface,
 				      const string& vif, A source,
@@ -611,6 +811,18 @@ PeerManager<A>::address_status_change(const string& interface,
     if (0 == _peers.count(peerid)) {
 	XLOG_ERROR("Unknown PeerID %u", peerid);
 	return;
+    }
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	list<OspfTypes::AreaID> areas;
+	_peers[peerid]->get_areas(areas);
+	list<OspfTypes::AreaID>::iterator i;
+	for (i = areas.begin(); i != areas.end(); i++)
+	    recompute_addresses_peer(peerid, *i);
+	break;
     }
 
     _peers[peerid]->set_link_status(state);

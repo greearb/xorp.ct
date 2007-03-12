@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.269 2007/02/27 23:03:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.270 2007/02/27 23:32:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -192,6 +192,19 @@ PeerOut<A>::get_frame_size() const
     }
 
     return frame;
+}
+
+template <typename A>
+bool
+PeerOut<A>::get_areas(list<OspfTypes::AreaID> &areas) const
+{
+    typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
+
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	areas.push_back((*i).first);
+    }
+
+    return true;
 }
 
 template <typename A>
@@ -572,6 +585,30 @@ PeerOut<A>::add_advertise_net(OspfTypes::AreaID area, A addr, uint32_t prefix)
 
 template <typename A>
 bool
+PeerOut<A>::remove_all_nets(OspfTypes::AreaID area)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->remove_all_nets();
+}
+
+template <typename A>
+bool
+PeerOut<A>::update_nets(OspfTypes::AreaID area)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->update_nets();
+}
+
+template <typename A>
+bool
 PeerOut<A>::set_hello_interval(OspfTypes::AreaID area, uint16_t hello_interval)
 {
     if (0 == _areas.count(area)) {
@@ -775,6 +812,19 @@ PeerOut<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
     }
 
     return false;
+}
+
+template <typename A>
+set<AddressInfo<A> >&
+PeerOut<A>::get_address_info(OspfTypes::AreaID area)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s unable to return address info",
+		   pr_id(area).c_str());
+	return _dummy;
+    }
+
+    return _areas[area]->get_address_info();
 }
 
 /****************************************/
@@ -2837,6 +2887,13 @@ Peer<A>::get_neighbour_info(OspfTypes::NeighbourID nid, NeighbourInfo& ninfo)
 }
 
 template <typename A>
+set<AddressInfo<A> >&
+Peer<A>::get_address_info()
+{
+    return _address_info;
+}
+
+template <typename A>
 void
 Peer<A>::get_attached_routers(list<RouterInfo>& routers)
 {
@@ -2978,8 +3035,47 @@ Peer<IPv6>::add_advertise_net(IPv6 addr, uint32_t prefix_length)
     host_prefix.set_network(IPNet<IPv6>(addr, IPv6::ADDR_BITLEN));
     host_prefix.set_la_bit(true);
     llsa->get_prefixes().push_back(host_prefix);
-    
+
     return true;
+}
+
+template <>
+bool
+Peer<IPv4>::remove_all_nets()
+{
+    XLOG_FATAL("Only IPv6 not IPv4");
+
+    return true;
+}
+
+template <>
+bool
+Peer<IPv6>::remove_all_nets()
+{
+    XLOG_ASSERT(OspfTypes::VirtualLink != get_linktype());
+
+    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
+    XLOG_ASSERT(llsa);
+
+    llsa->get_prefixes().clear();
+
+    return true;
+}
+
+template <>
+bool
+Peer<IPv4>::update_nets()
+{
+    XLOG_FATAL("Only IPv6 not IPv4");
+
+    return true;
+}
+
+template <>
+bool
+Peer<IPv6>::update_nets()
+{
+    return get_area_router()->update_link_lsa(get_peerid(), _link_lsa);
 }
 
 template <typename A>
@@ -3007,6 +3103,7 @@ Peer<A>::set_options(uint32_t options)
 	    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
 	    XLOG_ASSERT(llsa);
 	    llsa->set_options(options);
+	    get_area_router()->update_link_lsa(get_peerid(), _link_lsa);
 	}
 	break;
     }
@@ -3035,6 +3132,7 @@ Peer<A>::set_router_priority(uint8_t priority)
 	    LinkLsa *llsa = dynamic_cast<LinkLsa *>(_link_lsa.get());
 	    XLOG_ASSERT(llsa);
 	    llsa->set_rtr_priority(priority);
+	    get_area_router()->update_link_lsa(get_peerid(), _link_lsa);
 	}
 	break;
     }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.21 2007/02/20 01:14:34 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.22 2007/02/27 18:33:13 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -165,6 +165,15 @@ class DebugIO : public IO<A> {
     {
 	DOUT(_info) << "enabled(" << interface << "," << vif << ","
 		    << cstring(address) << ")\n";
+
+	return true;
+    }
+
+    bool get_addresses(const string& interface, const string& vif,
+		       list<A>& /*addresses*/) const
+    {
+	DOUT(_info) << "get_addresses(" << interface << "," << vif << ","
+		    << ")\n";
 
 	return true;
     }

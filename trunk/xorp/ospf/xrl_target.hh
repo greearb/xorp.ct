@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.37 2007/02/23 01:54:24 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.38 2007/02/23 21:09:49 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -836,11 +836,9 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
     /**
      *  Create a binding to an interface.
      *
-     *  @param ifname the interface that owns vif that has address.
+     *  @param ifname the interface.
      *
-     *  @param vifname virtual interface owning address.
-     *
-     *  @param addr the address to be added.
+     *  @param vifname virtual interface.
      *
      *  @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
      */
@@ -848,7 +846,6 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
-	const IPv6&	addr,
 	const string&	type,
 	const IPv4&	area);
 
@@ -868,6 +865,56 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	enable);
+
+    /**
+     *  Add an address to the peer.
+     */
+    XrlCmdError ospfv3_0_1_add_address_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv6&	addr);
+
+    /**
+     *  Remove an address from the peer.
+     */
+    XrlCmdError ospfv3_0_1_remove_address_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv6&	addr);
+
+    /**
+     *  Set the address state up or down.
+     */
+    XrlCmdError ospfv3_0_1_set_address_state_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv6&	addr,
+	const bool&	enable);
+
+    /**
+     *  Activate peer. Called once the peer and child nodes have been
+     *  configured.
+     */
+    XrlCmdError ospfv3_0_1_activate_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area);
+
+    /**
+     *  Update peer. Called if the peer and child nodes are modified.
+     */
+    XrlCmdError ospfv3_0_1_update_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area);
 
     /**
      *  Add a neighbour to the peer.

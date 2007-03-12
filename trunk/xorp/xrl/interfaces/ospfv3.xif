@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.8 2006/10/17 23:49:16 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.9 2007/02/23 01:54:25 atanu Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
@@ -49,20 +49,18 @@ interface ospfv3/0.1 {
     /**
      * Create a binding to an interface.
      *
-     * @param ifname the interface that owns vif that has address.
-     * @param vifname virtual interface owning address.
-     * @param addr the address to be added.
+     * @param ifname the interface.
+     * @param vifname virtual interface.
      * @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
+     * @param area
      */
     create_peer ? ifname:txt \
 		& vifname:txt \
-		& addr:ipv6 \
 		& type:txt \
 		& area:ipv4  
 
     /**
      * Delete peer.
-     *
      */
     delete_peer ? ifname:txt \
 		& vifname:txt
@@ -73,6 +71,47 @@ interface ospfv3/0.1 {
     set_peer_state ? ifname:txt \
 		   & vifname:txt \
 		   & enable:bool
+
+    /**
+     * Add an address to the peer.
+     */
+    add_address_peer ? ifname:txt \
+		     & vifname:txt \
+	             & area:ipv4 \
+	             & addr:ipv6
+
+    /**
+     * Remove an address from the peer.
+     */
+    remove_address_peer ? ifname:txt \
+		        & vifname:txt \
+	                & area:ipv4 \
+	                & addr:ipv6
+
+    /**
+     * Set the address state up or down.
+     */
+    set_address_state_peer ? ifname:txt \
+		           & vifname:txt \
+	                   & area:ipv4 \
+                           & addr:ipv6 \
+		           & enable:bool
+
+    /**
+     * Activate peer.
+     * Called once the peer and child nodes have been configured.
+     */
+    activate_peer ? ifname:txt \
+	          & vifname:txt \
+                  & area:ipv4
+
+    /**
+     * Update peer.
+     * Called if the peer and child nodes are modified.
+     */
+    update_peer ? ifname:txt \
+		& vifname:txt \
+                & area:ipv4
 
     /**
      * Add a neighbour to the peer.

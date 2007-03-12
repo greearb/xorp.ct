@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.25 2007/02/27 18:33:13 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.26 2007/03/01 23:16:03 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -148,6 +148,19 @@ class IO : public ServiceBase {
     }
 
     /**
+     * Get all addresses associated with this interface/vif.
+     *
+     * @param interface the name of the interface
+     * @param vif the name of the vif
+     * @param addresses (out argument) list of associated addresses
+     *
+     * @return true if there are no errors.
+     */
+    virtual bool get_addresses(const string& interface,
+			       const string& vif,
+			       list<A>& addresses) const = 0;
+
+    /**
      * Get a link local address for this interface/vif if available.
      *
      * @param interface the name of the interface
@@ -155,7 +168,6 @@ class IO : public ServiceBase {
      * @param address (out argument) set if address is found.
      *
      * @return true if a link local address is available.
-     *
      */
     virtual bool get_link_local_address(const string& interface,
 					const string& vif,

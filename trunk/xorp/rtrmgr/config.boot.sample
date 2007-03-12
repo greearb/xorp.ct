@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.44 2007/02/28 00:24:01 atanu Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.45 2007/03/01 02:53:36 pavlin Exp $ */
 
 
 interfaces {
@@ -353,18 +353,18 @@ protocols {
 		/* link-type: "broadcast" */
 		vif dc0 {
 		    address 10:10:10:10:10:10:10:10 {
-			/* priority: 128 */
-			/* hello-interval: 10 */
-			/* router-dead-interval: 40 */
-			/* interface-cost: 1 */
-			/* retransmit-interval: 5 */
-			/* transit-delay: 1 */
-
-			/* passive: false */
-
-			/* disable: false */			
-
+			disable: false
 		    }
+		    /* priority: 128 */
+		    /* hello-interval: 10 */
+		    /* router-dead-interval: 40 */
+		    /* interface-cost: 1 */
+		    /* retransmit-interval: 5 */
+		    /* transit-delay: 1 */
+
+		    /* passive: false */
+
+		    /* disable: false */			
 		}
 	    }
 	}

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.6 2007/02/22 23:00:07 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.7 2007/02/23 01:54:24 atanu Exp $ */
 
 protocols {
     ospf6 @: u32 {
@@ -42,22 +42,23 @@ protocols {
 		link-type:	txt = "broadcast";
 
 		vif @: txt {
+	            address @: ipv6 {
+			disable:	    toggle = false;
+	            }
 
-		    address @: ipv6 {
-			priority:		u32 = 128;
-			hello-interval:		u32 = 10;
-			router-dead-interval:   u32 = 40;
-			interface-cost:		u32 = 1;
-			retransmit-interval:	u32 = 5;
-			transit-delay:		u32 = 1;
-			passive:		bool = false;
+    		    priority:		    u32 = 128;
+		    hello-interval:	    u32 = 10;
+		    router-dead-interval:   u32 = 40;
+		    interface-cost:	    u32 = 1;
+		    retransmit-interval:    u32 = 5;
+		    transit-delay:	    u32 = 1;
+		    passive:		    bool = false;
 
-			neighbor @: ipv4 {
-			    router-id:  ipv4;
-			}
-
-			disable:		toggle = false;
+		    neighbor @: ipv4 {
+		        router-id:  ipv4;
 		    }
+
+		    disable:		    toggle = false;
 		}
 	    }
 	}
@@ -258,98 +259,106 @@ transmitted packets";
 
 		vif @: txt {
 		    %help: short "Include an vif in this area";
+    		    %create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
+		    %activate: xrl "$(ospf6.@.targetname)/ospfv3/0.1/activate_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)";
+		    %update: xrl "$(ospf6.@.targetname)/ospfv3/0.1/update_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)";
 
 		    address @ {
-		    	%help: short "Address on vif used for OSPF";
-			%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(@)&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
-			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
+		    	%help: short "Address on interface/vif";
+	    		%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/add_address_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(@)";
+	    		%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/remove_address_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(@)";
 
-			priority {
-			    %help: short "Priority used in DR election";
+		        disable {
+			    %help: short "Disable OSPF on interface/vif";
 
-			    %allow-range: $(@) "0" "255" %help: "The priority used in DR election";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(DEFAULT)";
-			}
-
-			hello-interval {
-			    %help: short
-				"Hello packets sent every interval seconds";
-
-			    %allow-range: $(@) "1" "65535" %help: "The Hello packets interval (in seconds)";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
-			}
-
-			router-dead-interval {
-			    %help: short
-	"Seconds to wait before considering a neighbor dead";
-
-			    %allow-range: $(@) "1" "4294967295" %help: "The neighbor router dead interval (in seconds)";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
-			}
-
-			interface-cost {
-			    %help: short "Cost of this address";
-
-			    %allow-range: $(@) "1" "65535" %help: "The cost of this address";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(DEFAULT)";
-			}
-
-			retransmit-interval {
-			    %help: short "The retransmit interval (RxmtInterval)";
-
-			    %allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
-			}
-
-			transit-delay {
-			    %help: short
-				"Add to age field of all transmitted LSAs";
-
-			    %allow-range: $(@) "0" "3600" %help: "The extra addition to age field of all transmitted LSAs";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(DEFAULT)";
-			}
-
-			passive {
-			    %help: short "Do not run OSPF, but advertise it";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(DEFAULT)";
-			}
-
-			disable {
-			    %help: short "Disable OSPF on address";
-
-			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
-			}
-
-			neighbor @: ipv4 {
-			    %help: short "Neighbors address";
-
-			    %mandatory: $(@.router-id);
-
-			    router-id {
-				%help: short "Neighbors router-id";
-
-				%set:;
-			    }
-
-			    %create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/add_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
-			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
-			}
+			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_address_state_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(address.@)&enable:bool=`~$(@)`";
+			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_address_state_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(address.@)&enable:bool=`~$(DEFAULT)`";
+		        }
 		    }
+
+		    priority {
+			%help: short "Priority used in DR election";
+
+			%allow-range: $(@) "0" "255" %help: "The priority used in DR election";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(DEFAULT)";
+		    }
+
+		    hello-interval {
+			%help: short "Hello packets sent every interval seconds";
+
+			%allow-range: $(@) "1" "65535" %help: "The Hello packets interval (in seconds)";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+			}
+
+		    router-dead-interval {
+			%help: short "Seconds to wait before considering a neighbor dead";
+
+			%allow-range: $(@) "1" "4294967295" %help: "The neighbor router dead interval (in seconds)";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		    }
+
+		    interface-cost {
+			%help: short "Cost of this interface/vif";
+
+			%allow-range: $(@) "1" "65535" %help: "The cost of this address";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(DEFAULT)";
+		    }
+
+		    retransmit-interval {
+			%help: short "The retransmit interval (RxmtInterval)";
+
+			%allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		    }
+
+		    transit-delay {
+			%help: short "Add to age field of all transmitted LSAs";
+
+			%allow-range: $(@) "0" "3600" %help: "The extra addition to age field of all transmitted LSAs";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(DEFAULT)";
+		    }
+
+		    passive {
+			%help: short "Do not run OSPF, but advertise it";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(DEFAULT)";
+		    }
+
+		    disable {
+			%help: short "Disable OSPF on interface/vif";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		    }
+
+		    neighbor @: ipv4 {
+			%help: short "Neighbors address";
+
+			%mandatory: $(@.router-id);
+
+			router-id {
+			    %help: short "Neighbors router-id";
+
+			    %set:;
+			}
+
+			%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/add_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
+		   }
 		}
 	    }
 	}
