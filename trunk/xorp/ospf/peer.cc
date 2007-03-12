@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.270 2007/02/27 23:32:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.271 2007/03/12 10:16:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2718,7 +2718,8 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 		if (get_designated_router() == (*n)->get_candidate_id()) {
 		    break;
 		}
-	    XLOG_ASSERT(n != _neighbours.end());
+	    if (n == _neighbours.end())
+		return;
 	    if (Neighbour<IPv6>::Full == (*n)->get_state())
 		adjacent = true;
 	}
