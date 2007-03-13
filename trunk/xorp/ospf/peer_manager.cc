@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.137 2007/02/28 00:52:10 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.138 2007/03/12 10:16:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1784,24 +1784,29 @@ PeerManager<A>::routing_recompute_all_areas()
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
     for (i = _areas.begin(); i != _areas.end(); i++)
 	if ((*i).first == BACKBONE) {
-	    (*i).second->testing_routing_total_recompute();
+	    (*i).second->routing_total_recompute();
 	    break;
 	}
 
-    // XXX
-    // Currently a call the recompute the backbone will cause a
-    // recompute of all areas so this call is not necessary.
-    // routing_recompute_all_areas_except_backbone();
+    // Once the backbone is recomputed any transit areas will also be
+    // recomputed; so they don't need to be computed again.
+    for (i = _areas.begin(); i != _areas.end(); i++)
+	if ((*i).first != BACKBONE) {
+	    if (!(*i).second->get_transit_capability())
+		(*i).second->routing_total_recompute();
+	    break;
+	}
 }
 
 template <typename A>
 void
-PeerManager<A>::routing_recompute_all_areas_except_backbone()
+PeerManager<A>::routing_recompute_all_transit_areas()
 {
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
     for (i = _areas.begin(); i != _areas.end(); i++)
 	if ((*i).first != BACKBONE)
-	    (*i).second->testing_routing_total_recompute();
+	    if ((*i).second->get_transit_capability())
+		(*i).second->routing_total_recompute();
 }
 
 template <typename A>

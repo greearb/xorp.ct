@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.264 2007/03/01 09:29:43 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.265 2007/03/12 01:34:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3796,11 +3796,8 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 
     routing_table.end();
 
-    // XXX
-    // This is a temporary hack to make sure that transit area routes
-    // are re-applied.
     if (backbone())
-	_ospf.get_peer_manager().routing_recompute_all_areas_except_backbone();
+	_ospf.get_peer_manager().routing_recompute_all_transit_areas();
 }
 
 template <>
@@ -4134,11 +4131,8 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 
     routing_table.end();
 
-    // XXX
-    // This is a temporary hack to make sure that transit area routes
-    // are re-applied.
     if (backbone())
-	_ospf.get_peer_manager().routing_recompute_all_areas_except_backbone();
+	_ospf.get_peer_manager().routing_recompute_all_transit_areas();
 }
 
 template <typename A>

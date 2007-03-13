@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.86 2007/02/26 05:05:02 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.87 2007/03/12 10:16:04 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -774,9 +774,9 @@ class PeerManager {
     void routing_recompute_all_areas();
 
     /**
-     * Recompute routing calculation all areas except BACKBONE.
+     * Recompute routing calculation for all transit areas.
      */
-    void routing_recompute_all_areas_except_backbone();
+    void routing_recompute_all_transit_areas();
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.

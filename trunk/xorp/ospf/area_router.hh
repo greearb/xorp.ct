@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.126 2007/02/26 10:12:50 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.127 2007/02/27 06:28:10 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -620,6 +620,23 @@ class AreaRouter : public ServiceBase {
     bool backbone(OspfTypes::AreaID area) const {
 	return OspfTypes::BACKBONE == area;
     }
+#ifndef	UNFINISHED_INCREMENTAL_UPDATE
+    bool get_transit_capability() const {
+	return _TransitCapability;
+    }
+#endif
+
+    /**
+     * Totally recompute the routing table from the LSA database.
+     */
+    void routing_total_recompute();
+
+    /**
+     * Testing entry point to force a total routing computation.
+     */
+    void testing_routing_total_recompute() {
+	routing_total_recompute();
+    }
 
     /**
      * Print link state database.
@@ -673,13 +690,6 @@ class AreaRouter : public ServiceBase {
 	XLOG_FATAL("Attempt to delete LSA that is not in database \n%s",
 		   cstring(*lsar));
 	return false;
-    }
-
-    /**
-     * Testing entry point to force a total routing computation.
-     */
-    void testing_routing_total_recompute() {
-	routing_total_recompute();
     }
 
     string str() {
@@ -750,9 +760,6 @@ class AreaRouter : public ServiceBase {
 	_TransitCapability = t;
     }
 
-    bool get_transit_capability() const {
-	return _TransitCapability;
-    }
 #endif
 
     /**
@@ -1163,7 +1170,6 @@ class AreaRouter : public ServiceBase {
     /**
      * Totally recompute the routing table from the LSA database.
      */
-    void routing_total_recompute();
     void routing_total_recomputeV2();
     void routing_total_recomputeV3();
 
