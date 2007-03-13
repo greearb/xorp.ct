@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.25 2006/08/02 05:43:33 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.26 2006/11/08 15:28:48 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -43,14 +43,14 @@
 
 \title{XORP Libxorp Library Overview \\
 \vspace{1ex}
-Version 1.3}
+Version 1.4}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{August 2, 2006}
+\date{March 15, 2007}
 
 \maketitle
 
@@ -109,6 +109,9 @@ components (in alphabetical order):
 
   \item \emph{heap.hh: class Heap}: Provides Heap data structure.
 
+  \item \emph{ioevents.hh}: Enumeration of various event types supported
+  by the I/O callback facade.
+
   \item \emph{ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh: class
   IPv4Net, class IPv6Net, class IPvXNet}: Implementation of classes for
   basic subnet addresses (for IPv4, IPv6 and dual IPv4/6 address family
@@ -131,6 +134,8 @@ components (in alphabetical order):
   \item \emph{profile.hh}: Implementation of a mechanism for event
   profiling.
 
+  \item \emph{random.h}: Local implementation of random(3).
+
   \item \emph{range.hh: class U32Range, class IPv4Range, class
   IPv4Range}: A set of classes that implement linear ranges (\eg
   integers or addresses).
@@ -142,10 +147,12 @@ components (in alphabetical order):
   lookups.  Based on trie.hh, but with reference-counted storage
   supporting delayed deletion.
 
+  \item \emph{round\_robin.hh}: Round-robin queue implementation.
+
   \item \emph{run\_command.hh: class RunCommand}: A class for running an
   external command.
 
-  \item \emph{safe\_callback\_obj.hh, class CallbackSafeObject}:
+  \item \emph{safe\_callback\_obj.hh: class CallbackSafeObject}:
   Implementation of a base class for objects that are callback safe.
 
   \item \emph{selector.hh}: I/O multiplexing interface.
@@ -156,10 +163,12 @@ components (in alphabetical order):
   processes when reporting their operational status to the router
   manager.
 
+  \item \emph{task.hh: class XorpTask}: Priority-based task implementation.
+
   \item \emph{time\_slice.hh: class TimeSlice}: A class for computing
   whether some processing is taking too long.
 
-  \item \emph{timer.hh, class XorpTimer}: XORP timer facility.
+  \item \emph{timer.hh: class XorpTimer}: XORP timer facility.
 
   \item \emph{timespent.hh: class TimeSpent}: A class used for debugging
   purpose to find code that has taken too long to execute.
@@ -167,7 +176,7 @@ components (in alphabetical order):
   \item \emph{timeval.hh: class TimeVal}: A class for storing time values
   (similar to \emph{struct timeval}).
 
-  \item \emph{tlv.hh, class Tlv}: Facility for reading and writing TLV
+  \item \emph{tlv.hh: class Tlv}: Facility for reading and writing TLV
   (Type-Lenght-Value) records.
 
   \item \emph{token.hh}: Token related definitions.
@@ -185,6 +194,9 @@ components (in alphabetical order):
 
   \item \emph{vif.hh: class Vif, class VifAddr}: Virtual interface and
   virtual interface address classes.
+
+  \item \emph{win\_dispatcher.hh, win\_io.hh}: Windows-specific header
+  files.
 
   \item \emph{xlog.h}: Provides facility for log messages generation.
 
@@ -362,6 +374,13 @@ supports removal of arbitrary objects from the heap, even if they are
 not located at the top.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{ioevents.hh}
+
+This file contains the enumerated \emph{IoEventType} codes: various
+event types supported by the I/O callback facade. The event types are
+used by clients when registering interest in I/O events.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{ipnet.hh, ipv4net.hh, ipv6net.hh, ipvxnet.hh}
 
 These files contain the declaration of the following classes:
@@ -439,6 +458,12 @@ and those strings can be read at some later stage.
 % TODO: add an example of using the profiling mechanism.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{random.hh}
+
+This file declares the API for the local implementation of random(3).
+Currently it is used if the underlying system doesn't have random(3).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{range.hh}
 
 This file implements the following classes:
@@ -487,6 +512,14 @@ to reference invalid memory, although a deletion and subsequent addition can
 cause the payload data referenced by an iterator to change.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{round\_robin.hh}
+
+This file implements round-robin queue which is used by the
+priority-based task implementation (see Section~\ref{sec:task_hh}).
+It is used internally by libxorp and shouldn't be used by the rest of
+the system.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{run\_command.hh}
 
 This file implements \emph{class RunCommand} which provides the
@@ -528,8 +561,8 @@ is pending on the particular descriptors.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{service.hh}
 
-This declares \emph{class ServiceBase}.  A service is a class that can
-be started and stopped and would typically involve some asynchronous
+This file declares \emph{class ServiceBase}.  A service is a class that
+can be started and stopped and would typically involve some asynchronous
 processing to transition between states.  The base class provides a
 state model and methods for transitioning between states.  Mandatory
 transition methods, like start and stop, are abstract in the base
@@ -543,6 +576,42 @@ that a XORP process should report to the XORP router manager
 (\emph{rtrmgr})~\cite{xorp:rtrmgr}.
 The file itself contains a detailed explanation of the process states
 (valid transaction between states, triggering events, actions, etc).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{task.hh}
+\label{sec:task_hh}
+
+This file declares and implements class \emph{class XorpTask}.
+Class \emph{XorpTask} is used for priority-based tasks.
+Each task can have a priority between \emph{PRIORITY\_HIGHEST} and
+\emph{PRIORITY\_LOWEST}. A number of suggested priorities and weights
+are declared inside that class:
+
+\begin{verbatim}
+class XorpTask {
+public:
+    ...
+
+    //
+    // Task/Timer priorities. Those are suggested values.
+    //
+    static const int PRIORITY_HIGHEST		= 0;
+    static const int PRIORITY_XRL_KEEPALIVE	= 1;
+    static const int PRIORITY_HIGH		= 2;
+    static const int PRIORITY_DEFAULT		= 4;
+    static const int PRIORITY_BACKGROUND	= 7;
+    static const int PRIORITY_LOWEST		= 9;
+    static const int PRIORITY_INFINITY		= 255;
+
+    //
+    // Task/Timer weights. Those are suggested values.
+    //
+    static const int WEIGHT_DEFAULT		= 1;
+
+    ...
+};
+
+\end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{time\_slice.hh}
@@ -638,6 +707,12 @@ entities such as the Discard interface, or a VLAN on a physical
 interface.
 VifAddr holds information about an address of a virtual interface.
 A virtual interface may have more than one VifAddr.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{win\_dispatcher.hh, win\_io.hh}
+
+Those are Windows-specific header files which are used internally by
+libxorp and shouldn't be used by the rest of the system.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{xlog.h}
@@ -893,6 +968,11 @@ of type HANDLE, which in turn is a typedef alias of 'void *'.
   \emph{xorpfd.hh}.
 
   \item August 2, 2006: Updated the version to 1.3, and the date.
+
+  \item March 15, 2007: Updated to match XORP release 1.4:
+  added information for \emph{ioevents.hh}, \emph{random.h},
+  \emph{round\_robin.hh}, \emph{task.hh}, \emph{win\_dispatcher.hh}
+  and \emph{win\_io.hh}.
 
 \end{itemize}
 
