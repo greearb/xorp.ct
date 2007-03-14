@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.49 2007/02/17 02:36:16 pavlin Exp $
+# $XORP: xorp/README,v 1.50 2007/02/28 00:42:39 atanu Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,7 +49,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release-1.4-RC (Release Candidate).
+This is XORP Release-1.4.
 It is reasonably stable and can be used for routing, but there are known
 issues.
 
@@ -257,7 +257,6 @@ limited interest, or are not relevant to the current release:
 ===============
 
 In the short-term we plan to add:
-  * OSPFv3
   * IS-IS
   * Security
   * Bi-directional PIM-SM
@@ -308,7 +307,9 @@ The core team currently consists of:
 
   * WWW: http://www.xorp.org/
 
-  * Source code and CVS access: see XORP web site.
+  * Source code and CVS access: see XORP Web site.
+
+  * XORP Bugzilla database and bug reports: see XORP Web site.
 
   * XORP users mailing list: xorp-users@xorp.org
     This list is for general XORP discussion.
