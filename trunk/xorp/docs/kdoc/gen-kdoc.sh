@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.23 2006/02/23 02:09:20 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.24 2006/02/23 02:18:44 pavlin Exp $
 #
 
 #
@@ -525,7 +525,7 @@ kdoc_bgp()
     html_start_page="index.html"
     files="bgp/*.h bgp/*.hh"
     excludes="bgp/test_*.h bgp/test_*.hh"
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libpolicybackend"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
     kdocify
 }
 
