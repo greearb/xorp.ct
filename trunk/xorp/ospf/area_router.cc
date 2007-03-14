@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.265 2007/03/12 01:34:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.266 2007/03/13 18:25:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -5703,16 +5703,15 @@ AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& spt,
     if (src.get_origin()) {
 	// Find the nexthop address from the router's Link-LSA. If the
 	// nexthop can't be found then there is no point putting
-	// this router into the graph.
-	if (RouterLink::p2p == rl.get_type()) {
-	    A interface_address;
-	    if (!find_interface_address(rl.get_neighbour_router_id(),
-					rl.get_neighbour_interface_id(),
-					interface_address))
-		return;
-	    dst.set_address(interface_address);
-	    dst.set_nexthop_id(rl.get_interface_id());
-	}
+	// this router into the graph. If this is a directly adjacent
+	// Virtual link then still use the Link-local address.
+	A interface_address;
+	if (!find_interface_address(rl.get_neighbour_router_id(),
+				    rl.get_neighbour_interface_id(),
+				    interface_address))
+	    return;
+	dst.set_address(interface_address);
+	dst.set_nexthop_id(rl.get_interface_id());
     }
     if (!spt.exists_node(dst)) {
 	spt.add_node(dst);
