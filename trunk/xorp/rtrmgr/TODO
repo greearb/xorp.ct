@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.29 2005/03/12 05:27:46 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.30 2006/08/02 07:59:23 pavlin Exp $
 #
 
 Urgent
@@ -68,9 +68,6 @@ General
  - User database needs proper implementation of capabilities.
  - When the rtrmgr is running in no-exec mode do not instantiate a
    finder and XrlRouter.
- - Implement an %update method to the rtrmgr templates to deal
-   with changing configuration on-the-fly. However, this is
-   a short-term solution and should not be used by new protocols.
  - Start using the start/end XRL transaction mechanism to update
    configuration changes on-the-fly. After all processes start using
    this mechanism, then deprecate the %update and %activate methods.
