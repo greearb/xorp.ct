@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.31 2005/06/16 19:40:02 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.32 2006/08/02 07:59:21 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -39,9 +39,6 @@
 * Check whether a returned MAC addresses of an interface is an
   Ethernet address before attempting to assign it as an Ethernet
   address.
-
-* Do we need to include <asm/types.h> for Linux, when we include
-  <linux/rtnetlink.h> ?
 
 * Fix test files like test_ifconfig_rtsock.cc
 
