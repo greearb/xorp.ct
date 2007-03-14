@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.8 2007/02/16 22:46:43 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.9 2007/02/21 00:24:34 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -51,21 +51,118 @@
 // allow us to use the leak checker program.
 
 /**
- * Simple test to verify that assigning a RouteEntry works, note only
- * one field is being checked a better test would test all fields. 
+ * Simple test to verify that assigning a RouteEntry works.
  */
 template <typename A>
 bool
-rt1(TestInfo& info, OspfTypes::Version /*version*/)
+rt1(TestInfo& info, OspfTypes::Version version)
 {
     RouteEntry<A> rt1;
     RouteEntry<A> rt2;
 
-    rt1.set_filtered(true);
+    OspfTypes::VertexType destination_type = OspfTypes::Network;
+    bool discard = true;
+    bool direct = true;
+    uint32_t address = 108;
+    OspfTypes::AreaID area = 55;
+    typename RouteEntry<A>::PathType path_type = RouteEntry<A>::type2;
+    uint32_t cost = 2007;
+    uint32_t type_2_cost = 1000;
+    A nexthop;
+    switch(nexthop.ip_version()) {
+    case 4:
+	nexthop = "192.150.187.78";
+	break;
+    case 6:
+	nexthop = "2001:468:e21:c800:220:edff:fe61:f033";
+	break;
+    default:
+	XLOG_FATAL("Unknown IP version %d", nexthop.ip_version());
+	break;
+    }
+    uint32_t nexthop_id = 2000000;
+    uint32_t advertising_router = 1500;
+    Lsa::LsaRef lsar(new RouterLsa(version));
+    bool filtered = true;
+
+    rt1.set_destination_type(destination_type);
+    rt1.set_discard(discard);
+    rt1.set_directly_connected(direct);
+    rt1.set_address(address);
+    rt1.set_area(area);
+    rt1.set_path_type(RouteEntry<A>::type2);
+    rt1.set_cost(cost);
+    rt1.set_type_2_cost(type_2_cost);
+    rt1.set_nexthop(nexthop);
+    rt1.set_nexthop_id(nexthop_id);
+    rt1.set_advertising_router(advertising_router);
+    rt1.set_lsa(lsar);
+    rt1.set_filtered(filtered);
+
     rt2 = rt1;
 
-    if (!rt2.get_filtered()) {
-	DOUT(info) << "Failed to copy value\n";
+    if (destination_type != rt2.get_destination_type())  {
+	DOUT(info) << "Failed to copy value of destination type\n";
+	return false;
+    }
+
+    if (discard != rt2.get_discard()) {
+	DOUT(info) << "Failed to copy discard value\n";
+	return false;
+    }
+
+    if (direct != rt2.get_directly_connected()) {
+	DOUT(info) << "Failed to copy directly connected value\n";
+	return false;
+    }
+
+    if (address != rt2.get_address())  {
+	DOUT(info) << "Failed to copy value of address\n";
+	return false;
+    }
+
+    if (area != rt2.get_area())  {
+	DOUT(info) << "Failed to copy value of area\n";
+	return false;
+    }
+
+    if (path_type != rt2.get_path_type())  {
+	DOUT(info) << "Failed to copy value of path type\n";
+	return false;
+    }
+
+    if (cost != rt2.get_cost())  {
+	DOUT(info) << "Failed to copy value of cost\n";
+	return false;
+    }
+
+    if (type_2_cost != rt2.get_type_2_cost())  {
+	DOUT(info) << "Failed to copy value of type 2 cost\n";
+	return false;
+    }
+
+    if (nexthop != rt2.get_nexthop())  {
+	DOUT(info) << "Failed to copy value of nexthop\n";
+	return false;
+    }
+
+    if (nexthop_id != rt2.get_nexthop_id())  {
+	DOUT(info) << "Failed to copy value of nexthop ID\n";
+	return false;
+    }
+
+    if (advertising_router != rt2.get_advertising_router())  {
+	DOUT(info) << "Failed to copy value of advertising router\n";
+	return false;
+    }
+
+    if (lsar != rt2.get_lsa())  {
+	DOUT(info) << "Failed to copy value of LSA\n";
+	return false;
+    }
+
+    if (filtered != rt2.get_filtered()) {
+	DOUT(info) << "Failed to copy filtered value\n";
 	return false;
     }
 
