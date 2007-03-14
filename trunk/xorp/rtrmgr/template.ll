@@ -1,6 +1,21 @@
 %{
+/*
+ * XXX: A hack to get rid of problematic __unused definition that might
+ * be inserted by lex itself and that might be conflicting when including
+ * some of the system header files.
+ */
+#ifdef __unused
+#define __xorp_unused __unused
+#undef __unused
+#endif
+
 #include "libxorp/xorp.h"
 #include "y.tplt_tab.h"
+
+#ifdef __xorp_unused
+#define __unused __xorp_unused
+#undef __xorp_unused
+#endif
 %}
 	int tplt_linenum = 1;
 	extern char* tpltlval;

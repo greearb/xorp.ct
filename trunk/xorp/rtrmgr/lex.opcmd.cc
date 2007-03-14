@@ -465,9 +465,24 @@ char *yytext;
 #line 1 "op_commands.ll"
 #define INITIAL 0
 #line 2 "op_commands.ll"
+/*
+ * XXX: A hack to get rid of problematic __unused definition that might
+ * be inserted by lex itself and that might be conflicting when including
+ * some of the system header files.
+ */
+#ifdef __unused
+#define __xorp_unused __unused
+#undef __unused
+#endif
+
 #include "libxorp/xorp.h"
 #include <string.h>
 #include "y.opcmd_tab.h"
+
+#ifdef __xorp_unused
+#define __unused __xorp_unused
+#undef __xorp_unused
+#endif
 int opcmd_linenum = 1;
 extern char* opcmdlval;
 string opcmd_parsebuf;
@@ -477,7 +492,7 @@ string opcmd_parsebuf;
 
 #define string 2
 
-#line 481 "lex.opcmd.cc"
+#line 496 "lex.opcmd.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -628,10 +643,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 16 "op_commands.ll"
+#line 31 "op_commands.ll"
 
 
-#line 635 "lex.opcmd.cc"
+#line 650 "lex.opcmd.cc"
 
 	if ( yy_init )
 		{
@@ -716,26 +731,26 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 18 "op_commands.ll"
+#line 33 "op_commands.ll"
 {
 	return UPLEVEL;
 	}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 22 "op_commands.ll"
+#line 37 "op_commands.ll"
 {
 	return DOWNLEVEL;
 	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 26 "op_commands.ll"
+#line 41 "op_commands.ll"
 /* whitespace */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 28 "op_commands.ll"
+#line 43 "op_commands.ll"
 {
 	/* newline is not significant */
 	opcmd_linenum++;
@@ -743,21 +758,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "op_commands.ll"
+#line 48 "op_commands.ll"
 {
 	return END;
 	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 37 "op_commands.ll"
+#line 52 "op_commands.ll"
 {
 	return COLON;
 	}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 41 "op_commands.ll"
+#line 56 "op_commands.ll"
 {
 	opcmdlval = strdup(opcmdtext);
 	return WILDCARD;
@@ -765,49 +780,49 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 46 "op_commands.ll"
+#line 61 "op_commands.ll"
 {
 	return CMD_MODULE;
 	}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 50 "op_commands.ll"
+#line 65 "op_commands.ll"
 {
 	return CMD_COMMAND;
 	}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 54 "op_commands.ll"
+#line 69 "op_commands.ll"
 {
 	return CMD_HELP;
 	}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 58 "op_commands.ll"
+#line 73 "op_commands.ll"
 {
 	return CMD_OPT_PARAMETER;
 	}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 62 "op_commands.ll"
+#line 77 "op_commands.ll"
 {
 	return CMD_TAG;
 	}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 66 "op_commands.ll"
+#line 81 "op_commands.ll"
 {
 	return CMD_NOMORE_MODE;
 	}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 70 "op_commands.ll"
+#line 85 "op_commands.ll"
 {
 	opcmdlval = strdup(opcmdtext);
 	return VARIABLE;
@@ -815,7 +830,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 75 "op_commands.ll"
+#line 90 "op_commands.ll"
 {
 	/*
 	 * Note that we explicitly allow a literal to start with not only
@@ -830,7 +845,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 87 "op_commands.ll"
+#line 102 "op_commands.ll"
 {
 			BEGIN(string);
 			/* XXX: include the original quote */
@@ -839,28 +854,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 93 "op_commands.ll"
+#line 108 "op_commands.ll"
 /* normal text */ {
 			opcmd_parsebuf += opcmdtext;
 			}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 97 "op_commands.ll"
+#line 112 "op_commands.ll"
 /* allow quoted quotes */ {
 			opcmd_parsebuf += "\"";
 			}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 101 "op_commands.ll"
+#line 116 "op_commands.ll"
 /* allow quoted backslash */ {
 			opcmd_parsebuf += "\\";
 			}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 105 "op_commands.ll"
+#line 120 "op_commands.ll"
 /* allow unquoted newlines */ {
 			opcmd_linenum++;
 			opcmd_parsebuf += "\n";
@@ -868,7 +883,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 110 "op_commands.ll"
+#line 125 "op_commands.ll"
 /* allow C-style quoted newlines */ {
 			/* XXX: don't increment the line number */
 			opcmd_parsebuf += "\n";
@@ -876,7 +891,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 115 "op_commands.ll"
+#line 130 "op_commands.ll"
 {
 			BEGIN(INITIAL);
 			/* XXX: include the original quote */
@@ -887,32 +902,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 123 "op_commands.ll"
+#line 138 "op_commands.ll"
 BEGIN(comment);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 125 "op_commands.ll"
+#line 140 "op_commands.ll"
 /* eat up anything that's not a '*' */
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 127 "op_commands.ll"
+#line 142 "op_commands.ll"
 /* eat up '*'s not followed by "/"s */
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 129 "op_commands.ll"
+#line 144 "op_commands.ll"
 opcmd_linenum++;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 131 "op_commands.ll"
+#line 146 "op_commands.ll"
 BEGIN(INITIAL);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 133 "op_commands.ll"
+#line 148 "op_commands.ll"
 {
 	/* everything else is a syntax error */
 	return SYNTAX_ERROR;
@@ -920,10 +935,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 139 "op_commands.ll"
+#line 154 "op_commands.ll"
 ECHO;
 	YY_BREAK
-#line 927 "lex.opcmd.cc"
+#line 942 "lex.opcmd.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(string):
@@ -1811,5 +1826,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 139 "op_commands.ll"
+#line 154 "op_commands.ll"
 
