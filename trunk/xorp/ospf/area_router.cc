@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.266 2007/03/13 18:25:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.267 2007/03/14 08:12:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -410,7 +410,7 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
     XLOG_TRACE(_ospf.trace()._virtual_link,
 	       "Found virtual link endpoint %s\n", pr_id(rid).c_str());
 
-    // Find the interface address of the neighbour that should be used.
+    // Find the global interface address of the neighbour that should be used.
     IPv6 neighbour_interface_address;
     const list<IntraAreaPrefixLsa *>& nlsai = 
 	lsa_temp_store.get_intra_area_prefix_lsas(rid);
@@ -434,9 +434,9 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
 	return;
     }
 
-    // Find this routers own interface address use the LSA database
+    // Find this routers own interface address, use the LSA database
     // because if the global address is not being advertised there is
-    // not point in trying to bring up the virtual link.
+    // no point in trying to bring up the virtual link.
     IPv6 routers_interface_address;
     const list<IntraAreaPrefixLsa *>& rlsai = 
 	lsa_temp_store.get_intra_area_prefix_lsas(r->get_header().
