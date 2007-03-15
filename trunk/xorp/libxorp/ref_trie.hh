@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.28 2006/08/15 23:04:06 mjh Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.29 2007/02/16 22:46:22 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -358,7 +358,7 @@ template <class A, class Payload>
 class RefTriePostOrderIterator {
 public:
     typedef IPNet<A> Key;
-    typedef RefTrie<A, Payload> RefTrie;
+    typedef ::RefTrie<A, Payload> RefTrie;
     typedef RefTrieNode<A, Payload> Node;
 
     /**
@@ -607,7 +607,7 @@ template <class A, class Payload>
 class RefTriePreOrderIterator {
 public:
     typedef IPNet<A> Key;
-    typedef RefTrie<A, Payload> RefTrie;
+    typedef ::RefTrie<A, Payload> RefTrie;
     typedef RefTrieNode<A, Payload> Node;
 
     /**
