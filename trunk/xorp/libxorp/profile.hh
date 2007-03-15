@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.7 2006/03/16 00:04:31 pavlin Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.8 2007/02/16 22:46:21 pavlin Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -87,7 +87,7 @@ class ProfileLogEntry {
  */
 class Profile {
  public:
-    typedef list<ProfileLogEntry> logentries;	// Profiling info
+    typedef std::list<ProfileLogEntry> logentries;	// Profiling info
 
     class ProfileState {
     public:
