@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/TODO,v 1.12 2004/07/24 00:54:13 pavlin Exp $
+# $XORP: xorp/rib/TODO,v 1.13 2006/08/02 07:59:23 pavlin Exp $
 #
 
 RIB To Do List
@@ -62,9 +62,3 @@ RIB To Do List
 
   Therefore registering interest should not return the answer the answer
   should come later via the rib_client interface.
-
-Done
-=======================
-* Add new interface for PIM simply be able to get all the routes.
-
-* Add route redistribution.

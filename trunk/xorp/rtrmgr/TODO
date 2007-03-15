@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.30 2006/08/02 07:59:23 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.31 2007/03/14 01:59:55 pavlin Exp $
 #
 
 Urgent
@@ -99,33 +99,3 @@ Configure Mode
 
 Operational Mode
  - Add template specification for "show" output: fields formatting, etc.
-
-Done
-====
-
- - Remove 5 second timeout.
- - Interruption of commands in progress.
-   RESOLVED: Use Ctrl-C to interrupt xorpsh waiting for command completion.
- - If rtrmgr restarts, xorpsh will talk to the new rtrmgr, but will
-   fail all authentication checks.  Handle this more gracefully.
- - Sort-out all *.hh files as appropriate to Makefile.am foo_SOURCE,
-   and list all *.cc files there in alphabetical order
- - Implement $(@.DEFAULT) varname.
-
-RESOLVED: restart is detected and user is advised to logout and login again.
-
- - TemplateTree destructor doesn't clean up properly.
-
-RESOLVED: actually it was correct, the comment was wrong.
-
- - Module unloading when relevant config is deleted. (Done)
- - Get rid of the printf() in master_conf_tree.cc and elsewhere.
-   At least, the info should be printed only if in debug mode.
- - Change the behavior of command-line option "-d" from "Display defaults"
-   to "Enable debug output" (for both the rtrmgr and xorpsh).
-RESOLVED: "-d" is removed, because it is redundant (the same info
-   is printed by "-h"). The new command-line option to print
-   verbose output is "-v".
- - Modify the *.cmds templates syntax to allow specification of the CLI
-   help per command.
- - Ensure commands only appear when modules are loaded.
