@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.59 2007/02/17 03:17:02 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.60 2007/03/14 02:11:10 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -67,7 +67,7 @@ the login shell is csh or tcsh):
 	COMMANDS:
  # Commands to verify the Version.
  cd xorp/docs
- egrep "^Version .\..}" */*.tex
+ egrep "Version .\..}" */*.tex
 
 ========================================================================
 0700.	TASK: Send email to xorp-dev@xorp.org to remain everyone about
