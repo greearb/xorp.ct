@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.15 2006/03/16 00:03:27 pavlin Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.16 2007/02/16 22:45:10 pavlin Exp $
 
 #ifndef __BGP_BGP_TRIE_HH__
 #define __BGP_BGP_TRIE_HH__
@@ -105,8 +105,8 @@ RefTrieNode<IPv6, const ChainedSubnetRoute<IPv6> >::delete_payload(const Chained
 template<class A>
 class BgpTrie : public RefTrie<A, const ChainedSubnetRoute<A> > {
 public:
-    typedef IPNet<A> IPNet;
-    typedef ChainedSubnetRoute<A> ChainedSubnetRoute;
+    typedef ::IPNet<A> IPNet;
+    typedef ::ChainedSubnetRoute<A> ChainedSubnetRoute;
     typedef map<const PathAttributeList<A> *,
 	const ChainedSubnetRoute*, Path_Att_Ptr_Cmp<A> > PathmapType;
     typedef RefTrie<A, const ChainedSubnetRoute> RouteTrie;
