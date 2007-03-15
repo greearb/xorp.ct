@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.75 2006/12/24 00:35:03 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.76 2007/02/16 22:47:22 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -788,7 +788,7 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 
     struct stat sb;
     if (stat(full_filename.c_str(), &sb) == 0) {
-	if (sb.st_mode & S_IFREG == 0) {
+	if ((sb.st_mode & S_IFREG) == 0) {
 	    if (((sb.st_mode & S_IFMT) == S_IFCHR) ||
 		((sb.st_mode & S_IFMT) == S_IFBLK)) {
 		error_msg = c_format("File %s is a special device.\n",
