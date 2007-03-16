@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.84 2007/02/10 02:13:47 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.85 2007/02/27 19:46:34 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -136,6 +136,7 @@ gmake check
       tests appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518 (default)
       gcc42 (GCC) 4.2.0 20060218 (experimental)
+      gcc43 (GCC) 4.3.0 20070223 (experimental)
 
   * FreeBSD-6.2 on i386
     - The code compiles with the default compiler, and the internal tests
@@ -323,7 +324,7 @@ gmake check
     - gcc version 3.3 20030304 (Apple Computer, Inc. build 1495)
     - The code compiles, and the internal tests appear to succeed.
 
-  * OS X 10.4.2 - 10.4.7 (Darwin 8.2.0 - 8.7.0) on PowerPC:
+  * OS X 10.4.2 - 10.4.9 (Darwin 8.2.0 - 8.9.0) on PowerPC:
     - gcc version 4.0.0 20041026 (Apple Computer, Inc. build 4061)
     - The code compiles, and the internal tests appear to succeed.
 
