@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.60 2007/03/14 02:11:10 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.61 2007/03/15 00:51:11 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -195,9 +195,11 @@ the login shell is csh or tcsh):
                 However, if the new entry is a release candidate, then only
                 uncomment and update the "Release Candidate" section, but
                 keep the original "Latest Release" section.
+                If a real release, then comment-out the "Release Candidate"
+                section.
 	      - Update www/html_src/getting_started.html with information
-		about supported operating systems, compilers, and XORP
-		configuration.
+		about supported operating systems, compilers,
+		cross-compilation, and XORP configuration.
                 This can be omitted for a release candidate.
 	      - Update www/html_src/index.html
 		Modify all references to the most recent version and
