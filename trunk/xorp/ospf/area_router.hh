@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.128 2007/03/13 18:25:51 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.129 2007/03/19 09:02:21 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -392,10 +392,14 @@ class AreaRouter : public ServiceBase {
      * type, Link State ID and Router ID, and add to the prefix
      * list. If the prefix is already on the list just or in the
      * options field.
+     *
+     * @return the options associated with this Link-LSA if present
+     * otherwise zero.
      */
-    bool populate_prefix(OspfTypes::PeerID peeridid, uint32_t interface_id, 
-			 OspfTypes::RouterID router_id,
-			 list<IPv6Prefix>& prefixes);
+    uint32_t populate_prefix(OspfTypes::PeerID peeridid,
+			     uint32_t interface_id, 
+			     OspfTypes::RouterID router_id,
+			     list<IPv6Prefix>& prefixes);
     
     /**
      * Update the Intra-Area-Prefix-LSA for this peer OSPFv3 only.
@@ -405,12 +409,14 @@ class AreaRouter : public ServiceBase {
      * @param interface_id that the generated Intra-Area-Prefix-LSA
      * belongs to.
      * @param atached_router list of fully attached routers.
+     *
+     * @return the options fields from all the Link-LSAs or'd together.
      */
-    bool update_intra_area_prefix_lsa(OspfTypes::PeerID peer,
-				      uint16_t referenced_ls_type,
-				      OspfTypes::RouterID interface_id,
-				      const list<RouterInfo>& 
-				      attached_routers);
+    uint32_t update_intra_area_prefix_lsa(OspfTypes::PeerID peer,
+					  uint16_t referenced_ls_type,
+					  OspfTypes::RouterID interface_id,
+					  const list<RouterInfo>& 
+					  attached_routers);
 
     /**
      * Withdraw the Intra-Area-Prefix-LSA for this peer by prematurely

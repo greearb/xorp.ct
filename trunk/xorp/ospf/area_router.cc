@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.269 2007/03/19 01:00:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.270 2007/03/19 09:02:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1741,9 +1741,10 @@ AreaRouter<A>::update_network_lsa(OspfTypes::PeerID peerid,
 	nlsa->get_header().set_options(get_options());
 	break;
     case OspfTypes::V3:
-	nlsa->set_options(get_options());
-	update_intra_area_prefix_lsa(peerid, _db[index]->get_ls_type(),
-				     link_state_id, routers);
+	uint32_t options =
+	    update_intra_area_prefix_lsa(peerid,_db[index]->get_ls_type(),
+					 link_state_id, routers); 
+	nlsa->set_options(options);
 	break;
     }
 
@@ -1867,7 +1868,7 @@ AreaRouter<A>::generate_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
 }
 
 template <typename A>
-bool
+uint32_t
 AreaRouter<A>::populate_prefix(OspfTypes::PeerID peerid,
 			       uint32_t interface_id,
 			       OspfTypes::RouterID router_id,
@@ -1878,10 +1879,12 @@ AreaRouter<A>::populate_prefix(OspfTypes::PeerID peerid,
     OspfTypes::Version version = _ospf.get_version();
     Ls_request lsr(version, LinkLsa(version).get_ls_type(), interface_id,
 		   router_id);
+    uint32_t options = 0;
     size_t index;
     if (find_lsa(lsr, index)) {
 	LinkLsa *llsa = dynamic_cast<LinkLsa *>(_db[index].get());
 	XLOG_ASSERT(llsa);
+	options = llsa->get_options();
 	const list<IPv6Prefix>& link_prefixes = llsa->get_prefixes();
 	list<IPv6Prefix>::const_iterator i;
 	for (i = link_prefixes.begin(); i != link_prefixes.end(); i++) {
@@ -1906,11 +1909,11 @@ AreaRouter<A>::populate_prefix(OspfTypes::PeerID peerid,
 	}
     }
 
-    return true;
+    return options;
 }
 
 template <typename A>
-bool
+uint32_t
 AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
 					    uint16_t referenced_ls_type,
 					    uint32_t interface_id,
@@ -1926,11 +1929,12 @@ AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
 		   create_link_state_id(referenced_ls_type, interface_id),
 		   _ospf.get_router_id());
 
+    uint32_t options = 0;
     size_t index;
     if (!find_lsa(lsr, index)) {
 	XLOG_FATAL("Couldn't find Intra-Area-Prefix-LSA %s in LSA database",
 		   cstring(lsr));
-	return false;
+	return options;
     }
 
     IntraAreaPrefixLsa *iaplsa =
@@ -1942,10 +1946,12 @@ AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
 	list<IPv6Prefix>& prefixes = iaplsa->get_prefixes();
 	prefixes.clear();
 	// Find our own Link-LSA for this interface and add the addresses.
-	populate_prefix(peerid, interface_id, _ospf.get_router_id(), prefixes);
+	options = populate_prefix(peerid, interface_id, _ospf.get_router_id(),
+				  prefixes);
 	list<RouterInfo>::const_iterator i;
 	for (i = attached_routers.begin(); i!= attached_routers.end(); i++)
-	    populate_prefix(peerid, i->_interface_id, i->_router_id, prefixes);
+	    options |= populate_prefix(peerid, i->_interface_id, i->_router_id,
+				       prefixes);
     }
 	
     TimeVal now;
@@ -1954,7 +1960,7 @@ AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
 
     publish_all(_db[index]);
     
-    return true;
+    return options;
 }
 
 template <typename A>
