@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.38 2007/02/27 18:33:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.39 2007/03/12 10:16:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -139,8 +139,8 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	src,
 	dst,
 	get_ip_protocol_number(),
-	-1,		// XXX: let the FEA set it
-	-1,		// XXX: let the FEA set it
+	dst.is_multicast() ? 1 : -1,		// XXX: let the FEA set it
+	-1,					// XXX: let the FEA set it
 	get_ip_router_alert(),
 	ext_headers_type,
 	ext_headers_payload,
