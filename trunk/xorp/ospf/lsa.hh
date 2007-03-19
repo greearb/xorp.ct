@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.98 2007/02/26 09:03:33 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.99 2007/03/19 01:00:19 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1075,6 +1075,68 @@ class RouterLink {
     uint32_t	_interface_id;		// OSPFv3 Only
     uint32_t	_neighbour_interface_id;// OSPFv3 Only
     uint32_t	_neighbour_router_id;	// OSPFv3 Only
+};
+
+class UnknownLsa : public Lsa {
+    UnknownLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {}
+
+    UnknownLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {}
+    /**
+     * @return the minimum length of a Router-LSA.
+     */
+    size_t min_length() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    XLOG_FATAL("OSPFv3 only");
+	    break;
+	case OspfTypes::V3:
+	    return 0;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    uint16_t get_ls_type() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    XLOG_FATAL("OSPFv3 only");
+	    break;
+	case OspfTypes::V3:
+	    return _header.get_ls_type();
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
+
+    bool encode();
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "Unknown";
+    }
+
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
 };
 
 class RouterLsa : public Lsa {

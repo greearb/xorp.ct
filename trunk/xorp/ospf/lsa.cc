@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.100 2007/02/24 09:08:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.101 2007/02/26 23:25:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -726,6 +726,65 @@ RouterLink::str() const
     }
 
     output += c_format(" Metric %u", get_metric());
+
+    return output;
+}
+
+Lsa::LsaRef
+UnknownLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
+
+    if (len < required)
+	xorp_throw(InvalidPacket,
+		   c_format("Unknown-LSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Unknown-LSA", buf, len, required);
+
+    // Verify the checksum.
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
+
+    UnknownLsa *lsa = 0;
+    try {
+	lsa = new UnknownLsa(version, buf, len);
+
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	
+    } catch(InvalidPacket& e) {
+	delete lsa;
+	throw e;
+    }
+
+    return Lsa::LsaRef(lsa);
+}
+
+bool
+UnknownLsa::encode()
+{
+    XLOG_FATAL("Can't encode an Unknown-LSA");
+
+    return true;
+}
+
+string
+UnknownLsa::str() const
+{
+    string output;
+
+    output += "Unknown-LSA:\n";
+    if (!valid())
+	output += "INVALID\n";
+    output += _header.str();
+
+    output += "\n";
 
     return output;
 }
