@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.100 2007/03/19 01:39:53 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.101 2007/03/19 05:47:07 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -700,6 +700,8 @@ class LsaDecoder {
      * @return true if we know about this type of LSA.
      */
     bool validate(uint16_t type) const {
+	if (0 != _unknown_lsa_decoder)
+	    return true;
 	return _lsa_decoders.end() != _lsa_decoders.find(type);
     }
 
@@ -732,7 +734,7 @@ class LsaDecoder {
 					// decoded, excluding LSA header.
 
     map<uint16_t, Lsa *> _lsa_decoders;	// OSPF LSA decoders
-    Lsa * _unknown_lsa_decoder;		// OSPF Unkown LSA decoder
+    Lsa * _unknown_lsa_decoder;		// OSPF Unknown LSA decoder
 };
 
 /**
@@ -2275,8 +2277,8 @@ initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
- 	lsa_decoder.register_decoder(new LinkLsa(version));
- 	lsa_decoder.register_decoder(new IntraAreaPrefixLsa(version));
+  	lsa_decoder.register_decoder(new LinkLsa(version));
+  	lsa_decoder.register_decoder(new IntraAreaPrefixLsa(version));
 	break;
     }
 }
