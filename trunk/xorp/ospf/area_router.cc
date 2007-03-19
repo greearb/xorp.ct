@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.267 2007/03/14 08:12:43 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.268 2007/03/15 19:15:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1438,7 +1438,14 @@ template <typename A>
 void
 AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/, bool redist)
 {
-    XLOG_ASSERT(lsar->external());
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	XLOG_ASSERT(lsar->external());
+	break;
+    case OspfTypes::V3:
+	XLOG_ASSERT(lsar->external() || (!lsar->known() && lsar->as_scope()));
+	break;
+    }
 
     switch(_area_type) {
     case OspfTypes::NORMAL:
@@ -1447,6 +1454,14 @@ AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/, bool redist)
 	return;
 	break;
     case OspfTypes::NSSA: {
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    if (!lsar->known())
+		return;
+	    break;
+	}
 	if (!redist)
 	    return;
 	bool indb;
@@ -2213,6 +2228,14 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	case OspfTypes::NSSA:
  	    if ((*i)->external())
  		continue;
+	    switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		if (!(*i)->known() && (*i)->as_scope())
+		    continue;
+		break;
+	    }
 	    break;
 	}
 	const Lsa_header& lsah = (*i)->get_header();
@@ -2291,6 +2314,15 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 
 	    if ((*i)->type7())
 		external_type7_translate((*i));
+
+	    switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		if (!(*i)->known() && (*i)->as_scope())
+		    external_flood_all_areas((*i));
+		break;
+	    }
 
 	    // Set to true if the LSA was multicast out of this
 	    // interface. If it was, there is no requirement to send an

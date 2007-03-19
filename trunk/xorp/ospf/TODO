@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.71 2007/03/12 18:17:57 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.72 2007/03/19 00:51:31 atanu Exp $
 #
 
 TODO
@@ -168,6 +168,14 @@ the list should be updated in the Vertex class or it should be
 reverted to holding a single entry. My preference is reverting to
 holding a single entry.
 
+53) The program in test_packet.cc contains a number of asserts of the form:
+XLOG_ASSERT(rlsa->known());
+XLOG_ASSERT(!rlsa->link_local_scope());
+XLOG_ASSERT(rlsa->area_scope());
+XLOG_ASSERT(!rlsa->as_scope());
+One for each LSA type, replace these asserts with a proper test for
+known and scopting, note this is OSPFv3 only.
+ 
 Possible issues
 ~~~~~~~~~~~~~~~
 

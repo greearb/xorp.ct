@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.28 2007/02/23 21:08:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.29 2007/02/24 11:00:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -53,7 +53,14 @@ template <typename A>
 bool
 External<A>::announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
 {
-    XLOG_ASSERT(lsar->external());
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	XLOG_ASSERT(lsar->external());
+	break;
+    case OspfTypes::V3:
+	XLOG_ASSERT(lsar->external() || (!lsar->known() && lsar->as_scope()));
+	break;
+    }
     XLOG_ASSERT(!lsar->get_self_originating());
 
     update_lsa(lsar);

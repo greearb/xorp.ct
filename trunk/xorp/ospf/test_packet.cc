@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.52 2007/02/16 22:46:43 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.53 2007/02/18 10:57:49 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -1115,6 +1115,10 @@ router_lsa_print(TestInfo& info)
     populate_router_lsa(rlsa, OspfTypes::V3);
 
     DOUT(info) << rlsa->str() << endl;
+    XLOG_ASSERT(rlsa->known());
+    XLOG_ASSERT(!rlsa->link_local_scope());
+    XLOG_ASSERT(rlsa->area_scope());
+    XLOG_ASSERT(!rlsa->as_scope());
 
     delete rlsa;
 
@@ -1135,6 +1139,10 @@ network_lsa_print(TestInfo& info)
     populate_network_lsa(nlsa, OspfTypes::V3);
 
     DOUT(info) << nlsa->str() << endl;
+    XLOG_ASSERT(nlsa->known());
+    XLOG_ASSERT(!nlsa->link_local_scope());
+    XLOG_ASSERT(nlsa->area_scope());
+    XLOG_ASSERT(!nlsa->as_scope());
 
     delete nlsa;
 
@@ -1155,6 +1163,10 @@ summary_network_lsa_print(TestInfo& info)
     populate_summary_network_lsa(snlsa, OspfTypes::V3);
 
     DOUT(info) << snlsa->str() << endl;
+    XLOG_ASSERT(snlsa->known());
+    XLOG_ASSERT(!snlsa->link_local_scope());
+    XLOG_ASSERT(snlsa->area_scope());
+    XLOG_ASSERT(!snlsa->as_scope());
 
     delete snlsa;
 
@@ -1175,6 +1187,10 @@ summary_router_lsa_print(TestInfo& info)
     populate_summary_router_lsa(srlsa, OspfTypes::V3);
 
     DOUT(info) << srlsa->str() << endl;
+    XLOG_ASSERT(srlsa->known());
+    XLOG_ASSERT(!srlsa->link_local_scope());
+    XLOG_ASSERT(srlsa->area_scope());
+    XLOG_ASSERT(!srlsa->as_scope());
 
     delete srlsa;
 
@@ -1195,6 +1211,10 @@ as_external_lsa_print(TestInfo& info)
     populate_as_external_lsa(aelsa, OspfTypes::V3);
 
     DOUT(info) << aelsa->str() << endl;
+    XLOG_ASSERT(aelsa->known());
+    XLOG_ASSERT(!aelsa->link_local_scope());
+    XLOG_ASSERT(!aelsa->area_scope());
+    XLOG_ASSERT(aelsa->as_scope());
 
     delete aelsa;
 
@@ -1215,6 +1235,10 @@ type7_lsa_print(TestInfo& info)
     populate_as_external_lsa(type7, OspfTypes::V3);
 
     DOUT(info) << type7->str() << endl;
+    XLOG_ASSERT(type7->known());
+    XLOG_ASSERT(!type7->link_local_scope());
+    XLOG_ASSERT(type7->area_scope());
+    XLOG_ASSERT(!type7->as_scope());
 
     delete type7;
 
@@ -1228,6 +1252,10 @@ link_lsa_print(TestInfo& info)
     populate_link_lsa(llsa, OspfTypes::V3);
 
     DOUT(info) << llsa->str() << endl;
+    XLOG_ASSERT(llsa->known());
+    XLOG_ASSERT(llsa->link_local_scope());
+    XLOG_ASSERT(!llsa->area_scope());
+    XLOG_ASSERT(!llsa->as_scope());
 
     delete llsa;
 

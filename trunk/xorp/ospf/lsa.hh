@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.97 2007/02/26 03:06:05 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.98 2007/02/26 09:03:33 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -300,6 +300,16 @@ class Lsa {
     virtual uint16_t get_ls_type() const = 0;
 
     /**
+     * OSPFv3 only is this a known LSA.
+     *
+     * @return true if this is a known LSA.
+     */
+    virtual bool known() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return true;
+    }
+
+    /**
      * @return True if this is an AS-external-LSA.
      */
     virtual bool external() const { return false; };
@@ -537,11 +547,18 @@ class Lsa {
 	return _peerid;
     }
 
+
+    // OSPFv3 only, if an LSA is not known and does not have the U-bit
+    // set then it should be treated as if it has Link-local flooding scope.
+
     /**
      * OSPFv3 only Link-local scope.
      */
     bool link_local_scope() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	if (!understood())
+	    return true;
+
 	return 0 == (get_ls_type() & 0x6000);
     }
 
@@ -550,6 +567,9 @@ class Lsa {
      */
     bool area_scope() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	if (!understood())
+	    return false;
+
 	return 0x2000 == (get_ls_type() & 0x6000);
     }
 
@@ -558,7 +578,10 @@ class Lsa {
      */
     bool as_scope() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	return 0x4000 == (get_ls_type() & 0x6000);
+	if (!understood())
+	    return false;
+
+ 	return 0x4000 == (get_ls_type() & 0x6000);
     }
 
     /**
@@ -611,6 +634,19 @@ class Lsa {
      * associated with.
      */
     OspfTypes::PeerID _peerid;
+
+    /**
+     * OSPFv3 only is the U-bit set, i.e. should this LSA be processed
+     * as if it is understood; obviously if we already know about it
+     * it is understood.
+     */
+    bool understood() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	if (known())
+	    return true;
+	else
+	    return 0x8000 == (get_ls_type() & 0x8000);
+    }
 };
 
 /**
