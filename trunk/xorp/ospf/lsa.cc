@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.101 2007/02/26 23:25:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.102 2007/03/19 01:39:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -399,6 +399,8 @@ LsaDecoder::~LsaDecoder()
 
     for(i = _lsa_decoders.begin(); i != _lsa_decoders.end(); i++)
 	delete i->second;
+
+    delete _unknown_lsa_decoder;
 }
 
 void
@@ -414,6 +416,21 @@ LsaDecoder::register_decoder(Lsa *lsa)
 	_min_lsa_length = lsa->min_length();
     else if (_min_lsa_length > lsa->min_length())
 	_min_lsa_length = lsa->min_length();
+}
+
+void
+LsaDecoder::register_unknown_decoder(Lsa *lsa)
+{
+    switch(get_version()) {
+    case OspfTypes::V2:
+	XLOG_FATAL("OSPFv2 does not have an Unknown-LSA decoder");
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+    // Don't allow a registration to be overwritten.
+    XLOG_ASSERT(0 == _unknown_lsa_decoder);
+    _unknown_lsa_decoder = lsa;
 }
 
 Lsa::LsaRef
@@ -436,10 +453,13 @@ LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
     map<uint16_t, Lsa *>::const_iterator i;
     uint16_t type = header.get_ls_type();
     i = _lsa_decoders.find(type);
-    if (i == _lsa_decoders.end())
+    if (i == _lsa_decoders.end()) {
+	if (0 != _unknown_lsa_decoder)
+	    return _unknown_lsa_decoder->decode(ptr, len);
 	xorp_throw(InvalidPacket,
 		   c_format("OSPF Version %u Unknown LSA Type %#x",
 			    version, type));
+    }
     
     Lsa *lsa = i->second;
 
@@ -783,8 +803,6 @@ UnknownLsa::str() const
     if (!valid())
 	output += "INVALID\n";
     output += _header.str();
-
-    output += "\n";
 
     return output;
 }

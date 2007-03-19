@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.53 2007/02/18 10:57:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.54 2007/03/19 01:00:19 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -1688,6 +1688,29 @@ lsa_decoder2(TestInfo& info, OspfTypes::Version version)
     return true;
 }
 
+bool
+lsa_decoder3(TestInfo& info, OspfTypes::Version version)
+{
+    LsaDecoder dec(version);
+    // Install the unknown LSA decoder.
+    UnknownLsa *unknown_lsa_decoder = new UnknownLsa(version);
+    dec.register_unknown_decoder(unknown_lsa_decoder);
+
+    RouterLsa router_lsa(version);
+    populate_router_lsa(&router_lsa, version);
+    router_lsa.encode();
+    size_t len;
+    uint8_t *ptr = router_lsa.lsa(len);
+
+    // The only decoder installed is the unknown decoder which should
+    // be able to handle the Router-LSA.
+    Lsa::LsaRef lsaref = dec.decode(ptr, len);
+
+    DOUT(info) << lsaref->str() << endl;
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1805,6 +1828,7 @@ main(int argc, char **argv)
 	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},
 	{"lsa_decoder2V2", callback(lsa_decoder2, OspfTypes::V2)},
 	{"lsa_decoder2V3", callback(lsa_decoder2, OspfTypes::V3)},
+	{"lsa_decoder3V3", callback(lsa_decoder3, OspfTypes::V3)},
     };
 
     try {

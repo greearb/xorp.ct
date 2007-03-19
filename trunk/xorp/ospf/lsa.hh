@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.99 2007/03/19 01:00:19 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.100 2007/03/19 01:39:53 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -655,17 +655,24 @@ class Lsa {
 class LsaDecoder {
  public:    
     LsaDecoder(OspfTypes::Version version)
-	: _version(version), _min_lsa_length(0)
+	: _version(version), _min_lsa_length(0), _unknown_lsa_decoder(0)
     {}
 
     ~LsaDecoder();
 
     /**
-     * Register the packet/decode routines
+     * Register the LSA decoders, called multiple times with each LSA.
      *
-     * @param packet decoder
+     * @param LSA decoder
      */
     void register_decoder(Lsa *lsa);
+
+    /**
+     * Register the unknown LSA decoder, called once.
+     *
+     * @param LSA decoder
+     */
+    void register_unknown_decoder(Lsa *lsa);
 
     /**
      * Decode an LSA.
@@ -725,6 +732,7 @@ class LsaDecoder {
 					// decoded, excluding LSA header.
 
     map<uint16_t, Lsa *> _lsa_decoders;	// OSPF LSA decoders
+    Lsa * _unknown_lsa_decoder;		// OSPF Unkown LSA decoder
 };
 
 /**
@@ -1078,6 +1086,7 @@ class RouterLink {
 };
 
 class UnknownLsa : public Lsa {
+public:
     UnknownLsa(OspfTypes::Version version)
 	: Lsa(version)
     {}
@@ -2248,6 +2257,14 @@ inline
 void
 initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
 {
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	lsa_decoder.register_unknown_decoder(new UnknownLsa(version));
+	break;
+    }
+
     lsa_decoder.register_decoder(new RouterLsa(version));
     lsa_decoder.register_decoder(new NetworkLsa(version));
     lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
