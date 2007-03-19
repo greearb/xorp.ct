@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.268 2007/03/15 19:15:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.269 2007/03/19 01:00:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -242,6 +242,43 @@ AreaRouter<A>::change_area_router_type(OspfTypes::AreaType area_type)
     startup();
 }
 
+template <>
+bool
+AreaRouter<IPv4>::find_global_address(uint32_t, uint16_t,
+				      LsaTempStore&,
+				      IPv4&) const
+{
+    XLOG_FATAL("Only IPv4 not IPv6");
+
+    return true;
+}
+
+template <>
+bool
+AreaRouter<IPv6>::find_global_address(uint32_t adv, uint16_t type,
+				      LsaTempStore& lsa_temp_store,
+				      IPv6& global_address) const
+{
+    // Find the global interface address of the neighbour that should be used.
+    const list<IntraAreaPrefixLsa *>& nlsai = 
+	lsa_temp_store.get_intra_area_prefix_lsas(adv);
+    list<IPv6Prefix> nprefixes;
+    associated_prefixesV3(type, 0, nlsai, nprefixes);
+    list<IPv6Prefix>::const_iterator ni;
+    for (ni = nprefixes.begin(); ni != nprefixes.end(); ni++) {
+	if (ni->get_la_bit() && 
+	    ni->get_network().prefix_len() == IPv6::ADDR_BITLEN) {
+	    IPv6 addr = ni->get_network().masked_addr();
+	    if (!addr.is_linklocal_unicast() && !addr.is_zero()) {
+		global_address = addr;
+		return true;
+	    }
+	}
+    }
+
+    return false;
+}
+
 template <typename A>
 bool
 AreaRouter<A>::configured_virtual_link() const
@@ -412,22 +449,8 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
 
     // Find the global interface address of the neighbour that should be used.
     IPv6 neighbour_interface_address;
-    const list<IntraAreaPrefixLsa *>& nlsai = 
-	lsa_temp_store.get_intra_area_prefix_lsas(rid);
-    list<IPv6Prefix> nprefixes;
-    associated_prefixesV3(rlsa->get_ls_type(), 0, nlsai, nprefixes);
-    list<IPv6Prefix>::const_iterator ni;
-    for (ni = nprefixes.begin(); ni != nprefixes.end(); i++) {
-	if (ni->get_la_bit() && 
-	    ni->get_network().prefix_len() == IPv6::ADDR_BITLEN) {
-	    IPv6 addr = ni->get_network().masked_addr();
-	    if (!addr.is_linklocal_unicast()) {
-		neighbour_interface_address = addr;
-		break;
-	    }
-	}
-    }
-    if (neighbour_interface_address.is_zero()) {
+    if (!find_global_address(rid, rlsa->get_ls_type(), lsa_temp_store,
+			     neighbour_interface_address)) {
 	XLOG_TRACE(_ospf.trace()._virtual_link,
 		   "No global address for virtual link endpoint %s\n",
 		   pr_id(rid).c_str());
@@ -438,24 +461,13 @@ AreaRouter<IPv6>::check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
     // because if the global address is not being advertised there is
     // no point in trying to bring up the virtual link.
     IPv6 routers_interface_address;
-    const list<IntraAreaPrefixLsa *>& rlsai = 
-	lsa_temp_store.get_intra_area_prefix_lsas(r->get_header().
-						  get_advertising_router());
-    list<IPv6Prefix> rprefixes;
-    associated_prefixesV3(rlsa->get_ls_type(), 0, rlsai, rprefixes);
-    list<IPv6Prefix>::iterator ri;
-    for (ri = rprefixes.begin(); ri != rprefixes.end(); ri++) {
-	if (ri->get_la_bit() &&
-	    ni->get_network().prefix_len() == IPv6::ADDR_BITLEN) {
-	    IPv6 addr = ri->get_network().masked_addr();
-	    if (!addr.is_linklocal_unicast()) {
-		routers_interface_address = addr;
-		break;
-	    }
-	}
-    }
-    if (routers_interface_address.is_zero())
+    if (!find_global_address(r->get_header().get_advertising_router(),
+			     rlsa->get_ls_type(), lsa_temp_store,
+			     routers_interface_address)) {
+	XLOG_TRACE(_ospf.trace()._virtual_link,
+		   "No global address for this router\n");
 	return;
+    }
 
     // Now that everything has succeeded mark the virtual link as up.
     XLOG_ASSERT(0 != _vlinks.count(rid));
@@ -4015,8 +4027,20 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 // 		route_entry.set_cost(ri->weight());
 		route_entry.set_type_2_cost(0);
 
-		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
-		route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
+		if (IPv6::ZERO() == ri->nexthop().get_address_ipv6()) {
+		    IPv6 global_address;
+		    if (!find_global_address(rlsa->get_header().
+					     get_advertising_router(),
+					     rlsa->get_ls_type(),
+					     lsa_temp_store,
+					     global_address))
+			continue;
+		    route_entry.set_nexthop(global_address);
+		    route_entry.set_nexthop_id(OspfTypes::UNUSED_INTERFACE_ID);
+		} else {
+		    route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		    route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
+		}
 		route_entry.set_advertising_router(lsar->get_header().
 						   get_advertising_router());
 		route_entry.set_area(_area);
@@ -4027,6 +4051,8 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 		list<IPv6Prefix>::iterator j;
 		for (j = prefixes.begin(); j != prefixes.end(); j++) {
 		    if (j->get_nu_bit())
+			continue;
+		    if (j->get_network().contains(route_entry.get_nexthop()))
 			continue;
 		    route_entry.set_cost(ri->weight() + j->get_metric());
 		    routing_table_add_entry(routing_table, j->get_network(),
@@ -4044,8 +4070,20 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
  		route_entry.set_cost(ri->weight());
 		route_entry.set_type_2_cost(0);
 
-		route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
-		route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
+		// If this is a virtual link use the global address if
+		// available.
+		if (IPv6::ZERO() == ri->nexthop().get_address_ipv6()) {
+		    IPv6 global_address;
+		    if (!find_global_address(rlsa->get_header().
+					     get_advertising_router(),
+					     rlsa->get_ls_type(),
+					     lsa_temp_store,
+					     global_address))
+			continue;
+		} else {
+		    route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
+		    route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
+		}
 		route_entry.set_advertising_router(lsar->get_header().
 						   get_advertising_router());
 		route_entry.set_area(_area);
@@ -5169,7 +5207,7 @@ bool
 AreaRouter<A>::associated_prefixesV3(uint16_t ls_type,
 				     uint32_t referenced_link_state_id,
 				     const list<IntraAreaPrefixLsa *>& lsai,
-				     list<IPv6Prefix>& prefixes)
+				     list<IPv6Prefix>& prefixes) const
 {
     list<IntraAreaPrefixLsa *>::const_iterator i;
     for (i = lsai.begin(); i != lsai.end(); i++) {
@@ -5733,17 +5771,24 @@ AreaRouter<A>::routing_router_link_p2p_vlinkV3(Spt<Vertex>& spt,
     // If the src is the origin then set the address of the
     // dest. This is the nexthop address from the origin.
     if (src.get_origin()) {
-	// Find the nexthop address from the router's Link-LSA. If the
-	// nexthop can't be found then there is no point putting
-	// this router into the graph. If this is a directly adjacent
-	// Virtual link then still use the Link-local address.
-	A interface_address;
-	if (!find_interface_address(rl.get_neighbour_router_id(),
-				    rl.get_neighbour_interface_id(),
-				    interface_address))
-	    return;
-	dst.set_address(interface_address);
-	dst.set_nexthop_id(rl.get_interface_id());
+	if (RouterLink::p2p == rl.get_type()) {
+	    // Find the nexthop address from the router's Link-LSA. If the
+	    // nexthop can't be found then there is no point putting
+	    // this router into the graph. If this is a directly adjacent
+	    // Virtual link then still use the Link-local address.
+	    A interface_address;
+	    if (!find_interface_address(rl.get_neighbour_router_id(),
+					rl.get_neighbour_interface_id(),
+					interface_address))
+		return;
+	    dst.set_address(interface_address);
+	    dst.set_nexthop_id(rl.get_interface_id());
+	} else if (RouterLink::vlink == rl.get_type()) {
+	    dst.set_address(IPv6::ZERO());
+	    dst.set_nexthop_id(OspfTypes::UNUSED_INTERFACE_ID);
+	} else {
+	    XLOG_FATAL("Unexpected router link %s", cstring(rl));
+	}
     }
     if (!spt.exists_node(dst)) {
 	spt.add_node(dst);

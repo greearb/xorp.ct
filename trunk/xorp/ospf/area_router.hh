@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.127 2007/02/27 06:28:10 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.128 2007/03/13 18:25:51 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -77,6 +77,23 @@ class AreaRouter : public ServiceBase {
     void change_area_router_type(OspfTypes::AreaType area_type);
 
     /**
+     * Given an advertising router and type find a global address if
+     * present in its associated Intra-Area-Prefix-LSA if present,
+     * OSPFv3 only.
+     *
+     * @param adv advertising router.
+     * @param type of Intra-Area-Prefix-LSA (Router-LSA or
+     * Network-LSA), Router-LSA expected.
+     * @param lsa_temp_store store of all possible Router-LSAs.
+     * @param global_address (out) argument.
+     *
+     * @return true if global address found.
+     */
+    bool find_global_address(uint32_t adv, uint16_t type,
+			     LsaTempStore& lsa_temp_store,
+			     A& global_address) const;
+
+    /**
      * @return true if any virtual links are configured through this area.
      */
     bool configured_virtual_link() const;
@@ -109,7 +126,8 @@ class AreaRouter : public ServiceBase {
      * Check this node to see if its a virtual link endpoint.
      *
      * @param rc node under consideration.
-     * @param router this router's Router-LSA.
+     * @param lsar RouterLSA belonging to the router under consideration.
+     * @param lsa_temp_store store of all possible Router-LSAs.
      */
     void check_for_virtual_linkV3(const RouteCmd<Vertex>& rc,
 				  Lsa::LsaRef lsar,
@@ -119,6 +137,7 @@ class AreaRouter : public ServiceBase {
      * End looking through the list of routers for a virtual link endpoint.
      */
     void end_virtual_link();
+
 
     /**
      * Given two LSAs find the interface address of the destination
@@ -1256,7 +1275,7 @@ class AreaRouter : public ServiceBase {
     bool associated_prefixesV3(uint16_t ls_type,
 			       uint32_t referenced_link_state_id,
 			       const list<IntraAreaPrefixLsa *>& lsai,
-			       list<IPv6Prefix>& prefixes);
+			       list<IPv6Prefix>& prefixes) const;
 
     /**
      * RFC 3101 Section 2.5. (6) (e) Calculating Type-7 AS external routes.

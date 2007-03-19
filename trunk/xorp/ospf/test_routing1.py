@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.23 2007/02/21 03:20:18 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.24 2007/03/14 08:12:43 atanu Exp $
 
 import getopt
 import sys
@@ -759,7 +759,7 @@ def r7V3(verbose, protocol):
 
     RT1_INTRA_R = "IntraAreaPrefixLsa lsid 0.0.0.0 adv 0.0.0.1 \
     rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.1 \
-    IPv6Prefix 5f00::0001/128 metric 1 \
+    IPv6Prefix 5f00::0001/128 metric 1 LA-bit \
     "
 
     RT2 = "RouterLsa bit-E V6-bit E-bit R-bit lsid 42.0.0.1 adv 0.0.0.2 \
@@ -770,7 +770,8 @@ def r7V3(verbose, protocol):
 
     RT2_INTRA_R = "IntraAreaPrefixLsa lsid 0.0.0.0 adv 0.0.0.2 \
     rlstype RouterLsa rlsid 0.0.0.0 radv 0.0.0.2 \
-    IPv6Prefix 5f00::0002/128 metric 1 \
+    IPv6Prefix 5f00::0002/128 metric 1 LA-bit \
+    IPv6Prefix 5f00:0000:c001:0200::/56 metric 1 \
     "
 
     command = """
@@ -785,7 +786,7 @@ add %s
 add %s
 compute 0.0.0.0
 verify_routing_table_size 1
-verify_routing_entry  5f00::0002/128 fe80:0001::2 2 false false
+verify_routing_entry  5f00:0000:c001:0200::/56 5f00::0002 2 false false
 """ % (RT1,RT1_LINK,RT1_INTRA_R,
        RT2,RT2_LINK,RT2_INTRA_R)
 
