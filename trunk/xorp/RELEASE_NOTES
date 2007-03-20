@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.166 2007/02/28 01:53:50 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.167 2007/03/14 18:55:06 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -168,20 +168,9 @@ Release 1.4 (2006/03/15)
       each interface, this restriction will be removed in the future.
 
     - The OSPFv3 configuration allows multiple instances to be configured
-      however only one instance will be created.
+      however only one instance will be created. Configuring multiple
+      OSPFv3 instances is guaranteed to cause problems.
 
-    - For OSPFv3 only one global address can be set on an interface,
-      multiple addresses will be allowed in the final release. Please
-      note that the configuration will change when multiple addresses
-      are supported.
-
-    - The OSPFv3 specification requires that unknown LSAs should be
-      processed, currently unknown LSAs are incorrectly considered an
-      error. Unknown LSAs will be handled in the final release.
-
-    - OSPFv3 has support for virtual links but adjacencies are not
-      always correctly formed.
-      
     - Bug fix related to the processing of previously generated LSAs
       on startup has been fixed. Restarting a router that was the
       designated router could exhibit this problem.
