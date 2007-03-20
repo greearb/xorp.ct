@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.35 2006/08/25 21:14:57 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.36 2006/09/15 18:49:25 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -132,12 +132,6 @@
         http://www.xorp.org/bugzilla/query.cgi
 
   BGP:
-    - If the RIB bug above (failure to delete an existing route) is
-      triggered by BGP, then the deletion failure error received by
-      BGP from the RIB is considered by BGP as a fatal error. This is
-      not a BGP problem, but a RIB problem that will be fixed in the
-      future.
-
     - The BGP configuration mandates that an IPv4 nexthop must be
       supplied. Unfortunately it is necessary to provide an IPv4 nexthop
       even for an IPv6 only peering. Even more unfortunately it is not
