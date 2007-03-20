@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.10 2006/04/12 02:44:53 pavlin Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.11 2006/08/02 05:31:48 pavlin Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -12,18 +12,18 @@ is also an IGP however OSPF and IS-IS have better scaling properties.
 
 The initial OSPF specification is RFC 2328 OSPF Version 2 or
 OSPFv2. This specification is specific to IPv4. There is a later
-specification RFC 2740 OSPF for IPv6, which happens to be Version 3 or
-OSPFv3.
+specification draft-ietf-ospf-ospfv3-update-14.txt OSPF for IPv6,
+which happens to be Version 3 or OSPFv3.
 
 The specifications for OSPFv2 and OSPFv3 are fairly similar the
 obvious difference is the handing of IPv4 and IPv6 addresses.
 
-The XORP implementation of OSPF supports both OSPFv2 and OSPFv3
-however only OSPFv2 is currently available in Release-1.2.
+The XORP implementation of OSPF supports both OSPFv2 and OSPFv3.
 
-For consistency with our other protocols OSPFv2 is {\tt ospf4} in the
-configuration files, the {\tt 4} in {\tt ospf4} refers to the IPv4
-address family.
+For consistency with our other protocols OSPFv2 is {\tt ospf4} and
+OPSFv3 is {\tt ospf6} in the configuration files, the {\tt 4} in {\tt
+ospf4} refers to the IPv4 address family and {\tt 6} in {\tt ospf6}
+refers to the IPv6 address family.
 
 \subsection{Key OSPF Concepts}
 
@@ -74,6 +74,7 @@ have a small number of internal routes and default routes to the
 XORP OSPF complies with the following standards:
 \begin{description}
 \item{\bf RFC 2328}: OSPF Version 2
+\item{\bf draft-ietf-ospf-ospfv3-update-14.txt} OSPF for IPv6
 \item{\bf RFC 3101}: The OSPF Not-So-Stubby Area (NSSA) Option
 \end{description}
 
@@ -94,6 +95,7 @@ protocols \{\\
 \>ospf4 \{\\
 \>\>targetname: {\it text}\\
 \>\>router-id: {\it IPv4}\\
+\>\>rfc1583-compatibility: {\it bool};
 \>\>ip-router-alert: {\it bool}\\
 \\
 \>\>traceoptions \{\\
@@ -196,14 +198,127 @@ xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 }
 \vspace{0.1in}
 
+\newpage
+The configuration syntax for XORP OSPFv3 is given below.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>ospf6 \{\\
+\>\>targetname: {\it text}\\
+\>\>router-id: {\it IPv4}\\
+\>\>ip-router-alert: {\it bool}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag \{\\
+\>\>\>\>all \{\\
+\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>area {\it IPv4} \{\\
+\>\>\>area-type: {\it text}\\
+\\
+\>\>\>default-lsa \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\>metric: {\it uint(0..0xffffff)}\\
+\>\>\>\}\\
+\\
+\>\>\>summaries \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\>\>\>area-range {\it IPv6Net} \{\\
+\>\>\>\>advertise: {\it bool}\\
+\>\>\>\}\\
+\>\>\>virtual-link {\it IPv4} \{\\
+\>\>\>\>transit-area: {\it ipv4}\\
+\>\>\>\>hello-interval: {\it uint(1..65535)}\\
+\>\>\>\>router-dead-interval: {\it uint(1..65535)}\\
+\>\>\>\>retransmit-interval: {\it uint(1..65535)}\\
+\>\>\>\>transit-delay: {\it uint(0..3600)}\\
+\>\>\>\}\\
+\\
+%{\rm continued overleaf....}
+%\end{tabbing}
+%\end{alltt}
+%\end{minipage}
+%}
+%\vspace{0.1in}
+
+%\newpage
+%\vspace{0.1in}
+%\noindent\framebox[\textwidth][l]{\scriptsize
+%\begin{minipage}{6in}
+%\begin{alltt}
+%\begin{tabbing}
+%xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+\>\>\>interface {\it text} \{\\
+\>\>\>\>link-type: {\it text}\\
+\\
+\>\>\>\>vif {\it text} \{\\
+\\
+\>\>\>\>\>address {\it IPv6} \{\\
+\>\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\>priority: {\it uint(0..255)}\\
+\>\>\>\>\>hello-interval: {\it uint(1..65535)}\\
+\>\>\>\>\>router-dead-interval: {\it uint(1..4294967295)}\\
+\>\>\>\>\>interface-cost: {\it uint(1..65535)}\\
+\>\>\>\>\>retransmit-interval: {\it uint(1..65535)}\\
+\>\>\>\>\>transit-delay: {\it uint(0..3600)}\\
+\>\>\>\>\>passive: {\it text}\\
+\>\>\>\>\>neighbor  {\it IPv4}\{\\
+\>\>\>\>\>\>router-id: {\it IPv4}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>import: {\it text} \\
+\>\>export: {\it text}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
 \noindent
+The OSPFv2 and OSPFv3 configurations are practically equivalent with
+the following exceptions:
+\begin{itemize}
+\item OSPFv3 does not support authentication in the protocol itself.
+\item OSPFv2 supports a single address per interface/vif, therefore all
+parameters are set below the address node.
+\item OSPFv3 supports multiple addresses per interface/vif, therefore
+parameters are set below the vif node.
+\item OSPFv3 does not require any addresses to be configured in which
+case it will advertise all global addresses configured on the
+interface/vif. If any addresses are configured in OSPFv3 then only
+those addresses will be advertised. If it is required that no
+addresses should be advertised then configuring an address and
+disabling it, will stop any global addresses being advertised.
+\item OSPFv3 in release 1.4 requires that a link local address is
+configured on any interface/vif on which it is configured to run.
+\end{itemize}
+
 The configuration parameters are used as follows:
 \begin{description}
 \item{\tt protocols}: This delimits the configuration for all routing
   protocols in the XORP router configuration.  It is mandatory that
   OSPF configuration is under the {\stt protocols} node in the
   configuration.
-\item{\tt ospf4}: This delimits the OSPF configuration part of the XORP
+\item{\tt ospf4}: This delimits the OSPFv2 configuration part of the XORP
+  router configuration.
+\item{\tt ospf6}: This delimits the OSPFv3 configuration part of the XORP
   router configuration.
 \item{\tt targetname}: This is the name for this instance of OSPF.  It
   defaults to ``{\stt ospfv2}'', and it is not recommended that this
@@ -449,16 +564,45 @@ protocols \{\\
 }
 
 This configuration is an example of the minimal possible
-configuration. OSPF is running in the {\tt BACKBONE} area, on a single
+configuration. OSPFv2 is running in the {\tt BACKBONE} area, on a single
 interface/vif the {\tt router-id} is set to the interface/vif address.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>ospf6 \{\\
+\>\>router-id: 10.10.10.10\\
+\\
+\>\>area 0.0.0.0 \{\\
+\>\>\>interface dc0 \{\\
+\>\>\>\>vif dc0 \{\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+This configuration is an example of the minimal possible
+configuration. OSPFv3 is running in the {\tt BACKBONE} area, on a single
+interface/vif the {\tt router-id} is set to an an IPv4 address owned
+by the router.
 
 \newpage
 \section{Monitoring OSPF}
 
-On a router running OSPF, the OSPF routing state can be displayed using
-the {\stt show ospf4} operational-mode command.  Information is available
-about the per area LSA databases and the status of OSPF adjacencies.
-used.
+On a router running OSPF, the OSPF routing state can be displayed
+using the {\stt show ospf4} or {\stt show ospf6} operational-mode
+command. Examples are given below of ospf4 commands equivalent ospf6
+commands are available. Information is available about the per area
+LSA databases and the status of OSPF adjacencies.
 
 As always, command completion using $<$TAB$>$ or ? will display the
 available sub-commands and parameters:
