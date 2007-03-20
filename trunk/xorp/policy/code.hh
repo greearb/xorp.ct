@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code.hh,v 1.6 2006/12/07 20:00:08 pavlin Exp $
+// $XORP: xorp/policy/code.hh,v 1.7 2007/02/16 22:46:52 pavlin Exp $
 
 #ifndef __POLICY_CODE_HH__
 #define __POLICY_CODE_HH__
@@ -220,7 +220,7 @@ public:
      * Add a tag.
      *
      * @param tag the tag to add.
-     * @is_redist_tag if true, the tag is used for route redistribution
+     * @param is_redist_tag if true, the tag is used for route redistribution
      * to other protocols.
      */
     void add_tag(uint32_t tag, bool is_redist_tag) {
