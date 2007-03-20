@@ -483,15 +483,16 @@ instead of "disable".
 
 <H4>Open Shortest Path First</H4>
 
-In order to run OSPF Version 2 the "router-id" must be specified, it
-is a unique IPv4 address within the Autonomous System. The smallest IP
-address of an interface belonging to the router is a good choice.
+In order to run OSPF Version 2 or 3 the "router-id" must be
+specified, it is a unique IPv4 address within the Autonomous
+System. The smallest IP address of an interface belonging to the
+router is a good choice.
 <P>
 OSPF splits networks into areas so an "area" must be configured.
 
 <P>
 Configure one or more of the routers configured interface/vif/address
-in this area.
+in this area. In the OSPF Version 3 case an address is not required.
 
 <P><U>Note</U>: The 4 in "ospf4" refers to the IPv4 address family.
 
@@ -505,6 +506,23 @@ protocols {
 		vif dc0 {
 		    address 10.10.10.10 {
 		    }
+		}
+	    }
+	}
+    }
+}
+</PRE>
+
+<P><U>Note</U>: The 6 in "ospf6" refers to the IPv6 address family.
+
+<PRE>
+protocols {
+    ospf6 {
+	router-id: 10.10.10.10
+
+	area 0.0.0.0 {
+	    interface dc0 {
+		vif dc0 {
 		}
 	    }
 	}
@@ -986,7 +1004,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.14 2006/10/16 23:25:36 atanu Exp $.
-<br>Generated on 15/Mar/2007 at 16:23:24.</em>
+<br>Generated on 20/Mar/2007 at 16:15:41.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
