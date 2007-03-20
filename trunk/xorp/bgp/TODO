@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.17 2006/03/09 07:11:22 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.18 2006/08/02 14:12:25 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -196,40 +196,3 @@ too close to the 1.1-RC to make this change now.
 16) IGP i.e. RIB interactions.
 17) Comparison against ideal.
 
------------------------------- OLD ------------------------------
-Current work:
-Go through each packet in order to ensure that it meets the spec for decoding/encoding.
-- open packet
-	look at the data pointers comming in since the decode is wrong
-	put the peer data into the system and hence sort out the timers
-- keepalive packet
-- update packet
-- notification packet
-- find current authentication parameter types
-
-General TODO
-
-- In the socket code connect needs to be make non-blocking.
-- retry a connection when the peer isn't listening, instead of exiting.
-- limit recursion in BGPPeerFSM , use counter perhaps
-- defaults to switch statemates , particularly in get_packet. (see pathattrib for example)
-- tabs in all files need to be defaults
-- check return values on writev (a peer may not be dead because the transmit buffer is full due to congestion control, rather than dropping)
-- sockets should be non-blocking, particularly for use with peers which aren't keeping up
-- look at increasing the kernel buffer for a problematic socket and if this fails then drop peering.
-- look at adding buffering into socket class, add high water mark on the buffer and a timer, possibly informing via exception.
-- remove 1 second waits 
-- look at switching data structures to use STL
-- look at memory handling in packets
-- add proper destructors
-- check two sessions per peer problem.
-
-Packets
-
-General packets:
-- Marker is set and retrieved, but never used. This needs to be looked into.
-- Exception throwing for invalid length and type (BGPSocket.cc or .hh)
-Open message:
-- Version - set, when it is being evaluated by BGP need to check  
-- Holdtime - need to calculate and process
-- Authentication parameter - need to find more information on
