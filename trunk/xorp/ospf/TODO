@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.72 2007/03/19 00:51:31 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.73 2007/03/19 01:00:18 atanu Exp $
 #
 
 TODO
@@ -11,12 +11,6 @@ in the standard header decode code.
 
 2) I don't think that the LSA routines check their own type field either.
 
-16) A data description packet carries a number of LSA headers. There
-is a count in the packet of the number of LSA header. We don't store
-this information as its unnecessary. Need to verify that we actually
-write this information out when encoding a packet. Should perhaps also
-check it on input rather than just stepping over it.
-
 17) When decoding a link state update packet if an LSA is not
 decodable either due to being an unknown type or some other problem
 the whole packet is discarded. Only the bad LSA should be dropped. See
@@ -24,10 +18,6 @@ section 13 of the RFC.
 
 19) The delayed ACKs are not delayed. The peer should probably hold a
 delayed ack list that is transmitted ocassionally.
-
-26) send_lsa() has not been tested.
-
-27) update_router_linksV2(), the DR_other case looks bogus.
 
 28) An LSA can be looked up by type,id and advertising router
 (find_lsa()). In an exception to this Network-LSAs can be looked up by
@@ -58,20 +48,6 @@ that violates the 1 second rule.
 
 This problem has been partially fixes by firing the delay timer when a
 self originating LSA is requested in a link state request packet.
-
-31) AS-External-Lsa.
-It is possible that when addresses are being read in with copy_in that
-network byte order issues are not being correctly handled. 
-
-32) The IP checksum is consistently mis-used through the code. To fix
-this problem the checksum is returned byte-swapped. Fix the code to
-deal with the checksum correctly.
-
-34) When the code was originally written the interface manager was not
-hooked into the code. Which meant that the prefix length and MTU had
-to be passed in from the config file. These values are still passed in
-but ignored. Starting from the XRLs go through and remove the passing
-of the prefix length and MTU.
 
 36) There is a queue to which route adds and deletes are added. The
 queue does not handle replace or discard routes. Plus policy tags
@@ -144,20 +120,6 @@ the system.
 In order to implement the push_routes the network, nexthop, metric and
 possibly policytags must be saved in a separate list, Or the
 AS-External-LSA could be augmented to hold the original values.
-
-50) When computing transit area routes, routes can only be installed
-if a backbone or inter area route exists. If a better route is found
-the cost and nexthop of the original route are overriden. Thus when
-the orignal route is withdrawn the lower cost route will be
-automatically withdrawn. To make sure the transit route will be
-re-applied *temporarily* whenever a routing computation happens on the
-backbone all other areas also have routing computations run. The
-recomputation should only occur if the other areas are actually
-transit areas. Even better the internal routing entry code could be
-taught about this type of transit derived route.
-  
-51) OSPF has its own IP checksum routine switch to using the routine
-in libproto.
 
 52) When implementing OSPFv3 the Vertex class was modified to hold a
 list of all the Router-LSAs that a router had generated. Currently
