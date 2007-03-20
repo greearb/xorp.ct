@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.38 2007/02/23 21:09:49 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.39 2007/03/12 10:16:05 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -209,10 +209,6 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      *  @param vifname virtual interface owning address.
      *
      *  @param addr the address to be added.
-     *
-     *  @param prefix_len the prefix length XXX temporary.
-     *
-     *  @param mtu maximum transmission unit XXX temporary.
      *
      *  @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
      */
