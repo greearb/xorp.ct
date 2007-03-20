@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.9 2006/11/07 00:41:30 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.10 2007/02/16 22:46:02 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -496,7 +496,7 @@ public:
      * @param do_checksum if true, compute and set the checksum in the IPv4
      * header, otherwise reset it to zero.
      * @param error_msg the error message (if error).
-     * @raturn XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 		 bool do_checksum, string& error_msg) const;
