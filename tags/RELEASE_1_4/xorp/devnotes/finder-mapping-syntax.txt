@@ -1,0 +1,40 @@
+
+
+
+The Finder provides information about how to contact entities within a
+system of XORP processes.  For purposes of flexibility and
+compatibility, it is desireable to be able to map one XRL into
+another, or into a series of XRL's.  As a simple example of
+motivation, envisage a situation where a developer wants to trace when
+a particular xrl is invoked without any recompilation.  By remapping
+the XRL in question to a logging XRL and followed by the original XRL,
+this can be achieved with no compilation.
+
+* Syntax for mapping
+
+The remapping might be communicated to the finder with:
+
+finder://fea/interface_enable?running:int=$val {
+	# Call another XRL
+	finder://logger/record_xrl_call?name:txt="fea/interface_enable"
+	# Call original XRL with arguments provided
+	finder://fea/interface_enable?running:int=$val 
+}
+
+This example re-maps the forwarding engine abstraction (fea)'s method
+interface_enable to an alternate routine that logs the xrl invocation
+and then calls the original interface_enable method.  The dollar
+syntax allows for storage and subsitution of values, here the xrlatom
+named "running" and type "int" has it's value propagated.
+
+We can do specialization overloading too, for instance if we only
+wanted to overrider interface_enable when the value of running was 1,
+we could write:
+
+finder://fea/interface_enable?running:int=1 {
+	# Call another XRL
+	finder://logger/record_xrl_call?name:txt="fea/interface_enable"
+	# Call original XRL with arguments provided
+	finder://fea/interface_enable?running:int=1 
+}
+

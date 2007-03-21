@@ -1,0 +1,120 @@
+--- rc	Mon May 31 03:26:47 2004
++++ rc.diff	Mon May 31 03:30:15 2004
+@@ -134,97 +134,12 @@
+ 	. /etc/rc.early
+ fi
+ 
+-case ${bootmode} in
+-autoboot)
+-	echo 'Automatic boot in progress...'
+-	fsck -p
+-	case $? in
+-	0)
+-		;;
+-	2)
+-		exit 1
+-		;;
+-	4)
+-		reboot
+-		echo 'Reboot failed... help!'
+-		exit 1
+-		;;
+-	8)
+-		case ${fsck_y_enable} in
+-		[Yy][Ee][Ss])
+-			echo 'File system preen failed, trying fsck -y . . .'
+-			fsck -y
+-			case $? in
+-			0)
+-				;;
+-			*)
+-			echo 'Automatic file system check failed . . . help!'
+-				exit 1
+-				;;
+-			esac
+-			;;
+-		*)
+-			echo 'Automatic file system check failed . . . help!'
+-			exit 1
+-			;;
+-		esac
+-		;;
+-	12)
+-		echo 'Reboot interrupted'
+-		exit 1
+-		;;
+-	130)
+-		# interrupt before catcher installed
+-		exit 1
+-		;;
+-	*)
+-		echo 'Unknown error in reboot'
+-		exit 1
+-		;;
+-	esac
+-	;;
+-*)
+-	echo 'Skipping disk checks ...'
+-	;;
+-esac
+-
+-set -T
+-trap "echo 'Reboot interrupted'; exit 1" 3
+-
+-# root normally must be read/write, but if this is a BOOTP NFS
+-# diskless boot it does not have to be.
+-#
+-case ${root_rw_mount} in
+-[Nn][Oo] | '')
+-	;;
+-*)
+-	if ! mount -u -o rw /; then
+-		echo 'Mounting root filesystem rw failed, startup aborted'
+-		exit 1
+-	fi
+-	;;
+-esac
+-
+-umount -a >/dev/null 2>&1
+-
+-# If using diskless, run custom disk mounting function here
+-#
+-if [ -n "${diskless_mount}" -a -r "${diskless_mount}" ]; then
+-	sh ${diskless_mount}
+-else
+-# otherwise mount everything except nfs filesystems.
+-	mount -a -t nonfs
++if [ -r /etc/rc.live ]; then
++        echo -n 'Iniciando LiveCD:'
++        sh /etc/rc.live
++        echo '.'
+ fi
+ 
+-case $? in
+-0)
+-	;;
+-*)
+-	echo 'Mounting /etc/fstab filesystems failed, startup aborted'
+-	exit 1
+-	;;
+-esac
+-
+ adjkerntz -i
+ 
+ purgedir() {
+@@ -528,15 +443,6 @@
+ case ${lpd_enable} in
+ [Yy][Ee][Ss])
+ 	echo -n ' printer';	${lpd_program:-/usr/sbin/lpd} ${lpd_flags}
+-	;;
+-esac
+-
+-case ${sshd_enable} in
+-[Yy][Ee][Ss])
+-	if [ -x ${sshd_program:-/usr/sbin/sshd} ]; then
+-		echo -n ' sshd';
+-		${sshd_program:-/usr/sbin/sshd} ${sshd_flags}
+-	fi
+ 	;;
+ esac
+ 

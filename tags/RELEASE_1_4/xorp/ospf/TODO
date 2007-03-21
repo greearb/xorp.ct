@@ -1,0 +1,166 @@
+#
+# $XORP: xorp/ospf/TODO,v 1.73 2007/03/19 01:00:18 atanu Exp $
+#
+
+TODO
+~~~~
+
+1) None of the packet decode routines check the type field in the header
+against their own type field. Could probably put the approriate check
+in the standard header decode code.
+
+2) I don't think that the LSA routines check their own type field either.
+
+17) When decoding a link state update packet if an LSA is not
+decodable either due to being an unknown type or some other problem
+the whole packet is discarded. Only the bad LSA should be dropped. See
+section 13 of the RFC.
+
+19) The delayed ACKs are not delayed. The peer should probably hold a
+delayed ack list that is transmitted ocassionally.
+
+28) An LSA can be looked up by type,id and advertising router
+(find_lsa()). In an exception to this Network-LSAs can be looked up by
+id only (find_network_lsa()). The two lookups are currently linear
+scans of the database. Add a map for each lookup type to speed up
+lookup.
+
+29) In xrl_target.cc calls are made directly to the peer_manager,
+equivalent calls exist in the ospf class and should be used in
+preference.
+
+30) It is a requirement that LSAs should not be originated more
+frequently than MinLSInterval (5 seconds). It is also a requirement
+that an LSA is not accepted if it arrives more frequently than
+MinLSArrival (1 second). Generated LSAs are added to the delay queue
+in the area_router. If an LSA arrives more frequently than 1 second it
+is ignored. When as part of the database exchange process an LSA is
+requested it is returned immediately (not delayed by 5 seconds). As
+soon as routers become adjacent a new Router-LSA is generated. This
+Router-LSA is ignored because in the regression tests it typically
+arrives before 1 second. The retransmission of the Router-LSA
+eventually fixes the problem. We should probably delay the sending of
+the Router-LSA somehow after an adjacency is formed. Adding a
+timestamp to LSAs could be used to stop this problem or the delay
+queue could be prodded when a self originated LSA is requested. We
+could also perhaps be a little more permissive about the first LSA
+that violates the 1 second rule.
+
+This problem has been partially fixes by firing the delay timer when a
+self originating LSA is requested in a link state request packet.
+
+36) There is a queue to which route adds and deletes are added. The
+queue does not handle replace or discard routes. Plus policy tags
+should be passed in somehow.
+
+37) The original design did not leave MaxAge LSAs in the
+database. When an LSA reached MaxAge it was removed from the database
+and existed only in retransmission lists. If an LSA was received which
+seemed to be from a previous incarnation of OSPF it had its age set to
+MaxAge and was fired out, also not being added to the database.  If
+while a MaxAge LSA is on the retransmission only, either a new LSA
+such as a Network-LSA is generated or an updated LSA arrives a second
+LSA can be created with the same <Type,ID,ADV> tuple. Two LSAs can
+exist on the retransmission list. Leaving the a MaxAge LSA in the
+database solves both problems but doesn't deal with when to purge the
+LSA. The indicator that an LSA can be purged is when its NACK list
+becomes empty.
+
+Currently the MaxAge LSAs are purged in valid_entry_database() this
+method is called to build the list of LSAs during database exchange.
+
+Remove the purge code from valid_entry_database() make it and
+subsequent() const again. When a MaxAge LSA is removed from the
+retransmission list and the NACK list becomes empty have it callback
+to the area code from the peer code to remove the LSA from the
+database. One possible implementation is to actually put a callback in
+the LSA itself that the peer code invokes.
+
+If MAX_AGE_IN_DATABASE in database is not defined then a check is now
+made for the duplicate LSA in the retransmission list.
+
+It might be appropriate to leave MaxAge LSAs on the retransmission list.
+
+If this fix works then do away with MAX_AGE_IN_DATABASE.
+
+40) When the adding of routes is more robust change the XLOG_ERROR to
+an XLOG_FATAL in route_command_done().
+
+44) The packet header encode and decode routines should use AUTH_* consts
+not hard coded numbers.
+
+47) During shutdown the method PeerManager<A>::virtual_link_endpoint
+gets called. The vlink database has knowledge of a peer that has been
+removed and a warning is printed. Modify the code to remove peerids
+from the vlink database when a peer is removed.
+
+48) If the user disables an address that OSPF is using via the xorpsh
+then the interface/peer is taken down. Part of the interface down
+process involves leaving multicast groups. When leaving a multicast
+group in IPv4 the interface address is used as the key to the
+kernel. Disabling an address via the xorpsh removes the address from
+the kernel the subsequent attempt to leave the multicast group fails
+generating an error. OSPF in the IPv4 case should check if the address
+(key) is still enabled before attempting to leave a group.
+
+49) When a policy is modified OSPF receives a push_routes call. All
+routes that are sent to the RIB are re-filtered, the import policies.
+
+The routes that are introduced to OSPF via an export policy are
+currently not re-filtered. A method External<A>::push_routes() exists
+but currently does nothing. If the "then" part of an export policy is
+changed such as setting the nexthop, or the ebit or the tag. The route
+is currently pushed through the system again so the filter can be
+re-run. Currently no functionality seems to be lost by not
+implementing this method, as the routes are always pushed through the
+system anyway. For completeness the method should be implemented for
+the day that a policy change does not force all routes back through
+the system.
+
+In order to implement the push_routes the network, nexthop, metric and
+possibly policytags must be saved in a separate list, Or the
+AS-External-LSA could be augmented to hold the original values.
+
+52) When implementing OSPFv3 the Vertex class was modified to hold a
+list of all the Router-LSAs that a router had generated. Currently
+only one entry is ever placed on the list. In order to support
+updating the list the SPT code will have to be modified to return a
+node. The list of Router-LSAs is actually held in LsaTempStore. Either
+the list should be updated in the Vertex class or it should be
+reverted to holding a single entry. My preference is reverting to
+holding a single entry.
+
+53) The program in test_packet.cc contains a number of asserts of the form:
+XLOG_ASSERT(rlsa->known());
+XLOG_ASSERT(!rlsa->link_local_scope());
+XLOG_ASSERT(rlsa->area_scope());
+XLOG_ASSERT(!rlsa->as_scope());
+One for each LSA type, replace these asserts with a proper test for
+known and scopting, note this is OSPFv3 only.
+ 
+Possible issues
+~~~~~~~~~~~~~~~
+
+1) Received hello packets are demultiplex on the source address of the
+packet or on the router ID, depending on the linktype that the packet
+arrived on. If a packet is being demultipled on the source address and
+the router ID changes is this likely to be a problem?
+
+2) In the OSPFv2 case when generating router links the state backup is
+treated the same as DR_other, which generates links. Previously the
+backup state generated no links. In the OSPFv3 case in state backup we
+generate no links. Its not clear what the correct behaviour should be.
+
+3) All LSAs carried in Link State Update Packets now have
+InfTransDelay added to them. InfTransDelay is being added to self
+originated LSAs as well is this correct?
+
+4) The Network-LSAs are not explicitly stored in the area router. It
+*may* improve performance to store a reference to any Network-LSAs in
+the PeerState data structure.
+
+5) The set_maxage() method on an LSA sets the age to MaxAge. It does
+not however manipulate the origination time. Therefore any subsequent
+erroneous calls to update_age() may revive an LSA. It may be safer to
+hold a separate flag in an LSA to stop the age being updated once it
+has been set to MaxAge.

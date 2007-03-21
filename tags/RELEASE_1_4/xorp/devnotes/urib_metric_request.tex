@@ -1,0 +1,46 @@
+\documentclass[11pt]{article}
+\usepackage{times}
+\usepackage{psfig}
+\usepackage{amsmath}
+%\usepackage{doublespace}
+\textwidth 6.5in
+\topmargin 0.0in
+\textheight 8.5in
+\headheight 0in
+\headsep 0in
+\oddsidemargin 0in
+%\date{}
+\title{Concept of XORP URIB Metric Interface}
+\author{Adam Greenhalgh}
+%\twocolumn
+\begin{document}
+\parsep 0ex
+\parskip 1.0ex
+\parindent 0em
+\noindent
+\maketitle                            
+\section{Introduction}
+This document describes the concept of a URIB metric interface. This interface to the URIB allows routing protocols to register an interest in an IGP metric associated with a particular route and to be informed if it changes. This interfaces is designed to allow protocols such as BGP which makes decisions based upon metrics to be able to reevaluate decisions if the data they made the decision on has changed.
+\section{Overview}
+The exact details of the interface need to be fleshed out but the interface will define two procedures in the URIB:-
+\newline
+\newline
+{\em uint32\_t reg\_interest\_in\_IGP\_metric(uint32\_t route)}
+\newline
+{\em void unreg\_interest\_in\_IGP\_metric(uint32\_t route) }
+\newline
+\newline
+The return value from register procedure is the current value of the metric which is associated with a route.
+
+An infinite metric is defined as 0xFFFFFFFF. 
+
+\section{BGP and URIB interaction}
+BGP passes any routes it has learnt post any internal BGP decision process to the URIB to add to its RIB. The URIB can be configured to pass routing information learnt from other routing protocols or the routers configuration to BGP along with the associated metric. Changes in the routing table are communicated as deltas to BGP from the URIB, BGP is responsible for maintaining any required state. BGP may also , using the above interface, subscribe to receive updates of when a routing metric changes. In addition to receiving routes from its Peers and the URIB BGP is configured at initalisation time with a set of Routes that it is originating. 
+
+\section{To do}
+The interface to which the URIB talks when informing the routing protocol of a change to the parameter it expressed an interest in needs to be defined. This definition will probably be expressed to some extent in terms of XRL's.
+
+Question : Does BGP receiving a routing update from the URIB with a metric attached mean that it automatically subscribes to here updates of that metric ?
+
+\section{Notes}
+\end{document}

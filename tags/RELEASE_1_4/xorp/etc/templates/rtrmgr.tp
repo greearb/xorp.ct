@@ -1,0 +1,202 @@
+/* $XORP: xorp/etc/templates/rtrmgr.tp,v 1.6 2006/02/22 02:07:32 pavlin Exp $ */
+
+rtrmgr {
+    targetname:			txt = "rtrmgr";
+
+    config-directory:		txt = "";
+
+    load-file-command:		txt = "fetch";
+    load-file-command-args:	txt = "-o";
+    load-ftp-command:		txt = "fetch";
+    load-ftp-command-args:	txt = "-o";
+    load-http-command:		txt = "fetch";
+    load-http-command-args:	txt = "-o";
+    load-tftp-command:		txt = "sh -c 'echo Not implemented 1>&2 && exit 1'";
+    load-tftp-command-args:	txt = "";
+
+    save-file-command:		txt = "sh -c 'echo Not implemented 1>&2 && exit 1'";
+    save-file-command-args:	txt = "";
+    save-ftp-command:		txt = "sh -c 'echo Not implemented 1>&2 && exit 1'";
+    save-ftp-command-args:	txt = "";
+    save-http-command:		txt = "sh -c 'echo Not implemented 1>&2 && exit 1'";
+    save-http-command-args:	txt = "";
+    save-tftp-command:		txt = "sh -c 'echo Not implemented 1>&2 && exit 1'";
+    save-tftp-command-args:	txt = "";
+
+    load @: url_file { }
+    load @: url_ftp { }
+    load @: url_http { }
+    load @: url_tftp { }
+
+    save @: url_file { }
+    save @: url_ftp { }
+    save @: url_http { }
+    save @: url_tftp { }
+}
+
+rtrmgr {
+    %help:	short		"Configure the Router Manager";
+    %modinfo:	provides	rtrmgr;
+    %modinfo:	default_targetname "rtrmgr";
+
+    %mandatory:	$(@.targetname);
+
+    targetname {
+	%user-hidden: "XRL target name";
+	%help:	short "XRL target name";
+	%set:;
+    }
+
+    CONFIG_FILENAME {
+	%user-hidden: "Internal transient file name";
+	%create:;
+    }
+
+    CONFIG_STDERR {
+	%user-hidden: "Internal transient command stderr output";
+	%create:;
+    }
+
+    config-directory {
+	%help:	short "Set the name of the directory with the configuration files";
+	%create:	xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(@)";
+	%set:		xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(@)";
+	%delete:	xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(DEFAULT)";
+    }
+
+    load-file-command {
+	%help:	short "Load configuration command (FILE URL)";
+	%create:;
+	%set:;
+    }
+
+    load-file-command-args {
+	%help:	short "Load configuration command arguments (FILE URL)";
+	%create:;
+	%set:;
+    }
+
+    load-ftp-command {
+	%help:	short "Load configuration command (FTP URL)";
+	%create:;
+	%set:;
+    }
+
+    load-ftp-command-args {
+	%help:	short "Load configuration command arguments (FTP URL)";
+	%create:;
+	%set:;
+    }
+
+    load-http-command {
+	%help:	short "Load configuration command (HTTP URL)";
+	%create:;
+	%set:;
+    }
+
+    load-http-command-args {
+	%help:	short "Load configuration command arguments (HTTP URL)";
+	%create:;
+	%set:;
+    }
+
+    load-tftp-command {
+	%help:	short "Load configuration command (TFTP URL)";
+	%create:;
+	%set:;
+    }
+
+    load-tftp-command-args {
+	%help:	short "Load configuration command arguments (TFTP URL)";
+	%create:;
+	%set:;
+    }
+
+    save-file-command {
+	%help:	short "Save configuration command (FILE URL)";
+	%create:;
+	%set:;
+    }
+
+    save-file-command-args {
+	%help:	short "Save configuration command arguments (FILE URL)";
+	%create:;
+	%set:;
+    }
+
+    save-ftp-command {
+	%help:	short "Save configuration command (FTP URL)";
+	%create:;
+	%set:;
+    }
+
+    save-ftp-command-args {
+	%help:	short "Save configuration command arguments (FTP URL)";
+	%create:;
+	%set:;
+    }
+
+    save-http-command {
+	%help:	short "Save configuration command (HTTP URL)";
+	%create:;
+	%set:;
+    }
+
+    save-http-command-args {
+	%help:	short "Save configuration command arguments (HTTP URL)";
+	%create:;
+	%set:;
+    }
+
+    save-tftp-command {
+	%help:	short "Save configuration command (TFTP URL)";
+	%create:;
+	%set:;
+    }
+
+    save-tftp-command-args {
+	%help:	short "Save configuration command arguments (TFTP URL)";
+	%create:;
+	%set:;
+    }
+
+    load @: url_file {
+	%help:	short "Load configuration file";
+	%create:	program "$(rtrmgr.load-file-command) $(rtrmgr.load-file-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    load @: url_ftp {
+	%help:	short "Load configuration file";
+	%create:	program "$(rtrmgr.load-ftp-command) $(rtrmgr.load-ftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    load @: url_http {
+	%help:	short "Load configuration file";
+	%create:	program "$(rtrmgr.load-http-command) $(rtrmgr.load-http-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    load @: url_tftp {
+	%help:	short "Load configuration file";
+	%create:	program "$(rtrmgr.load-tftp-command) $(rtrmgr.load-tftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    save @: url_file {
+	%help:	short "Save configuration file";
+	%create:	program "$(rtrmgr.save-file-command) $(rtrmgr.save-file-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    save @: url_ftp {
+	%help:	short "Save configuration file";
+	%create:	program "$(rtrmgr.save-ftp-command) $(rtrmgr.save-ftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    save @: url_http {
+	%help:	short "Save configuration file";
+	%create:	program "$(rtrmgr.save-http-command) $(rtrmgr.save-http-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+
+    save @: url_tftp {
+	%help:	short "Save configuration file";
+	%create:	program "$(rtrmgr.save-tftp-command) $(rtrmgr.save-tftp-command-args) $(rtrmgr.CONFIG_FILENAME) $(@) -> stderr=$(rtrmgr.CONFIG_STDERR)";
+    }
+}

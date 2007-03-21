@@ -1,0 +1,95 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/bgp/run_tests,v 1.1.1.1 2002/12/11 23:55:50 hodson Exp $
+#
+
+
+case `hostname` in
+	x20)
+		MESS="Running tests on x20"
+		CONFIG_FILE=configs/config-x20.internal.hiddennet.net.bgp 2>error	
+	;;
+	x20.internal.hiddennet.net)
+		MESS="Running tests on x20"
+		CONFIG_FILE=configs/config-x20.internal.hiddennet.net.bgp 2>error
+	;;
+
+	xorp0)
+		MESS="Running tests on xorp0"
+		CONFIG_FILE=configs/config-xorp0.icir.org.bgp
+	;;
+	xorp1)
+		MESS="Running tests on xorp1"
+		CONFIG_FILE=configs/config-xorp1.icir.org.bgp
+	;;
+	xorp2)
+		MESS="Running tests on xorp2"
+		CONFIG_FILE=configs/config-xorp2.icir.org.bgp
+	;;
+	xorp3)
+		MESS="Running tests on xorp3"
+		CONFIG_FILE=configs/config-xorp3.icir.org.bgp
+	;;
+	xorp4)
+		MESS="Running tests on xorp4"
+		CONFIG_FILE=configs/config-xorp4.icir.org.bgp
+	;;
+	xorp6)
+		MESS="Running tests on xorp6"
+		CONFIG_FILE=configs/config-xorp6.icir.org.bgp
+	;;
+	xorp7)
+		MESS="Running tests on xorp7"
+		CONFIG_FILE=configs/config-xorp7.icir.org.bgp
+	;;
+	tigger.icir.org)
+		MESS="Running tests on tigger"
+		CONFIG_FILE=configs/config-tigger.icir.org.bgp
+	;;
+	aardvark.icir.org)
+		MESS="Running tests on aardvark"
+		CONFIG_FILE=configs/config-aardvark.icir.org.bgp
+	;;
+	www.icir.org)
+		MESS="Running tests on www"
+		CONFIG_FILE=configs/config-www.icir.org.bgp
+	;;
+	lemming.icir.org)
+		MESS="Running tests on lemming"
+		CONFIG_FILE=configs/config-lemming.icir.org.bgp
+	;;
+	thinmint.icir.org)
+		MESS="Running tests on thinmint"
+	;;
+	*)
+		echo "Unknown host :" `hostname`
+		exit 1
+	;;
+esac
+
+	echo $MESS
+
+MALLOC_OPTIONS="AJX"
+export MALLOC_OPTIONS
+
+#
+# Any argument to this script will cause the XRL code to be used to
+# configure the bgp process.
+#
+if [ $# != 1 ]
+then
+	./BGPTest $CONFIG_FILE
+else
+	. ./xrl_shell_funcs.sh
+	# Start a finder in the background.
+	$FINDER &
+	# Start a bgp process and then send it the XRL config commands.
+	# We don't start the bgp process in the background as we want to
+	# be able to kill it from the keyboard. So schedule the xrl commands
+	# to be sent in five seconds and then start the bgp process in
+	# the foreground.
+	(sleep 5; bgp_xrl $CONFIG_FILE) &
+	./xorp_bgp
+fi
+

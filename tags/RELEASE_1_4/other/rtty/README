@@ -1,0 +1,228 @@
+rtty -- multiuser "tip"/"cu" replacement with logging
+Paul Vixie <vixie@isc.org> -- 24-March-2001 [V4.0 released]
+Paul Vixie <paul@vix.com> -- 27-December-1993 [V3.0 released]
+Paul Vixie <vixie@pa.dec.com> -- 1-January-1992 [V2.0 released]
+$Id$
+
+4.0 Release Notes (24-March-2001)
+
+Portability to POSIX/ANSI systems (pre-ANSI or pre-POSIX no longer supported.)
+Uses nonblocking I/O to terminals rather than depending on undependablt VMIN=0.
+Massive delinting (now passes "gcc -Wall".)
+
+3.3 Release Notes (22-August-1997)
+
+Portability to BSD/OS 3.0, bug fixes, better logging.
+
+3.2 Release Notes (23-August-1996)
+
+Portability, bug fixes, and a few miscellaneous features like DESTPATH/other/*.
+
+3.0 Release Notes (27-Devember-1993)
+
+I've ported it to BSD/386.  This led me to make some major changes to the
+way system routines were declared; the result also works fine on Ultrix 4.2
+and should work OK on any modern system, especially POSIX 1003.1 compatible
+systems.  I cleaned up the IP/TCP transport in case anyone wants to try it;
+in particular there is now a challenge/response for passwords (this used to be
+"wide open" which is why I always discouraged its use before.)
+
+There are some things on my to-do list that I'd like someone else to work on:
+   ->	public/private challenge/response, or kerberos, or both
+   ->	man pages
+
+2.5 Release Notes (12-Nov-92)
+
+This fixes a few minor lint-y things and puts a version stamp in all the
+binaries.
+
+2.4 Release Notes
+
+This version includes the ~query command and online notifications of coming
+and going.  ~tail finally works.  
+
+2.1 Release Notes
+
+Andrew Partan helped me understand that my termios code was nonportable,
+and suggested fixes for that and several other embarrassing errors of mine.
+Meanwhile, back at the ranch, I finally found the right dance to make this
+thing efficient enough to stop losing characters at 9600 baud, even when
+multiple clients connect to multiple servers, all with log files running,
+all on a 3 VUP console server.
+
+Introduction
+
+Rtty is "remote tty" (not radioteletype).  You run a server per port
+and then connect to that server from any number of "tip"/"cu"-like
+clients.  I wrote it for our console concentrator, but there's no
+reason other than performance why you couldn't use it to drive modems,
+printers, prom programmers, and so on.
+
+When you connect to the server from more than one client, all clients
+will see the same session and all clients can type at and see output
+from whatever device is attached to the tty port.  Typing at a device
+when someone else is also typing at that device is confusing and more
+than a little bit erie.
+
+You will need a BSD-derived UNIX to use this, and you will need "termios"
+(the POSIX terminal interface).  (If "man termios" doesn't say something
+informative and useful, you are probably hosed.)  Ultrix and SunOS and
+AT&T V.4 all have what you need.  AT&T V.3 and non-Tahoe/Reno BSD are
+both lacking one thing or another.
+
+Details
+
+The server can be told to keep a log file.  This log file will record
+all data in or out of the tty port; that is, data that comes from the
+tty port will be logged, and data that is typed at (and therefore sent
+to) the tty port from any client will be logged.  There are no special
+markers in the log file to tell you which data came from which source;
+the data is all just interleaved in the order it was received by the
+server.  Note that line terminators in the log file will be "physical"
+meaning probably \r\n rather than the normal UNIX \n.  It depends on
+the device on the other end of the tty port, but \r\n is pretty common.
+
+We watch our log files with daemons that do roughly what "tail -f" does
+except they scan for things like "file table full" or "out of inodes"
+or "panic" -- you know, things that computers say when they are unhappy.
+None of our scanning software is included in this release of rtty, but
+you can write your own.  Note that the protocol used between the server
+and client is mostly implemented in a separate module of this source
+directory; if you want to connect to the server in real time and scan
+the output direcly instead of tailing the log file, that's an option.
+(You would most especially want to do it this way if you aren't using
+any log files.)
+
+UNIX-domain sockets are the normal way that clients connect to the server.
+Both client and server support internet-domain sockets (we'll let you
+figure out "how" by reading the sources), there is absolutely no security
+in rtty, and opening up our tty ports to the local internet with no access
+control has seemed like a bad idea (especially since they are the main
+consoles of our Internet gateway computers).  So we don't use this feature.
+(Win promised to Kerberize this stuff for me but then he got busy.)
+
+Futures
+
+We need to write some man pages.  An RFC for the protocol would be nice.
+Kerberos or at least a "Password:" prompter/checker would make the internet
+domain sockets usable, but rsh/xterm presently work so well that ambition
+is getting its butt kicked by apathy.  All that said, this may well be the
+last version of rtty ever released unless someone else contributes bug fixes
+or enhancements.
+
+Installation
+
+These installation instructions assume that you are creating a console
+server.  If you are using this code for something else, you should read
+all this with several thousand grains of salt.
+
+We put everything in /rtty since it is extremely small and most of what gets
+put there is symlinks and short config files.  You will probably put it in
+/usr/local/rtty or /usr/local/adm/rtty or /usr/local/lib/rtty.  Once you
+decide where you want this stuff, edit the Makefile and change DESTPATH.
+(Probably you should not change DESTROOT; it's a knob for "make install"
+when the compilation host and the execution host have different paths to the
+tree.)  Assuming that you put it in /rtty, you will need the following
+subdirectories:
+
+    /rtty/bin
+	will contain the server, client, and some shell scripts to
+	glue it all together and make it work.  "make install" will
+	populate it but you will need to create the directory first.
+    /rtty/dev
+	will contain symlinks to entries in /dev.  the names of the
+	symlinks should be meaningful, and the names in /dev probably
+	will not be meaningful.  you might use
+		ln -s /dev/tty15 /rtty/dev/gatekeeper
+	and so on.
+    /rtty/log
+	will contain the log files, if you use them.  just create it,
+	the servers will populate it.  note that the default behaviour
+	of the "startsrv" script is to use them, so complaints will
+	be issued if you do not create this directory.
+    /rtty/pid
+	will contain server pid's, which are used by the various shell
+	scripts that kill or restart the servers or age the log files.
+	just create it and the servers will populate it.
+    /rtty/sock
+	will contain the UNIX-domain sockets for the various servers.
+	just create it and the servers will populate it.
+    /rtty/opt
+	this directory is optional.  if you created it and put in it files
+	of the form $HOST.srv and/or $HOST.cons, then when the server (or
+	"console" client) for that HOST is started, it will use the command
+	line options from this file.  the scripts will look for DEFAULT.srv
+	(and DEFAULT.cons) if there is no host-specific option file.  if
+	there are no option files at all (or no /rtty/opt directory), the
+	compiled-in defaults are used (baud=9600, parity=none, wordsize=8).
+	example 1: our 11/785 has a 1200-baud console, so...
+		% cat > /rtty/opt/wrlvms.srv
+		-b 1200
+		^D
+	example 2: our uVax2 running BSD likes different things in the >>>
+	mode than when /vmunix is running, so...
+		% cat > /rtty/opt/beast.cons
+		-7
+		^D
+    /rtty/owner
+	this directory is optional.  if you created it and put in it files
+	of the form $HOST.sock, then when the server for that HOST is 
+	started, the socket will be chown'd to the contents of this file.
+	typical use is to assign group ownership (by making the file contain
+	root.some-group) to control access to consoles by membership in a 
+	particular group.
+
+So OK, you've chosen a DESTPATH, created and populated it, and edited
+the Makefile.  Type "make" and if all goes well, type "make install" and
+"make clean".
+
+Make sure you've got /rtty/dev full of all the relevant symlinks into
+/dev before you continue.
+
+Edit root's crontab to include a line like this one:
+	10 4 * * * sh /rtty/bin/agelogs
+
+Edit rc.local or rc.localhost or whatever to include a line like this one:
+	/rtty/bin/Startup
+Then run that command by hand or reboot your computer.
+
+Make a symlink from some common executables directory so that the "console"
+command is in most people's $PATH.  We did this:
+	ln -s /rtty/bin/console /usr/local/bin/console
+
+That's all.  Type "rehash" and type "console".  You should get a list of
+the available consoles.  Pick one (say, "gatekeeper" if you have one) and try
+something like "console gatekeeper".  If it works, bring up another window and
+do it again.  You should see the same session in both windows.  Bring up
+yet another window and say something like "tail -f /rtty/log/gatekeeper".  You
+should see the session in that window, too.
+
+Other Notes
+
+Since there's no documentation, there's no harm in telling you that the
+"console" script just runs "rtty" with some obscure arguments to grease
+its skids.  While in "rtty", a "~" after a carriage return (\r or 0x0D)
+is magic; "~?" will explain the magic to you somewhat tersely.  The source
+code will explain it in more detail.
+
+Have fun.  Drop me a note if you find this useful.  Definitely drop me
+a note if you find a bug or add a feature.
+
+Paul Vixie <paul@vix.com>
+
+/* Copyright (c) 1996 by Internet Software Consortium.
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND INTERNET SOFTWARE CONSORTIUM DISCLAIMS
+ * ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL INTERNET SOFTWARE
+ * CONSORTIUM BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
+ * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
+ * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+ * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
+ * SOFTWARE.
+ */
+

@@ -1,0 +1,159 @@
+/* $XORP: xorp/etc/templates/mld.tp,v 1.20 2006/07/03 06:52:37 pavlin Exp $ */
+
+protocols {
+    mld {
+	targetname:		txt = "MLD";
+	disable:		toggle = false;
+	enabled:		bool;		/* %deprecated */
+
+	interface @: txt {
+	    vif @: txt {
+		disable:	toggle = false;
+		enabled:	bool;		/* %deprecated */
+		version:	u32 = 1;	/* Default to MLDv1 */
+		enable-ip-router-alert-option-check:	bool = false;
+		query-interval:	u32 = 125;
+		query-last-member-interval: u32 = 1;
+		query-response-interval: u32 = 10;
+		robust-count: u32 = 2;
+	    }
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:	toggle = false;
+		    enabled:	bool;		/* %deprecated */
+		}
+	    }
+	}
+    }
+}
+
+protocols {
+    mld {
+	%help:		short		"Configure the MLD protocol";
+	%modinfo:	provides	mld;
+	%modinfo:	depends		mfea6;
+	%modinfo:	path		"mld6igmp/xorp_mld";
+	%modinfo:	default_targetname "mld6igmp";
+	%modinfo:	status_method	xrl "$(mld.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo:	startup_method	xrl "$(mld.targetname)/mld6igmp/0.1/start_mld6igmp";
+	%modinfo:	shutdown_method	xrl "$(mld.targetname)/common/0.1/shutdown";
+
+	%mandatory:	$(@.targetname);
+
+	targetname {
+	    %user-hidden: "XRL target name";
+	    %help:	short "XRL target name";
+	    %set:;
+	}
+
+	disable {
+	    %help:	short "Disable the MLD protocol";
+	    %create:;
+	    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=`~$(@)`";
+	    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=`~$(DEFAULT)`";
+	}
+
+	enabled {
+	    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
+	    %help:	short "Enable the MLD protocol";
+	    %create:;
+	    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(@)";
+	}
+
+	interface @ {
+	    %help:	short "Configure MLD on a network interface";
+	    %delete: xrl "$(mld.targetname)/mld6igmp/0.1/stop_vif?vif_name:txt=$(interface.@)";
+	    vif @ {
+		%help:	short "Configure MLD on a virtual interface";
+		%activate: xrl "$(mld.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%update: xrl "$(mld.targetname)/mld6igmp/0.1/start_vif?vif_name:txt=$(vif.@)";
+		%delete: xrl "$(mld.targetname)/mld6igmp/0.1/stop_vif?vif_name:txt=$(vif.@)";
+
+		disable {
+		    %help:	short "Disable MLD on an interface";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(@)`";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
+		enabled {
+		    %deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
+		    %help:	short "Enable MLD on an interface";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/enable_vif?vif_name:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		}
+
+		version {
+		    %help:	short "Set the MLD protocol version";
+		    %allow-range: $(@) "1" "2" %help: "The MLD protocol version";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(DEFAULT)";
+		}
+
+		enable-ip-router-alert-option-check {
+		    %help:	short "Enable the IP Router Alert option check";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(DEFAULT)";
+		}
+
+		query-interval {
+		    %help:	short "Set the query interval (in seconds)";
+		    %allow-range: $(@) "1" "1024" %help: "The query interval (in seconds)";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(DEFAULT)&interval_usec:u32=0";
+		}
+
+		query-last-member-interval {
+		    %help:	short "Set the last member query interval (in seconds)";
+		    %allow-range: $(@) "1" "1024" %help: "The last member query interval (in seconds)";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_last_member_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_last_member_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_last_member_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(DEFAULT)&interval_usec:u32=0";
+		}
+
+		query-response-interval {
+		    %help:	short "Set the query response interval (in seconds)";
+		    %allow-range: $(@) "1" "1024" %help: "The query response interval (in seconds)";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_response_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_response_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_query_response_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(DEFAULT)&interval_usec:u32=0";
+		}
+
+		robust-count {
+		    %help:	short "Set the robustness variable count";
+		    %allow-range: $(@) "2" "10" %help: "The robustness variable count";
+		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_robust_count?vif_name:txt=$(vif.@)&robust_count:u32=$(@)";
+		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_robust_count?vif_name:txt=$(vif.@)&robust_count:u32=$(@)";
+		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_robust_count?vif_name:txt=$(vif.@)&robust_count:u32=$(DEFAULT)";
+		}
+	    }
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short "Configure all tracing operations";
+
+		    disable {
+			%help:	short "Enable all tracing operations";
+			%set:	xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=`~$(@)`";
+			%delete: xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(DEFAULT)";
+		    }
+
+		    enabled {
+			%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
+			%help:	short "Enable all tracing operations";
+			%set:	xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(@)";
+		    }
+		}
+	    }
+	}
+    }
+}

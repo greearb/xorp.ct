@@ -1,0 +1,20 @@
+#!/bin/sh
+
+test -f perlbin && rm perlbin
+
+exec 2>/dev/null
+
+for p in `echo $PATH | tr ":" " "`
+do
+	for perl in $p/perl5* $p/perl ; do
+		if [ -x $perl ]
+		then
+			if $perl -e 'require 5.6.0;' 
+			then
+				echo $perl > perlbin
+				exit 0
+			fi
+		fi
+	done
+done
+exit 1
