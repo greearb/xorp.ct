@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.167 2007/03/14 18:55:06 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.168 2007/03/20 22:25:57 atanu Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.4 (2006/03/15)
+Release 1.4 (2007/03/20)
 =========================
   ALL:
     - XORP now builds on DragonFlyBSD-1.8, FreeBSD-6.2, Linux Fedora
