@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.36 2006/09/15 18:49:25 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.37 2007/03/20 22:55:20 atanu Exp $
 #
 
 		XORP ERRATA
@@ -126,7 +126,12 @@
     - No known issues.
 
   OSPF:
-    - There are several known issues, but none of them is considered
+    - Just before the XORP-1.4 release it was noticed that in OSPFv3
+      LSAs with link-local scope could be flooded to links where they
+      shouldn't be sent. We believe this shouldn't affect the routing
+      computation, but it does introduce more LSAs than necessary.
+
+    - There are several other known issues, but none of them is considered
       critical. The list of known issues is available from:
 
         http://www.xorp.org/bugzilla/query.cgi
