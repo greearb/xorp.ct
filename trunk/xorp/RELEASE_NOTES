@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.169 2007/03/21 17:46:43 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.170 2007/03/21 19:04:54 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -45,7 +45,8 @@ Release 1.5-WIP (2007/??/??)
     - 
 
   OSPF:
-    - 
+    - In OSPFv3 LSAs of link-local scope were flooded to links other
+    than to the one to which they belonged.
 
   BGP:
     - 

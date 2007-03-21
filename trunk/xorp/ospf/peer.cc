@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.272 2007/03/12 11:43:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.273 2007/03/19 22:48:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4659,6 +4659,20 @@ Neighbour<A>::queue_lsa(OspfTypes::PeerID peerid, OspfTypes::NeighbourID nid,
     // RFC 2328 Section 13.3.  Next step in the flooding procedure
 
     XLOG_TRACE(lsar->tracing(), "Attempting to queue %s", cstring(*lsar));
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (lsar->link_local_scope()) {
+	    if (lsar->get_peerid() != _peer.get_peerid()) {
+		XLOG_TRACE(lsar->tracing(), "Not queued Link-local %s",
+			   cstring(*lsar));
+		return true;
+	    }
+	}
+	break;
+    }
 
     // (1) 
     switch(get_state()) {
