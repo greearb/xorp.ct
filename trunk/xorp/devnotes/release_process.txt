@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.61 2007/03/15 00:51:11 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.62 2007/03/16 00:15:07 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -534,7 +534,8 @@ the login shell is csh or tcsh):
 
 ========================================================================
 2900.	TASK: Send an anouncement email to xorp-announce@xorp.org
-	      and/or xorp-users@xorp.org about the new release 
+	      (CC to xorp-hackers@xorp.org and xorp-users@xorp.org)
+              about the new release.
 	WHO:  XORP project leader
 	WHEN: Right after the release
 	MISC: If this is a release candidate, then send the email
@@ -545,7 +546,8 @@ the login shell is csh or tcsh):
 	      http://freshmeat.net/projects/xorp/
 	WHO:  Release manager
 	WHEN: Right after the release
-	MISC: Should be omitted for a release candidate.
+	MISC: - Should be omitted for a release candidate.
+              - Requires login and a password.
 
 ========================================================================
 2955.	TASK: Contact the FreeBSD maintainer of net/xorp to update the
@@ -615,7 +617,7 @@ the login shell is csh or tcsh):
  #   unknown parts of the date.
  # - For example, if the next release would be 1.5, then the release and
  #   the date might look like:
- #      Release 1.5-WIP (2006/??/??)
+ #      Release 1.5-WIP (2007/??/??)
 
 ========================================================================
 3200.	TASK: Update the "Work-In-Progress" version number
