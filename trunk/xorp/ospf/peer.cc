@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.273 2007/03/19 22:48:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.274 2007/03/21 22:40:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3123,7 +3123,6 @@ template <typename A>
 bool
 Peer<A>::set_router_priority(uint8_t priority)
 {
-    uint8_t old_priority = _hello_packet.get_router_priority();
     _hello_packet.set_router_priority(priority);
 
     switch(_ospf.get_version()) {
@@ -3146,13 +3145,9 @@ Peer<A>::set_router_priority(uint8_t priority)
     case Point2Point:
 	break;
     case DR_other:
-	if (0 == old_priority && 0 != priority)
-	    compute_designated_router_and_backup_designated_router();
-	break;
     case Backup:
     case DR:
-	if (0 == priority)
-	    compute_designated_router_and_backup_designated_router();
+	compute_designated_router_and_backup_designated_router();
 	break;
     }
 
