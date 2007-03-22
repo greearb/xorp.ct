@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.60 2006/04/11 17:06:07 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.61 2006/10/19 02:14:30 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -35,6 +35,7 @@ tgt_files		+= ribclient.tgt
 tgt_files		+= rip.tgt
 tgt_files		+= ripng.tgt
 tgt_files		+= rtrmgr.tgt
+tgt_files		+= show_distances.tgt
 tgt_files		+= show_routes.tgt
 tgt_files		+= socket_server.tgt
 tgt_files		+= static_routes.tgt
@@ -81,6 +82,7 @@ noinst_LTLIBRARIES	+= libribclientbase.la
 noinst_LTLIBRARIES	+= libripbase.la
 noinst_LTLIBRARIES	+= libripngbase.la
 noinst_LTLIBRARIES	+= librtrmgrbase.la
+noinst_LTLIBRARIES	+= libshowdistancesbase.la
 noinst_LTLIBRARIES	+= libshowroutesbase.la
 noinst_LTLIBRARIES	+= libsocketserverbase.la
 noinst_LTLIBRARIES	+= libstaticroutesbase.la
@@ -296,6 +298,11 @@ librtrmgrbase_la_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/rtrmgr.xif
+
+libshowdistancesbase_la_SOURCES = show_distances_base.hh show_distances_base.cc
+$(srcdir)/show_distances_base.hh $(srcdir)/show_distances_base.cc:	\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif	
 
 libshowroutesbase_la_SOURCES = show_routes_base.hh show_routes_base.cc
 $(srcdir)/show_routes_base.hh $(srcdir)/show_routes_base.cc:		\
