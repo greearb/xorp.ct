@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.63 2007/02/16 22:47:08 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.64 2007/03/22 20:48:18 bms Exp $"
 
 #include "rib_module.h"
 
@@ -1154,7 +1154,7 @@ RIB<A>::add_origin_table(const string& tablename,
 			 const string& target_instance,
 			 ProtocolType protocol_type)
 {
-    debug_msg("add_origin_table %s type: %d",
+    debug_msg("add_origin_table %s type: %d\n",
 	      tablename.c_str(), protocol_type);
 
     Protocol* protocol = find_protocol(tablename);
