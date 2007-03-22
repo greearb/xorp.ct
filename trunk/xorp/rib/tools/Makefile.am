@@ -1,14 +1,20 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/tools/Makefile.am,v 1.2 2004/06/11 00:09:21 pavlin Exp $
+## $XORP: xorp/rib/tools/Makefile.am,v 1.3 2004/11/12 02:44:48 bms Exp $
 ##
 
 bindir = $(prefix)/$(subdir)
 
-bin_PROGRAMS			 = show_routes
-#noinst_PROGRAMS			 = show_routes
+bin_PROGRAMS			  = show_distances
+bin_PROGRAMS			 += show_routes
 
 # -- Program Sources
+show_distances_SOURCES		 = show_distances.cc
+show_distances_LDADD	 	 = $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+show_distances_LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
+show_distances_LDADD		+= $(top_builddir)/xrl/targets/libshowdistancesbase.la
+show_distances_LDADD		+= $(LDADD)
+
 show_routes_SOURCES		 = show_routes.cc
 show_routes_LDADD	 	 = $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 show_routes_LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la

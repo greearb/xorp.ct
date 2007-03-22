@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.36 2006/07/03 23:33:40 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.37 2007/02/16 22:47:08 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -382,8 +382,8 @@ public:
     /**
      * Find a routing protocol, given its protocol name.
      *
-     * @param protocol the name of the table to search for.
-     * @return pointer to table if exists, NULL otherwise.
+     * @param protocol the name of the protocol to search for.
+     * @return pointer to protocol if exists, NULL otherwise.
      */
     Protocol* find_protocol(const string& protocol);
 
@@ -488,6 +488,35 @@ public:
      */
     void push_routes();
 
+    /**
+     * Set the admin distance associated with a routing protocol.
+     *
+     * @param protocol_name the canonical name of a routing protocol,
+     * in lower case.  Eg "ospf", "ibgp", etc.
+     * @param admin_distance the admin distance to set.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_protocol_admin_distance(const string& protocol_name,
+				    const uint32_t& admin_distance);
+
+    /**
+     * Get the map of all registered admin distances.
+     *
+     * @return a reference to the _admin_distance map.
+     */
+    inline map<string, uint32_t>& get_protocol_admin_distances() {
+	return _admin_distances;
+    }
+
+    /**
+     * Get the admin distance associated with a routing protocol.
+     *
+     * @param protocol_name the canonical name of a routing protocol,
+     * in lower case.  Eg "ospf", "ibgp", etc.
+     * @return the admin distance; UNKNOWN_ADMIN_DISTANCE if unknown.
+     */
+    uint32_t get_protocol_admin_distance(const string& protocol_name);
+
 private:
     /**
      * Used to implement @ref add_igp_table and @ref add_egp_table.
@@ -503,7 +532,7 @@ private:
     int add_origin_table(const string& tablename,
 			 const string& target_class,
 			 const string& target_instance,
-			 ProtocolType protocol_type);
+			 ProtocolType  protocol_type);
 
     /**
      * Used to implement @ref delete_igp_table and @ref delete_egp_table.
@@ -606,16 +635,6 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     inline int remove_table(const string& tablename);
-
-    /**
-     * Lookup the default admin distance associated with a routing
-     * protocol name.
-     *
-     * @param protocol_name the canonical name of a routing protocol,
-     * in lower case.  Eg "ospf", "ibgp", etc.
-     * @return the admin distance.
-     */
-    inline uint32_t admin_distance(const string& protocol_name);
 
     /**
      * Find the virtual interface associated with one of this router's

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/protocol.hh,v 1.8 2006/03/16 00:05:29 pavlin Exp $
+// $XORP: xorp/rib/protocol.hh,v 1.9 2007/02/16 22:47:07 pavlin Exp $
 
 #ifndef __RIB_PROTOCOL_HH__
 #define __RIB_PROTOCOL_HH__
@@ -23,6 +23,12 @@
 enum ProtocolType {
     IGP = 1,		// Interior Gateway Protocol
     EGP = 2		// Exterior Gateway Protocol
+};
+
+enum ProtocolAdminDistance {
+    CONNECTED_ADMIN_DISTANCE	= 0,	// Only for connected routes.
+    UNKNOWN_ADMIN_DISTANCE	= 255,
+    UNSET_ADMIN_DISTANCE	= 256
 };
 
 /**

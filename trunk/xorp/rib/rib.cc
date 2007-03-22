@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.62 2006/10/23 18:20:28 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.63 2007/02/16 22:47:08 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -123,16 +123,36 @@ RIB<A>::remove_table(const string& tablename)
 }
 
 template <typename A>
+int
+RIB<A>::set_protocol_admin_distance(const string& protocol_name,
+				    const uint32_t& admin_distance)
+{
+    map<string, uint32_t>::iterator mi = _admin_distances.find(protocol_name);
+    if (mi != _admin_distances.end()) {
+	OriginTable<A>* ot =
+	    dynamic_cast<OriginTable<A>* >(find_table(protocol_name));
+	if (NULL != ot) {
+	    XLOG_ERROR("May not set an admin distance for protocol \"%s\", "
+		       "which has already instantiated an origin table.",
+		       protocol_name.c_str());
+	    return XORP_ERROR;
+	}
+    }
+    _admin_distances[protocol_name] = admin_distance;
+    return XORP_OK;
+}
+
+template <typename A>
 inline uint32_t
-RIB<A>::admin_distance(const string& tablename)
+RIB<A>::get_protocol_admin_distance(const string& protocol_name)
 {
     map<string, uint32_t>::iterator mi;
 
-    mi = _admin_distances.find(tablename);
+    mi = _admin_distances.find(protocol_name);
     if (mi == _admin_distances.end()) {
 	XLOG_ERROR("Administrative distance of \"%s\" unknown.",
-		   tablename.c_str());
-	return _admin_distances["unknown"];
+		   protocol_name.c_str());
+	return UNKNOWN_ADMIN_DISTANCE;
     }
     return mi->second;
 }
@@ -239,7 +259,7 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
     }
 
     // TODO: XXX: don't use hard-coded values below!
-    _admin_distances["connected"] =        0;
+    _admin_distances["connected"] =        CONNECTED_ADMIN_DISTANCE;
     _admin_distances["static"] =           1;
     _admin_distances["eigrp-summary"] =    5;
     _admin_distances["ebgp"] =            20;
@@ -251,7 +271,7 @@ RIB<A>::RIB(RibTransportType t, RibManager& rib_manager, EventLoop& eventloop)
     _admin_distances["eigrp-external"] = 170;
     _admin_distances["ibgp"] =           200;
     _admin_distances["fib2mrib"] =	 254;
-    _admin_distances["unknown"] =        255;
+    _admin_distances["unknown"] =        UNKNOWN_ADMIN_DISTANCE;
 }
 
 template <typename A>
@@ -300,6 +320,7 @@ RIB<A>::initialize(RegisterServer& register_server)
 		   "table for %s",
 		   name().c_str());
     }
+
     if (add_igp_table("connected", "", "") != XORP_OK) {
 	XLOG_FATAL("Could not add igp table \"connected\" for %s",
 		   name().c_str());
@@ -1133,7 +1154,7 @@ RIB<A>::add_origin_table(const string& tablename,
 			 const string& target_instance,
 			 ProtocolType protocol_type)
 {
-    debug_msg("add_origin_table %s type: %dn\n",
+    debug_msg("add_origin_table %s type: %d",
 	      tablename.c_str(), protocol_type);
 
     Protocol* protocol = find_protocol(tablename);
@@ -1172,7 +1193,8 @@ RIB<A>::add_origin_table(const string& tablename,
     }
 
     if (new_origin_table(tablename, target_class, target_instance,
-			 admin_distance(tablename), protocol_type)
+			 get_protocol_admin_distance(tablename),
+			 protocol_type)
 	!= XORP_OK) {
 	debug_msg("new_origin_table failed\n");
 	return XORP_ERROR;

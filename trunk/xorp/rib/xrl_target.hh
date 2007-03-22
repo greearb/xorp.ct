@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.33 2006/03/16 00:05:43 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.34 2007/02/16 22:47:12 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -768,6 +768,62 @@ protected:
         const string&	target,
 	const IPv6&	addr,
 	const uint32_t&	prefix_len);
+
+    /**
+     *  Get the configured admin distances from a selected RIB
+     *  for all routing protocols configured with one.
+     *
+     *  @param ipv4 true if we're looking in the ipv4 RIB.
+     *  false if we're looking in the ipv6 RIB.
+     *  @param unicast true if we're looking in the unicast RIB.
+     *  false if we're looking in the multicast RIB.
+     *  @param protocols the name of the protocols.
+     *  @param admin_distance the returned admin distances.
+     */
+    XrlCmdError rib_0_1_get_protocol_admin_distances(
+	// Input values,
+	const bool&	ipv4,
+	const bool&	unicast,
+	// Output values,
+	XrlAtomList&	protocols,
+	XrlAtomList&	admin_distances);
+
+    /**
+     *  Get the configured admin distance for a routing protocol from
+     *  a selected RIB.
+     *
+     *  @param protocol the name of the protocol.
+     *  @param unicast true if we're looking in the unicast RIB.
+     *  @param multicast true if we're looking in the multicast RIB.
+     *  @param admin_distance the returned admin distance.
+     */
+    XrlCmdError rib_0_1_get_protocol_admin_distance(
+	// Input values,
+	const string&	protocol,
+	const bool&	unicast,
+	const bool&	multicast,
+	// Output values,
+	uint32_t&	admin_distance);
+
+    /**
+     *  Set the configured admin distance for a routing protocol in
+     *  one or many RIBs.
+     *
+     *  @param protocol the name of the protocol.
+     *  @param ipv4 true if we should set it for the ipv4 RIBs.
+     *  @param ipv6 true if we should set it for the ipv6 RIBs.
+     *  @param unicast true if we should set it for the unicast RIBs.
+     *  @param multicast true if we should set it for the multicast RIBs.
+     *  @param admin_distance the admin distance.
+     */
+    XrlCmdError rib_0_1_set_protocol_admin_distance(
+	// Input values,
+	const string&	protocol,
+	const bool&	ipv4,
+	const bool&	ipv6,
+	const bool&	unicast,
+	const bool&	multicast,
+	const uint32_t&	admin_distance);
 
     /**
      *  Announce target birth.

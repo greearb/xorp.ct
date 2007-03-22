@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.20 2005/10/29 20:33:34 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.21 2006/01/04 05:55:29 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -548,4 +548,55 @@ interface rib/0.1 {
 	 *
 	 */
 	reset_policy_redist_tags
+
+	/**
+	 * Get administrative distance for all protocols registered as
+	 * having an admin distance in a selected RIB.
+	 *
+	 * @param ipv4 true if getting admin distances from IPv4 RIB;
+	 * false if getting admin distances from IPv6 RIB.
+	 * @param unicast true if getting admin distances from unicast RIB;
+	 * false if getting admin distances from multicast RIB.
+	 * @param protocols the list of protocols registered as having an
+	 * admin distance in the selected RIB.
+	 * @param admin_distance the administrative distance (1-255) for
+	 * each protocol in the @ref protocols list.
+	 */
+	get_protocol_admin_distances	? ipv4:bool			\
+					& unicast:bool			\
+					-> protocols:list		\
+					& admin_distances:list
+
+	/**
+	 * Get administrative distance for an individual protocol in
+	 * a selected RIB.
+	 *
+	 * @param protocol the name of the protocol.
+	 * @param ipv4 true if getting admin distance from IPv4 RIB;
+	 * false if getting admin distance from IPv6 RIB.
+	 * @param unicast true if getting admin distance from unicast RIB;
+	 * false if getting admin distance from multicast RIB.
+	 * @param admin_distance the administrative distance (1-255)
+	 */
+	get_protocol_admin_distance	? protocol:txt			\
+					& ipv4:bool			\
+					& unicast:bool			\
+					-> admin_distance:u32
+
+	/**
+	 * Set administrative distance for an individual protocol.
+	 *
+	 * @param protocol the name of the protocol.
+	 * @param ipv4 true if setting admin distance for IPv4 RIB.
+	 * @param ipv6 true if setting admin distance for IPv6 RIB.
+	 * @param unicast true if setting admin distance for unicast RIB.
+	 * @param multicast true if setting admin distance for multicast RIB.
+	 * @param admin_distance the administrative distance (1-255)
+	 */
+	set_protocol_admin_distance	? protocol:txt			\
+					& ipv4:bool			\
+					& ipv6:bool			\
+					& unicast:bool			\
+					& multicast:bool		\
+					& admin_distance:u32
 }

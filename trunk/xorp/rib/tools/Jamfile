@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/rib/tools/Jamfile,v 1.1 2007/01/11 22:30:51 bms Exp $
 #
 
 SubDir TOP rib tools ;
@@ -12,14 +12,27 @@ SubIncludeOnce TOP libxipc ;
 
 SubDir TOP rib tools ;
 
-Main show_routes : show_routes.cc ;
-LinkLibraries show_routes :
+RIB_TOOLS_LINKLIBS_COMMON = 
 	libfindereventnotifierxif
 	libribxif
-	libshowroutesbase
 	libxipc
 	libcomm
 	libxorp
 	;
 
-InstallBin $(PREFIX)/rib/tools : show_routes ;
+Main show_routes : show_routes.cc ;
+LinkLibraries show_routes :
+	libshowroutesbase
+	$(RIB_TOOLS_LINKLIBS_COMMON)
+	;
+
+Main show_distances : show_distances.cc ;
+LinkLibraries show_distances :
+	libshowdistancesbase
+	$(RIB_TOOLS_LINKLIBS_COMMON)
+	;
+
+InstallBin $(PREFIX)/rib/tools :
+	show_distances
+	show_routes
+	;

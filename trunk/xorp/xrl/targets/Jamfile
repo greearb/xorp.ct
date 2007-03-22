@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/xrl/targets/Jamfile,v 1.1 2007/01/11 22:30:54 bms Exp $
 #
 
 SubDir TOP xrl targets ;
@@ -35,6 +35,7 @@ XorpXrlTgt <xrl!targets>ribclient_base.cc <xrl!targets>ribclient_base.hh <xrl!ta
 XorpXrlTgt <xrl!targets>rip_base.cc <xrl!targets>rip_base.hh <xrl!targets>rip_base.xrls : rip.tgt ;
 XorpXrlTgt <xrl!targets>ripng_base.cc <xrl!targets>ripng_base.hh <xrl!targets>ripng_base.xrls : ripng.tgt ;
 XorpXrlTgt <xrl!targets>rtrmgr_base.cc <xrl!targets>rtrmgr_base.hh <xrl!targets>rtrmgr_base.xrls : rtrmgr.tgt ;
+XorpXrlTgt <xrl!targets>show_distances_base.cc <xrl!targets>show_distances_base.hh <xrl!targets>show_distances_base.xrls : show_distances.tgt ;
 XorpXrlTgt <xrl!targets>show_routes_base.cc <xrl!targets>show_routes_base.hh <xrl!targets>show_routes_base.xrls : show_routes.tgt ;
 XorpXrlTgt <xrl!targets>socket_server_base.cc <xrl!targets>socket_server_base.hh <xrl!targets>socket_server_base.xrls : socket_server.tgt ;
 XorpXrlTgt <xrl!targets>static_routes_base.cc <xrl!targets>static_routes_base.hh <xrl!targets>static_routes_base.xrls : static_routes.tgt ;
@@ -71,6 +72,7 @@ Library libribclientbase : ribclient_base.cc ;
 Library libripbase : rip_base.cc ;
 Library libripngbase : ripng_base.cc ;
 Library librtrmgrbase : rtrmgr_base.cc ;
+Library libshowdistancesbase : show_distances_base.cc ;
 Library libshowroutesbase : show_routes_base.cc ;
 Library libsocketserverbase : socket_server_base.cc ;
 Library libstaticroutesbase : static_routes_base.cc ;
@@ -110,6 +112,7 @@ INSTALLABLE_XRLS =
 	rip.xrls
 	ripng.xrls
 	rtrmgr.xrls
+	show_distances.xrls
 	show_routes.xrls
 	socket_server.xrls
 	static_routes.xrls

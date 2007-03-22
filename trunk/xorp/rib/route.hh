@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.20 2006/03/16 00:05:33 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.21 2007/02/16 22:47:08 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -53,7 +53,7 @@ public:
     RouteEntry(Vif* vif, NextHop* nexthop, const Protocol& protocol,
 	       uint16_t metric)
 	: _vif(vif), _nexthop(nexthop), _protocol(protocol),
-	  _admin_distance(255), _metric(metric)
+	  _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric)
     {
     }
 

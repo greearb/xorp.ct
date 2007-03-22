@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.58 2006/07/03 23:33:41 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.59 2007/02/16 22:47:12 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1250,6 +1250,139 @@ XrlRibTarget::rib_0_1_deregister_interest6(// Input values,
 				    XORP_UINT_CAST(prefix_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_get_protocol_admin_distances(
+    // Input values,
+    const bool&     ipv4,
+    const bool&     unicast,
+    // Output values,
+    XrlAtomList&    protocols,
+    XrlAtomList&    admin_distances)
+{
+
+    if (ipv4 && unicast) {
+	// ipv4 unicast
+	map<string, uint32_t>& rad = _urib4.get_protocol_admin_distances();
+	map<string, uint32_t>::iterator iter;
+	for (iter = rad.begin(); iter != rad.end(); ++iter) {
+	    protocols.append(XrlAtom(iter->first));
+	    admin_distances.append(XrlAtom(iter->second));
+	}
+    } else if (ipv4 && !unicast) {
+	// ipv4 multicast
+	map<string, uint32_t>& rad = _mrib4.get_protocol_admin_distances();
+	map<string, uint32_t>::iterator iter;
+	for (iter = rad.begin(); iter != rad.end(); ++iter) {
+	    protocols.append(XrlAtom(iter->first));
+	    admin_distances.append(XrlAtom(iter->second));
+	}
+    } else if (!ipv4 && unicast) {
+	// ipv6 unicast
+	map<string, uint32_t>& rad = _urib6.get_protocol_admin_distances();
+	map<string, uint32_t>::iterator iter;
+	for (iter = rad.begin(); iter != rad.end(); ++iter) {
+	    protocols.append(XrlAtom(iter->first));
+	    admin_distances.append(XrlAtom(iter->second));
+	}
+    } else if (!ipv4 && !unicast) {
+	// ipv6 multicast
+	map<string, uint32_t>& rad = _mrib6.get_protocol_admin_distances();
+	map<string, uint32_t>::iterator iter;
+	for (iter = rad.begin(); iter != rad.end(); ++iter) {
+	    protocols.append(XrlAtom(iter->first));
+	    admin_distances.append(XrlAtom(iter->second));
+	}
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_get_protocol_admin_distance(
+    // Input values,
+    const string& protocol,
+    const bool&	ipv4,
+    const bool&	unicast,
+    // Output values,
+    uint32_t& admin_distance)
+{
+
+    if (ipv4 && unicast) {
+	admin_distance = _urib4.get_protocol_admin_distance(protocol);
+    } else if (ipv4 && !unicast) {
+	admin_distance = _mrib4.get_protocol_admin_distance(protocol);
+    } else if (!ipv4 && unicast) {
+	admin_distance = _urib6.get_protocol_admin_distance(protocol);
+    } else if (!ipv4 && !unicast) {
+	admin_distance = _mrib6.get_protocol_admin_distance(protocol);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_set_protocol_admin_distance(
+    // Input values,
+    const string& protocol,
+    const bool& ipv4,
+    const bool& ipv6,
+    const bool&	unicast,
+    const bool&	multicast,
+    const uint32_t& admin_distance)
+{
+
+    // Only the RIB may set an admin distance outside of the
+    // ranges 1 to 255, as 0 is reserved for directly-connected
+    // routes, and anything >= 255 will never make it into the FIB.
+    if (admin_distance <= CONNECTED_ADMIN_DISTANCE ||
+	admin_distance > UNKNOWN_ADMIN_DISTANCE) {
+	string err = c_format("Admin distance %d out of range for %s"
+			      "%s protocol \"%s\"; must be between "
+			      "1 and 255 inclusive.",
+			      admin_distance, "unicast", "IPv4",
+			      protocol.c_str());
+	return XrlCmdError::BAD_ARGS(err);
+    }
+
+    if (ipv4 && unicast &&
+	_urib4.set_protocol_admin_distance(protocol, admin_distance)
+	!= XORP_OK) {
+	string err = c_format("Could not set admin distance for %s "
+			      "%s protocol \"%s\"",
+			      "IPv4", "unicast", protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (ipv4 && multicast &&
+	_mrib4.set_protocol_admin_distance(protocol, admin_distance)
+	!= XORP_OK) {
+	string err = c_format("Could not set admin distance for %s "
+			      "%s protocol \"%s\"",
+			      "IPv4", "multicast", protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (ipv6 && unicast &&
+	_urib6.set_protocol_admin_distance(protocol, admin_distance)
+	!= XORP_OK) {
+	string err = c_format("Could not set admin distance for %s "
+			      "%s protocol \"%s\"",
+			      "IPv6", "unicast", protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
+    if (ipv6 && multicast &&
+	_mrib6.set_protocol_admin_distance(protocol, admin_distance)
+	!= XORP_OK) {
+	string err = c_format("Could not set admin distance for %s "
+			      "%s protocol \"%s\"",
+			      "IPv6", "multicast", protocol.c_str());
+	return XrlCmdError::COMMAND_FAILED(err);
+    }
+
     return XrlCmdError::OKAY();
 }
 
