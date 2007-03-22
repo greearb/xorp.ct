@@ -86,10 +86,12 @@ install_sh = @install_sh@
 
 bindir = $(prefix)/$(subdir)
 
-bin_PROGRAMS = show_routes
-#noinst_PROGRAMS			 = show_routes
+bin_PROGRAMS = show_distances show_routes
 
 # -- Program Sources
+show_distances_SOURCES = show_distances.cc
+show_distances_LDADD = $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/targets/libshowdistancesbase.la $(LDADD)
+
 show_routes_SOURCES = show_routes.cc
 show_routes_LDADD = $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/targets/libshowroutesbase.la $(LDADD)
 
@@ -108,9 +110,19 @@ subdir = rib/tools
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
-bin_PROGRAMS = show_routes$(EXEEXT)
+bin_PROGRAMS = show_distances$(EXEEXT) show_routes$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
+am_show_distances_OBJECTS = show_distances.$(OBJEXT)
+show_distances_OBJECTS = $(am_show_distances_OBJECTS)
+show_distances_DEPENDENCIES = \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/targets/libshowdistancesbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+show_distances_LDFLAGS =
 am_show_routes_OBJECTS = show_routes.$(OBJEXT)
 show_routes_OBJECTS = $(am_show_routes_OBJECTS)
 show_routes_DEPENDENCIES = \
@@ -128,7 +140,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/show_routes.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/show_distances.Po \
+@AMDEP_TRUE@	$(DEPDIR)/show_routes.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -138,9 +151,9 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
-DIST_SOURCES = $(show_routes_SOURCES)
+DIST_SOURCES = $(show_distances_SOURCES) $(show_routes_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(show_routes_SOURCES)
+SOURCES = $(show_distances_SOURCES) $(show_routes_SOURCES)
 
 all: all-am
 
@@ -186,6 +199,9 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
+show_distances$(EXEEXT): $(show_distances_OBJECTS) $(show_distances_DEPENDENCIES) 
+	@rm -f show_distances$(EXEEXT)
+	$(CXXLINK) $(show_distances_LDFLAGS) $(show_distances_OBJECTS) $(show_distances_LDADD) $(LIBS)
 show_routes$(EXEEXT): $(show_routes_OBJECTS) $(show_routes_DEPENDENCIES) 
 	@rm -f show_routes$(EXEEXT)
 	$(CXXLINK) $(show_routes_LDFLAGS) $(show_routes_OBJECTS) $(show_routes_LDADD) $(LIBS)
@@ -196,6 +212,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/show_distances.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/show_routes.Po@am__quote@
 
 distclean-depend:
