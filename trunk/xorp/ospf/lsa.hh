@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.101 2007/03/19 05:47:07 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.102 2007/03/19 06:21:22 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1123,6 +1123,17 @@ public:
 	}
 	XLOG_UNREACHABLE();
 	return 0;
+    }
+
+    /**
+     * OSPFv3 only is this a known LSA, of course not this is the
+     * unknown LSA.
+     *
+     * @return false.
+     */
+    bool known() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return false;
     }
 
     /**
