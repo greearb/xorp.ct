@@ -1,8 +1,9 @@
 #
-# $XORP$
+# $XORP: xorp/contrib/Jamfile,v 1.1 2007/01/15 13:43:16 bms Exp $
 #
 
 SubDir TOP contrib ;
+#SubInclude TOP contrib bcast ;
 #SubInclude TOP contrib olsr ;
 #SubInclude TOP contrib win32 ;
-#SubDir TOP contrib ;
+SubDir TOP contrib ;
