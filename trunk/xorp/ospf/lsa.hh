@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.102 2007/03/19 06:21:22 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.103 2007/03/22 02:19:51 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1419,7 +1419,7 @@ class SummaryNetworkLsa : public Lsa {
     {}
 
     /**
-     * @return the minimum length of a RouterLSA.
+     * @return the minimum length of a SummaryNetworkLsa.
      */
     size_t min_length() const {
 	switch(get_version()) {
@@ -1427,7 +1427,7 @@ class SummaryNetworkLsa : public Lsa {
 	    return 8;
 	    break;
 	case OspfTypes::V3:
-	    return 12;
+	    return 8;
 	    break;
 	}
 	XLOG_UNREACHABLE();

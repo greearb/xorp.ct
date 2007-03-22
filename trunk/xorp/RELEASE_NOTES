@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.171 2007/03/21 22:40:10 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.172 2007/03/21 22:46:44 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -48,6 +48,10 @@ Release 1.5-WIP (2007/??/??)
     - Bug fix related to OSPFv3 link-local scope LSAs. Previously the
       link-local scope LSAs were incorrectly flooded to links other
       than the one they belonged to.
+
+    - Bug fix related to OSPFv3 Inter-Area-Prefix-LSAs. The check for
+      the minimum size of an Inter-Area-Prefix-LSA was incorrect so
+      short prefixes such as the default route would be rejected.
 
   BGP:
     - 
