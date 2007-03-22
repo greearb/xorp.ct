@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/etc/templates/rib.cmds,v 1.9 2007/02/26 10:31:12 atanu Exp $ */
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.10 2007/03/22 20:48:18 bms Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -67,6 +67,24 @@ show route table ipv6 multicast {
 /*
  * Administrative distance commands
  */
+show route admin distance {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show RIB administrative distances";
+}
+
+show route admin distance ipv4 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 administrative distances";
+}
+
+show route admin distance ipv6 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 administrative distances";
+}
+
 show route admin distances ipv4 unicast {
      %command: "rib/tools/show_distances ribin $5 $6" %help: HELP;
      %module: rib;
