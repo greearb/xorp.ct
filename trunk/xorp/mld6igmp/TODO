@@ -1,14 +1,9 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.19 2006/08/02 07:59:22 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.20 2007/03/14 01:52:03 pavlin Exp $
 #
 
 * Implement RFC 3590 "Source Address Selection for the
   Multicast Listener Discovery (MLD) Protocol".
-
-* Implement an MLD/IGMP "proxy" where the Join/Leave messages
-  from one interface are forwarded on another interface.
-  This may be useful with satellite routers which do support
-  IGMP, but do NOT support PIM-SM for example.
 
 * Implement graceful stopping of node and/or a vif. I.e., perform
   protocol-related operations to inform other nodes that
