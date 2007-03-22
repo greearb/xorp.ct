@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.138 2007/03/12 10:16:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.139 2007/03/13 18:25:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -528,14 +528,21 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 							  source));
 	}
 #endif
+	// This call needs to be made only once per invocation of OSPF
+	// but at this point we know that the interface mirror is up
+	// and running.
+	_ospf.register_address_status(callback(this,
+					       &PeerManager<A>::
+					       address_status_change));
 	break;
     }
 
-    // This call needs to be made only once per invocation of OSPF but
-    // at this point we know that the interface mirror is up and running.
-    _ospf.register_address_status(callback(this,
-					   &PeerManager<A>::
-					   address_status_change));
+    // This call needs to be made only once per invocation of OSPF
+    // but at this point we know that the interface mirror is up
+    // and running.
+    _ospf.register_vif_status(callback(this,
+				       &PeerManager<A>::
+				       vif_status_change));
 
     area_router->add_peer(peerid);
 
@@ -791,6 +798,34 @@ PeerManager<A>::recompute_addresses_peer(const OspfTypes::PeerID peerid,
 
 template <typename A>
 void
+PeerManager<A>::vif_status_change(const string& interface, const string& vif,
+				  bool state)
+{
+    debug_msg("interface %s vif %s state %s\n",
+	      interface.c_str(), vif.c_str(), pb(state));
+
+    OspfTypes::PeerID peerid;
+
+    // All interface/vif/address changes on the host come through
+    // here, ignore the changes that are not for OSPF.
+    try {
+	peerid = get_peerid(interface, vif);
+    } catch(...) {
+	return;
+    }
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return;
+    }
+
+    _peers[peerid]->set_link_status(state);
+
+    return;
+}
+
+template <typename A>
+void
 PeerManager<A>::address_status_change(const string& interface,
 				      const string& vif, A source,
 				      bool state)
@@ -824,8 +859,6 @@ PeerManager<A>::address_status_change(const string& interface,
 	    recompute_addresses_peer(peerid, *i);
 	break;
     }
-
-    _peers[peerid]->set_link_status(state);
 
     return;
 }

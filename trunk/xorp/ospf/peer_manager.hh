@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.87 2007/03/12 10:16:04 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.88 2007/03/13 18:25:51 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -213,6 +213,13 @@ class PeerManager {
      */
     bool recompute_addresses_peer(const OspfTypes::PeerID,
 				  OspfTypes::AreaID area);
+
+    /**
+     * Track the state of a vif.
+     * Callback when the status of the vif changes.
+     */
+    void vif_status_change(const string& interface, const string& vif,
+			   bool state);
 
     /**
      * Track the state of an address.
