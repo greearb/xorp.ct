@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.139 2007/02/27 23:32:24 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.140 2007/03/12 10:16:04 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -568,6 +568,8 @@ class Peer {
 	for (n = _neighbours.begin(); n != _neighbours.end(); n++)
 	    delete (*n);
 	_neighbours.clear();
+
+	shutdown();
     }
 
     bool init() {
@@ -577,6 +579,18 @@ class Peer {
 		break;
 	    case OspfTypes::V3:
 		status = initV3();
+		break;
+	}
+	return status;
+    }
+
+    bool shutdown() {
+	bool status = true;
+	switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		status = shutdownV3();
 		break;
 	}
 	return status;
@@ -606,6 +620,11 @@ class Peer {
      * OSPFv3 specific go
      */
     bool goV3();
+
+    /**
+     * OSPFv3 specific shutdown
+     */
+    bool shutdownV3();
 
     /*
      * OSPFv3 set all the fields for the peers Link-LSA.

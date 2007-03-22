@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.271 2007/03/19 14:51:56 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.272 2007/03/21 22:40:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1639,7 +1639,14 @@ AreaRouter<A>::withdraw_link_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar)
     debug_msg("PeerID %u %s\n", peerid, cstring(*lsar));
     XLOG_ASSERT(lsar->get_peerid() == peerid);
 
-    XLOG_UNFINISHED();
+    // Clear the timer, don't want this LSA coming back.
+    lsar->get_timer().clear();
+
+    size_t index;
+    if (find_lsa(lsar, index))
+	delete_lsa(lsar, index, false /* Don't invalidate */);
+    else
+	XLOG_WARNING("Link-LSA not found in database %s", cstring(*lsar));
 
     return true;
 }

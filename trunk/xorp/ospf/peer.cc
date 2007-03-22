@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.274 2007/03/21 22:40:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.275 2007/03/21 22:46:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -858,6 +858,18 @@ Peer<A>::goV3()
     populate_link_lsa();
 
     get_area_router()->add_link_lsa(get_peerid(), _link_lsa);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::shutdownV3()
+{
+    if (OspfTypes::VirtualLink == get_linktype())
+	return true;
+
+    get_area_router()->withdraw_link_lsa(get_peerid(), _link_lsa);
 
     return true;
 }
