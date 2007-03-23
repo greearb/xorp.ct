@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.85 2007/02/27 19:46:34 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.86 2007/03/16 00:04:26 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -131,7 +131,9 @@ gmake check
 
   * FreeBSD-6.1 on amd64
     - The utils/flower_malloc/test_flower_malloc.sh test fails.
-    - The SNMP support inside the "mibs" directory fails to compile.
+    - The SNMP support inside the "mibs" directory can be compiled only
+      if the "--enable-shared" flag is used when running "./configure":
+      ./configure --with-snmp --enable-shared
     - The rest of code compiles with the following compilers, and the internal
       tests appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518 (default)
