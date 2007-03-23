@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.37 2007/03/20 22:55:20 atanu Exp $
+# $XORP: xorp/ERRATA,v 1.38 2007/03/21 18:14:28 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -265,3 +265,19 @@
       the problems:
 
          http://www.xorp.org/snmp.html 
+
+    - There might be a compilation error in the mibs directory on some
+      systems running on 64-bit machines (e.g., FreeBSD-6.1 or 6.2 on
+      AMD-64):
+
+g++ -shared   xorpevents.lo -Wl,--whole-archive ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -Wl,--no-whole-archive  ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -lcrypto  -Wl,-soname -Wl,libnetsnmpxorp.so -o .libs/libnetsnmpxorp.so
+/usr/bin/ld: ../libxipc/.libs/libxipc.a(hmac_md5.o): relocation R_X86_64_32S can not be used when making a shared object; recompile with -fPIC
+../libxipc/.libs/libxipc.a(hmac_md5.o): could not read symbols: Bad value
+gmake[1]: *** [libnetsnmpxorp.la] Error 1
+
+     In that case use the "--enable-shared" flag to "./configure", and
+     remove the previous compilation:
+
+       ./configure --with-snmp --enable-shared
+       gmake clean
+       gmake
