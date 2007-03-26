@@ -85,7 +85,8 @@ DEFINES_R = -D_POSIX_C_SOURCE=200112L
 # on modifying the library, leave this set to -O.
 #
 
-OPT = -O
+# OPT = -O
+OPT =
 
 #
 # These are paranoid gcc warning flags to use when compiling new code.
