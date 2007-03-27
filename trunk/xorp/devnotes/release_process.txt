@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.63 2007/03/21 19:15:41 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.64 2007/03/27 17:35:54 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -595,7 +595,15 @@ the login shell is csh or tcsh):
 	MISC: Should be omitted for a release candidate.
 
 ========================================================================
-2975.	TASK: Update the heise.de XORP entry:
+2975.	TASK: Update the Wikipedia XORP entry:
+	      http://en.wikipedia.org/wiki/XORP
+	WHO:  Release manager or any core developer
+	WHEN: Right after the release
+	MISC: - Should be omitted for a release candidate.
+              - Requires login and a password.
+
+========================================================================
+2980.	TASK: Update the heise.de XORP entry:
 	      http://www.heise.de/software/default.shtml?prg=42502
 	WHO:  Release manager
 	WHEN: Right after the release
