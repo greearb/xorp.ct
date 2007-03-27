@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.62 2007/03/16 00:15:07 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.63 2007/03/21 19:15:41 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -593,6 +593,14 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: Right after the release
 	MISC: Should be omitted for a release candidate.
+
+========================================================================
+2975.	TASK: Update the heise.de XORP entry:
+	      http://www.heise.de/software/default.shtml?prg=42502
+	WHO:  Release manager
+	WHEN: Right after the release
+	MISC: - Should be omitted for a release candidate.
+              - Requires access URL.
 
 ========================================================================
 3000.	TASK: Start the XORP tinderbox crontab job (only if it was
