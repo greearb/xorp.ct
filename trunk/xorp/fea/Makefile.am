@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.66 2006/06/29 19:10:56 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.67 2006/08/23 17:35:17 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -20,14 +20,17 @@ check_PROGRAMS		 = test_ifmanager_transaction
 check_PROGRAMS 		+= test_mfea
 check_PROGRAMS		+= test_rawsock4
 check_PROGRAMS		+= test_xrl_sockets4_udp
+check_PROGRAMS		+= test_xrl_sockets4_tcp
 
 check_SCRIPTS		 = test_add_route.sh
 check_SCRIPTS		+= test_config_interface.sh
 check_SCRIPTS		+= test_xrl_sockets4_udp.sh
+check_SCRIPTS		+= test_xrl_sockets4_tcp.sh
 
 # -- Test Programs and Scripts
 #TESTS			 = $(check_SCRIPTS)
 TESTS			 = test_xrl_sockets4_udp.sh
+TESTS			+= test_xrl_sockets4_tcp.sh
 TESTS			+= test_rawsock4$(EXEEXT)
 TESTS			+= test_ifmanager_transaction$(EXEEXT)
 
@@ -155,6 +158,20 @@ test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
+
+test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
+
+test_xrl_sockets4_tcp_LDADD	 = $(noinst_LTLIBRARIES)
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for demo_fea_ifmgr_client
 demo_fea_ifmgr_client_SOURCES	 = demo_fea_ifmgr_client.cc

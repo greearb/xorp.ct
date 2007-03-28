@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.21 2005/09/01 20:50:13 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.22 2006/03/01 12:55:33 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -61,6 +61,8 @@
 #define COMM_SOCK_ADDR_PORT_DONTREUSE	0
 #define COMM_SOCK_BLOCKING		1
 #define COMM_SOCK_NONBLOCKING		0
+
+#define COMM_DEFAULT_BACKLOG		5
 
 #ifndef AF_LOCAL
 #define AF_LOCAL		AF_UNIX	   /* XXX: AF_UNIX is the older name */
@@ -171,6 +173,15 @@ extern xsock_t	comm_open_udp(int family, int is_blocking);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_close(xsock_t sock);
+
+/**
+ * Listen on a socket.
+ *
+ * @param sock the socket to listen on.
+ * @param backlog the maximum queue size for pending connections.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_listen(xsock_t sock, int backlog);
 
 /**
  * Open an IPv4 TCP socket and bind it to a local address and a port.
@@ -635,6 +646,15 @@ extern int	comm_sock_connect(xsock_t sock, const struct sockaddr *sin,
 extern xsock_t	comm_sock_accept(xsock_t sock);
 
 /**
+ * Listen for connections on a socket.
+ *
+ * @param sock the socket to listen on.
+ * @param backlog the maximum queue size for pending connections
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_sock_listen(xsock_t sock, int backlog);
+
+/**
  * Close a socket.
  *
  * @param sock the socket to close.
@@ -756,6 +776,15 @@ extern int	comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize,
  * @return the address family on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_get_family(xsock_t sock);
+
+/**
+ * Get the type of a socket.
+ * Code copied from comm_sock_get_family.
+ *
+ * @param sock the socket whose type we need to get.
+ * @return the socket type on success, otherwise XORP_ERROR.
+ */
+extern int	comm_sock_get_type(xsock_t sock);
 
 /**
  * Set the blocking or non-blocking mode of an existing socket.

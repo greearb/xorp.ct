@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/socket4.xif,v 1.5 2006/09/12 22:56:40 atanu Exp $ */
 
 /**
  * Interface implementing basic IPv4 socket functionality.  This interface
@@ -18,6 +18,52 @@
  *
  */
 interface socket4/0.1 {
+
+    /**
+     * Open a tcp socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    tcp_open			? creator:txt				\
+				& is_blocking:bool			\
+				-> sockid:txt
+
+    /**
+     * Open a udp socket.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param is_blocking if true then the socket will be blocking, otherwise
+     *        non-blocking.
+     *
+     * @param sockid return parameter that contains unique socket id when
+     *        socket instantiation is successful.
+     */
+    udp_open			? creator:txt				\
+				& is_blocking:bool			\
+				-> sockid:txt
+
+    /**
+     * Bind a socket.
+     *
+     * @param sockid the socket id of the socket to bind.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     */
+    bind			? creator:txt				\
+				& sockid:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32
 
     /**
      * Create a bound TCP socket.
@@ -63,7 +109,6 @@ interface socket4/0.1 {
 				& is_blocking:bool			\
 				-> sockid:txt
 
-
     /**
      * Create a bound UDP multicast socket.
      *
@@ -94,7 +139,6 @@ interface socket4/0.1 {
 				& reuse:bool				\
 				& is_blocking:bool			\
 				-> sockid:txt
-
 
     /**
      * Create a bound and connected TCP socket.
@@ -152,7 +196,6 @@ interface socket4/0.1 {
 				& is_blocking:bool			\
 				-> sockid:txt
 
-
     /**
      * Join multicast group on already bound socket.
      *
@@ -181,7 +224,6 @@ interface socket4/0.1 {
 				& mcast_addr:ipv4			\
 				& leave_if_addr:ipv4
 
-
     /**
      * Close socket.
      *
@@ -200,7 +242,6 @@ interface socket4/0.1 {
      */
     tcp_listen			? sockid:txt				\
 				& backlog:u32
-
 
     /**
      * Send data on socket.
@@ -236,7 +277,6 @@ interface socket4/0.1 {
 				& out_of_band:bool			\
 				& end_of_record:bool			\
 				& end_of_file:bool
-
 
     /**
      * Send data on socket to a given destination.  The packet is not
@@ -300,7 +340,6 @@ interface socket4/0.1 {
 				& group_port:u32			\
 				& ifaddr:ipv4				\
 				& data:binary
-
 
     /**
      * Set a named socket option.

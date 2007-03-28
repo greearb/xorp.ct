@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.7 2006/03/16 00:04:04 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.8 2007/02/16 22:45:53 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_CMDS_HH__
 #define __FEA_XRL_SOCKET_CMDS_HH__
@@ -111,6 +111,7 @@ private:
     A			_src_host;
     uint32_t		_src_port;
     string		_new_sockid;
+    CommandCallback	_cb;
 };
 
 template <typename A>

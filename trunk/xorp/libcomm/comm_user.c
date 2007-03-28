@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.22 2006/03/30 00:32:02 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.23 2006/10/12 01:24:45 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -258,6 +258,24 @@ comm_close(xsock_t sock)
 }
 
 /**
+ * comm_listen:
+ * @sock the socket to listen on.
+ * @backlog the maximum queue size for pending connections.
+ *
+ * Listen on a socket.
+ *
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+comm_listen(xsock_t sock, int backlog)
+{
+    if (comm_sock_listen(sock, backlog) != XORP_OK)
+	return (XORP_ERROR);
+
+    return (XORP_OK);
+}
+
+/**
  * comm_bind_tcp4:
  * @my_addr: The local IPv4 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
@@ -284,14 +302,6 @@ comm_bind_tcp4(const struct in_addr *my_addr, unsigned short my_port,
 	return (XORP_BAD_SOCKET);
     }
     if (comm_sock_bind4(sock, my_addr, my_port) != XORP_OK) {
-	comm_sock_close(sock);
-	return (XORP_BAD_SOCKET);
-    }
-
-    if (listen(sock, 5) < 0) {
-	_comm_set_serrno();
-	XLOG_ERROR("Error listen() on socket %d: %s",
-		   sock, comm_get_error_str(comm_get_last_error()));
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
     }
@@ -331,14 +341,6 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
 	return (XORP_BAD_SOCKET);
     }
 
-    if (listen(sock, 5) < 0) {
-	_comm_set_serrno();
-	XLOG_ERROR("Error listen() on socket %d: %s",
-		   sock, comm_get_error_str(comm_get_last_error()));
-	comm_sock_close(sock);
-	return (XORP_BAD_SOCKET);
-    }
-
     return (sock);
 
 #else /* ! HAVE_IPV6 */
@@ -363,16 +365,17 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
     switch (sock->sa_family) {
     case AF_INET:
 	{
-	    const struct sockaddr_in *sin = (const struct sockaddr_in *)((const void *)sock);
+	    const struct sockaddr_in *sin =
+		(const struct sockaddr_in *)((const void *)sock);
 	    return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking);
 	}
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	{
-	    const struct sockaddr_in6 *sin = (const struct sockaddr_in6 *)((const void *)sock);
-	    return comm_bind_tcp6(&sin->sin6_addr, sin->sin6_port,
-				  is_blocking);
+	    const struct sockaddr_in6 *sin =
+		(const struct sockaddr_in6 *)((const void *)sock);
+	    return comm_bind_tcp6(&sin->sin6_addr, sin->sin6_port, is_blocking);
 	}
 	break;
 #endif /* HAVE_IPV6 */

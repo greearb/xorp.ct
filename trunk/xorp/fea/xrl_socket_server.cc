@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.28 2006/03/16 00:04:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.29 2007/02/16 22:45:53 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -57,7 +57,7 @@ public:
 		       uint16_t		finder_port,
 		       XrlSocketServer* parent)
 	: XrlStdRouter(eventloop, class_name, finder_host, finder_port),
-	  _p(parent)
+	    _p(parent)
     {}
 
     void
@@ -138,7 +138,7 @@ XrlSocketServer::RemoteSocketOwner::RemoteSocketOwner(
 					XrlSender&		xs,
 					const string&		tname)
     : XrlSocketCommandDispatcher(xs), _ss(ss), _tname(tname), _sockets(0),
-      _watched(false)
+	_watched(false)
 {
     _ss.add_owner_watch(_tname);
 }
@@ -163,7 +163,8 @@ XrlSocketServer::RemoteSocketOwner::decr_socket_count()
     _sockets--;
 
     // Arrange for instance to be cleared up if no xrls are pending
-    if (queue_empty())
+    // (and there are no remaining sockets [tschooley])
+    if (queue_empty() && _sockets == 0)
 	_ss.destroy_owner(_tname);
 }
 
@@ -192,7 +193,8 @@ XrlSocketServer::find_or_create_owner(const string& target)
 	return &i->second;
     }
     pair<map<string, RemoteSocketOwner>::iterator, bool> ins =
-	_socket_owners.insert(pair<string,RemoteSocketOwner>(target, RemoteSocketOwner(*this, *_r, target)));
+	_socket_owners.insert(pair<string,RemoteSocketOwner>(target, 
+				RemoteSocketOwner(*this, *_r, target)));
     if (ins.second == false)
 	return 0;
     i = ins.first;
@@ -213,7 +215,45 @@ XrlSocketServer::destroy_owner(const string& target)
 {
     map<string, RemoteSocketOwner>::iterator i = _socket_owners.find(target);
     if (i != _socket_owners.end()) {
+    /*
+     * remove_sockets_owned_by(target) needs to be called before the owner
+     * is destroyed, otherwise remove_owner_watch (which calls 
+     * remove_sockets_owned_by at an arbitrary future time) might find
+     * RemoteSockets with their owners destroyed, thus any owner() accesses
+     * will cause a segfault. [tschooley]
+     */
+    remove_sockets_owned_by(target);
 	_socket_owners.erase(i);
+    }
+}
+
+template <>
+void
+XrlSocketServer::destroy_socket<IPv4>(const string& sockid)
+{
+    V4Sockets::iterator i4 = _v4sockets.begin();
+    while (i4 != _v4sockets.end()) {
+	RemoteSocket<IPv4>* rs = i4->get();
+	if (rs->sockid() == sockid) {
+	    _v4sockets.erase(i4);
+	    return;
+	}
+	i4++;
+    }
+}
+
+template <>
+void
+XrlSocketServer::destroy_socket<IPv6>(const string& sockid)
+{
+    V6Sockets::iterator i6 = _v6sockets.begin();
+    while (i6 != _v6sockets.end()) {
+	RemoteSocket<IPv6>* rs = i6->get();
+	if (rs->sockid() == sockid) {
+	    _v6sockets.erase(i6);
+	    return;
+	}
+	i6++;
     }
 }
 
@@ -269,9 +309,9 @@ XrlSocketServer::remove_owner_watch_cb(const XrlError& e, string target)
     }
     RemoteSocketOwner* rso = find_owner(target);
     if (rso) {
+    XLOG_ASSERT(rso->socket_count() == 0);
 	rso->set_watched(false);
     }
-    remove_sockets_owned_by(target);
     XLOG_ASSERT(find_owner(target) == 0);
 }
 
@@ -309,6 +349,15 @@ XrlSocketServer::RemoteSocket<A>::RemoteSocket(XrlSocketServer&	ss,
 			      XorpFd				fd,
 			      const A&				addr)
     : _ss(ss), _owner(owner), _fd(fd), _addr(addr), _sockid(XUID().str())
+{
+    _owner.incr_socket_count();
+}
+
+template <typename A>
+XrlSocketServer::RemoteSocket<A>::RemoteSocket(XrlSocketServer&	ss,
+			      RemoteSocketOwner&		owner,
+			      XorpFd				fd)
+    : _ss(ss), _owner(owner), _fd(fd), _addr(A()), _sockid(XUID().str())
 {
     _owner.incr_socket_count();
 }
@@ -352,15 +401,14 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
     SocketUserSendRecvEvent<A>* cmd =
 	new SocketUserSendRecvEvent<A>(owner().tgt_name(), sockid());
 
-    typename A::SockAddrType sin;
-    socklen_t sin_len = sizeof(sin);
-    sockaddr* sa = reinterpret_cast<sockaddr*>(&sin);
+    struct sockaddr_storage ss;
+    socklen_t ss_len = sizeof(ss);
 
     // XXX buffer is overprovisioned for normal case and size hard-coded...
     // It get's resized a little later on to amount of data read.
     cmd->data().resize(64000);
     ssize_t rsz = recvfrom(fd, XORP_BUF_CAST(&cmd->data()[0]),
-			   cmd->data().size(), 0, sa, &sin_len);
+	cmd->data().size(), 0, (struct sockaddr *)&ss, &ss_len);
 
     if (rsz < 0) {
 	delete cmd;
@@ -373,8 +421,57 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
 
     cmd->data().resize(rsz);
 
-    XLOG_ASSERT(sa->sa_family == A::af());
-    cmd->set_source(sin, sin_len);
+    // Establish socket type
+    int so_type = comm_sock_get_type(fd);
+
+    if (so_type == SOCK_DGRAM)
+    {
+	XLOG_ASSERT(ss.ss_family == A::af());
+	typename A::SockAddrType *sa =
+	    reinterpret_cast<typename A::SockAddrType *>(&ss);
+	socklen_t sa_len = sizeof(*sa);
+	cmd->set_source(*sa, sa_len);
+    }
+    else if (so_type == SOCK_STREAM)
+    {
+	if (rsz == 0) {
+	    /* socket closed, need to call deletion of self */
+	    delete cmd;
+	    ref_ptr<XrlSocketCommandBase> cmd = new
+		SocketUserSendCloseEvent<A>(owner().tgt_name(),
+		    sockid(), "Remote host closed the connection.");
+	    owner().enqueue(cmd);
+	    return _ss.destroy_socket<A>(sockid());
+	}
+
+	struct sockaddr_storage newss;
+	socklen_t newss_len = sizeof(newss);
+
+	int error = getpeername(fd, (struct sockaddr *)&newss, &newss_len);
+	if (error != 0) {
+	    ref_ptr<XrlSocketCommandBase> ecmd = new
+		SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
+					comm_get_last_error_str(), false);
+		owner().enqueue(ecmd);
+		return;
+	}
+	XLOG_ASSERT(newss.ss_family == A::af());
+	typename A::SockAddrType *sa =
+	    reinterpret_cast<typename A::SockAddrType *>(&newss);
+	socklen_t sa_len = sizeof(*sa);
+	cmd->set_source(*sa, sa_len);
+    }
+    else
+    {
+	delete cmd;
+	string error = "Invalid socket type %d\n", so_type;
+	ref_ptr<XrlSocketCommandBase> ecmd = new
+	    SocketUserSendErrorEvent<A>(owner().tgt_name(),
+					sockid(), error, false);
+	owner().enqueue(ecmd);
+	return;
+    }
+
     debug_msg("Command %s\n", cmd->str().c_str());
     owner().enqueue(cmd);
 }
@@ -385,7 +482,7 @@ XrlSocketServer::RemoteSocket<A>::set_connect_recv_enable(bool en)
 {
     EventLoop& eventloop = _ss.eventloop();
     if (en) {
-	eventloop.remove_ioevent_cb(_fd, IOT_ACCEPT,
+	eventloop.add_ioevent_cb(_fd, IOT_ACCEPT,
 			  callback(this, &RemoteSocket::accept_io_cb));
     } else {
 	eventloop.remove_ioevent_cb(_fd);
@@ -398,37 +495,38 @@ XrlSocketServer::RemoteSocket<A>::accept_io_cb(XorpFd fd, IoEventType)
 {
     XLOG_ASSERT(fd == _fd);
 
-    struct sockaddr_storage sa;
-    socklen_t sa_len = sizeof(sa);
-
     XorpFd afd = comm_sock_accept(_fd);
     if (!afd.is_valid()) {
-	ref_ptr<XrlSocketCommandBase*> ecmd = new
-	    SocketUserSendErrorEvent<A>(owner()->tgt_name(), sockid(),
+	ref_ptr<XrlSocketCommandBase> ecmd = new
+	    SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
 					comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
 
-    // XXX
-    int error = getpeername(afd, (struct sockaddr *)&sa, &sa_len);
+    struct sockaddr_storage ss;
+    socklen_t ss_len = sizeof(ss);
+
+    int error = getpeername(afd, (struct sockaddr *)&ss, &ss_len);
     if (error != 0) {
-	ref_ptr<XrlSocketCommandBase*> ecmd = new
-	    SocketUserSendErrorEvent<A>(owner()->tgt_name(), sockid(),
+	ref_ptr<XrlSocketCommandBase> ecmd = new
+	    SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
 					comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
 
-    XLOG_ASSERT(sa.ss_family == A::af());
+    XLOG_ASSERT(ss.ss_family == A::af());
+    sockaddr* sa = reinterpret_cast<sockaddr*>(&ss);
+    A host(*sa);
 
-    _ss.push_socket(new RemoteSocket<A>(_ss, owner(), afd, sa));
-
-    ref_ptr<XrlSocketCommandBase*> cmd =
+    _ss.push_socket(new RemoteSocket<A>(_ss, owner(), afd, host));
+    
+    ref_ptr<XrlSocketCommandBase> cmd =
 	new SocketUserSendConnectEvent<A>(&_ss, _owner.tgt_name(),
-					  _sockid, sa,
-					  sockaddr_ip_port<A>(sa),
-					  _v4sockets.back()->sockid());
+					  _sockid, host,
+					  sockaddr_ip_port<A>(*sa), 
+					  _ss._v4sockets.back()->sockid());
     owner().enqueue(cmd);
 }
 
@@ -657,6 +755,83 @@ last_comm_error()
 }
 
 XrlCmdError
+XrlSocketServer::socket4_0_1_tcp_open(const string&	creator,
+				      const bool&	is_blocking,
+				      string&		sockid)
+{
+    if (status() != SERVICE_RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    XorpFd fd = comm_open_tcp(AF_INET, is_blocking);
+    if (!fd.is_valid()) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v4sockets.push_back(new RemoteSocket<IPv4>(*this, *rso, fd));
+    sockid = _v4sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket4_0_1_udp_open(const string&	creator,
+				      const bool&	is_blocking,
+				      string&		sockid)
+{
+    if (status() != SERVICE_RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    XorpFd fd = comm_open_udp(AF_INET, is_blocking);
+    if (!fd.is_valid()) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v4sockets.push_back(new RemoteSocket<IPv4>(*this, *rso, fd));
+    sockid = _v4sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket4_0_1_bind(const string&	    creator,
+				  const string&	    sockid,
+				  const IPv4&	    local_addr,
+				  const uint32_t&   local_port)
+{
+    if (status() != SERVICE_RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+    
+    UNUSED(creator); // May use it in future using lookups via owner
+
+    in_addr ia;
+    local_addr.copy_out(ia);
+
+    V4Sockets::const_iterator ci;
+    for (ci = _v4sockets.begin(); ci != _v4sockets.end(); ++ci) {
+	RemoteSocket<IPv4>* rs = ci->get();
+	if (rs->sockid() == sockid) {
+	    int x = comm_sock_bind4(rs->fd(), &ia, htons(local_port));
+	    //rs->set_connect_recv_enable(true);
+	    if (x == XORP_OK) {
+		return XrlCmdError::OKAY();
+	    }
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+}
+
+XrlCmdError
 XrlSocketServer::socket4_0_1_tcp_open_and_bind(const string&	creator,
 					       const IPv4&	local_addr,
 					       const uint32_t&	local_port,
@@ -758,7 +933,7 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
     mcast_addr.copy_out(grp);
 
     XorpFd fd = comm_bind_join_udp4(&grp, &ia, htons(local_port), reuse,
-				 is_blocking);
+				    is_blocking);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -990,6 +1165,7 @@ XrlSocketServer::socket4_0_1_tcp_listen(const string&	sockid,
 	RemoteSocket<IPv4>* rs = ci->get();
 	if (rs->sockid() == sockid) {
 	    int x = listen(rs->fd(), backlog);
+	    rs->set_connect_recv_enable(true);
 	    if (x == 0) {
 		return XrlCmdError::OKAY();
 	    }
@@ -998,7 +1174,6 @@ XrlSocketServer::socket4_0_1_tcp_listen(const string&	sockid,
     }
     return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
 }
-
 
 XrlCmdError
 XrlSocketServer::socket4_0_1_send(
@@ -1309,6 +1484,83 @@ XrlSocketServer::socket4_0_1_get_socket_option(const string&	sockid,
 
 // ----------------------------------------------------------------------------
 // socket6/0.1 implementation
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_tcp_open(const string&	creator,
+				      const bool&	is_blocking,
+				      string&		sockid)
+{
+    if (status() != SERVICE_RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    XorpFd fd = comm_open_tcp(AF_INET, is_blocking);
+    if (!fd.is_valid()) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd));
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_udp_open(const string&	creator,
+				      const bool&	is_blocking,
+				      string&		sockid)
+{
+    if (status() != SERVICE_RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+
+    XorpFd fd = comm_open_udp(AF_INET6, is_blocking);
+    if (!fd.is_valid()) {
+	return XrlCmdError::COMMAND_FAILED(last_comm_error());
+    }
+
+    RemoteSocketOwner* rso = find_or_create_owner(creator);
+    if (rso == 0) {
+	comm_close(fd);
+	return XrlCmdError::COMMAND_FAILED("Could not create owner");
+    }
+    _v6sockets.push_back(new RemoteSocket<IPv6>(*this, *rso, fd));
+    sockid = _v6sockets.back()->sockid();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlSocketServer::socket6_0_1_bind(const string&	    creator,
+				  const string&	    sockid,
+				  const IPv6&	    local_addr,
+				  const uint32_t&   local_port)
+{
+    if (status() != SERVICE_RUNNING)
+	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
+    
+    UNUSED(creator); // May use it in future using lookups via owner
+
+    in6_addr ia;
+    local_addr.copy_out(ia);
+    
+    V6Sockets::const_iterator ci;
+    for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
+	RemoteSocket<IPv6>* rs = ci->get();
+	if (rs->sockid() == sockid) {
+	    int x = comm_sock_bind6(rs->fd(), &ia, htons(local_port));
+	    //rs->set_connect_recv_enable(true);
+	    if (x == XORP_OK) {
+		return XrlCmdError::OKAY();
+	    }
+	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
+	}
+    }
+    return XrlCmdError::COMMAND_FAILED(NOT_FOUND_MSG);
+}
 
 XrlCmdError
 XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
@@ -1674,8 +1926,8 @@ XrlSocketServer::socket6_0_1_tcp_listen(const string&	sockid,
     for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
 	RemoteSocket<IPv6>* rs = ci->get();
 	if (rs->sockid() == sockid) {
-	    int x = listen(rs->fd(), backlog);
-	    if (x == 0) {
+	    if (comm_listen(rs->fd(), backlog) == XORP_OK) {
+		rs->set_connect_recv_enable(true);
 		return XrlCmdError::OKAY();
 	    }
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
