@@ -173,20 +173,6 @@ test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
-test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
-
-test_xrl_sockets4_tcp_LDADD	 = $(noinst_LTLIBRARIES)
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
-
 # -- Sources and Linkage for demo_fea_ifmgr_client
 demo_fea_ifmgr_client_SOURCES	 = demo_fea_ifmgr_client.cc
 demo_fea_ifmgr_client_LDADD	 = $(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.la
