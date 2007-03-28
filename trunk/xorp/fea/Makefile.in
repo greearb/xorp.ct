@@ -98,13 +98,13 @@ bin_SCRIPTS = xorp_fea_click_config_generator
 # -- No-install Programs and Scripts
 noinst_PROGRAMS = demo_fea_ifmgr_client
 
-check_PROGRAMS = test_ifmanager_transaction test_mfea test_rawsock4 test_xrl_sockets4_udp
+check_PROGRAMS = test_ifmanager_transaction test_mfea test_rawsock4 test_xrl_sockets4_udp test_xrl_sockets4_tcp
 
-check_SCRIPTS = test_add_route.sh test_config_interface.sh test_xrl_sockets4_udp.sh
+check_SCRIPTS = test_add_route.sh test_config_interface.sh test_xrl_sockets4_udp.sh test_xrl_sockets4_tcp.sh
 
 # -- Test Programs and Scripts
 #TESTS			 = $(check_SCRIPTS)
-TESTS = test_xrl_sockets4_udp.sh test_rawsock4$(EXEEXT) test_ifmanager_transaction$(EXEEXT)
+TESTS = test_xrl_sockets4_udp.sh test_xrl_sockets4_tcp.sh test_rawsock4$(EXEEXT) test_ifmanager_transaction$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la
@@ -153,6 +153,10 @@ test_rawsock4_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libproto/libproto.la
 test_xrl_sockets4_udp_SOURCES = test_xrl_sockets4_udp.cc
 
 test_xrl_sockets4_udp_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/xrl/targets/libtestsocket4.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
+
+test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
+
+test_xrl_sockets4_tcp_LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/xrl/targets/libtestsocket4.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Sources and Linkage for demo_fea_ifmgr_client
 demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
@@ -228,7 +232,8 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fti_transaction.lo \
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
 check_PROGRAMS = test_ifmanager_transaction$(EXEEXT) test_mfea$(EXEEXT) \
-	test_rawsock4$(EXEEXT) test_xrl_sockets4_udp$(EXEEXT)
+	test_rawsock4$(EXEEXT) test_xrl_sockets4_udp$(EXEEXT) \
+	test_xrl_sockets4_tcp$(EXEEXT)
 noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
@@ -288,6 +293,20 @@ test_rawsock4_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_rawsock4_LDFLAGS =
+am_test_xrl_sockets4_tcp_OBJECTS = test_xrl_sockets4_tcp.$(OBJEXT)
+test_xrl_sockets4_tcp_OBJECTS = $(am_test_xrl_sockets4_tcp_OBJECTS)
+test_xrl_sockets4_tcp_DEPENDENCIES = libfea.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libsocketserverbase.la \
+	$(top_builddir)/xrl/targets/libtestsocket4.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+test_xrl_sockets4_tcp_LDFLAGS =
 am_test_xrl_sockets4_udp_OBJECTS = test_xrl_sockets4_udp.$(OBJEXT)
 test_xrl_sockets4_udp_OBJECTS = $(am_test_xrl_sockets4_udp_OBJECTS)
 test_xrl_sockets4_udp_DEPENDENCIES = libfea.la \
@@ -473,6 +492,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/routing_socket_utils.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_ifmanager_transaction.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_mfea.Po $(DEPDIR)/test_rawsock4.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl_sockets4_tcp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_sockets4_udp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/win_rtm_pipe.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/win_support.Plo \
@@ -505,8 +525,9 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
 	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
-	$(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) \
-	$(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
+	$(test_rawsock4_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
+	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
+	$(xorp_fea_dummy_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -514,7 +535,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
+SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) $(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) $(test_rawsock4_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) $(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) $(xorp_fea_dummy_SOURCES)
 
 all: all-recursive
 
@@ -583,6 +604,9 @@ test_mfea$(EXEEXT): $(test_mfea_OBJECTS) $(test_mfea_DEPENDENCIES)
 test_rawsock4$(EXEEXT): $(test_rawsock4_OBJECTS) $(test_rawsock4_DEPENDENCIES) 
 	@rm -f test_rawsock4$(EXEEXT)
 	$(CXXLINK) $(test_rawsock4_LDFLAGS) $(test_rawsock4_OBJECTS) $(test_rawsock4_LDADD) $(LIBS)
+test_xrl_sockets4_tcp$(EXEEXT): $(test_xrl_sockets4_tcp_OBJECTS) $(test_xrl_sockets4_tcp_DEPENDENCIES) 
+	@rm -f test_xrl_sockets4_tcp$(EXEEXT)
+	$(CXXLINK) $(test_xrl_sockets4_tcp_LDFLAGS) $(test_xrl_sockets4_tcp_OBJECTS) $(test_xrl_sockets4_tcp_LDADD) $(LIBS)
 test_xrl_sockets4_udp$(EXEEXT): $(test_xrl_sockets4_udp_OBJECTS) $(test_xrl_sockets4_udp_DEPENDENCIES) 
 	@rm -f test_xrl_sockets4_udp$(EXEEXT)
 	$(CXXLINK) $(test_xrl_sockets4_udp_LDFLAGS) $(test_xrl_sockets4_udp_OBJECTS) $(test_xrl_sockets4_udp_LDADD) $(LIBS)
@@ -724,6 +748,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_ifmanager_transaction.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mfea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_rawsock4.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/win_rtm_pipe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/win_support.Plo@am__quote@
