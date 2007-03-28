@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.31 2007/03/28 13:41:44 schooley Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.32 2007/03/28 13:49:34 schooley Exp $"
 
 #include "fea_module.h"
 
@@ -57,7 +57,7 @@ public:
 		       uint16_t		finder_port,
 		       XrlSocketServer* parent)
 	: XrlStdRouter(eventloop, class_name, finder_host, finder_port),
-	    _p(parent)
+	  _p(parent)
     {}
 
     void
@@ -138,7 +138,7 @@ XrlSocketServer::RemoteSocketOwner::RemoteSocketOwner(
 					XrlSender&		xs,
 					const string&		tname)
     : XrlSocketCommandDispatcher(xs), _ss(ss), _tname(tname), _sockets(0),
-	_watched(false)
+      _watched(false)
 {
     _ss.add_owner_watch(_tname);
 }
@@ -162,8 +162,10 @@ XrlSocketServer::RemoteSocketOwner::decr_socket_count()
     XLOG_ASSERT(_sockets != 0);
     _sockets--;
 
-    // Arrange for instance to be cleared up if no xrls are pending
-    // (and there are no remaining sockets [tschooley])
+    //
+    // Arrange for instance to be cleared up if no XRLs are pending
+    // and there are no remaining sockets.
+    //
     if (queue_empty() && _sockets == 0)
 	_ss.destroy_owner(_tname);
 }
@@ -178,7 +180,7 @@ void
 XrlSocketServer::RemoteSocketOwner::xrl_cb(const XrlError& xe)
 {
     if (xe != XrlError::OKAY()) {
-	XLOG_FATAL("Unhandled Xrl error: %s\n", xe.str().c_str());
+	XLOG_FATAL("Unhandled Xrl error: %s", xe.str().c_str());
     }
     if (send_next() == false && _sockets == 0) {
 	_ss.destroy_owner(_tname);
@@ -193,8 +195,9 @@ XrlSocketServer::find_or_create_owner(const string& target)
 	return &i->second;
     }
     pair<map<string, RemoteSocketOwner>::iterator, bool> ins =
-	_socket_owners.insert(pair<string,RemoteSocketOwner>(target, 
-				RemoteSocketOwner(*this, *_r, target)));
+	_socket_owners.insert(pair<string, RemoteSocketOwner>(
+				  target, 
+				  RemoteSocketOwner(*this, *_r, target)));
     if (ins.second == false)
 	return 0;
     i = ins.first;
@@ -215,14 +218,14 @@ XrlSocketServer::destroy_owner(const string& target)
 {
     map<string, RemoteSocketOwner>::iterator i = _socket_owners.find(target);
     if (i != _socket_owners.end()) {
-    /*
-     * remove_sockets_owned_by(target) needs to be called before the owner
-     * is destroyed, otherwise remove_owner_watch (which calls 
-     * remove_sockets_owned_by at an arbitrary future time) might find
-     * RemoteSockets with their owners destroyed, thus any owner() accesses
-     * will cause a segfault. [tschooley]
-     */
-    remove_sockets_owned_by(target);
+	//
+	// Method remove_sockets_owned_by(target) needs to be called before
+	// the owner is destroyed, otherwise remove_owner_watch (which calls 
+	// remove_sockets_owned_by at an arbitrary future time) might find
+	// RemoteSockets with their owners destroyed, thus any owner() accesses
+	// will cause a segfault.
+	//
+	remove_sockets_owned_by(target);
 	_socket_owners.erase(i);
     }
 }
@@ -231,14 +234,14 @@ template <>
 void
 XrlSocketServer::destroy_socket<IPv4>(const string& sockid)
 {
-    V4Sockets::iterator i4 = _v4sockets.begin();
-    while (i4 != _v4sockets.end()) {
+    V4Sockets::iterator i4;
+
+    for (i4 = _v4sockets.begin(); i4 != _v4sockets.end(); ++i4) {
 	RemoteSocket<IPv4>* rs = i4->get();
 	if (rs->sockid() == sockid) {
 	    _v4sockets.erase(i4);
 	    return;
 	}
-	i4++;
     }
 }
 
@@ -246,14 +249,14 @@ template <>
 void
 XrlSocketServer::destroy_socket<IPv6>(const string& sockid)
 {
-    V6Sockets::iterator i6 = _v6sockets.begin();
-    while (i6 != _v6sockets.end()) {
+    V6Sockets::iterator i6;
+
+    for (i6 = _v6sockets.begin(); i6 != _v6sockets.end(); ++i6) {
 	RemoteSocket<IPv6>* rs = i6->get();
 	if (rs->sockid() == sockid) {
 	    _v6sockets.erase(i6);
 	    return;
 	}
-	i6++;
     }
 }
 
@@ -266,15 +269,14 @@ XrlSocketServer::add_owner_watch(const string& target)
     XrlFinderEventNotifierV0p1Client c(_r);
     c.send_register_instance_event_interest(
 	"finder", _r->instance_name(), target,
-	callback(this, &XrlSocketServer::add_owner_watch_cb, target)
-	);
+	callback(this, &XrlSocketServer::add_owner_watch_cb, target));
 }
 
 void
 XrlSocketServer::add_owner_watch_cb(const XrlError& e, string target)
 {
     if (e != XrlError::OKAY()) {
-	XLOG_ERROR("Could not add watch on Xrl Target %s\n", target.c_str());
+	XLOG_ERROR("Could not add watch on Xrl Target %s", target.c_str());
 	remove_sockets_owned_by(target);
 	return;
     }
@@ -297,15 +299,14 @@ XrlSocketServer::remove_owner_watch(const string& target)
     XrlFinderEventNotifierV0p1Client c(_r);
     c.send_deregister_instance_event_interest(
 	"finder", _r->instance_name(), target,
-	callback(this, &XrlSocketServer::remove_owner_watch_cb, target)
-	);
+	callback(this, &XrlSocketServer::remove_owner_watch_cb, target));
 }
 
 void
 XrlSocketServer::remove_owner_watch_cb(const XrlError& e, string target)
 {
     if (e != XrlError::OKAY()) {
-	XLOG_ERROR("Could not remove watch on Xrl Target %s\n", target.c_str());
+	XLOG_ERROR("Could not remove watch on Xrl Target %s", target.c_str());
     }
     RemoteSocketOwner* rso = find_owner(target);
     if (rso) {
@@ -344,10 +345,10 @@ XrlSocketServer::remove_sockets_owned_by(const string& target)
 // RemoteSocket<A>
 
 template <typename A>
-XrlSocketServer::RemoteSocket<A>::RemoteSocket(XrlSocketServer&	ss,
-			      RemoteSocketOwner&		owner,
-			      XorpFd				fd,
-			      const A&				addr)
+XrlSocketServer::RemoteSocket<A>::RemoteSocket(XrlSocketServer&		ss,
+					       RemoteSocketOwner&	owner,
+					       XorpFd			fd,
+					       const A&			addr)
     : _ss(ss), _owner(owner), _fd(fd), _addr(addr), _sockid(XUID().str())
 {
     _owner.incr_socket_count();
@@ -380,7 +381,7 @@ XrlSocketServer::RemoteSocket<A>::set_data_recv_enable(bool en)
 	debug_msg("Adding I/O event hook for %s\n", _fd.str().c_str());
 	if (eventloop.add_ioevent_cb(_fd, IOT_READ,
 			callback(this, &RemoteSocket::data_io_cb)) == false) {
-	    XLOG_ERROR("FAILED TO ADD I/O CALLBACK %s\n", _fd.str().c_str());
+	    XLOG_ERROR("FAILED TO ADD I/O CALLBACK %s", _fd.str().c_str());
 	}
     } else {
 	debug_msg("Removing I/O event hook for %s\n", _fd.str().c_str());
@@ -408,7 +409,8 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
     // It get's resized a little later on to amount of data read.
     cmd->data().resize(64000);
     ssize_t rsz = recvfrom(fd, XORP_BUF_CAST(&cmd->data()[0]),
-	cmd->data().size(), 0, (struct sockaddr *)&ss, &ss_len);
+			   cmd->data().size(), 0,
+			   reinterpret_cast<struct sockaddr *>(&ss), &ss_len);
 
     if (rsz < 0) {
 	delete cmd;
@@ -424,21 +426,24 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
     // Establish socket type
     int so_type = comm_sock_get_type(fd);
 
-    if (so_type == SOCK_DGRAM)
+    switch (so_type) {
+    case SOCK_DGRAM:
     {
 	XLOG_ASSERT(ss.ss_family == A::af());
 	typename A::SockAddrType *sa =
 	    reinterpret_cast<typename A::SockAddrType *>(&ss);
 	socklen_t sa_len = sizeof(*sa);
 	cmd->set_source(*sa, sa_len);
+	break;
     }
-    else if (so_type == SOCK_STREAM)
+    case SOCK_STREAM:
     {
 	if (rsz == 0) {
-	    /* socket closed, need to call deletion of self */
+	    // socket closed, need to call deletion of self
 	    delete cmd;
-	    ref_ptr<XrlSocketCommandBase> cmd = new
-		SocketUserSendCloseEvent<A>(owner().tgt_name(),
+	    ref_ptr<XrlSocketCommandBase> cmd =
+		new SocketUserSendCloseEvent<A>(
+		    owner().tgt_name(),
 		    sockid(), "Remote host closed the connection.");
 	    owner().enqueue(cmd);
 	    return _ss.destroy_socket<A>(sockid());
@@ -447,11 +452,14 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
 	struct sockaddr_storage newss;
 	socklen_t newss_len = sizeof(newss);
 
-	int error = getpeername(fd, (struct sockaddr *)&newss, &newss_len);
+	int error = getpeername(fd,
+				reinterpret_cast<struct sockaddr *>(&newss),
+				&newss_len);
 	if (error != 0) {
-	    ref_ptr<XrlSocketCommandBase> ecmd = new
-		SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
-					comm_get_last_error_str(), false);
+	    ref_ptr<XrlSocketCommandBase> ecmd =
+		new SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
+						comm_get_last_error_str(),
+						false);
 		owner().enqueue(ecmd);
 		return;
 	}
@@ -460,16 +468,18 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
 	    reinterpret_cast<typename A::SockAddrType *>(&newss);
 	socklen_t sa_len = sizeof(*sa);
 	cmd->set_source(*sa, sa_len);
+	break;
     }
-    else
+    default:
     {
 	delete cmd;
-	string error = "Invalid socket type %d\n", so_type;
-	ref_ptr<XrlSocketCommandBase> ecmd = new
-	    SocketUserSendErrorEvent<A>(owner().tgt_name(),
-					sockid(), error, false);
+	string error = "Invalid socket type %d", so_type;
+	ref_ptr<XrlSocketCommandBase> ecmd =
+	    new SocketUserSendErrorEvent<A>(owner().tgt_name(),
+					    sockid(), error, false);
 	owner().enqueue(ecmd);
 	return;
+    }
     }
 
     debug_msg("Command %s\n", cmd->str().c_str());
@@ -483,7 +493,7 @@ XrlSocketServer::RemoteSocket<A>::set_connect_recv_enable(bool en)
     EventLoop& eventloop = _ss.eventloop();
     if (en) {
 	eventloop.add_ioevent_cb(_fd, IOT_ACCEPT,
-			  callback(this, &RemoteSocket::accept_io_cb));
+				 callback(this, &RemoteSocket::accept_io_cb));
     } else {
 	eventloop.remove_ioevent_cb(_fd);
     }
@@ -497,9 +507,9 @@ XrlSocketServer::RemoteSocket<A>::accept_io_cb(XorpFd fd, IoEventType)
 
     XorpFd afd = comm_sock_accept(_fd);
     if (!afd.is_valid()) {
-	ref_ptr<XrlSocketCommandBase> ecmd = new
-	    SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
-					comm_get_last_error_str(), false);
+	ref_ptr<XrlSocketCommandBase> ecmd =
+	    new SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
+					    comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
@@ -509,9 +519,9 @@ XrlSocketServer::RemoteSocket<A>::accept_io_cb(XorpFd fd, IoEventType)
 
     int error = getpeername(afd, (struct sockaddr *)&ss, &ss_len);
     if (error != 0) {
-	ref_ptr<XrlSocketCommandBase> ecmd = new
-	    SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
-					comm_get_last_error_str(), false);
+	ref_ptr<XrlSocketCommandBase> ecmd =
+	    new SocketUserSendErrorEvent<A>(owner().tgt_name(), sockid(),
+					    comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
@@ -811,7 +821,7 @@ XrlSocketServer::socket4_0_1_bind(const string&	    creator,
     if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
     
-    UNUSED(creator); // May use it in future using lookups via owner
+    UNUSED(creator);	// May use it in future using lookups via owner
 
     in_addr ia;
     local_addr.copy_out(ia);
@@ -821,7 +831,7 @@ XrlSocketServer::socket4_0_1_bind(const string&	    creator,
 	RemoteSocket<IPv4>* rs = ci->get();
 	if (rs->sockid() == sockid) {
 	    int x = comm_sock_bind4(rs->fd(), &ia, htons(local_port));
-	    //rs->set_connect_recv_enable(true);
+	    // rs->set_connect_recv_enable(true);
 	    if (x == XORP_OK) {
 		return XrlCmdError::OKAY();
 	    }
@@ -1219,37 +1229,38 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 	    continue;
 
 	int flags = 0;
+
+	if (out_of_band) {
 #ifdef MSG_OOB
-	if (out_of_band)
 	    flags |= MSG_OOB;
 #else
-	if (out_of_band)
 	    XLOG_WARNING("sendto with out_of_band, "
-			 "but platform has no MSG_OOB\n");
+			 "but platform has no MSG_OOB");
 #endif
+	}
 
+	if (end_of_record) {
 #ifdef MSG_EOR
-	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
-			 "but platform has no MSG_EOR\n");
+			 "but platform has no MSG_EOR");
 #endif
+	}
 
+	if (end_of_file) {
 #ifdef MSG_EOF
-	if (end_of_file)
 	    flags |= MSG_EOF;
 #else
-	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_file, "
-			 "but platform has no MSG_EOF\n");
+			 "but platform has no MSG_EOF");
 #endif
+	}
 
 	int out = send(rs->fd(),
 		       reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
 			data.size(), flags);
-	if (out == (int)data.size()) {
+	if (out == static_cast<int>(data.size())) {
 	    return XrlCmdError::OKAY();
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
@@ -1317,36 +1328,38 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 	sai.sin_port = htons(static_cast<uint16_t>(remote_port));
 
 	int flags = 0;
+
+	if (out_of_band) {
 #ifdef MSG_OOB
-	if (out_of_band)
 	    flags |= MSG_OOB;
 #else
-	if (out_of_band)
 	    XLOG_WARNING("sendto with out_of_band, "
-			 "but platform has no MSG_OOB\n");
+			 "but platform has no MSG_OOB");
 #endif
+	}
 
+	if (end_of_record) {
 #ifdef MSG_EOR
-	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
-			 "but platform has no MSG_EOR\n");
+			 "but platform has no MSG_EOR");
 #endif
+	}
 
+	if (end_of_file) {
 #ifdef MSG_EOF
-	if (end_of_file)
 	    flags |= MSG_EOF;
 #else
-	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_file, "
-			 "but platform has no MSG_EOF\n");
+			 "but platform has no MSG_EOF");
 #endif
+	}
+
 	int out = sendto(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
 			 data.size(), flags,
 			 reinterpret_cast<const sockaddr*>(&sai), sizeof(sai));
-	if (out == (int)data.size()) {
+	if (out == static_cast<int>(data.size())) {
 	    return XrlCmdError::OKAY();
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
@@ -1542,7 +1555,7 @@ XrlSocketServer::socket6_0_1_bind(const string&	    creator,
     if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
     
-    UNUSED(creator); // May use it in future using lookups via owner
+    UNUSED(creator);	// May use it in future using lookups via owner
 
     in6_addr ia;
     local_addr.copy_out(ia);
@@ -1552,7 +1565,7 @@ XrlSocketServer::socket6_0_1_bind(const string&	    creator,
 	RemoteSocket<IPv6>* rs = ci->get();
 	if (rs->sockid() == sockid) {
 	    int x = comm_sock_bind6(rs->fd(), &ia, htons(local_port));
-	    //rs->set_connect_recv_enable(true);
+	    // rs->set_connect_recv_enable(true);
 	    if (x == XORP_OK) {
 		return XrlCmdError::OKAY();
 	    }
@@ -1985,36 +1998,37 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 	    continue;
 
 	int flags = 0;
+
+	if (out_of_band) {
 #ifdef MSG_OOB
-	if (out_of_band)
 	    flags |= MSG_OOB;
 #else
-	if (out_of_band)
 	    XLOG_WARNING("sendto with out_of_band, "
-			 "but platform has no MSG_OOB\n");
+			 "but platform has no MSG_OOB");
 #endif
+	}
 
+	if (end_of_record) {
 #ifdef MSG_EOR
-	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
-			 "but platform has no MSG_EOR\n");
+			 "but platform has no MSG_EOR");
 #endif
+	}
 
+	if (end_of_file) {
 #ifdef MSG_EOF
-	if (end_of_file)
 	    flags |= MSG_EOF;
 #else
-	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_file, "
-			 "but platform has no MSG_EOF\n");
+			 "but platform has no MSG_EOF");
 #endif
+	}
 
 	int out = send(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
 		       data.size(), flags);
-	if (out == (int)data.size()) {
+	if (out == static_cast<int>(data.size())) {
 	    return XrlCmdError::OKAY();
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));
@@ -2087,36 +2101,38 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
 	sai.sin6_port = htons(static_cast<uint16_t>(remote_port));
 
 	int flags = 0;
+
+	if (out_of_band) {
 #ifdef MSG_OOB
-	if (out_of_band)
 	    flags |= MSG_OOB;
 #else
-	if (out_of_band)
 	    XLOG_WARNING("sendto with out_of_band, "
-			 "but platform has no MSG_OOB\n");
+			 "but platform has no MSG_OOB");
 #endif
+	}
 
+	if (end_of_record) {
 #ifdef MSG_EOR
-	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
-			 "but platform has no MSG_EOR\n");
+			 "but platform has no MSG_EOR");
 #endif
+	}
 
+	if (end_of_file) {
 #ifdef MSG_EOF
-	if (end_of_file)
 	    flags |= MSG_EOF;
 #else
-	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_file, "
-			 "but platform has no MSG_EOF\n");
+			 "but platform has no MSG_EOF");
 #endif
+	}
+
 	int out = sendto(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
 			 data.size(), flags,
 			 reinterpret_cast<const sockaddr*>(&sai), sizeof(sai));
-	if (out == (int)data.size()) {
+	if (out == static_cast<int>(data.size())) {
 	    return XrlCmdError::OKAY();
 	}
 	return XrlCmdError::COMMAND_FAILED(strerror(errno));

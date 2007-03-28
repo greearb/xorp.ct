@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.47 2007/03/28 13:41:45 schooley Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.48 2007/03/28 13:49:36 schooley Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -409,7 +409,7 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-    if (comm_listen(s, COMM_DEFAULT_BACKLOG) != XORP_OK) {
+    if (comm_listen(s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	error_string = c_format("comm_listen() failed: %s\n",
 				comm_get_last_error_str());
 	return false;

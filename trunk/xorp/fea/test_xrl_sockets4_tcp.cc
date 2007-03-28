@@ -1,6 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -459,7 +460,7 @@ protected:
 				const uint32_t&	src_port,
 				const vector<uint8_t>&	data)
     {
-	/* should only be receiving data on the client socket */
+	// should only be receiving data on the client socket
 	XLOG_ASSERT(_client_sockid == sockid);
 	verbose_log("Server received %d bytes from %s:%u\n",
 		    data.size(), src_host.str().c_str(), src_port);
@@ -480,7 +481,7 @@ protected:
 				   const string&	new_sockid,
 				   bool&			accept)
     {
-	/* should only be receiving connections from the server socket */
+	// should only be receiving connections from the server socket
 	XLOG_ASSERT(sockid == _server_sockid);
 	verbose_log("Accepting connection from %s:%d\n",
     			src_host.str().c_str(), src_port);
@@ -495,7 +496,7 @@ protected:
 				 const string&	error,
 				 const bool&	fatal)
     {
-	/* socket must be one of the two... */
+	// socket must be one of the two...
 	XLOG_ASSERT(sockid == _server_sockid || sockid == _client_sockid);
 	verbose_log("Server error event on %s socket: %s (fatal = %d)\n",
 			(sockid == _server_sockid) ? "server" : "client",
@@ -507,7 +508,7 @@ protected:
     socket4_user_0_1_close_event(const string&	sockid,
 				 const string&	reason)
     {
-	/* socket must be one of the two... */
+	// socket must be one of the two...
 	XLOG_ASSERT(sockid == _server_sockid || sockid == _client_sockid);
 	verbose_log("Server close event on %s socket: %s\n",
 	    (sockid == _server_sockid) ? "server" : "client", reason.c_str());
@@ -524,8 +525,8 @@ protected:
 private:
     string 	_server_sockid;
     string	_client_sockid;
-    bool 	_server_closed;	/* flag indicating if server socket is closed */
-    bool	_client_closed;	/* flag indicating if client socket is closed */
+    bool 	_server_closed;	// flag indicating if server socket is closed
+    bool	_client_closed;	// flag indicating if client socket is closed
 };
 
 //
@@ -697,8 +698,8 @@ protected:
     }	
 
 private:
-    string _sockid; /* socket used to connect to server */
-    bool _closed;   /* flag indicating whether socket is closed */
+    string _sockid; // socket used to connect to server
+    bool _closed;   // flag indicating whether socket is closed
 };
 
 //

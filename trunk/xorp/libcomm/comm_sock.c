@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.36 2007/03/28 13:41:42 schooley Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.37 2007/03/28 13:49:31 schooley Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1397,7 +1397,7 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
  * @sock: The socket whose address family we need to get.
  *
  * Get the address family of a socket.
- * XXX: idea taken from W. Stevens' UNPv1, 2e (pp 109)
+ * XXX: Idea taken from W. Stevens' UNPv1, 2e (pp 109).
  *
  * Return value: The address family on success, otherwise %XORP_ERROR.
  **/
@@ -1448,7 +1448,8 @@ comm_sock_get_family(xsock_t sock)
  * @sock: The socket whose type we need to get.
  *
  * Get the type of a socket.
- * Code taken from comm_sock_get_family
+ * Examples of socket type are SOCK_STREAM for TCP, SOCK_DGRAM for UDP,
+ * and SOCK_RAW for raw protocol sockets.
  *
  * Return value: The socket type on success, otherwise %XORP_ERROR.
  **/

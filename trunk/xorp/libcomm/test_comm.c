@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.15 2007/03/28 13:41:42 schooley Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.16 2007/03/28 13:49:32 schooley Exp $"
 
 
 /*
@@ -161,7 +161,7 @@ main(int argc, char *argv[])
     if (sock == XORP_BAD_SOCKET) {
 	printf("ERROR: cannot open and bind TCP socket to port %d,"
 	       " for listening\n", ntohs(port));
-    } else if (comm_listen(sock, 5) != XORP_OK) {
+    } else if (comm_listen(sock, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	printf("ERROR: listening TCP socket on port %d\n", ntohs(port));
 	comm_close(sock);
     } else {

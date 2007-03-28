@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.10 2007/03/28 13:41:44 schooley Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.11 2007/03/28 13:49:34 schooley Exp $"
 
 #include "fea_module.h"
 
@@ -86,9 +86,9 @@ SocketUserSendConnectEvent<IPv4>::execute(XrlSender&		    xs,
 {
     XrlSocket4UserV0p1Client c(&xs);
     _cb = cb;
-	bool result = c.send_connect_event(target(), _sockid,
-	    _src_host, _src_port, _new_sockid,
-	    callback(this, &SocketUserSendConnectEvent::accept_or_reject_cb));
+    bool result = c.send_connect_event(
+	target(), _sockid, _src_host, _src_port, _new_sockid,
+	callback(this, &SocketUserSendConnectEvent::accept_or_reject_cb));
     return result;
 }
 
@@ -99,7 +99,8 @@ SocketUserSendConnectEvent<IPv6>::execute(XrlSender&		    xs,
 {
     XrlSocket6UserV0p1Client c(&xs);
     _cb = cb;
-    bool result = c.send_connect_event(target(), _sockid,
+    bool result = c.send_connect_event(
+	target(), _sockid,
 	_src_host, _src_port, _new_sockid,
 	callback(this, &SocketUserSendConnectEvent::accept_or_reject_cb));
     return result;
@@ -213,7 +214,7 @@ XrlSocketCommandDispatcher::dispatch_head()
     const Command& cmd = _cmds.front();
 
     bool r = cmd->execute(_xs,
-		callback(this, &XrlSocketCommandDispatcher::xrl_cb));
+			  callback(this, &XrlSocketCommandDispatcher::xrl_cb));
     if (r == false) {
 	XLOG_ERROR("Command failed discarding: %s", cmd->str().c_str());
 	_cmds.pop_front();

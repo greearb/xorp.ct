@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.48 2007/03/28 13:41:43 schooley Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.49 2007/03/28 13:49:33 schooley Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -64,7 +64,7 @@ Socket::create_listener()
     if (!_s.is_valid()) {
 	XLOG_ERROR("comm_bind_tcp failed");
     }
-    if (comm_listen(_s, 5) != XORP_OK) {
+    if (comm_listen(_s, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	XLOG_ERROR("comm_listen failed");
     }
 }

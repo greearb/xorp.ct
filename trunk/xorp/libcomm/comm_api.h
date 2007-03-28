@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.24 2007/03/28 13:41:42 schooley Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.25 2007/03/28 13:49:32 schooley Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -62,7 +62,7 @@
 #define COMM_SOCK_BLOCKING		1
 #define COMM_SOCK_NONBLOCKING		0
 
-#define COMM_DEFAULT_BACKLOG		5
+#define COMM_LISTEN_DEFAULT_BACKLOG	5
 
 #ifndef AF_LOCAL
 #define AF_LOCAL		AF_UNIX	   /* XXX: AF_UNIX is the older name */
@@ -779,7 +779,9 @@ extern int	comm_sock_get_family(xsock_t sock);
 
 /**
  * Get the type of a socket.
- * Code copied from comm_sock_get_family.
+ *
+ * Examples of socket type are SOCK_STREAM for TCP, SOCK_DGRAM for UDP,
+ * and SOCK_RAW for raw protocol sockets.
  *
  * @param sock the socket whose type we need to get.
  * @return the socket type on success, otherwise XORP_ERROR.
