@@ -259,21 +259,6 @@ if $(MAKE_CHECK) {
 	libxorp
 	libcomm
 	;
-
- Main test_xrl_sockets4_tcp : test_xrl_sockets4_tcp.cc ;
- LinkLibraries test_xrl_sockets4_tcp :
-	libfea
-	libsocket4userxif
-	libsocket4xif
-	libsocket6userxif
-	libsocket6xif
-	libfindereventnotifierxif
-	libsocketserverbase
-	libtestsocket4
-	libxipc
-	libxorp
-	libcomm
-	;
 } # MAKE_CHECK
 
 InstallBin $(PREFIX)/fea :
