@@ -462,8 +462,9 @@ protected:
     {
 	// should only be receiving data on the client socket
 	XLOG_ASSERT(_client_sockid == sockid);
-	verbose_log("Server received %d bytes from %s:%u\n",
-		    data.size(), src_host.str().c_str(), src_port);
+	verbose_log("Server received %u bytes from %s:%u\n",
+		    XORP_UINT_CAST(data.size()), src_host.str().c_str(),
+		    src_port);
 	_p_rcv += 1;
 	for (size_t i = 0; i < data.size(); i++) {
 	    if (data[i] != FILLER_VALUE) {
@@ -654,8 +655,9 @@ protected:
 				const vector<uint8_t>&	data)
     {
 	XLOG_ASSERT(_sockid == sockid);
-	verbose_log("Client received %d bytes from %s:%u\n",
-		    data.size(), src_host.str().c_str(), src_port);
+	verbose_log("Client received %u bytes from %s:%u\n",
+		    XORP_UINT_CAST(data.size()), src_host.str().c_str(),
+		    src_port);
 	_p_rcv += 1;
 	for (size_t i = 0; i < data.size(); i++) {
 	    if (data[i] != FILLER_VALUE) {
