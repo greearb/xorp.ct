@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.92 2006/04/29 08:12:21 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.93 2006/05/01 16:49:06 zec Exp $ */
 
 protocols {
     bgp {
@@ -88,8 +88,8 @@ protocols {
 	    }
 	}
 
-	import: txt;
-	export: txt;
+	import: txt = "";
+	export: txt = "";
     }
 }
 
@@ -177,6 +177,21 @@ protocols {
 	    %help: short "XRL target name";
 	    %set:;
 	}
+
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aspath&type:txt=aspath&access:txt=rw&id:u32=14";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_com32&access:txt=rw&id:u32=18";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r&id:u32=16";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=origin&type:txt=u32&access:txt=rw&id:u32=15";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw&id:u32=19";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med_remove&type:txt=bool&access:txt=rw&id:u32=20";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_prefix_len&type:txt=u32&access:txt=w&id:u32=21";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_brief_mode&type:txt=bool&access:txt=w&id:u32=22";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=was_aggregated&type:txt=bool&access:txt=r&id:u32=23";
 
 	bgp-id {
 	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
@@ -449,13 +464,17 @@ protocols {
 	import {
 	    %help: short "Import policy";
 	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
+	    %create:;
 	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
 	}
 	export {
 	    %help: short "Export policy";
 	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
+	    %create:;
 	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
 	}
+	%activate: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@.import)";
+	%activate: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@.export)";
     }
 }
 
@@ -669,21 +688,6 @@ protocols {
 }
 
 policy {
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=13";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aspath&type:txt=aspath&access:txt=rw&id:u32=14";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_com32&access:txt=rw&id:u32=18";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r&id:u32=16";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=origin&type:txt=u32&access:txt=rw&id:u32=15";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw&id:u32=19";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med_remove&type:txt=bool&access:txt=rw&id:u32=20";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_prefix_len&type:txt=u32&access:txt=w&id:u32=21";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_brief_mode&type:txt=bool&access:txt=w&id:u32=22";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=was_aggregated&type:txt=bool&access:txt=r&id:u32=23";
-
     policy-statement @: txt {
 	term @: txt {
 
