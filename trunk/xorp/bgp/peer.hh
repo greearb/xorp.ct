@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.43 2007/02/16 22:45:14 pavlin Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.44 2007/03/28 10:11:01 schooley Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -359,7 +359,7 @@ private:
  *
  * Under normal circumstances only one connection attempt will be
  * taking place. When both BGP processes at either end of a session
- * attempt to make a connection at the same time there may be a
+ * attempt to make a conection at the same time there may be a
  * connection collision in this case it is necessary to hold two TCP
  * connections until an open message is seen by the peer to decide
  * which session should be selected. If a connection collision is

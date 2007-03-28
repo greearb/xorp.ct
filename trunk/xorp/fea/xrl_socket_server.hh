@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.12 2007/02/16 22:45:54 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.13 2007/03/28 10:11:03 schooley Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -92,19 +92,6 @@ public:
     finder_event_observer_0_1_xrl_target_death(const string& clsname,
 					       const string& instance);
 
-    XrlCmdError socket4_0_1_tcp_open(const string&  creator,
-				     const bool&    is_blocking,
-				     string&	    sockid);
-
-    XrlCmdError socket4_0_1_udp_open(const string&  creator,
-				     const bool&    is_blocking,
-				     string&	    sockid);
-
-    XrlCmdError socket4_0_1_bind(const string&	    creator,
-				 const string&	    sockid,
-				 const IPv4&	    local_addr,
-				 const uint32_t&    local_port);
- 
     XrlCmdError socket4_0_1_tcp_open_and_bind(const string&	creator,
 					      const IPv4&	local_addr,
 					      const uint32_t&	local_port,
@@ -192,19 +179,6 @@ public:
     XrlCmdError socket4_0_1_get_socket_option(const string&	sockid,
 					      const string&	optname,
 					      uint32_t&		optval);
-
-    XrlCmdError socket6_0_1_tcp_open(const string&  creator,
-				     const bool&    is_blocking,
-				     string&	    sockid);
-
-    XrlCmdError socket6_0_1_udp_open(const string&  creator,
-				     const bool&    is_blocking,
-				     string&	    sockid);
-
-    XrlCmdError socket6_0_1_bind(const string&	    creator,
-				 const string&	    sockid,
-				 const IPv6&	    local_addr,
-				 const uint32_t&    local_port);
 
     XrlCmdError socket6_0_1_tcp_open_and_bind(const string&	creator,
 					      const IPv6&	local_addr,
@@ -343,7 +317,6 @@ public:
     RemoteSocketOwner* find_or_create_owner(const string& xrl_target_name);
     RemoteSocketOwner* find_owner(const string& xrl_target_name);
     void destroy_owner(const string& xrl_target);
-    template <typename A> void destroy_socket(const string& sockid);
 
     void add_owner_watch(const string& xrl_target_name);
     void add_owner_watch_cb(const XrlError& xe, string xrl_target_name);
@@ -361,9 +334,6 @@ public:
 		     RemoteSocketOwner& rso,
 		     XorpFd		fd,
 		     const A&		addr);
-	RemoteSocket(XrlSocketServer&	ss,
-		     RemoteSocketOwner& rso,
-		     XorpFd		fd);
 	~RemoteSocket();
 
 	inline XorpFd  fd() const			{ return _fd;	      }
@@ -371,8 +341,6 @@ public:
 	inline bool addr_is(const A& a) const		{ return a == _addr;  }
 	inline const RemoteSocketOwner& owner() const	{ return _owner; }
 	inline RemoteSocketOwner& owner()		{ return _owner; }
-
-	void set_addr(const A& addr)			{ _addr(addr); }
 
 	void set_data_recv_enable(bool en);
 	void data_io_cb(XorpFd fd, IoEventType);
