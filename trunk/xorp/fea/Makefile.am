@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.67 2006/08/23 17:35:17 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.68 2007/03/28 10:11:03 schooley Exp $
 ##
 
 # Redefine the bin installation directory
@@ -158,6 +158,20 @@ test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
+
+test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
+
+test_xrl_sockets4_tcp_LDADD	 = $(noinst_LTLIBRARIES)
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
+test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
 

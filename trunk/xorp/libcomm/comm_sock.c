@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.35 2007/03/28 10:11:00 schooley Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.36 2007/03/28 13:41:42 schooley Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -919,6 +919,31 @@ comm_sock_accept(xsock_t sock)
 }
 
 /**
+ * comm_sock_listen:
+ * @sock: The socket to listen on.
+ * @backlog: The maximum queue size for pending connections.
+ *
+ * Listen on a socket.
+ *
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+comm_sock_listen(xsock_t sock, int backlog)
+{
+    int ret;
+    ret = listen(sock, backlog);
+
+    if (ret < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error listening on socket (socket = %d) : %s",
+		   sock, comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+/**
  * comm_sock_close:
  * @sock: The socket to close.
  *
@@ -1416,6 +1441,33 @@ comm_sock_get_family(xsock_t sock)
 
     return (un.sa.sa_family);
 #endif /* ! HOST_OS_WINDOWS */
+}
+
+/**
+ * comm_sock_get_type:
+ * @sock: The socket whose type we need to get.
+ *
+ * Get the type of a socket.
+ * Code taken from comm_sock_get_family
+ *
+ * Return value: The socket type on success, otherwise %XORP_ERROR.
+ **/
+int
+comm_sock_get_type(xsock_t sock)
+{
+    int err, type;
+    socklen_t len = sizeof(type);
+
+    err = getsockopt(sock, SOL_SOCKET, SO_TYPE,
+		     XORP_SOCKOPT_CAST(&type), &len);
+    if (err != 0)  {
+	_comm_set_serrno();
+	XLOG_ERROR("Error getsockopt(SO_TYPE) for socket %d: %s",
+		   sock, comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return type;
 }
 
 /**

@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.14 2007/03/28 10:11:00 schooley Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.15 2007/03/28 13:41:42 schooley Exp $"
 
 
 /*
@@ -151,6 +151,23 @@ main(int argc, char *argv[])
     } else {
 	printf("OK: open, bind and join UDP socket to group %s and port %d\n",
 	       inet_ntoa(mcast_addr), ntohs(port));
+	comm_close(sock);
+    }
+
+    /*
+     * Test 'listen on socket'
+     */
+    sock = comm_bind_tcp4(NULL, port, COMM_SOCK_BLOCKING);
+    if (sock == XORP_BAD_SOCKET) {
+	printf("ERROR: cannot open and bind TCP socket to port %d,"
+	       " for listening\n", ntohs(port));
+    } else if (comm_listen(sock, 5) != XORP_OK) {
+	printf("ERROR: listening TCP socket on port %d\n", ntohs(port));
+	comm_close(sock);
+    } else {
+        printf("OK: open, bind and listen TCP socket on port %d\n",
+	       ntohs(port));
+	comm_close(sock);
     }
 
 

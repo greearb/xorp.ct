@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.1 2007/01/11 22:30:46 bms Exp $
+# $XORP: xorp/fea/Jamfile,v 1.2 2007/03/28 10:11:03 schooley Exp $
 #
 
 SubDir TOP fea ;
@@ -232,6 +232,21 @@ if $(MAKE_CHECK) {
 
  Main test_xrl_sockets4_udp : test_xrl_sockets4_udp.cc ;
  LinkLibraries test_xrl_sockets4_udp :
+	libfea
+	libsocket4userxif
+	libsocket4xif
+	libsocket6userxif
+	libsocket6xif
+	libfindereventnotifierxif
+	libsocketserverbase
+	libtestsocket4
+	libxipc
+	libxorp
+	libcomm
+	;
+
+ Main test_xrl_sockets4_tcp : test_xrl_sockets4_tcp.cc ;
+ LinkLibraries test_xrl_sockets4_tcp :
 	libfea
 	libsocket4userxif
 	libsocket4xif

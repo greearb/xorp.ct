@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.54 2007/03/28 10:11:02 schooley Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.55 2007/03/28 13:41:44 schooley Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -360,6 +360,10 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
 
     _sock = comm_bind_tcp4(&myaddr, port, COMM_SOCK_NONBLOCKING);
     if (!_sock.is_valid()) {
+	xorp_throw(XrlPFConstructorError,
+		   comm_get_last_error_str());
+    }
+    if (comm_listen(_sock, COMM_DEFAULT_BACKLOG) != XORP_OK) {
 	xorp_throw(XrlPFConstructorError,
 		   comm_get_last_error_str());
     }
