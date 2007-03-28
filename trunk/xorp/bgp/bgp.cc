@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.80 2007/02/16 16:07:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.81 2007/02/16 22:45:10 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -52,7 +52,8 @@ BGPMain::BGPMain()
       _local_data(_eventloop),
       _component_count(0),
       _ifmgr(NULL),
-      _is_ifmgr_ready(false)
+      _is_ifmgr_ready(false),
+      _first_policy_push(false)
 {
     debug_msg("BGPMain object created\n");
     /*
@@ -1461,6 +1462,11 @@ BGPMain::activate(const Iptuple& iptuple)
 
     peer->set_activate_state(true);
 
+    // Delay the activation of the peers until we have seen the first
+    // policy push.
+    if (!_first_policy_push)
+	return true;
+
     if (peer->get_current_peer_state() == peer->get_next_peer_state())
 	return true;
 
@@ -1468,6 +1474,27 @@ BGPMain::activate(const Iptuple& iptuple)
 	enable_peer(iptuple);
     } else {
 	disable_peer(iptuple);
+    }
+
+    return true;
+}
+
+bool
+BGPMain::activate_all_peers()
+{
+    list<BGPPeer *>& peers = _peerlist->get_list();
+    list<BGPPeer *>::iterator i;
+    for (i = peers.begin(); i != peers.end(); i++) {
+	const Iptuple& iptuple = (*i)->peerdata()->iptuple();
+	debug_msg("Trying: %s ", iptuple.str().c_str());
+	if ((*i)->get_current_peer_state() == (*i)->get_next_peer_state())
+	    continue;
+
+	if ((*i)->get_next_peer_state()) {
+	    enable_peer(iptuple);
+	} else {
+	    disable_peer(iptuple);
+	}
     }
 
     return true;
@@ -1959,17 +1986,25 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
 }
 
 void
-BGPMain::configure_filter(const uint32_t& filter, const string& conf) {
+BGPMain::configure_filter(const uint32_t& filter, const string& conf)
+{
     _policy_filters.configure(filter,conf);
 }
 
 void
-BGPMain::reset_filter(const uint32_t& filter) {
+BGPMain::reset_filter(const uint32_t& filter)
+{
     _policy_filters.reset(filter);
 }
 
 void
-BGPMain::push_routes() {
+BGPMain::push_routes()
+{
     _plumbing_unicast->push_routes();
     _plumbing_multicast->push_routes();
+
+    if (!_first_policy_push) {
+	_first_policy_push = true;
+	activate_all_peers();
+    }
 }

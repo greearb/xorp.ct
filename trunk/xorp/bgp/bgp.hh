@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.62 2006/07/12 02:35:19 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.63 2007/02/16 22:45:10 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -545,6 +545,13 @@ public:
     bool activate(const Iptuple& iptuple);
 
     /**
+     * Activate all peers.
+     *
+     * @return true on success
+     */
+    bool activate_all_peers();
+
+    /**
      * Set peer TCP-MD5 password.
      *
      * @param iptuple iptuple.
@@ -1037,6 +1044,9 @@ private:
 
     map<IPv4, uint32_t> _interfaces_ipv4;	// IPv4 interface addresses
     map<IPv6, uint32_t> _interfaces_ipv6;	// IPv6 interface addresses
+
+    bool _first_policy_push;	     	// Don't form peerings until the
+					// first policy push is seen.
 };
 
 template <typename A>
