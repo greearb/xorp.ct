@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.60 2007/03/28 19:31:13 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.61 2007/03/29 21:58:55 pavlin Exp $"
 
 
 //
@@ -402,8 +402,10 @@ CliClient::start_connection(string& error_msg)
 	send(input_fd(), will_sga_cmd, sizeof(will_sga_cmd), 0);
 	send(input_fd(), dont_linemode_cmd, sizeof(dont_linemode_cmd), 0);
 	send(input_fd(), do_window_size_cmd, sizeof(do_window_size_cmd), 0);
-	send(input_fd(), do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd), 0);
-	send(input_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd), 0);
+	send(input_fd(), do_transmit_binary_cmd,
+	     sizeof(do_transmit_binary_cmd), 0);
+	send(input_fd(), will_transmit_binary_cmd,
+	     sizeof(will_transmit_binary_cmd), 0);
     }
 #endif
 
