@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.59 2007/03/28 13:49:35 schooley Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.60 2007/03/28 19:31:13 pavlin Exp $"
 
 
 //
@@ -818,7 +818,7 @@ CliClient::process_input_data()
 
 	preprocess_char(val, stop_processing);
 
-	if (is_waiting_for_data()) {
+	if (is_waiting_for_data() && (! is_page_mode())) {
 	    stop_processing = true;
 	    ignore_current_character = true;
 	}
@@ -899,6 +899,9 @@ int
 CliClient::preprocess_char(uint8_t val, bool& stop_processing)
 {
     stop_processing = false;
+
+    if (is_page_mode())
+	return (XORP_OK);
 
     if ((val == '\n') || (val == '\r')) {
 	// New command
