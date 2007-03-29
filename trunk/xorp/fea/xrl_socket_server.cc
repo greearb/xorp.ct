@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.32 2007/03/28 13:49:34 schooley Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.33 2007/03/28 19:31:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -536,7 +536,7 @@ XrlSocketServer::RemoteSocket<A>::accept_io_cb(XorpFd fd, IoEventType)
 	new SocketUserSendConnectEvent<A>(&_ss, _owner.tgt_name(),
 					  _sockid, host,
 					  sockaddr_ip_port<A>(*sa), 
-					  _ss._v4sockets.back()->sockid());
+					  _ss.v4sockets().back()->sockid());
     owner().enqueue(cmd);
 }
 

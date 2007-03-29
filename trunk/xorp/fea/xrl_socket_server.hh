@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.14 2007/03/28 13:41:44 schooley Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.15 2007/03/28 13:49:34 schooley Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -398,6 +398,9 @@ public:
 public:
     typedef list<ref_ptr<RemoteSocket<IPv4> > > V4Sockets;
     typedef list<ref_ptr<RemoteSocket<IPv6> > > V6Sockets;
+
+    V4Sockets&			v4sockets() { return _v4sockets; }
+    V6Sockets&			v6sockets() { return _v6sockets; }
 
 protected:
     EventLoop&			_eventloop;
