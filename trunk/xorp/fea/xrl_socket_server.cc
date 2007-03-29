@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.33 2007/03/28 19:31:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.34 2007/03/29 22:19:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -232,9 +232,13 @@ XrlSocketServer::destroy_owner(const string& target)
 
 template <>
 void
-XrlSocketServer::destroy_socket<IPv4>(const string& sockid)
+XrlSocketServer::destroy_socket<IPv4>(const string& sockid,
+				      const IPv4& dummy_addr)
 {
     V4Sockets::iterator i4;
+
+    // XXX: dummy_addr is needed to get around a compilation issue on gcc-2.9x
+    UNUSED(dummy_addr);
 
     for (i4 = _v4sockets.begin(); i4 != _v4sockets.end(); ++i4) {
 	RemoteSocket<IPv4>* rs = i4->get();
@@ -247,9 +251,13 @@ XrlSocketServer::destroy_socket<IPv4>(const string& sockid)
 
 template <>
 void
-XrlSocketServer::destroy_socket<IPv6>(const string& sockid)
+XrlSocketServer::destroy_socket<IPv6>(const string& sockid,
+				      const IPv6& dummy_addr)
 {
     V6Sockets::iterator i6;
+
+    // XXX: dummy_addr is needed to get around a compilation issue on gcc-2.9x
+    UNUSED(dummy_addr);
 
     for (i6 = _v6sockets.begin(); i6 != _v6sockets.end(); ++i6) {
 	RemoteSocket<IPv6>* rs = i6->get();
@@ -446,7 +454,8 @@ XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
 		    owner().tgt_name(),
 		    sockid(), "Remote host closed the connection.");
 	    owner().enqueue(cmd);
-	    return _ss.destroy_socket<A>(sockid());
+	    _ss.destroy_socket(sockid(), _addr);
+	    return;
 	}
 
 	struct sockaddr_storage newss;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.15 2007/03/28 13:49:34 schooley Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.16 2007/03/29 22:19:52 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -343,7 +343,8 @@ public:
     RemoteSocketOwner* find_or_create_owner(const string& xrl_target_name);
     RemoteSocketOwner* find_owner(const string& xrl_target_name);
     void destroy_owner(const string& xrl_target);
-    template <typename A> void destroy_socket(const string& sockid);
+    template <typename A> void destroy_socket(const string& sockid,
+					      const A& dummy_addr);
 
     void add_owner_watch(const string& xrl_target_name);
     void add_owner_watch_cb(const XrlError& xe, string xrl_target_name);
