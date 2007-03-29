@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.103 2007/03/22 02:19:51 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.104 2007/03/22 20:20:09 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1993,6 +1993,10 @@ public:
 
     IPv6 get_link_local_address() const {
 	return _link_local_address;
+    }
+
+    const list<IPv6Prefix>& get_prefixes() const {
+	return _prefixes;
     }
 
     list<IPv6Prefix>& get_prefixes() {

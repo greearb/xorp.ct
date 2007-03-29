@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.275 2007/03/21 22:46:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.276 2007/03/22 17:15:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -569,6 +569,19 @@ PeerOut<A>::set_interface_id(uint32_t interface_id)
     }
 
     return true;
+}
+
+template <typename A>
+bool
+PeerOut<A>::get_attached_routers(OspfTypes::AreaID area,
+				 list<RouterInfo>& routers)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->get_attached_routers(routers);
 }
 
 template <typename A>
@@ -2907,7 +2920,7 @@ Peer<A>::get_address_info()
 }
 
 template <typename A>
-void
+bool
 Peer<A>::get_attached_routers(list<RouterInfo>& routers)
 {
     typename list<Neighbour<A> *>::const_iterator n;
@@ -2924,6 +2937,8 @@ Peer<A>::get_attached_routers(list<RouterInfo>& routers)
 		break;
 	    }
 	}
+
+    return true;
 }
 
 template <typename A>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.272 2007/03/21 22:40:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.273 2007/03/22 17:15:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1837,6 +1837,73 @@ AreaRouter<A>::refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
 	routing_schedule_total_recompute();
 }
 
+inline
+bool 
+operator<(const IPv6Prefix& lhs, const IPv6Prefix& rhs)
+{
+    if (lhs.get_network() < rhs.get_network())
+	return true;
+
+    if (lhs.get_prefix_options() < rhs.get_prefix_options())
+	return true;
+
+    if (lhs.use_metric() && lhs.get_metric() < rhs.get_metric())
+	return true;
+
+    return false;
+}
+
+inline
+bool
+operator==(const LinkLsa& lhs, const LinkLsa& rhs)
+{
+    set<IPv6Prefix> lhs_set, rhs_set;
+    list<IPv6Prefix>::const_iterator i;
+
+    const list<IPv6Prefix>& lhs_prefixes = lhs.get_prefixes();
+    for (i = lhs_prefixes.begin(); i != lhs_prefixes.end(); i++)
+	lhs_set.insert(*i);
+    
+    const list<IPv6Prefix>& rhs_prefixes = rhs.get_prefixes();
+    for (i = rhs_prefixes.begin(); i != rhs_prefixes.end(); i++)
+	rhs_set.insert(*i);
+
+    return lhs_set == rhs_set;
+}
+
+template <typename A>
+void
+AreaRouter<A>::check_link_lsa(OspfTypes::PeerID peerid, LinkLsa *nllsa,
+			      LinkLsa *ollsa)
+{
+    XLOG_ASSERT(nllsa);
+
+    // There is an existing Link-LSA if it is the same as the new
+    // Link-LSA then there is nothing that needs to be done.
+    if (ollsa) {
+	if (*nllsa == *ollsa)
+	    return;
+    }
+
+    PeerManager<A>& pm = _ospf.get_peer_manager();
+    uint32_t interface_id = pm.get_interface_id(peerid);
+    list<RouterInfo> routers;
+    if (!pm.get_attached_routers(peerid, _area, routers))
+	XLOG_WARNING("Unable to get attached routers");
+
+    // Test to see that a Network-LSA and Intra-Area-Prefix-LSA have
+    // already been generated. In particular during the database
+    // exchange the router maybe the designated router for a peer but
+    // no full adjacencies have yet been formed.
+    if (routers.empty())
+	return;
+
+    // An updated Network-LSA and Intra-Area-Prefix-LSA will be sent,
+    // note if the options have not changed then it is not actually
+    // necessary to send a new Network-LSA.
+    update_network_lsa(peerid, interface_id, routers, 0);
+}
+
 template <typename A>
 bool
 AreaRouter<A>::generate_intra_area_prefix_lsa(OspfTypes::PeerID peerid,
@@ -2293,7 +2360,37 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 		}
 	    }
 	}
-	
+
+	// OSPFv3 only.
+	// If this router is the designated router for this peer and
+	// this is a Link-LSA it may be necessary for the router to
+	// generated a new Intra-Area-Prefix-LSA.
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    if (!dr)
+		break;
+	    LinkLsa *ollsa = 0;
+	    LinkLsa *nllsa = 0;
+	    switch(search) {
+	    case NEWER:
+		ollsa = dynamic_cast<LinkLsa *>(_db[index].get());
+		XLOG_ASSERT(ollsa);
+		/*FALLTHROUGH*/
+	    case NOMATCH:
+ 		nllsa = dynamic_cast<LinkLsa *>((*i).get());
+		if (0 == nllsa)
+		    break;
+		check_link_lsa(peerid, nllsa, ollsa);
+		break;
+	    case OLDER:
+	    case EQUIVALENT:
+		break;
+	    }
+	    break;
+	}
+
 	switch(search) {
 	case NOMATCH:
 	case NEWER: {

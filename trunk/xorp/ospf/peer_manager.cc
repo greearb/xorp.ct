@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.139 2007/03/13 18:25:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.140 2007/03/22 01:44:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -962,6 +962,20 @@ PeerManager<A>::get_interface_id(const OspfTypes::PeerID peerid)
     }
 
     return _peers[peerid]->get_interface_id();
+}
+
+template <typename A>
+bool
+PeerManager<A>::get_attached_routers(const OspfTypes::PeerID peerid,
+				     OspfTypes::AreaID area,
+				     list<RouterInfo>& routers)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->get_attached_routers(area, routers);
 }
 
 template <typename A>

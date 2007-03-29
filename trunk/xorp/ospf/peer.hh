@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.140 2007/03/12 10:16:04 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.141 2007/03/22 17:15:52 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -324,6 +324,12 @@ class PeerOut {
      */
     uint32_t get_interface_id() const { return _interface_id; }
 	
+    /**
+     * Return a list of the fully adjacent routers.
+     */
+    bool get_attached_routers(OspfTypes::AreaID area,
+			      list<RouterInfo>& routes);
+
     /**
      * Set a network to advertise OSPFv3 only.
      */
@@ -1247,6 +1253,11 @@ class Peer {
      */
     set<AddressInfo<A> >& get_address_info();
 
+    /**
+     * Return a list of the fully adjacent routers.
+     */
+    bool get_attached_routers(list<RouterInfo>& routers);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -1331,11 +1342,6 @@ class Peer {
      * longer the DR.
      */
     void designated_router_changed(bool yes);
-
-    /**
-     * Return a list of the fully adjacent routers.
-     */
-    void get_attached_routers(list<RouterInfo>& routers);
 
     /**
      * Unconditionally start the hello timer running.

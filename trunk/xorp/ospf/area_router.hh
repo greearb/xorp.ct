@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.129 2007/03/19 09:02:21 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.130 2007/03/19 14:51:56 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -372,6 +372,14 @@ class AreaRouter : public ServiceBase {
 			     bool timer = false);
 
     /**
+     * A new Link-LSA has arrived if this router is the designated
+     * router then it may be necessary to generate a new
+     * Intra-Area-Prefix-LSA.
+     */
+    void check_link_lsa(OspfTypes::PeerID peerid, LinkLsa *nllsa,
+			LinkLsa *ollsa);
+
+    /**
      * Generate a Intra-Area-Prefix-LSA for this peer OSPFv3 only and
      * add it to the database.
      *
@@ -408,7 +416,7 @@ class AreaRouter : public ServiceBase {
      * @param referenced_ls_type
      * @param interface_id that the generated Intra-Area-Prefix-LSA
      * belongs to.
-     * @param atached_router list of fully attached routers.
+     * @param attached_routers list of fully attached routers.
      *
      * @return the options fields from all the Link-LSAs or'd together.
      */

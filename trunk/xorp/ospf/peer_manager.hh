@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.88 2007/03/13 18:25:51 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.89 2007/03/22 01:44:44 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -290,6 +290,13 @@ class PeerManager {
      */
     uint32_t get_interface_id(const OspfTypes::PeerID peerid);
 
+    /**
+     * Return a list of the fully adjacent routers.
+     */
+    bool get_attached_routers(const OspfTypes::PeerID peerid,
+			      OspfTypes::AreaID area,
+			      list<RouterInfo>& routers);
+    
     /*
      * Does this address fall into a configured OSPF network making it
      * a valid nexthop address.
