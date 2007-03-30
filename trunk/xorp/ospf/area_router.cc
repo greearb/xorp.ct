@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.275 2007/03/30 00:41:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.276 2007/03/30 00:42:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1132,11 +1132,21 @@ AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
 	case OspfTypes::V3:
 	    srlsa->set_destination_id(rt.get_router_id());
 	    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(rt.get_lsa().get());
-	    XLOG_ASSERT(rlsa);
+	    SummaryRouterLsa *sr = 
+		dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get());
+	    uint32_t options = 0;
+	    if (rlsa) {
+		options = rlsa->get_options();
+	    } else if(sr) {
+		options = sr->get_options();
+	    } else {
+		XLOG_WARNING("Unexpected LSA can't get options %s",
+			     cstring(rt));
+	    }
 	    // In OSPFv3 the options field is set to the options from
 	    // the original Router-LSA in OSPFv2 as far as I can tell
 	    // it should be this routers options.
-	    srlsa->set_options(rlsa->get_options());
+	    srlsa->set_options(options);
 	    break;
 	}
 
