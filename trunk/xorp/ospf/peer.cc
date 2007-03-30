@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.276 2007/03/22 17:15:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.277 2007/03/29 23:49:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2271,7 +2271,8 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     // If nothing has changed out of here.
     if (_hello_packet.get_designated_router() == dr &&
 	_hello_packet.get_backup_designated_router() == bdr)
-	return;
+	if (Waiting != get_state())
+	    return;
 
     bool recompute = false;
     // Has this router just become the DR or BDR
