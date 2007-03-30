@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.9 2007/02/21 00:24:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.10 2007/03/14 09:14:06 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -623,7 +623,7 @@ main(int argc, char **argv)
 	{"r1v2", callback(routing1<IPv4>, OspfTypes::V2)},
 // 	{"r1v3", callback(routing1<IPv6>, OspfTypes::V3)},
 //	{"r2v2", callback(routing1<IPv4>, OspfTypes::V2)},
- 	{"r2v3", callback(routing2<IPv6>, OspfTypes::V3)},
+//  	{"r2v3", callback(routing2<IPv6>, OspfTypes::V3)},
     };
 
     try {

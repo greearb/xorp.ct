@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.274 2007/03/29 23:49:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.275 2007/03/30 00:41:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4173,17 +4173,18 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 
 		// If this is a virtual link use the global address if
 		// available.
+		IPv6 router_address;
 		if (IPv6::ZERO() == ri->nexthop().get_address_ipv6()) {
-		    IPv6 global_address;
 		    if (!find_global_address(rlsa->get_header().
 					     get_advertising_router(),
 					     rlsa->get_ls_type(),
 					     lsa_temp_store,
-					     global_address))
+					     router_address))
 			continue;
 		} else {
 		    route_entry.set_nexthop(ri->nexthop().get_address_ipv6());
 		    route_entry.set_nexthop_id(ri->nexthop().get_nexthop_id());
+		    router_address = ri->nexthop().get_address_ipv6();
 		}
 		route_entry.set_advertising_router(lsar->get_header().
 						   get_advertising_router());
@@ -4192,10 +4193,10 @@ AreaRouter<IPv6>::routing_total_recomputeV3()
 
 		route_entry.set_area_border_router(rlsa->get_b_bit());
 		route_entry.set_as_boundary_router(rlsa->get_e_bit());
-// 		IPNet<IPv6> net(ri->nexthop().get_address_ipv6(),
-// 				IPv6::ADDR_BITLEN);
-		routing_table_add_entry(routing_table, IPNet<IPv6>(),
-					route_entry);
+ 		IPNet<IPv6> net(router_address,	IPv6::ADDR_BITLEN);
+ 		routing_table_add_entry(routing_table, net, route_entry);
+// 		routing_table_add_entry(routing_table, IPNet<IPv6>(),
+// 					route_entry);
 	    }
 	} else {
 	    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());

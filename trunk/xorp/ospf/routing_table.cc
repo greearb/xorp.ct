@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.59 2007/02/23 21:08:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.60 2007/02/27 18:33:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -101,18 +101,18 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 
     if (rt.get_destination_type() == OspfTypes::Router) {
 	status = _adv.add_entry(area, rt.get_router_id(), rt);
-	switch(_ospf.get_version()) {
-	case OspfTypes::V2:
-	    break;
-	case OspfTypes::V3:
+// 	switch(_ospf.get_version()) {
+// 	case OspfTypes::V2:
+// 	    break;
+// 	case OspfTypes::V3:
 // 	    XLOG_ASSERT(!net.is_valid());
-	    if (net.is_valid()) {
-		XLOG_WARNING("Net should be zero %s", cstring(net));
-		status = false;
-	    }
-	    return status;
-	    break;
-	}
+// 	    if (net.is_valid()) {
+// 		XLOG_WARNING("Net should be zero %s", cstring(net));
+// 		status = false;
+// 	    }
+// 	    return status;
+// 	    break;
+// 	}
     }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
@@ -140,18 +140,18 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 
     if (rt.get_destination_type() == OspfTypes::Router) {
 	status = _adv.replace_entry(area, rt.get_router_id(), rt);
-	switch(_ospf.get_version()) {
-	case OspfTypes::V2:
-	    break;
-	case OspfTypes::V3:
+// 	switch(_ospf.get_version()) {
+// 	case OspfTypes::V2:
+// 	    break;
+// 	case OspfTypes::V3:
 // 	    XLOG_ASSERT(!net.is_valid());
-	    if (net.is_valid()) {
-		XLOG_WARNING("Net should be zero %s", cstring(net));
-		status = false;
-	    }
-	    return status;
-	    break;
-	}
+// 	    if (net.is_valid()) {
+// 		XLOG_WARNING("Net should be zero %s", cstring(net));
+// 		status = false;
+// 	    }
+// 	    return status;
+// 	    break;
+// 	}
     }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
