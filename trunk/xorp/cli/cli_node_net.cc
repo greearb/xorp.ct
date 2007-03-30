@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.61 2007/03/29 21:58:55 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.62 2007/03/29 22:07:25 pavlin Exp $"
 
 
 //
@@ -109,7 +109,8 @@ sigwinch_handler(int signo)
  * 
  * Open a socket for the CLI to listen on for connections.
  * 
- * Return value: The new socket to listen on success, othewise %XORP_ERROR.
+ * Return value: The new socket to listen on success, othewise a XockFd
+ * that contains an invalid socket.
  **/
 XorpFd
 CliNode::sock_serv_open()
@@ -131,7 +132,6 @@ CliNode::sock_serv_open()
     }
     if (comm_listen(_cli_socket, COMM_LISTEN_DEFAULT_BACKLOG) != XORP_OK) {
 	_cli_socket.clear();
-	return XORP_ERROR;
     }
     return (_cli_socket);
 }
