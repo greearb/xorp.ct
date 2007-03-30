@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.273 2007/03/22 17:15:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.274 2007/03/29 23:49:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1838,6 +1838,27 @@ AreaRouter<A>::refresh_network_lsa(OspfTypes::PeerID peerid, Lsa::LsaRef lsar,
 }
 
 inline
+bool
+operator==(const IPv6Prefix& lhs, const IPv6Prefix& rhs)
+{
+    // We could check for lhs == rhs this will be such a rare
+    // occurence why bother.
+    if (lhs.use_metric() != rhs.use_metric())
+	return false;
+
+    if (lhs.get_network() != rhs.get_network())
+	return false;
+
+    if (lhs.get_prefix_options() != rhs.get_prefix_options())
+	return false;
+
+    if (lhs.use_metric() && lhs.get_metric() != rhs.get_metric())
+	return false;
+
+    return true;
+}
+
+inline
 bool 
 operator<(const IPv6Prefix& lhs, const IPv6Prefix& rhs)
 {
@@ -3217,27 +3238,6 @@ AreaRouter<A>::refresh_router_lsa(bool timer)
 	if (!timer)
 	    routing_schedule_total_recompute();
     }
-}
-
-inline
-bool
-operator==(const IPv6Prefix& lhs, const IPv6Prefix& rhs)
-{
-    // We could check for lhs == rhs this will be such a rare
-    // occurence why bother.
-    if (lhs.use_metric() != rhs.use_metric())
-	return false;
-
-    if (lhs.get_network() != rhs.get_network())
-	return false;
-
-    if (lhs.get_prefix_options() != rhs.get_prefix_options())
-	return false;
-
-    if (lhs.use_metric() && lhs.get_metric() != rhs.get_metric())
-	return false;
-
-    return true;
 }
 
 template <typename A>
