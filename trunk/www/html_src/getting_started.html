@@ -261,7 +261,7 @@ interfaces {
 		disable: false
 	    }
 /*
-	    address 10:10:10:10:10:10:10:10 {
+	    address 2001:DB8:10:10:10:10:10:10 {
 		prefix-length: 64
 		disable: false
 	    }
@@ -335,12 +335,12 @@ protocols {
 	    metric: 1
 	}
 /*
-	route 20:20:20:20::/64 {
-	    next-hop: 10:10:10:10:10:10:10:20
+	route 2001:DB8:AAAA:20::/64 {
+	    next-hop: 2001:DB8:10:10:10:10:10:20
 	    metric: 1
 	}
-	mrib-route 20:20:20:20::/64 {
-	    next-hop: 10:10:10:10:10:10:10:30
+	mrib-route 2001:DB8:AAAA:20::/64 {
+	    next-hop: 2001:DB8:10:10:10:10:10:30
 	    metric: 1
 	}
 */
@@ -759,7 +759,7 @@ protocols {
 		/* dr-priority: 1 */
 		/* hello-period: 30 */
 		/* hello-triggered-delay: 5 */
-		/* alternative-subnet 40:40:40:40::/64 */
+		/* alternative-subnet 2001:DB8:40:40::/64 */
 	    }
 	}
 	interface register_vif {
@@ -770,7 +770,7 @@ protocols {
 	}
 
 	static-rps {
-	    rp 50:50:50:50:50:50:50:50 {
+	    rp 2001:DB8:50:50:50:50:50:50 {
 		group-prefix ff00::/8 {
 		    /* rp-priority: 192 */
 		    /* hash-mask-len: 126 */
@@ -784,7 +784,7 @@ protocols {
 		scope-zone ff00::/8 {
 		    /* is-scope-zone: false */
 		    cand-bsr-by-vif-name: "dc0"
-		    /* cand-bsr-by-vif-addr: 10:10:10:10:10:10:10:10 */
+		    /* cand-bsr-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */
 		    /* bsr-priority: 1 */
 		    /* hash-mask-len: 126 */
 		}
@@ -794,7 +794,7 @@ protocols {
 		group-prefix ff00::/8 {
 		    /* is-scope-zone: false */
 		    cand-rp-by-vif-name: "dc0"
-		    /* cand-rp-by-vif-addr: 10:10:10:10:10:10:10:10 */
+		    /* cand-rp-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */
 		    /* rp-priority: 192 */
 		    /* rp-holdtime: 150 */
 		}

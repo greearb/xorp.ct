@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.14 2006/08/02 05:31:48 pavlin Exp $
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.15 2007/01/23 03:56:47 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -299,8 +299,8 @@ protocols \{\\
 \>\>\>\>metric: 10\\
 \>\>\>\}\\
 \>\>\}\\
-\>\>route 20:20:20:20::/64 \{\\
-\>\>\>next-hop: 10:10:10:10:10:10:10:20\\
+\>\>route 2001:DB8:AAAA:20::/64 \{\\
+\>\>\>next-hop: 2001:DB8:10:10:10:10:10:20\\
 \>\>\>metric: 1\\
 \>\>\}\\
 \>\>\\
@@ -308,8 +308,8 @@ protocols \{\\
 \>\>\>next-hop: 10.10.10.30\\
 \>\>\>metric: 1\\
 \>\>\}\\
-\>\>mrib-route 20:20:20:20::/64 \{\\
-\>\>\>next-hop: 10:10:10:10:10:10:10:30\\
+\>\>mrib-route 2001:DB8:AAAA:20::/64 \{\\
+\>\>\>next-hop: 2001:DB8:10:10:10:10:10:30\\
 \>\>\>metric: 1\\
 \>\>\}\\
 \>\>\\
@@ -323,7 +323,7 @@ protocols \{\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
-\>\>interface-route 30:30:30:30::/64 \{\\
+\>\>interface-route 2001:DB8:AAAA:30::/64 \{\\
 \>\>\>next-hop-interface: rl0\\
 \>\>\>next-hop-vif: rl0\\
 \>\>\>metric: 1\\
@@ -334,7 +334,7 @@ protocols \{\\
 \>\>\>next-hop-vif: rl1\\
 \>\>\>metric: 1\\
 \>\>\}\\
-\>\>mrib-interface-route 30:30:30:30::/64 \{\\
+\>\>mrib-interface-route 2001:DB8:AAAA:30::/64 \{\\
 \>\>\>next-hop-interface: rl1\\
 \>\>\>next-hop-vif: rl1\\
 \>\>\>metric: 1\\

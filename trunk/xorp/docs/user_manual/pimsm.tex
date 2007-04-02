@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.27 2007/02/10 22:16:46 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.28 2007/03/14 01:07:01 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -1085,7 +1085,7 @@ protocols \{\\
 \>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
-\>\>\>\>/* alternative-subnet 40:40:40:40::/64 */\\
+\>\>\>\>/* alternative-subnet 2001:DB8:40:40::/64 */\\
 \>\>\>\}\\
 \>\>\}\\
 \>\>interface register\_vif \{\\
@@ -1096,7 +1096,7 @@ protocols \{\\
 \>\>\}\\
 \\
 \>\>static-rps \{\\
-\>\>\>rp 50:50:50:50:50:50:50:50 \{\\
+\>\>\>rp 2001:DB8:50:50:50:50:50:50 \{\\
 \>\>\>\>group-prefix ff00::/8 \{\\
 \>\>\>\>\>/* rp-priority: 192 */\\
 \>\>\>\>\>/* hash-mask-len: 126 */\\
@@ -1110,7 +1110,7 @@ protocols \{\\
 \>\>\>\>scope-zone ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-bsr-by-vif-name: "dc0"\\
-\>\>\>\>\>/* cand-bsr-by-vif-addr: 10:10:10:10:10:10:10:10 */\\
+\>\>\>\>\>/* cand-bsr-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */\\
 \>\>\>\>\>/* bsr-priority: 1 */\\
 \>\>\>\>\>/* hash-mask-len: 126 */\\
 \>\>\>\>\}\\
@@ -1120,7 +1120,7 @@ protocols \{\\
 \>\>\>\>group-prefix ff00::/8 \{\\
 \>\>\>\>\>/* is-scope-zone: false */\\
 \>\>\>\>\>cand-rp-by-vif-name: "dc0"\\
-\>\>\>\>\>/* cand-rp-by-vif-addr: 10:10:10:10:10:10:10:10 */\\
+\>\>\>\>\>/* cand-rp-by-vif-addr: 2001:DB8:10:10:10:10:10:10 */\\
 \>\>\>\>\>/* rp-priority: 192 */\\
 \>\>\>\>\>/* rp-holdtime: 150 */\\
 \>\>\>\>\}\\
