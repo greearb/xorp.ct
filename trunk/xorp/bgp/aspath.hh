@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.27 2007/02/16 16:07:03 mjh Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.28 2007/02/16 22:45:10 pavlin Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -80,14 +80,16 @@ enum ASPathSegType {
  */
 class AsSegment {
 public:
-    typedef list <AsNum>::iterator iterator;
-    typedef list <AsNum>::const_iterator const_iterator;
-    typedef list <AsNum>::const_reverse_iterator const_reverse_iterator;
+    typedef vector <AsNum>::iterator iterator;
+    typedef vector <AsNum>::const_iterator const_iterator;
+    typedef vector <AsNum>::const_reverse_iterator const_reverse_iterator;
 
     /**
      * Constructor of an empty AsSegment
      */
-    AsSegment(ASPathSegType t = AS_NONE) : _type(t), _entries(0) {}
+    AsSegment(ASPathSegType t = AS_NONE) : _type(t)	{
+	_aslist.reserve(16);
+    }
 
     /**
      * constructor from external representation will just decode
@@ -96,13 +98,16 @@ public:
      *
      * _type is d[0], l is d[1], entries follow.
      */
-    AsSegment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
+    AsSegment(const uint8_t* d) throw(CorruptMessage)	{
+	_aslist.reserve(16);
+	decode(d);
+    }
 
     /**
      * Copy constructor
      */
     AsSegment(const AsSegment& a) :
-	    _type(a._type), _entries(a._entries), _aslist(a._aslist)	{}
+	_type(a._type), _aslist(a._aslist)		{}
 
     /**
      * The destructor has nothing to do, the underlying container will
@@ -116,7 +121,6 @@ public:
     void clear()					{
 	_type = AS_NONE;
 	_aslist.clear();
-	_entries = 0;
     }
 
     /**
@@ -127,12 +131,14 @@ public:
 	if (_type == AS_SET || _type == AS_CONFED_SET)
 	    return 1;
 	else if (_type == AS_SEQUENCE || _type == AS_CONFED_SEQUENCE)
-	    return _entries;
+	    return _aslist.size();
 	else
 	    return 0; // XXX should not be called!
     }
 
-    size_t as_size() const				{ return _entries; }
+    size_t as_size() const				{
+	return _aslist.size();
+    }
 
     /**
      * Add AsNum at the end of the segment (order is irrelevant
@@ -140,9 +146,8 @@ public:
      * This is used when initializing from a string.
      */
     void add_as(const AsNum& n)				{
-	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_entries));
+	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_aslist.size()));
 	_aslist.push_back(n);
-	_entries++;
     }
 
     /**
@@ -151,16 +156,15 @@ public:
      * This is used e.g. when a node is adding its AsNum to the sequence.
      */
     void prepend_as(const AsNum& n)			{
-	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_entries));
-	_aslist.push_front(n);
-	_entries++;
+	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_aslist.size()));
+	_aslist.insert(_aslist.begin(), n);
     }
 
     /**
      * Check if a given AsNum is contained in the segment.
      */
     bool contains(const AsNum& as_num) const		{
-	list <AsNum>::const_iterator iter;
+	const_iterator iter;
 
 	for (iter = _aslist.begin(); iter != _aslist.end(); ++iter)
 	    if (*iter == as_num)
@@ -173,15 +177,8 @@ public:
     /**
      * find the n'th AS number in the segment 
      */
-    const AsNum& as_num(int n) const {
-	list <AsNum>::const_iterator iter;
-	iter = _aslist.begin();
-	while (n > 0) {
-	    iter++;
-	    n--;
-	    XLOG_ASSERT(iter != _aslist.end());
-	}
-	return *iter;
+    const AsNum& as_num(int n) const			{
+	return _aslist[n];
     }
 
     /**
@@ -202,7 +199,9 @@ public:
     /**
      * @return the size of the list on the wire.
      */
-    size_t wire_size() const			{ return 2 + 2*_entries; }
+    size_t wire_size() const			{
+	return 2 + 2 * _aslist.size();
+    }
 
     /**
      * @return fancy string representation of the segment
@@ -237,8 +236,7 @@ public:
 
 protected:
     ASPathSegType	_type;
-    size_t		_entries;	// # of AS numbers in the as path
-    list <AsNum>	_aslist;
+    vector <AsNum>	_aslist;
 };
 
 
@@ -265,7 +263,9 @@ public:
     /**
      * @return the size of the list on the wire.
      */
-    size_t wire_size() const			{ return 2 + 4*_entries; }
+    size_t wire_size() const			{
+	return 2 + 4 * _aslist.size();
+    }
 private:
     /* no storage, as this is handled by the underlying AsSegment */
 };

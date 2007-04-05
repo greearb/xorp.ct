@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.38 2007/02/16 16:07:03 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.39 2007/02/16 22:45:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -79,8 +79,7 @@ const uint8_t *
 AsSegment::encode(size_t &len, uint8_t *data) const
 {
     debug_msg("AsSegment encode\n");
-    XLOG_ASSERT(_entries <= 255);
-    XLOG_ASSERT(_aslist.size() == _entries);	// XXX this is expensive
+    XLOG_ASSERT(_aslist.size() <= 255);
 
     size_t i = wire_size();
     const_iterator as;
@@ -92,7 +91,7 @@ AsSegment::encode(size_t &len, uint8_t *data) const
     len = i;
 
     data[0] = _type;
-    data[1] = _entries;
+    data[1] = _aslist.size();
 
     for (i = 2, as = _aslist.begin(); as != _aslist.end(); i += 2, ++as) {
 	debug_msg("Encoding 16-bit As %d\n", as->as());
@@ -149,7 +148,7 @@ AsSegment::str() const
     }
     const_iterator iter = _aslist.begin();
 
-    for (u_int i = 0; i<_entries; i++, ++iter) {
+    for (u_int i = 0; i<_aslist.size(); i++, ++iter) {
 	s += sep ;
 	s += iter->str();
 	sep = ", ";
@@ -205,7 +204,7 @@ AsSegment::short_str() const
     }
     const_iterator iter = _aslist.begin();
 
-    for (u_int i = 0; i<_entries; i++, ++iter) {
+    for (u_int i = 0; i<_aslist.size(); i++, ++iter) {
 	s += sep ;
 	s += iter->short_str();
 	sep = " ";
@@ -237,18 +236,7 @@ AsSegment::short_str() const
 bool
 AsSegment::operator==(const AsSegment& him) const
 {
-    if (_entries != him._entries)
-	return false;
-    //We use reverse iterators because the aspaths we receive have
-    //more in common in the ASs near us than in the ASs further away.
-    //Much of the time we can detect disimilarity in the first AS if
-    //we start at the end.
-    const_reverse_iterator my_i = _aslist.rbegin();
-    const_reverse_iterator his_i = him._aslist.rbegin();
-    for (;my_i != _aslist.rend(); my_i++, his_i++)
-	if (*my_i != *his_i)
-	    return false;
-    return true;
+    return (_aslist == him._aslist);
 }
 
 /**
@@ -257,21 +245,13 @@ AsSegment::operator==(const AsSegment& him) const
 bool
 AsSegment::operator<(const AsSegment& him) const
 {
-    int mysize = _entries;
-    int hissize = him._entries;
+    int mysize = _aslist.size();
+    int hissize = him._aslist.size();
     if (mysize < hissize)
 	return true;
     if (mysize > hissize)
 	return false;
-    const_reverse_iterator my_i = _aslist.rbegin();
-    const_reverse_iterator his_i = him._aslist.rbegin();
-    for (; my_i != _aslist.rend(); my_i++, his_i++) {
-	if (*my_i < *his_i)
-	    return true;
-	if (*his_i < *my_i)
-	    return false;
-    }
-    return false;
+    return (_aslist < him._aslist);
 }
 
 // XXX isn't this the same format as on the wire ???
@@ -280,15 +260,15 @@ size_t
 AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
 {
     //See RFC 1657, Page 15 for the encoding
-    XLOG_ASSERT(buf_size >= (2 + _entries * 2));
+    XLOG_ASSERT(buf_size >= (2 + _aslist.size() * 2));
     uint8_t *p = buf;
     *p = (uint8_t)_type;  p++;
-    *p = (uint8_t)_entries; p++;
+    *p = (uint8_t)_aslist.size(); p++;
     const_iterator i;
     for (i = _aslist.begin(); i!= _aslist.end(); i++, p += 2)
 	i->copy_out(p);
 
-    return (2 + _entries * 2);
+    return (2 + _aslist.size() * 2);
 }
 
 bool
@@ -349,8 +329,7 @@ const uint8_t *
 As4Segment::encode(size_t &len, uint8_t *data) const
 {
     debug_msg("AsSegment encode\n");
-    XLOG_ASSERT(_entries <= 255);
-    XLOG_ASSERT(_aslist.size() == _entries);	// XXX this is expensive
+    XLOG_ASSERT(_aslist.size() <= 255);
 
     size_t i = wire_size();
     const_iterator as;
@@ -362,7 +341,7 @@ As4Segment::encode(size_t &len, uint8_t *data) const
     len = i;
 
     data[0] = _type;
-    data[1] = _entries;
+    data[1] = _aslist.size();
 
     for (i = 2, as = _aslist.begin(); as != _aslist.end(); i += 4, ++as) {
 	debug_msg("Encoding 4-byte As %d\n", as->as());
