@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.84 2006/12/13 02:30:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.85 2007/02/16 22:45:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1750,7 +1750,16 @@ operator == (const PathAttributeList<A> &him) const
     debug_msg("PathAttributeList operator== %p %p\n", this, &him);
     assert_rehash();
     him.assert_rehash();
-    return (memcmp(_hash, him.hash(), sizeof(_hash)) == 0);
+    if (memcmp(_hash, him.hash(), sizeof(_hash)) != 0) {
+	return false;
+    } else if (*this < him) {
+	return false;
+    } else if (him < *this) {
+	return false;
+    } else {
+	return true;
+    }
+    XLOG_UNREACHABLE();
 }
 
 template<class A>
