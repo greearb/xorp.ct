@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/bgp/bgp.tex,v 1.23 2006/08/02 16:19:19 pavlin Exp $
+% $XORP: xorp/docs/bgp/bgp.tex,v 1.24 2007/03/15 00:53:48 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -212,7 +212,7 @@ is the responsibility of the receive code in the Peer classes to check
 that received update messages are syntactically and semantically
 valid.
 
-The current (August 2006) version of XORP stores all routes in the RibIn,
+The current (March 2007) version of XORP stores all routes in the RibIn,
 irrespective of whether or not they will fail to pass a downstream
 filter.  However, the RibIn has enough information (from the values
 returned by the {\tt add\_route}, {\tt delete\_route} and {\tt
