@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.50 2007/03/28 19:31:13 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.51 2007/04/09 18:45:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -559,7 +559,8 @@ SocketClient::async_add(XorpFd sock)
     // Also, the priority is lower than the tasks' background priority
     // to avoid being overloaded by high volume data from the peers.
     //
-    _async_reader = new AsyncFileReader(eventloop(), sock, PRIORITY_LOWEST);
+    _async_reader = new AsyncFileReader(eventloop(), sock,
+					XorpTask::PRIORITY_LOWEST);
 
     async_read_start();
 }
