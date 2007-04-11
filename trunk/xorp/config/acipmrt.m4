@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.4 2006/04/03 05:17:56 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.5 2007/04/11 00:58:33 pavlin Exp $
 dnl
 
 dnl
@@ -11,12 +11,15 @@ AC_LANG_PUSH(C)
 dnl
 dnl Check for typical BSD-like multicast header files.
 dnl
-dnl XXX: <netinet/ip_mroute.h> might need <sys/types.h> <sys/socket.h>
-dnl <net/route.h> and <netinet/in.h>
-AC_CHECK_HEADERS([sys/types.h sys/socket.h net/route.h netinet/in.h netinet/ip_mroute.h], [], [],
+dnl XXX: <netinet/ip_mroute.h> might need <sys/types.h> <sys/time.h>
+dnl <sys/socket.h> <net/route.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h sys/time.h sys/socket.h net/route.h netinet/in.h netinet/ip_mroute.h], [], [],
 [[
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
