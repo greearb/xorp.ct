@@ -1,10 +1,8 @@
 dnl ---------------------------------------------------------------------------
 dnl
 dnl Autoheader definitions
-dnl XXX: Currently this should not be referenced. Do not use until
-dnl      we bump all of the autotools.
 dnl
-dnl $XORP: xorp/config/ahxorp.m4,v 1.2 2005/10/30 21:18:43 pavlin Exp $
+dnl $XORP: xorp/config/ahxorp.m4,v 1.3 2007/04/11 00:58:33 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 
