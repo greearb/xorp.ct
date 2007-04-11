@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.23 2007/03/14 18:59:05 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.24 2007/03/21 19:16:15 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -11,8 +11,8 @@ dnl Boilerplate
 dnl ---------------------------------------------------------------------------
 
 AC_INIT
-AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.23 2007/03/14 18:59:05 pavlin Exp $])
+AC_PREREQ(2.61)
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.24 2007/03/21 19:16:15 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
