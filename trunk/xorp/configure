@@ -887,6 +887,14 @@ TRY_USE_SIM_TRUE
 TRY_USE_SIM_FALSE
 MIBS
 PYTHON
+PYTHON_VERSION
+PYTHON_PREFIX
+PYTHON_EXEC_PREFIX
+PYTHON_PLATFORM
+pythondir
+pkgpythondir
+pyexecdir
+pkgpyexecdir
 PYTHON_BUILD
 CLI_CURSES_LIB
 POW_LIB
@@ -5996,7 +6004,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5999 "configure"' > conftest.$ac_ext
+  echo '#line 6007 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -8315,11 +8323,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8318: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8326: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8322: \$? = $ac_status" >&5
+   echo "$as_me:8330: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8583,11 +8591,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8586: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8594: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8590: \$? = $ac_status" >&5
+   echo "$as_me:8598: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8687,11 +8695,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8690: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8698: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8694: \$? = $ac_status" >&5
+   echo "$as_me:8702: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10995,7 +11003,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 10998 "configure"
+#line 11006 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11095,7 +11103,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11098 "configure"
+#line 11106 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13431,11 +13439,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13434: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13442: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13438: \$? = $ac_status" >&5
+   echo "$as_me:13446: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13535,11 +13543,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13538: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13546: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13542: \$? = $ac_status" >&5
+   echo "$as_me:13550: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15105,11 +15113,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15108: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15116: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15112: \$? = $ac_status" >&5
+   echo "$as_me:15120: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15209,11 +15217,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15212: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15220: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15216: \$? = $ac_status" >&5
+   echo "$as_me:15224: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17407,11 +17415,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17410: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17418: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17414: \$? = $ac_status" >&5
+   echo "$as_me:17422: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17675,11 +17683,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17678: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17686: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17682: \$? = $ac_status" >&5
+   echo "$as_me:17690: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17779,11 +17787,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17782: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17790: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17786: \$? = $ac_status" >&5
+   echo "$as_me:17794: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20888,26 +20896,88 @@ echo "${ECHO_T}$xorp_cv_gmake_name" >&6; }
 
 
 
-for ac_prog in python2.2 python2 python
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ echo "$as_me:$LINENO: checking for $ac_word" >&5
-echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
-if test "${ac_cv_prog_PYTHON+set}" = set; then
+
+
+
+        if test -n "$PYTHON"; then
+      # If the user set $PYTHON, use it and don't search something else.
+      { echo "$as_me:$LINENO: checking whether $PYTHON version >= 2.0" >&5
+echo $ECHO_N "checking whether $PYTHON version >= 2.0... $ECHO_C" >&6; }
+      prog="import sys, string
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+minver = map(int, string.split('2.0', '.')) + [0, 0, 0]
+minverhex = 0
+for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[i]
+sys.exit(sys.hexversion < minverhex)"
+  if { echo "$as_me:$LINENO: $PYTHON -c "$prog"" >&5
+   ($PYTHON -c "$prog") >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }; then
+  { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+else
+  { { echo "$as_me:$LINENO: error: too old" >&5
+echo "$as_me: error: too old" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+      am_display_PYTHON=$PYTHON
+    else
+      # Otherwise, try each interpreter until we find one that satisfies
+      # VERSION.
+      { echo "$as_me:$LINENO: checking for a Python interpreter with version >= 2.0" >&5
+echo $ECHO_N "checking for a Python interpreter with version >= 2.0... $ECHO_C" >&6; }
+if test "${am_cv_pathless_PYTHON+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  if test -n "$PYTHON"; then
-  ac_cv_prog_PYTHON="$PYTHON" # Let the user override the test.
+
+	for am_cv_pathless_PYTHON in python python2 python2.5 python2.4 python2.3 python2.2 python2.1 python2.0 python1.6 python1.5 none; do
+	  test "$am_cv_pathless_PYTHON" = none && break
+	  prog="import sys, string
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+minver = map(int, string.split('2.0', '.')) + [0, 0, 0]
+minverhex = 0
+for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[i]
+sys.exit(sys.hexversion < minverhex)"
+  if { echo "$as_me:$LINENO: $am_cv_pathless_PYTHON -c "$prog"" >&5
+   ($am_cv_pathless_PYTHON -c "$prog") >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }; then
+  break
+fi
+
+	done
+fi
+{ echo "$as_me:$LINENO: result: $am_cv_pathless_PYTHON" >&5
+echo "${ECHO_T}$am_cv_pathless_PYTHON" >&6; }
+      # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
+      if test "$am_cv_pathless_PYTHON" = none; then
+	PYTHON=:
+      else
+        # Extract the first word of "$am_cv_pathless_PYTHON", so it can be a program name with args.
+set dummy $am_cv_pathless_PYTHON; ac_word=$2
+{ echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6; }
+if test "${ac_cv_path_PYTHON+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+  case $PYTHON in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PYTHON="$PYTHON" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
 do
   IFS=$as_save_IFS
   test -z "$as_dir" && as_dir=.
   for ac_exec_ext in '' $ac_executable_extensions; do
   if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
-    ac_cv_prog_PYTHON="$ac_prog"
+    ac_cv_path_PYTHON="$as_dir/$ac_word$ac_exec_ext"
     echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
     break 2
   fi
@@ -20915,9 +20985,10 @@ done
 done
 IFS=$as_save_IFS
 
+  ;;
+esac
 fi
-fi
-PYTHON=$ac_cv_prog_PYTHON
+PYTHON=$ac_cv_path_PYTHON
 if test -n "$PYTHON"; then
   { echo "$as_me:$LINENO: result: $PYTHON" >&5
 echo "${ECHO_T}$PYTHON" >&6; }
@@ -20927,31 +20998,86 @@ echo "${ECHO_T}no" >&6; }
 fi
 
 
-  test -n "$PYTHON" && break
-done
-test -n "$PYTHON" || PYTHON=""NO_PYTHON""
-
-if test "${PYTHON}" != "NO_PYTHON" ; then
-  { echo "$as_me:$LINENO: checking python version 2.0 or above" >&5
-echo $ECHO_N "checking python version 2.0 or above... $ECHO_C" >&6; }
-if test "${xorp_python_good+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-      python_version=`$PYTHON -c 'import sys; print sys.version[:3]' | tr -cd '[:digit:]'`
-        if test 0${python_version} -ge 20 ; then
-      xorp_python_good="yes"
-    else
-      xorp_python_good="no"
+      fi
+      am_display_PYTHON=$am_cv_pathless_PYTHON
     fi
 
+
+  if test "$PYTHON" = :; then
+      PYTHON_BUILD="#"
+  else
+
+
+  { echo "$as_me:$LINENO: checking for $am_display_PYTHON version" >&5
+echo $ECHO_N "checking for $am_display_PYTHON version... $ECHO_C" >&6; }
+if test "${am_cv_python_version+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  am_cv_python_version=`$PYTHON -c "import sys; print sys.version[:3]"`
 fi
-{ echo "$as_me:$LINENO: result: $xorp_python_good" >&5
-echo "${ECHO_T}$xorp_python_good" >&6; }
+{ echo "$as_me:$LINENO: result: $am_cv_python_version" >&5
+echo "${ECHO_T}$am_cv_python_version" >&6; }
+  PYTHON_VERSION=$am_cv_python_version
+
+
+
+  PYTHON_PREFIX='${prefix}'
+
+  PYTHON_EXEC_PREFIX='${exec_prefix}'
+
+
+
+  { echo "$as_me:$LINENO: checking for $am_display_PYTHON platform" >&5
+echo $ECHO_N "checking for $am_display_PYTHON platform... $ECHO_C" >&6; }
+if test "${am_cv_python_platform+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  am_cv_python_platform=`$PYTHON -c "import sys; print sys.platform"`
 fi
-PYTHON_BUILD="#"
-if test "${xorp_python_good}" = "yes" ; then
-   PYTHON_BUILD=''
+{ echo "$as_me:$LINENO: result: $am_cv_python_platform" >&5
+echo "${ECHO_T}$am_cv_python_platform" >&6; }
+  PYTHON_PLATFORM=$am_cv_python_platform
+
+
+
+
+                { echo "$as_me:$LINENO: checking for $am_display_PYTHON script directory" >&5
+echo $ECHO_N "checking for $am_display_PYTHON script directory... $ECHO_C" >&6; }
+if test "${am_cv_python_pythondir+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  am_cv_python_pythondir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(0,0,prefix='$PYTHON_PREFIX')" 2>/dev/null ||
+     echo "$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages"`
 fi
+{ echo "$as_me:$LINENO: result: $am_cv_python_pythondir" >&5
+echo "${ECHO_T}$am_cv_python_pythondir" >&6; }
+  pythondir=$am_cv_python_pythondir
+
+
+
+  pkgpythondir=\${pythondir}/$PACKAGE
+
+
+            { echo "$as_me:$LINENO: checking for $am_display_PYTHON extension module directory" >&5
+echo $ECHO_N "checking for $am_display_PYTHON extension module directory... $ECHO_C" >&6; }
+if test "${am_cv_python_pyexecdir+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  am_cv_python_pyexecdir=`$PYTHON -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='$PYTHON_EXEC_PREFIX')" 2>/dev/null ||
+     echo "${PYTHON_EXEC_PREFIX}/lib/python${PYTHON_VERSION}/site-packages"`
+fi
+{ echo "$as_me:$LINENO: result: $am_cv_python_pyexecdir" >&5
+echo "${ECHO_T}$am_cv_python_pyexecdir" >&6; }
+  pyexecdir=$am_cv_python_pyexecdir
+
+
+
+  pkgpyexecdir=\${pyexecdir}/$PACKAGE
+
+
+      PYTHON_BUILD=''
+  fi
+
 
 
 
@@ -40549,6 +40675,14 @@ TRY_USE_SIM_TRUE!$TRY_USE_SIM_TRUE$ac_delim
 TRY_USE_SIM_FALSE!$TRY_USE_SIM_FALSE$ac_delim
 MIBS!$MIBS$ac_delim
 PYTHON!$PYTHON$ac_delim
+PYTHON_VERSION!$PYTHON_VERSION$ac_delim
+PYTHON_PREFIX!$PYTHON_PREFIX$ac_delim
+PYTHON_EXEC_PREFIX!$PYTHON_EXEC_PREFIX$ac_delim
+PYTHON_PLATFORM!$PYTHON_PLATFORM$ac_delim
+pythondir!$pythondir$ac_delim
+pkgpythondir!$pkgpythondir$ac_delim
+pyexecdir!$pyexecdir$ac_delim
+pkgpyexecdir!$pkgpyexecdir$ac_delim
 PYTHON_BUILD!$PYTHON_BUILD$ac_delim
 CLI_CURSES_LIB!$CLI_CURSES_LIB$ac_delim
 POW_LIB!$POW_LIB$ac_delim
@@ -40557,7 +40691,7 @@ FLOWER_MALLOC!$FLOWER_MALLOC$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 26; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 34; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

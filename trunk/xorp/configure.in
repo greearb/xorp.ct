@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.189 2007/04/11 01:13:13 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.190 2007/04/11 02:00:07 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.189 2007/04/11 01:13:13 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.190 2007/04/11 02:00:07 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -390,43 +390,10 @@ dnl -----------------------------------------
 dnl Python related checks
 dnl -----------------------------------------
 
-dnl
-dnl XXX: A better mechanism for Python-related checks.
-dnl This mechanism doesn't work for older automake version (e.g., 1.5),
-dnl and should be enabled after we move to newer automake (e.g., 1.9).
-dnl
-dnl AM_PATH_PYTHON(2.0,			dnl Min. required Python version
-dnl   [PYTHON_BUILD=''],
-dnl   [PYTHON_BUILD="#"])
-dnl AC_SUBST(PYTHON_BUILD)
-
-dnl
-dnl The older mechanism for Python-related checks. Should be removed
-dnl after the newer AM_PATH_PYTHON() mechanism is enabled (see above).
-dnl
-AC_CHECK_PROGS(PYTHON, python2.2 python2 python, "NO_PYTHON")
-if test "${PYTHON}" != "NO_PYTHON" ; then
-  AC_CACHE_CHECK(
-    [python version 2.0 or above], xorp_python_good,
-    changequote(<<,>>)dnl
-    python_version=`$PYTHON -c 'import sys; print sys.version[[:3]]' | tr -cd '[[:digit:]]'`
-    changequote([,])dnl
-    if test 0${python_version} -ge 20 ; then
-      xorp_python_good="yes"
-    else
-      xorp_python_good="no"
-    fi
-  )
-fi
-PYTHON_BUILD="#"
-if test "${xorp_python_good}" = "yes" ; then
-   PYTHON_BUILD=''
-fi
+AM_PATH_PYTHON(2.0,			dnl Min. required Python version
+  [PYTHON_BUILD=''],
+  [PYTHON_BUILD="#"])
 AC_SUBST(PYTHON_BUILD)
-AC_SUBST(PYTHON)
-dnl
-dnl End of older Python-related mechanism
-dnl
 
 dnl ---------------------------------------------------------------------------
 dnl OpenSSL (Strictly OpenSSL MD5 implementation)
