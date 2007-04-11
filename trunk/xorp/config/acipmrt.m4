@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.5 2007/04/11 00:58:33 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.6 2007/04/11 02:10:55 pavlin Exp $
 dnl
 
 dnl
@@ -43,7 +43,13 @@ AC_CHECK_HEADERS([sys/types.h netinet/in.h netinet/igmp.h], [], [],
 #endif
 ]])
 
-AC_CHECK_HEADERS([netinet/pim.h])
+dnl XXX: <netinet/pim.h> might need <sys/types.h>
+AC_CHECK_HEADERS([sys/types.h netinet/pim.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+]])
 
 dnl
 dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
