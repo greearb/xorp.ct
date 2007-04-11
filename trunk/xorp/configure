@@ -23117,9 +23117,6 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 
 
 #include <$ac_header>
@@ -23166,7 +23163,8 @@ done
 
 
 
-for ac_header in sys/socket.h net/if.h net/if_var.h
+
+for ac_header in sys/types.h sys/socket.h net/if.h net/if_var.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -23181,6 +23179,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -23235,7 +23236,8 @@ done
 
 
 
-for ac_header in sys/socket.h net/if.h net/if_var.h netinet/in.h netinet/in_var.h
+
+for ac_header in sys/types.h sys/socket.h net/if.h net/if_var.h netinet/in.h netinet/in_var.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -23250,6 +23252,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -32709,7 +32714,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-for ac_header in sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h
+
+for ac_header in sys/types.h sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -32724,6 +32730,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -32786,7 +32795,8 @@ done
 
 
 
-for ac_header in sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h netinet6/nd6.h
+
+for ac_header in sys/types.h sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h netinet6/nd6.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 { echo "$as_me:$LINENO: checking for $ac_header" >&5
@@ -32801,6 +32811,9 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

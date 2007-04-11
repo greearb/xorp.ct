@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.24 2006/08/18 18:04:33 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.25 2007/04/11 00:58:33 pavlin Exp $
 dnl
 
 dnl
@@ -12,10 +12,13 @@ dnl ------------------------------------
 dnl Check for IPv6 related headers
 dnl ------------------------------------
 
-dnl XXX: <netinet6/in6_var.h> might need <sys/socket.h> <net/if.h>
-dnl <net/if_var.h> and <netinet/in.h>
-AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h], [], [],
+dnl XXX: <netinet6/in6_var.h> might need <sys/types.h> <sys/socket.h>
+dnl <net/if.h> <net/if_var.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h], [], [],
 [[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -30,10 +33,13 @@ AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_v
 #endif
 ]])
 
-dnl XXX: <netinet6/nd6.h> might need <sys/socket.h> <net/if.h>
+dnl XXX: <netinet6/nd6.h> might need <sys/types.h> <sys/socket.h> <net/if.h>
 dnl <net/if_var.h> <netinet/in.h> and <netinet6/in6_var.h>
-AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h netinet6/nd6.h], [], [],
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h netinet6/nd6.h], [], [],
 [[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.188 2007/04/11 00:58:32 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.189 2007/04/11 01:13:13 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.188 2007/04/11 00:58:32 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.189 2007/04/11 01:13:13 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -560,8 +560,8 @@ dnl
 dnl Check for typical BSD-like networking stack header files.
 dnl
 AC_CHECK_HEADERS([ifaddrs.h netdb.h arpa/inet.h arpa/telnet.h net/if_dl.h net/if_media.h net/if_types.h netinet/in.h netinet/in_systm.h netinet/tcp.h sys/sockio.h])
-dnl XXX: <net/if.h>, <net/if_arp.h> and <net/route.h> might need <sys/socket.h>
-dnl XXX: <net/if_arp.h> and <net/route.h> might need <sys/types.h>
+dnl XXX: <net/if.h>, <net/if_arp.h> and <net/route.h> might need <sys/types.h>
+dnl and <sys/socket.h>
 AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_arp.h net/route.h], [], [],
 [[
 #ifdef HAVE_SYS_TYPES_H
@@ -570,13 +570,13 @@ AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_arp.h net/route.h], [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 ]])
-dnl XXX: <net/if_var.h> might need <sys/socket.h> and <net/if.h>
-AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h], [], [],
+dnl XXX: <net/if_var.h> might need <sys/types.h> <sys/socket.h> and <net/if.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_var.h], [], [],
 [[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -584,10 +584,13 @@ AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h], [], [],
 #include <net/if.h>
 #endif
 ]])
-dnl XXX: <netinet/in_var.h> might need <sys/socket.h> <net/if.h> <net/if_var.h>
-dnl and <netinet/in.h>
-AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet/in_var.h], [], [],
+dnl XXX: <netinet/in_var.h> might need <sys/types.h> <sys/socket.h> <net/if.h>
+dnl <net/if_var.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_var.h netinet/in.h netinet/in_var.h], [], [],
 [[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
