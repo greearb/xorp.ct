@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.3 2006/04/01 09:09:23 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.4 2006/04/03 05:17:56 pavlin Exp $
 dnl
 
 dnl
@@ -11,7 +11,37 @@ AC_LANG_PUSH(C)
 dnl
 dnl Check for typical BSD-like multicast header files.
 dnl
-AC_CHECK_HEADERS([netinet/igmp.h netinet/ip_mroute.h netinet/pim.h])
+dnl XXX: <netinet/ip_mroute.h> might need <sys/types.h> <sys/socket.h>
+dnl <net/route.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/route.h netinet/in.h netinet/ip_mroute.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
+dnl XXX: <netinet/igmp.h> might need <sys/types.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h netinet/in.h netinet/igmp.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
+AC_CHECK_HEADERS([netinet/pim.h])
+
 dnl
 dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
 dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back

@@ -4,11 +4,9 @@ dnl Autoheader definitions
 dnl XXX: Currently this should not be referenced. Do not use until
 dnl      we bump all of the autotools.
 dnl
-dnl $XORP: xorp/config/ahxorp.m4,v 1.1 2005/05/05 19:38:32 bms Exp $
+dnl $XORP: xorp/config/ahxorp.m4,v 1.2 2005/10/30 21:18:43 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
-
-AC_CONFIG_HEADERS(config.h)
 
 AH_TOP([
 /*
@@ -24,6 +22,44 @@ AH_BOTTOM([
 /*
  * XORP definitions
  */
+
+/*
+ * If you don't have these types in <inttypes.h> or <stdint.h>,
+ * typedef these to be the types you do have.
+ */
+#ifndef HAVE_INT8_T
+typedef char int8_t;
+#endif
+#ifndef HAVE_INT16_T
+typedef short int16_t;
+#endif
+#ifndef HAVE_INT32_T
+typedef int int32_t;
+#endif
+#ifndef HAVE_INT64_T
+typedef long long int64_t;
+#endif
+#ifndef HAVE_UINT8_T
+typedef unsigned char uint8_t;
+#endif
+#ifndef HAVE_UINT16_T
+typedef unsigned short uint16_t;
+#endif
+#ifndef HAVE_UINT32_T
+typedef unsigned int uint32_t;
+#endif
+#ifndef HAVE_UINT64_T
+typedef unsigned long long uint64_t;
+#endif
+
+
+/*
+ * XXX: Workaround a bug whereby the GNU autoconf tests will happily
+ * go off and define their own fictional pid_t using the preprocessor.
+ */
+#ifdef pid_t
+#undef pid_t
+#endif
 
 #ifndef HAVE_SIG_T
 typedef RETSIGTYPE (*sig_t)(int);

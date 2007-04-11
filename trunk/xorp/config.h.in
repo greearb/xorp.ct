@@ -1,5 +1,6 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
-/*  acconfig.h -- `autoheader' will generate config.h.in */
+
+
 /*
  * This file is part of the XORP software.
  * See file `LICENSE.xorp' for copyright and license information.
@@ -7,18 +8,6 @@
 
 #ifndef __XORP_CONFIG_H__
 #define __XORP_CONFIG_H__
-
-/*
- * XXX: everything above is unconditionally copied to the generated file
- */
-
-/*
- * Debugging:
- * DEBUG: general debugging
- * DEBUG_MEM: debug memory allocation
- */
-#undef DEBUG
-#undef DEBUG_MEM
 
 
 /* Define to 1 if the preprocessor supports C99 style variadic macros */
@@ -68,6 +57,9 @@
 
 /* Define to 1 if system getopt() is in unistd.h */
 #undef HAVE_DECL_GETOPT
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
 
 /* Define to 1 if you have the `ether_aton' function. */
 #undef HAVE_ETHER_ATON
@@ -700,13 +692,15 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
 
-/* Define to `unsigned' if <sys/types.h> does not define. */
+/* Define to `unsigned int' if <sys/types.h> does not define. */
 #undef size_t
 
 /* Define as `fork' if `vfork' does not work. */
 #undef vfork
+
+
 /*
- * XXX: everything below is unconditionally copied to the generated file
+ * XORP definitions
  */
 
 /*
@@ -800,3 +794,4 @@ using namespace std;
 #endif /* __BEGIN_DECLS */
 
 #endif /* __XORP_CONFIG_H__ */
+

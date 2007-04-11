@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.23 2005/10/30 05:14:59 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.24 2006/08/18 18:04:33 pavlin Exp $
 dnl
 
 dnl
@@ -12,7 +12,77 @@ dnl ------------------------------------
 dnl Check for IPv6 related headers
 dnl ------------------------------------
 
-AC_CHECK_HEADERS(netinet6/in6_var.h netinet6/nd6.h netinet/ip6.h netinet/icmp6.h netinet6/ip6_mroute.h)
+dnl XXX: <netinet6/in6_var.h> might need <sys/socket.h> <net/if.h>
+dnl <net/if_var.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h], [], [],
+[[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
+dnl XXX: <netinet6/nd6.h> might need <sys/socket.h> <net/if.h>
+dnl <net/if_var.h> <netinet/in.h> and <netinet6/in6_var.h>
+AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet6/in6_var.h netinet6/nd6.h], [], [],
+[[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET6_IN6_VAR_H
+#include <netinet6/in6_var.h>
+#endif
+]])
+
+dnl XXX: <netinet/ip6.h> might need <sys/types.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h netinet/in.h netinet/ip6.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
+dnl XXX: <netinet/icmp6.h> might need <sys/types> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h netinet/in.h netinet/icmp6.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
+dnl XXX: <netinet6/ip6_mroute.h> might need <sys/param.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/param.h netinet/in.h netinet6/ip6_mroute.h], [], [],
+[[
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
 
 dnl ------------------------------------
 dnl Check whether the system IPv6 stack implementation is reasonable

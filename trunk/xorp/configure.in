@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.186 2007/03/14 18:59:04 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.187 2007/03/21 19:16:14 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,21 +37,20 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.186 2007/03/14 18:59:04 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.187 2007/03/21 19:16:14 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
 
-dnl XXX: We can't use AC_CONFIG_HEADERS yet because automake is old.
-dnl builtin(include, config/ahxorp.m4)
-dnl AC_CONFIG_HEADERS(config.h)
+builtin(include, config/ahxorp.m4)
+AC_CONFIG_HEADERS(config.h)
 
 dnl ---------------------------------------------------------------------------
 dnl automake options
 dnl ---------------------------------------------------------------------------
 
 AM_INIT_AUTOMAKE(xorp, 1.5-WIP)
-AM_CONFIG_HEADER(config.h)
+dnl AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_CACHE_SAVE
 
@@ -535,7 +534,14 @@ AC_CHECK_HEADERS([fcntl.h])
 dnl
 dnl Check for POSIX 1003.1 headers.
 dnl
-AC_CHECK_HEADERS([glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/mount.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/uio.h sys/un.h sys/utsname.h sys/wait.h])
+AC_CHECK_HEADERS([glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/uio.h sys/un.h sys/utsname.h sys/wait.h])
+dnl XXX: <sys/mount.h> might need <sys/param.h>
+AC_CHECK_HEADERS([sys/param.h sys/mount.h], [], [],
+[[
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+]])
 AC_HEADER_TIME
 AC_HEADER_STAT
 
@@ -553,12 +559,74 @@ AC_HEADER_SYS_WAIT
 dnl
 dnl Check for typical BSD-like networking stack header files.
 dnl
-AC_CHECK_HEADERS([ifaddrs.h netdb.h arpa/inet.h arpa/telnet.h net/if.h net/if_arp.h net/if_dl.h net/if_media.h net/if_types.h net/if_var.h net/route.h netinet/in.h netinet/in_systm.h netinet/in_var.h netinet/ip.h netinet/tcp.h sys/sockio.h])
+AC_CHECK_HEADERS([ifaddrs.h netdb.h arpa/inet.h arpa/telnet.h net/if_dl.h net/if_media.h net/if_types.h netinet/in.h netinet/in_systm.h netinet/tcp.h sys/sockio.h])
+dnl XXX: <net/if.h>, <net/if_arp.h> and <net/route.h> might need <sys/socket.h>
+dnl XXX: <net/if_arp.h> and <net/route.h> might need <sys/types.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h net/if_arp.h net/route.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+]])
+dnl XXX: <net/if_var.h> might need <sys/socket.h> and <net/if.h>
+AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h], [], [],
+[[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+]])
+dnl XXX: <netinet/in_var.h> might need <sys/socket.h> <net/if.h> <net/if_var.h>
+dnl and <netinet/in.h>
+AC_CHECK_HEADERS([sys/socket.h net/if.h net/if_var.h netinet/in.h netinet/in_var.h], [], [],
+[[
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_VAR_H
+#include <net/if_var.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+dnl XXX: <netinet/ip.h> might need <sys/types.h> <netinet/in.h>
+dnl and <netinet/in_systm.h>
+AC_CHECK_HEADERS([sys/types.h netinet/in.h netinet/in_systm.h netinet/ip.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+]])
 
 dnl
 dnl Check for BSD-specific header files.
 dnl
-AC_CHECK_HEADERS([sys/linker.h sys/sysctl.h])
+AC_CHECK_HEADERS([sys/sysctl.h])
+dnl XXX: <sys/linker.h> might need <sys/param.h>
+AC_CHECK_HEADERS([sys/param.h sys/linker.h], [], [],
+[[
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+]])
 
 dnl
 dnl Check for Linux-specific header files.
@@ -576,7 +644,22 @@ fi
 dnl
 dnl Check for Ethernet-related types and functions.
 dnl
-AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if.h net/if_ether.h netinet/in.h netinet/if_ether.h netinet/ether.h])
+AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if.h net/if_ether.h netinet/in.h netinet/ether.h])
+dnl XXX: <netinet/if_ether.h> might need <sys/types.h> <sys/socket.h>
+dnl and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h netinet/in.h netinet/if_ether.h], [], [],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
 dnl
 dnl Check for headers where 'struct ether_addr' is typically defined.
 dnl

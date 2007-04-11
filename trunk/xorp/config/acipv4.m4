@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.7 2006/04/01 09:09:24 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.8 2006/08/24 19:00:59 pavlin Exp $
 dnl
 
 dnl
@@ -97,9 +97,26 @@ case "${host_os}" in
 	test_undef_kernel="#undef _KERNEL"
     ;;
 esac
-AC_CHECK_HEADER(netinet/ip_mroute.h,
+dnl XXX: <netinet/ip_mroute.h> might need <sys/types.h> <sys/socket.h>
+dnl <net/route.h> and <netinet/in.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/route.h netinet/in.h netinet/ip_mroute.h],
   [test_netinet_ip_mroute_h="#include <netinet/ip_mroute.h>"],
-  [test_netinet_ip_mroute_h=""])
+  [test_netinet_ip_mroute_h=""],
+[[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]])
+
 dnl
 dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
 dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
