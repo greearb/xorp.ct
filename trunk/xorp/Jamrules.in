@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.4 2007/01/14 21:43:09 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.5 2007/01/14 21:46:08 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -24,7 +24,6 @@ PYTHON_BUILD 	= @PYTHON_BUILD@ defined
 		; # will != defined if commented out.
 
 # failsafe
-CLI_CURSES_LIB	?= -lcurses ;
 CRYPTO_LIB	?= -lcrypto ;
 
 # top level stuff
