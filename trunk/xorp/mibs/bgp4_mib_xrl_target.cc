@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_xrl_target.cc,v 1.8 2006/03/16 00:04:41 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_xrl_target.cc,v 1.9 2007/02/16 22:46:34 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -22,6 +22,7 @@
 #include "fixconfigs.h"
 
 #include "bgp4_mib_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
