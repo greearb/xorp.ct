@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.19 2006/10/12 01:24:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.20 2007/02/16 22:46:25 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -161,7 +161,7 @@ test_ipvxnet_valid_constructors(TestInfo& test_info)
     in_addr.s_addr = ui;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin.sin_len = sizeof(sin);
 #endif
     sin.sin_family = AF_INET;
@@ -181,7 +181,7 @@ test_ipvxnet_valid_constructors(TestInfo& test_info)
     memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
     struct sockaddr_in6 sin6;
     memset(&sin6, 0, sizeof(sin6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_family = AF_INET6;

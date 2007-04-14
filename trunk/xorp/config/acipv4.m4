@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.10 2007/04/11 02:10:55 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.11 2007/04/14 01:35:06 pavlin Exp $
 dnl
 
 dnl
@@ -32,44 +32,6 @@ AC_CHECK_HEADERS([netinet/ip.h], [], [],
 if test "${_USING_WINDOWS}" = "1" ; then
     AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h])
 fi
-
-dnl ---------------------
-dnl Check for "struct ip"
-dnl ---------------------
-
-AC_CHECK_TYPE([struct ip], [],
-	      [AC_DEFINE(NEED_STRUCT_IP, 1,
-		         [Define to 1 if you need a definition of struct ip])],
-[
-#ifdef HOST_OS_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifdef HAVE_WINDOWS_H
-#include <windows.h>
-#endif
-#ifdef HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-#ifdef HAVE_WS2TCPIP_H
-#include <ws2tcpip.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#ifdef HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-])
 
 dnl ---------------------------------------------------------------------------
 dnl IPv4 raw socket

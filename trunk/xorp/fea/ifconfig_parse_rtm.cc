@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.30 2006/11/29 08:21:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.31 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -348,7 +348,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			   ifridx.ifr_name, strerror(errno));
 	    } else {
-#ifdef HAVE_IFR_IFINDEX
+#ifdef HAVE_STRUCT_IFREQ_IFR_IFINDEX
 		    if_index = ifridx.ifr_ifindex;
 #else
 		    if_index = ifridx.ifr_index;

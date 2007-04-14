@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.7 2007/04/11 02:24:30 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.8 2007/04/14 01:35:06 pavlin Exp $
 dnl
 
 dnl
@@ -385,32 +385,12 @@ ${test_ipv4_multicast_headers}
      AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)])
 
-dnl ------------------------------------------------------
-dnl Check for "struct ip_mreq" and "struct ip_mreq_source"
-dnl ------------------------------------------------------
-
-if test "${ipv4_multicast}" = "yes"; then
-    AC_CHECK_TYPE([struct ip_mreq],
-		  [AC_DEFINE(HAVE_IP_MREQ, 1,
-			     [Define to 1 if you have struct ip_mreq])], [],
-[
-${test_ipv4_multicast_headers}
-])
-
-    AC_CHECK_TYPE([struct ip_mreq_source],
-		  [AC_DEFINE(HAVE_IP_MREQ_SOURCE, 1,
-			     [Define to 1 if you have struct ip_mreq_source (SSM)])], [],
-[
-${test_ipv4_multicast_headers}
-])
-fi
-
 dnl -----------------------------------------------------------
 dnl Check whether the system IPv6 stack supports IPv6 multicast
 dnl -----------------------------------------------------------
 
 ipv6_multicast="no"
-if test "${ipv6}" = "yes"; then
+if test "${ipv6}" = "yes" ; then
     AC_MSG_CHECKING(whether the system IPv4 stack supports IPv6 multicast)
     AC_TRY_COMPILE([
 ${test_ipv6_multicast_headers}
@@ -436,10 +416,8 @@ dnl -------------------------------------------
 dnl Check for struct mld_hdr in netinet/icmp6.h
 dnl -------------------------------------------
 
-if test "${ipv6_multicast}" = "yes"; then
-    AC_CHECK_TYPE([struct mld_hdr],
-		  [AC_DEFINE(HAVE_MLD_HDR, 1,
-			     [Define to 1 if you have struct mld_hdr in netinet/icmp6.h])], [],
+if test "${ipv6_multicast}" = "yes" ; then
+    AC_CHECK_TYPES([struct mld_hdr], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -461,7 +439,7 @@ dnl TODO: This test will have to be substantially rewritten for Windows.
 dnl
 
 ipv4_multicast_routing="no"
-if test "${ipv4_multicast}" = "yes"; then
+if test "${ipv4_multicast}" = "yes" ; then
     AC_MSG_CHECKING(whether the system IPv4 stack supports IPv4 multicast routing)
     AC_TRY_COMPILE([
 ${test_ipv4_multicast_routing_headers}
@@ -491,7 +469,7 @@ dnl ---------------------------------------------
 dnl Check for "struct pim" and field "pim.pim_vt"
 dnl ---------------------------------------------
 
-if test "${ipv4_multicast_routing}" = "yes"; then
+if test "${ipv4_multicast_routing}" = "yes" ; then
     AC_CHECK_TYPES([struct pim], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
@@ -528,7 +506,7 @@ dnl TODO: This test will have to be substantially rewritten for Windows.
 dnl
 
 ipv6_multicast_routing="no"
-if test "${ipv6_multicast}" = "yes"; then
+if test "${ipv6_multicast}" = "yes" ; then
     AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast routing)
     AC_TRY_COMPILE([
 ${test_ipv6_multicast_routing_headers}
@@ -565,58 +543,42 @@ dnl ---------------------------------------------
 dnl Check for IPv4 advanced multicast API support
 dnl ---------------------------------------------
 
-if test "${ipv4_multicast_routing}" = "yes"; then
-    AC_CHECK_TYPE([struct mfcctl2],
-		  [AC_DEFINE(HAVE_MFCCTL2, 1,
-			     [Define to 1 if you have struct mfcctl2])], [],
-		  [${test_ipv4_multicast_routing_headers}])
+if test "${ipv4_multicast_routing}" = "yes" ; then
+    AC_CHECK_TYPES([struct mfcctl2], [], [],
+[
+${test_ipv4_multicast_routing_headers}
+])
 
-    AC_CHECK_MEMBER([struct mfcctl2.mfcc_flags],
-		    [AC_DEFINE(HAVE_MFCC_FLAGS, 1,
-			       [Define to 1 if your struct mfcctl2 has field mfcc_flags])], [],
-		    [${test_ipv4_multicast_routing_headers}])
+    AC_CHECK_MEMBERS([struct mfcctl2.mfcc_flags], [], [],
+[
+${test_ipv4_multicast_routing_headers}
+])
 
-    dnl
-    dnl XXX: The check below is actually for "mfcc_rp.s_addr"
-    dnl instead of "mfcc_rp" because of a limitation in AC_CHECK_MEMBER():
-    dnl it uses a C/C++ statement like "if (ac_aggr.mfcc_rp)" to check if
-    dnl a member exists, but this statement fails to compile because "mfcc_rp"
-    dnl is of type "struct in_addr".
-    dnl
-    AC_CHECK_MEMBER([struct mfcctl2.mfcc_rp.s_addr],
-		    [AC_DEFINE(HAVE_MFCC_RP, 1,
-			       [Define to 1 if your struct mfcctl2 has field mfcc_rp])], [],
-		    [${test_ipv4_multicast_routing_headers}])
-
+    AC_CHECK_MEMBERS([struct mfcctl2.mfcc_rp], [], [],
+[
+${test_ipv4_multicast_routing_headers}
+])
 fi
 
 dnl ---------------------------------------------
 dnl Check for IPv6 advanced multicast API support
 dnl ---------------------------------------------
 
-if test "${ipv6_multicast_routing}" = "yes"; then
-    AC_CHECK_TYPE([struct mf6cctl2],
-		  [AC_DEFINE(HAVE_MF6CCTL2, 1,
-			     [Define to 1 if you have struct mf6cctl2])], [],
-		  [${test_ipv6_multicast_routing_headers}])
+if test "${ipv6_multicast_routing}" = "yes" ; then
+    AC_CHECK_TYPES([struct mf6cctl2], [], [],
+[
+${test_ipv6_multicast_routing_headers}
+])
 
-    AC_CHECK_MEMBER([struct mf6cctl2.mf6cc_flags],
-		    [AC_DEFINE(HAVE_MF6CC_FLAGS, 1,
-			       [Define to 1 if your struct mf6cctl2 has field mf6cc_flags])], [],
-		    [${test_ipv6_multicast_routing_headers}])
+    AC_CHECK_MEMBERS([struct mf6cctl2.mf6cc_flags], [], [],
+[
+${test_ipv6_multicast_routing_headers}
+])
 
-    dnl
-    dnl XXX: The check below is actually for
-    dnl "mf6cctl2.mf6cc_rp.sin6_addr.s6_addr" instead of "mf6cc_rp" because
-    dnl of a limitation in AC_CHECK_MEMBER():
-    dnl it uses a C/C++ statement like "if (ac_aggr.mf6cc_rp)" to check if
-    dnl a member exists, but this statement fails to compile because "mf6cc_rp"
-    dnl is of type "struct sockaddr_in6".
-    dnl
-    AC_CHECK_MEMBER([struct mf6cctl2.mf6cc_rp.sin6_addr.s6_addr],
-		    [AC_DEFINE(HAVE_MF6CC_RP, 1,
-			       [Define to 1 if your struct mf6cctl2 has field mf6cc_rp])], [],
-		    [${test_ipv6_multicast_routing_headers}])
+    AC_CHECK_MEMBERS([struct mf6cctl2.mf6cc_rp], [], [],
+[
+${test_ipv6_multicast_routing_headers}
+])
 fi
 
 

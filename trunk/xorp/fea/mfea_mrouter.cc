@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.49 2006/08/28 23:20:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.50 2007/02/16 22:45:45 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1183,7 +1183,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 
-#if defined(HAVE_MFCCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
+#if defined(HAVE_STRUCT_MFCCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mfcctl2 mc;
 #else
 	struct mfcctl mc;
@@ -1195,11 +1195,11 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	mc.mfcc_parent = iif_vif_index;
 	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    mc.mfcc_ttls[i] = oifs_ttl[i];
-#if defined(HAVE_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
+#if defined(HAVE_STRUCT_MFCCTL2_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    mc.mfcc_flags[i] = oifs_flags[i];
 #endif
 	}
-#if defined(HAVE_MFCC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
+#if defined(HAVE_STRUCT_MFCCTL2_MFCC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	if (_mrt_api_mrt_mfc_rp)
 	    rp_addr.copy_out(mc.mfcc_rp);
 #endif
@@ -1223,7 +1223,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);
 #else
 	
-#if defined(HAVE_MF6CCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
+#if defined(HAVE_STRUCT_MF6CCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mf6cctl2 mc;
 #else
 	struct mf6cctl mc;
@@ -1237,11 +1237,11 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    if (oifs_ttl[i] > 0)
 		IF_SET(i, &mc.mf6cc_ifset);
-#if defined(HAVE_MF6CC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
+#if defined(HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    mc.mf6cc_flags[i] = oifs_flags[i];
 #endif
 	}
-#if defined(HAVE_MF6CC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
+#if defined(HAVE_STRUCT_MF6CCTL2_MF6CC_RP) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	if (_mrt_api_mrt_mfc_rp)
 	    rp_addr.copy_out(mc.mf6cc_rp);
 #endif

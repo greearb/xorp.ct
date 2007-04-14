@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.28 2006/12/13 02:30:52 atanu Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.29 2007/02/16 22:46:19 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -105,7 +105,7 @@ size_t
 IPv4::copy_out(struct sockaddr_in& to_sockaddr_in) const
 {
     memset(&to_sockaddr_in, 0, sizeof(to_sockaddr_in));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     to_sockaddr_in.sin_len = sizeof(to_sockaddr_in);
 #endif
     to_sockaddr_in.sin_family = AF_INET;

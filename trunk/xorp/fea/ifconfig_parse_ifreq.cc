@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.32 2006/11/29 08:21:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.33 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -84,7 +84,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	memcpy(&ifreq, &buffer[offset], sizeof(ifreq));
 	
 	// Get the length of the ifreq entry
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 	len = max(sizeof(struct sockaddr),
 		  static_cast<size_t>(ifreq.ifr_addr.sa_len));
 #else
@@ -99,7 +99,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    len = sizeof(struct sockaddr);
 	    break;
 	}
-#endif // HAVE_SA_LEN
+#endif // HAVE_STRUCT_SOCKADDR_SA_LEN
 	len += sizeof(ifreq.ifr_name);
 	len = max(len, sizeof(struct ifreq));
 	offset += len;				// Point to the next entry
@@ -144,7 +144,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		    XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			       if_name.c_str(), strerror(errno));
 		} else {
-#ifdef HAVE_IFR_IFINDEX
+#ifdef HAVE_STRUCT_IFREQ_IFR_IFINDEX
 		    if_index = ifridx.ifr_ifindex;
 #else
 		    if_index = ifridx.ifr_index;

@@ -97,9 +97,6 @@
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #undef HAVE_IFADDRS_H
 
-/* Define to 1 if your struct ifreq has field ifr_ifindex */
-#undef HAVE_IFR_IFINDEX
-
 /* Define to 1 if you have the `if_indextoname' function. */
 #undef HAVE_IF_INDEXTONAME
 
@@ -163,12 +160,6 @@
 /* Define to 1 if you have IPv6 multicast routing */
 #undef HAVE_IPV6_MULTICAST_ROUTING
 
-/* Define to 1 if you have struct ip_mreq */
-#undef HAVE_IP_MREQ
-
-/* Define to 1 if you have struct ip_mreq_source (SSM) */
-#undef HAVE_IP_MREQ_SOURCE
-
 /* Define to 1 if you have RFC 2367 key sockets (PF_KEY_V2) */
 #undef HAVE_KEY_SOCKETS
 
@@ -205,29 +196,8 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have struct mf6cctl2 */
-#undef HAVE_MF6CCTL2
-
-/* Define to 1 if your struct mf6cctl2 has field mf6cc_flags */
-#undef HAVE_MF6CC_FLAGS
-
-/* Define to 1 if your struct mf6cctl2 has field mf6cc_rp */
-#undef HAVE_MF6CC_RP
-
-/* Define to 1 if you have struct mfcctl2 */
-#undef HAVE_MFCCTL2
-
-/* Define to 1 if your struct mfcctl2 has field mfcc_flags */
-#undef HAVE_MFCC_FLAGS
-
-/* Define to 1 if your struct mfcctl2 has field mfcc_rp */
-#undef HAVE_MFCC_RP
-
 /* Define to 1 if you have the <mgm.h> header file. */
 #undef HAVE_MGM_H
-
-/* Define to 1 if you have struct mld_hdr in netinet/icmp6.h */
-#undef HAVE_MLD_HDR
 
 /* Define to 1 if you have the <mprapi.h> header file. */
 #undef HAVE_MPRAPI_H
@@ -384,32 +354,14 @@
 /* Define to 1 if you have the <rtmv2.h> header file. */
 #undef HAVE_RTMV2_H
 
-/* Define to 1 if your struct sockaddr has field sa_len */
-#undef HAVE_SA_LEN
-
-/* Define to 1 if your struct sockaddr_dl has field sdl_len */
-#undef HAVE_SDL_LEN
-
 /* Define to 1 if you have the `sendmsg' function. */
 #undef HAVE_SENDMSG
 
 /* Define to 1 if you have sig_t */
 #undef HAVE_SIG_T
 
-/* Define to 1 if your struct sockaddr_in6 has field sin6_len */
-#undef HAVE_SIN6_LEN
-
-/* Define to 1 if your struct sockaddr_in6 has field sin6_scope_id */
-#undef HAVE_SIN6_SCOPE_ID
-
-/* Define to 1 if your struct sockaddr_in has field sin_len */
-#undef HAVE_SIN_LEN
-
-/* Define to 1 if you have socklen_t */
+/* Define to 1 if the system has the type `socklen_t'. */
 #undef HAVE_SOCKLEN_T
-
-/* Define to 1 if your struct sockaddr_storage has field ss_len */
-#undef HAVE_SS_LEN
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -444,8 +396,32 @@
 /* Define to 1 if the system has the type `struct ether_addr'. */
 #undef HAVE_STRUCT_ETHER_ADDR
 
+/* Define to 1 if `ifr_ifindex' is member of `struct ifreq'. */
+#undef HAVE_STRUCT_IFREQ_IFR_IFINDEX
+
 /* Define to 1 if the system has the type `struct iovec'. */
 #undef HAVE_STRUCT_IOVEC
+
+/* Define to 1 if the system has the type `struct mf6cctl2'. */
+#undef HAVE_STRUCT_MF6CCTL2
+
+/* Define to 1 if `mf6cc_flags' is member of `struct mf6cctl2'. */
+#undef HAVE_STRUCT_MF6CCTL2_MF6CC_FLAGS
+
+/* Define to 1 if `mf6cc_rp' is member of `struct mf6cctl2'. */
+#undef HAVE_STRUCT_MF6CCTL2_MF6CC_RP
+
+/* Define to 1 if the system has the type `struct mfcctl2'. */
+#undef HAVE_STRUCT_MFCCTL2
+
+/* Define to 1 if `mfcc_flags' is member of `struct mfcctl2'. */
+#undef HAVE_STRUCT_MFCCTL2_MFCC_FLAGS
+
+/* Define to 1 if `mfcc_rp' is member of `struct mfcctl2'. */
+#undef HAVE_STRUCT_MFCCTL2_MFCC_RP
+
+/* Define to 1 if the system has the type `struct mld_hdr'. */
+#undef HAVE_STRUCT_MLD_HDR
 
 /* Define to 1 if the system has the type `struct msghdr'. */
 #undef HAVE_STRUCT_MSGHDR
@@ -468,8 +444,26 @@
 /* Define to 1 if `pim_vt' is member of `struct pim'. */
 #undef HAVE_STRUCT_PIM_PIM_VT
 
-/* Define to 1 if your struct sockaddr_un has field sun_len */
-#undef HAVE_SUN_LEN
+/* Define to 1 if `sdl_len' is member of `struct sockaddr_dl'. */
+#undef HAVE_STRUCT_SOCKADDR_DL_SDL_LEN
+
+/* Define to 1 if `sin6_len' is member of `struct sockaddr_in6'. */
+#undef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+
+/* Define to 1 if `sin6_scope_id' is member of `struct sockaddr_in6'. */
+#undef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
+
+/* Define to 1 if `sin_len' is member of `struct sockaddr_in'. */
+#undef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+
+/* Define to 1 if `sa_len' is member of `struct sockaddr'. */
+#undef HAVE_STRUCT_SOCKADDR_SA_LEN
+
+/* Define to 1 if `ss_len' is member of `struct sockaddr_storage'. */
+#undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN
+
+/* Define to 1 if `sun_len' is member of `struct sockaddr_un'. */
+#undef HAVE_STRUCT_SOCKADDR_UN_SUN_LEN
 
 /* Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method */
 #undef HAVE_SYSCTL_NET_RT_DUMP
@@ -631,15 +625,6 @@
 
 /* Define to 1 if you have KAME IPv6 stack */
 #undef IPV6_STACK_KAME
-
-/* Define to 1 if your system does not define ssize_t */
-#undef NEED_SSIZE_T
-
-/* Define to 1 if you need a definition of struct ip */
-#undef NEED_STRUCT_IP
-
-/* Define to 1 if your system does not define uid_t */
-#undef NEED_UID_T
 
 /* Name of package */
 #undef PACKAGE

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.5 2006/10/01 06:31:27 pavlin Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.6 2007/04/14 01:35:06 pavlin Exp $
 dnl
 
 dnl
@@ -92,9 +92,7 @@ dnl -------------------
 dnl Check for socklen_t
 dnl -------------------
 
-AC_CHECK_TYPE([socklen_t],
-	      [AC_DEFINE(HAVE_SOCKLEN_T, 1,
-			 [Define to 1 if you have socklen_t])], [],
+AC_CHECK_TYPES([socklen_t], [], [],
 [
 ${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
@@ -106,9 +104,7 @@ dnl ----------------------------
 dnl Check for sa_len in sockaddr
 dnl ----------------------------
 
-AC_CHECK_MEMBER([struct sockaddr.sa_len],
-		[AC_DEFINE(HAVE_SA_LEN, 1,
-			   [Define to 1 if your struct sockaddr has field sa_len])], [],
+AC_CHECK_MEMBERS([struct sockaddr.sa_len], [], [],
 [
 ${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
@@ -120,9 +116,7 @@ dnl ------------------------------------
 dnl Check for ss_len in sockaddr_storage
 dnl ------------------------------------
 
-AC_CHECK_MEMBER([struct sockaddr_storage.ss_len],
-		[AC_DEFINE(HAVE_SS_LEN, 1,
-			   [Define to 1 if your struct sockaddr_storage has field ss_len])], [],
+AC_CHECK_MEMBERS([struct sockaddr_storage.ss_len], [], [],
 [
 ${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
@@ -134,9 +128,7 @@ dnl --------------------------------
 dnl Check for sin_len in sockaddr_in
 dnl --------------------------------
 
-AC_CHECK_MEMBER([struct sockaddr_in.sin_len],
-		[AC_DEFINE(HAVE_SIN_LEN, 1,
-			   [Define to 1 if your struct sockaddr_in has field sin_len])], [],
+AC_CHECK_MEMBERS([struct sockaddr_in.sin_len], [], [],
 [
 ${test_socket_headers}
 #ifdef HAVE_NETINET_IN_H
@@ -148,9 +140,7 @@ dnl --------------------------------
 dnl Check for sun_len in sockaddr_un
 dnl --------------------------------
 
-AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
-		[AC_DEFINE(HAVE_SUN_LEN, 1,
-			   [Define to 1 if your struct sockaddr_un has field sun_len])], [],
+AC_CHECK_MEMBERS([struct sockaddr_un.sun_len], [], [],
 [
 ${test_socket_headers}
 #ifdef HAVE_SYS_UN_H
@@ -162,9 +152,7 @@ dnl --------------------------------
 dnl Check for sdl_len in sockaddr_dl
 dnl --------------------------------
 
-AC_CHECK_MEMBER([struct sockaddr_dl.sdl_len],
-		[AC_DEFINE(HAVE_SDL_LEN, 1,
-			   [Define to 1 if your struct sockaddr_dl has field sdl_len])], [],
+AC_CHECK_MEMBERS([struct sockaddr_dl.sdl_len], [], [],
 [
 ${test_socket_headers}
 #ifdef HAVE_NET_IF_DL_H

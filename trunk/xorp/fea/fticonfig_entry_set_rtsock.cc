@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.38 2007/02/16 22:45:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.39 2007/03/02 00:56:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -314,17 +314,17 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 
     // Copy the destination, the nexthop, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_dst->sin_len = sin_dst_len;
 #endif
     if (sin_nexthop != NULL) {
 	fte_nexthop.copy_out(*sin_nexthop);
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 	sin_nexthop->sin_len = sin_nexthop_len;
 #endif
     }
     fte.net().netmask().copy_out(*sin_netmask);
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_netmask->sin_len = sin_netmask_len;
 #endif
 
@@ -379,7 +379,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	}
 
 	sdl->sdl_family = AF_LINK;
-#ifdef HAVE_SDL_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_DL_SDL_LEN
 	sdl->sdl_len = sdl_len;
 #endif
 	sdl->sdl_index = pif_index;
@@ -491,13 +491,13 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     
     // Copy the destination, and the netmask addresses (if needed)
     fte.net().masked_addr().copy_out(*sin_dst);
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_dst->sin_len = sin_dst_len;
 #endif
 
     if (! is_host_route) {
 	fte.net().netmask().copy_out(*sin_netmask);
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 	sin_netmask->sin_len = sin_netmask_len;
 #endif
     }

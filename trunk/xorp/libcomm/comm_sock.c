@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.37 2007/03/28 13:49:31 schooley Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.38 2007/03/28 19:31:14 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -340,7 +340,7 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
     }
 
     memset(&sin_addr, 0, sizeof(sin_addr));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_addr.sin_len = sizeof(sin_addr);
 #endif
     sin_addr.sin_family = (u_char)family;
@@ -391,7 +391,7 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
     }
 
     memset(&sin6_addr, 0, sizeof(sin6_addr));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6_addr.sin6_len = sizeof(sin6_addr);
 #endif
     sin6_addr.sin6_family = (u_char)family;
@@ -703,7 +703,7 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
     }
 
     memset(&sin_addr, 0, sizeof(sin_addr));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin_addr.sin_len = sizeof(sin_addr);
 #endif
     sin_addr.sin_family = (u_char)family;
@@ -776,7 +776,7 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
     }
 
     memset(&sin6_addr, 0, sizeof(sin6_addr));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6_addr.sin6_len = sizeof(sin6_addr);
 #endif
     sin6_addr.sin6_family = (u_char)family;

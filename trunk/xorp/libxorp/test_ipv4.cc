@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.26 2006/12/13 02:30:52 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.27 2007/02/16 22:46:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -146,7 +146,7 @@ test_ipv4_valid_constructors()
     in_addr.s_addr = ui;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin.sin_len = sizeof(sin);
 #endif
     sin.sin_family = AF_INET;
@@ -211,7 +211,7 @@ test_ipv4_invalid_constructors()
     // Test values for IPv4 address: "12.34.56.78"
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin.sin_len = sizeof(sin);
 #endif
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
@@ -272,7 +272,7 @@ test_ipv4_valid_copy_in_out()
     in_addr.s_addr = ui;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin.sin_len = sizeof(sin);
 #endif
     sin.sin_family = AF_INET;
@@ -366,7 +366,7 @@ test_ipv4_invalid_copy_in_out()
     // const char *addr_string4 = "12.34.56.78";
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin.sin_len = sizeof(sin);
 #endif
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family

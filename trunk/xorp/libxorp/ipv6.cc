@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.28 2006/12/13 02:30:52 atanu Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.29 2007/02/16 22:46:19 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -113,12 +113,12 @@ size_t
 IPv6::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 {
     memset(&to_sockaddr_in6, 0, sizeof(to_sockaddr_in6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     to_sockaddr_in6.sin6_len = sizeof(to_sockaddr_in6);
 #endif
     to_sockaddr_in6.sin6_family = AF_INET6;
 
-#ifdef HAVE_SIN6_SCOPE_ID
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 #ifdef IPV6_STACK_KAME
     //
     // XXX: In case of KAME the local interface index (also the link-local
@@ -134,7 +134,7 @@ IPv6::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 	to_sockaddr_in6.sin6_scope_id = zoneid;
     }
 #endif // IPV6_STACK_KAME
-#endif // HAVE_SIN6_SCOPE_ID
+#endif // HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 
     return (copy_out(to_sockaddr_in6.sin6_addr));
 }

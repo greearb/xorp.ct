@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.48 2006/04/28 17:06:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.49 2007/02/16 22:46:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -225,9 +225,9 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Bad destination: %s\n", address_slash_port));
     }
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     _destination.sin_len = sizeof(struct sockaddr_in);
-#endif /* HAVE_SIN_LEN */
+#endif
     _destination.sin_family = AF_INET;
     _destination.sin_port = htons(port);
 
@@ -313,7 +313,7 @@ XrlPFSUDPSender::send(const Xrl& 			x,
 	debug_msg("Message sent larger than transport method designed");
     } else if (::sendto(sender_sock, msg.data(), msg.size(), 0,
 		      (sockaddr*)&_destination,
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 		      _destination.sin_len
 #else
 		      sizeof(_destination)
@@ -608,7 +608,7 @@ XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
     msghdr m;
     memset(&m, 0, sizeof(m));
     m.msg_name = (caddr_t)ss;
-#ifdef HAVE_SS_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN
     m.msg_namelen = ss->ss_len;
 #else
     m.msg_namelen = ss_len;

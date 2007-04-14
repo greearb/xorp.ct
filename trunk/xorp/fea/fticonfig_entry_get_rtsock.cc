@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.35 2006/08/29 22:42:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.36 2007/02/16 22:45:37 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -289,7 +289,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	    break;
 	}
 	sdl->sdl_family = AF_LINK;
-#ifdef HAVE_SDL_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_DL_SDL_LEN
 	sdl->sdl_len = sizeof(struct sockaddr_dl);
 #endif
     } while (false);
@@ -432,7 +432,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 	    break;
 	}
 	sdl->sdl_family = AF_LINK;
-#ifdef HAVE_SDL_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_DL_SDL_LEN
 	sdl->sdl_len = sizeof(struct sockaddr_dl);
 #endif
     } while (false);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.34 2006/12/13 02:30:51 atanu Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.35 2007/02/16 22:45:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -638,7 +638,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
     ifreq.ifr_hwaddr.sa_family = ARPHRD_ETHER;
     memcpy(ifreq.ifr_hwaddr.sa_data, &ether_addr, ETH_ALEN);
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
     ifreq.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
     if (ioctl(s, SIOCSIFHWADDR, &ifreq) < 0) {

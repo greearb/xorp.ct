@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.37 2006/11/29 08:21:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.38 2007/02/16 22:45:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -160,10 +160,10 @@ next_sa(const struct sockaddr* sa)
      * a fixed sockaddr size of sockaddr_storage.
      */
     sa_size = sizeof(struct sockaddr_storage);
-#else // !HOST_OS_WINDOWS 
-#ifdef HAVE_SA_LEN
+#else // ! HOST_OS_WINDOWS
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
     sa_size = sa->sa_len ? round_up(sa->sa_len, min_size) : min_size;
-#else // ! HAVE_SA_LEN
+#else // ! HAVE_STRUCT_SOCKADDR_SA_LEN
     switch (sa->sa_family) {
     case AF_INET:
 	sa_size = sizeof(struct sockaddr_in);
@@ -177,7 +177,7 @@ next_sa(const struct sockaddr* sa)
 	sa_size = sizeof(struct sockaddr_in);
 	break;
     }
-#endif // ! HAVE_SA_LEN
+#endif // ! HAVE_STRUCT_SOCKADDR_SA_LEN
 #endif // HOST_OS_WINDOWS
 
     // XXX: the sa_size offset is aligned, hence we can use a void pointer
@@ -193,7 +193,7 @@ RtmUtils::get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
 
     for (uint32_t i = 0; i < RTAX_MAX; i++) {
 	if (amask & (1 << i)) {
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
 	    sa_len = sock->sa_len;
 	    debug_msg("\tPresent 0x%02x af %d size %u\n",
 		      1 << i, sock->sa_family,
@@ -216,7 +216,7 @@ int
 RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 {
 
-#ifndef HAVE_SA_LEN
+#ifndef HAVE_STRUCT_SOCKADDR_SA_LEN
     switch (family) {
     case AF_INET:
     {
@@ -240,7 +240,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	XLOG_FATAL("Invalid address family %d", family);
     }
     
-#else // HAVE_SA_LEN
+#else // HAVE_STRUCT_SOCKADDR_SA_LEN
     
     switch (family) {
     case AF_INET:
@@ -301,7 +301,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
     default:
 	XLOG_FATAL("Invalid address family %d", family);
     }
-#endif // HAVE_SA_LEN
+#endif // HAVE_STRUCT_SOCKADDR_SA_LEN
     
     return (-1);
 }

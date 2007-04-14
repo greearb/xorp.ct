@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acifconf.m4,v 1.3 2006/07/18 00:39:31 pavlin Exp $
+dnl $XORP: xorp/config/acifconf.m4,v 1.4 2007/04/14 01:35:06 pavlin Exp $
 dnl
 
 dnl
@@ -31,10 +31,7 @@ dnl ------------------------------
 dnl Check for ifr_ifindex in ifreq
 dnl ------------------------------
 
-AC_CHECK_MEMBER([struct ifreq.ifr_ifindex],
-		[AC_DEFINE(HAVE_IFR_IFINDEX, 1,
-			   [Define to 1 if your struct ifreq has field ifr_ifindex])],
-		[],
+AC_CHECK_MEMBERS([struct ifreq.ifr_ifindex], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

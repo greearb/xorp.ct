@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/kernel_utils.hh,v 1.7 2007/02/16 22:45:45 pavlin Exp $
+// $XORP: xorp/fea/kernel_utils.hh,v 1.8 2007/03/02 00:56:30 pavlin Exp $
 
 #ifndef __FEA_KERNEL_UTILS_HH__
 #define __FEA_KERNEL_UTILS_HH__
@@ -73,7 +73,7 @@ kernel_adjust_ipvx_recv(const IPvX& ipvx)
 inline void
 kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 {
-#ifdef HAVE_SIN6_SCOPE_ID
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 #ifdef IPV6_STACK_KAME
     if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr)
 	|| IN6_IS_ADDR_MC_LINKLOCAL(&sin6.sin6_addr)
@@ -81,7 +81,7 @@ kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 	sin6.sin6_scope_id = zone_id;
     }
 #endif // IPV6_STACK_KAME
-#endif // HAVE_SIN6_SCOPE_ID
+#endif // HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 
     UNUSED(sin6);
     UNUSED(zone_id);
@@ -103,9 +103,9 @@ kernel_adjust_sockaddr_in6_route(struct sockaddr_in6& sin6, uint16_t iface_id)
     if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr)
 	|| IN6_IS_ADDR_MC_LINKLOCAL(&sin6.sin6_addr)) {
 	embed_16(&sin6.sin6_addr.s6_addr[2], iface_id);
-#ifdef HAVE_SIN6_SCOPE_ID
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 	sin6.sin6_scope_id = 0;
-#endif // HAVE_SIN6_SCOPE_ID
+#endif
     }
 #endif // IPV6_STACK_KAME
 

@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.191 2007/04/11 18:33:12 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.192 2007/04/14 01:35:05 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.191 2007/04/11 18:33:12 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.192 2007/04/14 01:35:05 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -664,17 +664,6 @@ AC_TYPE_MODE_T
 AC_TYPE_SIZE_T
 AC_TYPE_SIGNAL
 AC_HEADER_TIOCGWINSZ
-
-dnl TODO: remove the uid_t and ssize_t checks because they are not needed?
-AC_CHECK_TYPE([uid_t], ,
-    [AC_DEFINE(NEED_UID_T, 1,
-	       [Define to 1 if your system does not define uid_t])])
-AC_CHECK_TYPE([ssize_t], ,
-    [AC_DEFINE(NEED_SSIZE_T, 1,
-	       [Define to 1 if your system does not define ssize_t])],
-[
-#include <sys/types.h>
-])
 
 dnl XXX needed by cli code. C90
 AC_FUNC_STRFTIME

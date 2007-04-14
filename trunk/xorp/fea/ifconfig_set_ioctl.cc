@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.43 2006/05/10 07:52:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.44 2007/02/16 22:45:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -645,7 +645,7 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     //
     ifreq.ifr_addr.sa_family = AF_LINK;
     memcpy(ifreq.ifr_addr.sa_data, &ether_addr, sizeof(ether_addr));
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
     ifreq.ifr_addr.sa_len = sizeof(ether_addr);
 #endif
     if (ioctl(_s4, SIOCSIFLLADDR, &ifreq) < 0) {
@@ -660,7 +660,7 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     //
     ifreq.ifr_hwaddr.sa_family = ARPHRD_ETHER;
     memcpy(ifreq.ifr_hwaddr.sa_data, &ether_addr, ETH_ALEN);
-#ifdef HAVE_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
     ifreq.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
     if (ioctl(_s4, SIOCSIFHWADDR, &ifreq) < 0) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.20 2006/10/12 01:24:54 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.21 2007/02/16 22:46:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -160,7 +160,7 @@ test_ipv4net_valid_constructors(TestInfo& test_info)
     in_addr.s_addr = ui;
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
     sin.sin_len = sizeof(sin);
 #endif
     sin.sin_family = AF_INET;

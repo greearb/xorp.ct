@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.39 2006/11/29 08:21:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.40 2007/02/16 22:45:49 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -101,7 +101,7 @@
 #endif
 
 #ifndef MLD_MINLEN
-#  ifdef HAVE_MLD_HDR
+#  ifdef HAVE_STRUCT_MLD_HDR
 #    define MLD_MINLEN			(sizeof(struct mld_hdr))
 #  else
 #    define MLD_MINLEN			24

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_osdep.hh,v 1.9 2006/03/16 00:03:58 pavlin Exp $
+// $XORP: xorp/fea/mfea_osdep.hh,v 1.10 2007/02/16 22:45:46 pavlin Exp $
 
 #ifndef __FEA_MFEA_OSDEP_HH__
 #define __FEA_MFEA_OSDEP_HH__
@@ -142,7 +142,7 @@
 #endif
 
 #ifndef MLD_MINLEN
-#  ifdef HAVE_MLD_HDR
+#  ifdef HAVE_STRUCT_MLD_HDR
 #    define MLD_MINLEN			(sizeof(struct mld_hdr))
 #  else
 #    define MLD_MINLEN			24

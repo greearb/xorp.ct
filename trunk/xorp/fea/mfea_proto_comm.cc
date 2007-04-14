@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.69 2006/11/29 08:21:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.70 2007/02/16 22:45:46 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -105,7 +105,7 @@
 #endif
 
 #ifndef MLD_MINLEN
-#  ifdef HAVE_MLD_HDR
+#  ifdef HAVE_STRUCT_MLD_HDR
 #    define MLD_MINLEN			(sizeof(struct mld_hdr))
 #  else
 #    define MLD_MINLEN			24

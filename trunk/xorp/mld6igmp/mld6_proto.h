@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.17 2006/06/29 07:23:46 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.18 2007/02/16 22:46:35 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
@@ -116,7 +116,7 @@
 #endif
 
 #ifndef MLD_MINLEN
-#  ifdef HAVE_MLD_HDR
+#  ifdef HAVE_STRUCT_MLD_HDR
 #    define MLD_MINLEN			(sizeof(struct mld_hdr))
 #  else
 #    define MLD_MINLEN			24

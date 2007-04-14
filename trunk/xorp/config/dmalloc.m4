@@ -17,13 +17,13 @@ AC_DEFUN([XR_WITH_DMALLOC_DIR],
 		AC_HELP_STRING([--with-dmalloc=DIR],
 			       [build using the dmalloc allocator in DIR]),
 	  [
-		if test "${withval}" = "no"; then
+		if test "${withval}" = "no" ; then
 		    AC_MSG_RESULT(no)
 		else
 		    AC_MSG_RESULT(yes)
 		    AC_DEFINE(WITH_DMALLOC, 1,
 			      [Define if using the dmalloc debugging malloc package])
-		    if test "${withval}" = "yes"; then
+		    if test "${withval}" = "yes" ; then
 			LIBS="-ldmalloc ${LIBS}"
 		    else
 			LIBS="-L${withval} -L${withval}/lib -ldmalloc ${LIBS}"

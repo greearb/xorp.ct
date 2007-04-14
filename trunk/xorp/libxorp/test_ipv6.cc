@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.25 2006/12/13 02:30:52 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.26 2007/02/16 22:46:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -152,7 +152,7 @@ test_ipv6_valid_constructors()
     memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
     struct sockaddr_in6 sin6;
     memset(&sin6, 0, sizeof(sin6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_family = AF_INET6;
@@ -221,7 +221,7 @@ test_ipv6_invalid_constructors()
 				     0x87, 0x65, 0x43, 0x21 } } };
     struct sockaddr_in6 sin6;
     memset(&sin6, 0, sizeof(sin6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family
@@ -288,7 +288,7 @@ test_ipv6_valid_copy_in_out()
     memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
     struct sockaddr_in6 sin6;
     memset(&sin6, 0, sizeof(sin6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_family = AF_INET6;
@@ -390,7 +390,7 @@ test_ipv6_invalid_copy_in_out()
     memcpy(&ui32[0], &in6_addr, sizeof(in6_addr));
     struct sockaddr_in6 sin6;
     memset(&sin6, 0, sizeof(sin6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
     sin6.sin6_len = sizeof(sin6);
 #endif
     sin6.sin6_family = AF_UNSPEC;	// Note: invalid IP address family

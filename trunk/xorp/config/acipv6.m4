@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.26 2007/04/11 02:00:07 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.27 2007/04/14 01:35:06 pavlin Exp $
 dnl
 
 dnl
@@ -239,7 +239,7 @@ dnl Check the IPv6 stack type
 dnl -------------------------
 
 ipv6type="unknown"
-if test "${ipv6}" = "yes"; then
+if test "${ipv6}" = "yes" ; then
     AC_MSG_CHECKING(IPv6 stack type)
     dnl XXX: Add all known stacks here
     for i in KAME ; do
@@ -300,10 +300,8 @@ dnl ----------------------------------
 dnl Check for sin6_len in sockaddr_in6
 dnl ----------------------------------
 
-if test "${ipv6}" = "yes"; then
-    AC_CHECK_MEMBER([struct sockaddr_in6.sin6_len],
-		    [AC_DEFINE(HAVE_SIN6_LEN, 1,
-			       [Define to 1 if your struct sockaddr_in6 has field sin6_len])], [],
+if test "${ipv6}" = "yes" ; then
+    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_len], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -318,10 +316,8 @@ dnl ---------------------------------------
 dnl Check for sin6_scope_id in sockaddr_in6
 dnl ---------------------------------------
 
-if test "${ipv6}" = "yes"; then
-    AC_CHECK_MEMBER([struct sockaddr_in6.sin6_scope_id],
-		    [AC_DEFINE(HAVE_SIN6_SCOPE_ID, 1,
-			       [Define to 1 if your struct sockaddr_in6 has field sin6_scope_id])], [],
+if test "${ipv6}" = "yes" ; then
+    AC_CHECK_MEMBERS([struct sockaddr_in6.sin6_scope_id], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.27 2006/12/13 02:30:52 atanu Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.28 2007/02/16 22:46:20 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -329,7 +329,7 @@ IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
     switch (_af) {
     case AF_INET:
 	memset(&to_sockaddr_in, 0, sizeof(to_sockaddr_in));
-#ifdef HAVE_SIN_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
 	to_sockaddr_in.sin_len = sizeof(to_sockaddr_in);
 #endif
 	to_sockaddr_in.sin_family = _af;
@@ -361,12 +361,12 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 
     case AF_INET6:
 	memset(&to_sockaddr_in6, 0, sizeof(to_sockaddr_in6));
-#ifdef HAVE_SIN6_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
 	to_sockaddr_in6.sin6_len = sizeof(to_sockaddr_in6);
 #endif
 	to_sockaddr_in6.sin6_family = _af;
 
-#ifdef HAVE_SIN6_SCOPE_ID
+#ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 #ifdef IPV6_STACK_KAME
 	//
 	// XXX: In case of KAME the local interface index (also the link-local
@@ -382,7 +382,7 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 	    to_sockaddr_in6.sin6_scope_id = zoneid;
 	}
 #endif // IPV6_STACK_KAME
-#endif // HAVE_SIN6_SCOPE_ID
+#endif // HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 
 	return (copy_out(to_sockaddr_in6.sin6_addr));
 
