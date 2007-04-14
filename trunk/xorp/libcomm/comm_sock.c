@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.38 2007/03/28 19:31:14 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.39 2007/04/14 07:00:51 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -42,6 +42,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -233,7 +234,7 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 
     numtries = 3;
     do {
-	port = htons((rand() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
+	port = htons((xorp_random() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
 #ifdef HAVE_IPV6
 	if (intdomain == AF_INET6)
 	    psin6->sin6_port = port;

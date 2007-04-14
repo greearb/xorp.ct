@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.17 2007/02/16 22:46:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.18 2007/04/14 08:59:50 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -197,7 +197,7 @@ local_comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 
     numtries = 3;
     do {
-	port = htons((rand() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
+	port = htons((xorp_random() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
 #ifdef HAVE_IPV6
 	if (intdomain == AF_INET6)
 	    psin6->sin6_port = port;
@@ -456,7 +456,7 @@ run_test()
 	printf("%d ", n); fflush(stdout);
 	while (n >= 0) {
 	    // Size of buffer add must be at least 1
-	    size_t b_bytes = 1 + (rand() % (MAX_BUFFER_BYTES - 1)); 
+	    size_t b_bytes = 1 + (xorp_random() % (MAX_BUFFER_BYTES - 1)); 
 	    afw.add_buffer(msg, b_bytes, 
 			   callback(&writer_check, msg, &t));
 	    afr.add_buffer(msg, b_bytes,
