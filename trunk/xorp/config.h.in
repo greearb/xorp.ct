@@ -148,6 +148,9 @@
 /* Define to 1 if you have the <iptypes.h> header file. */
 #undef HAVE_IPTYPES_H
 
+/* Define to 1 if you have IPv4 multicast */
+#undef HAVE_IPV4_MULTICAST
+
 /* Define to 1 if you have IPv4 multicast routing */
 #undef HAVE_IPV4_MULTICAST_ROUTING
 
@@ -166,7 +169,7 @@
 /* Define to 1 if you have struct ip_mreq_source (SSM) */
 #undef HAVE_IP_MREQ_SOURCE
 
-/* Define to 1 if you have RFC2367 key sockets (PF_KEY_V2) */
+/* Define to 1 if you have RFC 2367 key sockets (PF_KEY_V2) */
 #undef HAVE_KEY_SOCKETS
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
@@ -181,8 +184,17 @@
 /* Define to 1 if you have the <linux/mroute6.h> header file. */
 #undef HAVE_LINUX_MROUTE6_H
 
+/* Define to 1 if you have the <linux/mroute.h> header file. */
+#undef HAVE_LINUX_MROUTE_H
+
+/* Define to 1 if you have the <linux/netlink.h> header file. */
+#undef HAVE_LINUX_NETLINK_H
+
 /* Define to 1 if you have the <linux/rtnetlink.h> header file. */
 #undef HAVE_LINUX_RTNETLINK_H
+
+/* Define to 1 if you have the <linux/socket.h> header file. */
+#undef HAVE_LINUX_SOCKET_H
 
 /* Define to 1 if you have the <linux/sockios.h> header file. */
 #undef HAVE_LINUX_SOCKIOS_H
@@ -308,6 +320,9 @@
 
 /* Define to 1 if you have the <net/ip_mroute/ip_mroute.h> header file. */
 #undef HAVE_NET_IP_MROUTE_IP_MROUTE_H
+
+/* Define to 1 if you have the <net/pfkeyv2.h> header file. */
+#undef HAVE_NET_PFKEYV2_H
 
 /* Define to 1 if you have the <net/route.h> header file. */
 #undef HAVE_NET_ROUTE_H

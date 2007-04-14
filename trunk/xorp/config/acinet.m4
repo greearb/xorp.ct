@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acinet.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
+dnl $XORP: xorp/config/acinet.m4,v 1.2 2005/08/04 12:01:50 bms Exp $
 dnl
 
 dnl
@@ -20,13 +20,13 @@ dnl let us define prerequisite headers (we *need* to include
 dnl headers to get the right linkage.)
 dnl ------------------------------------------------------
 
-if test "${ac_cv_header_ws2tcpip_h}" = "yes"; then
- AC_DEFINE(HAVE_GETADDRINFO, 1, [Define to 1 if you have getaddrinfo])
- AC_DEFINE(HAVE_GETNAMEINFO, 1, [Define to 1 if you have getnameinfo])
+if test "${_USING_WINDOWS}" = "1" ; then
+    AC_DEFINE(HAVE_GETADDRINFO, 1, [Define to 1 if you have getaddrinfo])
+    AC_DEFINE(HAVE_GETNAMEINFO, 1, [Define to 1 if you have getnameinfo])
 else
- AC_CHECK_FUNCS([getaddrinfo getnameinfo])
+    AC_CHECK_FUNCS([getaddrinfo getnameinfo])
 fi
 
-AC_LANG_POP(C)
 
+AC_LANG_POP(C)
 AC_CACHE_SAVE

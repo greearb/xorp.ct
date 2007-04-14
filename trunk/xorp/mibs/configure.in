@@ -1,5 +1,6 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.24 2007/03/21 19:16:15 pavlin Exp $
+dnl
+dnl $XORP: xorp/mibs/configure.in,v 1.25 2007/04/11 01:13:14 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -12,7 +13,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.24 2007/03/21 19:16:15 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.25 2007/04/11 01:13:14 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -64,9 +65,9 @@ AC_PROG_LIBTOOL
 CC="${_old_cc}"
 
 AC_VALIDATE_CACHED_SYSTEM_TUPLE(
-	echo "Removing stale config.cache and restarting configure"
-	rm -f config.cache
-	exec ./configure
+    echo "Removing stale config.cache and restarting configure"
+    rm -f config.cache
+    exec ./configure
 )
 
 dnl
@@ -87,32 +88,11 @@ AC_ARG_ENABLE([debug],
 	      AC_HELP_STRING([--disable-debug],
 			     [disable compiler debug information]),
 	      [],
-	      [enable_debug=yes;])
+	      [enable_debug="yes";])
 
-dnl ----------------------------
-dnl --enable-debug-msgs
-dnl ----------------------------
-AC_ARG_ENABLE([debug-msgs],
-	      AC_HELP_STRING([--enable-debug-msgs],
-			     [enable debug messages]))
-
-dnl ----------------------------
-dnl --enable-debug-linker-maps
-dnl ----------------------------
-AC_ARG_ENABLE([debug-linker-maps],
-	      AC_HELP_STRING([--enable-debug-linker-maps],
-			     [enable linker map file output to stderr]))
-
-dnl ----------------------------
-dnl --enable-debug-fnames (GCC)
-dnl ----------------------------
-AC_ARG_ENABLE([debug-fnames],
-	      AC_HELP_STRING([--enable-debug-fnames],
-			     [enable function names in debug messages (requires GCC)]))
-
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-stl-debug (GCC)
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([stl-debug],
 	      AC_HELP_STRING([--enable-stl-debug],
 			     [enable STL debugging (requires GCC)]))
@@ -138,25 +118,7 @@ AC_ARG_ENABLE([compiler-pipe],
 	      AC_HELP_STRING([--disable-compiler-pipe],
 			     [disable compiler's -pipe compilation option]),
 	      [],
-	      [enable_compiler_pipe=yes;])
-
-dnl ----------------------------
-dnl --enable-callback-debug
-dnl ----------------------------
-AC_ARG_ENABLE([callback-debug],
-	      AC_HELP_STRING([--enable-callback-debug],
-			     [enable callback debugging]),
-	      AC_DEFINE(DEBUG_CALLBACKS, 1,
-			[Define to enable callback debugging]))
-
-dnl ----------------------------------------
-dnl --disable-ipv6 (XXX: enabled by default)
-dnl ----------------------------------------
-AC_ARG_ENABLE([ipv6],
-	      AC_HELP_STRING([--disable-ipv6],
-			     [disable IPv6 support]),
-	      [],
-	      [enable_ipv6=yes;])
+	      [enable_compiler_pipe="yes";])
 
 dnl ----------------------------
 dnl --with-dmalloc
@@ -168,10 +130,7 @@ builtin(include, ../config/dmalloc.m4)
 dnl ----------------------------
 dnl --with-openssl
 dnl ----------------------------
-AC_ARG_WITH([openssl],
-	    AC_HELP_STRING([--with-openssl],
-			   [specify path to OpenSSL installation root]),
-	    [ xr_openssl_prefix="$withval" ])
+builtin(include, ../config/acopenssl.m4)
 
 dnl ----------------------------
 dnl --with-snmp (XXX: disabled by default)
@@ -206,92 +165,6 @@ AC_ARG_WITH([path-to-net-snmp-config],
 )
 
 dnl ---------------------------------------------------------------------------
-dnl Additional tool probes
-dnl ---------------------------------------------------------------------------
-
-dnl ----------------------------
-dnl CPP GNU variable arguments
-dnl ----------------------------
-
-AC_CACHE_CHECK(
-	[whether preprocessor supports GNU style variable argument macros],
-	xorp_cv_cpp_gnu_va_args,
-	AC_TRY_CPP(
-		[
-			#define SOME_PRINTF(args...) printf(args)
-			SOME_PRINTF("hello %s %d", "world", '\n');
-		],
-		xorp_cv_cpp_gnu_va_args=yes,
-		xorp_cv_cpp_gnu_va_args=no
-	)
-)
-if test "${xorp_cv_cpp_gnu_va_args}" = "yes" ; then
-	AC_DEFINE(CPP_SUPPORTS_GNU_VA_ARGS, 1,
- [Define to 1 if the preprocessor supports GNU style variable argument macros])
-fi
-
-AC_CACHE_CHECK([if GNU make is installed], xorp_cv_gmake_name,
-                for g in ${GMAKE} make gmake gnumake; do
-		  if ($g -version) < /dev/null > /dev/null 2>&1 ; then
-		    GMAKE_NAME="$g"
-		    break
-		  fi
-		done
-		xorp_cv_gmake_name=${GMAKE_NAME})
-
-dnl ----------------------------
-dnl OpenSSL (Strictly OpenSSL MD5 implementation)
-dnl ----------------------------
-
-fail_openssl()
-{
-	echo "Could not find part of OpenSSL or one it's components in $1"
-	echo "Use --with-openssl=DIR to specify OpenSSL directory"
-	exit 1
-}
-
-if test "${xr_openssl_prefix}" = "" ; then
-# User has not specified an OpenSSL prefix, may be in cache, otherwise take
-# a guess
-    AC_CACHE_CHECK(
-	[OpenSSL installation prefix],
-	xr_cv_openssl_prefix,
-	[
-	    # Prefer base install over local install, assume base if not found
-	    for xr_cv_openssl_prefix in /usr /usr/local /usr ; do
-		if test -d ${xr_cv_openssl_prefix}/include/openssl; then
-		    break
-		fi
-	    done
-	])
-elif test "${xr_openssl_prefix}" != "${xr_cv_openssl_prefix}"; then
-
-    # User has specified a new OpenSSL prefix, flush cache state of
-    # header files and libraries that we care about to force a
-    # re-check.
-    unset ac_cv_header_openssl_md5_h
-    unset ac_cv_lib_crypto_MD5_Init
-    unset xr_cv_openssl_prefix
-
-    # This cache check is doomed to fail because we unset variable,
-    # but use it for consistent looking output.
-    AC_CACHE_CHECK([OpenSSL installation prefix],
-		   xr_cv_openssl_prefix,
-		   xr_cv_openssl_prefix="${xr_openssl_prefix}")
-fi
-
-if test -d ${xr_cv_openssl_prefix}/include/openssl; then
-    if test "${xr_cv_openssl_prefix}" != "/usr"; then
-	CPPFLAGS="${CPPFLAGS} -I${xr_cv_openssl_prefix}/include"
-	LIBS="${LIBS} -L${xr_cv_openssl_prefix}"
-    fi
-    AC_HEADER_CHECK(openssl/md5.h, , fail_openssl "${xr_cv_openssl_prefix}")
-    AC_CHECK_LIB(crypto, MD5_Init, , fail_openssl "${xr_cv_openssl_prefix}")
-else
-    fail_openssl "${xr_cv_openssl_prefix}"
-fi
-
-dnl ---------------------------------------------------------------------------
 dnl Check for programs
 dnl ---------------------------------------------------------------------------
 
@@ -307,7 +180,7 @@ if test "${with_snmp}" = "yes"; then
 	AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false")
     else
 	AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false",
-		${net_snmp_config_dir})
+		      ${net_snmp_config_dir})
     fi
 else
     net_snmp_found="skip_check"
@@ -326,57 +199,66 @@ if test "${net_snmp_found}" = "true";  then
 	net_snmp_rev=0
     fi
     AC_CACHE_CHECK([if net-snmp version equal or newer than 5.0.6],
-    ac_cv_net_snmp_usable,
-	net_snmp_too_old=true
-	while test "${net_snmp_too_old}" = "true"; do
-	    if test "${net_snmp_maj}" -lt "5" ; then
-		break;
-	    fi
-	    if test "${net_snmp_maj}" -gt "5" ; then
-		net_snmp_too_old=false
-		break;
-	    fi
-	    if test "${net_snmp_min}" -lt "0" ; then
-		break;
-	    fi
-	    if test "${net_snmp_min}" -gt "0" ; then
-		net_snmp_too_old=false
-		break;
-	    fi
-	    if test "${net_snmp_rev}" -lt "6" ; then
-		break;
-	    fi
-	    if test "${net_snmp_rev}" -gt "6" ; then
-		net_snmp_too_old=false
-		break;
-	    fi
-	    net_snmp_too_old=false
-	    break;
-	done
-	if test "${net_snmp_too_old}" != "true"; then
-	    ac_cv_net_snmp_usable=yes
-	else
-	    ac_cv_net_snmp_usable=no
-	    snmpd="skip_check"
-	fi
-	if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -le "1"; then
-	   AC_MSG_WARN(net-snmp version has broken inlining defines)
-	   AC_DEFINE(HAVE_BROKEN_NETSNMP_INLINE, 1, [])
-	   ac_cv_net_snmp_broken_inline=yes
-	else
-	   ac_cv_net_snmp_broken_inline=no
-	fi
-	dnl
-	dnl XXX: As of net-snmp-5.2, the ASN_IPADDRESS values are returned
-	dnl in network order.
-	dnl
-	if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -lt "2"; then
-	    AC_MSG_WARN(net-snmp version returns ASN_IPADDRESS in host order)
-	    AC_DEFINE(HAVE_NETSNMP_ASN_IPADDRESS_IN_HOST_ORDER)
-	fi
+		   [ac_cv_net_snmp_usable],
+		   [
+		    net_snmp_too_old="true"
+		    while test "${net_snmp_too_old}" = "true"; do
+			if test "${net_snmp_maj}" -lt "5" ; then
+			    break;
+			fi
+			if test "${net_snmp_maj}" -gt "5" ; then
+			    net_snmp_too_old="false"
+			    break;
+			fi
+			if test "${net_snmp_min}" -lt "0" ; then
+			    break;
+			fi
+			if test "${net_snmp_min}" -gt "0" ; then
+			    net_snmp_too_old="false"
+			    break;
+			fi
+			if test "${net_snmp_rev}" -lt "6" ; then
+			    break;
+			fi
+			if test "${net_snmp_rev}" -gt "6" ; then
+			    net_snmp_too_old="false"
+			    break;
+			fi
+			net_snmp_too_old="false"
+			break;
+		    done
+		    if test "${net_snmp_too_old}" != "true"; then
+			ac_cv_net_snmp_usable="yes"
+		    else
+			ac_cv_net_snmp_usable="no"
+			snmpd="skip_check"
+		    fi
+		    if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -le "1"; then
+			ac_cv_net_snmp_broken_inline="yes"
+		    else
+			ac_cv_net_snmp_broken_inline="no"
+		    fi
+		    dnl
+		    dnl XXX: As of net-snmp-5.2, the ASN_IPADDRESS values are
+		    dnl returned in network order.
+		    dnl
+		    if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -lt "2"; then
+			ac_cv_net_snmp_asn_ipaddresses_in_host_order="yes"
+		    else
+			ac_cv_net_snmp_asn_ipaddresses_in_host_order="no"
+		    fi
+		   ]
     )
     if test "${ac_cv_net_snmp_usable}" != "yes" ; then
 	AC_MSG_WARN(net-snmp version too old)
+    fi
+    if test "${ac_cv_net_snmp_broken_inline}" = "yes" ; then
+	AC_MSG_WARN(net-snmp version has broken inlining defines)
+	AC_DEFINE(HAVE_BROKEN_NETSNMP_INLINE, 1, [])
+    fi
+    if test "${ac_cv_net_snmp_asn_ipaddresses_in_host_order}" = "yes" ; then
+	AC_MSG_WARN(net-snmp version returns ASN_IPADDRESS in host order)
+	AC_DEFINE(HAVE_NETSNMP_ASN_IPADDRESS_IN_HOST_ORDER)
     fi
 elif test "${net_snmp_found}" = "false"; then
     AC_MSG_WARN(Net-SNMP not found! MIB modules will not be built)
@@ -421,19 +303,16 @@ else
 
     snmpd_base_args="-f -r ${snmpd_log_output_arg} conftestsnmp.log -c conftestsnmp.conf"
     # On Linux snmpd seems to need the "-p" flag.
-    for args in "" "-p"
-    do
-	for p in ${test_ports}
-	do
-		${snmpd} ${snmpd_base_args} ${args} udp:localhost:$p&
-		pid=$!
-		sleep 3
-		if ps -p ${pid} > /dev/null
-		then
-			kill ${pid}
-			snmpd_valid="yes"
-			break 2
-		fi
+    for args in "" "-p"; do
+	for p in ${test_ports}; do
+	    ${snmpd} ${snmpd_base_args} ${args} udp:localhost:$p&
+	    pid=$!
+	    sleep 3
+	    if ps -p ${pid} > /dev/null ; then
+		kill ${pid}
+		snmpd_valid="yes"
+		break 2
+	    fi
 	done
     done
     if test "${snmpd_valid}" = "yes" ; then
@@ -487,12 +366,12 @@ while test "${net_snmp_found}" = "true"; do
 
     # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
     # the default compiler cannot compile.
-    XR_CHECK_CFLAG(${NETSNMPCFLAGS}, snmpd_flags_valid=yes, snmpd_flags_valid=no)
+    XR_CHECK_CFLAG(${NETSNMPCFLAGS}, snmpd_flags_valid="yes", snmpd_flags_valid="no")
     if test "${snmpd_flags_valid}" = "no" ; then
 	echo "-------------------------------------------------------------   "
 	echo "'${net_snmp_config} --cflags' gave invalid cflags!              "
 	echo "-------------------------------------------------------------   "
-	snmpd_valid=no
+	snmpd_valid="no"
 	break
     fi
 
@@ -500,30 +379,30 @@ while test "${net_snmp_found}" = "true"; do
 
     CPPFLAGS=${NETSNMPCFLAGS}
     AC_CHECK_HEADERS([net-snmp/agent/net-snmp-agent-includes.h],
-	net_snmp_agent_includes_bug=no,
-        net_snmp_agent_includes_bug=yes,
-        [
-        #include <net-snmp/net-snmp-config.h>
-        #include <net-snmp/net-snmp-includes.h>
-        ]
+		     [net_snmp_agent_includes_bug="no"],
+		     [net_snmp_agent_includes_bug="yes"],
+		     [
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+		     ]
     )
     if test "${net_snmp_agent_includes_bug}" = "yes" ; then
 	AC_MSG_WARN(File <net-snmp/agent/net-snmp-agent-includes.h> does not appear usable)
-	snmpd_valid=no
+	snmpd_valid="no"
 	break
     fi
     AC_CHECK_HEADERS([net-snmp/library/container.h],
-	net_snmp_container_bug=no,
-        net_snmp_container_bug=yes,
-        [
-        #include <net-snmp/net-snmp-config.h>
-        #include <net-snmp/net-snmp-includes.h>
-        #include <net-snmp/agent/net-snmp-agent-includes.h>
-        ]
+		     [net_snmp_container_bug="no"],
+		     [net_snmp_container_bug="yes"],
+		     [
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+		     ]
     )
     if test "${net_snmp_container_bug}" = "yes" ; then
 	AC_MSG_WARN(File <net-snmp/library/container.h> does not appear usable)
-	snmpd_valid=no
+	snmpd_valid="no"
 	break
     fi
     break
@@ -578,74 +457,96 @@ dnl GCC-specific warning flags
 dnl ----------------------------
 
 if test "${GCC}" = "yes" ; then
-	dnl
-	dnl Filter-out the "-g" flag
-	dnl
-	CFLAGS=`echo $CFLAGS |  sed 's/-g//g'`
-	CXXFLAGS=`echo $CXXFLAGS |  sed 's/-g//g'`
+    dnl
+    dnl Filter-out the "-g" flag
+    dnl
+    CFLAGS=`echo $CFLAGS |  sed 's/-g//g'`
+    CXXFLAGS=`echo $CXXFLAGS |  sed 's/-g//g'`
 
-	dnl
-	dnl If debugging is enabled, try to add the "-g" flag
-	dnl
-	if test "${enable_debug}" = "yes" ; then
-		XR_TRY_ADD_CFLAGS("-g")
-		XR_TRY_ADD_CXXFLAGS("-g")
-	fi
+    dnl
+    dnl If debugging is enabled, try to add the "-g" flag
+    dnl
+    if test "${enable_debug}" = "yes" ; then
+	XR_TRY_ADD_CFLAGS("-g")
+	XR_TRY_ADD_CXXFLAGS("-g")
+    fi
 
-	dnl
-	dnl TODO: add -ansi -pedantic
-	dnl XXX: Flag -Wtraditional is not recommended for C, because:
-	dnl	- On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
-	dnl	  create a warning for gcc 2.95.3
-	dnl	- On Linux RedHat 7.2, #elif creates a warning for gcc 2.96
-	dnl
-	dnl XXX: Flag -Wnon-const-format is not included, because it appears
-	dnl	 to exist only on earlier versions of gcc (e.g., gcc-2.95.x),
-	dnl	 and only on FreeBSD, but not on Linux. In addition, this flag
-	dnl	 appears to be problematic, because if it is enabled we cannot
-	dnl	 use statements like "vfprintf(stderr, fmt, ap);" where "fmt"
-	dnl	 is a variable (e.g., defined as "const char *").
-	dnl
-	dnl XXX: For extra debugging, the following g++ flag may be enabled
-	dnl	 and added to CXXFLAGS:
-	dnl	 -D_GLIBCXX_DEBUG
-	dnl
+    dnl
+    dnl TODO: add -ansi -pedantic
+    dnl XXX: Flag -Wtraditional is not recommended for C, because:
+    dnl   - On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
+    dnl     create a warning for gcc 2.95.3
+    dnl   - On Linux RedHat 7.2, #elif creates a warning for gcc 2.96
+    dnl
+    dnl XXX: Flag -Wnon-const-format is not included, because it appears
+    dnl to exist only on earlier versions of gcc (e.g., gcc-2.95.x),
+    dnl and only on FreeBSD, but not on Linux. In addition, this flag
+    dnl appears to be problematic, because if it is enabled we cannot
+    dnl use statements like "vfprintf(stderr, fmt, ap);" where "fmt"
+    dnl is a variable (e.g., defined as "const char *").
+    dnl
+    dnl XXX: For extra debugging, the following g++ flag may be enabled
+    dnl	and added to CXXFLAGS: -D_GLIBCXX_DEBUG
+    dnl
+    dnl XXX: Intel compiler, although tries to mimic GCC, has different
+    dnl warnings handling:
+    dnl   - It doesn't support most of the GCC -W<feature> options.
+    dnl     The XR_TRY_ADD_* macros should handle this, but they don't.
+    dnl   - Option -Wall has different meaning than in GCC, it really
+    dnl     means ALL warnings and remarks the compiler knows about.
+    dnl
+    if test "${ICC}" = "yes" ; then
+	CPARANOIDFLAGS="-Werror"
+	CXXPARANOIDFLAGS="-Werror"
+    else
 	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
-	XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
-	XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
-	XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-22")
+    fi
+    XR_TRY_ADD_CFLAGS($CPARANOIDFLAGS)
+    XR_TRY_ADD_CXXFLAGS($CXXPARANOIDFLAGS)
+    XR_TRY_ADD_CXXFLAGS("-ftemplate-depth-25")
 
-	dnl
-	dnl Try to add the -pipe option, which can significantly speed up
-	dnl compile runs by avoiding the use of temporary files.
-	dnl
-	if test "${enable_compiler_pipe}" == "yes" ; then
-		XR_TRY_ADD_CFLAGS("-pipe")
-		XR_TRY_ADD_CXXFLAGS("-pipe")
-	fi
+    dnl
+    dnl Try to add the -pipe option, which can significantly speed up
+    dnl compile runs by avoiding the use of temporary files.
+    dnl
+    if test "${enable_compiler_pipe}" = "yes" ; then
+	XR_TRY_ADD_CFLAGS("-pipe")
+	XR_TRY_ADD_CXXFLAGS("-pipe")
+    fi
 
+    dnl
+    dnl Default compiler flags have optimization turned on which
+    dnl can cause helpful debugging info to be optimized out.
+    dnl
+    if test "${enable_optimize}" != "yes" ; then
 	dnl
-	dnl Default compiler flags have optimization turned on which
-	dnl can cause helpful debugging info to be optimized out.
+	dnl Could just append -O0, but two -O args are icky
+	dnl We make assumption change is O2 because extended regexps
+	dnl are not portable...
 	dnl
-	if test "${enable_optimize}" != "yes" ; then
-		dnl Could just append -O0, but two -O args are icky
-		dnl We make assumption change is O2 because extended regexps
-		dnl are not portable...
-		changequote(<<, >>)dnl preserve braces in sed expressions
-		CFLAGS=`echo $CFLAGS | sed 's/-O2//g'`
-		CXXFLAGS=`echo $CXXFLAGS | sed 's/-O2//g'`
-		changequote([, ])dnl
-	fi
-	if test "${enable_profile}" = "yes" ; then
-		CFLAGS="${CFLAGS} -pg"
-		CXXFLAGS="${CXXFLAGS} -pg"
-	fi
-	if test "${enable_debug_fnames}" = "yes" ; then
-		AC_DEFINE(DEBUG_PRINT_FUNCTION_NAME, 1,
-			[Define to 1 to enable printing function name in debug messages])
-	fi
+	changequote(<<, >>)dnl preserve braces in sed expressions
+	CFLAGS=`echo $CFLAGS | sed 's/-O2//g'`
+	CXXFLAGS=`echo $CXXFLAGS | sed 's/-O2//g'`
+	changequote([, ])dnl
+    fi
+    if test "${enable_profile}" = "yes" ; then
+	CFLAGS="${CFLAGS} -pg"
+	CXXFLAGS="${CXXFLAGS} -pg"
+    fi
+    if test "${enable_stl_debug}" = "yes" ; then
+	CXXFLAGS="${CXXFLAGS} -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"
+    fi
+
+    dnl
+    dnl Conditionally add the user-specified flags that must be after
+    dnl all other compiler flags.
+    dnl
+    dnl Those are specified in the "CFLAGS_END" and "CXXFLAGS_END"
+    dnl environmental variables (for the C and C++ compiler respectively).
+    dnl
+    XR_TRY_ADD_CFLAGS($CFLAGS_END)
+    XR_TRY_ADD_CXXFLAGS($CXXFLAGS_END)
 fi
 
 
@@ -654,15 +555,15 @@ dnl Add files to under-go substitution here.
 dnl ---------------------------------------------------------------------------
 
 AC_OUTPUT(
-	Makefile
-	snmpdscripts/Makefile
-	tests/Makefile
-	tests/test_bgpmib.sh
-	snmpdscripts/startsnmp
+    Makefile
+    snmpdscripts/Makefile
+    tests/Makefile
+    tests/test_bgpmib.sh
+    snmpdscripts/startsnmp
 ,
-	echo timestamp > stamp-h
-	chmod a+x tests/test_bgpmib.sh
-	chmod a+x snmpdscripts/startsnmp
+    echo timestamp > stamp-h
+    chmod a+x tests/test_bgpmib.sh
+    chmod a+x snmpdscripts/startsnmp
 )
 
 dnl ------------------------

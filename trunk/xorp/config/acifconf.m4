@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acifconf.m4,v 1.2 2006/05/02 01:45:07 pavlin Exp $
+dnl $XORP: xorp/config/acifconf.m4,v 1.3 2006/07/18 00:39:31 pavlin Exp $
 dnl
 
 dnl
@@ -8,39 +8,67 @@ dnl
 
 AC_LANG_PUSH(C)
 
-dnl ----------------------------
-dnl Check for ifr_ifindex in ifreq
-dnl ----------------------------
+dnl -----------------------------------------------
+dnl Check for header files that might be used later
+dnl -----------------------------------------------
 
-test_ifr_ifindex_headers=["
+AC_CHECK_HEADERS([sys/types.h sys/param.h sys/socket.h sys/sockio.h])
+
+dnl XXX: Header files <net/if.h> might need <sys/types.h> and <sys/socket.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h])
+AC_CHECK_HEADERS([net/if.h], [], [],
+[
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#include <net/if.h>
-"]
+#endif
+])
+
+
+dnl ------------------------------
+dnl Check for ifr_ifindex in ifreq
+dnl ------------------------------
 
 AC_CHECK_MEMBER([struct ifreq.ifr_ifindex],
- [AC_DEFINE(HAVE_IFR_IFINDEX, 1,
-    [Define to 1 if your struct ifreq has field ifr_ifindex])], ,
- [${test_ifr_ifindex_headers}])
+		[AC_DEFINE(HAVE_IFR_IFINDEX, 1,
+			   [Define to 1 if your struct ifreq has field ifr_ifindex])],
+		[],
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+])
 
 
-dnl ------------------------------------
+dnl -------------------------------------------
 dnl Check for ioctl(SIOCGIFCONF) interface read
-dnl ------------------------------------
+dnl -------------------------------------------
 
-dnl XXX: <sys/sockio.h> is needed on Solaris-10
-AC_CHECK_HEADER(sys/sockio.h,
-  [test_sys_sockio_h="#include <sys/sockio.h>"],
-  [test_sys_sockio_h=""])
 AC_MSG_CHECKING(whether the system has ioctl(SIOCGIFCONF) interface read)
 AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-${test_sys_sockio_h}
+#endif
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
+#endif
 #include <sys/ioctl.h>
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 ],
 [
 {
@@ -56,39 +84,46 @@ ${test_sys_sockio_h}
 
     /* Loop until SIOCGIFCONF success. */
     for ( ; ; ) {
-        ifconf.ifc_len = ifnum*sizeof(struct ifreq);
-        ifconf.ifc_buf = (caddr_t)realloc(ifconf.ifc_buf, ifconf.ifc_len);
-        if (ioctl(sock, SIOCGIFCONF, &ifconf) < 0) {
-            /* Check UNPv1, 2e, pp 435 for an explanation why we need this */
-            if ((errno != EINVAL) || (lastlen != 0))
+	ifconf.ifc_len = ifnum*sizeof(struct ifreq);
+	ifconf.ifc_buf = (caddr_t)realloc(ifconf.ifc_buf, ifconf.ifc_len);
+	if (ioctl(sock, SIOCGIFCONF, &ifconf) < 0) {
+	    /* Check UNPv1, 2e, pp 435 for an explanation why we need this */
+	    if ((errno != EINVAL) || (lastlen != 0))
 		return (1);
-        } else {
-            if (ifconf.ifc_len == lastlen)
-                break;          /* success, len has not changed */
-            lastlen = ifconf.ifc_len;
-        }
-        ifnum += 10;
+	} else {
+	    if (ifconf.ifc_len == lastlen)
+		break;		/* success, len has not changed */
+	    lastlen = ifconf.ifc_len;
+	}
+	ifnum += 10;
     }
 
     return (0);
 }
 ],
-  [AC_DEFINE(HAVE_IOCTL_SIOCGIFCONF, 1,
-	[Define to 1 if you have ioctl(SIOCGIFCONF) interface read method])
-   AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)])
+    [AC_DEFINE(HAVE_IOCTL_SIOCGIFCONF, 1,
+	       [Define to 1 if you have ioctl(SIOCGIFCONF) interface read method])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
 
-dnl ------------------------------------
+
+dnl ----------------------------------------------
 dnl Check for sysctl(NET_RT_IFLIST) interface read
-dnl ------------------------------------
+dnl ----------------------------------------------
 
 AC_MSG_CHECKING(whether the system has sysctl(NET_RT_IFLIST) interface read)
 AC_TRY_COMPILE([
 #include <stdlib.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <sys/sysctl.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 ],
 [
 {
@@ -102,22 +137,29 @@ AC_TRY_COMPILE([
     return (0);
 }
 ],
-  [AC_DEFINE(HAVE_SYSCTL_NET_RT_IFLIST, 1,
-	[Define to 1 if you have sysctl(NET_RT_IFLIST) interface read method])
-   AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)])
+    [AC_DEFINE(HAVE_SYSCTL_NET_RT_IFLIST, 1,
+	       [Define to 1 if you have sysctl(NET_RT_IFLIST) interface read method])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
 
-dnl ------------------------------------
+
+dnl ------------------------------------------------
 dnl Check for sysctl(NET_RT_DUMP) routing table read
-dnl ------------------------------------
+dnl ------------------------------------------------
 
 AC_MSG_CHECKING(whether the system has sysctl(NET_RT_DUMP) routing table read)
 AC_TRY_COMPILE([
 #include <stdlib.h>
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <sys/sysctl.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 ],
 [
 {
@@ -131,10 +173,10 @@ AC_TRY_COMPILE([
     return (0);
 }
 ],
-  [AC_DEFINE(HAVE_SYSCTL_NET_RT_DUMP, 1,
-	[Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method])
-   AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)])
+    [AC_DEFINE(HAVE_SYSCTL_NET_RT_DUMP, 1,
+	       [Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
 
 
 AC_LANG_POP(C)
