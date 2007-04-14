@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.66 2006/08/20 06:19:27 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.67 2007/02/16 22:47:14 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -45,7 +45,7 @@ inline static uint32_t
 range_random(uint32_t lo, uint32_t hi)
 {
     if (hi < lo) swap(hi, lo);
-    return lo + ( random() % (hi - lo) );
+    return lo + ( xorp_random() % (hi - lo) );
 }
 
 // ----------------------------------------------------------------------------

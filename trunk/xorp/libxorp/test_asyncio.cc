@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.16 2006/10/12 01:24:54 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.17 2007/02/16 22:46:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -452,7 +452,7 @@ run_test()
 	UNUSED(was_started);
 	assert(was_started == false); // can't start no buffer
 	// Choose number of buffers to use
-	int n = 1 + (random() % MAX_BUFFERS);
+	int n = 1 + (xorp_random() % MAX_BUFFERS);
 	printf("%d ", n); fflush(stdout);
 	while (n >= 0) {
 	    // Size of buffer add must be at least 1

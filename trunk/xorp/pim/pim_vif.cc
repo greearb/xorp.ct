@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.64 2006/12/23 19:21:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.65 2007/02/16 22:46:51 pavlin Exp $"
 
 
 //
@@ -24,11 +24,10 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 #include "libxorp/ipvx.hh"
 
 #include "libproto/checksum.h"
-
-#include "mrt/random.h"
 
 #include "pim_node.hh"
 #include "pim_vif.hh"
@@ -87,7 +86,7 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
 				    callback(this,
 					     &PimVif::set_is_tracking_support_disabled_callback)),
       _accept_nohello_neighbors(false),
-      _genid(RANDOM(0xffffffffU),
+      _genid(xorp_random() % 0xffffffffU,
 	     callback(this, &PimVif::set_genid_callback)),
       _join_prune_period(PIM_JOIN_PRUNE_PERIOD_DEFAULT,
 			 callback(this,
@@ -222,7 +221,7 @@ PimVif::set_default_config()
     accept_nohello_neighbors().reset();
     
     // Hello-related non-configurable parameters
-    genid().set(RANDOM(0xffffffffU));
+    genid().set(xorp_random() % 0xffffffffU);
     
     // Join/Prune-related parameters
     _join_prune_period.reset();

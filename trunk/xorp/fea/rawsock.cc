@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.40 2007/02/16 22:45:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.41 2007/04/14 07:00:50 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -233,7 +233,7 @@ RawSocket::RawSocket(EventLoop& eventloop, int init_family,
       _ip_protocol(ip_protocol),
       _iftree(iftree),
       _is_ip_hdr_included(false),
-      _ip_id(random())
+      _ip_id(xorp_random())
 {
     // Init Router Alert related option stuff
     ra_opt4 = htonl((IPOPT_RA << 24) | (0x04 << 16));

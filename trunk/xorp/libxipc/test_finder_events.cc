@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.23 2006/10/12 01:24:47 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.24 2007/02/16 22:46:08 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -447,7 +447,7 @@ remove_any_xrl_target(list<AnXrlTarget*>* store)
     uint32_t n = store->size();
     XLOG_ASSERT(n > 0);
 
-    n = (uint32_t)random() % n;
+    n = (uint32_t)xorp_random() % n;
     list<AnXrlTarget*>::iterator i = store->begin();
     while (n > 0) {
 	i++;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/transaction.cc,v 1.8 2006/03/16 00:04:36 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/transaction.cc,v 1.9 2007/02/16 22:46:27 pavlin Exp $"
 
 #include <assert.h>
 
@@ -100,7 +100,7 @@ TransactionManager::crank_tid()
     //
     _next_tid++;
     do {
-	_next_tid += (random() & 0xfffff);
+	_next_tid += (xorp_random() & 0xfffff);
     } while (_transactions.find(_next_tid) != _transactions.end());
 }
 

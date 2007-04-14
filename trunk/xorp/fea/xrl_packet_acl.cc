@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.5 2006/03/16 00:04:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.6 2007/02/16 22:45:53 pavlin Exp $"
 
 #include <map>
 
@@ -581,7 +581,7 @@ XrlPacketAclTarget::crank_token()
 {
     _next_token++;
     do {
-	_next_token += (random() & 0xfffff);
+	_next_token += (xorp_random() & 0xfffff);
     } while (_bdb.find(_next_token) != _bdb.end());
 }
 

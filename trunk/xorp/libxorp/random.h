@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/random.h,v 1.4 2006/03/25 00:51:12 bms Exp $
+ * $XORP: xorp/libxorp/random.h,v 1.5 2007/02/16 22:46:22 pavlin Exp $
  */
 
 #ifndef __LIBXORP_RANDOM_H__
@@ -30,17 +30,13 @@ extern "C" {
  * as per 4.2BSD / SUSV2:
  * http://www.opengroup.org/onlinepubs/007908799/xsh/initstate.html
  */
-#ifndef RANDOM_MAX
-#define RANDOM_MAX	0x7FFFFFFF  /* 2^31 - 1 in 2's complement */
-#endif
+#define XORP_RANDOM_MAX		0x7FFFFFFF  /* 2^31 - 1 in 2's complement */
 
-#ifndef HAVE_RANDOM
-long	random(void);
-void	srandom(unsigned long);
-char*	initstate(unsigned long, char *, long);
-char*	setstate(char *);
-void	srandomdev(void);
-#endif /* HAVE_RANDOM */
+long	xorp_random(void);
+void	xorp_srandom(unsigned long);
+char*	xorp_initstate(unsigned long, char *, long);
+char*	xorp_setstate(char *);
+void	xorp_srandomdev(void);
 
 #ifdef __cplusplus
 }

@@ -14,11 +14,30 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.7 2006/10/12 01:24:53 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.8 2007/02/16 22:46:21 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
-#ifndef HAVE_RANDOM	/* This entire file is not needed if we have random() */
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
+/*
+ * Local implementation of random(3).
+ *
+ * It is always used instead of the system random(3) implementation so it
+ * will be easier to obtain repeatable results across different systems
+ * (when we have support for simulations).
+ */
 
 /*
  * Copyright (c) 1983, 1993
@@ -286,7 +305,7 @@ static inline uint32_t good_rand (x)
  * for default usage relies on values produced by this routine.
  */
 void
-srandom(x)
+xorp_srandom(x)
 	unsigned long x;
 {
 	int i, lim;
@@ -302,7 +321,7 @@ srandom(x)
 		lim = 10 * rand_deg;
 	}
 	for (i = 0; i < lim; i++)
-		(void)random();
+		(void)xorp_random();
 }
 
 /*
@@ -317,7 +336,7 @@ srandom(x)
  * a fixed seed.
  */
 void
-srandomdev()
+xorp_srandomdev()
 {
 	int fd, done;
 	size_t len;
@@ -332,11 +351,11 @@ srandomdev()
 	/* XXX: We need to use CAPI to get hardware randomness. */
 	UNUSED(fd);
 #else
-	fd = _open("/dev/random", O_RDONLY, 0);
+	fd = open("/dev/random", O_RDONLY, 0);
 	if (fd >= 0) {
-		if (_read(fd, (void *) state, len) == (ssize_t) len)
+		if (read(fd, (void *) state, len) == (ssize_t) len)
 			done = 1;
-		_close(fd);
+		close(fd);
 	}
 #endif
 
@@ -351,7 +370,7 @@ srandomdev()
 		unsigned long junk;
 
 		gettimeofday(&tv, NULL);
-		srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
+		xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
 #endif
 		return;
 	}
@@ -386,7 +405,7 @@ srandomdev()
  * complain about mis-alignment, but you should disregard these messages.
  */
 char *
-initstate(seed, arg_state, n)
+xorp_initstate(seed, arg_state, n)
 	unsigned long seed;		/* seed for R.N.G. */
 	char *arg_state;		/* pointer to state array */
 	long n;				/* # bytes of state info */
@@ -426,7 +445,7 @@ initstate(seed, arg_state, n)
 	}
 	state = int_arg_state + 1; /* first location */
 	end_ptr = &state[rand_deg];	/* must set end_ptr before srandom */
-	srandom(seed);
+	xorp_srandom(seed);
 	if (rand_type == TYPE_0)
 		int_arg_state[0] = rand_type;
 	else
@@ -454,7 +473,7 @@ initstate(seed, arg_state, n)
  * complain about mis-alignment, but you should disregard these messages.
  */
 char *
-setstate(arg_state)
+xorp_setstate(arg_state)
 	char *arg_state;		/* pointer to state array */
 {
 	uint32_t *new_state = (uint32_t *)arg_state;
@@ -507,7 +526,7 @@ setstate(arg_state)
  * Returns a 31-bit random number.
  */
 long
-random()
+xorp_random()
 {
 	uint32_t i;
 	uint32_t *f, *r;
@@ -534,5 +553,3 @@ random()
 	}
 	return((long)i);
 }
-
-#endif /* !HAVE_RANDOM */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.12 2006/03/16 00:04:56 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.13 2007/02/16 22:46:51 pavlin Exp $"
 
 
 //
@@ -25,6 +25,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
@@ -91,6 +92,15 @@ pim_main(const string& finder_hostname, uint16_t finder_port)
     // Init stuff
     //
     EventLoop eventloop;
+
+    //
+    // Initialize the random generator
+    //
+    {
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
+	xorp_srandom(now.sec());
+    }
 
     //
     // PIMSM node

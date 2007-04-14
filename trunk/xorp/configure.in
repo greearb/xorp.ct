@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.192 2007/04/14 01:35:05 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.193 2007/04/14 07:00:48 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.192 2007/04/14 01:35:05 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.193 2007/04/14 07:00:48 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -679,15 +679,6 @@ AC_CHECK_FUNCS([realpath])
 
 dnl XXX We have a library check but we need to know if the function exists.
 AC_CHECK_FUNCS([hstrerror])
-
-dnl XXX The autoconf 2.59 generated test for random() fails indiscriminately.
-dnl We need to manually break out detection of the function.
-dnl TODO: Get rid of using the system random() and always use the local
-dnl implementation.
-if test "${_USING_WINDOWS}" != "1" ; then
-    AC_DEFINE(HAVE_RANDOM, 1,
-	      [Define to 1 if you have the `random' function.])
-fi
 
 dnl
 dnl XXX: This is a hack. Look for getopt in unistd.h by grepping for it.

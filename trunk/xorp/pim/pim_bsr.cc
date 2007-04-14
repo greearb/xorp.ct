@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.48 2006/12/13 02:30:54 atanu Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.49 2007/02/16 22:46:46 pavlin Exp $"
 
 
 //
@@ -27,10 +27,9 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/utils.hh"
-
-#include "mrt/random.h"
 
 #include "pim_proto.h"
 #include "pim_bsr.hh"
@@ -1361,7 +1360,7 @@ BsrZone::BsrZone(PimBsr& pim_bsr, const PimScopeZoneId& zone_id)
       _bsr_addr(IPvX::ZERO(_pim_bsr.family())),
       _bsr_priority(0),
       _hash_mask_len(PIM_BOOTSTRAP_HASH_MASK_LEN_DEFAULT(_pim_bsr.family())),
-      _fragment_tag(RANDOM(0xffff)),
+      _fragment_tag(xorp_random() % 0xffff),
       _is_accepted_message(false),
       _is_unicast_message(false),
       _unicast_message_src(IPvX::ZERO(_pim_bsr.family())),

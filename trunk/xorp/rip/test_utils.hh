@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/test_utils.hh,v 1.10 2006/10/12 01:25:10 pavlin Exp $
+// $XORP: xorp/rip/test_utils.hh,v 1.11 2007/02/16 22:47:17 pavlin Exp $
 
 #ifndef __RIP_TEST_UTILS_HH__
 #define __RIP_TEST_UTILS_HH__
@@ -29,20 +29,6 @@
 #include "route_db.hh"
 
 
-/**
- * A weak but platform independent random number generator.
- */
-inline static uint32_t
-weak_random()
-{
-    static uint64_t r = 883652921;
-    static uint32_t s = 0;
-    r = r * 37 + 1;
-    r = r & 0xffffffff;
-    s++;
-    return (r & 0xffffffff) ^ s;
-}
-
 template <typename A>
 inline A random_addr();
 
@@ -53,7 +39,7 @@ template <>
 IPv4
 random_addr<IPv4>()
 {
-    uint32_t h = htonl(weak_random());
+    uint32_t h = htonl(xorp_random());
     return IPv4(h);
 }
 
@@ -65,10 +51,10 @@ IPv6
 random_addr<IPv6>()
 {
     uint32_t x[4];
-    x[0] = htonl(weak_random());
-    x[1] = htonl(weak_random());
-    x[2] = htonl(weak_random());
-    x[3] = htonl(weak_random());
+    x[0] = htonl(xorp_random());
+    x[1] = htonl(xorp_random());
+    x[2] = htonl(xorp_random());
+    x[3] = htonl(xorp_random());
     return IPv6(x);
 }
 
@@ -82,7 +68,7 @@ make_nets(set<IPNet<A> >& nets, uint32_t n_nets)
     // attempt at deterministic nets sequence
     while (nets.size() != n_nets) {
 	A addr = random_addr<A>();
-	IPNet<A> net = IPNet<A>(addr, 1 + weak_random() % A::ADDR_BITLEN);
+	IPNet<A> net = IPNet<A>(addr, 1 + xorp_random() % A::ADDR_BITLEN);
 	nets.insert(net);
     }
 }

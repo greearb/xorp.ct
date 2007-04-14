@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.13 2006/10/12 01:24:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.14 2007/02/16 22:46:09 pavlin Exp $"
 
 // test_xrl_atom: String Serialization Tests
 
@@ -218,7 +218,7 @@ test()
 		    tracef("Binary data size = %u\n", XORP_UINT_CAST(sz));
 		    vector<uint8_t> t(sz);
 		    for (size_t i = 0; i < sz; i++) {
-			t[i] = random();
+			t[i] = xorp_random();
 		    }
 		    assert(t.size() == sz);
 		    XrlAtom a("binary_data", t);

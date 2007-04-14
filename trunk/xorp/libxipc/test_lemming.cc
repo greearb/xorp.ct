@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.18 2006/10/12 01:24:47 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.19 2007/02/16 22:46:08 pavlin Exp $"
 
 #include "ipc_module.h"
 
@@ -216,10 +216,8 @@ lemming_main()
 
     while (run && pfs) {
 	bool life = true;
-	XorpTimer snuffer = e.new_oneoff_after_ms((random() % 7777) + 1000,
-						  callback(&snuff_flag,
-							   &life));
-
+	XorpTimer snuffer = e.new_oneoff_after_ms(
+	    (xorp_random() % 7777) + 1000, callback(&snuff_flag, &life));
 	{
 	    Lemming l(e, life);
 	    while (life) e.run();

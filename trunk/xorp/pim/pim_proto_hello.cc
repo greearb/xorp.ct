@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.25 2006/12/23 19:21:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.26 2007/02/16 22:46:49 pavlin Exp $"
 
 
 //
@@ -24,9 +24,9 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 #include "libxorp/ipvx.hh"
 
-#include "mrt/random.h"
 #include "pim_node.hh"
 #include "pim_vif.hh"
 
@@ -58,7 +58,7 @@ void
 PimVif::pim_hello_start()
 {
     // Generate a new Gen-ID
-    genid().set(RANDOM(0xffffffffU));
+    genid().set(xorp_random() % 0xffffffffU);
     
     // On startup, I will become the PIM Designated Router
     pim_dr_elect();

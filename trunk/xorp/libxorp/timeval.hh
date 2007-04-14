@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.29 2006/07/19 22:55:42 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.30 2007/02/16 22:46:27 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -568,7 +568,7 @@ inline TimeVal
 random_uniform(const TimeVal& lower, const TimeVal& upper)
 {
     double d = (upper - lower).get_double();
-    d *= double(random()) / double(RANDOM_MAX);
+    d *= double(xorp_random()) / double(XORP_RANDOM_MAX);
     return lower + TimeVal(d);
 }
 
@@ -582,7 +582,7 @@ inline TimeVal
 random_uniform(const TimeVal& upper)
 {
     double d = upper.get_double();
-    d *= double(random()) / double(RANDOM_MAX);
+    d *= double(xorp_random()) / double(XORP_RANDOM_MAX);
     return TimeVal(d);
 }
 

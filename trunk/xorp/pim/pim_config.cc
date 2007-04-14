@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.49 2006/12/23 19:01:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.50 2007/02/16 22:46:46 pavlin Exp $"
 
 
 //
@@ -25,9 +25,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 #include "libxorp/ipvx.hh"
-
-#include "mrt/random.h"
 
 #include "pim_node.hh"
 #include "pim_vif.hh"
@@ -1254,7 +1253,7 @@ PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     IPvX my_cand_bsr_addr = vif_addr;
-    uint16_t fragment_tag = RANDOM(0xffff);
+    uint16_t fragment_tag = xorp_random() % 0xffff;
     string local_error_msg = "";
     PimScopeZoneId zone_id(scope_zone_id, is_scope_zone);
     

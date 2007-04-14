@@ -50,7 +50,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libmrt_la_LIBADD =
-am_libmrt_la_OBJECTS = buffer.lo random.lo mifset.lo mrib_table.lo
+am_libmrt_la_OBJECTS = buffer.lo mifset.lo mrib_table.lo
 libmrt_la_OBJECTS = $(am_libmrt_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -235,8 +235,8 @@ test_mrib_SOURCES = test_mrib.cc
 
 # -- Library Sources
 libmrt_la_SOURCES = mrt_module.h buffer.h max_vifs.h multicast_defs.h \
-	netstream_access.h random.h mifset.hh mrt.hh mrib_table.hh \
-	buffer.c random.c mifset.cc mrib_table.cc
+	netstream_access.h mifset.hh mrt.hh mrib_table.hh buffer.c \
+	mifset.cc mrib_table.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = include
@@ -338,7 +338,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mifset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mrib_table.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_mrib.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_mrt.Po@am__quote@
 

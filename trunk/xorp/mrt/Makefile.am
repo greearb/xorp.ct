@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mrt/Makefile.am,v 1.8 2004/11/23 22:43:46 bms Exp $
+## $XORP: xorp/mrt/Makefile.am,v 1.9 2006/08/15 02:36:54 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -30,14 +30,12 @@ libmrt_la_SOURCES += buffer.h
 libmrt_la_SOURCES += max_vifs.h
 libmrt_la_SOURCES += multicast_defs.h
 libmrt_la_SOURCES += netstream_access.h
-libmrt_la_SOURCES += random.h
 
 libmrt_la_SOURCES += mifset.hh
 libmrt_la_SOURCES += mrt.hh
 libmrt_la_SOURCES += mrib_table.hh
 
 libmrt_la_SOURCES += buffer.c
-libmrt_la_SOURCES += random.c
 
 libmrt_la_SOURCES += mifset.cc
 libmrt_la_SOURCES += mrib_table.cc

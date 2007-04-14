@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.70 2007/02/16 22:45:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.71 2007/04/14 07:00:50 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -233,7 +233,7 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ip_protocol,
       _ip_protocol(ip_protocol),
       _module_id(module_id),
       _is_ip_hdr_included(false),
-      _ip_id(random())
+      _ip_id(xorp_random())
 {
     // Init Router Alert related option stuff
     ra_opt4 = htonl((IPOPT_RA << 24) | (0x04 << 16));
