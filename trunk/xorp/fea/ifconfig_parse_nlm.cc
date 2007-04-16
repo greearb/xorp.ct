@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.29 2006/12/13 02:30:51 atanu Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.30 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -79,7 +79,7 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
     
     for (nlh = align_data.payload();
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = XORP_NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
 	switch (nlh->nlmsg_type) {
@@ -172,7 +172,7 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = XORP_IFLA_RTA(const_cast<struct ifinfomsg*>(ifinfomsg));
+    rtattr = IFLA_RTA(const_cast<struct ifinfomsg*>(ifinfomsg));
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
     
@@ -315,7 +315,7 @@ nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = XORP_IFLA_RTA(const_cast<struct ifinfomsg*>(ifinfomsg));
+    rtattr = IFLA_RTA(const_cast<struct ifinfomsg*>(ifinfomsg));
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
     
@@ -390,7 +390,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = XORP_IFA_RTA(const_cast<struct ifaddrmsg*>(ifaddrmsg));
+    rtattr = IFA_RTA(const_cast<struct ifaddrmsg*>(ifaddrmsg));
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
 

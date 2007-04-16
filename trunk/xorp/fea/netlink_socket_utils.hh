@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.16 2006/10/24 22:35:34 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.17 2007/02/16 22:45:47 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
@@ -31,41 +31,36 @@
 
 
 //
-// Conditionally define some of the netlink-related macros that are not
+// Conditionally re-define some of the netlink-related macros that are not
 // defined properly and might generate alignment-related compilation
 // warning on some architectures (e.g, ARM/XScale) if we use
 // "-Wcast-align" compilation flag.
 //
 #ifdef HAVE_BROKEN_MACRO_NLMSG_NEXT
-#define XORP_NLMSG_NEXT(nlh,len) ((len) -= NLMSG_ALIGN((nlh)->nlmsg_len), \
+#undef NLMSG_NEXT
+#define NLMSG_NEXT(nlh, len)	((len) -= NLMSG_ALIGN((nlh)->nlmsg_len), \
 				  (struct nlmsghdr*)(void*)(((char*)(nlh)) + NLMSG_ALIGN((nlh)->nlmsg_len)))
-#else
-#define XORP_NLMSG_NEXT(nlh,len) NLMSG_NEXT(nlh,len)
 #endif
 
 #ifdef HAVE_BROKEN_MACRO_RTA_NEXT
-#define XORP_RTA_NEXT(rta,attrlen) ((attrlen) -= RTA_ALIGN((rta)->rta_len), \
+#undef RTA_NEXT
+#define RTA_NEXT(rta, attrlen)	((attrlen) -= RTA_ALIGN((rta)->rta_len), \
 				    (struct rtattr*)(void*)(((char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
-#else
-#define XORP_RTA_NEXT(rta,attrlen) RTA_NEXT(rta,attrlen)
 #endif
 
 #ifdef HAVE_BROKEN_MACRO_IFA_RTA
-#define XORP_IFA_RTA(r)		((struct rtattr*)(void*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
-#else
-#define XORP_IFA_RTA(r)		IFA_RTA(r)
+#undef IFA_RTA
+#define IFA_RTA(r)		((struct rtattr*)(void*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
 #endif
 
 #ifdef HAVE_BROKEN_MACRO_IFLA_RTA
-#define XORP_IFLA_RTA(r)	((struct rtattr*)(void*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifinfomsg))))
-#else
-#define XORP_IFLA_RTA(r)	IFLA_RTA(r)
+#undef IFLA_RTA
+#define IFLA_RTA(r)		((struct rtattr*)(void*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifinfomsg))))
 #endif
 
 #ifdef HAVE_BROKEN_MACRO_RTM_RTA
-#define XORP_RTM_RTA(r)		((struct rtattr*)(void *)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct rtmsg))))
-#else
-#define XORP_RTM_RTA(r)		RTM_RTA(r)
+#undef RTM_RTA
+#define RTM_RTA(r)		((struct rtattr*)(void *)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct rtmsg))))
 #endif
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.42 2006/08/30 16:46:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.43 2007/02/16 22:45:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -320,7 +320,7 @@ NetlinkSocket::force_read(string& error_msg)
 	const struct nlmsghdr* mh;
 	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
-	     mh = XORP_NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
+	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if ((mh->nlmsg_flags & NLM_F_MULTI)
 		|| _is_multipart_message_read) {
@@ -398,7 +398,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	const struct nlmsghdr* mh;
 	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
-	     mh = XORP_NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
+	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if ((mh->nlmsg_flags & NLM_F_MULTI)
 		|| _is_multipart_message_read) {
@@ -512,7 +512,7 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 	const struct nlmsghdr* mh;
 	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
-	     mh = XORP_NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
+	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
 	    if ((mh->nlmsg_flags & NLM_F_MULTI)
 		|| _is_multipart_message_read) {

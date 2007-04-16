@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.38 2006/11/29 08:21:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.39 2007/02/16 22:45:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -150,7 +150,7 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
     while (RTA_OK(rtattr, rta_len)) {
 	if (rtattr->rta_type < rta_array_n)
 	    rta_array[rtattr->rta_type] = rtattr;
-	rtattr = XORP_RTA_NEXT(const_cast<struct rtattr *>(rtattr), rta_len);
+	rtattr = RTA_NEXT(const_cast<struct rtattr *>(rtattr), rta_len);
     }
     
     if (rta_len) {
@@ -237,7 +237,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
-    rtattr = XORP_RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
+    rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
 			 sizeof(rta_array) / sizeof(rta_array[0]));
 
@@ -359,7 +359,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
     AlignData<struct nlmsghdr> align_data(buffer);
     for (nlh = align_data.payload();
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = XORP_NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
 	switch (nlh->nlmsg_type) {
