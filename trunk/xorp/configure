@@ -38315,12 +38315,12 @@ echo "${ECHO_T}no" >&6; }
 
     fi
 
-                                                                                                    if test "${ICC}" = "yes" ; then
+                                                                                                                    if test "${ICC}" = "yes" ; then
 	CPARANOIDFLAGS="-Werror"
 	CXXPARANOIDFLAGS="-Werror"
     else
-	CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
-	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
+	CPARANOIDFLAGS="-Werror -W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
+	CXXPARANOIDFLAGS="-Werror -W -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
     fi
 
 
