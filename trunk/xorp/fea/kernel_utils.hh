@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/kernel_utils.hh,v 1.8 2007/03/02 00:56:30 pavlin Exp $
+// $XORP: xorp/fea/kernel_utils.hh,v 1.9 2007/04/14 07:00:50 pavlin Exp $
 
 #ifndef __FEA_KERNEL_UTILS_HH__
 #define __FEA_KERNEL_UTILS_HH__
@@ -23,6 +23,33 @@
 
 #include "libproto/packet.hh"
 
+
+//
+// Conditionally re-define some of the system macros that are not
+// defined properly and might generate alignment-related compilation
+// warning on some architectures (e.g, ARM/XScale) if we use
+// "-Wcast-align" compilation flag.
+//
+#ifdef HAVE_BROKEN_MACRO_CMSG_NXTHDR
+#if ((! defined(__CMSG_ALIGN)) && (! defined(_ALIGN)))
+#error "The system has broken CMSG_NXTHDR, but we don't know how to re-define it. Fix the alignment compilation error of the CMSG_NXTHDR macro in your system header files."
+#endif
+
+#ifndef __CMSG_ALIGN
+#define __CMSG_ALIGN(n)		_ALIGN(n)
+#endif
+
+#undef CMSG_NXTHDR
+#define	CMSG_NXTHDR(mhdr, cmsg)	\
+	(((caddr_t)(cmsg) + __CMSG_ALIGN((cmsg)->cmsg_len) + \
+			    __CMSG_ALIGN(sizeof(struct cmsghdr)) > \
+	    ((caddr_t)(mhdr)->msg_control) + (mhdr)->msg_controllen) ? \
+	    (struct cmsghdr *)NULL : \
+	    (struct cmsghdr *)(void *)((caddr_t)(cmsg) + __CMSG_ALIGN((cmsg)->cmsg_len)))
+
+#else
+#define XORP_CMSG_NXTHDR(mhdr, cmsg) CMSG_NXTHDR(mhdr, cmsg)
+#endif
 
 //
 // XXX: In case of KAME the local interface index (also the link-local

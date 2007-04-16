@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.11 2007/04/14 01:35:06 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.12 2007/04/14 07:00:48 pavlin Exp $
 dnl
 
 dnl
@@ -12,7 +12,7 @@ dnl -----------------------------------------------
 dnl Check for header files that might be used later
 dnl -----------------------------------------------
 
-AC_CHECK_HEADERS([sys/types.h sys/socket.h netinet/in.h netinet/in_systm.h])
+AC_CHECK_HEADERS([string.h sys/types.h sys/socket.h netinet/in.h netinet/in_systm.h])
 
 dnl XXX: Header file <netinet/ip.h> might need <sys/types.h> <netinet/in.h>
 dnl and <netinet/in_systm.h>
@@ -32,6 +32,46 @@ AC_CHECK_HEADERS([netinet/ip.h], [], [],
 if test "${_USING_WINDOWS}" = "1" ; then
     AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h])
 fi
+
+dnl
+dnl XXX: Save the original CFLAGS and add extra flags that can trigger
+dnl the alignment compilation errors.
+dnl
+_save_cflags="$CFLAGS"
+CFLAGS="$CFLAGS -Wcast-align -Werror"
+
+dnl ---------------------------------------
+dnl Test whether macro CMSG_NXTHDR is broken
+dnl ---------------------------------------
+AC_MSG_CHECKING(whether the build environment has broken CMSG_NXTHDR macro)
+AC_TRY_COMPILE([
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+],
+[
+#ifdef CMSG_NXTHDR
+    struct cmsghdr buffer[100];
+    struct cmsghdr *cmsgp = &buffer[0];
+    struct msghdr msghdr;
+    memset(&msghdr, 0, sizeof(msghdr));
+    cmsgp = CMSG_NXTHDR(&msghdr, cmsgp);
+#endif
+    exit(0);
+],
+    [AC_MSG_RESULT(no)],
+    [AC_DEFINE(HAVE_BROKEN_MACRO_CMSG_NXTHDR, 1,
+	       [Define to 1 if you have broken CMSG_NXTHDR macro])
+     AC_MSG_RESULT(yes)])
+
+dnl Restore the original CFLAGS
+CFLAGS="${_save_cflags}"
 
 dnl ---------------------------------------------------------------------------
 dnl IPv4 raw socket
