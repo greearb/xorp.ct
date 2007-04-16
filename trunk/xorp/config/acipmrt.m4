@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.8 2007/04/14 01:35:06 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.9 2007/04/14 07:00:48 pavlin Exp $
 dnl
 
 dnl
@@ -391,7 +391,7 @@ dnl -----------------------------------------------------------
 
 ipv6_multicast="no"
 if test "${ipv6}" = "yes" ; then
-    AC_MSG_CHECKING(whether the system IPv4 stack supports IPv6 multicast)
+    AC_MSG_CHECKING(whether the system IPv6 stack supports IPv6 multicast)
     AC_TRY_COMPILE([
 ${test_ipv6_multicast_headers}
 ],
