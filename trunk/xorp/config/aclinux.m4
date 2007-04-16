@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aclinux.m4,v 1.2 2006/08/30 16:07:20 pavlin Exp $
+dnl $XORP: xorp/config/aclinux.m4,v 1.3 2007/04/14 01:35:06 pavlin Exp $
 dnl
 
 dnl
@@ -174,7 +174,7 @@ ${test_broken_netlink_macro_headers}
     size_t buffer_bytes = sizeof(buffer);
     nlh = NLMSG_NEXT(nlh, buffer_bytes);
 #endif
-    exit(0);
+    return(0);
 ],
     [AC_MSG_RESULT(no)],
     [AC_DEFINE(HAVE_BROKEN_MACRO_NLMSG_NEXT, 1,
@@ -195,7 +195,7 @@ ${test_broken_netlink_macro_headers}
     size_t buffer_bytes = sizeof(buffer);
     rtattr = RTA_NEXT(rtattr, buffer_bytes);
 #endif
-    exit(0);
+    return(0);
 ],
     [AC_MSG_RESULT(no)],
     [AC_DEFINE(HAVE_BROKEN_MACRO_RTA_NEXT, 1,
@@ -215,7 +215,7 @@ ${test_broken_netlink_macro_headers}
     struct rtattr *rtattr = &buffer[0];
     rtattr = IFA_RTA(rtattr);
 #endif
-    exit(0);
+    return(0);
 ],
     [AC_MSG_RESULT(no)],
     [AC_DEFINE(HAVE_BROKEN_MACRO_IFA_RTA, 1,
@@ -235,7 +235,7 @@ ${test_broken_netlink_macro_headers}
     struct rtattr *rtattr = &buffer[0];
     rtattr = IFLA_RTA(rtattr);
 #endif
-    exit(0);
+    return(0);
 ],
     [AC_MSG_RESULT(no)],
     [AC_DEFINE(HAVE_BROKEN_MACRO_IFLA_RTA, 1,
@@ -255,7 +255,7 @@ ${test_broken_netlink_macro_headers}
     struct rtattr *rtattr = &buffer[0];
     rtattr = RTM_RTA(rtattr);
 #endif
-    exit(0);
+    return(0);
 ],
     [AC_MSG_RESULT(no)],
     [AC_DEFINE(HAVE_BROKEN_MACRO_RTM_RTA, 1,

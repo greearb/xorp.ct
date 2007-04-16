@@ -31584,7 +31584,7 @@ main ()
     memset(&msghdr, 0, sizeof(msghdr));
     cmsgp = CMSG_NXTHDR(&msghdr, cmsgp);
 #endif
-    exit(0);
+    return(0);
 
   ;
   return 0;
@@ -36867,7 +36867,7 @@ main ()
     size_t buffer_bytes = sizeof(buffer);
     nlh = NLMSG_NEXT(nlh, buffer_bytes);
 #endif
-    exit(0);
+    return(0);
 
   ;
   return 0;
@@ -36928,7 +36928,7 @@ main ()
     size_t buffer_bytes = sizeof(buffer);
     rtattr = RTA_NEXT(rtattr, buffer_bytes);
 #endif
-    exit(0);
+    return(0);
 
   ;
   return 0;
@@ -36988,7 +36988,7 @@ main ()
     struct rtattr *rtattr = &buffer[0];
     rtattr = IFA_RTA(rtattr);
 #endif
-    exit(0);
+    return(0);
 
   ;
   return 0;
@@ -37048,7 +37048,7 @@ main ()
     struct rtattr *rtattr = &buffer[0];
     rtattr = IFLA_RTA(rtattr);
 #endif
-    exit(0);
+    return(0);
 
   ;
   return 0;
@@ -37108,7 +37108,7 @@ main ()
     struct rtattr *rtattr = &buffer[0];
     rtattr = RTM_RTA(rtattr);
 #endif
-    exit(0);
+    return(0);
 
   ;
   return 0;

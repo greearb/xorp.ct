@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.12 2007/04/14 07:00:48 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.13 2007/04/16 18:57:47 pavlin Exp $
 dnl
 
 dnl
@@ -63,7 +63,7 @@ AC_TRY_COMPILE([
     memset(&msghdr, 0, sizeof(msghdr));
     cmsgp = CMSG_NXTHDR(&msghdr, cmsgp);
 #endif
-    exit(0);
+    return(0);
 ],
     [AC_MSG_RESULT(no)],
     [AC_DEFINE(HAVE_BROKEN_MACRO_CMSG_NXTHDR, 1,
