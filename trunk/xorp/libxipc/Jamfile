@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/libxipc/Jamfile,v 1.1 2007/01/11 22:30:48 bms Exp $
 #
 
 SubDir TOP libxipc ;
@@ -42,16 +42,16 @@ LibraryFromObjects libfinder$(SUFLIB) :
 Main call_xrl : call_xrl.cc ;
 LinkLibraries call_xrl :
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
 Main xorp_finder : finder_main.cc ;
 LinkLibraries xorp_finder :
 	libfinder
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
 #
@@ -62,8 +62,8 @@ if $(MAKE_CHECK) {
  LINKLIBS_REGRESSION_COMMON =
 	libfinder
 	libxipc
-	libxorp
 	libcomm	
+	libxorp
 	;
  REGRESSION_TESTS =
 	test_finder

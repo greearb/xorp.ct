@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mibs/Jamfile,v 1.1 2007/01/11 22:30:48 bms Exp $
+# $XORP: xorp/mibs/Jamfile,v 1.2 2007/03/22 18:10:33 bms Exp $
 #
 
 # XXX: Currently NETSNMPCFLAGS here is hard-coded. This is because in
@@ -53,7 +53,7 @@ if $(BUILD_MIBS) {
  ZSharedLibrary libnetsnmpxorp.so : xorpevents.cc ;
 
  # libraries upon which the above library depends.
- NETSNMPXORP_LIB_COMMON = libxipc libxorp libcomm ;
+ NETSNMPXORP_LIB_COMMON = libxipc libcomm libxorp ;
 
  ZSharedLibrary bgp4_mib_1657 :
 	 bgp4_mib_1657.cc

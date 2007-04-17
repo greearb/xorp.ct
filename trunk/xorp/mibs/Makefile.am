@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/Makefile.am,v 1.35 2005/08/17 01:15:45 pavlin Exp $
+## $XORP: xorp/mibs/Makefile.am,v 1.36 2005/08/18 21:23:08 pavlin Exp $
 ##
 
 # All of the following shared objects will be installed in
@@ -66,8 +66,8 @@ test_xorpevents_LDADD		+= ./libnetsnmpxorp.la
 # -- Libraries and library flags to link the libtoolized shared objects
 
 libnetsnmpxorp_la_LIBADD	 = ../libxipc/libxipc.la
-libnetsnmpxorp_la_LIBADD	+= ../libxorp/libxorp.la
 libnetsnmpxorp_la_LIBADD	+= ../libcomm/libcomm.la
+libnetsnmpxorp_la_LIBADD	+= ../libxorp/libxorp.la
 libnetsnmpxorp_la_LDFLAGS	 = -avoid-version
 
 bgp4_mib_1657_la_LIBADD		 = ./libnetsnmpxorp.la

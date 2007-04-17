@@ -307,11 +307,11 @@ LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/xrl/targets/libribbase.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources

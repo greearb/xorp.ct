@@ -85,8 +85,8 @@ am_call_xrl_OBJECTS = call_xrl.$(OBJEXT)
 call_xrl_OBJECTS = $(am_call_xrl_OBJECTS)
 call_xrl_LDADD = $(LDADD)
 call_xrl_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_finder_OBJECTS = test_finder.$(OBJEXT)
 test_finder_OBJECTS = $(am_test_finder_OBJECTS)
 test_finder_DEPENDENCIES = libfinder.la $(LDADD)
@@ -99,20 +99,20 @@ am_test_finder_messenger_OBJECTS = test_finder_messenger.$(OBJEXT)
 test_finder_messenger_OBJECTS = $(am_test_finder_messenger_OBJECTS)
 test_finder_messenger_LDADD = $(LDADD)
 test_finder_messenger_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_finder_msgs_OBJECTS = test_finder_msgs.$(OBJEXT)
 test_finder_msgs_OBJECTS = $(am_test_finder_msgs_OBJECTS)
 test_finder_msgs_LDADD = $(LDADD)
 test_finder_msgs_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_finder_tcp_OBJECTS = test_finder_tcp.$(OBJEXT)
 test_finder_tcp_OBJECTS = $(am_test_finder_tcp_OBJECTS)
 test_finder_tcp_LDADD = $(LDADD)
 test_finder_tcp_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_finder_to_OBJECTS = test_finder_to.$(OBJEXT)
 test_finder_to_OBJECTS = $(am_test_finder_to_OBJECTS)
 test_finder_to_DEPENDENCIES = libfinder.la $(LDADD)
@@ -120,75 +120,75 @@ am_test_header_OBJECTS = test_header.$(OBJEXT)
 test_header_OBJECTS = $(am_test_header_OBJECTS)
 test_header_LDADD = $(LDADD)
 test_header_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_inproc_OBJECTS = test_inproc.$(OBJEXT)
 test_inproc_OBJECTS = $(am_test_inproc_OBJECTS)
 test_inproc_LDADD = $(LDADD)
 test_inproc_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_lemming_OBJECTS = test_lemming.$(OBJEXT)
 test_lemming_OBJECTS = $(am_test_lemming_OBJECTS)
 test_lemming_LDADD = $(LDADD)
 test_lemming_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_stcp_OBJECTS = test_stcp.$(OBJEXT)
 test_stcp_OBJECTS = $(am_test_stcp_OBJECTS)
 test_stcp_LDADD = $(LDADD)
 test_stcp_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_stcppf_OBJECTS = test_stcppf.$(OBJEXT)
 test_stcppf_OBJECTS = $(am_test_stcppf_OBJECTS)
 test_stcppf_LDADD = $(LDADD)
 test_stcppf_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_sudp_OBJECTS = test_sudp.$(OBJEXT)
 test_sudp_OBJECTS = $(am_test_sudp_OBJECTS)
 test_sudp_LDADD = $(LDADD)
 test_sudp_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_OBJECTS = test_xrl.$(OBJEXT)
 test_xrl_OBJECTS = $(am_test_xrl_OBJECTS)
 test_xrl_LDADD = $(LDADD)
 test_xrl_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_args_OBJECTS = test_xrl_args.$(OBJEXT)
 test_xrl_args_OBJECTS = $(am_test_xrl_args_OBJECTS)
 test_xrl_args_LDADD = $(LDADD)
 test_xrl_args_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_atom_OBJECTS = test_xrl_atom.$(OBJEXT)
 test_xrl_atom_OBJECTS = $(am_test_xrl_atom_OBJECTS)
 test_xrl_atom_LDADD = $(LDADD)
 test_xrl_atom_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_error_OBJECTS = test_xrl_error.$(OBJEXT)
 test_xrl_error_OBJECTS = $(am_test_xrl_error_OBJECTS)
 test_xrl_error_LDADD = $(LDADD)
 test_xrl_error_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_parser_OBJECTS = test_xrl_parser.$(OBJEXT)
 test_xrl_parser_OBJECTS = $(am_test_xrl_parser_OBJECTS)
 test_xrl_parser_LDADD = $(LDADD)
 test_xrl_parser_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_receiver_OBJECTS = test_xrl_receiver.$(OBJEXT) \
 	test_xrls_base.$(OBJEXT)
 test_xrl_receiver_OBJECTS = $(am_test_xrl_receiver_OBJECTS)
 test_xrl_receiver_LDADD = $(LDADD)
 test_xrl_receiver_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_router_OBJECTS = test_xrl_router.$(OBJEXT)
 test_xrl_router_OBJECTS = $(am_test_xrl_router_OBJECTS)
 test_xrl_router_DEPENDENCIES = libfinder.la $(LDADD)
@@ -197,13 +197,13 @@ am_test_xrl_sender_OBJECTS = test_xrl_sender.$(OBJEXT) \
 test_xrl_sender_OBJECTS = $(am_test_xrl_sender_OBJECTS)
 test_xrl_sender_LDADD = $(LDADD)
 test_xrl_sender_DEPENDENCIES = ./libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_xorp_finder_OBJECTS = finder_main.$(OBJEXT)
 xorp_finder_OBJECTS = $(am_xorp_finder_OBJECTS)
 xorp_finder_DEPENDENCIES = libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -403,11 +403,11 @@ check_SCRIPTS = test_xrl_parser.sh test_finder_deaths.sh test_leaks.sh
 TESTS = $(addsuffix $(EXEEXT),$(test_programs)) $(check_SCRIPTS)
 
 # -- Libraries and library flags to link the binary programs
-LDADD = ./libfinder.la ./libxipc.la $(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+LDADD = ./libfinder.la ./libxipc.la $(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 xorp_finder_LDADD = libfinder.la ./libxipc.la \
-	$(top_builddir)/libxorp/libxorp.la \
-	$(top_builddir)/libcomm/libcomm.la
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 call_xrl_SOURCES = call_xrl.cc

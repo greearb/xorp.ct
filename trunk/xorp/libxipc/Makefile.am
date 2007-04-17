@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.44 2005/08/18 15:32:38 bms Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.45 2006/08/16 22:47:47 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -40,13 +40,13 @@ TESTS		 = $(addsuffix $(EXEEXT),$(test_programs)) $(check_SCRIPTS)
 # -- Libraries and library flags to link the binary programs
 LDADD		 = ./libfinder.la
 LDADD		+= ./libxipc.la
-LDADD		+= $(top_builddir)/libxorp/libxorp.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
+LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 xorp_finder_LDADD		 = libfinder.la
 xorp_finder_LDADD		+= ./libxipc.la
-xorp_finder_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 xorp_finder_LDADD		+= $(top_builddir)/libcomm/libcomm.la
+xorp_finder_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 call_xrl_SOURCES		 = call_xrl.cc

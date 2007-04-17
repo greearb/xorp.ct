@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/ospf/Jamfile,v 1.1 2007/01/11 22:30:49 bms Exp $
 #
 
 SubDir TOP ospf ;
@@ -46,10 +46,10 @@ LINKLIBS_OSPF_COMMON =
 	libfearawpkt4
 	libfearawpkt6
 	libfeaifmgrmirrorbase
+	libproto
 	libxipc
 	libcomm
 	libxorp
-	libproto
 	;
 
 Main xorp_ospfv2 : xorp_ospfv2.cc ;

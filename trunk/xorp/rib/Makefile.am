@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.38 2004/11/23 22:43:47 bms Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.40 2005/08/04 11:52:32 bms Exp $
 ##
 
 SUBDIRS = . tools
@@ -51,11 +51,11 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 LDADD		+= $(top_builddir)/xrl/targets/libribbase.la
-LDADD		+= $(top_builddir)/libxipc/libfinder.la
 LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+LDADD		+= $(top_builddir)/libproto/libproto.la
+LDADD		+= $(top_builddir)/libxipc/libfinder.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
-LDADD		+= $(top_builddir)/libproto/libproto.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 

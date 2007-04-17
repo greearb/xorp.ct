@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.24 2006/03/28 01:50:07 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.25 2006/10/12 20:22:06 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -45,10 +45,10 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+LDADD		+= $(top_builddir)/libproto/libproto.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
-LDADD		+= $(top_builddir)/libproto/libproto.la
 
 # -- Program Sources
 xorp_ospfv2_SOURCES		 = xorp_ospfv2.cc

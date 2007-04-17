@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/rib/Jamfile,v 1.1 2007/01/11 22:30:52 bms Exp $
 #
 
 SubDir TOP rib ;
@@ -47,10 +47,10 @@ LINKLIBS_RIB_COMMON =
 	libprofileclientxif
 	libfeaifmgrmirrorbase
 	libribbase
-	libfinder
 	libpolicybackend
 	libpolicycommon
 	libproto
+	libfinder
 	libxipc
 	libcomm
 	libxorp
