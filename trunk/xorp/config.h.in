@@ -318,6 +318,9 @@
 /* Define to 1 if you have the <pcreposix.h> header file. */
 #undef HAVE_PCREPOSIX_H
 
+/* Define to 1 if you have the <pcre.h> header file. */
+#undef HAVE_PCRE_H
+
 /* Define to 1 if you have the <process.h> header file. */
 #undef HAVE_PROCESS_H
 

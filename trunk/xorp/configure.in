@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.196 2007/04/17 00:11:41 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.197 2007/04/17 00:43:35 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.196 2007/04/17 00:11:41 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.197 2007/04/17 00:43:35 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -480,7 +480,15 @@ AC_CHECK_TYPES([int8_t, int16_t, int32_t, int64_t,
 dnl
 dnl Check for the PCRE POSIX compatibility header (equivalent to regex.h).
 dnl
-AC_CHECK_HEADERS([pcreposix.h])
+
+dnl XXX: Header file <pcreposix.h> might need <pcre.h>
+AC_CHECK_HEADERS([pcre.h])
+AC_CHECK_HEADERS([pcreposix.h], [], [],
+[
+#ifdef HAVE_PCRE_H
+#include <pcre.h>
+#endif
+])
 
 dnl
 dnl Check for headers commonly found on UNIX systems (BSD, SYSV etc).
@@ -578,7 +586,30 @@ dnl
 dnl Check for Windows-specific header files.
 dnl
 if test "${_USING_WINDOWS}" = "1" ; then
-    AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h iphlpapi.h ipifcons.h iptypes.h iprtrmib.h routprot.h rtinfo.h rtmv2.h mgm.h mprapi.h mprerror.h stm.h process.h])
+    AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h])
+
+    dnl XXX: Header files <iphlpapi.h> <iptypes.h> <iprtrmib.h> <routprot.h>
+    dnl <rtmv2.h> <mprapi.h> and <stm.h> might need <windows.h>
+    dnl XXX: Header files <ipifcons.h> <rtinfo.h> <mprerror.h> and <process.h>
+    dnl might not require <windows.h> but we add them here to play it safe.
+    AC_CHECK_HEADERS([iphlpapi.h iptypes.h iprtrmib.h routprot.h rtmv2.h mprapi.h stm.h ipifcons.h rtinfo.h mprerror.h process.h], [], [],
+[
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+])
+
+    dnl XXX: Header file <mgm.h> might need <windows.h> and <iprtrmib.h>
+    AC_CHECK_HEADERS([mgm.h], [], [],
+[
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+#ifdef HAVE_IPRTRMIB_H
+#include <iprtrmib.h>
+#endif
+])
+
 fi
 
 dnl
