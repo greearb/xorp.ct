@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.195 2007/04/16 23:26:39 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.196 2007/04/17 00:11:41 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.195 2007/04/16 23:26:39 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.196 2007/04/17 00:11:41 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -682,7 +682,11 @@ AC_TYPE_SIGNAL
 AC_HEADER_TIOCGWINSZ
 
 dnl XXX needed by cli code. C90
+dnl XXX: The AC_FUNC_STRFTIME check might fail on NetBSD-1.3 and OpenBSD-4.0
+dnl if the compiler is C++ hence we explicitly use the C compiler.
+AC_LANG_PUSH(C)
 AC_FUNC_STRFTIME
+AC_LANG_POP(C)
 
 dnl XXX needed by libxipc. C99
 AC_FUNC_STRTOD
