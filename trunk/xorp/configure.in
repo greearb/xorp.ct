@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.194 2007/04/14 08:59:47 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.195 2007/04/16 23:26:39 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.194 2007/04/14 08:59:47 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.195 2007/04/16 23:26:39 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -563,11 +563,11 @@ AC_CHECK_HEADERS([netinet/ip.h], [], [],
 dnl
 dnl Check for BSD-specific header files.
 dnl
-AC_CHECK_HEADERS([sys/sysctl.h])
 
-dnl XXX: Header file <sys/linker.h> might need <sys/param.h>
+dnl XXX: Header files <sys/linker.h> and <sys/sysctl.h> might need
+dnl <sys/param.h>
 AC_CHECK_HEADERS([sys/param.h])
-AC_CHECK_HEADERS([sys/linker.h], [], [],
+AC_CHECK_HEADERS([sys/linker.h sys/sysctl.h], [], [],
 [
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -584,7 +584,23 @@ fi
 dnl
 dnl Check for Ethernet-related types and functions.
 dnl
-AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if.h net/if_ether.h netinet/in.h netinet/ether.h])
+AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h netinet/ether.h])
+
+dnl XXX: Header file <net/if_ether.h> might need <sys/types.h>
+dnl <sys/socket.h> and <net/if.h>
+AC_CHECK_HEADERS([sys/types.h sys/socket.h net/if.h])
+AC_CHECK_HEADERS([net/if_ether.h], [], [],
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+])
 
 dnl XXX: Header file <netinet/if_ether.h> might need <sys/types.h>
 dnl <sys/socket.h> <net/if.h> and <netinet/in.h>
