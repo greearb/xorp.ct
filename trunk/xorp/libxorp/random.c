@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.9 2007/04/14 08:59:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.10 2007/04/17 06:19:21 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -417,7 +417,7 @@ xorp_initstate(seed, arg_state, n)
 	long n;				/* # bytes of state info */
 {
 	char *ostate = (char *)(&state[-1]);
-	uint32_t *int_arg_state = (uint32_t *)arg_state;
+	uint32_t *int_arg_state = (uint32_t *)(void *)arg_state;
 
 	if (rand_type == TYPE_0)
 		state[-1] = rand_type;
@@ -482,7 +482,7 @@ char *
 xorp_setstate(arg_state)
 	char *arg_state;		/* pointer to state array */
 {
-	uint32_t *new_state = (uint32_t *)arg_state;
+	uint32_t *new_state = (uint32_t *)(void *)arg_state;
 	uint32_t type = new_state[0] % MAX_TYPES;
 	uint32_t rear = new_state[0] / MAX_TYPES;
 	char *ostate = (char *)(&state[-1]);
