@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.9 2007/04/14 07:00:48 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.10 2007/04/16 18:55:14 pavlin Exp $
 dnl
 
 dnl
@@ -144,7 +144,27 @@ dnl <net/ip_mroute/ip_mroute.h>. The purpose of moving it there is
 dnl questionable, but hopefully in the future it will be back to its original
 dnl location.
 dnl
-AC_CHECK_HEADERS([net/ip_mroute/ip_mroute.h])
+
+dnl XXX: Header file <net/ip_mroute/ip_mroute.h> might need <sys/types.h>
+dnl <sys/time.h> <sys/socket.h> <net/route.h> and <netinet/in.h>
+AC_CHECK_HEADERS([net/ip_mroute/ip_mroute.h], [], [],
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_ROUTE_H
+#include <net/route.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+])
 
 dnl -------------------------------------------------
 dnl Check for typical Linux multicast header files
