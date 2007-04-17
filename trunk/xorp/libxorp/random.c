@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.8 2007/02/16 22:46:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.9 2007/04/14 08:59:50 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -72,9 +72,15 @@
  * SUCH DAMAGE.
  */
 
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>          /* for srandomdev() */
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>             /* for srandomdev() */
+#endif
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
