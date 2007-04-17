@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aclinux.m4,v 1.3 2007/04/14 01:35:06 pavlin Exp $
+dnl $XORP: xorp/config/aclinux.m4,v 1.4 2007/04/16 19:12:15 pavlin Exp $
 dnl
 
 dnl
@@ -12,7 +12,7 @@ dnl -----------------------------------------------
 dnl Check for header files that might be used later
 dnl -----------------------------------------------
 
-AC_CHECK_HEADERS([sys/types.h sys/socket.h inttypes.h stdint.h])
+AC_CHECK_HEADERS([inttypes.h stdint.h sys/types.h sys/socket.h])
 
 
 dnl -------------------------------------
@@ -22,6 +22,8 @@ dnl
 
 AC_CHECK_HEADERS([linux/types.h linux/socket.h linux/sockios.h])
 
+dnl XXX: Header file <linux/ethtool.h> might need <inttypes.h> <stdint.h>
+dnl and <linux/types.h>
 AC_CHECK_HEADERS([linux/ethtool.h], [], [],
 [
 /*
@@ -35,6 +37,9 @@ AC_CHECK_HEADERS([linux/ethtool.h], [], [],
 #endif
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 typedef uint8_t  u8;
 typedef uint16_t u16;

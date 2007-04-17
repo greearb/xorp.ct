@@ -36236,7 +36236,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-for ac_header in sys/types.h sys/socket.h inttypes.h stdint.h
+for ac_header in inttypes.h stdint.h sys/types.h sys/socket.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if { as_var=$as_ac_Header; eval "test \"\${$as_var+set}\" = set"; }; then
@@ -36558,6 +36558,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 typedef uint8_t  u8;
 typedef uint16_t u16;
