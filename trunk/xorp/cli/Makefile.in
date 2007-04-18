@@ -54,16 +54,16 @@ am_libcli_la_OBJECTS = cli_client.lo cli_command.lo \
 libcli_la_OBJECTS = $(am_libcli_la_OBJECTS)
 am_test_cli_OBJECTS = test_cli.$(OBJEXT)
 test_cli_OBJECTS = $(am_test_cli_OBJECTS)
-test_cli_LDADD = $(LDADD)
-test_cli_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/cli/libtecla/libtecla.a \
+am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/cli/libtecla/libtecla.a \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
+test_cli_DEPENDENCIES = $(top_builddir)/libxipc/libfinder.la \
+	$(am__DEPENDENCIES_1)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -237,20 +237,21 @@ SUBDIRS = libtecla . tools
 noinst_LTLIBRARIES = libcli.la
 
 # -- Libraries and library flags to link the binary programs
+### XRL libraries
 ### CLI libraries
 ### XORP misc libraries
-LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/cli/libtecla/libtecla.a \
-	@CLI_CURSES_LIB@ \
+LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 test_cli_SOURCES = test_cli.cc
+test_cli_LDADD = $(top_builddir)/libxipc/libfinder.la $(LDADD)
 
 # -- Library Sources
 libcli_la_SOURCES = cli_module.h cli_client.hh cli_command.hh \
@@ -259,7 +260,7 @@ libcli_la_SOURCES = cli_module.h cli_client.hh cli_command.hh \
 	cli_node_internal_commands.cc cli_node_net.cc xrl_cli_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = libtecla
+EXTRA_DIST = libtecla xrl_cli_shell_funcs.sh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
