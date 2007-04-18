@@ -210,7 +210,7 @@ ETAGS_ARGS = --c++
 
 # --- Libraries and utilities (directory ordering is important)
 
-# --- Dual Libraries/Applications (directory ordering should not matter)
+# --- Applications used by other applications (directory ordering is important)
 
 # --- Applications (directory ordering should not matter)
 
@@ -218,7 +218,7 @@ ETAGS_ARGS = --c++
 
 # --- Conditional applications
 SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli \
-	policy utils fea fib2mrib mld6igmp rib bgp ospf pim rip rtrmgr \
+	policy utils fea rib bgp fib2mrib mld6igmp ospf pim rip rtrmgr \
 	static_routes etc contrib @MIBS@
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
