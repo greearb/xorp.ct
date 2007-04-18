@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.19 2006/03/16 00:03:46 pavlin Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.20 2007/02/16 22:45:29 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -53,6 +53,13 @@ public:
      * @return a reference to the XrlRouter (@ref XrlRouter) instance.
      */
     XrlRouter&	xrl_router() { return *this; }
+
+    /**
+     * Get a const reference to the XrlRouter instance.
+     *
+     * @return a const reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    const XrlRouter& xrl_router() const { return *this; }
 
 protected:
     //
