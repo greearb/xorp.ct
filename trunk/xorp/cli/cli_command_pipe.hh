@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command_pipe.hh,v 1.13 2007/02/16 22:45:28 pavlin Exp $
+// $XORP: xorp/cli/cli_command_pipe.hh,v 1.14 2007/04/17 20:44:49 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_PIPE_HH__
@@ -31,13 +31,16 @@
 
 #ifdef HAVE_REGEX_H
 #include <regex.h>
-#endif
+#else // ! HAVE_REGEX_H
+
 #ifdef HAVE_PCRE_H
 #include <pcre.h>
 #endif
 #ifdef HAVE_PCREPOSIX_H
 #include <pcreposix.h>
 #endif
+
+#endif // ! HAVE_REGEX_H
 
 #include "cli_command.hh"
 
