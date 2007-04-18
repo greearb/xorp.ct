@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/mld6igmp/Jamfile,v 1.1 2007/01/11 22:30:48 bms Exp $
 #
 
 SubDir TOP mld6igmp ;
@@ -9,11 +9,7 @@ SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
-SubIncludeOnce TOP libfeaclient ;
 SubIncludeOnce TOP mrt ;
-SubIncludeOnce TOP cli ;
-SubIncludeOnce TOP cli libtecla ;
-SubIncludeOnce TOP fea ;
 SubDir TOP mld6igmp ;
 
 Library libmld6igmp :
@@ -25,27 +21,13 @@ Library libmld6igmp :
 
 MLD6IGMP_LINKLIBS_COMMON = 
 	libmld6igmp
-	libfindereventnotifierxif
-	libmfeaxif
-	libmld6igmpclientxif
 	libmld6igmpbase
-	libfea
-	libfeafibclientxif
-	libfeaifmgrclientxif
-	libfearawpkt4client
-	libfearawpkt6client
-	libfeabase
-	libfeaifmgrxif
+	libmld6igmpclientxif
+	libmfeaxif
 	libclimanagerxif
-	libmfeaclientxif
-	libmfeabase
+	libfindereventnotifierxif
 	libmrt
-	libcli
-	libtecla
-	libcliprocessorxif
-	libclibase
 	libproto
-	libfinder
 	libxipc
 	libcomm
 	libxorp
@@ -62,46 +44,7 @@ LinkLibraries xorp_mld :
 	;
 
 if $(MAKE_CHECK) {
- Main test_mld6igmp : test_mld6igmp.cc ;
 
- LinkLibraries test_mld6igmp :
-	libmld6igmp
-	libfindereventnotifierxif
-	libmfeaxif
-	libmld6igmpclientxif
-	libmld6igmpbase
-	libfea
-	libfeafibclientxif
-	libfeaifmgrclientxif
-	libfearawpkt4client
-	libfearawpkt6client
-	libfeabase
-	libfeaifmgrclientxif
-	libfeaifmgrxif
-	libfeaclient
-	libfeaifmgrmirrorxif
-	libfeaifmgrreplicatorxif
-	libfeaifmgrmirrorbase
-	libclimanagerxif
-	libmfeaclientxif
-	libmfeabase
-	libmrt
-	libcli
-	libtecla
-	libcliprocessorxif
-	libclibase
-	libsocket4userxif
-	libsocket4xif
-	libsocket6userxif
-	libsocket6xif
-	libsocketserverbase
-	libprofileclientxif
-	libproto
-	libfinder
-	libxipc
-	libxorp
-	libcomm
-	;
 }
 
 InstallBin $(PREFIX)/mld6igmp : xorp_igmp xorp_mld ;

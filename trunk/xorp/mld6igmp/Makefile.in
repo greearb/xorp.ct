@@ -36,7 +36,7 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = xorp_igmp$(EXEEXT) xorp_mld$(EXEEXT)
 TESTS =
-check_PROGRAMS = test_mld6igmp$(EXEEXT)
+check_PROGRAMS =
 subdir = mld6igmp
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -58,68 +58,17 @@ libmld6igmp_la_OBJECTS = $(am_libmld6igmp_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_test_mld6igmp_OBJECTS = test_mld6igmp.$(OBJEXT)
-test_mld6igmp_OBJECTS = $(am_test_mld6igmp_OBJECTS)
-am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-test_mld6igmp_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
-	$(top_builddir)/libxorp/libxorp.la
 am_xorp_igmp_OBJECTS = xorp_igmp.$(OBJEXT)
 xorp_igmp_OBJECTS = $(am_xorp_igmp_OBJECTS)
 xorp_igmp_LDADD = $(LDADD)
 xorp_igmp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
 	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -127,26 +76,13 @@ am_xorp_mld_OBJECTS = xorp_mld.$(OBJEXT)
 xorp_mld_OBJECTS = $(am_xorp_mld_OBJECTS)
 xorp_mld_LDADD = $(LDADD)
 xorp_mld_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
 	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -171,10 +107,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libmld6igmp_la_SOURCES) $(test_mld6igmp_SOURCES) \
-	$(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
-DIST_SOURCES = $(libmld6igmp_la_SOURCES) $(test_mld6igmp_SOURCES) \
-	$(xorp_igmp_SOURCES) $(xorp_mld_SOURCES)
+SOURCES = $(libmld6igmp_la_SOURCES) $(xorp_igmp_SOURCES) \
+	$(xorp_mld_SOURCES)
+DIST_SOURCES = $(libmld6igmp_la_SOURCES) $(xorp_igmp_SOURCES) \
+	$(xorp_mld_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -314,35 +250,16 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libmld6igmp.la
 
 # -- Libraries and library flags to link the binary programs
-### MLD6IGMP libraries
-#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
-### MFEA libraries
-# FEA-specific begin
-# FEA-specific end
-### MRT libraries
-### CLI libraries
+### XRL libraries
 ### XORP misc libraries
 LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
 	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -350,19 +267,6 @@ LDADD = $(noinst_LTLIBRARIES) \
 # -- Program Sources
 xorp_igmp_SOURCES = xorp_igmp.cc
 xorp_mld_SOURCES = xorp_mld.cc
-test_mld6igmp_SOURCES = test_mld6igmp.cc
-test_mld6igmp_LDADD = $(LDADD) \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
-	$(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libmld6igmp_la_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h \
@@ -373,7 +277,7 @@ libmld6igmp_la_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h \
 	mld6igmp_source_record.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = configure_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
+EXTRA_DIST = command_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -456,9 +360,6 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-test_mld6igmp$(EXEEXT): $(test_mld6igmp_OBJECTS) $(test_mld6igmp_DEPENDENCIES) 
-	@rm -f test_mld6igmp$(EXEEXT)
-	$(CXXLINK) $(test_mld6igmp_OBJECTS) $(test_mld6igmp_LDADD) $(LIBS)
 xorp_igmp$(EXEEXT): $(xorp_igmp_OBJECTS) $(xorp_igmp_DEPENDENCIES) 
 	@rm -f xorp_igmp$(EXEEXT)
 	$(CXXLINK) $(xorp_igmp_OBJECTS) $(xorp_igmp_LDADD) $(LIBS)
@@ -479,7 +380,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mld6igmp_proto.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mld6igmp_source_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mld6igmp_vif.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_mld6igmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_igmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_mld.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_mld6igmp_node.Plo@am__quote@
