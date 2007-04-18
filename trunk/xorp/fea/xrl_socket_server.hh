@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.16 2007/03/29 22:19:52 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.17 2007/03/29 22:45:45 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -58,6 +58,27 @@ public:
      * @return true on success, false on failure.
      */
     bool shutdown();
+
+    /**
+     * Test whether the service is running.
+     *
+     * @return true if the service is still running, otherwise false.
+     */
+    bool is_running() const;
+
+    /**
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    XrlRouter&	xrl_router() { return *_r; }
+
+    /**
+     * Get a const reference to the XrlRouter instance.
+     *
+     * @return a const reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    const XrlRouter& xrl_router() const { return *_r; }
 
     /**
      * Get count of number of socket owners.  These are XrlTargets that own

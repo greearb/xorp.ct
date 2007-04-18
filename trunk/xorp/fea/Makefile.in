@@ -36,10 +36,8 @@ build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
-noinst_PROGRAMS = demo_fea_ifmgr_client$(EXEEXT)
-check_PROGRAMS = test_ifmanager_transaction$(EXEEXT) \
-	test_mfea$(EXEEXT) test_rawsock4$(EXEEXT) \
-	test_xrl_sockets4_udp$(EXEEXT) test_xrl_sockets4_tcp$(EXEEXT)
+check_PROGRAMS = test_xrl_sockets4_tcp$(EXEEXT) \
+	test_xrl_sockets4_udp$(EXEEXT)
 subdir = fea
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -53,12 +51,13 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libfea_la_LIBADD =
-am_libfea_la_OBJECTS = addr_table.lo click_socket.lo \
-	fti_transaction.lo fticonfig.lo fticonfig_entry_get.lo \
-	fticonfig_entry_get_click.lo fticonfig_entry_get_dummy.lo \
-	fticonfig_entry_get_iphelper.lo fticonfig_entry_get_netlink.lo \
-	fticonfig_entry_get_rtmv2.lo fticonfig_entry_get_rtsock.lo \
-	fticonfig_entry_observer.lo fticonfig_entry_observer_dummy.lo \
+am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
+	fea_node.lo fti_transaction.lo fticonfig.lo \
+	fticonfig_entry_get.lo fticonfig_entry_get_click.lo \
+	fticonfig_entry_get_dummy.lo fticonfig_entry_get_iphelper.lo \
+	fticonfig_entry_get_netlink.lo fticonfig_entry_get_rtmv2.lo \
+	fticonfig_entry_get_rtsock.lo fticonfig_entry_observer.lo \
+	fticonfig_entry_observer_dummy.lo \
 	fticonfig_entry_observer_iphelper.lo \
 	fticonfig_entry_observer_netlink.lo \
 	fticonfig_entry_observer_rtmv2.lo \
@@ -89,77 +88,26 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo \
 	ifconfig_observer_dummy.lo ifconfig_observer_iphelper.lo \
 	ifconfig_observer_netlink.lo ifconfig_observer_rtsock.lo \
 	ifconfig_parse_ifaddrs.lo ifconfig_parse_ifreq.lo \
-	ifconfig_parse_nlm.lo ifconfig_parse_rtm.lo ifconfig_set.lo \
-	ifconfig_set_click.lo ifconfig_set_dummy.lo \
-	ifconfig_set_ioctl.lo ifconfig_set_iphelper.lo \
-	ifconfig_set_netlink.lo ifmanager_transaction.lo iftree.lo \
-	libfeaclient_bridge.lo mfea_config.lo mfea_dataflow.lo \
-	mfea_mrouter.lo mfea_node.lo mfea_node_cli.lo \
-	mfea_proto_comm.lo mfea_vif.lo netlink_socket.lo \
-	netlink_socket_utils.lo nexthop_port_mapper.lo \
-	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
-	pa_table.lo pa_transaction.lo profile_vars.lo rawsock.lo \
-	rawsock4.lo rawsock6.lo routing_socket.lo \
+	ifconfig_parse_nlm.lo ifconfig_parse_rtm.lo \
+	ifconfig_reporter.lo ifconfig_set.lo ifconfig_set_click.lo \
+	ifconfig_set_dummy.lo ifconfig_set_ioctl.lo \
+	ifconfig_set_iphelper.lo ifconfig_set_netlink.lo \
+	ifmanager_transaction.lo iftree.lo libfeaclient_bridge.lo \
+	mfea_config.lo mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo \
+	mfea_node_cli.lo mfea_proto_comm.lo mfea_vif.lo \
+	netlink_socket.lo netlink_socket_utils.lo \
+	nexthop_port_mapper.lo pa_backend_dummy.lo pa_backend_ipfw2.lo \
+	pa_entry.lo pa_table.lo pa_transaction.lo profile_vars.lo \
+	rawsock.lo rawsock4.lo rawsock6.lo routing_socket.lo \
 	routing_socket_utils.lo win_rtm_pipe.lo win_support.lo \
-	xrl_packet_acl.lo xrl_fti.lo xrl_ifmanager.lo xrl_ifupdate.lo \
+	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
+	xrl_fea_target.lo xrl_fti.lo xrl_ifmanager.lo xrl_ifupdate.lo \
 	xrl_mfea_node.lo xrl_rawsock4.lo xrl_rawsock6.lo \
-	xrl_socket_cmds.lo xrl_socket_server.lo xrl_target.lo
+	xrl_socket_cmds.lo xrl_socket_server.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_demo_fea_ifmgr_client_OBJECTS = demo_fea_ifmgr_client.$(OBJEXT)
-demo_fea_ifmgr_client_OBJECTS = $(am_demo_fea_ifmgr_client_OBJECTS)
-demo_fea_ifmgr_client_DEPENDENCIES =  \
-	$(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_ifmanager_transaction_OBJECTS =  \
-	test_ifmanager_transaction.$(OBJEXT)
-test_ifmanager_transaction_OBJECTS =  \
-	$(am_test_ifmanager_transaction_OBJECTS)
-test_ifmanager_transaction_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_mfea_OBJECTS = test_mfea.$(OBJEXT)
-test_mfea_OBJECTS = $(am_test_mfea_OBJECTS)
-test_mfea_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-am_test_rawsock4_OBJECTS = test_rawsock4.$(OBJEXT)
-test_rawsock4_OBJECTS = $(am_test_rawsock4_OBJECTS)
-test_rawsock4_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
+PROGRAMS = $(bin_PROGRAMS)
 am_test_xrl_sockets4_tcp_OBJECTS = test_xrl_sockets4_tcp.$(OBJEXT)
 test_xrl_sockets4_tcp_OBJECTS = $(am_test_xrl_sockets4_tcp_OBJECTS)
 test_xrl_sockets4_tcp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
@@ -186,8 +134,9 @@ test_xrl_sockets4_udp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
-am_xorp_fea_OBJECTS = fea.$(OBJEXT)
+am_xorp_fea_OBJECTS = xorp_fea.$(OBJEXT)
 xorp_fea_OBJECTS = $(am_xorp_fea_OBJECTS)
+xorp_fea_LDADD = $(LDADD)
 xorp_fea_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
@@ -218,9 +167,10 @@ xorp_fea_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
-am_xorp_fea_dummy_OBJECTS = xorp_fea_dummy-fea.$(OBJEXT)
+am_xorp_fea_dummy_OBJECTS = xorp_fea_dummy-xorp_fea.$(OBJEXT)
 xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
-am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
+xorp_fea_dummy_LDADD = $(LDADD)
+xorp_fea_dummy_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -250,7 +200,6 @@ am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
-xorp_fea_dummy_DEPENDENCIES = $(am__DEPENDENCIES_1)
 xorp_fea_dummy_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) \
 	$(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
@@ -278,14 +227,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
-	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
-	$(test_rawsock4_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
+SOURCES = $(libfea_la_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
 	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
 	$(xorp_fea_dummy_SOURCES)
-DIST_SOURCES = $(libfea_la_SOURCES) $(demo_fea_ifmgr_client_SOURCES) \
-	$(test_ifmanager_transaction_SOURCES) $(test_mfea_SOURCES) \
-	$(test_rawsock4_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
+DIST_SOURCES = $(libfea_la_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
 	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
 	$(xorp_fea_dummy_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -436,21 +381,14 @@ top_srcdir = @top_srcdir@
 # -- Subdirectories
 SUBDIRS = . tools
 bin_SCRIPTS = xorp_fea_click_config_generator
-check_SCRIPTS = test_add_route.sh test_config_interface.sh \
-	test_xrl_sockets4_udp.sh test_xrl_sockets4_tcp.sh
-
-# -- Test Programs and Scripts
-#TESTS			 = $(check_SCRIPTS)
-TESTS = test_xrl_sockets4_udp.sh test_xrl_sockets4_tcp.sh \
-	test_rawsock4$(EXEEXT) test_ifmanager_transaction$(EXEEXT)
+check_SCRIPTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
+TESTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la
 
-# -- Sources and Linkage for xorp_fea
-xorp_fea_SOURCES = fea.cc
-
-### FEA XRL libraries
+# -- Libraries and library flags to link the binary programs
+### XRL libraries
 ### MFEA XRL libraries
 ### MRT libraries
 ### CLI libraries
@@ -459,7 +397,7 @@ xorp_fea_SOURCES = fea.cc
 ### socket server libraries and related
 ### XRL client for Profile
 ### XORP misc libraries
-xorp_fea_LDADD = $(noinst_LTLIBRARIES) \
+LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -490,127 +428,38 @@ xorp_fea_LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
-# -- Sources and Linkage for xorp_fea_dummy
+# -- Program Sources
+xorp_fea_SOURCES = xorp_fea.cc
 xorp_fea_dummy_CXXFLAGS = -DFEA_DUMMY
-xorp_fea_dummy_SOURCES = fea.cc
-xorp_fea_dummy_LDADD = $(xorp_fea_LDADD)
-
-# -- Sources and Linkage for test_mfea
-test_mfea_SOURCES = test_mfea.cc
-
-# FEA-specific begin
-# FEA-specific end
-### MRT libraries
-### CLI libraries
-### libfeaclient libraries
-### socket server libraries and releated
-### XRL client for Profile
-### XORP misc libraries
-test_mfea_LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-
-# -- Sources and Linkage for test_ifmanager_transaction
-test_ifmanager_transaction_SOURCES = test_ifmanager_transaction.cc
-test_ifmanager_transaction_LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/libxorp/libxorp.la
-
-# -- Sources and Linkages for test_rawsock4
-test_rawsock4_SOURCES = test_rawsock4.cc
-test_rawsock4_LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-
-# -- Sources and Linkage for test_xrl_sockets
-test_xrl_sockets4_udp_SOURCES = test_xrl_sockets4_udp.cc
-test_xrl_sockets4_udp_LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
-	$(top_builddir)/xrl/targets/libtestsocket4.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
-test_xrl_sockets4_tcp_LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
-	$(top_builddir)/xrl/targets/libtestsocket4.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-
-# -- Sources and Linkage for demo_fea_ifmgr_client
-demo_fea_ifmgr_client_SOURCES = demo_fea_ifmgr_client.cc
-demo_fea_ifmgr_client_LDADD =  \
-	$(top_builddir)/xrl/targets/libdemofeaifmgrclientbase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
+xorp_fea_dummy_SOURCES = xorp_fea.cc
 
 # -- Library Sources
 libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
-	click_socket.hh fte.hh fti.hh fti_transaction.hh fticonfig.hh \
-	fticonfig_entry_get.hh fticonfig_entry_observer.hh \
-	fticonfig_entry_set.hh fticonfig_table_get.hh \
-	fticonfig_table_observer.hh fticonfig_table_set.hh ifconfig.hh \
-	ifconfig_addr_table.hh ifconfig_get.hh ifconfig_media.hh \
-	ifconfig_observer.hh ifconfig_set.hh ifmanager.hh \
-	ifmanager_transaction.hh iftree.hh kernel_utils.hh \
-	libfeaclient_bridge.hh mfea_dataflow.hh \
-	mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh \
-	mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh \
-	netlink_socket.hh netlink_socket_utils.hh \
+	click_socket.hh fea_io.hh fea_node.hh fte.hh fti.hh \
+	fti_transaction.hh fticonfig.hh fticonfig_entry_get.hh \
+	fticonfig_entry_observer.hh fticonfig_entry_set.hh \
+	fticonfig_table_get.hh fticonfig_table_observer.hh \
+	fticonfig_table_set.hh ifconfig.hh ifconfig_addr_table.hh \
+	ifconfig_get.hh ifconfig_media.hh ifconfig_observer.hh \
+	ifconfig_reporter.hh ifconfig_set.hh ifmanager_transaction.hh \
+	iftree.hh kernel_utils.hh libfeaclient_bridge.hh \
+	mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh \
+	mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh \
+	mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh \
 	nexthop_port_mapper.hh pa_backend.hh pa_backend_dummy.hh \
 	pa_backend_ipfw2.hh pa_entry.hh pa_table.hh pa_transaction.hh \
 	profile_vars.hh rawsock.hh rawsock4.hh rawsock6.hh \
 	routing_socket.hh routing_socket_utils.hh win_rtm_pipe.hh \
-	win_rtsock.h win_support.hh xrl_fti.hh xrl_ifmanager.hh \
-	xrl_ifupdate.hh xrl_mfea_node.hh xrl_packet_acl.hh \
-	xrl_rawsock4.hh xrl_rawsock6.hh xrl_socket_cmds.hh \
-	xrl_socket_server.hh xrl_target.hh addr_table.cc \
-	click_socket.cc fti_transaction.cc fticonfig.cc \
-	fticonfig_entry_get.cc fticonfig_entry_get_click.cc \
-	fticonfig_entry_get_dummy.cc fticonfig_entry_get_iphelper.cc \
-	fticonfig_entry_get_netlink.cc fticonfig_entry_get_rtmv2.cc \
-	fticonfig_entry_get_rtsock.cc fticonfig_entry_observer.cc \
-	fticonfig_entry_observer_dummy.cc \
+	win_rtsock.h win_support.hh xrl_fea_io.hh xrl_fea_node.hh \
+	xrl_fea_target.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh \
+	xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh \
+	xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh \
+	addr_table.cc click_socket.cc fea_io.cc fea_node.cc \
+	fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc \
+	fticonfig_entry_get_click.cc fticonfig_entry_get_dummy.cc \
+	fticonfig_entry_get_iphelper.cc fticonfig_entry_get_netlink.cc \
+	fticonfig_entry_get_rtmv2.cc fticonfig_entry_get_rtsock.cc \
+	fticonfig_entry_observer.cc fticonfig_entry_observer_dummy.cc \
 	fticonfig_entry_observer_iphelper.cc \
 	fticonfig_entry_observer_netlink.cc \
 	fticonfig_entry_observer_rtmv2.cc \
@@ -641,25 +490,55 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	ifconfig_observer_dummy.cc ifconfig_observer_iphelper.cc \
 	ifconfig_observer_netlink.cc ifconfig_observer_rtsock.cc \
 	ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc \
-	ifconfig_parse_nlm.cc ifconfig_parse_rtm.cc ifconfig_set.cc \
-	ifconfig_set_click.cc ifconfig_set_dummy.cc \
-	ifconfig_set_ioctl.cc ifconfig_set_iphelper.cc \
-	ifconfig_set_netlink.cc ifmanager_transaction.cc iftree.cc \
-	libfeaclient_bridge.cc mfea_config.cc mfea_dataflow.cc \
-	mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc \
-	mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc \
-	netlink_socket_utils.cc nexthop_port_mapper.cc \
-	pa_backend_dummy.cc pa_backend_ipfw2.cc pa_entry.cc \
-	pa_table.cc pa_transaction.cc profile_vars.cc rawsock.cc \
-	rawsock4.cc rawsock6.cc routing_socket.cc \
+	ifconfig_parse_nlm.cc ifconfig_parse_rtm.cc \
+	ifconfig_reporter.cc ifconfig_set.cc ifconfig_set_click.cc \
+	ifconfig_set_dummy.cc ifconfig_set_ioctl.cc \
+	ifconfig_set_iphelper.cc ifconfig_set_netlink.cc \
+	ifmanager_transaction.cc iftree.cc libfeaclient_bridge.cc \
+	mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc \
+	mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc \
+	netlink_socket.cc netlink_socket_utils.cc \
+	nexthop_port_mapper.cc pa_backend_dummy.cc pa_backend_ipfw2.cc \
+	pa_entry.cc pa_table.cc pa_transaction.cc profile_vars.cc \
+	rawsock.cc rawsock4.cc rawsock6.cc routing_socket.cc \
 	routing_socket_utils.cc win_rtm_pipe.cc win_support.cc \
-	xrl_packet_acl.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc \
+	xrl_packet_acl.cc xrl_fea_io.cc xrl_fea_node.cc \
+	xrl_fea_target.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc \
 	xrl_mfea_node.cc xrl_rawsock4.cc xrl_rawsock6.cc \
-	xrl_socket_cmds.cc xrl_socket_server.cc xrl_target.cc
+	xrl_socket_cmds.cc xrl_socket_server.cc
+
+# -- Sources and Linkage for test_xrl_sockets4_tcp
+test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
+test_xrl_sockets4_tcp_LDADD = $(noinst_LTLIBRARIES) \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libsocketserverbase.la \
+	$(top_builddir)/xrl/targets/libtestsocket4.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+
+# -- Sources and Linkage for test_xrl_sockets4_udp
+test_xrl_sockets4_udp_SOURCES = test_xrl_sockets4_udp.cc
+test_xrl_sockets4_udp_LDADD = $(noinst_LTLIBRARIES) \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libsocketserverbase.la \
+	$(top_builddir)/xrl/targets/libtestsocket4.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = DEVNOTES.mfea command_mfea configure_mfea test_xrls.sh \
-	xorp_fea_click_config_generator xrl_mfea_shell_funcs.sh
+EXTRA_DIST = DEVNOTES.mfea command_mfea \
+	xorp_fea_click_config_generator xrl_mfea_shell_funcs.sh \
+	xrl_shell_funcs.sh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -742,25 +621,6 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; for p in $$list; do \
-	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
-	  echo " rm -f $$p $$f"; \
-	  rm -f $$p $$f ; \
-	done
-demo_fea_ifmgr_client$(EXEEXT): $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_DEPENDENCIES) 
-	@rm -f demo_fea_ifmgr_client$(EXEEXT)
-	$(CXXLINK) $(demo_fea_ifmgr_client_OBJECTS) $(demo_fea_ifmgr_client_LDADD) $(LIBS)
-test_ifmanager_transaction$(EXEEXT): $(test_ifmanager_transaction_OBJECTS) $(test_ifmanager_transaction_DEPENDENCIES) 
-	@rm -f test_ifmanager_transaction$(EXEEXT)
-	$(CXXLINK) $(test_ifmanager_transaction_OBJECTS) $(test_ifmanager_transaction_LDADD) $(LIBS)
-test_mfea$(EXEEXT): $(test_mfea_OBJECTS) $(test_mfea_DEPENDENCIES) 
-	@rm -f test_mfea$(EXEEXT)
-	$(CXXLINK) $(test_mfea_OBJECTS) $(test_mfea_LDADD) $(LIBS)
-test_rawsock4$(EXEEXT): $(test_rawsock4_OBJECTS) $(test_rawsock4_DEPENDENCIES) 
-	@rm -f test_rawsock4$(EXEEXT)
-	$(CXXLINK) $(test_rawsock4_OBJECTS) $(test_rawsock4_LDADD) $(LIBS)
 test_xrl_sockets4_tcp$(EXEEXT): $(test_xrl_sockets4_tcp_OBJECTS) $(test_xrl_sockets4_tcp_DEPENDENCIES) 
 	@rm -f test_xrl_sockets4_tcp$(EXEEXT)
 	$(CXXLINK) $(test_xrl_sockets4_tcp_OBJECTS) $(test_xrl_sockets4_tcp_LDADD) $(LIBS)
@@ -801,8 +661,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addr_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/click_socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/demo_fea_ifmgr_client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fti_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fticonfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fticonfig_entry_get.Plo@am__quote@
@@ -869,6 +729,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_ifreq.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_nlm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_rtm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_reporter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_dummy.Plo@am__quote@
@@ -899,14 +760,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rawsock6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket_utils.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ifmanager_transaction.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_mfea.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_rawsock4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/win_rtm_pipe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/win_support.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_fea_dummy-fea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_fea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_fea_dummy-xorp_fea.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fea_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fea_node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fea_target.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fti.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_ifmanager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_ifupdate.Plo@am__quote@
@@ -916,7 +778,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_rawsock6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_socket_cmds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_socket_server.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_target.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -939,19 +800,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-xorp_fea_dummy-fea.o: fea.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-fea.o -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-fea.Tpo -c -o xorp_fea_dummy-fea.o `test -f 'fea.cc' || echo '$(srcdir)/'`fea.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorp_fea_dummy-fea.Tpo $(DEPDIR)/xorp_fea_dummy-fea.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='fea.cc' object='xorp_fea_dummy-fea.o' libtool=no @AMDEPBACKSLASH@
+xorp_fea_dummy-xorp_fea.o: xorp_fea.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-xorp_fea.o -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo -c -o xorp_fea_dummy-xorp_fea.o `test -f 'xorp_fea.cc' || echo '$(srcdir)/'`xorp_fea.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo $(DEPDIR)/xorp_fea_dummy-xorp_fea.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xorp_fea.cc' object='xorp_fea_dummy-xorp_fea.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -c -o xorp_fea_dummy-fea.o `test -f 'fea.cc' || echo '$(srcdir)/'`fea.cc
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -c -o xorp_fea_dummy-xorp_fea.o `test -f 'xorp_fea.cc' || echo '$(srcdir)/'`xorp_fea.cc
 
-xorp_fea_dummy-fea.obj: fea.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-fea.obj -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-fea.Tpo -c -o xorp_fea_dummy-fea.obj `if test -f 'fea.cc'; then $(CYGPATH_W) 'fea.cc'; else $(CYGPATH_W) '$(srcdir)/fea.cc'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorp_fea_dummy-fea.Tpo $(DEPDIR)/xorp_fea_dummy-fea.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='fea.cc' object='xorp_fea_dummy-fea.obj' libtool=no @AMDEPBACKSLASH@
+xorp_fea_dummy-xorp_fea.obj: xorp_fea.cc
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-xorp_fea.obj -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo -c -o xorp_fea_dummy-xorp_fea.obj `if test -f 'xorp_fea.cc'; then $(CYGPATH_W) 'xorp_fea.cc'; else $(CYGPATH_W) '$(srcdir)/xorp_fea.cc'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo $(DEPDIR)/xorp_fea_dummy-xorp_fea.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='xorp_fea.cc' object='xorp_fea_dummy-xorp_fea.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -c -o xorp_fea_dummy-fea.obj `if test -f 'fea.cc'; then $(CYGPATH_W) 'fea.cc'; else $(CYGPATH_W) '$(srcdir)/fea.cc'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -c -o xorp_fea_dummy-xorp_fea.obj `if test -f 'xorp_fea.cc'; then $(CYGPATH_W) 'xorp_fea.cc'; else $(CYGPATH_W) '$(srcdir)/xorp_fea.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1243,8 +1104,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool clean-noinstLTLIBRARIES clean-noinstPROGRAMS \
-	mostlyclean-am
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -1306,31 +1166,20 @@ uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS
 .PHONY: $(RECURSIVE_CLEAN_TARGETS) $(RECURSIVE_TARGETS) CTAGS GTAGS \
 	all all-am check check-TESTS check-am clean clean-binPROGRAMS \
 	clean-checkPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS ctags \
-	ctags-recursive distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
-	install-binSCRIPTS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-recursive \
-	uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-binSCRIPTS
+	clean-noinstLTLIBRARIES ctags ctags-recursive distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-binSCRIPTS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-recursive uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-binSCRIPTS
 
-
-# Test scripts dependency
-test_add_route.sh: $(top_builddir)/fea/xrl_fea_shell_funcs.sh
-test_config_interface.sh: $(top_builddir)/fea/xrl_fea_shell_funcs.sh
-
-# XRL wrapper scripts dependency
-$(top_builddir)/fea/xrl_fea_shell_funcs.sh:				\
-    $(top_srcdir)/xrl/targets/fea.xrls					\
-    $(top_srcdir)/utils/xrl_wrappers_generator.sh
-	$(top_srcdir)/utils/xrl_wrappers_generator.sh $(top_srcdir)/xrl/targets/fea.xrls > $(top_builddir)/fea/xrl_fea_shell_funcs.sh
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,16 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.61 2006/10/17 22:26:09 pavlin Exp $
+// $XORP$
 
-#ifndef __FEA_XRL_TARGET_HH__
-#define __FEA_XRL_TARGET_HH__
+
+#ifndef __FEA_XRL_FEA_TARGET_HH__
+#define __FEA_XRL_FEA_TARGET_HH__
+
+
+//
+// FEA (Forwarding Engine Abstraction) XRL target implementation.
+//
 
 #include "xrl/targets/fea_base.hh"
+
 #include "xrl_fti.hh"
 #include "xrl_ifmanager.hh"
 
-class FtiConfig;
+class EventLoop;
+class FeaNode;
 class InterfaceManager;
 class LibFeaClientBridge;
 class XrlIfConfigUpdateReporter;
@@ -30,20 +38,65 @@ class XrlRawSocket6Manager;
 class XrlSocketServer;
 class Profile;
 
+/**
+ * @short FEA (Forwarding Engine Abstraction) XRL target class.
+ */
 class XrlFeaTarget : public XrlFeaTargetBase {
 public:
-    XrlFeaTarget(EventLoop&			e,
-		 XrlRouter&			rtr,
-		 FtiConfig& 			ftic,
-		 InterfaceManager& 		ifmgr,
-		 XrlIfConfigUpdateReporter&	ifupd,
-		 Profile&			profile,
-		 XrlRawSocket4Manager*		xrsm4	= 0,
-		 XrlRawSocket6Manager*		xrsm6	= 0,
-		 LibFeaClientBridge*		lfbr	= 0,
-		 XrlSocketServer*		xss	= 0);
+    /**
+     * Constructor.
+     *
+     * @param eventloop the event loop to use.
+     */
+    XrlFeaTarget(EventLoop&	eventloop,
+		 FeaNode&	fea_node,
+		 XrlRouter&	xrl_router,
+		 XrlIfConfigUpdateReporter& xrl_ifconfig_reporter,
+		 Profile&	profile,
+		 XrlRawSocket4Manager&	xrsm4,
+		 XrlRawSocket6Manager&	xrsm6,
+		 LibFeaClientBridge&	lib_fea_client_bridge,
+		 XrlSocketServer&	xrl_socket_server);
 
-    bool done() const { return _done; }
+    /**
+     * Destructor
+     */
+    virtual	~XrlFeaTarget();
+
+    /**
+     * Startup the service operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		startup();
+
+    /**
+     * Shutdown the service operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		shutdown();
+
+    /**
+     * Test whether the service is running.
+     *
+     * @return true if the service is still running, otherwise false.
+     */
+    bool	is_running() const;
+
+    /**
+     * Test whether a shutdown XRL request has been received.
+     *
+     * @return true if shutdown XRL request has been received, otherwise false.
+     */
+    bool	is_shutdown_received() const { return (_is_shutdown_received); }
+
+    /**
+     * Get the event loop this service is added to.
+     * 
+     * @return the event loop this service is added to.
+     */
+    EventLoop&	eventloop() { return (_eventloop); }
 
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
@@ -1402,23 +1455,28 @@ public:
     XrlCmdError profile_0_1_list(
 	// Output values,
 	string&	info);
+
 private:
     bool have_ipv4() const { return (_have_ipv4); };
     bool have_ipv6() const { return (_have_ipv6); };
 
+    EventLoop&		_eventloop;	// The event loop to use
+    FeaNode&		_fea_node;	// The corresponding FeaNode
+
     XrlRouter&		       	_xrl_router;
     XrlFtiTransactionManager	_xftm;
     XrlInterfaceManager 	_xifmgr;
-    XrlIfConfigUpdateReporter&	_xifcur;
+    XrlIfConfigUpdateReporter&	_xrl_ifconfig_reporter;
     Profile&			_profile;
-    XrlRawSocket4Manager*	_xrsm4;
-    XrlRawSocket6Manager*	_xrsm6;
-    LibFeaClientBridge*		_lfcb;
-    XrlSocketServer*		_xss;
+    XrlRawSocket4Manager&	_xrsm4;
+    XrlRawSocket6Manager&	_xrsm6;
+    LibFeaClientBridge&		_lib_fea_client_bridge;
+    XrlSocketServer&		_xrl_socket_server;
 
-    bool			_done;		// True if we are done
-    bool			_have_ipv4;	// True if we have IPv4
-    bool			_have_ipv6;	// True if we have IPv6
+    bool	_is_running;	// True if the service is running
+    bool	_is_shutdown_received; // True if shutdown XRL request received
+    bool	_have_ipv4;	// True if we have IPv4
+    bool	_have_ipv6;	// True if we have IPv6
 };
 
-#endif //  __FEA_XRL_TARGET_HH__
+#endif // __FEA_XRL_FEA_TARGET_HH__

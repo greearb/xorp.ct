@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.84 2006/10/17 22:26:09 pavlin Exp $"
+#ident "$XORP$"
+
+
+//
+// FEA (Forwarding Engine Abstraction) XRL target implementation.
+//
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -34,34 +39,72 @@
 //
 #include "libxorp/profile.hh"
 
-
-#include "fticonfig.hh"
+#include "fea_node.hh"
 #include "libfeaclient_bridge.hh"
+#include "profile_vars.hh"
+#include "xrl_fea_target.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_rawsock4.hh"
 #include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
-#include "xrl_target.hh"
-#include "profile_vars.hh"
 
-XrlFeaTarget::XrlFeaTarget(EventLoop&		 	e,
-			   XrlRouter&		 	r,
-			   FtiConfig&  		 	ftic,
-			   InterfaceManager&	 	ifmgr,
-			   XrlIfConfigUpdateReporter&	xifcur,
+
+XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
+			   FeaNode&			fea_node,
+			   XrlRouter&			xrl_router,
+			   XrlIfConfigUpdateReporter&	xrl_ifconfig_reporter,
 			   Profile&			profile,
-			   XrlRawSocket4Manager*	xrsm4,
-			   XrlRawSocket6Manager*	xrsm6,
-			   LibFeaClientBridge*		lfcb,
-			   XrlSocketServer*		xss)
-    : XrlFeaTargetBase(&r), _xrl_router(r), _xftm(e, ftic, &r),
-      _xifmgr(e, ifmgr), _xifcur(xifcur), _profile(profile),
-      _xrsm4(xrsm4), _xrsm6(xrsm6),
-      _lfcb(lfcb), _xss(xss), _done(false),
-      _have_ipv4(false), _have_ipv6(false)
+			   XrlRawSocket4Manager&	xrsm4,
+			   XrlRawSocket6Manager&	xrsm6,
+			   LibFeaClientBridge&		lib_fea_client_bridge,
+			   XrlSocketServer&		xrl_socket_server)
+    : XrlFeaTargetBase(&xrl_router),
+      _eventloop(eventloop),
+      _fea_node(fea_node),
+      _xrl_router(xrl_router),
+      _xftm(eventloop, fea_node.fticonfig(), &xrl_router),
+      _xifmgr(eventloop, fea_node.ifconfig()),
+      _xrl_ifconfig_reporter(xrl_ifconfig_reporter),
+      _profile(profile),
+      _xrsm4(xrsm4),
+      _xrsm6(xrsm6),
+      _lib_fea_client_bridge(lib_fea_client_bridge),
+      _xrl_socket_server(xrl_socket_server),
+      _is_running(false),
+      _is_shutdown_received(false),
+      _have_ipv4(false),
+      _have_ipv6(false)
 {
-    _have_ipv4 = _xftm.ftic().have_ipv4();
-    _have_ipv6 = _xftm.ftic().have_ipv6();
+}
+
+XrlFeaTarget::~XrlFeaTarget()
+{
+    shutdown();
+}
+
+int
+XrlFeaTarget::startup()
+{
+    _have_ipv4 = _fea_node.fticonfig().have_ipv4();
+    _have_ipv6 = _fea_node.fticonfig().have_ipv6();
+
+    _is_running = true;
+
+    return (XORP_OK);
+}
+
+int
+XrlFeaTarget::shutdown()
+{
+    _is_running = false;
+
+    return (XORP_OK);
+}
+
+bool
+XrlFeaTarget::is_running() const
+{
+    return (_is_running);
 }
 
 XrlCmdError
@@ -113,12 +156,12 @@ XrlFeaTarget::common_0_1_get_status(
     }
     status = s;
 
-    if (_done) {
-	status = PROC_DONE;	// XXX: the process was shutdown
+    if (_is_shutdown_received) {
+	status = PROC_SHUTDOWN;	// XXX: the process received shutdown request
 	reason = "";
     }
 
-    if (_xifcur.busy()) {
+    if (_xrl_ifconfig_reporter.busy()) {
 	status = PROC_NOT_READY;
 	reason = "Communicating config changes to other processes";
     }
@@ -129,7 +172,7 @@ XrlFeaTarget::common_0_1_get_status(
 XrlCmdError
 XrlFeaTarget::common_0_1_shutdown()
 {
-    _done = true;
+    _is_shutdown_received = true;
 
     return XrlCmdError::OKAY();
 }
@@ -145,8 +188,8 @@ XrlFeaTarget::fea_click_0_1_enable_click(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.enable_click(enable);
     ftic.enable_click(enable);
@@ -160,8 +203,8 @@ XrlFeaTarget::fea_click_0_1_enable_click(
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_start_click()
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
     string error_msg;
 
     if (ifc.start_click(error_msg) < 0) {
@@ -182,8 +225,8 @@ XrlFeaTarget::fea_click_0_1_start_click()
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_stop_click()
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
     string error_msg1, error_msg2;
 
     if (ftic.stop_click(error_msg1) < 0) {
@@ -208,7 +251,7 @@ XrlFeaTarget::fea_click_0_1_enable_duplicate_routes_to_kernel(
     // Input values,
     const bool&	enable)
 {
-    FtiConfig& ftic = _xftm.ftic();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ftic.enable_duplicate_routes_to_kernel(enable);
 
@@ -226,8 +269,8 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.enable_kernel_click(enable);
     ftic.enable_kernel_click(enable);
@@ -245,8 +288,8 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click_install_on_startup(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.enable_kernel_click_install_on_startup(enable);
     ftic.enable_kernel_click_install_on_startup(enable);
@@ -269,8 +312,8 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
 {
     list<string> modules_list;
 
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     //
     // Split the string with the names of the modules (separated by colon)
@@ -307,8 +350,8 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_mount_directory(
     // Input values,
     const string&	directory)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_kernel_click_mount_directory(directory);
     ftic.set_kernel_click_mount_directory(directory);
@@ -328,8 +371,8 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_config_generator_file(
     // Input values,
     const string&	kernel_click_config_generator_file)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_kernel_click_config_generator_file(kernel_click_config_generator_file);
     ftic.set_kernel_click_config_generator_file(kernel_click_config_generator_file);
@@ -348,8 +391,8 @@ XrlFeaTarget::fea_click_0_1_enable_user_click(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.enable_user_click(enable);
     ftic.enable_user_click(enable);
@@ -368,8 +411,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_file(
     // Input values,
     const string&	user_click_command_file)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_command_file(user_click_command_file);
     ftic.set_user_click_command_file(user_click_command_file);
@@ -388,8 +431,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_extra_arguments(
     // Input values,
     const string&	user_click_command_extra_arguments)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
     ftic.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
@@ -408,8 +451,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_execute_on_startup(
     // Input values,
     const bool&	user_click_command_execute_on_startup)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
     ftic.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
@@ -429,8 +472,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_address(
     // Input values,
     const IPv4&	user_click_control_address)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_control_address(user_click_control_address);
     ftic.set_user_click_control_address(user_click_control_address);
@@ -450,8 +493,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_socket_port(
     // Input values,
     const uint32_t&	user_click_control_socket_port)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_control_socket_port(user_click_control_socket_port);
     ftic.set_user_click_control_socket_port(user_click_control_socket_port);
@@ -471,8 +514,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
     // Input values,
     const string&	user_click_startup_config_file)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_startup_config_file(user_click_startup_config_file);
     ftic.set_user_click_startup_config_file(user_click_startup_config_file);
@@ -492,8 +535,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
     // Input values,
     const string&	user_click_config_generator_file)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
-    FtiConfig& ftic = _xftm.ftic();
+    IfConfig& ifc = _fea_node.ifconfig();
+    FtiConfig& ftic = _fea_node.fticonfig();
 
     ifc.set_user_click_config_generator_file(user_click_config_generator_file);
     ftic.set_user_click_config_generator_file(user_click_config_generator_file);
@@ -566,7 +609,7 @@ XrlFeaTarget::ifmgr_0_1_set_restore_original_config_on_shutdown(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
+    IfConfig& ifc = _fea_node.ifconfig();
     ifc.set_restore_original_config_on_shutdown(enable);
 
     return XrlCmdError::OKAY();
@@ -577,7 +620,7 @@ XrlFeaTarget::ifmgr_0_1_get_system_interface_names(
 						// Output values,
 						XrlAtomList&	ifnames)
 {
-    const IfTree& it = _xifmgr.ifconfig().pull_config();
+    const IfTree& it = _fea_node.ifconfig().pull_config();
 
     for (IfTree::IfMap::const_iterator ii = it.ifs().begin();
 	 ii != it.ifs().end(); ++ii) {
@@ -1395,7 +1438,7 @@ XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfConfig& ifc = _xifmgr.ifconfig();
+    IfConfig& ifc = _fea_node.ifconfig();
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new ConfigureInterfaceFromSystem(ifc, it, ifname));
 }
@@ -1442,7 +1485,7 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
     IfTree& it = _xifmgr.iftree();
 
     // Find the original MAC address
-    IfConfig& ifc = _xifmgr.ifconfig();
+    IfConfig& ifc = _fea_node.ifconfig();
     const IfTree& original_it = ifc.original_config();
     IfTree::IfMap::const_iterator ii = original_it.get_if(ifname);
     if (ii == original_it.ifs().end()) {
@@ -1476,7 +1519,7 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
     IfTree& it = _xifmgr.iftree();
 
     // Find the original MTU
-    IfConfig& ifc = _xifmgr.ifconfig();
+    IfConfig& ifc = _fea_node.ifconfig();
     const IfTree& original_it = ifc.original_config();
     IfTree::IfMap::const_iterator ii = original_it.get_if(ifname);
     if (ii == original_it.ifs().end()) {
@@ -1787,11 +1830,11 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_register_client(const string& client)
 {
-    if (_xifcur.has_reportee(client)) {
+    if (_xrl_ifconfig_reporter.has_reportee(client)) {
 	XLOG_WARNING("Registering again client %s", client.c_str());
 	return XrlCmdError::OKAY();
     }
-    if (_xifcur.add_reportee(client))
+    if (_xrl_ifconfig_reporter.add_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
 				       string(" cannot be registered."));
@@ -1800,7 +1843,7 @@ XrlFeaTarget::ifmgr_0_1_register_client(const string& client)
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_unregister_client(const string& client)
 {
-    if (_xifcur.remove_reportee(client))
+    if (_xrl_ifconfig_reporter.remove_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
 				       string(" not registered."));
@@ -1809,11 +1852,11 @@ XrlFeaTarget::ifmgr_0_1_unregister_client(const string& client)
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_register_system_interfaces_client(const string& client)
 {
-    if (_xifcur.has_system_interfaces_reportee(client)) {
+    if (_xrl_ifconfig_reporter.has_system_interfaces_reportee(client)) {
 	XLOG_WARNING("Registering again client %s", client.c_str());
 	return XrlCmdError::OKAY();
     }
-    if (_xifcur.add_system_interfaces_reportee(client))
+    if (_xrl_ifconfig_reporter.add_system_interfaces_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
 				       string(" cannot be registered."));
@@ -1822,7 +1865,7 @@ XrlFeaTarget::ifmgr_0_1_register_system_interfaces_client(const string& client)
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_unregister_system_interfaces_client(const string& client)
 {
-    if (_xifcur.remove_system_interfaces_reportee(client))
+    if (_xrl_ifconfig_reporter.remove_system_interfaces_reportee(client))
 	return XrlCmdError::OKAY();
     return XrlCmdError::COMMAND_FAILED(client +
 				       string(" not registered."));
@@ -1833,10 +1876,7 @@ XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(
 	const string& clientname
 	)
 {
-    if (_lfcb == 0) {
-	return XrlCmdError::COMMAND_FAILED("Service not available.");
-    }
-    if (_lfcb->add_libfeaclient_mirror(clientname) == false) {
+    if (_lib_fea_client_bridge.add_libfeaclient_mirror(clientname) == false) {
 	return XrlCmdError::COMMAND_FAILED();
     }
     return XrlCmdError::OKAY();
@@ -1847,10 +1887,7 @@ XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
 	const string& clientname
 	)
 {
-    if (_lfcb == 0) {
-	return XrlCmdError::COMMAND_FAILED("Service not available.");
-    }
-    if (_lfcb->remove_libfeaclient_mirror(clientname) == false) {
+    if (_lib_fea_client_bridge.remove_libfeaclient_mirror(clientname) == false) {
 	return XrlCmdError::COMMAND_FAILED();
     }
     return XrlCmdError::OKAY();
@@ -2419,8 +2456,6 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
 // ----------------------------------------------------------------------------
 // IPv4 Raw Socket related
 
-static const string XRL_RAW_SOCKET4_NULL = "XrlRawSocket4Manager not present";
-
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_send(
     // Input values,
@@ -2437,12 +2472,9 @@ XrlFeaTarget::raw_packet4_0_1_send(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
-    }
-    return _xrsm4->send(if_name, vif_name, src_address, dst_address,
-			ip_protocol, ip_ttl, ip_tos, ip_router_alert,
-			payload);
+    return _xrsm4.send(if_name, vif_name, src_address, dst_address,
+		       ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+		       payload);
 }
 
 XrlCmdError
@@ -2457,11 +2489,8 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
-    }
-    return _xrsm4->register_receiver(xrl_target_name, if_name, vif_name,
-				     ip_protocol, enable_multicast_loopback);
+    return _xrsm4.register_receiver(xrl_target_name, if_name, vif_name,
+				    ip_protocol, enable_multicast_loopback);
 }
 
 XrlCmdError
@@ -2472,11 +2501,8 @@ XrlFeaTarget::raw_packet4_0_1_unregister_receiver(
     const string&	vif_name,
     const uint32_t&	ip_protocol)
 {
-    if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
-    }
-    return _xrsm4->unregister_receiver(xrl_target_name, if_name, vif_name,
-				       ip_protocol);
+    return _xrsm4.unregister_receiver(xrl_target_name, if_name, vif_name,
+				      ip_protocol);
 }
 
 XrlCmdError
@@ -2488,11 +2514,8 @@ XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
     const uint32_t&	ip_protocol,
     const IPv4&		group_address)
 {
-    if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
-    }
-    return _xrsm4->join_multicast_group(xrl_target_name, if_name, vif_name,
-					ip_protocol, group_address);
+    return _xrsm4.join_multicast_group(xrl_target_name, if_name, vif_name,
+				       ip_protocol, group_address);
 }
 
 XrlCmdError
@@ -2504,11 +2527,8 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     const uint32_t&	ip_protocol,
     const IPv4&		group_address)
 {
-    if (_xrsm4 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
-    }
-    return _xrsm4->leave_multicast_group(xrl_target_name, if_name, vif_name,
-					 ip_protocol, group_address);
+    return _xrsm4.leave_multicast_group(xrl_target_name, if_name, vif_name,
+					ip_protocol, group_address);
 }
 
 // ----------------------------------------------------------------------------
@@ -2535,10 +2555,6 @@ XrlFeaTarget::raw_packet6_0_1_send(
 
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
-    if (_xrsm6 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-    }
 
     // Decompose the external headers info
     if (ext_headers_type.size() != ext_headers_payload.size()) {
@@ -2567,10 +2583,10 @@ XrlFeaTarget::raw_packet6_0_1_send(
 	ext_headers_payload_vector[i] = atom_payload.binary();
     }
 
-    return _xrsm6->send(if_name, vif_name, src_address, dst_address,
-			ip_protocol, ip_ttl, ip_tos, ip_router_alert,
-			ext_headers_type_vector, ext_headers_payload_vector,
-			payload);
+    return _xrsm6.send(if_name, vif_name, src_address, dst_address,
+		       ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+		       ext_headers_type_vector, ext_headers_payload_vector,
+		       payload);
 }
 
 XrlCmdError
@@ -2582,11 +2598,8 @@ XrlFeaTarget::raw_packet6_0_1_register_receiver(
     const uint32_t&	ip_protocol,
     const bool&		enable_multicast_loopback)
 {
-    if (_xrsm6 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-    }
-    return _xrsm6->register_receiver(xrl_target_name, if_name, vif_name,
-				     ip_protocol, enable_multicast_loopback);
+    return _xrsm6.register_receiver(xrl_target_name, if_name, vif_name,
+				    ip_protocol, enable_multicast_loopback);
 }
 
 XrlCmdError
@@ -2597,11 +2610,8 @@ XrlFeaTarget::raw_packet6_0_1_unregister_receiver(
     const string&	vif_name,
     const uint32_t&	ip_protocol)
 {
-    if (_xrsm6 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-    }
-    return _xrsm6->unregister_receiver(xrl_target_name, if_name, vif_name,
-				       ip_protocol);
+    return _xrsm6.unregister_receiver(xrl_target_name, if_name, vif_name,
+				      ip_protocol);
 }
 
 XrlCmdError
@@ -2613,11 +2623,8 @@ XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
     const uint32_t&	ip_protocol,
     const IPv6&		group_address)
 {
-    if (_xrsm6 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-    }
-    return _xrsm6->join_multicast_group(xrl_target_name, if_name, vif_name,
-					ip_protocol, group_address);
+    return _xrsm6.join_multicast_group(xrl_target_name, if_name, vif_name,
+				       ip_protocol, group_address);
 }
 
 XrlCmdError
@@ -2629,11 +2636,8 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
     const uint32_t&	ip_protocol,
     const IPv6&		group_address)
 {
-    if (_xrsm6 == 0) {
-	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
-    }
-    return _xrsm6->leave_multicast_group(xrl_target_name, if_name, vif_name,
-					 ip_protocol, group_address);
+    return _xrsm6.leave_multicast_group(xrl_target_name, if_name, vif_name,
+					ip_protocol, group_address);
 }
 
 
@@ -2654,13 +2658,10 @@ XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
     // If we had multiple socket servers we'd look for the right one
     // to use.  At the present time we only have one so this is the
     // one to return
-    if (_xss == 0) {
-	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
-    }
-    if (_xss->status() != SERVICE_RUNNING) {
+    if (_xrl_socket_server.status() != SERVICE_RUNNING) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
     }
-    svr = _xss->instance_name();
+    svr = _xrl_socket_server.instance_name();
     return XrlCmdError::OKAY();
 }
 
@@ -2679,14 +2680,11 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
     // to use.  At the present time we only have one so this is the
     // one to return
 
-    if (_xss == 0) {
-	return XrlCmdError::COMMAND_FAILED("Socket Server is not present.");
-    }
-    if (_xss->status() != SERVICE_RUNNING) {
+    if (_xrl_socket_server.status() != SERVICE_RUNNING) {
 	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
     }
 
-    svr = _xss->instance_name();
+    svr = _xrl_socket_server.instance_name();
     return XrlCmdError::OKAY();
 }
 

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.32 2006/08/02 07:59:21 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.33 2007/03/14 01:41:11 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -19,10 +19,6 @@
   in the IfTree. That align_with() method would be aware of the internals
   of the item it serves and can update appropriately some of the fields
   even if the item is disabled.
-  Note: if this solution is applied, then reverse-back the
-  "fea_ifmgr_set_interface_enabled" and "fea_ifmgr_set_vif_enabled"
-  added to test_get_vif_pif_index() in revision 1.13 of
-  fea/test_config_interface.sh.
   
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
   distribution (which returns "struct ip_tunnel_parm"),
@@ -40,8 +36,6 @@
   Ethernet address before attempting to assign it as an Ethernet
   address.
 
-* Fix test files like test_ifconfig_rtsock.cc
-
 * Sync by renaming all "IfTree& iftree" to "IfTree& it" (or vice-versa).
 
 * Make sure that the interfaces in the interface tree are deleted properly
@@ -50,10 +44,6 @@
   after that a new interface with different name but same interface index
   appears. In that case, we need to update properly the local cache
   that maps interface names to indexes.
-
-* The following files inside "fea" are not used?
-  test_fea.cc test_fti.cc test_ifmanager.cc
-  Refactor them?
 
 * Parse and pass up Linux RTN_UNREACHABLE messages using the new resolve
   upcall mechanism.

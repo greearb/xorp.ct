@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.49 2006/10/13 06:19:17 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.50 2007/02/16 22:45:41 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -20,6 +20,7 @@
 #include "ifconfig_get.hh"
 #include "ifconfig_set.hh"
 #include "ifconfig_observer.hh"
+#include "ifconfig_reporter.hh"
 #include "iftree.hh"
 
 class EventLoop;
@@ -82,9 +83,8 @@ public:
     const IfTree& pulled_config()	{ return (_pulled_config); }
     IfTree& pushed_config()		{ return (_pushed_config); }
     const IfTree& original_config()	{ return (_original_config); }
-
-    IfTree* local_config() { return (_local_config); }
-    void    hook_local_config(IfTree* v) { _local_config = v; }
+    IfTree& local_config()		{ return (_local_config); }
+    IfTree& old_local_config()		{ return (_old_local_config); }
 
     /**
      * Test whether the original configuration should be restored on shutdown.
@@ -411,7 +411,8 @@ private:
     IfTree		_original_config; // The IfTree on startup
     bool		_restore_original_config_on_shutdown; // If true, then
 				//  restore the original config on shutdown
-    IfTree*		_local_config;	// The IfTree with the local config
+    IfTree		_local_config;	// The IfTree with the local config
+    IfTree		_old_local_config; // The IfTree with the old local config
 
     IfConfigGet*		_ifc_get_primary;
     IfConfigSet*		_ifc_set_primary;
@@ -482,215 +483,6 @@ private:
     bool	_have_ipv6;
     bool	_is_dummy;
     bool	_is_running;
-};
-
-/**
- * @short Base class for propagating update information on from IfConfig.
- *
- * When the platform @ref IfConfig updates interfaces it can report
- * updates to an IfConfigUpdateReporter.  The @ref IfConfig instance
- * takes a pointer to the IfConfigUpdateReporter object it should use.
- */
-class IfConfigUpdateReporterBase {
-public:
-    enum Update { CREATED, DELETED, CHANGED };
-
-    virtual ~IfConfigUpdateReporterBase() {}
-
-    virtual void interface_update(const string& ifname,
-				  const Update& u,
-				  bool  is_system_interfaces_reportee) = 0;
-
-    virtual void vif_update(const string& ifname,
-			    const string& vifname,
-			    const Update& u,
-			    bool  is_system_interfaces_reportee) = 0;
-
-    virtual void vifaddr4_update(const string& ifname,
-				 const string& vifname,
-				 const IPv4&   addr,
-				 const Update& u,
-				 bool  is_system_interfaces_reportee) = 0;
-
-    virtual void vifaddr6_update(const string& ifname,
-				 const string& vifname,
-				 const IPv6&   addr,
-				 const Update& u,
-				 bool  is_system_interfaces_reportee) = 0;
-
-    virtual void updates_completed(bool is_system_interfaces_reportee) = 0;
-};
-
-/**
- * @short A class to replicate update notifications to multiple reporters.
- */
-class IfConfigUpdateReplicator : public IfConfigUpdateReporterBase {
-public:
-    typedef IfConfigUpdateReporterBase::Update Update;
-
-public:
-    virtual ~IfConfigUpdateReplicator();
-
-    /**
-     * Add a reporter instance to update notification list.
-     *
-     * @return true on success, false if object already receiving updates or
-     * could not be added.
-     */
-    bool add_reporter(IfConfigUpdateReporterBase* rp);
-
-    /**
-     * Remove a reporter instance from update notification list.
-     *
-     * @return true on success, false if instance is not on the
-     * receiving updates list.
-     */
-    bool remove_reporter(IfConfigUpdateReporterBase* rp);
-
-    /**
-     * Forward interface update notification to reporter instances on
-     * update notification list.
-     */
-    void interface_update(const string& ifname,
-			  const Update& u,
-			  bool  is_system_interfaces_reportee);
-
-    /**
-     * Forward virtual interface update notification to reporter
-     * instances on update notification list.
-     */
-    void vif_update(const string& ifname,
-		    const string& vifname,
-		    const Update& u,
-		    bool is_system_interfaces_reportee);
-
-    /**
-     * Forward virtual interface address update notification to
-     * reporter instances on update notification list.
-     */
-    void vifaddr4_update(const string& ifname,
-			 const string& vifname,
-			 const IPv4&   addr,
-			 const Update& u,
-			 bool is_system_interfaces_reportee);
-
-    /**
-     * Forward virtual interface address update notification to
-     * reporter instances on update notification list.
-     */
-    void vifaddr6_update(const string& ifname,
-			 const string& vifname,
-			 const IPv6&   addr,
-			 const Update& u,
-			 bool is_system_interfaces_reportee);
-
-    /**
-     * Forward notification that updates were completed to
-     * reporter instances on update notification list.
-     */
-    void updates_completed(bool is_system_interfaces_reportee);
-
-protected:
-    list<IfConfigUpdateReporterBase*> _reporters;
-};
-
-/**
- * @short Base class for propagating error information on from IfConfig.
- *
- * When the platform @ref IfConfig updates interfaces it can report
- * errors to an IfConfigErrorReporterBase.  The @ref IfConfig instance
- * takes a pointer to the IfConfigErrorReporterBase object it should use.
- */
-class IfConfigErrorReporterBase {
-public:
-    IfConfigErrorReporterBase() : _error_cnt(0) {}
-    virtual ~IfConfigErrorReporterBase() {}
-
-    virtual void config_error(const string& error_msg) = 0;
-
-    virtual void interface_error(const string& ifname,
-				 const string& error_msg) = 0;
-
-    virtual void vif_error(const string& ifname,
-			   const string& vifname,
-			   const string& error_msg) = 0;
-
-    virtual void vifaddr_error(const string& ifname,
-			       const string& vifname,
-			       const IPv4&   addr,
-			       const string& error_msg) = 0;
-
-    virtual void vifaddr_error(const string& ifname,
-			       const string& vifname,
-			       const IPv6&   addr,
-			       const string& error_msg) = 0;
-
-    /**
-     * @return error message of first error encountered.
-     */
-    inline const string& first_error() const	{ return _first_error; }
-
-    /**
-     * @return error message of last error encountered.
-     */
-    inline const string& last_error() const	{ return _last_error; }
-
-    /**
-     * @return number of errors reported.
-     */
-    inline uint32_t error_count() const		{ return _error_cnt; }
-
-    /**
-     * Reset error count and error message.
-     */
-    inline void reset() {
-	_first_error.erase();
-	_last_error.erase();
-	_error_cnt = 0;
-    }
-
-    inline void	log_error(const string& s) {
-	if (0 == _error_cnt)
-	    _first_error = s;
-	_last_error = s;
-	_error_cnt++;
-    }
-
-private:
-    string	_last_error;	// last error reported
-    string	_first_error;	// first error reported
-
-    uint32_t	_error_cnt;	// number of errors reported
-};
-
-/**
- * @short Class for propagating error information during IfConfig operations.
- *
- */
-class IfConfigErrorReporter : public IfConfigErrorReporterBase {
-public:
-    IfConfigErrorReporter();
-
-    void config_error(const string& error_msg);
-
-    void interface_error(const string& ifname,
-			 const string& error_msg);
-
-    void vif_error(const string& ifname,
-		   const string& vifname,
-		   const string& error_msg);
-
-    void vifaddr_error(const string& ifname,
-		       const string& vifname,
-		       const IPv4&   addr,
-		       const string& error_msg);
-
-    void vifaddr_error(const string& ifname,
-		       const string& vifname,
-		       const IPv6&   addr,
-		       const string& error_msg);
-
-private:
 };
 
 #endif // __FEA_IFCONFIG_HH__

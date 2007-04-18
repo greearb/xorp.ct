@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.6 2007/02/16 22:45:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.7 2007/04/14 08:59:49 pavlin Exp $"
 
 #include <map>
 
@@ -51,16 +51,46 @@ static const char* PA_NOT_READY = "Underlying provider is NULL.";
 // ----------------------------------------------------------------------------
 // XrlPacketAclTarget constructor/destructor
 
-XrlPacketAclTarget::XrlPacketAclTarget(XrlCmdMap* cmds, EventLoop& e,
+XrlPacketAclTarget::XrlPacketAclTarget(EventLoop& eventloop,
+				       const string& class_name,
+				       const string& finder_hostname,
+				       uint16_t finder_port,
 				       PaTransactionManager& pat,
 				       uint32_t browse_timeout_ms)
-    : XrlPacketAclTargetBase(cmds), _e(e), _pat(pat),
-      _browse_timeout_ms(browse_timeout_ms)
+    : XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
+		   finder_port),
+      XrlPacketAclTargetBase(&xrl_router()),
+      _eventloop(eventloop),
+      _pat(pat),
+      _browse_timeout_ms(browse_timeout_ms),
+      _is_running(false)
 {
 }
 
 XrlPacketAclTarget::~XrlPacketAclTarget()
 {
+}
+
+int
+XrlPacketAclTarget::startup()
+{
+    _is_running = true;
+
+    return (XORP_OK);
+}
+
+int
+XrlPacketAclTarget::shutdown()
+{
+    _is_running = false;
+
+    return (XORP_OK);
+}
+
+bool
+XrlPacketAclTarget::is_running() const
+{
+    return (_is_running);
 }
 
 // ----------------------------------------------------------------------------
@@ -69,14 +99,14 @@ XrlPacketAclTarget::~XrlPacketAclTarget()
 XrlCmdError
 XrlPacketAclTarget::common_0_1_get_target_name(string& name)
 {
-    name = this->name();
+    name = XrlPacketAclTargetBase::name();
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlPacketAclTarget::common_0_1_get_version(string& version)
 {
-    version = this->version();
+    version = XORP_MODULE_VERSION;
     return XrlCmdError::OKAY();
 }
 
@@ -363,7 +393,7 @@ XrlPacketAclTarget::packet_acl_0_1_get_entry_list_start4(
     token = _next_token;
 
     if (browse_timeout_ms()) {
-	XorpTimer t = _e.new_oneoff_after_ms(
+	XorpTimer t = _eventloop.new_oneoff_after_ms(
 	    browse_timeout_ms(),
 	    callback(this, &XrlPacketAclTarget::timeout_browse, token)
 	);

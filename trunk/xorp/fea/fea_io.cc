@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,29 +12,52 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager.hh,v 1.7 2006/03/16 00:03:57 pavlin Exp $
+#ident "$XORP$"
 
-#ifndef __FEA_IFMANAGER_HH__
-#define __FEA_IFMANAGER_HH__
 
-#include "iftree.hh"
-#include "ifconfig.hh"
+//
+// FEA (Forwarding Engine Abstraction) I/O interface.
+//
 
-/**
- * InterfaceManager is the interface that is exposed by the fea via XRL's.
- */
-class InterfaceManager {
-public:
-    InterfaceManager(IfConfig& ifc) : _ifc(ifc) {}
 
-    IfConfig&  ifc() const				{ return _ifc; }
-    IfTree& iftree()					{ return _iftree; }
-    IfTree& old_iftree()				{ return _old_iftree; }
+#include "fea_module.h"
 
-protected:
-    IfConfig&	_ifc;
-    IfTree	_iftree;
-    IfTree	_old_iftree;
-};
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
-#endif // __FEA_IFMANAGER_HH__
+#include "fea_io.hh"
+
+
+FeaIO::FeaIO(EventLoop& eventloop)
+    : _eventloop(eventloop),
+      _is_running(false)
+{
+}
+
+FeaIO::~FeaIO()
+{
+    shutdown();
+}
+
+int
+FeaIO::startup()
+{
+    _is_running = true;
+
+    return (XORP_OK);
+}
+
+int
+FeaIO::shutdown()
+{
+    _is_running = false;
+
+    return (XORP_OK);
+}
+
+bool
+FeaIO::is_running() const
+{
+    return (_is_running);
+}

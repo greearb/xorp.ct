@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_packet_acl.hh,v 1.4 2006/11/07 18:55:40 pavlin Exp $
+// $XORP: xorp/fea/xrl_packet_acl.hh,v 1.5 2007/02/16 22:45:53 pavlin Exp $
 
 #ifndef __FEA_XRL_PACKET_ACL_HH__
 #define __FEA_XRL_PACKET_ACL_HH__
@@ -40,64 +40,27 @@
  * The class provides error messages suitable for Xrl return values
  * and does some extra checking not in the PaTransactionManager class.
  */
-class XrlPacketAclTarget : public XrlPacketAclTargetBase {
-protected:
-    /**
-     * Used to hold state for clients reading snapshots of the ACL tables.
-     */
-    struct PaBrowseState {
-    public:
-	PaBrowseState(const XrlPacketAclTarget& xpa,
-		      const XorpTimer& timeout_timer,
-		      const PaSnapshot4* snap4,
-		      size_t idx = 0);
-	PaBrowseState(const XrlPacketAclTarget& xpa,
-		      const PaSnapshot4* snap4,
-		      size_t idx = 0);
-	~PaBrowseState();
-	inline size_t index() const		{ return _idx; }
-	inline void set_index(size_t idx)	{ _idx = idx; }
-	inline const PaSnapshot4* snap4() const	{ return _snap4; }
-	void defer_timeout();
-	void cancel_timeout();
-    private:
-	const XrlPacketAclTarget&	_xpa;
-	XorpTimer			_timeout_timer;
-	const PaSnapshot4*		_snap4;	// XXX: not refcnted!
-	size_t				_idx;
-    };
-
-    typedef map<uint32_t, PaBrowseState> PaBrowseDB;
-
-    EventLoop&			_e;
-    PaTransactionManager&	_pat;
-    uint32_t			_browse_timeout_ms;
-
-    uint32_t			_next_token;
-    PaBrowseDB			_bdb;
-
-    void crank_token();
-    void timeout_browse(uint32_t token);
-
+class XrlPacketAclTarget : public XrlStdRouter,
+			   public XrlPacketAclTargetBase {
 public:
-    inline const EventLoop& eventloop() const { return _e; }
-    inline uint32_t browse_timeout_ms() const { return _browse_timeout_ms; }
-
     enum { BROWSE_TIMEOUT_MS = 15000 };
 
     /**
      * Constructor.
      *
      * @param eventloop an EventLoop which will be used for scheduling timers.
-     * @param cmds an XrlCmdMap that the commands associated with the target
-     *		   should be added to.  This is typically the XrlRouter
-     *		   associated with the target.
+     * @param class_name the class name for this service.
+     * @param finder_hostname the Finder host name.
+     * @param finder_port the Finder port.
      * @param pat a PaTransactionManager which manages accesses to the
      *		  underlying ACL tables.
      */
-    XrlPacketAclTarget(XrlCmdMap* cmds, EventLoop& e,
+    XrlPacketAclTarget(EventLoop&	eventloop,
+		       const string&	class_name,
+		       const string&	finder_hostname,
+		       uint16_t		finder_port,
 		       PaTransactionManager& pat,
-		       uint32_t browse_timeout_ms = BROWSE_TIMEOUT_MS);
+		       uint32_t		browse_timeout_ms = BROWSE_TIMEOUT_MS);
 
     /**
      * Destructor.
@@ -107,26 +70,53 @@ public:
      virtual ~XrlPacketAclTarget();
 
     /**
-     * Set command map.
-     *
-     * @param cmds pointer to command map to associate commands with.  This
-     * argument is typically a pointer to the XrlRouter associated with the
-     * target.
-     *
-     * @return true on success, false if cmds is null or a command map has
-     * already been supplied.
+     * Startup the service operation.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool set_command_map(XrlCmdMap* cmds);
+    int		startup();
 
     /**
-     * Get Xrl instance name associated with command map.
+     * Shutdown the service operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline const string& name() const { return _cmds->name(); }
+    int		shutdown();
 
     /**
-     * Get version string of instance.
+     * Test whether the service is running.
+     *
+     * @return true if the service is still running, otherwise false.
      */
-    inline const char* version() const { return "packet_acl/0.1"; }
+    bool	is_running() const;
+
+    /**
+     * Get the event loop this service is added to.
+     * 
+     * @return the event loop this service is added to.
+     */
+    EventLoop& eventloop() { return (_eventloop); }
+
+    /**
+     * Get a reference to the XrlRouter instance.
+     *
+     * @return a reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    XrlRouter&	xrl_router() { return *this; }
+
+    /**
+     * Get a const reference to the XrlRouter instance.
+     *
+     * @return a const reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    const XrlRouter& xrl_router() const { return *this; }
+
+    /**
+     * Get the browse timeout (in milliseconds).
+     *
+     * @return the browse timeout (in milliseconds).
+     */
+     uint32_t browse_timeout_ms() const { return _browse_timeout_ms; }
 
 protected:
     /* ---------------------------------------------------------------- */
@@ -370,6 +360,45 @@ protected:
      XrlCmdError packet_acl_0_1_delete_all_entries6(
 	// Input values,
 	const uint32_t&	tid);
+
+protected:
+    /**
+     * Used to hold state for clients reading snapshots of the ACL tables.
+     */
+    struct PaBrowseState {
+    public:
+	PaBrowseState(const XrlPacketAclTarget& xpa,
+		      const XorpTimer& timeout_timer,
+		      const PaSnapshot4* snap4,
+		      size_t idx = 0);
+	PaBrowseState(const XrlPacketAclTarget& xpa,
+		      const PaSnapshot4* snap4,
+		      size_t idx = 0);
+	~PaBrowseState();
+	inline size_t index() const		{ return _idx; }
+	inline void set_index(size_t idx)	{ _idx = idx; }
+	inline const PaSnapshot4* snap4() const	{ return _snap4; }
+	void defer_timeout();
+	void cancel_timeout();
+    private:
+	const XrlPacketAclTarget&	_xpa;
+	XorpTimer			_timeout_timer;
+	const PaSnapshot4*		_snap4;	// XXX: not refcnted!
+	size_t				_idx;
+    };
+
+    typedef map<uint32_t, PaBrowseState> PaBrowseDB;
+
+    void crank_token();
+    void timeout_browse(uint32_t token);
+
+    EventLoop&		_eventloop;
+    PaTransactionManager& _pat;
+    uint32_t		_browse_timeout_ms;
+
+    uint32_t		_next_token;
+    PaBrowseDB		_bdb;
+    bool		_is_running;	// True if the service is running
 };
 
 #endif /* __FEA_XRL_PACKET_ACL_HH__ */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_iphelper.cc,v 1.7 2006/08/29 22:42:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_iphelper.cc,v 1.8 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -65,13 +65,12 @@ IfConfigObserverIPHelper::start(string& error_msg)
 
     // XXX: Dummy.
     ifc().report_updates(ifc().live_config(), true);
-    if (ifc().local_config() != NULL) {
-	// Propagate the changes from the live config to the local config
-	IfTree& local_config = *ifc().local_config();
-	local_config.track_live_config_state(ifc().live_config());
-	ifc().report_updates(local_config, false);
-	local_config.finalize_state();
-    }
+
+    // Propagate the changes from the live config to the local config
+    IfTree& local_config = ifc().local_config();
+    local_config.track_live_config_state(ifc().live_config());
+    ifc().report_updates(local_config, false);
+    local_config.finalize_state();
     ifc().live_config().finalize_state();
 
     return (XORP_OK);

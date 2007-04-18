@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.2 2007/03/28 10:11:03 schooley Exp $
+# $XORP: xorp/fea/Jamfile,v 1.4 2007/03/28 15:40:02 schooley Exp $
 #
 
 SubDir TOP fea ;
@@ -18,6 +18,8 @@ SubDir TOP fea ;
 Library libfea : 
 	addr_table.cc
 	click_socket.cc
+	fea_io.cc
+	fea_node.cc
 	fti_transaction.cc
 	fticonfig.cc
 	fticonfig_entry_get.cc
@@ -84,6 +86,7 @@ Library libfea :
 	ifconfig_parse_ifreq.cc
 	ifconfig_parse_nlm.cc
 	ifconfig_parse_rtm.cc
+	ifconfig_reporter.cc
 	ifconfig_set.cc
 	ifconfig_set_click.cc
 	ifconfig_set_dummy.cc
@@ -117,6 +120,9 @@ Library libfea :
 	win_rtm_pipe.cc
 	win_support.cc
 	xrl_packet_acl.cc
+	xrl_fea_io.cc
+	xrl_fea_node.cc
+	xrl_fea_target.cc
 	xrl_fti.cc
 	xrl_ifmanager.cc
 	xrl_ifupdate.cc
@@ -125,7 +131,6 @@ Library libfea :
 	xrl_rawsock6.cc
 	xrl_socket_cmds.cc
 	xrl_socket_server.cc
-	xrl_target.cc
 	;
 
 FEA_LDADD =
@@ -158,11 +163,11 @@ FEA_LDADD =
 	libprofileclientxif
 	libproto
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
-Main xorp_fea : fea.cc ;
+Main xorp_fea : xorp_fea.cc ;
 LinkLibraries xorp_fea : $(FEA_LDADD) ;
 
 #
@@ -173,62 +178,10 @@ LinkLibraries xorp_fea : $(FEA_LDADD) ;
 #
 MainFromObjects <fea>xorp_fea_dummy$(SUFEXE) : <fea>fea_dummy$(SUFOBJ) ;
 LinkLibraries <fea>xorp_fea_dummy$(SUFEXE) : $(FEA_LDADD) ;
-Object <fea>fea_dummy$(SUFOBJ) : fea.cc ;
+Object <fea>fea_dummy$(SUFOBJ) : xorp_fea.cc ;
 C++FLAGS on <fea>fea_dummy$(SUFOBJ) += -DFEA_DUMMY ;
 
 if $(MAKE_CHECK) {
-
- Main test_mfea : test_mfea.cc ;
- LinkLibraries test_mfea :
-	libfea
-	libfeafibclientxif
-	libfeaifmgrclientxif
-	libfearawpkt4client
-	libfearawpkt6client
-	libfeabase
-	libfeaifmgrxif
-	libclimanagerxif
-	libmfeaclientxif
-	libmfeabase
-	libmrt
-	libcli
-	libtecla
-	libcliprocessorxif
-	libclibase
-	libfeaclient
-	libfeaifmgrmirrorxif
-	libfeaifmgrreplicatorxif
-	libfeaifmgrmirrorbase
-	libsocket4userxif
-	libsocket4xif
-	libsocket6userxif
-	libsocket6xif
-	libfindereventnotifierxif
-	libsocketserverbase
-	libprofileclientxif
-	libproto
-	libfinder
-	libxipc
-	libxorp
-	libcomm
-	;
-
- Main test_ifmanager_transaction : test_ifmanager_transaction.cc ;
- LinkLibraries test_ifmanager_transaction :
-	libfea
-	libxipc
-	libxorp
-	libcomm
-	;
-
- Main test_rawsock4 : test_rawsock4.cc ;
- LinkLibraries test_rawsock4 :
-	libfea
-	libproto
-	libxipc
-	libxorp
-	libcomm
-	;
 
  Main test_xrl_sockets4_udp : test_xrl_sockets4_udp.cc ;
  LinkLibraries test_xrl_sockets4_udp :
@@ -241,8 +194,8 @@ if $(MAKE_CHECK) {
 	libsocketserverbase
 	libtestsocket4
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
  Main test_xrl_sockets4_tcp : test_xrl_sockets4_tcp.cc ;
@@ -256,8 +209,8 @@ if $(MAKE_CHECK) {
 	libsocketserverbase
 	libtestsocket4
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 } # MAKE_CHECK
 

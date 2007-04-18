@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.27 2006/07/03 23:33:37 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.28 2007/02/16 22:45:52 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -73,6 +73,13 @@ public:
      * @return a reference to the XrlRouter (@ref XrlRouter) instance.
      */
     XrlRouter&	xrl_router() { return *this; }
+
+    /**
+     * Get a const reference to the XrlRouter instance.
+     *
+     * @return a const reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    const XrlRouter& xrl_router() const { return *this; }
 
     //
     // XrlMfeaNode front-end interface

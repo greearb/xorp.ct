@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.34 2007/03/29 22:19:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.35 2007/03/29 22:45:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -662,9 +662,21 @@ XrlSocketServer::startup()
 bool
 XrlSocketServer::shutdown()
 {
-    set_status(SERVICE_SHUTTING_DOWN);
+    set_status(SERVICE_SHUTDOWN);
 
     return true;
+}
+
+bool
+XrlSocketServer::is_running() const
+{
+    if ((status() == SERVICE_READY)
+	|| (status() == SERVICE_SHUTDOWN)
+	|| (status() == SERVICE_FAILED)) {
+	return (false);
+    }
+
+    return (true);
 }
 
 uint32_t

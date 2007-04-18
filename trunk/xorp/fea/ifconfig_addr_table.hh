@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.7 2006/03/16 00:03:54 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.8 2007/02/16 22:45:41 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
 
-#include "fea/addr_table.hh"
-#include "fea/ifconfig.hh"
+#include "addr_table.hh"
+#include "ifconfig.hh"
+#include "ifconfig_reporter.hh"
 
 /**
  * Standard Xorp FEA AddressTable implementation.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.7 2006/03/16 00:03:57 pavlin Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.8 2007/02/16 22:45:45 pavlin Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
@@ -45,15 +45,8 @@ class IfMgrIfTree;
  */
 class LibFeaClientBridge : public IfConfigUpdateReporterBase {
 public:
-    LibFeaClientBridge(XrlRouter& rtr);
+    LibFeaClientBridge(XrlRouter& rtr, const IfTree& iftree);
     ~LibFeaClientBridge();
-
-    /**
-     * Set interface configuration tree to read from when an update is
-     * recorded through one of the update methods implemented from
-     * IfConfigUpdateReporterBase.
-     */
-    void set_iftree(const IfTree* tree);
 
     /**
      * Add named Xrl target to list to receive libfeaclient updates.
@@ -79,13 +72,13 @@ public:
     inline const IfMgrIfTree& libfeaclient_iftree() const;
 
     /**
-     * Get pointer FEA interface configuration tree that is
+     * Get reference to the FEA interface configuration tree that is
      * being used to feed data into libfeaclient's interface
      * configuration tree.
      *
-     * @return pointer to tree.
+     * @return reference to tree.
      */
-    inline const IfTree* fea_iftree() const;
+    inline const IfTree& fea_iftree() const;
 
 protected:
     void interface_update(const string& ifname,
@@ -113,7 +106,7 @@ protected:
 
 protected:
     IfMgrXrlReplicationManager* _rm;
-    const IfTree*		_iftree;
+    const IfTree&		_iftree;
 };
 
 /**

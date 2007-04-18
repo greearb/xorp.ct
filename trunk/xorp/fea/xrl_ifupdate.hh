@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.13 2006/03/16 00:04:03 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifupdate.hh,v 1.14 2007/02/16 22:45:52 pavlin Exp $
 
 #ifndef __FEA_XRL_IFUPDATE_HH__
 #define __FEA_XRL_IFUPDATE_HH__
 
-#include "libxipc/xrl_router.hh"
-#include "ifconfig.hh"
+
+#include "ifconfig_reporter.hh"
+
+class XrlRouter;
 
 /**
  * @short Class for exporting configuration events within FEA to other

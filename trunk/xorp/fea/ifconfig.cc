@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.51 2006/07/25 09:46:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.52 2007/02/16 22:45:41 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -62,7 +62,6 @@ IfConfig::IfConfig(EventLoop& eventloop,
     : _eventloop(eventloop), _ur(ur), _er(er),
       _nexthop_port_mapper(nexthop_port_mapper),
       _restore_original_config_on_shutdown(false),
-      _local_config(NULL),
       _ifc_get_primary(NULL),
       _ifc_set_primary(NULL),
       _ifc_observer_primary(NULL),
@@ -956,161 +955,4 @@ IfConfig::get_vif(IfTree& it, const string& ifname, const string& vifname)
 	return NULL;
 
     return &vi->second;
-}
-
-
-// ----------------------------------------------------------------------------
-// IfConfigUpdateReplicator
-
-IfConfigUpdateReplicator::~IfConfigUpdateReplicator()
-{
-}
-
-bool
-IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
-{
-    if (find(_reporters.begin(), _reporters.end(), rp) != _reporters.end())
-	return false;
-    _reporters.push_back(rp);
-    return true;
-}
-
-bool
-IfConfigUpdateReplicator::remove_reporter(IfConfigUpdateReporterBase* rp)
-{
-    list<IfConfigUpdateReporterBase*>::iterator i = find(_reporters.begin(),
-							 _reporters.end(),
-							 rp);
-    if (i == _reporters.end())
-	return false;
-    _reporters.erase(i);
-    return true;
-}
-
-void
-IfConfigUpdateReplicator::interface_update(const string& ifname,
-					   const Update& update,
-					   bool		 system)
-{
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->interface_update(ifname, update, system);
-	++i;
-    }
-}
-
-void
-IfConfigUpdateReplicator::vif_update(const string& ifname,
-				     const string& vifname,
-				     const Update& update,
-				     bool	   system)
-{
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->vif_update(ifname, vifname, update, system);
-	++i;
-    }
-}
-
-void
-IfConfigUpdateReplicator::vifaddr4_update(const string& ifname,
-					  const string& vifname,
-					  const IPv4&   addr,
-					  const Update& update,
-					  bool		system)
-{
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->vifaddr4_update(ifname, vifname, addr, update, system);
-	++i;
-    }
-}
-
-void
-IfConfigUpdateReplicator::vifaddr6_update(const string& ifname,
-					  const string& vifname,
-					  const IPv6&   addr,
-					  const Update& update,
-					  bool		system)
-{
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->vifaddr6_update(ifname, vifname, addr, update, system);
-	++i;
-    }
-}
-
-void
-IfConfigUpdateReplicator::updates_completed(bool	system)
-{
-    list<IfConfigUpdateReporterBase*>::iterator i = _reporters.begin();
-    while (i != _reporters.end()) {
-	IfConfigUpdateReporterBase*& r = *i;
-	r->updates_completed(system);
-	++i;
-    }
-}
-
-
-// ----------------------------------------------------------------------------
-// IfConfigErrorReporter methods
-
-IfConfigErrorReporter::IfConfigErrorReporter()
-{
-
-}
-
-void
-IfConfigErrorReporter::config_error(const string& error_msg)
-{
-    string preamble(c_format("Config error: "));
-    log_error(preamble + error_msg);
-}
-
-void
-IfConfigErrorReporter::interface_error(const string& ifname,
-				       const string& error_msg)
-{
-    string preamble(c_format("Interface error on %s: ", ifname.c_str()));
-    log_error(preamble + error_msg);
-}
-
-void
-IfConfigErrorReporter::vif_error(const string& ifname,
-				 const string& vifname,
-				 const string& error_msg)
-{
-    string preamble(c_format("Interface/Vif error on %s/%s: ",
-			     ifname.c_str(), vifname.c_str()));
-    log_error(preamble + error_msg);
-}
-
-void
-IfConfigErrorReporter::vifaddr_error(const string& ifname,
-				     const string& vifname,
-				     const IPv4&   addr,
-				     const string& error_msg)
-{
-    string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
-			     ifname.c_str(),
-			     vifname.c_str(),
-			     addr.str().c_str()));
-    log_error(preamble + error_msg);
-}
-
-void
-IfConfigErrorReporter::vifaddr_error(const string& ifname,
-				     const string& vifname,
-				     const IPv6&   addr,
-				     const string& error_msg)
-{
-    string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
-			     ifname.c_str(),
-			     vifname.c_str(),
-			     addr.str().c_str()));
-    log_error(preamble + error_msg);
 }

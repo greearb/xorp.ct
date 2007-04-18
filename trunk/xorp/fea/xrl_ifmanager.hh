@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.11 2006/03/16 00:04:03 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.12 2007/02/16 22:45:52 pavlin Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
@@ -21,7 +21,6 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
 #include "libxipc/xrl_router.hh"
-#include "ifmanager.hh"
 #include "ifmanager_transaction.hh"
 
 /**
@@ -29,8 +28,7 @@
  * via an Xrl interface.
  *
  * The class provides error messages suitable for Xrl return values
- * and does some extra checking not in the InterfaceManager
- * class.
+ * and does some extra checking not in the IfConfig class.
  */
 class XrlInterfaceManager
 {
@@ -41,13 +39,13 @@ public:
      * Constructor
      *
      * @param e the EventLoop.
-     * @param ifm the InterfaceManager object.
+     * @param ifconfig the IfConfig object.
      * @param max_ops the maximum number of operations pending.
      */
-    XrlInterfaceManager(EventLoop&	     e,
-			InterfaceManager& ifm,
-			uint32_t	     max_ops = 200)
-	: _itm(e, 5000, 10), _ifm(ifm), _max_ops(max_ops)
+    XrlInterfaceManager(EventLoop&	e,
+			IfConfig&	ifconfig,
+			uint32_t	max_ops = 200)
+	: _itm(e, 5000, 10), _ifconfig(ifconfig), _max_ops(max_ops)
     {}
 
     /**
@@ -118,11 +116,11 @@ public:
 				  const string& descr,
 				  const IPv6&   validate_addr);
 
-    inline IfTree& iftree() const	{ return _ifm.iftree(); }
+    inline IfTree& iftree() const	{ return _ifconfig.local_config(); }
 
-    inline IfTree& old_iftree() const	{ return _ifm.old_iftree(); }
+    inline IfTree& old_iftree() const	{ return _ifconfig.old_local_config(); }
 
-    inline IfConfig& ifconfig() const	{ return _ifm.ifc(); }
+    inline IfConfig& ifconfig() const	{ return _ifconfig; }
 
 protected:
     XrlCmdError get_if_from_config(const IfTree&	it,
@@ -148,7 +146,7 @@ protected:
 
 protected:
     InterfaceTransactionManager	_itm;
-    InterfaceManager&		_ifm;
+    IfConfig&			_ifconfig;
     uint32_t			_max_ops;
     ProcessStatus               _status, _prev_status;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.17 2006/03/16 00:03:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.18 2007/02/16 22:45:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -54,8 +54,8 @@ truth_of(bool v)
 // ----------------------------------------------------------------------------
 // LibFeaClientBridge implementation
 
-LibFeaClientBridge::LibFeaClientBridge(XrlRouter& rtr)
-    : _iftree(0)
+LibFeaClientBridge::LibFeaClientBridge(XrlRouter& rtr, const IfTree& iftree)
+    : _iftree(iftree)
 {
     _rm = new IfMgrXrlReplicationManager(rtr);
 }
@@ -63,12 +63,6 @@ LibFeaClientBridge::LibFeaClientBridge(XrlRouter& rtr)
 LibFeaClientBridge::~LibFeaClientBridge()
 {
     delete _rm;
-}
-
-void
-LibFeaClientBridge::set_iftree(const IfTree* tree)
-{
-    _iftree = tree;
 }
 
 bool
@@ -89,7 +83,7 @@ LibFeaClientBridge::libfeaclient_iftree() const
     return _rm->iftree();
 }
 
-const IfTree*
+const IfTree&
 LibFeaClientBridge::fea_iftree() const
 {
     return _iftree;
@@ -111,8 +105,6 @@ LibFeaClientBridge::interface_update(const string& ifname,
 	//
 	return;
     }
-
-    XLOG_ASSERT(_iftree != 0);
 
     switch (update) {
     case CREATED:
@@ -138,8 +130,8 @@ LibFeaClientBridge::interface_update(const string& ifname,
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree->get_if(ifname);
-    if (ii == _iftree->ifs().end()) {
+    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
+    if (ii == _iftree.ifs().end()) {
 	XLOG_WARNING("Got update for interface not in FEA tree: %s\n",
 		     ifname.c_str());
 	return;
@@ -182,8 +174,6 @@ LibFeaClientBridge::vif_update(const string& ifname,
 	return;
     }
 
-    XLOG_ASSERT(_iftree != 0);
-
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrVifAdd(ifname, vifname));
@@ -208,8 +198,8 @@ LibFeaClientBridge::vif_update(const string& ifname,
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree->get_if(ifname);
-    if (ii == _iftree->ifs().end()) {
+    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
+    if (ii == _iftree.ifs().end()) {
 	XLOG_WARNING("Got update for vif on interface not in tree:"
 		     "%s/(%s)", ifname.c_str(), vifname.c_str());
 	return;
@@ -269,8 +259,6 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 	return;
     }
 
-    XLOG_ASSERT(_iftree != 0);
-
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrIPv4Add(ifname, vifname, addr));
@@ -298,8 +286,8 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree->get_if(ifname);
-    if (ii == _iftree->ifs().end()) {
+    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
+    if (ii == _iftree.ifs().end()) {
 	XLOG_WARNING("Got update for address on interface not in tree: "
 		     "%s/(%s/%s)",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
@@ -376,8 +364,6 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 	return;
     }
 
-    XLOG_ASSERT(_iftree != 0);
-
     switch (update) {
     case CREATED:
 	_rm->push(new IfMgrIPv6Add(ifname, vifname, addr));
@@ -405,8 +391,8 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree->get_if(ifname);
-    if (ii == _iftree->ifs().end()) {
+    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
+    if (ii == _iftree.ifs().end()) {
 	XLOG_WARNING("Got update for address on interface not in tree: "
 		     "%s/(%s/%s)",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
@@ -467,8 +453,6 @@ LibFeaClientBridge::updates_completed(bool	  system)
 	//
 	return;
     }
-
-    XLOG_ASSERT(_iftree != 0);
 
     _rm->push(new IfMgrHintUpdatesMade());
 }

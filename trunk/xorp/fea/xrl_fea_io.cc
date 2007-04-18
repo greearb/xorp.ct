@@ -1,7 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
-// vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,29 +12,47 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/profile_vars.cc,v 1.5 2007/02/16 22:45:49 pavlin Exp $"
+#ident "$XORP$"
+
+
+//
+// FEA (Forwarding Engine Abstraction) XRL-based I/O implementation.
+//
+
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-#include "libxorp/profile.hh"
 
-#include "profile_vars.hh"
+#include "xrl_fea_io.hh"
 
-struct profile_vars {
-    string var;
-    string comment;
-} profile_vars[] = {
-    { profile_route_in, 	"Routes entering FEA" },
-    { profile_route_out,	"Routes being sent to the KERNEL" }
-};
 
-void
-initialize_profiling_variables(Profile& p)
+XrlFeaIO::XrlFeaIO(EventLoop& eventloop)
+    : FeaIO(eventloop)
 {
-    for (size_t i = 0; i < sizeof(profile_vars) / sizeof(struct profile_vars);
-	 i++)
-	p.create(profile_vars[i].var, profile_vars[i].comment);
+}
+
+XrlFeaIO::~XrlFeaIO()
+{
+    shutdown();
+}
+
+int
+XrlFeaIO::startup()
+{
+    return (FeaIO::startup());
+}
+
+int
+XrlFeaIO::shutdown()
+{
+    return (FeaIO::shutdown());
+}
+
+bool
+XrlFeaIO::is_running() const
+{
+    return (FeaIO::is_running());
 }
