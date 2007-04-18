@@ -161,10 +161,10 @@ default: $(TARGETS)
 all: $(TARGETS)
 
 normal:
-	@$(MAKE) -f $(srcdir)/Makefile.rules TARGETS="$(TARGET_LIBS)" SUFFIX="" CFLAGS="$(CFLAGS)" CC="$(CC)" OBJDIR=normal_obj LINK_SHARED='@LINK_SHARED@' SHARED_EXT='@SHARED_EXT@' SHARED_ALT='@SHARED_ALT@' LIBS='$(LIBS)' srcdir='$(srcdir)' LIBDIR='$(LIBDIR)' LN_S='@LN_S@' DEMOS="$(DEMOS)" PROGRAMS='$(PROGRAMS)'
+	@"$(MAKE)" -f $(srcdir)/Makefile.rules TARGETS="$(TARGET_LIBS)" SUFFIX="" CFLAGS="$(CFLAGS)" CC="$(CC)" OBJDIR=normal_obj LINK_SHARED='@LINK_SHARED@' SHARED_EXT='@SHARED_EXT@' SHARED_ALT='@SHARED_ALT@' LIBS='$(LIBS)' srcdir='$(srcdir)' LIBDIR='$(LIBDIR)' LN_S='@LN_S@' DEMOS="$(DEMOS)" PROGRAMS='$(PROGRAMS)'
 
 reentrant:
-	@$(MAKE) -f $(srcdir)/Makefile.rules TARGETS="$(TARGET_LIBS)" SUFFIX="_r" CFLAGS="$(CFLAGS) $(DEFINES_R)" CC="$(CC)" OBJDIR=reentrant_obj LINK_SHARED='@LINK_SHARED@' SHARED_EXT='@SHARED_EXT@' SHARED_ALT='@SHARED_ALT@' LIBS='$(LIBS)' srcdir='$(srcdir)' LIBDIR='$(LIBDIR)' LN_S='@LN_S@' DEMOS="$(DEMOS)" PROGRAMS='$(PROGRAMS_R)'
+	@"$(MAKE)" -f $(srcdir)/Makefile.rules TARGETS="$(TARGET_LIBS)" SUFFIX="_r" CFLAGS="$(CFLAGS) $(DEFINES_R)" CC="$(CC)" OBJDIR=reentrant_obj LINK_SHARED='@LINK_SHARED@' SHARED_EXT='@SHARED_EXT@' SHARED_ALT='@SHARED_ALT@' LIBS='$(LIBS)' srcdir='$(srcdir)' LIBDIR='$(LIBDIR)' LN_S='@LN_S@' DEMOS="$(DEMOS)" PROGRAMS='$(PROGRAMS_R)'
 
 demos: normal
 
