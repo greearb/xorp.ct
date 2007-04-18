@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/cli/tools/Makefile.am,v 1.1 2004/05/05 05:10:24 pavlin Exp $
+## $XORP: xorp/cli/tools/Makefile.am,v 1.2 2004/11/12 02:44:30 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -35,4 +35,3 @@ EXTRA_DIST	  =
 ##
 
 INCLUDES =	-I$(top_srcdir)
-
