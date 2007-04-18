@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/pim/Jamfile,v 1.1 2007/01/11 22:30:50 bms Exp $
 #
 
 SubDir TOP pim ;
@@ -9,50 +9,19 @@ SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
-SubIncludeOnce TOP libfeaclient ;
 SubIncludeOnce TOP mrt ;
-SubIncludeOnce TOP cli ;
-SubIncludeOnce TOP cli libtecla ;
-SubIncludeOnce TOP fea ;
-SubIncludeOnce TOP fib2mrib ;
-SubIncludeOnce TOP rib ;
-SubIncludeOnce TOP mld6igmp ;
 SubDir TOP pim ;
 
 LINKLIBS_PIM_COMMON = 
 	libpim
-	libmld6igmpxif
 	libpimbase
-	libmld6igmp
-	libmfeaxif
-	libmld6igmpclientxif
-	libmld6igmpbase
-	librib
-	libftixif
-	libfeaifmgrxif
 	libribxif
-	libribclientxif
-	libribbase
-	libfindereventnotifierxif
-	libprofileclientxif
-	libfea
-	libfeafibclientxif
-	libfeaifmgrclientxif
-	libfearawpkt4client
-	libfearawpkt6client
-	libfeabase
-	libfeaifmgrxif
+	libmld6igmpxif
+	libmfeaxif
 	libclimanagerxif
-	libmfeaclientxif
-	libmfeabase
+	libfindereventnotifierxif
 	libmrt
-	libcli
-	libtecla
-	libcliprocessorxif
-	libclibase
-	libprofileclientxif
 	libproto
-	libfinder
 	libxipc
 	libcomm
 	libxorp
@@ -101,38 +70,6 @@ Library libpim :
 
 if $(MAKE_CHECK) {
 
- MainFromObjects test_pim :
-	test_pim$(SUFOBJ)
-	rib_manager$(SUFOBJ) xrl_target$(SUFOBJ) redist_xrl$(SUFOBJ) ;
- Objects test_pim.cc ;
- LinkLibraries test_pim :
-	$(LINKLIBS_PIM_COMMON)
-	libfib2mrib
-	libpolicybackend
-	libpolicycommon
-	libfeaclient
-	libfeaifmgrmirrorxif
-	libfeaifmgrreplicatorxif
-	libfeaifmgrmirrorbase
-	libfib2mribbase
-	libftixif
-	libfeafibxif
-	libsocket4userxif
-	libsocket4xif
-	libredist4xif
-	libredisttransaction4xif
-	libsocket6userxif
-	libsocket6xif
-	libredist6xif
-	libpolicyredist4xif
-	libpolicyredist6xif
-	libredisttransaction6xif
-	libfindereventnotifierxif
-	libsocketserverbase
-	libxorp
-	;
- SEARCH_SOURCE = $(TOP)/rib ;
- Objects rib_manager.cc xrl_target.cc redist_xrl.cc ;
 } # MAKE_CHECK
 
 InstallBin $(PREFIX)/pim : xorp_pimsm4 xorp_pimsm6 ;

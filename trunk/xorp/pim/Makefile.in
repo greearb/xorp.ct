@@ -36,7 +36,7 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = xorp_pimsm4$(EXEEXT) xorp_pimsm6$(EXEEXT)
 TESTS =
-check_PROGRAMS = test_pim$(EXEEXT)
+check_PROGRAMS =
 subdir = pim
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -65,101 +65,18 @@ libpim_la_OBJECTS = $(am_libpim_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
-am_test_pim_OBJECTS = test_pim.$(OBJEXT) rib_manager.$(OBJEXT) \
-	xrl_target.$(OBJEXT) redist_xrl.$(OBJEXT)
-test_pim_OBJECTS = $(am_test_pim_OBJECTS)
-am__DEPENDENCIES_1 = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
-	$(top_builddir)/xrl/targets/libpimbase.la \
-	$(top_builddir)/mld6igmp/libmld6igmp.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/rib/librib.la \
-	$(top_builddir)/xrl/interfaces/libftixif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libribclientxif.la \
-	$(top_builddir)/xrl/targets/libribbase.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
-	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
-	$(top_builddir)/libxipc/libxipc.la \
-	$(top_builddir)/libcomm/libcomm.la \
-	$(top_builddir)/libxorp/libxorp.la
-test_pim_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(top_builddir)/fib2mrib/libfib2mrib.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/targets/libfib2mribbase.la \
-	$(top_builddir)/xrl/interfaces/libftixif.la \
-	$(top_builddir)/xrl/interfaces/libfeafibxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libredist4xif.la \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libredist6xif.la \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la
 am_xorp_pimsm4_OBJECTS = xorp_pimsm4.$(OBJEXT)
 xorp_pimsm4_OBJECTS = $(am_xorp_pimsm4_OBJECTS)
 xorp_pimsm4_LDADD = $(LDADD)
 xorp_pimsm4_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
 	$(top_builddir)/xrl/targets/libpimbase.la \
-	$(top_builddir)/mld6igmp/libmld6igmp.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/rib/librib.la \
-	$(top_builddir)/xrl/interfaces/libftixif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libribclientxif.la \
-	$(top_builddir)/xrl/targets/libribbase.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -167,37 +84,14 @@ am_xorp_pimsm6_OBJECTS = xorp_pimsm6.$(OBJEXT)
 xorp_pimsm6_OBJECTS = $(am_xorp_pimsm6_OBJECTS)
 xorp_pimsm6_LDADD = $(LDADD)
 xorp_pimsm6_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
 	$(top_builddir)/xrl/targets/libpimbase.la \
-	$(top_builddir)/mld6igmp/libmld6igmp.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/rib/librib.la \
-	$(top_builddir)/xrl/interfaces/libftixif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libribclientxif.la \
-	$(top_builddir)/xrl/targets/libribbase.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -222,10 +116,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libpim_la_SOURCES) $(test_pim_SOURCES) \
-	$(xorp_pimsm4_SOURCES) $(xorp_pimsm6_SOURCES)
-DIST_SOURCES = $(libpim_la_SOURCES) $(test_pim_SOURCES) \
-	$(xorp_pimsm4_SOURCES) $(xorp_pimsm6_SOURCES)
+SOURCES = $(libpim_la_SOURCES) $(xorp_pimsm4_SOURCES) \
+	$(xorp_pimsm6_SOURCES)
+DIST_SOURCES = $(libpim_la_SOURCES) $(xorp_pimsm4_SOURCES) \
+	$(xorp_pimsm6_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -365,53 +259,17 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libpim.la
 
 # -- Libraries and library flags to link the binary programs
-### PIM libraries
-#LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la
-### MLD6IGMP libraries
-#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
-### RIB libraries
-### MFEA libraries
-# FEA-specific begin
-# FEA-specific end
-### MRT libraries
-### CLI libraries
-### XRL client for Profile
+### XRL libraries
 ### XORP misc libraries
 LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
 	$(top_builddir)/xrl/targets/libpimbase.la \
-	$(top_builddir)/mld6igmp/libmld6igmp.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
-	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
-	$(top_builddir)/rib/librib.la \
-	$(top_builddir)/xrl/interfaces/libftixif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
-	$(top_builddir)/xrl/interfaces/libribclientxif.la \
-	$(top_builddir)/xrl/targets/libribbase.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/fea/libfea.la \
-	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
-	$(top_builddir)/xrl/targets/libfeabase.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
+	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
+	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
-	$(top_builddir)/xrl/targets/libmfeabase.la \
-	$(top_builddir)/mrt/libmrt.la $(top_builddir)/cli/libcli.la \
-	$(top_builddir)/cli/libtecla/libtecla.a @CLI_CURSES_LIB@ \
-	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
-	$(top_builddir)/xrl/targets/libclibase.la \
-	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
-	$(top_builddir)/libxipc/libfinder.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -419,34 +277,6 @@ LDADD = $(noinst_LTLIBRARIES) \
 # -- Program Sources
 xorp_pimsm4_SOURCES = xorp_pimsm4.cc
 xorp_pimsm6_SOURCES = xorp_pimsm6.cc
-test_pim_SOURCES = test_pim.cc $(top_srcdir)/rib/rib_manager.hh \
-	$(top_srcdir)/rib/rib_manager.cc \
-	$(top_srcdir)/rib/xrl_target.hh \
-	$(top_srcdir)/rib/xrl_target.cc \
-	$(top_srcdir)/rib/redist_xrl.hh \
-	$(top_srcdir)/rib/redist_xrl.cc
-test_pim_LDADD = $(LDADD) $(top_builddir)/fib2mrib/libfib2mrib.la \
-	$(top_builddir)/policy/backend/libpolicybackend.la \
-	$(top_builddir)/libfeaclient/libfeaclient.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/targets/libfib2mribbase.la \
-	$(top_builddir)/xrl/interfaces/libftixif.la \
-	$(top_builddir)/xrl/interfaces/libfeafibxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libredist4xif.la \
-	$(top_builddir)/xrl/interfaces/libredisttransaction4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libredist6xif.la \
-	$(top_builddir)/xrl/interfaces/libpolicyredist4xif.la \
-	$(top_builddir)/xrl/interfaces/libpolicyredist6xif.la \
-	$(top_builddir)/xrl/interfaces/libredisttransaction6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la
-#test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libpim_la_SOURCES = pim_module.h pim_proto.h pim_bsr.hh pim_mfc.hh \
@@ -467,8 +297,7 @@ libpim_la_SOURCES = pim_module.h pim_proto.h pim_bsr.hh pim_mfc.hh \
 	pim_scope_zone_table.cc pim_vif.cc xrl_pim_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = DEVNOTES command_pim configure_pim docs \
-	xrl_pim_shell_funcs.sh
+EXTRA_DIST = DEVNOTES command_pim docs xrl_pim_shell_funcs.sh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -551,9 +380,6 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-test_pim$(EXEEXT): $(test_pim_OBJECTS) $(test_pim_DEPENDENCIES) 
-	@rm -f test_pim$(EXEEXT)
-	$(CXXLINK) $(test_pim_OBJECTS) $(test_pim_LDADD) $(LIBS)
 xorp_pimsm4$(EXEEXT): $(xorp_pimsm4_OBJECTS) $(xorp_pimsm4_DEPENDENCIES) 
 	@rm -f xorp_pimsm4$(EXEEXT)
 	$(CXXLINK) $(xorp_pimsm4_OBJECTS) $(xorp_pimsm4_LDADD) $(LIBS)
@@ -598,13 +424,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pim_rp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pim_scope_zone_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pim_vif.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/redist_xrl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rib_manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_pim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_pimsm4.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_pimsm6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_pim_node.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_target.Po@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -626,48 +448,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
-
-rib_manager.o: $(top_srcdir)/rib/rib_manager.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT rib_manager.o -MD -MP -MF $(DEPDIR)/rib_manager.Tpo -c -o rib_manager.o `test -f '$(top_srcdir)/rib/rib_manager.cc' || echo '$(srcdir)/'`$(top_srcdir)/rib/rib_manager.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/rib_manager.Tpo $(DEPDIR)/rib_manager.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/rib/rib_manager.cc' object='rib_manager.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.o `test -f '$(top_srcdir)/rib/rib_manager.cc' || echo '$(srcdir)/'`$(top_srcdir)/rib/rib_manager.cc
-
-rib_manager.obj: $(top_srcdir)/rib/rib_manager.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT rib_manager.obj -MD -MP -MF $(DEPDIR)/rib_manager.Tpo -c -o rib_manager.obj `if test -f '$(top_srcdir)/rib/rib_manager.cc'; then $(CYGPATH_W) '$(top_srcdir)/rib/rib_manager.cc'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/rib/rib_manager.cc'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/rib_manager.Tpo $(DEPDIR)/rib_manager.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/rib/rib_manager.cc' object='rib_manager.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rib_manager.obj `if test -f '$(top_srcdir)/rib/rib_manager.cc'; then $(CYGPATH_W) '$(top_srcdir)/rib/rib_manager.cc'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/rib/rib_manager.cc'; fi`
-
-xrl_target.o: $(top_srcdir)/rib/xrl_target.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xrl_target.o -MD -MP -MF $(DEPDIR)/xrl_target.Tpo -c -o xrl_target.o `test -f '$(top_srcdir)/rib/xrl_target.cc' || echo '$(srcdir)/'`$(top_srcdir)/rib/xrl_target.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xrl_target.Tpo $(DEPDIR)/xrl_target.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/rib/xrl_target.cc' object='xrl_target.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.o `test -f '$(top_srcdir)/rib/xrl_target.cc' || echo '$(srcdir)/'`$(top_srcdir)/rib/xrl_target.cc
-
-xrl_target.obj: $(top_srcdir)/rib/xrl_target.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xrl_target.obj -MD -MP -MF $(DEPDIR)/xrl_target.Tpo -c -o xrl_target.obj `if test -f '$(top_srcdir)/rib/xrl_target.cc'; then $(CYGPATH_W) '$(top_srcdir)/rib/xrl_target.cc'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/rib/xrl_target.cc'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/xrl_target.Tpo $(DEPDIR)/xrl_target.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/rib/xrl_target.cc' object='xrl_target.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xrl_target.obj `if test -f '$(top_srcdir)/rib/xrl_target.cc'; then $(CYGPATH_W) '$(top_srcdir)/rib/xrl_target.cc'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/rib/xrl_target.cc'; fi`
-
-redist_xrl.o: $(top_srcdir)/rib/redist_xrl.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT redist_xrl.o -MD -MP -MF $(DEPDIR)/redist_xrl.Tpo -c -o redist_xrl.o `test -f '$(top_srcdir)/rib/redist_xrl.cc' || echo '$(srcdir)/'`$(top_srcdir)/rib/redist_xrl.cc
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/redist_xrl.Tpo $(DEPDIR)/redist_xrl.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/rib/redist_xrl.cc' object='redist_xrl.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.o `test -f '$(top_srcdir)/rib/redist_xrl.cc' || echo '$(srcdir)/'`$(top_srcdir)/rib/redist_xrl.cc
-
-redist_xrl.obj: $(top_srcdir)/rib/redist_xrl.cc
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT redist_xrl.obj -MD -MP -MF $(DEPDIR)/redist_xrl.Tpo -c -o redist_xrl.obj `if test -f '$(top_srcdir)/rib/redist_xrl.cc'; then $(CYGPATH_W) '$(top_srcdir)/rib/redist_xrl.cc'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/rib/redist_xrl.cc'; fi`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/redist_xrl.Tpo $(DEPDIR)/redist_xrl.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/rib/redist_xrl.cc' object='redist_xrl.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o redist_xrl.obj `if test -f '$(top_srcdir)/rib/redist_xrl.cc'; then $(CYGPATH_W) '$(top_srcdir)/rib/redist_xrl.cc'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/rib/redist_xrl.cc'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

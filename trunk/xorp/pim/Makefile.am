@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.34 2005/02/19 02:55:14 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.35 2005/02/27 20:49:46 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -13,61 +13,23 @@ bin_PROGRAMS	 = xorp_pimsm4 xorp_pimsm6
 TESTS		 =
 
 # -- No-install Programs
-check_PROGRAMS  = test_pim
+check_PROGRAMS	 = 
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libpim.la
 
 # -- Libraries and library flags to link the binary programs
-### PIM libraries
 LDADD		 = $(noinst_LTLIBRARIES)
-#LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpxif.la
+### XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libpimbase.la
-### MLD6IGMP libraries
-LDADD		+= $(top_builddir)/mld6igmp/libmld6igmp.la
-#LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la
-LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.la
-### RIB libraries
-LDADD		+= $(top_builddir)/rib/librib.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libftixif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libribclientxif.la
-LDADD		+= $(top_builddir)/xrl/targets/libribbase.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
-### MFEA libraries
-LDADD		+= $(top_builddir)/fea/libfea.la
-# FEA-specific begin
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6client.la
-LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
-# FEA-specific end
+LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.la
-LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.la
-### MRT libraries
-LDADD		+= $(top_builddir)/mrt/libmrt.la
-### CLI libraries
-LDADD		+= $(top_builddir)/cli/libcli.la
-LDADD		+= $(top_builddir)/cli/libtecla/libtecla.a
-LDADD		+= @CLI_CURSES_LIB@
-LDADD		+= $(top_builddir)/xrl/interfaces/libcliprocessorxif.la
-LDADD		+= $(top_builddir)/xrl/targets/libclibase.la
-### XRL client for Profile
-LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 ### XORP misc libraries
+LDADD		+= $(top_builddir)/mrt/libmrt.la
 LDADD		+= $(top_builddir)/libproto/libproto.la
-LDADD		+= $(top_builddir)/libxipc/libfinder.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
@@ -75,40 +37,6 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 # -- Program Sources
 xorp_pimsm4_SOURCES  = xorp_pimsm4.cc
 xorp_pimsm6_SOURCES  = xorp_pimsm6.cc
-
-test_pim_SOURCES  = test_pim.cc
-test_pim_SOURCES += $(top_srcdir)/rib/rib_manager.hh
-test_pim_SOURCES += $(top_srcdir)/rib/rib_manager.cc
-test_pim_SOURCES += $(top_srcdir)/rib/xrl_target.hh
-test_pim_SOURCES += $(top_srcdir)/rib/xrl_target.cc
-test_pim_SOURCES += $(top_srcdir)/rib/redist_xrl.hh
-test_pim_SOURCES += $(top_srcdir)/rib/redist_xrl.cc
-
-test_pim_LDADD	 = $(LDADD)
-test_pim_LDADD	+= $(top_builddir)/fib2mrib/libfib2mrib.la
-test_pim_LDADD	+= $(top_builddir)/policy/backend/libpolicybackend.la
-test_pim_LDADD	+= $(top_builddir)/libfeaclient/libfeaclient.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
-
-test_pim_LDADD	+= $(top_builddir)/xrl/targets/libfib2mribbase.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libftixif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfeafibxif.la
-
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredist4xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction4xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredist6xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libpolicyredist4xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libpolicyredist6xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libredisttransaction6xif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-test_pim_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
-#test_pim_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libpim_la_SOURCES  = pim_module.h
@@ -167,7 +95,6 @@ libpim_la_SOURCES += xrl_pim_node.cc
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = DEVNOTES
 EXTRA_DIST	 += command_pim
-EXTRA_DIST	 += configure_pim
 EXTRA_DIST	 += docs
 EXTRA_DIST	 += xrl_pim_shell_funcs.sh
 
@@ -179,4 +106,3 @@ EXTRA_DIST	 += xrl_pim_shell_funcs.sh
 ##
 
 INCLUDES =	-I$(top_srcdir)
-
