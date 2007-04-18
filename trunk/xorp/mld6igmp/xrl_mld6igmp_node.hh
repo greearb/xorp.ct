@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.37 2006/07/03 23:33:38 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.38 2007/02/16 22:46:38 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -72,6 +72,13 @@ public:
      * @return a reference to the XrlRouter (@ref XrlRouter) instance.
      */
     XrlRouter&	xrl_router() { return *this; }
+
+    /**
+     * Get a const reference to the XrlRouter instance.
+     *
+     * @return a const reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    const XrlRouter& xrl_router() const { return *this; }
 
     //
     // XrlMld6igmpNode front-end interface
