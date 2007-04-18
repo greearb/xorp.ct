@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.67 2006/07/03 23:33:39 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.68 2007/02/16 22:46:51 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -80,6 +80,13 @@ public:
      * @return a reference to the XrlRouter (@ref XrlRouter) instance.
      */
     XrlRouter&	xrl_router() { return *this; }
+
+    /**
+     * Get a const reference to the XrlRouter instance.
+     *
+     * @return a const reference to the XrlRouter (@ref XrlRouter) instance.
+     */
+    const XrlRouter& xrl_router() const { return *this; }
 
     //
     // XrlPimNode front-end interface
