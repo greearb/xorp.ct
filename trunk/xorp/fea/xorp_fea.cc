@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xorp_fea.cc,v 1.1 2007/04/18 06:20:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,6 +31,12 @@
 // TODO: XXX: those XRL target names should be defined somewhere else
 static const string xrl_fea_targetname = "fea";
 static const string xrl_finder_targetname = "finder";
+
+#ifndef FEA_DUMMY
+static bool is_dummy = false;
+#else
+static bool is_dummy = true;
+#endif
 
 
 /**
@@ -84,6 +90,10 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     XrlFeaNode xrl_fea_node(eventloop, xrl_fea_targetname,
 			    xrl_finder_targetname, finder_hostname,
 			    finder_port);
+
+    // Set the unit in dummy mode
+    if (is_dummy)
+	xrl_fea_node.set_dummy();
 
     // Start operations
     xrl_fea_node.startup();

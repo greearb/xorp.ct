@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.1 2007/04/18 06:21:00 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -91,6 +91,20 @@ public:
     bool	is_running() const;
 
     /**
+     * Setup the unit to behave as dummy (for testing purpose).
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_dummy();
+
+    /**
+     * Test if running in dummy mode.
+     * 
+     * @return true if running in dummy mode, otherwise false.
+     */
+    bool	is_dummy() const { return _is_dummy; }
+
+    /**
      * Test whether a shutdown XRL request has been received.
      *
      * @return true if shutdown XRL request has been received, otherwise false.
@@ -146,7 +160,6 @@ private:
     XrlSocketServer	_xrl_socket_server; // XRL socket server
     XrlPacketAclTarget	_xrl_packet_acl_target;
 
-#ifndef FEA_DUMMY
     // MFEA-related stuff
     // TODO: XXX: This should be refactored and better integrated with the FEA.
     // TODO: XXX: For now we don't have a dummy MFEA
@@ -161,9 +174,10 @@ private:
 #ifdef HAVE_IPV6_MULTICAST
     XrlMfeaNode		_xrl_mfea_node6;	// The IPv6 MFEA
 #endif
-#endif // ! FEA_DUMMY
 
     XrlFeaTarget	_xrl_fea_target; // The FEA XRL target
+
+    bool		_is_dummy;	// True if running in dummy node
 };
 
 #endif // __FEA_XRL_FEA_NODE_HH__

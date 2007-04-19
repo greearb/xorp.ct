@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.1 2007/04/18 06:20:56 pavlin Exp $"
 
 
 //
@@ -33,16 +33,10 @@
 #include "profile_vars.hh"
 
 
-#ifndef FEA_DUMMY
-static bool is_dummy = false;
-#else
-static bool is_dummy = true;
-#endif
-
-
 FeaNode::FeaNode(EventLoop& eventloop)
     : _eventloop(eventloop),
       _is_running(false),
+      _is_dummy(false),
       _ifconfig(eventloop, _ifconfig_update_replicator,
 		_ifconfig_error_reporter, _nexthop_port_mapper),
       _ifconfig_address_table(_ifconfig.local_config()),
@@ -56,10 +50,6 @@ FeaNode::FeaNode(EventLoop& eventloop)
 		 _nexthop_port_mapper),
       _pa_transaction_manager(_eventloop, _pa_table_manager)
 {
-    if (is_dummy) {
-	_ifconfig.set_dummy();
-	_fticonfig.set_dummy();
-    }
     _ifconfig_update_replicator.add_reporter(&_ifconfig_address_table);
 }
 
@@ -142,4 +132,15 @@ bool
 FeaNode::is_running() const
 {
     return (_is_running);
+}
+
+int
+FeaNode::set_dummy()
+{
+    _ifconfig.set_dummy();
+    _fticonfig.set_dummy();
+
+    _is_dummy = true;
+
+    return (XORP_OK);
 }

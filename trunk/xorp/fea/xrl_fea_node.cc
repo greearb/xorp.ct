@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.1 2007/04/18 06:21:00 pavlin Exp $"
 
 
 //
@@ -85,15 +85,14 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router,
 		      _xrl_ifconfig_reporter, _fea_node.profile(),
 		      _xrsm4, _xrsm6, _lib_fea_client_bridge,
-		      _xrl_socket_server)
+		      _xrl_socket_server),
+      _is_dummy(false)
 {
     IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();
     repl.add_reporter(&_xrl_ifconfig_reporter);
     repl.add_reporter(&_lib_fea_client_bridge);
 
-#ifndef FEA_DUMMY
     _cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access
-#endif
 }
 
 XrlFeaNode::~XrlFeaNode()
@@ -108,13 +107,17 @@ XrlFeaNode::startup()
     wait_until_xrl_router_is_ready(eventloop(),
 				   _xrl_packet_acl_target.xrl_router());
 
-#ifndef FEA_DUMMY
-    wait_until_xrl_router_is_ready(eventloop(), _xrl_cli_node.xrl_router());
-    wait_until_xrl_router_is_ready(eventloop(), _xrl_mfea_node4.xrl_router());
+    if (! is_dummy()) {
+	// XXX: The multicast-related code doesn't have dummy mode (yet)
+	wait_until_xrl_router_is_ready(eventloop(),
+				       _xrl_cli_node.xrl_router());
+	wait_until_xrl_router_is_ready(eventloop(),
+				       _xrl_mfea_node4.xrl_router());
 #ifdef HAVE_IPV6_MULTICAST
-    wait_until_xrl_router_is_ready(eventloop(), _xrl_mfea_node6.xrl_router());
+	wait_until_xrl_router_is_ready(eventloop(),
+				       _xrl_mfea_node6.xrl_router());
 #endif
-#endif
+    }
 
     fea_node().startup();
     xrl_fea_io().startup();
@@ -123,21 +126,21 @@ XrlFeaNode::startup()
     _xrl_socket_server.startup();
     _xrl_packet_acl_target.startup();
 
-#ifndef FEA_DUMMY
-    // XXX: temporary enable the built-in CLI access
-    _xrl_cli_node.enable_cli();
-    _xrl_cli_node.start_cli();
-    _xrl_mfea_node4.enable_mfea();
-    // _xrl_mfea_node4.startup();
-    _xrl_mfea_node4.enable_cli();
-    _xrl_mfea_node4.start_cli();
+    if (! is_dummy()) {
+	// XXX: temporary enable the built-in CLI access
+	_xrl_cli_node.enable_cli();
+	_xrl_cli_node.start_cli();
+	_xrl_mfea_node4.enable_mfea();
+	// _xrl_mfea_node4.startup();
+	_xrl_mfea_node4.enable_cli();
+	_xrl_mfea_node4.start_cli();
 #ifdef HAVE_IPV6_MULTICAST
-    _xrl_mfea_node6.enable_mfea();
-    // _xrl_mfea_node6.startup();
-    _xrl_mfea_node6.enable_cli();
-    _xrl_mfea_node6.start_cli();
+	_xrl_mfea_node6.enable_mfea();
+	// _xrl_mfea_node6.startup();
+	_xrl_mfea_node6.enable_cli();
+	_xrl_mfea_node6.start_cli();
 #endif
-#endif // ! FEA_DUMMY
+    }
 
     return (XORP_OK);
 }
@@ -149,12 +152,12 @@ XrlFeaNode::shutdown()
     xrl_fea_io().shutdown();
     xrl_fea_target().shutdown();
 
-#ifndef FEA_DUMMY
-    _xrl_mfea_node4.shutdown();
+    if (! is_dummy()) {
+	_xrl_mfea_node4.shutdown();
 #ifdef HAVE_IPV6_MULTICAST
-    _xrl_mfea_node6.shutdown();
+	_xrl_mfea_node6.shutdown();
 #endif
-#endif // ! FEA_DUMMY
+    }
 
     _xrl_packet_acl_target.shutdown();
     _xrl_socket_server.shutdown();
@@ -172,14 +175,14 @@ XrlFeaNode::is_running() const
     if (_xrl_fea_target.is_running())
 	return (true);
 
-#ifndef FEA_DUMMY
-    if (! _xrl_mfea_node4.MfeaNode::is_down())
-	return (true);
+    if (! is_dummy()) {
+	if (! _xrl_mfea_node4.MfeaNode::is_down())
+	    return (true);
 #ifdef HAVE_IPV6_MULTICAST
-    if (! _xrl_mfea_node6.MfeaNode::is_down())
-	return (true);
+	if (! _xrl_mfea_node6.MfeaNode::is_down())
+	    return (true);
 #endif
-#endif // ! FEA_DUMMY
+    }
 
     if (_xrl_packet_acl_target.is_running())
 	return (true);
@@ -190,16 +193,16 @@ XrlFeaNode::is_running() const
     // Test whether all XRL operations have completed
     //
 
-#ifndef FEA_DUMMY
-    if (_xrl_cli_node.xrl_router().pending())
-	return (true);
-    if (_xrl_mfea_node4.xrl_router().pending())
-	return (true);
+    if (! is_dummy()) {
+	if (_xrl_cli_node.xrl_router().pending())
+	    return (true);
+	if (_xrl_mfea_node4.xrl_router().pending())
+	    return (true);
 #ifdef HAVE_IPV6_MULTICAST
-    if (_xrl_mfea_node6.xrl_router().pending())
-	return (true);
+	if (_xrl_mfea_node6.xrl_router().pending())
+	    return (true);
 #endif
-#endif // ! FEA_DUMMY
+    }
 
 
     if (_xrl_packet_acl_target.xrl_router().pending())
@@ -211,6 +214,16 @@ XrlFeaNode::is_running() const
 	return (true);
 
     return (false);
+}
+
+int
+XrlFeaNode::set_dummy()
+{
+    _fea_node.set_dummy();
+
+    _is_dummy = true;
+
+    return (XORP_OK);
 }
 
 bool

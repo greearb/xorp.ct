@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/fea_node.hh,v 1.1 2007/04/18 06:20:56 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -78,6 +78,20 @@ public:
     bool	is_running() const;
 
     /**
+     * Setup the unit to behave as dummy (for testing purpose).
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		set_dummy();
+
+    /**
+     * Test if running in dummy mode.
+     * 
+     * @return true if running in dummy mode, otherwise false.
+     */
+    bool	is_dummy() const { return _is_dummy; }
+
+    /**
      * Get the event loop this service is added to.
      * 
      * @return the event loop this service is added to.
@@ -135,6 +149,7 @@ public:
 private:
     EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running
+    bool	_is_dummy;	// True if running in dummy node
     Profile	_profile;	// Profile entity
     NexthopPortMapper		_nexthop_port_mapper;	// Next-hop port mapper
 
