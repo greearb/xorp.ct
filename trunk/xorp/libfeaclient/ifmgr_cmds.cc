@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.17 2007/02/16 22:45:59 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.18 2007/04/19 21:36:51 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -635,6 +635,38 @@ IfMgrVifSetLoopbackCapable::str() const
 {
     return vif_str_begin(this, "SetLoopbackCapable")
 	+ ", " + bool2str(loopback_capable()) + vif_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrVifSetPimRegister
+
+bool
+IfMgrVifSetPimRegister::execute(IfMgrIfTree& tree) const
+{
+    IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
+    if (vifa == NULL)
+	return false;
+
+    vifa->set_pim_register(pim_register());
+    return true;
+}
+
+bool
+IfMgrVifSetPimRegister::forward(XrlSender&		sender,
+				const string&		xrl_target,
+				const IfMgrXrlSendCB&	xscb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_vif_set_pim_register(xt, ifname(), vifname(),
+				       pim_register(), xscb);
+}
+
+string
+IfMgrVifSetPimRegister::str() const
+{
+    return vif_str_begin(this, "SetPimRegister")
+	+ ", " + bool2str(pim_register()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------

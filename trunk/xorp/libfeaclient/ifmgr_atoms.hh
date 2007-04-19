@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.25 2007/02/16 22:45:59 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.26 2007/04/19 21:36:51 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -341,6 +341,9 @@ public:
     inline bool		loopback() const		{ return _loopback; }
     inline void		set_loopback(bool v)		{ _loopback = v; }
 
+    inline bool		pim_register() const		{ return _pim_register; }
+    inline void		set_pim_register(bool v)	{ _pim_register = v; }
+
     inline uint32_t	pif_index() const		{ return _pif_index; }
     inline uint32_t	set_pif_index(uint32_t v) 	{ return _pif_index = v; }
 
@@ -367,6 +370,7 @@ protected:
     bool	_broadcast_capable;	// True if broadcast capable
     bool	_p2p_capable;		// True if point-to-point capable
     bool	_loopback;		// True if loopback vif
+    bool	_pim_register;		// True if PIM Register vif
     uint32_t	_pif_index;		// Physical interface index
 
     IPv4Map	_ipv4addrs;		// The IPv4 addresses
@@ -544,6 +548,7 @@ IfMgrVifAtom::IfMgrVifAtom(const string& name)
       _broadcast_capable(false),
       _p2p_capable(false),
       _loopback(false),
+      _pim_register(false),
       _pif_index(0)
 {
 }

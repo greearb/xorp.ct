@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.14 2007/02/16 22:45:59 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.15 2007/04/19 21:36:51 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -400,6 +400,32 @@ public:
 
 protected:
     bool	_loopback_capable;
+};
+
+/**
+ * @short Command to mark virtual interface as PIM Register vif.
+ */
+class IfMgrVifSetPimRegister : public IfMgrVifCommandBase {
+public:
+    inline IfMgrVifSetPimRegister(const string&	ifname,
+				  const string&	vifname,
+				  bool		pim_register)
+	: IfMgrVifCommandBase(ifname, vifname),
+	  _pim_register(pim_register)
+    {}
+
+    inline bool pim_register() const 	{ return _pim_register; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    bool	_pim_register;
 };
 
 /**

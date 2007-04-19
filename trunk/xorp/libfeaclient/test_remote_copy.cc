@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.16 2007/02/16 22:46:01 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.17 2007/04/19 21:36:52 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -151,7 +151,7 @@ populate_iftree(IfMgrIfTree& t)
 	verbose_log("Failed to enable vif\n");
 	return 1;
     }
-    if (IfMgrVifSetMulticastCapable("if0", "vif0", true).execute (t)== false) {
+    if (IfMgrVifSetMulticastCapable("if0", "vif0", true).execute(t) == false) {
 	verbose_log("Failed to set multicast capable\n");
 	return 1;
     }
@@ -165,6 +165,10 @@ populate_iftree(IfMgrIfTree& t)
     }
     if (IfMgrVifSetLoopbackCapable("if0", "vif0", true).execute(t) == false) {
 	verbose_log("Failed to set loopback capable\n");
+	return 1;
+    }
+    if (IfMgrVifSetPimRegister("if0", "vif0", true).execute(t)== false) {
+	verbose_log("Failed to set PIM Register vif\n");
 	return 1;
     }
     if (IfMgrVifSetPifIndex("if0", "vif0", 74).execute(t) == false) {

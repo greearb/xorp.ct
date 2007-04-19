@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.20 2007/02/16 22:46:00 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.21 2007/04/19 21:36:51 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -146,6 +146,12 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	loopback);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_pim_register(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const bool&	pim_register);
 
     XrlCmdError fea_ifmgr_mirror_0_1_vif_set_pif_index(
 	// Input values,
@@ -507,6 +513,20 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_loopback(
 	)
 {
     _dispatcher.push(new IfMgrVifSetLoopbackCapable(ifname, vifname, cap));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_pim_register(
+	const string&	ifname,
+	const string&	vifname,
+	const bool&	pim_register
+	)
+{
+    _dispatcher.push(new IfMgrVifSetPimRegister(ifname, vifname, pim_register));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

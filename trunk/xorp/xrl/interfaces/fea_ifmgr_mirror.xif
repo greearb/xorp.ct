@@ -22,6 +22,7 @@ interface fea_ifmgr_mirror/0.1 {
 	vif_set_broadcast_capable ? ifname:txt & vifname:txt & capable:bool
 	vif_set_p2p_capable ? ifname:txt & vifname:txt & capable:bool
 	vif_set_loopback ? ifname:txt & vifname:txt & loopback:bool
+	vif_set_pim_register ? ifname:txt & vifname:txt & pim_register:bool
 	vif_set_pif_index ? ifname:txt & vifname:txt & index:u32
 
 

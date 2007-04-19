@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.16 2007/02/16 22:45:59 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.17 2007/04/19 21:36:51 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -508,6 +508,7 @@ IfMgrVifAtom::operator==(const IfMgrVifAtom& o) const
 	    broadcast_capable()	  	== o.broadcast_capable()	&&
 	    p2p_capable()		== o.p2p_capable()		&&
 	    loopback()			== o.loopback()			&&
+	    pim_register()		== o.pim_register()		&&
 	    pif_index()			== o.pif_index()		&&
 	    ipv4addrs()			== o.ipv4addrs()		&&
 	    ipv6addrs()			== o.ipv6addrs()

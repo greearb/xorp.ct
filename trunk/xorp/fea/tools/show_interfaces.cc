@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.19 2007/02/16 22:45:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.20 2007/04/19 21:36:50 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -387,6 +387,12 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		if (prev)
 		    fprintf(stdout, ",");
 		fprintf(stdout, "POINTTOPOINT");
+		prev = true;
+	    }
+	    if (ifmgr_vif.pim_register()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "PIM-REGISTER");
 		prev = true;
 	    }
 	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu());
