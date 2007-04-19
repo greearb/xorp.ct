@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/mrt/Jamfile,v 1.1 2007/01/11 22:30:49 bms Exp $
 #
 
 SubDir TOP mrt ;
@@ -10,7 +10,6 @@ SubDir TOP mrt ;
 
 Library libmrt : 
 	buffer.c
-	random.c
 	mifset.cc
 	mrib_table.cc
 	;
