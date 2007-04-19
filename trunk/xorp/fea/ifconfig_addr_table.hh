@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.8 2007/02/16 22:45:41 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.9 2007/04/18 06:20:57 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
@@ -104,14 +104,14 @@ protected:
      * messages for addresses in list that are not present in instance
      * address list and then sets instance address set to be same as supplied.
      */
-    void set_addrs(const set<IPv4>& new_v4s);
+    void set_addrs(const set<IPv4>& new_ipv4addrs);
 
     /**
      * Set new valid interface addresses.  Triggers invalid_address
      * messages for addresses in list that are not present in instance
      * address list and then sets instance address set to be same as supplied.
      */
-    void set_addrs(const set<IPv6>& new_v6s);
+    void set_addrs(const set<IPv6>& new_ipv6addrs);
 
     /**
      * Covering method for update handling.  Scans valid addresses and
@@ -121,9 +121,9 @@ protected:
     inline void update();
 
 protected:
-    const IfTree& _iftree;
-    set<IPv4> _v4addrs;
-    set<IPv6> _v6addrs;
+    const IfTree&	_iftree;
+    set<IPv4>		_ipv4addrs;
+    set<IPv6>		_ipv6addrs;
 };
 
 #endif // __FEA_IFCONFIG_ADDR_TABLE_HH__

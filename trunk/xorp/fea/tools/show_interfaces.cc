@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.18 2006/04/03 06:39:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.19 2007/02/16 22:45:57 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -285,8 +285,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
     bool iface_found = false;
     IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
     IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
-    IfMgrVifAtom::V4Map::const_iterator a4_iter;
-    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
+    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
     debug_msg("Begin iftree loop\n");
 
@@ -327,7 +327,7 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		fprintf(stdout, "ENABLED");
 		prev = true;
 	    }
-	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu_bytes());
+	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu());
 
 	    //
 	    // Print the physical interface index and MAC address
@@ -389,7 +389,7 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		fprintf(stdout, "POINTTOPOINT");
 		prev = true;
 	    }
-	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu_bytes());
+	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu());
 
 	    //
 	    // Print the IPv6 addresses

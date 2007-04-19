@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.24 2006/08/18 04:18:28 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.25 2007/02/16 22:45:59 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -247,7 +247,7 @@ public:
 			       string& vifname) const;
 
 protected:
-    IfMap _ifs;
+    IfMap	_ifs;		// The interface configuration state
 };
 
 
@@ -268,23 +268,23 @@ public:
 
     inline const string& name() const			{ return _name; }
 
-    inline bool		enabled() const			{ return _en; }
-    inline void		set_enabled(bool en)		{ _en = en; }
+    inline bool		enabled() const			{ return _enabled; }
+    inline void		set_enabled(bool v)		{ _enabled = v; }
 
     inline bool		discard() const			{ return _discard; }
-    inline void		set_discard(bool discard)	{ _discard = discard; }
+    inline void		set_discard(bool v)		{ _discard = v; }
 
-    inline uint32_t	mtu_bytes() const		{ return _mtu; }
-    inline void		set_mtu_bytes(uint32_t mtu) 	{ _mtu = mtu; }
+    inline uint32_t	mtu() const			{ return _mtu; }
+    inline void		set_mtu(uint32_t v)		{ _mtu = v; }
 
     inline const Mac&	mac() const			{ return _mac; }
-    inline void		set_mac(const Mac& mac)		{ _mac = mac; }
+    inline void		set_mac(const Mac& v)		{ _mac = v; }
 
-    inline uint32_t	pif_index() const		{ return _pif; }
-    inline void		set_pif_index(uint32_t pif)	{ _pif = pif; }
+    inline uint32_t	pif_index() const		{ return _pif_index; }
+    inline void		set_pif_index(uint32_t v)	{ _pif_index = v; }
 
     inline bool		no_carrier() const		{ return _no_carrier; }
-    inline void		set_no_carrier(bool no_carrier)	{ _no_carrier = no_carrier; }
+    inline void		set_no_carrier(bool v)		{ _no_carrier = v; }
 
     inline const VifMap& vifs() const			{ return _vifs; }
     inline VifMap& vifs()				{ return _vifs; }
@@ -297,16 +297,16 @@ private:
     IfMgrIfAtom();					// not implemented
 
 protected:
-    string	_name;
+    string	_name;		// The interface name
 
-    bool	_en;		// enabled
-    bool	_discard;	// is a discard interface
-    uint32_t	_mtu;		// mtu in bytes
-    Mac		_mac;		// MAC address
-    uint32_t	_pif;		// Physical interface index
+    bool	_enabled;	// True if enabled
+    bool	_discard;	// True if a discard interface
+    uint32_t	_mtu;		// The interface MTU (in bytes)
+    Mac		_mac;		// The interface MAC address
+    uint32_t	_pif_index;	// Physical interface index
     bool	_no_carrier;	// True if no carrier
 
-    VifMap	_vifs;		// map of vifname-vif
+    VifMap	_vifs;		// The vif configuration state
 };
 
 
@@ -317,59 +317,60 @@ protected:
  */
 class IfMgrVifAtom {
 public:
-    typedef map<const IPv4, IfMgrIPv4Atom> V4Map;
-    typedef map<const IPv6, IfMgrIPv6Atom> V6Map;
+    typedef map<const IPv4, IfMgrIPv4Atom> IPv4Map;
+    typedef map<const IPv6, IfMgrIPv6Atom> IPv6Map;
 
 public:
     inline IfMgrVifAtom(const string& name);
 
     inline const string& name() const			{ return _name; }
 
-    inline bool		enabled() const			{ return _en; }
-    inline void		set_enabled(bool en)		{ _en = en; }
+    inline bool		enabled() const			{ return _enabled; }
+    inline void		set_enabled(bool v)		{ _enabled = v; }
 
-    inline bool		multicast_capable() const 	{ return _mcap; }
-    inline void		set_multicast_capable(bool cap)	{ _mcap = cap; }
+    inline bool		multicast_capable() const 	{ return _multicast_capable; }
+    inline void		set_multicast_capable(bool v)	{ _multicast_capable = v; }
 
-    inline bool		broadcast_capable() const 	{ return _bcap; }
-    inline void		set_broadcast_capable(bool cap)	{ _bcap = cap; }
+    inline bool		broadcast_capable() const 	{ return _broadcast_capable; }
+    inline void		set_broadcast_capable(bool v)	{ _broadcast_capable = v; }
 
-    inline bool		p2p_capable() const		{ return _p2pcap; }
-    inline void		set_p2p_capable(bool cap)	{ _p2pcap = cap; }
+    inline bool		p2p_capable() const		{ return _p2p_capable; }
+    inline void		set_p2p_capable(bool v)		{ _p2p_capable = v; }
+
 
     inline bool		loopback() const		{ return _loopback; }
-    inline void		set_loopback(bool l)		{ _loopback = l; }
+    inline void		set_loopback(bool v)		{ _loopback = v; }
 
-    inline uint32_t	pif_index() const		{ return _pif; }
-    inline uint32_t	set_pif_index(uint32_t i) 	{ return _pif = i; }
+    inline uint32_t	pif_index() const		{ return _pif_index; }
+    inline uint32_t	set_pif_index(uint32_t v) 	{ return _pif_index = v; }
 
-    inline const V4Map&	ipv4addrs() const		{ return _v4addrs; }
-    inline V4Map&	ipv4addrs() 			{ return _v4addrs; }
-    const IfMgrIPv4Atom* find_addr(const IPv4& a) const;
-    IfMgrIPv4Atom*	find_addr(const IPv4& a);
+    inline const IPv4Map& ipv4addrs() const		{ return _ipv4addrs; }
+    inline IPv4Map&	ipv4addrs() 			{ return _ipv4addrs; }
+    const IfMgrIPv4Atom* find_addr(const IPv4& addr) const;
+    IfMgrIPv4Atom*	find_addr(const IPv4& addr);
 
-    inline const V6Map&	ipv6addrs() const		{ return _v6addrs; }
-    inline V6Map&	ipv6addrs() 			{ return _v6addrs; }
-    const IfMgrIPv6Atom* find_addr(const IPv6& a) const;
-    IfMgrIPv6Atom*	find_addr(const IPv6& a);
+    inline const IPv6Map& ipv6addrs() const		{ return _ipv6addrs; }
+    inline IPv6Map&	ipv6addrs() 			{ return _ipv6addrs; }
+    const IfMgrIPv6Atom* find_addr(const IPv6& addr) const;
+    IfMgrIPv6Atom*	find_addr(const IPv6& addr);
 
     bool 		operator==(const IfMgrVifAtom& o) const;
 
 private:
-    IfMgrVifAtom();					// not implemented
+    IfMgrVifAtom();			// Not implemented
 
 protected:
-    string	_name;
+    string	_name;			// The vif name
 
-    bool	_en;		// enabled
-    bool	_mcap;		// multicast capable
-    bool	_bcap;		// broadcast capable
-    bool	_p2pcap;	// point-to-point capable
-    bool	_loopback;	// true if loopback Vif
-    uint32_t	_pif;		// physical interface index
+    bool	_enabled;		// True if enabled
+    bool	_multicast_capable;	// True if multicast capable
+    bool	_broadcast_capable;	// True if broadcast capable
+    bool	_p2p_capable;		// True if point-to-point capable
+    bool	_loopback;		// True if loopback vif
+    uint32_t	_pif_index;		// Physical interface index
 
-    V4Map	_v4addrs;
-    V6Map	_v6addrs;
+    IPv4Map	_ipv4addrs;		// The IPv4 addresses
+    IPv6Map	_ipv6addrs;		// The IPv6 addresses
 };
 
 
@@ -383,45 +384,46 @@ class IfMgrIPv4Atom {
 public:
     inline IfMgrIPv4Atom(const IPv4& addr);
 
-    inline IPv4		addr() const			{ return _addr; }
+    inline const IPv4&	addr() const			{ return _addr; }
 
     inline uint32_t	prefix_len() const		{ return _prefix_len; }
-    inline void		set_prefix_len(uint32_t p)	{ _prefix_len = p; }
+    inline void		set_prefix_len(uint32_t v)	{ _prefix_len = v; }
 
-    inline bool		enabled() const			{ return _en; }
-    inline void		set_enabled(bool en)		{ _en = en; }
+    inline bool		enabled() const			{ return _enabled; }
+    inline void		set_enabled(bool v)		{ _enabled = v; }
 
-    inline bool		multicast_capable() const 	{ return _mcap; }
-    inline void		set_multicast_capable(bool cap)	{ _mcap = cap; }
+    inline bool		multicast_capable() const 	{ return _multicast_capable; }
+    inline void		set_multicast_capable(bool v)	{ _multicast_capable = v; }
 
-    inline bool		loopback() const		{ return _loop; }
-    inline void		set_loopback(bool l) 		{ _loop = l; }
+    inline bool		loopback() const		{ return _loopback; }
+    inline void		set_loopback(bool v) 		{ _loopback = v; }
 
-    inline bool		has_broadcast() const		{ return _bcast; }
-    inline void		remove_broadcast()		{ _bcast = false; }
-    inline void		set_broadcast_addr(const IPv4 baddr);
-    inline IPv4		broadcast_addr() const;
+    inline bool		has_broadcast() const		{ return _broadcast; }
+    inline void		remove_broadcast()		{ _broadcast = false; }
+    inline void		set_broadcast_addr(const IPv4& baddr);
+    inline const IPv4&	broadcast_addr() const;
 
     inline bool		has_endpoint() const		{ return _p2p; }
     inline void		remove_endpoint()		{ _p2p = false; }
-    inline void		set_endpoint_addr(const IPv4 endpoint);
-    inline IPv4		endpoint_addr() const;
+    inline void		set_endpoint_addr(const IPv4& endpoint);
+    inline const IPv4&	endpoint_addr() const;
 
     bool 		operator==(const IfMgrIPv4Atom& o) const;
 
 private:
-    IfMgrIPv4Atom();		// not implemented
+    IfMgrIPv4Atom();			// Not implemented
 
 protected:
-    IPv4	  _addr;
-    uint32_t	  _prefix_len;	// network prefix length
-    bool	  _en;		// enabled
-    bool	  _mcap;	// multicast capable
-    bool	  _loop;	// Is a loopback address
-    bool	  _bcast;	// _oaddr refers to a broadcast addr
-    bool	  _p2p;		// _oaddr refers to a point-to-point address
+    IPv4	_addr;			// The address
+    uint32_t	_prefix_len;		// The network prefix length
+    bool	_enabled;		// True if enabled
+    bool	_multicast_capable;	// True if multicast capable
+    bool	_loopback;		// True if a loopback address
+    bool	_broadcast;	// True if _other_addr is a broadcast address
+    bool	_p2p;		// True if _other_addr is a p2p address
 
-    IPv4	  _oaddr;	// Other address [bcast|p2p]
+    IPv4	_other_addr;	// The "other" address [broadcast | p2p]
+    static const IPv4	_ZERO_ADDR;	// IPv4::ZERO() address
 };
 
 
@@ -438,17 +440,17 @@ public:
 
     inline const IPv6&  addr() const			{ return _addr; }
 
-    inline bool		enabled() const			{ return _en; }
-    inline void		set_enabled(bool en)		{ _en = en; }
+    inline bool		enabled() const			{ return _enabled; }
+    inline void		set_enabled(bool v)		{ _enabled = v; }
 
     inline uint32_t	prefix_len() const		{ return _prefix_len; }
-    inline void		set_prefix_len(uint32_t p)	{ _prefix_len = p; }
+    inline void		set_prefix_len(uint32_t v)	{ _prefix_len = v; }
 
-    inline bool		multicast_capable() const 	{ return _mcap; }
-    inline void		set_multicast_capable(bool cap)	{ _mcap = cap; }
+    inline bool		multicast_capable() const 	{ return _multicast_capable; }
+    inline void		set_multicast_capable(bool v)	{ _multicast_capable = v; }
 
-    inline bool		loopback() const		{ return _loop; }
-    inline void		set_loopback(bool l) 		{ _loop = l; }
+    inline bool		loopback() const		{ return _loopback; }
+    inline void		set_loopback(bool v) 		{ _loopback = v; }
 
     inline bool		has_endpoint() const		{ return _p2p; }
     inline void		remove_endpoint()		{ _p2p = false; }
@@ -458,17 +460,18 @@ public:
     bool 		operator==(const IfMgrIPv6Atom& o) const;
 
 private:
-    IfMgrIPv6Atom();		// not implemented
+    IfMgrIPv6Atom();			// Not implemented
 
 protected:
-    IPv6	_addr;
-    uint32_t	_prefix_len;	// network prefix length
-    bool	_en;		// enabled
-    bool	_mcap;		// multicast capable
-    bool	_loop;		// Is a loopback address
-    bool	_p2p;		// _oaddr refers to a point-to-point address
+    IPv6	_addr;			// The address
+    uint32_t	_prefix_len;		// The network prefix length
+    bool	_enabled;		// True if enabled
+    bool	_multicast_capable;	// True if multicast capable
+    bool	_loopback;		// True if a loopback address
+    bool	_p2p;		// True if _other_addr is a p2p2 address
 
-    IPv6	_oaddr;
+    IPv6	_other_addr;	// The "other" address [p2p]
+    static const IPv6	_ZERO_ADDR;	// IPv6::ZERO() address
 };
 
 
@@ -489,7 +492,8 @@ protected:
  */
 template <typename A>
 struct IfMgrIP
-{};
+{
+};
 
 template <>
 struct IfMgrIP<IPv4>
@@ -519,9 +523,14 @@ IfMgrIfTree::clear()
 
 inline
 IfMgrIfAtom::IfMgrIfAtom(const string& name)
-    : _name(name), _en(false), _discard(false), _mtu(0), _pif(0),
+    : _name(name),
+      _enabled(false),
+      _discard(false),
+      _mtu(0),
+      _pif_index(0),
       _no_carrier(false)
-{}
+{
+}
 
 
 // ----------------------------------------------------------------------------
@@ -530,54 +539,64 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
 inline
 IfMgrVifAtom::IfMgrVifAtom(const string& name)
     : _name(name),
-      _en(false), _mcap(false), _bcap(false), _p2pcap(false), _loopback(false),
-      _pif(0)
-{}
+      _enabled(false),
+      _multicast_capable(false),
+      _broadcast_capable(false),
+      _p2p_capable(false),
+      _loopback(false),
+      _pif_index(0)
+{
+}
 
 // ----------------------------------------------------------------------------
 // Inline IfMgrIPv4Atom methods
 
 inline
 IfMgrIPv4Atom::IfMgrIPv4Atom(const IPv4& addr)
-    : _addr(addr), _prefix_len(0),
-      _en(false), _mcap(false), _loop(false), _bcast(false), _p2p(false)
+    : _addr(addr),
+      _prefix_len(0),
+      _enabled(false),
+      _multicast_capable(false),
+      _loopback(false),
+      _broadcast(false),
+      _p2p(false)
 {
 }
 
 inline void
-IfMgrIPv4Atom::set_broadcast_addr(const IPv4 oaddr)
+IfMgrIPv4Atom::set_broadcast_addr(const IPv4& broadcast_addr)
 {
-    if (oaddr == IPv4::ZERO()) {
-	_bcast = false;
+    if (broadcast_addr == IPv4::ZERO()) {
+	_broadcast = false;
     } else {
-	_bcast = true;
+	_broadcast = true;
 	_p2p = false;
-	_oaddr = oaddr;
+	_other_addr = broadcast_addr;
     }
 }
 
-inline IPv4
+inline const IPv4&
 IfMgrIPv4Atom::broadcast_addr() const
 {
-    return _bcast ? _oaddr : IPv4::ZERO();
+    return _broadcast ? _other_addr : _ZERO_ADDR;
 }
 
 inline void
-IfMgrIPv4Atom::set_endpoint_addr(const IPv4 oaddr)
+IfMgrIPv4Atom::set_endpoint_addr(const IPv4& p2p_addr)
 {
-    if (oaddr == IPv4::ZERO()) {
+    if (p2p_addr == IPv4::ZERO()) {
 	_p2p = false;
     } else {
 	_p2p = true;
-	_bcast = false;
-	_oaddr = oaddr;
+	_broadcast = false;
+	_other_addr = p2p_addr;
     }
 }
 
-inline IPv4
+inline const IPv4&
 IfMgrIPv4Atom::endpoint_addr() const
 {
-    return _p2p ? _oaddr : IPv4::ZERO();
+    return _p2p ? _other_addr : _ZERO_ADDR;
 }
 
 
@@ -586,27 +605,30 @@ IfMgrIPv4Atom::endpoint_addr() const
 
 inline
 IfMgrIPv6Atom::IfMgrIPv6Atom(const IPv6& addr)
-    : _addr(addr), _prefix_len(0),
-      _en(false), _mcap(false), _loop(false), _p2p(false)
+    : _addr(addr),
+      _prefix_len(0),
+      _enabled(false),
+      _multicast_capable(false),
+      _loopback(false),
+      _p2p(false)
 {
 }
 
 inline void
-IfMgrIPv6Atom::set_endpoint_addr(const IPv6& oaddr)
+IfMgrIPv6Atom::set_endpoint_addr(const IPv6& p2p_addr)
 {
-    if (oaddr == IPv6::ZERO()) {
+    if (p2p_addr == IPv6::ZERO()) {
 	_p2p = false;
     } else {
 	_p2p = true;
-	_oaddr = oaddr;
+	_other_addr = p2p_addr;
     }
 }
 
 inline const IPv6&
 IfMgrIPv6Atom::endpoint_addr() const
 {
-    return _p2p ? _oaddr : IPv6::ZERO();
+    return _p2p ? _other_addr : _ZERO_ADDR;
 }
 
 #endif // __LIBFEACLIENT_IFMGR_ATOMS_HH__
-

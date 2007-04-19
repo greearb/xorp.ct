@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.12 2006/03/16 00:04:10 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.13 2007/02/16 22:45:59 pavlin Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -58,7 +58,7 @@ IfMgrCommandDispatcher::IfMgrCommandDispatcher(IfMgrIfTree& tree)
 void
 IfMgrCommandDispatcher::push(const Cmd& cmd)
 {
-    if (_cmd.get() != 0) {
+    if (_cmd.get() != NULL) {
 	XLOG_WARNING("Dropping buffered command.");
     }
     _cmd = cmd;
@@ -68,7 +68,7 @@ bool
 IfMgrCommandDispatcher::execute()
 {
     bool success = false;
-    if (_cmd.get()) {
+    if (_cmd.get() != NULL) {
 	success = _cmd->execute(_iftree);
 	_cmd = 0;
     }
@@ -121,7 +121,7 @@ void
 IfMgrCommandIfClusteringQueue::push(const Cmd& cmd)
 {
     IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(cmd.get());
-    XLOG_ASSERT(ifcmd != 0);
+    XLOG_ASSERT(ifcmd != NULL);
     if (ifcmd->ifname() == _current_ifname) {
 	_current_cmds.push_back(cmd);
     } else {
@@ -158,7 +158,7 @@ IfMgrCommandIfClusteringQueue::pop_front()
 	Cmd& c = _current_cmds.front();
 	IfMgrIfCommandBase* ifcmd =
 	    dynamic_cast<IfMgrIfCommandBase*>(c.get());
-	XLOG_ASSERT(ifcmd != 0);
+	XLOG_ASSERT(ifcmd != NULL);
 	_current_ifname = ifcmd->ifname();
 	_current_cmds.pop_front();
     }
@@ -181,7 +181,7 @@ public:
     inline bool operator() (IfMgrCommandIfClusteringQueue::Cmd c)
     {
 	IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(c.get());
-	XLOG_ASSERT(ifcmd != 0);
+	XLOG_ASSERT(ifcmd != NULL);
 	return ifcmd->ifname() == _ifname;
     }
 protected:
@@ -201,7 +201,7 @@ IfMgrCommandIfClusteringQueue::change_active_interface()
     Cmd& c = _future_cmds.front();
     IfMgrIfCommandBase* ifcmd =
 	dynamic_cast<IfMgrIfCommandBase*>(c.get());
-    XLOG_ASSERT(ifcmd != 0);
+    XLOG_ASSERT(ifcmd != NULL);
     _current_ifname = ifcmd->ifname();
     back_insert_iterator<CmdList> bi(_current_cmds);
     remove_copy_if(_future_cmds.begin(), _future_cmds.end(), bi,
@@ -229,7 +229,7 @@ IfMgrIfAtomToCommands::convert(IfMgrCommandSinkBase& s) const
 {
     s.push(new IfMgrIfAdd(_i.name()));
     s.push(new IfMgrIfSetEnabled(_i.name(), _i.enabled()));
-    s.push(new IfMgrIfSetMtu(_i.name(), _i.mtu_bytes()));
+    s.push(new IfMgrIfSetMtu(_i.name(), _i.mtu()));
     s.push(new IfMgrIfSetMac(_i.name(), _i.mac()));
     s.push(new IfMgrIfSetPifIndex(_i.name(), _i.pif_index()));
     s.push(new IfMgrIfSetNoCarrier(_i.name(), _i.no_carrier()));
@@ -255,14 +255,14 @@ IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrVifSetLoopbackCapable(ifn, vifn, _v.loopback()));
     s.push(new IfMgrVifSetPifIndex(ifn, vifn, _v.pif_index()));
 
-    const IfMgrVifAtom::V4Map& v4s = _v.ipv4addrs();
-    for (IfMgrVifAtom::V4Map::const_iterator cai = v4s.begin();
+    const IfMgrVifAtom::IPv4Map& v4s = _v.ipv4addrs();
+    for (IfMgrVifAtom::IPv4Map::const_iterator cai = v4s.begin();
 	 cai != v4s.end(); ++cai) {
 	IfMgrIPv4AtomToCommands(ifn, vifn, cai->second).convert(s);
     }
 
-    const IfMgrVifAtom::V6Map& v6s = _v.ipv6addrs();
-    for (IfMgrVifAtom::V6Map::const_iterator cai = v6s.begin();
+    const IfMgrVifAtom::IPv6Map& v6s = _v.ipv6addrs();
+    for (IfMgrVifAtom::IPv6Map::const_iterator cai = v6s.begin();
 	 cai != v6s.end(); ++cai) {
 	IfMgrIPv6AtomToCommands(ifn, vifn, cai->second).convert(s);
     }

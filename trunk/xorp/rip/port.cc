@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.67 2007/02/16 22:47:14 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.68 2007/04/14 08:59:52 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -1019,7 +1019,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 		    // Test if there is a matching interface address
 		    // or a broadcast address.
 		    //
-		    IfMgrVifAtom::V4Map::const_iterator a4_iter;
+		    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 
 		    for (a4_iter = vif.ipv4addrs().begin();
 			 a4_iter != vif.ipv4addrs().end();
@@ -1198,7 +1198,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 		    // Test if there is a matching interface address
 		    // or a broadcast address.
 		    //
-		    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+		    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
 		    for (a6_iter = vif.ipv6addrs().begin();
 			 a6_iter != vif.ipv6addrs().end();

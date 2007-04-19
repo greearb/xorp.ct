@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.43 2006/07/03 23:33:40 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.44 2007/02/16 22:47:11 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -305,8 +305,8 @@ VifManager::updates_made()
     string error_msg;
     IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
     IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
-    IfMgrVifAtom::V4Map::const_iterator a4_iter;
-    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
+    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
     //
     // Update the local copy of the interface tree
@@ -375,7 +375,7 @@ VifManager::updates_made()
 						ifmgr_vif.multicast_capable(),
 						ifmgr_vif.broadcast_capable(),
 						is_up,
-						ifmgr_iface.mtu_bytes(),
+						ifmgr_iface.mtu(),
 						error_msg)
 		    != XORP_OK) {
 		    XLOG_ERROR("Cannot update the flags for vif %s: %s",
@@ -388,7 +388,7 @@ VifManager::updates_made()
 		vif.set_multicast_capable(ifmgr_vif.multicast_capable());
 		vif.set_broadcast_capable(ifmgr_vif.broadcast_capable());
 		vif.set_underlying_vif_up(is_up);
-		vif.set_mtu(ifmgr_iface.mtu_bytes());
+		vif.set_mtu(ifmgr_iface.mtu());
 	    }
 
 	    //

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.39 2007/03/12 10:16:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.40 2007/03/19 11:03:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -422,7 +422,7 @@ XrlIO<IPv4>::get_addresses(const string& interface, const string& vif,
     if (fv == NULL)
 	return false;
 
-    IfMgrVifAtom::V4Map::const_iterator i;
+    IfMgrVifAtom::IPv4Map::const_iterator i;
     for (i = fv->ipv4addrs().begin(); i != fv->ipv4addrs().end(); i++)
 	addresses.push_back(i->second.addr());
 
@@ -440,7 +440,7 @@ XrlIO<IPv6>::get_addresses(const string& interface, const string& vif,
     if (fv == NULL)
 	return false;
 
-    IfMgrVifAtom::V6Map::const_iterator i;
+    IfMgrVifAtom::IPv6Map::const_iterator i;
     for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++)
 	addresses.push_back(i->second.addr());
 
@@ -458,7 +458,7 @@ XrlIO<IPv4>::get_link_local_address(const string& interface, const string& vif,
     if (fv == NULL)
 	return false;
 
-    IfMgrVifAtom::V4Map::const_iterator i;
+    IfMgrVifAtom::IPv4Map::const_iterator i;
     for (i = fv->ipv4addrs().begin(); i != fv->ipv4addrs().end(); i++) {
 	if (i->second.addr().is_linklocal_unicast()) {
 	    address = i->second.addr();
@@ -480,7 +480,7 @@ XrlIO<IPv6>::get_link_local_address(const string& interface, const string& vif,
     if (fv == NULL)
 	return false;
 
-    IfMgrVifAtom::V6Map::const_iterator i;
+    IfMgrVifAtom::IPv6Map::const_iterator i;
     for (i = fv->ipv6addrs().begin(); i != fv->ipv6addrs().end(); i++) {
 	if (i->second.addr().is_linklocal_unicast()) {
 	    address = i->second.addr();
@@ -550,7 +550,7 @@ XrlIO<A>::get_mtu(const string& interface)
     if (fi == NULL)
 	return 0;
 
-    return (fi->mtu_bytes());
+    return (fi->mtu());
 }
 
 template <>
@@ -1184,7 +1184,7 @@ XrlIO<IPv4>::updates_made()
 {
     IfMgrIfTree::IfMap::const_iterator ii;
     IfMgrIfAtom::VifMap::const_iterator vi;
-    IfMgrVifAtom::V4Map::const_iterator ai;
+    IfMgrVifAtom::IPv4Map::const_iterator ai;
     const IfMgrIfAtom* if_atom;
     const IfMgrIfAtom* other_if_atom;
     const IfMgrVifAtom* vif_atom;
@@ -1353,7 +1353,7 @@ XrlIO<IPv6>::updates_made()
 {
     IfMgrIfTree::IfMap::const_iterator ii;
     IfMgrIfAtom::VifMap::const_iterator vi;
-    IfMgrVifAtom::V6Map::const_iterator ai;
+    IfMgrVifAtom::IPv6Map::const_iterator ai;
     const IfMgrIfAtom* if_atom;
     const IfMgrIfAtom* other_if_atom;
     const IfMgrVifAtom* vif_atom;

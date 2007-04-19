@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.41 2007/04/14 07:00:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.42 2007/04/14 08:59:49 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -647,8 +647,8 @@ RawSocket::set_default_multicast_interface(const string& if_name,
 	struct in_addr in_addr;
 
 	// Find the first address
-	IfTreeVif::V4Map::const_iterator ai = fv.v4addrs().begin();
-	if (ai == fv.v4addrs().end()) {
+	IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
+	if (ai == fv.ipv4addrs().end()) {
 	    error_msg = c_format("Setting the default multicast interface "
 				 "failed: "
 				 "interface %s vif %s has no address",
@@ -744,8 +744,8 @@ RawSocket::join_multicast_group(const string& if_name,
 	struct in_addr in_addr;
 
 	// Find the first address
-	IfTreeVif::V4Map::const_iterator ai = fv.v4addrs().begin();
-	if (ai == fv.v4addrs().end()) {
+	IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
+	if (ai == fv.ipv4addrs().end()) {
 	    error_msg = c_format("Cannot join group %s on interface %s vif %s: "
 				 "interface/vif has no address",
 				 cstring(group),
@@ -853,8 +853,8 @@ RawSocket::leave_multicast_group(const string& if_name,
 	struct in_addr in_addr;
 
 	// Find the first address
-	IfTreeVif::V4Map::const_iterator ai = fv.v4addrs().begin();
-	if (ai == fv.v4addrs().end()) {
+	IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
+	if (ai == fv.ipv4addrs().end()) {
 	    error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
 				 "interface/vif has no address",
 				 cstring(group),
@@ -1934,7 +1934,7 @@ RawSocket::proto_socket_write(const string& if_name,
 		break;
 
 	    if (iftree_vif->get_addr(src_address.get_ipv4())
-		!= iftree_vif->v4addrs().end()) {
+		!= iftree_vif->ipv4addrs().end()) {
 		do_ip_hdr_include = false;
 		break;
 	    }
@@ -2550,8 +2550,8 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
-    IfTreeVif::V4Map::const_iterator ai4;
-    IfTreeVif::V6Map::const_iterator ai6;
+    IfTreeVif::IPv4Map::const_iterator ai4;
+    IfTreeVif::IPv6Map::const_iterator ai6;
 
     iftree_if = NULL;
     iftree_vif = NULL;
@@ -2563,7 +2563,7 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 
 	    if (addr.is_ipv4()) {
 		IPv4 addr4 = addr.get_ipv4();
-		for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
+		for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
 		    const IfTreeAddr4& a4 = ai4->second;
 
 		    // Test if same subnet
@@ -2590,7 +2590,7 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 
 	    if (addr.is_ipv6()) {
 		IPv6 addr6 = addr.get_ipv6();
-		for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
+		for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
 		    const IfTreeAddr6& a6 = ai6->second;
 
 		    // Test if same subnet
@@ -2628,8 +2628,8 @@ RawSocket::find_interface_vif_by_addr(
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
-    IfTreeVif::V4Map::const_iterator ai4;
-    IfTreeVif::V6Map::const_iterator ai6;
+    IfTreeVif::IPv4Map::const_iterator ai4;
+    IfTreeVif::IPv6Map::const_iterator ai6;
 
     iftree_if = NULL;
     iftree_vif = NULL;
@@ -2641,7 +2641,7 @@ RawSocket::find_interface_vif_by_addr(
 
 	    if (addr.is_ipv4()) {
 		IPv4 addr4 = addr.get_ipv4();
-		for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
+		for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
 		    const IfTreeAddr4& a4 = ai4->second;
 
 		    if (a4.addr() == addr4) {
@@ -2656,7 +2656,7 @@ RawSocket::find_interface_vif_by_addr(
 
 	    if (addr.is_ipv6()) {
 		IPv6 addr6 = addr.get_ipv6();
-		for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
+		for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
 		    const IfTreeAddr6& a6 = ai6->second;
 
 		    if (a6.addr() == addr6) {

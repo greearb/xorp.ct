@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.16 2006/03/16 00:04:10 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.17 2007/02/16 22:45:59 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -201,7 +201,7 @@ IfMgrIfSetEnabled::execute(IfMgrIfTree& t) const
 	return false;
 
     IfMgrIfAtom& interface = i->second;
-    interface.set_enabled(en());
+    interface.set_enabled(enabled());
     return true;
 }
 
@@ -212,14 +212,14 @@ IfMgrIfSetEnabled::forward(XrlSender&		 sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    return c.send_interface_set_enabled(xt, ifname(), en(), xcb);
+    return c.send_interface_set_enabled(xt, ifname(), enabled(), xcb);
 }
 
 string
 IfMgrIfSetEnabled::str() const
 {
     return if_str_begin(this, "SetEnabled")
-	+ "\", " + bool2str(en()) + if_str_end();
+	+ "\", " + bool2str(enabled()) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -271,7 +271,7 @@ IfMgrIfSetMtu::execute(IfMgrIfTree& t) const
 	return false;
 
     IfMgrIfAtom& interface = i->second;
-    interface.set_mtu_bytes(mtu_bytes());
+    interface.set_mtu(mtu());
     return true;
 }
 
@@ -282,14 +282,14 @@ IfMgrIfSetMtu::forward(XrlSender&	     sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    return c.send_interface_set_mtu(xt, ifname(), mtu_bytes(), xcb);
+    return c.send_interface_set_mtu(xt, ifname(), mtu(), xcb);
 }
 
 string
 IfMgrIfSetMtu::str() const
 {
     return if_str_begin(this, "Mtu") + ", " +
-	c_format("%u", XORP_UINT_CAST(mtu_bytes())) + if_str_end();
+	c_format("%u", XORP_UINT_CAST(mtu())) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -488,7 +488,7 @@ IfMgrVifSetEnabled::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    vifa->set_enabled(en());
+    vifa->set_enabled(enabled());
     return true;
 }
 
@@ -499,14 +499,14 @@ IfMgrVifSetEnabled::forward(XrlSender&		  sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    return c.send_vif_set_enabled(xt, ifname(), vifname(), en(), xscb);
+    return c.send_vif_set_enabled(xt, ifname(), vifname(), enabled(), xscb);
 }
 
 string
 IfMgrVifSetEnabled::str() const
 {
     return vif_str_begin(this, "SetEnabled")
-	+ ", " + bool2str(en()) + vif_str_end();
+	+ ", " + bool2str(enabled()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -519,7 +519,7 @@ IfMgrVifSetMulticastCapable::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    vifa->set_multicast_capable(capable());
+    vifa->set_multicast_capable(multicast_capable());
     return true;
 }
 
@@ -530,16 +530,15 @@ IfMgrVifSetMulticastCapable::forward(XrlSender&		   sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& in = ifname();
-    const string& vn = vifname();
-    return c.send_vif_set_multicast_capable(xt, in, vn, capable(), xscb);
+    return c.send_vif_set_multicast_capable(xt, ifname(), vifname(),
+					    multicast_capable(), xscb);
 }
 
 string
 IfMgrVifSetMulticastCapable::str() const
 {
     return vif_str_begin(this, "SetMulticastCapable")
-	+ ", " + bool2str(capable()) + vif_str_end();
+	+ ", " + bool2str(multicast_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -552,7 +551,7 @@ IfMgrVifSetBroadcastCapable::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    vifa->set_broadcast_capable(capable());
+    vifa->set_broadcast_capable(broadcast_capable());
     return true;
 }
 
@@ -563,16 +562,15 @@ IfMgrVifSetBroadcastCapable::forward(XrlSender&		   sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& in = ifname();
-    const string& vn = vifname();
-    return c.send_vif_set_broadcast_capable(xt, in, vn, capable(), xscb);
+    return c.send_vif_set_broadcast_capable(xt, ifname(), vifname(),
+					    broadcast_capable(), xscb);
 }
 
 string
 IfMgrVifSetBroadcastCapable::str() const
 {
     return vif_str_begin(this, "SetBroadcastCapable")
-	+ ", " + bool2str(capable()) + vif_str_end();
+	+ ", " + bool2str(broadcast_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -585,7 +583,7 @@ IfMgrVifSetP2PCapable::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    vifa->set_p2p_capable(capable());
+    vifa->set_p2p_capable(p2p_capable());
     return true;
 }
 
@@ -596,15 +594,15 @@ IfMgrVifSetP2PCapable::forward(XrlSender&	     sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const bool& cap = capable();
-    return c.send_vif_set_p2p_capable(xt, ifname(), vifname(), cap, xscb);
+    return c.send_vif_set_p2p_capable(xt, ifname(), vifname(), p2p_capable(),
+				      xscb);
 }
 
 string
 IfMgrVifSetP2PCapable::str() const
 {
     return vif_str_begin(this, "SetP2PCapable")
-	+ ", " + bool2str(capable()) + vif_str_end();
+	+ ", " + bool2str(p2p_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -617,7 +615,7 @@ IfMgrVifSetLoopbackCapable::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    vifa->set_loopback(capable());
+    vifa->set_loopback(loopback_capable());
     return true;
 }
 
@@ -628,15 +626,15 @@ IfMgrVifSetLoopbackCapable::forward(XrlSender&		  sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const bool& cap = capable();
-    return c.send_vif_set_loopback(xt, ifname(), vifname(), cap, xscb);
+    return c.send_vif_set_loopback(xt, ifname(), vifname(), loopback_capable(),
+				   xscb);
 }
 
 string
 IfMgrVifSetLoopbackCapable::str() const
 {
     return vif_str_begin(this, "SetLoopbackCapable")
-	+ ", " + bool2str(capable()) + vif_str_end();
+	+ ", " + bool2str(loopback_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -660,9 +658,8 @@ IfMgrVifSetPifIndex::forward(XrlSender&		   sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& in = ifname();
-    const string& vn = vifname();
-    return c.send_vif_set_pif_index(xt, in, vn, pif_index(), xscb);
+    return c.send_vif_set_pif_index(xt, ifname(), vifname(), pif_index(),
+				    xscb);
 }
 
 string
@@ -686,11 +683,11 @@ IfMgrIPv4Add::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
+    IfMgrVifAtom::IPv4Map& addrs = vifa->ipv4addrs();
     if (addrs.find(addr()) != addrs.end())
 	return true;	// Not a failure to add something that already exists
 
-    pair<IfMgrVifAtom::V4Map::iterator, bool> r =
+    pair<IfMgrVifAtom::IPv4Map::iterator, bool> r =
 	addrs.insert( make_pair(addr(), IfMgrIPv4Atom(addr())) );
     return r.second;
 }
@@ -721,8 +718,8 @@ IfMgrIPv4Remove::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return true;	// Not a failure if the vif doesn't exist anymore
 
-    IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
-    IfMgrVifAtom::V4Map::iterator i = addrs.find(addr());
+    IfMgrVifAtom::IPv4Map& addrs = vifa->ipv4addrs();
+    IfMgrVifAtom::IPv4Map::iterator i = addrs.find(addr());
     if (i == addrs.end())
 	return true;	// Not a failure if the address doesn't exist anymore
 
@@ -767,9 +764,8 @@ IfMgrIPv4SetPrefix::forward(XrlSender&		  sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv4_set_prefix(xt, ifn, vifn, addr(), prefix_len(), xcb);
+    return c.send_ipv4_set_prefix(xt, ifname(), vifname(), addr(),
+				  prefix_len(), xcb);
 }
 
 string
@@ -789,7 +785,7 @@ IfMgrIPv4SetEnabled::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_enabled(en());
+    a->set_enabled(enabled());
     return true;
 }
 
@@ -800,14 +796,15 @@ IfMgrIPv4SetEnabled::forward(XrlSender&		   sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    return c.send_ipv4_set_enabled(xt, ifname(), vifname(), addr(), en(), xcb);
+    return c.send_ipv4_set_enabled(xt, ifname(), vifname(), addr(), enabled(),
+				   xcb);
 }
 
 string
 IfMgrIPv4SetEnabled::str() const
 {
     return ipv4_str_begin(this, "SetEnabled") + ", " +
-	bool2str(en()) + ipv4_str_end();
+	bool2str(enabled()) + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -820,7 +817,7 @@ IfMgrIPv4SetMulticastCapable::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_multicast_capable(capable());
+    a->set_multicast_capable(multicast_capable());
     return true;
 }
 
@@ -831,17 +828,15 @@ IfMgrIPv4SetMulticastCapable::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    IPv4 a = addr();
-    return c.send_ipv4_set_multicast_capable(xt, ifn, vifn, a, capable(), xcb);
+    return c.send_ipv4_set_multicast_capable(xt, ifname(), vifname(), addr(),
+					     multicast_capable(), xcb);
 }
 
 string
 IfMgrIPv4SetMulticastCapable::str() const
 {
     return ipv4_str_begin(this, "SetMulticastCapable") + ", " +
-	bool2str(capable()) + ipv4_str_end();
+	bool2str(multicast_capable()) + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -865,9 +860,8 @@ IfMgrIPv4SetLoopback::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv4_set_loopback(xt, ifn, vifn, addr(), loopback(), xcb);
+    return c.send_ipv4_set_loopback(xt, ifname(), vifname(), addr(),
+				    loopback(), xcb);
 }
 
 string
@@ -888,7 +882,7 @@ IfMgrIPv4SetBroadcast::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_broadcast_addr(oaddr());
+    a->set_broadcast_addr(broadcast_addr());
     return true;
 }
 
@@ -899,16 +893,15 @@ IfMgrIPv4SetBroadcast::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv4_set_broadcast(xt, ifn, vifn, addr(), oaddr(), xcb);
+    return c.send_ipv4_set_broadcast(xt, ifname(), vifname(), addr(),
+				     broadcast_addr(), xcb);
 }
 
 string
 IfMgrIPv4SetBroadcast::str() const
 {
     return ipv4_str_begin(this, "SetBroadcast") + ", " +
-	oaddr().str() + ipv4_str_end();
+	broadcast_addr().str() + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -921,7 +914,7 @@ IfMgrIPv4SetEndpoint::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_endpoint_addr(oaddr());
+    a->set_endpoint_addr(endpoint_addr());
     return true;
 }
 
@@ -932,16 +925,15 @@ IfMgrIPv4SetEndpoint::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv4_set_endpoint(xt, ifn, vifn, addr(), oaddr(), xcb);
+    return c.send_ipv4_set_endpoint(xt, ifname(), vifname(), addr(),
+				    endpoint_addr(), xcb);
 }
 
 string
 IfMgrIPv4SetEndpoint::str() const
 {
     return ipv4_str_begin(this, "SetEndpoint") + ", " +
-	oaddr().str() + ipv4_str_end();
+	endpoint_addr().str() + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -957,11 +949,11 @@ IfMgrIPv6Add::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return false;
 
-    IfMgrVifAtom::V6Map& addrs = vifa->ipv6addrs();
+    IfMgrVifAtom::IPv6Map& addrs = vifa->ipv6addrs();
     if (addrs.find(addr()) != addrs.end())
 	return true;	// Not a failure to add something that already exists
 
-    pair<IfMgrVifAtom::V6Map::iterator, bool> r =
+    pair<IfMgrVifAtom::IPv6Map::iterator, bool> r =
 	addrs.insert( make_pair(addr(), IfMgrIPv6Atom(addr())) );
     return r.second;
 }
@@ -992,8 +984,8 @@ IfMgrIPv6Remove::execute(IfMgrIfTree& tree) const
     if (vifa == NULL)
 	return true;	// Not a failure if the vif doesn't exist anymore
 
-    IfMgrVifAtom::V6Map& addrs = vifa->ipv6addrs();
-    IfMgrVifAtom::V6Map::iterator i = addrs.find(addr());
+    IfMgrVifAtom::IPv6Map& addrs = vifa->ipv6addrs();
+    IfMgrVifAtom::IPv6Map::iterator i = addrs.find(addr());
     if (i == addrs.end())
 	return true;	// Not a failure if the address doesn't exist anymore
 
@@ -1038,9 +1030,8 @@ IfMgrIPv6SetPrefix::forward(XrlSender&			sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv6_set_prefix(xt, ifn, vifn, addr(), prefix_len(), xcb);
+    return c.send_ipv6_set_prefix(xt, ifname(), vifname(), addr(),
+				  prefix_len(), xcb);
 }
 
 string
@@ -1060,7 +1051,7 @@ IfMgrIPv6SetEnabled::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_enabled(en());
+    a->set_enabled(enabled());
     return true;
 }
 
@@ -1071,14 +1062,15 @@ IfMgrIPv6SetEnabled::forward(XrlSender&			sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    return c.send_ipv6_set_enabled(xt, ifname(), vifname(), addr(), en(), xcb);
+    return c.send_ipv6_set_enabled(xt, ifname(), vifname(), addr(), enabled(),
+				   xcb);
 }
 
 string
 IfMgrIPv6SetEnabled::str() const
 {
     return ipv6_str_begin(this, "SetEnabled") + ", " +
-	bool2str(en()) + ipv6_str_end();
+	bool2str(enabled()) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -1091,7 +1083,7 @@ IfMgrIPv6SetMulticastCapable::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_multicast_capable(capable());
+    a->set_multicast_capable(multicast_capable());
     return true;
 }
 
@@ -1102,17 +1094,15 @@ IfMgrIPv6SetMulticastCapable::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    const IPv6& a = addr();
-    return c.send_ipv6_set_multicast_capable(xt, ifn, vifn, a, capable(), xcb);
+    return c.send_ipv6_set_multicast_capable(xt, ifname(), vifname(), addr(),
+					     multicast_capable(), xcb);
 }
 
 string
 IfMgrIPv6SetMulticastCapable::str() const
 {
     return ipv6_str_begin(this, "SetMulticastCapable") + ", " +
-	bool2str(capable()) + ipv6_str_end();
+	bool2str(multicast_capable()) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -1136,9 +1126,8 @@ IfMgrIPv6SetLoopback::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv6_set_loopback(xt, ifn, vifn, addr(), loopback(), xcb);
+    return c.send_ipv6_set_loopback(xt, ifname(), vifname(), addr(),
+				    loopback(), xcb);
 }
 
 string
@@ -1158,7 +1147,7 @@ IfMgrIPv6SetEndpoint::execute(IfMgrIfTree& tree) const
     if (a == NULL)
 	return false;
 
-    a->set_endpoint_addr(oaddr());
+    a->set_endpoint_addr(endpoint_addr());
     return true;
 }
 
@@ -1169,16 +1158,15 @@ IfMgrIPv6SetEndpoint::forward(XrlSender&		sender,
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    const string& ifn = ifname();
-    const string& vifn = vifname();
-    return c.send_ipv6_set_endpoint(xt, ifn, vifn, addr(), oaddr(), xcb);
+    return c.send_ipv6_set_endpoint(xt, ifname(), vifname(), addr(),
+				    endpoint_addr(), xcb);
 }
 
 string
 IfMgrIPv6SetEndpoint::str() const
 {
     return ipv6_str_begin(this, "SetEndpoint") + ", " +
-	oaddr().str() + ipv6_str_end();
+	endpoint_addr().str() + ipv6_str_end();
 }
 
 

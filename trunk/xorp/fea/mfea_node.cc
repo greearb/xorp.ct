@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.66 2006/10/06 22:58:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.67 2007/02/16 22:45:46 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -446,7 +446,7 @@ MfeaNode::updates_made()
 				 ifmgr_vif.multicast_capable(),
 				 ifmgr_vif.broadcast_capable(),
 				 is_up,
-				 ifmgr_iface.mtu_bytes(),
+				 ifmgr_iface.mtu(),
 				 error_msg);
 	
 	}
@@ -478,7 +478,7 @@ MfeaNode::updates_made()
 	    }
 
 	    if (is_ipv4()) {
-		IfMgrVifAtom::V4Map::const_iterator a4_iter;
+		IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 
 		for (a4_iter = ifmgr_vif.ipv4addrs().begin();
 		     a4_iter != ifmgr_vif.ipv4addrs().end();
@@ -542,7 +542,7 @@ MfeaNode::updates_made()
 	    }
 
 	    if (is_ipv6()) {
-		IfMgrVifAtom::V6Map::const_iterator a6_iter;
+		IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
 		for (a6_iter = ifmgr_vif.ipv6addrs().begin();
 		     a6_iter != ifmgr_vif.ipv6addrs().end();

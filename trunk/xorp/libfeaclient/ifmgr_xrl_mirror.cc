@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.19 2006/03/16 00:04:11 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.20 2007/02/16 22:46:00 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -90,7 +90,7 @@ protected:
     XrlCmdError fea_ifmgr_mirror_0_1_interface_set_mtu(
 	// Input values,
 	const string&	ifname,
-	const uint32_t&	mtu_bytes);
+	const uint32_t&	mtu);
 
     XrlCmdError fea_ifmgr_mirror_0_1_interface_set_mac(
 	// Input values,
@@ -198,14 +198,14 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
-	const IPv4&	oaddr);
+	const IPv4&	broadcast_addr);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
-	const IPv4&	oaddr);
+	const IPv4&	endpoint_addr);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv6_add(
 	// Input values,
@@ -252,7 +252,7 @@ protected:
 	const string&	ifname,
 	const string&	vifname,
 	const IPv6&	addr,
-	const IPv6&	oaddr);
+	const IPv6&	endpoint_addr);
 
     XrlCmdError fea_ifmgr_mirror_0_1_hint_tree_complete();
 
@@ -278,7 +278,7 @@ static const char* DISPATCH_FAILED = "Local dispatch error";
 IfMgrXrlMirrorTarget::IfMgrXrlMirrorTarget(XrlRouter&		 rtr,
 					   IfMgrCommandDispatcher& dispatcher)
     : XrlFeaIfmgrMirrorTargetBase(&rtr), _rtr(rtr), _dispatcher(dispatcher),
-      _hint_observer(0)
+      _hint_observer(NULL)
 {
 }
 
@@ -367,10 +367,10 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_discard(
 XrlCmdError
 IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_mtu(
 	const string&	ifname,
-	const uint32_t&	mtu_bytes
+	const uint32_t&	mtu
 	)
 {
-    _dispatcher.push(new IfMgrIfSetMtu(ifname, mtu_bytes));
+    _dispatcher.push(new IfMgrIfSetMtu(ifname, mtu));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }
@@ -620,10 +620,11 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_broadcast(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
-	const IPv4&	oaddr
+	const IPv4&	broadcast_addr
 )
 {
-    _dispatcher.push(new IfMgrIPv4SetBroadcast(ifn, vifn, addr, oaddr));
+    _dispatcher.push(new IfMgrIPv4SetBroadcast(ifn, vifn, addr,
+					       broadcast_addr));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }
@@ -635,10 +636,10 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv4_set_endpoint(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv4&	addr,
-	const IPv4&	oaddr
+	const IPv4&	endpoint_addr
 )
 {
-    _dispatcher.push(new IfMgrIPv4SetEndpoint(ifn, vifn, addr, oaddr));
+    _dispatcher.push(new IfMgrIPv4SetEndpoint(ifn, vifn, addr, endpoint_addr));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }
@@ -738,10 +739,10 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
 	const string&	ifn,
 	const string&	vifn,
 	const IPv6&	addr,
-	const IPv6&	oaddr
+	const IPv6&	endpoint_addr
 )
 {
-    _dispatcher.push(new IfMgrIPv6SetEndpoint(ifn, vifn, addr, oaddr));
+    _dispatcher.push(new IfMgrIPv6SetEndpoint(ifn, vifn, addr, endpoint_addr));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }
@@ -751,7 +752,7 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_ipv6_set_endpoint(
 bool
 IfMgrXrlMirrorTarget::attach(IfMgrHintObserver* ho)
 {
-    if (_hint_observer != 0) {
+    if (_hint_observer != NULL) {
 	return false;
     }
     _hint_observer = ho;
@@ -764,7 +765,7 @@ IfMgrXrlMirrorTarget::detach(IfMgrHintObserver* ho)
     if (_hint_observer != ho) {
 	return false;
     }
-    _hint_observer = 0;
+    _hint_observer = NULL;
     return true;
 }
 
@@ -796,27 +797,27 @@ class IfMgrXrlMirrorRouter : public XrlStdRouter
 public:
     IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name)
-	: XrlStdRouter(e, class_name), _o(0)
+	: XrlStdRouter(e, class_name), _o(NULL)
     {}
 
     IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name,
 			 IPv4		finder_addr)
-	: XrlStdRouter(e, class_name, finder_addr), _o(0)
+	: XrlStdRouter(e, class_name, finder_addr), _o(NULL)
     {}
 
     IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name,
 			 IPv4		finder_addr,
 			 uint16_t	finder_port)
-	: XrlStdRouter(e, class_name, finder_addr, finder_port), _o(0)
+	: XrlStdRouter(e, class_name, finder_addr, finder_port), _o(NULL)
     {}
 
     IfMgrXrlMirrorRouter(EventLoop&	e,
 			 const char*	class_name,
 			 const char*	finder_hostname,
 			 uint16_t	finder_port)
-	: XrlStdRouter(e, class_name, finder_hostname, finder_port), _o(0)
+	: XrlStdRouter(e, class_name, finder_hostname, finder_port), _o(NULL)
     {}
 
     /**
@@ -827,7 +828,7 @@ public:
      */
     bool attach(IfMgrXrlMirrorRouterObserver* o)
     {
-	if (_o)
+	if (_o != NULL)
 	    return false;
 	_o = o;
 	return true;
@@ -843,21 +844,21 @@ public:
     {
 	if (o != _o)
 	    return false;
-	_o = 0;
+	_o = NULL;
 	return true;
     }
 
 protected:
     void finder_ready_event(const string& tgt_name)
     {
-	if (tgt_name == instance_name() && _o != 0) {
+	if (tgt_name == instance_name() && _o != NULL) {
 	    _o->finder_ready_event();
 	}
     }
 
     void finder_disconnect_event()
     {
-	if (_o != 0) {
+	if (_o != NULL) {
 	    _o->finder_disconnect_event();
 	}
     }
@@ -879,7 +880,7 @@ IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 
     : ServiceBase("FEA Interface Mirror"),
       _e(e), _finder_addr(finder_addr), _finder_port(finder_port),
-      _dispatcher(_iftree), _rtarget(rtarget), _rtr(0), _xrl_tgt(0)
+      _dispatcher(_iftree), _rtarget(rtarget), _rtr(NULL), _xrl_tgt(NULL)
 {
 }
 
@@ -890,7 +891,7 @@ IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
 
     : ServiceBase("FEA Interface Mirror"),
       _e(e), _finder_hostname(finder_hostname), _finder_port(finder_port),
-      _dispatcher(_iftree), _rtarget(rtarget), _rtr(0), _xrl_tgt(0)
+      _dispatcher(_iftree), _rtarget(rtarget), _rtr(NULL), _xrl_tgt(NULL)
 {
 }
 
@@ -905,9 +906,9 @@ IfMgrXrlMirror::~IfMgrXrlMirror()
 	_xrl_tgt->detach(this);
 	_rtr->detach(this);
 	delete _xrl_tgt;
-	_xrl_tgt = 0;
+	_xrl_tgt = NULL;
 	delete _rtr;
-	_rtr = 0;
+	_rtr = NULL;
     }
 }
 

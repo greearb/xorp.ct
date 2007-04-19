@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.52 2007/02/16 22:45:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.53 2007/04/18 06:20:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -776,15 +776,15 @@ IfConfig::report_updates(IfTree& it, bool is_system_interfaces_reportee)
 	    updated |= report_update(interface, vif,
 				     is_system_interfaces_reportee);
 
-	    for (IfTreeVif::V4Map::const_iterator ai = vif.v4addrs().begin();
-		 ai != vif.v4addrs().end(); ai++) {
+	    for (IfTreeVif::IPv4Map::const_iterator ai = vif.ipv4addrs().begin();
+		 ai != vif.ipv4addrs().end(); ai++) {
 		const IfTreeAddr4& addr = ai->second;
 		updated |= report_update(interface, vif, addr,
 					 is_system_interfaces_reportee);
 	    }
 
-	    for (IfTreeVif::V6Map::const_iterator ai = vif.v6addrs().begin();
-		 ai != vif.v6addrs().end(); ai++) {
+	    for (IfTreeVif::IPv6Map::const_iterator ai = vif.ipv6addrs().begin();
+		 ai != vif.ipv6addrs().end(); ai++) {
 		const IfTreeAddr6& addr = ai->second;
 		updated |= report_update(interface, vif, addr,
 					 is_system_interfaces_reportee);

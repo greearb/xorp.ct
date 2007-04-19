@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.38 2006/07/25 09:46:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.39 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -148,8 +148,8 @@ IfConfigSet::push_config(IfTree& it)
 
 	    push_vif_begin(i, v);
 
-	    IfTreeVif::V4Map::iterator a4i;
-	    for (a4i = v.v4addrs().begin(); a4i != v.v4addrs().end(); ++a4i) {
+	    IfTreeVif::IPv4Map::iterator a4i;
+	    for (a4i = v.ipv4addrs().begin(); a4i != v.ipv4addrs().end(); ++a4i) {
 		IfTreeAddr4& a = a4i->second;
 		// XXX: delete the address if the vif is deleted
 		if (v.state() == IfTreeItem::DELETED)
@@ -159,8 +159,8 @@ IfConfigSet::push_config(IfTree& it)
 	    }
 
 #ifdef HAVE_IPV6
-	    IfTreeVif::V6Map::iterator a6i;
-	    for (a6i = v.v6addrs().begin(); a6i != v.v6addrs().end(); ++a6i) {
+	    IfTreeVif::IPv6Map::iterator a6i;
+	    for (a6i = v.ipv6addrs().begin(); a6i != v.ipv6addrs().end(); ++a6i) {
 		IfTreeAddr6& a = a6i->second;
 		// XXX: delete the address if the vif is deleted
 		if (v.state() == IfTreeItem::DELETED)
@@ -558,7 +558,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
 	XLOG_ASSERT(vi != ii->second.vifs().end());
 	vi->second.add_addr(a.addr());
-	IfTreeVif::V4Map::iterator ai = vi->second.get_addr(a.addr());
+	IfTreeVif::IPv4Map::iterator ai = vi->second.get_addr(a.addr());
 	ai->second = a;
 	return;
     }
@@ -602,8 +602,8 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    if (vi == ii->second.vifs().end())
 		break;
 	    vp = &vi->second;
-	    IfTreeVif::V4Map::const_iterator ai = vi->second.get_addr(a.addr());
-	    if (ai == vi->second.v4addrs().end())
+	    IfTreeVif::IPv4Map::const_iterator ai = vi->second.get_addr(a.addr());
+	    if (ai == vi->second.ipv4addrs().end())
 		break;
 	    ap = &ai->second;
 	    break;
@@ -693,7 +693,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
 	XLOG_ASSERT(vi != ii->second.vifs().end());
 	vi->second.add_addr(a.addr());
-	IfTreeVif::V6Map::iterator ai = vi->second.get_addr(a.addr());
+	IfTreeVif::IPv6Map::iterator ai = vi->second.get_addr(a.addr());
 	ai->second = a;
 	return;
     }
@@ -737,8 +737,8 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
 	    if (vi == ii->second.vifs().end())
 		break;
-	    IfTreeVif::V6Map::const_iterator ai = vi->second.get_addr(a.addr());
-	    if (ai == vi->second.v6addrs().end())
+	    IfTreeVif::IPv6Map::const_iterator ai = vi->second.get_addr(a.addr());
+	    if (ai == vi->second.ipv6addrs().end())
 		break;
 	    ap = &ai->second;
 	    break;

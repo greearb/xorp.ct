@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.32 2006/03/16 00:03:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.33 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -450,12 +450,12 @@ IfConfigSetClick::add_vif_address(const string& ifname,
     // Add the address
     //
     if (addr.is_ipv4()) {
-	IfTreeVif::V4Map::iterator ai;
+	IfTreeVif::IPv4Map::iterator ai;
 	IPv4 addr4 = addr.get_ipv4();
 	IPv4 dst_or_bcast4 = dst_or_bcast.get_ipv4();
 
 	ai = fv.get_addr(addr4);
-	if (ai == fv.v4addrs().end()) {
+	if (ai == fv.ipv4addrs().end()) {
 	    if (fv.add_addr(addr4) != true) {
 		error_msg = c_format("Cannot add address '%s' "
 				     "to interface '%s' vif '%s'",
@@ -465,7 +465,7 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 		return (XORP_ERROR);
 	    }
 	    ai = fv.get_addr(addr4);
-	    XLOG_ASSERT(ai != fv.v4addrs().end());
+	    XLOG_ASSERT(ai != fv.ipv4addrs().end());
 	}
 	IfTreeAddr4& fa = ai->second;
 
@@ -496,12 +496,12 @@ IfConfigSetClick::add_vif_address(const string& ifname,
     }
 
     if (addr.is_ipv6()) {
-	IfTreeVif::V6Map::iterator ai;
+	IfTreeVif::IPv6Map::iterator ai;
 	IPv6 addr6 = addr.get_ipv6();
 	IPv6 dst_or_bcast6 = dst_or_bcast.get_ipv6();
 
 	ai = fv.get_addr(addr6);
-	if (ai == fv.v6addrs().end()) {
+	if (ai == fv.ipv6addrs().end()) {
 	    if (fv.add_addr(addr6) != true) {
 		error_msg = c_format("Cannot add address '%s' "
 				     "to interface '%s' vif '%s'",
@@ -511,7 +511,7 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 		return (XORP_ERROR);
 	    }
 	    ai = fv.get_addr(addr6);
-	    XLOG_ASSERT(ai != fv.v6addrs().end());
+	    XLOG_ASSERT(ai != fv.ipv6addrs().end());
 	}
 	IfTreeAddr6& fa = ai->second;
 
@@ -581,11 +581,11 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
     // Delete the address
     //
     if (addr.is_ipv4()) {
-	IfTreeVif::V4Map::iterator ai;
+	IfTreeVif::IPv4Map::iterator ai;
 	IPv4 addr4 = addr.get_ipv4();
 
 	ai = fv.get_addr(addr4);
-	if (ai == fv.v4addrs().end()) {
+	if (ai == fv.ipv4addrs().end()) {
 	    error_msg = c_format("Cannot delete address '%s' "
 				 "on interface '%s' vif '%s': "
 				 "no such address",
@@ -599,11 +599,11 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
     }
 
     if (addr.is_ipv6()) {
-	IfTreeVif::V6Map::iterator ai;
+	IfTreeVif::IPv6Map::iterator ai;
 	IPv6 addr6 = addr.get_ipv6();
 
 	ai = fv.get_addr(addr6);
-	if (ai == fv.v6addrs().end()) {
+	if (ai == fv.ipv6addrs().end()) {
 	    error_msg = c_format("Cannot delete address '%s' "
 				 "on interface '%s' vif '%s': "
 				 "no such address",
@@ -815,8 +815,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
     string config, preamble;
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
-    IfTreeVif::V4Map::const_iterator ai4;
-    IfTreeVif::V6Map::const_iterator ai6;
+    IfTreeVif::IPv4Map::const_iterator ai4;
+    IfTreeVif::IPv6Map::const_iterator ai6;
 
     //
     // Configuration section: "interfaces{}"
@@ -842,7 +842,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	    preamble = "\t    ";
 	    config += preamble + c_format("disable: %s\n",
 					  (! fv.enabled()) ? "true" : "false");
-	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
+	    for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
 		const IfTreeAddr4& fa4 = ai4->second;
 		preamble = "\t    ";
 		config += preamble + c_format("address %s {\n",
@@ -869,7 +869,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 		preamble = "\t    ";
 		config += preamble + c_format("}\n");
 	    }
-	    for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
+	    for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
 		const IfTreeAddr6& fa6 = ai6->second
 ;		preamble = "\t    ";
 		config += preamble + c_format("address %s {\n",
@@ -963,8 +963,8 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
-    IfTreeVif::V4Map::const_iterator ai4;
-    IfTreeVif::V6Map::const_iterator ai6;
+    IfTreeVif::IPv4Map::const_iterator ai4;
+    IfTreeVif::IPv6Map::const_iterator ai6;
     int xorp_rt_port, local_xorp_rt_port;
 
     //
@@ -993,7 +993,7 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 	    ifc().nexthop_port_mapper().add_interface(fi.ifname(),
 						      fv.vifname(),
 						      xorp_rt_port);
-	    for (ai4 = fv.v4addrs().begin(); ai4 != fv.v4addrs().end(); ++ai4) {
+	    for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
 		const IfTreeAddr4& fa4 = ai4->second;
 		ifc().nexthop_port_mapper().add_ipv4(fa4.addr(),
 						     local_xorp_rt_port);
@@ -1003,7 +1003,7 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 		    ifc().nexthop_port_mapper().add_ipv4(fa4.endpoint(),
 							 xorp_rt_port);
 	    }
-	    for (ai6 = fv.v6addrs().begin(); ai6 != fv.v6addrs().end(); ++ai6) {
+	    for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
 		const IfTreeAddr6& fa6 = ai6->second;
 		ifc().nexthop_port_mapper().add_ipv6(fa6.addr(),
 						     local_xorp_rt_port);

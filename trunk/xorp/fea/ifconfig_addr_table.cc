@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.8 2006/03/16 00:03:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.9 2007/02/16 22:45:41 pavlin Exp $"
 
 #include <algorithm>
 
@@ -27,7 +27,7 @@
 IfConfigAddressTable::IfConfigAddressTable(const IfTree& iftree)
     : _iftree(iftree)
 {
-    get_valid_addrs(_v4addrs, _v6addrs);
+    get_valid_addrs(_ipv4addrs, _ipv6addrs);
 }
 
 IfConfigAddressTable::~IfConfigAddressTable()
@@ -37,13 +37,13 @@ IfConfigAddressTable::~IfConfigAddressTable()
 bool
 IfConfigAddressTable::address_valid(const IPv4& addr) const
 {
-    return _v4addrs.find(addr) != _v4addrs.end();
+    return _ipv4addrs.find(addr) != _ipv4addrs.end();
 }
 
 bool
 IfConfigAddressTable::address_valid(const IPv6& addr) const
 {
-    return _v6addrs.find(addr) != _v6addrs.end();
+    return _ipv6addrs.find(addr) != _ipv6addrs.end();
 }
 
 uint32_t
@@ -60,8 +60,8 @@ IfConfigAddressTable::address_pif_index(const IPv4& addr) const
 	    const IfTreeVif& itv = vi->second;
 	    if (itv.state() == IfTreeItem::DELETED)
 		continue;
-	    IfTreeVif::V4Map::const_iterator ai4 = itv.v4addrs().begin();
-	    for (; ai4 != itv.v4addrs().end(); ++ai4) {
+	    IfTreeVif::IPv4Map::const_iterator ai4 = itv.ipv4addrs().begin();
+	    for (; ai4 != itv.ipv4addrs().end(); ++ai4) {
 		const IfTreeAddr4& ita = ai4->second;
 		if (ita.state() == IfTreeItem::DELETED)
 		    continue;
@@ -87,8 +87,8 @@ IfConfigAddressTable::address_pif_index(const IPv6& addr) const
 	    const IfTreeVif& itv = vi->second;
 	    if (itv.state() == IfTreeItem::DELETED)
 		continue;
-	    IfTreeVif::V6Map::const_iterator ai6 = itv.v6addrs().begin();
-	    for (; ai6 != itv.v6addrs().end(); ++ai6) {
+	    IfTreeVif::IPv6Map::const_iterator ai6 = itv.ipv6addrs().begin();
+	    for (; ai6 != itv.ipv6addrs().end(); ++ai6) {
 		const IfTreeAddr6& ita = ai6->second;
 		if (ita.state() == IfTreeItem::DELETED)
 		    continue;
@@ -118,15 +118,15 @@ IfConfigAddressTable::get_valid_addrs(set<IPv4>& v4s, set<IPv6>& v6s)
 	    if (itv.enabled() == false || itv.state() == deleted)
 		continue;
 
-	    IfTreeVif::V4Map::const_iterator ai4 = itv.v4addrs().begin();
-	    for (; ai4 != itv.v4addrs().end(); ++ai4) {
+	    IfTreeVif::IPv4Map::const_iterator ai4 = itv.ipv4addrs().begin();
+	    for (; ai4 != itv.ipv4addrs().end(); ++ai4) {
 		const IfTreeAddr4& ita = ai4->second;
 		if (ita.enabled() == false || ita.state() == deleted)
 		    continue;
 		v4s.insert(ita.addr());
 	    }
-	    IfTreeVif::V6Map::const_iterator ai6 = itv.v6addrs().begin();
-	    for (; ai6 != itv.v6addrs().end(); ++ai6) {
+	    IfTreeVif::IPv6Map::const_iterator ai6 = itv.ipv6addrs().begin();
+	    for (; ai6 != itv.ipv6addrs().end(); ++ai6) {
 		const IfTreeAddr6& ita = ai6->second;
 		if (ita.enabled() == false || ita.state() == deleted)
 		    continue;
@@ -137,7 +137,7 @@ IfConfigAddressTable::get_valid_addrs(set<IPv4>& v4s, set<IPv6>& v6s)
 }
 
 void
-IfConfigAddressTable::set_addrs(const set<IPv4>& new_v4s)
+IfConfigAddressTable::set_addrs(const set<IPv4>& new_ipv4addrs)
 {
     //
     // Find what's in supplied interface address that's not in
@@ -149,8 +149,8 @@ IfConfigAddressTable::set_addrs(const set<IPv4>& new_v4s)
     //
     set<IPv4> delta;
     set_difference(
-		   new_v4s.begin(), new_v4s.end(),
-		   _v4addrs.begin(), _v4addrs.end(),
+		   new_ipv4addrs.begin(), new_ipv4addrs.end(),
+		   _ipv4addrs.begin(), _ipv4addrs.end(),
 		   insert_iterator<set<IPv4> >(delta, delta.begin())
 		   );
 
@@ -165,11 +165,11 @@ IfConfigAddressTable::set_addrs(const set<IPv4>& new_v4s)
     //
     // Set instance addresses to supplied addresses
     //
-    _v4addrs = new_v4s;
+    _ipv4addrs = new_ipv4addrs;
 }
 
 void
-IfConfigAddressTable::set_addrs(const set<IPv6>& new_v6s)
+IfConfigAddressTable::set_addrs(const set<IPv6>& new_ipv6addrs)
 {
     //
     // Find what's in supplied interface address that's not in
@@ -181,8 +181,8 @@ IfConfigAddressTable::set_addrs(const set<IPv6>& new_v6s)
     //
     set<IPv6> delta;
     set_difference(
-		   new_v6s.begin(), new_v6s.end(),
-		   _v6addrs.begin(), _v6addrs.end(),
+		   new_ipv6addrs.begin(), new_ipv6addrs.end(),
+		   _ipv6addrs.begin(), _ipv6addrs.end(),
 		   insert_iterator<set<IPv6> >(delta, delta.begin())
 		   );
 
@@ -197,7 +197,7 @@ IfConfigAddressTable::set_addrs(const set<IPv6>& new_v6s)
     //
     // Set instance addresses to supplied addresses
     //
-    _v6addrs = new_v6s;
+    _ipv6addrs = new_ipv6addrs;
 }
 
 inline void

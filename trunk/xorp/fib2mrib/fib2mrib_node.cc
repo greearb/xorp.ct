@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.32 2007/01/13 04:52:14 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.33 2007/02/16 22:45:58 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -1173,7 +1173,7 @@ Fib2mribNode::update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route)
 	    // Check the IPv4 subnets
 	    //
 	    if (route.is_ipv4()) {
-		IfMgrVifAtom::V4Map::const_iterator a4_iter;
+		IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 		for (a4_iter = vif.ipv4addrs().begin();
 		     a4_iter != vif.ipv4addrs().end();
 		     ++a4_iter) {
@@ -1203,7 +1203,7 @@ Fib2mribNode::update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route)
 	    // Check the IPv6 subnets
 	    //
 	    if (route.is_ipv6()) {
-		IfMgrVifAtom::V6Map::const_iterator a6_iter;
+		IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 		for (a6_iter = vif.ipv6addrs().begin();
 		     a6_iter != vif.ipv6addrs().end();
 		     ++a6_iter) {

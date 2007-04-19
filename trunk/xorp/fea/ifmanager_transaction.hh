@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.16 2006/10/12 01:24:44 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.17 2007/02/16 22:45:44 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -527,8 +527,8 @@ protected:
 	IfTreeVif* fv = vif();
 	if (fv == 0)
 	    return 0;
-	IfTreeVif::V4Map::iterator ai = fv->get_addr(_addr);
-	if (ai == fv->v4addrs().end())
+	IfTreeVif::IPv4Map::iterator ai = fv->get_addr(_addr);
+	if (ai == fv->ipv4addrs().end())
 	    return 0;
 	return &(ai->second);
     }
@@ -536,8 +536,8 @@ protected:
 	const IfTreeVif* fv = vif();
 	if (fv == 0)
 	    return 0;
-	IfTreeVif::V4Map::const_iterator ai = fv->get_addr(_addr);
-	if (ai == fv->v4addrs().end())
+	IfTreeVif::IPv4Map::const_iterator ai = fv->get_addr(_addr);
+	if (ai == fv->ipv4addrs().end())
 	    return 0;
 	return &(ai->second);
     }
@@ -688,8 +688,8 @@ protected:
 	IfTreeVif* fv = vif();
 	if (fv == 0)
 	    return 0;
-	IfTreeVif::V6Map::iterator ai = fv->get_addr(_addr);
-	if (ai == fv->v6addrs().end())
+	IfTreeVif::IPv6Map::iterator ai = fv->get_addr(_addr);
+	if (ai == fv->ipv6addrs().end())
 	    return 0;
 	return &(ai->second);
     }
@@ -698,8 +698,8 @@ protected:
 	const IfTreeVif* fv = vif();
 	if (fv == 0)
 	    return 0;
-	IfTreeVif::V6Map::const_iterator ai = fv->get_addr(_addr);
-	if (ai == fv->v6addrs().end())
+	IfTreeVif::IPv6Map::const_iterator ai = fv->get_addr(_addr);
+	if (ai == fv->ipv6addrs().end())
 	    return 0;
 	return &(ai->second);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.18 2007/02/16 22:45:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.19 2007/04/18 06:20:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -304,8 +304,8 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
     }
 
     const IfTreeVif& vif = vi->second;
-    IfTreeVif::V4Map::const_iterator ai = vif.get_addr(addr);
-    if (ai == vif.v4addrs().end()) {
+    IfTreeVif::IPv4Map::const_iterator ai = vif.get_addr(addr);
+    if (ai == vif.ipv4addrs().end()) {
 	XLOG_WARNING("Got update for address not in FEA tree: %s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
@@ -409,8 +409,8 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
     }
 
     const IfTreeVif& vif = vi->second;
-    IfTreeVif::V6Map::const_iterator ai = vif.get_addr(addr);
-    if (ai == vif.v6addrs().end()) {
+    IfTreeVif::IPv6Map::const_iterator ai = vif.get_addr(addr);
+    if (ai == vif.ipv6addrs().end()) {
 	XLOG_WARNING("Got update for address not in FEA tree: %s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
@@ -493,13 +493,13 @@ private:
     string& _out;
 };
 
-class AppendFeaV4Addrs {
+class AppendFeaIPv4Addrs {
 public:
-    AppendFeaV4Addrs(string& out) : _out(out)
+    AppendFeaIPv4Addrs(string& out) : _out(out)
     {}
 
     void
-    operator() (const IfTreeVif::V4Map::value_type& v)
+    operator() (const IfTreeVif::IPv4Map::value_type& v)
     {
 	_out += v.first.str() + " ";
     }
@@ -508,13 +508,13 @@ private:
     string& _out;
 };
 
-class AppendFeaV6Addrs {
+class AppendFeaIPv6Addrs {
 public:
-    AppendFeaV6Addrs(string& out) : _out(out)
+    AppendFeaIPv6Addrs(string& out) : _out(out)
     {}
 
     void
-    operator() (const IfTreeVif::V6Map::value_type& v)
+    operator() (const IfTreeVif::IPv6Map::value_type& v)
     {
 	_out += v.first.str() + " ";
     }
@@ -553,13 +553,13 @@ private:
     string& _out;
 };
 
-class AppendLibFeaClientV4Addrs {
+class AppendLibFeaClientIPv4Addrs {
 public:
-    AppendLibFeaClientV4Addrs(string& out) : _out(out)
+    AppendLibFeaClientIPv4Addrs(string& out) : _out(out)
     {}
 
     void
-    operator() (const IfMgrVifAtom::V4Map::value_type& v)
+    operator() (const IfMgrVifAtom::IPv4Map::value_type& v)
     {
 	_out += v.first.str() + " ";
     }
@@ -568,13 +568,13 @@ private:
     string& _out;
 };
 
-class AppendLibFeaClientV6Addrs {
+class AppendLibFeaClientIPv6Addrs {
 public:
-    AppendLibFeaClientV6Addrs(string& out) : _out(out)
+    AppendLibFeaClientIPv6Addrs(string& out) : _out(out)
     {}
 
     void
-    operator() (const IfMgrVifAtom::V6Map::value_type& v)
+    operator() (const IfMgrVifAtom::IPv6Map::value_type& v)
     {
 	_out += v.first.str() + " ";
     }
@@ -587,19 +587,19 @@ private:
 /**
  * Check IPv4 addresses.
  */
-class CheckV4Addrs {
+class CheckIPv4Addrs {
 public:
-    CheckV4Addrs(const IfMgrVifAtom::V4Map&	lfc_addrs,
-		 string&			errlog)
+    CheckIPv4Addrs(const IfMgrVifAtom::IPv4Map&	lfc_addrs,
+		   string&			errlog)
 	: _lfc_addrs(lfc_addrs), _errlog(errlog)
     {}
 
     void
-    operator() (const IfTreeVif::V4Map::value_type& v)
+    operator() (const IfTreeVif::IPv4Map::value_type& v)
     {
 	const IfTreeAddr4& ita = v.second;
 
-	IfMgrVifAtom::V4Map::const_iterator i = _lfc_addrs.find(ita.addr());
+	IfMgrVifAtom::IPv4Map::const_iterator i = _lfc_addrs.find(ita.addr());
 	if (i == _lfc_addrs.end()) {
 	    return;
 	}
@@ -663,26 +663,26 @@ public:
     }
 
 private:
-    const IfMgrVifAtom::V4Map&	_lfc_addrs;
-    string&			_errlog;
+    const IfMgrVifAtom::IPv4Map&	_lfc_addrs;
+    string&				_errlog;
 };
 
 /**
  * Check IPv6 addresses.
  */
-class CheckV6Addrs {
+class CheckIPv6Addrs {
 public:
-    CheckV6Addrs(const IfMgrVifAtom::V6Map&	lfc_addrs,
+    CheckIPv6Addrs(const IfMgrVifAtom::IPv6Map&	lfc_addrs,
 		 string&			errlog)
 	: _lfc_addrs(lfc_addrs), _errlog(errlog)
     {}
 
     void
-    operator() (const IfTreeVif::V6Map::value_type& v)
+    operator() (const IfTreeVif::IPv6Map::value_type& v)
     {
 	const IfTreeAddr6& ita = v.second;
 
-	IfMgrVifAtom::V6Map::const_iterator i = _lfc_addrs.find(ita.addr());
+	IfMgrVifAtom::IPv6Map::const_iterator i = _lfc_addrs.find(ita.addr());
 	if (i == _lfc_addrs.end()) {
 	    return;
 	}
@@ -734,8 +734,8 @@ public:
     }
 
 private:
-    const IfMgrVifAtom::V6Map&	_lfc_addrs;
-    string&			_errlog;
+    const IfMgrVifAtom::IPv6Map&	_lfc_addrs;
+    string&				_errlog;
 };
 
 
@@ -803,36 +803,39 @@ public:
 				truth_of(imv.loopback()));
 	}
 
-	if (itv.v4addrs().size() != imv.ipv4addrs().size()) {
+	if (itv.ipv4addrs().size() != imv.ipv4addrs().size()) {
 	    _errlog += "Vif %s IPv4 address count mismatch\n";
 
 	    string fv4a;
-	    for_each(itv.v4addrs().begin(), itv.v4addrs().end(),
-		     AppendFeaV4Addrs(fv4a));
-	    _errlog += "  Fea Iftree v4addrs          = " + fv4a + "\n";
+	    for_each(itv.ipv4addrs().begin(), itv.ipv4addrs().end(),
+		     AppendFeaIPv4Addrs(fv4a));
+	    _errlog += "  Fea Iftree ipv4addrs        = " + fv4a + "\n";
 
 	    string lfv4a;
 	    for_each(imv.ipv4addrs().begin(), imv.ipv4addrs().end(),
-		     AppendLibFeaClientV4Addrs(lfv4a));
-	    _errlog += "  LibFeaClient Iftree v4addrs = " + lfv4a + "\n";
+		     AppendLibFeaClientIPv4Addrs(lfv4a));
+	    _errlog += "  LibFeaClient Iftree ipv4addrs = " + lfv4a + "\n";
 	}
 
-	if (itv.v6addrs().size() != imv.ipv6addrs().size()) {
+	if (itv.ipv6addrs().size() != imv.ipv6addrs().size()) {
 	    _errlog += "Vif %s IPv6 address count mismatch\n";
 
 	    string fv6a;
-	    for_each(itv.v6addrs().begin(), itv.v6addrs().end(),
-		     AppendFeaV6Addrs(fv6a));
-	    _errlog += "  Fea Iftree v6addrs          = " + fv6a + "\n";
+	    for_each(itv.ipv6addrs().begin(), itv.ipv6addrs().end(),
+		     AppendFeaIPv6Addrs(fv6a));
+	    _errlog += "  Fea Iftree ipv6addrs        = " + fv6a + "\n";
 
 	    string lfv6a;
 	    for_each(imv.ipv6addrs().begin(), imv.ipv6addrs().end(),
-		     AppendLibFeaClientV6Addrs(lfv6a));
-	    _errlog += "  LibFeaClient Iftree v6addrs = " + lfv6a + "\n";
+		     AppendLibFeaClientIPv6Addrs(lfv6a));
+	    _errlog += "  LibFeaClient Iftree ipv6addrs = " + lfv6a + "\n";
 	}
 
-	for_each(itv.v4addrs().begin(), itv.v4addrs().end(),
-		 CheckV4Addrs(imv.ipv4addrs(), _errlog));
+	for_each(itv.ipv4addrs().begin(), itv.ipv4addrs().end(),
+		 CheckIPv4Addrs(imv.ipv4addrs(), _errlog));
+
+	for_each(itv.ipv6addrs().begin(), itv.ipv6addrs().end(),
+		 CheckIPv6Addrs(imv.ipv6addrs(), _errlog));
     }
 
 private:
@@ -868,11 +871,11 @@ public:
 				ifi.name().c_str(),
 				ifi.enabled(), imi.enabled());
 	}
-	if (ifi.mtu() != imi.mtu_bytes()) {
+	if (ifi.mtu() != imi.mtu()) {
 	    _errlog += c_format("+ Interface %s mtu %u != %u\n",
 				ifi.name().c_str(),
 				XORP_UINT_CAST(ifi.mtu()),
-				XORP_UINT_CAST(imi.mtu_bytes()));
+				XORP_UINT_CAST(imi.mtu()));
 	}
 	if (ifi.mac() != imi.mac()) {
 	    _errlog += c_format("+ Interface %s mac %s != %s\n",

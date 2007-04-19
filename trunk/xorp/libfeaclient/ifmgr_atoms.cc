@@ -12,9 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.15 2006/08/18 04:18:28 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.16 2007/02/16 22:45:59 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
+
+
+const IPv4 IfMgrIPv4Atom::_ZERO_ADDR = IPv4::ZERO();
+const IPv6 IfMgrIPv6Atom::_ZERO_ADDR = IPv6::ZERO();
 
 // ----------------------------------------------------------------------------
 // Find method helpers
@@ -25,7 +29,7 @@ find_interface(const IfMgrIfTree* tree, const string& ifname)
     const IfMgrIfTree::IfMap& ifs = tree->ifs();
     IfMgrIfTree::IfMap::const_iterator ii = ifs.find(ifname);
     if (ifs.end() == ii)
-	return 0;
+	return NULL;
     return &ii->second;
 }
 
@@ -35,7 +39,7 @@ find_interface(IfMgrIfTree* tree, const string& ifname)
     IfMgrIfTree::IfMap& ifs = tree->ifs();
     IfMgrIfTree::IfMap::iterator ii = ifs.find(ifname);
     if (ifs.end() == ii)
-	return 0;
+	return NULL;
     return &ii->second;
 }
 
@@ -46,7 +50,7 @@ find_virtual_interface(const IfMgrIfAtom* ifa, const string& vifname)
     const IfMgrIfAtom::VifMap& vifs = ifa->vifs();
     IfMgrIfAtom::VifMap::const_iterator vi = vifs.find(vifname);
     if (vifs.end() == vi)
-	return 0;
+	return NULL;
     return &vi->second;
 }
 
@@ -56,7 +60,7 @@ find_virtual_interface(IfMgrIfAtom* ifa, const string& vifname)
     IfMgrIfAtom::VifMap& vifs = ifa->vifs();
     IfMgrIfAtom::VifMap::iterator vi = vifs.find(vifname);
     if (vifs.end() == vi)
-	return 0;
+	return NULL;
     return &vi->second;
 }
 
@@ -64,40 +68,40 @@ find_virtual_interface(IfMgrIfAtom* ifa, const string& vifname)
 static inline const IfMgrIPv4Atom*
 find_virtual_interface_addr(const IfMgrVifAtom* vifa, const IPv4& addr)
 {
-    const IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
-    IfMgrVifAtom::V4Map::const_iterator ai = addrs.find(addr);
+    const IfMgrVifAtom::IPv4Map& addrs = vifa->ipv4addrs();
+    IfMgrVifAtom::IPv4Map::const_iterator ai = addrs.find(addr);
     if (addrs.end() == ai)
-	return 0;
+	return NULL;
     return &ai->second;
 }
 
 static inline IfMgrIPv4Atom*
 find_virtual_interface_addr(IfMgrVifAtom* vifa, const IPv4& addr)
 {
-    IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
-    IfMgrVifAtom::V4Map::iterator ai = addrs.find(addr);
+    IfMgrVifAtom::IPv4Map& addrs = vifa->ipv4addrs();
+    IfMgrVifAtom::IPv4Map::iterator ai = addrs.find(addr);
     if (addrs.end() == ai)
-	return 0;
+	return NULL;
     return &ai->second;
 }
 
 static inline const IfMgrIPv6Atom*
 find_virtual_interface_addr(const IfMgrVifAtom* vifa, const IPv6& addr)
 {
-    const IfMgrVifAtom::V6Map& addrs = vifa->ipv6addrs();
-    IfMgrVifAtom::V6Map::const_iterator ai = addrs.find(addr);
+    const IfMgrVifAtom::IPv6Map& addrs = vifa->ipv6addrs();
+    IfMgrVifAtom::IPv6Map::const_iterator ai = addrs.find(addr);
     if (addrs.end() == ai)
-	return 0;
+	return NULL;
     return &ai->second;
 }
 
 static inline IfMgrIPv6Atom*
 find_virtual_interface_addr(IfMgrVifAtom* vifa, const IPv6& addr)
 {
-    IfMgrVifAtom::V6Map& addrs = vifa->ipv6addrs();
-    IfMgrVifAtom::V6Map::iterator ai = addrs.find(addr);
+    IfMgrVifAtom::IPv6Map& addrs = vifa->ipv6addrs();
+    IfMgrVifAtom::IPv6Map::iterator ai = addrs.find(addr);
     if (addrs.end() == ai)
-	return 0;
+	return NULL;
     return &ai->second;
 }
 
@@ -120,8 +124,8 @@ const IfMgrVifAtom*
 IfMgrIfTree::find_vif(const string& ifname, const string& vifname) const
 {
     const IfMgrIfAtom* ifa = find_interface(this, ifname);
-    if (ifa == 0)
-	return 0;
+    if (ifa == NULL)
+	return NULL;
     return find_virtual_interface(ifa, vifname);
 }
 
@@ -129,8 +133,8 @@ IfMgrVifAtom*
 IfMgrIfTree::find_vif(const string& ifname, const string& vifname)
 {
     IfMgrIfAtom* ifa = find_interface(this, ifname);
-    if (ifa == 0)
-	return 0;
+    if (ifa == NULL)
+	return NULL;
     return find_virtual_interface(ifa, vifname);
 }
 
@@ -140,11 +144,11 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const IPv4&   addr) const
 {
     const IfMgrIfAtom* ifa = find_interface(this, ifname);
-    if (ifa == 0)
-	return 0;
+    if (ifa == NULL)
+	return NULL;
     const IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
-    if (vifa == 0)
-	return 0;
+    if (vifa == NULL)
+	return NULL;
     return find_virtual_interface_addr(vifa, addr);
 }
 
@@ -154,11 +158,11 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const IPv4&   addr)
 {
     IfMgrIfAtom* ifa = find_interface(this, ifname);
-    if (ifa == 0)
-	return 0;
+    if (ifa == NULL)
+	return NULL;
     IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
-    if (vifa == 0)
-	return 0;
+    if (vifa == NULL)
+	return NULL;
     return find_virtual_interface_addr(vifa, addr);
 }
 
@@ -168,11 +172,11 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const IPv6&   addr) const
 {
     const IfMgrIfAtom* ifa = find_interface(this, ifname);
-    if (ifa == 0)
-	return 0;
+    if (ifa == NULL)
+	return NULL;
     const IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
-    if (vifa == 0)
-	return 0;
+    if (vifa == NULL)
+	return NULL;
     return find_virtual_interface_addr(vifa, addr);
 }
 
@@ -182,11 +186,11 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const IPv6&   addr)
 {
     IfMgrIfAtom* ifa = find_interface(this, ifname);
-    if (ifa == 0)
-	return 0;
+    if (ifa == NULL)
+	return NULL;
     IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
-    if (vifa == 0)
-	return 0;
+    if (vifa == NULL)
+	return NULL;
     return find_virtual_interface_addr(vifa, addr);
 }
 
@@ -220,7 +224,7 @@ IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
 		continue;
 
 	    // Test if there is matching IPv4 address
-	    IfMgrVifAtom::V4Map::const_iterator a4_iter;
+	    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 
 	    for (a4_iter = vif.ipv4addrs().begin();
 		 a4_iter != vif.ipv4addrs().end();
@@ -269,7 +273,7 @@ IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
 		continue;
 
 	    // Test if there is matching IPv6 address
-	    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+	    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
 	    for (a6_iter = vif.ipv6addrs().begin();
 		 a6_iter != vif.ipv6addrs().end();
@@ -335,7 +339,7 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
 		continue;
 
 	    // Test if there is matching IPv4 address
-	    IfMgrVifAtom::V4Map::const_iterator a4_iter;
+	    IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
 
 	    for (a4_iter = vif.ipv4addrs().begin();
 		 a4_iter != vif.ipv4addrs().end();
@@ -401,7 +405,7 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
 		continue;
 
 	    // Test if there is matching IPv6 address
-	    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+	    IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
 
 	    for (a6_iter = vif.ipv6addrs().begin();
 		 a6_iter != vif.ipv6addrs().end();
@@ -470,7 +474,7 @@ IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
     return (
 	    name()			== o.name()			&&
 	    enabled()			== o.enabled()			&&
-	    mtu_bytes()			== o.mtu_bytes()		&&
+	    mtu()			== o.mtu()			&&
 	    mac()			== o.mac()			&&
 	    pif_index()			== o.pif_index()		&&
 	    no_carrier()		== o.no_carrier()		&&

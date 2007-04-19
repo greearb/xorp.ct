@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.1 2007/04/18 06:21:00 pavlin Exp $"
 
 
 //
@@ -1195,8 +1195,8 @@ XrlFeaTarget::ifmgr_0_1_get_system_vif_addresses6(
     if (e != XrlCmdError::OKAY())
 	return e;
 
-    for (IfTreeVif::V6Map::const_iterator ai = fv->v6addrs().begin();
-	 ai != fv->v6addrs().end(); ++ai) {
+    for (IfTreeVif::IPv6Map::const_iterator ai = fv->ipv6addrs().begin();
+	 ai != fv->ipv6addrs().end(); ++ai) {
 	addrs.append(XrlAtom(ai->second.addr()));
     }
     return XrlCmdError::OKAY();
@@ -1218,8 +1218,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
     if (e != XrlCmdError::OKAY())
 	return e;
 
-    for (IfTreeVif::V6Map::const_iterator ai = fv->v6addrs().begin();
-	 ai != fv->v6addrs().end(); ++ai) {
+    for (IfTreeVif::IPv6Map::const_iterator ai = fv->ipv6addrs().begin();
+	 ai != fv->ipv6addrs().end(); ++ai) {
 	addrs.append(XrlAtom(ai->second.addr()));
     }
     return XrlCmdError::OKAY();
@@ -1358,8 +1358,8 @@ XrlFeaTarget::ifmgr_0_1_get_system_vif_addresses4(
     if (e != XrlCmdError::OKAY())
 	return e;
 
-    for (IfTreeVif::V4Map::const_iterator ai = fv->v4addrs().begin();
-	 ai != fv->v4addrs().end(); ++ai) {
+    for (IfTreeVif::IPv4Map::const_iterator ai = fv->ipv4addrs().begin();
+	 ai != fv->ipv4addrs().end(); ++ai) {
 	addrs.append(XrlAtom(ai->second.addr()));
     }
     return XrlCmdError::OKAY();
@@ -1381,8 +1381,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
     if (e != XrlCmdError::OKAY())
 	return e;
 
-    for (IfTreeVif::V4Map::const_iterator ai = fv->v4addrs().begin();
-	 ai != fv->v4addrs().end(); ++ai) {
+    for (IfTreeVif::IPv4Map::const_iterator ai = fv->ipv4addrs().begin();
+	 ai != fv->ipv4addrs().end(); ++ai) {
 	addrs.append(XrlAtom(ai->second.addr()));
     }
     return XrlCmdError::OKAY();

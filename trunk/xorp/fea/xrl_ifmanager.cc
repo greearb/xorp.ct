@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.21 2006/09/08 15:32:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.22 2007/02/16 22:45:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -93,8 +93,8 @@ XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
 						    ifname.c_str()));
     }
 
-    IfTreeVif::V4Map::const_iterator ai = vi->second.get_addr(addr);
-    if (ai == vi->second.v4addrs().end()) {
+    IfTreeVif::IPv4Map::const_iterator ai = vi->second.get_addr(addr);
+    if (ai == vi->second.ipv4addrs().end()) {
 	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_ADDR,
 						    addr.str().c_str(),
 						    vif.c_str(),
@@ -125,8 +125,8 @@ XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
 						    ifname.c_str()));
     }
 
-    IfTreeVif::V6Map::const_iterator ai = vi->second.get_addr(addr);
-    if (ai == vi->second.v6addrs().end()) {
+    IfTreeVif::IPv6Map::const_iterator ai = vi->second.get_addr(addr);
+    if (ai == vi->second.ipv6addrs().end()) {
 	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_ADDR,
 						    addr.str().c_str(),
 						    vif.c_str(),

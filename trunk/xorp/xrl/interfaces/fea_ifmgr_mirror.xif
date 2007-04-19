@@ -8,7 +8,7 @@ interface fea_ifmgr_mirror/0.1 {
 	interface_remove ? ifname:txt
 	interface_set_enabled ? ifname:txt & enabled:bool
 	interface_set_discard ? ifname:txt & discard:bool
-	interface_set_mtu ? ifname:txt & mtu_bytes:u32
+	interface_set_mtu ? ifname:txt & mtu:u32
 	interface_set_mac ? ifname:txt & mac:mac
 	interface_set_pif_index ? ifname:txt & index:u32
 	interface_set_no_carrier ? ifname:txt & no_carrier:bool
@@ -34,8 +34,10 @@ interface fea_ifmgr_mirror/0.1 {
 				   & capable:bool
 	ipv4_set_loopback ? ifname:txt & vifname:txt & addr:ipv4	      \
 			  & loopback:bool
-	ipv4_set_broadcast ? ifname:txt & vifname:txt & addr:ipv4 & oaddr:ipv4
-	ipv4_set_endpoint ? ifname:txt & vifname:txt & addr:ipv4 & oaddr:ipv4
+	ipv4_set_broadcast ? ifname:txt & vifname:txt & addr:ipv4	\
+			   & broadcast_addr:ipv4
+	ipv4_set_endpoint ? ifname:txt & vifname:txt & addr:ipv4	\
+			  & endpoint_addr:ipv4
 
 
 
@@ -47,7 +49,8 @@ interface fea_ifmgr_mirror/0.1 {
 			  & loopback:bool
 	ipv6_set_multicast_capable ? ifname:txt & vifname:txt & addr:ipv6     \
 				   & capable:bool
-	ipv6_set_endpoint ? ifname:txt & vifname:txt & addr:ipv6 & oaddr:ipv6
+	ipv6_set_endpoint ? ifname:txt & vifname:txt & addr:ipv6	\
+			  & endpoint_addr:ipv6
 
 
 

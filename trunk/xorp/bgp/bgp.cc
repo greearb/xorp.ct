@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.81 2007/02/16 22:45:10 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.82 2007/03/28 02:14:23 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -431,7 +431,7 @@ BGPMain::get_mtu(const string& interface)
     if (fi == NULL)
 	return 0;
 
-    return (fi->mtu_bytes());
+    return (fi->mtu());
 }
 
 void
@@ -450,8 +450,8 @@ BGPMain::updates_made()
 {
     IfMgrIfTree::IfMap::const_iterator ii;
     IfMgrIfAtom::VifMap::const_iterator vi;
-    IfMgrVifAtom::V4Map::const_iterator ai4;
-    IfMgrVifAtom::V6Map::const_iterator ai6;
+    IfMgrVifAtom::IPv4Map::const_iterator ai4;
+    IfMgrVifAtom::IPv6Map::const_iterator ai6;
     const IfMgrIfAtom* if_atom;
     const IfMgrIfAtom* other_if_atom;
     const IfMgrVifAtom* vif_atom;

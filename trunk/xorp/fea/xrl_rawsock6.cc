@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.11 2006/10/18 22:57:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.12 2007/02/16 22:45:53 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -191,8 +191,8 @@ protected:
 	    return (false);
 	}
 	if (iftree_if->enabled() && iftree_vif->enabled()) {
-	    IfTreeVif::V6Map::const_iterator iter = iftree_vif->get_addr(addr);
-	    if (iter != iftree_vif->v6addrs().end()) {
+	    IfTreeVif::IPv6Map::const_iterator iter = iftree_vif->get_addr(addr);
+	    if (iter != iftree_vif->ipv6addrs().end()) {
 		const IfTreeAddr6* iftree_a6 = &iter->second;
 		if (iftree_a6->enabled())
 		    return (true);

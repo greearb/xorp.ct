@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.37 2006/07/25 09:46:42 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.38 2007/02/16 22:45:44 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -436,8 +436,8 @@ protected:
  */
 class IfTreeVif : public IfTreeItem {
 public:
-    typedef map<const IPv4, IfTreeAddr4> V4Map;
-    typedef map<const IPv6, IfTreeAddr6> V6Map;
+    typedef map<const IPv4, IfTreeAddr4> IPv4Map;
+    typedef map<const IPv6, IfTreeAddr6> IPv6Map;
 
     IfTreeVif(const string& ifname, const string& vifname);
 
@@ -460,55 +460,59 @@ public:
     inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
 
-    inline const V4Map& v4addrs() const	{ return _v4addrs; }
-    inline V4Map& v4addrs()		{ return _v4addrs; }
+    inline const IPv4Map& ipv4addrs() const { return _ipv4addrs; }
+    inline IPv4Map& ipv4addrs()		{ return _ipv4addrs; }
 
-    inline const V6Map& v6addrs() const	{ return _v6addrs; }
-    inline V6Map& v6addrs()		{ return _v6addrs; }
+    inline const IPv6Map& ipv6addrs() const { return _ipv6addrs; }
+    inline IPv6Map& ipv6addrs()		{ return _ipv6addrs; }
 
-    inline V4Map::iterator get_addr(const IPv4& a);
+    inline IPv4Map::iterator get_addr(const IPv4& addr);
 
-    inline V6Map::iterator get_addr(const IPv6& a);
+    inline IPv6Map::iterator get_addr(const IPv6& addr);
 
-    inline V4Map::const_iterator get_addr(const IPv4& a) const;
+    inline IPv4Map::const_iterator get_addr(const IPv4& addr) const;
 
-    inline V6Map::const_iterator get_addr(const IPv6& a) const;
+    inline IPv6Map::const_iterator get_addr(const IPv6& addr) const;
 
     /**
-     * Add address.
+     * Add IPv4 address.
      *
-     * @param v4addr address to be added.
+     * @param addr address to be added.
      *
      * @return true on success, false if an error.
      */
-    bool add_addr(const IPv4& v4addr);
+    bool add_addr(const IPv4& addr);
 
     /**
-     * Mark address as DELETED.  Deletion occurs when finalize_state is called.
+     * Mark IPv4 address as DELETED.
      *
-     * @param v4addr address to labelled.
+     * Deletion occurs when finalize_state is called.
+     *
+     * @param addr address to labelled.
      *
      * @return true on success, false if address does not exist.
      */
-    bool remove_addr(const IPv4& v4addr);
+    bool remove_addr(const IPv4& addr);
 
     /**
-     * Add address.
+     * Add IPv6 address.
      *
-     * @param v6addr address to be added.
+     * @param addr address to be added.
      *
      * @return true on success, false if an error.
      */
-    bool add_addr(const IPv6& v6addr);
+    bool add_addr(const IPv6& addr);
 
     /**
-     * Mark address as DELETED.  Deletion occurs when finalize_state is called.
+     * Mark IPv6 address as DELETED.
      *
-     * @param v6addr address to labelled.
+     * Deletion occurs when finalize_state is called.
+     *
+     * @param addr address to labelled.
      *
      * @return true on success, false if address does not exist.
      */
-    bool remove_addr(const IPv6& v6addr);
+    bool remove_addr(const IPv6& addr);
 
     /**
      * Copy state of internal variables from another IfTreeVif.
@@ -554,8 +558,8 @@ protected:
     bool	 _point_to_point;
     bool	 _multicast;
 
-    V4Map	 _v4addrs;
-    V6Map	 _v6addrs;
+    IPv4Map	 _ipv4addrs;
+    IPv6Map	 _ipv6addrs;
 };
 
 
@@ -797,28 +801,28 @@ IfTreeInterface::get_vif(const string& vifname) const
 // Inline IfTreeVif methods
 //
 
-inline IfTreeVif::V4Map::iterator
-IfTreeVif::get_addr(const IPv4& a)
+inline IfTreeVif::IPv4Map::iterator
+IfTreeVif::get_addr(const IPv4& addr)
 {
-    return _v4addrs.find(a);
+    return _ipv4addrs.find(addr);
 }
 
-inline IfTreeVif::V6Map::iterator
-IfTreeVif::get_addr(const IPv6& a)
+inline IfTreeVif::IPv6Map::iterator
+IfTreeVif::get_addr(const IPv6& addr)
 {
-    return _v6addrs.find(a);
+    return _ipv6addrs.find(addr);
 }
 
-inline IfTreeVif::V4Map::const_iterator
-IfTreeVif::get_addr(const IPv4& a) const
+inline IfTreeVif::IPv4Map::const_iterator
+IfTreeVif::get_addr(const IPv4& addr) const
 {
-    return _v4addrs.find(a);
+    return _ipv4addrs.find(addr);
 }
 
-inline IfTreeVif::V6Map::const_iterator
-IfTreeVif::get_addr(const IPv6& a) const
+inline IfTreeVif::IPv6Map::const_iterator
+IfTreeVif::get_addr(const IPv6& addr) const
 {
-    return _v6addrs.find(a);
+    return _ipv6addrs.find(addr);
 }
 
 #endif // __FEA_IFTREE_HH__

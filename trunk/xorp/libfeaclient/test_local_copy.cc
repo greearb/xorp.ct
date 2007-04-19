@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.10 2006/03/16 00:04:11 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.11 2007/02/16 22:46:00 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -202,8 +202,8 @@ test_main()
 	verbose_log("Failed to set loopback");
 	return 1;
     }
-    IPv6 oaddr("fe80::220:edff:fe5c:d0c7");
-    if (IfMgrIPv6SetEndpoint("if0", "vif0", v6a, oaddr).execute(t)
+    IPv6 endpoint_addr("fe80::220:edff:fe5c:d0c7");
+    if (IfMgrIPv6SetEndpoint("if0", "vif0", v6a, endpoint_addr).execute(t)
 	== false) {
 	verbose_log("Failed to set endpoint");
 	return 1;

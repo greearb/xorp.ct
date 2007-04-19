@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.17 2007/03/29 22:45:45 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.18 2007/04/18 06:21:01 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -418,11 +418,11 @@ public:
     void push_socket(const ref_ptr<RemoteSocket<IPv6> >& s);
 
 public:
-    typedef list<ref_ptr<RemoteSocket<IPv4> > > V4Sockets;
-    typedef list<ref_ptr<RemoteSocket<IPv6> > > V6Sockets;
+    typedef list<ref_ptr<RemoteSocket<IPv4> > > IPv4Sockets;
+    typedef list<ref_ptr<RemoteSocket<IPv6> > > IPv6Sockets;
 
-    V4Sockets&			v4sockets() { return _v4sockets; }
-    V6Sockets&			v6sockets() { return _v6sockets; }
+    IPv4Sockets&		ipv4sockets() { return _ipv4sockets; }
+    IPv6Sockets&		ipv6sockets() { return _ipv6sockets; }
 
 protected:
     EventLoop&			_eventloop;
@@ -430,8 +430,8 @@ protected:
     AddressTableBase&		_atable;
 
     map<string, RemoteSocketOwner> _socket_owners;
-    V4Sockets			_v4sockets;
-    V6Sockets			_v6sockets;
+    IPv4Sockets			_ipv4sockets;
+    IPv6Sockets			_ipv6sockets;
 };
 
 #endif // __FEA_XRL_SOCKET_SERVER_HH__

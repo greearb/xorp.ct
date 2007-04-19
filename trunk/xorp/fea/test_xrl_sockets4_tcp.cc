@@ -81,52 +81,52 @@ public:
     uint32_t address_pif_index(const IPv6&) const { return 0; }
 
 protected:
-    set<IPv4> _v4s;
-    set<IPv6> _v6s;
+    set<IPv4> _ipv4addrs;
+    set<IPv6> _ipv6addrs;
 };
 
 void
-TestAddressTable::add_address(const IPv4& a)
+TestAddressTable::add_address(const IPv4& addr)
 {
-    _v4s.insert(a);
+    _ipv4addrs.insert(addr);
 }
 
 void
-TestAddressTable::remove_address(const IPv4& a)
+TestAddressTable::remove_address(const IPv4& addr)
 {
-    set<IPv4>::iterator i = _v4s.find(a);
-    if (i != _v4s.end()) {
-	_v4s.erase(i);
-	invalidate_address(a, "invalidated");
+    set<IPv4>::iterator i = _ipv4addrs.find(addr);
+    if (i != _ipv4addrs.end()) {
+	_ipv4addrs.erase(i);
+	invalidate_address(addr, "invalidated");
     }
 }
 
 bool
-TestAddressTable::address_valid(const IPv4& a) const
+TestAddressTable::address_valid(const IPv4& addr) const
 {
-    return _v4s.find(a) != _v4s.end();
+    return _ipv4addrs.find(addr) != _ipv4addrs.end();
 }
 
 void
-TestAddressTable::add_address(const IPv6& a)
+TestAddressTable::add_address(const IPv6& addr)
 {
-    _v6s.insert(a);
+    _ipv6addrs.insert(addr);
 }
 
 void
-TestAddressTable::remove_address(const IPv6& a)
+TestAddressTable::remove_address(const IPv6& addr)
 {
-    set<IPv6>::iterator i = _v6s.find(a);
-    if (i != _v6s.end()) {
-	_v6s.erase(i);
-	invalidate_address(a, "invalidated");
+    set<IPv6>::iterator i = _ipv6addrs.find(addr);
+    if (i != _ipv6addrs.end()) {
+	_ipv6addrs.erase(i);
+	invalidate_address(addr, "invalidated");
     }
 }
 
 bool
-TestAddressTable::address_valid(const IPv6& a) const
+TestAddressTable::address_valid(const IPv6& addr) const
 {
-    return _v6s.find(a) != _v6s.end();
+    return _ipv6addrs.find(addr) != _ipv6addrs.end();
 }
 
 //
