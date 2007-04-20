@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/overview.hh,v 1.4 2006/03/16 00:04:11 pavlin Exp $
+// $XORP: xorp/libfeaclient/overview.hh,v 1.5 2007/02/16 22:46:00 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_OVERVIEW_HH__
 #define __LIBFEACLIENT_OVERVIEW_HH__
@@ -53,18 +53,18 @@ IfMgrXrlReplicationManager.  The command is dispatched on the local
 <pre>
 FEA                                                           Remote Process1
 
-IfMgrCommand ---> IfMgrReplicationManager + - - - - - - - - > IfMgrXrlMirror
-                          | ^             |                        | ^
-		          V |             |                        V |
-                      IfMgrIfTree         |                    IfMgrIfTree
-                                          |
-                                          |
-                                          |                   Remote Process2
-                                          |
-					  + - - - - - - - - > IfMgrXrlMirror
-		                                                   | ^
-		                                                   V |
-							       IfMgrIfTree
+IfMgrCommand ---> IfMgrXrlReplicationManager + - - - - - - > IfMgrXrlMirror
+                          | ^                |                    | ^
+		          V |                |                    V |
+                      IfMgrIfTree            |                IfMgrIfTree
+                                             |
+                                             |
+                                             |               Remote Process2
+                                             |
+					     + - - - - - - > IfMgrXrlMirror
+		                                                  | ^
+		                                                  V |
+							      IfMgrIfTree
 </pre>
 
 The base class for command objects is @ref IfMgrCommandBase.  The
