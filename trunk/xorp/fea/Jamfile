@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.5 2007/04/18 06:20:55 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.6 2007/04/20 05:43:43 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -135,7 +135,6 @@ Library libfea :
 FEA_LDADD =
 	libfea
 	libfeafibclientxif
-	libfeaifmgrclientxif
 	libfearawpkt4client
 	libfearawpkt6client
 	libfeabase

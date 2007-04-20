@@ -139,7 +139,6 @@ xorp_fea_OBJECTS = $(am_xorp_fea_OBJECTS)
 xorp_fea_LDADD = $(LDADD)
 xorp_fea_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
@@ -172,7 +171,6 @@ xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
 xorp_fea_dummy_LDADD = $(LDADD)
 xorp_fea_dummy_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
@@ -399,7 +397,6 @@ noinst_LTLIBRARIES = libfea.la
 ### XORP misc libraries
 LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfeaifmgrclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
