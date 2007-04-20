@@ -36,8 +36,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/docs/mk/Makefile.doc.am
 subdir = docs/pim_testsuite
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/acxorp.m4 \
-	$(top_srcdir)/config/compiler_flags.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/compiler_flags.m4 \
 	$(top_srcdir)/config/dmalloc.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)

@@ -360,7 +360,10 @@
 /* Define to 1 if you have the `sendmsg' function. */
 #undef HAVE_SENDMSG
 
-/* Define to 1 if you have sig_t */
+/* Define to 1 if you have the <signal.h> header file. */
+#undef HAVE_SIGNAL_H
+
+/* Define to 1 if the system has the type `sig_t'. */
 #undef HAVE_SIG_T
 
 /* Define to 1 if the system has the type `socklen_t'. */

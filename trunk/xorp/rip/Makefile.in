@@ -39,8 +39,7 @@ check_PROGRAMS = $(am__EXEEXT_1)
 subdir = rip
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/config/acxorp.m4 \
-	$(top_srcdir)/config/compiler_flags.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/config/compiler_flags.m4 \
 	$(top_srcdir)/config/dmalloc.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
