@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.62 2007/03/22 22:45:36 bms Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.63 2007/04/20 06:08:14 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -62,7 +62,6 @@ noinst_LTLIBRARIES	 = libbgpbase.la
 noinst_LTLIBRARIES	+= libbgp4mibbase.la
 noinst_LTLIBRARIES	+= libclibase.la
 noinst_LTLIBRARIES	+= libcoordbase.la
-noinst_LTLIBRARIES	+= libdemofeaifmgrclientbase.la
 noinst_LTLIBRARIES	+= libfeabase.la
 noinst_LTLIBRARIES	+= libfeaifmgrmirrorbase.la
 noinst_LTLIBRARIES	+= libfib2mribbase.la
