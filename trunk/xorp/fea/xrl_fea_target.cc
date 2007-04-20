@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.1 2007/04/18 06:21:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.2 2007/04/19 21:36:49 pavlin Exp $"
 
 
 //
@@ -1824,51 +1824,6 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
     return _xifmgr.add(tid,
 		       new SetAddr6Endpoint(it, ifname, vifname, address,
 					    endpoint));
-}
-
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_register_client(const string& client)
-{
-    if (_xrl_ifconfig_reporter.has_reportee(client)) {
-	XLOG_WARNING("Registering again client %s", client.c_str());
-	return XrlCmdError::OKAY();
-    }
-    if (_xrl_ifconfig_reporter.add_reportee(client))
-	return XrlCmdError::OKAY();
-    return XrlCmdError::COMMAND_FAILED(client +
-				       string(" cannot be registered."));
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_unregister_client(const string& client)
-{
-    if (_xrl_ifconfig_reporter.remove_reportee(client))
-	return XrlCmdError::OKAY();
-    return XrlCmdError::COMMAND_FAILED(client +
-				       string(" not registered."));
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_register_system_interfaces_client(const string& client)
-{
-    if (_xrl_ifconfig_reporter.has_system_interfaces_reportee(client)) {
-	XLOG_WARNING("Registering again client %s", client.c_str());
-	return XrlCmdError::OKAY();
-    }
-    if (_xrl_ifconfig_reporter.add_system_interfaces_reportee(client))
-	return XrlCmdError::OKAY();
-    return XrlCmdError::COMMAND_FAILED(client +
-				       string(" cannot be registered."));
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_unregister_system_interfaces_client(const string& client)
-{
-    if (_xrl_ifconfig_reporter.remove_system_interfaces_reportee(client))
-	return XrlCmdError::OKAY();
-    return XrlCmdError::COMMAND_FAILED(client +
-				       string(" not registered."));
 }
 
 XrlCmdError

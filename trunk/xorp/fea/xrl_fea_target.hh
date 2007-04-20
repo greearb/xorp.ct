@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.1 2007/04/18 06:21:00 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -812,22 +812,6 @@ public:
 	const IPv6&	address,
 	// Output values,
 	IPv6&		endpoint);
-
-    XrlCmdError ifmgr_0_1_register_client(
-	// Input values,
-	const string&	spyname);
-
-    XrlCmdError ifmgr_0_1_unregister_client(
-	// Input values,
-	const string&	spyname);
-
-    XrlCmdError ifmgr_0_1_register_system_interfaces_client(
-	// Input values,
-	const string&	spyname);
-
-    XrlCmdError ifmgr_0_1_unregister_system_interfaces_client(
-	// Input values,
-	const string&	spyname);
 
     XrlCmdError ifmgr_replicator_0_1_register_ifmgr_mirror(
 	// Input values,

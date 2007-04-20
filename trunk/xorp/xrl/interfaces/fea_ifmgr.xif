@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.16 2005/10/16 07:10:38 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.17 2006/10/13 06:24:09 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -177,21 +177,6 @@ interface ifmgr/0.1 {
 				& address:ipv6				\
 				& endpoint:ipv6
 
-	/**
-	 * Register network interface observer for configured interfaces.
-	 *  @param clientname name of xrl entity supporting
-	 * fea_ifmgr_client.xif methods.
-	 */
-	register_client ? clientname:txt
-
-	/**
-	 * Unregister network interface observer for configured interfaces.
-	 * This method is not strictly necessary, the fea will remove the
-	 * interface observer from its list of known observers if interface
-	 * update XRLs fail.
-	 */
-	unregister_client ? clientname:txt
-
 	/*
 	 * get_system methods
 	 *
@@ -276,19 +261,4 @@ interface ifmgr/0.1 {
 					& vif:txt			\
 					& address:ipv6			\
 					-> enabled:bool
-
-	/**
-	 * Register network interface observer for all system interfaces.
-	 *  @param clientname name of xrl entity supporting
-	 * fea_ifmgr_client.xif methods.
-	 */
-	register_system_interfaces_client ? clientname:txt
-
-	/**
-	 * Unregister network interface observer for all system interfaces.
-	 * This method is not strictly necessary, the fea will remove the
-	 * interface observer from its list of known observers if interface
-	 * update XRLs fail.
-	 */
-	unregister_system_interfaces_client ? clientname:txt
 }
