@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/utils/flower_malloc/flower_malloc.c,v 1.6 2006/10/11 23:15:27 pavlin Exp $"
+#ident "$XORP: xorp/utils/flower_malloc/flower_malloc.c,v 1.7 2007/02/16 22:47:33 pavlin Exp $"
 
 /*
  * Library interposer to collect malloc/calloc/realloc statistics 
@@ -333,16 +333,16 @@ init_flower_malloc()
      * Get current executable's name using proc(4) interface
      */
     pid = (int)getpid ();
-    (void)sprintf (procbuf, "/proc/%ld/status", (long)pid);
+    (void)snprintf (procbuf, sizeof(procbuf), "/proc/%ld/status", (long)pid);
     if ((fd = open (procbuf, O_RDONLY)) != -1) {
 	if (read (fd, procname, sizeof (procname)) == sizeof (procname)) {
 	    strtok (procname, " ");
-	    sprintf (prog_name, "%s.%d", procname, pid);
+	    snprintf (prog_name, sizeof(prog_name), "%s.%d", procname, pid);
 	} else
-	    sprintf (prog_name, "%s.%d", "unknown", pid);
+	    snprintf (prog_name, sizeof(prog_name), "%s.%d", "unknown", pid);
     } else
-	sprintf (prog_name, "%s.%d", "unknown", pid);
-    sprintf (path, "%s%s", "./flower_report.",
+	snprintf (prog_name, sizeof(prog_name), "%s.%d", "unknown", pid);
+    snprintf (path, sizeof(path), "%s%s", "./flower_report.",
 	prog_name);
 
     if (!output) {

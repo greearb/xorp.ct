@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/utils/flower_malloc/test_flower_malloc.c,v 1.5 2006/10/11 23:15:27 pavlin Exp $"
+#ident "$XORP: xorp/utils/flower_malloc/test_flower_malloc.c,v 1.6 2007/02/16 22:47:33 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -174,16 +174,16 @@ void examine_report()
 
 
     int pid = (int)getpid ();
-    (void)sprintf (procbuf, "/proc/%ld/status", (long)pid);
+    (void)snprintf (procbuf, sizeof(procbuf), "/proc/%ld/status", (long)pid);
     if ((fd = open (procbuf, O_RDONLY)) != -1) {
         if (read (fd, procname, sizeof (procname)) == sizeof (procname)) {
             strtok (procname, " ");
-            sprintf (prog_name, "%s.%d", procname, pid);
+            snprintf (prog_name, sizeof(prog_name), "%s.%d", procname, pid);
         } else
-            sprintf (prog_name, "%s.%d", "unknown", pid);
+            snprintf (prog_name, sizeof(prog_name), "%s.%d", "unknown", pid);
     } else
-        sprintf (prog_name, "%s.%d", "unknown", pid);
-    sprintf (path, "%s%s", "./flower_report.",
+        snprintf (prog_name, sizeof(prog_name), "%s.%d", "unknown", pid);
+    snprintf (path, sizeof(path), "%s%s", "./flower_report.",
         prog_name);
 
     report = fopen (path, "r");

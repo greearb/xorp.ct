@@ -254,7 +254,8 @@ const char *_hd_lookup_home_dir(HomeDir *home, const char *user)
       status = getpwnam_r(user, &home->pwd, home->buffer, home->buflen, &ret);
     if(status || !ret) {
       const char *fmt = "User '%.*s' doesn't exist.";
-      sprintf(home->errmsg, fmt, ERRLEN - strlen(fmt),  user);
+      snprintf(home->errmsg, sizeof(home->errmsg), fmt, ERRLEN - strlen(fmt),
+	       user);
       return NULL;
     };
 /*
@@ -270,7 +271,8 @@ const char *_hd_lookup_home_dir(HomeDir *home, const char *user)
     struct passwd *pwd = login_user ? getpwuid(geteuid()) : getpwnam(user);
     if(!pwd) {
       const char *fmt = "User '%.*s' doesn't exist.";
-      sprintf(home->errmsg, fmt, ERRLEN - strlen(fmt),  user);
+      snprintf(home->errmsg, sizeof(home->errmsg), fmt, ERRLEN - strlen(fmt),
+	       user);
       return NULL;
     };
 /*

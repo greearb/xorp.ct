@@ -569,7 +569,7 @@ static int ef_record_pathname(ExpandFile *ef, const char *pathname,
     char **files = (char **) realloc(ef->result.files,
 				     files_dim * sizeof(files[0]));
     if(!files) {
-      sprintf(ef->errmsg,
+      snprintf(ef->errmsg, sizeof(ef->errmsg),
 	      "Insufficient memory to record all of the matching filenames");
       return 1;
     };
@@ -647,7 +647,8 @@ static DirNode *ef_open_dir(ExpandFile *ef, const char *pathname)
   if(!cache->next) {
     node = (DirNode *) _new_FreeListNode(cache->mem);
     if(!node) {
-      sprintf(ef->errmsg, "Insufficient memory to open a new directory");
+      snprintf(ef->errmsg, sizeof(ef->errmsg),
+	       "Insufficient memory to open a new directory");
       return NULL;
     };
 /*
@@ -661,7 +662,8 @@ static DirNode *ef_open_dir(ExpandFile *ef, const char *pathname)
  */
     node->dr = _new_DirReader();
     if(!node->dr) {
-      sprintf(ef->errmsg, "Insufficient memory to open a new directory");
+      snprintf(ef->errmsg, sizeof(ef->errmsg),
+	       "Insufficient memory to open a new directory");
       node = (DirNode *) _del_FreeListNode(cache->mem, node);
       return NULL;
     };
@@ -1056,7 +1058,8 @@ static char *ef_expand_special(ExpandFile *ef, const char *path, int pathlen)
       value = getenv(ef->envnam);
       if(!value) {
 	const char *fmt = "No expansion found for: $%.*s";
-	sprintf(ef->errmsg, fmt, ERRLEN - strlen(fmt), ef->envnam);
+	snprintf(ef->errmsg, sizeof(ef->errmsg), fmt, ERRLEN - strlen(fmt),
+		 ef->envnam);
 	return NULL;
       };
 /*

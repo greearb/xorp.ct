@@ -358,7 +358,8 @@ int _cf_complete_file(WordCompletion *cpl, CompleteFile *cf,
       value = getenv(cf->envnam);
       if(!value) {
 	const char *fmt = "Unknown environment variable: %.*s";
-	sprintf(cf->errmsg, fmt, ERRLEN - strlen(fmt), cf->envnam);
+	snprintf(cf->errmsg, sizeof(cf->errmsg), fmt, ERRLEN - strlen(fmt),
+		 cf->envnam);
 	return 1;
       };
       vlen = strlen(value);
@@ -661,7 +662,8 @@ static int cf_complete_entry(CompleteFile *cf, WordCompletion *cpl,
  */
   if(_dr_open_dir(cf->dr, dirpath, NULL)) {
     const char *fmt = "Can't open directory: %.*s";
-    sprintf(cf->errmsg, fmt, ERRLEN - strlen(fmt), dirpath);
+    snprintf(cf->errmsg, sizeof(cf->errmsg), fmt, ERRLEN - strlen(fmt),
+	     dirpath);
     return 1;
   };
 /*
@@ -789,7 +791,7 @@ static char *cf_read_name(CompleteFile *cf, const char *type,
  */
   if(namlen >= nammax) {
     const char *fmt = "%.*s name too long";
-    sprintf(cf->errmsg, fmt, ERRLEN - strlen(fmt), type);
+    snprintf(cf->errmsg, sizeof(cf->errmsg), fmt, ERRLEN - strlen(fmt), type);
     return NULL;
   };
 /*

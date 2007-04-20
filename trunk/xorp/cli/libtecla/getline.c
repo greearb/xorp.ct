@@ -2917,7 +2917,7 @@ static int gl_displayed_char_width(GetLine *gl, char c, int term_curpos)
     return 2;
   if(!isprint((int)(unsigned char) c)) {
     char string[TAB_WIDTH + 4];
-    sprintf(string, "\\%o", (int)(unsigned char)c);
+    snprintf(string, sizeof(string), "\\%o", (int)(unsigned char)c);
     return strlen(string);
   };
   return 1;
@@ -3174,7 +3174,7 @@ static int gl_output_char(GetLine *gl, char c, char pad)
     string[1] = CTRL_TO_CHAR(c);
     nchar = 2;
   } else if(!isprint((int)(unsigned char) c)) {
-    sprintf(string, "\\%o", (int)(unsigned char)c);
+    snprintf(string, sizeof(string), "\\%o", (int)(unsigned char)c);
     nchar = strlen(string);
   } else {
     string[0] = c;

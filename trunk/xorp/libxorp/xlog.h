@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.14 2006/11/08 15:27:45 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.15 2007/02/16 22:46:29 pavlin Exp $
  */
 
 
@@ -98,10 +98,11 @@ typedef int (*xlog_output_func_t)(void *obj, const char *msg);
 #else
 #  define _XLOG_MODULE_NAME XORP_MODULE_NAME
 #endif
-#define XLOG_FN(fn, fmt...)						 \
-do {									 \
-	char xlog_where_buf[8000];					 \
-	sprintf(xlog_where_buf, "+%d %s %s", __LINE__, __FILE__, __FUNCTION__);\
+#define XLOG_FN(fn, fmt...)						\
+do {									\
+	char xlog_where_buf[8000];					\
+	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s",	\
+		 __LINE__, __FILE__, __FUNCTION__);			\
 	xlog_##fn(_XLOG_MODULE_NAME, xlog_where_buf, fmt);		\
 } while (0)
 

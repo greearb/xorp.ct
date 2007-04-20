@@ -1368,7 +1368,7 @@ int _glh_show_history(GlHistory *glh, FILE *fp, const char *fmt,
  * the biggest number in the buffer. Smaller numbers will be padded 
  * with leading zeroes if needed.
  */
-  sprintf(buffer, "%lu", (unsigned long) glh->list.tail->id);
+  snprintf(buffer, sizeof(buffer), "%lu", (unsigned long) glh->list.tail->id);
   idlen = strlen(buffer);
 /*
  * Find the largest group number.
@@ -1381,7 +1381,7 @@ int _glh_show_history(GlHistory *glh, FILE *fp, const char *fmt,
 /*
  * Find out how many characters are needed to display the group number.
  */
-  sprintf(buffer, "%u", (unsigned) grpmax);
+  snprintf(buffer, sizeof(buffer), "%u", (unsigned) grpmax);
   grplen = strlen(buffer);
 /*
  * Find the node that follows the oldest line to be displayed.

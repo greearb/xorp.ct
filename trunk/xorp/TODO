@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.18 2006/03/08 02:36:16 pavlin Exp $
+# $XORP: xorp/TODO,v 1.19 2006/10/12 01:24:36 pavlin Exp $
 #
 
 * Add a list with acknowledgments for all people who have contributed:
@@ -25,6 +25,3 @@
   and settle on one only if possible.
 
 * Libtoolize flower_malloc.
-
-* Don't use sprintf(3) and friends. Instead, use the safer snprintf(3)
-  and friends.

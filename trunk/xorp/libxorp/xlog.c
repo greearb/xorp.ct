@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.21 2006/11/08 15:27:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.22 2007/02/16 22:46:29 pavlin Exp $"
 
 /*
  * Message logging utility.
@@ -785,8 +785,8 @@ _xcond_trace_msg_long(const char	*module_name,
 	char xlog_where_buf[8000];
 
 	/* TODO: use _xcond_trace_entry and _xcond_trace_msg_short instead */
-	sprintf(xlog_where_buf, "+%d %s %s", line, file,
-		(func) ? func : "(unknown_func)");
+	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s", line,
+		 file, (func) ? func : "(unknown_func)");
 	va_start(ap, fmt);
 	xlog_record_va(XLOG_LEVEL_TRACE, module_name, xlog_where_buf, fmt, ap);
 	va_end(ap);
@@ -831,8 +831,8 @@ _xcond_trace_msg_short(int flag, const char* fmt, ...)
 	va_list ap;
 	char xlog_where_buf[8000];
 
-	sprintf(xlog_where_buf, "+%d %s %s", the_line, the_file,
-		(the_func) ? the_func : "(unknown_func)");
+	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s",
+		 the_line, the_file, (the_func) ? the_func : "(unknown_func)");
 	va_start(ap, fmt);
 	xlog_record_va(XLOG_LEVEL_TRACE, the_module, xlog_where_buf, fmt, ap);
 	va_end(ap);
@@ -1079,7 +1079,6 @@ xlog_localtime2string_short(void)
  * Return value: A statically allocated string with the local time using
  * the format described above.
  * XXX: This function uses a BSD-specific function, gettimeofday().
- * XXX: This function calls sprintf() without bounds checking.
  **/
 const char *
 xlog_localtime2string(void)
@@ -1107,11 +1106,12 @@ xlog_localtime2string(void)
     clock = tv.tv_sec;
     tm = localtime(&clock);
     if (strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", tm) == 0) {
-	sprintf(ret_buf, "strftime ERROR");
+	snprintf(ret_buf, sizeof(ret_buf), "strftime ERROR");
 	return (ret_buf);
     }
 
-    sprintf(ret_buf, "%s.%lu", buf, (unsigned long)tv.tv_usec);
+    snprintf(ret_buf, sizeof(ret_buf), "%s.%lu", buf,
+	     (unsigned long)tv.tv_usec);
 
     return (ret_buf);
 #endif /* HOST_OS_WINDOWS */

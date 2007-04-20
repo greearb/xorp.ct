@@ -807,7 +807,8 @@ static int add_PathNode(PathCache *pc, const char *dirname)
  */
   node = (PathNode *) _new_FreeListNode(pc->node_mem);
   if(!node) {
-    sprintf(pc->errmsg, "Insufficient memory to cache new directory.");
+    snprintf(pc->errmsg, sizeof(pc->errmsg),
+	     "Insufficient memory to cache new directory.");
     return 1;
   };
 /*

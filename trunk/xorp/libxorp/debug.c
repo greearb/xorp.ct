@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.9 2006/10/12 01:24:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/debug.c,v 1.10 2007/02/16 22:46:18 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
@@ -57,9 +57,10 @@ _xdebug_preamble(const char*	file,
      * arguments to emacs, vi, vim, nedit, etc, but not ed :-( 
      */
     if (func) {
-	sprintf(sbuf, "[ %d %+5d %s %s ] ", spid, line, file, func);
+	snprintf(sbuf, sbuf_bytes, "[ %d %+5d %s %s ] ", spid, line, file,
+		 func);
     } else {
-	sprintf(sbuf, "[ %d %+5d %s ] ", spid, line, file);
+	snprintf(sbuf, sbuf_bytes, "[ %d %+5d %s ] ", spid, line, file);
     }
     return sbuf;
 }

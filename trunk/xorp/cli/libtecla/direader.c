@@ -159,7 +159,8 @@ int _dr_open_dir(DirReader *dr, const char *path, char **errmsg)
   if(!_dr_path_is_dir(path)) {
     if(errmsg) {
       const char *fmt = "Can't open directory: %.*s\n";
-      sprintf(dr->errmsg, fmt, ERRLEN - strlen(fmt), path);
+      snprintf(dr->errmsg, sizeof(dr->errmsg), fmt, ERRLEN - strlen(fmt),
+	       path);
       *errmsg = dr->errmsg;
     };
     return 1;
@@ -171,7 +172,8 @@ int _dr_open_dir(DirReader *dr, const char *path, char **errmsg)
   if(!dir) {
     if(errmsg) {
       const char *fmt = "Can't open directory: %.*s\n";
-      sprintf(dr->errmsg, fmt, ERRLEN - strlen(fmt), path);
+      snprintf(dr->errmsg, sizeof(dr->errmsg), fmt, ERRLEN - strlen(fmt),
+	       path);
       *errmsg = dr->errmsg;
     };
     return 1;
