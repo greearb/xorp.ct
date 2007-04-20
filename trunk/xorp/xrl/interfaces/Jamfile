@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.1 2007/01/11 22:30:54 bms Exp $
 #
 
 #
@@ -28,7 +28,6 @@ Library libfeaclickxif : fea_click_xif.cc ;
 Library libfeafibxif : fea_fib_xif.cc ;
 Library libfeafibclientxif : fea_fib_client_xif.cc ;
 Library libfeaifmgrxif : fea_ifmgr_xif.cc ;
-Library libfeaifmgrclientxif : fea_ifmgr_client_xif.cc ;
 Library libfeaifmgrmirrorxif : fea_ifmgr_mirror_xif.cc ;
 Library libfeaifmgrreplicatorxif : fea_ifmgr_replicator_xif.cc ;
 Library libfearawpkt4 : fea_rawpkt4_xif.cc ;
@@ -89,7 +88,6 @@ XorpXrlXif <xrl!interfaces>fea_click_xif.cc <xrl!interfaces>fea_click_xif.hh : f
 XorpXrlXif <xrl!interfaces>fea_fib_xif.cc <xrl!interfaces>fea_fib_xif.hh : fea_fib.xif ;
 XorpXrlXif <xrl!interfaces>fea_fib_client_xif.cc <xrl!interfaces>fea_fib_client_xif.hh : fea_fib_client.xif ;
 XorpXrlXif <xrl!interfaces>fea_ifmgr_xif.cc <xrl!interfaces>fea_ifmgr_xif.hh : fea_ifmgr.xif ;
-XorpXrlXif <xrl!interfaces>fea_ifmgr_client_xif.cc <xrl!interfaces>fea_ifmgr_client_xif.hh : fea_ifmgr_client.xif ;
 XorpXrlXif <xrl!interfaces>fea_ifmgr_mirror_xif.cc <xrl!interfaces>fea_ifmgr_mirror_xif.hh : fea_ifmgr_mirror.xif ;
 XorpXrlXif <xrl!interfaces>fea_ifmgr_replicator_xif.cc <xrl!interfaces>fea_ifmgr_replicator_xif.hh : fea_ifmgr_replicator.xif ;
 XorpXrlXif <xrl!interfaces>fea_rawpkt4_xif.cc <xrl!interfaces>fea_rawpkt4_xif.hh : fea_rawpkt4.xif ;
