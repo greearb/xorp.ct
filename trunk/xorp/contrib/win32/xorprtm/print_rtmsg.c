@@ -13,7 +13,7 @@
  * notice is a summary of the XORP LICENSE file; the license in that file is
  * legally binding.
  *
- * $XORP: xorp/contrib/win32/xorprtm/print_rtmsg.c,v 1.2 2006/07/07 10:59:37 bms Exp $
+ * $XORP: xorp/contrib/win32/xorprtm/print_rtmsg.c,v 1.3 2007/02/16 22:45:32 pavlin Exp $
  */
 
 /*
@@ -200,7 +200,7 @@ routename(sa)
 		    line, sizeof(line), NULL, 0, niflags) != 0)
 			strncpy(line, "invalid", sizeof(line));
 
-		return(line);
+		return (line);
 	}
 #endif
 
@@ -324,7 +324,7 @@ netname(sa)
 		    line, sizeof(line), NULL, 0, niflags) != 0)
 			strncpy(line, "invalid", sizeof(line));
 
-		return(line);
+		return (line);
 	}
 #endif
 

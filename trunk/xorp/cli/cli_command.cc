@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.29 2006/10/13 20:48:16 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.30 2007/02/16 22:45:28 pavlin Exp $"
 
 
 //
@@ -138,7 +138,7 @@ CliCommand::add_command(CliCommand *child_command, string& error_msg)
 	_child_command_list.insert(insert_pos, child_command);
     child_command->set_root_command(this->root_command());
     
-    return(XORP_OK);
+    return (XORP_OK);
 }
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.28 2007/02/16 22:46:20 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.29 2007/04/14 07:00:52 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -343,7 +343,7 @@ IPvX::copy_out(struct sockaddr_in& to_sockaddr_in) const throw (InvalidFamily)
 	xorp_throw(InvalidFamily, _af);
     }
 
-    return((size_t)-1);
+    return ((size_t)-1);
 }
 
 /**
@@ -390,7 +390,7 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 	xorp_throw(InvalidFamily, _af);
     }
 
-    return((size_t)-1);
+    return ((size_t)-1);
 }
 
 /**
@@ -461,7 +461,7 @@ IPvX::copy_in(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
     default:
 	xorp_throw(InvalidFamily, _af);
     }
-    return((size_t)-1);
+    return ((size_t)-1);
 }
 
 /**
@@ -482,7 +482,7 @@ IPvX::copy_in(const sockaddr_in6& from_sockaddr_in6) throw (InvalidFamily)
 	xorp_throw(InvalidFamily, _af);
     }
 
-    return((size_t)-1);
+    return ((size_t)-1);
 }
 
 bool

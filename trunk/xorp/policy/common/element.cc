@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.8 2006/09/08 18:44:38 mjh Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.9 2007/02/16 22:47:02 pavlin Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
@@ -121,5 +121,5 @@ ElemCom32::str() const {
 	    return com_aliases[i].text;
     ostringstream oss;
     oss << (_val >> 16) << ":" << (_val & 0xffff);
-    return(oss.str());
+    return (oss.str());
 }

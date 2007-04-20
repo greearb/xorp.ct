@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/xorpfd.hh,v 1.5 2006/03/16 00:04:38 pavlin Exp $
+// $XORP: xorp/libxorp/xorpfd.hh,v 1.6 2007/02/16 22:46:29 pavlin Exp $
 
 #ifndef __LIBXORP_XORPFD_HH__
 #define __LIBXORP_XORPFD_HH__
@@ -136,7 +136,7 @@ private:
 	default:
 	    if (GetLastError() != NO_ERROR) {
 		if (0 != GetProcessId(*this)) {
-		    return(FDTYPE_PROCESS);
+		    return (FDTYPE_PROCESS);
 		}
 		return (FDTYPE_ERROR);
 	    }

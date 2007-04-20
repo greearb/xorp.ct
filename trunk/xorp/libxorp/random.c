@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.11 2007/04/17 06:52:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.12 2007/04/17 17:25:03 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -432,7 +432,7 @@ xorp_initstate(seed, arg_state, n)
 	if (n < BREAK_0) {
 		(void)fprintf(stderr,
 		    "random: not enough state (%ld bytes); ignored.\n", n);
-		return(0);
+		return (0);
 	}
 	if (n < BREAK_1) {
 		rand_type = TYPE_0;
@@ -462,7 +462,7 @@ xorp_initstate(seed, arg_state, n)
 		int_arg_state[0] = rand_type;
 	else
 		int_arg_state[0] = MAX_TYPES * (rptr - state) + rand_type;
-	return(ostate);
+	return (ostate);
 }
 
 /*
@@ -517,7 +517,7 @@ xorp_setstate(arg_state)
 		fptr = &state[(rear + rand_sep) % rand_deg];
 	}
 	end_ptr = &state[rand_deg];		/* set end_ptr too */
-	return(ostate);
+	return (ostate);
 }
 
 /*
@@ -563,5 +563,5 @@ xorp_random()
 
 		fptr = f; rptr = r;
 	}
-	return((long)i);
+	return ((long)i);
 }
