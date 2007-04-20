@@ -1,3 +1,5 @@
+/*	$OpenBSD: inet_ntop.c,v 1.7 2005/08/06 20:30:03 espie Exp $	*/
+
 /* Copyright (c) 1996 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -14,17 +16,11 @@
  * SOFTWARE.
  */
 
+#ident "$XORP$"
+
 #include "libxorp/xorp.h"
 
 #ifndef HAVE_INET_NTOP
-
-#if 0
-#if defined(LIBC_SCCS) && !defined(lint)
-static char rcsid[] = "$Id$";
-#endif /* LIBC_SCCS and not lint */
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD: src/lib/libc/net/inet_ntop.c,v 1.12 2002/09/06 11:23:49 tjr Exp $");
-#endif
 
 #ifdef HOST_OS_WINDOWS
 
@@ -37,14 +33,11 @@ __FBSDID("$FreeBSD: src/lib/libc/net/inet_ntop.c,v 1.12 2002/09/06 11:23:49 tjr 
 #ifndef IN6ADDRSZ
 #define IN6ADDRSZ 16
 #endif
-#ifndef NS_IN6ADDRSZ
-#define NS_IN6ADDRSZ IN6ADDRSZ
-#endif
-#ifndef NS_INT16SZ
-#define NS_INT16SZ 2
+#ifndef INT16SZ
+#define INT16SZ 2
 #endif
 
-#else
+#else /* ! HOST_OS_WINDOWS */
 
 #include <sys/param.h>
 #include <sys/types.h>
@@ -52,18 +45,19 @@ __FBSDID("$FreeBSD: src/lib/libc/net/inet_ntop.c,v 1.12 2002/09/06 11:23:49 tjr 
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <arpa/nameser.h>
+#include <string.h>
 #include <errno.h>
 #include <stdio.h>
-#include <string.h>
-#endif
+
+#endif /* ! HOST_OS_WINDOWS */
 
 /*
  * WARNING: Don't even consider trying to compile this on a system where
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static const char *inet_ntop4(const u_char *src, char *dst, socklen_t size);
-static const char *inet_ntop6(const u_char *src, char *dst, socklen_t size);
+static const char *inet_ntop4(const u_char *src, char *dst, size_t size);
+static const char *inet_ntop6(const u_char *src, char *dst, size_t size);
 
 /* char *
  * inet_ntop(af, src, dst, size)
@@ -74,8 +68,7 @@ static const char *inet_ntop6(const u_char *src, char *dst, socklen_t size);
  *	Paul Vixie, 1996.
  */
 const char *
-inet_ntop(int af, const void * __restrict src, char * __restrict dst,
-    socklen_t size)
+inet_ntop(int af, const void *src, char *dst, size_t size)
 {
 	switch (af) {
 	case AF_INET:
@@ -101,15 +94,18 @@ inet_ntop(int af, const void * __restrict src, char * __restrict dst,
  *	Paul Vixie, 1996.
  */
 static const char *
-inet_ntop4(const u_char *src, char *dst, socklen_t size)
+inet_ntop4(const u_char *src, char *dst, size_t size)
 {
 	static const char fmt[] = "%u.%u.%u.%u";
+	char tmp[sizeof "255.255.255.255"];
+	int l;
 
-	if ((socklen_t)snprintf(dst, size, fmt, src[0], src[1], src[2], src[3])
-	    >= size) {
+	l = snprintf(tmp, size, fmt, src[0], src[1], src[2], src[3]);
+	if (l <= 0 || l >= size) {
 		errno = ENOSPC;
 		return (NULL);
 	}
+	strlcpy(dst, tmp, size);
 	return (dst);
 }
 
@@ -120,7 +116,7 @@ inet_ntop4(const u_char *src, char *dst, socklen_t size)
  *	Paul Vixie, 1996.
  */
 static const char *
-inet_ntop6(const u_char *src, char *dst, socklen_t size)
+inet_ntop6(const u_char *src, char *dst, size_t size)
 {
 	/*
 	 * Note that int32_t and int16_t need only be "at least" large enough
@@ -129,10 +125,12 @@ inet_ntop6(const u_char *src, char *dst, socklen_t size)
 	 * Keep this in mind if you think this function should have been coded
 	 * to use pointer overlays.  All the world's not a VAX.
 	 */
-	char tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"], *tp;
+	char tmp[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
+	char *tp, *ep;
 	struct { int base, len; } best, cur;
-	u_int words[NS_IN6ADDRSZ / NS_INT16SZ];
+	u_int words[IN6ADDRSZ / INT16SZ];
 	int i;
+	int advance;
 
 	/*
 	 * Preprocess:
@@ -140,11 +138,11 @@ inet_ntop6(const u_char *src, char *dst, socklen_t size)
 	 *	Find the longest run of 0x00's in src[] for :: shorthanding.
 	 */
 	memset(words, '\0', sizeof words);
-	for (i = 0; i < NS_IN6ADDRSZ; i++)
+	for (i = 0; i < IN6ADDRSZ; i++)
 		words[i / 2] |= (src[i] << ((1 - (i % 2)) << 3));
 	best.base = -1;
 	cur.base = -1;
-	for (i = 0; i < (NS_IN6ADDRSZ / NS_INT16SZ); i++) {
+	for (i = 0; i < (IN6ADDRSZ / INT16SZ); i++) {
 		if (words[i] == 0) {
 			if (cur.base == -1)
 				cur.base = i, cur.len = 1;
@@ -169,42 +167,56 @@ inet_ntop6(const u_char *src, char *dst, socklen_t size)
 	 * Format the result.
 	 */
 	tp = tmp;
-	for (i = 0; i < (NS_IN6ADDRSZ / NS_INT16SZ); i++) {
+	ep = tmp + sizeof(tmp);
+	for (i = 0; i < (IN6ADDRSZ / INT16SZ) && tp < ep; i++) {
 		/* Are we inside the best run of 0x00's? */
 		if (best.base != -1 && i >= best.base &&
 		    i < (best.base + best.len)) {
-			if (i == best.base)
+			if (i == best.base) {
+				if (tp + 1 >= ep)
+					return (NULL);
 				*tp++ = ':';
+			}
 			continue;
 		}
 		/* Are we following an initial run of 0x00s or any real hex? */
-		if (i != 0)
+		if (i != 0) {
+			if (tp + 1 >= ep)
+				return (NULL);
 			*tp++ = ':';
+		}
 		/* Is this address an encapsulated IPv4? */
 		if (i == 6 && best.base == 0 &&
 		    (best.len == 6 || (best.len == 5 && words[5] == 0xffff))) {
-			if (!inet_ntop4(src+12, tp, sizeof tmp - (tp - tmp)))
+			if (!inet_ntop4(src+12, tp, (size_t)(ep - tp)))
 				return (NULL);
 			tp += strlen(tp);
 			break;
 		}
-		tp += sprintf(tp, "%x", words[i]);
+		advance = snprintf(tp, ep - tp, "%x", words[i]);
+		if (advance <= 0 || advance >= ep - tp)
+			return (NULL);
+		tp += advance;
 	}
 	/* Was it a trailing run of 0x00's? */
-	if (best.base != -1 && (best.base + best.len) ==
-	    (NS_IN6ADDRSZ / NS_INT16SZ))
+	if (best.base != -1 && (best.base + best.len) == (IN6ADDRSZ / INT16SZ)) {
+		if (tp + 1 >= ep)
+			return (NULL);
 		*tp++ = ':';
+	}
+	if (tp + 1 >= ep)
+		return (NULL);
 	*tp++ = '\0';
 
 	/*
 	 * Check for overflow, copy, and we're done.
 	 */
-	if ((socklen_t)(tp - tmp) > size) {
+	if ((size_t)(tp - tmp) > size) {
 		errno = ENOSPC;
 		return (NULL);
 	}
-	strcpy(dst, tmp);
+	strlcpy(dst, tmp, size);
 	return (dst);
 }
 
-#endif /* !HAVE_INET_NTOP */
+#endif /* ! HAVE_INET_NTOP */
