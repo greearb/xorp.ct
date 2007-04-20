@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.51 2006/12/18 23:52:37 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.52 2007/02/16 22:46:36 pavlin Exp $"
 
 
 //
@@ -609,18 +609,24 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
+    VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
 
     //
-    // TODO: If an interface changes its primary IP address, then
-    // we should do something about it.
+    // Get the vif's old primary address and whether the vif is UP
     //
-    if (mld6igmp_vif->is_up()) {
+    bool old_vif_is_up = mld6igmp_vif->is_up() || mld6igmp_vif->is_pending_up();
+    IPvX old_primary_addr = mld6igmp_vif->primary_addr();
+    
+    //
+    // If an interface's primary address is deleted, first stop the vif.
+    //
+    if (old_vif_is_up) {
 	if (mld6igmp_vif->primary_addr() == addr) {
-	    // TODO: do something. Maybe stop the vif now?
+	    string dummy_error_msg;
+	    mld6igmp_vif->stop(dummy_error_msg);
 	}
     }
 
-    VifAddr vif_addr = *tmp_vif_addr;	// Get a copy
     if (mld6igmp_vif->delete_address(addr) != XORP_OK) {
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -631,22 +637,28 @@ Mld6igmpNode::delete_vif_addr(const string& vif_name,
     
     //
     // Update and check the primary address.
-    // If the vif has no more primary address, then stop it.
+    // If the vif has no primary address, then stop it.
+    // If the vif's primary address was changed, then restart the vif.
     //
     do {
-	if (mld6igmp_vif->update_primary_address(error_msg) == XORP_OK)
-	    break;
-	if (! (mld6igmp_vif->is_up() || mld6igmp_vif->is_pending_up())) {
-	    // XXX: don't do anything if the interface is not UP or PENDING_UP
+	string dummy_error_msg;
+
+	if (mld6igmp_vif->update_primary_address(error_msg) != XORP_OK) {
+	    XLOG_ERROR("Error updating primary address for vif %s: %s",
+		       mld6igmp_vif->name().c_str(), error_msg.c_str());
+	}
+	if (mld6igmp_vif->primary_addr().is_zero()) {
+	    mld6igmp_vif->stop(dummy_error_msg);
 	    break;
 	}
-	if (mld6igmp_vif->is_loopback() || mld6igmp_vif->is_pim_register()) {
-	    // XXX: don't do anything if this is a loopback or register_vif
-	    break;
-	}
-	XLOG_ERROR("Error updating primary address for vif %s: %s",
-		   mld6igmp_vif->name().c_str(), error_msg.c_str());
-	mld6igmp_vif->stop(error_msg);
+	if (old_primary_addr == mld6igmp_vif->primary_addr())
+	    break;		// Nothing changed
+
+	// Conditionally restart the interface
+	mld6igmp_vif->stop(dummy_error_msg);
+	if (old_vif_is_up)
+	    mld6igmp_vif->start(dummy_error_msg);
+	break;
     } while (false);
 
     return (XORP_OK);
