@@ -1,10 +1,10 @@
 #
-# $XORP$
+# $XORP: xorp/static_routes/Jamfile,v 1.1 2007/01/11 22:30:53 bms Exp $
 #
 
 SubDir TOP static_routes ;
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
@@ -32,8 +32,8 @@ LinkLibraries xorp_static_routes :
 	libribxif
 	libfeaifmgrmirrorbase
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
 InstallBin $(PREFIX)/static_routes : xorp_static_routes ;

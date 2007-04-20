@@ -1,11 +1,11 @@
 #
-# $XORP: xorp/rib/tools/Jamfile,v 1.1 2007/01/11 22:30:51 bms Exp $
+# $XORP: xorp/rib/tools/Jamfile,v 1.2 2007/03/22 20:48:19 bms Exp $
 #
 
 SubDir TOP rib tools ;
 
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;

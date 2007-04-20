@@ -1,11 +1,11 @@
 #
-# $XORP$
+# $XORP: xorp/fea/tools/Jamfile,v 1.1 2007/01/11 22:30:46 bms Exp $
 #
 
 SubDir TOP fea tools ;
 
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
@@ -20,8 +20,8 @@ LinkLibraries show_interfaces :
 	libfeaifmgrreplicatorxif
 	libfeaifmgrmirrorbase
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
 InstallBin $(PREFIX)/fea/tools : show_interfaces ;

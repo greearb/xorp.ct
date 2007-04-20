@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamfile,v 1.2 2007/03/22 18:03:00 bms Exp $
+# $XORP: xorp/Jamfile,v 1.3 2007/04/18 01:27:41 pavlin Exp $
 #
 
 # TODO: Fix building in a directory other than source tree. Make the rules
@@ -19,8 +19,8 @@ if ! $(JAMRULES_ALREADY_SEEN)
 	include $(TOP)/Jamrules ;
 }
 
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
 SubIncludeOnce TOP mrt ;

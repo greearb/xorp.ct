@@ -1,10 +1,10 @@
 #
-# $XORP$
+# $XORP: xorp/rip/Jamfile,v 1.1 2007/01/11 22:30:52 bms Exp $
 #
 
 SubDir TOP rip ;
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
@@ -109,10 +109,10 @@ LinkLibraries xorp_ripng :
 if $(MAKE_CHECK) {
 
  Main test_auth : test_auth.cc ;
- LinkLibraries test_auth : librip libxorp libcomm ;
+ LinkLibraries test_auth : librip libcomm libxorp ;
 
  Main test_packets : test_packets.cc ;
- LinkLibraries test_packets : librip libxorp libcomm ;
+ LinkLibraries test_packets : librip libcomm libxorp ;
 
  LINKLIBS_RIP_REGRESSION_COMMON = 
 	librip
@@ -121,8 +121,8 @@ if $(MAKE_CHECK) {
 	libpolicycommon
 	libfeaclient
 	libxipc
-	libxorp
 	libcomm
+	libxorp
 	;
 
  Main test_request : test_request.cc ;

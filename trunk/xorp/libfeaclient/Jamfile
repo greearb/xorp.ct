@@ -1,11 +1,11 @@
 #
-# $XORP$
+# $XORP: xorp/libfeaclient/Jamfile,v 1.1 2007/01/11 22:30:47 bms Exp $
 #
 
 SubDir TOP libfeaclient ;
 if $(MAKE_CHECK) {
-  SubIncludeOnce TOP libcomm ;
   SubIncludeOnce TOP libxorp ;
+  SubIncludeOnce TOP libcomm ;
   SubIncludeOnce TOP xrl interfaces ;
   SubIncludeOnce TOP xrl targets ;
   SubIncludeOnce TOP libxipc ;

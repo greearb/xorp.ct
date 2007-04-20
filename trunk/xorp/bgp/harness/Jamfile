@@ -1,10 +1,10 @@
 #
-# $XORP$
+# $XORP: xorp/bgp/harness/Jamfile,v 1.1 2007/01/11 22:30:43 bms Exp $
 #
 
 SubDir TOP bgp harness ;
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;

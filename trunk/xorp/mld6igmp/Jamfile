@@ -1,10 +1,10 @@
 #
-# $XORP: xorp/mld6igmp/Jamfile,v 1.1 2007/01/11 22:30:48 bms Exp $
+# $XORP: xorp/mld6igmp/Jamfile,v 1.2 2007/04/18 01:18:10 pavlin Exp $
 #
 
 SubDir TOP mld6igmp ;
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;

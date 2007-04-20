@@ -1,11 +1,11 @@
 #
-# $XORP$
+# $XORP: xorp/policy/common/Jamfile,v 1.1 2007/01/11 22:30:50 bms Exp $
 #
 
 SubDir TOP policy common ;
 
-SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP policy ;
