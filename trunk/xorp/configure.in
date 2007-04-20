@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.198 2007/04/17 20:44:49 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.199 2007/04/20 19:25:12 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.198 2007/04/17 20:44:49 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.199 2007/04/20 19:25:12 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -740,28 +740,34 @@ dnl XXX We have a library check but we need to know if the function exists.
 AC_CHECK_FUNCS([hstrerror])
 
 dnl
-dnl XXX: This is a hack. Look for getopt in unistd.h by grepping for it.
-dnl If it's not there, then look for the getopt.h header file.
+dnl Test whether getopt() is in unistd.h.
+dnl If it is not there, then look for the getopt.h header file.
 dnl This assumes that the system's getopt declaration comes before the GNU one,
 dnl if getopt.h is being picked up from a GNU C library include directory.
-dnl Note that the HAVE_DECL_GETOPT definition might not be used elsewhere,
-dnl but is used here as a guard against checking for <getopt.h>.
 dnl
-dnl For Windows, we always force HAVE_GETOPT_H to be defined so that it
-dnl gets included.
+dnl Note that we use the getopt() check only as a guard against checking
+dnl for <getopt.h>.
 dnl
-if test "${_USING_WINDOWS}" != "1" ; then
-    AC_EGREP_HEADER(getopt, unistd.h, xr_cv_unistd_getopt="yes")
-    if test "${xr_cv_unistd_getopt}" = "yes" ; then
-	AC_DEFINE(HAVE_DECL_GETOPT, 1,
-		  [Define to 1 if system getopt() is in unistd.h])
-    else
-	AC_CHECK_HEADERS([getopt.h])
-    fi
-else
-    AC_DEFINE(HAVE_GETOPT_H, 1,
-	      [Define to 1 if you have the <getopt.h> header file.])
-fi
+AC_CHECK_HEADERS([unistd.h])
+AC_MSG_CHECKING(whether the system has getopt() in <unistd.h>)
+AC_TRY_COMPILE([
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+],
+[
+    int my_argc = 0;
+    char **my_argv = NULL;
+    int ch;
+
+    ch = getopt(my_argc, my_argv, "bf:");
+
+    return (0);
+],
+    [AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)
+     AC_CHECK_HEADERS([getopt.h])
+    ])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for library functions
