@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.8 2007/02/16 22:45:45 pavlin Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.9 2007/04/18 06:20:57 pavlin Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
@@ -108,24 +108,5 @@ protected:
     IfMgrXrlReplicationManager* _rm;
     const IfTree&		_iftree;
 };
-
-/**
- * Check equivalence of interface configuration trees in FEA and
- * libfeaclient.  This is a debugging method.
- *
- * @param fea_iftree reference to an FEA interface configuration tree.
- *
- * @param libfeaclient_iftree reference to a libfeaclient interface
- * configuration tree.
- *
- * @param errlog string to store textual representation of
- * differences.
- *
- * @return true if tree's are equivalent, false otherwise.
- */
-bool
-equivalent(const IfTree&	fea_iftree,
-	   const IfMgrIfTree&	libfeaclient_iftree,
-	   string&		errlog);
 
 #endif // __FEA_LIBFEACLIENT_BRIDGE_HH__
