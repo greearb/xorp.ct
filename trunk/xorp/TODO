@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.19 2006/10/12 01:24:36 pavlin Exp $
+# $XORP: xorp/TODO,v 1.20 2007/04/20 19:06:19 pavlin Exp $
 #
 
 * Add a list with acknowledgments for all people who have contributed:
@@ -12,10 +12,6 @@
   common_0_1_get_version XRL across all targets.
 
 * Add "-ansi" and "-pedantic" flags to the gcc/g++ compilation flags
-
-* Change configure.in NOT to use AC_EGREP_HEADER to check
-  for various fields, etc in system header files. Instead,
-  it should use AC_TRY_COMPILE or AC_TRY_RUN.
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.
