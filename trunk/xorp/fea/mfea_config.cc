@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.17 2006/12/23 19:01:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.18 2007/02/16 22:45:45 pavlin Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
@@ -307,8 +307,8 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	 vif_iter != configured_vifs.end();
 	 ++vif_iter) {
 	Vif* vif = &vif_iter->second;
-	Vif* node_vif = vif_find_by_name(vif->name());
-	
+	MfeaVif* node_vif = vif_find_by_name(vif->name());
+
 	//
 	// Add a new vif
 	//
@@ -316,7 +316,15 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	    add_vif(*vif, dummy_error_msg);
 	    continue;
 	}
-	
+
+	//
+	// Get the vif's old primary address and whether the vif is UP
+	//
+	bool old_vif_is_up = node_vif->is_up();
+	IPvX old_primary_addr = IPvX::ZERO(family());
+	if (node_vif->addr_ptr() != NULL)
+	    old_primary_addr = *node_vif->addr_ptr();
+
 	//
 	// Update the vif flags
 	//
@@ -349,11 +357,14 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 	}
 
 	//
-	// Delete vif addresses that don't exist anymore
+	// Delete vif addresses that don't exist anymore.
+	// If the vif's primary address is deleted, then first stop the vif.
 	//
 	{
 	    list<IPvX> delete_addresses_list;
 	    list<VifAddr>::const_iterator vif_addr_iter;
+	    string dummy_error_msg;
+
 	    for (vif_addr_iter = node_vif->addr_list().begin();
 		 vif_addr_iter != node_vif->addr_list().end();
 		 ++vif_addr_iter) {
@@ -367,9 +378,34 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
 		 ipvx_iter != delete_addresses_list.end();
 		 ++ipvx_iter) {
 		const IPvX& ipvx = *ipvx_iter;
+		if (ipvx == old_primary_addr) {
+		    // Stop the vif if the primary address is deleted
+		    if (old_vif_is_up)
+			node_vif->stop(dummy_error_msg);
+		}
 		node_vif->delete_address(ipvx);
 	    }
 	}
+
+	//
+	// If the vif has no address then stop it.
+	// If the vif's primary address was changed, then restart the vif.
+	//
+	do {
+	    string dummy_error_msg;
+	    if (node_vif->addr_ptr() == NULL) {
+		node_vif->stop(dummy_error_msg);
+		break;
+	    }
+	    if (old_primary_addr == *node_vif->addr_ptr())
+		break;		// Nothing changed
+
+	    // Conditionally restart the interface
+	    node_vif->stop(dummy_error_msg);
+	    if (old_vif_is_up)
+		node_vif->start(dummy_error_msg);
+	    break;
+	} while (false);
     }
 
     //
