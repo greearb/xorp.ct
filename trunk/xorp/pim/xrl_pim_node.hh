@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.68 2007/02/16 22:46:51 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.69 2007/04/18 01:02:21 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -306,15 +306,6 @@ protected:
      *  Complete all transactions with vif information.
      */
     XrlCmdError mfea_client_0_1_set_all_vifs_done();
-
-    /**
-     *  Test if the vif setup is completed.
-     *  
-     *  @param is_completed if true the vif setup is completed.
-     */
-    XrlCmdError mfea_client_0_1_is_vif_setup_completed(
-	// Output values, 
-	bool&	is_completed);
 
     /**
      *  Receive a protocol message from the MFEA.

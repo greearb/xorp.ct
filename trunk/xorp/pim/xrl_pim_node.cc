@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.94 2006/03/30 02:21:13 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.95 2006/07/03 23:33:39 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -3189,16 +3189,6 @@ XrlPimNode::mfea_client_0_1_set_all_vifs_done()
 	// information on startup.
 	PimNode::decr_startup_requests_n();
     }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_is_vif_setup_completed(
-    // Output values, 
-    bool&	is_completed)
-{
-    is_completed = PimNode::is_vif_setup_completed();
     
     return XrlCmdError::OKAY();
 }

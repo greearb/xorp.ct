@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.14 2005/06/01 00:36:58 pavlin Exp $
+# $XORP: xorp/mld6igmp/xrl_mld6igmp_shell_funcs.sh,v 1.15 2005/06/01 09:34:01 pavlin Exp $
 #
 
 #
@@ -102,14 +102,6 @@ mld6igmp_stop_all_vifs()
     XRL="finder://$MLD6IGMP_TARGET/mld6igmp/0.1/stop_all_vifs"
     XRL_ARGS=""
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-mld6igmp_is_vif_setup_completed()
-{
-    echo "mld6igmp_is_vif_setup_completed" $*
-    XRL="finder://$MLD6IGMP_TARGET/mfea_client/0.1/is_vif_setup_completed"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS is_completed:bool = true
 }
 
 mld6igmp_enable_mld6igmp()

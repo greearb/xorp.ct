@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.58 2006/07/03 23:33:38 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.59 2007/02/16 22:46:37 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2063,16 +2063,6 @@ XrlMld6igmpNode::mfea_client_0_1_set_all_vifs_done()
 	Mld6igmpNode::decr_startup_requests_n();
     }
 
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_is_vif_setup_completed(
-    // Output values, 
-    bool&	is_completed)
-{
-    is_completed = Mld6igmpNode::is_vif_setup_completed();
-    
     return XrlCmdError::OKAY();
 }
 

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.6 2005/01/28 03:34:21 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.7 2006/07/03 23:33:42 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -68,13 +68,6 @@ interface mfea_client/0.1 {
 	 */
 	set_all_vifs_done
 
-	/**
-	 * Test if the vif setup is completed.
-	 *
-	 * @param is_completed if true the vif setup is completed.
-	 */
-	is_vif_setup_completed	-> is_completed:bool
-		
 	/**
 	 * Receive a protocol message from the MFEA.
 	 *

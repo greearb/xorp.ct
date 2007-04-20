@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.29 2005/05/14 03:18:40 pavlin Exp $
+# $XORP: xorp/pim/xrl_pim_shell_funcs.sh,v 1.30 2005/06/01 00:36:59 pavlin Exp $
 #
 
 #
@@ -101,14 +101,6 @@ pim_stop_all_vifs()
     XRL="finder://$PIM_TARGET/pim/0.1/stop_all_vifs"
     XRL_ARGS=""
     call_xrl_wrapper -r 0 $XRL$XRL_ARGS
-}
-
-pim_is_vif_setup_completed()
-{
-    echo "pim_is_vif_setup_completed" $*
-    XRL="finder://$PIM_TARGET/mfea_client/0.1/is_vif_setup_completed"
-    XRL_ARGS=""
-    call_xrl_wrapper -r 0 $XRL$XRL_ARGS is_completed:bool = true
 }
 
 pim_enable_pim()
