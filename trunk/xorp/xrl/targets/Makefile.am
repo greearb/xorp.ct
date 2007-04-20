@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.61 2006/10/19 02:14:30 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.62 2007/03/22 22:45:36 bms Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -16,7 +16,6 @@ tgt_files		 = bgp.tgt
 tgt_files		+= bgp4_mib.tgt
 tgt_files		+= cli.tgt
 tgt_files		+= coord.tgt
-tgt_files		+= demo_fea_ifmgr_client.tgt
 tgt_files		+= fea.tgt
 tgt_files		+= fea_ifmgr_mirror.tgt
 tgt_files		+= fib2mrib.tgt
@@ -126,15 +125,6 @@ $(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/coord.xif				\
 		$(INTERFACES_DIR)/datain.xif
-
-# Demo FEA ifmgr client
-libdemofeaifmgrclientbase_la_SOURCES = demo_fea_ifmgr_client_base.hh	\
-				      demo_fea_ifmgr_client_base.cc
-
-$(srcdir)/demo_fea_ifmgr_client_base.hh					\
-$(srcdir)/demo_fea_ifmgr_client_base.cc:				\
-		$(INTERFACES_DIR)/common.xif 				\
-		$(INTERFACES_DIR)/fea_ifmgr_client.xif
 
 # FEA
 libfeabase_la_SOURCES = fea_base.hh fea_base.cc

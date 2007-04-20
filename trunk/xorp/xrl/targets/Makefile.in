@@ -59,10 +59,8 @@ libcoordbase_la_LIBADD =
 am_libcoordbase_la_OBJECTS = coord_base.lo
 libcoordbase_la_OBJECTS = $(am_libcoordbase_la_OBJECTS)
 libdemofeaifmgrclientbase_la_LIBADD =
-am_libdemofeaifmgrclientbase_la_OBJECTS =  \
-	demo_fea_ifmgr_client_base.lo
-libdemofeaifmgrclientbase_la_OBJECTS =  \
-	$(am_libdemofeaifmgrclientbase_la_OBJECTS)
+libdemofeaifmgrclientbase_la_SOURCES = libdemofeaifmgrclientbase.c
+libdemofeaifmgrclientbase_la_OBJECTS = libdemofeaifmgrclientbase.lo
 libfeabase_la_LIBADD =
 am_libfeabase_la_OBJECTS = fea_base.lo
 libfeabase_la_OBJECTS = $(am_libfeabase_la_OBJECTS)
@@ -165,15 +163,6 @@ libxorpshbase_la_OBJECTS = $(am_libxorpshbase_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
-CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
-CXXLD = $(CXX)
-CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
-	$(LDFLAGS) -o $@
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
@@ -183,10 +172,19 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libclibase_la_SOURCES) $(libcoordbase_la_SOURCES) \
-	$(libdemofeaifmgrclientbase_la_SOURCES) \
-	$(libfeabase_la_SOURCES) $(libfeaifmgrmirrorbase_la_SOURCES) \
+	libdemofeaifmgrclientbase.c $(libfeabase_la_SOURCES) \
+	$(libfeaifmgrmirrorbase_la_SOURCES) \
 	$(libfib2mribbase_la_SOURCES) $(libfinderbase_la_SOURCES) \
 	$(libfinderclientbase_la_SOURCES) $(libmfeabase_la_SOURCES) \
 	$(libmld6igmpbase_la_SOURCES) $(libospfv2base_la_SOURCES) \
@@ -206,8 +204,8 @@ SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libxorpifmibbase_la_SOURCES) $(libxorpshbase_la_SOURCES)
 DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libclibase_la_SOURCES) $(libcoordbase_la_SOURCES) \
-	$(libdemofeaifmgrclientbase_la_SOURCES) \
-	$(libfeabase_la_SOURCES) $(libfeaifmgrmirrorbase_la_SOURCES) \
+	libdemofeaifmgrclientbase.c $(libfeabase_la_SOURCES) \
+	$(libfeaifmgrmirrorbase_la_SOURCES) \
 	$(libfib2mribbase_la_SOURCES) $(libfinderbase_la_SOURCES) \
 	$(libfinderclientbase_la_SOURCES) $(libmfeabase_la_SOURCES) \
 	$(libmld6igmpbase_la_SOURCES) $(libospfv2base_la_SOURCES) \
@@ -376,11 +374,10 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt \
-	demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt \
-	fib2mrib.tgt finder.tgt finder_client.tgt mfea.tgt \
-	mld6igmp.tgt ospfv2.tgt ospfv3.tgt packet_acl.tgt pim.tgt \
-	policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt \
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt fea.tgt \
+	fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt \
+	mfea.tgt mld6igmp.tgt ospfv2.tgt ospfv3.tgt packet_acl.tgt \
+	pim.tgt policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt \
 	ripng.tgt rtrmgr.tgt show_distances.tgt show_routes.tgt \
 	socket_server.tgt static_routes.tgt test.tgt \
 	test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt \
@@ -419,11 +416,6 @@ libclibase_la_SOURCES = cli_base.hh cli_base.cc
 
 # COORD
 libcoordbase_la_SOURCES = coord_base.hh coord_base.cc
-
-# Demo FEA ifmgr client
-libdemofeaifmgrclientbase_la_SOURCES = demo_fea_ifmgr_client_base.hh	\
-				      demo_fea_ifmgr_client_base.cc
-
 
 # FEA
 libfeabase_la_SOURCES = fea_base.hh fea_base.cc
@@ -552,7 +544,7 @@ TGTGEN_PY = $(SCRIPT_DIR)/tgt-gen
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .lo .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -600,7 +592,7 @@ libclibase.la: $(libclibase_la_OBJECTS) $(libclibase_la_DEPENDENCIES)
 libcoordbase.la: $(libcoordbase_la_OBJECTS) $(libcoordbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libcoordbase_la_OBJECTS) $(libcoordbase_la_LIBADD) $(LIBS)
 libdemofeaifmgrclientbase.la: $(libdemofeaifmgrclientbase_la_OBJECTS) $(libdemofeaifmgrclientbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libdemofeaifmgrclientbase_la_OBJECTS) $(libdemofeaifmgrclientbase_la_LIBADD) $(LIBS)
+	$(LINK)  $(libdemofeaifmgrclientbase_la_OBJECTS) $(libdemofeaifmgrclientbase_la_LIBADD) $(LIBS)
 libfeabase.la: $(libfeabase_la_OBJECTS) $(libfeabase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfeabase_la_OBJECTS) $(libfeabase_la_LIBADD) $(LIBS)
 libfeaifmgrmirrorbase.la: $(libfeaifmgrmirrorbase_la_OBJECTS) $(libfeaifmgrmirrorbase_la_DEPENDENCIES) 
@@ -674,12 +666,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bgp_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/coord_base.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/demo_fea_ifmgr_client_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_mirror_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fib2mrib_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/finder_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/finder_client_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdemofeaifmgrclientbase.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mld6igmp_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ospfv2_base.Plo@am__quote@
@@ -706,6 +698,27 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrls_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_if_mib_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_base.Plo@am__quote@
+
+.c.o:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c $<
+
+.c.obj:
+@am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+.c.lo:
+@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -950,11 +963,6 @@ $(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/coord.xif				\
 		$(INTERFACES_DIR)/datain.xif
-
-$(srcdir)/demo_fea_ifmgr_client_base.hh					\
-$(srcdir)/demo_fea_ifmgr_client_base.cc:				\
-		$(INTERFACES_DIR)/common.xif 				\
-		$(INTERFACES_DIR)/fea_ifmgr_client.xif
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/fea_click.xif				\

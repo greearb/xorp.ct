@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/targets/Jamfile,v 1.1 2007/01/11 22:30:54 bms Exp $
+# $XORP: xorp/xrl/targets/Jamfile,v 1.2 2007/03/22 20:48:21 bms Exp $
 #
 
 SubDir TOP xrl targets ;
@@ -16,7 +16,6 @@ XorpXrlTgt <xrl!targets>bgp_base.cc <xrl!targets>bgp_base.hh <xrl!targets>bgp_ba
 XorpXrlTgt <xrl!targets>bgp4_mib_base.cc <xrl!targets>bgp4_mib_base.hh <xrl!targets>bgp4_mib_base.xrls : bgp4_mib.tgt ;
 XorpXrlTgt <xrl!targets>cli_base.cc <xrl!targets>cli_base.hh <xrl!targets>cli_base.xrls : cli.tgt ;
 XorpXrlTgt <xrl!targets>coord_base.cc <xrl!targets>coord_base.hh <xrl!targets>coord_base.xrls : coord.tgt ;
-XorpXrlTgt <xrl!targets>demo_fea_ifmgr_client_base.cc <xrl!targets>demo_fea_ifmgr_client_base.hh <xrl!targets>demo_fea_ifmgr_client_base.xrls : demo_fea_ifmgr_client.tgt ;
 XorpXrlTgt <xrl!targets>fea_base.cc <xrl!targets>fea_base.hh <xrl!targets>fea_base.xrls : fea.tgt ;
 XorpXrlTgt <xrl!targets>fea_ifmgr_mirror_base.cc <xrl!targets>fea_ifmgr_mirror_base.hh <xrl!targets>fea_ifmgr_mirror_base.xrls : fea_ifmgr_mirror.tgt ;
 XorpXrlTgt <xrl!targets>fib2mrib_base.cc <xrl!targets>fib2mrib_base.hh <xrl!targets>fib2mrib_base.xrls : fib2mrib.tgt ;
@@ -53,7 +52,6 @@ Library libbgpbase : bgp_base.cc ;
 Library libbgp4mibbase : bgp4_mib_base.cc ;
 Library libclibase : cli_base.cc ;
 Library libcoordbase : coord_base.cc ;
-Library libdemofeaifmgrclientbase : demo_fea_ifmgr_client_base.cc ;
 Library libfeabase : fea_base.cc ;
 Library libfeaifmgrmirrorbase : fea_ifmgr_mirror_base.cc ;
 Library libfib2mribbase : fib2mrib_base.cc ;
@@ -93,7 +91,6 @@ INSTALLABLE_XRLS =
 	bgp4_mib.xrls
 	cli.xrls
 	coord.xrls
-	demo_fea_ifmgr_client.xrls
 	fea.xrls
 	fea_ifmgr_mirror.xrls
 	fib2mrib.xrls
