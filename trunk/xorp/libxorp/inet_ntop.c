@@ -16,7 +16,7 @@
  * SOFTWARE.
  */
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/inet_ntop.c,v 1.4 2007/04/20 18:43:08 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -101,7 +101,7 @@ inet_ntop4(const u_char *src, char *dst, size_t size)
 	int l;
 
 	l = snprintf(tmp, size, fmt, src[0], src[1], src[2], src[3]);
-	if (l <= 0 || l >= size) {
+	if (l <= 0 || (size_t)l >= size) {
 		errno = ENOSPC;
 		return (NULL);
 	}
