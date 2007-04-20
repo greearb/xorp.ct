@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.2 2007/04/19 21:36:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.3 2007/04/20 05:24:31 pavlin Exp $"
 
 
 //
@@ -43,7 +43,6 @@
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
-#include "xrl_ifupdate.hh"
 #include "xrl_rawsock4.hh"
 #include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
@@ -52,7 +51,6 @@
 XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
 			   XrlRouter&			xrl_router,
-			   XrlIfConfigUpdateReporter&	xrl_ifconfig_reporter,
 			   Profile&			profile,
 			   XrlRawSocket4Manager&	xrsm4,
 			   XrlRawSocket6Manager&	xrsm6,
@@ -64,7 +62,6 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _xrl_router(xrl_router),
       _xftm(eventloop, fea_node.fticonfig(), &xrl_router),
       _xifmgr(eventloop, fea_node.ifconfig()),
-      _xrl_ifconfig_reporter(xrl_ifconfig_reporter),
       _profile(profile),
       _xrsm4(xrsm4),
       _xrsm6(xrsm6),
@@ -159,11 +156,6 @@ XrlFeaTarget::common_0_1_get_status(
     if (_is_shutdown_received) {
 	status = PROC_SHUTDOWN;	// XXX: the process received shutdown request
 	reason = "";
-    }
-
-    if (_xrl_ifconfig_reporter.busy()) {
-	status = PROC_NOT_READY;
-	reason = "Communicating config changes to other processes";
     }
 
     return XrlCmdError::OKAY();

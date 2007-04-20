@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.70 2007/03/28 14:08:13 schooley Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.71 2007/04/18 06:20:55 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -134,7 +134,6 @@ libfea_la_SOURCES	+= xrl_fea_node.hh
 libfea_la_SOURCES	+= xrl_fea_target.hh
 libfea_la_SOURCES	+= xrl_fti.hh
 libfea_la_SOURCES	+= xrl_ifmanager.hh
-libfea_la_SOURCES	+= xrl_ifupdate.hh
 libfea_la_SOURCES	+= xrl_mfea_node.hh
 libfea_la_SOURCES	+= xrl_packet_acl.hh
 libfea_la_SOURCES	+= xrl_rawsock4.hh
@@ -251,7 +250,6 @@ libfea_la_SOURCES	+= xrl_fea_node.cc
 libfea_la_SOURCES	+= xrl_fea_target.cc
 libfea_la_SOURCES	+= xrl_fti.cc
 libfea_la_SOURCES	+= xrl_ifmanager.cc
-libfea_la_SOURCES	+= xrl_ifupdate.cc
 libfea_la_SOURCES	+= xrl_mfea_node.cc
 libfea_la_SOURCES	+= xrl_rawsock4.cc
 libfea_la_SOURCES	+= xrl_rawsock6.cc

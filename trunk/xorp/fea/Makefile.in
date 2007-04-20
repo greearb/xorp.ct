@@ -101,9 +101,9 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	rawsock.lo rawsock4.lo rawsock6.lo routing_socket.lo \
 	routing_socket_utils.lo win_rtm_pipe.lo win_support.lo \
 	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
-	xrl_fea_target.lo xrl_fti.lo xrl_ifmanager.lo xrl_ifupdate.lo \
-	xrl_mfea_node.lo xrl_rawsock4.lo xrl_rawsock6.lo \
-	xrl_socket_cmds.lo xrl_socket_server.lo
+	xrl_fea_target.lo xrl_fti.lo xrl_ifmanager.lo xrl_mfea_node.lo \
+	xrl_rawsock4.lo xrl_rawsock6.lo xrl_socket_cmds.lo \
+	xrl_socket_server.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -451,11 +451,11 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	profile_vars.hh rawsock.hh rawsock4.hh rawsock6.hh \
 	routing_socket.hh routing_socket_utils.hh win_rtm_pipe.hh \
 	win_rtsock.h win_support.hh xrl_fea_io.hh xrl_fea_node.hh \
-	xrl_fea_target.hh xrl_fti.hh xrl_ifmanager.hh xrl_ifupdate.hh \
-	xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh \
-	xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh \
-	addr_table.cc click_socket.cc fea_io.cc fea_node.cc \
-	fti_transaction.cc fticonfig.cc fticonfig_entry_get.cc \
+	xrl_fea_target.hh xrl_fti.hh xrl_ifmanager.hh xrl_mfea_node.hh \
+	xrl_packet_acl.hh xrl_rawsock4.hh xrl_rawsock6.hh \
+	xrl_socket_cmds.hh xrl_socket_server.hh addr_table.cc \
+	click_socket.cc fea_io.cc fea_node.cc fti_transaction.cc \
+	fticonfig.cc fticonfig_entry_get.cc \
 	fticonfig_entry_get_click.cc fticonfig_entry_get_dummy.cc \
 	fticonfig_entry_get_iphelper.cc fticonfig_entry_get_netlink.cc \
 	fticonfig_entry_get_rtmv2.cc fticonfig_entry_get_rtsock.cc \
@@ -503,9 +503,9 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	rawsock.cc rawsock4.cc rawsock6.cc routing_socket.cc \
 	routing_socket_utils.cc win_rtm_pipe.cc win_support.cc \
 	xrl_packet_acl.cc xrl_fea_io.cc xrl_fea_node.cc \
-	xrl_fea_target.cc xrl_fti.cc xrl_ifmanager.cc xrl_ifupdate.cc \
-	xrl_mfea_node.cc xrl_rawsock4.cc xrl_rawsock6.cc \
-	xrl_socket_cmds.cc xrl_socket_server.cc
+	xrl_fea_target.cc xrl_fti.cc xrl_ifmanager.cc xrl_mfea_node.cc \
+	xrl_rawsock4.cc xrl_rawsock6.cc xrl_socket_cmds.cc \
+	xrl_socket_server.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
@@ -771,7 +771,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fea_target.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fti.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_ifmanager.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_ifupdate.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_mfea_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_packet_acl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_rawsock4.Plo@am__quote@

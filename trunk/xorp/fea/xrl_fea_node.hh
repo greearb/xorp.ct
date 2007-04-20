@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.1 2007/04/18 06:21:00 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.2 2007/04/19 16:45:05 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -33,7 +33,6 @@
 #include "libfeaclient_bridge.hh"
 #include "xrl_fea_io.hh"
 #include "xrl_fea_target.hh"
-#include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_packet_acl.hh"
 #include "xrl_rawsock4.hh"
@@ -150,7 +149,6 @@ private:
     EventLoop&		_eventloop;	// The event loop to use
     FeaNode		_fea_node;	// The FEA node
     XrlStdRouter	_xrl_router;	// The standard XRL send/recv point
-    XrlIfConfigUpdateReporter	_xrl_ifconfig_reporter;
     LibFeaClientBridge	_lib_fea_client_bridge;
     XrlFeaIO		_xrl_fea_io;	// The FEA I/O XRL interface
 
