@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.6 2006/08/05 16:58:30 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.7 2007/02/16 22:46:29 pavlin Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -181,7 +181,7 @@ extern "C" {
 int inet_pton(int af, const char *src, void *dst);
 #endif
 #ifndef HAVE_INET_NTOP
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
+const char *inet_ntop(int af, const void *src, char *dst, size_t size);
 #endif
 
 /*
