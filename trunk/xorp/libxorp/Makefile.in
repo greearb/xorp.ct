@@ -60,14 +60,14 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libxorp_la_LIBADD =
 am_libxorp_la_OBJECTS = debug.lo ether_compat.lo gai_strerror.lo \
-	getopt.lo inet_ntop.lo inet_pton.lo random.lo strptime.lo \
-	utility.lo win_io.lo xlog.lo asyncio.lo buffered_asyncio.lo \
-	c_format.lo callback.lo clock.lo eventloop.lo exceptions.lo \
-	heap.lo ipnet.lo ipv4.lo ipv6.lo ipvx.lo mac.lo nexthop.lo \
-	popen.lo profile.lo ref_ptr.lo round_robin.lo run_command.lo \
-	safe_callback_obj.lo selector.lo service.lo task.lo \
-	time_slice.lo timer.lo token.lo transaction.lo utils.lo vif.lo \
-	win_dispatcher.lo
+	getopt.lo inet_ntop.lo inet_pton.lo random.lo strlcpy.lo \
+	strptime.lo utility.lo win_io.lo xlog.lo asyncio.lo \
+	buffered_asyncio.lo c_format.lo callback.lo clock.lo \
+	eventloop.lo exceptions.lo heap.lo ipnet.lo ipv4.lo ipv6.lo \
+	ipvx.lo mac.lo nexthop.lo popen.lo profile.lo ref_ptr.lo \
+	round_robin.lo run_command.lo safe_callback_obj.lo selector.lo \
+	service.lo task.lo time_slice.lo timer.lo token.lo \
+	transaction.lo utils.lo vif.lo win_dispatcher.lo
 libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -425,12 +425,12 @@ libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h random.h \
 	timer.hh timeval.hh tlv.hh token.hh tokenize.hh transaction.hh \
 	trie.hh utils.hh vif.hh win_dispatcher.hh debug.c \
 	ether_compat.c gai_strerror.c getopt.c inet_ntop.c inet_pton.c \
-	random.c strptime.c utility.c win_io.c xlog.c asyncio.cc \
-	buffered_asyncio.cc c_format.cc callback.cc clock.cc \
-	eventloop.cc exceptions.cc heap.cc ipnet.cc ipv4.cc ipv6.cc \
-	ipvx.cc mac.cc nexthop.cc popen.cc profile.cc ref_ptr.cc \
-	round_robin.cc run_command.cc safe_callback_obj.cc selector.cc \
-	service.cc task.cc time_slice.cc timer.cc token.cc \
+	random.c strlcpy.c strptime.c utility.c win_io.c xlog.c \
+	asyncio.cc buffered_asyncio.cc c_format.cc callback.cc \
+	clock.cc eventloop.cc exceptions.cc heap.cc ipnet.cc ipv4.cc \
+	ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc \
+	ref_ptr.cc round_robin.cc run_command.cc safe_callback_obj.cc \
+	selector.cc service.cc task.cc time_slice.cc timer.cc token.cc \
 	transaction.cc utils.cc vif.cc win_dispatcher.cc
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -636,6 +636,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/safe_callback_obj.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/selector.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/service.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strlcpy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/strptime.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/task.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_asyncio.Po@am__quote@

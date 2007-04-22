@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.7 2007/02/16 22:46:29 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.8 2007/04/22 01:03:53 pavlin Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -172,6 +172,10 @@ typedef int xsock_t;
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+#ifndef HAVE_STRLCPY
+size_t strlcpy(char *dst, const char *src, size_t size);
 #endif
 
 /*

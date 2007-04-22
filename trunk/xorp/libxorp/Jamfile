@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxorp/Jamfile,v 1.1 2007/01/11 22:30:48 bms Exp $
+# $XORP: xorp/libxorp/Jamfile,v 1.2 2007/03/22 18:10:33 bms Exp $
 #
 
 SubDir TOP libxorp ;
@@ -43,8 +43,8 @@ if $(MAKE_CHECK) {
 
 Library libxorp : 
 	debug.c ether_compat.c gai_strerror.c getopt.c
-	inet_ntop.c inet_pton.c random.c strptime.c utility.c win_io.c
-	xlog.c
+	inet_ntop.c inet_pton.c random.c strlcpy.c strptime.c utility.c
+	win_io.c xlog.c
 	asyncio.cc buffered_asyncio.cc c_format.cc callback.cc
 	clock.cc eventloop.cc exceptions.cc heap.cc
 	ipnet.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc
