@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.30 2007/02/16 22:45:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.31 2007/04/16 18:53:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -312,6 +312,7 @@ nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     const struct rtattr *rta_array[IFLA_MAX + 1];
     u_short if_index = 0;
     string if_name;
+    string error_msg;
     
     // The attributes
     memset(rta_array, 0, sizeof(rta_array));
@@ -345,7 +346,7 @@ nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     // Delete the interface
     //
     debug_msg("Deleting interface and vif named: %s\n", if_name.c_str());
-    IfTreeInterface* fi = ifc.get_if(it, if_name);
+    IfTreeInterface* fi = ifconfig.find_interface(it, if_name, error_msg);
     if (fi != NULL) {
 	fi->mark(IfTree::DELETED);
     } else {
@@ -353,7 +354,7 @@ nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
 		  if_name.c_str());
     }
     // XXX: vifname == ifname on this platform
-    IfTreeVif* fv = ifc.get_vif(it, if_name, if_name);
+    IfTreeVif* fv = ifc.find_vif(it, if_name, if_name, error_msg);
     if (fv != NULL) {
 	fv->mark(IfTree::DELETED);
     } else {
@@ -372,6 +373,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     u_short if_index = 0;
     string if_name;
     int family = ifaddrmsg->ifa_family;
+    string error_msg;
     
     //
     // Test the family
@@ -441,9 +443,10 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     // Locate the vif to pin data on
     //
     // XXX: vifname == ifname on this platform
-    IfTreeVif* fv = ifc.get_vif(it, if_name, if_name);
+    IfTreeVif* fv = ifc.find_vif(it, if_name, if_name, error_msg);
     if (fv == NULL) {
-	XLOG_FATAL("Could not find vif named %s in IfTree.", if_name.c_str());
+	XLOG_FATAL("Could not find vif named %s in IfTree: %s",
+		   if_name.c_str(), error_msg.c_str());
     }
     
     //

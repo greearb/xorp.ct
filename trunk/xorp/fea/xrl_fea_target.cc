@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.4 2007/04/20 05:43:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.5 2007/04/20 17:14:13 pavlin Exp $"
 
 
 //
@@ -102,6 +102,12 @@ bool
 XrlFeaTarget::is_running() const
 {
     return (_is_running);
+}
+
+IfConfig&
+XrlFeaTarget::ifconfig()
+{
+    return (_fea_node.ifconfig());
 }
 
 XrlCmdError
@@ -612,10 +618,10 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_names(
 						       // Output values,
 						       XrlAtomList&	ifnames)
 {
-    const IfTree& it = _xifmgr.iftree();
+    const IfTree& iftree = ifconfig().local_config();
 
-    for (IfTree::IfMap::const_iterator ii = it.ifs().begin();
-	 ii != it.ifs().end(); ++ii) {
+    for (IfTree::IfMap::const_iterator ii = iftree.ifs().begin();
+	 ii != iftree.ifs().end(); ++ii) {
 	ifnames.append(XrlAtom(ii->second.ifname()));
     }
 
@@ -628,24 +634,27 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
 						 // Output values,
 						 XrlAtomList&  vifnames)
 {
-    const IfTreeInterface* fip = 0;
-    XrlCmdError e = _xifmgr.get_if(ifname, fip);
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY()) {
-	for (IfTreeInterface::VifMap::const_iterator vi = fip->vifs().begin();
-	     vi != fip->vifs().end(); ++vi) {
-	    vifnames.append(XrlAtom(vi->second.vifname()));
-	}
+    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
+				    error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    for (IfTreeInterface::VifMap::const_iterator vi = ifp->vifs().begin();
+	 vi != ifp->vifs().end(); ++vi) {
+	vifnames.append(XrlAtom(vi->second.vifname()));
     }
 
-    return e;
+    return  XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
     // Input values,
     const string&	ifname,
-    const string&	vif,
+    const string&	vifname,
     // Output values,
     bool&		enabled,
     bool&		broadcast,
@@ -653,16 +662,19 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
     bool&		point_to_point,
     bool&		multicast)
 {
-    const IfTreeVif* fv = 0;
-    XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
-    if (e != XrlCmdError::OKAY())
-	return e;
+    const IfTreeVif* vifp = NULL;
+    string error_msg;
 
-    enabled = fv->enabled();
-    broadcast = fv->broadcast();
-    loopback = fv->loopback();
-    point_to_point = fv->point_to_point();
-    multicast = fv->multicast();
+    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
+			       error_msg);
+    if (vifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    enabled = vifp->enabled();
+    broadcast = vifp->broadcast();
+    loopback = vifp->loopback();
+    point_to_point = vifp->point_to_point();
+    multicast = vifp->multicast();
 
     return XrlCmdError::OKAY();
 }
@@ -671,16 +683,19 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
     // Input values,
     const string&	ifname,
-    const string&	vif,
+    const string&	vifname,
     // Output values,
     uint32_t&		pif_index)
 {
-    const IfTreeVif* fv = 0;
-    XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
-    if (e != XrlCmdError::OKAY())
-	return e;
+    const IfTreeVif* vifp = NULL;
+    string error_msg;
 
-    pif_index = fv->pif_index();
+    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
+			       error_msg);
+    if (vifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    pif_index = vifp->pif_index();
 
     return XrlCmdError::OKAY();
 }
@@ -692,13 +707,17 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
 					      // Output values,
 					      bool&		enabled)
 {
-    const IfTreeInterface* fi = 0;
-    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY())
-	enabled = fi->enabled();
+    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
+				    error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    return e;
+    enabled = ifp->enabled();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -708,13 +727,17 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_discard(
 					      // Output values,
 					      bool&		discard)
 {
-    const IfTreeInterface* fi = 0;
-    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY())
-	discard = fi->discard();
+    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
+				    error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    return e;
+    discard = ifp->discard();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -723,13 +746,17 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mac(
 				const string& ifname,
 				Mac&	    mac)
 {
-    const IfTreeInterface* fi = 0;
-    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY())
-	mac = fi->mac();
+    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
+				    error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    return e;
+    mac = ifp->mac();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -738,13 +765,17 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
 				const string&	ifname,
 				uint32_t&	mtu)
 {
-    const IfTreeInterface* fi = 0;
-    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY())
-	mtu = fi->mtu();
+    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
+				    error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    return e;
+    mtu = ifp->mtu();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -753,13 +784,17 @@ XrlFeaTarget::ifmgr_0_1_get_configured_no_carrier(
 				const string&	ifname,
 				bool&		no_carrier)
 {
-    const IfTreeInterface* fi = 0;
-    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY())
-	no_carrier = fi->no_carrier();
+    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
+				    error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    return e;
+    no_carrier = ifp->no_carrier();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -770,13 +805,17 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
 					// Output values,
 					bool&	    enabled)
 {
-    const IfTreeVif* fv = 0;
-    XrlCmdError e = _xifmgr.get_vif(ifname, vifname, fv);
+    const IfTreeVif* vifp = NULL;
+    string error_msg;
 
-    if (e == XrlCmdError::OKAY())
-	enabled = fv->enabled();
+    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
+			       error_msg);
+    if (vifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    return e;
+    enabled = vifp->enabled();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -784,20 +823,24 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
 				    // Input values,
 				    const string&	ifname,
 				    const string&	vifname,
-				    const IPv4&	addr,
+				    const IPv4&		address,
 				    // Output values,
 				    uint32_t&		prefix_len)
 {
+    const IfTreeAddr4* ap = NULL;
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    const IfTreeAddr4* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    if (e == XrlCmdError::OKAY())
-	prefix_len = fa->prefix_len();
+    prefix_len = ap->prefix_len();
 
-    return e;
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -805,21 +848,31 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
 				       // Input values,
 				       const string&	ifname,
 				       const string&	vifname,
-				       const IPv4&	addr,
+				       const IPv4&	address,
 				       // Output values,
 				       IPv4&		broadcast)
 {
+    const IfTreeAddr4* ap = NULL;
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    const IfTreeAddr4* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    if (e != XrlCmdError::OKAY())
-	return e;
+    broadcast = ap->bcast();
+    if ((! ap->broadcast()) || (broadcast == IPv4::ZERO())) {
+	error_msg = c_format("No broadcast address associated with "
+			     "interface %s vif %s address %s",
+			     ifname.c_str(), vifname.c_str(),
+			     address.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
-    broadcast = fa->bcast();
-    return _xifmgr.addr_valid(ifname, vifname, addr, "broadcast", broadcast);
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -827,143 +880,30 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
 				      // Input values,
 				      const string&	ifname,
 				      const string&	vifname,
-				      const IPv4&	addr,
+				      const IPv4&	address,
 				      // Output values,
 				      IPv4&		endpoint)
 {
+    const IfTreeAddr4* ap = NULL;
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    const IfTreeAddr4* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    if (e != XrlCmdError::OKAY())
-	return e;
+    endpoint = ap->endpoint();
+    if ((! ap->point_to_point()) || (endpoint == IPv4::ZERO())) {
+	error_msg = c_format("No endpoint address associated with "
+			     "interface %s vif %s address %s",
+			     ifname.c_str(), vifname.c_str(),
+			     address.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    endpoint = fa->endpoint();
-    return _xifmgr.addr_valid(ifname, vifname, addr, "endpoint", endpoint);
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
-				    // Input values,
-				    const string&	ifname,
-				    const string&	vifname,
-				    const IPv6&		addr,
-				    // Output values,
-				    uint32_t&		prefix_len)
-{
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
-    const IfTreeAddr6* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
-
-    if (e == XrlCmdError::OKAY())
-	prefix_len = fa->prefix_len();
-
-    return e;
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
-				      // Input values,
-				      const string&	ifname,
-				      const string&	vifname,
-				      const IPv6&	addr,
-				      // Output values,
-				      IPv6&		endpoint)
-{
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
-    const IfTreeAddr6* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, addr, fa);
-
-    if (e != XrlCmdError::OKAY())
-	return e;
-
-    endpoint = fa->endpoint();
-    return  _xifmgr.addr_valid(ifname, vifname, addr, "endpoint", endpoint);
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
-						      // Input values,
-						      const string&	ifname,
-						      const string&	vif,
-						      // Output values,
-						      XrlAtomList&	addrs)
-{
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
-    const IfTreeVif* fv = 0;
-    XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
-    if (e != XrlCmdError::OKAY())
-	return e;
-
-    for (IfTreeVif::IPv6Map::const_iterator ai = fv->ipv6addrs().begin();
-	 ai != fv->ipv6addrs().end(); ++ai) {
-	addrs.append(XrlAtom(ai->second.addr()));
     }
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
-				       // Input values
-				       const string& ifname,
-				       const string& vif,
-				       const IPv4&   address,
-				       // Output values
-				       bool& up,
-				       bool& broadcast,
-				       bool& loopback,
-				       bool& point_to_point,
-				       bool& multicast)
-{
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
-    const IfTreeAddr4* fa;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vif, address, fa);
-    if (e != XrlCmdError::OKAY())
-	return e;
-
-    up = fa->enabled();
-    broadcast = fa->broadcast();
-    loopback = fa->loopback();
-    point_to_point = fa->point_to_point();
-    multicast = fa->multicast();
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
-				       // Input values
-				       const string& ifname,
-				       const string& vif,
-				       const IPv6&   address,
-				       // Output values
-				       bool& up,
-				       bool& loopback,
-				       bool& point_to_point,
-				       bool& multicast)
-{
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
-    const IfTreeAddr6* fa;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vif, address, fa);
-    if (e != XrlCmdError::OKAY())
-	return e;
-
-    up = fa->enabled();
-    loopback = fa->loopback();
-    point_to_point = fa->point_to_point();
-    multicast = fa->multicast();
 
     return XrlCmdError::OKAY();
 }
@@ -972,22 +912,223 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
 						      // Input values,
 						      const string&	ifname,
-						      const string&	vif,
+						      const string&	vifname,
 						      // Output values,
-						      XrlAtomList&	addrs)
+						      XrlAtomList&	addresses)
 {
+    const IfTreeVif* vifp = NULL;
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    const IfTreeVif* fv = 0;
-    XrlCmdError e = _xifmgr.get_vif(ifname, vif, fv);
-    if (e != XrlCmdError::OKAY())
-	return e;
+    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
+			       error_msg);
+    if (vifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
-    for (IfTreeVif::IPv4Map::const_iterator ai = fv->ipv4addrs().begin();
-	 ai != fv->ipv4addrs().end(); ++ai) {
-	addrs.append(XrlAtom(ai->second.addr()));
+    for (IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
+	 ai != vifp->ipv4addrs().end(); ++ai) {
+	addresses.append(XrlAtom(ai->second.addr()));
     }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
+				    // Input values,
+				    const string&	ifname,
+				    const string&	vifname,
+				    const IPv6&		address,
+				    // Output values,
+				    uint32_t&		prefix_len)
+{
+    const IfTreeAddr6* ap = NULL;
+    string error_msg;
+
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    prefix_len = ap->prefix_len();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
+				      // Input values,
+				      const string&	ifname,
+				      const string&	vifname,
+				      const IPv6&	address,
+				      // Output values,
+				      IPv6&		endpoint)
+{
+    const IfTreeAddr6* ap = NULL;
+    string error_msg;
+
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    endpoint = ap->endpoint();
+
+    if ((! ap->point_to_point()) || (endpoint == IPv6::ZERO())) {
+	error_msg = c_format("No endpoint address associated with "
+			     "interface %s vif %s address %s",
+			     ifname.c_str(), vifname.c_str(),
+			     address.str().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
+						      // Input values,
+						      const string&	ifname,
+						      const string&	vifname,
+						      // Output values,
+						      XrlAtomList&	addresses)
+{
+    const IfTreeVif* vifp = NULL;
+    string error_msg;
+
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
+			       error_msg);
+    if (vifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    for (IfTreeVif::IPv6Map::const_iterator ai = vifp->ipv6addrs().begin();
+	 ai != vifp->ipv6addrs().end(); ++ai) {
+	addresses.append(XrlAtom(ai->second.addr()));
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
+				       // Input values
+				       const string& ifname,
+				       const string& vifname,
+				       const IPv4&   address,
+				       // Output values
+				       bool& up,
+				       bool& broadcast,
+				       bool& loopback,
+				       bool& point_to_point,
+				       bool& multicast)
+{
+    const IfTreeAddr4* ap = NULL;
+    string error_msg;
+
+    if (! have_ipv4())
+	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
+
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    up = ap->enabled();
+    broadcast = ap->broadcast();
+    loopback = ap->loopback();
+    point_to_point = ap->point_to_point();
+    multicast = ap->multicast();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
+				       // Input values
+				       const string& ifname,
+				       const string& vifname,
+				       const IPv6&   address,
+				       // Output values
+				       bool& up,
+				       bool& loopback,
+				       bool& point_to_point,
+				       bool& multicast)
+{
+    const IfTreeAddr6* ap = NULL;
+    string error_msg;
+
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    up = ap->enabled();
+    loopback = ap->loopback();
+    point_to_point = ap->point_to_point();
+    multicast = ap->multicast();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
+					     // Input values,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv4&	address,
+					     bool&		enabled)
+{
+    const IfTreeAddr4* ap = NULL;
+    string error_msg;
+
+    if (! have_ipv4())
+	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
+
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    enabled = ap->enabled();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
+					     // Input values,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const IPv6&	address,
+					     bool&		enabled)
+{
+    const IfTreeAddr6* ap = NULL;
+    string error_msg;
+
+    if (! have_ipv6())
+	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
+
+    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
+			      address, error_msg);
+    if (ap == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    enabled = ap->enabled();
+
     return XrlCmdError::OKAY();
 }
 
@@ -1021,8 +1162,8 @@ XrlFeaTarget::ifmgr_0_1_create_interface(
 					 const uint32_t&	tid,
 					 const string&		ifname)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddInterface(it, ifname));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new AddInterface(iftree, ifname));
 }
 
 XrlCmdError
@@ -1031,8 +1172,8 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
 					 const uint32_t&	tid,
 					 const string&		ifname)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveInterface(it, ifname));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new RemoveInterface(iftree, ifname));
 }
 
 XrlCmdError
@@ -1042,8 +1183,9 @@ XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
     const string&	ifname)
 {
     IfConfig& ifc = _fea_node.ifconfig();
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new ConfigureInterfaceFromSystem(ifc, it, ifname));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new ConfigureInterfaceFromSystem(ifc, iftree,
+							     ifname));
 }
 
 XrlCmdError
@@ -1053,8 +1195,8 @@ XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
 					      const string&	ifname,
 					      const bool&	enabled)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceEnabled(it, ifname, enabled));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetInterfaceEnabled(iftree, ifname, enabled));
 }
 
 XrlCmdError
@@ -1064,8 +1206,8 @@ XrlFeaTarget::ifmgr_0_1_set_interface_discard(
 					      const string&	ifname,
 					      const bool&	discard)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceDiscard(it, ifname, discard));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetInterfaceDiscard(iftree, ifname, discard));
 }
 
 XrlCmdError
@@ -1075,8 +1217,8 @@ XrlFeaTarget::ifmgr_0_1_set_mac(
 				const string&	ifname,
 				const Mac&	mac)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceMAC(it, ifname, mac));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetInterfaceMAC(iftree, ifname, mac));
 }
 
 XrlCmdError
@@ -1085,13 +1227,13 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& it = _xifmgr.iftree();
+    IfTree& iftree = _xifmgr.iftree();
 
     // Find the original MAC address
     IfConfig& ifc = _fea_node.ifconfig();
-    const IfTree& original_it = ifc.original_config();
-    IfTree::IfMap::const_iterator ii = original_it.get_if(ifname);
-    if (ii == original_it.ifs().end()) {
+    const IfTree& original_iftree = ifc.original_config();
+    IfTree::IfMap::const_iterator ii = original_iftree.get_if(ifname);
+    if (ii == original_iftree.ifs().end()) {
 	string error_msg = c_format("Interface %s does not exist.",
 				    ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1099,7 +1241,7 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
     const IfTreeInterface& fi = ii->second;
     const Mac& mac = fi.mac();
 
-    return _xifmgr.add(tid, new SetInterfaceMAC(it, ifname, mac));
+    return _xifmgr.add(tid, new SetInterfaceMAC(iftree, ifname, mac));
 }
 
 XrlCmdError
@@ -1109,8 +1251,8 @@ XrlFeaTarget::ifmgr_0_1_set_mtu(
 				const string&	ifname,
 				const uint32_t&	mtu)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceMTU(it, ifname, mtu));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetInterfaceMTU(iftree, ifname, mtu));
 }
 
 XrlCmdError
@@ -1119,13 +1261,13 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& it = _xifmgr.iftree();
+    IfTree& iftree = _xifmgr.iftree();
 
     // Find the original MTU
     IfConfig& ifc = _fea_node.ifconfig();
-    const IfTree& original_it = ifc.original_config();
-    IfTree::IfMap::const_iterator ii = original_it.get_if(ifname);
-    if (ii == original_it.ifs().end()) {
+    const IfTree& original_iftree = ifc.original_config();
+    IfTree::IfMap::const_iterator ii = original_iftree.get_if(ifname);
+    if (ii == original_iftree.ifs().end()) {
 	string error_msg = c_format("Interface %s does not exist.",
 				    ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1133,7 +1275,7 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
     const IfTreeInterface& fi = ii->second;
     uint32_t mtu = fi.mtu();
 
-    return _xifmgr.add(tid, new SetInterfaceMTU(it, ifname, mtu));
+    return _xifmgr.add(tid, new SetInterfaceMTU(iftree, ifname, mtu));
 }
 
 XrlCmdError
@@ -1143,8 +1285,8 @@ XrlFeaTarget::ifmgr_0_1_create_vif(
 				   const string&	ifname,
 				   const string&	vifname)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddInterfaceVif(it, ifname, vifname));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new AddInterfaceVif(iftree, ifname, vifname));
 }
 
 XrlCmdError
@@ -1154,8 +1296,8 @@ XrlFeaTarget::ifmgr_0_1_delete_vif(
 				   const string&	ifname,
 				   const string&	vifname)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveInterfaceVif(it, ifname, vifname));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new RemoveInterfaceVif(iftree, ifname, vifname));
 }
 
 XrlCmdError
@@ -1166,8 +1308,9 @@ XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
 					const string&	vifname,
 					const bool&	enabled)
 {
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetVifEnabled(it, ifname, vifname, enabled));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetVifEnabled(iftree, ifname, vifname,
+					      enabled));
 }
 
 
@@ -1182,8 +1325,8 @@ XrlFeaTarget::ifmgr_0_1_create_address4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddAddr4(it, ifname, vifname, address));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new AddAddr4(iftree, ifname, vifname, address));
 }
 
 XrlCmdError
@@ -1197,8 +1340,8 @@ XrlFeaTarget::ifmgr_0_1_delete_address4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveAddr4(it, ifname, vifname, address));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new RemoveAddr4(iftree, ifname, vifname, address));
 }
 
 XrlCmdError
@@ -1208,33 +1351,15 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
 					const string&	ifname,
 					const string&	vifname,
 					const IPv4&	address,
-					const bool&	en)
+					const bool&	enabled)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& it = _xifmgr.iftree();
+    IfTree& iftree = _xifmgr.iftree();
     return _xifmgr.add(tid,
-		       new SetAddr4Enabled(it, ifname, vifname, address, en));
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
-					     // Input values,
-					     const string&	ifname,
-					     const string&	vifname,
-					     const IPv4&	address,
-					     bool&		enabled)
-{
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
-    const IfTreeAddr4* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, address, fa);
-    if (e == XrlCmdError::OKAY())
-	enabled = fa->enabled();
-
-    return e;
+		       new SetAddr4Enabled(iftree, ifname, vifname, address,
+					   enabled));
 }
 
 XrlCmdError
@@ -1249,9 +1374,9 @@ XrlFeaTarget::ifmgr_0_1_set_prefix4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetAddr4Prefix(it, ifname, vifname, address,
-					       prefix_len));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetAddr4Prefix(iftree, ifname, vifname,
+					       address, prefix_len));
 }
 
 XrlCmdError
@@ -1266,9 +1391,9 @@ XrlFeaTarget::ifmgr_0_1_set_broadcast4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetAddr4Broadcast(it, ifname, vifname, address,
-						  broadcast));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetAddr4Broadcast(iftree, ifname, vifname,
+						  address, broadcast));
 }
 
 
@@ -1284,9 +1409,9 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetAddr4Endpoint(it, ifname, vifname, address,
-						 endpoint));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetAddr4Endpoint(iftree, ifname, vifname,
+						 address, endpoint));
 }
 
 XrlCmdError
@@ -1300,8 +1425,8 @@ XrlFeaTarget::ifmgr_0_1_create_address6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddAddr6(it, ifname, vifname, address));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new AddAddr6(iftree, ifname, vifname, address));
 }
 
 XrlCmdError
@@ -1315,8 +1440,8 @@ XrlFeaTarget::ifmgr_0_1_delete_address6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& it = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveAddr6(it, ifname, vifname, address));
+    IfTree& iftree = _xifmgr.iftree();
+    return _xifmgr.add(tid, new RemoveAddr6(iftree, ifname, vifname, address));
 }
 
 XrlCmdError
@@ -1326,33 +1451,15 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
 					     const string&	ifname,
 					     const string&	vifname,
 					     const IPv6&	address,
-					     const bool&	en)
+					     const bool&	enabled)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& it = _xifmgr.iftree();
+    IfTree& iftree = _xifmgr.iftree();
     return _xifmgr.add(tid,
-		       new SetAddr6Enabled(it, ifname, vifname, address, en));
-}
-
-XrlCmdError
-XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
-					     // Input values,
-					     const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	address,
-					     bool&		enabled)
-{
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
-    const IfTreeAddr6* fa = 0;
-    XrlCmdError e = _xifmgr.get_addr(ifname, vifname, address, fa);
-    if (e == XrlCmdError::OKAY())
-	enabled = fa->enabled();
-
-    return e;
+		       new SetAddr6Enabled(iftree, ifname, vifname, address,
+					   enabled));
 }
 
 XrlCmdError
@@ -1367,9 +1474,9 @@ XrlFeaTarget::ifmgr_0_1_set_prefix6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& it = _xifmgr.iftree();
+    IfTree& iftree = _xifmgr.iftree();
     return _xifmgr.add(tid,
-		       new SetAddr6Prefix(it, ifname, vifname, address,
+		       new SetAddr6Prefix(iftree, ifname, vifname, address,
 					  prefix_len));
 }
 
@@ -1385,9 +1492,9 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& it = _xifmgr.iftree();
+    IfTree& iftree = _xifmgr.iftree();
     return _xifmgr.add(tid,
-		       new SetAddr6Endpoint(it, ifname, vifname, address,
+		       new SetAddr6Endpoint(iftree, ifname, vifname, address,
 					    endpoint));
 }
 

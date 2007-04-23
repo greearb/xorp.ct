@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.22 2007/02/16 22:45:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.23 2007/04/19 21:36:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,115 +27,6 @@ static const char* MAX_TRANSACTIONS_HIT =
 
 static const char* BAD_ID =
 			"Expired or invalid transaction id presented.";
-
-static const char* MISSING_IF = "Interface %s does not exist.";
-
-static const char* MISSING_VIF = "Vif %s on interface %s does not exist.";
-
-static const char* MISSING_ADDR =
-			"Address %s on Vif %s on Interface %s does not exist.";
-
-XrlCmdError
-XrlInterfaceManager::get_if_from_config(const IfTree&	it,
-					const string&		ifname,
-					const IfTreeInterface*&	fi) const
-{
-    IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == it.ifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
-						    ifname.c_str()));
-    }
-
-    fi = &ii->second;
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlInterfaceManager::get_vif_from_config(const IfTree&	it,
-					 const string&		ifname,
-					 const string&		vif,
-					 const IfTreeVif*&	fv) const
-{
-    IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == it.ifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
-						    ifname.c_str()));
-    }
-
-    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(vif);
-    if (vi == ii->second.vifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_VIF,
-						    vif.c_str(),
-						    ifname.c_str()));
-    }
-
-    fv = &vi->second;
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
-					  const string&		ifname,
-					  const string&		vif,
-					  const IPv4&		addr,
-					  const IfTreeAddr4*&	fa) const
-{
-    IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == it.ifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
-						    ifname.c_str()));
-    }
-
-    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(vif);
-    if (vi == ii->second.vifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_VIF,
-						    vif.c_str(),
-						    ifname.c_str()));
-    }
-
-    IfTreeVif::IPv4Map::const_iterator ai = vi->second.get_addr(addr);
-    if (ai == vi->second.ipv4addrs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_ADDR,
-						    addr.str().c_str(),
-						    vif.c_str(),
-						    ifname.c_str()));
-    }
-
-    fa = &ai->second;
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlInterfaceManager::get_addr_from_config(const IfTree&	it,
-					  const string&		ifname,
-					  const string&		vif,
-					  const IPv6&		addr,
-					  const IfTreeAddr6*&	fa) const
-{
-    IfTree::IfMap::const_iterator ii = it.get_if(ifname);
-    if (ii == it.ifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_IF,
-						    ifname.c_str()));
-    }
-
-    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(vif);
-    if (vi == ii->second.vifs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_VIF,
-						    vif.c_str(),
-						    ifname.c_str()));
-    }
-
-    IfTreeVif::IPv6Map::const_iterator ai = vi->second.get_addr(addr);
-    if (ai == vi->second.ipv6addrs().end()) {
-	return XrlCmdError::COMMAND_FAILED(c_format(MISSING_ADDR,
-						    addr.str().c_str(),
-						    vif.c_str(),
-						    ifname.c_str()));
-    }
-
-    fa = &ai->second;
-    return XrlCmdError::OKAY();
-}
 
 ProcessStatus
 XrlInterfaceManager::status(string& reason) const

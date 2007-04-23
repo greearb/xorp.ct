@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.3 2007/04/20 05:43:44 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.4 2007/04/20 17:14:13 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -30,6 +30,7 @@
 
 class EventLoop;
 class FeaNode;
+class IfConfig;
 class InterfaceManager;
 class LibFeaClientBridge;
 class XrlRawSocket4Manager;
@@ -95,6 +96,14 @@ public:
      * @return the event loop this service is added to.
      */
     EventLoop&	eventloop() { return (_eventloop); }
+
+    /**
+     * Get the IfConfig instance.
+     *
+     * @return a reference to the IfConfig instance.
+     * @see IfConfig.
+     */
+    IfConfig& ifconfig();
 
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
@@ -329,7 +338,7 @@ public:
     XrlCmdError ifmgr_0_1_get_configured_vif_names(
 	const string&	ifname,
 	// Output values,
-	XrlAtomList&		ifnames);
+	XrlAtomList&		vifs);
 
     XrlCmdError ifmgr_0_1_get_configured_vif_flags(
 	// Input values,
@@ -451,7 +460,7 @@ public:
     XrlCmdError ifmgr_0_1_get_configured_address_flags4(
 	// Input values,
 	const string& ifname,
-	const string& vifname,
+	const string& vif,
 	const IPv4&   address,
 	// Output values,
 	bool& up,
@@ -463,7 +472,7 @@ public:
     XrlCmdError ifmgr_0_1_get_configured_address_flags6(
 	// Input values,
 	const string& ifname,
-	const string& vifname,
+	const string& vif,
 	const IPv6&   address,
 	// Output values,
 	bool& up,
@@ -531,7 +540,7 @@ public:
 	const string&	ifname,
 	const string&	vif,
 	const IPv4&	address,
-	const bool&	en);
+	const bool&	enabled);
 
     XrlCmdError ifmgr_0_1_get_configured_address_enabled4(
 	// Input values,

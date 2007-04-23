@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.12 2007/02/16 22:45:52 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.13 2007/04/18 06:21:00 pavlin Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
@@ -30,22 +30,21 @@
  * The class provides error messages suitable for Xrl return values
  * and does some extra checking not in the IfConfig class.
  */
-class XrlInterfaceManager
-{
+class XrlInterfaceManager {
 public:
     typedef InterfaceTransactionManager::Operation Operation;
 
     /**
      * Constructor
      *
-     * @param e the EventLoop.
+     * @param eventloop the EventLoop.
      * @param ifconfig the IfConfig object.
      * @param max_ops the maximum number of operations pending.
      */
-    XrlInterfaceManager(EventLoop&	e,
+    XrlInterfaceManager(EventLoop&	eventloop,
 			IfConfig&	ifconfig,
 			uint32_t	max_ops = 200)
-	: _itm(e, 5000, 10), _ifconfig(ifconfig), _max_ops(max_ops)
+	: _itm(eventloop, 5000, 10), _ifconfig(ifconfig), _max_ops(max_ops)
     {}
 
     /**
@@ -70,52 +69,6 @@ public:
     //
     // Miscellaneous helper methods
     //
-    inline XrlCmdError get_if(const string&	   ifname,
-			      const IfTreeInterface*& fi) const;
-
-    inline XrlCmdError get_vif(const string&  ifname,
-			       const string&  vifname,
-			       const IfTreeVif*& fv) const;
-
-    inline XrlCmdError get_addr(const string&	 ifname,
-				const string&	 vifname,
-				const IPv4&	 addr,
-				const IfTreeAddr4*& fa) const;
-
-    inline XrlCmdError get_addr(const string&	 ifname,
-				const string&	 vifname,
-				const IPv6&	 addr,
-				const IfTreeAddr6*& fa) const;
-
-    inline XrlCmdError pull_config_get_if(const string& ifname,
-					  const IfTreeInterface*& fi) const;
-
-    inline XrlCmdError pull_config_get_vif(const string&  ifname,
-					   const string&  vifname,
-					   const IfTreeVif*& fv) const;
-
-    inline XrlCmdError pull_config_get_addr(const string&	ifname,
-					    const string&	vifname,
-					    const IPv4&		addr,
-					    const IfTreeAddr4*&	fa) const;
-
-    inline XrlCmdError pull_config_get_addr(const string&	ifname,
-					const string&		vifname,
-					const IPv6&		addr,
-					const IfTreeAddr6*&	fa) const;
-
-    inline XrlCmdError addr_valid(const string& ifname,
-				  const string& vifname,
-				  const IPv4&	addr,
-				  const string& descr,
-				  const IPv4&   validate_addr);
-
-    inline XrlCmdError addr_valid(const string& ifname,
-				  const string& vifname,
-				  const IPv6&	addr,
-				  const string& descr,
-				  const IPv6&   validate_addr);
-
     inline IfTree& iftree() const	{ return _ifconfig.local_config(); }
 
     inline IfTree& old_iftree() const	{ return _ifconfig.old_local_config(); }
@@ -123,136 +76,13 @@ public:
     inline IfConfig& ifconfig() const	{ return _ifconfig; }
 
 protected:
-    XrlCmdError get_if_from_config(const IfTree&	it,
-				   const string&	ifname,
-				   const IfTreeInterface*&	fi) const;
-
-    XrlCmdError get_vif_from_config(const IfTree&	it,
-				    const string&	ifname,
-				    const string&	vifname,
-				    const IfTreeVif*&	fv) const;
-
-    XrlCmdError get_addr_from_config(const IfTree&	it,
-				     const string&	ifname,
-				     const string&	vifname,
-				     const IPv4&	addr,
-				     const IfTreeAddr4*&	fa) const;
-
-    XrlCmdError get_addr_from_config(const IfTree&	it,
-				     const string&	ifname,
-				     const string&	vifname,
-				     const IPv6&	addr,
-				     const IfTreeAddr6*&	fa) const;
 
 protected:
     InterfaceTransactionManager	_itm;
     IfConfig&			_ifconfig;
     uint32_t			_max_ops;
-    ProcessStatus               _status, _prev_status;
+    ProcessStatus               _status;
+    ProcessStatus               _prev_status;
 };
-
-inline XrlCmdError
-XrlInterfaceManager::get_if(const string&	  ifname,
-			    const IfTreeInterface*& fi) const
-{
-    return get_if_from_config(iftree(), ifname, fi);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::get_vif(const string&  ifname,
-			     const string&  vif,
-			     const IfTreeVif*& fv) const
-{
-    return get_vif_from_config(iftree(), ifname, vif, fv);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::get_addr(const string&	 ifname,
-			      const string&	 vif,
-			      const IPv4&	 addr,
-			      const IfTreeAddr4*& fa) const
-{
-    return get_addr_from_config(iftree(), ifname, vif, addr, fa);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::get_addr(const string&	 ifname,
-			      const string&	 vif,
-			      const IPv6&	 addr,
-			      const IfTreeAddr6*& fa) const
-{
-    return get_addr_from_config(iftree(), ifname, vif, addr, fa);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::pull_config_get_if(const string&	ifname,
-			    const IfTreeInterface*&	fi) const
-{
-    const IfTree& it = ifconfig().pull_config();
-    return get_if_from_config(it, ifname, fi);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::pull_config_get_vif(const string&	ifname,
-				     const string&	vif,
-				     const IfTreeVif*&	fv) const
-{
-    const IfTree& it = ifconfig().pull_config();
-    return get_vif_from_config(it, ifname, vif, fv);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::pull_config_get_addr(const string&	ifname,
-				      const string&	vif,
-				      const IPv4&	addr,
-				      const IfTreeAddr4*&	fa) const
-{
-    const IfTree& it = ifconfig().pull_config();
-    return get_addr_from_config(it, ifname, vif, addr, fa);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::pull_config_get_addr(const string&	ifname,
-				      const string&	vif,
-				      const IPv6&	addr,
-				      const IfTreeAddr6*&	fa) const
-{
-    const IfTree& it = ifconfig().pull_config();
-    return get_addr_from_config(it, ifname, vif, addr, fa);
-}
-
-inline XrlCmdError
-XrlInterfaceManager::addr_valid(const string& ifname,
-				const string& vifname,
-				const IPv4&   addr,
-				const string& descr,
-				const IPv4&   validate_addr)
-{
-    if (validate_addr != IPv4::ZERO())
-	return XrlCmdError::OKAY();
-    return
-	XrlCmdError::COMMAND_FAILED(c_format("No %s address associated with "
-					     "address %s Vif %s on "
-					     "Interface %s.",
-					     descr.c_str(), addr.str().c_str(),
-					     vifname.c_str(), ifname.c_str()));
-}
-
-inline XrlCmdError
-XrlInterfaceManager::addr_valid(const string& ifname,
-				const string& vifname,
-				const IPv6&   addr,
-				const string& descr,
-				const IPv6&   validate_addr)
-{
-    if (validate_addr != IPv6::ZERO())
-	return XrlCmdError::OKAY();
-    return
-	XrlCmdError::COMMAND_FAILED(c_format("No %s address associated with "
-					     "address %s Vif %s on "
-					     "Interface %s.",
-					     descr.c_str(), addr.str().c_str(),
-					     vifname.c_str(), ifname.c_str()));
-}
 
 #endif // __FEA_XRL_IFMANAGER_HH__
