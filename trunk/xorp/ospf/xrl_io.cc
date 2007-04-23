@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.40 2007/03/19 11:03:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.41 2007/04/19 21:36:52 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -348,7 +348,7 @@ XrlIO<A>::is_interface_enabled(const string& interface) const
 {
     debug_msg("Interface %s\n", interface.c_str());
 
-    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_interface(interface);
     if (fi == NULL)
 	return false;
 
@@ -497,7 +497,7 @@ XrlIO<A>::get_interface_id(const string& interface, uint32_t& interface_id)
 {
     debug_msg("Interface %s\n", interface.c_str());
 
-    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_interface(interface);
     if (fi == NULL)
 	return false;
 
@@ -546,7 +546,7 @@ XrlIO<A>::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
 
-    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_interface(interface);
     if (fi == NULL)
 	return 0;
 
@@ -1208,7 +1208,7 @@ XrlIO<IPv4>::updates_made()
 	is_old_interface_enabled &= (! if_atom->no_carrier());
 
 	// Check the interface
-	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
+	other_if_atom = ifmgr_iftree().find_interface(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // The interface has disappeared
 	    is_new_interface_enabled = false;
@@ -1288,7 +1288,7 @@ XrlIO<IPv4>::updates_made()
 	if_atom = &ii->second;
 
 	// Check the interface
-	other_if_atom = _iftree.find_if(if_atom->name());
+	other_if_atom = _iftree.find_interface(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // A new interface
 	    if (if_atom->enabled()
@@ -1377,7 +1377,7 @@ XrlIO<IPv6>::updates_made()
 	is_old_interface_enabled &= (! if_atom->no_carrier());
 
 	// Check the interface
-	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
+	other_if_atom = ifmgr_iftree().find_interface(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // The interface has disappeared
 	    is_new_interface_enabled = false;
@@ -1457,7 +1457,7 @@ XrlIO<IPv6>::updates_made()
 	if_atom = &ii->second;
 
 	// Check the interface
-	other_if_atom = _iftree.find_if(if_atom->name());
+	other_if_atom = _iftree.find_interface(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // A new interface
 	    if (if_atom->enabled()

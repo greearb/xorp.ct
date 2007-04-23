@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.20 2007/04/19 21:36:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.21 2007/04/20 01:35:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -123,7 +123,7 @@ LibFeaClientBridge::interface_update(const string& ifname,
     // Validate interface is in the FEA iftree we're using and
     // in libfeaclient's equivalent.
     //
-    const IfMgrIfAtom* ifa = _rm->iftree().find_if(ifname);
+    const IfMgrIfAtom* ifa = _rm->iftree().find_interface(ifname);
     if (ifa == 0) {
 	XLOG_WARNING("Got update for interface not in libfeaclient tree: "
 		     "%s\n", ifname.c_str());

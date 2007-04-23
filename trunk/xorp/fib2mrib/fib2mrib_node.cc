@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.33 2007/02/16 22:45:58 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.34 2007/04/19 21:36:51 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -319,7 +319,7 @@ Fib2mribNode::updates_made()
 	    const IfMgrIfAtom* if_atom;
 	    const IfMgrVifAtom* vif_atom;
 
-	    if_atom = _iftree.find_if(fib2mrib_route.ifname());
+	    if_atom = _iftree.find_interface(fib2mrib_route.ifname());
 	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
 					fib2mrib_route.vifname());
 	    if ((if_atom != NULL) && (if_atom->enabled())
@@ -328,7 +328,7 @@ Fib2mribNode::updates_made()
 		is_old_up = true;
 	    }
 
-	    if_atom = ifmgr_iftree().find_if(fib2mrib_route.ifname());
+	    if_atom = ifmgr_iftree().find_interface(fib2mrib_route.ifname());
 	    vif_atom = ifmgr_iftree().find_vif(fib2mrib_route.ifname(),
 					       fib2mrib_route.vifname());
 	    if ((if_atom != NULL) && (if_atom->enabled())
@@ -1049,7 +1049,7 @@ Fib2mribNode::is_accepted_by_nexthop(const Fib2mribRoute& route) const
 	const IfMgrVifAtom* vif_atom;
 	bool is_up = false;
 
-	if_atom = _iftree.find_if(route.ifname());
+	if_atom = _iftree.find_interface(route.ifname());
 	vif_atom = _iftree.find_vif(route.ifname(), route.vifname());
 	if ((if_atom != NULL) && (if_atom->enabled())
 	    && (! if_atom->no_carrier())

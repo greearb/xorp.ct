@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.26 2007/04/19 21:36:51 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.27 2007/04/19 23:53:05 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -69,14 +69,14 @@ public:
      * @param ifname name of interface to find.
      * @return pointer to interface structure on success, 0 otherwise.
      */
-    const IfMgrIfAtom* find_if(const string& ifname) const;
+    const IfMgrIfAtom* find_interface(const string& ifname) const;
 
     /**
      * Find interface.
      * @param ifname name of interface to find.
      * @return pointer to interface structure on success, 0 otherwise.
      */
-    IfMgrIfAtom* find_if(const string& ifname);
+    IfMgrIfAtom* find_interface(const string& ifname);
 
     /**
      * Find virtual interface.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.18 2007/04/19 21:36:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.19 2007/04/19 23:53:05 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -410,7 +410,7 @@ IfMgrIfSetNoCarrier::str() const
 bool
 IfMgrVifAdd::execute(IfMgrIfTree& tree) const
 {
-    IfMgrIfAtom* ifa = tree.find_if(ifname());
+    IfMgrIfAtom* ifa = tree.find_interface(ifname());
     if (ifa == NULL)
 	return false;
 
@@ -447,7 +447,7 @@ IfMgrVifAdd::str() const
 bool
 IfMgrVifRemove::execute(IfMgrIfTree& tree) const
 {
-    IfMgrIfAtom* ifa = tree.find_if(ifname());
+    IfMgrIfAtom* ifa = tree.find_interface(ifname());
     if (ifa == NULL)
 	return true;	// Not a failure if the interface doesn't exist anymore
 

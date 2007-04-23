@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.17 2007/04/19 21:36:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.18 2007/04/19 23:53:05 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -22,26 +22,6 @@ const IPv6 IfMgrIPv6Atom::_ZERO_ADDR = IPv6::ZERO();
 
 // ----------------------------------------------------------------------------
 // Find method helpers
-
-static inline const IfMgrIfAtom*
-find_interface(const IfMgrIfTree* tree, const string& ifname)
-{
-    const IfMgrIfTree::IfMap& ifs = tree->ifs();
-    IfMgrIfTree::IfMap::const_iterator ii = ifs.find(ifname);
-    if (ifs.end() == ii)
-	return NULL;
-    return &ii->second;
-}
-
-static inline IfMgrIfAtom*
-find_interface(IfMgrIfTree* tree, const string& ifname)
-{
-    IfMgrIfTree::IfMap& ifs = tree->ifs();
-    IfMgrIfTree::IfMap::iterator ii = ifs.find(ifname);
-    if (ifs.end() == ii)
-	return NULL;
-    return &ii->second;
-}
 
 
 static inline const IfMgrVifAtom*
@@ -109,21 +89,27 @@ find_virtual_interface_addr(IfMgrVifAtom* vifa, const IPv6& addr)
 // IfMgrIfTree Methods
 
 const IfMgrIfAtom*
-IfMgrIfTree::find_if(const string& ifname) const
+IfMgrIfTree::find_interface(const string& ifname) const
 {
-    return find_interface(this, ifname);
+    IfMgrIfTree::IfMap::const_iterator ii = ifs().find(ifname);
+    if (ii == ifs().end())
+	return NULL;
+    return &ii->second;
 }
 
 IfMgrIfAtom*
-IfMgrIfTree::find_if(const string& ifname)
+IfMgrIfTree::find_interface(const string& ifname)
 {
-    return find_interface(this, ifname);
+    IfMgrIfTree::IfMap::iterator ii = ifs().find(ifname);
+    if (ii == ifs().end())
+	return NULL;
+    return &ii->second;
 }
 
 const IfMgrVifAtom*
 IfMgrIfTree::find_vif(const string& ifname, const string& vifname) const
 {
-    const IfMgrIfAtom* ifa = find_interface(this, ifname);
+    const IfMgrIfAtom* ifa = find_interface(ifname);
     if (ifa == NULL)
 	return NULL;
     return find_virtual_interface(ifa, vifname);
@@ -132,7 +118,7 @@ IfMgrIfTree::find_vif(const string& ifname, const string& vifname) const
 IfMgrVifAtom*
 IfMgrIfTree::find_vif(const string& ifname, const string& vifname)
 {
-    IfMgrIfAtom* ifa = find_interface(this, ifname);
+    IfMgrIfAtom* ifa = find_interface(ifname);
     if (ifa == NULL)
 	return NULL;
     return find_virtual_interface(ifa, vifname);
@@ -143,7 +129,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const string& vifname,
 		       const IPv4&   addr) const
 {
-    const IfMgrIfAtom* ifa = find_interface(this, ifname);
+    const IfMgrIfAtom* ifa = find_interface(ifname);
     if (ifa == NULL)
 	return NULL;
     const IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
@@ -157,7 +143,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const string& vifname,
 		       const IPv4&   addr)
 {
-    IfMgrIfAtom* ifa = find_interface(this, ifname);
+    IfMgrIfAtom* ifa = find_interface(ifname);
     if (ifa == NULL)
 	return NULL;
     IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
@@ -171,7 +157,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const string& vifname,
 		       const IPv6&   addr) const
 {
-    const IfMgrIfAtom* ifa = find_interface(this, ifname);
+    const IfMgrIfAtom* ifa = find_interface(ifname);
     if (ifa == NULL)
 	return NULL;
     const IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);
@@ -185,7 +171,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 		       const string& vifname,
 		       const IPv6&   addr)
 {
-    IfMgrIfAtom* ifa = find_interface(this, ifname);
+    IfMgrIfAtom* ifa = find_interface(ifname);
     if (ifa == NULL)
 	return NULL;
     IfMgrVifAtom* vifa = find_virtual_interface(ifa, vifname);

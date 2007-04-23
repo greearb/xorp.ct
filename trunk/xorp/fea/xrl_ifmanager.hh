@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.13 2007/04/18 06:21:00 pavlin Exp $
+// $XORP: xorp/fea/xrl_ifmanager.hh,v 1.14 2007/04/23 22:14:11 pavlin Exp $
 
 #ifndef __FEA_XRL_IFMANAGER_HH__
 #define __FEA_XRL_IFMANAGER_HH__
@@ -81,8 +81,6 @@ protected:
     InterfaceTransactionManager	_itm;
     IfConfig&			_ifconfig;
     uint32_t			_max_ops;
-    ProcessStatus               _status;
-    ProcessStatus               _prev_status;
 };
 
 #endif // __FEA_XRL_IFMANAGER_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.35 2007/01/23 01:57:37 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.36 2007/02/16 22:47:29 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -317,7 +317,7 @@ StaticRoutesNode::updates_made()
 	    const IfMgrIfAtom* if_atom;
 	    const IfMgrVifAtom* vif_atom;
 
-	    if_atom = _iftree.find_if(static_route.ifname());
+	    if_atom = _iftree.find_interface(static_route.ifname());
 	    vif_atom = _iftree.find_vif(static_route.ifname(),
 					static_route.vifname());
 	    if ((if_atom != NULL) && (if_atom->enabled())
@@ -326,7 +326,7 @@ StaticRoutesNode::updates_made()
 		is_old_up = true;
 	    }
 
-	    if_atom = ifmgr_iftree().find_if(static_route.ifname());
+	    if_atom = ifmgr_iftree().find_interface(static_route.ifname());
 	    vif_atom = ifmgr_iftree().find_vif(static_route.ifname(),
 					       static_route.vifname());
 	    if ((if_atom != NULL) && (if_atom->enabled())
@@ -1152,7 +1152,7 @@ StaticRoutesNode::is_accepted_by_nexthop(const StaticRoute& route) const
 	const IfMgrVifAtom* vif_atom;
 	bool is_up = false;
 
-	if_atom = _iftree.find_if(route.ifname());
+	if_atom = _iftree.find_interface(route.ifname());
 	vif_atom = _iftree.find_vif(route.ifname(), route.vifname());
 	if ((if_atom != NULL) && (if_atom->enabled())
 	    && (! if_atom->no_carrier())

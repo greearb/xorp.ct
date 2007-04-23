@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.82 2007/03/28 02:14:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.83 2007/04/19 21:36:47 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -330,7 +330,7 @@ BGPMain::is_interface_enabled(const string& interface) const
 {
     debug_msg("Interface %s\n", interface.c_str());
 
-    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_interface(interface);
     if (fi == NULL)
 	return false;
 
@@ -427,7 +427,7 @@ BGPMain::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
 
-    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_interface(interface);
     if (fi == NULL)
 	return 0;
 
@@ -477,7 +477,7 @@ BGPMain::updates_made()
 	is_old_interface_enabled &= (! if_atom->no_carrier());
 
 	// Check the interface
-	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
+	other_if_atom = ifmgr_iftree().find_interface(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // The interface has disappeared
 	    is_new_interface_enabled = false;
@@ -588,7 +588,7 @@ BGPMain::updates_made()
 	if_atom = &ii->second;
 
 	// Check the interface
-	other_if_atom = _iftree.find_if(if_atom->name());
+	other_if_atom = _iftree.find_interface(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // A new interface
 	    if (if_atom->enabled()
