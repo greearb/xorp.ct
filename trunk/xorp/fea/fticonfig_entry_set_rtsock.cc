@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.39 2007/03/02 00:56:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.40 2007/04/14 07:00:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -534,7 +534,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 		break;		// No interface to check
 	    const IfTree& iftree = ftic().iftree();
 	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	    if ((ii == iftree.ifs().end()) || ii->second.enabled())
+	    if ((ii != iftree.ifs().end()) && ii->second.enabled())
 		break;		// The interface is UP
 
 	    return (true);
