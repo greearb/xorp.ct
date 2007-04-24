@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.7 2007/04/20 06:35:10 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.8 2007/04/20 07:17:42 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -124,7 +124,6 @@ Library libfea :
 	xrl_fea_node.cc
 	xrl_fea_target.cc
 	xrl_fti.cc
-	xrl_ifmanager.cc
 	xrl_mfea_node.cc
 	xrl_rawsock4.cc
 	xrl_rawsock6.cc

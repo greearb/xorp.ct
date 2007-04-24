@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.5 2007/04/20 17:14:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.6 2007/04/23 22:14:10 pavlin Exp $"
 
 
 //
@@ -40,6 +40,7 @@
 #include "libxorp/profile.hh"
 
 #include "fea_node.hh"
+#include "ifmanager_transaction.hh"
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
@@ -61,7 +62,6 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _fea_node(fea_node),
       _xrl_router(xrl_router),
       _xftm(eventloop, fea_node.fticonfig(), &xrl_router),
-      _xifmgr(eventloop, fea_node.ifconfig()),
       _profile(profile),
       _xrsm4(xrsm4),
       _xrsm6(xrsm6),
@@ -136,7 +136,7 @@ XrlFeaTarget::common_0_1_get_status(
 {
     ProcessStatus s;
     string r;
-    s = _xifmgr.status(r);
+    s = ifconfig().status(r);
     //if it's bad news, don't bother to ask any other modules.
     switch (s) {
     case PROC_FAILED:
@@ -1137,7 +1137,12 @@ XrlFeaTarget::ifmgr_0_1_start_transaction(
 					  // Output values,
 					  uint32_t& tid)
 {
-    return _xifmgr.start_transaction(tid);
+    string error_msg;
+
+    if (ifconfig().start_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1145,7 +1150,12 @@ XrlFeaTarget::ifmgr_0_1_commit_transaction(
 					   // Input values,
 					   const uint32_t& tid)
 {
-    return _xifmgr.commit_transaction(tid);
+    string error_msg;
+
+    if (ifconfig().commit_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1153,7 +1163,12 @@ XrlFeaTarget::ifmgr_0_1_abort_transaction(
 					  // Input values,
 					  const uint32_t& tid)
 {
-    return _xifmgr.abort_transaction(tid);
+    string error_msg;
+
+    if (ifconfig().abort_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1162,8 +1177,18 @@ XrlFeaTarget::ifmgr_0_1_create_interface(
 					 const uint32_t&	tid,
 					 const string&		ifname)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddInterface(iftree, ifname));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new AddInterface(iftree, ifname),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1172,8 +1197,18 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
 					 const uint32_t&	tid,
 					 const string&		ifname)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveInterface(iftree, ifname));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new RemoveInterface(iftree, ifname),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1182,10 +1217,18 @@ XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new ConfigureInterfaceFromSystem(ifc, iftree,
-							     ifname));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new ConfigureInterfaceFromSystem(ifconfig(), iftree, ifname),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1195,8 +1238,18 @@ XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
 					      const string&	ifname,
 					      const bool&	enabled)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceEnabled(iftree, ifname, enabled));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceEnabled(iftree, ifname, enabled),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1206,8 +1259,18 @@ XrlFeaTarget::ifmgr_0_1_set_interface_discard(
 					      const string&	ifname,
 					      const bool&	discard)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceDiscard(iftree, ifname, discard));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceDiscard(iftree, ifname, discard),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1217,8 +1280,18 @@ XrlFeaTarget::ifmgr_0_1_set_mac(
 				const string&	ifname,
 				const Mac&	mac)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceMAC(iftree, ifname, mac));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceMAC(iftree, ifname, mac),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1227,21 +1300,26 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& iftree = _xifmgr.iftree();
+    IfTree& iftree = ifconfig().local_config();
+    const IfTree& original_iftree = ifconfig().original_config();
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
     // Find the original MAC address
-    IfConfig& ifc = _fea_node.ifconfig();
-    const IfTree& original_iftree = ifc.original_config();
-    IfTree::IfMap::const_iterator ii = original_iftree.get_if(ifname);
-    if (ii == original_iftree.ifs().end()) {
-	string error_msg = c_format("Interface %s does not exist.",
-				    ifname.c_str());
+    ifp = ifconfig().find_interface(original_iftree, ifname, error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    const Mac& mac = ifp->mac();
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceMAC(iftree, ifname, mac),
+	    error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    const IfTreeInterface& fi = ii->second;
-    const Mac& mac = fi.mac();
 
-    return _xifmgr.add(tid, new SetInterfaceMAC(iftree, ifname, mac));
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1251,8 +1329,18 @@ XrlFeaTarget::ifmgr_0_1_set_mtu(
 				const string&	ifname,
 				const uint32_t&	mtu)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetInterfaceMTU(iftree, ifname, mtu));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceMTU(iftree, ifname, mtu),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1261,21 +1349,26 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& iftree = _xifmgr.iftree();
+    IfTree& iftree = ifconfig().local_config();
+    const IfTree& original_iftree = ifconfig().original_config();
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
 
     // Find the original MTU
-    IfConfig& ifc = _fea_node.ifconfig();
-    const IfTree& original_iftree = ifc.original_config();
-    IfTree::IfMap::const_iterator ii = original_iftree.get_if(ifname);
-    if (ii == original_iftree.ifs().end()) {
-	string error_msg = c_format("Interface %s does not exist.",
-				    ifname.c_str());
+    ifp = ifconfig().find_interface(original_iftree, ifname, error_msg);
+    if (ifp == NULL)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    uint32_t mtu = ifp->mtu();
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceMTU(iftree, ifname, mtu),
+	    error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    const IfTreeInterface& fi = ii->second;
-    uint32_t mtu = fi.mtu();
 
-    return _xifmgr.add(tid, new SetInterfaceMTU(iftree, ifname, mtu));
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1285,8 +1378,18 @@ XrlFeaTarget::ifmgr_0_1_create_vif(
 				   const string&	ifname,
 				   const string&	vifname)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddInterfaceVif(iftree, ifname, vifname));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new AddInterfaceVif(iftree, ifname, vifname),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1296,8 +1399,18 @@ XrlFeaTarget::ifmgr_0_1_delete_vif(
 				   const string&	ifname,
 				   const string&	vifname)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveInterfaceVif(iftree, ifname, vifname));
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new RemoveInterfaceVif(iftree, ifname, vifname),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1308,11 +1421,19 @@ XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
 					const string&	vifname,
 					const bool&	enabled)
 {
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetVifEnabled(iftree, ifname, vifname,
-					      enabled));
-}
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
 
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetVifEnabled(iftree, ifname, vifname, enabled),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_create_address4(
@@ -1322,11 +1443,21 @@ XrlFeaTarget::ifmgr_0_1_create_address4(
 					const string&   vifname,
 					const IPv4&	address)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddAddr4(iftree, ifname, vifname, address));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new AddAddr4(iftree, ifname, vifname, address),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1337,11 +1468,21 @@ XrlFeaTarget::ifmgr_0_1_delete_address4(
 					const string&   vifname,
 					const IPv4&     address)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveAddr4(iftree, ifname, vifname, address));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new RemoveAddr4(iftree, ifname, vifname, address),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1353,13 +1494,21 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
 					const IPv4&	address,
 					const bool&	enabled)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid,
-		       new SetAddr4Enabled(iftree, ifname, vifname, address,
-					   enabled));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr4Enabled(iftree, ifname, vifname, address, enabled),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1371,12 +1520,21 @@ XrlFeaTarget::ifmgr_0_1_set_prefix4(
 				    const IPv4&		address,
 				    const uint32_t&	prefix_len)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetAddr4Prefix(iftree, ifname, vifname,
-					       address, prefix_len));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr4Prefix(iftree, ifname, vifname, address, prefix_len),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1388,14 +1546,22 @@ XrlFeaTarget::ifmgr_0_1_set_broadcast4(
 				       const IPv4&	address,
 				       const IPv4&	broadcast)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetAddr4Broadcast(iftree, ifname, vifname,
-						  address, broadcast));
-}
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr4Broadcast(iftree, ifname, vifname, address, broadcast),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
+    return XrlCmdError::OKAY();
+}
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_endpoint4(
@@ -1406,12 +1572,21 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint4(
 				      const IPv4&	address,
 				      const IPv4&	endpoint)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new SetAddr4Endpoint(iftree, ifname, vifname,
-						 address, endpoint));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr4Endpoint(iftree, ifname, vifname, address, endpoint),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1422,11 +1597,21 @@ XrlFeaTarget::ifmgr_0_1_create_address6(
 					const string&	vifname,
 					const IPv6&	address)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new AddAddr6(iftree, ifname, vifname, address));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new AddAddr6(iftree, ifname, vifname, address),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1437,11 +1622,21 @@ XrlFeaTarget::ifmgr_0_1_delete_address6(
 					const string&	vifname,
 					const IPv6&	address)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid, new RemoveAddr6(iftree, ifname, vifname, address));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new RemoveAddr6(iftree, ifname, vifname, address),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1453,13 +1648,21 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
 					     const IPv6&	address,
 					     const bool&	enabled)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid,
-		       new SetAddr6Enabled(iftree, ifname, vifname, address,
-					   enabled));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr6Enabled(iftree, ifname, vifname, address, enabled),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1471,13 +1674,21 @@ XrlFeaTarget::ifmgr_0_1_set_prefix6(
 				    const IPv6&	  	address,
 				    const uint32_t&	prefix_len)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid,
-		       new SetAddr6Prefix(iftree, ifname, vifname, address,
-					  prefix_len));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr6Prefix(iftree, ifname, vifname, address, prefix_len),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -1489,13 +1700,21 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
 				      const IPv6&	address,
 				      const IPv6&	endpoint)
 {
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    IfTree& iftree = _xifmgr.iftree();
-    return _xifmgr.add(tid,
-		       new SetAddr6Endpoint(iftree, ifname, vifname, address,
-					    endpoint));
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetAddr6Endpoint(iftree, ifname, vifname, address, endpoint),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError

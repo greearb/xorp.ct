@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.54 2007/04/19 21:36:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.55 2007/04/23 22:14:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,6 +27,8 @@
 #endif
 
 #include "ifconfig.hh"
+#include "ifmanager_transaction.hh"
+
 
 //
 // Network interfaces related configuration.
@@ -61,6 +63,7 @@ IfConfig::IfConfig(EventLoop& eventloop,
 		   NexthopPortMapper& nexthop_port_mapper)
     : _eventloop(eventloop), _ur(ur), _er(er),
       _nexthop_port_mapper(nexthop_port_mapper),
+      _itm(NULL),
       _restore_original_config_on_shutdown(false),
       _ifc_get_primary(NULL),
       _ifc_set_primary(NULL),
@@ -87,6 +90,8 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _is_dummy(false),
       _is_running(false)
 {
+    _itm = new InterfaceTransactionManager(_eventloop, 5000, 10);
+
     //
     // Check that all necessary mechanisms to interact with the
     // underlying system are in place.
@@ -120,6 +125,159 @@ IfConfig::~IfConfig()
 		   "the network interfaces: %s",
 		   error_msg.c_str());
     }
+
+    if (_itm != NULL) {
+	delete _itm;
+	_itm = NULL;
+    }
+}
+
+ProcessStatus
+IfConfig::status(string& reason) const
+{
+    if (_itm->pending() > 0) {
+	reason = "There are transactions pending";
+	return (PROC_NOT_READY);
+    }
+    return (PROC_READY);
+}
+
+int
+IfConfig::start_transaction(uint32_t& tid, string& error_msg)
+{
+    if (_itm->start(tid) != true) {
+	error_msg = c_format("Resource limit on number of pending transactions hit");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::abort_transaction(uint32_t tid, string& error_msg)
+{
+    if (_itm->abort(tid) != true) {
+	error_msg = c_format("Expired or invalid transaction ID presented");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::add_transaction_operation(uint32_t tid,
+				    const TransactionManager::Operation& op,
+				    string& error_msg)
+{
+    uint32_t n_ops = 0;
+
+    if (_itm->retrieve_size(tid, n_ops) != true) {
+	error_msg = c_format("Expired or invalid transaction ID presented");
+	return (XORP_ERROR);
+    }
+
+    if (_itm->add(tid, op) != true) {
+	error_msg = c_format("Unknown resource shortage");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::commit_transaction(uint32_t tid, string& error_msg)
+{
+    bool is_error = false;
+
+    //
+    // XXX: Pull in advance the current config, in case it is needed
+    // by some of the transaction operations.
+    //
+    pull_config();
+
+    if (_itm->commit(tid) != true) {
+	error_msg = c_format("Expired or invalid transaction ID presented");
+	return (XORP_ERROR);
+    }
+
+    if (_itm->error().empty() != true) {
+	error_msg = _itm->error();
+	return (XORP_ERROR);
+    }
+
+    //
+    // If we get here we have updated the local copy of the config
+    // successfully.
+    //
+
+    //
+    // Push the configuration
+    //
+    do {
+	if (push_config(local_config()) == true)
+	    break;		// Success
+
+	error_msg = push_error();
+	is_error = true;
+
+	// Reverse-back to the previously working configuration
+	IfTree restore_config = old_local_config();
+	restore_config.prepare_replacement_state(local_config());
+	set_local_config(restore_config);
+	if (push_config(local_config()) == true)
+	    break;		// Continue with finalizing the reverse-back
+
+	// Failed to reverse back
+	string tmp_error_msg = push_error();
+	tmp_error_msg = c_format("[Also, failed to reverse-back to the "
+				 "previous config: %s]",
+				 tmp_error_msg.c_str());
+	error_msg = error_msg + " " + tmp_error_msg;
+	break;
+    } while (false);
+
+    //
+    // Pull the new device configuration
+    //
+    const IfTree& dev_config = pull_config();
+    debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
+    debug_msg("LOCAL CONFIG %s\n", local_config().str().c_str());
+
+    //
+    // Align with device configuration, so that any stuff that failed
+    // in push is not held over in config.
+    //
+    local_config().align_with(dev_config);
+    debug_msg("LOCAL CONFIG AFTER ALIGN %s\n", local_config().str().c_str());
+
+    //
+    // Prune deleted state that was never added earlier
+    //
+    local_config().prune_bogus_deleted_state(old_local_config());
+
+    //
+    // Propagate the configuration changes to all listeners.
+    //
+    if (! is_error)
+	report_updates(local_config(), false);
+
+    //
+    // Flush-out config state
+    //
+    local_config().finalize_state();
+
+    //
+    // Save a backup copy of the configuration state
+    //
+    if (! is_error) {
+	set_old_local_config(local_config());
+	old_local_config().finalize_state();
+    }
+
+    if (is_error)
+	return (XORP_ERROR);
+
+    return (XORP_OK);
 }
 
 int
@@ -945,6 +1103,20 @@ IfConfig::find_interface(IfTree& iftree, const string& ifname,
     return (&ii->second);
 }
 
+const IfTreeInterface *
+IfConfig::find_interface(const IfTree& iftree, const string& ifname,
+			 string& error_msg) const
+{
+    IfTree::IfMap::const_iterator ii = iftree.get_if(ifname);
+
+    if (ii == iftree.ifs().end()) {
+	error_msg = c_format("Interface %s does not exist", ifname.c_str());
+	return (NULL);
+    }
+
+    return (&ii->second);
+}
+
 IfTreeVif *
 IfConfig::find_vif(IfTree& iftree, const string& ifname, const string& vifname,
 		   string& error_msg)
@@ -955,6 +1127,25 @@ IfConfig::find_vif(IfTree& iftree, const string& ifname, const string& vifname,
 	return (NULL);
 
     IfTreeInterface::VifMap::iterator vi = iface->get_vif(vifname);
+    if (vi == iface->vifs().end()) {
+	error_msg = c_format("Vif %s on interface %s does not exist",
+			     vifname.c_str(), ifname.c_str());
+	return (NULL);
+    }
+
+    return (&vi->second);
+}
+
+const IfTreeVif *
+IfConfig::find_vif(const IfTree& iftree, const string& ifname,
+		   const string& vifname, string& error_msg) const
+{
+    const IfTreeInterface* iface = find_interface(iftree, ifname, error_msg);
+
+    if (iface == NULL)
+	return (NULL);
+
+    IfTreeInterface::VifMap::const_iterator vi = iface->get_vif(vifname);
     if (vi == iface->vifs().end()) {
 	error_msg = c_format("Vif %s on interface %s does not exist",
 			     vifname.c_str(), ifname.c_str());
@@ -985,6 +1176,28 @@ IfConfig::find_addr(IfTree& iftree, const string& ifname,
     return (&ai->second);
 }
 
+const IfTreeAddr4 *
+IfConfig::find_addr(const IfTree& iftree, const string& ifname,
+		    const string& vifname, const IPv4& addr,
+		    string& error_msg) const
+{
+    const IfTreeVif* vif = find_vif(iftree, ifname, vifname, error_msg);
+
+    if (vif == NULL)
+	return (NULL);
+
+    IfTreeVif::IPv4Map::const_iterator ai = vif->get_addr(addr);
+    if (ai == vif->ipv4addrs().end()) {
+	error_msg = c_format("Address %s on interface %s vif %s does not exist",
+			     addr.str().c_str(),
+			     ifname.c_str(),
+			     vifname.c_str());
+	return (NULL);
+    }
+
+    return (&ai->second);
+}
+
 IfTreeAddr6 *
 IfConfig::find_addr(IfTree& iftree, const string& ifname,
 		    const string& vifname, const IPv6& addr, string& error_msg)
@@ -995,6 +1208,28 @@ IfConfig::find_addr(IfTree& iftree, const string& ifname,
 	return (NULL);
 
     IfTreeVif::IPv6Map::iterator ai = vif->get_addr(addr);
+    if (ai == vif->ipv6addrs().end()) {
+	error_msg = c_format("Address %s on interface %s vif %s does not exist",
+			     addr.str().c_str(),
+			     ifname.c_str(),
+			     vifname.c_str());
+	return (NULL);
+    }
+
+    return (&ai->second);
+}
+
+const IfTreeAddr6 *
+IfConfig::find_addr(const IfTree& iftree, const string& ifname,
+		    const string& vifname, const IPv6& addr,
+		    string& error_msg) const
+{
+    const IfTreeVif* vif = find_vif(iftree, ifname, vifname, error_msg);
+
+    if (vif == NULL)
+	return (NULL);
+
+    IfTreeVif::IPv6Map::const_iterator ai = vif->get_addr(addr);
     if (ai == vif->ipv6addrs().end()) {
 	error_msg = c_format("Address %s on interface %s vif %s does not exist",
 			     addr.str().c_str(),

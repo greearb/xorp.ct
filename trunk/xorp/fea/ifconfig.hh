@@ -12,10 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.51 2007/04/18 06:20:57 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.52 2007/04/23 22:14:10 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
+
+#include "libxorp/status_codes.h"
+#include "libxorp/transaction.hh"
 
 #include "ifconfig_get.hh"
 #include "ifconfig_set.hh"
@@ -29,6 +32,7 @@ class IfConfigSet;
 class IfConfigObserver;
 class IfConfigErrorReporterBase;
 class IfConfigUpdateReporterBase;
+class InterfaceTransactionManager;
 class NexthopPortMapper;
 
 
@@ -66,6 +70,53 @@ public:
     EventLoop& eventloop() { return _eventloop; }
 
     /**
+     * Get the status code
+     *
+     * @param reason the human-readable reason for any failure.
+     * @return the status code.
+     */
+    ProcessStatus status(string& reason) const;
+
+    /**
+     * Start interface-related transaction.
+     *
+     * @param tid the return-by-reference new transaction ID.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start_transaction(uint32_t& tid, string& error_msg);
+
+    /**
+     * Commit interface-related transaction.
+     *
+     * @param tid the transaction ID.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int commit_transaction(uint32_t tid, string& error_msg);
+
+    /**
+     * Abort interface-related transaction.
+     *
+     * @param tid the transaction ID.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int abort_transaction(uint32_t tid, string& error_msg);
+
+    /**
+     * Add operation to interface-related transaction.
+     *
+     * @param tid the transaction ID.
+     * @param op the operation to add.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_transaction_operation(uint32_t tid,
+				  const TransactionManager::Operation& op,
+				  string& error_msg);
+
+    /**
      * Get a reference to the @ref NexthopPortMapper instance.
      *
      * @return a reference to the @ref NexthopPortMapper instance.
@@ -84,7 +135,9 @@ public:
     IfTree& pushed_config()		{ return (_pushed_config); }
     const IfTree& original_config()	{ return (_original_config); }
     IfTree& local_config()		{ return (_local_config); }
+    void set_local_config(const IfTree& it) { _local_config = it; }
     IfTree& old_local_config()		{ return (_old_local_config); }
+    void set_old_local_config(const IfTree& it) { _old_local_config = it; }
 
     /**
      * Test whether the original configuration should be restored on shutdown.
@@ -339,6 +392,19 @@ public:
 				    string& error_msg);
 
     /**
+     * Find an interface from a given interface tree.
+     *
+     * @param iftree the interface tree to search.
+     * @param ifname the interface name to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the interface (@see IfTreeInterface) or NULL
+     * if not found.
+     */
+    const IfTreeInterface* find_interface(const IfTree& iftree,
+					  const string& ifname,
+					  string& error_msg) const;
+
+    /**
      * Find a vif from a given interface tree.
      *
      * @param iftree the interface tree to search.
@@ -349,6 +415,18 @@ public:
      */
     IfTreeVif* find_vif(IfTree& iftree, const string& ifname,
 			const string& vifname, string& error_msg);
+
+    /**
+     * Find a vif from a given interface tree.
+     *
+     * @param iftree the interface tree to search.
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeVif) or NULL if not found.
+     */
+    const IfTreeVif* find_vif(const IfTree& iftree, const string& ifname,
+			      const string& vifname, string& error_msg) const;
 
     /**
      * Find an IPv4 address from a given interface tree.
@@ -365,6 +443,20 @@ public:
 			   string& error_msg);
 
     /**
+     * Find an IPv4 address from a given interface tree.
+     *
+     * @param iftree the interface tree to search.
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param addr the address to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeAddr4) or NULL if not found.
+     */
+    const IfTreeAddr4* find_addr(const IfTree& iftree, const string& ifname,
+				 const string& vifname, const IPv4& addr,
+				 string& error_msg) const;
+
+    /**
      * Find an IPv6 address from a given interface tree.
      *
      * @param iftree the interface tree to search.
@@ -377,6 +469,20 @@ public:
     IfTreeAddr6* find_addr(IfTree& iftree, const string& ifname,
 			   const string& vifname, const IPv6& addr,
 			   string& error_msg);
+
+    /**
+     * Find an IPv6 address from a given interface tree.
+     *
+     * @param iftree the interface tree to search.
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param addr the address to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     */
+    const IfTreeAddr6* find_addr(const IfTree& iftree, const string& ifname,
+				 const string& vifname, const IPv6& addr,
+				 string& error_msg) const;
 
     /**
      * Get error message associated with push operation.
@@ -444,6 +550,11 @@ private:
     IfConfigUpdateReporterBase&	_ur;
     IfConfigErrorReporterBase&	_er;
     NexthopPortMapper&		_nexthop_port_mapper;
+
+    //
+    // The interface transaction manager
+    //
+    InterfaceTransactionManager* _itm;
 
     //
     // A cache of associative array of interface names to interface index.
