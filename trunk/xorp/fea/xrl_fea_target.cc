@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.6 2007/04/23 22:14:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.7 2007/04/24 01:28:42 pavlin Exp $"
 
 
 //
@@ -637,8 +637,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
-				    error_msg);
+    ifp = ifconfig().local_config().find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -665,8 +664,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
-			       error_msg);
+    vifp = ifconfig().local_config().find_vif(ifname, vifname, error_msg);
     if (vifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -690,8 +688,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
-			       error_msg);
+    vifp = ifconfig().local_config().find_vif(ifname, vifname, error_msg);
     if (vifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -710,8 +707,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
-				    error_msg);
+    ifp = ifconfig().local_config().find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -730,8 +726,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_discard(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
-				    error_msg);
+    ifp = ifconfig().local_config().find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -749,8 +744,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mac(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
-				    error_msg);
+    ifp = ifconfig().local_config().find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -768,8 +762,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
-				    error_msg);
+    ifp = ifconfig().local_config().find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -787,8 +780,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_no_carrier(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = ifconfig().find_interface(ifconfig().local_config(), ifname,
-				    error_msg);
+    ifp = ifconfig().local_config().find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -808,8 +800,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
-			       error_msg);
+    vifp = ifconfig().local_config().find_vif(ifname, vifname, error_msg);
     if (vifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -833,8 +824,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -858,8 +849,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -890,8 +881,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -922,8 +913,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
-			       error_msg);
+    vifp = ifconfig().local_config().find_vif(ifname, vifname, error_msg);
     if (vifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -950,8 +940,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -975,8 +965,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -1007,8 +997,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    vifp = ifconfig().find_vif(ifconfig().local_config(), ifname, vifname,
-			       error_msg);
+    vifp = ifconfig().local_config().find_vif(ifname, vifname, error_msg);
     if (vifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -1039,8 +1028,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -1071,8 +1060,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -1098,8 +1087,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -1122,8 +1111,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    ap = ifconfig().find_addr(ifconfig().local_config(), ifname, vifname,
-			      address, error_msg);
+    ap = ifconfig().local_config().find_addr(ifname, vifname, address,
+					     error_msg);
     if (ap == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
@@ -1306,7 +1295,7 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
     string error_msg;
 
     // Find the original MAC address
-    ifp = ifconfig().find_interface(original_iftree, ifname, error_msg);
+    ifp = original_iftree.find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     const Mac& mac = ifp->mac();
@@ -1355,7 +1344,7 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
     string error_msg;
 
     // Find the original MTU
-    ifp = ifconfig().find_interface(original_iftree, ifname, error_msg);
+    ifp = original_iftree.find_interface(ifname, error_msg);
     if (ifp == NULL)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     uint32_t mtu = ifp->mtu();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.37 2007/02/16 22:45:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.38 2007/04/19 21:36:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -74,6 +74,154 @@ IfTree::add_if(const string& ifname)
     }
     _ifs.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
     return true;
+}
+
+IfTreeInterface *
+IfTree::find_interface(const string& ifname, string& error_msg)
+{
+    IfTree::IfMap::iterator ii = get_if(ifname);
+
+    if (ii == ifs().end()) {
+	error_msg = c_format("Interface %s does not exist", ifname.c_str());
+	return (NULL);
+    }
+
+    return (&ii->second);
+}
+
+const IfTreeInterface *
+IfTree::find_interface(const string& ifname, string& error_msg) const
+{
+    IfTree::IfMap::const_iterator ii = get_if(ifname);
+
+    if (ii == ifs().end()) {
+	error_msg = c_format("Interface %s does not exist", ifname.c_str());
+	return (NULL);
+    }
+
+    return (&ii->second);
+}
+
+IfTreeVif *
+IfTree::find_vif(const string& ifname, const string& vifname,
+		 string& error_msg)
+{
+    IfTreeInterface* iface = find_interface(ifname, error_msg);
+
+    if (iface == NULL)
+	return (NULL);
+
+    IfTreeInterface::VifMap::iterator vi = iface->get_vif(vifname);
+    if (vi == iface->vifs().end()) {
+	error_msg = c_format("Vif %s on interface %s does not exist",
+			     vifname.c_str(), ifname.c_str());
+	return (NULL);
+    }
+
+    return (&vi->second);
+}
+
+const IfTreeVif *
+IfTree::find_vif(const string& ifname, const string& vifname,
+		 string& error_msg) const
+{
+    const IfTreeInterface* iface = find_interface(ifname, error_msg);
+
+    if (iface == NULL)
+	return (NULL);
+
+    IfTreeInterface::VifMap::const_iterator vi = iface->get_vif(vifname);
+    if (vi == iface->vifs().end()) {
+	error_msg = c_format("Vif %s on interface %s does not exist",
+			     vifname.c_str(), ifname.c_str());
+	return (NULL);
+    }
+
+    return (&vi->second);
+}
+
+IfTreeAddr4 *
+IfTree::find_addr(const string& ifname, const string& vifname,
+		  const IPv4& addr, string& error_msg)
+{
+    IfTreeVif* vif = find_vif(ifname, vifname, error_msg);
+
+    if (vif == NULL)
+	return (NULL);
+
+    IfTreeVif::IPv4Map::iterator ai = vif->get_addr(addr);
+    if (ai == vif->ipv4addrs().end()) {
+	error_msg = c_format("Address %s on interface %s vif %s does not exist",
+			     addr.str().c_str(),
+			     ifname.c_str(),
+			     vifname.c_str());
+	return (NULL);
+    }
+
+    return (&ai->second);
+}
+
+const IfTreeAddr4 *
+IfTree::find_addr(const string& ifname, const string& vifname,
+		  const IPv4& addr, string& error_msg) const
+{
+    const IfTreeVif* vif = find_vif(ifname, vifname, error_msg);
+
+    if (vif == NULL)
+	return (NULL);
+
+    IfTreeVif::IPv4Map::const_iterator ai = vif->get_addr(addr);
+    if (ai == vif->ipv4addrs().end()) {
+	error_msg = c_format("Address %s on interface %s vif %s does not exist",
+			     addr.str().c_str(),
+			     ifname.c_str(),
+			     vifname.c_str());
+	return (NULL);
+    }
+
+    return (&ai->second);
+}
+
+IfTreeAddr6 *
+IfTree::find_addr(const string& ifname, const string& vifname,
+		  const IPv6& addr, string& error_msg)
+{
+    IfTreeVif* vif = find_vif(ifname, vifname, error_msg);
+
+    if (vif == NULL)
+	return (NULL);
+
+    IfTreeVif::IPv6Map::iterator ai = vif->get_addr(addr);
+    if (ai == vif->ipv6addrs().end()) {
+	error_msg = c_format("Address %s on interface %s vif %s does not exist",
+			     addr.str().c_str(),
+			     ifname.c_str(),
+			     vifname.c_str());
+	return (NULL);
+    }
+
+    return (&ai->second);
+}
+
+const IfTreeAddr6 *
+IfTree::find_addr(const string& ifname, const string& vifname,
+		  const IPv6& addr, string& error_msg) const
+{
+    const IfTreeVif* vif = find_vif(ifname, vifname, error_msg);
+
+    if (vif == NULL)
+	return (NULL);
+
+    IfTreeVif::IPv6Map::const_iterator ai = vif->get_addr(addr);
+    if (ai == vif->ipv6addrs().end()) {
+	error_msg = c_format("Address %s on interface %s vif %s does not exist",
+			     addr.str().c_str(),
+			     ifname.c_str(),
+			     vifname.c_str());
+	return (NULL);
+    }
+
+    return (&ai->second);
 }
 
 IfTree::IfMap::iterator

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.32 2007/04/14 07:00:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.33 2007/04/23 22:14:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -224,7 +224,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	debug_msg("interface: %s\n", if_name.c_str());
 	debug_msg("interface index: %d\n", if_index);
 	
-	IfTreeInterface* fi = ifc.find_interface(it, if_name, error_msg);
+	IfTreeInterface* fi = it.find_interface(if_name, error_msg);
 	if (fi == NULL) {
 	    XLOG_FATAL("Could not find interface named %s: %s",
 		       if_name.c_str(), error_msg.c_str());
@@ -249,7 +249,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	debug_msg("enabled: %s\n", fi->enabled() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
-	IfTreeVif* fv = ifc.find_vif(it, if_name, if_name, error_msg);
+	IfTreeVif* fv = it.find_vif(if_name, if_name, error_msg);
 	if (fv == NULL) {
 	    XLOG_FATAL("Could not find IfTreeVif on %s named %s: %s",
 		       if_name.c_str(), if_name.c_str(), error_msg.c_str());
@@ -545,7 +545,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     // Locate the vif to pin data on
     //
     // XXX: vifname == ifname on this platform
-    IfTreeVif* fv = ifc.find_vif(it, if_name, if_name, error_msg);
+    IfTreeVif* fv = it.find_vif(if_name, if_name, error_msg);
     if (fv == NULL) {
 	XLOG_FATAL("Could not find vif named %s in IfTree: %s",
 		   if_name.c_str(), error_msg.c_str());
@@ -710,7 +710,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 	ifc.map_ifindex(if_index, if_name);
 	
 	it.add_if(if_name);
-	IfTreeInterface* fi = ifc.find_interface(it, if_name, error_msg);
+	IfTreeInterface* fi = it.find_interface(if_name, error_msg);
 	// XXX: vifname == ifname on this platform
 	if (fi != NULL) {
 	    fi->add_vif(if_name);
@@ -726,7 +726,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 	// Delete interface
 	//
 	debug_msg("Deleting interface and vif named: %s\n", if_name.c_str());
-	IfTreeInterface* fi = ifc.find_interface(it, if_name, error_msg);
+	IfTreeInterface* fi = it.find_interface(if_name, error_msg);
 	if (fi != NULL) {
 	    fi->mark(IfTree::DELETED);
 	} else {
@@ -734,7 +734,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 		      if_name.c_str());
 	}
 	// XXX: vifname == ifname on this platform
-	IfTreeVif* fv = ifc.find_vif(it, if_name, if_name, error_msg);
+	IfTreeVif* fv = it.find_vif(if_name, if_name, error_msg);
 	if (fv != NULL) {
 	    fv->mark(IfTree::DELETED);
 	} else {

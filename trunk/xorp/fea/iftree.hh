@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.38 2007/02/16 22:45:44 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.39 2007/04/19 21:36:49 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -143,6 +143,99 @@ public:
      * @return true on success, false if an error.
      */
     bool update_if(const IfTreeInterface& other_iface);
+
+    /**
+     * Find an interface.
+     *
+     * @param ifname the interface name to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the interface (@see IfTreeInterface) or NULL
+     * if not found.
+     */
+    IfTreeInterface* find_interface(const string& ifname, string& error_msg);
+
+    /**
+     * Find a const interface.
+     *
+     * @param ifname the interface name to search for.
+     * @param error_msg the error message (if error).
+     * @return a const pointer to the interface (@see IfTreeInterface) or NULL
+     * if not found.
+     */
+    const IfTreeInterface* find_interface(const string& ifname,
+					  string& error_msg) const;
+
+    /**
+     * Find a vif.
+     *
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeVif) or NULL if not found.
+     */
+    IfTreeVif* find_vif(const string& ifname, const string& vifname,
+			string& error_msg);
+
+    /**
+     * Find a const vif.
+     *
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param error_msg the error message (if error).
+     * @return a const pointer to the vif (@see IfTreeVif) or NULL
+     * if not found.
+     */
+    const IfTreeVif* find_vif(const string& ifname, const string& vifname,
+			      string& error_msg) const;
+
+    /**
+     * Find an IPv4 address.
+     *
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param addr the address to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeAddr4) or NULL if not found.
+     */
+    IfTreeAddr4* find_addr(const string& ifname, const string& vifname,
+			   const IPv4& addr, string& error_msg);
+
+    /**
+     * Find a const IPv4 address.
+     *
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param addr the address to search for.
+     * @param error_msg the error message (if error).
+     * @return a const pointer to the vif (@see IfTreeAddr4) or NULL
+     * if not found.
+     */
+    const IfTreeAddr4* find_addr(const string& ifname, const string& vifname,
+				 const IPv4& addr, string& error_msg) const;
+
+    /**
+     * Find an IPv6 address.
+     *
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param addr the address to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     */
+    IfTreeAddr6* find_addr(const string& ifname, const string& vifname,
+			   const IPv6& addr, string& error_msg);
+
+    /**
+     * Find a const IPv6 address.
+     *
+     * @param ifname the interface name to search for.
+     * @param vifname the vif name to search for.
+     * @param addr the address to search for.
+     * @param error_msg the error message (if error).
+     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     */
+    const IfTreeAddr6* find_addr(const string& ifname, const string& vifname,
+				 const IPv6& addr, string& error_msg) const;
 
     /**
      * Get iterator of corresponding to named interface.
