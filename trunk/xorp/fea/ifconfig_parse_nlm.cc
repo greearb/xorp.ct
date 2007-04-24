@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.31 2007/04/16 18:53:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.32 2007/04/23 22:14:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -346,7 +346,7 @@ nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     // Delete the interface
     //
     debug_msg("Deleting interface and vif named: %s\n", if_name.c_str());
-    IfTreeInterface* fi = ifconfig.find_interface(it, if_name, error_msg);
+    IfTreeInterface* fi = ifc.find_interface(it, if_name, error_msg);
     if (fi != NULL) {
 	fi->mark(IfTree::DELETED);
     } else {
