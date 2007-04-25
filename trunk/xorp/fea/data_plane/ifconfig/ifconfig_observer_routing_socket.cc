@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_dummy.cc,v 1.15 2006/08/29 22:42:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.17 2007/04/18 06:20:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,25 +28,26 @@
 // Observe information change about network interface configuration from
 // the underlying system.
 //
-// The mechanism to observe the information is dummy (for testing
-// purpose).
+// The mechanism to observe the information is routing sockets.
 //
 
 
-IfConfigObserverDummy::IfConfigObserverDummy(IfConfig& ifc)
-    : IfConfigObserver(ifc)
+IfConfigObserverRtsock::IfConfigObserverRtsock(IfConfig& ifc)
+    : IfConfigObserver(ifc),
+      RoutingSocket(ifc.eventloop()),
+      RoutingSocketObserver(*(RoutingSocket *)this)
 {
-#if 0	// XXX: by default Dummy is never registering by itself
+#ifdef HAVE_ROUTING_SOCKETS
     register_ifc_primary();
 #endif
 }
 
-IfConfigObserverDummy::~IfConfigObserverDummy()
+IfConfigObserverRtsock::~IfConfigObserverRtsock()
 {
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the dummy mechanism to observe "
+	XLOG_ERROR("Cannot stop the routing sockets mechanism to observe "
 		   "information about network interfaces from the underlying "
 		   "system: %s",
 		   error_msg.c_str());
@@ -54,14 +55,13 @@ IfConfigObserverDummy::~IfConfigObserverDummy()
 }
 
 int
-IfConfigObserverDummy::start(string& error_msg)
+IfConfigObserverRtsock::start(string& error_msg)
 {
-    UNUSED(error_msg);
-
     if (_is_running)
 	return (XORP_OK);
 
-    // TODO: XXX: PAVPAVPAV: implement it!
+    if (RoutingSocket::start(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = true;
 
@@ -69,14 +69,13 @@ IfConfigObserverDummy::start(string& error_msg)
 }
 
 int
-IfConfigObserverDummy::stop(string& error_msg)
+IfConfigObserverRtsock::stop(string& error_msg)
 {
-    UNUSED(error_msg);
-
-    // TODO: XXX: PAVPAVPAV: implement it!
-
     if (! _is_running)
 	return (XORP_OK);
+
+    if (RoutingSocket::stop(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = false;
 
@@ -84,9 +83,26 @@ IfConfigObserverDummy::stop(string& error_msg)
 }
 
 void
-IfConfigObserverDummy::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverRtsock::receive_data(const vector<uint8_t>& buffer)
 {
-    // TODO: use it?
-    UNUSED(buffer);
+    if (ifc().ifc_get_primary().parse_buffer_rtm(ifc().live_config(), buffer)
+	!= true) {
+	return;
+    }
+
+    ifc().report_updates(ifc().live_config(), true);
+
+    // Propagate the changes from the live config to the local config
+    IfTree& local_config = ifc().local_config();
+    local_config.track_live_config_state(ifc().live_config());
+    ifc().report_updates(local_config, false);
+    local_config.finalize_state();
+    ifc().live_config().finalize_state();
+}
+
+void
+IfConfigObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
+{
+    receive_data(buffer);
 }
 

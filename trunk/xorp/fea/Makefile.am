@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.74 2007/04/24 01:28:41 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.75 2007/04/24 18:50:54 greenhal Exp $
 ##
 
 # Redefine the bin installation directory
@@ -193,17 +193,17 @@ libfea_la_SOURCES	+= ifconfig_addr_table.cc
 libfea_la_SOURCES	+= ifconfig_get.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_click.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_dummy.cc
-libfea_la_SOURCES	+= ifconfig_get_getifaddrs.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_ioctl.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_netlink.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_sysctl.cc
 libfea_la_SOURCES	+= ifconfig_media.cc
 libfea_la_SOURCES	+= ifconfig_observer.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_netlink.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc
 libfea_la_SOURCES	+= ifconfig_parse_ifaddrs.cc
 libfea_la_SOURCES	+= ifconfig_parse_ifreq.cc
@@ -215,7 +215,7 @@ libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_click.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_ioctl.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_netlink.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
 libfea_la_SOURCES	+= ifmanager_transaction.cc
 libfea_la_SOURCES	+= iftree.cc
 libfea_la_SOURCES	+= libfeaclient_bridge.cc

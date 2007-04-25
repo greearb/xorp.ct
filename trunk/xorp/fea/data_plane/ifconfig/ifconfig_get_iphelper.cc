@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.8 2007/02/16 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.9 2007/04/25 01:57:42 pavlin Exp $"
 
 #include "fea_module.h"
 

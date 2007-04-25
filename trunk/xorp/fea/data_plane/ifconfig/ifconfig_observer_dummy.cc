@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_dummy.cc,v 1.15 2006/03/16 00:03:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_dummy.cc,v 1.16 2007/02/16 22:45:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,30 +21,32 @@
 #include "libxorp/debug.h"
 
 #include "ifconfig.hh"
-#include "ifconfig_get.hh"
+#include "ifconfig_observer.hh"
 
 
 //
-// Get information about network interfaces from the underlying system.
+// Observe information change about network interface configuration from
+// the underlying system.
 //
-// The mechanism to obtain the information is dummy (for testing purpose).
+// The mechanism to observe the information is dummy (for testing
+// purpose).
 //
 
 
-IfConfigGetDummy::IfConfigGetDummy(IfConfig& ifc)
-    : IfConfigGet(ifc)
+IfConfigObserverDummy::IfConfigObserverDummy(IfConfig& ifc)
+    : IfConfigObserver(ifc)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
     register_ifc_primary();
 #endif
 }
 
-IfConfigGetDummy::~IfConfigGetDummy()
+IfConfigObserverDummy::~IfConfigObserverDummy()
 {
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the dummy mechanism to get "
+	XLOG_ERROR("Cannot stop the dummy mechanism to observe "
 		   "information about network interfaces from the underlying "
 		   "system: %s",
 		   error_msg.c_str());
@@ -52,12 +54,14 @@ IfConfigGetDummy::~IfConfigGetDummy()
 }
 
 int
-IfConfigGetDummy::start(string& error_msg)
+IfConfigObserverDummy::start(string& error_msg)
 {
     UNUSED(error_msg);
 
     if (_is_running)
 	return (XORP_OK);
+
+    // TODO: XXX: PAVPAVPAV: implement it!
 
     _is_running = true;
 
@@ -65,9 +69,11 @@ IfConfigGetDummy::start(string& error_msg)
 }
 
 int
-IfConfigGetDummy::stop(string& error_msg)
+IfConfigObserverDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
+
+    // TODO: XXX: PAVPAVPAV: implement it!
 
     if (! _is_running)
 	return (XORP_OK);
@@ -77,10 +83,10 @@ IfConfigGetDummy::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
-IfConfigGetDummy::pull_config(IfTree& iftree)
+void
+IfConfigObserverDummy::receive_data(const vector<uint8_t>& buffer)
 {
-    iftree = ifc().live_config();
-    
-    return true;
+    // TODO: use it?
+    UNUSED(buffer);
 }
+

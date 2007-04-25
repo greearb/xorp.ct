@@ -82,22 +82,23 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	ifconfig_addr_table.lo ifconfig_get.lo ifconfig_get_click.lo \
 	ifconfig_get_dummy.lo ifconfig_get_getifaddrs.lo \
 	ifconfig_get_ioctl.lo ifconfig_get_iphelper.lo \
-	ifconfig_get_netlink.lo ifconfig_get_proc_linux.lo \
+	ifconfig_get_netlink_socket.lo ifconfig_get_proc_linux.lo \
 	ifconfig_get_sysctl.lo ifconfig_media.lo ifconfig_observer.lo \
 	ifconfig_observer_dummy.lo ifconfig_observer_iphelper.lo \
-	ifconfig_observer_netlink.lo ifconfig_observer_rtsock.lo \
-	ifconfig_parse_ifaddrs.lo ifconfig_parse_ifreq.lo \
-	ifconfig_parse_nlm.lo ifconfig_parse_rtm.lo \
-	ifconfig_reporter.lo ifconfig_set.lo ifconfig_set_click.lo \
-	ifconfig_set_dummy.lo ifconfig_set_ioctl.lo \
-	ifconfig_set_iphelper.lo ifconfig_set_netlink.lo \
-	ifmanager_transaction.lo iftree.lo libfeaclient_bridge.lo \
-	mfea_config.lo mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo \
-	mfea_node_cli.lo mfea_proto_comm.lo mfea_vif.lo \
-	netlink_socket.lo netlink_socket_utils.lo \
-	nexthop_port_mapper.lo pa_backend_dummy.lo pa_backend_ipfw2.lo \
-	pa_entry.lo pa_table.lo pa_transaction.lo profile_vars.lo \
-	rawsock.lo rawsock4.lo rawsock6.lo routing_socket.lo \
+	ifconfig_observer_netlink_socket.lo \
+	ifconfig_observer_rtsock.lo ifconfig_parse_ifaddrs.lo \
+	ifconfig_parse_ifreq.lo ifconfig_parse_nlm.lo \
+	ifconfig_parse_rtm.lo ifconfig_reporter.lo ifconfig_set.lo \
+	ifconfig_set_click.lo ifconfig_set_dummy.lo \
+	ifconfig_set_ioctl.lo ifconfig_set_iphelper.lo \
+	ifconfig_set_netlink_socket.lo ifmanager_transaction.lo \
+	iftree.lo libfeaclient_bridge.lo mfea_config.lo \
+	mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo mfea_node_cli.lo \
+	mfea_proto_comm.lo mfea_vif.lo netlink_socket.lo \
+	netlink_socket_utils.lo nexthop_port_mapper.lo \
+	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
+	pa_table.lo pa_transaction.lo profile_vars.lo rawsock.lo \
+	rawsock4.lo rawsock6.lo routing_socket.lo \
 	routing_socket_utils.lo win_rtm_pipe.lo win_support.lo \
 	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
 	xrl_fea_target.lo xrl_fti.lo xrl_mfea_node.lo xrl_rawsock4.lo \
@@ -477,18 +478,28 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	fticonfig_table_set_dummy.cc fticonfig_table_set_iphelper.cc \
 	fticonfig_table_set_netlink.cc fticonfig_table_set_rtmv2.cc \
 	fticonfig_table_set_rtsock.cc ifconfig.cc \
-	ifconfig_addr_table.cc ifconfig_get.cc ifconfig_get_click.cc \
-	ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc \
-	ifconfig_get_ioctl.cc ifconfig_get_iphelper.cc \
-	ifconfig_get_netlink.cc ifconfig_get_proc_linux.cc \
-	ifconfig_get_sysctl.cc ifconfig_media.cc ifconfig_observer.cc \
-	ifconfig_observer_dummy.cc ifconfig_observer_iphelper.cc \
-	ifconfig_observer_netlink.cc ifconfig_observer_rtsock.cc \
+	ifconfig_addr_table.cc ifconfig_get.cc \
+	forwarding_plane/ifconfig/ifconfig_get_click.cc \
+	forwarding_plane/ifconfig/ifconfig_get_dummy.cc \
+	forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc \
+	forwarding_plane/ifconfig/ifconfig_get_ioctl.cc \
+	forwarding_plane/ifconfig/ifconfig_get_iphelper.cc \
+	forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc \
+	forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc \
+	forwarding_plane/ifconfig/ifconfig_get_sysctl.cc \
+	ifconfig_media.cc ifconfig_observer.cc \
+	forwarding_plane/ifconfig/ifconfig_observer_dummy.cc \
+	forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc \
+	forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc \
+	forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc \
 	ifconfig_parse_ifaddrs.cc ifconfig_parse_ifreq.cc \
 	ifconfig_parse_nlm.cc ifconfig_parse_rtm.cc \
-	ifconfig_reporter.cc ifconfig_set.cc ifconfig_set_click.cc \
-	ifconfig_set_dummy.cc ifconfig_set_ioctl.cc \
-	ifconfig_set_iphelper.cc ifconfig_set_netlink.cc \
+	ifconfig_reporter.cc ifconfig_set.cc \
+	forwarding_plane/ifconfig/ifconfig_set_click.cc \
+	forwarding_plane/ifconfig/ifconfig_set_dummy.cc \
+	forwarding_plane/ifconfig/ifconfig_set_ioctl.cc \
+	forwarding_plane/ifconfig/ifconfig_set_iphelper.cc \
+	forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc \
 	ifmanager_transaction.cc iftree.cc libfeaclient_bridge.cc \
 	mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc \
 	mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc \
@@ -710,14 +721,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_getifaddrs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_ioctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_iphelper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_netlink.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_proc_linux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_sysctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_media.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_iphelper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_netlink.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_rtsock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_ifaddrs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_ifreq.Plo@am__quote@
@@ -729,7 +740,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_ioctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_iphelper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_netlink.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifmanager_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iftree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfeaclient_bridge.Plo@am__quote@
@@ -791,6 +802,125 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+ifconfig_get_click.lo: forwarding_plane/ifconfig/ifconfig_get_click.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_click.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_click.Tpo -c -o ifconfig_get_click.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_click.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_click.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_click.Tpo $(DEPDIR)/ifconfig_get_click.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_click.cc' object='ifconfig_get_click.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_click.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_click.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_click.cc
+
+ifconfig_get_dummy.lo: forwarding_plane/ifconfig/ifconfig_get_dummy.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_dummy.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_dummy.Tpo -c -o ifconfig_get_dummy.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_dummy.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_dummy.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_dummy.Tpo $(DEPDIR)/ifconfig_get_dummy.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_dummy.cc' object='ifconfig_get_dummy.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_dummy.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_dummy.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_dummy.cc
+
+ifconfig_get_getifaddrs.lo: forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_getifaddrs.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_getifaddrs.Tpo -c -o ifconfig_get_getifaddrs.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_getifaddrs.Tpo $(DEPDIR)/ifconfig_get_getifaddrs.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc' object='ifconfig_get_getifaddrs.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_getifaddrs.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc
+
+ifconfig_get_ioctl.lo: forwarding_plane/ifconfig/ifconfig_get_ioctl.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_ioctl.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_ioctl.Tpo -c -o ifconfig_get_ioctl.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_ioctl.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_ioctl.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_ioctl.Tpo $(DEPDIR)/ifconfig_get_ioctl.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_ioctl.cc' object='ifconfig_get_ioctl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_ioctl.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_ioctl.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_ioctl.cc
+
+ifconfig_get_iphelper.lo: forwarding_plane/ifconfig/ifconfig_get_iphelper.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_iphelper.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_iphelper.Tpo -c -o ifconfig_get_iphelper.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_iphelper.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_iphelper.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_iphelper.Tpo $(DEPDIR)/ifconfig_get_iphelper.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_iphelper.cc' object='ifconfig_get_iphelper.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_iphelper.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_iphelper.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_iphelper.cc
+
+ifconfig_get_netlink_socket.lo: forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_netlink_socket.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_netlink_socket.Tpo -c -o ifconfig_get_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_netlink_socket.Tpo $(DEPDIR)/ifconfig_get_netlink_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc' object='ifconfig_get_netlink_socket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc
+
+ifconfig_get_proc_linux.lo: forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_proc_linux.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_proc_linux.Tpo -c -o ifconfig_get_proc_linux.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_proc_linux.Tpo $(DEPDIR)/ifconfig_get_proc_linux.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc' object='ifconfig_get_proc_linux.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_proc_linux.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc
+
+ifconfig_get_sysctl.lo: forwarding_plane/ifconfig/ifconfig_get_sysctl.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_sysctl.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_sysctl.Tpo -c -o ifconfig_get_sysctl.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_sysctl.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_sysctl.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_get_sysctl.Tpo $(DEPDIR)/ifconfig_get_sysctl.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_get_sysctl.cc' object='ifconfig_get_sysctl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_get_sysctl.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_sysctl.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_sysctl.cc
+
+ifconfig_observer_dummy.lo: forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_observer_dummy.lo -MD -MP -MF $(DEPDIR)/ifconfig_observer_dummy.Tpo -c -o ifconfig_observer_dummy.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_dummy.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_observer_dummy.Tpo $(DEPDIR)/ifconfig_observer_dummy.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_observer_dummy.cc' object='ifconfig_observer_dummy.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_observer_dummy.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_dummy.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
+
+ifconfig_observer_iphelper.lo: forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_observer_iphelper.lo -MD -MP -MF $(DEPDIR)/ifconfig_observer_iphelper.Tpo -c -o ifconfig_observer_iphelper.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_observer_iphelper.Tpo $(DEPDIR)/ifconfig_observer_iphelper.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc' object='ifconfig_observer_iphelper.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_observer_iphelper.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
+
+ifconfig_observer_netlink_socket.lo: forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_observer_netlink_socket.lo -MD -MP -MF $(DEPDIR)/ifconfig_observer_netlink_socket.Tpo -c -o ifconfig_observer_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_observer_netlink_socket.Tpo $(DEPDIR)/ifconfig_observer_netlink_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc' object='ifconfig_observer_netlink_socket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_observer_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
+
+ifconfig_observer_rtsock.lo: forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_observer_rtsock.lo -MD -MP -MF $(DEPDIR)/ifconfig_observer_rtsock.Tpo -c -o ifconfig_observer_rtsock.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_observer_rtsock.Tpo $(DEPDIR)/ifconfig_observer_rtsock.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc' object='ifconfig_observer_rtsock.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_observer_rtsock.lo `test -f 'forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc
+
+ifconfig_set_click.lo: forwarding_plane/ifconfig/ifconfig_set_click.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set_click.lo -MD -MP -MF $(DEPDIR)/ifconfig_set_click.Tpo -c -o ifconfig_set_click.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_click.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_click.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_set_click.Tpo $(DEPDIR)/ifconfig_set_click.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set_click.cc' object='ifconfig_set_click.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set_click.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_click.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_click.cc
+
+ifconfig_set_dummy.lo: forwarding_plane/ifconfig/ifconfig_set_dummy.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set_dummy.lo -MD -MP -MF $(DEPDIR)/ifconfig_set_dummy.Tpo -c -o ifconfig_set_dummy.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_dummy.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_dummy.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_set_dummy.Tpo $(DEPDIR)/ifconfig_set_dummy.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set_dummy.cc' object='ifconfig_set_dummy.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set_dummy.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_dummy.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_dummy.cc
+
+ifconfig_set_ioctl.lo: forwarding_plane/ifconfig/ifconfig_set_ioctl.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set_ioctl.lo -MD -MP -MF $(DEPDIR)/ifconfig_set_ioctl.Tpo -c -o ifconfig_set_ioctl.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_ioctl.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_ioctl.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_set_ioctl.Tpo $(DEPDIR)/ifconfig_set_ioctl.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set_ioctl.cc' object='ifconfig_set_ioctl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set_ioctl.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_ioctl.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_ioctl.cc
+
+ifconfig_set_iphelper.lo: forwarding_plane/ifconfig/ifconfig_set_iphelper.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set_iphelper.lo -MD -MP -MF $(DEPDIR)/ifconfig_set_iphelper.Tpo -c -o ifconfig_set_iphelper.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_iphelper.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_iphelper.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_set_iphelper.Tpo $(DEPDIR)/ifconfig_set_iphelper.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set_iphelper.cc' object='ifconfig_set_iphelper.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set_iphelper.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_iphelper.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_iphelper.cc
+
+ifconfig_set_netlink_socket.lo: forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set_netlink_socket.lo -MD -MP -MF $(DEPDIR)/ifconfig_set_netlink_socket.Tpo -c -o ifconfig_set_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_set_netlink_socket.Tpo $(DEPDIR)/ifconfig_set_netlink_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc' object='ifconfig_set_netlink_socket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
 
 xorp_fea_dummy-xorp_fea.o: xorp_fea.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-xorp_fea.o -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo -c -o xorp_fea_dummy-xorp_fea.o `test -f 'xorp_fea.cc' || echo '$(srcdir)/'`xorp_fea.cc
