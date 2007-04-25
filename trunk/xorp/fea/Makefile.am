@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.75 2007/04/24 18:50:54 greenhal Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.76 2007/04/25 07:31:52 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -204,7 +204,7 @@ libfea_la_SOURCES	+= ifconfig_observer.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_rtsock.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_routing_socket.cc
 libfea_la_SOURCES	+= ifconfig_parse_ifaddrs.cc
 libfea_la_SOURCES	+= ifconfig_parse_ifreq.cc
 libfea_la_SOURCES	+= ifconfig_parse_nlm.cc
