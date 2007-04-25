@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.33 2007/02/16 22:45:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.34 2007/04/19 21:36:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -139,14 +139,14 @@ IfConfigSetClick::add_interface(const string& ifname,
 				uint32_t if_index,
 				string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
+    IfTreeInterface* ifp;
 
     debug_msg("add_interface "
 	      "(ifname = %s if_index = %u)\n",
 	      ifname.c_str(), if_index);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	//
 	// Add the new interface
 	//
@@ -154,13 +154,13 @@ IfConfigSetClick::add_interface(const string& ifname,
 	    error_msg = c_format("Cannot add interface '%s'", ifname.c_str());
 	    return (XORP_ERROR);
 	}
-	ii = _iftree.get_if(ifname);
-	XLOG_ASSERT(ii != _iftree.ifs().end());
+	ifp = _iftree.find_interface(ifname);
+	XLOG_ASSERT(ifp != NULL);
     }
 
     // Update the interface
-    if (ii->second.pif_index() != if_index)
-	ii->second.set_pif_index(if_index);
+    if (ifp->pif_index() != if_index)
+	ifp->set_pif_index(if_index);
 
     return (XORP_OK);
 }
@@ -171,8 +171,8 @@ IfConfigSetClick::add_vif(const string& ifname,
 			  uint32_t if_index,
 			  string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::iterator vi;
+    IfTreeInterface* ifp;
+    IfTreeVif* vifp;
 
     debug_msg("add_vif "
 	      "(ifname = %s vifname = %s if_index = %u)\n",
@@ -180,27 +180,26 @@ IfConfigSetClick::add_vif(const string& ifname,
 
     UNUSED(if_index);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot add interface '%s' vif '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
-    vi = fi.get_vif(vifname);
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	//
 	// Add the new vif
 	//
-	if (fi.add_vif(vifname) != true) {
+	if (ifp->add_vif(vifname) != true) {
 	    error_msg = c_format("Cannot add interface '%s' vif '%s'",
 				 ifname.c_str(), vifname.c_str());
 	    return (XORP_ERROR);
 	}
-	vi = fi.get_vif(vifname);
-	XLOG_ASSERT(vi != fi.vifs().end());
+	vifp = ifp->find_vif(vifname);
+	XLOG_ASSERT(vifp != NULL);
     }
 
     return (XORP_OK);
@@ -214,7 +213,7 @@ IfConfigSetClick::config_interface(const string& ifname,
 				   bool is_deleted,
 				   string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
+    IfTreeInterface* ifp;
 
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
@@ -223,26 +222,25 @@ IfConfigSetClick::config_interface(const string& ifname,
 	      XORP_UINT_CAST(flags), (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false");
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot configure interface '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
     //
     // Update the interface
     //
-    if (fi.pif_index() != if_index)
-	fi.set_pif_index(if_index);
+    if (ifp->pif_index() != if_index)
+	ifp->set_pif_index(if_index);
 
-    if (fi.if_flags() != flags)
-	fi.set_if_flags(flags);
+    if (ifp->if_flags() != flags)
+	ifp->set_if_flags(flags);
 
-    if (fi.enabled() != is_up)
-	fi.set_enabled(is_up);
+    if (ifp->enabled() != is_up)
+	ifp->set_enabled(is_up);
 
     if (is_deleted)
 	_iftree.remove_if(ifname);
@@ -263,8 +261,8 @@ IfConfigSetClick::config_vif(const string& ifname,
 			     bool multicast,
 			     string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::iterator vi;
+    IfTreeInterface* ifp;
+    IfTreeVif* vifp;
 
     debug_msg("config_vif "
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
@@ -282,44 +280,42 @@ IfConfigSetClick::config_vif(const string& ifname,
     UNUSED(if_index);
     UNUSED(flags);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot configure interface '%s' vif '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
-    vi = fi.get_vif(vifname);
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	error_msg = c_format("Cannot configure interface '%s' vif '%s': "
 			     "no such vif in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeVif& fv = vi->second;
 
     //
     // Update the vif
     //
-    if (fv.enabled() != is_up)
-	fv.set_enabled(is_up);
+    if (vifp->enabled() != is_up)
+	vifp->set_enabled(is_up);
 
-    if (fv.broadcast() != broadcast)
-	fv.set_broadcast(broadcast);
+    if (vifp->broadcast() != broadcast)
+	vifp->set_broadcast(broadcast);
 
-    if (fv.loopback() != loopback)
-	fv.set_loopback(loopback);
+    if (vifp->loopback() != loopback)
+	vifp->set_loopback(loopback);
 
-    if (fv.point_to_point() != point_to_point)
-	fv.set_point_to_point(point_to_point);
+    if (vifp->point_to_point() != point_to_point)
+	vifp->set_point_to_point(point_to_point);
 
-    if (fv.multicast() != multicast)
-	fv.set_multicast(multicast);
+    if (vifp->multicast() != multicast)
+	vifp->set_multicast(multicast);
 
     if (is_deleted) {
-	fi.remove_vif(vifname);
+	ifp->remove_vif(vifname);
 	ifc().nexthop_port_mapper().delete_interface(ifname, vifname);
     }
 
@@ -332,7 +328,7 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
 					    const struct ether_addr& ether_addr,
 					    string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
+    IfTreeInterface* ifp;
 
     debug_msg("set_interface_mac "
 	      "(ifname = %s if_index = %u mac = %s)\n",
@@ -340,14 +336,13 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
 
     UNUSED(if_index);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot set MAC address on interface '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
     //
     // Set the MAC address
@@ -356,8 +351,8 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
 	EtherMac new_ether_mac(ether_addr);
 	Mac new_mac = new_ether_mac;
 
-	if (fi.mac() != new_mac)
-	    fi.set_mac(new_mac);
+	if (ifp->mac() != new_mac)
+	    ifp->set_mac(new_mac);
     } catch (BadMac) {
 	error_msg = c_format("Cannot set MAC address on interface '%s' "
 			     "to '%s': "
@@ -376,7 +371,7 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
 				    uint32_t mtu,
 				    string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
+    IfTreeInterface* ifp;
 
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
@@ -384,20 +379,19 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
 
     UNUSED(if_index);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot set MTU on interface '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
     //
     // Set the MTU
     //
-    if (fi.mtu() != mtu)
-	fi.set_mtu(mtu);
+    if (ifp->mtu() != mtu)
+	ifp->set_mtu(mtu);
 
     return (XORP_OK);
 }
@@ -413,8 +407,8 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 				  uint32_t prefix_len,
 				  string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::iterator vi;
+    IfTreeInterface* ifp;
+    IfTreeVif* vifp;
 
     debug_msg("add_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
@@ -427,36 +421,32 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 
     UNUSED(if_index);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot add address to interface '%s' vif '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
-    vi = fi.get_vif(vifname);
-
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	error_msg = c_format("Cannot add address to interface '%s' vif '%s': "
 			     "no such vif in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeVif& fv = vi->second;
 
     //
     // Add the address
     //
     if (addr.is_ipv4()) {
-	IfTreeVif::IPv4Map::iterator ai;
 	IPv4 addr4 = addr.get_ipv4();
 	IPv4 dst_or_bcast4 = dst_or_bcast.get_ipv4();
+	IfTreeAddr4* ap = vifp->find_addr(addr4);
 
-	ai = fv.get_addr(addr4);
-	if (ai == fv.ipv4addrs().end()) {
-	    if (fv.add_addr(addr4) != true) {
+	if (ap == NULL) {
+	    if (vifp->add_addr(addr4) != true) {
 		error_msg = c_format("Cannot add address '%s' "
 				     "to interface '%s' vif '%s'",
 				     addr4.str().c_str(),
@@ -464,45 +454,43 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 				     vifname.c_str());
 		return (XORP_ERROR);
 	    }
-	    ai = fv.get_addr(addr4);
-	    XLOG_ASSERT(ai != fv.ipv4addrs().end());
+	    ap = vifp->find_addr(addr4);
+	    XLOG_ASSERT(ap != NULL);
 	}
-	IfTreeAddr4& fa = ai->second;
 
 	//
 	// Update the address
 	//
-	if (fa.broadcast() != is_broadcast)
-	    fa.set_broadcast(is_broadcast);
+	if (ap->broadcast() != is_broadcast)
+	    ap->set_broadcast(is_broadcast);
 
-	if (fa.point_to_point() != is_p2p)
-	    fa.set_point_to_point(is_p2p);
+	if (ap->point_to_point() != is_p2p)
+	    ap->set_point_to_point(is_p2p);
 
-	if (fa.broadcast()) {
-	    if (fa.bcast() != dst_or_bcast4)
-		fa.set_bcast(dst_or_bcast4);
+	if (ap->broadcast()) {
+	    if (ap->bcast() != dst_or_bcast4)
+		ap->set_bcast(dst_or_bcast4);
 	}
 
-	if (fa.point_to_point()) {
-	    if (fa.endpoint() != dst_or_bcast4)
-		fa.set_endpoint(dst_or_bcast4);
+	if (ap->point_to_point()) {
+	    if (ap->endpoint() != dst_or_bcast4)
+		ap->set_endpoint(dst_or_bcast4);
 	}
 
-	if (fa.prefix_len() != prefix_len)
-	    fa.set_prefix_len(prefix_len);
+	if (ap->prefix_len() != prefix_len)
+	    ap->set_prefix_len(prefix_len);
 
-	if (! fa.enabled())
-	    fa.set_enabled(true);
+	if (! ap->enabled())
+	    ap->set_enabled(true);
     }
 
     if (addr.is_ipv6()) {
-	IfTreeVif::IPv6Map::iterator ai;
 	IPv6 addr6 = addr.get_ipv6();
 	IPv6 dst_or_bcast6 = dst_or_bcast.get_ipv6();
+	IfTreeAddr6* ap = vifp->find_addr(addr6);
 
-	ai = fv.get_addr(addr6);
-	if (ai == fv.ipv6addrs().end()) {
-	    if (fv.add_addr(addr6) != true) {
+	if (ap == NULL) {
+	    if (vifp->add_addr(addr6) != true) {
 		error_msg = c_format("Cannot add address '%s' "
 				     "to interface '%s' vif '%s'",
 				     addr6.str().c_str(),
@@ -510,27 +498,26 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 				     vifname.c_str());
 		return (XORP_ERROR);
 	    }
-	    ai = fv.get_addr(addr6);
-	    XLOG_ASSERT(ai != fv.ipv6addrs().end());
+	    ap = vifp->find_addr(addr6);
+	    XLOG_ASSERT(ap != NULL);
 	}
-	IfTreeAddr6& fa = ai->second;
 
 	//
 	// Update the address
 	//
-	if (fa.point_to_point() != is_p2p)
-	    fa.set_point_to_point(is_p2p);
+	if (ap->point_to_point() != is_p2p)
+	    ap->set_point_to_point(is_p2p);
 
-	if (fa.point_to_point()) {
-	    if (fa.endpoint() != dst_or_bcast6)
-		fa.set_endpoint(dst_or_bcast6);
+	if (ap->point_to_point()) {
+	    if (ap->endpoint() != dst_or_bcast6)
+		ap->set_endpoint(dst_or_bcast6);
 	}
 
-	if (fa.prefix_len() != prefix_len)
-	    fa.set_prefix_len(prefix_len);
+	if (ap->prefix_len() != prefix_len)
+	    ap->set_prefix_len(prefix_len);
 
-	if (! fa.enabled())
-	    fa.set_enabled(true);
+	if (! ap->enabled())
+	    ap->set_enabled(true);
     }
 
     return (XORP_OK);
@@ -544,8 +531,8 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 				     uint32_t prefix_len,
 				     string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::iterator vi;
+    IfTreeInterface* ifp;
+    IfTreeVif* vifp;
 
     debug_msg("delete_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
@@ -556,36 +543,32 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
     UNUSED(if_index);
     UNUSED(prefix_len);
 
-    ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	error_msg = c_format("Cannot delete address "
 			     "on interface '%s' vif '%s': "
 			     "no such interface in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeInterface& fi = ii->second;
 
-    vi = fi.get_vif(vifname);
-
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	error_msg = c_format("Cannot delete address "
 			     "on interface '%s' vif '%s': "
 			     "no such vif in the interface tree",
 			     ifname.c_str(), vifname.c_str());
 	return (XORP_ERROR);
     }
-    IfTreeVif& fv = vi->second;
 
     //
     // Delete the address
     //
     if (addr.is_ipv4()) {
-	IfTreeVif::IPv4Map::iterator ai;
 	IPv4 addr4 = addr.get_ipv4();
+	IfTreeAddr4* ap = vifp->find_addr(addr4);
 
-	ai = fv.get_addr(addr4);
-	if (ai == fv.ipv4addrs().end()) {
+	if (ap == NULL) {
 	    error_msg = c_format("Cannot delete address '%s' "
 				 "on interface '%s' vif '%s': "
 				 "no such address",
@@ -594,16 +577,14 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 				 vifname.c_str());
 	    return (XORP_ERROR);
 	}
-	fv.remove_addr(addr4);
+	vifp->remove_addr(addr4);
 	ifc().nexthop_port_mapper().delete_ipv4(addr4);
     }
 
     if (addr.is_ipv6()) {
-	IfTreeVif::IPv6Map::iterator ai;
 	IPv6 addr6 = addr.get_ipv6();
-
-	ai = fv.get_addr(addr6);
-	if (ai == fv.ipv6addrs().end()) {
+	IfTreeAddr6* ap = vifp->find_addr(addr6);
+	if (ap == NULL) {
 	    error_msg = c_format("Cannot delete address '%s' "
 				 "on interface '%s' vif '%s': "
 				 "no such address",
@@ -612,7 +593,7 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 				 vifname.c_str());
 	    return (XORP_ERROR);
 	}
-	fv.remove_addr(addr6);
+	vifp->remove_addr(addr6);
 	ifc().nexthop_port_mapper().delete_ipv6(addr6);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.17 2007/02/16 22:45:44 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.18 2007/04/19 21:36:49 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -123,11 +123,11 @@ public:
 
     bool dispatch() {
 	const IfTree& dev_config = _ifc.pulled_config();
-	IfTree::IfMap::const_iterator iter = dev_config.get_if(ifname());
-	if (iter == dev_config.ifs().end())
+	const IfTreeInterface* ifp = dev_config.find_interface(ifname());
+	if (ifp == NULL)
 	    return false;
 	
-	return iftree().update_if(iter->second);
+	return iftree().update_if(*ifp);
     }
 
     string str() const {
@@ -152,14 +152,12 @@ public:
 
 protected:
     inline IfTreeInterface* interface() {
-	IfTree::IfMap::iterator ii = iftree().get_if(ifname());
-	if (iftree().ifs().end() == ii) return 0;
-	return &(ii->second);
+	IfTreeInterface* ifp = iftree().find_interface(ifname());
+	return (ifp);
     }
     inline const IfTreeInterface* interface() const {
-	IfTree::IfMap::const_iterator ii = iftree().get_if(ifname());
-	if (iftree().ifs().end() == ii) return 0;
-	return &(ii->second);
+	const IfTreeInterface* ifp = iftree().find_interface(ifname());
+	return (ifp);
     }
 };
 
@@ -350,22 +348,12 @@ public:
 
 protected:
     IfTreeVif* vif() {
-	IfTreeInterface* fi = interface();
-	if (fi == 0)
-	    return 0;
-	IfTreeInterface::VifMap::iterator vi = fi->get_vif(_vifname);
-	if (vi == fi->vifs().end())
-	    return 0;
-	return &(vi->second);
+	IfTreeVif* vifp = iftree().find_vif(ifname(), _vifname);
+	return (vifp);
     }
     const IfTreeVif* vif() const {
-	const IfTreeInterface* fi = interface();
-	if (fi == 0)
-	    return 0;
-	IfTreeInterface::VifMap::const_iterator vi = fi->get_vif(_vifname);
-	if (vi == fi->vifs().end())
-	    return 0;
-	return &(vi->second);
+	const IfTreeVif* vifp = iftree().find_vif(ifname(), _vifname);
+	return (vifp);
     }
 
 protected:
@@ -524,22 +512,12 @@ public:
 
 protected:
     IfTreeAddr4* addr() {
-	IfTreeVif* fv = vif();
-	if (fv == 0)
-	    return 0;
-	IfTreeVif::IPv4Map::iterator ai = fv->get_addr(_addr);
-	if (ai == fv->ipv4addrs().end())
-	    return 0;
-	return &(ai->second);
+	IfTreeAddr4* ap = iftree().find_addr(ifname(), vifname(), _addr);
+	return (ap);
     }
     const IfTreeAddr4* addr() const {
-	const IfTreeVif* fv = vif();
-	if (fv == 0)
-	    return 0;
-	IfTreeVif::IPv4Map::const_iterator ai = fv->get_addr(_addr);
-	if (ai == fv->ipv4addrs().end())
-	    return 0;
-	return &(ai->second);
+	const IfTreeAddr4* ap = iftree().find_addr(ifname(), vifname(), _addr);
+	return (ap);
     }
 
 protected:
@@ -685,23 +663,13 @@ public:
 
 protected:
     IfTreeAddr6* addr() {
-	IfTreeVif* fv = vif();
-	if (fv == 0)
-	    return 0;
-	IfTreeVif::IPv6Map::iterator ai = fv->get_addr(_addr);
-	if (ai == fv->ipv6addrs().end())
-	    return 0;
-	return &(ai->second);
+	IfTreeAddr6* ap = iftree().find_addr(ifname(), vifname(), _addr);
+	return (ap);
     }
 
     const IfTreeAddr6* addr() const {
-	const IfTreeVif* fv = vif();
-	if (fv == 0)
-	    return 0;
-	IfTreeVif::IPv6Map::const_iterator ai = fv->get_addr(_addr);
-	if (ai == fv->ipv6addrs().end())
-	    return 0;
-	return &(ai->second);
+	const IfTreeAddr6* ap = iftree().find_addr(ifname(), vifname(), _addr);
+	return (ap);
     }
 
 protected:

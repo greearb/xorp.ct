@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.42 2007/04/14 08:59:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.43 2007/04/19 21:36:49 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -621,25 +621,26 @@ RawSocket::set_default_multicast_interface(const string& if_name,
 					   const string& vif_name,
 					   string& error_msg)
 {
+    const IfTreeInterface* ifp;
+    const IfTreeVif* vifp;
+
     // Find the interface
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(if_name);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(if_name);
+    if (ifp == NULL) {
 	error_msg = c_format("Setting the default multicast interface failed:"
 			     "interface %s not found",
 			     if_name.c_str());
 	return (XORP_ERROR);
     }
-    const IfTreeInterface& fi = ii->second;
 
     // Find the vif
-    IfTreeInterface::VifMap::const_iterator vi = fi.get_vif(vif_name);
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vif_name);
+    if (vifp == NULL) {
 	error_msg = c_format("Setting the default multicast interface failed:"
 			     "interface %s vif %s not found",
 			     if_name.c_str(), vif_name.c_str());
 	return (XORP_ERROR);
     }
-    const IfTreeVif& fv = vi->second;
 
     switch (family()) {
     case AF_INET:
@@ -647,8 +648,8 @@ RawSocket::set_default_multicast_interface(const string& if_name,
 	struct in_addr in_addr;
 
 	// Find the first address
-	IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
-	if (ai == fv.ipv4addrs().end()) {
+	IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
+	if (ai == vifp->ipv4addrs().end()) {
 	    error_msg = c_format("Setting the default multicast interface "
 				 "failed: "
 				 "interface %s vif %s has no address",
@@ -675,7 +676,7 @@ RawSocket::set_default_multicast_interface(const string& if_name,
 			     "IPv6 multicast not supported");
 	return (XORP_ERROR);
 #else
-	u_int pif_index = fv.pif_index();
+	u_int pif_index = vifp->pif_index();
 	
 	if (setsockopt(_proto_socket_out, IPPROTO_IPV6, IPV6_MULTICAST_IF,
 		       XORP_SOCKOPT_CAST(&pif_index), sizeof(pif_index)) < 0) {
@@ -703,20 +704,22 @@ RawSocket::join_multicast_group(const string& if_name,
 				const IPvX& group,
 				string& error_msg)
 {
+    const IfTreeInterface* ifp;
+    const IfTreeVif* vifp;
+
     // Find the interface
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(if_name);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(if_name);
+    if (ifp == NULL) {
 	error_msg = c_format("Joining multicast group %s failed: "
 			     "interface %s not found",
 			     cstring(group),
 			     if_name.c_str());
 	return (XORP_ERROR);
     }
-    const IfTreeInterface& fi = ii->second;
 
     // Find the vif
-    IfTreeInterface::VifMap::const_iterator vi = fi.get_vif(vif_name);
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vif_name);
+    if (vifp == NULL) {
 	error_msg = c_format("Joining multicast group %s failed: "
 			     "interface %s vif %s not found",
 			     cstring(group),
@@ -724,10 +727,9 @@ RawSocket::join_multicast_group(const string& if_name,
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
-    const IfTreeVif& fv = vi->second;
     
 #if 0	// TODO: enable or disable the enabled() check?
-    if (! (fi.enabled() || fv.enabled())) {
+    if (! (ifp->enabled() || vifp->enabled())) {
 	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
 			     "interface/vif is DOWN",
 			     cstring(group),
@@ -744,8 +746,8 @@ RawSocket::join_multicast_group(const string& if_name,
 	struct in_addr in_addr;
 
 	// Find the first address
-	IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
-	if (ai == fv.ipv4addrs().end()) {
+	IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
+	if (ai == vifp->ipv4addrs().end()) {
 	    error_msg = c_format("Cannot join group %s on interface %s vif %s: "
 				 "interface/vif has no address",
 				 cstring(group),
@@ -782,7 +784,7 @@ RawSocket::join_multicast_group(const string& if_name,
 	struct ipv6_mreq mreq6;
 	
 	group.copy_out(mreq6.ipv6mr_multiaddr);
-	mreq6.ipv6mr_interface = fv.pif_index();
+	mreq6.ipv6mr_interface = vifp->pif_index();
 	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_JOIN_GROUP,
 		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
 	    error_msg = c_format("Cannot join group %s on interface %s vif %s: %s",
@@ -812,20 +814,22 @@ RawSocket::leave_multicast_group(const string& if_name,
 				 const IPvX& group,
 				 string& error_msg)
 {
+    const IfTreeInterface* ifp;
+    const IfTreeVif* vifp;
+
     // Find the interface
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(if_name);
-    if (ii == _iftree.ifs().end()) {
+    ifp = _iftree.find_interface(if_name);
+    if (ifp == NULL) {
 	error_msg = c_format("Leaving multicast group %s failed: "
 			     "interface %s not found",
 			     cstring(group),
 			     if_name.c_str());
 	return (XORP_ERROR);
     }
-    const IfTreeInterface& fi = ii->second;
 
     // Find the vif
-    IfTreeInterface::VifMap::const_iterator vi = fi.get_vif(vif_name);
-    if (vi == fi.vifs().end()) {
+    vifp = ifp->find_vif(vif_name);
+    if (vifp == NULL) {
 	error_msg = c_format("Leaving multicast group %s failed: "
 			     "interface %s vif %s not found",
 			     cstring(group),
@@ -833,10 +837,9 @@ RawSocket::leave_multicast_group(const string& if_name,
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
-    const IfTreeVif& fv = vi->second;
     
 #if 0	// TODO: enable or disable the enabled() check?
-    if (! (fi.enabled() || fv.enabled())) {
+    if (! (ifp->enabled() || vifp->enabled())) {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
 			     "interface/vif is DOWN",
 			     cstring(group),
@@ -853,8 +856,8 @@ RawSocket::leave_multicast_group(const string& if_name,
 	struct in_addr in_addr;
 
 	// Find the first address
-	IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
-	if (ai == fv.ipv4addrs().end()) {
+	IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
+	if (ai == vifp->ipv4addrs().end()) {
 	    error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
 				 "interface/vif has no address",
 				 cstring(group),
@@ -890,7 +893,7 @@ RawSocket::leave_multicast_group(const string& if_name,
 	struct ipv6_mreq mreq6;
 	
 	group.copy_out(mreq6.ipv6mr_multiaddr);
-	mreq6.ipv6mr_interface = fv.pif_index();
+	mreq6.ipv6mr_interface = vifp->pif_index();
 	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
 		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
 	    error_msg = c_format("Cannot leave group %s on interface %s vif %s: %s",
@@ -1933,8 +1936,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	    if (ip_hdr_len + payload.size() <= iftree_if->mtu())
 		break;
 
-	    if (iftree_vif->get_addr(src_address.get_ipv4())
-		!= iftree_vif->ipv4addrs().end()) {
+	    if (iftree_vif->find_addr(src_address.get_ipv4()) != NULL) {
 		do_ip_hdr_include = false;
 		break;
 	    }
@@ -2488,27 +2490,22 @@ RawSocket::find_interface_vif_by_name(const string& if_name,
 				      const IfTreeInterface*& iftree_if,
 				      const IfTreeVif*& iftree_vif) const
 {
-    IfTree::IfMap::const_iterator ii;
-    IfTreeInterface::VifMap::const_iterator vi;
-
     iftree_if = NULL;
     iftree_vif = NULL;
 
     // Find the interface
-    ii = _iftree.get_if(if_name);
-    if (ii == _iftree.ifs().end())
+    iftree_if = _iftree.find_interface(if_name);
+    if (iftree_if == NULL)
 	return (false);
-    const IfTreeInterface& fi = ii->second;
 
     // Find the vif
-    vi = fi.get_vif(vif_name);
-    if (vi == fi.vifs().end())
+    iftree_vif = iftree_if->find_vif(vif_name);
+    if (iftree_vif == NULL) {
+	iftree_if = NULL;
 	return (false);
-    const IfTreeVif& fv = vi->second;
+    }
 
     // Found a match
-    iftree_if = &fi;
-    iftree_vif = &fv;
     return (true);
 }
 
@@ -2517,29 +2514,23 @@ RawSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
 					   const IfTreeInterface*& iftree_if,
 					   const IfTreeVif*& iftree_vif) const
 {
-    IfTree::IfMap::const_iterator ii;
-    IfTreeInterface::VifMap::const_iterator vi;
-
     iftree_if = NULL;
     iftree_vif = NULL;
 
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
-	if (fi.pif_index() != pif_index)
-	    continue;
-	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
+    // Find the interface
+    iftree_if = _iftree.find_interface(pif_index);
+    if (iftree_if == NULL)
+	return (false);
 
-	    if (fv.pif_index() == pif_index) {
-		// Found a match
-		iftree_if = &fi;
-		iftree_vif = &fv;
-		return (true);
-	    }
-	}
+    // Find the vif
+    iftree_vif = iftree_if->find_vif(pif_index);
+    if (iftree_vif == NULL) {
+	iftree_if = NULL;
+	return (false);
     }
 
-    return (false);
+    // Found a match
+    return (true);
 }
 
 bool

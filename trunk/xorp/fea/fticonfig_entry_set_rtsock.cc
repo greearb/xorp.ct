@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.40 2007/04/14 07:00:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.41 2007/04/24 07:05:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -216,12 +216,12 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	if (fte.ifname().empty())
 	    break;
 	const IfTree& iftree = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	if (ii == iftree.ifs().end()) {
+	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
 	    return false;
 	}
-	if (ii->second.discard()) {
+	if (ifp->discard()) {
 	    is_discard_route = true;
 	    fte_nexthop = IPvX::LOOPBACK(family);
 	}
@@ -338,12 +338,12 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	// Get the physical interface index
 	do {
 	    const IfTree& iftree = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	    if (ii == iftree.ifs().end()) {
+	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	    if (ifp == NULL) {
 		XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
 		return false;
 	    }
-	    pif_index = ii->second.pif_index();
+	    pif_index = ifp->pif_index();
 	} while (false);
 
 	// Adjust the nexthop address (if necessary)
@@ -533,8 +533,8 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	    if (fte.ifname().empty())
 		break;		// No interface to check
 	    const IfTree& iftree = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	    if ((ii != iftree.ifs().end()) && ii->second.enabled())
+	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	    if ((ifp != NULL) && ifp->enabled())
 		break;		// The interface is UP
 
 	    return (true);

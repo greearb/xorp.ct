@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.35 2007/04/16 18:53:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.36 2007/04/24 07:05:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -255,10 +255,10 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	    if (fte.ifname().empty())
 		break;
 	    const IfTree& iftree = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	    XLOG_ASSERT(ii != iftree.ifs().end());
+	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	    XLOG_ASSERT(ifp != NULL);
 
-	    if (ii->second.discard()) {
+	    if (ifp->discard()) {
 		rtmsg->rtm_type = RTN_BLACKHOLE;
 	    } else {
 		// Catchall.
@@ -417,7 +417,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	if (fte.ifname().empty())
 	    break;
 	const IfTree& iftree = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	//
 	// XXX: unlike adding a route, we don't use XLOG_ASSERT()
 	// to check whether the interface is configured in the system.
@@ -425,7 +425,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	// routes while we still don't have any interface tree configuration.
 	//
 
-	if ((ii != iftree.ifs().end()) && ii->second.discard())
+	if ((ifp != NULL) && ifp->discard())
 	    rtmsg->rtm_type = RTN_BLACKHOLE;
 
 	break;
@@ -471,8 +471,8 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	    if (fte.ifname().empty())
 		break;		// No interface to check
 	    const IfTree& iftree = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	    if ((ii != iftree.ifs().end()) && ii->second.enabled())
+	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	    if ((ifp != NULL) && ifp->enabled())
 		break;		// The interface is UP
 
 	    return (true);

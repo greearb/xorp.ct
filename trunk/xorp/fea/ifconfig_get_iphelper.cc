@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.7 2006/03/16 00:03:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.8 2007/02/16 22:45:42 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -154,15 +154,17 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 	ifc().map_ifindex(if_index, if_name);
 
 	// Name
-	if (it.get_if(if_name) == it.ifs().end()) {
+	IfTreeInterface* ifp = it.find_interface(if_name);
+	if (ifp == NULL) {
 	    it.add_if(if_name);
 	    is_newlink = true;
+	    ifp = it.find_interface(if_name);
+	    XLOG_ASSERT(ifp != NULL);
 	}
-	IfTreeInterface& fi = it.get_if(if_name)->second;
 
 	// Index
-	if (is_newlink || (if_index != fi.pif_index()))
-	    fi.set_pif_index(if_index);
+	if (is_newlink || (if_index != ifp->pif_index()))
+	    ifp->set_pif_index(if_index);
 
 	// MAC
 	if (curAdapter->IfType == MIB_IF_TYPE_ETHERNET &&
@@ -170,40 +172,41 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 		struct ether_addr ea;
 		memcpy(&ea, curAdapter->PhysicalAddress, sizeof(ea));
 		EtherMac ether_mac(ea);
-		if (is_newlink || (ether_mac != EtherMac(fi.mac()))) {
-		    fi.set_mac(ether_mac);
+		if (is_newlink || (ether_mac != EtherMac(ifp->mac()))) {
+		    ifp->set_mac(ether_mac);
 		}
 	}
 
 	// MTU
 	uint32_t mtu = curAdapter->Mtu;
-	if (is_newlink || (mtu != fi.mtu()))
-	    fi.set_mtu(mtu);
+	if (is_newlink || (mtu != ifp->mtu()))
+	    ifp->set_mtu(mtu);
 
 	// Link status
 	bool no_carrier = true;
 	if (curAdapter->OperStatus == IfOperStatusUp)
 	    no_carrier = false;
-	if (is_newlink || no_carrier != fi.no_carrier())
-	    fi.set_no_carrier(no_carrier);
+	if (is_newlink || no_carrier != ifp->no_carrier())
+	    ifp->set_no_carrier(no_carrier);
 
-	fi.set_enabled((curAdapter->OperStatus == IfOperStatusUp));
+	ifp->set_enabled((curAdapter->OperStatus == IfOperStatusUp));
 
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)
-	    fi.add_vif(if_name);
+	    ifp->add_vif(if_name);
 
-	IfTreeVif& fv = fi.get_vif(if_name)->second;
+	IfTreeVif* vifp = ifp->find_vif(if_name);
+	XLOG_ASSERT(vifp != NULL);
 
-        if (is_newlink || (if_index != fv.pif_index()))
-            fv.set_pif_index(if_index);
+        if (is_newlink || (if_index != vifp->pif_index()))
+            vifp->set_pif_index(if_index);
 
-	fv.set_enabled(fi.enabled() &&
-		       (curAdapter->OperStatus == IfOperStatusUp));
-	fv.set_broadcast(curAdapter->IfType == MIB_IF_TYPE_ETHERNET);
-	fv.set_multicast(curAdapter->IfType == MIB_IF_TYPE_ETHERNET);
-	fv.set_loopback(curAdapter->IfType == MIB_IF_TYPE_LOOPBACK);
-	fv.set_point_to_point(curAdapter->IfType == MIB_IF_TYPE_PPP);
+	vifp->set_enabled(ifp->enabled() &&
+			  (curAdapter->OperStatus == IfOperStatusUp));
+	vifp->set_broadcast(curAdapter->IfType == MIB_IF_TYPE_ETHERNET);
+	vifp->set_multicast(curAdapter->IfType == MIB_IF_TYPE_ETHERNET);
+	vifp->set_loopback(curAdapter->IfType == MIB_IF_TYPE_LOOPBACK);
+	vifp->set_point_to_point(curAdapter->IfType == MIB_IF_TYPE_PPP);
 
 	// Unicast addresses
 	// XXX: Currently we only support IPv4.
@@ -254,17 +257,18 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 		}
 	    }
 
-	    fv.add_addr(lcl_addr);
+	    vifp->add_addr(lcl_addr);
 
-	    IfTreeAddr4& fa = fv.get_addr(lcl_addr)->second;
-	    fa.set_enabled(fv.enabled());
-	    fa.set_loopback(fv.loopback());
-	    fa.set_point_to_point(fv.point_to_point());
-	    fa.set_multicast(fv.multicast());
-	    fa.set_prefix_len(prefix_len);
-	    if (fv.broadcast()) {
-		fa.set_broadcast(true);
-		fa.set_bcast(bcast_addr);
+	    IfTreeAddr4* ap = vifp->find_addr(lcl_addr);
+	    XLOG_ASSERT(ap != NULL);
+	    ap->set_enabled(vifp->enabled());
+	    ap->set_loopback(vifp->loopback());
+	    ap->set_point_to_point(vifp->point_to_point());
+	    ap->set_multicast(vifp->multicast());
+	    ap->set_prefix_len(prefix_len);
+	    if (vifp->broadcast()) {
+		ap->set_broadcast(true);
+		ap->set_bcast(bcast_addr);
 	    }
 	}
     }

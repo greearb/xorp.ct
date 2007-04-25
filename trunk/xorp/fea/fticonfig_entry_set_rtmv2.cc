@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtmv2.cc,v 1.2 2006/08/27 07:34:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtmv2.cc,v 1.3 2007/02/16 22:45:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -225,12 +225,12 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
 	if (fte.ifname().empty())
 	    break;
 	const IfTree& iftree = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-	if (ii == iftree.ifs().end()) {
+	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
 	    return false;
 	}
-	if (ii->second.discard()) {
+	if (ifp->discard()) {
 	    is_discard_route = true;
 	    fte_nexthop = IPvX::LOOPBACK(family);
 	}
@@ -261,9 +261,9 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
 
     // Copy the interface index.
     const IfTree& iftree = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-    XLOG_ASSERT(ii != iftree.ifs().end());
-    rtm->rtm_index = ii->second.pif_index();
+    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+    XLOG_ASSERT(ifp != NULL);
+    rtm->rtm_index = ifp->pif_index();
 
     // Copy the destination, the nexthop, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
@@ -347,9 +347,9 @@ FtiConfigEntrySetRtmV2::delete_entry(const FteX& fte)
 
     // Copy the interface index.
     const IfTree& iftree = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-    XLOG_ASSERT(ii != iftree.ifs().end());
-    rtm->rtm_index = ii->second.pif_index();
+    const& IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+    XLOG_ASSERT(ifp != NULL);
+    rtm->rtm_index = ifp->pif_index();
     
     // Copy the destination, and the netmask addresses (if needed)
     fte.net().masked_addr().copy_out(*sin_dst);

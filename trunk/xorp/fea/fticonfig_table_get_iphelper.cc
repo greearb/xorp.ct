@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_iphelper.cc,v 1.6 2006/03/22 00:41:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_iphelper.cc,v 1.7 2007/02/16 22:45:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -190,14 +190,15 @@ FtiConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 
 	uint32_t ifindex = static_cast<uint32_t>(pFwdRow->dwForwardIfIndex);
 	const IfTree& iftree = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = iftree.get_if(ifindex);
+	const IfTreeInterface* ifp = iftree.find_interface(ifindex);
 
 	string if_name;
-	if (ii != iftree.ifs().end()) {
-	    if_name = ii->second.ifname();
+	if (ifp != NULL) {
+	    if_name = ifp->ifname();
 	} else {
 	    if_name = "unknown";
-	    XLOG_WARNING("route via unknown interface %d\n", (int)ifindex);
+	    XLOG_WARNING("Route via unknown interface index %u",
+			 XORP_UINT_CAST(ifindex));
 	}
 
 	// TODO: define default routing metric and admin distance.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.21 2007/04/20 01:35:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.22 2007/04/23 23:05:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -124,14 +124,14 @@ LibFeaClientBridge::interface_update(const string& ifname,
     // in libfeaclient's equivalent.
     //
     const IfMgrIfAtom* ifa = _rm->iftree().find_interface(ifname);
-    if (ifa == 0) {
+    if (ifa == NULL) {
 	XLOG_WARNING("Got update for interface not in libfeaclient tree: "
 		     "%s\n", ifname.c_str());
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	XLOG_WARNING("Got update for interface not in FEA tree: %s\n",
 		     ifname.c_str());
 	return;
@@ -141,16 +141,16 @@ LibFeaClientBridge::interface_update(const string& ifname,
     // Copy interface state out of FEA iftree into libfeaclient's
     // equivalent.
     //
-    _rm->push(new IfMgrIfSetEnabled(ifname, ii->second.enabled()));
-    _rm->push(new IfMgrIfSetDiscard(ifname, ii->second.discard()));
-    _rm->push(new IfMgrIfSetMtu(ifname, ii->second.mtu()));
-    _rm->push(new IfMgrIfSetMac(ifname, ii->second.mac()));
-    _rm->push(new IfMgrIfSetPifIndex(ifname, ii->second.pif_index()));
-    _rm->push(new IfMgrIfSetNoCarrier(ifname, ii->second.no_carrier()));
+    _rm->push(new IfMgrIfSetEnabled(ifname, ifp->enabled()));
+    _rm->push(new IfMgrIfSetDiscard(ifname, ifp->discard()));
+    _rm->push(new IfMgrIfSetMtu(ifname, ifp->mtu()));
+    _rm->push(new IfMgrIfSetMac(ifname, ifp->mac()));
+    _rm->push(new IfMgrIfSetPifIndex(ifname, ifp->pif_index()));
+    _rm->push(new IfMgrIfSetNoCarrier(ifname, ifp->no_carrier()));
 
     //
     // XXX TODO / TBD if need doing...
-    // _rm->push(new IfMgrIfSetIfFlags(ifname, ii- if_flags - relevant ????
+    // _rm->push(new IfMgrIfSetIfFlags(ifname, ifp->if_flags()) - relevant ????
     //
 }
 
@@ -192,22 +192,21 @@ LibFeaClientBridge::vif_update(const string& ifname,
     // libfeaclient's equivalent.
     //
     const IfMgrVifAtom* ifa = _rm->iftree().find_vif(ifname, vifname);
-    if (ifa == 0) {
+    if (ifa == NULL) {
 	XLOG_WARNING("Got update for vif not in libfeaclient tree: %s/%s",
 		     ifname.c_str(), vifname.c_str());
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	XLOG_WARNING("Got update for vif on interface not in tree:"
 		     "%s/(%s)", ifname.c_str(), vifname.c_str());
 	return;
     }
 
-    const IfTreeInterface& iface = ii->second;
-    IfTreeInterface::VifMap::const_iterator vi = iface.get_vif(vifname);
-    if (vi == iface.vifs().end()) {
+    const IfTreeVif* vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	XLOG_WARNING("Got update for vif not in FEA tree: %s/%s",
 		     ifname.c_str(), vifname.c_str());
 	return;
@@ -217,24 +216,23 @@ LibFeaClientBridge::vif_update(const string& ifname,
     // Copy vif state out of FEA iftree into libfeaclient's
     // equivalent.
     //
-    const IfTreeVif& vif = vi->second;
     _rm->push(new
-	      IfMgrVifSetEnabled(ifname, vifname, vif.enabled())
+	      IfMgrVifSetEnabled(ifname, vifname, vifp->enabled())
 	      );
     _rm->push(new
-	      IfMgrVifSetBroadcastCapable(ifname, vifname, vif.broadcast())
+	      IfMgrVifSetBroadcastCapable(ifname, vifname, vifp->broadcast())
 	      );
     _rm->push(new
-	      IfMgrVifSetLoopbackCapable(ifname, vifname, vif.loopback())
+	      IfMgrVifSetLoopbackCapable(ifname, vifname, vifp->loopback())
 	      );
     _rm->push(new
-	      IfMgrVifSetP2PCapable(ifname, vifname, vif.point_to_point())
+	      IfMgrVifSetP2PCapable(ifname, vifname, vifp->point_to_point())
 	      );
     _rm->push(new
-	      IfMgrVifSetMulticastCapable(ifname, vifname, vif.multicast())
+	      IfMgrVifSetMulticastCapable(ifname, vifname, vifp->multicast())
 	      );
     _rm->push(new
-	      IfMgrVifSetPifIndex(ifname, vifname, vif.pif_index())
+	      IfMgrVifSetPifIndex(ifname, vifname, vifp->pif_index())
 	      );
 }
 
@@ -279,66 +277,62 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
     const IfMgrIPv4Atom* ifa = _rm->iftree().find_addr(ifname,
 						       vifname,
 						       addr);
-    if (ifa == 0) {
+    if (ifa == NULL) {
 	XLOG_WARNING("Got update for address no in libfeaclient tree: "
 		     "%s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in tree: "
 		     "%s/(%s/%s)",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
-    const IfTreeInterface& iface = ii->second;
-    IfTreeInterface::VifMap::const_iterator vi = iface.get_vif(vifname);
-    if (vi == iface.vifs().end()) {
+    const IfTreeVif* vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	XLOG_WARNING("Got update for address on vif not in FEA tree: "
 		     "%s/%s/(%s)",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
-    const IfTreeVif& vif = vi->second;
-    IfTreeVif::IPv4Map::const_iterator ai = vif.get_addr(addr);
-    if (ai == vif.ipv4addrs().end()) {
+    const IfTreeAddr4* ap = vifp->find_addr(addr);
+    if (ap == NULL) {
 	XLOG_WARNING("Got update for address not in FEA tree: %s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
-
-    const IfTreeAddr4& a4 = ai->second;
 
     //
     // Copy address state out of FEA iftree into libfeaclient's
     // equivalent.
     //
     _rm->push(new
-	      IfMgrIPv4SetEnabled(ifname, vifname, addr, a4.enabled())
+	      IfMgrIPv4SetEnabled(ifname, vifname, addr, ap->enabled())
 	      );
     _rm->push(new
-	      IfMgrIPv4SetLoopback(ifname, vifname, addr, a4.loopback())
+	      IfMgrIPv4SetLoopback(ifname, vifname, addr, ap->loopback())
 	      );
     _rm->push(new
 	      IfMgrIPv4SetMulticastCapable(ifname, vifname, addr,
-					   a4.multicast())
+					   ap->multicast())
 	      );
     _rm->push(new
-	      IfMgrIPv4SetPrefix(ifname, vifname, addr, a4.prefix_len())
+	      IfMgrIPv4SetPrefix(ifname, vifname, addr, ap->prefix_len())
 	      );
-    if (a4.point_to_point()) {
-	const IPv4& end = a4.endpoint();
+    if (ap->point_to_point()) {
+	const IPv4& end = ap->endpoint();
 	_rm->push(new IfMgrIPv4SetEndpoint(ifname, vifname, addr, end));
     } else {
 	// NB if IfTreeAddr4::bcast() will return IPv4::ZERO() if
 	// broadcast is not supported.  This happens to be the
 	// correct argument for libfeaclient to signify broadcast
 	// is not supported.
-	const IPv4& bcast = a4.bcast();
+	const IPv4& bcast = ap->bcast();
 	_rm->push(new IfMgrIPv4SetBroadcast(ifname, vifname, addr, bcast));
     }
 }
@@ -384,59 +378,55 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
     const IfMgrIPv6Atom* ifa = _rm->iftree().find_addr(ifname,
 						       vifname,
 						       addr);
-    if (ifa == 0) {
+    if (ifa == NULL) {
 	XLOG_WARNING("Got update for address no in libfeaclient tree: "
 		     "%s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
-    IfTree::IfMap::const_iterator ii = _iftree.get_if(ifname);
-    if (ii == _iftree.ifs().end()) {
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in tree: "
 		     "%s/(%s/%s)",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
-    const IfTreeInterface& iface = ii->second;
-    IfTreeInterface::VifMap::const_iterator vi = iface.get_vif(vifname);
-    if (vi == iface.vifs().end()) {
+    const IfTreeVif* vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
 	XLOG_WARNING("Got update for address on vif not in FEA tree: "
 		     "%s/%s/(%s)",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
-    const IfTreeVif& vif = vi->second;
-    IfTreeVif::IPv6Map::const_iterator ai = vif.get_addr(addr);
-    if (ai == vif.ipv6addrs().end()) {
+    const IfTreeAddr6* ap = vifp->find_addr(addr);
+    if (ap == NULL) {
 	XLOG_WARNING("Got update for address not in FEA tree: %s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
-
-    const IfTreeAddr6& a6 = ai->second;
 
     //
     // Copy address state out of FEA iftree into libfeaclient's
     // equivalent.
     //
     _rm->push(new
-	      IfMgrIPv6SetEnabled(ifname, vifname, addr, a6.enabled())
+	      IfMgrIPv6SetEnabled(ifname, vifname, addr, ap->enabled())
 	      );
     _rm->push(new
-	      IfMgrIPv6SetLoopback(ifname, vifname, addr, a6.loopback())
+	      IfMgrIPv6SetLoopback(ifname, vifname, addr, ap->loopback())
 	      );
     _rm->push(new
 	      IfMgrIPv6SetMulticastCapable(ifname, vifname, addr,
-					   a6.multicast())
+					   ap->multicast())
 	      );
     _rm->push(new
-	      IfMgrIPv6SetPrefix(ifname, vifname, addr, a6.prefix_len())
+	      IfMgrIPv6SetPrefix(ifname, vifname, addr, ap->prefix_len())
 	      );
     _rm->push(new
-	      IfMgrIPv6SetEndpoint(ifname, vifname, addr, a6.endpoint()));
+	      IfMgrIPv6SetEndpoint(ifname, vifname, addr, ap->endpoint()));
 }
 
 

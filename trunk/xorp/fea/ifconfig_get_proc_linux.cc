@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.28 2007/02/16 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.29 2007/04/20 19:06:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -277,7 +277,7 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it,
 	    continue;
 	}
 	
-	if (it.get_if(ifname) != it.ifs().end()) {
+	if (it->find_interface(ifname) != NULL) {
 	    // Already have this interface. Ignore it.
 	    continue;
 	}
@@ -383,12 +383,13 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	//
 	ifc.map_ifindex(if_index, alias_if_name);
 	it.add_if(alias_if_name);
-	IfTreeInterface& fi = it.get_if(alias_if_name)->second;
+	IfTreeInterface* ifp = it.find_interface(alias_if_name);
+	XLOG_ASSERT(ifp != NULL);
 
 	//
 	// Set the physical interface index for the interface
 	//
-	fi.set_pif_index(if_index);
+	ifp->set_pif_index(if_index);
 
 	//
 	// Get the MAC address
@@ -404,14 +405,14 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	    } else {
 		struct ether_addr ea;
 		memcpy(&ea, ifreq.ifr_hwaddr.sa_data, sizeof(ea));
-		fi.set_mac(EtherMac(ea));
+		ifp->set_mac(EtherMac(ea));
 		break;
 	    }
 #endif // SIOCGIFHWADDR
 	    
 	    break;
 	} while (false);
-	debug_msg("MAC address: %s\n", fi.mac().str().c_str());
+	debug_msg("MAC address: %s\n", ifp->mac().str().c_str());
 	
 	//
 	// Get the MTU
@@ -425,8 +426,8 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	} else {
 	    mtu = ifreq.ifr_mtu;
 	}
-	fi.set_mtu(mtu);
-	debug_msg("MTU: %d\n", fi.mtu());
+	ifp->set_mtu(mtu);
+	debug_msg("MTU: %d\n", ifp->mtu());
 	
 	//
 	// Get the flags
@@ -441,9 +442,9 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	} else {
 	    flags = ifreq.ifr_flags;
 	}
-	fi.set_if_flags(flags);
-	fi.set_enabled(flags & IFF_UP);
-	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
+	ifp->set_if_flags(flags);
+	ifp->set_enabled(flags & IFF_UP);
+	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
 
 	//
 	// Get the link status
@@ -453,32 +454,33 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	    no_carrier = true;
 	else
 	    no_carrier = false;
-	fi.set_no_carrier(no_carrier);
-	debug_msg("no_carrier: %s\n", fi.no_carrier() ? "true" : "false");
+	ifp->set_no_carrier(no_carrier);
+	debug_msg("no_carrier: %s\n", ifp->no_carrier() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
-	fi.add_vif(alias_if_name);
-	IfTreeVif& fv = fi.get_vif(alias_if_name)->second;
+	ifp->add_vif(alias_if_name);
+	IfTreeVif* vifp = ifp->find_vif(alias_if_name);
+	XLOG_ASSERT(vifp != NULL);
 	
 	//
 	// Set the physical interface index for the vif
 	//
-	fv.set_pif_index(if_index);
+	vifp->set_pif_index(if_index);
 	
 	//
 	// Set the vif flags
 	//
-	fv.set_enabled(fi.enabled() && (flags & IFF_UP));
-	fv.set_broadcast(flags & IFF_BROADCAST);
-	fv.set_loopback(flags & IFF_LOOPBACK);
-	fv.set_point_to_point(flags & IFF_POINTOPOINT);
-	fv.set_multicast(flags & IFF_MULTICAST);
-	debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
-	debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
-	debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");
-	debug_msg("vif point_to_point: %s\n", fv.point_to_point() ? "true"
+	vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
+	vifp->set_broadcast(flags & IFF_BROADCAST);
+	vifp->set_loopback(flags & IFF_LOOPBACK);
+	vifp->set_point_to_point(flags & IFF_POINTOPOINT);
+	vifp->set_multicast(flags & IFF_MULTICAST);
+	debug_msg("vif enabled: %s\n", vifp->enabled() ? "true" : "false");
+	debug_msg("vif broadcast: %s\n", vifp->broadcast() ? "true" : "false");
+	debug_msg("vif loopback: %s\n", vifp->loopback() ? "true" : "false");
+	debug_msg("vif point_to_point: %s\n", vifp->point_to_point() ? "true"
 		  : "false");
-	debug_msg("vif multicast: %s\n", fv.multicast() ? "true" : "false");
+	debug_msg("vif multicast: %s\n", vifp->multicast() ? "true" : "false");
 	
 	//
 	// Get the IP address, netmask, P2P destination
@@ -502,7 +504,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	
 	// Get the p2p address
-	if (fv.point_to_point()) {
+	if (vifp->point_to_point()) {
 	    XLOG_FATAL("IPv6 point-to-point address unimplemented");
 	    has_peer_addr = true;
 	    debug_msg("Peer address: %s\n", peer_addr.str().c_str());
@@ -511,16 +513,17 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	debug_msg("\n");	// put an empty line between interfaces
 	
 	// Add the address
-	fv.add_addr(lcl_addr);
-	IfTreeAddr6& fa = fv.get_addr(lcl_addr)->second;
-	fa.set_enabled(fv.enabled() && (flags & IFF_UP));
-	fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
-	fa.set_point_to_point(fv.point_to_point() && (flags & IFF_POINTOPOINT));
-	fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
+	vifp->add_addr(lcl_addr);
+	IfTreeAddr6* ap = vifp->find_addr(lcl_addr);
+	XLOG_ASSERT(ap != NULL);
+	ap->set_enabled(vifp->enabled() && (flags & IFF_UP));
+	ap->set_loopback(vifp->loopback() && (flags & IFF_LOOPBACK));
+	ap->set_point_to_point(vifp->point_to_point() && (flags & IFF_POINTOPOINT));
+	ap->set_multicast(vifp->multicast() && (flags & IFF_MULTICAST));
 	
-	fa.set_prefix_len(subnet_mask.mask_len());
-	if (fa.point_to_point())
-	    fa.set_endpoint(peer_addr);
+	ap->set_prefix_len(subnet_mask.mask_len());
+	if (ap->point_to_point())
+	    ap->set_endpoint(peer_addr);
     }
     
     if (ferror(fh)) {

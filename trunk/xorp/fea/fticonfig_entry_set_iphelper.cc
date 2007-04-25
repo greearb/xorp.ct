@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.12 2006/07/15 14:15:00 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.13 2007/02/16 22:45:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -203,13 +203,13 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
     }
 
     const IfTree& iftree = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-    XLOG_ASSERT(ii != iftree.ifs().end());
+    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+    XLOG_ASSERT(ifp != NULL);
 
     ipfwdrow.dwForwardDest = tmpdest;
     ipfwdrow.dwForwardMask = tmpmask;
     ipfwdrow.dwForwardNextHop = tmpnexthop;
-    ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
+    ipfwdrow.dwForwardIfIndex = ifp->pif_index();
     ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
     ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_OTHER;
     //
@@ -314,9 +314,9 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // programming error.
     //
     const IfTree& iftree = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-    XLOG_ASSERT(ii != iftree.ifs().end());
-    ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
+    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+    XLOG_ASSERT(ifp != NULL);
+    ipfwdrow.dwForwardIfIndex = ifp->pif_index();
 
     //
     // The FIB fills out the dwForwardType field strictly according

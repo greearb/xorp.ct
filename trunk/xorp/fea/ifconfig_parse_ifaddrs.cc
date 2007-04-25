@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.30 2007/02/16 22:45:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.31 2007/04/14 07:00:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -159,17 +159,19 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	// Add the interface (if a new one)
 	//
 	ifc().map_ifindex(if_index, alias_if_name);
-	if (it.get_if(alias_if_name) == it.ifs().end()) {
+	IfTreeInterface* ifp = it.find_interface(alias_if_name);
+	if (ifp == NULL) {
 	    it.add_if(alias_if_name);
 	    is_newlink = true;
+	    ifp = it.find_interface(alias_if_name);
+	    XLOG_ASSERT(ifp != NULL);
 	}
-	IfTreeInterface& fi = it.get_if(alias_if_name)->second;
 
 	//
 	// Set the physical interface index for the interface
 	//
-	if (is_newlink || (if_index != fi.pif_index()))
-	    fi.set_pif_index(if_index);
+	if (is_newlink || (if_index != ifp->pif_index()))
+	    ifp->set_pif_index(if_index);
 
 	//
 	// Get the MAC address
@@ -186,8 +188,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 			memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 			       sdl->sdl_alen);
 			EtherMac ether_mac(ea);
-			if (is_newlink || (ether_mac != EtherMac(fi.mac())))
-			    fi.set_mac(ether_mac);
+			if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
+			    ifp->set_mac(ether_mac);
 			break;
 		    } else if (sdl->sdl_alen != 0) {
 			XLOG_ERROR("Address size %d uncatered for interface %s",
@@ -216,8 +218,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 		    struct ether_addr ea;
 		    memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
 		    EtherMac ether_mac(ea);
-		    if (is_newlink || (ether_mac != EtherMac(fi.mac())))
-			fi.set_mac(ether_mac);
+		    if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
+			ifp->set_mac(ether_mac);
 		    close(s);
 		    break;
 		}
@@ -227,7 +229,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    
 	    break;
 	} while (false);
-	debug_msg("MAC address: %s\n", fi.mac().str().c_str());
+	debug_msg("MAC address: %s\n", ifp->mac().str().c_str());
 	
 	//
 	// Get the MTU
@@ -244,8 +246,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 			XLOG_ERROR("Couldn't get the MTU for interface %s",
 				   if_name.c_str());
 		    }
-		    if (is_newlink || (mtu != fi.mtu()))
-			fi.set_mtu(mtu);
+		    if (is_newlink || (mtu != ifp->mtu()))
+			ifp->set_mtu(mtu);
 		    break;
 		}
 	    }
@@ -268,8 +270,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 			      if_name.c_str(), strerror(errno));
 		} else {
 		    unsigned int mtu = ifridx.ifr_mtu;
-		    if (is_newlink || (mtu != fi.mtu()))
-			fi.set_mtu(mtu);
+		    if (is_newlink || (mtu != ifp->mtu()))
+			ifp->set_mtu(mtu);
 		    close(s);
 		    break;
 		}
@@ -279,7 +281,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    
 	    break;
 	} while (false);
-	debug_msg("MTU: %d\n", fi.mtu());
+	debug_msg("MTU: %d\n", ifp->mtu());
 
 	//
 	// Get the link status
@@ -307,8 +309,8 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 		    default:
 			break;
 		    }
-		    if (is_newlink || no_carrier != fi.no_carrier())
-			fi.set_no_carrier(no_carrier);
+		    if (is_newlink || no_carrier != ifp->no_carrier())
+			ifp->set_no_carrier(no_carrier);
 		    break;
 		}
 	    }
@@ -319,49 +321,50 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 		XLOG_ERROR("%s", error_msg.c_str());
 		break;
 	    }
-	    if (is_newlink || (no_carrier != fi.no_carrier()))
-		fi.set_no_carrier(no_carrier);
+	    if (is_newlink || (no_carrier != ifp->no_carrier()))
+		ifp->set_no_carrier(no_carrier);
 	    break;
 	} while (false);
-	debug_msg("no_carrier: %s\n", fi.no_carrier() ? "true" : "false");
+	debug_msg("no_carrier: %s\n", ifp->no_carrier() ? "true" : "false");
 	
 	//
 	// Get the flags
 	//
 	unsigned int flags = ifa->ifa_flags;
-	if (is_newlink || (flags != fi.if_flags())) {
-	    fi.set_if_flags(flags);
-	    fi.set_enabled(flags & IFF_UP);
+	if (is_newlink || (flags != ifp->if_flags())) {
+	    ifp->set_if_flags(flags);
+	    ifp->set_enabled(flags & IFF_UP);
 	}
-	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
+	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)
-	    fi.add_vif(alias_if_name);
-	IfTreeVif& fv = fi.get_vif(alias_if_name)->second;
+	    ifp->add_vif(alias_if_name);
+	IfTreeVif* vifp = ifp->find_vif(alias_if_name);
+	XLOG_ASSERT(vifp != NULL);
 	
 	//
 	// Set the physical interface index for the vif
 	//
-	if (is_newlink || (if_index != fv.pif_index()))
-	    fv.set_pif_index(if_index);
+	if (is_newlink || (if_index != vifp->pif_index()))
+	    vifp->set_pif_index(if_index);
 	
 	//
 	// Set the vif flags
 	//
-	if (is_newlink || (flags != fi.if_flags())) {
-	    fv.set_enabled(fi.enabled() && (flags & IFF_UP));
-	    fv.set_broadcast(flags & IFF_BROADCAST);
-	    fv.set_loopback(flags & IFF_LOOPBACK);
-	    fv.set_point_to_point(flags & IFF_POINTOPOINT);
-	    fv.set_multicast(flags & IFF_MULTICAST);
+	if (is_newlink || (flags != ifp->if_flags())) {
+	    vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
+	    vifp->set_broadcast(flags & IFF_BROADCAST);
+	    vifp->set_loopback(flags & IFF_LOOPBACK);
+	    vifp->set_point_to_point(flags & IFF_POINTOPOINT);
+	    vifp->set_multicast(flags & IFF_MULTICAST);
 	}
-	debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
-	debug_msg("vif broadcast: %s\n", fv.broadcast() ? "true" : "false");
-	debug_msg("vif loopback: %s\n", fv.loopback() ? "true" : "false");
-	debug_msg("vif point_to_point: %s\n", fv.point_to_point() ? "true"
+	debug_msg("vif enabled: %s\n", vifp->enabled() ? "true" : "false");
+	debug_msg("vif broadcast: %s\n", vifp->broadcast() ? "true" : "false");
+	debug_msg("vif loopback: %s\n", vifp->loopback() ? "true" : "false");
+	debug_msg("vif point_to_point: %s\n", vifp->point_to_point() ? "true"
 		  : "false");
-	debug_msg("vif multicast: %s\n", fv.multicast() ? "true" : "false");
+	debug_msg("vif multicast: %s\n", vifp->multicast() ? "true" : "false");
 	
 	//
 	// Get the IP address, netmask, broadcast address, P2P destination
@@ -394,7 +397,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the broadcast address
-	    if (fv.broadcast() && (ifa->ifa_broadaddr != NULL)) {
+	    if (vifp->broadcast() && (ifa->ifa_broadaddr != NULL)) {
 		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_broadaddr);
 		broadcast_addr.copy_in(sin->sin_addr);
 		has_broadcast_addr = true;
@@ -403,7 +406,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    }
 	    
 	    // Get the p2p address
-	    if (fv.point_to_point() && (ifa->ifa_dstaddr != NULL)) {
+	    if (vifp->point_to_point() && (ifa->ifa_dstaddr != NULL)) {
 		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_dstaddr);
 		peer_addr.copy_in(sin->sin_addr);
 		has_peer_addr = true;
@@ -413,23 +416,24 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    debug_msg("\n");	// put an empty line between interfaces
 	    
 	    // Add the address
-	    fv.add_addr(lcl_addr);
-	    IfTreeAddr4& fa = fv.get_addr(lcl_addr)->second;
-	    fa.set_enabled(fv.enabled() && (flags & IFF_UP));
-	    fa.set_broadcast(fv.broadcast()
-			     && (flags & IFF_BROADCAST)
-			     && has_broadcast_addr);
-	    fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
-	    fa.set_point_to_point(fv.point_to_point()
-				  && (flags & IFF_POINTOPOINT)
-				  && has_peer_addr);
-	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
+	    vifp->add_addr(lcl_addr);
+	    IfTreeAddr4* ap = vifp->find_addr(lcl_addr);
+	    XLOG_ASSERT(ap != NULL);
+	    ap->set_enabled(vifp->enabled() && (flags & IFF_UP));
+	    ap->set_broadcast(vifp->broadcast()
+			      && (flags & IFF_BROADCAST)
+			      && has_broadcast_addr);
+	    ap->set_loopback(vifp->loopback() && (flags & IFF_LOOPBACK));
+	    ap->set_point_to_point(vifp->point_to_point()
+				   && (flags & IFF_POINTOPOINT)
+				   && has_peer_addr);
+	    ap->set_multicast(vifp->multicast() && (flags & IFF_MULTICAST));
 	    
-	    fa.set_prefix_len(subnet_mask.mask_len());
-	    if (fa.broadcast())
-		fa.set_bcast(broadcast_addr);
-	    if (fa.point_to_point())
-		fa.set_endpoint(peer_addr);
+	    ap->set_prefix_len(subnet_mask.mask_len());
+	    if (ap->broadcast())
+		ap->set_bcast(broadcast_addr);
+	    if (ap->point_to_point())
+		ap->set_endpoint(peer_addr);
 	    
 	    break;
 	}
@@ -459,7 +463,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    // Get the p2p address
 	    // XXX: note that unlike IPv4, here we check whether the
 	    // address family of the destination address is valid.
-	    if (fv.point_to_point()
+	    if (vifp->point_to_point()
 		&& (ifa->ifa_dstaddr != NULL)
 		&& (ifa->ifa_dstaddr->sa_family == AF_INET6)) {
 		const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(ifa->ifa_dstaddr);
@@ -471,18 +475,19 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	    debug_msg("\n");	// put an empty line between interfaces
 	    
 	    // Add the address
-	    fv.add_addr(lcl_addr);
-	    IfTreeAddr6& fa = fv.get_addr(lcl_addr)->second;
-	    fa.set_enabled(fv.enabled() && (flags & IFF_UP));
-	    fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
-	    fa.set_point_to_point(fv.point_to_point()
-				  && (flags & IFF_POINTOPOINT)
-				  && has_peer_addr);
-	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
+	    vifp->add_addr(lcl_addr);
+	    IfTreeAddr6* ap = vifp->find_addr(lcl_addr);
+	    XLOG_ASSERT(ap != NULL);
+	    ap->set_enabled(vifp->enabled() && (flags & IFF_UP));
+	    ap->set_loopback(vifp->loopback() && (flags & IFF_LOOPBACK));
+	    ap->set_point_to_point(vifp->point_to_point()
+				   && (flags & IFF_POINTOPOINT)
+				   && has_peer_addr);
+	    ap->set_multicast(vifp->multicast() && (flags & IFF_MULTICAST));
 	    
-	    fa.set_prefix_len(subnet_mask.mask_len());
-	    if (fa.point_to_point())
-		fa.set_endpoint(peer_addr);
+	    ap->set_prefix_len(subnet_mask.mask_len());
+	    if (ap->point_to_point())
+		ap->set_endpoint(peer_addr);
 	    
 	    //
 	    // TODO: do we need to check the IPv6-specific flags, and ignore

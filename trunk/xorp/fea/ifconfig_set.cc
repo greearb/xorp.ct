@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.39 2007/02/16 22:45:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.40 2007/04/19 21:36:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -261,14 +261,16 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
     do {
 	uint32_t pulled_flags = 0;
 	bool pulled_up, enabled;
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	const IfTreeInterface* ifp;
+
+	ifp = ifc().pulled_config().find_interface(i.ifname());
 
 	deleted = i.is_marked(IfTreeItem::DELETED);
 	enabled = i.enabled();
 
 	// Get the flags from the pulled config
-	if (ii != ifc().pulled_config().ifs().end())
-	    pulled_flags = ii->second.if_flags();
+	if (ifp != NULL)
+	    pulled_flags = ifp->if_flags();
 	new_flags = pulled_flags;
 
 	pulled_up = pulled_flags & IFF_UP;
@@ -301,10 +303,12 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	bool was_disabled = false;
 	uint32_t new_mtu = i.mtu();
 	uint32_t pulled_mtu = 0;
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	const IfTreeInterface* ifp;
 
-	if (ii != ifc().pulled_config().ifs().end())
-	    pulled_mtu = ii->second.mtu();
+	ifp = ifc().pulled_config().find_interface(i.ifname());
+
+	if (ifp != NULL)
+	    pulled_mtu = ifp->mtu();
 
 	if (is_secondary() && (new_mtu == 0)) {
 	    // Get the MTU from the pulled config
@@ -317,9 +321,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	if (is_primary() && (new_mtu == pulled_mtu))
 	    break;		// Ignore: the MTU hasn't changed
 
-	if (is_primary()
-	    && (ii != ifc().pulled_config().ifs().end())
-	    && new_up) {
+	if (is_primary() && (ifp != NULL) && new_up) {
 	    //
 	    // XXX: Set the interface DOWN otherwise we may not be able to
 	    // set the MTU (limitation imposed by the Linux kernel).
@@ -358,10 +360,12 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	bool was_disabled = false;
 	Mac new_mac = i.mac();
 	Mac pulled_mac;
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	const IfTreeInterface* ifp;
 
-	if (ii != ifc().pulled_config().ifs().end())
-	    pulled_mac = ii->second.mac();
+	ifp = ifc().pulled_config().find_interface(i.ifname());
+
+	if (ifp != NULL)
+	    pulled_mac = ifp->mac();
 
 	if (is_secondary() && new_mac.empty()) {
 	    // Get the MAC from the pulled config
@@ -394,9 +398,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    return;
 	}
 
-	if (is_primary()
-	    && (ii != ifc().pulled_config().ifs().end())
-	    && new_up) {
+	if (is_primary() && (ifp != NULL) && new_up) {
 	    //
 	    // XXX: Set the interface DOWN otherwise we may not be able to
 	    // set the MAC address (limitation imposed by the Linux kernel).
@@ -474,15 +476,17 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 	bool new_loopback = false;
 	bool new_point_to_point = false;
 	bool new_multicast = false;
-	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
+	const IfTreeInterface* ifp;
+
+	ifp = ifc().pulled_config().find_interface(i.ifname());
 
 	deleted = (i.is_marked(IfTreeItem::DELETED) |
 		   v.is_marked(IfTreeItem::DELETED));
 	enabled = i.enabled() & v.enabled();
 
 	// Get the flags from the pulled config
-	if (ii != ifc().pulled_config().ifs().end())
-	    pulled_flags = ii->second.if_flags();
+	if (ifp != NULL)
+	    pulled_flags = ifp->if_flags();
 	new_flags = pulled_flags;
 
 	pulled_up = pulled_flags & IFF_UP;
@@ -495,13 +499,13 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 	    break;		// XXX: nothing changed
 
 	// Set the vif flags
-	if (ii != ifc().pulled_config().ifs().end()) {
-	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
-	    if (vi != ii->second.vifs().end()) {
-		pulled_broadcast = vi->second.broadcast();
-		pulled_loopback = vi->second.loopback();
-		pulled_point_to_point = vi->second.point_to_point();
-		pulled_multicast = vi->second.multicast();
+	if (ifp != NULL) {
+	    const IfTreeVif* vifp = ifp->find_vif(v.vifname());
+	    if (vifp != NULL) {
+		pulled_broadcast = vifp->broadcast();
+		pulled_loopback = vifp->loopback();
+		pulled_point_to_point = vifp->point_to_point();
+		pulled_multicast = vifp->multicast();
 	    }
 	}
 	if (is_primary()) {
@@ -547,19 +551,16 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 
     if (a.is_marked(IfTreeItem::CREATED) && enabled == false) {
 	//
-	// XXX:
 	// A created but disabled address will not appear in the live
 	// config that was read from the kernel.
-	// 
-	// This is a lot of work!
 	//
-	IfTree::IfMap::iterator ii = ifc().live_config().get_if(i.ifname());
-	XLOG_ASSERT(ii != ifc().live_config().ifs().end());
-	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
-	XLOG_ASSERT(vi != ii->second.vifs().end());
-	vi->second.add_addr(a.addr());
-	IfTreeVif::IPv4Map::iterator ai = vi->second.get_addr(a.addr());
-	ai->second = a;
+	IfTreeVif* vifp;
+	vifp = ifc().live_config().find_vif(i.ifname(), v.vifname());
+	XLOG_ASSERT(vifp != NULL);
+	vifp->add_addr(a.addr());
+	IfTreeAddr4* ap = vifp->find_addr(a.addr());
+	XLOG_ASSERT(ap != NULL);
+	*ap = a;
 	return;
     }
 
@@ -591,23 +592,12 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    oaddr = a.endpoint();
 	
 	uint32_t prefix_len = a.prefix_len();
-	
+
 	const IfTreeAddr4* ap = NULL;
-	const IfTreeVif* vp = NULL;
-	do {
-	    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-	    if (ii == ifc().pulled_config().ifs().end())
-		break;
-	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
-	    if (vi == ii->second.vifs().end())
-		break;
-	    vp = &vi->second;
-	    IfTreeVif::IPv4Map::const_iterator ai = vi->second.get_addr(a.addr());
-	    if (ai == vi->second.ipv4addrs().end())
-		break;
-	    ap = &ai->second;
-	    break;
-	} while (false);
+	const IfTreeVif* vifp = ifc().pulled_config().find_vif(i.ifname(),
+							       v.vifname());
+	if (vifp != NULL)
+	    ap = vifp->find_addr(a.addr());
 
 	// Test if a new address
 	bool new_address = true;
@@ -636,10 +626,10 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	// broadcast-capable.
 	//
 	bool is_broadcast = a.broadcast();
-	if ((vp != NULL)
+	if ((vifp != NULL)
 	    && (! (a.broadcast() || a.point_to_point()))
 	    && (prefix_len > 0)
-	    && vp->broadcast()) {
+	    && vifp->broadcast()) {
 	    IPv4 mask = IPv4::make_prefix(prefix_len);
 	    oaddr = a.addr() | ~mask;
 	    is_broadcast = true;
@@ -681,20 +671,20 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 
     bool enabled = (i.enabled() & v.enabled() & a.enabled());
 
+    debug_msg("Pushing %s\n", a.str().c_str());
+
     if (a.is_marked(IfTreeItem::CREATED) && enabled == false) {
 	//
 	// A created but disabled address will not appear in the live
 	// config rippled up from the kernel via the routing socket
-	// 
-	// This is a lot of work!
 	//
-	IfTree::IfMap::iterator ii = ifc().live_config().get_if(i.ifname());
-	XLOG_ASSERT(ii != ifc().live_config().ifs().end());
-	IfTreeInterface::VifMap::iterator vi = ii->second.get_vif(v.vifname());
-	XLOG_ASSERT(vi != ii->second.vifs().end());
-	vi->second.add_addr(a.addr());
-	IfTreeVif::IPv6Map::iterator ai = vi->second.get_addr(a.addr());
-	ai->second = a;
+	IfTreeVif* vifp;
+	vifp = ifc().live_config().find_vif(i.ifname(), v.vifname());
+	XLOG_ASSERT(vifp != NULL);
+	vifp->add_addr(a.addr());
+	IfTreeAddr6* ap = vifp->find_addr(a.addr());
+	XLOG_ASSERT(ap != NULL);
+	*ap = a;
 	return;
     }
 
@@ -703,8 +693,8 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 		    a.is_marked(IfTreeItem::DELETED));
 
     if (deleted || !enabled) {
-	if (delete_vif_address(i.ifname(), v.vifname(), if_index, a.addr(),
-			       a.prefix_len(), error_msg)
+	if (delete_vif_address(i.ifname(), v.vifname(), if_index,
+			       IPvX(a.addr()), a.prefix_len(), error_msg)
 	    < 0) {
 	    error_msg = c_format("Failed to delete address: %s",
 				 error_msg.c_str());
@@ -724,25 +714,14 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    oaddr = a.endpoint();
 	
 	// XXX: for whatever reason a prefix length of zero does not cut it, so
-	// initialize prefix to 64.  This is exactly as ifconfig does.
+	// initialize prefix to 64.  This is exactly as ifconfig(8) does.
 	uint32_t prefix_len = a.prefix_len();
-	if (0 == prefix_len)
+	if (prefix_len == 0)
 	    prefix_len = 64;
 
-	const IfTreeAddr6* ap = NULL;
-	do {
-	    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
-	    if (ii == ifc().pulled_config().ifs().end())
-		break;
-	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
-	    if (vi == ii->second.vifs().end())
-		break;
-	    IfTreeVif::IPv6Map::const_iterator ai = vi->second.get_addr(a.addr());
-	    if (ai == vi->second.ipv6addrs().end())
-		break;
-	    ap = &ai->second;
-	    break;
-	} while (false);
+	const IfTreeAddr6* ap = ifc().pulled_config().find_addr(i.ifname(),
+								v.vifname(),
+								a.addr());
 
 	// Test if a new address
 	bool new_address = true;
