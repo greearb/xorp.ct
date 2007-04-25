@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.22 2007/02/16 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.1 2007/04/25 07:31:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -40,7 +40,7 @@
 // The mechanism to obtain the information is netlink(7) sockets.
 //
 
-IfConfigGetNetlink::IfConfigGetNetlink(IfConfig& ifc)
+IfConfigGetNetlinkSocket::IfConfigGetNetlinkSocket(IfConfig& ifc)
     : IfConfigGet(ifc),
       NetlinkSocket(ifc.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
@@ -50,7 +50,7 @@ IfConfigGetNetlink::IfConfigGetNetlink(IfConfig& ifc)
 #endif
 }
 
-IfConfigGetNetlink::~IfConfigGetNetlink()
+IfConfigGetNetlinkSocket::~IfConfigGetNetlinkSocket()
 {
     string error_msg;
 
@@ -63,7 +63,7 @@ IfConfigGetNetlink::~IfConfigGetNetlink()
 }
 
 int
-IfConfigGetNetlink::start(string& error_msg)
+IfConfigGetNetlinkSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -77,7 +77,7 @@ IfConfigGetNetlink::start(string& error_msg)
 }
 
 int
-IfConfigGetNetlink::stop(string& error_msg)
+IfConfigGetNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -91,7 +91,7 @@ IfConfigGetNetlink::stop(string& error_msg)
 }
 
 bool
-IfConfigGetNetlink::pull_config(IfTree& iftree)
+IfConfigGetNetlinkSocket::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
@@ -99,7 +99,7 @@ IfConfigGetNetlink::pull_config(IfTree& iftree)
 #ifndef HAVE_NETLINK_SOCKETS
 
 bool
-IfConfigGetNetlink::read_config(IfTree& )
+IfConfigGetNetlinkSocket::read_config(IfTree& )
 {
     return false;
 }
@@ -107,7 +107,7 @@ IfConfigGetNetlink::read_config(IfTree& )
 #else // HAVE_NETLINK_SOCKETS
 
 bool
-IfConfigGetNetlink::read_config(IfTree& it)
+IfConfigGetNetlinkSocket::read_config(IfTree& it)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512;

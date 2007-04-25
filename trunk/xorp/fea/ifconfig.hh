@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.53 2007/04/24 01:28:42 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.54 2007/04/24 05:53:06 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -487,7 +487,7 @@ private:
     IfConfigGetSysctl		_ifc_get_sysctl;
     IfConfigGetGetifaddrs	_ifc_get_getifaddrs;
     IfConfigGetProcLinux	_ifc_get_proc_linux;
-    IfConfigGetNetlink		_ifc_get_netlink;
+    IfConfigGetNetlinkSocket	_ifc_get_netlink_socket;
     IfConfigGetIPHelper		_ifc_get_iphelper;
 
     //
@@ -507,7 +507,7 @@ private:
     //
     IfConfigSetDummy		_ifc_set_dummy;
     IfConfigSetIoctl		_ifc_set_ioctl;
-    IfConfigSetNetlink		_ifc_set_netlink;
+    IfConfigSetNetlinkSocket	_ifc_set_netlink_socket;
     IfConfigSetIPHelper		_ifc_set_iphelper;
 
     //
@@ -525,10 +525,10 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    IfConfigObserverDummy	_ifc_observer_dummy;
-    IfConfigObserverRtsock	_ifc_observer_rtsock;
-    IfConfigObserverNetlink	_ifc_observer_netlink;
-    IfConfigObserverIPHelper	_ifc_observer_iphelper;
+    IfConfigObserverDummy		_ifc_observer_dummy;
+    IfConfigObserverRoutingSocket	_ifc_observer_routing_socket;
+    IfConfigObserverNetlinkSocket	_ifc_observer_netlink_socket;
+    IfConfigObserverIPHelper		_ifc_observer_iphelper;
 
     //
     // Misc other state

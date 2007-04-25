@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.56 2007/04/24 01:28:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.57 2007/04/24 05:53:06 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -73,17 +73,17 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _ifc_get_sysctl(*this),
       _ifc_get_getifaddrs(*this),
       _ifc_get_proc_linux(*this),
-      _ifc_get_netlink(*this),
+      _ifc_get_netlink_socket(*this),
       _ifc_get_iphelper(*this),
       _ifc_get_click(*this),
       _ifc_set_dummy(*this),
       _ifc_set_ioctl(*this),
-      _ifc_set_netlink(*this),
+      _ifc_set_netlink_socket(*this),
       _ifc_set_iphelper(*this),
       _ifc_set_click(*this),
       _ifc_observer_dummy(*this),
-      _ifc_observer_rtsock(*this),
-      _ifc_observer_netlink(*this),
+      _ifc_observer_routing_socket(*this),
+      _ifc_observer_netlink_socket(*this),
       _ifc_observer_iphelper(*this),
       _have_ipv4(false),
       _have_ipv6(false),

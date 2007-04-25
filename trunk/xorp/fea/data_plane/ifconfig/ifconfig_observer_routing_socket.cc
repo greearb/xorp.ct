@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.17 2007/04/18 06:20:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,7 +32,7 @@
 //
 
 
-IfConfigObserverRtsock::IfConfigObserverRtsock(IfConfig& ifc)
+IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(IfConfig& ifc)
     : IfConfigObserver(ifc),
       RoutingSocket(ifc.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
@@ -42,7 +42,7 @@ IfConfigObserverRtsock::IfConfigObserverRtsock(IfConfig& ifc)
 #endif
 }
 
-IfConfigObserverRtsock::~IfConfigObserverRtsock()
+IfConfigObserverRoutingSocket::~IfConfigObserverRoutingSocket()
 {
     string error_msg;
 
@@ -55,7 +55,7 @@ IfConfigObserverRtsock::~IfConfigObserverRtsock()
 }
 
 int
-IfConfigObserverRtsock::start(string& error_msg)
+IfConfigObserverRoutingSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -69,7 +69,7 @@ IfConfigObserverRtsock::start(string& error_msg)
 }
 
 int
-IfConfigObserverRtsock::stop(string& error_msg)
+IfConfigObserverRoutingSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -83,7 +83,7 @@ IfConfigObserverRtsock::stop(string& error_msg)
 }
 
 void
-IfConfigObserverRtsock::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 {
     if (ifc().ifc_get_primary().parse_buffer_rtm(ifc().live_config(), buffer)
 	!= true) {
@@ -101,8 +101,7 @@ IfConfigObserverRtsock::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-IfConfigObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
+IfConfigObserverRoutingSocket::rtsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
-

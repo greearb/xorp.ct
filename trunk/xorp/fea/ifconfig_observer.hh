@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.17 2006/08/29 22:42:21 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.18 2007/02/16 22:45:43 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -104,12 +104,12 @@ private:
     
 };
 
-class IfConfigObserverRtsock : public IfConfigObserver,
-			       public RoutingSocket,
-			       public RoutingSocketObserver {
+class IfConfigObserverRoutingSocket : public IfConfigObserver,
+				      public RoutingSocket,
+				      public RoutingSocketObserver {
 public:
-    IfConfigObserverRtsock(IfConfig& ifc);
-    virtual ~IfConfigObserverRtsock();
+    IfConfigObserverRoutingSocket(IfConfig& ifc);
+    virtual ~IfConfigObserverRoutingSocket();
 
     /**
      * Start operation.
@@ -140,12 +140,12 @@ private:
     
 };
 
-class IfConfigObserverNetlink : public IfConfigObserver,
-				public NetlinkSocket,
-				public NetlinkSocketObserver {
+class IfConfigObserverNetlinkSocket : public IfConfigObserver,
+				      public NetlinkSocket,
+				      public NetlinkSocketObserver {
 public:
-    IfConfigObserverNetlink(IfConfig& ifc);
-    virtual ~IfConfigObserverNetlink();
+    IfConfigObserverNetlinkSocket(IfConfig& ifc);
+    virtual ~IfConfigObserverNetlinkSocket();
 
     /**
      * Start operation.

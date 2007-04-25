@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.19 2007/04/18 06:20:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -39,7 +39,7 @@
 //
 
 
-IfConfigObserverNetlink::IfConfigObserverNetlink(IfConfig& ifc)
+IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(IfConfig& ifc)
     : IfConfigObserver(ifc),
       NetlinkSocket(ifc.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
@@ -49,7 +49,7 @@ IfConfigObserverNetlink::IfConfigObserverNetlink(IfConfig& ifc)
 #endif
 }
 
-IfConfigObserverNetlink::~IfConfigObserverNetlink()
+IfConfigObserverNetlinkSocket::~IfConfigObserverNetlinkSocket()
 {
     string error_msg;
 
@@ -62,7 +62,7 @@ IfConfigObserverNetlink::~IfConfigObserverNetlink()
 }
 
 int
-IfConfigObserverNetlink::start(string& error_msg)
+IfConfigObserverNetlinkSocket::start(string& error_msg)
 {
 #ifndef HAVE_NETLINK_SOCKETS
     error_msg = c_format("The netlink(7) sockets mechanism to observe "
@@ -109,7 +109,7 @@ IfConfigObserverNetlink::start(string& error_msg)
 }
 
 int
-IfConfigObserverNetlink::stop(string& error_msg)
+IfConfigObserverNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -123,7 +123,7 @@ IfConfigObserverNetlink::stop(string& error_msg)
 }
 
 void
-IfConfigObserverNetlink::receive_data(const vector<uint8_t>& buffer)
+IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
     if (ifc().ifc_get_primary().parse_buffer_nlm(ifc().live_config(), buffer)
 	!= true) {
@@ -141,7 +141,7 @@ IfConfigObserverNetlink::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-IfConfigObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
+IfConfigObserverNetlinkSocket::nlsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
