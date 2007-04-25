@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.276 2007/03/30 00:42:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.277 2007/03/30 01:19:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2395,7 +2395,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	// OSPFv3 only.
 	// If this router is the designated router for this peer and
 	// this is a Link-LSA it may be necessary for the router to
-	// generated a new Intra-Area-Prefix-LSA.
+	// generate a new Intra-Area-Prefix-LSA.
 	switch(_ospf.get_version()) {
 	case OspfTypes::V2:
 	    break;
@@ -2407,7 +2407,8 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	    switch(search) {
 	    case NEWER:
 		ollsa = dynamic_cast<LinkLsa *>(_db[index].get());
-		XLOG_ASSERT(ollsa);
+		if (0 == ollsa)
+		    break;
 		/*FALLTHROUGH*/
 	    case NOMATCH:
  		nllsa = dynamic_cast<LinkLsa *>((*i).get());
