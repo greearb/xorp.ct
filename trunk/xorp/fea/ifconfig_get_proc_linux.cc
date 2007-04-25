@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.29 2007/04/20 19:06:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.30 2007/04/25 01:57:42 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -277,7 +277,7 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it,
 	    continue;
 	}
 	
-	if (it->find_interface(ifname) != NULL) {
+	if (it.find_interface(ifname) != NULL) {
 	    // Already have this interface. Ignore it.
 	    continue;
 	}
