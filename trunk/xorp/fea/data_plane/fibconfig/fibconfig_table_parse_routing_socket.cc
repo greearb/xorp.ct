@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.16 2006/08/30 08:10:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.21 2007/02/16 22:45:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,12 +28,12 @@
 #endif
 
 #include "fticonfig.hh"
-#include "fticonfig_entry_get.hh"
+#include "fticonfig_table_get.hh"
 #include "routing_socket_utils.hh"
 
 
 //
-// Parse information about routing entry information received from
+// Parse information about routing table information received from
 // the underlying system.
 //
 // The information to parse is in RTM format
@@ -44,7 +44,7 @@
 
 #if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
-FtiConfigEntryGet::parse_buffer_rtm(FteX& , const vector<uint8_t>& ,
+FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
 				    FtiFibMsgSet)
 {
     return false;
@@ -53,7 +53,8 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& , const vector<uint8_t>& ,
 #else // HAVE_ROUTING_SOCKETS
 
 bool
-FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
+FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
+				    const vector<uint8_t>& buffer,
 				    FtiFibMsgSet filter)
 {
     AlignData<struct rt_msghdr> align_data(buffer);
@@ -76,17 +77,14 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 	if (rtm->rtm_errno != 0)
 	    continue;
 
-	// Caller wants route gets to be parsed.
 	if (filter & FtiFibMsg::GETS) {
 #ifdef RTM_GET
-	    if ((rtm->rtm_type == RTM_GET) &&
-	        (rtm->rtm_flags & RTF_UP))
+	    if ((rtm->rtm_type == RTM_GET) && (rtm->rtm_flags & RTF_UP))
 		filter_match = true;
 #endif
 	}
 
-	// Caller wants route resolves to be parsed.
-	// Resolves may not be supported in some implementations.
+	// Upcalls may not be supported in some BSD derived implementations.
 	if (filter & FtiFibMsg::RESOLVES) {
 #ifdef RTM_MISS
 	    if (rtm->rtm_type == RTM_MISS)
@@ -98,7 +96,6 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 #endif
 	}
 
-	// Caller wants routing table updates to be parsed.
 	if (filter & FtiFibMsg::UPDATES) {
 	    if ((rtm->rtm_type == RTM_ADD) ||
 		(rtm->rtm_type == RTM_DELETE) ||
@@ -106,11 +103,36 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 		    filter_match = true;
 	}
 
-	if (filter_match)
-	    return (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm));
+	if (!filter_match)
+	    continue;
+
+#ifdef RTF_LLINFO
+	if (rtm->rtm_flags & RTF_LLINFO)
+	    continue;		// Ignore ARP table entries.
+#endif
+#ifdef RTF_WASCLONED
+	if (rtm->rtm_flags & RTF_WASCLONED)
+	    continue;		// XXX: ignore cloned entries
+#endif
+#ifdef RTF_CLONED
+	if (rtm->rtm_flags & RTF_CLONED)
+	    continue;		// XXX: ignore cloned entries
+#endif
+#ifdef RTF_MULTICAST
+	if (rtm->rtm_flags & RTF_MULTICAST)
+	    continue;		// XXX: ignore multicast entries
+#endif
+#ifdef RTF_BROADCAST
+	if (rtm->rtm_flags & RTF_BROADCAST)
+	    continue;		// XXX: ignore broadcast entries
+#endif
+
+	FteX fte(family);
+	if (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm) == true)
+	    fte_list.push_back(fte);
     }
 
-    return (false);
+    return true;
 }
 
 #endif // HAVE_ROUTING_SOCKETS

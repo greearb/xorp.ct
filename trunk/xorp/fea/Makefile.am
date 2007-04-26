@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.77 2007/04/25 07:55:36 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.78 2007/04/26 01:23:39 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -158,8 +158,8 @@ libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_iphelpe
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc
-libfea_la_SOURCES	+= fticonfig_entry_parse_nlm.cc
-libfea_la_SOURCES	+= fticonfig_entry_parse_rtm.cc
+libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc
+libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc
 libfea_la_SOURCES	+= fticonfig_entry_set.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_click.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_dummy.cc
@@ -179,8 +179,8 @@ libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_iphelpe
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc
-libfea_la_SOURCES	+= fticonfig_table_parse_nlm.cc
-libfea_la_SOURCES	+= fticonfig_table_parse_rtm.cc
+libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc
+libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_parse_routing_socket.cc
 libfea_la_SOURCES	+= fticonfig_table_set.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_click.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_dummy.cc
@@ -205,10 +205,10 @@ libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_routing_socket.cc
-libfea_la_SOURCES	+= ifconfig_parse_ifaddrs.cc
-libfea_la_SOURCES	+= ifconfig_parse_ifreq.cc
-libfea_la_SOURCES	+= ifconfig_parse_nlm.cc
-libfea_la_SOURCES	+= ifconfig_parse_rtm.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_netlink_socket.cc
+libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc
 libfea_la_SOURCES	+= ifconfig_reporter.cc
 libfea_la_SOURCES	+= ifconfig_set.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_click.cc
