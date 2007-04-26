@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer.cc,v 1.8 2006/03/16 00:03:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get.cc,v 1.11 2007/02/16 22:45:37 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,40 +20,63 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "fticonfig.hh"
-#include "fticonfig_entry_observer.hh"
+#include "libcomm/comm_api.h"
+
+#include "fibconfig.hh"
+#include "fibconfig_entry_get.hh"
 
 
 //
-// Observe single-entry information change about the unicast forwarding table.
-//
-// E.g., if the forwarding table has changed, then the information
-// received by the observer would specify the particular entry that
-// has changed.
+// Get single-entry information from the unicast forwarding table.
 //
 
 
-FtiConfigEntryObserver::FtiConfigEntryObserver(FtiConfig& ftic)
-    : _is_running(false),
+FtiConfigEntryGet::FtiConfigEntryGet(FtiConfig& ftic)
+    : _s4(-1),
+      _s6(-1),
+      _is_running(false),
       _ftic(ftic),
       _is_primary(true)
 {
     
 }
 
-FtiConfigEntryObserver::~FtiConfigEntryObserver()
+FtiConfigEntryGet::~FtiConfigEntryGet()
 {
-    
+    if (_s4 >= 0) {
+	comm_close(_s4);
+	_s4 = -1;
+    }
+    if (_s6 >= 0) {
+	comm_close(_s6);
+	_s6 = -1;
+    }
 }
 
 void
-FtiConfigEntryObserver::register_ftic_primary()
+FtiConfigEntryGet::register_ftic_primary()
 {
-    _ftic.register_ftic_entry_observer_primary(this);
+    _ftic.register_ftic_entry_get_primary(this);
 }
 
 void
-FtiConfigEntryObserver::register_ftic_secondary()
+FtiConfigEntryGet::register_ftic_secondary()
 {
-    _ftic.register_ftic_entry_observer_secondary(this);
+    _ftic.register_ftic_entry_get_secondary(this);
+}
+
+int
+FtiConfigEntryGet::sock(int family)
+{
+    switch (family) {
+    case AF_INET:
+	return _s4;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	return _s6;
+#endif // HAVE_IPV6
+    default:
+	XLOG_FATAL("Unknown address family %d", family);
+    }
+    return (-1);
 }

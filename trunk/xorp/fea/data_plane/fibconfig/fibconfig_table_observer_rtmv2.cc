@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer_rtmv2.cc,v 1.4 2007/02/16 22:45:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,10 +21,10 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "fticonfig.hh"
+#include "fibconfig.hh"
 
-#include "fticonfig_table_get.hh"
-#include "fticonfig_table_observer.hh"
+#include "fibconfig_table_get.hh"
+#include "fibconfig_table_observer.hh"
 
 //
 // Observe whole-table information change about the unicast forwarding table.

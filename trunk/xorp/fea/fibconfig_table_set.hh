@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.19 2006/06/29 20:07:37 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.20 2007/02/16 22:45:40 pavlin Exp $
 
-#ifndef __FEA_FTICONFIG_TABLE_SET_HH__
-#define __FEA_FTICONFIG_TABLE_SET_HH__
+#ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
+#define __FEA_FIBCONFIG_TABLE_SET_HH__
 
 
 #include "libxorp/xorp.h"
@@ -535,4 +535,4 @@ public:
 private:
 };
 
-#endif // __FEA_FTICONFIG_TABLE_SET_HH__
+#endif // __FEA_FIBCONFIG_TABLE_SET_HH__

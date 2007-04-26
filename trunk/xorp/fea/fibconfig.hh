@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.41 2006/10/17 22:26:08 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.42 2007/02/16 22:45:37 pavlin Exp $
 
-#ifndef	__FEA_FTICONFIG_HH__
-#define __FEA_FTICONFIG_HH__
+#ifndef	__FEA_FIBCONFIG_HH__
+#define __FEA_FIBCONFIG_HH__
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
@@ -28,12 +28,12 @@
 
 typedef unsigned long FtiFibMsgSet;
 
-#include "fticonfig_entry_get.hh"
-#include "fticonfig_entry_set.hh"
-#include "fticonfig_entry_observer.hh"
-#include "fticonfig_table_get.hh"
-#include "fticonfig_table_set.hh"
-#include "fticonfig_table_observer.hh"
+#include "fibconfig_entry_get.hh"
+#include "fibconfig_entry_set.hh"
+#include "fibconfig_entry_observer.hh"
+#include "fibconfig_table_get.hh"
+#include "fibconfig_table_set.hh"
+#include "fibconfig_table_observer.hh"
 #include "iftree.hh"
 #include "win_support.hh"
 
@@ -826,4 +826,4 @@ namespace FtiFibMsg {
 	const unsigned long	UPDATES = 0x1, GETS = 0x2, RESOLVES = 0x4;
 };
 
-#endif	// __FEA_FTICONFIG_HH__
+#endif	// __FEA_FIBCONFIG_HH__

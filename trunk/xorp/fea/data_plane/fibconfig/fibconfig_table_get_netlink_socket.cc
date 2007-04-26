@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.33 2007/02/16 22:45:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,8 +27,8 @@
 #include <linux/rtnetlink.h>
 #endif
 
-#include "fticonfig.hh"
-#include "fticonfig_table_get.hh"
+#include "fibconfig.hh"
+#include "fibconfig_table_get.hh"
 
 
 //

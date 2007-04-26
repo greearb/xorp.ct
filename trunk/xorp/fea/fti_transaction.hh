@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.13 2006/03/30 02:21:13 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.14 2007/02/16 22:45:36 pavlin Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -25,7 +25,7 @@
 #include "libxorp/ipv6net.hh"
 #include "libxorp/transaction.hh"
 
-#include "fticonfig.hh"
+#include "fibconfig.hh"
 
 /**
  * Base class for operations that can occur during an FTI transaction.

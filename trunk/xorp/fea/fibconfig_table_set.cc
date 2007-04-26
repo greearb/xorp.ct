@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set.cc,v 1.10 2006/03/16 00:03:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set.cc,v 1.11 2007/02/16 22:45:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,16 +20,16 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "fticonfig.hh"
-#include "fticonfig_entry_set.hh"
+#include "fibconfig.hh"
+#include "fibconfig_table_set.hh"
 
 
 //
-// Set single-entry information into the unicast forwarding table.
+// Set whole-table information into the unicast forwarding table.
 //
 
 
-FtiConfigEntrySet::FtiConfigEntrySet(FtiConfig& ftic)
+FtiConfigTableSet::FtiConfigTableSet(FtiConfig& ftic)
     : _is_running(false),
       _ftic(ftic),
       _in_configuration(false),
@@ -38,33 +38,46 @@ FtiConfigEntrySet::FtiConfigEntrySet(FtiConfig& ftic)
     
 }
 
-FtiConfigEntrySet::~FtiConfigEntrySet()
+FtiConfigTableSet::~FtiConfigTableSet()
 {
     
 }
 
 void
-FtiConfigEntrySet::register_ftic_primary()
+FtiConfigTableSet::register_ftic_primary()
 {
-    _ftic.register_ftic_entry_set_primary(this);
+    _ftic.register_ftic_table_set_primary(this);
 }
 
 void
-FtiConfigEntrySet::register_ftic_secondary()
+FtiConfigTableSet::register_ftic_secondary()
 {
-    _ftic.register_ftic_entry_set_secondary(this);
+    _ftic.register_ftic_table_set_secondary(this);
 
     //
     // XXX: push the current config into the new secondary
     //
     if (_is_running) {
-	// XXX: nothing to do. 
-	//
-	// XXX: note that the forwarding table state in the secondary methods
-	// is pushed by FtiConfigTableSet::register_ftic_secondary(), hence
-	// we don't need to do it here again. However, this is based on the
-	// assumption that for each FtiConfigEntrySet secondary method
-	// there is a corresponding FtiConfigTableSet secondary method.
-	//
+	list<Fte4> fte_list4;
+
+	if (_ftic.get_table4(fte_list4) == true) {
+	    if (set_table4(fte_list4) != true) {
+		XLOG_ERROR("Cannot push the current IPv4 forwarding table "
+			   "into a new secondary mechanism for setting the "
+			   "forwarding table");
+	    }
+	}
+
+#ifdef HAVE_IPV6
+	list<Fte6> fte_list6;
+
+	if (_ftic.get_table6(fte_list6) == true) {
+	    if (set_table6(fte_list6) != true) {
+		XLOG_ERROR("Cannot push the current IPv6 forwarding table "
+			   "into a new secondary mechanism for setting the "
+			   "forwarding table");
+	    }
+	}
+#endif // HAVE_IPV6
     }
 }

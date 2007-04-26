@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.27 2006/08/29 22:42:18 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.28 2007/02/16 22:45:37 pavlin Exp $
 
-#ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
-#define __FEA_FTICONFIG_ENTRY_GET_HH__
+#ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
+#define __FEA_FIBCONFIG_ENTRY_GET_HH__
 
 
 #include "libxorp/xorp.h"
@@ -608,4 +608,4 @@ private:
     virtual bool lookup_route_by_network(const IPvXNet& dst, FteX& fte);
 };
 
-#endif // __FEA_FTICONFIG_ENTRY_GET_HH__
+#endif // __FEA_FIBCONFIG_ENTRY_GET_HH__

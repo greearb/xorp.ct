@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.18 2006/08/29 22:42:18 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.19 2007/02/16 22:45:37 pavlin Exp $
 
-#ifndef __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
-#define __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
+#ifndef __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
+#define __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 
 #include "netlink_socket.hh"
 #include "routing_socket.hh"
@@ -229,4 +229,4 @@ private:
 
 };
     
-#endif // __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
+#endif // __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__

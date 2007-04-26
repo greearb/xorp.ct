@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.23 2006/06/29 11:03:54 bms Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.24 2007/02/16 22:45:38 pavlin Exp $
 
-#ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
-#define __FEA_FTICONFIG_ENTRY_SET_HH__
+#ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
+#define __FEA_FIBCONFIG_ENTRY_SET_HH__
 
 
 #include "libxorp/xorp.h"
@@ -609,4 +609,4 @@ private:
     bool delete_entry(const FteX& fte);
 };
 
-#endif // __FEA_FTICONFIG_ENTRY_SET_HH__
+#endif // __FEA_FIBCONFIG_ENTRY_SET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.2 2007/04/19 16:45:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.3 2007/04/20 05:43:43 pavlin Exp $"
 
 
 //
@@ -34,7 +34,7 @@
 
 #include "cli/xrl_cli_node.hh"
 
-#include "fticonfig.hh"
+#include "fibconfig.hh"
 #include "ifconfig.hh"
 #include "ifconfig_addr_table.hh"
 #include "libfeaclient_bridge.hh"
