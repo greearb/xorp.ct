@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.54 2007/04/24 05:53:06 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.55 2007/04/25 07:57:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -160,19 +160,19 @@ public:
 	_restore_original_config_on_shutdown = v;
     }
 
-    int register_ifc_get_primary(IfConfigGet *ifc_get);
-    int register_ifc_set_primary(IfConfigSet *ifc_set);
-    int register_ifc_observer_primary(IfConfigObserver *ifc_observer);
-    int register_ifc_get_secondary(IfConfigGet *ifc_get);
-    int register_ifc_set_secondary(IfConfigSet *ifc_set);
-    int register_ifc_observer_secondary(IfConfigObserver *ifc_observer);
+    int register_ifconfig_get_primary(IfConfigGet *ifconfig_get);
+    int register_ifconfig_set_primary(IfConfigSet *ifconfig_set);
+    int register_ifconfig_observer_primary(IfConfigObserver *ifconfig_observer);
+    int register_ifconfig_get_secondary(IfConfigGet *ifconfig_get);
+    int register_ifconfig_set_secondary(IfConfigSet *ifconfig_set);
+    int register_ifconfig_observer_secondary(IfConfigObserver *ifconfig_observer);
 
-    IfConfigGet&	ifc_get_primary() { return *_ifc_get_primary; }
-    IfConfigSet&	ifc_set_primary() { return *_ifc_set_primary; }
-    IfConfigObserver&	ifc_observer_primary() { return *_ifc_observer_primary; }
+    IfConfigGet&	ifconfig_get_primary() { return *_ifconfig_get_primary; }
+    IfConfigSet&	ifconfig_set_primary() { return *_ifconfig_set_primary; }
+    IfConfigObserver&	ifconfig_observer_primary() { return *_ifconfig_observer_primary; }
 
-    IfConfigGet&	ifc_get_ioctl() { return _ifc_get_ioctl; }
-    IfConfigSetClick&	ifc_set_click() { return _ifc_set_click; }
+    IfConfigGet&	ifconfig_get_ioctl() { return _ifconfig_get_ioctl; }
+    IfConfigSetClick&	ifconfig_set_click() { return _ifconfig_set_click; }
 
     /**
      * Setup the unit to behave as dummy (for testing purpose).
@@ -468,12 +468,12 @@ private:
     IfTree		_local_config;	// The IfTree with the local config
     IfTree		_old_local_config; // The IfTree with the old local config
 
-    IfConfigGet*		_ifc_get_primary;
-    IfConfigSet*		_ifc_set_primary;
-    IfConfigObserver*		_ifc_observer_primary;
-    list<IfConfigGet*>		_ifc_gets_secondary;
-    list<IfConfigSet*>		_ifc_sets_secondary;
-    list<IfConfigObserver*>	_ifc_observers_secondary;
+    IfConfigGet*		_ifconfig_get_primary;
+    IfConfigSet*		_ifconfig_set_primary;
+    IfConfigObserver*		_ifconfig_observer_primary;
+    list<IfConfigGet*>		_ifconfig_gets_secondary;
+    list<IfConfigSet*>		_ifconfig_sets_secondary;
+    list<IfConfigObserver*>	_ifconfig_observers_secondary;
 
     //
     // The primary mechanisms to get interface-related information
@@ -482,13 +482,13 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    IfConfigGetDummy		_ifc_get_dummy;
-    IfConfigGetIoctl		_ifc_get_ioctl;
-    IfConfigGetSysctl		_ifc_get_sysctl;
-    IfConfigGetGetifaddrs	_ifc_get_getifaddrs;
-    IfConfigGetProcLinux	_ifc_get_proc_linux;
-    IfConfigGetNetlinkSocket	_ifc_get_netlink_socket;
-    IfConfigGetIPHelper		_ifc_get_iphelper;
+    IfConfigGetDummy		_ifconfig_get_dummy;
+    IfConfigGetIoctl		_ifconfig_get_ioctl;
+    IfConfigGetSysctl		_ifconfig_get_sysctl;
+    IfConfigGetGetifaddrs	_ifconfig_get_getifaddrs;
+    IfConfigGetProcLinux	_ifconfig_get_proc_linux;
+    IfConfigGetNetlinkSocket	_ifconfig_get_netlink_socket;
+    IfConfigGetIPHelper		_ifconfig_get_iphelper;
 
     //
     // The secondary mechanisms to get interface-related information
@@ -496,7 +496,7 @@ private:
     //
     // XXX: Ordering is not important.
     //
-    IfConfigGetClick		_ifc_get_click;
+    IfConfigGetClick		_ifconfig_get_click;
 
     //
     // The primary mechanisms to set interface-related information
@@ -505,10 +505,10 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    IfConfigSetDummy		_ifc_set_dummy;
-    IfConfigSetIoctl		_ifc_set_ioctl;
-    IfConfigSetNetlinkSocket	_ifc_set_netlink_socket;
-    IfConfigSetIPHelper		_ifc_set_iphelper;
+    IfConfigSetDummy		_ifconfig_set_dummy;
+    IfConfigSetIoctl		_ifconfig_set_ioctl;
+    IfConfigSetNetlinkSocket	_ifconfig_set_netlink_socket;
+    IfConfigSetIPHelper		_ifconfig_set_iphelper;
 
     //
     // The secondary mechanisms to get interface-related information
@@ -516,7 +516,7 @@ private:
     //
     // XXX: Ordering is not important.
     //
-    IfConfigSetClick		_ifc_set_click;
+    IfConfigSetClick		_ifconfig_set_click;
 
     //
     // The primary mechanisms to observe whether the interface-related
@@ -525,10 +525,10 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    IfConfigObserverDummy		_ifc_observer_dummy;
-    IfConfigObserverRoutingSocket	_ifc_observer_routing_socket;
-    IfConfigObserverNetlinkSocket	_ifc_observer_netlink_socket;
-    IfConfigObserverIPHelper		_ifc_observer_iphelper;
+    IfConfigObserverDummy		_ifconfig_observer_dummy;
+    IfConfigObserverRoutingSocket	_ifconfig_observer_routing_socket;
+    IfConfigObserverNetlinkSocket	_ifconfig_observer_netlink_socket;
+    IfConfigObserverIPHelper		_ifconfig_observer_iphelper;
 
     //
     // Misc other state

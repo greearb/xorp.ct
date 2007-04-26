@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.8 2007/04/24 05:53:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.9 2007/04/25 01:57:44 pavlin Exp $"
 
 
 //
@@ -186,10 +186,9 @@ XrlFeaTarget::fea_click_0_1_enable_click(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.enable_click(enable);
+    ifconfig().enable_click(enable);
     ftic.enable_click(enable);
 
     return XrlCmdError::OKAY();
@@ -201,16 +200,15 @@ XrlFeaTarget::fea_click_0_1_enable_click(
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_start_click()
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
     string error_msg;
 
-    if (ifc.start_click(error_msg) < 0) {
+    if (ifconfig().start_click(error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (ftic.start_click(error_msg) < 0) {
 	string dummy_msg;
-	ifc.stop_click(error_msg);
+	ifconfig().stop_click(error_msg);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -223,15 +221,14 @@ XrlFeaTarget::fea_click_0_1_start_click()
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_stop_click()
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
     string error_msg1, error_msg2;
 
     if (ftic.stop_click(error_msg1) < 0) {
-	ifc.stop_click(error_msg2);
+	ifconfig().stop_click(error_msg2);
 	return XrlCmdError::COMMAND_FAILED(error_msg1);
     }
-    if (ifc.stop_click(error_msg1) < 0) {
+    if (ifconfig().stop_click(error_msg1) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg1);
     }
 
@@ -267,10 +264,9 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.enable_kernel_click(enable);
+    ifconfig().enable_kernel_click(enable);
     ftic.enable_kernel_click(enable);
 
     return XrlCmdError::OKAY();
@@ -286,10 +282,9 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click_install_on_startup(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.enable_kernel_click_install_on_startup(enable);
+    ifconfig().enable_kernel_click_install_on_startup(enable);
     ftic.enable_kernel_click_install_on_startup(enable);
 
     return XrlCmdError::OKAY();
@@ -310,7 +305,6 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
 {
     list<string> modules_list;
 
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
     //
@@ -332,7 +326,7 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
 	    modules_list.push_back(name);
     } while (true);
 
-    ifc.set_kernel_click_modules(modules_list);
+    ifconfig().set_kernel_click_modules(modules_list);
     ftic.set_kernel_click_modules(modules_list);
 
     return XrlCmdError::OKAY();
@@ -348,10 +342,9 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_mount_directory(
     // Input values,
     const string&	directory)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_kernel_click_mount_directory(directory);
+    ifconfig().set_kernel_click_mount_directory(directory);
     ftic.set_kernel_click_mount_directory(directory);
 
     return XrlCmdError::OKAY();
@@ -369,11 +362,12 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_config_generator_file(
     // Input values,
     const string&	kernel_click_config_generator_file)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_kernel_click_config_generator_file(kernel_click_config_generator_file);
-    ftic.set_kernel_click_config_generator_file(kernel_click_config_generator_file);
+    ifconfig().set_kernel_click_config_generator_file(
+	kernel_click_config_generator_file);
+    ftic.set_kernel_click_config_generator_file(
+	kernel_click_config_generator_file);
 
     return XrlCmdError::OKAY();
 }
@@ -389,10 +383,9 @@ XrlFeaTarget::fea_click_0_1_enable_user_click(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.enable_user_click(enable);
+    ifconfig().enable_user_click(enable);
     ftic.enable_user_click(enable);
 
     return XrlCmdError::OKAY();
@@ -409,10 +402,9 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_file(
     // Input values,
     const string&	user_click_command_file)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_command_file(user_click_command_file);
+    ifconfig().set_user_click_command_file(user_click_command_file);
     ftic.set_user_click_command_file(user_click_command_file);
 
     return XrlCmdError::OKAY();
@@ -429,10 +421,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_extra_arguments(
     // Input values,
     const string&	user_click_command_extra_arguments)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
+    ifconfig().set_user_click_command_extra_arguments(
+	user_click_command_extra_arguments);
     ftic.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
 
     return XrlCmdError::OKAY();
@@ -449,10 +441,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_execute_on_startup(
     // Input values,
     const bool&	user_click_command_execute_on_startup)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
+    ifconfig().set_user_click_command_execute_on_startup(
+	user_click_command_execute_on_startup);
     ftic.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
 
     return XrlCmdError::OKAY();
@@ -470,10 +462,9 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_address(
     // Input values,
     const IPv4&	user_click_control_address)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_control_address(user_click_control_address);
+    ifconfig().set_user_click_control_address(user_click_control_address);
     ftic.set_user_click_control_address(user_click_control_address);
 
     return XrlCmdError::OKAY();
@@ -491,10 +482,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_socket_port(
     // Input values,
     const uint32_t&	user_click_control_socket_port)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_control_socket_port(user_click_control_socket_port);
+    ifconfig().set_user_click_control_socket_port(
+	user_click_control_socket_port);
     ftic.set_user_click_control_socket_port(user_click_control_socket_port);
 
     return XrlCmdError::OKAY();
@@ -512,10 +503,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
     // Input values,
     const string&	user_click_startup_config_file)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_startup_config_file(user_click_startup_config_file);
+    ifconfig().set_user_click_startup_config_file(
+	user_click_startup_config_file);
     ftic.set_user_click_startup_config_file(user_click_startup_config_file);
 
     return XrlCmdError::OKAY();
@@ -533,10 +524,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
     // Input values,
     const string&	user_click_config_generator_file)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
     FtiConfig& ftic = _fea_node.fticonfig();
 
-    ifc.set_user_click_config_generator_file(user_click_config_generator_file);
+    ifconfig().set_user_click_config_generator_file(
+	user_click_config_generator_file);
     ftic.set_user_click_config_generator_file(user_click_config_generator_file);
 
     return XrlCmdError::OKAY();
@@ -607,8 +598,7 @@ XrlFeaTarget::ifmgr_0_1_set_restore_original_config_on_shutdown(
     // Input values,
     const bool&	enable)
 {
-    IfConfig& ifc = _fea_node.ifconfig();
-    ifc.set_restore_original_config_on_shutdown(enable);
+    ifconfig().set_restore_original_config_on_shutdown(enable);
 
     return XrlCmdError::OKAY();
 }

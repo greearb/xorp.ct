@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.18 2007/04/19 21:36:49 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.19 2007/04/25 01:57:43 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -117,12 +117,12 @@ public:
  */
 class ConfigureInterfaceFromSystem : public InterfaceManagerOperation {
 public:
-    ConfigureInterfaceFromSystem(IfConfig& ifc, IfTree& it,
+    ConfigureInterfaceFromSystem(IfConfig& ifconfig, IfTree& it,
 				 const string& ifname)
-	: InterfaceManagerOperation(it, ifname), _ifc(ifc) {}
+	: InterfaceManagerOperation(it, ifname), _ifconfig(ifconfig) {}
 
     bool dispatch() {
-	const IfTree& dev_config = _ifc.pulled_config();
+	const IfTree& dev_config = _ifconfig.pulled_config();
 	const IfTreeInterface* ifp = dev_config.find_interface(ifname());
 	if (ifp == NULL)
 	    return false;
@@ -137,7 +137,7 @@ public:
     bool path_valid() const	{ return true; }
 
 private:
-    IfConfig& _ifc;
+    IfConfig& _ifconfig;
 };
 
 /**

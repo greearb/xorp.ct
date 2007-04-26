@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.28 2007/02/16 22:45:41 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.29 2007/04/25 07:57:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -30,14 +30,14 @@ struct ifaddrs;
 
 class IfConfigGet {
 public:
-    IfConfigGet(IfConfig& ifc);
+    IfConfigGet(IfConfig& ifconfig);
     
     virtual ~IfConfigGet();
     
-    IfConfig&	ifc() { return _ifc; }
+    IfConfig&	ifconfig() { return _ifconfig; }
     
-    virtual void register_ifc_primary();
-    virtual void register_ifc_secondary();
+    virtual void register_ifconfig_primary();
+    virtual void register_ifconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -139,13 +139,13 @@ protected:
     bool	_is_running;
     
 private:
-    IfConfig&	_ifc;
+    IfConfig&	_ifconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
 class IfConfigGetDummy : public IfConfigGet {
 public:
-    IfConfigGetDummy(IfConfig& ifc);
+    IfConfigGetDummy(IfConfig& ifconfig);
     virtual ~IfConfigGetDummy();
 
     /**
@@ -178,7 +178,7 @@ private:
 
 class IfConfigGetGetifaddrs : public IfConfigGet {
 public:
-    IfConfigGetGetifaddrs(IfConfig& ifc);
+    IfConfigGetGetifaddrs(IfConfig& ifconfig);
     virtual ~IfConfigGetGetifaddrs();
 
     /**
@@ -211,7 +211,7 @@ private:
 
 class IfConfigGetSysctl : public IfConfigGet {
 public:
-    IfConfigGetSysctl(IfConfig& ifc);
+    IfConfigGetSysctl(IfConfig& ifconfig);
     virtual ~IfConfigGetSysctl();
 
     /**
@@ -244,7 +244,7 @@ private:
 
 class IfConfigGetIoctl : public IfConfigGet {
 public:
-    IfConfigGetIoctl(IfConfig& ifc);
+    IfConfigGetIoctl(IfConfig& ifconfig);
     virtual ~IfConfigGetIoctl();
     
     /**
@@ -277,7 +277,7 @@ private:
 
 class IfConfigGetProcLinux : public IfConfigGet {
 public:
-    IfConfigGetProcLinux(IfConfig& ifc);
+    IfConfigGetProcLinux(IfConfig& ifconfig);
     virtual ~IfConfigGetProcLinux();
     
     /**
@@ -314,7 +314,7 @@ private:
 class IfConfigGetNetlinkSocket : public IfConfigGet,
 				 public NetlinkSocket {
 public:
-    IfConfigGetNetlinkSocket(IfConfig& ifc);
+    IfConfigGetNetlinkSocket(IfConfig& ifconfig);
     virtual ~IfConfigGetNetlinkSocket();
 
     /**
@@ -350,7 +350,7 @@ private:
 class IfConfigGetClick : public IfConfigGet,
 			 public ClickSocket {
 public:
-    IfConfigGetClick(IfConfig& ifc);
+    IfConfigGetClick(IfConfig& ifconfig);
     virtual ~IfConfigGetClick();
     
     /**
@@ -385,7 +385,7 @@ private:
 
 class IfConfigGetIPHelper : public IfConfigGet {
 public:
-    IfConfigGetIPHelper(IfConfig& ifc);
+    IfConfigGetIPHelper(IfConfig& ifconfig);
     virtual ~IfConfigGetIPHelper();
 
     /**

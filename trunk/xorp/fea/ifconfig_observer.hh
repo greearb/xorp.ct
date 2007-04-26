@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.18 2007/02/16 22:45:43 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.19 2007/04/25 07:57:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -26,14 +26,14 @@ class IfTree;
 
 class IfConfigObserver {
 public:
-    IfConfigObserver(IfConfig& ifc);
+    IfConfigObserver(IfConfig& ifconfig);
     
     virtual ~IfConfigObserver();
     
-    IfConfig&	ifc() { return _ifc; }
+    IfConfig&	ifconfig() { return _ifconfig; }
     
-    virtual void register_ifc_primary();
-    virtual void register_ifc_secondary();
+    virtual void register_ifconfig_primary();
+    virtual void register_ifconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -68,13 +68,13 @@ protected:
     bool	_is_running;
 
 private:
-    IfConfig&	_ifc;
+    IfConfig&	_ifconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
 class IfConfigObserverDummy : public IfConfigObserver {
 public:
-    IfConfigObserverDummy(IfConfig& ifc);
+    IfConfigObserverDummy(IfConfig& ifconfig);
     virtual ~IfConfigObserverDummy();
 
     /**
@@ -108,7 +108,7 @@ class IfConfigObserverRoutingSocket : public IfConfigObserver,
 				      public RoutingSocket,
 				      public RoutingSocketObserver {
 public:
-    IfConfigObserverRoutingSocket(IfConfig& ifc);
+    IfConfigObserverRoutingSocket(IfConfig& ifconfig);
     virtual ~IfConfigObserverRoutingSocket();
 
     /**
@@ -144,7 +144,7 @@ class IfConfigObserverNetlinkSocket : public IfConfigObserver,
 				      public NetlinkSocket,
 				      public NetlinkSocketObserver {
 public:
-    IfConfigObserverNetlinkSocket(IfConfig& ifc);
+    IfConfigObserverNetlinkSocket(IfConfig& ifconfig);
     virtual ~IfConfigObserverNetlinkSocket();
 
     /**
@@ -178,7 +178,7 @@ private:
 
 class IfConfigObserverIPHelper : public IfConfigObserver {
 public:
-    IfConfigObserverIPHelper(IfConfig& ifc);
+    IfConfigObserverIPHelper(IfConfig& ifconfig);
     virtual ~IfConfigObserverIPHelper();
 
     /**

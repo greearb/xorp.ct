@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.57 2007/04/24 05:53:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.58 2007/04/25 07:57:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -65,26 +65,26 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _nexthop_port_mapper(nexthop_port_mapper),
       _itm(NULL),
       _restore_original_config_on_shutdown(false),
-      _ifc_get_primary(NULL),
-      _ifc_set_primary(NULL),
-      _ifc_observer_primary(NULL),
-      _ifc_get_dummy(*this),
-      _ifc_get_ioctl(*this),
-      _ifc_get_sysctl(*this),
-      _ifc_get_getifaddrs(*this),
-      _ifc_get_proc_linux(*this),
-      _ifc_get_netlink_socket(*this),
-      _ifc_get_iphelper(*this),
-      _ifc_get_click(*this),
-      _ifc_set_dummy(*this),
-      _ifc_set_ioctl(*this),
-      _ifc_set_netlink_socket(*this),
-      _ifc_set_iphelper(*this),
-      _ifc_set_click(*this),
-      _ifc_observer_dummy(*this),
-      _ifc_observer_routing_socket(*this),
-      _ifc_observer_netlink_socket(*this),
-      _ifc_observer_iphelper(*this),
+      _ifconfig_get_primary(NULL),
+      _ifconfig_set_primary(NULL),
+      _ifconfig_observer_primary(NULL),
+      _ifconfig_get_dummy(*this),
+      _ifconfig_get_ioctl(*this),
+      _ifconfig_get_sysctl(*this),
+      _ifconfig_get_getifaddrs(*this),
+      _ifconfig_get_proc_linux(*this),
+      _ifconfig_get_netlink_socket(*this),
+      _ifconfig_get_iphelper(*this),
+      _ifconfig_get_click(*this),
+      _ifconfig_set_dummy(*this),
+      _ifconfig_set_ioctl(*this),
+      _ifconfig_set_netlink_socket(*this),
+      _ifconfig_set_iphelper(*this),
+      _ifconfig_set_click(*this),
+      _ifconfig_observer_dummy(*this),
+      _ifconfig_observer_routing_socket(*this),
+      _ifconfig_observer_netlink_socket(*this),
+      _ifconfig_observer_iphelper(*this),
       _have_ipv4(false),
       _have_ipv6(false),
       _is_dummy(false),
@@ -96,15 +96,15 @@ IfConfig::IfConfig(EventLoop& eventloop,
     // Check that all necessary mechanisms to interact with the
     // underlying system are in place.
     //
-    if (_ifc_get_primary == NULL) {
+    if (_ifconfig_get_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to get the network interface "
 		   "information from the underlying system");
     }
-    if (_ifc_set_primary == NULL) {
+    if (_ifconfig_set_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to set the network interface "
 		   "information into the underlying system");
     }
-    if (_ifc_observer_primary == NULL) {
+    if (_ifconfig_observer_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to observe the network interface "
 		   "information from the underlying system");
     }
@@ -281,63 +281,63 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
 }
 
 int
-IfConfig::register_ifc_get_primary(IfConfigGet *ifc_get)
+IfConfig::register_ifconfig_get_primary(IfConfigGet *ifconfig_get)
 {
-    _ifc_get_primary = ifc_get;
-    if (ifc_get != NULL)
-	ifc_get->set_primary();
+    _ifconfig_get_primary = ifconfig_get;
+    if (ifconfig_get != NULL)
+	ifconfig_get->set_primary();
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_set_primary(IfConfigSet *ifc_set)
+IfConfig::register_ifconfig_set_primary(IfConfigSet *ifconfig_set)
 {
-    _ifc_set_primary = ifc_set;
-    if (ifc_set != NULL)
-	ifc_set->set_primary();
+    _ifconfig_set_primary = ifconfig_set;
+    if (ifconfig_set != NULL)
+	ifconfig_set->set_primary();
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_observer_primary(IfConfigObserver *ifc_observer)
+IfConfig::register_ifconfig_observer_primary(IfConfigObserver *ifconfig_observer)
 {
-    _ifc_observer_primary = ifc_observer;
-    if (ifc_observer != NULL)
-	ifc_observer->set_primary();
+    _ifconfig_observer_primary = ifconfig_observer;
+    if (ifconfig_observer != NULL)
+	ifconfig_observer->set_primary();
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_get_secondary(IfConfigGet *ifc_get)
+IfConfig::register_ifconfig_get_secondary(IfConfigGet *ifconfig_get)
 {
-    if (ifc_get != NULL) {
-	_ifc_gets_secondary.push_back(ifc_get);
-	ifc_get->set_secondary();
+    if (ifconfig_get != NULL) {
+	_ifconfig_gets_secondary.push_back(ifconfig_get);
+	ifconfig_get->set_secondary();
     }
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_set_secondary(IfConfigSet *ifc_set)
+IfConfig::register_ifconfig_set_secondary(IfConfigSet *ifconfig_set)
 {
-    if (ifc_set != NULL) {
-	_ifc_sets_secondary.push_back(ifc_set);
-	ifc_set->set_secondary();
+    if (ifconfig_set != NULL) {
+	_ifconfig_sets_secondary.push_back(ifconfig_set);
+	ifconfig_set->set_secondary();
     }
 
     return (XORP_OK);
 }
 
 int
-IfConfig::register_ifc_observer_secondary(IfConfigObserver *ifc_observer)
+IfConfig::register_ifconfig_observer_secondary(IfConfigObserver *ifconfig_observer)
 {
-    if (ifc_observer != NULL) {
-	_ifc_observers_secondary.push_back(ifc_observer);
-	ifc_observer->set_secondary();
+    if (ifconfig_observer != NULL) {
+	_ifconfig_observers_secondary.push_back(ifconfig_observer);
+	ifconfig_observer->set_secondary();
     }
 
     return (XORP_OK);
@@ -346,9 +346,9 @@ IfConfig::register_ifc_observer_secondary(IfConfigObserver *ifc_observer)
 int
 IfConfig::set_dummy()
 {
-    register_ifc_get_primary(&_ifc_get_dummy);
-    register_ifc_set_primary(&_ifc_set_dummy);
-    register_ifc_observer_primary(&_ifc_observer_dummy);
+    register_ifconfig_get_primary(&_ifconfig_get_dummy);
+    register_ifconfig_set_primary(&_ifconfig_set_dummy);
+    register_ifconfig_observer_primary(&_ifconfig_observer_dummy);
 
     //
     // XXX: if we are dummy FEA, then we always have IPv4 and IPv6
@@ -364,9 +364,9 @@ IfConfig::set_dummy()
 int
 IfConfig::start(string& error_msg)
 {
-    list<IfConfigGet*>::iterator ifc_get_iter;
-    list<IfConfigSet*>::iterator ifc_set_iter;
-    list<IfConfigObserver*>::iterator ifc_observer_iter;
+    list<IfConfigGet*>::iterator ifconfig_get_iter;
+    list<IfConfigSet*>::iterator ifconfig_set_iter;
+    list<IfConfigObserver*>::iterator ifconfig_observer_iter;
 
     if (_is_running)
 	return (XORP_OK);
@@ -374,45 +374,45 @@ IfConfig::start(string& error_msg)
     //
     // Start the IfConfigGet methods
     //
-    if (_ifc_get_primary != NULL) {
-	if (_ifc_get_primary->start(error_msg) < 0)
+    if (_ifconfig_get_primary != NULL) {
+	if (_ifconfig_get_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ifc_get_iter = _ifc_gets_secondary.begin();
-	 ifc_get_iter != _ifc_gets_secondary.end();
-	 ++ifc_get_iter) {
-	IfConfigGet* ifc_get = *ifc_get_iter;
-	if (ifc_get->start(error_msg) < 0)
+    for (ifconfig_get_iter = _ifconfig_gets_secondary.begin();
+	 ifconfig_get_iter != _ifconfig_gets_secondary.end();
+	 ++ifconfig_get_iter) {
+	IfConfigGet* ifconfig_get = *ifconfig_get_iter;
+	if (ifconfig_get->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
     //
     // Start the IfConfigSet methods
     //
-    if (_ifc_set_primary != NULL) {
-	if (_ifc_set_primary->start(error_msg) < 0)
+    if (_ifconfig_set_primary != NULL) {
+	if (_ifconfig_set_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ifc_set_iter = _ifc_sets_secondary.begin();
-	 ifc_set_iter != _ifc_sets_secondary.end();
-	 ++ifc_set_iter) {
-	IfConfigSet* ifc_set = *ifc_set_iter;
-	if (ifc_set->start(error_msg) < 0)
+    for (ifconfig_set_iter = _ifconfig_sets_secondary.begin();
+	 ifconfig_set_iter != _ifconfig_sets_secondary.end();
+	 ++ifconfig_set_iter) {
+	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
+	if (ifconfig_set->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
     //
     // Start the IfConfigObserver methods
     //
-    if (_ifc_observer_primary != NULL) {
-	if (_ifc_observer_primary->start(error_msg) < 0)
+    if (_ifconfig_observer_primary != NULL) {
+	if (_ifconfig_observer_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ifc_observer_iter = _ifc_observers_secondary.begin();
-	 ifc_observer_iter != _ifc_observers_secondary.end();
-	 ++ifc_observer_iter) {
-	IfConfigObserver* ifc_observer = *ifc_observer_iter;
-	if (ifc_observer->start(error_msg) < 0)
+    for (ifconfig_observer_iter = _ifconfig_observers_secondary.begin();
+	 ifconfig_observer_iter != _ifconfig_observers_secondary.end();
+	 ++ifconfig_observer_iter) {
+	IfConfigObserver* ifconfig_observer = *ifconfig_observer_iter;
+	if (ifconfig_observer->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -433,9 +433,9 @@ IfConfig::start(string& error_msg)
 int
 IfConfig::stop(string& error_msg)
 {
-    list<IfConfigGet*>::iterator ifc_get_iter;
-    list<IfConfigSet*>::iterator ifc_set_iter;
-    list<IfConfigObserver*>::iterator ifc_observer_iter;
+    list<IfConfigGet*>::iterator ifconfig_get_iter;
+    list<IfConfigSet*>::iterator ifconfig_set_iter;
+    list<IfConfigObserver*>::iterator ifconfig_observer_iter;
     int ret_value = XORP_OK;
     string error_msg2;
 
@@ -461,18 +461,18 @@ IfConfig::stop(string& error_msg)
     //
     // Stop the IfConfigObserver methods
     //
-    for (ifc_observer_iter = _ifc_observers_secondary.begin();
-	 ifc_observer_iter != _ifc_observers_secondary.end();
-	 ++ifc_observer_iter) {
-	IfConfigObserver* ifc_observer = *ifc_observer_iter;
-	if (ifc_observer->stop(error_msg2) < 0) {
+    for (ifconfig_observer_iter = _ifconfig_observers_secondary.begin();
+	 ifconfig_observer_iter != _ifconfig_observers_secondary.end();
+	 ++ifconfig_observer_iter) {
+	IfConfigObserver* ifconfig_observer = *ifconfig_observer_iter;
+	if (ifconfig_observer->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ifc_observer_primary != NULL) {
-	if (_ifc_observer_primary->stop(error_msg2) < 0) {
+    if (_ifconfig_observer_primary != NULL) {
+	if (_ifconfig_observer_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -482,18 +482,18 @@ IfConfig::stop(string& error_msg)
     //
     // Stop the IfConfigSet methods
     //
-    for (ifc_set_iter = _ifc_sets_secondary.begin();
-	 ifc_set_iter != _ifc_sets_secondary.end();
-	 ++ifc_set_iter) {
-	IfConfigSet* ifc_set = *ifc_set_iter;
-	if (ifc_set->stop(error_msg2) < 0) {
+    for (ifconfig_set_iter = _ifconfig_sets_secondary.begin();
+	 ifconfig_set_iter != _ifconfig_sets_secondary.end();
+	 ++ifconfig_set_iter) {
+	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
+	if (ifconfig_set->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ifc_set_primary != NULL) {
-	if (_ifc_set_primary->stop(error_msg2) < 0) {
+    if (_ifconfig_set_primary != NULL) {
+	if (_ifconfig_set_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -503,18 +503,18 @@ IfConfig::stop(string& error_msg)
     //
     // Stop the IfConfigGet methods
     //
-    for (ifc_get_iter = _ifc_gets_secondary.begin();
-	 ifc_get_iter != _ifc_gets_secondary.end();
-	 ++ifc_get_iter) {
-	IfConfigGet* ifc_get = *ifc_get_iter;
-	if (ifc_get->stop(error_msg2) < 0) {
+    for (ifconfig_get_iter = _ifconfig_gets_secondary.begin();
+	 ifconfig_get_iter != _ifconfig_gets_secondary.end();
+	 ++ifconfig_get_iter) {
+	IfConfigGet* ifconfig_get = *ifconfig_get_iter;
+	if (ifconfig_get->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ifc_get_primary != NULL) {
-	if (_ifc_get_primary->stop(error_msg2) < 0) {
+    if (_ifconfig_get_primary != NULL) {
+	if (_ifconfig_get_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -579,8 +579,8 @@ IfConfig::test_have_ipv6() const
 void
 IfConfig::enable_click(bool enable)
 {
-    _ifc_get_click.enable_click(enable);
-    _ifc_set_click.enable_click(enable);
+    _ifconfig_get_click.enable_click(enable);
+    _ifconfig_set_click.enable_click(enable);
 }
 
 /**
@@ -592,12 +592,12 @@ IfConfig::enable_click(bool enable)
 int
 IfConfig::start_click(string& error_msg)
 {
-    if (_ifc_get_click.start(error_msg) < 0) {
+    if (_ifconfig_get_click.start(error_msg) < 0) {
 	return (XORP_ERROR);
     }
-    if (_ifc_set_click.start(error_msg) < 0) {
+    if (_ifconfig_set_click.start(error_msg) < 0) {
 	string error_msg2;
-	_ifc_get_click.stop(error_msg2);
+	_ifconfig_get_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
 
@@ -613,12 +613,12 @@ IfConfig::start_click(string& error_msg)
 int
 IfConfig::stop_click(string& error_msg)
 {
-    if (_ifc_get_click.stop(error_msg) < 0) {
+    if (_ifconfig_get_click.stop(error_msg) < 0) {
 	string error_msg2;
-	_ifc_set_click.stop(error_msg2);
+	_ifconfig_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ifc_set_click.stop(error_msg) < 0) {
+    if (_ifconfig_set_click.stop(error_msg) < 0) {
 	return (XORP_ERROR);
     }
 
@@ -635,8 +635,8 @@ IfConfig::stop_click(string& error_msg)
 void
 IfConfig::set_kernel_click_config_generator_file(const string& v)
 {
-    _ifc_get_click.set_kernel_click_config_generator_file(v);
-    _ifc_set_click.set_kernel_click_config_generator_file(v);
+    _ifconfig_get_click.set_kernel_click_config_generator_file(v);
+    _ifconfig_set_click.set_kernel_click_config_generator_file(v);
 }
 
 /**
@@ -648,8 +648,8 @@ IfConfig::set_kernel_click_config_generator_file(const string& v)
 void
 IfConfig::enable_kernel_click(bool enable)
 {
-    _ifc_get_click.enable_kernel_click(enable);
-    _ifc_set_click.enable_kernel_click(enable);
+    _ifconfig_get_click.enable_kernel_click(enable);
+    _ifconfig_set_click.enable_kernel_click(enable);
 }
 
 /**
@@ -661,8 +661,8 @@ void
 IfConfig::enable_kernel_click_install_on_startup(bool enable)
 {
     // XXX: only IfConfigGet should install the kernel-level Click
-    _ifc_get_click.enable_kernel_click_install_on_startup(enable);
-    _ifc_set_click.enable_kernel_click_install_on_startup(false);
+    _ifconfig_get_click.enable_kernel_click_install_on_startup(enable);
+    _ifconfig_set_click.enable_kernel_click_install_on_startup(false);
 }
 
 /**
@@ -674,8 +674,8 @@ IfConfig::enable_kernel_click_install_on_startup(bool enable)
 void
 IfConfig::set_kernel_click_modules(const list<string>& modules)
 {
-    _ifc_get_click.set_kernel_click_modules(modules);
-    _ifc_set_click.set_kernel_click_modules(modules);
+    _ifconfig_get_click.set_kernel_click_modules(modules);
+    _ifconfig_set_click.set_kernel_click_modules(modules);
 }
 
 /**
@@ -686,8 +686,8 @@ IfConfig::set_kernel_click_modules(const list<string>& modules)
 void
 IfConfig::set_kernel_click_mount_directory(const string& directory)
 {
-    _ifc_get_click.set_kernel_click_mount_directory(directory);
-    _ifc_set_click.set_kernel_click_mount_directory(directory);
+    _ifconfig_get_click.set_kernel_click_mount_directory(directory);
+    _ifconfig_set_click.set_kernel_click_mount_directory(directory);
 }
 
 /**
@@ -699,8 +699,8 @@ IfConfig::set_kernel_click_mount_directory(const string& directory)
 void
 IfConfig::enable_user_click(bool enable)
 {
-    _ifc_get_click.enable_user_click(enable);
-    _ifc_set_click.enable_user_click(enable);
+    _ifconfig_get_click.enable_user_click(enable);
+    _ifconfig_set_click.enable_user_click(enable);
 }
 
 /**
@@ -711,8 +711,8 @@ IfConfig::enable_user_click(bool enable)
 void
 IfConfig::set_user_click_command_file(const string& v)
 {
-    _ifc_get_click.set_user_click_command_file(v);
-    _ifc_set_click.set_user_click_command_file(v);
+    _ifconfig_get_click.set_user_click_command_file(v);
+    _ifconfig_set_click.set_user_click_command_file(v);
 }
 
 /**
@@ -723,8 +723,8 @@ IfConfig::set_user_click_command_file(const string& v)
 void
 IfConfig::set_user_click_command_extra_arguments(const string& v)
 {
-    _ifc_get_click.set_user_click_command_extra_arguments(v);
-    _ifc_set_click.set_user_click_command_extra_arguments(v);
+    _ifconfig_get_click.set_user_click_command_extra_arguments(v);
+    _ifconfig_set_click.set_user_click_command_extra_arguments(v);
 }
 
 /**
@@ -736,8 +736,8 @@ void
 IfConfig::set_user_click_command_execute_on_startup(bool v)
 {
     // XXX: only IfConfigGet should execute the user-level Click command
-    _ifc_get_click.set_user_click_command_execute_on_startup(v);
-    _ifc_set_click.set_user_click_command_execute_on_startup(false);
+    _ifconfig_get_click.set_user_click_command_execute_on_startup(v);
+    _ifconfig_set_click.set_user_click_command_execute_on_startup(false);
 }
 
 /**
@@ -749,8 +749,8 @@ IfConfig::set_user_click_command_execute_on_startup(bool v)
 void
 IfConfig::set_user_click_control_address(const IPv4& v)
 {
-    _ifc_get_click.set_user_click_control_address(v);
-    _ifc_set_click.set_user_click_control_address(v);
+    _ifconfig_get_click.set_user_click_control_address(v);
+    _ifconfig_set_click.set_user_click_control_address(v);
 }
 
 /**
@@ -763,8 +763,8 @@ IfConfig::set_user_click_control_address(const IPv4& v)
 void
 IfConfig::set_user_click_control_socket_port(uint32_t v)
 {
-    _ifc_get_click.set_user_click_control_socket_port(v);
-    _ifc_set_click.set_user_click_control_socket_port(v);
+    _ifconfig_get_click.set_user_click_control_socket_port(v);
+    _ifconfig_set_click.set_user_click_control_socket_port(v);
 }
 
 /**
@@ -777,8 +777,8 @@ IfConfig::set_user_click_control_socket_port(uint32_t v)
 void
 IfConfig::set_user_click_startup_config_file(const string& v)
 {
-    _ifc_get_click.set_user_click_startup_config_file(v);
-    _ifc_set_click.set_user_click_startup_config_file(v);
+    _ifconfig_get_click.set_user_click_startup_config_file(v);
+    _ifconfig_set_click.set_user_click_startup_config_file(v);
 }
 
 /**
@@ -791,17 +791,17 @@ IfConfig::set_user_click_startup_config_file(const string& v)
 void
 IfConfig::set_user_click_config_generator_file(const string& v)
 {
-    _ifc_get_click.set_user_click_config_generator_file(v);
-    _ifc_set_click.set_user_click_config_generator_file(v);
+    _ifconfig_get_click.set_user_click_config_generator_file(v);
+    _ifconfig_set_click.set_user_click_config_generator_file(v);
 }
 
 bool
 IfConfig::push_config(IfTree& config)
 {
     bool ret_value = false;
-    list<IfConfigSet*>::iterator ifc_set_iter;
+    list<IfConfigSet*>::iterator ifconfig_set_iter;
 
-    if ((_ifc_set_primary == NULL) && _ifc_sets_secondary.empty())
+    if ((_ifconfig_set_primary == NULL) && _ifconfig_sets_secondary.empty())
 	goto ret_label;
 
     //
@@ -810,15 +810,15 @@ IfConfig::push_config(IfTree& config)
     //
     pull_config();
 
-    if (_ifc_set_primary != NULL) {
-	if (_ifc_set_primary->push_config(config) != true)
+    if (_ifconfig_set_primary != NULL) {
+	if (_ifconfig_set_primary->push_config(config) != true)
 	    goto ret_label;
     }
-    for (ifc_set_iter = _ifc_sets_secondary.begin();
-	 ifc_set_iter != _ifc_sets_secondary.end();
-	 ++ifc_set_iter) {
-	IfConfigSet* ifc_set = *ifc_set_iter;
-	if (ifc_set->push_config(config) != true)
+    for (ifconfig_set_iter = _ifconfig_sets_secondary.begin();
+	 ifconfig_set_iter != _ifconfig_sets_secondary.end();
+	 ++ifconfig_set_iter) {
+	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
+	if (ifconfig_set->push_config(config) != true)
 	    goto ret_label;
     }
     ret_value = true;		// Success
@@ -839,8 +839,8 @@ IfConfig::pull_config()
     // Clear the old state
     _pulled_config.clear();
 
-    if (_ifc_get_primary != NULL)
-	_ifc_get_primary->pull_config(_pulled_config);
+    if (_ifconfig_get_primary != NULL)
+	_ifconfig_get_primary->pull_config(_pulled_config);
 
     return _pulled_config;
 }

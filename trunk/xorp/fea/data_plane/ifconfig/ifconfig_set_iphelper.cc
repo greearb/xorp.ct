@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_iphelper.cc,v 1.7 2007/02/16 22:45:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.1 2007/04/25 07:31:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -41,11 +41,11 @@
 //
 
 
-IfConfigSetIPHelper::IfConfigSetIPHelper(IfConfig& ifc)
-    : IfConfigSet(ifc)
+IfConfigSetIPHelper::IfConfigSetIPHelper(IfConfig& ifconfig)
+    : IfConfigSet(ifconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -751,7 +751,7 @@ IfConfigSetIPHelper::delete_vif_address(const string& ifname,
     // Check that the family is supported
     switch (addr.af()) {
     case AF_INET:
-	if (! ifc().have_ipv4()) {
+	if (! ifconfig().have_ipv4()) {
 	    error_msg = "IPv4 is not supported";
 	    return (XORP_ERROR);
 	}
@@ -759,7 +759,7 @@ IfConfigSetIPHelper::delete_vif_address(const string& ifname,
 
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (! ifc().have_ipv6()) {
+	if (! ifconfig().have_ipv6()) {
 	    error_msg = "IPv6 is not supported";
 	    return (XORP_ERROR);
 	}

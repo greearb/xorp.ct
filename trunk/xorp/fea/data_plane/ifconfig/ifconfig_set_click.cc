@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.35 2007/04/25 01:57:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -38,9 +38,9 @@
 // (e.g., see http://www.pdos.lcs.mit.edu/click/).
 //
 
-IfConfigSetClick::IfConfigSetClick(IfConfig& ifc)
-    : IfConfigSet(ifc),
-      ClickSocket(ifc.eventloop()),
+IfConfigSetClick::IfConfigSetClick(IfConfig& ifconfig)
+    : IfConfigSet(ifconfig),
+      ClickSocket(ifconfig.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _kernel_click_config_generator(NULL),
       _user_click_config_generator(NULL),
@@ -80,7 +80,7 @@ IfConfigSetClick::start(string& error_msg)
     // registration process itself can trigger some startup operations
     // (if any).
     //
-    register_ifc_secondary();
+    register_ifconfig_secondary();
 
     return (XORP_OK);
 }
@@ -316,7 +316,7 @@ IfConfigSetClick::config_vif(const string& ifname,
 
     if (is_deleted) {
 	ifp->remove_vif(vifname);
-	ifc().nexthop_port_mapper().delete_interface(ifname, vifname);
+	ifconfig().nexthop_port_mapper().delete_interface(ifname, vifname);
     }
 
     return (XORP_OK);
@@ -578,7 +578,7 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 	    return (XORP_ERROR);
 	}
 	vifp->remove_addr(addr4);
-	ifc().nexthop_port_mapper().delete_ipv4(addr4);
+	ifconfig().nexthop_port_mapper().delete_ipv4(addr4);
     }
 
     if (addr.is_ipv6()) {
@@ -594,7 +594,7 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 	    return (XORP_ERROR);
 	}
 	vifp->remove_addr(addr6);
-	ifc().nexthop_port_mapper().delete_ipv6(addr6);
+	ifconfig().nexthop_port_mapper().delete_ipv6(addr6);
     }
 
     return (XORP_OK);
@@ -785,7 +785,7 @@ IfConfigSetClick::write_generated_config(bool has_kernel_config,
     //
     // Notify the NextHopPortMapper observers about any port mapping changes
     //
-    ifc().nexthop_port_mapper().notify_observers();
+    ifconfig().nexthop_port_mapper().notify_observers();
 
     return (XORP_OK);
 }
@@ -965,34 +965,36 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     // Note that all local IP addresses are mapped to the port
     // designated for local delivery.
     //
-    ifc().nexthop_port_mapper().clear();
+    ifconfig().nexthop_port_mapper().clear();
     xorp_rt_port = 0;
     for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    const IfTreeVif& fv = vi->second;
-	    ifc().nexthop_port_mapper().add_interface(fi.ifname(),
-						      fv.vifname(),
-						      xorp_rt_port);
+	    ifconfig().nexthop_port_mapper().add_interface(fi.ifname(),
+							   fv.vifname(),
+							   xorp_rt_port);
 	    for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
 		const IfTreeAddr4& fa4 = ai4->second;
-		ifc().nexthop_port_mapper().add_ipv4(fa4.addr(),
-						     local_xorp_rt_port);
+		ifconfig().nexthop_port_mapper().add_ipv4(fa4.addr(),
+							  local_xorp_rt_port);
 		IPv4Net ipv4net(fa4.addr(), fa4.prefix_len());
-		ifc().nexthop_port_mapper().add_ipv4net(ipv4net, xorp_rt_port);
+		ifconfig().nexthop_port_mapper().add_ipv4net(ipv4net,
+							     xorp_rt_port);
 		if (fa4.point_to_point())
-		    ifc().nexthop_port_mapper().add_ipv4(fa4.endpoint(),
-							 xorp_rt_port);
+		    ifconfig().nexthop_port_mapper().add_ipv4(fa4.endpoint(),
+							      xorp_rt_port);
 	    }
 	    for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
 		const IfTreeAddr6& fa6 = ai6->second;
-		ifc().nexthop_port_mapper().add_ipv6(fa6.addr(),
-						     local_xorp_rt_port);
+		ifconfig().nexthop_port_mapper().add_ipv6(fa6.addr(),
+							  local_xorp_rt_port);
 		IPv6Net ipv6net(fa6.addr(), fa6.prefix_len());
-		ifc().nexthop_port_mapper().add_ipv6net(ipv6net, xorp_rt_port);
+		ifconfig().nexthop_port_mapper().add_ipv6net(ipv6net,
+							     xorp_rt_port);
 		if (fa6.point_to_point())
-		    ifc().nexthop_port_mapper().add_ipv6(fa6.endpoint(),
-							 xorp_rt_port);
+		    ifconfig().nexthop_port_mapper().add_ipv6(fa6.endpoint(),
+							      xorp_rt_port);
 	    }
 	    xorp_rt_port++;
 	}
@@ -1002,10 +1004,10 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 }
 
 IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
-    IfConfigSetClick& ifc_set_click,
+    IfConfigSetClick& ifconfig_set_click,
     const string& command_name)
-    : _ifc_set_click(ifc_set_click),
-      _eventloop(ifc_set_click.ifc().eventloop()),
+    : _ifconfig_set_click(ifconfig_set_click),
+      _eventloop(ifconfig_set_click.ifconfig().eventloop()),
       _command_name(command_name),
       _run_command(NULL)
 {
@@ -1094,5 +1096,5 @@ IfConfigSetClick::ClickConfigGenerator::done_cb(RunCommand* run_command,
 						const string& error_msg)
 {
     XLOG_ASSERT(run_command == _run_command);
-    _ifc_set_click.click_config_generator_done(this, success, error_msg);
+    _ifconfig_set_click.click_config_generator_done(this, success, error_msg);
 }

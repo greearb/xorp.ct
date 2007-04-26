@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.34 2007/04/24 05:53:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.35 2007/04/25 01:57:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -72,13 +72,15 @@ IfConfigGet::parse_buffer_rtm(IfTree& , const vector<uint8_t>& )
 
 #else // HAVE_ROUTING_SOCKETS
 
-static void rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
-				  IfTree& it, u_short& if_index_hint);
-static void rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
-				IfTree& it, u_short if_index_hint);
+static void rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig,
+				  const struct if_msghdr* ifm, IfTree& it,
+				  u_short& if_index_hint);
+static void rtm_addr_to_fea_cfg(IfConfig& ifconfig,
+				const struct if_msghdr* ifm, IfTree& it,
+				u_short if_index_hint);
 #ifdef RTM_IFANNOUNCE
-static void rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
-				    IfTree& it);
+static void rtm_announce_to_fea_cfg(IfConfig& ifconfig,
+				    const struct if_msghdr* ifm, IfTree& it);
 #endif
 
 //
@@ -140,18 +142,18 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer)
 	switch (ifm->ifm_type) {
 	case RTM_IFINFO:
 	    if_index_hint = 0;
-	    rtm_ifinfo_to_fea_cfg(ifc(), ifm, it, if_index_hint);
+	    rtm_ifinfo_to_fea_cfg(ifconfig(), ifm, it, if_index_hint);
 	    recognized = true;
 	    break;
 	case RTM_NEWADDR:
 	case RTM_DELADDR:
-	    rtm_addr_to_fea_cfg(ifc(), ifm, it, if_index_hint);
+	    rtm_addr_to_fea_cfg(ifconfig(), ifm, it, if_index_hint);
 	    recognized = true;
 	    break;
 #ifdef RTM_IFANNOUNCE
 	case RTM_IFANNOUNCE:
 	    if_index_hint = 0;
-	    rtm_announce_to_fea_cfg(ifc(), ifm, it);
+	    rtm_announce_to_fea_cfg(ifconfig(), ifm, it);
 	    recognized = true;
 	    break;
 #endif // RTM_IFANNOUNCE
@@ -179,8 +181,8 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer)
 }
 
 static void
-rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
-		      u_short& if_index_hint)
+rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
+		      IfTree& it, u_short& if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFINFO);
     
@@ -207,14 +209,14 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	    return;
 	}
 	
-	const char* name = ifc.get_insert_ifname(if_index);
+	const char* name = ifconfig.get_insert_ifname(if_index);
 	if (name == NULL) {
 	    char name_buf[IF_NAMESIZE];
 #ifdef HAVE_IF_INDEXTONAME
 	    name = if_indextoname(if_index, name_buf);
 #endif
 	    if (name != NULL)
-		ifc.map_ifindex(if_index, name);
+		ifconfig.map_ifindex(if_index, name);
 	}
 	if (name == NULL) {
 	    XLOG_FATAL("Could not find interface corresponding to index %d",
@@ -368,7 +370,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
     //
     // Add the interface (if a new one)
     //
-    ifc.map_ifindex(if_index, if_name);
+    ifconfig.map_ifindex(if_index, if_name);
     IfTreeInterface* ifp = it.find_interface(if_name);
     if (ifp == NULL) {
 	it.add_if(if_name);
@@ -496,8 +498,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 }
 
 static void
-rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
-		    u_short if_index_hint)
+rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
+		    IfTree& it, u_short if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_NEWADDR || ifm->ifm_type == RTM_DELADDR);
     
@@ -524,14 +526,14 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 		   "with unknown index");
     }
     
-    const char* name = ifc.get_insert_ifname(if_index);
+    const char* name = ifconfig.get_insert_ifname(if_index);
     if (name == NULL) {
 #ifdef HAVE_IF_INDEXTONAME
 	char name_buf[IF_NAMESIZE];
 	name = if_indextoname(if_index, name_buf);
 #endif
 	if (name != NULL)
-	    ifc.map_ifindex(if_index, name);
+	    ifconfig.map_ifindex(if_index, name);
     }
     if (name == NULL) {
 	XLOG_FATAL("Could not find interface corresponding to index %d",
@@ -687,7 +689,8 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 
 #ifdef RTM_IFANNOUNCE
 static void
-rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
+rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
+			IfTree& it)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFANNOUNCE);
     
@@ -706,7 +709,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 	// Add interface
 	//
 	debug_msg("Mapping %d -> %s\n", if_index, if_name.c_str());
-	ifc.map_ifindex(if_index, if_name);
+	ifconfig.map_ifindex(if_index, if_name);
 	
 	it.add_if(if_name);
 	IfTreeInterface* ifp = it.find_interface(if_name);
@@ -740,7 +743,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it)
 	    debug_msg("Attempted to delete missing interface: %s\n",
 		      if_name.c_str());
 	}
-	ifc.unmap_ifindex(if_index);
+	ifconfig.unmap_ifindex(if_index);
 	break;
     }
     

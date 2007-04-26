@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.9 2007/04/25 01:57:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.1 2007/04/25 07:31:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -40,11 +40,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-IfConfigGetIPHelper::IfConfigGetIPHelper(IfConfig& ifc)
-    : IfConfigGet(ifc)
+IfConfigGetIPHelper::IfConfigGetIPHelper(IfConfig& ifconfig)
+    : IfConfigGet(ifconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -151,7 +151,7 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 	    continue;
 
 	wcstombs(if_name, curAdapter->FriendlyName, sizeof(if_name));
-	ifc().map_ifindex(if_index, if_name);
+	ifconfig().map_ifindex(if_index, if_name);
 
 	// Name
 	IfTreeInterface* ifp = it.find_interface(if_name);

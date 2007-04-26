@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.44 2007/02/16 22:45:43 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.45 2007/04/25 07:57:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -26,14 +26,14 @@ class RunCommand;
 
 class IfConfigSet {
 public:
-    IfConfigSet(IfConfig& ifc);
+    IfConfigSet(IfConfig& ifconfig);
     
     virtual ~IfConfigSet();
     
-    IfConfig&	ifc() { return _ifc; }
+    IfConfig&	ifconfig() { return _ifconfig; }
     
-    virtual void register_ifc_primary();
-    virtual void register_ifc_secondary();
+    virtual void register_ifconfig_primary();
+    virtual void register_ifconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -251,13 +251,13 @@ private:
     void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
 			  const IfTreeAddr6& a);
 
-    IfConfig&	_ifc;
+    IfConfig&	_ifconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
 class IfConfigSetDummy : public IfConfigSet {
 public:
-    IfConfigSetDummy(IfConfig& ifc);
+    IfConfigSetDummy(IfConfig& ifconfig);
     virtual ~IfConfigSetDummy();
 
     /**
@@ -350,7 +350,7 @@ private:
 
 class IfConfigSetIoctl : public IfConfigSet {
 public:
-    IfConfigSetIoctl(IfConfig& ifc);
+    IfConfigSetIoctl(IfConfig& ifconfig);
     virtual ~IfConfigSetIoctl();
 
     /**
@@ -454,7 +454,7 @@ private:
 class IfConfigSetNetlinkSocket : public IfConfigSet,
 				 public NetlinkSocket {
 public:
-    IfConfigSetNetlinkSocket(IfConfig& ifc);
+    IfConfigSetNetlinkSocket(IfConfig& ifconfig);
     virtual ~IfConfigSetNetlinkSocket();
 
     /**
@@ -542,7 +542,7 @@ private:
     class ClickConfigGenerator;
 
 public:
-    IfConfigSetClick(IfConfig& ifc);
+    IfConfigSetClick(IfConfig& ifconfig);
     virtual ~IfConfigSetClick();
 
     /**
@@ -665,7 +665,7 @@ private:
 
     class ClickConfigGenerator {
     public:
-	ClickConfigGenerator(IfConfigSetClick& ifc_set_click,
+	ClickConfigGenerator(IfConfigSetClick& ifconfig_set_click,
 			     const string& command_name);
 	~ClickConfigGenerator();
 	int execute(const string& xorp_config, string& error_msg);
@@ -679,7 +679,7 @@ private:
 	void done_cb(RunCommand* run_command, bool success,
 		     const string& error_msg);
 
-	IfConfigSetClick& _ifc_set_click;
+	IfConfigSetClick& _ifconfig_set_click;
 	EventLoop&	_eventloop;
 	string		_command_name;
 	list<string>	_command_argument_list;
@@ -698,7 +698,7 @@ private:
 
 class IfConfigSetIPHelper : public IfConfigSet {
 public:
-    IfConfigSetIPHelper(IfConfig& ifc);
+    IfConfigSetIPHelper(IfConfig& ifconfig);
     virtual ~IfConfigSetIPHelper();
 
     /**

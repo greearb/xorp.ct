@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_iphelper.cc,v 1.9 2007/04/18 06:20:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,11 +33,11 @@
 //
 
 
-IfConfigObserverIPHelper::IfConfigObserverIPHelper(IfConfig& ifc)
-    : IfConfigObserver(ifc)
+IfConfigObserverIPHelper::IfConfigObserverIPHelper(IfConfig& ifconfig)
+    : IfConfigObserver(ifconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -64,14 +64,14 @@ IfConfigObserverIPHelper::start(string& error_msg)
     _is_running = true;
 
     // XXX: Dummy.
-    ifc().report_updates(ifc().live_config(), true);
+    ifconfig().report_updates(ifconfig().live_config(), true);
 
     // Propagate the changes from the live config to the local config
-    IfTree& local_config = ifc().local_config();
-    local_config.track_live_config_state(ifc().live_config());
-    ifc().report_updates(local_config, false);
+    IfTree& local_config = ifconfig().local_config();
+    local_config.track_live_config_state(ifconfig().live_config());
+    ifconfig().report_updates(local_config, false);
     local_config.finalize_state();
-    ifc().live_config().finalize_state();
+    ifconfig().live_config().finalize_state();
 
     return (XORP_OK);
 }

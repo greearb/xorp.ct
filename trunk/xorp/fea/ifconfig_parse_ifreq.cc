@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.34 2007/04/14 07:00:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.35 2007/04/25 01:57:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -167,7 +167,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	// Add the interface (if a new one)
 	//
-	ifc().map_ifindex(if_index, alias_if_name);
+	ifconfig().map_ifindex(if_index, alias_if_name);
 	IfTreeInterface* ifp = it.find_interface(alias_if_name);
 	if (ifp == NULL) {
 	    it.add_if(alias_if_name);

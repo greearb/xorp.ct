@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_click.cc,v 1.11 2007/02/16 22:45:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_click.cc,v 1.1 2007/04/25 07:31:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,9 +31,9 @@
 // (e.g., see http://www.pdos.lcs.mit.edu/click/).
 //
 
-IfConfigGetClick::IfConfigGetClick(IfConfig& ifc)
-    : IfConfigGet(ifc),
-      ClickSocket(ifc.eventloop()),
+IfConfigGetClick::IfConfigGetClick(IfConfig& ifconfig)
+    : IfConfigGet(ifconfig),
+      ClickSocket(ifconfig.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
@@ -69,7 +69,7 @@ IfConfigGetClick::start(string& error_msg)
     // registration process itself can trigger some startup operations
     // (if any).
     //
-    register_ifc_secondary();
+    register_ifconfig_secondary();
 
     return (XORP_OK);
 }
@@ -104,9 +104,9 @@ IfConfigGetClick::read_config(IfTree& it)
     // impossible to read the Click configuration and parse it to restore
     // the original IfTree state.
     //
-    if (! ifc().ifc_set_click().is_running())
+    if (! ifconfig().ifconfig_set_click().is_running())
 	return (false);
 
-    it = ifc().ifc_set_click().iftree();
+    it = ifconfig().ifconfig_set_click().iftree();
     return (true);
 }

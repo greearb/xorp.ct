@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.18 2007/02/16 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.1 2007/04/25 07:31:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,11 +42,11 @@
 // The mechanism to obtain the information is ioctl(2).
 //
 
-IfConfigGetIoctl::IfConfigGetIoctl(IfConfig& ifc)
-    : IfConfigGet(ifc)
+IfConfigGetIoctl::IfConfigGetIoctl(IfConfig& ifconfig)
+    : IfConfigGet(ifconfig)
 {
 #ifdef HAVE_IOCTL_SIOCGIFCONF
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -68,7 +68,7 @@ IfConfigGetIoctl::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (ifc().have_ipv4()) {
+    if (ifconfig().have_ipv4()) {
 	if (_s4 < 0) {
 	    _s4 = socket(AF_INET, SOCK_DGRAM, 0);
 	    if (_s4 < 0) {
@@ -80,7 +80,7 @@ IfConfigGetIoctl::start(string& error_msg)
     }
     
 #ifdef HAVE_IPV6
-    if (ifc().have_ipv6()) {
+    if (ifconfig().have_ipv6()) {
 	if (_s6 < 0) {
 	    _s6 = socket(AF_INET6, SOCK_DGRAM, 0);
 	    if (_s6 < 0) {
@@ -156,7 +156,7 @@ IfConfigGetIoctl::read_config(IfTree& it)
     //
     // The IPv4 information
     //
-    if (ifc().have_ipv4()) {
+    if (ifconfig().have_ipv4()) {
 	if (ioctl_read_ifconf(AF_INET, &ifconf) != true)
 	    return false;
 	vector<uint8_t> buffer(ifconf.ifc_len);
@@ -170,7 +170,7 @@ IfConfigGetIoctl::read_config(IfTree& it)
     //
     // The IPv6 information
     //
-    if (ifc().have_ipv6()) {
+    if (ifconfig().have_ipv6()) {
 	if (ioctl_read_ifconf(AF_INET6, &ifconf) != true)
 	    return false;
 	vector<uint8_t> buffer(ifconf.ifc_len);

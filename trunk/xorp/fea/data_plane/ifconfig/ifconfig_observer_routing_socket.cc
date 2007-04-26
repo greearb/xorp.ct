@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.2 2007/04/25 07:57:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,13 +32,13 @@
 //
 
 
-IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(IfConfig& ifc)
-    : IfConfigObserver(ifc),
-      RoutingSocket(ifc.eventloop()),
+IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(IfConfig& ifconfig)
+    : IfConfigObserver(ifconfig),
+      RoutingSocket(ifconfig.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -85,19 +85,20 @@ IfConfigObserverRoutingSocket::stop(string& error_msg)
 void
 IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 {
-    if (ifc().ifc_get_primary().parse_buffer_rtm(ifc().live_config(), buffer)
+    if (ifconfig().ifconfig_get_primary().parse_buffer_rtm(
+	    ifconfig().live_config(), buffer)
 	!= true) {
 	return;
     }
 
-    ifc().report_updates(ifc().live_config(), true);
+    ifconfig().report_updates(ifconfig().live_config(), true);
 
     // Propagate the changes from the live config to the local config
-    IfTree& local_config = ifc().local_config();
-    local_config.track_live_config_state(ifc().live_config());
-    ifc().report_updates(local_config, false);
+    IfTree& local_config = ifconfig().local_config();
+    local_config.track_live_config_state(ifconfig().live_config());
+    ifconfig().report_updates(local_config, false);
     local_config.finalize_state();
-    ifc().live_config().finalize_state();
+    ifconfig().live_config().finalize_state();
 }
 
 void

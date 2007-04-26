@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.34 2007/04/24 05:53:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.35 2007/04/25 01:57:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -59,13 +59,13 @@ IfConfigGet::parse_buffer_nlm(IfTree& , const vector<uint8_t>&)
 
 #else // HAVE_NETLINK_SOCKETS
 
-static void nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
+static void nlm_newlink_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
 				   const struct ifinfomsg* ifinfomsg,
 				   int rta_len);
-static void nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
+static void nlm_dellink_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
 				   const struct ifinfomsg* ifinfomsg,
 				   int rta_len);
-static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
+static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
 				      const struct ifaddrmsg* ifaddrmsg,
 				      int rta_len, bool is_deleted);
 
@@ -120,9 +120,9 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 	    }
 	    ifinfomsg = reinterpret_cast<const struct ifinfomsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWLINK)
-		nlm_newlink_to_fea_cfg(ifc(), it, ifinfomsg, rta_len);
+		nlm_newlink_to_fea_cfg(ifconfig(), it, ifinfomsg, rta_len);
 	    else
-		nlm_dellink_to_fea_cfg(ifc(), it, ifinfomsg, rta_len);
+		nlm_dellink_to_fea_cfg(ifconfig(), it, ifinfomsg, rta_len);
 	    recognized = true;
 	}
 	break;
@@ -138,10 +138,13 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 		break;
 	    }
 	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
-	    if (nlh->nlmsg_type == RTM_NEWADDR)
-		nlm_newdeladdr_to_fea_cfg(ifc(), it, ifaddrmsg, rta_len, false);
-	    else
-		nlm_newdeladdr_to_fea_cfg(ifc(), it, ifaddrmsg, rta_len, true);
+	    if (nlh->nlmsg_type == RTM_NEWADDR) {
+		nlm_newdeladdr_to_fea_cfg(ifconfig(), it, ifaddrmsg, rta_len,
+					  false);
+	    } else {
+		nlm_newdeladdr_to_fea_cfg(ifconfig(), it, ifaddrmsg, rta_len,
+					  true);
+	    }
 	    recognized = true;
 	}
 	break;
@@ -161,7 +164,7 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 }
 
 static void
-nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
+nlm_newlink_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
 		       const struct ifinfomsg* ifinfomsg, int rta_len)
 {
     const struct rtattr *rtattr;
@@ -211,7 +214,7 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
     //
     // Add the interface (if a new one)
     //
-    ifc.map_ifindex(if_index, if_name);
+    ifconfig.map_ifindex(if_index, if_name);
     IfTreeInterface* ifp = it.find_interface(if_name);
     if (ifp == NULL) {
 	it.add_if(if_name);
@@ -308,7 +311,7 @@ nlm_newlink_to_fea_cfg(IfConfig& ifc, IfTree& it,
 }
 
 static void
-nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
+nlm_dellink_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
 		       const struct ifinfomsg* ifinfomsg, int rta_len)
 {
     const struct rtattr *rtattr;
@@ -363,12 +366,13 @@ nlm_dellink_to_fea_cfg(IfConfig& ifc, IfTree& it,
 	debug_msg("Attempted to delete missing interface: %s\n",
 		  if_name.c_str());
     }
-    ifc.unmap_ifindex(if_index);
+    ifconfig.unmap_ifindex(if_index);
 }
 
 static void
-nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
-    const struct ifaddrmsg* ifaddrmsg, int rta_len, bool is_deleted)
+nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
+			  const struct ifaddrmsg* ifaddrmsg, int rta_len,
+			  bool is_deleted)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFA_MAX + 1];
@@ -409,7 +413,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
     //
     // Get the interface name
     //
-    const char* name = ifc.get_insert_ifname(if_index);
+    const char* name = ifconfig.get_insert_ifname(if_index);
     if (name == NULL) {
 	if (is_deleted) {
 	    //
@@ -429,7 +433,7 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 	name = if_indextoname(if_index, name_buf);
 #endif
 	if (name != NULL)
-	    ifc.map_ifindex(if_index, name);
+	    ifconfig.map_ifindex(if_index, name);
     }
     if (name == NULL) {
 	XLOG_FATAL("Could not find interface corresponding to index %d",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.1 2007/04/25 07:31:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.2 2007/04/25 07:57:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -49,13 +49,13 @@
 // The mechanism to set the information is netlink(7) sockets.
 //
 
-IfConfigSetNetlinkSocket::IfConfigSetNetlinkSocket(IfConfig& ifc)
-    : IfConfigSet(ifc),
-      NetlinkSocket(ifc.eventloop()),
+IfConfigSetNetlinkSocket::IfConfigSetNetlinkSocket(IfConfig& ifconfig)
+    : IfConfigSet(ifconfig),
+      NetlinkSocket(ifconfig.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -802,7 +802,7 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
     // Check that the family is supported
     switch (addr.af()) {
     case AF_INET:
-	if (! ifc().have_ipv4()) {
+	if (! ifconfig().have_ipv4()) {
 	    error_msg = "IPv4 is not supported";
 	    return (XORP_ERROR);
 	}
@@ -810,7 +810,7 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
 
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (! ifc().have_ipv6()) {
+	if (! ifconfig().have_ipv6()) {
 	    error_msg = "IPv6 is not supported";
 	    return (XORP_ERROR);
 	}
@@ -931,7 +931,7 @@ IfConfigSetNetlinkSocket::delete_vif_address(const string& ifname,
     // Check that the family is supported
     switch (addr.af()) {
     case AF_INET:
-	if (! ifc().have_ipv4()) {
+	if (! ifconfig().have_ipv4()) {
 	    error_msg = "IPv4 is not supported";
 	    return (XORP_ERROR);
 	}
@@ -939,7 +939,7 @@ IfConfigSetNetlinkSocket::delete_vif_address(const string& ifname,
 
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (! ifc().have_ipv6()) {
+	if (! ifconfig().have_ipv6()) {
 	    error_msg = "IPv6 is not supported";
 	    return (XORP_ERROR);
 	}

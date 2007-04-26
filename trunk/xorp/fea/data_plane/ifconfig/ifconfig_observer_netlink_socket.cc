@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.2 2007/04/25 07:57:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -39,13 +39,13 @@
 //
 
 
-IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(IfConfig& ifc)
-    : IfConfigObserver(ifc),
-      NetlinkSocket(ifc.eventloop()),
+IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(IfConfig& ifconfig)
+    : IfConfigObserver(ifconfig),
+      NetlinkSocket(ifconfig.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -82,7 +82,7 @@ IfConfigObserverNetlinkSocket::start(string& error_msg)
     // Listen to the netlink multicast group for network interfaces status
     // and IPv4 addresses.
     //
-    if (ifc().have_ipv4()) 
+    if (ifconfig().have_ipv4()) 
 	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
 
 #ifdef HAVE_IPV6
@@ -90,7 +90,7 @@ IfConfigObserverNetlinkSocket::start(string& error_msg)
     // Listen to the netlink multicast group for network interfaces status
     // and IPv6 addresses.
     //
-    if (ifc().have_ipv6())
+    if (ifconfig().have_ipv6())
 	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
 #endif // HAVE_IPV6
 
@@ -125,19 +125,20 @@ IfConfigObserverNetlinkSocket::stop(string& error_msg)
 void
 IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
-    if (ifc().ifc_get_primary().parse_buffer_nlm(ifc().live_config(), buffer)
+    if (ifconfig().ifconfig_get_primary().parse_buffer_nlm(
+	    ifconfig().live_config(), buffer)
 	!= true) {
 	return;
     }
 
-    ifc().report_updates(ifc().live_config(), true);
+    ifconfig().report_updates(ifconfig().live_config(), true);
 
     // Propagate the changes from the live config to the local config
-    IfTree& local_config = ifc().local_config();
-    local_config.track_live_config_state(ifc().live_config());
-    ifc().report_updates(local_config, false);
+    IfTree& local_config = ifconfig().local_config();
+    local_config.track_live_config_state(ifconfig().live_config());
+    ifconfig().report_updates(local_config, false);
     local_config.finalize_state();
-    ifc().live_config().finalize_state();
+    ifconfig().live_config().finalize_state();
 }
 
 void

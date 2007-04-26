@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.1 2007/04/25 07:31:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.2 2007/04/25 07:57:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -40,13 +40,13 @@
 // The mechanism to obtain the information is netlink(7) sockets.
 //
 
-IfConfigGetNetlinkSocket::IfConfigGetNetlinkSocket(IfConfig& ifc)
-    : IfConfigGet(ifc),
-      NetlinkSocket(ifc.eventloop()),
+IfConfigGetNetlinkSocket::IfConfigGetNetlinkSocket(IfConfig& ifconfig)
+    : IfConfigGet(ifconfig),
+      NetlinkSocket(ifconfig.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -211,7 +211,7 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
 	//
 	// Set the request for IPv4 addresses
 	//
-	if (ifc().have_ipv4()) {
+	if (ifconfig().have_ipv4()) {
 	    memset(&buffer, 0, sizeof(buffer));
 	    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
 	    nlh->nlmsg_type = RTM_GETADDR;
@@ -263,7 +263,7 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
 	//
 	// Set the request for IPv6 addresses
 	//
-	if (ifc().have_ipv6()) {
+	if (ifconfig().have_ipv6()) {
 	    memset(&buffer, 0, sizeof(buffer));
 	    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
 	    nlh->nlmsg_type = RTM_GETADDR;

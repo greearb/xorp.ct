@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.25 2007/02/16 22:45:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_dummy.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,11 +32,11 @@
 // The mechanism to set the information is dummy (for testing purpose).
 //
 
-IfConfigSetDummy::IfConfigSetDummy(IfConfig& ifc)
-    : IfConfigSet(ifc)
+IfConfigSetDummy::IfConfigSetDummy(IfConfig& ifconfig)
+    : IfConfigSet(ifconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ifc_primary();
+    register_ifconfig_primary();
 #endif
 }
 
@@ -81,8 +81,8 @@ IfConfigSetDummy::stop(string& error_msg)
 bool
 IfConfigSetDummy::push_config(IfTree& it)
 {
-    ifc().report_updates(it, true);
-    ifc().set_live_config(it);
+    ifconfig().report_updates(it, true);
+    ifconfig().set_live_config(it);
 
     return true;
 }
