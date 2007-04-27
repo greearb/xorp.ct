@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.59 2007/04/26 06:29:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.60 2007/04/27 21:11:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -90,7 +90,7 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _is_dummy(false),
       _is_running(false)
 {
-    _itm = new InterfaceTransactionManager(_eventloop, 5000, 10);
+    _itm = new IfConfigTransactionManager(_eventloop, 5000, 10);
 
     //
     // Check that all necessary mechanisms to interact with the

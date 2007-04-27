@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifmanager_transaction.cc,v 1.7 2007/02/16 22:45:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_transaction.cc,v 1.1 2007/04/27 21:11:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,25 +22,25 @@
 
 #include "ifconfig_transaction.hh"
 
-InterfaceTransactionManager::InterfaceTransactionManager(EventLoop& e,
-							 uint32_t timeout_ms,
-							 uint32_t max_pending)
+IfConfigTransactionManager::IfConfigTransactionManager(EventLoop& e,
+						       uint32_t timeout_ms,
+						       uint32_t max_pending)
     : TransactionManager(e, timeout_ms, max_pending)
 {}
 
-InterfaceTransactionManager::~InterfaceTransactionManager()
+IfConfigTransactionManager::~IfConfigTransactionManager()
 {}
 
 void
-InterfaceTransactionManager::pre_commit(uint32_t tid)
+IfConfigTransactionManager::pre_commit(uint32_t tid)
 {
     reset_error();
     _tid_exec = tid;
 }
 
 void
-InterfaceTransactionManager::operation_result(bool success,
-					      const TransactionOperation& op)
+IfConfigTransactionManager::operation_result(bool success,
+					     const TransactionOperation& op)
 {
     if (false == success && _first_error.empty()) {
 	_first_error = c_format("Failed executing: \"%s\"", op.str().c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.55 2007/04/25 07:57:48 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.56 2007/04/26 06:29:44 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -28,11 +28,11 @@
 
 class EventLoop;
 class IfConfigGet;
-class IfConfigSet;
-class IfConfigObserver;
 class IfConfigErrorReporterBase;
+class IfConfigObserver;
+class IfConfigSet;
+class IfConfigTransactionManager;
 class IfConfigUpdateReporterBase;
-class InterfaceTransactionManager;
 class NexthopPortMapper;
 
 
@@ -449,7 +449,7 @@ private:
     //
     // The interface transaction manager
     //
-    InterfaceTransactionManager* _itm;
+    IfConfigTransactionManager* _itm;
 
     //
     // A cache of associative array of interface names to interface index.

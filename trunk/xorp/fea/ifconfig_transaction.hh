@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.20 2007/04/26 06:29:45 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.1 2007/04/27 21:11:29 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -25,14 +25,14 @@
 #include "iftree.hh"
 
 
-class InterfaceTransactionManager : public TransactionManager
+class IfConfigTransactionManager : public TransactionManager
 {
 public:
-    InterfaceTransactionManager(EventLoop&	e,
-				uint32_t	timeout_ms,
-				uint32_t	max_pending);
+    IfConfigTransactionManager(EventLoop&	e,
+			       uint32_t		timeout_ms,
+			       uint32_t		max_pending);
 
-    ~InterfaceTransactionManager();
+    ~IfConfigTransactionManager();
 
     inline void reset_error()			{ _first_error.erase(); }
 
@@ -52,9 +52,9 @@ protected:
  * Base class for Interface related operations acting on an
  * IfTree.
  */
-class InterfaceManagerOperation : public TransactionOperation {
+class IfConfigManagerOperation : public TransactionOperation {
 public:
-    InterfaceManagerOperation(IfTree& it, const string& ifname)
+    IfConfigManagerOperation(IfTree& it, const string& ifname)
 	: _it(it), _ifname(ifname) {}
 
     /**
@@ -82,10 +82,10 @@ private:
 /**
  * Class for adding an interface.
  */
-class AddInterface : public InterfaceManagerOperation {
+class AddInterface : public IfConfigManagerOperation {
 public:
     AddInterface(IfTree& it, const string& ifname)
-	: InterfaceManagerOperation(it, ifname) {}
+	: IfConfigManagerOperation(it, ifname) {}
 
     bool dispatch() 		{ iftree().add_if(ifname()); return true; }
 
@@ -97,10 +97,10 @@ public:
 /**
  * Class for removing an interface.
  */
-class RemoveInterface : public InterfaceManagerOperation {
+class RemoveInterface : public IfConfigManagerOperation {
 public:
     RemoveInterface(IfTree& it, const string& ifname)
-	: InterfaceManagerOperation(it, ifname) {}
+	: IfConfigManagerOperation(it, ifname) {}
 
     bool dispatch() 		{ return iftree().remove_if(ifname()); }
 
@@ -115,11 +115,11 @@ public:
  * Class for configuring an interface within the FEA by using information
  * from the underlying system.
  */
-class ConfigureInterfaceFromSystem : public InterfaceManagerOperation {
+class ConfigureInterfaceFromSystem : public IfConfigManagerOperation {
 public:
     ConfigureInterfaceFromSystem(IfConfig& ifconfig, IfTree& it,
 				 const string& ifname)
-	: InterfaceManagerOperation(it, ifname), _ifconfig(ifconfig) {}
+	: IfConfigManagerOperation(it, ifname), _ifconfig(ifconfig) {}
 
     bool dispatch() {
 	const IfTree& dev_config = _ifconfig.pulled_config();
@@ -143,10 +143,10 @@ private:
 /**
  * Base class for interface modifier operations.
  */
-class InterfaceModifier : public InterfaceManagerOperation {
+class InterfaceModifier : public IfConfigManagerOperation {
 public:
     InterfaceModifier(IfTree& it, const string& ifname)
-	: InterfaceManagerOperation(it, ifname) {}
+	: IfConfigManagerOperation(it, ifname) {}
 
     bool path_valid() const	{ return interface() != 0; }
 
