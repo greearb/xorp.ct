@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifmanager_transaction.cc,v 1.6 2006/03/16 00:03:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifmanager_transaction.cc,v 1.7 2007/02/16 22:45:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,7 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "ifmanager_transaction.hh"
+#include "ifconfig_transaction.hh"
 
 InterfaceTransactionManager::InterfaceTransactionManager(EventLoop& e,
 							 uint32_t timeout_ms,

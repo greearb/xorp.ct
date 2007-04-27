@@ -54,8 +54,9 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	fea_node.lo fibconfig.lo fibconfig_entry_get.lo \
 	fibconfig_entry_observer.lo fibconfig_entry_set.lo \
 	fibconfig_table_get.lo fibconfig_table_observer.lo \
-	fibconfig_table_set.lo fibconfig_entry_get_click.lo \
-	fibconfig_entry_get_dummy.lo fibconfig_entry_get_iphelper.lo \
+	fibconfig_table_set.lo fibconfig_transaction.lo \
+	fibconfig_entry_get_click.lo fibconfig_entry_get_dummy.lo \
+	fibconfig_entry_get_iphelper.lo \
 	fibconfig_entry_get_netlink_socket.lo \
 	fibconfig_entry_get_routing_socket.lo \
 	fibconfig_entry_get_rtmv2.lo fibconfig_entry_observer_dummy.lo \
@@ -84,21 +85,22 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	fibconfig_table_set_iphelper.lo \
 	fibconfig_table_set_netlink_socket.lo \
 	fibconfig_table_set_routing_socket.lo \
-	fibconfig_table_set_rtmv2.lo fti_transaction.lo ifconfig.lo \
-	ifconfig_addr_table.lo ifconfig_get.lo ifconfig_get_click.lo \
+	fibconfig_table_set_rtmv2.lo ifconfig.lo \
+	ifconfig_addr_table.lo ifconfig_get.lo ifconfig_media.lo \
+	ifconfig_observer.lo ifconfig_reporter.lo ifconfig_set.lo \
+	ifconfig_transaction.lo ifconfig_get_click.lo \
 	ifconfig_get_dummy.lo ifconfig_get_getifaddrs.lo \
 	ifconfig_get_ioctl.lo ifconfig_get_iphelper.lo \
 	ifconfig_get_netlink_socket.lo ifconfig_get_proc_linux.lo \
-	ifconfig_get_sysctl.lo ifconfig_media.lo ifconfig_observer.lo \
-	ifconfig_observer_dummy.lo ifconfig_observer_iphelper.lo \
+	ifconfig_get_sysctl.lo ifconfig_observer_dummy.lo \
+	ifconfig_observer_iphelper.lo \
 	ifconfig_observer_netlink_socket.lo \
 	ifconfig_observer_routing_socket.lo \
 	ifconfig_parse_getifaddrs.lo ifconfig_parse_ioctl.lo \
 	ifconfig_parse_netlink_socket.lo \
-	ifconfig_parse_routing_socket.lo ifconfig_reporter.lo \
-	ifconfig_set.lo ifconfig_set_click.lo ifconfig_set_dummy.lo \
-	ifconfig_set_ioctl.lo ifconfig_set_iphelper.lo \
-	ifconfig_set_netlink_socket.lo ifmanager_transaction.lo \
+	ifconfig_parse_routing_socket.lo ifconfig_set_click.lo \
+	ifconfig_set_dummy.lo ifconfig_set_ioctl.lo \
+	ifconfig_set_iphelper.lo ifconfig_set_netlink_socket.lo \
 	iftree.lo libfeaclient_bridge.lo mfea_config.lo \
 	mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo mfea_node_cli.lo \
 	mfea_proto_comm.lo mfea_vif.lo netlink_socket.lo \
@@ -442,9 +444,9 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	fibconfig_entry_get.hh fibconfig_entry_observer.hh \
 	fibconfig_entry_set.hh fibconfig_table_get.hh \
 	fibconfig_table_observer.hh fibconfig_table_set.hh \
-	fti_transaction.hh ifconfig.hh ifconfig_addr_table.hh \
+	fibconfig_transaction.hh ifconfig.hh ifconfig_addr_table.hh \
 	ifconfig_get.hh ifconfig_media.hh ifconfig_observer.hh \
-	ifconfig_reporter.hh ifconfig_set.hh ifmanager_transaction.hh \
+	ifconfig_reporter.hh ifconfig_set.hh ifconfig_transaction.hh \
 	iftree.hh kernel_utils.hh libfeaclient_bridge.hh \
 	mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh \
 	mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh \
@@ -461,6 +463,7 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	fibconfig_entry_get.cc fibconfig_entry_observer.cc \
 	fibconfig_entry_set.cc fibconfig_table_get.cc \
 	fibconfig_table_observer.cc fibconfig_table_set.cc \
+	fibconfig_transaction.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_click.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc \
@@ -498,8 +501,9 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/fibconfig/fibconfig_table_set_netlink_socket.cc \
 	forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc \
 	forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc \
-	fti_transaction.cc ifconfig.cc ifconfig_addr_table.cc \
-	ifconfig_get.cc \
+	ifconfig.cc ifconfig_addr_table.cc ifconfig_get.cc \
+	ifconfig_media.cc ifconfig_observer.cc ifconfig_reporter.cc \
+	ifconfig_set.cc ifconfig_transaction.cc \
 	forwarding_plane/ifconfig/ifconfig_get_click.cc \
 	forwarding_plane/ifconfig/ifconfig_get_dummy.cc \
 	forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc \
@@ -508,7 +512,6 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc \
 	forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc \
 	forwarding_plane/ifconfig/ifconfig_get_sysctl.cc \
-	ifconfig_media.cc ifconfig_observer.cc \
 	forwarding_plane/ifconfig/ifconfig_observer_dummy.cc \
 	forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc \
 	forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc \
@@ -517,19 +520,18 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc \
 	forwarding_plane/ifconfig/ifconfig_parse_netlink_socket.cc \
 	forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc \
-	ifconfig_reporter.cc ifconfig_set.cc \
 	forwarding_plane/ifconfig/ifconfig_set_click.cc \
 	forwarding_plane/ifconfig/ifconfig_set_dummy.cc \
 	forwarding_plane/ifconfig/ifconfig_set_ioctl.cc \
 	forwarding_plane/ifconfig/ifconfig_set_iphelper.cc \
 	forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc \
-	ifmanager_transaction.cc iftree.cc libfeaclient_bridge.cc \
-	mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc \
-	mfea_node_cli.cc mfea_proto_comm.cc mfea_vif.cc \
-	netlink_socket.cc netlink_socket_utils.cc \
-	nexthop_port_mapper.cc pa_backend_dummy.cc pa_backend_ipfw2.cc \
-	pa_entry.cc pa_table.cc pa_transaction.cc profile_vars.cc \
-	rawsock.cc rawsock4.cc rawsock6.cc routing_socket.cc \
+	iftree.cc libfeaclient_bridge.cc mfea_config.cc \
+	mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc \
+	mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc \
+	netlink_socket_utils.cc nexthop_port_mapper.cc \
+	pa_backend_dummy.cc pa_backend_ipfw2.cc pa_entry.cc \
+	pa_table.cc pa_transaction.cc profile_vars.cc rawsock.cc \
+	rawsock4.cc rawsock6.cc routing_socket.cc \
 	routing_socket_utils.cc win_rtm_pipe.cc win_support.cc \
 	xrl_packet_acl.cc xrl_fea_io.cc xrl_fea_node.cc \
 	xrl_fea_target.cc xrl_fti.cc xrl_mfea_node.cc xrl_rawsock4.cc \
@@ -735,7 +737,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set_routing_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set_rtmv2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fti_transaction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_addr_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get.Plo@am__quote@
@@ -764,7 +766,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_ioctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_netlink_socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifmanager_transaction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iftree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfeaclient_bridge.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_config.Plo@am__quote@

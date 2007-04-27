@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.16 2007/02/16 22:45:52 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.17 2007/04/27 01:10:30 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -21,7 +21,7 @@
 
 #include "xrl/interfaces/fea_fib_client_xif.hh"
 
-#include "fti_transaction.hh"
+#include "fibconfig_transaction.hh"
 #include "fte.hh"
 
 

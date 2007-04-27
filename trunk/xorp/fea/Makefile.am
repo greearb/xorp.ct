@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.80 2007/04/26 22:29:49 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.81 2007/04/27 08:14:07 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -89,7 +89,7 @@ libfea_la_SOURCES	+= fibconfig_entry_set.hh
 libfea_la_SOURCES	+= fibconfig_table_get.hh
 libfea_la_SOURCES	+= fibconfig_table_observer.hh
 libfea_la_SOURCES	+= fibconfig_table_set.hh
-libfea_la_SOURCES	+= fti_transaction.hh
+libfea_la_SOURCES	+= fibconfig_transaction.hh
 libfea_la_SOURCES	+= ifconfig.hh
 libfea_la_SOURCES	+= ifconfig_addr_table.hh
 libfea_la_SOURCES	+= ifconfig_get.hh
@@ -97,7 +97,7 @@ libfea_la_SOURCES	+= ifconfig_media.hh
 libfea_la_SOURCES	+= ifconfig_observer.hh
 libfea_la_SOURCES	+= ifconfig_reporter.hh
 libfea_la_SOURCES	+= ifconfig_set.hh
-libfea_la_SOURCES	+= ifmanager_transaction.hh
+libfea_la_SOURCES	+= ifconfig_transaction.hh
 libfea_la_SOURCES	+= iftree.hh
 libfea_la_SOURCES	+= kernel_utils.hh
 libfea_la_SOURCES	+= libfeaclient_bridge.hh
@@ -149,6 +149,7 @@ libfea_la_SOURCES	+= fibconfig_entry_set.cc
 libfea_la_SOURCES	+= fibconfig_table_get.cc
 libfea_la_SOURCES	+= fibconfig_table_observer.cc
 libfea_la_SOURCES	+= fibconfig_table_set.cc
+libfea_la_SOURCES	+= fibconfig_transaction.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_click.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc
@@ -186,10 +187,14 @@ libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_iphelper.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc
-libfea_la_SOURCES	+= fti_transaction.cc
 libfea_la_SOURCES	+= ifconfig.cc
 libfea_la_SOURCES	+= ifconfig_addr_table.cc
 libfea_la_SOURCES	+= ifconfig_get.cc
+libfea_la_SOURCES	+= ifconfig_media.cc
+libfea_la_SOURCES	+= ifconfig_observer.cc
+libfea_la_SOURCES	+= ifconfig_reporter.cc
+libfea_la_SOURCES	+= ifconfig_set.cc
+libfea_la_SOURCES	+= ifconfig_transaction.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_click.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc
@@ -198,8 +203,6 @@ libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_iphelper.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_sysctl.cc
-libfea_la_SOURCES	+= ifconfig_media.cc
-libfea_la_SOURCES	+= ifconfig_observer.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
@@ -208,14 +211,11 @@ libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_netlink_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc
-libfea_la_SOURCES	+= ifconfig_reporter.cc
-libfea_la_SOURCES	+= ifconfig_set.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_click.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_dummy.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_ioctl.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_iphelper.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
-libfea_la_SOURCES	+= ifmanager_transaction.cc
 libfea_la_SOURCES	+= iftree.cc
 libfea_la_SOURCES	+= libfeaclient_bridge.cc
 libfea_la_SOURCES	+= mfea_config.cc

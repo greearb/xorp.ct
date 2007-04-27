@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.11 2007/02/16 22:45:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.12 2007/04/27 01:10:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,7 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "fti_transaction.hh"
+#include "fibconfig_transaction.hh"
 
 void
 FtiTransactionManager::pre_commit(uint32_t /* tid */)

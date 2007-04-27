@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.10 2007/04/26 06:29:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.11 2007/04/27 01:10:29 pavlin Exp $"
 
 
 //
@@ -40,7 +40,7 @@
 #include "libxorp/profile.hh"
 
 #include "fea_node.hh"
-#include "ifmanager_transaction.hh"
+#include "ifconfig_transaction.hh"
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
