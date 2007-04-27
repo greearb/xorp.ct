@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.2 2007/04/27 01:10:27 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -24,9 +24,23 @@
 #include "libxorp/ipv6net.hh"
 #include "libxorp/trie.hh"
 
-#include "fte.hh"
+//
+// Flag values used to tell underlying FIB message parsing routines
+// which messages the caller is interested in.
+//
+// TODO: Those values and FibMsgSet are temporarily defined here.
+// In the future they should be moved inside FibConfig.
+//
+namespace FibMsg {
+    enum {
+	UPDATES		= 1 << 0,
+	GETS		= 1 << 1,
+	RESOLVES	= 1 << 2
+    };
+};
+typedef uint32_t FibMsgSet;
 
-typedef unsigned long FtiFibMsgSet;
+#include "fte.hh"
 
 #include "fibconfig_entry_get.hh"
 #include "fibconfig_entry_set.hh"
@@ -816,14 +830,6 @@ private:
     OVERLAPPED  _overlapped;
     int		_enablecnt;
 #endif
-};
-
-//
-// Flag values for FtiFibMsgSet, used to tell underlying FIB message
-// parsing routines which messages the caller is interested in.
-//
-namespace FtiFibMsg {
-	const unsigned long	UPDATES = 0x1, GETS = 0x2, RESOLVES = 0x4;
 };
 
 #endif	// __FEA_FIBCONFIG_HH__

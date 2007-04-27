@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.2 2007/04/27 01:10:27 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
 #define __FEA_FIBCONFIG_ENTRY_GET_HH__
@@ -117,7 +117,7 @@ public:
      * @see FteX.
      */
     bool parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
-			  FtiFibMsgSet filter);
+			  FibMsgSet filter);
 
     /**
      * Parse information about routing entry information received from

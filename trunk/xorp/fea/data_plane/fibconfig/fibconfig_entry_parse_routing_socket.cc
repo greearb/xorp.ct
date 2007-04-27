@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc,v 1.3 2007/04/27 01:10:31 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -45,7 +45,7 @@
 #if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
 FibConfigEntryGet::parse_buffer_rtm(FteX& , const vector<uint8_t>& ,
-				    FtiFibMsgSet)
+				    FibMsgSet)
 {
     return false;
 }
@@ -54,7 +54,7 @@ FibConfigEntryGet::parse_buffer_rtm(FteX& , const vector<uint8_t>& ,
 
 bool
 FibConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
-				    FtiFibMsgSet filter)
+				    FibMsgSet filter)
 {
     AlignData<struct rt_msghdr> align_data(buffer);
     const struct rt_msghdr* rtm;
@@ -77,7 +77,7 @@ FibConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 	    continue;
 
 	// Caller wants route gets to be parsed.
-	if (filter & FtiFibMsg::GETS) {
+	if (filter & FibMsg::GETS) {
 #ifdef RTM_GET
 	    if ((rtm->rtm_type == RTM_GET) &&
 	        (rtm->rtm_flags & RTF_UP))
@@ -87,7 +87,7 @@ FibConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 
 	// Caller wants route resolves to be parsed.
 	// Resolves may not be supported in some implementations.
-	if (filter & FtiFibMsg::RESOLVES) {
+	if (filter & FibMsg::RESOLVES) {
 #ifdef RTM_MISS
 	    if (rtm->rtm_type == RTM_MISS)
 		filter_match = true;
@@ -99,7 +99,7 @@ FibConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 	}
 
 	// Caller wants routing table updates to be parsed.
-	if (filter & FtiFibMsg::UPDATES) {
+	if (filter & FibMsg::UPDATES) {
 	    if ((rtm->rtm_type == RTM_ADD) ||
 		(rtm->rtm_type == RTM_DELETE) ||
 		(rtm->rtm_type == RTM_CHANGE))

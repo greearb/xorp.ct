@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.3 2007/04/27 01:10:32 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -127,8 +127,8 @@ FibConfigTableObserverRtmV2::stop(string& error_msg)
 void
 FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 {
-    using namespace FtiFibMsg;
     list<FteX> fte_list;
+    FibMsgSet filter = FibMsg::UPDATES | FibMsg::GETS;
 
     if (_fib_table_observers.empty())
 	return;		// Nobody is interested in the routes
@@ -140,7 +140,7 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET,
 								   fte_list,
 								   buffer,
-								   UPDATES | GETS);
+								   filter);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -155,7 +155,7 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET6,
 								   fte_list,
 								   buffer,
-								   UPDATES | GETS);
+								   filter);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();

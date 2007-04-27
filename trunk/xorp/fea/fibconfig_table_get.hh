@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.2 2007/04/27 01:10:28 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -98,7 +98,8 @@ public:
      * @see FteX.
      */
     bool parse_buffer_rtm(int family, list<FteX>& fte_list,
-			  const vector<uint8_t>& buffer, FtiFibMsgSet filter);
+			  const vector<uint8_t>& buffer,
+			  FibMsgSet filter);
 
     /**
      * Parse information about routing table information received from
