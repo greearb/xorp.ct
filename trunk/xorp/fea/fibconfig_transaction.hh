@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.1 2007/04/27 21:11:29 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.2 2007/04/27 21:47:26 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TRANSACTION_HH__
 #define __FEA_FIBCONFIG_TRANSACTION_HH__
@@ -38,11 +38,8 @@ class FibConfigTransactionManager : public TransactionManager
 public:
     typedef TransactionManager::Operation Operation;
 
-    enum { TIMEOUT_MS = 5000 };
-
-    FibConfigTransactionManager(EventLoop& e, FibConfig& fibconfig,
-				uint32_t max_pending = 10)
-	: TransactionManager(e, TIMEOUT_MS, max_pending),
+    FibConfigTransactionManager(EventLoop& eventloop, FibConfig& fibconfig)
+	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING),
 	  _fibconfig(fibconfig)
     {}
 
@@ -53,6 +50,8 @@ public:
      * empty(), then no error occurred.
      */
     const string& error() const { return _error; }
+
+    size_t max_ops() const { return MAX_OPS; }
 
 protected:
     void unset_error();
@@ -66,6 +65,9 @@ protected:
 protected:
     FibConfig&	_fibconfig;
     string	_error;
+
+private:
+    enum { TIMEOUT_MS = 5000, MAX_PENDING = 10, MAX_OPS = 200 };
 };
 
 /**
@@ -88,9 +90,9 @@ private:
  * Class to store request to add routing entry to FibConfig and
  * dispatch it later.
  */
-class FtiAddEntry4 : public FibConfigTransactionOperation {
+class FibAddEntry4 : public FibConfigTransactionOperation {
 public:
-    FtiAddEntry4(FibConfig&	fibconfig,
+    FibAddEntry4(FibConfig&	fibconfig,
 		 const IPv4Net&	net,
 		 const IPv4&	nexthop,
 		 const string&	ifname,
@@ -118,9 +120,9 @@ private:
  * Class to store request to delete routing entry to FibConfig and
  * dispatch it later.
  */
-class FtiDeleteEntry4 : public FibConfigTransactionOperation {
+class FibDeleteEntry4 : public FibConfigTransactionOperation {
 public:
-    FtiDeleteEntry4(FibConfig&		fibconfig,
+    FibDeleteEntry4(FibConfig&		fibconfig,
 		    const IPv4Net&	net,
 		    const IPv4&		nexthop,
 		    const string&	ifname,
@@ -148,9 +150,9 @@ private:
  * Class to store request to delete all routing entries to FibConfig and
  * dispatch it later.
  */
-class FtiDeleteAllEntries4 : public FibConfigTransactionOperation {
+class FibDeleteAllEntries4 : public FibConfigTransactionOperation {
 public:
-    FtiDeleteAllEntries4(FibConfig& fibconfig)
+    FibDeleteAllEntries4(FibConfig& fibconfig)
 	: FibConfigTransactionOperation(fibconfig) {}
 
     bool dispatch() { return fibconfig().delete_all_entries4(); }
@@ -162,9 +164,9 @@ public:
  * Class to store request to add routing entry to FibConfig and
  * dispatch it later.
  */
-class FtiAddEntry6 : public FibConfigTransactionOperation {
+class FibAddEntry6 : public FibConfigTransactionOperation {
 public:
-    FtiAddEntry6(FibConfig&	fibconfig,
+    FibAddEntry6(FibConfig&	fibconfig,
 		 const IPv6Net&	net,
 		 const IPv6&	nexthop,
 		 const string&  ifname,
@@ -192,9 +194,9 @@ private:
  * Class to store request to delete routing entry to FibConfig
  * and dispatch it later.
  */
-class FtiDeleteEntry6 : public FibConfigTransactionOperation {
+class FibDeleteEntry6 : public FibConfigTransactionOperation {
 public:
-    FtiDeleteEntry6(FibConfig&		fibconfig,
+    FibDeleteEntry6(FibConfig&		fibconfig,
 		    const IPv6Net&	net,
 		    const IPv6&		nexthop,
 		    const string&	ifname,
@@ -222,9 +224,9 @@ private:
  * Class to store request to delete all routing entries to FibConfig
  * and dispatch it later.
  */
-class FtiDeleteAllEntries6 : public FibConfigTransactionOperation {
+class FibDeleteAllEntries6 : public FibConfigTransactionOperation {
 public:
-    FtiDeleteAllEntries6(FibConfig& fibconfig)
+    FibDeleteAllEntries6(FibConfig& fibconfig)
 	: FibConfigTransactionOperation(fibconfig) {}
 
     bool dispatch() { return fibconfig().delete_all_entries6(); }

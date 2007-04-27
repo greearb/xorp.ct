@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.2 2007/04/27 21:24:38 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.3 2007/04/27 21:47:26 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -28,11 +28,9 @@
 class IfConfigTransactionManager : public TransactionManager
 {
 public:
-    IfConfigTransactionManager(EventLoop&	e,
-			       uint32_t		timeout_ms,
-			       uint32_t		max_pending);
-
-    ~IfConfigTransactionManager();
+    IfConfigTransactionManager(EventLoop& eventloop)
+	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
+    {}
 
     inline void reset_error()			{ _first_error.erase(); }
 
@@ -46,6 +44,9 @@ public:
 protected:
     string   _first_error;
     uint32_t _tid_exec;
+
+private:
+    enum { TIMEOUT_MS = 5000, MAX_PENDING = 10 };
 };
 
 /**

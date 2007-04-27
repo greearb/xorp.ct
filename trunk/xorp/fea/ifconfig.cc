@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.60 2007/04/27 21:11:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.61 2007/04/27 21:24:38 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -90,7 +90,7 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _is_dummy(false),
       _is_running(false)
 {
-    _itm = new IfConfigTransactionManager(_eventloop, 5000, 10);
+    _itm = new IfConfigTransactionManager(_eventloop);
 
     //
     // Check that all necessary mechanisms to interact with the
@@ -176,6 +176,11 @@ IfConfig::add_transaction_operation(uint32_t tid,
 	return (XORP_ERROR);
     }
 
+    // XXX: If necessary, check whether n_ops is above a pre-defined limit.
+
+    //
+    // In theory, resource shortage is the only thing that could get us here
+    //
     if (_itm->add(tid, op) != true) {
 	error_msg = c_format("Unknown resource shortage");
 	return (XORP_ERROR);

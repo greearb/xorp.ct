@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.2 2007/04/27 01:10:27 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.3 2007/04/27 20:33:31 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -22,6 +22,8 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv6net.hh"
+#include "libxorp/status_codes.h"
+#include "libxorp/transaction.hh"
 #include "libxorp/trie.hh"
 
 //
@@ -58,6 +60,7 @@ class FibConfigEntryObserver;
 class FibConfigTableGet;
 class FibConfigTableSet;
 class FibConfigTableObserver;
+class FibConfigTransactionManager;
 class NexthopPortMapper;
 class Profile;
 
@@ -107,7 +110,54 @@ public:
      * @return a reference to the @ref IfTree instance.
      */
     const IfTree& iftree() const { return _iftree; }
-    
+
+    /**
+     * Get the status code
+     *
+     * @param reason the human-readable reason for any failure.
+     * @return the status code.
+     */
+    ProcessStatus status(string& reason) const;
+
+    /**
+     * Start FIB-related transaction.
+     *
+     * @param tid the return-by-reference new transaction ID.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start_transaction(uint32_t& tid, string& error_msg);
+
+    /**
+     * Commit FIB-related transaction.
+     *
+     * @param tid the transaction ID.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int commit_transaction(uint32_t tid, string& error_msg);
+
+    /**
+     * Abort FIB-related transaction.
+     *
+     * @param tid the transaction ID.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int abort_transaction(uint32_t tid, string& error_msg);
+
+    /**
+     * Add operation to FIB-related transaction.
+     *
+     * @param tid the transaction ID.
+     * @param op the operation to add.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_transaction_operation(uint32_t tid,
+				  const TransactionManager::Operation& op,
+				  string& error_msg);
+
     int register_fibconfig_entry_get_primary(FibConfigEntryGet *fibconfig_entry_get);
     int register_fibconfig_entry_set_primary(FibConfigEntrySet *fibconfig_entry_set);
     int register_fibconfig_entry_observer_primary(FibConfigEntryObserver *fibconfig_entry_observer);
@@ -669,6 +719,11 @@ private:
     Profile&				_profile;
     NexthopPortMapper&			_nexthop_port_mapper;
     const IfTree&			_iftree;
+
+    //
+    // The FIB transaction manager
+    //
+    FibConfigTransactionManager*	_ftm;
 
     FibConfigEntryGet*			_fibconfig_entry_get_primary;
     FibConfigEntrySet*			_fibconfig_entry_set_primary;

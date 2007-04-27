@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.18 2007/04/27 21:11:30 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.19 2007/04/27 21:47:26 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -40,14 +40,10 @@ public:
      *
      * @param e the EventLoop.
      * @param fibconfig the ForwardingTableInterface configuration object.
-     * @param max_ops the maximum number of operations pending.
      */
-    XrlFtiTransactionManager(EventLoop&	e,
-			     FibConfig&	fibconfig,
-			     XrlRouter* xrl_router,
-			     uint32_t	max_ops = 200)
-	: _ftm(e, fibconfig),
-	  _max_ops(max_ops),
+    XrlFtiTransactionManager(FibConfig&	fibconfig,
+			     XrlRouter* xrl_router)
+	: _fibconfig(fibconfig),
 	  _xrl_fea_fib_client(xrl_router) {
 	fibconfig.add_fib_table_observer(this);
     }
@@ -57,45 +53,12 @@ public:
     }
 
     /**
-     * Start a Fti transaction.
-     * 
-     * @param tid the return-by-reference transaction ID.
-     * @return the XRL command error.
-     */
-    XrlCmdError start_transaction(uint32_t& tid);
-
-    /**
-     * Commit a Fti transaction.
-     * 
-     * @param tid the ID of the transaction to commit.
-     * @return the XRL command error.
-     */
-    XrlCmdError commit_transaction(uint32_t tid);
-
-    /**
-     * Abort a Fti transaction.
-     * 
-     * @param tid the ID of the transaction to abort.
-     * @return the XRL command error.
-     */
-    XrlCmdError abort_transaction(uint32_t tid);
-
-    /**
-     * Add a Fti operation.
-     * 
-     * @param tid the transaction ID.
-     * @param op the operation to add.
-     * @return the XRL command error.
-     */
-    XrlCmdError add(uint32_t tid, const FibConfigTransactionManager::Operation& op);
-
-    /**
      * Get the FibConfig entry.
      * 
      * @return a reference to the corresponding FibConfig entry.
      * @see FibConfig.
      */
-    FibConfig& fibconfig() { return _ftm.fibconfig(); }
+    FibConfig& fibconfig() { return _fibconfig; }
 
     /**
      * Process a list of IPv4 FIB route changes.
@@ -222,8 +185,7 @@ public:
 				     const Fte6& fte);
 
 protected:
-    FibConfigTransactionManager	_ftm;
-    uint32_t		   _max_ops;	// Maximum operations in a transaction
+    FibConfig&		_fibconfig;
 
 private:
 

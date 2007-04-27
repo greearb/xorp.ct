@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.12 2007/04/27 21:11:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.13 2007/04/27 21:47:26 pavlin Exp $"
 
 
 //
@@ -61,7 +61,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _eventloop(eventloop),
       _fea_node(fea_node),
       _xrl_router(xrl_router),
-      _xftm(eventloop, fea_node.fibconfig(), &xrl_router),
+      _xftm(fea_node.fibconfig(), &xrl_router),
       _profile(profile),
       _xrsm4(xrsm4),
       _xrsm6(xrsm6),
@@ -118,8 +118,8 @@ XrlFeaTarget::fibconfig()
 
 XrlCmdError
 XrlFeaTarget::common_0_1_get_target_name(
-					 // Output values,
-					 string&	name)
+    // Output values,
+    string&	name)
 {
     name = "fea";
     return XrlCmdError::OKAY();
@@ -127,8 +127,8 @@ XrlFeaTarget::common_0_1_get_target_name(
 
 XrlCmdError
 XrlFeaTarget::common_0_1_get_version(
-				     // Output values,
-				     string&   version)
+    // Output values,
+    string&   version)
 {
     version = "0.1";
     return XrlCmdError::OKAY();
@@ -136,9 +136,9 @@ XrlFeaTarget::common_0_1_get_version(
 
 XrlCmdError
 XrlFeaTarget::common_0_1_get_status(
-				    // Output values,
-				    uint32_t& status,
-				    string&	reason)
+    // Output values,
+    uint32_t&	status,
+    string&	reason)
 {
     ProcessStatus s;
     string r;
@@ -584,8 +584,8 @@ XrlFeaTarget::ifmgr_0_1_set_restore_original_config_on_shutdown(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_interface_names(
-						       // Output values,
-						       XrlAtomList&	ifnames)
+    // Output values,
+    XrlAtomList&	ifnames)
 {
     const IfTree& iftree = ifconfig().local_config();
 
@@ -599,9 +599,9 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_names(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
-						 const string& ifname,
-						 // Output values,
-						 XrlAtomList&  vifnames)
+    const string& ifname,
+    // Output values,
+    XrlAtomList&  vifnames)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;
@@ -676,10 +676,10 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
-					      // Input values,
-					      const string&	ifname,
-					      // Output values,
-					      bool&		enabled)
+    // Input values,
+    const string&	ifname,
+    // Output values,
+    bool&		enabled)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;
@@ -697,10 +697,10 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_interface_discard(
-					      // Input values,
-					      const string&	ifname,
-					      // Output values,
-					      bool&		discard)
+    // Input values,
+    const string&	ifname,
+    // Output values,
+    bool&		discard)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;
@@ -718,9 +718,9 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_discard(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_mac(
-				// Input values,
-				const string& ifname,
-				Mac&	    mac)
+    // Input values,
+    const string& ifname,
+    Mac&	    mac)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;
@@ -738,9 +738,9 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mac(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
-				// Input values,
-				const string&	ifname,
-				uint32_t&	mtu)
+    // Input values,
+    const string&	ifname,
+    uint32_t&	mtu)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;
@@ -758,9 +758,9 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_no_carrier(
-				// Input values,
-				const string&	ifname,
-				bool&		no_carrier)
+    // Input values,
+    const string&	ifname,
+    bool&		no_carrier)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;
@@ -778,11 +778,11 @@ XrlFeaTarget::ifmgr_0_1_get_configured_no_carrier(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
-					// Input values,
-					const string& ifname,
-					const string& vifname,
-					// Output values,
-					bool&	    enabled)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    // Output values,
+    bool&		enabled)
 {
     const IfTreeVif* vifp = NULL;
     string error_msg;
@@ -801,12 +801,12 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
-				    // Input values,
-				    const string&	ifname,
-				    const string&	vifname,
-				    const IPv4&		address,
-				    // Output values,
-				    uint32_t&		prefix_len)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    // Output values,
+    uint32_t&		prefix_len)
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
@@ -829,12 +829,12 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
-				       // Input values,
-				       const string&	ifname,
-				       const string&	vifname,
-				       const IPv4&	address,
-				       // Output values,
-				       IPv4&		broadcast)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    // Output values,
+    IPv4&		broadcast)
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
@@ -864,12 +864,12 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
-				      // Input values,
-				      const string&	ifname,
-				      const string&	vifname,
-				      const IPv4&	address,
-				      // Output values,
-				      IPv4&		endpoint)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    // Output values,
+    IPv4&		endpoint)
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
@@ -900,11 +900,11 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
-						      // Input values,
-						      const string&	ifname,
-						      const string&	vifname,
-						      // Output values,
-						      XrlAtomList&	addresses)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    // Output values,
+    XrlAtomList&	addresses)
 {
     const IfTreeVif* vifp = NULL;
     string error_msg;
@@ -929,12 +929,12 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
-				    // Input values,
-				    const string&	ifname,
-				    const string&	vifname,
-				    const IPv6&		address,
-				    // Output values,
-				    uint32_t&		prefix_len)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    // Output values,
+    uint32_t&		prefix_len)
 {
     const IfTreeAddr6* ap = NULL;
     string error_msg;
@@ -957,12 +957,12 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
-				      // Input values,
-				      const string&	ifname,
-				      const string&	vifname,
-				      const IPv6&	address,
-				      // Output values,
-				      IPv6&		endpoint)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    // Output values,
+    IPv6&		endpoint)
 {
     const IfTreeAddr6* ap = NULL;
     string error_msg;
@@ -993,11 +993,11 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
-						      // Input values,
-						      const string&	ifname,
-						      const string&	vifname,
-						      // Output values,
-						      XrlAtomList&	addresses)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    // Output values,
+    XrlAtomList&	addresses)
 {
     const IfTreeVif* vifp = NULL;
     string error_msg;
@@ -1022,16 +1022,16 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
-				       // Input values
-				       const string& ifname,
-				       const string& vifname,
-				       const IPv4&   address,
-				       // Output values
-				       bool& up,
-				       bool& broadcast,
-				       bool& loopback,
-				       bool& point_to_point,
-				       bool& multicast)
+    // Input values
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    // Output values
+    bool&		up,
+    bool&		broadcast,
+    bool&		loopback,
+    bool&		point_to_point,
+    bool&		multicast)
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
@@ -1058,15 +1058,15 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
-				       // Input values
-				       const string& ifname,
-				       const string& vifname,
-				       const IPv6&   address,
-				       // Output values
-				       bool& up,
-				       bool& loopback,
-				       bool& point_to_point,
-				       bool& multicast)
+    // Input values
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    // Output values
+    bool&		up,
+    bool&		loopback,
+    bool&		point_to_point,
+    bool&		multicast)
 {
     const IfTreeAddr6* ap = NULL;
     string error_msg;
@@ -1092,11 +1092,11 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
-					     // Input values,
-					     const string&	ifname,
-					     const string&	vifname,
-					     const IPv4&	address,
-					     bool&		enabled)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    bool&		enabled)
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
@@ -1119,11 +1119,11 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
-					     // Input values,
-					     const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	address,
-					     bool&		enabled)
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    bool&		enabled)
 {
     const IfTreeAddr6* ap = NULL;
     string error_msg;
@@ -1146,8 +1146,8 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_start_transaction(
-					  // Output values,
-					  uint32_t& tid)
+    // Output values,
+    uint32_t&	tid)
 {
     string error_msg;
 
@@ -1159,8 +1159,8 @@ XrlFeaTarget::ifmgr_0_1_start_transaction(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_commit_transaction(
-					   // Input values,
-					   const uint32_t& tid)
+    // Input values,
+    const uint32_t&	tid)
 {
     string error_msg;
 
@@ -1172,8 +1172,8 @@ XrlFeaTarget::ifmgr_0_1_commit_transaction(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_abort_transaction(
-					  // Input values,
-					  const uint32_t& tid)
+    // Input values,
+    const uint32_t&	tid)
 {
     string error_msg;
 
@@ -1185,9 +1185,9 @@ XrlFeaTarget::ifmgr_0_1_abort_transaction(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_create_interface(
-					 // Input values,
-					 const uint32_t&	tid,
-					 const string&		ifname)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1205,9 +1205,9 @@ XrlFeaTarget::ifmgr_0_1_create_interface(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_delete_interface(
-					 // Input values,
-					 const uint32_t&	tid,
-					 const string&		ifname)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1245,10 +1245,10 @@ XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
-					      // Input values,
-					      const uint32_t&	tid,
-					      const string&	ifname,
-					      const bool&	enabled)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const bool&		enabled)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1266,10 +1266,10 @@ XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_interface_discard(
-					      // Input values,
-					      const uint32_t&	tid,
-					      const string&	ifname,
-					      const bool&	discard)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const bool&		discard)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1287,10 +1287,10 @@ XrlFeaTarget::ifmgr_0_1_set_interface_discard(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_mac(
-				// Input values,
-				const uint32_t&	tid,
-				const string&	ifname,
-				const Mac&	mac)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const Mac&		mac)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1338,10 +1338,10 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_mtu(
-				// Input values,
-				const uint32_t&	tid,
-				const string&	ifname,
-				const uint32_t&	mtu)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const uint32_t&	mtu)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1389,10 +1389,10 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_create_vif(
-				   // Input values,
-				   const uint32_t&	tid,
-				   const string&	ifname,
-				   const string&	vifname)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1410,10 +1410,10 @@ XrlFeaTarget::ifmgr_0_1_create_vif(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_delete_vif(
-				   // Input values,
-				   const uint32_t&	tid,
-				   const string&	ifname,
-				   const string&	vifname)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1431,11 +1431,11 @@ XrlFeaTarget::ifmgr_0_1_delete_vif(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
-					// Input values,
-					const uint32_t&	tid,
-					const string&	ifname,
-					const string&	vifname,
-					const bool&	enabled)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const bool&		enabled)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1453,11 +1453,11 @@ XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_create_address4(
-					// Input values,
-					const uint32_t& tid,
-					const string&   ifname,
-					const string&   vifname,
-					const IPv4&	address)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1478,11 +1478,11 @@ XrlFeaTarget::ifmgr_0_1_create_address4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_delete_address4(
-					// Input values,
-					const uint32_t& tid,
-					const string&   ifname,
-					const string&   vifname,
-					const IPv4&     address)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1503,12 +1503,12 @@ XrlFeaTarget::ifmgr_0_1_delete_address4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
-					// Input values,
-					const uint32_t&	tid,
-					const string&	ifname,
-					const string&	vifname,
-					const IPv4&	address,
-					const bool&	enabled)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    const bool&		enabled)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1529,12 +1529,12 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_prefix4(
-				    // Input values,
-				    const uint32_t&	tid,
-				    const string&	ifname,
-				    const string&	vifname,
-				    const IPv4&		address,
-				    const uint32_t&	prefix_len)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    const uint32_t&	prefix_len)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1555,12 +1555,12 @@ XrlFeaTarget::ifmgr_0_1_set_prefix4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_broadcast4(
-				       // Input values,
-				       const uint32_t&	tid,
-				       const string&	ifname,
-				       const string&	vifname,
-				       const IPv4&	address,
-				       const IPv4&	broadcast)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    const IPv4&		broadcast)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1581,12 +1581,12 @@ XrlFeaTarget::ifmgr_0_1_set_broadcast4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_endpoint4(
-				      // Input values,
-				      const uint32_t&	tid,
-				      const string&	ifname,
-				      const string&	vifname,
-				      const IPv4&	address,
-				      const IPv4&	endpoint)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		address,
+    const IPv4&		endpoint)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1607,11 +1607,11 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint4(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_create_address6(
-					// Input values,
-					const uint32_t&	tid,
-					const string&	ifname,
-					const string&	vifname,
-					const IPv6&	address)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1632,11 +1632,11 @@ XrlFeaTarget::ifmgr_0_1_create_address6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_delete_address6(
-					// Input values,
-					const uint32_t&	tid,
-					const string&	ifname,
-					const string&	vifname,
-					const IPv6&	address)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1657,12 +1657,12 @@ XrlFeaTarget::ifmgr_0_1_delete_address6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
-					     // Input values,
-					     const uint32_t&	tid,
-					     const string&	ifname,
-					     const string&	vifname,
-					     const IPv6&	address,
-					     const bool&	enabled)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    const bool&		enabled)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1683,12 +1683,12 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_prefix6(
-				    // Input values,
-				    const uint32_t&	tid,
-				    const string&	ifname,
-				    const string&	vifname,
-				    const IPv6&	  	address,
-				    const uint32_t&	prefix_len)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&	  	address,
+    const uint32_t&	prefix_len)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1709,12 +1709,12 @@ XrlFeaTarget::ifmgr_0_1_set_prefix6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_endpoint6(
-				      // Input values,
-				      const uint32_t&	tid,
-				      const string&	ifname,
-				      const string&	vifname,
-				      const IPv6&	address,
-				      const IPv6&	endpoint)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6&		address,
+    const IPv6&		endpoint)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
@@ -1756,20 +1756,20 @@ XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
 }
 
 // ----------------------------------------------------------------------------
-// FTI Related
+// FIB Related
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
-	// Input values,
-	const IPv4&	dst,
-	// Output values,
-	IPv4Net&	netmask,
-	IPv4&		nexthop,
-	string&		ifname,
-	string&		vifname,
-	uint32_t&	metric,
-	uint32_t&	admin_distance,
-	string&		protocol_origin)
+    // Input values,
+    const IPv4&		dst,
+    // Output values,
+    IPv4Net&		netmask,
+    IPv4&		nexthop,
+    string&		ifname,
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -1791,16 +1791,16 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
-	// Input values,
-	const IPv6&	dst,
-	// Output values,
-	IPv6Net&	netmask,
-	IPv6&		nexthop,
-	string&		ifname,
-	string&		vifname,
-	uint32_t&	metric,
-	uint32_t&	admin_distance,
-	string&		protocol_origin)
+    // Input values,
+    const IPv6&		dst,
+    // Output values,
+    IPv6Net&		netmask,
+    IPv6&		nexthop,
+    string&		ifname,
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
@@ -1822,15 +1822,15 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_lookup_route_by_network4(
-	// Input values,
-	const IPv4Net&	dst,
-	// Output values,
-	IPv4&		nexthop,
-	string&		ifname,
-	string&		vifname,
-	uint32_t&	metric,
-	uint32_t&	admin_distance,
-	string&		protocol_origin)
+    // Input values,
+    const IPv4Net&	dst,
+    // Output values,
+    IPv4&		nexthop,
+    string&		ifname,
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -1851,15 +1851,15 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network4(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_lookup_route_by_network6(
-	// Input values,
-	const IPv6Net&	dst,
-	// Output values,
-	IPv6&		nexthop,
-	string&		ifname,
-	string&		vifname,
-	uint32_t&	metric,
-	uint32_t&	admin_distance,
-	string&		protocol_origin)
+    // Input values,
+    const IPv6Net&	dst,
+    // Output values,
+    IPv6&		nexthop,
+    string&		ifname,
+    string&		vifname,
+    uint32_t&		metric,
+    uint32_t&		admin_distance,
+    string&		protocol_origin)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
@@ -1880,8 +1880,8 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network6(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_have_ipv4(
-	// Output values,
-	bool&	result)
+    // Output values,
+    bool&	result)
 {
     result = fibconfig().have_ipv4();
 
@@ -1890,8 +1890,8 @@ XrlFeaTarget::fti_0_2_have_ipv4(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_have_ipv6(
-	// Output values,
-	bool&	result)
+    // Output values,
+    bool&	result)
 {
     result = fibconfig().have_ipv6();
 
@@ -1900,8 +1900,8 @@ XrlFeaTarget::fti_0_2_have_ipv6(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
-	// Output values,
-	bool&	enabled)
+    // Output values,
+    bool&	enabled)
 {
     string error_msg;
 
@@ -1913,8 +1913,8 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
-	// Output values,
-	bool&	enabled)
+    // Output values,
+    bool&	enabled)
 {
     string error_msg;
 
@@ -1926,8 +1926,8 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
-	// Input values,
-	const bool&	enabled)
+    // Input values,
+    const bool&	enabled)
 {
     string error_msg;
 
@@ -1939,8 +1939,8 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
 
 XrlCmdError
 XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
-	// Input values,
-	const bool&	enabled)
+    // Input values,
+    const bool&	enabled)
 {
     string error_msg;
 
@@ -2027,7 +2027,12 @@ XrlFeaTarget::redist_transaction4_0_1_start_transaction(
     // Output values,
     uint32_t&	tid)
 {
-    return _xftm.start_transaction(tid);
+    string error_msg;
+
+    if (fibconfig().start_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2035,7 +2040,12 @@ XrlFeaTarget::redist_transaction4_0_1_commit_transaction(
     // Input values,
     const uint32_t&	tid)
 {
-    return _xftm.commit_transaction(tid);
+    string error_msg;
+
+    if (fibconfig().commit_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2043,7 +2053,12 @@ XrlFeaTarget::redist_transaction4_0_1_abort_transaction(
     // Input values,
     const uint32_t&	tid)
 {
-    return _xftm.abort_transaction(tid);
+    string error_msg;
+
+    if (fibconfig().abort_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2061,6 +2076,7 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 {
     bool is_xorp_route;
     bool is_connected_route = false;
+    string error_msg;
 
     debug_msg("redist_transaction4_0_1_add_route(): "
 	      "dst = %s nexthop = %s ifname = %s vifname = %s "
@@ -2087,13 +2103,17 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
 
-    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-    FibConfigTransactionManager::Operation op(
-	new FtiAddEntry4(fibconfig(), dst, nexthop, ifname, vifname, metric,
-			 admin_distance, is_xorp_route, is_connected_route)
-	);
-    return _xftm.add(tid, op);
+    if (fibconfig().add_transaction_operation(
+	    tid,
+	    new FibAddEntry4(fibconfig(), dst, nexthop, ifname, vifname,
+			     metric, admin_distance, is_xorp_route,
+			     is_connected_route),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2111,6 +2131,7 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 {
     bool is_xorp_route;
     bool is_connected_route = false;
+    string error_msg;
 
     debug_msg("redist_transaction4_0_1_delete_route(): "
 	      "dst = %s nexthop = %s ifname = %s vifname = %s "
@@ -2138,34 +2159,41 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 	_profile.log(profile_route_in,
 		     c_format("delete %s", dst.str().c_str()));
 
-    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-    FibConfigTransactionManager::Operation op(
-	new FtiDeleteEntry4(fibconfig(), dst, nexthop, ifname, vifname,
-			    metric, admin_distance, is_xorp_route,
-			    is_connected_route)
-	);
-    return _xftm.add(tid, op);
+    if (fibconfig().add_transaction_operation(
+	    tid,
+	    new FibDeleteEntry4(fibconfig(), dst, nexthop, ifname, vifname,
+				metric, admin_distance, is_xorp_route,
+				is_connected_route),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
-	// Input values,
-	const uint32_t&	tid,
-	const string&	cookie)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	cookie)
 {
+    string error_msg;
+
     UNUSED(cookie);
 
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
+    if (fibconfig().add_transaction_operation(
+	    tid,
+	    new FibDeleteAllEntries4(fibconfig()),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
-    FibConfigTransactionManager::Operation op(
-	new FtiDeleteAllEntries4(fibconfig())
-	);
-    return _xftm.add(tid, op);
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2173,7 +2201,12 @@ XrlFeaTarget::redist_transaction6_0_1_start_transaction(
     // Output values,
     uint32_t&	tid)
 {
-    return _xftm.start_transaction(tid);
+    string error_msg;
+
+    if (fibconfig().start_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2181,7 +2214,12 @@ XrlFeaTarget::redist_transaction6_0_1_commit_transaction(
     // Input values,
     const uint32_t&	tid)
 {
-    return _xftm.commit_transaction(tid);
+    string error_msg;
+
+    if (fibconfig().commit_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2189,7 +2227,12 @@ XrlFeaTarget::redist_transaction6_0_1_abort_transaction(
     // Input values,
     const uint32_t&	tid)
 {
-    return _xftm.abort_transaction(tid);
+    string error_msg;
+
+    if (fibconfig().abort_transaction(tid, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2207,6 +2250,7 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 {
     bool is_xorp_route;
     bool is_connected_route = false;
+    string error_msg;
 
     debug_msg("redist_transaction6_0_1_add_route(): "
 	      "dst = %s nexthop = %s ifname = %s vifname = %s "
@@ -2233,13 +2277,17 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
 
-    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-    FibConfigTransactionManager::Operation op(
-	new FtiAddEntry6(fibconfig(), dst, nexthop, ifname, vifname, metric,
-			 admin_distance, is_xorp_route, is_connected_route)
-	);
-    return _xftm.add(tid, op);
+    if (fibconfig().add_transaction_operation(
+	    tid,
+	    new FibAddEntry6(fibconfig(), dst, nexthop, ifname, vifname,
+			     metric, admin_distance, is_xorp_route,
+			     is_connected_route),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
@@ -2257,6 +2305,7 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
 {
     bool is_xorp_route;
     bool is_connected_route = false;
+    string error_msg;
 
     debug_msg("redist_transaction6_0_1_delete_route(): "
 	      "dst = %s nexthop = %s ifname = %s vifname = %s "
@@ -2284,35 +2333,41 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
 	_profile.log(profile_route_in,
 		     c_format("delete %s", dst.str().c_str()));
 
-    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
-    FibConfigTransactionManager::Operation op(
-	new FtiDeleteEntry6(fibconfig(), dst, nexthop, ifname, vifname,
-			    metric, admin_distance, is_xorp_route,
-			    is_connected_route)
-	);
-    return _xftm.add(tid, op);
+    if (fibconfig().add_transaction_operation(
+	    tid,
+	    new FibDeleteEntry6(fibconfig(), dst, nexthop, ifname, vifname,
+				metric, admin_distance, is_xorp_route,
+				is_connected_route),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
-	// Input values,
-	const uint32_t&	tid,
-	const string&	cookie)
+    // Input values,
+    const uint32_t&	tid,
+    const string&	cookie)
 {
+    string error_msg;
+
     UNUSED(cookie);
 
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
-    // memory here is handed it to to manage.
+    if (fibconfig().add_transaction_operation(
+	    tid,
+	    new FibDeleteAllEntries6(fibconfig()),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
-    FibConfigTransactionManager::Operation op(
-	new FtiDeleteAllEntries6(fibconfig())
-	);
-
-    return _xftm.add(tid, op);
+    return XrlCmdError::OKAY();
 }
 
 // ----------------------------------------------------------------------------

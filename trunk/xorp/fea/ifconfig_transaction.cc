@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_transaction.cc,v 1.1 2007/04/27 21:11:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_transaction.cc,v 1.2 2007/04/27 21:24:38 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,15 +21,6 @@
 #include "libxorp/debug.h"
 
 #include "ifconfig_transaction.hh"
-
-IfConfigTransactionManager::IfConfigTransactionManager(EventLoop& e,
-						       uint32_t timeout_ms,
-						       uint32_t max_pending)
-    : TransactionManager(e, timeout_ms, max_pending)
-{}
-
-IfConfigTransactionManager::~IfConfigTransactionManager()
-{}
 
 void
 IfConfigTransactionManager::pre_commit(uint32_t tid)

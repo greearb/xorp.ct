@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.23 2007/04/27 01:10:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.24 2007/04/27 21:47:26 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,65 +22,6 @@
 
 #include "xrl_fti.hh"
 
-
-static const char* FTI_MAX_OPS_HIT =
-"Resource limit on number of operations in a transaction hit.";
-
-static const char* FTI_MAX_TRANSACTIONS_HIT =
-"Resource limit on number of pending transactions hit.";
-
-static const char* FTI_BAD_ID =
-"Expired or invalid transaction id presented.";
-
-XrlCmdError
-XrlFtiTransactionManager::start_transaction(uint32_t& tid)
-{
-    if (_ftm.start(tid))
-	return XrlCmdError::OKAY();
-    return XrlCmdError::COMMAND_FAILED(FTI_MAX_TRANSACTIONS_HIT);
-}
-
-XrlCmdError
-XrlFtiTransactionManager::commit_transaction(uint32_t tid)
-{
-    if (_ftm.commit(tid)) {
-	const string& error_msg = _ftm.error();
-	if (error_msg.empty())
-	    return XrlCmdError::OKAY();
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    return XrlCmdError::COMMAND_FAILED(FTI_BAD_ID);
-}
-
-XrlCmdError
-XrlFtiTransactionManager::abort_transaction(uint32_t tid)
-{
-    if (_ftm.abort(tid))
-	return XrlCmdError::OKAY();
-    return XrlCmdError::COMMAND_FAILED(FTI_BAD_ID);
-}
-
-XrlCmdError
-XrlFtiTransactionManager::add(uint32_t tid,
-			      const FibConfigTransactionManager::Operation& op)
-{
-    uint32_t n_ops;
-
-    if (_ftm.retrieve_size(tid, n_ops) == false)
-	return XrlCmdError::COMMAND_FAILED(FTI_BAD_ID);
-
-    if (_max_ops <= n_ops)
-	return XrlCmdError::COMMAND_FAILED(FTI_MAX_OPS_HIT);
-
-    if (_ftm.add(tid, op))
-	return XrlCmdError::OKAY();
-
-    //
-    // In theory, resource shortage is the only thing that could get us
-    // here.
-    //
-    return XrlCmdError::COMMAND_FAILED("Unknown resource shortage");
-}
 
 /**
  * Process a list of IPv4 FIB route changes.

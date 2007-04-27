@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.1 2007/04/26 22:29:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.2 2007/04/27 01:10:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -46,6 +46,7 @@
 
 #include "profile_vars.hh"
 #include "fibconfig.hh"
+#include "fibconfig_transaction.hh"
 
 #ifdef HOST_OS_WINDOWS
 #include "libxorp/win_io.h"
@@ -77,6 +78,7 @@ FibConfig::FibConfig(EventLoop& eventloop, Profile& profile,
       _profile(profile),
       _nexthop_port_mapper(nexthop_port_mapper),
       _iftree(iftree),
+      _ftm(NULL),
       _fibconfig_entry_get_primary(NULL),
       _fibconfig_entry_set_primary(NULL),
       _fibconfig_entry_observer_primary(NULL),
@@ -129,6 +131,8 @@ FibConfig::FibConfig(EventLoop& eventloop, Profile& profile,
       _is_running(false)
 {
     string error_msg;
+
+    _ftm = new FibConfigTransactionManager(_eventloop, *this);
 
     //
     // Check that all necessary mechanisms to interact with the
@@ -213,6 +217,88 @@ FibConfig::~FibConfig()
     }
     CloseHandle(_event);
 #endif
+
+    if (_ftm != NULL) {
+	delete _ftm;
+	_ftm = NULL;
+    }
+}
+
+ProcessStatus
+FibConfig::status(string& reason) const
+{
+    if (_ftm->pending() > 0) {
+	reason = "There are transactions pending";
+	return (PROC_NOT_READY);
+    }
+    return (PROC_READY);
+}
+
+int
+FibConfig::start_transaction(uint32_t& tid, string& error_msg)
+{
+    if (_ftm->start(tid) != true) {
+	error_msg = c_format("Resource limit on number of pending transactions hit");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::abort_transaction(uint32_t tid, string& error_msg)
+{
+    if (_ftm->abort(tid) != true) {
+	error_msg = c_format("Expired or invalid transaction ID presented");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::add_transaction_operation(uint32_t tid,
+				     const TransactionManager::Operation& op,
+				     string& error_msg)
+{
+    uint32_t n_ops = 0;
+
+    if (_ftm->retrieve_size(tid, n_ops) != true) {
+	error_msg = c_format("Expired or invalid transaction ID presented");
+	return (XORP_ERROR);
+    }
+
+    if (_ftm->max_ops() <= n_ops) {
+	error_msg = c_format("Resource limit on number of operations in a transaction hit");
+	return (XORP_ERROR);
+    }
+
+    //
+    // In theory, resource shortage is the only thing that could get us here
+    //
+    if (_ftm->add(tid, op) != true) {
+	error_msg = c_format("Unknown resource shortage");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::commit_transaction(uint32_t tid, string& error_msg)
+{
+    if (_ftm->commit(tid) != true) {
+	error_msg = c_format("Expired or invalid transaction ID presented");
+	return (XORP_ERROR);
+    }
+
+    const string& ftm_error_msg = _ftm->error();
+    if (! ftm_error_msg.empty()) {
+	error_msg = ftm_error_msg;
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
 }
 
 int

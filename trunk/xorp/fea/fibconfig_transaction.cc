@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.1 2007/04/27 21:11:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.2 2007/04/27 21:47:26 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -75,7 +75,7 @@ FibConfigTransactionManager::operation_result(bool success,
 	//
 	// Getting here is programmer error.
 	//
-	XLOG_ERROR("FTI transaction commit error, \"%s\" is not an FTI "
+	XLOG_ERROR("FIB transaction commit error, \"%s\" is not an FIB "
 		   "TransactionOperation",
 		   op.str().c_str());
 	return;
@@ -85,7 +85,7 @@ FibConfigTransactionManager::operation_result(bool success,
     // Record error and xlog first error only
     //
     if (set_unset_error(fto->str())) {
-	XLOG_ERROR("FTI transaction commit failed on %s",
+	XLOG_ERROR("FIB transaction commit failed on %s",
 		   fto->str().c_str());
     }
 }
