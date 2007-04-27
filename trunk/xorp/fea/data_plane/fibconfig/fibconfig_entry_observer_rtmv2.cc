@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,21 +35,21 @@
 //
 
 
-FtiConfigEntryObserverRtmV2::FtiConfigEntryObserverRtmV2(FtiConfig& ftic)
-    : FtiConfigEntryObserver(ftic)
+FibConfigEntryObserverRtmV2::FibConfigEntryObserverRtmV2(FibConfig& fibconfig)
+    : FibConfigEntryObserver(fibconfig)
 #if 0
-      WinRtmPipe(ftic.eventloop()),
+      WinRtmPipe(fibconfig.eventloop()),
       WinRtmPipeObserver(*(WinRtmPipe *)this)
 #endif
 {
 #if 0
 #ifdef HOST_OS_WINDOWS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 #endif
 }
 
-FtiConfigEntryObserverRtmV2::~FtiConfigEntryObserverRtmV2()
+FibConfigEntryObserverRtmV2::~FibConfigEntryObserverRtmV2()
 {
     string error_msg;
 
@@ -62,7 +62,7 @@ FtiConfigEntryObserverRtmV2::~FtiConfigEntryObserverRtmV2()
 }
 
 int
-FtiConfigEntryObserverRtmV2::start(string& error_msg)
+FibConfigEntryObserverRtmV2::start(string& error_msg)
 {
 #if 0
     if (_is_running)
@@ -78,7 +78,7 @@ FtiConfigEntryObserverRtmV2::start(string& error_msg)
 }
 
 int
-FtiConfigEntryObserverRtmV2::stop(string& error_msg)
+FibConfigEntryObserverRtmV2::stop(string& error_msg)
 {
 #if 0
     if (! _is_running)
@@ -96,14 +96,14 @@ FtiConfigEntryObserverRtmV2::stop(string& error_msg)
 
 #if 0
 void
-FtiConfigEntryObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FtiConfigEntryObserverRtmV2::rtsock_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRtmV2::rtsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

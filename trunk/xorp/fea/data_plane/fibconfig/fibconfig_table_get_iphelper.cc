@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -46,15 +46,15 @@
 //
 
 
-FtiConfigTableGetIPHelper::FtiConfigTableGetIPHelper(FtiConfig& ftic)
-    : FtiConfigTableGet(ftic)
+FibConfigTableGetIPHelper::FibConfigTableGetIPHelper(FibConfig& fibconfig)
+    : FibConfigTableGet(fibconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableGetIPHelper::~FtiConfigTableGetIPHelper()
+FibConfigTableGetIPHelper::~FibConfigTableGetIPHelper()
 {
     string error_msg;
 
@@ -67,7 +67,7 @@ FtiConfigTableGetIPHelper::~FtiConfigTableGetIPHelper()
 }
 
 int
-FtiConfigTableGetIPHelper::start(string& error_msg)
+FibConfigTableGetIPHelper::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -80,7 +80,7 @@ FtiConfigTableGetIPHelper::start(string& error_msg)
 }
 
 int
-FtiConfigTableGetIPHelper::stop(string& error_msg)
+FibConfigTableGetIPHelper::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -93,7 +93,7 @@ FtiConfigTableGetIPHelper::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableGetIPHelper::get_table4(list<Fte4>& fte_list)
+FibConfigTableGetIPHelper::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
     
@@ -112,7 +112,7 @@ FtiConfigTableGetIPHelper::get_table4(list<Fte4>& fte_list)
 }
 
 bool
-FtiConfigTableGetIPHelper::get_table6(list<Fte6>& fte_list)
+FibConfigTableGetIPHelper::get_table6(list<Fte6>& fte_list)
 {
     UNUSED(fte_list);
     return false;
@@ -121,7 +121,7 @@ FtiConfigTableGetIPHelper::get_table6(list<Fte6>& fte_list)
 #ifndef HOST_OS_WINDOWS
 
 bool
-FtiConfigTableGetIPHelper::get_table(int , list<FteX>& )
+FibConfigTableGetIPHelper::get_table(int , list<FteX>& )
 {
     return false;
 }
@@ -129,12 +129,12 @@ FtiConfigTableGetIPHelper::get_table(int , list<FteX>& )
 #else // HOST_OS_WINDOWS
 
 bool
-FtiConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
+FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 {
     // Check that the family is supported
     switch(family) {
     case AF_INET:
-	if (! ftic().have_ipv4())
+	if (! fibconfig().have_ipv4())
 	    return false;
 	break;
 #ifdef HAVE_IPV6
@@ -189,7 +189,7 @@ FtiConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 	    xorp_route = true;
 
 	uint32_t ifindex = static_cast<uint32_t>(pFwdRow->dwForwardIfIndex);
-	const IfTree& iftree = ftic().iftree();
+	const IfTree& iftree = fibconfig().iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(ifindex);
 
 	string if_name;

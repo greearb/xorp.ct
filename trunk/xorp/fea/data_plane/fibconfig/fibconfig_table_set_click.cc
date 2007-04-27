@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_click.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_click.cc,v 1.2 2007/04/26 22:29:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,14 +32,14 @@
 //
 
 
-FtiConfigTableSetClick::FtiConfigTableSetClick(FtiConfig& ftic)
-    : FtiConfigTableSet(ftic),
-      ClickSocket(ftic.eventloop()),
+FibConfigTableSetClick::FibConfigTableSetClick(FibConfig& fibconfig)
+    : FibConfigTableSet(fibconfig),
+      ClickSocket(fibconfig.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
 
-FtiConfigTableSetClick::~FtiConfigTableSetClick()
+FibConfigTableSetClick::~FibConfigTableSetClick()
 {
     string error_msg;
 
@@ -52,7 +52,7 @@ FtiConfigTableSetClick::~FtiConfigTableSetClick()
 }
 
 int
-FtiConfigTableSetClick::start(string& error_msg)
+FibConfigTableSetClick::start(string& error_msg)
 {
     if (! ClickSocket::is_enabled())
 	return (XORP_OK);
@@ -64,9 +64,9 @@ FtiConfigTableSetClick::start(string& error_msg)
 	return (XORP_ERROR);
 
     // Cleanup any leftover entries from previously run XORP instance
-    if (! ftic().unicast_forwarding_entries_retain_on_startup4())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_startup4())
 	delete_all_entries4();
-    if (! ftic().unicast_forwarding_entries_retain_on_startup6())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_startup6())
 	delete_all_entries6();
 
     _is_running = true;
@@ -77,15 +77,15 @@ FtiConfigTableSetClick::start(string& error_msg)
     // (if any).
     //
     if (ClickSocket::is_duplicate_routes_to_kernel_enabled())
-	register_ftic_secondary();
+	register_fibconfig_secondary();
     else
-	register_ftic_primary();
+	register_fibconfig_primary();
 
     return (XORP_OK);
 }
 
 int
-FtiConfigTableSetClick::stop(string& error_msg)
+FibConfigTableSetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
@@ -93,9 +93,9 @@ FtiConfigTableSetClick::stop(string& error_msg)
 	return (XORP_OK);
 
     // Delete the XORP entries
-    if (! ftic().unicast_forwarding_entries_retain_on_shutdown4())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown4())
 	delete_all_entries4();
-    if (! ftic().unicast_forwarding_entries_retain_on_shutdown6())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown6())
 	delete_all_entries6();
 
     ret_value = ClickSocket::stop(error_msg);
@@ -106,66 +106,66 @@ FtiConfigTableSetClick::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableSetClick::set_table4(const list<Fte4>& fte_list)
+FibConfigTableSetClick::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
 
     // Add the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte4& fte = *iter;
-	ftic().add_entry4(fte);
+	fibconfig().add_entry4(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetClick::delete_all_entries4()
+FibConfigTableSetClick::delete_all_entries4()
 {
     list<Fte4> fte_list;
     list<Fte4>::const_iterator iter;
     
     // Get the list of all entries
-    ftic().get_table4(fte_list);
+    fibconfig().get_table4(fte_list);
     
     // Delete the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte4& fte = *iter;
 	if (fte.xorp_route())
-	    ftic().delete_entry4(fte);
+	    fibconfig().delete_entry4(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetClick::set_table6(const list<Fte6>& fte_list)
+FibConfigTableSetClick::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
     
     // Add the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte6& fte = *iter;
-	ftic().add_entry6(fte);
+	fibconfig().add_entry6(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetClick::delete_all_entries6()
+FibConfigTableSetClick::delete_all_entries6()
 {
     list<Fte6> fte_list;
     list<Fte6>::const_iterator iter;
     
     // Get the list of all entries
-    ftic().get_table6(fte_list);
+    fibconfig().get_table6(fte_list);
     
     // Delete the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte6& fte = *iter;
 	if (fte.xorp_route())
-	    ftic().delete_entry6(fte);
+	    fibconfig().delete_entry6(fte);
     }
     
     return true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.20 2007/02/16 22:45:40 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
 #define __FEA_FIBCONFIG_TABLE_SET_HH__
@@ -27,18 +27,18 @@
 #include "routing_socket.hh"
 
 
-class FtiConfig;
+class FibConfig;
 
-class FtiConfigTableSet {
+class FibConfigTableSet {
 public:
-    FtiConfigTableSet(FtiConfig& ftic);
+    FibConfigTableSet(FibConfig& fibconfig);
     
-    virtual ~FtiConfigTableSet();
+    virtual ~FibConfigTableSet();
     
-    FtiConfig&	ftic() { return _ftic; }
+    FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_ftic_primary();
-    virtual void register_ftic_secondary();
+    virtual void register_fibconfig_primary();
+    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -62,7 +62,7 @@ public:
     virtual int stop(string& error_msg) = 0;
     
     /**
-     * Start a configuration interval. All modifications to FtiConfig
+     * Start a configuration interval. All modifications to FibConfig
      * state must be within a marked "configuration" interval.
      *
      * This method provides derived classes with a mechanism to perform
@@ -167,15 +167,15 @@ protected:
     bool	_is_running;
 
 private:
-    FtiConfig&	_ftic;
+    FibConfig&	_fibconfig;
     bool	_in_configuration;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FtiConfigTableSetDummy : public FtiConfigTableSet {
+class FibConfigTableSetDummy : public FibConfigTableSet {
 public:
-    FtiConfigTableSetDummy(FtiConfig& ftic);
-    virtual ~FtiConfigTableSetDummy();
+    FibConfigTableSetDummy(FibConfig& fibconfig);
+    virtual ~FibConfigTableSetDummy();
 
     /**
      * Start operation.
@@ -233,10 +233,10 @@ private:
     
 };
 
-class FtiConfigTableSetRtsock : public FtiConfigTableSet {
+class FibConfigTableSetRtsock : public FibConfigTableSet {
 public:
-    FtiConfigTableSetRtsock(FtiConfig& ftic);
-    virtual ~FtiConfigTableSetRtsock();
+    FibConfigTableSetRtsock(FibConfig& fibconfig);
+    virtual ~FibConfigTableSetRtsock();
 
     /**
      * Start operation.
@@ -294,10 +294,10 @@ private:
     
 };
 
-class FtiConfigTableSetNetlink : public FtiConfigTableSet {
+class FibConfigTableSetNetlink : public FibConfigTableSet {
 public:
-    FtiConfigTableSetNetlink(FtiConfig& ftic);
-    virtual ~FtiConfigTableSetNetlink();
+    FibConfigTableSetNetlink(FibConfig& fibconfig);
+    virtual ~FibConfigTableSetNetlink();
 
     /**
      * Start operation.
@@ -355,11 +355,11 @@ private:
     
 };
 
-class FtiConfigTableSetClick : public FtiConfigTableSet,
+class FibConfigTableSetClick : public FibConfigTableSet,
 			       public ClickSocket {
 public:
-    FtiConfigTableSetClick(FtiConfig& ftic);
-    virtual ~FtiConfigTableSetClick();
+    FibConfigTableSetClick(FibConfig& fibconfig);
+    virtual ~FibConfigTableSetClick();
 
     /**
      * Start operation.
@@ -417,10 +417,10 @@ private:
     ClickSocketReader	_cs_reader;
 };
 
-class FtiConfigTableSetIPHelper : public FtiConfigTableSet {
+class FibConfigTableSetIPHelper : public FibConfigTableSet {
 public:
-    FtiConfigTableSetIPHelper(FtiConfig& ftic);
-    virtual ~FtiConfigTableSetIPHelper();
+    FibConfigTableSetIPHelper(FibConfig& fibconfig);
+    virtual ~FibConfigTableSetIPHelper();
 
     /**
      * Start operation.
@@ -475,10 +475,10 @@ public:
     virtual bool delete_all_entries6();
 };
 
-class FtiConfigTableSetRtmV2 : public FtiConfigTableSet {
+class FibConfigTableSetRtmV2 : public FibConfigTableSet {
 public:
-    FtiConfigTableSetRtmV2(FtiConfig& ftic);
-    virtual ~FtiConfigTableSetRtmV2();
+    FibConfigTableSetRtmV2(FibConfig& fibconfig);
+    virtual ~FibConfigTableSetRtmV2();
 
     /**
      * Start operation.

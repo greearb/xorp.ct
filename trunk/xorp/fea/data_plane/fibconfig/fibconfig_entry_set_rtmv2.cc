@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -43,28 +43,28 @@
 //
 
 
-FtiConfigEntrySetRtmV2::FtiConfigEntrySetRtmV2(FtiConfig& ftic)
-    : FtiConfigEntrySet(ftic),
+FibConfigEntrySetRtmV2::FibConfigEntrySetRtmV2(FibConfig& fibconfig)
+    : FibConfigEntrySet(fibconfig),
       _rs4(NULL),
       _rs6(NULL)
 {
 #ifdef HOST_OS_WINDOWS
     if (!WinSupport::is_rras_running()) {
-	XLOG_WARNING("RRAS is not running; disabling FtiConfigEntrySetRtmV2.");
+	XLOG_WARNING("RRAS is not running; disabling FibConfigEntrySetRtmV2.");
         return;
     }
 
-    _rs4 = new WinRtmPipe(ftic.eventloop());
+    _rs4 = new WinRtmPipe(fibconfig.eventloop());
 
 #ifdef HAVE_IPV6
-    _rs6 = new WinRtmPipe(ftic.eventloop());
+    _rs6 = new WinRtmPipe(fibconfig.eventloop());
 #endif
 
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntrySetRtmV2::~FtiConfigEntrySetRtmV2()
+FibConfigEntrySetRtmV2::~FibConfigEntrySetRtmV2()
 {
     string error_msg;
 
@@ -83,7 +83,7 @@ FtiConfigEntrySetRtmV2::~FtiConfigEntrySetRtmV2()
 }
 
 int
-FtiConfigEntrySetRtmV2::start(string& error_msg)
+FibConfigEntrySetRtmV2::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -102,7 +102,7 @@ FtiConfigEntrySetRtmV2::start(string& error_msg)
 }
 
 int
-FtiConfigEntrySetRtmV2::stop(string& error_msg)
+FibConfigEntrySetRtmV2::stop(string& error_msg)
 {
     int result;
 
@@ -124,7 +124,7 @@ FtiConfigEntrySetRtmV2::stop(string& error_msg)
 }
 
 bool
-FtiConfigEntrySetRtmV2::add_entry4(const Fte4& fte)
+FibConfigEntrySetRtmV2::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -132,7 +132,7 @@ FtiConfigEntrySetRtmV2::add_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetRtmV2::delete_entry4(const Fte4& fte)
+FibConfigEntrySetRtmV2::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -140,7 +140,7 @@ FtiConfigEntrySetRtmV2::delete_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetRtmV2::add_entry6(const Fte6& fte)
+FibConfigEntrySetRtmV2::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -148,7 +148,7 @@ FtiConfigEntrySetRtmV2::add_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfigEntrySetRtmV2::delete_entry6(const Fte6& fte)
+FibConfigEntrySetRtmV2::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -157,13 +157,13 @@ FtiConfigEntrySetRtmV2::delete_entry6(const Fte6& fte)
 
 #ifndef HOST_OS_WINDOWS
 bool
-FtiConfigEntrySetRtmV2::add_entry(const FteX& )
+FibConfigEntrySetRtmV2::add_entry(const FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntrySetRtmV2::delete_entry(const FteX& )
+FibConfigEntrySetRtmV2::delete_entry(const FteX& )
 {
     return false;
 }
@@ -171,7 +171,7 @@ FtiConfigEntrySetRtmV2::delete_entry(const FteX& )
 #else // HOST_OS_WINDOWS
 
 bool
-FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
+FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr)
 	+ (sizeof(struct sockaddr_storage) * 3);
@@ -194,12 +194,12 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte_nexthop.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte_nexthop.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -224,7 +224,7 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = ftic().iftree();
+	const IfTree& iftree = fibconfig().iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -260,7 +260,7 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
     rtm->rtm_seq = ((family == AF_INET ? _rs4 : _rs6))->seqno();
 
     // Copy the interface index.
-    const IfTree& iftree = ftic().iftree();
+    const IfTree& iftree = fibconfig().iftree();
     const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
     XLOG_ASSERT(ifp != NULL);
     rtm->rtm_index = ifp->pif_index();
@@ -287,7 +287,7 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
 }
 
 bool
-FtiConfigEntrySetRtmV2::delete_entry(const FteX& fte)
+FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr)
 	+ (sizeof(struct sockaddr_storage) * 2);
@@ -308,12 +308,12 @@ FtiConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -346,7 +346,7 @@ FtiConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     rtm->rtm_seq = ((family == AF_INET ? _rs4 : _rs6))->seqno();
 
     // Copy the interface index.
-    const IfTree& iftree = ftic().iftree();
+    const IfTree& iftree = fibconfig().iftree();
     const& IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
     XLOG_ASSERT(ifp != NULL);
     rtm->rtm_index = ifp->pif_index();

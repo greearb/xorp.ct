@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc,v 1.2 2007/04/26 22:29:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,15 +31,15 @@
 //
 
 
-FtiConfigTableSetRtsock::FtiConfigTableSetRtsock(FtiConfig& ftic)
-    : FtiConfigTableSet(ftic)
+FibConfigTableSetRtsock::FibConfigTableSetRtsock(FibConfig& fibconfig)
+    : FibConfigTableSet(fibconfig)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableSetRtsock::~FtiConfigTableSetRtsock()
+FibConfigTableSetRtsock::~FibConfigTableSetRtsock()
 {
     string error_msg;
 
@@ -52,7 +52,7 @@ FtiConfigTableSetRtsock::~FtiConfigTableSetRtsock()
 }
 
 int
-FtiConfigTableSetRtsock::start(string& error_msg)
+FibConfigTableSetRtsock::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -60,13 +60,13 @@ FtiConfigTableSetRtsock::start(string& error_msg)
 	return (XORP_OK);
 
     // Cleanup any leftover entries from previously run XORP instance
-    if (! ftic().unicast_forwarding_entries_retain_on_startup4())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_startup4())
 	delete_all_entries4();
-    if (! ftic().unicast_forwarding_entries_retain_on_startup6())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_startup6())
 	delete_all_entries6();
 
     //
-    // XXX: This mechanism relies on the FtiConfigEntrySet mechanism
+    // XXX: This mechanism relies on the FibConfigEntrySet mechanism
     // to set the forwarding table, hence there is nothing else to do.
     //
 
@@ -76,7 +76,7 @@ FtiConfigTableSetRtsock::start(string& error_msg)
 }
 
 int
-FtiConfigTableSetRtsock::stop(string& error_msg)
+FibConfigTableSetRtsock::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -84,13 +84,13 @@ FtiConfigTableSetRtsock::stop(string& error_msg)
 	return (XORP_OK);
 
     // Delete the XORP entries
-    if (! ftic().unicast_forwarding_entries_retain_on_shutdown4())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown4())
 	delete_all_entries4();
-    if (! ftic().unicast_forwarding_entries_retain_on_shutdown6())
+    if (! fibconfig().unicast_forwarding_entries_retain_on_shutdown6())
 	delete_all_entries6();
 
     //
-    // XXX: This mechanism relies on the FtiConfigEntrySet mechanism
+    // XXX: This mechanism relies on the FibConfigEntrySet mechanism
     // to set the forwarding table, hence there is nothing else to do.
     //
 
@@ -100,66 +100,66 @@ FtiConfigTableSetRtsock::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableSetRtsock::set_table4(const list<Fte4>& fte_list)
+FibConfigTableSetRtsock::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
 
     // Add the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte4& fte = *iter;
-	ftic().add_entry4(fte);
+	fibconfig().add_entry4(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetRtsock::delete_all_entries4()
+FibConfigTableSetRtsock::delete_all_entries4()
 {
     list<Fte4> fte_list;
     list<Fte4>::const_iterator iter;
     
     // Get the list of all entries
-    ftic().get_table4(fte_list);
+    fibconfig().get_table4(fte_list);
     
     // Delete the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte4& fte = *iter;
 	if (fte.xorp_route())
-	    ftic().delete_entry4(fte);
+	    fibconfig().delete_entry4(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetRtsock::set_table6(const list<Fte6>& fte_list)
+FibConfigTableSetRtsock::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
     
     // Add the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte6& fte = *iter;
-	ftic().add_entry6(fte);
+	fibconfig().add_entry6(fte);
     }
     
     return true;
 }
     
 bool
-FtiConfigTableSetRtsock::delete_all_entries6()
+FibConfigTableSetRtsock::delete_all_entries6()
 {
     list<Fte6> fte_list;
     list<Fte6>::const_iterator iter;
     
     // Get the list of all entries
-    ftic().get_table6(fte_list);
+    fibconfig().get_table6(fte_list);
     
     // Delete the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte6& fte = *iter;
 	if (fte.xorp_route())
-	    ftic().delete_entry6(fte);
+	    fibconfig().delete_entry6(fte);
     }
     
     return true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.1 2007/04/18 06:20:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.2 2007/04/19 16:45:05 pavlin Exp $"
 
 
 //
@@ -40,9 +40,9 @@ FeaNode::FeaNode(EventLoop& eventloop)
       _ifconfig(eventloop, _ifconfig_update_replicator,
 		_ifconfig_error_reporter, _nexthop_port_mapper),
       _ifconfig_address_table(_ifconfig.local_config()),
-      _fticonfig(_eventloop, _profile,
+      _fibconfig(_eventloop, _profile,
 #ifdef HOST_OS_WINDOWS
-		 // XXX: Windows FtiConfig needs to see the live ifconfig tree
+		 // XXX: Windows FibConfig needs to see the live ifconfig tree
 		 _ifconfig.live_config(),
 #else
 		 _ifconfig.local_config(),
@@ -88,13 +88,13 @@ FeaNode::startup()
 #endif // HOST_OS_WINDOWS
 
     //
-    // IfConfig and FtiConfig
+    // IfConfig and FibConfig
     //
     if (_ifconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
     }
-    if (_fticonfig.start(error_msg) != XORP_OK) {
-	XLOG_FATAL("Cannot start FtiConfig: %s", error_msg.c_str());
+    if (_fibconfig.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start FibConfig: %s", error_msg.c_str());
     }
 
     _is_running = true;
@@ -114,8 +114,8 @@ FeaNode::shutdown()
     // data from sockets. To fix this, we need to run the eventloop
     // until we get all the data we need. Tricky...
     //
-    if (_fticonfig.stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop FtiConfig: %s", error_msg.c_str());
+    if (_fibconfig.stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop FibConfig: %s", error_msg.c_str());
     }
     if (_ifconfig.stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop IfConfig: %s", error_msg.c_str());
@@ -138,7 +138,7 @@ int
 FeaNode::set_dummy()
 {
     _ifconfig.set_dummy();
-    _fticonfig.set_dummy();
+    _fibconfig.set_dummy();
 
     _is_dummy = true;
 

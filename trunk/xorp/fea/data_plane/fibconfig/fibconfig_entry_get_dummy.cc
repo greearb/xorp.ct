@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc,v 1.2 2007/04/26 22:29:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,15 +32,15 @@
 //
 
 
-FtiConfigEntryGetDummy::FtiConfigEntryGetDummy(FtiConfig& ftic)
-    : FtiConfigEntryGet(ftic)
+FibConfigEntryGetDummy::FibConfigEntryGetDummy(FibConfig& fibconfig)
+    : FibConfigEntryGet(fibconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryGetDummy::~FtiConfigEntryGetDummy()
+FibConfigEntryGetDummy::~FibConfigEntryGetDummy()
 {
     string error_msg;
 
@@ -53,7 +53,7 @@ FtiConfigEntryGetDummy::~FtiConfigEntryGetDummy()
 }
 
 int
-FtiConfigEntryGetDummy::start(string& error_msg)
+FibConfigEntryGetDummy::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -66,7 +66,7 @@ FtiConfigEntryGetDummy::start(string& error_msg)
 }
     
 int
-FtiConfigEntryGetDummy::stop(string& error_msg)
+FibConfigEntryGetDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -87,10 +87,10 @@ FtiConfigEntryGetDummy::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetDummy::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
-    Trie4::iterator ti = ftic().trie4().find(dst);
-    if (ti != ftic().trie4().end()) {
+    Trie4::iterator ti = fibconfig().trie4().find(dst);
+    if (ti != fibconfig().trie4().end()) {
 	fte = ti.payload();
 	return true;
     }
@@ -107,10 +107,10 @@ FtiConfigEntryGetDummy::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
+FibConfigEntryGetDummy::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
-    Trie4::iterator ti = ftic().trie4().find(dst);
-    if (ti != ftic().trie4().end()) {
+    Trie4::iterator ti = fibconfig().trie4().find(dst);
+    if (ti != fibconfig().trie4().end()) {
 	fte = ti.payload();
 	return true;
     }
@@ -127,10 +127,10 @@ FtiConfigEntryGetDummy::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetDummy::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
-    Trie6::iterator ti = ftic().trie6().find(dst);
-    if (ti != ftic().trie6().end()) {
+    Trie6::iterator ti = fibconfig().trie6().find(dst);
+    if (ti != fibconfig().trie6().end()) {
 	fte = ti.payload();
 	return true;
     }
@@ -147,10 +147,10 @@ FtiConfigEntryGetDummy::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetDummy::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
+FibConfigEntryGetDummy::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
-    Trie6::iterator ti = ftic().trie6().find(dst);
-    if (ti != ftic().trie6().end()) {
+    Trie6::iterator ti = fibconfig().trie6().find(dst);
+    if (ti != fibconfig().trie6().end()) {
 	fte = ti.payload();
 	return true;
     }

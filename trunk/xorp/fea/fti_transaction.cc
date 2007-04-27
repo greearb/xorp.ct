@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.10 2006/03/16 00:03:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.11 2007/02/16 22:45:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,7 +28,7 @@ FtiTransactionManager::pre_commit(uint32_t /* tid */)
     string error_msg;
 
     unset_error();
-    if (ftic().start_configuration(error_msg) != true) {
+    if (fibconfig().start_configuration(error_msg) != true) {
 	XLOG_ERROR("Cannot start configuration: %s", error_msg.c_str());
 	set_unset_error(error_msg);
     }
@@ -38,7 +38,7 @@ void
 FtiTransactionManager::post_commit(uint32_t /* tid */)
 {
     string error_msg;
-    if (ftic().end_configuration(error_msg) != true) {
+    if (fibconfig().end_configuration(error_msg) != true) {
 	XLOG_ERROR("Cannot end configuration: %s", error_msg.c_str());
 	set_unset_error(error_msg);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,15 +35,15 @@
 //
 
 
-FtiConfigTableGetSysctl::FtiConfigTableGetSysctl(FtiConfig& ftic)
-    : FtiConfigTableGet(ftic)
+FibConfigTableGetSysctl::FibConfigTableGetSysctl(FibConfig& fibconfig)
+    : FibConfigTableGet(fibconfig)
 {
 #ifdef HAVE_SYSCTL_NET_RT_DUMP
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableGetSysctl::~FtiConfigTableGetSysctl()
+FibConfigTableGetSysctl::~FibConfigTableGetSysctl()
 {
     string error_msg;
 
@@ -56,7 +56,7 @@ FtiConfigTableGetSysctl::~FtiConfigTableGetSysctl()
 }
 
 int
-FtiConfigTableGetSysctl::start(string& error_msg)
+FibConfigTableGetSysctl::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -69,7 +69,7 @@ FtiConfigTableGetSysctl::start(string& error_msg)
 }
 
 int
-FtiConfigTableGetSysctl::stop(string& error_msg)
+FibConfigTableGetSysctl::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -82,7 +82,7 @@ FtiConfigTableGetSysctl::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
+FibConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
     
@@ -101,7 +101,7 @@ FtiConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 }
 
 bool
-FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
+FibConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
     UNUSED(fte_list);
@@ -128,7 +128,7 @@ FtiConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 #ifndef HAVE_SYSCTL_NET_RT_DUMP
 
 bool
-FtiConfigTableGetSysctl::get_table(int , list<FteX>& )
+FibConfigTableGetSysctl::get_table(int , list<FteX>& )
 {
     return false;
 }
@@ -136,19 +136,19 @@ FtiConfigTableGetSysctl::get_table(int , list<FteX>& )
 #else // HAVE_SYSCTL_NET_RT_DUMP
 
 bool
-FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
+FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 {
     int mib[6];
 
     // Check that the family is supported
     switch(family) {
     case AF_INET:
-	if (! ftic().have_ipv4())
+	if (! fibconfig().have_ipv4())
 	    return false;
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (! ftic().have_ipv6())
+	if (! fibconfig().have_ipv6())
 	    return false;
 	break;
 #endif // HAVE_IPV6

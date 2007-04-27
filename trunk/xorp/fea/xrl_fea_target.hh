@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.5 2007/04/23 22:14:10 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.6 2007/04/24 01:28:42 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -25,11 +25,12 @@
 
 #include "xrl/targets/fea_base.hh"
 
-#include "ifconfig.hh"
 #include "xrl_fti.hh"
 
 class EventLoop;
 class FeaNode;
+class FibConfig;
+class IfConfig;
 class InterfaceManager;
 class LibFeaClientBridge;
 class XrlRawSocket4Manager;
@@ -103,6 +104,14 @@ public:
      * @see IfConfig.
      */
     IfConfig& ifconfig();
+
+    /**
+     * Get the FibConfig instance.
+     *
+     * @return a reference to the FibConfig instance.
+     * @see FibConfig.
+     */
+    FibConfig& fibconfig();
 
     XrlCmdError common_0_1_get_target_name(
 	// Output values,

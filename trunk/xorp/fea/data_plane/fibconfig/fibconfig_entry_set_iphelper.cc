@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,15 +42,15 @@
 //
 
 
-FtiConfigEntrySetIPHelper::FtiConfigEntrySetIPHelper(FtiConfig& ftic)
-    : FtiConfigEntrySet(ftic)
+FibConfigEntrySetIPHelper::FibConfigEntrySetIPHelper(FibConfig& fibconfig)
+    : FibConfigEntrySet(fibconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntrySetIPHelper::~FtiConfigEntrySetIPHelper()
+FibConfigEntrySetIPHelper::~FibConfigEntrySetIPHelper()
 {
     string error_msg;
 
@@ -63,7 +63,7 @@ FtiConfigEntrySetIPHelper::~FtiConfigEntrySetIPHelper()
 }
 
 int
-FtiConfigEntrySetIPHelper::start(string& error_msg)
+FibConfigEntrySetIPHelper::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -76,7 +76,7 @@ FtiConfigEntrySetIPHelper::start(string& error_msg)
 }
 
 int
-FtiConfigEntrySetIPHelper::stop(string& error_msg)
+FibConfigEntrySetIPHelper::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -89,7 +89,7 @@ FtiConfigEntrySetIPHelper::stop(string& error_msg)
 }
 
 bool
-FtiConfigEntrySetIPHelper::add_entry4(const Fte4& fte)
+FibConfigEntrySetIPHelper::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -97,7 +97,7 @@ FtiConfigEntrySetIPHelper::add_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetIPHelper::delete_entry4(const Fte4& fte)
+FibConfigEntrySetIPHelper::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -105,7 +105,7 @@ FtiConfigEntrySetIPHelper::delete_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetIPHelper::add_entry6(const Fte6& fte)
+FibConfigEntrySetIPHelper::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -113,7 +113,7 @@ FtiConfigEntrySetIPHelper::add_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfigEntrySetIPHelper::delete_entry6(const Fte6& fte)
+FibConfigEntrySetIPHelper::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -122,20 +122,20 @@ FtiConfigEntrySetIPHelper::delete_entry6(const Fte6& fte)
 
 #ifndef HOST_OS_WINDOWS
 bool
-FtiConfigEntrySetIPHelper::add_entry(const FteX& )
+FibConfigEntrySetIPHelper::add_entry(const FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntrySetIPHelper::delete_entry(const FteX& )
+FibConfigEntrySetIPHelper::delete_entry(const FteX& )
 {
     return false;
 }
 
 #else // HOST_OS_WINDOWS
 bool
-FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
+FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
 {
     MIB_IPFORWARDROW	ipfwdrow;
     int			family = fte.net().af();
@@ -146,12 +146,12 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -202,7 +202,7 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
     	memset(&ipfwdrow, 0, sizeof(ipfwdrow));
     }
 
-    const IfTree& iftree = ftic().iftree();
+    const IfTree& iftree = fibconfig().iftree();
     const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
     XLOG_ASSERT(ifp != NULL);
 
@@ -246,7 +246,7 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
 }
 
 bool
-FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
+FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
 {
     MIB_IPFORWARDROW	ipfwdrow;
     int			family = fte.net().af();
@@ -257,12 +257,12 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -313,7 +313,7 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // If the FEA does not know about this interface, there is a
     // programming error.
     //
-    const IfTree& iftree = ftic().iftree();
+    const IfTree& iftree = fibconfig().iftree();
     const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
     XLOG_ASSERT(ifp != NULL);
     ipfwdrow.dwForwardIfIndex = ifp->pif_index();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,17 +42,17 @@
 //
 
 
-FtiConfigTableObserverNetlink::FtiConfigTableObserverNetlink(FtiConfig& ftic)
-    : FtiConfigTableObserver(ftic),
-      NetlinkSocket(ftic.eventloop()),
+FibConfigTableObserverNetlink::FibConfigTableObserverNetlink(FibConfig& fibconfig)
+    : FibConfigTableObserver(fibconfig),
+      NetlinkSocket(fibconfig.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableObserverNetlink::~FtiConfigTableObserverNetlink()
+FibConfigTableObserverNetlink::~FibConfigTableObserverNetlink()
 {
     string error_msg;
 
@@ -65,7 +65,7 @@ FtiConfigTableObserverNetlink::~FtiConfigTableObserverNetlink()
 }
 
 int
-FtiConfigTableObserverNetlink::start(string& error_msg)
+FibConfigTableObserverNetlink::start(string& error_msg)
 {
 #ifndef HAVE_NETLINK_SOCKETS
     error_msg = c_format("The netlink(7) mechanism to observe "
@@ -84,14 +84,14 @@ FtiConfigTableObserverNetlink::start(string& error_msg)
     //
     // Listen to the netlink multicast group for IPv4 routing entries
     //
-    if (ftic().have_ipv4())
+    if (fibconfig().have_ipv4())
 	nl_groups |= RTMGRP_IPV4_ROUTE;
 
 #ifdef HAVE_IPV6
     //
     // Listen to the netlink multicast group for IPv6 routing entries
     //
-    if (ftic().have_ipv6())
+    if (fibconfig().have_ipv6())
 	nl_groups |= RTMGRP_IPV6_ROUTE;
 #endif // HAVE_IPV6
 
@@ -110,7 +110,7 @@ FtiConfigTableObserverNetlink::start(string& error_msg)
 }
     
 int
-FtiConfigTableObserverNetlink::stop(string& error_msg)
+FibConfigTableObserverNetlink::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -124,16 +124,18 @@ FtiConfigTableObserverNetlink::stop(string& error_msg)
 }
 
 void
-FtiConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
 
     //
     // Get the IPv4 routes
     //
-    if (ftic().have_ipv4()) {
-	ftic().ftic_table_get_primary().parse_buffer_nlm(AF_INET, fte_list,
-							 buffer, false);
+    if (fibconfig().have_ipv4()) {
+	fibconfig().fibconfig_table_get_primary().parse_buffer_nlm(AF_INET,
+								   fte_list,
+								   buffer,
+								   false);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -144,9 +146,11 @@ FtiConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv6 routes
     //
-    if (ftic().have_ipv6()) {
-	ftic().ftic_table_get_primary().parse_buffer_nlm(AF_INET6, fte_list,
-							 buffer, false);
+    if (fibconfig().have_ipv6()) {
+	fibconfig().fibconfig_table_get_primary().parse_buffer_nlm(AF_INET6,
+								   fte_list,
+								   buffer,
+								   false);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -156,7 +160,7 @@ FtiConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-FtiConfigTableObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

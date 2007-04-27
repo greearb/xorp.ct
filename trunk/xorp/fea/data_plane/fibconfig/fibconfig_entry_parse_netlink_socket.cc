@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,7 +44,7 @@
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-FtiConfigEntryGet::parse_buffer_nlm(FteX& , const vector<uint8_t>& , bool )
+FibConfigEntryGet::parse_buffer_nlm(FteX& , const vector<uint8_t>& , bool )
 {
     return false;
 }
@@ -52,7 +52,7 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& , const vector<uint8_t>& , bool )
 #else // HAVE_NETLINK_SOCKETS
 
 bool
-FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
+FibConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
 				    bool is_nlm_get_only)
 {
     size_t buffer_bytes = buffer.size();
@@ -115,8 +115,8 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
 	    if (rtmsg->rtm_type == RTN_BROADCAST)
 		break;		// XXX: ignore broadcast entries
 
-	    return (NlmUtils::nlm_get_to_fte_cfg(fte, ftic().iftree(), nlh,
-		    rtmsg, rta_len));
+	    return (NlmUtils::nlm_get_to_fte_cfg(fte, fibconfig().iftree(),
+						 nlh, rtmsg, rta_len));
 	}
 	break;
 	

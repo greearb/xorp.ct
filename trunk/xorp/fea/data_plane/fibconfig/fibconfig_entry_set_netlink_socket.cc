@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,17 +42,17 @@
 //
 
 
-FtiConfigEntrySetNetlink::FtiConfigEntrySetNetlink(FtiConfig& ftic)
-    : FtiConfigEntrySet(ftic),
-      NetlinkSocket(ftic.eventloop()),
+FibConfigEntrySetNetlink::FibConfigEntrySetNetlink(FibConfig& fibconfig)
+    : FibConfigEntrySet(fibconfig),
+      NetlinkSocket(fibconfig.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntrySetNetlink::~FtiConfigEntrySetNetlink()
+FibConfigEntrySetNetlink::~FibConfigEntrySetNetlink()
 {
     string error_msg;
 
@@ -65,7 +65,7 @@ FtiConfigEntrySetNetlink::~FtiConfigEntrySetNetlink()
 }
 
 int
-FtiConfigEntrySetNetlink::start(string& error_msg)
+FibConfigEntrySetNetlink::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -79,7 +79,7 @@ FtiConfigEntrySetNetlink::start(string& error_msg)
 }
 
 int
-FtiConfigEntrySetNetlink::stop(string& error_msg)
+FibConfigEntrySetNetlink::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -93,7 +93,7 @@ FtiConfigEntrySetNetlink::stop(string& error_msg)
 }
 
 bool
-FtiConfigEntrySetNetlink::add_entry4(const Fte4& fte)
+FibConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -101,7 +101,7 @@ FtiConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
+FibConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -109,7 +109,7 @@ FtiConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetNetlink::add_entry6(const Fte6& fte)
+FibConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -117,7 +117,7 @@ FtiConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfigEntrySetNetlink::delete_entry6(const Fte6& fte)
+FibConfigEntrySetNetlink::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -126,20 +126,20 @@ FtiConfigEntrySetNetlink::delete_entry6(const Fte6& fte)
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-FtiConfigEntrySetNetlink::add_entry(const FteX& )
+FibConfigEntrySetNetlink::add_entry(const FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntrySetNetlink::delete_entry(const FteX& )
+FibConfigEntrySetNetlink::delete_entry(const FteX& )
 {
     return false;
 }
 
 #else // HAVE_NETLINK_SOCKETS
 bool
-FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
+FibConfigEntrySetNetlink::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
 	+ 3*sizeof(struct rtattr) + sizeof(int) + 512;
@@ -165,12 +165,12 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -254,7 +254,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	    //
 	    if (fte.ifname().empty())
 		break;
-	    const IfTree& iftree = ftic().iftree();
+	    const IfTree& iftree = fibconfig().iftree();
 	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	    XLOG_ASSERT(ifp != NULL);
 
@@ -329,7 +329,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 }
 
 bool
-FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
+FibConfigEntrySetNetlink::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
 	+ 3*sizeof(struct rtattr) + sizeof(int) + 512;
@@ -353,12 +353,12 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -416,7 +416,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = ftic().iftree();
+	const IfTree& iftree = fibconfig().iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	//
 	// XXX: unlike adding a route, we don't use XLOG_ASSERT()
@@ -454,7 +454,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	// Note that we could add to the following list the check whether
 	// the forwarding entry is not in the kernel, but this is probably
 	// an overkill. If such check should be performed, we should
-	// use the corresponding FtiConfigTableGetNetlink provider.
+	// use the corresponding FibConfigTableGetNetlink provider.
 	//
 	do {
 	    // Check whether the error code matches
@@ -470,7 +470,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	    // Check whether the interface is down
 	    if (fte.ifname().empty())
 		break;		// No interface to check
-	    const IfTree& iftree = ftic().iftree();
+	    const IfTree& iftree = fibconfig().iftree();
 	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	    if ((ifp != NULL) && ifp->enabled())
 		break;		// The interface is UP

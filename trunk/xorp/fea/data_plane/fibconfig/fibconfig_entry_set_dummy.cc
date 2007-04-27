@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,15 +31,15 @@
 //
 
 
-FtiConfigEntrySetDummy::FtiConfigEntrySetDummy(FtiConfig& ftic)
-    : FtiConfigEntrySet(ftic)
+FibConfigEntrySetDummy::FibConfigEntrySetDummy(FibConfig& fibconfig)
+    : FibConfigEntrySet(fibconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntrySetDummy::~FtiConfigEntrySetDummy()
+FibConfigEntrySetDummy::~FibConfigEntrySetDummy()
 {
     string error_msg;
 
@@ -52,7 +52,7 @@ FtiConfigEntrySetDummy::~FtiConfigEntrySetDummy()
 }
 
 int
-FtiConfigEntrySetDummy::start(string& error_msg)
+FibConfigEntrySetDummy::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -65,7 +65,7 @@ FtiConfigEntrySetDummy::start(string& error_msg)
 }
     
 int
-FtiConfigEntrySetDummy::stop(string& error_msg)
+FibConfigEntrySetDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -79,7 +79,7 @@ FtiConfigEntrySetDummy::stop(string& error_msg)
 
 
 bool
-FtiConfigEntrySetDummy::add_entry4(const Fte4& fte)
+FibConfigEntrySetDummy::add_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
 	return false;
@@ -88,20 +88,20 @@ FtiConfigEntrySetDummy::add_entry4(const Fte4& fte)
 	// XXX: accept directly-connected routes
     }
     
-    int rc = ftic().trie4().route_count();
+    int rc = fibconfig().trie4().route_count();
     XLOG_ASSERT(rc >= 0);
     
-    ftic().trie4().insert(fte.net(), fte);
-    if (ftic().trie4().route_count() == rc) {
+    fibconfig().trie4().insert(fte.net(), fte);
+    if (fibconfig().trie4().route_count() == rc) {
 	XLOG_WARNING("add_entry4 is overriding old entry for %s (%d %d)",
-		     fte.net().str().c_str(), rc, ftic().trie4().route_count());
+		     fte.net().str().c_str(), rc, fibconfig().trie4().route_count());
     }
     
     return true;
 }
 
 bool
-FtiConfigEntrySetDummy::delete_entry4(const Fte4& fte)
+FibConfigEntrySetDummy::delete_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
 	return false;
@@ -110,16 +110,16 @@ FtiConfigEntrySetDummy::delete_entry4(const Fte4& fte)
 	// XXX: accept directly-connected routes
     }
     
-    Trie4::iterator ti = ftic().trie4().find(fte.net());
-    if (ti == ftic().trie4().end())
+    Trie4::iterator ti = fibconfig().trie4().find(fte.net());
+    if (ti == fibconfig().trie4().end())
 	return false;
-    ftic().trie4().erase(ti);
+    fibconfig().trie4().erase(ti);
     
     return true;
 }
 
 bool
-FtiConfigEntrySetDummy::add_entry6(const Fte6& fte)
+FibConfigEntrySetDummy::add_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
 	return false;
@@ -128,20 +128,21 @@ FtiConfigEntrySetDummy::add_entry6(const Fte6& fte)
 	// XXX: accept directly-connected routes
     }
     
-    int rc = ftic().trie6().route_count();
+    int rc = fibconfig().trie6().route_count();
     XLOG_ASSERT(rc >= 0);
     
-    ftic().trie6().insert(fte.net(), fte);
-    if (ftic().trie6().route_count() == rc) {
+    fibconfig().trie6().insert(fte.net(), fte);
+    if (fibconfig().trie6().route_count() == rc) {
 	XLOG_WARNING("add_entry6 is overriding old entry for %s (%d %d)",
-		     fte.net().str().c_str(), rc, ftic().trie6().route_count());
+		     fte.net().str().c_str(), rc,
+		     fibconfig().trie6().route_count());
     }
     
     return true;
 }
 
 bool
-FtiConfigEntrySetDummy::delete_entry6(const Fte6& fte)
+FibConfigEntrySetDummy::delete_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
 	return false;
@@ -150,10 +151,10 @@ FtiConfigEntrySetDummy::delete_entry6(const Fte6& fte)
 	// XXX: accept directly-connected routes
     }
     
-    Trie6::iterator ti = ftic().trie6().find(fte.net());
-    if (ti == ftic().trie6().end())
+    Trie6::iterator ti = fibconfig().trie6().find(fte.net());
+    if (ti == fibconfig().trie6().end())
 	return false;
-    ftic().trie6().erase(ti);
+    fibconfig().trie6().erase(ti);
     
     return true;
 }

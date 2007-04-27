@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,7 +44,7 @@
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-FtiConfigTableGet::parse_buffer_nlm(int, list<FteX>& , const vector<uint8_t>& ,
+FibConfigTableGet::parse_buffer_nlm(int, list<FteX>& , const vector<uint8_t>& ,
 				    bool )
 {
     return false;
@@ -53,7 +53,7 @@ FtiConfigTableGet::parse_buffer_nlm(int, list<FteX>& , const vector<uint8_t>& ,
 #else // HAVE_NETLINK_SOCKETS
 
 bool
-FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
+FibConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 				    const vector<uint8_t>& buffer,
 				    bool is_nlm_get_only)
 {
@@ -122,7 +122,7 @@ FtiConfigTableGet::parse_buffer_nlm(int family, list<FteX>& fte_list,
 		break;		// XXX: ignore broadcast entries
 	    
 	    FteX fte(family);
-	    if (NlmUtils::nlm_get_to_fte_cfg(fte, ftic().iftree(), nlh,
+	    if (NlmUtils::nlm_get_to_fte_cfg(fte, fibconfig().iftree(), nlh,
 	        rtmsg, rta_len) == true) {
 		fte_list.push_back(fte);
 	    }

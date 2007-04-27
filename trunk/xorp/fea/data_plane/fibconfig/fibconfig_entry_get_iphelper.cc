@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc,v 1.2 2007/04/26 22:29:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -41,15 +41,15 @@
 //
 
 
-FtiConfigEntryGetIPHelper::FtiConfigEntryGetIPHelper(FtiConfig& ftic)
-    : FtiConfigEntryGet(ftic)
+FibConfigEntryGetIPHelper::FibConfigEntryGetIPHelper(FibConfig& fibconfig)
+    : FibConfigEntryGet(fibconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryGetIPHelper::~FtiConfigEntryGetIPHelper()
+FibConfigEntryGetIPHelper::~FibConfigEntryGetIPHelper()
 {
     string error_msg;
 
@@ -62,7 +62,7 @@ FtiConfigEntryGetIPHelper::~FtiConfigEntryGetIPHelper()
 }
 
 int
-FtiConfigEntryGetIPHelper::start(string& error_msg)
+FibConfigEntryGetIPHelper::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -75,7 +75,7 @@ FtiConfigEntryGetIPHelper::start(string& error_msg)
 }
 
 int
-FtiConfigEntryGetIPHelper::stop(string& error_msg)
+FibConfigEntryGetIPHelper::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -96,7 +96,7 @@ FtiConfigEntryGetIPHelper::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -117,7 +117,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
+FibConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
 						    Fte4& fte)
 {
     FteX ftex(dst.af());
@@ -139,7 +139,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -160,7 +160,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
+FibConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
 						    Fte6& fte)
 { 
     FteX ftex(dst.af());
@@ -175,13 +175,13 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
 
 #ifndef HOST_OS_WINDOWS
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& , FteX& )
+FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& , FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& , FteX& )
+FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& , FteX& )
 {
     return false;
 }
@@ -197,7 +197,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
+FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
     // Zero the return information
     fte.zero();
@@ -205,12 +205,12 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -278,7 +278,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 
 	    uint32_t ifindex = static_cast<uint32_t>(
 				pfwdtable->table[i].dwForwardIfIndex);
-	    const IfTree& iftree = ftic().iftree();
+	    const IfTree& iftree = fibconfig().iftree();
 	    const IfTreeInterface* ifp = iftree.find_interface(ifindex);
 	    XLOG_ASSERT(ifp != NULL);
 
@@ -307,7 +307,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
+FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 						   FteX& fte)
 {
     // Zero the return information
@@ -316,12 +316,12 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -380,7 +380,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 
 	    uint32_t ifindex = static_cast<uint32_t>(
 				pfwdtable->table[i].dwForwardIfIndex);
-	    const IfTree& iftree = ftic().iftree();
+	    const IfTree& iftree = fibconfig().iftree();
 	    const IfTreeInterface* ifp = iftree.find_interface(ifindex);
 	    XLOG_ASSERT(ifp != NULL);
 

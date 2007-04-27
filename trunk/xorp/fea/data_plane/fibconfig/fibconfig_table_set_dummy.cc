@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_dummy.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_dummy.cc,v 1.2 2007/04/26 22:29:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,15 +31,15 @@
 //
 
 
-FtiConfigTableSetDummy::FtiConfigTableSetDummy(FtiConfig& ftic)
-    : FtiConfigTableSet(ftic)
+FibConfigTableSetDummy::FibConfigTableSetDummy(FibConfig& fibconfig)
+    : FibConfigTableSet(fibconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableSetDummy::~FtiConfigTableSetDummy()
+FibConfigTableSetDummy::~FibConfigTableSetDummy()
 {
     string error_msg;
 
@@ -52,7 +52,7 @@ FtiConfigTableSetDummy::~FtiConfigTableSetDummy()
 }
 
 int
-FtiConfigTableSetDummy::start(string& error_msg)
+FibConfigTableSetDummy::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -65,7 +65,7 @@ FtiConfigTableSetDummy::start(string& error_msg)
 }
     
 int
-FtiConfigTableSetDummy::stop(string& error_msg)
+FibConfigTableSetDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -78,51 +78,51 @@ FtiConfigTableSetDummy::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
+FibConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
 
     // Add the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte4& fte = *iter;
-	ftic().add_entry4(fte);
+	fibconfig().add_entry4(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetDummy::delete_all_entries4()
+FibConfigTableSetDummy::delete_all_entries4()
 {
     if (in_configuration() == false)
 	return false;
     
-    ftic().trie4().delete_all_nodes();
+    fibconfig().trie4().delete_all_nodes();
     
     return true;
 }
 
 bool
-FtiConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
+FibConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
     
     // Add the entries one-by-one
     for (iter = fte_list.begin(); iter != fte_list.end(); ++iter) {
 	const Fte6& fte = *iter;
-	ftic().add_entry6(fte);
+	fibconfig().add_entry6(fte);
     }
     
     return true;
 }
 
 bool
-FtiConfigTableSetDummy::delete_all_entries6()
+FibConfigTableSetDummy::delete_all_entries6()
 {
     if (in_configuration() == false)
 	return false;
     
-    ftic().trie6().delete_all_nodes();
+    fibconfig().trie6().delete_all_nodes();
     
     return true;
 }

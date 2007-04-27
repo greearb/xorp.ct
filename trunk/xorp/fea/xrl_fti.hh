@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.15 2006/03/26 08:05:03 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.16 2007/02/16 22:45:52 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -39,19 +39,21 @@ public:
      * Constructor
      *
      * @param e the EventLoop.
-     * @param ftic the ForwardingTableInterface configuration object.
+     * @param fibconfig the ForwardingTableInterface configuration object.
      * @param max_ops the maximum number of operations pending.
      */
     XrlFtiTransactionManager(EventLoop&	e,
-			     FtiConfig&	ftic,
+			     FibConfig&	fibconfig,
 			     XrlRouter* xrl_router,
 			     uint32_t	max_ops = 200)
-	: _ftm(e, ftic), _max_ops(max_ops), _xrl_fea_fib_client(xrl_router) {
-	ftic.add_fib_table_observer(this);
+	: _ftm(e, fibconfig),
+	  _max_ops(max_ops),
+	  _xrl_fea_fib_client(xrl_router) {
+	fibconfig.add_fib_table_observer(this);
     }
 
     ~XrlFtiTransactionManager() {
-	ftic().delete_fib_table_observer(this);
+	fibconfig().delete_fib_table_observer(this);
     }
 
     /**
@@ -88,12 +90,12 @@ public:
     XrlCmdError add(uint32_t tid, const FtiTransactionManager::Operation& op);
 
     /**
-     * Get the FtiConfig entry.
+     * Get the FibConfig entry.
      * 
-     * @return a reference to the corresponding FtiConfig entry.
-     * @see FtiConfig.
+     * @return a reference to the corresponding FibConfig entry.
+     * @see FibConfig.
      */
-    FtiConfig& ftic() { return _ftm.ftic(); }
+    FibConfig& fibconfig() { return _ftm.fibconfig(); }
 
     /**
      * Process a list of IPv4 FIB route changes.
@@ -257,7 +259,7 @@ private:
 	void set_send_resolves(const bool sendit) { _send_resolves = sendit; }
 
     private:
-	EventLoop& eventloop() { return _xftm.ftic().eventloop(); }
+	EventLoop& eventloop() { return _xftm.fibconfig().eventloop(); }
 	void	send_fib_client_route_change();
 
 	list<F>			_inform_fib_client_queue;

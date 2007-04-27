@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.42 2007/02/16 22:45:37 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -38,12 +38,12 @@ typedef unsigned long FtiFibMsgSet;
 #include "win_support.hh"
 
 class EventLoop;
-class FtiConfigEntryGet;
-class FtiConfigEntrySet;
-class FtiConfigEntryObserver;
-class FtiConfigTableGet;
-class FtiConfigTableSet;
-class FtiConfigTableObserver;
+class FibConfigEntryGet;
+class FibConfigEntrySet;
+class FibConfigEntryObserver;
+class FibConfigTableGet;
+class FibConfigTableSet;
+class FibConfigTableObserver;
 class NexthopPortMapper;
 class Profile;
 
@@ -55,7 +55,7 @@ typedef Trie<IPv6, Fte6> Trie6;
  *
  * Abstract class.
  */
-class FtiConfig {
+class FibConfig {
 public:
 
     /**
@@ -65,13 +65,13 @@ public:
      * @param profile the profile entity.
      * @param nexthop_port_mapper the next-hop port mapper.
      */
-    FtiConfig(EventLoop& eventloop, Profile& profile, const IfTree& iftree,
+    FibConfig(EventLoop& eventloop, Profile& profile, const IfTree& iftree,
 	      NexthopPortMapper& nexthop_port_mapper);
 
     /**
      * Virtual destructor (in case this class is used as base class).
      */
-    virtual ~FtiConfig();
+    virtual ~FibConfig();
 
     /**
      * Get a reference to the @ref EventLoop instance.
@@ -94,27 +94,27 @@ public:
      */
     const IfTree& iftree() const { return _iftree; }
     
-    int register_ftic_entry_get_primary(FtiConfigEntryGet *ftic_entry_get);
-    int register_ftic_entry_set_primary(FtiConfigEntrySet *ftic_entry_set);
-    int register_ftic_entry_observer_primary(FtiConfigEntryObserver *ftic_entry_observer);
-    int register_ftic_table_get_primary(FtiConfigTableGet *ftic_table_get);
-    int register_ftic_table_set_primary(FtiConfigTableSet *ftic_table_set);
-    int register_ftic_table_observer_primary(FtiConfigTableObserver *ftic_table_observer);
-    int register_ftic_entry_get_secondary(FtiConfigEntryGet *ftic_entry_get);
-    int register_ftic_entry_set_secondary(FtiConfigEntrySet *ftic_entry_set);
-    int register_ftic_entry_observer_secondary(FtiConfigEntryObserver *ftic_entry_observer);
-    int register_ftic_table_get_secondary(FtiConfigTableGet *ftic_table_get);
-    int register_ftic_table_set_secondary(FtiConfigTableSet *ftic_table_set);
-    int register_ftic_table_observer_secondary(FtiConfigTableObserver *ftic_table_observer);
+    int register_fibconfig_entry_get_primary(FibConfigEntryGet *fibconfig_entry_get);
+    int register_fibconfig_entry_set_primary(FibConfigEntrySet *fibconfig_entry_set);
+    int register_fibconfig_entry_observer_primary(FibConfigEntryObserver *fibconfig_entry_observer);
+    int register_fibconfig_table_get_primary(FibConfigTableGet *fibconfig_table_get);
+    int register_fibconfig_table_set_primary(FibConfigTableSet *fibconfig_table_set);
+    int register_fibconfig_table_observer_primary(FibConfigTableObserver *fibconfig_table_observer);
+    int register_fibconfig_entry_get_secondary(FibConfigEntryGet *fibconfig_entry_get);
+    int register_fibconfig_entry_set_secondary(FibConfigEntrySet *fibconfig_entry_set);
+    int register_fibconfig_entry_observer_secondary(FibConfigEntryObserver *fibconfig_entry_observer);
+    int register_fibconfig_table_get_secondary(FibConfigTableGet *fibconfig_table_get);
+    int register_fibconfig_table_set_secondary(FibConfigTableSet *fibconfig_table_set);
+    int register_fibconfig_table_observer_secondary(FibConfigTableObserver *fibconfig_table_observer);
     
-    FtiConfigEntryGet&		ftic_entry_get_primary() { return *_ftic_entry_get_primary; }
-    FtiConfigEntrySet&		ftic_entry_set_primary() { return *_ftic_entry_set_primary; }
-    FtiConfigEntryObserver&	ftic_entry_observer_primary() { return *_ftic_entry_observer_primary; }
-    FtiConfigTableGet&		ftic_table_get_primary() { return *_ftic_table_get_primary; }
-    FtiConfigTableSet&		ftic_table_set_primary() { return *_ftic_table_set_primary; }
-    FtiConfigTableObserver&	ftic_table_observer_primary() { return *_ftic_table_observer_primary; }
+    FibConfigEntryGet&		fibconfig_entry_get_primary() { return *_fibconfig_entry_get_primary; }
+    FibConfigEntrySet&		fibconfig_entry_set_primary() { return *_fibconfig_entry_set_primary; }
+    FibConfigEntryObserver&	fibconfig_entry_observer_primary() { return *_fibconfig_entry_observer_primary; }
+    FibConfigTableGet&		fibconfig_table_get_primary() { return *_fibconfig_table_get_primary; }
+    FibConfigTableSet&		fibconfig_table_set_primary() { return *_fibconfig_table_set_primary; }
+    FibConfigTableObserver&	fibconfig_table_observer_primary() { return *_fibconfig_table_observer_primary; }
 
-    FtiConfigEntrySetClick&	ftic_entry_set_click() { return _ftic_entry_set_click; }
+    FibConfigEntrySetClick&	fibconfig_entry_set_click() { return _fibconfig_entry_set_click; }
 
     /**
      * Setup the unit to behave as dummy (for testing purpose).
@@ -656,19 +656,19 @@ private:
     NexthopPortMapper&			_nexthop_port_mapper;
     const IfTree&			_iftree;
 
-    FtiConfigEntryGet*			_ftic_entry_get_primary;
-    FtiConfigEntrySet*			_ftic_entry_set_primary;
-    FtiConfigEntryObserver*		_ftic_entry_observer_primary;
-    FtiConfigTableGet*			_ftic_table_get_primary;
-    FtiConfigTableSet*			_ftic_table_set_primary;
-    FtiConfigTableObserver*		_ftic_table_observer_primary;
+    FibConfigEntryGet*			_fibconfig_entry_get_primary;
+    FibConfigEntrySet*			_fibconfig_entry_set_primary;
+    FibConfigEntryObserver*		_fibconfig_entry_observer_primary;
+    FibConfigTableGet*			_fibconfig_table_get_primary;
+    FibConfigTableSet*			_fibconfig_table_set_primary;
+    FibConfigTableObserver*		_fibconfig_table_observer_primary;
 
-    list<FtiConfigEntryGet*>		_ftic_entry_gets_secondary;
-    list<FtiConfigEntrySet*>		_ftic_entry_sets_secondary;
-    list<FtiConfigEntryObserver*>	_ftic_entry_observers_secondary;
-    list<FtiConfigTableGet*>		_ftic_table_gets_secondary;
-    list<FtiConfigTableSet*>		_ftic_table_sets_secondary;
-    list<FtiConfigTableObserver*>	_ftic_table_observers_secondary;
+    list<FibConfigEntryGet*>		_fibconfig_entry_gets_secondary;
+    list<FibConfigEntrySet*>		_fibconfig_entry_sets_secondary;
+    list<FibConfigEntryObserver*>	_fibconfig_entry_observers_secondary;
+    list<FibConfigTableGet*>		_fibconfig_table_gets_secondary;
+    list<FibConfigTableSet*>		_fibconfig_table_sets_secondary;
+    list<FibConfigTableObserver*>	_fibconfig_table_observers_secondary;
     
     //
     // The primary mechanisms to get single-entry information
@@ -677,11 +677,11 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigEntryGetDummy	_ftic_entry_get_dummy;
-    FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
-    FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
-    FtiConfigEntryGetIPHelper	_ftic_entry_get_iphelper;
-    //FtiConfigEntryGetRtmV2	_ftic_entry_get_rtmv2;
+    FibConfigEntryGetDummy	_fibconfig_entry_get_dummy;
+    FibConfigEntryGetRtsock	_fibconfig_entry_get_rtsock;
+    FibConfigEntryGetNetlink	_fibconfig_entry_get_netlink;
+    FibConfigEntryGetIPHelper	_fibconfig_entry_get_iphelper;
+    //FibConfigEntryGetRtmV2	_fibconfig_entry_get_rtmv2;
 
     //
     // The secondary mechanisms to get single-entry information
@@ -689,7 +689,7 @@ private:
     //
     // XXX: Ordering is not important.
     //
-    FtiConfigEntryGetClick	_ftic_entry_get_click;
+    FibConfigEntryGetClick	_fibconfig_entry_get_click;
     
     //
     // The primary mechanisms to set single-entry information
@@ -698,11 +698,11 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigEntrySetDummy	_ftic_entry_set_dummy;
-    FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
-    FtiConfigEntrySetNetlink	_ftic_entry_set_netlink;
-    FtiConfigEntrySetIPHelper	_ftic_entry_set_iphelper;
-    FtiConfigEntrySetRtmV2	_ftic_entry_set_rtmv2;
+    FibConfigEntrySetDummy	_fibconfig_entry_set_dummy;
+    FibConfigEntrySetRtsock	_fibconfig_entry_set_rtsock;
+    FibConfigEntrySetNetlink	_fibconfig_entry_set_netlink;
+    FibConfigEntrySetIPHelper	_fibconfig_entry_set_iphelper;
+    FibConfigEntrySetRtmV2	_fibconfig_entry_set_rtmv2;
 
     //
     // The secondary mechanisms to set single-entry information
@@ -710,7 +710,7 @@ private:
     //
     // XXX: Ordering is not important.
     //
-    FtiConfigEntrySetClick	_ftic_entry_set_click;
+    FibConfigEntrySetClick	_fibconfig_entry_set_click;
     
     //
     // The primary mechanisms to observe single-entry information change
@@ -722,11 +722,11 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigEntryObserverDummy		_ftic_entry_observer_dummy;
-    FtiConfigEntryObserverRtsock	_ftic_entry_observer_rtsock;
-    FtiConfigEntryObserverNetlink	_ftic_entry_observer_netlink;
-    FtiConfigEntryObserverIPHelper	_ftic_entry_observer_iphelper;
-    //FtiConfigEntryObserverRtmV2		_ftic_entry_observer_rtmv2;
+    FibConfigEntryObserverDummy		_fibconfig_entry_observer_dummy;
+    FibConfigEntryObserverRtsock	_fibconfig_entry_observer_rtsock;
+    FibConfigEntryObserverNetlink	_fibconfig_entry_observer_netlink;
+    FibConfigEntryObserverIPHelper	_fibconfig_entry_observer_iphelper;
+    //FibConfigEntryObserverRtmV2	_fibconfig_entry_observer_rtmv2;
 
     //
     // The primary mechanisms to get the whole table information
@@ -735,10 +735,10 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigTableGetDummy	_ftic_table_get_dummy;
-    FtiConfigTableGetSysctl	_ftic_table_get_sysctl;
-    FtiConfigTableGetNetlink	_ftic_table_get_netlink;
-    FtiConfigTableGetIPHelper	_ftic_table_get_iphelper;
+    FibConfigTableGetDummy	_fibconfig_table_get_dummy;
+    FibConfigTableGetSysctl	_fibconfig_table_get_sysctl;
+    FibConfigTableGetNetlink	_fibconfig_table_get_netlink;
+    FibConfigTableGetIPHelper	_fibconfig_table_get_iphelper;
     
     //
     // The secondary mechanisms to get the whole table information
@@ -746,7 +746,7 @@ private:
     //
     // XXX: Ordering is not important.
     //
-    FtiConfigTableGetClick	_ftic_table_get_click;
+    FibConfigTableGetClick	_fibconfig_table_get_click;
 
     //
     // The primary mechanisms to set the whole table information
@@ -755,11 +755,11 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigTableSetDummy	_ftic_table_set_dummy;
-    FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
-    FtiConfigTableSetNetlink	_ftic_table_set_netlink;
-    FtiConfigTableSetIPHelper	_ftic_table_set_iphelper;
-    //FtiConfigTableSetRtmV2	_ftic_table_set_rtmv2;
+    FibConfigTableSetDummy	_fibconfig_table_set_dummy;
+    FibConfigTableSetRtsock	_fibconfig_table_set_rtsock;
+    FibConfigTableSetNetlink	_fibconfig_table_set_netlink;
+    FibConfigTableSetIPHelper	_fibconfig_table_set_iphelper;
+    //FibConfigTableSetRtmV2	_fibconfig_table_set_rtmv2;
 
     //
     // The secondary mechanisms to set the whole table information
@@ -767,7 +767,7 @@ private:
     //
     // XXX: Ordering is not important.
     //
-    FtiConfigTableSetClick	_ftic_table_set_click;
+    FibConfigTableSetClick	_fibconfig_table_set_click;
     
     //
     // The primary mechanisms to observe the whole-table information change
@@ -779,11 +779,11 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigTableObserverDummy		_ftic_table_observer_dummy;
-    FtiConfigTableObserverRtsock	_ftic_table_observer_rtsock;
-    FtiConfigTableObserverNetlink	_ftic_table_observer_netlink;
-    FtiConfigTableObserverIPHelper	_ftic_table_observer_iphelper;
-    FtiConfigTableObserverRtmV2		_ftic_table_observer_rtmv2;
+    FibConfigTableObserverDummy		_fibconfig_table_observer_dummy;
+    FibConfigTableObserverRtsock	_fibconfig_table_observer_rtsock;
+    FibConfigTableObserverNetlink	_fibconfig_table_observer_netlink;
+    FibConfigTableObserverIPHelper	_fibconfig_table_observer_iphelper;
+    FibConfigTableObserverRtmV2		_fibconfig_table_observer_rtmv2;
     
     //
     // Original state from the underlying system before the FEA was started

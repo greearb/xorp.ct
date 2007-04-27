@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_click.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_click.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,14 +33,14 @@
 //
 
 
-FtiConfigTableGetClick::FtiConfigTableGetClick(FtiConfig& ftic)
-    : FtiConfigTableGet(ftic),
-      ClickSocket(ftic.eventloop()),
+FibConfigTableGetClick::FibConfigTableGetClick(FibConfig& fibconfig)
+    : FibConfigTableGet(fibconfig),
+      ClickSocket(fibconfig.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
 
-FtiConfigTableGetClick::~FtiConfigTableGetClick()
+FibConfigTableGetClick::~FibConfigTableGetClick()
 {
     string error_msg;
 
@@ -53,7 +53,7 @@ FtiConfigTableGetClick::~FtiConfigTableGetClick()
 }
 
 int
-FtiConfigTableGetClick::start(string& error_msg)
+FibConfigTableGetClick::start(string& error_msg)
 {
     if (! ClickSocket::is_enabled())
 	return (XORP_OK);
@@ -75,13 +75,13 @@ FtiConfigTableGetClick::start(string& error_msg)
     // Click should be the ultimate place to read the route info from.
     // The kernel itself may contain some left-over stuff.
     //
-    register_ftic_primary();
+    register_fibconfig_primary();
 
     return (XORP_OK);
 }
 
 int
-FtiConfigTableGetClick::stop(string& error_msg)
+FibConfigTableGetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
@@ -96,9 +96,9 @@ FtiConfigTableGetClick::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableGetClick::get_table4(list<Fte4>& fte_list)
+FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 {
-    const map<IPv4Net, Fte4>& fte_table4 = ftic().ftic_entry_set_click().fte_table4();
+    const map<IPv4Net, Fte4>& fte_table4 = fibconfig().fibconfig_entry_set_click().fte_table4();
     map<IPv4Net, Fte4>::const_iterator iter;
 
     for (iter = fte_table4.begin(); iter != fte_table4.end(); ++iter) {
@@ -109,14 +109,14 @@ FtiConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 }
 
 bool
-FtiConfigTableGetClick::get_table6(list<Fte6>& fte_list)
+FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
     UNUSED(fte_list);
     
     return false;
 #else
-    const map<IPv6Net, Fte6>& fte_table6 = ftic().ftic_entry_set_click().fte_table6();
+    const map<IPv6Net, Fte6>& fte_table6 = fibconfig().fibconfig_entry_set_click().fte_table6();
     map<IPv6Net, Fte6>::const_iterator iter;
 
     for (iter = fte_table6.begin(); iter != fte_table6.end(); ++iter) {

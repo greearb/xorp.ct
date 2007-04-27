@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.24 2007/02/16 22:45:38 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
 #define __FEA_FIBCONFIG_ENTRY_SET_HH__
@@ -30,18 +30,18 @@
 #include "routing_socket.hh"
 #include "win_rtm_pipe.hh"
 
-class FtiConfig;
+class FibConfig;
 
-class FtiConfigEntrySet {
+class FibConfigEntrySet {
 public:
-    FtiConfigEntrySet(FtiConfig& ftic);
+    FibConfigEntrySet(FibConfig& fibconfig);
     
-    virtual ~FtiConfigEntrySet();
+    virtual ~FibConfigEntrySet();
     
-    FtiConfig&	ftic() { return _ftic; }
+    FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_ftic_primary();
-    virtual void register_ftic_secondary();
+    virtual void register_fibconfig_primary();
+    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -65,7 +65,7 @@ public:
     virtual int stop(string& error_msg) = 0;
     
     /**
-     * Start a configuration interval. All modifications to FtiConfig
+     * Start a configuration interval. All modifications to FibConfig
      * state must be within a marked "configuration" interval.
      *
      * This method provides derived classes with a mechanism to perform
@@ -173,15 +173,15 @@ protected:
     bool	_is_running;
 
 private:
-    FtiConfig&	_ftic;
+    FibConfig&	_fibconfig;
     bool	_in_configuration;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FtiConfigEntrySetDummy : public FtiConfigEntrySet {
+class FibConfigEntrySetDummy : public FibConfigEntrySet {
 public:
-    FtiConfigEntrySetDummy(FtiConfig& ftic);
-    virtual ~FtiConfigEntrySetDummy();
+    FibConfigEntrySetDummy(FibConfig& fibconfig);
+    virtual ~FibConfigEntrySetDummy();
 
     /**
      * Start operation.
@@ -241,11 +241,11 @@ public:
 private:
 };
 
-class FtiConfigEntrySetRtsock : public FtiConfigEntrySet,
+class FibConfigEntrySetRtsock : public FibConfigEntrySet,
 				public RoutingSocket {
 public:
-    FtiConfigEntrySetRtsock(FtiConfig& ftic);
-    virtual ~FtiConfigEntrySetRtsock();
+    FibConfigEntrySetRtsock(FibConfig& fibconfig);
+    virtual ~FibConfigEntrySetRtsock();
 
     /**
      * Start operation.
@@ -306,11 +306,11 @@ private:
     bool delete_entry(const FteX& fte);
 };
 
-class FtiConfigEntrySetNetlink : public FtiConfigEntrySet,
+class FibConfigEntrySetNetlink : public FibConfigEntrySet,
 				 public NetlinkSocket {
 public:
-    FtiConfigEntrySetNetlink(FtiConfig& ftic);
-    virtual ~FtiConfigEntrySetNetlink();
+    FibConfigEntrySetNetlink(FibConfig& fibconfig);
+    virtual ~FibConfigEntrySetNetlink();
 
     /**
      * Start operation.
@@ -374,12 +374,12 @@ private:
     NetlinkSocketReader _ns_reader;
 };
 
-class FtiConfigEntrySetClick : public FtiConfigEntrySet,
+class FibConfigEntrySetClick : public FibConfigEntrySet,
 			       public ClickSocket,
 			       public NexthopPortMapperObserver {
 public:
-    FtiConfigEntrySetClick(FtiConfig& ftic);
-    virtual ~FtiConfigEntrySetClick();
+    FibConfigEntrySetClick(FibConfig& fibconfig);
+    virtual ~FibConfigEntrySetClick();
 
     /**
      * Start operation.
@@ -478,10 +478,10 @@ private:
     IPv6Net _reinstalling_ipv6net;
 };
 
-class FtiConfigEntrySetIPHelper : public FtiConfigEntrySet {
+class FibConfigEntrySetIPHelper : public FibConfigEntrySet {
 public:
-    FtiConfigEntrySetIPHelper(FtiConfig& ftic);
-    virtual ~FtiConfigEntrySetIPHelper();
+    FibConfigEntrySetIPHelper(FibConfig& fibconfig);
+    virtual ~FibConfigEntrySetIPHelper();
 
     /**
      * Start operation.
@@ -543,10 +543,10 @@ private:
     bool delete_entry(const FteX& fte);
 };
 
-class FtiConfigEntrySetRtmV2 : public FtiConfigEntrySet {
+class FibConfigEntrySetRtmV2 : public FibConfigEntrySet {
 public:
-    FtiConfigEntrySetRtmV2(FtiConfig& ftic);
-    virtual ~FtiConfigEntrySetRtmV2();
+    FibConfigEntrySetRtmV2(FibConfig& fibconfig);
+    virtual ~FibConfigEntrySetRtmV2();
 
     /**
      * Start operation.

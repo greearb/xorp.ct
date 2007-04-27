@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.2 2007/04/26 22:29:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -40,17 +40,17 @@
 //
 
 
-FtiConfigEntryGetRtsock::FtiConfigEntryGetRtsock(FtiConfig& ftic)
-    : FtiConfigEntryGet(ftic),
-      RoutingSocket(ftic.eventloop()),
+FibConfigEntryGetRtsock::FibConfigEntryGetRtsock(FibConfig& fibconfig)
+    : FibConfigEntryGet(fibconfig),
+      RoutingSocket(fibconfig.eventloop()),
       _rs_reader(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryGetRtsock::~FtiConfigEntryGetRtsock()
+FibConfigEntryGetRtsock::~FibConfigEntryGetRtsock()
 {
     string error_msg;
 
@@ -63,7 +63,7 @@ FtiConfigEntryGetRtsock::~FtiConfigEntryGetRtsock()
 }
 
 int
-FtiConfigEntryGetRtsock::start(string& error_msg)
+FibConfigEntryGetRtsock::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -77,7 +77,7 @@ FtiConfigEntryGetRtsock::start(string& error_msg)
 }
 
 int
-FtiConfigEntryGetRtsock::stop(string& error_msg)
+FibConfigEntryGetRtsock::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -99,7 +99,7 @@ FtiConfigEntryGetRtsock::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -120,7 +120,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
+FibConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
 						  Fte4& fte)
 {
     FteX ftex(dst.af());
@@ -142,7 +142,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -163,7 +163,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
+FibConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
 						  Fte6& fte)
 { 
     FteX ftex(dst.af());
@@ -178,13 +178,13 @@ FtiConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& , FteX& )
+FibConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& , FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& , FteX& )
+FibConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& , FteX& )
 {
     return false;
 }
@@ -200,7 +200,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
+FibConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -217,12 +217,12 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -324,7 +324,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
+FibConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -341,12 +341,12 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}

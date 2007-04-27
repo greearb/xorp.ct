@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.20 2007/02/16 22:45:40 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
@@ -22,19 +22,19 @@
 #include "win_rtm_pipe.hh"
 
 
-class FtiConfig;
+class FibConfig;
 class FibTableObserverBase;
 
-class FtiConfigTableObserver {
+class FibConfigTableObserver {
 public:
-    FtiConfigTableObserver(FtiConfig& ftic);
+    FibConfigTableObserver(FibConfig& fibconfig);
     
-    virtual ~FtiConfigTableObserver();
+    virtual ~FibConfigTableObserver();
     
-    FtiConfig&	ftic() { return _ftic; }
+    FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_ftic_primary();
-    virtual void register_ftic_secondary();
+    virtual void register_fibconfig_primary();
+    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -92,14 +92,14 @@ protected:
     bool	_is_running;
 
 private:
-    FtiConfig&	_ftic;
+    FibConfig&	_fibconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FtiConfigTableObserverDummy : public FtiConfigTableObserver {
+class FibConfigTableObserverDummy : public FibConfigTableObserver {
 public:
-    FtiConfigTableObserverDummy(FtiConfig& ftic);
-    virtual ~FtiConfigTableObserverDummy();
+    FibConfigTableObserverDummy(FibConfig& fibconfig);
+    virtual ~FibConfigTableObserverDummy();
 
     /**
      * Start operation.
@@ -128,12 +128,12 @@ private:
     
 };
 
-class FtiConfigTableObserverRtsock : public FtiConfigTableObserver,
+class FibConfigTableObserverRtsock : public FibConfigTableObserver,
 				     public RoutingSocket,
 				     public RoutingSocketObserver {
 public:
-    FtiConfigTableObserverRtsock(FtiConfig& ftic);
-    virtual ~FtiConfigTableObserverRtsock();
+    FibConfigTableObserverRtsock(FibConfig& fibconfig);
+    virtual ~FibConfigTableObserverRtsock();
 
     /**
      * Start operation.
@@ -165,10 +165,10 @@ private:
 };
 
 
-class FtiConfigTableObserverRtmV2 : public FtiConfigTableObserver {
+class FibConfigTableObserverRtmV2 : public FibConfigTableObserver {
 public:
-    FtiConfigTableObserverRtmV2(FtiConfig& ftic);
-    virtual ~FtiConfigTableObserverRtmV2();
+    FibConfigTableObserverRtmV2(FibConfig& fibconfig);
+    virtual ~FibConfigTableObserverRtmV2();
 
     /**
      * Start operation.
@@ -197,7 +197,7 @@ private:
     class RtmV2Observer : public WinRtmPipeObserver {
     public:
     	RtmV2Observer(WinRtmPipe& rs, int af,
-		      FtiConfigTableObserverRtmV2& rtmo)
+		      FibConfigTableObserverRtmV2& rtmo)
 	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
     	virtual ~RtmV2Observer() {}
 	void rtsock_data(const vector<uint8_t>& buffer) {
@@ -205,7 +205,7 @@ private:
 	}
     private:
 	int _af;
-    	FtiConfigTableObserverRtmV2& _rtmo;
+    	FibConfigTableObserverRtmV2& _rtmo;
     };
 private:
     WinRtmPipe*		_rs4;
@@ -214,12 +214,12 @@ private:
     RtmV2Observer*	_rso6;
 };
 
-class FtiConfigTableObserverNetlink : public FtiConfigTableObserver,
+class FibConfigTableObserverNetlink : public FibConfigTableObserver,
 				      public NetlinkSocket,
 				      public NetlinkSocketObserver {
 public:
-    FtiConfigTableObserverNetlink(FtiConfig& ftic);
-    virtual ~FtiConfigTableObserverNetlink();
+    FibConfigTableObserverNetlink(FibConfig& fibconfig);
+    virtual ~FibConfigTableObserverNetlink();
 
     /**
      * Start operation.
@@ -250,10 +250,10 @@ private:
     
 };
 
-class FtiConfigTableObserverIPHelper : public FtiConfigTableObserver {
+class FibConfigTableObserverIPHelper : public FibConfigTableObserver {
 public:
-    FtiConfigTableObserverIPHelper(FtiConfig& ftic);
-    virtual ~FtiConfigTableObserverIPHelper();
+    FibConfigTableObserverIPHelper(FibConfig& fibconfig);
+    virtual ~FibConfigTableObserverIPHelper();
 
     /**
      * Start operation.

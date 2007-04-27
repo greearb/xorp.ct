@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.28 2007/02/16 22:45:37 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
 #define __FEA_FIBCONFIG_ENTRY_GET_HH__
@@ -29,18 +29,18 @@
 
 class IPv4;
 class IPv6;
-class FtiConfig;
+class FibConfig;
 
-class FtiConfigEntryGet {
+class FibConfigEntryGet {
 public:
-    FtiConfigEntryGet(FtiConfig& ftic);
+    FibConfigEntryGet(FibConfig& fibconfig);
     
-    virtual ~FtiConfigEntryGet();
+    virtual ~FibConfigEntryGet();
     
-    FtiConfig&	ftic() { return _ftic; }
+    FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_ftic_primary();
-    virtual void register_ftic_secondary();
+    virtual void register_fibconfig_primary();
+    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -146,14 +146,14 @@ protected:
     bool	_is_running;
 
 private:
-    FtiConfig&	_ftic;
+    FibConfig&	_fibconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FtiConfigEntryGetDummy : public FtiConfigEntryGet {
+class FibConfigEntryGetDummy : public FibConfigEntryGet {
 public:
-    FtiConfigEntryGetDummy(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetDummy();
+    FibConfigEntryGetDummy(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetDummy();
 
     /**
      * Start operation.
@@ -214,11 +214,11 @@ public:
 private:
 };
 
-class FtiConfigEntryGetRtsock : public FtiConfigEntryGet,
+class FibConfigEntryGetRtsock : public FibConfigEntryGet,
 				public RoutingSocket {
 public:
-    FtiConfigEntryGetRtsock(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetRtsock();
+    FibConfigEntryGetRtsock(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetRtsock();
 
     /**
      * Start operation.
@@ -300,11 +300,11 @@ private:
     RoutingSocketReader _rs_reader;
 };
 
-class FtiConfigEntryGetNetlink : public FtiConfigEntryGet,
+class FibConfigEntryGetNetlink : public FibConfigEntryGet,
 				 public NetlinkSocket {
 public:
-    FtiConfigEntryGetNetlink(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetNetlink();
+    FibConfigEntryGetNetlink(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetNetlink();
 
     /**
      * Start operation.
@@ -376,11 +376,11 @@ private:
     NetlinkSocketReader	_ns_reader;
 };
 
-class FtiConfigEntryGetClick : public FtiConfigEntryGet,
+class FibConfigEntryGetClick : public FibConfigEntryGet,
 			       public ClickSocket {
 public:
-    FtiConfigEntryGetClick(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetClick();
+    FibConfigEntryGetClick(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetClick();
 
     /**
      * Start operation.
@@ -442,10 +442,10 @@ private:
     ClickSocketReader	_cs_reader;
 };
 
-class FtiConfigEntryGetIPHelper : public FtiConfigEntryGet {
+class FibConfigEntryGetIPHelper : public FibConfigEntryGet {
 public:
-    FtiConfigEntryGetIPHelper(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetIPHelper();
+    FibConfigEntryGetIPHelper(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetIPHelper();
 
     /**
      * Start operation.
@@ -525,10 +525,10 @@ private:
     virtual bool lookup_route_by_network(const IPvXNet& dst, FteX& fte);
 };
 
-class FtiConfigEntryGetRtmV2 : public FtiConfigEntryGet {
+class FibConfigEntryGetRtmV2 : public FibConfigEntryGet {
 public:
-    FtiConfigEntryGetRtmV2(FtiConfig& ftic);
-    virtual ~FtiConfigEntryGetRtmV2();
+    FibConfigEntryGetRtmV2(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetRtmV2();
 
     /**
      * Start operation.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -39,16 +39,16 @@
 //
 
 
-FtiConfigEntrySetRtsock::FtiConfigEntrySetRtsock(FtiConfig& ftic)
-    : FtiConfigEntrySet(ftic),
-      RoutingSocket(ftic.eventloop())
+FibConfigEntrySetRtsock::FibConfigEntrySetRtsock(FibConfig& fibconfig)
+    : FibConfigEntrySet(fibconfig),
+      RoutingSocket(fibconfig.eventloop())
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntrySetRtsock::~FtiConfigEntrySetRtsock()
+FibConfigEntrySetRtsock::~FibConfigEntrySetRtsock()
 {
     string error_msg;
 
@@ -61,7 +61,7 @@ FtiConfigEntrySetRtsock::~FtiConfigEntrySetRtsock()
 }
 
 int
-FtiConfigEntrySetRtsock::start(string& error_msg)
+FibConfigEntrySetRtsock::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -75,7 +75,7 @@ FtiConfigEntrySetRtsock::start(string& error_msg)
 }
 
 int
-FtiConfigEntrySetRtsock::stop(string& error_msg)
+FibConfigEntrySetRtsock::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -89,7 +89,7 @@ FtiConfigEntrySetRtsock::stop(string& error_msg)
 }
 
 bool
-FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
+FibConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -97,7 +97,7 @@ FtiConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
+FibConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -105,7 +105,7 @@ FtiConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
+FibConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -113,7 +113,7 @@ FtiConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
+FibConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -122,13 +122,13 @@ FtiConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
-FtiConfigEntrySetRtsock::add_entry(const FteX& )
+FibConfigEntrySetRtsock::add_entry(const FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntrySetRtsock::delete_entry(const FteX& )
+FibConfigEntrySetRtsock::delete_entry(const FteX& )
 {
     return false;
 }
@@ -155,7 +155,7 @@ static const size_t SOCKADDR_DL_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockadd
 #undef LONG_ROUNDUP_SIZEOF
 
 bool
-FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
+FibConfigEntrySetRtsock::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -188,12 +188,12 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte_nexthop.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte_nexthop.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -215,7 +215,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = ftic().iftree();
+	const IfTree& iftree = fibconfig().iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -337,7 +337,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 
 	// Get the physical interface index
 	do {
-	    const IfTree& iftree = ftic().iftree();
+	    const IfTree& iftree = fibconfig().iftree();
 	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	    if (ifp == NULL) {
 		XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -407,7 +407,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 }
 
 bool
-FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
+FibConfigEntrySetRtsock::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -430,12 +430,12 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -516,7 +516,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	// Note that we could add to the following list the check whether
 	// the forwarding entry is not in the kernel, but this is probably
 	// an overkill. If such check should be performed, we should
-	// use the corresponding FtiConfigTableGetNetlink provider.
+	// use the corresponding FibConfigTableGetNetlink provider.
 	//
 	do {
 	    // Check whether the error code matches
@@ -532,7 +532,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	    // Check whether the interface is down
 	    if (fte.ifname().empty())
 		break;		// No interface to check
-	    const IfTree& iftree = ftic().iftree();
+	    const IfTree& iftree = fibconfig().iftree();
 	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	    if ((ifp != NULL) && ifp->enabled())
 		break;		// The interface is UP

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,15 +35,15 @@
 //
 
 
-FtiConfigEntryGetRtmV2::FtiConfigEntryGetRtmV2(FtiConfig& ftic)
-    : FtiConfigEntryGet(ftic)
+FibConfigEntryGetRtmV2::FibConfigEntryGetRtmV2(FibConfig& fibconfig)
+    : FibConfigEntryGet(fibconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryGetRtmV2::~FtiConfigEntryGetRtmV2()
+FibConfigEntryGetRtmV2::~FibConfigEntryGetRtmV2()
 {
 #if 0
     string error_msg;
@@ -58,7 +58,7 @@ FtiConfigEntryGetRtmV2::~FtiConfigEntryGetRtmV2()
 }
 
 int
-FtiConfigEntryGetRtmV2::start(string& error_msg)
+FibConfigEntryGetRtmV2::start(string& error_msg)
 {
 #if 0
     if (_is_running)
@@ -75,7 +75,7 @@ FtiConfigEntryGetRtmV2::start(string& error_msg)
 }
 
 int
-FtiConfigEntryGetRtmV2::stop(string& error_msg)
+FibConfigEntryGetRtmV2::stop(string& error_msg)
 {
 #if 0
     if (! _is_running)
@@ -100,7 +100,7 @@ FtiConfigEntryGetRtmV2::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetRtmV2::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -121,8 +121,8 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_network4(const IPv4Net& dst,
-						  Fte4& fte)
+FibConfigEntryGetRtmV2::lookup_route_by_network4(const IPv4Net& dst,
+						 Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -143,7 +143,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network4(const IPv4Net& dst,
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetRtmV2::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -164,8 +164,8 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_network6(const IPv6Net& dst,
-						  Fte6& fte)
+FibConfigEntryGetRtmV2::lookup_route_by_network6(const IPv6Net& dst,
+						 Fte6& fte)
 { 
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -179,13 +179,13 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network6(const IPv6Net& dst,
 
 #ifndef HOST_OS_WINDOWS
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& , FteX& )
+FibConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& , FteX& )
 {
     return false;
 }
 
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& , FteX& )
+FibConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& , FteX& )
 {
     return false;
 }
@@ -201,7 +201,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
+FibConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
 #if 1
     /*
@@ -226,12 +226,12 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
@@ -334,7 +334,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
+FibConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 {
 #if 1
     /*
@@ -359,12 +359,12 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}

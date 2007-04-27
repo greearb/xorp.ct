@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.54 2007/02/16 22:45:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.1 2007/04/26 22:29:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -70,52 +70,52 @@
 //
 
 
-FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
+FibConfig::FibConfig(EventLoop& eventloop, Profile& profile,
 		     const IfTree& iftree,
 		     NexthopPortMapper& nexthop_port_mapper)
     : _eventloop(eventloop),
       _profile(profile),
       _nexthop_port_mapper(nexthop_port_mapper),
       _iftree(iftree),
-      _ftic_entry_get_primary(NULL),
-      _ftic_entry_set_primary(NULL),
-      _ftic_entry_observer_primary(NULL),
-      _ftic_table_get_primary(NULL),
-      _ftic_table_set_primary(NULL),
-      _ftic_table_observer_primary(NULL),
-      _ftic_entry_get_dummy(*this),
-      _ftic_entry_get_rtsock(*this),
-      _ftic_entry_get_netlink(*this),
-      _ftic_entry_get_iphelper(*this),
-      //_ftic_entry_get_rtmv2(*this),
-      _ftic_entry_get_click(*this),
-      _ftic_entry_set_dummy(*this),
-      _ftic_entry_set_rtsock(*this),
-      _ftic_entry_set_netlink(*this),
-      _ftic_entry_set_iphelper(*this),
-      _ftic_entry_set_rtmv2(*this),
-      _ftic_entry_set_click(*this),
-      _ftic_entry_observer_dummy(*this),
-      _ftic_entry_observer_rtsock(*this),
-      _ftic_entry_observer_netlink(*this),
-      _ftic_entry_observer_iphelper(*this),
-      //_ftic_entry_observer_rtmv2(*this),
-      _ftic_table_get_dummy(*this),
-      _ftic_table_get_sysctl(*this),
-      _ftic_table_get_netlink(*this),
-      _ftic_table_get_iphelper(*this),
-      _ftic_table_get_click(*this),
-      _ftic_table_set_dummy(*this),
-      _ftic_table_set_rtsock(*this),
-      _ftic_table_set_netlink(*this),
-      _ftic_table_set_iphelper(*this),
-      //_ftic_table_set_rtmv2(*this),
-      _ftic_table_set_click(*this),
-      _ftic_table_observer_dummy(*this),
-      _ftic_table_observer_rtsock(*this),
-      _ftic_table_observer_netlink(*this),
-      _ftic_table_observer_iphelper(*this),
-      _ftic_table_observer_rtmv2(*this),
+      _fibconfig_entry_get_primary(NULL),
+      _fibconfig_entry_set_primary(NULL),
+      _fibconfig_entry_observer_primary(NULL),
+      _fibconfig_table_get_primary(NULL),
+      _fibconfig_table_set_primary(NULL),
+      _fibconfig_table_observer_primary(NULL),
+      _fibconfig_entry_get_dummy(*this),
+      _fibconfig_entry_get_rtsock(*this),
+      _fibconfig_entry_get_netlink(*this),
+      _fibconfig_entry_get_iphelper(*this),
+      //_fibconfig_entry_get_rtmv2(*this),
+      _fibconfig_entry_get_click(*this),
+      _fibconfig_entry_set_dummy(*this),
+      _fibconfig_entry_set_rtsock(*this),
+      _fibconfig_entry_set_netlink(*this),
+      _fibconfig_entry_set_iphelper(*this),
+      _fibconfig_entry_set_rtmv2(*this),
+      _fibconfig_entry_set_click(*this),
+      _fibconfig_entry_observer_dummy(*this),
+      _fibconfig_entry_observer_rtsock(*this),
+      _fibconfig_entry_observer_netlink(*this),
+      _fibconfig_entry_observer_iphelper(*this),
+      //_fibconfig_entry_observer_rtmv2(*this),
+      _fibconfig_table_get_dummy(*this),
+      _fibconfig_table_get_sysctl(*this),
+      _fibconfig_table_get_netlink(*this),
+      _fibconfig_table_get_iphelper(*this),
+      _fibconfig_table_get_click(*this),
+      _fibconfig_table_set_dummy(*this),
+      _fibconfig_table_set_rtsock(*this),
+      _fibconfig_table_set_netlink(*this),
+      _fibconfig_table_set_iphelper(*this),
+      //_fibconfig_table_set_rtmv2(*this),
+      _fibconfig_table_set_click(*this),
+      _fibconfig_table_observer_dummy(*this),
+      _fibconfig_table_observer_rtsock(*this),
+      _fibconfig_table_observer_netlink(*this),
+      _fibconfig_table_observer_iphelper(*this),
+      _fibconfig_table_observer_rtmv2(*this),
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false),
@@ -134,27 +134,27 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
     // Check that all necessary mechanisms to interact with the
     // underlying system are in place.
     //
-    if (_ftic_entry_get_primary == NULL) {
+    if (_fibconfig_entry_get_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to get forwarding table entries "
 		   "from the underlying system");
     }
-    if (_ftic_entry_set_primary == NULL) {
+    if (_fibconfig_entry_set_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to set forwarding table entries "
 		   "into the underlying system");
     }
-    if (_ftic_entry_observer_primary == NULL) {
+    if (_fibconfig_entry_observer_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to observe forwarding table entries "
 		   "from the underlying system");
     }
-    if (_ftic_table_get_primary == NULL) {
+    if (_fibconfig_table_get_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to get the forwarding table "
 		   "information from the underlying system");
     }
-    if (_ftic_table_set_primary == NULL) {
+    if (_fibconfig_table_set_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to set the forwarding table "
 		   "information into the underlying system");
     }
-    if (_ftic_table_observer_primary == NULL) {
+    if (_fibconfig_table_observer_primary == NULL) {
 	XLOG_FATAL("No primary mechanism to observe the forwarding table "
 		   "information from the underlying system");
     }
@@ -196,7 +196,7 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
 #endif
 }
 
-FtiConfig::~FtiConfig()
+FibConfig::~FibConfig()
 {
     string error_msg;
 
@@ -216,140 +216,140 @@ FtiConfig::~FtiConfig()
 }
 
 int
-FtiConfig::register_ftic_entry_get_primary(FtiConfigEntryGet *ftic_entry_get)
+FibConfig::register_fibconfig_entry_get_primary(FibConfigEntryGet *fibconfig_entry_get)
 {
-    _ftic_entry_get_primary = ftic_entry_get;
-    if (ftic_entry_get != NULL)
-	ftic_entry_get->set_primary();
+    _fibconfig_entry_get_primary = fibconfig_entry_get;
+    if (fibconfig_entry_get != NULL)
+	fibconfig_entry_get->set_primary();
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_entry_set_primary(FtiConfigEntrySet *ftic_entry_set)
+FibConfig::register_fibconfig_entry_set_primary(FibConfigEntrySet *fibconfig_entry_set)
 {
-    _ftic_entry_set_primary = ftic_entry_set;
-    if (ftic_entry_set != NULL)
-	ftic_entry_set->set_primary();
+    _fibconfig_entry_set_primary = fibconfig_entry_set;
+    if (fibconfig_entry_set != NULL)
+	fibconfig_entry_set->set_primary();
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_entry_observer_primary(FtiConfigEntryObserver *ftic_entry_observer)
+FibConfig::register_fibconfig_entry_observer_primary(FibConfigEntryObserver *fibconfig_entry_observer)
 {
-    _ftic_entry_observer_primary = ftic_entry_observer;
-    if (ftic_entry_observer != NULL)
-	ftic_entry_observer->set_primary();
+    _fibconfig_entry_observer_primary = fibconfig_entry_observer;
+    if (fibconfig_entry_observer != NULL)
+	fibconfig_entry_observer->set_primary();
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_table_get_primary(FtiConfigTableGet *ftic_table_get)
+FibConfig::register_fibconfig_table_get_primary(FibConfigTableGet *fibconfig_table_get)
 {
-    _ftic_table_get_primary = ftic_table_get;
-    if (ftic_table_get != NULL)
-	ftic_table_get->set_primary();
+    _fibconfig_table_get_primary = fibconfig_table_get;
+    if (fibconfig_table_get != NULL)
+	fibconfig_table_get->set_primary();
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_table_set_primary(FtiConfigTableSet *ftic_table_set)
+FibConfig::register_fibconfig_table_set_primary(FibConfigTableSet *fibconfig_table_set)
 {
-    _ftic_table_set_primary = ftic_table_set;
-    if (ftic_table_set != NULL)
-	ftic_table_set->set_primary();
+    _fibconfig_table_set_primary = fibconfig_table_set;
+    if (fibconfig_table_set != NULL)
+	fibconfig_table_set->set_primary();
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_table_observer_primary(FtiConfigTableObserver *ftic_table_observer)
+FibConfig::register_fibconfig_table_observer_primary(FibConfigTableObserver *fibconfig_table_observer)
 {
-    _ftic_table_observer_primary = ftic_table_observer;
-    if (ftic_table_observer != NULL)
-	ftic_table_observer->set_primary();
+    _fibconfig_table_observer_primary = fibconfig_table_observer;
+    if (fibconfig_table_observer != NULL)
+	fibconfig_table_observer->set_primary();
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_entry_get_secondary(FtiConfigEntryGet *ftic_entry_get)
+FibConfig::register_fibconfig_entry_get_secondary(FibConfigEntryGet *fibconfig_entry_get)
 {
-    if (ftic_entry_get != NULL) {
-	_ftic_entry_gets_secondary.push_back(ftic_entry_get);
-	ftic_entry_get->set_secondary();
+    if (fibconfig_entry_get != NULL) {
+	_fibconfig_entry_gets_secondary.push_back(fibconfig_entry_get);
+	fibconfig_entry_get->set_secondary();
     }
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_entry_set_secondary(FtiConfigEntrySet *ftic_entry_set)
+FibConfig::register_fibconfig_entry_set_secondary(FibConfigEntrySet *fibconfig_entry_set)
 {
-    if (ftic_entry_set != NULL) {
-	_ftic_entry_sets_secondary.push_back(ftic_entry_set);
-	ftic_entry_set->set_secondary();
+    if (fibconfig_entry_set != NULL) {
+	_fibconfig_entry_sets_secondary.push_back(fibconfig_entry_set);
+	fibconfig_entry_set->set_secondary();
     }
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_entry_observer_secondary(FtiConfigEntryObserver *ftic_entry_observer)
+FibConfig::register_fibconfig_entry_observer_secondary(FibConfigEntryObserver *fibconfig_entry_observer)
 {
-    if (ftic_entry_observer != NULL) {
-	_ftic_entry_observers_secondary.push_back(ftic_entry_observer);
-	ftic_entry_observer->set_secondary();
+    if (fibconfig_entry_observer != NULL) {
+	_fibconfig_entry_observers_secondary.push_back(fibconfig_entry_observer);
+	fibconfig_entry_observer->set_secondary();
     }
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_table_get_secondary(FtiConfigTableGet *ftic_table_get)
+FibConfig::register_fibconfig_table_get_secondary(FibConfigTableGet *fibconfig_table_get)
 {
-    if (ftic_table_get != NULL) {
-	_ftic_table_gets_secondary.push_back(ftic_table_get);
-	ftic_table_get->set_secondary();
+    if (fibconfig_table_get != NULL) {
+	_fibconfig_table_gets_secondary.push_back(fibconfig_table_get);
+	fibconfig_table_get->set_secondary();
     }
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_table_set_secondary(FtiConfigTableSet *ftic_table_set)
+FibConfig::register_fibconfig_table_set_secondary(FibConfigTableSet *fibconfig_table_set)
 {
-    if (ftic_table_set != NULL) {
-	_ftic_table_sets_secondary.push_back(ftic_table_set);
-	ftic_table_set->set_secondary();
+    if (fibconfig_table_set != NULL) {
+	_fibconfig_table_sets_secondary.push_back(fibconfig_table_set);
+	fibconfig_table_set->set_secondary();
     }
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::register_ftic_table_observer_secondary(FtiConfigTableObserver *ftic_table_observer)
+FibConfig::register_fibconfig_table_observer_secondary(FibConfigTableObserver *fibconfig_table_observer)
 {
-    if (ftic_table_observer != NULL) {
-	_ftic_table_observers_secondary.push_back(ftic_table_observer);
-	ftic_table_observer->set_secondary();
+    if (fibconfig_table_observer != NULL) {
+	_fibconfig_table_observers_secondary.push_back(fibconfig_table_observer);
+	fibconfig_table_observer->set_secondary();
     }
     
     return (XORP_OK);
 }
 
 int
-FtiConfig::set_dummy()
+FibConfig::set_dummy()
 {
-    register_ftic_entry_get_primary(&_ftic_entry_get_dummy);
-    register_ftic_entry_set_primary(&_ftic_entry_set_dummy);
-    register_ftic_entry_observer_primary(&_ftic_entry_observer_dummy);
-    register_ftic_table_get_primary(&_ftic_table_get_dummy);
-    register_ftic_table_set_primary(&_ftic_table_set_dummy);
-    register_ftic_table_observer_primary(&_ftic_table_observer_dummy);
+    register_fibconfig_entry_get_primary(&_fibconfig_entry_get_dummy);
+    register_fibconfig_entry_set_primary(&_fibconfig_entry_set_dummy);
+    register_fibconfig_entry_observer_primary(&_fibconfig_entry_observer_dummy);
+    register_fibconfig_table_get_primary(&_fibconfig_table_get_dummy);
+    register_fibconfig_table_set_primary(&_fibconfig_table_set_dummy);
+    register_fibconfig_table_observer_primary(&_fibconfig_table_observer_dummy);
 
     //
     // XXX: if we are dummy FEA, then we always have IPv4 and IPv6
@@ -363,105 +363,105 @@ FtiConfig::set_dummy()
 }
 
 int
-FtiConfig::start(string& error_msg)
+FibConfig::start(string& error_msg)
 {
-    list<FtiConfigEntryGet*>::iterator ftic_entry_get_iter;
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
-    list<FtiConfigEntryObserver*>::iterator ftic_entry_observer_iter;
-    list<FtiConfigTableGet*>::iterator ftic_table_get_iter;
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
-    list<FtiConfigTableObserver*>::iterator ftic_table_observer_iter;
+    list<FibConfigEntryGet*>::iterator fibconfig_entry_get_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
+    list<FibConfigEntryObserver*>::iterator fibconfig_entry_observer_iter;
+    list<FibConfigTableGet*>::iterator fibconfig_table_get_iter;
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
+    list<FibConfigTableObserver*>::iterator fibconfig_table_observer_iter;
 
     if (_is_running)
 	return (XORP_OK);
 
     //
-    // Start the FtiConfigEntryGet methods
+    // Start the FibConfigEntryGet methods
     //
-    if (_ftic_entry_get_primary != NULL) {
-	if (_ftic_entry_get_primary->start(error_msg) < 0)
+    if (_fibconfig_entry_get_primary != NULL) {
+	if (_fibconfig_entry_get_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ftic_entry_get_iter = _ftic_entry_gets_secondary.begin();
-	 ftic_entry_get_iter != _ftic_entry_gets_secondary.end();
-	 ++ftic_entry_get_iter) {
-	FtiConfigEntryGet* ftic_entry_get = *ftic_entry_get_iter;
-	if (ftic_entry_get->start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
-
-    //
-    // Start the FtiConfigEntrySet methods
-    //
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->start(error_msg) < 0)
+    for (fibconfig_entry_get_iter = _fibconfig_entry_gets_secondary.begin();
+	 fibconfig_entry_get_iter != _fibconfig_entry_gets_secondary.end();
+	 ++fibconfig_entry_get_iter) {
+	FibConfigEntryGet* fibconfig_entry_get = *fibconfig_entry_get_iter;
+	if (fibconfig_entry_get->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
     //
-    // Start the FtiConfigEntryObserver methods
+    // Start the FibConfigEntrySet methods
     //
-    if (_ftic_entry_observer_primary != NULL) {
-	if (_ftic_entry_observer_primary->start(error_msg) < 0)
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ftic_entry_observer_iter = _ftic_entry_observers_secondary.begin();
-	 ftic_entry_observer_iter != _ftic_entry_observers_secondary.end();
-	 ++ftic_entry_observer_iter) {
-	FtiConfigEntryObserver* ftic_entry_observer = *ftic_entry_observer_iter;
-	if (ftic_entry_observer->start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
-
-    //
-    // Start the FtiConfigTableGet methods
-    //
-    if (_ftic_table_get_primary != NULL) {
-	if (_ftic_table_get_primary->start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
-    for (ftic_table_get_iter = _ftic_table_gets_secondary.begin();
-	 ftic_table_get_iter != _ftic_table_gets_secondary.end();
-	 ++ftic_table_get_iter) {
-	FtiConfigTableGet* ftic_table_get = *ftic_table_get_iter;
-	if (ftic_table_get->start(error_msg) < 0)
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
     //
-    // Start the FtiConfigTableSet methods
+    // Start the FibConfigEntryObserver methods
     //
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->start(error_msg) < 0)
+    if (_fibconfig_entry_observer_primary != NULL) {
+	if (_fibconfig_entry_observer_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->start(error_msg) < 0)
+    for (fibconfig_entry_observer_iter = _fibconfig_entry_observers_secondary.begin();
+	 fibconfig_entry_observer_iter != _fibconfig_entry_observers_secondary.end();
+	 ++fibconfig_entry_observer_iter) {
+	FibConfigEntryObserver* fibconfig_entry_observer = *fibconfig_entry_observer_iter;
+	if (fibconfig_entry_observer->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
     //
-    // Start the FtiConfigTableObserver methods
+    // Start the FibConfigTableGet methods
     //
-    if (_ftic_table_observer_primary != NULL) {
-	if (_ftic_table_observer_primary->start(error_msg) < 0)
+    if (_fibconfig_table_get_primary != NULL) {
+	if (_fibconfig_table_get_primary->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
-    for (ftic_table_observer_iter = _ftic_table_observers_secondary.begin();
-	 ftic_table_observer_iter != _ftic_table_observers_secondary.end();
-	 ++ftic_table_observer_iter) {
-	FtiConfigTableObserver* ftic_table_observer = *ftic_table_observer_iter;
-	if (ftic_table_observer->start(error_msg) < 0)
+    for (fibconfig_table_get_iter = _fibconfig_table_gets_secondary.begin();
+	 fibconfig_table_get_iter != _fibconfig_table_gets_secondary.end();
+	 ++fibconfig_table_get_iter) {
+	FibConfigTableGet* fibconfig_table_get = *fibconfig_table_get_iter;
+	if (fibconfig_table_get->start(error_msg) < 0)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // Start the FibConfigTableSet methods
+    //
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->start(error_msg) < 0)
+	    return (XORP_ERROR);
+    }
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->start(error_msg) < 0)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // Start the FibConfigTableObserver methods
+    //
+    if (_fibconfig_table_observer_primary != NULL) {
+	if (_fibconfig_table_observer_primary->start(error_msg) < 0)
+	    return (XORP_ERROR);
+    }
+    for (fibconfig_table_observer_iter = _fibconfig_table_observers_secondary.begin();
+	 fibconfig_table_observer_iter != _fibconfig_table_observers_secondary.end();
+	 ++fibconfig_table_observer_iter) {
+	FibConfigTableObserver* fibconfig_table_observer = *fibconfig_table_observer_iter;
+	if (fibconfig_table_observer->start(error_msg) < 0)
 	    return (XORP_ERROR);
     }
 
@@ -471,14 +471,14 @@ FtiConfig::start(string& error_msg)
 }
 
 int
-FtiConfig::stop(string& error_msg)
+FibConfig::stop(string& error_msg)
 {
-    list<FtiConfigEntryGet*>::iterator ftic_entry_get_iter;
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
-    list<FtiConfigEntryObserver*>::iterator ftic_entry_observer_iter;
-    list<FtiConfigTableGet*>::iterator ftic_table_get_iter;
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
-    list<FtiConfigTableObserver*>::iterator ftic_table_observer_iter;
+    list<FibConfigEntryGet*>::iterator fibconfig_entry_get_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
+    list<FibConfigEntryObserver*>::iterator fibconfig_entry_observer_iter;
+    list<FibConfigTableGet*>::iterator fibconfig_table_get_iter;
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
+    list<FibConfigTableObserver*>::iterator fibconfig_table_observer_iter;
     int ret_value = XORP_OK;
     string error_msg2;
 
@@ -488,41 +488,20 @@ FtiConfig::stop(string& error_msg)
     error_msg.erase();
 
     //
-    // Stop the FtiConfigTableObserver methods
+    // Stop the FibConfigTableObserver methods
     //
-    for (ftic_table_observer_iter = _ftic_table_observers_secondary.begin();
-	 ftic_table_observer_iter != _ftic_table_observers_secondary.end();
-	 ++ftic_table_observer_iter) {
-	FtiConfigTableObserver* ftic_table_observer = *ftic_table_observer_iter;
-	if (ftic_table_observer->stop(error_msg2) < 0) {
+    for (fibconfig_table_observer_iter = _fibconfig_table_observers_secondary.begin();
+	 fibconfig_table_observer_iter != _fibconfig_table_observers_secondary.end();
+	 ++fibconfig_table_observer_iter) {
+	FibConfigTableObserver* fibconfig_table_observer = *fibconfig_table_observer_iter;
+	if (fibconfig_table_observer->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ftic_table_observer_primary != NULL) {
-	if (_ftic_table_observer_primary->stop(error_msg2) < 0) {
-	    ret_value = XORP_ERROR;
-	    if (error_msg.empty())
-		error_msg = error_msg2;
-	}
-    }
-
-    //
-    // Stop the FtiConfigTableSet methods
-    //
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->stop(error_msg2) < 0) {
-	    ret_value = XORP_ERROR;
-	    if (error_msg.empty())
-		error_msg = error_msg2;
-	}
-    }
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->stop(error_msg2) < 0) {
+    if (_fibconfig_table_observer_primary != NULL) {
+	if (_fibconfig_table_observer_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -530,41 +509,20 @@ FtiConfig::stop(string& error_msg)
     }
 
     //
-    // Stop the FtiConfigTableGet methods
+    // Stop the FibConfigTableSet methods
     //
-    for (ftic_table_get_iter = _ftic_table_gets_secondary.begin();
-	 ftic_table_get_iter != _ftic_table_gets_secondary.end();
-	 ++ftic_table_get_iter) {
-	FtiConfigTableGet* ftic_table_get = *ftic_table_get_iter;
-	if (ftic_table_get->stop(error_msg2) < 0) {
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ftic_table_get_primary != NULL) {
-	if (_ftic_table_get_primary->stop(error_msg2) < 0) {
-	    ret_value = XORP_ERROR;
-	    if (error_msg.empty())
-		error_msg = error_msg2;
-	}
-    }
-
-    //
-    // Stop the FtiConfigEntryObserver methods
-    //
-    for (ftic_entry_observer_iter = _ftic_entry_observers_secondary.begin();
-	 ftic_entry_observer_iter != _ftic_entry_observers_secondary.end();
-	 ++ftic_entry_observer_iter) {
-	FtiConfigEntryObserver* ftic_entry_observer = *ftic_entry_observer_iter;
-	if (ftic_entry_observer->stop(error_msg2) < 0) {
-	    ret_value = XORP_ERROR;
-	    if (error_msg.empty())
-		error_msg = error_msg2;
-	}
-    }
-    if (_ftic_entry_observer_primary != NULL) {
-	if (_ftic_entry_observer_primary->stop(error_msg2) < 0) {
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -572,20 +530,20 @@ FtiConfig::stop(string& error_msg)
     }
 
     //
-    // Stop the FtiConfigEntrySet methods
+    // Stop the FibConfigTableGet methods
     //
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->stop(error_msg2) < 0) {
+    for (fibconfig_table_get_iter = _fibconfig_table_gets_secondary.begin();
+	 fibconfig_table_get_iter != _fibconfig_table_gets_secondary.end();
+	 ++fibconfig_table_get_iter) {
+	FibConfigTableGet* fibconfig_table_get = *fibconfig_table_get_iter;
+	if (fibconfig_table_get->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->stop(error_msg2) < 0) {
+    if (_fibconfig_table_get_primary != NULL) {
+	if (_fibconfig_table_get_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -593,20 +551,62 @@ FtiConfig::stop(string& error_msg)
     }
 
     //
-    // Stop the FtiConfigEntryGet methods
+    // Stop the FibConfigEntryObserver methods
     //
-    for (ftic_entry_get_iter = _ftic_entry_gets_secondary.begin();
-	 ftic_entry_get_iter != _ftic_entry_gets_secondary.end();
-	 ++ftic_entry_get_iter) {
-	FtiConfigEntryGet* ftic_entry_get = *ftic_entry_get_iter;
-	if (ftic_entry_get->stop(error_msg2) < 0) {
+    for (fibconfig_entry_observer_iter = _fibconfig_entry_observers_secondary.begin();
+	 fibconfig_entry_observer_iter != _fibconfig_entry_observers_secondary.end();
+	 ++fibconfig_entry_observer_iter) {
+	FibConfigEntryObserver* fibconfig_entry_observer = *fibconfig_entry_observer_iter;
+	if (fibconfig_entry_observer->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    if (_ftic_entry_get_primary != NULL) {
-	if (_ftic_entry_get_primary->stop(error_msg2) < 0) {
+    if (_fibconfig_entry_observer_primary != NULL) {
+	if (_fibconfig_entry_observer_primary->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
+    }
+
+    //
+    // Stop the FibConfigEntrySet methods
+    //
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
+    }
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
+    }
+
+    //
+    // Stop the FibConfigEntryGet methods
+    //
+    for (fibconfig_entry_get_iter = _fibconfig_entry_gets_secondary.begin();
+	 fibconfig_entry_get_iter != _fibconfig_entry_gets_secondary.end();
+	 ++fibconfig_entry_get_iter) {
+	FibConfigEntryGet* fibconfig_entry_get = *fibconfig_entry_get_iter;
+	if (fibconfig_entry_get->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
+    }
+    if (_fibconfig_entry_get_primary != NULL) {
+	if (_fibconfig_entry_get_primary->stop(error_msg2) < 0) {
 	    ret_value = XORP_ERROR;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -653,12 +653,12 @@ FtiConfig::stop(string& error_msg)
  * @param enable if true, then enable Click support, otherwise disable it.
  */
 void
-FtiConfig::enable_click(bool enable)
+FibConfig::enable_click(bool enable)
 {
-    _ftic_entry_get_click.enable_click(enable);
-    _ftic_entry_set_click.enable_click(enable);
-    _ftic_table_get_click.enable_click(enable);
-    _ftic_table_set_click.enable_click(enable);
+    _fibconfig_entry_get_click.enable_click(enable);
+    _fibconfig_entry_set_click.enable_click(enable);
+    _fibconfig_table_get_click.enable_click(enable);
+    _fibconfig_table_set_click.enable_click(enable);
 }
 
 /**
@@ -668,27 +668,27 @@ FtiConfig::enable_click(bool enable)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::start_click(string& error_msg)
+FibConfig::start_click(string& error_msg)
 {
-    if (_ftic_entry_get_click.start(error_msg) < 0) {
+    if (_fibconfig_entry_get_click.start(error_msg) < 0) {
 	return (XORP_ERROR);
     }
-    if (_ftic_entry_set_click.start(error_msg) < 0) {
+    if (_fibconfig_entry_set_click.start(error_msg) < 0) {
 	string error_msg2;
-	_ftic_entry_get_click.stop(error_msg2);
+	_fibconfig_entry_get_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_get_click.start(error_msg) < 0) {
+    if (_fibconfig_table_get_click.start(error_msg) < 0) {
 	string error_msg2;
-	_ftic_entry_get_click.stop(error_msg2);
-	_ftic_entry_set_click.stop(error_msg2);
+	_fibconfig_entry_get_click.stop(error_msg2);
+	_fibconfig_entry_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_set_click.start(error_msg) < 0) {
+    if (_fibconfig_table_set_click.start(error_msg) < 0) {
 	string error_msg2;
-	_ftic_entry_get_click.stop(error_msg2);
-	_ftic_entry_set_click.stop(error_msg2);
-	_ftic_table_get_click.stop(error_msg2);
+	_fibconfig_entry_get_click.stop(error_msg2);
+	_fibconfig_entry_set_click.stop(error_msg2);
+	_fibconfig_table_get_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
 
@@ -702,27 +702,27 @@ FtiConfig::start_click(string& error_msg)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::stop_click(string& error_msg)
+FibConfig::stop_click(string& error_msg)
 {
-    if (_ftic_entry_get_click.stop(error_msg) < 0) {
+    if (_fibconfig_entry_get_click.stop(error_msg) < 0) {
 	string error_msg2;
-	_ftic_entry_set_click.stop(error_msg2);
-	_ftic_table_get_click.stop(error_msg2);
-	_ftic_table_set_click.stop(error_msg2);
+	_fibconfig_entry_set_click.stop(error_msg2);
+	_fibconfig_table_get_click.stop(error_msg2);
+	_fibconfig_table_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_entry_set_click.stop(error_msg) < 0) {
+    if (_fibconfig_entry_set_click.stop(error_msg) < 0) {
 	string error_msg2;
-	_ftic_table_get_click.stop(error_msg2);
-	_ftic_table_set_click.stop(error_msg2);
+	_fibconfig_table_get_click.stop(error_msg2);
+	_fibconfig_table_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_get_click.stop(error_msg) < 0) {
+    if (_fibconfig_table_get_click.stop(error_msg) < 0) {
 	string error_msg2;
-	_ftic_table_set_click.stop(error_msg2);
+	_fibconfig_table_set_click.stop(error_msg2);
 	return (XORP_ERROR);
     }
-    if (_ftic_table_set_click.stop(error_msg) < 0) {
+    if (_fibconfig_table_set_click.stop(error_msg) < 0) {
 	return (XORP_ERROR);
     }
 
@@ -736,12 +736,12 @@ FtiConfig::stop_click(string& error_msg)
  * system kernel, otherwise disable it.
  */
 void
-FtiConfig::enable_duplicate_routes_to_kernel(bool enable)
+FibConfig::enable_duplicate_routes_to_kernel(bool enable)
 {
-    _ftic_entry_get_click.enable_duplicate_routes_to_kernel(enable);
-    _ftic_entry_set_click.enable_duplicate_routes_to_kernel(enable);
-    _ftic_table_get_click.enable_duplicate_routes_to_kernel(enable);
-    _ftic_table_set_click.enable_duplicate_routes_to_kernel(enable);
+    _fibconfig_entry_get_click.enable_duplicate_routes_to_kernel(enable);
+    _fibconfig_entry_set_click.enable_duplicate_routes_to_kernel(enable);
+    _fibconfig_table_get_click.enable_duplicate_routes_to_kernel(enable);
+    _fibconfig_table_set_click.enable_duplicate_routes_to_kernel(enable);
 }
 
 /**
@@ -751,12 +751,12 @@ FtiConfig::enable_duplicate_routes_to_kernel(bool enable)
  * otherwise disable it.
  */
 void
-FtiConfig::enable_kernel_click(bool enable)
+FibConfig::enable_kernel_click(bool enable)
 {
-    _ftic_entry_get_click.enable_kernel_click(enable);
-    _ftic_entry_set_click.enable_kernel_click(enable);
-    _ftic_table_get_click.enable_kernel_click(enable);
-    _ftic_table_set_click.enable_kernel_click(enable);
+    _fibconfig_entry_get_click.enable_kernel_click(enable);
+    _fibconfig_entry_set_click.enable_kernel_click(enable);
+    _fibconfig_table_get_click.enable_kernel_click(enable);
+    _fibconfig_table_set_click.enable_kernel_click(enable);
 }
 
 /**
@@ -765,13 +765,13 @@ FtiConfig::enable_kernel_click(bool enable)
  * @param enable if true, then install kernel-level Click on startup.
  */
 void
-FtiConfig::enable_kernel_click_install_on_startup(bool enable)
+FibConfig::enable_kernel_click_install_on_startup(bool enable)
 {
     // XXX: only IfConfigGet should install the kernel-level Click
-    _ftic_entry_get_click.enable_kernel_click_install_on_startup(enable);
-    _ftic_entry_set_click.enable_kernel_click_install_on_startup(false);
-    _ftic_table_get_click.enable_kernel_click_install_on_startup(false);
-    _ftic_table_set_click.enable_kernel_click_install_on_startup(false);
+    _fibconfig_entry_get_click.enable_kernel_click_install_on_startup(enable);
+    _fibconfig_entry_set_click.enable_kernel_click_install_on_startup(false);
+    _fibconfig_table_get_click.enable_kernel_click_install_on_startup(false);
+    _fibconfig_table_set_click.enable_kernel_click_install_on_startup(false);
 }
 
 /**
@@ -781,12 +781,12 @@ FtiConfig::enable_kernel_click_install_on_startup(bool enable)
  * @param modules the list of kernel Click modules to load.
  */
 void
-FtiConfig::set_kernel_click_modules(const list<string>& modules)
+FibConfig::set_kernel_click_modules(const list<string>& modules)
 {
-    _ftic_entry_get_click.set_kernel_click_modules(modules);
-    _ftic_entry_set_click.set_kernel_click_modules(modules);
-    _ftic_table_get_click.set_kernel_click_modules(modules);
-    _ftic_table_set_click.set_kernel_click_modules(modules);
+    _fibconfig_entry_get_click.set_kernel_click_modules(modules);
+    _fibconfig_entry_set_click.set_kernel_click_modules(modules);
+    _fibconfig_table_get_click.set_kernel_click_modules(modules);
+    _fibconfig_table_set_click.set_kernel_click_modules(modules);
 }
 
 /**
@@ -795,12 +795,12 @@ FtiConfig::set_kernel_click_modules(const list<string>& modules)
  * @param directory the kernel-level Click mount directory.
  */
 void
-FtiConfig::set_kernel_click_mount_directory(const string& directory)
+FibConfig::set_kernel_click_mount_directory(const string& directory)
 {
-    _ftic_entry_get_click.set_kernel_click_mount_directory(directory);
-    _ftic_entry_set_click.set_kernel_click_mount_directory(directory);
-    _ftic_table_get_click.set_kernel_click_mount_directory(directory);
-    _ftic_table_set_click.set_kernel_click_mount_directory(directory);
+    _fibconfig_entry_get_click.set_kernel_click_mount_directory(directory);
+    _fibconfig_entry_set_click.set_kernel_click_mount_directory(directory);
+    _fibconfig_table_get_click.set_kernel_click_mount_directory(directory);
+    _fibconfig_table_set_click.set_kernel_click_mount_directory(directory);
 }
 
 /**
@@ -811,12 +811,12 @@ FtiConfig::set_kernel_click_mount_directory(const string& directory)
  * Click configuration.
  */
 void
-FtiConfig::set_kernel_click_config_generator_file(const string& v)
+FibConfig::set_kernel_click_config_generator_file(const string& v)
 {
-    _ftic_entry_get_click.set_kernel_click_config_generator_file(v);
-    _ftic_entry_set_click.set_kernel_click_config_generator_file(v);
-    _ftic_table_get_click.set_kernel_click_config_generator_file(v);
-    _ftic_table_set_click.set_kernel_click_config_generator_file(v);
+    _fibconfig_entry_get_click.set_kernel_click_config_generator_file(v);
+    _fibconfig_entry_set_click.set_kernel_click_config_generator_file(v);
+    _fibconfig_table_get_click.set_kernel_click_config_generator_file(v);
+    _fibconfig_table_set_click.set_kernel_click_config_generator_file(v);
 }
 
 /**
@@ -826,12 +826,12 @@ FtiConfig::set_kernel_click_config_generator_file(const string& v)
  * otherwise disable it.
  */
 void
-FtiConfig::enable_user_click(bool enable)
+FibConfig::enable_user_click(bool enable)
 {
-    _ftic_entry_get_click.enable_user_click(enable);
-    _ftic_entry_set_click.enable_user_click(enable);
-    _ftic_table_get_click.enable_user_click(enable);
-    _ftic_table_set_click.enable_user_click(enable);
+    _fibconfig_entry_get_click.enable_user_click(enable);
+    _fibconfig_entry_set_click.enable_user_click(enable);
+    _fibconfig_table_get_click.enable_user_click(enable);
+    _fibconfig_table_set_click.enable_user_click(enable);
 }
 
 /**
@@ -840,12 +840,12 @@ FtiConfig::enable_user_click(bool enable)
  * @param v the name of the user-level Click command file.
  */
 void
-FtiConfig::set_user_click_command_file(const string& v)
+FibConfig::set_user_click_command_file(const string& v)
 {
-    _ftic_entry_get_click.set_user_click_command_file(v);
-    _ftic_entry_set_click.set_user_click_command_file(v);
-    _ftic_table_get_click.set_user_click_command_file(v);
-    _ftic_table_set_click.set_user_click_command_file(v);
+    _fibconfig_entry_get_click.set_user_click_command_file(v);
+    _fibconfig_entry_set_click.set_user_click_command_file(v);
+    _fibconfig_table_get_click.set_user_click_command_file(v);
+    _fibconfig_table_set_click.set_user_click_command_file(v);
 }
 
 /**
@@ -854,12 +854,12 @@ FtiConfig::set_user_click_command_file(const string& v)
  * @param v the extra arguments to the user-level Click command.
  */
 void
-FtiConfig::set_user_click_command_extra_arguments(const string& v)
+FibConfig::set_user_click_command_extra_arguments(const string& v)
 {
-    _ftic_entry_get_click.set_user_click_command_extra_arguments(v);
-    _ftic_entry_set_click.set_user_click_command_extra_arguments(v);
-    _ftic_table_get_click.set_user_click_command_extra_arguments(v);
-    _ftic_table_set_click.set_user_click_command_extra_arguments(v);
+    _fibconfig_entry_get_click.set_user_click_command_extra_arguments(v);
+    _fibconfig_entry_set_click.set_user_click_command_extra_arguments(v);
+    _fibconfig_table_get_click.set_user_click_command_extra_arguments(v);
+    _fibconfig_table_set_click.set_user_click_command_extra_arguments(v);
 }
 
 /**
@@ -868,15 +868,15 @@ FtiConfig::set_user_click_command_extra_arguments(const string& v)
  * @param v if true, then execute the user-level Click command on startup.
  */
 void
-FtiConfig::set_user_click_command_execute_on_startup(bool v)
+FibConfig::set_user_click_command_execute_on_startup(bool v)
 {
     UNUSED(v);
 
     // XXX: only IfConfigGet should execute the user-level Click command
-    _ftic_entry_get_click.set_user_click_command_execute_on_startup(false);
-    _ftic_entry_set_click.set_user_click_command_execute_on_startup(false);
-    _ftic_table_get_click.set_user_click_command_execute_on_startup(false);
-    _ftic_table_set_click.set_user_click_command_execute_on_startup(false);
+    _fibconfig_entry_get_click.set_user_click_command_execute_on_startup(false);
+    _fibconfig_entry_set_click.set_user_click_command_execute_on_startup(false);
+    _fibconfig_table_get_click.set_user_click_command_execute_on_startup(false);
+    _fibconfig_table_set_click.set_user_click_command_execute_on_startup(false);
 }
 
 /**
@@ -886,12 +886,12 @@ FtiConfig::set_user_click_command_execute_on_startup(bool v)
  * @param v the address to use for control access to the user-level Click.
  */
 void
-FtiConfig::set_user_click_control_address(const IPv4& v)
+FibConfig::set_user_click_control_address(const IPv4& v)
 {
-    _ftic_entry_get_click.set_user_click_control_address(v);
-    _ftic_entry_set_click.set_user_click_control_address(v);
-    _ftic_table_get_click.set_user_click_control_address(v);
-    _ftic_table_set_click.set_user_click_control_address(v);
+    _fibconfig_entry_get_click.set_user_click_control_address(v);
+    _fibconfig_entry_set_click.set_user_click_control_address(v);
+    _fibconfig_table_get_click.set_user_click_control_address(v);
+    _fibconfig_table_set_click.set_user_click_control_address(v);
 }
 
 /**
@@ -902,12 +902,12 @@ FtiConfig::set_user_click_control_address(const IPv4& v)
  * Click.
  */
 void
-FtiConfig::set_user_click_control_socket_port(uint32_t v)
+FibConfig::set_user_click_control_socket_port(uint32_t v)
 {
-    _ftic_entry_get_click.set_user_click_control_socket_port(v);
-    _ftic_entry_set_click.set_user_click_control_socket_port(v);
-    _ftic_table_get_click.set_user_click_control_socket_port(v);
-    _ftic_table_set_click.set_user_click_control_socket_port(v);
+    _fibconfig_entry_get_click.set_user_click_control_socket_port(v);
+    _fibconfig_entry_set_click.set_user_click_control_socket_port(v);
+    _fibconfig_table_get_click.set_user_click_control_socket_port(v);
+    _fibconfig_table_set_click.set_user_click_control_socket_port(v);
 }
 
 /**
@@ -918,12 +918,12 @@ FtiConfig::set_user_click_control_socket_port(uint32_t v)
  * Click on startup.
  */
 void
-FtiConfig::set_user_click_startup_config_file(const string& v)
+FibConfig::set_user_click_startup_config_file(const string& v)
 {
-    _ftic_entry_get_click.set_user_click_startup_config_file(v);
-    _ftic_entry_set_click.set_user_click_startup_config_file(v);
-    _ftic_table_get_click.set_user_click_startup_config_file(v);
-    _ftic_table_set_click.set_user_click_startup_config_file(v);
+    _fibconfig_entry_get_click.set_user_click_startup_config_file(v);
+    _fibconfig_entry_set_click.set_user_click_startup_config_file(v);
+    _fibconfig_table_get_click.set_user_click_startup_config_file(v);
+    _fibconfig_table_set_click.set_user_click_startup_config_file(v);
 }
 
 /**
@@ -934,19 +934,19 @@ FtiConfig::set_user_click_startup_config_file(const string& v)
  * Click configuration.
  */
 void
-FtiConfig::set_user_click_config_generator_file(const string& v)
+FibConfig::set_user_click_config_generator_file(const string& v)
 {
-    _ftic_entry_get_click.set_user_click_config_generator_file(v);
-    _ftic_entry_set_click.set_user_click_config_generator_file(v);
-    _ftic_table_get_click.set_user_click_config_generator_file(v);
-    _ftic_table_set_click.set_user_click_config_generator_file(v);
+    _fibconfig_entry_get_click.set_user_click_config_generator_file(v);
+    _fibconfig_entry_set_click.set_user_click_config_generator_file(v);
+    _fibconfig_table_get_click.set_user_click_config_generator_file(v);
+    _fibconfig_table_set_click.set_user_click_config_generator_file(v);
 }
 
 bool
-FtiConfig::start_configuration(string& error_msg)
+FibConfig::start_configuration(string& error_msg)
 {
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
     bool ret_value = true;
     string error_msg2;
 
@@ -957,36 +957,36 @@ FtiConfig::start_configuration(string& error_msg)
     // because the top-level start/end configuration interface
     // does not distinguish between "entry" and "table" modification.
     //
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->start_configuration(error_msg2) != true) {
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->start_configuration(error_msg2) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->start_configuration(error_msg2) != true) {
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->start_configuration(error_msg2) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
 
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->start_configuration(error_msg2) != true) {
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->start_configuration(error_msg2) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->start_configuration(error_msg2) != true) {
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->start_configuration(error_msg2) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -997,10 +997,10 @@ FtiConfig::start_configuration(string& error_msg)
 }
 
 bool
-FtiConfig::end_configuration(string& error_msg)
+FibConfig::end_configuration(string& error_msg)
 {
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
     bool ret_value = true;
     string error_msg2;
 
@@ -1011,36 +1011,36 @@ FtiConfig::end_configuration(string& error_msg)
     // because the top-level start/end configuration interface
     // does not distinguish between "entry" and "table" modification.
     //
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->end_configuration(error_msg) != true) {
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->end_configuration(error_msg) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->end_configuration(error_msg) != true) {
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->end_configuration(error_msg) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
 
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->end_configuration(error_msg) != true) {
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->end_configuration(error_msg) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
 	}
     }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->end_configuration(error_msg) != true) {
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->end_configuration(error_msg) != true) {
 	    ret_value = false;
 	    if (error_msg.empty())
 		error_msg = error_msg2;
@@ -1051,26 +1051,26 @@ FtiConfig::end_configuration(string& error_msg)
 }
 
 bool
-FtiConfig::add_entry4(const Fte4& fte)
+FibConfig::add_entry4(const Fte4& fte)
 {
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
 
-    if ((_ftic_entry_set_primary == NULL) && _ftic_entry_sets_secondary.empty())
+    if ((_fibconfig_entry_set_primary == NULL) && _fibconfig_entry_sets_secondary.empty())
 	return (false);
 
     if (_profile.enabled(profile_route_out))
 	_profile.log(profile_route_out,
 		     c_format("add %s", fte.net().str().c_str()));
 
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->add_entry4(fte) != true)
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->add_entry4(fte) != true)
 	    return (false);
     }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->add_entry4(fte) != true)
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->add_entry4(fte) != true)
 	    return (false);
     }
 
@@ -1078,49 +1078,26 @@ FtiConfig::add_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfig::delete_entry4(const Fte4& fte)
+FibConfig::delete_entry4(const Fte4& fte)
 {
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
 
-    if ((_ftic_entry_set_primary == NULL) && _ftic_entry_sets_secondary.empty())
+    if ((_fibconfig_entry_set_primary == NULL) && _fibconfig_entry_sets_secondary.empty())
 	return (false);
 
     if (_profile.enabled(profile_route_out))
 	_profile.log(profile_route_out,
 		     c_format("delete %s", fte.net().str().c_str()));
 
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->delete_entry4(fte) != true)
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->delete_entry4(fte) != true)
 	    return (false);
     }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->delete_entry4(fte) != true)
-	    return (false);
-    }
-
-    return (true);
-}
-
-bool
-FtiConfig::set_table4(const list<Fte4>& fte_list)
-{
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
-
-    if ((_ftic_table_set_primary == NULL) && _ftic_table_sets_secondary.empty())
-	return (false);
-
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->set_table4(fte_list) != true)
-	    return (false);
-    }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->set_table4(fte_list) != true)
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->delete_entry4(fte) != true)
 	    return (false);
     }
 
@@ -1128,22 +1105,22 @@ FtiConfig::set_table4(const list<Fte4>& fte_list)
 }
 
 bool
-FtiConfig::delete_all_entries4()
+FibConfig::set_table4(const list<Fte4>& fte_list)
 {
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
 
-    if ((_ftic_table_set_primary == NULL) && _ftic_table_sets_secondary.empty())
+    if ((_fibconfig_table_set_primary == NULL) && _fibconfig_table_sets_secondary.empty())
 	return (false);
 
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->delete_all_entries4() != true)
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->set_table4(fte_list) != true)
 	    return (false);
     }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->delete_all_entries4() != true)
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->set_table4(fte_list) != true)
 	    return (false);
     }
 
@@ -1151,62 +1128,85 @@ FtiConfig::delete_all_entries4()
 }
 
 bool
-FtiConfig::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfig::delete_all_entries4()
 {
-    if (_ftic_entry_get_primary == NULL)
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
+
+    if ((_fibconfig_table_set_primary == NULL) && _fibconfig_table_sets_secondary.empty())
 	return (false);
 
-    if (_ftic_entry_get_primary->lookup_route_by_dest4(dst, fte) != true)
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->delete_all_entries4() != true)
+	    return (false);
+    }
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->delete_all_entries4() != true)
+	    return (false);
+    }
+
+    return (true);
+}
+
+bool
+FibConfig::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+{
+    if (_fibconfig_entry_get_primary == NULL)
+	return (false);
+
+    if (_fibconfig_entry_get_primary->lookup_route_by_dest4(dst, fte) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-FtiConfig::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
+FibConfig::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
-    if (_ftic_entry_get_primary == NULL)
+    if (_fibconfig_entry_get_primary == NULL)
 	return (false);
 
-    if (_ftic_entry_get_primary->lookup_route_by_network4(dst, fte) != true)
+    if (_fibconfig_entry_get_primary->lookup_route_by_network4(dst, fte) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-FtiConfig::get_table4(list<Fte4>& fte_list)
+FibConfig::get_table4(list<Fte4>& fte_list)
 {
-    if (_ftic_table_get_primary == NULL)
+    if (_fibconfig_table_get_primary == NULL)
 	return (false);
 
-    if (_ftic_table_get_primary->get_table4(fte_list) != true)
+    if (_fibconfig_table_get_primary->get_table4(fte_list) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-FtiConfig::add_entry6(const Fte6& fte)
+FibConfig::add_entry6(const Fte6& fte)
 {
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
 
-    if ((_ftic_entry_set_primary == NULL) && _ftic_entry_sets_secondary.empty())
+    if ((_fibconfig_entry_set_primary == NULL) && _fibconfig_entry_sets_secondary.empty())
 	return (false);
 
     if (_profile.enabled(profile_route_out))
 	_profile.log(profile_route_out,
 		     c_format("add %s", fte.net().str().c_str()));
 
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->add_entry6(fte) != true)
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->add_entry6(fte) != true)
 	    return (false);
     }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->add_entry6(fte) != true)
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->add_entry6(fte) != true)
 	    return (false);
     }
 
@@ -1214,49 +1214,26 @@ FtiConfig::add_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfig::delete_entry6(const Fte6& fte)
+FibConfig::delete_entry6(const Fte6& fte)
 {
-    list<FtiConfigEntrySet*>::iterator ftic_entry_set_iter;
+    list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
 
-    if ((_ftic_entry_set_primary == NULL) && _ftic_entry_sets_secondary.empty())
+    if ((_fibconfig_entry_set_primary == NULL) && _fibconfig_entry_sets_secondary.empty())
 	return (false);
 
     if (_profile.enabled(profile_route_out))
 	_profile.log(profile_route_out,
 		     c_format("delete %s", fte.net().str().c_str()));
 
-    if (_ftic_entry_set_primary != NULL) {
-	if (_ftic_entry_set_primary->delete_entry6(fte) != true)
+    if (_fibconfig_entry_set_primary != NULL) {
+	if (_fibconfig_entry_set_primary->delete_entry6(fte) != true)
 	    return (false);
     }
-    for (ftic_entry_set_iter = _ftic_entry_sets_secondary.begin();
-	 ftic_entry_set_iter != _ftic_entry_sets_secondary.end();
-	 ++ftic_entry_set_iter) {
-	FtiConfigEntrySet* ftic_entry_set = *ftic_entry_set_iter;
-	if (ftic_entry_set->delete_entry6(fte) != true)
-	    return (false);
-    }
-
-    return (true);
-}
-
-bool
-FtiConfig::set_table6(const list<Fte6>& fte_list)
-{
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
-
-    if ((_ftic_table_set_primary == NULL) && _ftic_table_sets_secondary.empty())
-	return (false);
-
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->set_table6(fte_list) != true)
-	    return (false);
-    }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->set_table6(fte_list) != true)
+    for (fibconfig_entry_set_iter = _fibconfig_entry_sets_secondary.begin();
+	 fibconfig_entry_set_iter != _fibconfig_entry_sets_secondary.end();
+	 ++fibconfig_entry_set_iter) {
+	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
+	if (fibconfig_entry_set->delete_entry6(fte) != true)
 	    return (false);
     }
 
@@ -1264,22 +1241,22 @@ FtiConfig::set_table6(const list<Fte6>& fte_list)
 }
 
 bool
-FtiConfig::delete_all_entries6()
+FibConfig::set_table6(const list<Fte6>& fte_list)
 {
-    list<FtiConfigTableSet*>::iterator ftic_table_set_iter;
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
 
-    if ((_ftic_table_set_primary == NULL) && _ftic_table_sets_secondary.empty())
+    if ((_fibconfig_table_set_primary == NULL) && _fibconfig_table_sets_secondary.empty())
 	return (false);
 
-    if (_ftic_table_set_primary != NULL) {
-	if (_ftic_table_set_primary->delete_all_entries6() != true)
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->set_table6(fte_list) != true)
 	    return (false);
     }
-    for (ftic_table_set_iter = _ftic_table_sets_secondary.begin();
-	 ftic_table_set_iter != _ftic_table_sets_secondary.end();
-	 ++ftic_table_set_iter) {
-	FtiConfigTableSet* ftic_table_set = *ftic_table_set_iter;
-	if (ftic_table_set->delete_all_entries6() != true)
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->set_table6(fte_list) != true)
 	    return (false);
     }
 
@@ -1287,59 +1264,82 @@ FtiConfig::delete_all_entries6()
 }
 
 bool
-FtiConfig::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfig::delete_all_entries6()
 {
-    if (_ftic_entry_get_primary == NULL)
+    list<FibConfigTableSet*>::iterator fibconfig_table_set_iter;
+
+    if ((_fibconfig_table_set_primary == NULL) && _fibconfig_table_sets_secondary.empty())
 	return (false);
 
-    if (_ftic_entry_get_primary->lookup_route_by_dest6(dst, fte) != true)
+    if (_fibconfig_table_set_primary != NULL) {
+	if (_fibconfig_table_set_primary->delete_all_entries6() != true)
+	    return (false);
+    }
+    for (fibconfig_table_set_iter = _fibconfig_table_sets_secondary.begin();
+	 fibconfig_table_set_iter != _fibconfig_table_sets_secondary.end();
+	 ++fibconfig_table_set_iter) {
+	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
+	if (fibconfig_table_set->delete_all_entries6() != true)
+	    return (false);
+    }
+
+    return (true);
+}
+
+bool
+FibConfig::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+{
+    if (_fibconfig_entry_get_primary == NULL)
+	return (false);
+
+    if (_fibconfig_entry_get_primary->lookup_route_by_dest6(dst, fte) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-FtiConfig::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
+FibConfig::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 {
-    if (_ftic_entry_get_primary == NULL)
+    if (_fibconfig_entry_get_primary == NULL)
 	return (false);
 
-    if (_ftic_entry_get_primary->lookup_route_by_network6(dst, fte) != true)
+    if (_fibconfig_entry_get_primary->lookup_route_by_network6(dst, fte) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-FtiConfig::get_table6(list<Fte6>& fte_list)
+FibConfig::get_table6(list<Fte6>& fte_list)
 {
-    if (_ftic_table_get_primary == NULL)
+    if (_fibconfig_table_get_primary == NULL)
 	return (false);
 
-    if (_ftic_table_get_primary->get_table6(fte_list) != true)
+    if (_fibconfig_table_get_primary->get_table6(fte_list) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-FtiConfig::add_fib_table_observer(FibTableObserverBase* fib_table_observer)
+FibConfig::add_fib_table_observer(FibTableObserverBase* fib_table_observer)
 {
-    if (_ftic_table_observer_primary == NULL)
+    if (_fibconfig_table_observer_primary == NULL)
 	return (false);
 
-    _ftic_table_observer_primary->add_fib_table_observer(fib_table_observer);
+    _fibconfig_table_observer_primary->add_fib_table_observer(fib_table_observer);
 
     return (true);
 }
 
 bool
-FtiConfig::delete_fib_table_observer(FibTableObserverBase* fib_table_observer)
+FibConfig::delete_fib_table_observer(FibTableObserverBase* fib_table_observer)
 {
-    if (_ftic_table_observer_primary == NULL)
+    if (_fibconfig_table_observer_primary == NULL)
 	return (false);
 
-    _ftic_table_observer_primary->delete_fib_table_observer(fib_table_observer);
+    _fibconfig_table_observer_primary->delete_fib_table_observer(fib_table_observer);
 
     return (true);
 }
@@ -1350,7 +1350,7 @@ FtiConfig::delete_fib_table_observer(FibTableObserverBase* fib_table_observer)
  * @return true if the underlying system supports IPv4, otherwise false.
  */
 bool
-FtiConfig::test_have_ipv4() const
+FibConfig::test_have_ipv4() const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy())
@@ -1371,7 +1371,7 @@ FtiConfig::test_have_ipv4() const
  * @return true if the underlying system supports IPv6, otherwise false.
  */
 bool
-FtiConfig::test_have_ipv6() const
+FibConfig::test_have_ipv6() const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy())
@@ -1399,7 +1399,7 @@ FtiConfig::test_have_ipv6() const
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
+FibConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy()) {
@@ -1546,7 +1546,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
+FibConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy()) {
@@ -1704,7 +1704,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
+FibConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 {
     // XXX: always return true if running in dummy mode
     if (is_dummy()) {
@@ -1846,7 +1846,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
+FibConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
     if (is_dummy())
@@ -2019,7 +2019,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
+FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
     if (is_dummy())
@@ -2209,7 +2209,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
+FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
     if (is_dummy())
@@ -2368,7 +2368,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_unicast_forwarding_entries_retain_on_startup4(bool retain,
+FibConfig::set_unicast_forwarding_entries_retain_on_startup4(bool retain,
 							     string& error_msg)
 {
     _unicast_forwarding_entries_retain_on_startup4 = retain;
@@ -2387,7 +2387,7 @@ FtiConfig::set_unicast_forwarding_entries_retain_on_startup4(bool retain,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
+FibConfig::set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
 							      string& error_msg)
 {
     _unicast_forwarding_entries_retain_on_shutdown4 = retain;
@@ -2406,7 +2406,7 @@ FtiConfig::set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_unicast_forwarding_entries_retain_on_startup6(bool retain,
+FibConfig::set_unicast_forwarding_entries_retain_on_startup6(bool retain,
 							     string& error_msg)
 {
     _unicast_forwarding_entries_retain_on_startup6 = retain;
@@ -2425,7 +2425,7 @@ FtiConfig::set_unicast_forwarding_entries_retain_on_startup6(bool retain,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-FtiConfig::set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
+FibConfig::set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
 							      string& error_msg)
 {
     _unicast_forwarding_entries_retain_on_shutdown6 = retain;

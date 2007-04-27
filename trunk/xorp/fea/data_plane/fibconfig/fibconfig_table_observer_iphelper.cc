@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_iphelper.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_iphelper.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -36,15 +36,15 @@
 //
 
 
-FtiConfigTableObserverIPHelper::FtiConfigTableObserverIPHelper(FtiConfig& ftic)
-    : FtiConfigTableObserver(ftic)
+FibConfigTableObserverIPHelper::FibConfigTableObserverIPHelper(FibConfig& fibconfig)
+    : FibConfigTableObserver(fibconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableObserverIPHelper::~FtiConfigTableObserverIPHelper()
+FibConfigTableObserverIPHelper::~FibConfigTableObserverIPHelper()
 {
     string error_msg;
 
@@ -57,7 +57,7 @@ FtiConfigTableObserverIPHelper::~FtiConfigTableObserverIPHelper()
 }
 
 int
-FtiConfigTableObserverIPHelper::start(string& error_msg)
+FibConfigTableObserverIPHelper::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -70,7 +70,7 @@ FtiConfigTableObserverIPHelper::start(string& error_msg)
 }
     
 int
-FtiConfigTableObserverIPHelper::stop(string& error_msg)
+FibConfigTableObserverIPHelper::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -83,7 +83,7 @@ FtiConfigTableObserverIPHelper::stop(string& error_msg)
 }
 
 void
-FtiConfigTableObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
 {
     debug_msg("called\n");
     UNUSED(buffer);

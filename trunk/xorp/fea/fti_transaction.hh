@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.14 2007/02/16 22:45:36 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.15 2007/04/26 22:29:51 pavlin Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -32,23 +32,23 @@
  */
 class FtiTransactionOperation : public TransactionOperation {
 public:
-    FtiTransactionOperation(FtiConfig& ftic) : _ftic(ftic) {}
+    FtiTransactionOperation(FibConfig& fibconfig) : _fibconfig(fibconfig) {}
     virtual ~FtiTransactionOperation() {}
 
 protected:
-    FtiConfig& ftic() { return _ftic; }
+    FibConfig& fibconfig() { return _fibconfig; }
 
 private:
-    FtiConfig& _ftic;
+    FibConfig& _fibconfig;
 };
 
 /**
- * Class to store request to add routing entry to FtiConfig and
+ * Class to store request to add routing entry to FibConfig and
  * dispatch it later.
  */
 class FtiAddEntry4 : public FtiTransactionOperation {
 public:
-    FtiAddEntry4(FtiConfig&	ftic,
+    FtiAddEntry4(FibConfig&	fibconfig,
 		 const IPv4Net&	net,
 		 const IPv4&	nexthop,
 		 const string&	ifname,
@@ -57,14 +57,14 @@ public:
 		 uint32_t	admin_distance,
 		 bool		xorp_route,
 		 bool		is_connected_route)
-	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
-					      metric, admin_distance,
-					      xorp_route) {
+	: FtiTransactionOperation(fibconfig),
+	  _fte(net, nexthop, ifname, vifname, metric, admin_distance,
+	       xorp_route) {
 	if (is_connected_route)
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return ftic().add_entry4(_fte); }
+    bool dispatch() { return fibconfig().add_entry4(_fte); }
 
     string str() const { return string("AddEntry4: ") + _fte.str(); }
 
@@ -73,12 +73,12 @@ private:
 };
 
 /**
- * Class to store request to delete routing entry to FtiConfig and
+ * Class to store request to delete routing entry to FibConfig and
  * dispatch it later.
  */
 class FtiDeleteEntry4 : public FtiTransactionOperation {
 public:
-    FtiDeleteEntry4(FtiConfig&		ftic,
+    FtiDeleteEntry4(FibConfig&		fibconfig,
 		    const IPv4Net&	net,
 		    const IPv4&		nexthop,
 		    const string&	ifname,
@@ -87,14 +87,14 @@ public:
 		    uint32_t		admin_distance,
 		    bool		xorp_route,
 		    bool		is_connected_route)
-	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
-					      metric, admin_distance,
-					      xorp_route) {
+	: FtiTransactionOperation(fibconfig),
+	  _fte(net, nexthop, ifname, vifname, metric, admin_distance,
+	       xorp_route) {
 	if (is_connected_route)
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return ftic().delete_entry4(_fte); }
+    bool dispatch() { return fibconfig().delete_entry4(_fte); }
 
     string str() const { return string("DeleteEntry4: ") + _fte.str();  }
 
@@ -103,25 +103,26 @@ private:
 };
 
 /**
- * Class to store request to delete all routing entries to FtiConfig and
+ * Class to store request to delete all routing entries to FibConfig and
  * dispatch it later.
  */
 class FtiDeleteAllEntries4 : public FtiTransactionOperation {
 public:
-    FtiDeleteAllEntries4(FtiConfig& ftic) : FtiTransactionOperation(ftic) {}
+    FtiDeleteAllEntries4(FibConfig& fibconfig)
+	: FtiTransactionOperation(fibconfig) {}
 
-    bool dispatch() { return ftic().delete_all_entries4(); }
+    bool dispatch() { return fibconfig().delete_all_entries4(); }
 
     string str() const { return string("DeleteAllEntries4");  }
 };
 
 /**
- * Class to store request to add routing entry to FtiConfig and
+ * Class to store request to add routing entry to FibConfig and
  * dispatch it later.
  */
 class FtiAddEntry6 : public FtiTransactionOperation {
 public:
-    FtiAddEntry6(FtiConfig&	ftic,
+    FtiAddEntry6(FibConfig&	fibconfig,
 		 const IPv6Net&	net,
 		 const IPv6&	nexthop,
 		 const string&  ifname,
@@ -130,14 +131,14 @@ public:
 		 uint32_t	admin_distance,
 		 bool		xorp_route,
 		 bool		is_connected_route)
-	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
-					      metric, admin_distance,
-					      xorp_route) {
+	: FtiTransactionOperation(fibconfig),
+	  _fte(net, nexthop, ifname, vifname, metric, admin_distance,
+	       xorp_route) {
 	if (is_connected_route)
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return ftic().add_entry6(_fte); }
+    bool dispatch() { return fibconfig().add_entry6(_fte); }
 
     string str() const { return string("AddEntry6: ") + _fte.str(); }
 
@@ -146,12 +147,12 @@ private:
 };
 
 /**
- * Class to store request to delete routing entry to FtiConfig
+ * Class to store request to delete routing entry to FibConfig
  * and dispatch it later.
  */
 class FtiDeleteEntry6 : public FtiTransactionOperation {
 public:
-    FtiDeleteEntry6(FtiConfig&		ftic,
+    FtiDeleteEntry6(FibConfig&		fibconfig,
 		    const IPv6Net&	net,
 		    const IPv6&		nexthop,
 		    const string&	ifname,
@@ -160,14 +161,14 @@ public:
 		    uint32_t		admin_distance,
 		    bool		xorp_route,
 		    bool		is_connected_route)
-	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
-					      metric, admin_distance,
-					      xorp_route) {
+	: FtiTransactionOperation(fibconfig),
+	  _fte(net, nexthop, ifname, vifname, metric, admin_distance,
+	       xorp_route) {
 	if (is_connected_route)
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return ftic().delete_entry6(_fte); }
+    bool dispatch() { return fibconfig().delete_entry6(_fte); }
 
     string str() const { return string("DeleteEntry6: ") + _fte.str();  }
 
@@ -176,14 +177,15 @@ private:
 };
 
 /**
- * Class to store request to delete all routing entries to FtiConfig
+ * Class to store request to delete all routing entries to FibConfig
  * and dispatch it later.
  */
 class FtiDeleteAllEntries6 : public FtiTransactionOperation {
 public:
-    FtiDeleteAllEntries6(FtiConfig& ftic) : FtiTransactionOperation(ftic) {}
+    FtiDeleteAllEntries6(FibConfig& fibconfig)
+	: FtiTransactionOperation(fibconfig) {}
 
-    bool dispatch() { return ftic().delete_all_entries6(); }
+    bool dispatch() { return fibconfig().delete_all_entries6(); }
 
     string str() const { return string("DeleteAllEntries6");  }
 };
@@ -199,12 +201,13 @@ public:
 
     enum { TIMEOUT_MS = 5000 };
 
-    FtiTransactionManager(EventLoop& e, FtiConfig& ftic,
+    FtiTransactionManager(EventLoop& e, FibConfig& fibconfig,
 			  uint32_t max_pending = 10)
-	: TransactionManager(e, TIMEOUT_MS, max_pending), _ftic(ftic)
+	: TransactionManager(e, TIMEOUT_MS, max_pending),
+	  _fibconfig(fibconfig)
     {}
 
-    FtiConfig& ftic() { return _ftic; }
+    FibConfig& fibconfig() { return _fibconfig; }
 
     /**
      * @return string representing first error during commit.  If string is
@@ -222,7 +225,7 @@ protected:
     void operation_result(bool success, const TransactionOperation& op);
 
 protected:
-    FtiConfig& _ftic;
+    FibConfig& _fibconfig;
     string _error;
 };
 

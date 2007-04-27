@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set.cc,v 1.11 2007/02/16 22:45:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_table_set.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,30 +29,30 @@
 //
 
 
-FtiConfigTableSet::FtiConfigTableSet(FtiConfig& ftic)
+FibConfigTableSet::FibConfigTableSet(FibConfig& fibconfig)
     : _is_running(false),
-      _ftic(ftic),
+      _fibconfig(fibconfig),
       _in_configuration(false),
       _is_primary(true)
 {
     
 }
 
-FtiConfigTableSet::~FtiConfigTableSet()
+FibConfigTableSet::~FibConfigTableSet()
 {
     
 }
 
 void
-FtiConfigTableSet::register_ftic_primary()
+FibConfigTableSet::register_fibconfig_primary()
 {
-    _ftic.register_ftic_table_set_primary(this);
+    _fibconfig.register_fibconfig_table_set_primary(this);
 }
 
 void
-FtiConfigTableSet::register_ftic_secondary()
+FibConfigTableSet::register_fibconfig_secondary()
 {
-    _ftic.register_ftic_table_set_secondary(this);
+    _fibconfig.register_fibconfig_table_set_secondary(this);
 
     //
     // XXX: push the current config into the new secondary
@@ -60,7 +60,7 @@ FtiConfigTableSet::register_ftic_secondary()
     if (_is_running) {
 	list<Fte4> fte_list4;
 
-	if (_ftic.get_table4(fte_list4) == true) {
+	if (_fibconfig.get_table4(fte_list4) == true) {
 	    if (set_table4(fte_list4) != true) {
 		XLOG_ERROR("Cannot push the current IPv4 forwarding table "
 			   "into a new secondary mechanism for setting the "
@@ -71,7 +71,7 @@ FtiConfigTableSet::register_ftic_secondary()
 #ifdef HAVE_IPV6
 	list<Fte6> fte_list6;
 
-	if (_ftic.get_table6(fte_list6) == true) {
+	if (_fibconfig.get_table6(fte_list6) == true) {
 	    if (set_table6(fte_list6) != true) {
 		XLOG_ERROR("Cannot push the current IPv6 forwarding table "
 			   "into a new secondary mechanism for setting the "

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.25 2007/02/16 22:45:39 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -28,18 +28,18 @@
 
 class IPv4;
 class IPv6;
-class FtiConfig;
+class FibConfig;
 
-class FtiConfigTableGet {
+class FibConfigTableGet {
 public:
-    FtiConfigTableGet(FtiConfig& ftic);
+    FibConfigTableGet(FibConfig& fibconfig);
     
-    virtual ~FtiConfigTableGet();
+    virtual ~FibConfigTableGet();
     
-    FtiConfig&	ftic() { return _ftic; }
+    FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_ftic_primary();
-    virtual void register_ftic_secondary();
+    virtual void register_fibconfig_primary();
+    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -129,14 +129,14 @@ protected:
     bool	_is_running;
 
 private:
-    FtiConfig&	_ftic;
+    FibConfig&	_fibconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FtiConfigTableGetDummy : public FtiConfigTableGet {
+class FibConfigTableGetDummy : public FibConfigTableGet {
 public:
-    FtiConfigTableGetDummy(FtiConfig& ftic);
-    virtual ~FtiConfigTableGetDummy();
+    FibConfigTableGetDummy(FibConfig& fibconfig);
+    virtual ~FibConfigTableGetDummy();
 
     /**
      * Start operation.
@@ -178,10 +178,10 @@ private:
     
 };
 
-class FtiConfigTableGetSysctl : public FtiConfigTableGet {
+class FibConfigTableGetSysctl : public FibConfigTableGet {
 public:
-    FtiConfigTableGetSysctl(FtiConfig& ftic);
-    virtual ~FtiConfigTableGetSysctl();
+    FibConfigTableGetSysctl(FibConfig& fibconfig);
+    virtual ~FibConfigTableGetSysctl();
 
     /**
      * Start operation.
@@ -224,11 +224,11 @@ private:
     
 };
 
-class FtiConfigTableGetNetlink : public FtiConfigTableGet,
+class FibConfigTableGetNetlink : public FibConfigTableGet,
 				 public NetlinkSocket {
 public:
-    FtiConfigTableGetNetlink(FtiConfig& ftic);
-    virtual ~FtiConfigTableGetNetlink();
+    FibConfigTableGetNetlink(FibConfig& fibconfig);
+    virtual ~FibConfigTableGetNetlink();
 
     /**
      * Start operation.
@@ -272,11 +272,11 @@ private:
     NetlinkSocketReader	_ns_reader;
 };
 
-class FtiConfigTableGetClick : public FtiConfigTableGet,
+class FibConfigTableGetClick : public FibConfigTableGet,
 			       public ClickSocket {
 public:
-    FtiConfigTableGetClick(FtiConfig& ftic);
-    virtual ~FtiConfigTableGetClick();
+    FibConfigTableGetClick(FibConfig& fibconfig);
+    virtual ~FibConfigTableGetClick();
 
     /**
      * Start operation.
@@ -319,10 +319,10 @@ private:
     ClickSocketReader	_cs_reader;
 };
 
-class FtiConfigTableGetIPHelper : public FtiConfigTableGet {
+class FibConfigTableGetIPHelper : public FibConfigTableGet {
 public:
-    FtiConfigTableGetIPHelper(FtiConfig& ftic);
-    virtual ~FtiConfigTableGetIPHelper();
+    FibConfigTableGetIPHelper(FibConfig& fibconfig);
+    virtual ~FibConfigTableGetIPHelper();
 
     /**
      * Start operation.
@@ -364,10 +364,10 @@ private:
     bool get_table(int family, list<FteX>& fte_list);
 };
 
-class FtiConfigTableGetRtmV2 : public FtiConfigTableGet {
+class FibConfigTableGetRtmV2 : public FibConfigTableGet {
 public:
-    FtiConfigTableGetRtmV2(FtiConfig& ftic);
-    virtual ~FtiConfigTableGetRtmV2();
+    FibConfigTableGetRtmV2(FibConfig& fibconfig);
+    virtual ~FibConfigTableGetRtmV2();
 
     /**
      * Start operation.

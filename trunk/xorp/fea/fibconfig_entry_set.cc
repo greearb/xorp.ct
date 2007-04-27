@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set.cc,v 1.11 2007/02/16 22:45:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_entry_set.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,30 +29,30 @@
 //
 
 
-FtiConfigEntrySet::FtiConfigEntrySet(FtiConfig& ftic)
+FibConfigEntrySet::FibConfigEntrySet(FibConfig& fibconfig)
     : _is_running(false),
-      _ftic(ftic),
+      _fibconfig(fibconfig),
       _in_configuration(false),
       _is_primary(true)
 {
     
 }
 
-FtiConfigEntrySet::~FtiConfigEntrySet()
+FibConfigEntrySet::~FibConfigEntrySet()
 {
     
 }
 
 void
-FtiConfigEntrySet::register_ftic_primary()
+FibConfigEntrySet::register_fibconfig_primary()
 {
-    _ftic.register_ftic_entry_set_primary(this);
+    _fibconfig.register_fibconfig_entry_set_primary(this);
 }
 
 void
-FtiConfigEntrySet::register_ftic_secondary()
+FibConfigEntrySet::register_fibconfig_secondary()
 {
-    _ftic.register_ftic_entry_set_secondary(this);
+    _fibconfig.register_fibconfig_entry_set_secondary(this);
 
     //
     // XXX: push the current config into the new secondary
@@ -61,10 +61,10 @@ FtiConfigEntrySet::register_ftic_secondary()
 	// XXX: nothing to do. 
 	//
 	// XXX: note that the forwarding table state in the secondary methods
-	// is pushed by FtiConfigTableSet::register_ftic_secondary(), hence
-	// we don't need to do it here again. However, this is based on the
-	// assumption that for each FtiConfigEntrySet secondary method
-	// there is a corresponding FtiConfigTableSet secondary method.
+	// is pushed by FibConfigTableSet::register_fibconfig_secondary(),
+	// hence we don't need to do it here again. However, this is based on
+	// the assumption that for each FibConfigEntrySet secondary method
+	// there is a corresponding FibConfigTableSet secondary method.
 	//
     }
 }

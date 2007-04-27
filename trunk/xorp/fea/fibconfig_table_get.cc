@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get.cc,v 1.11 2007/02/16 22:45:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_table_get.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,17 +31,17 @@
 //
 
 
-FtiConfigTableGet::FtiConfigTableGet(FtiConfig& ftic)
+FibConfigTableGet::FibConfigTableGet(FibConfig& fibconfig)
     : _s4(-1),
       _s6(-1),
       _is_running(false),
-      _ftic(ftic),
+      _fibconfig(fibconfig),
       _is_primary(true)
 {
     
 }
 
-FtiConfigTableGet::~FtiConfigTableGet()
+FibConfigTableGet::~FibConfigTableGet()
 {
     if (_s4 >= 0) {
 	comm_close(_s4);
@@ -54,19 +54,19 @@ FtiConfigTableGet::~FtiConfigTableGet()
 }
 
 void
-FtiConfigTableGet::register_ftic_primary()
+FibConfigTableGet::register_fibconfig_primary()
 {
-    _ftic.register_ftic_table_get_primary(this);
+    _fibconfig.register_fibconfig_table_get_primary(this);
 }
 
 void
-FtiConfigTableGet::register_ftic_secondary()
+FibConfigTableGet::register_fibconfig_secondary()
 {
-    _ftic.register_ftic_table_get_secondary(this);
+    _fibconfig.register_fibconfig_table_get_secondary(this);
 }
 
 int
-FtiConfigTableGet::sock(int family)
+FibConfigTableGet::sock(int family)
 {
     switch (family) {
     case AF_INET:

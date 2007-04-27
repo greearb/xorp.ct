@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_observer.cc,v 1.13 2007/02/16 22:45:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_table_observer.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,29 +33,29 @@
 //
 
 
-FtiConfigTableObserver::FtiConfigTableObserver(FtiConfig& ftic)
+FibConfigTableObserver::FibConfigTableObserver(FibConfig& fibconfig)
     : _is_running(false),
-      _ftic(ftic),
+      _fibconfig(fibconfig),
       _is_primary(true)
 {
     
 }
 
-FtiConfigTableObserver::~FtiConfigTableObserver()
+FibConfigTableObserver::~FibConfigTableObserver()
 {
     
 }
 
 void
-FtiConfigTableObserver::register_ftic_primary()
+FibConfigTableObserver::register_fibconfig_primary()
 {
-    _ftic.register_ftic_table_observer_primary(this);
+    _fibconfig.register_fibconfig_table_observer_primary(this);
 }
 
 void
-FtiConfigTableObserver::register_ftic_secondary()
+FibConfigTableObserver::register_fibconfig_secondary()
 {
-    _ftic.register_ftic_table_observer_secondary(this);
+    _fibconfig.register_fibconfig_table_observer_secondary(this);
 }
 
 /**
@@ -64,7 +64,7 @@ FtiConfigTableObserver::register_ftic_secondary()
  * @param fib_table_observer the FIB table observer to add.
  */
 void
-FtiConfigTableObserver::add_fib_table_observer(
+FibConfigTableObserver::add_fib_table_observer(
     FibTableObserverBase* fib_table_observer)
 {
     if (find(_fib_table_observers.begin(),
@@ -83,7 +83,7 @@ FtiConfigTableObserver::add_fib_table_observer(
  * @param fib_table_observer the FIB table observer to delete.
  */
 void
-FtiConfigTableObserver::delete_fib_table_observer(
+FibConfigTableObserver::delete_fib_table_observer(
     FibTableObserverBase* fib_table_observer)
 {
     list<FibTableObserverBase* >::iterator iter;
@@ -101,7 +101,7 @@ FtiConfigTableObserver::delete_fib_table_observer(
  * @param fte_list the list with the FIB changes.
  */
 void
-FtiConfigTableObserver::propagate_fib_changes(const list<FteX>& fte_list)
+FibConfigTableObserver::propagate_fib_changes(const list<FteX>& fte_list)
 {
     list<Fte4> fte_list4;
     list<Fte6> fte_list6;

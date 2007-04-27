@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_click.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_click.cc,v 1.2 2007/04/26 22:29:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,14 +32,14 @@
 //
 
 
-FtiConfigEntryGetClick::FtiConfigEntryGetClick(FtiConfig& ftic)
-    : FtiConfigEntryGet(ftic),
-      ClickSocket(ftic.eventloop()),
+FibConfigEntryGetClick::FibConfigEntryGetClick(FibConfig& fibconfig)
+    : FibConfigEntryGet(fibconfig),
+      ClickSocket(fibconfig.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
 
-FtiConfigEntryGetClick::~FtiConfigEntryGetClick()
+FibConfigEntryGetClick::~FibConfigEntryGetClick()
 {
     string error_msg;
 
@@ -52,7 +52,7 @@ FtiConfigEntryGetClick::~FtiConfigEntryGetClick()
 }
 
 int
-FtiConfigEntryGetClick::start(string& error_msg)
+FibConfigEntryGetClick::start(string& error_msg)
 {
     if (! ClickSocket::is_enabled())
 	return (XORP_OK);
@@ -74,13 +74,13 @@ FtiConfigEntryGetClick::start(string& error_msg)
     // Click should be the ultimate place to read the route info from.
     // The kernel itself may contain some left-over stuff.
     //
-    register_ftic_primary();
+    register_fibconfig_primary();
 
     return (XORP_OK);
 }
 
 int
-FtiConfigEntryGetClick::stop(string& error_msg)
+FibConfigEntryGetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
@@ -103,7 +103,7 @@ FtiConfigEntryGetClick::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     list<Fte4> fte_list4;
     bool found = false;
@@ -113,7 +113,7 @@ FtiConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
     // for the longest-prefix match.
     // TODO: This implementation is very inefficient.
     //
-    if (ftic().get_table4(fte_list4) != true)
+    if (fibconfig().get_table4(fte_list4) != true)
 	return (false);
 
     list<Fte4>::iterator iter4;
@@ -139,7 +139,7 @@ FtiConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
+FibConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
     list<Fte4> fte_list4;
 
@@ -148,7 +148,7 @@ FtiConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
     // for the exact match.
     // TODO: This implementation is very inefficient.
     //
-    if (ftic().get_table4(fte_list4) != true)
+    if (fibconfig().get_table4(fte_list4) != true)
 	return (false);
 
     list<Fte4>::iterator iter4;
@@ -172,7 +172,7 @@ FtiConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     list<Fte6> fte_list6;
     bool found = false;
@@ -182,7 +182,7 @@ FtiConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
     // for the longest-prefix match.
     // TODO: This implementation is very inefficient.
     //
-    if (ftic().get_table6(fte_list6) != true)
+    if (fibconfig().get_table6(fte_list6) != true)
 	return (false);
 
     list<Fte6>::iterator iter6;
@@ -208,7 +208,7 @@ FtiConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
+FibConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
     list<Fte6> fte_list6;
 
@@ -217,7 +217,7 @@ FtiConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
     // for the longest-prefix match.
     // TODO: This implementation is very inefficient.
     //
-    if (ftic().get_table6(fte_list6) != true)
+    if (fibconfig().get_table6(fte_list6) != true)
 	return (false);
 
     list<Fte6>::iterator iter6;

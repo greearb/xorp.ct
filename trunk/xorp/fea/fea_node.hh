@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.2 2007/04/19 16:45:05 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.3 2007/04/26 22:29:49 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -131,12 +131,12 @@ public:
     IfConfigAddressTable& ifconfig_address_table() { return (_ifconfig_address_table); }
 
     /**
-     * Get the FtiConfig instance.
+     * Get the FibConfig instance.
      *
-     * @return a reference to the FtiConfig instance.
-     * @see FtiConfig.
+     * @return a reference to the FibConfig instance.
+     * @see FibConfig.
      */
-    FtiConfig& fticonfig() { return (_fticonfig); }
+    FibConfig& fibconfig() { return (_fibconfig); }
 
     /**
      * Get the PaTransactionManager instance.
@@ -158,7 +158,7 @@ private:
     IfConfigErrorReporter	_ifconfig_error_reporter;
     IfConfigAddressTable	_ifconfig_address_table;
 
-    FtiConfig			_fticonfig;
+    FibConfig			_fibconfig;
 
     PaTableManager		_pa_table_manager;
     PaTransactionManager	_pa_transaction_manager;

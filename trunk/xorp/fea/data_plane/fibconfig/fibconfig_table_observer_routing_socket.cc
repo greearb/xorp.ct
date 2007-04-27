@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -36,17 +36,17 @@
 //
 
 
-FtiConfigTableObserverRtsock::FtiConfigTableObserverRtsock(FtiConfig& ftic)
-    : FtiConfigTableObserver(ftic),
-      RoutingSocket(ftic.eventloop()),
+FibConfigTableObserverRtsock::FibConfigTableObserverRtsock(FibConfig& fibconfig)
+    : FibConfigTableObserver(fibconfig),
+      RoutingSocket(fibconfig.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableObserverRtsock::~FtiConfigTableObserverRtsock()
+FibConfigTableObserverRtsock::~FibConfigTableObserverRtsock()
 {
     string error_msg;
 
@@ -59,7 +59,7 @@ FtiConfigTableObserverRtsock::~FtiConfigTableObserverRtsock()
 }
 
 int
-FtiConfigTableObserverRtsock::start(string& error_msg)
+FibConfigTableObserverRtsock::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -73,7 +73,7 @@ FtiConfigTableObserverRtsock::start(string& error_msg)
 }
     
 int
-FtiConfigTableObserverRtsock::stop(string& error_msg)
+FibConfigTableObserverRtsock::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -87,7 +87,7 @@ FtiConfigTableObserverRtsock::stop(string& error_msg)
 }
 
 void
-FtiConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
 {
     using namespace FtiFibMsg;
     list<FteX> fte_list;
@@ -98,10 +98,11 @@ FtiConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv4 routes
     //
-    if (ftic().have_ipv4()) {
-	ftic().ftic_table_get_primary().parse_buffer_rtm(AF_INET, fte_list,
-				buffer,
-				UPDATES | GETS | RESOLVES);
+    if (fibconfig().have_ipv4()) {
+	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET,
+								   fte_list,
+								   buffer,
+								   UPDATES | GETS | RESOLVES);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -112,10 +113,11 @@ FtiConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv6 routes
     //
-    if (ftic().have_ipv6()) {
-	ftic().ftic_table_get_primary().parse_buffer_rtm(AF_INET6, fte_list,
-				buffer,
-				UPDATES | GETS | RESOLVES);
+    if (fibconfig().have_ipv6()) {
+	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET6,
+								   fte_list,
+								   buffer,
+								   UPDATES | GETS | RESOLVES);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -125,7 +127,7 @@ FtiConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-FtiConfigTableObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

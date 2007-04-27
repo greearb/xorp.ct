@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,17 +35,17 @@
 //
 
 
-FtiConfigEntryObserverRtsock::FtiConfigEntryObserverRtsock(FtiConfig& ftic)
-    : FtiConfigEntryObserver(ftic),
-      RoutingSocket(ftic.eventloop()),
+FibConfigEntryObserverRtsock::FibConfigEntryObserverRtsock(FibConfig& fibconfig)
+    : FibConfigEntryObserver(fibconfig),
+      RoutingSocket(fibconfig.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryObserverRtsock::~FtiConfigEntryObserverRtsock()
+FibConfigEntryObserverRtsock::~FibConfigEntryObserverRtsock()
 {
     string error_msg;
 
@@ -58,7 +58,7 @@ FtiConfigEntryObserverRtsock::~FtiConfigEntryObserverRtsock()
 }
 
 int
-FtiConfigEntryObserverRtsock::start(string& error_msg)
+FibConfigEntryObserverRtsock::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -72,7 +72,7 @@ FtiConfigEntryObserverRtsock::start(string& error_msg)
 }
 
 int
-FtiConfigEntryObserverRtsock::stop(string& error_msg)
+FibConfigEntryObserverRtsock::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -86,14 +86,14 @@ FtiConfigEntryObserverRtsock::stop(string& error_msg)
 }
 
 void
-FtiConfigEntryObserverRtsock::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRtsock::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FtiConfigEntryObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,9 +32,9 @@
 //
 
 
-FtiConfigEntrySetClick::FtiConfigEntrySetClick(FtiConfig& ftic)
-    : FtiConfigEntrySet(ftic),
-      ClickSocket(ftic.eventloop()),
+FibConfigEntrySetClick::FibConfigEntrySetClick(FibConfig& fibconfig)
+    : FibConfigEntrySet(fibconfig),
+      ClickSocket(fibconfig.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _reinstall_all_entries_time_slice(100000, 20),	// 100ms, test every 20th iter
       _start_reinstalling_fte_table4(false),
@@ -46,7 +46,7 @@ FtiConfigEntrySetClick::FtiConfigEntrySetClick(FtiConfig& ftic)
 {
 }
 
-FtiConfigEntrySetClick::~FtiConfigEntrySetClick()
+FibConfigEntrySetClick::~FibConfigEntrySetClick()
 {
     string error_msg;
 
@@ -59,7 +59,7 @@ FtiConfigEntrySetClick::~FtiConfigEntrySetClick()
 }
 
 int
-FtiConfigEntrySetClick::start(string& error_msg)
+FibConfigEntrySetClick::start(string& error_msg)
 {
     if (! ClickSocket::is_enabled())
 	return (XORP_OK);
@@ -71,7 +71,7 @@ FtiConfigEntrySetClick::start(string& error_msg)
 	return (XORP_ERROR);
 
     // XXX: add myself as an observer to the NexthopPortMapper
-    ftic().nexthop_port_mapper().add_observer(this);
+    fibconfig().nexthop_port_mapper().add_observer(this);
 
     _is_running = true;
 
@@ -81,15 +81,15 @@ FtiConfigEntrySetClick::start(string& error_msg)
     // (if any).
     //
     if (ClickSocket::is_duplicate_routes_to_kernel_enabled())
-	register_ftic_secondary();
+	register_fibconfig_secondary();
     else
-	register_ftic_primary();
+	register_fibconfig_primary();
 
     return (XORP_OK);
 }
 
 int
-FtiConfigEntrySetClick::stop(string& error_msg)
+FibConfigEntrySetClick::stop(string& error_msg)
 {
     int ret_value = XORP_OK;
 
@@ -97,7 +97,7 @@ FtiConfigEntrySetClick::stop(string& error_msg)
 	return (XORP_OK);
 
     // XXX: delete myself as an observer to the NexthopPortMapper
-    ftic().nexthop_port_mapper().delete_observer(this);
+    fibconfig().nexthop_port_mapper().delete_observer(this);
 
     ret_value = ClickSocket::stop(error_msg);
 
@@ -107,7 +107,7 @@ FtiConfigEntrySetClick::stop(string& error_msg)
 }
 
 bool
-FtiConfigEntrySetClick::add_entry4(const Fte4& fte)
+FibConfigEntrySetClick::add_entry4(const Fte4& fte)
 {
     bool ret_value;
 
@@ -135,7 +135,7 @@ FtiConfigEntrySetClick::add_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetClick::delete_entry4(const Fte4& fte)
+FibConfigEntrySetClick::delete_entry4(const Fte4& fte)
 {
     bool ret_value;
 
@@ -161,7 +161,7 @@ FtiConfigEntrySetClick::delete_entry4(const Fte4& fte)
 }
 
 bool
-FtiConfigEntrySetClick::add_entry6(const Fte6& fte)
+FibConfigEntrySetClick::add_entry6(const Fte6& fte)
 {
     bool ret_value;
 
@@ -189,7 +189,7 @@ FtiConfigEntrySetClick::add_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
+FibConfigEntrySetClick::delete_entry6(const Fte6& fte)
 {
     bool ret_value;
 
@@ -215,7 +215,7 @@ FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
 }
 
 bool
-FtiConfigEntrySetClick::add_entry(const FteX& fte)
+FibConfigEntrySetClick::add_entry(const FteX& fte)
 {
     int port = -1;
     string element;
@@ -229,13 +229,13 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return (false);
 	    element = "_xorp_rt4";
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return (false);
 	    element = "_xorp_rt6";
 	    break;
@@ -248,7 +248,7 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
     // Get the outgoing port number
     //
     do {
-	NexthopPortMapper& m = ftic().nexthop_port_mapper();
+	NexthopPortMapper& m = fibconfig().nexthop_port_mapper();
 	const IPvX& nexthop = fte.nexthop();
 	bool lookup_nexthop_interface_first = true;
 
@@ -336,7 +336,7 @@ FtiConfigEntrySetClick::add_entry(const FteX& fte)
 }
 
 bool
-FtiConfigEntrySetClick::delete_entry(const FteX& fte)
+FibConfigEntrySetClick::delete_entry(const FteX& fte)
 {
     int port = -1;
     string element;
@@ -350,13 +350,13 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return (false);
 	    element = "_xorp_rt4";
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return (false);
 	    element = "_xorp_rt6";
 	    break;
@@ -369,7 +369,7 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
     // Get the outgoing port number
     //
     do {
-	NexthopPortMapper& m = ftic().nexthop_port_mapper();
+	NexthopPortMapper& m = fibconfig().nexthop_port_mapper();
 	port = m.lookup_nexthop_interface(fte.ifname(), fte.vifname());
 	if (port >= 0)
 	    break;
@@ -442,7 +442,7 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 }
 
 void
-FtiConfigEntrySetClick::nexthop_port_mapper_event(bool is_mapping_changed)
+FibConfigEntrySetClick::nexthop_port_mapper_event(bool is_mapping_changed)
 {
     UNUSED(is_mapping_changed);
 
@@ -454,7 +454,7 @@ FtiConfigEntrySetClick::nexthop_port_mapper_event(bool is_mapping_changed)
 }
 
 void
-FtiConfigEntrySetClick::start_task_reinstall_all_entries()
+FibConfigEntrySetClick::start_task_reinstall_all_entries()
 {
     // Initialize the reinstalling from the beginning
     _start_reinstalling_fte_table4 = true;
@@ -466,7 +466,7 @@ FtiConfigEntrySetClick::start_task_reinstall_all_entries()
 }
 
 void
-FtiConfigEntrySetClick::run_task_reinstall_all_entries()
+FibConfigEntrySetClick::run_task_reinstall_all_entries()
 {
     _reinstall_all_entries_time_slice.reset();
 
@@ -476,9 +476,9 @@ FtiConfigEntrySetClick::run_task_reinstall_all_entries()
     //
     if (_start_reinstalling_fte_table4 || _is_reinstalling_fte_table4) {
 	if (reinstall_all_entries4() == true) {
-	    _reinstall_all_entries_timer = ftic().eventloop().new_oneoff_after(
+	    _reinstall_all_entries_timer = fibconfig().eventloop().new_oneoff_after(
 		TimeVal(0, 1),
-		callback(this, &FtiConfigEntrySetClick::run_task_reinstall_all_entries));
+		callback(this, &FibConfigEntrySetClick::run_task_reinstall_all_entries));
 	    return;
 	}
     }
@@ -489,9 +489,9 @@ FtiConfigEntrySetClick::run_task_reinstall_all_entries()
     //
     if (_start_reinstalling_fte_table6 || _is_reinstalling_fte_table6) {
 	if (reinstall_all_entries6() == true) {
-	    _reinstall_all_entries_timer = ftic().eventloop().new_oneoff_after(
+	    _reinstall_all_entries_timer = fibconfig().eventloop().new_oneoff_after(
 		TimeVal(0, 1),
-		callback(this, &FtiConfigEntrySetClick::run_task_reinstall_all_entries));
+		callback(this, &FibConfigEntrySetClick::run_task_reinstall_all_entries));
 	    return;
 	}
     }
@@ -500,7 +500,7 @@ FtiConfigEntrySetClick::run_task_reinstall_all_entries()
 }
 
 bool
-FtiConfigEntrySetClick::reinstall_all_entries4()
+FibConfigEntrySetClick::reinstall_all_entries4()
 {
     map<IPv4Net, Fte4>::const_iterator iter4, iter4_begin, iter4_end;
 
@@ -538,7 +538,7 @@ FtiConfigEntrySetClick::reinstall_all_entries4()
 }
 
 bool
-FtiConfigEntrySetClick::reinstall_all_entries6()
+FibConfigEntrySetClick::reinstall_all_entries6()
 {
     map<IPv6Net, Fte6>::const_iterator iter6, iter6_begin, iter6_end;
 

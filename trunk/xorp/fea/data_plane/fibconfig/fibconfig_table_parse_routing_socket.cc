@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.2 2007/04/26 22:29:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,7 +44,7 @@
 
 #if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
-FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
+FibConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
 				    FtiFibMsgSet)
 {
     return false;
@@ -53,7 +53,7 @@ FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
 #else // HAVE_ROUTING_SOCKETS
 
 bool
-FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
+FibConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 				    const vector<uint8_t>& buffer,
 				    FtiFibMsgSet filter)
 {
@@ -128,8 +128,10 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 #endif
 
 	FteX fte(family);
-	if (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm) == true)
+	if (RtmUtils::rtm_get_to_fte_cfg(fte, fibconfig().iftree(), rtm)
+	    == true) {
 	    fte_list.push_back(fte);
+	}
     }
 
     return true;

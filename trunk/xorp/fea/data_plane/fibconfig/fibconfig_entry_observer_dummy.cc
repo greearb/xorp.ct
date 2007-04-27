@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_dummy.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_dummy.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,15 +35,15 @@
 //
 
 
-FtiConfigEntryObserverDummy::FtiConfigEntryObserverDummy(FtiConfig& ftic)
-    : FtiConfigEntryObserver(ftic)
+FibConfigEntryObserverDummy::FibConfigEntryObserverDummy(FibConfig& fibconfig)
+    : FibConfigEntryObserver(fibconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryObserverDummy::~FtiConfigEntryObserverDummy()
+FibConfigEntryObserverDummy::~FibConfigEntryObserverDummy()
 {
     string error_msg;
 
@@ -56,7 +56,7 @@ FtiConfigEntryObserverDummy::~FtiConfigEntryObserverDummy()
 }
 
 int
-FtiConfigEntryObserverDummy::start(string& error_msg)
+FibConfigEntryObserverDummy::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -71,7 +71,7 @@ FtiConfigEntryObserverDummy::start(string& error_msg)
 }
     
 int
-FtiConfigEntryObserverDummy::stop(string& error_msg)
+FibConfigEntryObserverDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -86,7 +86,7 @@ FtiConfigEntryObserverDummy::stop(string& error_msg)
 }
 
 void
-FtiConfigEntryObserverDummy::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverDummy::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: use it?
     UNUSED(buffer);

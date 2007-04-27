@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_dummy.cc,v 1.1 2007/04/26 01:23:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_dummy.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,15 +31,15 @@
 //
 
 
-FtiConfigTableGetDummy::FtiConfigTableGetDummy(FtiConfig& ftic)
-    : FtiConfigTableGet(ftic)
+FibConfigTableGetDummy::FibConfigTableGetDummy(FibConfig& fibconfig)
+    : FibConfigTableGet(fibconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableGetDummy::~FtiConfigTableGetDummy()
+FibConfigTableGetDummy::~FibConfigTableGetDummy()
 {
     string error_msg;
 
@@ -52,7 +52,7 @@ FtiConfigTableGetDummy::~FtiConfigTableGetDummy()
 }
 
 int
-FtiConfigTableGetDummy::start(string& error_msg)
+FibConfigTableGetDummy::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -65,7 +65,7 @@ FtiConfigTableGetDummy::start(string& error_msg)
 }
     
 int
-FtiConfigTableGetDummy::stop(string& error_msg)
+FibConfigTableGetDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -78,10 +78,10 @@ FtiConfigTableGetDummy::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
+FibConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 {
     Trie4::iterator ti;
-    for (ti = ftic().trie4().begin(); ti != ftic().trie4().end(); ++ti) {
+    for (ti = fibconfig().trie4().begin(); ti != fibconfig().trie4().end(); ++ti) {
 	const Fte4& fte = ti.payload();
 	fte_list.push_back(fte);
     }
@@ -90,10 +90,10 @@ FtiConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 }
 
 bool
-FtiConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
+FibConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
 {
     Trie6::iterator ti;
-    for (ti = ftic().trie6().begin(); ti != ftic().trie6().end(); ++ti) {
+    for (ti = fibconfig().trie6().begin(); ti != fibconfig().trie6().end(); ++ti) {
 	const Fte6& fte = ti.payload();
 	fte_list.push_back(fte);
     }

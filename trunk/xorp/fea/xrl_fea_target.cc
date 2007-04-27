@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.9 2007/04/25 01:57:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.10 2007/04/26 06:29:45 pavlin Exp $"
 
 
 //
@@ -61,7 +61,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _eventloop(eventloop),
       _fea_node(fea_node),
       _xrl_router(xrl_router),
-      _xftm(eventloop, fea_node.fticonfig(), &xrl_router),
+      _xftm(eventloop, fea_node.fibconfig(), &xrl_router),
       _profile(profile),
       _xrsm4(xrsm4),
       _xrsm6(xrsm6),
@@ -82,8 +82,8 @@ XrlFeaTarget::~XrlFeaTarget()
 int
 XrlFeaTarget::startup()
 {
-    _have_ipv4 = _fea_node.fticonfig().have_ipv4();
-    _have_ipv6 = _fea_node.fticonfig().have_ipv6();
+    _have_ipv4 = _fea_node.fibconfig().have_ipv4();
+    _have_ipv6 = _fea_node.fibconfig().have_ipv6();
 
     _is_running = true;
 
@@ -108,6 +108,12 @@ IfConfig&
 XrlFeaTarget::ifconfig()
 {
     return (_fea_node.ifconfig());
+}
+
+FibConfig&
+XrlFeaTarget::fibconfig()
+{
+    return (_fea_node.fibconfig());
 }
 
 XrlCmdError
@@ -186,10 +192,8 @@ XrlFeaTarget::fea_click_0_1_enable_click(
     // Input values,
     const bool&	enable)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().enable_click(enable);
-    ftic.enable_click(enable);
+    fibconfig().enable_click(enable);
 
     return XrlCmdError::OKAY();
 }
@@ -200,13 +204,12 @@ XrlFeaTarget::fea_click_0_1_enable_click(
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_start_click()
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
     string error_msg;
 
     if (ifconfig().start_click(error_msg) < 0) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    if (ftic.start_click(error_msg) < 0) {
+    if (fibconfig().start_click(error_msg) < 0) {
 	string dummy_msg;
 	ifconfig().stop_click(error_msg);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -221,10 +224,9 @@ XrlFeaTarget::fea_click_0_1_start_click()
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_stop_click()
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
     string error_msg1, error_msg2;
 
-    if (ftic.stop_click(error_msg1) < 0) {
+    if (fibconfig().stop_click(error_msg1) < 0) {
 	ifconfig().stop_click(error_msg2);
 	return XrlCmdError::COMMAND_FAILED(error_msg1);
     }
@@ -246,9 +248,7 @@ XrlFeaTarget::fea_click_0_1_enable_duplicate_routes_to_kernel(
     // Input values,
     const bool&	enable)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
-    ftic.enable_duplicate_routes_to_kernel(enable);
+    fibconfig().enable_duplicate_routes_to_kernel(enable);
 
     return XrlCmdError::OKAY();
 }
@@ -264,10 +264,8 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click(
     // Input values,
     const bool&	enable)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().enable_kernel_click(enable);
-    ftic.enable_kernel_click(enable);
+    fibconfig().enable_kernel_click(enable);
 
     return XrlCmdError::OKAY();
 }
@@ -282,10 +280,8 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click_install_on_startup(
     // Input values,
     const bool&	enable)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().enable_kernel_click_install_on_startup(enable);
-    ftic.enable_kernel_click_install_on_startup(enable);
+    fibconfig().enable_kernel_click_install_on_startup(enable);
 
     return XrlCmdError::OKAY();
 }
@@ -304,8 +300,6 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
     const string&	modules)
 {
     list<string> modules_list;
-
-    FtiConfig& ftic = _fea_node.fticonfig();
 
     //
     // Split the string with the names of the modules (separated by colon)
@@ -327,7 +321,7 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
     } while (true);
 
     ifconfig().set_kernel_click_modules(modules_list);
-    ftic.set_kernel_click_modules(modules_list);
+    fibconfig().set_kernel_click_modules(modules_list);
 
     return XrlCmdError::OKAY();
 }
@@ -342,10 +336,8 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_mount_directory(
     // Input values,
     const string&	directory)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_kernel_click_mount_directory(directory);
-    ftic.set_kernel_click_mount_directory(directory);
+    fibconfig().set_kernel_click_mount_directory(directory);
 
     return XrlCmdError::OKAY();
 }
@@ -362,11 +354,9 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_config_generator_file(
     // Input values,
     const string&	kernel_click_config_generator_file)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_kernel_click_config_generator_file(
 	kernel_click_config_generator_file);
-    ftic.set_kernel_click_config_generator_file(
+    fibconfig().set_kernel_click_config_generator_file(
 	kernel_click_config_generator_file);
 
     return XrlCmdError::OKAY();
@@ -383,10 +373,8 @@ XrlFeaTarget::fea_click_0_1_enable_user_click(
     // Input values,
     const bool&	enable)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().enable_user_click(enable);
-    ftic.enable_user_click(enable);
+    fibconfig().enable_user_click(enable);
 
     return XrlCmdError::OKAY();
 }
@@ -402,10 +390,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_file(
     // Input values,
     const string&	user_click_command_file)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_command_file(user_click_command_file);
-    ftic.set_user_click_command_file(user_click_command_file);
+    fibconfig().set_user_click_command_file(user_click_command_file);
 
     return XrlCmdError::OKAY();
 }
@@ -421,11 +407,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_extra_arguments(
     // Input values,
     const string&	user_click_command_extra_arguments)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_command_extra_arguments(
 	user_click_command_extra_arguments);
-    ftic.set_user_click_command_extra_arguments(user_click_command_extra_arguments);
+    fibconfig().set_user_click_command_extra_arguments(
+	user_click_command_extra_arguments);
 
     return XrlCmdError::OKAY();
 }
@@ -441,11 +426,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_execute_on_startup(
     // Input values,
     const bool&	user_click_command_execute_on_startup)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_command_execute_on_startup(
 	user_click_command_execute_on_startup);
-    ftic.set_user_click_command_execute_on_startup(user_click_command_execute_on_startup);
+    fibconfig().set_user_click_command_execute_on_startup(
+	user_click_command_execute_on_startup);
 
     return XrlCmdError::OKAY();
 }
@@ -462,10 +446,8 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_address(
     // Input values,
     const IPv4&	user_click_control_address)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_control_address(user_click_control_address);
-    ftic.set_user_click_control_address(user_click_control_address);
+    fibconfig().set_user_click_control_address(user_click_control_address);
 
     return XrlCmdError::OKAY();
 }
@@ -482,11 +464,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_socket_port(
     // Input values,
     const uint32_t&	user_click_control_socket_port)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_control_socket_port(
 	user_click_control_socket_port);
-    ftic.set_user_click_control_socket_port(user_click_control_socket_port);
+    fibconfig().set_user_click_control_socket_port(
+	user_click_control_socket_port);
 
     return XrlCmdError::OKAY();
 }
@@ -503,11 +484,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
     // Input values,
     const string&	user_click_startup_config_file)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_startup_config_file(
 	user_click_startup_config_file);
-    ftic.set_user_click_startup_config_file(user_click_startup_config_file);
+    fibconfig().set_user_click_startup_config_file(
+	user_click_startup_config_file);
 
     return XrlCmdError::OKAY();
 }
@@ -524,11 +504,10 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
     // Input values,
     const string&	user_click_config_generator_file)
 {
-    FtiConfig& ftic = _fea_node.fticonfig();
-
     ifconfig().set_user_click_config_generator_file(
 	user_click_config_generator_file);
-    ftic.set_user_click_config_generator_file(user_click_config_generator_file);
+    fibconfig().set_user_click_config_generator_file(
+	user_click_config_generator_file);
 
     return XrlCmdError::OKAY();
 }
@@ -1796,7 +1775,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     Fte4 fte;
-    if (_xftm.ftic().lookup_route_by_dest4(dst, fte) == true) {
+    if (fibconfig().lookup_route_by_dest4(dst, fte) == true) {
 	netmask = fte.net();
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
@@ -1827,7 +1806,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     Fte6 fte;
-    if (_xftm.ftic().lookup_route_by_dest6(dst, fte) == true) {
+    if (fibconfig().lookup_route_by_dest6(dst, fte) == true) {
 	netmask = fte.net();
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
@@ -1857,7 +1836,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network4(
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     Fte4 fte;
-    if (_xftm.ftic().lookup_route_by_network4(dst, fte)) {
+    if (fibconfig().lookup_route_by_network4(dst, fte)) {
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
@@ -1886,7 +1865,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network6(
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     Fte6 fte;
-    if (_xftm.ftic().lookup_route_by_network6(dst, fte)) {
+    if (fibconfig().lookup_route_by_network6(dst, fte)) {
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
@@ -1904,7 +1883,7 @@ XrlFeaTarget::fti_0_2_have_ipv4(
 	// Output values,
 	bool&	result)
 {
-    result = _xftm.ftic().have_ipv4();
+    result = fibconfig().have_ipv4();
 
     return XrlCmdError::OKAY();
 }
@@ -1914,7 +1893,7 @@ XrlFeaTarget::fti_0_2_have_ipv6(
 	// Output values,
 	bool&	result)
 {
-    result = _xftm.ftic().have_ipv6();
+    result = fibconfig().have_ipv6();
 
     return XrlCmdError::OKAY();
 }
@@ -1926,7 +1905,7 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
 {
     string error_msg;
 
-    if (_xftm.ftic().unicast_forwarding_enabled4(enabled, error_msg) < 0)
+    if (fibconfig().unicast_forwarding_enabled4(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
@@ -1939,7 +1918,7 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
 {
     string error_msg;
 
-    if (_xftm.ftic().unicast_forwarding_enabled6(enabled, error_msg) < 0)
+    if (fibconfig().unicast_forwarding_enabled6(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
@@ -1952,7 +1931,7 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
 {
     string error_msg;
 
-    if (_xftm.ftic().set_unicast_forwarding_enabled4(enabled, error_msg) < 0)
+    if (fibconfig().set_unicast_forwarding_enabled4(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
@@ -1965,7 +1944,7 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
 {
     string error_msg;
 
-    if (_xftm.ftic().set_unicast_forwarding_enabled6(enabled, error_msg) < 0)
+    if (fibconfig().set_unicast_forwarding_enabled6(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
@@ -1978,7 +1957,7 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_startup4(
 {
     string error_msg;
 
-    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_startup4(
+    if (fibconfig().set_unicast_forwarding_entries_retain_on_startup4(
 	    retain,
 	    error_msg)
 	!= XORP_OK) {
@@ -1995,7 +1974,7 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown4(
 {
     string error_msg;
 
-    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_shutdown4(
+    if (fibconfig().set_unicast_forwarding_entries_retain_on_shutdown4(
 	    retain,
 	    error_msg)
 	!= XORP_OK) {
@@ -2012,7 +1991,7 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_startup6(
 {
     string error_msg;
 
-    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_startup6(
+    if (fibconfig().set_unicast_forwarding_entries_retain_on_startup6(
 	    retain,
 	    error_msg)
 	!= XORP_OK) {
@@ -2029,7 +2008,7 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
 {
     string error_msg;
 
-    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_shutdown6(
+    if (fibconfig().set_unicast_forwarding_entries_retain_on_shutdown6(
 	    retain,
 	    error_msg)
 	!= XORP_OK) {
@@ -2111,7 +2090,7 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiAddEntry4(_xftm.ftic(), dst, nexthop, ifname, vifname, metric,
+	new FtiAddEntry4(fibconfig(), dst, nexthop, ifname, vifname, metric,
 			 admin_distance, is_xorp_route, is_connected_route)
 	);
     return _xftm.add(tid, op);
@@ -2162,7 +2141,7 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry4(_xftm.ftic(), dst, nexthop, ifname, vifname,
+	new FtiDeleteEntry4(fibconfig(), dst, nexthop, ifname, vifname,
 			    metric, admin_distance, is_xorp_route,
 			    is_connected_route)
 	);
@@ -2184,7 +2163,7 @@ XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
     // memory here is handed it to to manage.
 
     FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries4(_xftm.ftic())
+	new FtiDeleteAllEntries4(fibconfig())
 	);
     return _xftm.add(tid, op);
 }
@@ -2257,7 +2236,7 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiAddEntry6(_xftm.ftic(), dst, nexthop, ifname, vifname, metric,
+	new FtiAddEntry6(fibconfig(), dst, nexthop, ifname, vifname, metric,
 			 admin_distance, is_xorp_route, is_connected_route)
 	);
     return _xftm.add(tid, op);
@@ -2308,7 +2287,7 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry6(_xftm.ftic(), dst, nexthop, ifname, vifname,
+	new FtiDeleteEntry6(fibconfig(), dst, nexthop, ifname, vifname,
 			    metric, admin_distance, is_xorp_route,
 			    is_connected_route)
 	);
@@ -2330,7 +2309,7 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
     // memory here is handed it to to manage.
 
     FtiTransactionManager::Operation op(
-	new FtiDeleteAllEntries6(_xftm.ftic())
+	new FtiDeleteAllEntries6(fibconfig())
 	);
 
     return _xftm.add(tid, op);

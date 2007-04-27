@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.1 2007/04/26 01:23:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -36,8 +36,8 @@
 // The mechanism to observe the information is Router Manager V2.
 //
 
-FtiConfigTableObserverRtmV2::FtiConfigTableObserverRtmV2(FtiConfig& ftic)
-    : FtiConfigTableObserver(ftic),
+FibConfigTableObserverRtmV2::FibConfigTableObserverRtmV2(FibConfig& fibconfig)
+    : FibConfigTableObserver(fibconfig),
       _rs4(NULL),
       _rso4(NULL),
       _rs6(NULL),
@@ -45,23 +45,23 @@ FtiConfigTableObserverRtmV2::FtiConfigTableObserverRtmV2(FtiConfig& ftic)
 {
 #ifdef HOST_OS_WINDOWS
     if (!WinSupport::is_rras_running()) {
-        XLOG_WARNING("RRAS is not running; disabling FtiConfigTableObserverRtmV2.");
+        XLOG_WARNING("RRAS is not running; disabling FibConfigTableObserverRtmV2.");
         return;
     }
 
-    _rs4 = new WinRtmPipe(ftic.eventloop());
+    _rs4 = new WinRtmPipe(fibconfig.eventloop());
     _rso4 = new RtmV2Observer(*_rs4, AF_INET, *this);
 
 #ifdef HAVE_IPV6
-    _rs6 = new WinRtmPipe(ftic.eventloop());
+    _rs6 = new WinRtmPipe(fibconfig.eventloop());
     _rso6 = new RtmV2Observer(*_rs6, AF_INET6, *this);
 #endif
 
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigTableObserverRtmV2::~FtiConfigTableObserverRtmV2()
+FibConfigTableObserverRtmV2::~FibConfigTableObserverRtmV2()
 {
     string error_msg;
 
@@ -84,7 +84,7 @@ FtiConfigTableObserverRtmV2::~FtiConfigTableObserverRtmV2()
 }
 
 int
-FtiConfigTableObserverRtmV2::start(string& error_msg)
+FibConfigTableObserverRtmV2::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -103,7 +103,7 @@ FtiConfigTableObserverRtmV2::start(string& error_msg)
 }
     
 int
-FtiConfigTableObserverRtmV2::stop(string& error_msg)
+FibConfigTableObserverRtmV2::stop(string& error_msg)
 {
     int result = XORP_OK;
 
@@ -125,7 +125,7 @@ FtiConfigTableObserverRtmV2::stop(string& error_msg)
 }
 
 void
-FtiConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 {
     using namespace FtiFibMsg;
     list<FteX> fte_list;
@@ -136,10 +136,11 @@ FtiConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv4 routes
     //
-    if (ftic().have_ipv4() && _rs4->is_open()) {
-	ftic().ftic_table_get_primary().parse_buffer_rtm(AF_INET, fte_list,
-							 buffer,
-							 UPDATES | GETS);
+    if (fibconfig().have_ipv4() && _rs4->is_open()) {
+	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET,
+								   fte_list,
+								   buffer,
+								   UPDATES | GETS);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -150,10 +151,11 @@ FtiConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv6 routes
     //
-    if (ftic().have_ipv6() && _rs6->is_open()) {
-	ftic().ftic_table_get_primary().parse_buffer_rtm(AF_INET6, fte_list,
-							 buffer,
-							 UPDATES | GETS);
+    if (fibconfig().have_ipv6() && _rs6->is_open()) {
+	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET6,
+								   fte_list,
+								   buffer,
+								   UPDATES | GETS);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();

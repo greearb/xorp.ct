@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc,v 1.2 2007/04/26 22:29:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,17 +42,17 @@
 //
 
 
-FtiConfigEntryObserverNetlink::FtiConfigEntryObserverNetlink(FtiConfig& ftic)
-    : FtiConfigEntryObserver(ftic),
-      NetlinkSocket(ftic.eventloop()),
+FibConfigEntryObserverNetlink::FibConfigEntryObserverNetlink(FibConfig& fibconfig)
+    : FibConfigEntryObserver(fibconfig),
+      NetlinkSocket(fibconfig.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryObserverNetlink::~FtiConfigEntryObserverNetlink()
+FibConfigEntryObserverNetlink::~FibConfigEntryObserverNetlink()
 {
     string error_msg;
 
@@ -65,7 +65,7 @@ FtiConfigEntryObserverNetlink::~FtiConfigEntryObserverNetlink()
 }
 
 int
-FtiConfigEntryObserverNetlink::start(string& error_msg)
+FibConfigEntryObserverNetlink::start(string& error_msg)
 {
 #ifndef HAVE_NETLINK_SOCKETS
     error_msg = c_format("The netlink(7) mechanism to observe "
@@ -84,14 +84,14 @@ FtiConfigEntryObserverNetlink::start(string& error_msg)
     //
     // Listen to the netlink multicast group for IPv4 routing entries
     //
-    if (ftic().have_ipv4())
+    if (fibconfig().have_ipv4())
 	nl_groups |= RTMGRP_IPV4_ROUTE;
 
 #ifdef HAVE_IPV6
     //
     // Listen to the netlink multicast group for IPv6 routing entries
     //
-    if (ftic().have_ipv6())
+    if (fibconfig().have_ipv6())
 	nl_groups |= RTMGRP_IPV6_ROUTE;
 #endif // HAVE_IPV6
 
@@ -110,7 +110,7 @@ FtiConfigEntryObserverNetlink::start(string& error_msg)
 }
 
 int
-FtiConfigEntryObserverNetlink::stop(string& error_msg)
+FibConfigEntryObserverNetlink::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -124,14 +124,14 @@ FtiConfigEntryObserverNetlink::stop(string& error_msg)
 }
 
 void
-FtiConfigEntryObserverNetlink::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverNetlink::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FtiConfigEntryObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.19 2007/02/16 22:45:37 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_observer.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
@@ -21,18 +21,18 @@
 #include "routing_socket.hh"
 
 
-class FtiConfig;
+class FibConfig;
 
-class FtiConfigEntryObserver {
+class FibConfigEntryObserver {
 public:
-    FtiConfigEntryObserver(FtiConfig& ftic);
+    FibConfigEntryObserver(FibConfig& fibconfig);
     
-    virtual ~FtiConfigEntryObserver();
+    virtual ~FibConfigEntryObserver();
     
-    FtiConfig&	ftic() { return _ftic; }
+    FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_ftic_primary();
-    virtual void register_ftic_secondary();
+    virtual void register_fibconfig_primary();
+    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }
@@ -67,14 +67,14 @@ protected:
     bool	_is_running;
 
 private:
-    FtiConfig&	_ftic;
+    FibConfig&	_fibconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FtiConfigEntryObserverDummy : public FtiConfigEntryObserver {
+class FibConfigEntryObserverDummy : public FibConfigEntryObserver {
 public:
-    FtiConfigEntryObserverDummy(FtiConfig& ftic);
-    virtual ~FtiConfigEntryObserverDummy();
+    FibConfigEntryObserverDummy(FibConfig& fibconfig);
+    virtual ~FibConfigEntryObserverDummy();
 
     /**
      * Start operation.
@@ -103,12 +103,12 @@ private:
     
 };
 
-class FtiConfigEntryObserverRtsock : public FtiConfigEntryObserver,
+class FibConfigEntryObserverRtsock : public FibConfigEntryObserver,
 				     public RoutingSocket,
 				     public RoutingSocketObserver {
 public:
-    FtiConfigEntryObserverRtsock(FtiConfig& ftic);
-    virtual ~FtiConfigEntryObserverRtsock();
+    FibConfigEntryObserverRtsock(FibConfig& fibconfig);
+    virtual ~FibConfigEntryObserverRtsock();
 
     /**
      * Start operation.
@@ -139,12 +139,12 @@ private:
     
 };
 
-class FtiConfigEntryObserverNetlink : public FtiConfigEntryObserver,
+class FibConfigEntryObserverNetlink : public FibConfigEntryObserver,
 				      public NetlinkSocket,
 				      public NetlinkSocketObserver {
 public:
-    FtiConfigEntryObserverNetlink(FtiConfig& ftic);
-    virtual ~FtiConfigEntryObserverNetlink();
+    FibConfigEntryObserverNetlink(FibConfig& fibconfig);
+    virtual ~FibConfigEntryObserverNetlink();
 
     /**
      * Start operation.
@@ -175,10 +175,10 @@ private:
     
 };
 
-class FtiConfigEntryObserverIPHelper : public FtiConfigEntryObserver {
+class FibConfigEntryObserverIPHelper : public FibConfigEntryObserver {
 public:
-    FtiConfigEntryObserverIPHelper(FtiConfig& ftic);
-    virtual ~FtiConfigEntryObserverIPHelper();
+    FibConfigEntryObserverIPHelper(FibConfig& fibconfig);
+    virtual ~FibConfigEntryObserverIPHelper();
 
     /**
      * Start operation.
@@ -204,10 +204,10 @@ public:
     virtual void receive_data(const vector<uint8_t>& buffer);
 };
 
-class FtiConfigEntryObserverRtmV2 : public FtiConfigEntryObserver {
+class FibConfigEntryObserverRtmV2 : public FibConfigEntryObserver {
 public:
-    FtiConfigEntryObserverRtmV2(FtiConfig& ftic);
-    virtual ~FtiConfigEntryObserverRtmV2();
+    FibConfigEntryObserverRtmV2(FibConfig& fibconfig);
+    virtual ~FibConfigEntryObserverRtmV2();
 
     /**
      * Start operation.

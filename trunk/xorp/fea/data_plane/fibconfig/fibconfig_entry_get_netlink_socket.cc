@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.1 2007/04/26 01:23:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.2 2007/04/26 22:29:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -40,17 +40,17 @@
 //
 
 
-FtiConfigEntryGetNetlink::FtiConfigEntryGetNetlink(FtiConfig& ftic)
-    : FtiConfigEntryGet(ftic),
-      NetlinkSocket(ftic.eventloop()),
+FibConfigEntryGetNetlink::FibConfigEntryGetNetlink(FibConfig& fibconfig)
+    : FibConfigEntryGet(fibconfig),
+      NetlinkSocket(fibconfig.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
-    register_ftic_primary();
+    register_fibconfig_primary();
 #endif
 }
 
-FtiConfigEntryGetNetlink::~FtiConfigEntryGetNetlink()
+FibConfigEntryGetNetlink::~FibConfigEntryGetNetlink()
 {
     string error_msg;
 
@@ -63,7 +63,7 @@ FtiConfigEntryGetNetlink::~FtiConfigEntryGetNetlink()
 }
 
 int
-FtiConfigEntryGetNetlink::start(string& error_msg)
+FibConfigEntryGetNetlink::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -77,7 +77,7 @@ FtiConfigEntryGetNetlink::start(string& error_msg)
 }
 
 int
-FtiConfigEntryGetNetlink::stop(string& error_msg)
+FibConfigEntryGetNetlink::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -99,7 +99,7 @@ FtiConfigEntryGetNetlink::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -120,12 +120,12 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route_by_network4(const IPv4Net& dst,
+FibConfigEntryGetNetlink::lookup_route_by_network4(const IPv4Net& dst,
 						   Fte4& fte)
 {
     list<Fte4> fte_list4;
 
-    if (ftic().get_table4(fte_list4) != true)
+    if (fibconfig().get_table4(fte_list4) != true)
 	return (false);
 
     list<Fte4>::iterator iter4;
@@ -149,7 +149,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_network4(const IPv4Net& dst,
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -170,12 +170,12 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route_by_network6(const IPv6Net& dst,
+FibConfigEntryGetNetlink::lookup_route_by_network6(const IPv6Net& dst,
 						   Fte6& fte)
 { 
     list<Fte6> fte_list6;
 
-    if (ftic().get_table6(fte_list6) != true)
+    if (fibconfig().get_table6(fte_list6) != true)
 	return (false);
 
     list<Fte6>::iterator iter6;
@@ -193,7 +193,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_network6(const IPv6Net& dst,
 #ifndef HAVE_NETLINK_SOCKETS
 
 bool
-FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
+FibConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
 {
     return false;
 }
@@ -209,7 +209,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
+FibConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct rtmsg) + sizeof(struct rtattr) + 512;
@@ -231,12 +231,12 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     // Check that the family is supported
     do {
 	if (dst.is_ipv4()) {
-	    if (! ftic().have_ipv4())
+	    if (! fibconfig().have_ipv4())
 		return false;
 	    break;
 	}
 	if (dst.is_ipv6()) {
-	    if (! ftic().have_ipv6())
+	    if (! fibconfig().have_ipv6())
 		return false;
 	    break;
 	}
