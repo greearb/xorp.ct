@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fti_transaction.cc,v 1.12 2007/04/27 01:10:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.1 2007/04/27 21:11:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,8 +22,25 @@
 
 #include "fibconfig_transaction.hh"
 
+
 void
-FtiTransactionManager::pre_commit(uint32_t /* tid */)
+FibConfigTransactionManager::unset_error()
+{
+    _error.erase();
+}
+
+bool
+FibConfigTransactionManager::set_unset_error(const string& error)
+{
+    if (_error.empty()) {
+	_error = error;
+	return true;
+    }
+    return false;
+}
+
+void
+FibConfigTransactionManager::pre_commit(uint32_t /* tid */)
 {
     string error_msg;
 
@@ -35,7 +52,7 @@ FtiTransactionManager::pre_commit(uint32_t /* tid */)
 }
 
 void
-FtiTransactionManager::post_commit(uint32_t /* tid */)
+FibConfigTransactionManager::post_commit(uint32_t /* tid */)
 {
     string error_msg;
     if (fibconfig().end_configuration(error_msg) != true) {
@@ -45,15 +62,16 @@ FtiTransactionManager::post_commit(uint32_t /* tid */)
 }
 
 void
-FtiTransactionManager::operation_result(bool success,
-					const TransactionOperation& op)
+FibConfigTransactionManager::operation_result(bool success,
+					      const TransactionOperation& op)
 {
     if (success) {
 	return;
     }
 
-    const FtiTransactionOperation* fto = dynamic_cast<const FtiTransactionOperation*>(&op);
-    if (fto == 0) {
+    const FibConfigTransactionOperation* fto;
+    fto = dynamic_cast<const FibConfigTransactionOperation*>(&op);
+    if (fto == NULL) {
 	//
 	// Getting here is programmer error.
 	//

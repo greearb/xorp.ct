@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.1 2007/04/27 21:11:29 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.2 2007/04/27 21:24:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -52,9 +52,9 @@ protected:
  * Base class for Interface related operations acting on an
  * IfTree.
  */
-class IfConfigManagerOperation : public TransactionOperation {
+class IfConfigTransactionOperation : public TransactionOperation {
 public:
-    IfConfigManagerOperation(IfTree& it, const string& ifname)
+    IfConfigTransactionOperation(IfTree& it, const string& ifname)
 	: _it(it), _ifname(ifname) {}
 
     /**
@@ -82,10 +82,10 @@ private:
 /**
  * Class for adding an interface.
  */
-class AddInterface : public IfConfigManagerOperation {
+class AddInterface : public IfConfigTransactionOperation {
 public:
     AddInterface(IfTree& it, const string& ifname)
-	: IfConfigManagerOperation(it, ifname) {}
+	: IfConfigTransactionOperation(it, ifname) {}
 
     bool dispatch() 		{ iftree().add_if(ifname()); return true; }
 
@@ -97,10 +97,10 @@ public:
 /**
  * Class for removing an interface.
  */
-class RemoveInterface : public IfConfigManagerOperation {
+class RemoveInterface : public IfConfigTransactionOperation {
 public:
     RemoveInterface(IfTree& it, const string& ifname)
-	: IfConfigManagerOperation(it, ifname) {}
+	: IfConfigTransactionOperation(it, ifname) {}
 
     bool dispatch() 		{ return iftree().remove_if(ifname()); }
 
@@ -115,11 +115,11 @@ public:
  * Class for configuring an interface within the FEA by using information
  * from the underlying system.
  */
-class ConfigureInterfaceFromSystem : public IfConfigManagerOperation {
+class ConfigureInterfaceFromSystem : public IfConfigTransactionOperation {
 public:
     ConfigureInterfaceFromSystem(IfConfig& ifconfig, IfTree& it,
 				 const string& ifname)
-	: IfConfigManagerOperation(it, ifname), _ifconfig(ifconfig) {}
+	: IfConfigTransactionOperation(it, ifname), _ifconfig(ifconfig) {}
 
     bool dispatch() {
 	const IfTree& dev_config = _ifconfig.pulled_config();
@@ -143,10 +143,10 @@ private:
 /**
  * Base class for interface modifier operations.
  */
-class InterfaceModifier : public IfConfigManagerOperation {
+class InterfaceModifier : public IfConfigTransactionOperation {
 public:
     InterfaceModifier(IfTree& it, const string& ifname)
-	: IfConfigManagerOperation(it, ifname) {}
+	: IfConfigTransactionOperation(it, ifname) {}
 
     bool path_valid() const	{ return interface() != 0; }
 

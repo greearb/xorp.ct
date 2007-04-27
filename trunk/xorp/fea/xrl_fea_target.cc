@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.11 2007/04/27 01:10:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.12 2007/04/27 21:11:30 pavlin Exp $"
 
 
 //
@@ -2087,9 +2087,9 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
 
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
-    FtiTransactionManager::Operation op(
+    FibConfigTransactionManager::Operation op(
 	new FtiAddEntry4(fibconfig(), dst, nexthop, ifname, vifname, metric,
 			 admin_distance, is_xorp_route, is_connected_route)
 	);
@@ -2138,9 +2138,9 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 	_profile.log(profile_route_in,
 		     c_format("delete %s", dst.str().c_str()));
 
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
-    FtiTransactionManager::Operation op(
+    FibConfigTransactionManager::Operation op(
 	new FtiDeleteEntry4(fibconfig(), dst, nexthop, ifname, vifname,
 			    metric, admin_distance, is_xorp_route,
 			    is_connected_route)
@@ -2159,10 +2159,10 @@ XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
 
-    FtiTransactionManager::Operation op(
+    FibConfigTransactionManager::Operation op(
 	new FtiDeleteAllEntries4(fibconfig())
 	);
     return _xftm.add(tid, op);
@@ -2233,9 +2233,9 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in, c_format("add %s", dst.str().c_str()));
 
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
-    FtiTransactionManager::Operation op(
+    FibConfigTransactionManager::Operation op(
 	new FtiAddEntry6(fibconfig(), dst, nexthop, ifname, vifname, metric,
 			 admin_distance, is_xorp_route, is_connected_route)
 	);
@@ -2284,9 +2284,9 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
 	_profile.log(profile_route_in,
 		     c_format("delete %s", dst.str().c_str()));
 
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
-    FtiTransactionManager::Operation op(
+    FibConfigTransactionManager::Operation op(
 	new FtiDeleteEntry6(fibconfig(), dst, nexthop, ifname, vifname,
 			    metric, admin_distance, is_xorp_route,
 			    is_connected_route)
@@ -2305,10 +2305,10 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    // FtiTransactionManager::Operation is a ref_ptr object, allocated
+    // FibConfigTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
 
-    FtiTransactionManager::Operation op(
+    FibConfigTransactionManager::Operation op(
 	new FtiDeleteAllEntries6(fibconfig())
 	);
 

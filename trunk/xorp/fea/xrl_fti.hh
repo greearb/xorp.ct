@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.17 2007/04/27 01:10:30 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.18 2007/04/27 21:11:30 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -87,7 +87,7 @@ public:
      * @param op the operation to add.
      * @return the XRL command error.
      */
-    XrlCmdError add(uint32_t tid, const FtiTransactionManager::Operation& op);
+    XrlCmdError add(uint32_t tid, const FibConfigTransactionManager::Operation& op);
 
     /**
      * Get the FibConfig entry.
@@ -222,7 +222,7 @@ public:
 				     const Fte6& fte);
 
 protected:
-    FtiTransactionManager  _ftm;
+    FibConfigTransactionManager	_ftm;
     uint32_t		   _max_ops;	// Maximum operations in a transaction
 
 private:

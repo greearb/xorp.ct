@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.22 2007/02/16 22:45:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.23 2007/04/27 01:10:30 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -62,7 +62,7 @@ XrlFtiTransactionManager::abort_transaction(uint32_t tid)
 
 XrlCmdError
 XrlFtiTransactionManager::add(uint32_t tid,
-			      const FtiTransactionManager::Operation& op)
+			      const FibConfigTransactionManager::Operation& op)
 {
     uint32_t n_ops;
 
