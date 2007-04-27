@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.2 2007/04/26 22:29:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.3 2007/04/27 01:10:31 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -347,7 +347,7 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
 
     // Copy the interface index.
     const IfTree& iftree = fibconfig().iftree();
-    const& IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
     XLOG_ASSERT(ifp != NULL);
     rtm->rtm_index = ifp->pif_index();
     
