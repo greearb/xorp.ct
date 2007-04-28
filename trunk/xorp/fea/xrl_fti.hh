@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.19 2007/04/27 21:47:26 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.20 2007/04/27 23:48:57 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -38,27 +38,25 @@ public:
     /**
      * Constructor
      *
-     * @param e the EventLoop.
      * @param fibconfig the ForwardingTableInterface configuration object.
      */
     XrlFtiTransactionManager(FibConfig&	fibconfig,
 			     XrlRouter* xrl_router)
 	: _fibconfig(fibconfig),
 	  _xrl_fea_fib_client(xrl_router) {
-	fibconfig.add_fib_table_observer(this);
+	_fibconfig.add_fib_table_observer(this);
     }
 
     ~XrlFtiTransactionManager() {
-	fibconfig().delete_fib_table_observer(this);
+	_fibconfig.delete_fib_table_observer(this);
     }
 
     /**
-     * Get the FibConfig entry.
-     * 
-     * @return a reference to the corresponding FibConfig entry.
-     * @see FibConfig.
+     * Get a reference to the @ref EventLoop instance.
+     *
+     * @return a reference to the @ref EventLoop instance.
      */
-    FibConfig& fibconfig() { return _fibconfig; }
+    EventLoop& eventloop() { return _fibconfig.eventloop(); }
 
     /**
      * Process a list of IPv4 FIB route changes.
@@ -221,7 +219,7 @@ private:
 	void set_send_resolves(const bool sendit) { _send_resolves = sendit; }
 
     private:
-	EventLoop& eventloop() { return _xftm.fibconfig().eventloop(); }
+	EventLoop& eventloop() { return _xftm.eventloop(); }
 	void	send_fib_client_route_change();
 
 	list<F>			_inform_fib_client_queue;
