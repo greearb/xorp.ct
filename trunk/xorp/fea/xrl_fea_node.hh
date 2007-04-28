@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.2 2007/04/19 16:45:05 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.3 2007/04/20 05:43:43 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -152,6 +152,7 @@ private:
     LibFeaClientBridge	_lib_fea_client_bridge;
     XrlFeaIO		_xrl_fea_io;	// The FEA I/O XRL interface
 
+    XrlFibClientManager	_xrl_fib_client_manager; // The FIB client manager
     XrlRawSocket4Manager _xrsm4;	// IPv4 raw sockets manager
     XrlRawSocket6Manager _xrsm6;	// IPv6 raw sockets manager
 

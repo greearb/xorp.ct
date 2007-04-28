@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.26 2007/04/28 00:04:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fib_client_manager.cc,v 1.1 2007/04/28 00:19:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,7 +31,7 @@
  * @param fte_list the list of Fte entries to add or delete.
  */
 void
-XrlFtiTransactionManager::process_fib_changes(const list<Fte4>& fte_list)
+XrlFibClientManager::process_fib_changes(const list<Fte4>& fte_list)
 {
     map<string, FibClient4>::iterator iter;
 
@@ -49,7 +49,7 @@ XrlFtiTransactionManager::process_fib_changes(const list<Fte4>& fte_list)
  * @param fte_list the list of Fte entries to add or delete.
  */
 void
-XrlFtiTransactionManager::process_fib_changes(const list<Fte6>& fte_list)
+XrlFibClientManager::process_fib_changes(const list<Fte6>& fte_list)
 {
     map<string, FibClient6>::iterator iter;
 
@@ -60,8 +60,9 @@ XrlFtiTransactionManager::process_fib_changes(const list<Fte6>& fte_list)
 }
 
 XrlCmdError
-XrlFtiTransactionManager::add_fib_client4(const string& client_target_name,
-	const bool send_updates, const bool send_resolves)
+XrlFibClientManager::add_fib_client4(const string& client_target_name,
+				     const bool send_updates,
+				     const bool send_resolves)
 {
     // Test if we have this client already
     if (_fib_clients4.find(client_target_name) != _fib_clients4.end()) {
@@ -90,8 +91,9 @@ XrlFtiTransactionManager::add_fib_client4(const string& client_target_name,
 }
 
 XrlCmdError
-XrlFtiTransactionManager::add_fib_client6(const string& client_target_name,
-	const bool send_updates, const bool send_resolves)
+XrlFibClientManager::add_fib_client6(const string& client_target_name,
+				     const bool send_updates,
+				     const bool send_resolves)
 {
     // Test if we have this client already
     if (_fib_clients6.find(client_target_name) != _fib_clients6.end()) {
@@ -120,7 +122,7 @@ XrlFtiTransactionManager::add_fib_client6(const string& client_target_name,
 }
 
 XrlCmdError
-XrlFtiTransactionManager::delete_fib_client4(const string& client_target_name)
+XrlFibClientManager::delete_fib_client4(const string& client_target_name)
 {
     map<string, FibClient4>::iterator iter;
 
@@ -137,7 +139,7 @@ XrlFtiTransactionManager::delete_fib_client4(const string& client_target_name)
 }
 
 XrlCmdError
-XrlFtiTransactionManager::delete_fib_client6(const string& client_target_name)
+XrlFibClientManager::delete_fib_client6(const string& client_target_name)
 {
     map<string, FibClient6>::iterator iter;
 
@@ -154,8 +156,8 @@ XrlFtiTransactionManager::delete_fib_client6(const string& client_target_name)
 }
 
 int
-XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
-						    const Fte4& fte)
+XrlFibClientManager::send_fib_client_add_route(const string& target_name,
+					       const Fte4& fte)
 {
     bool success;
 
@@ -170,7 +172,7 @@ XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
 	string("NOT_SUPPORTED"),
 	fte.xorp_route(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_add_route4_cb,
+		 &XrlFibClientManager::send_fib_client_add_route4_cb,
 		 target_name));
 
     if (success)
@@ -180,8 +182,8 @@ XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
 }
 
 int
-XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
-						    const Fte6& fte)
+XrlFibClientManager::send_fib_client_add_route(const string& target_name,
+					       const Fte6& fte)
 {
     bool success;
 
@@ -196,7 +198,7 @@ XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
 	string("NOT_SUPPORTED"),
 	fte.xorp_route(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_add_route6_cb,
+		 &XrlFibClientManager::send_fib_client_add_route6_cb,
 		 target_name));
 
     if (success)
@@ -206,8 +208,8 @@ XrlFtiTransactionManager::send_fib_client_add_route(const string& target_name,
 }
 
 int
-XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name,
-						       const Fte4& fte)
+XrlFibClientManager::send_fib_client_delete_route(const string& target_name,
+						  const Fte4& fte)
 {
     bool success;
 
@@ -217,7 +219,7 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
 	fte.ifname(),
 	fte.vifname(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_delete_route4_cb,
+		 &XrlFibClientManager::send_fib_client_delete_route4_cb,
 		 target_name));
 
     if (success)
@@ -227,8 +229,8 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
 }
 
 int
-XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name,
-						       const Fte6& fte)
+XrlFibClientManager::send_fib_client_delete_route(const string& target_name,
+						  const Fte6& fte)
 {
     bool success;
 
@@ -238,7 +240,7 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
 	fte.ifname(),
 	fte.vifname(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_delete_route6_cb,
+		 &XrlFibClientManager::send_fib_client_delete_route6_cb,
 		 target_name));
 
     if (success)
@@ -248,8 +250,8 @@ XrlFtiTransactionManager::send_fib_client_delete_route(const string& target_name
 }
 
 int
-XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_name,
-						       const Fte4& fte)
+XrlFibClientManager::send_fib_client_resolve_route(const string& target_name,
+						   const Fte4& fte)
 {
     bool success;
 
@@ -257,7 +259,7 @@ XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_nam
 	target_name.c_str(),
 	fte.net(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_resolve_route4_cb,
+		 &XrlFibClientManager::send_fib_client_resolve_route4_cb,
 		 target_name));
 
     if (success)
@@ -267,8 +269,8 @@ XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_nam
 }
 
 int
-XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_name,
-						       const Fte6& fte)
+XrlFibClientManager::send_fib_client_resolve_route(const string& target_name,
+						   const Fte6& fte)
 {
     bool success;
 
@@ -276,7 +278,7 @@ XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_nam
 	target_name.c_str(),
 	fte.net(),
 	callback(this,
-		 &XrlFtiTransactionManager::send_fib_client_resolve_route6_cb,
+		 &XrlFibClientManager::send_fib_client_resolve_route6_cb,
 		 target_name));
 
     if (success)
@@ -286,7 +288,39 @@ XrlFtiTransactionManager::send_fib_client_resolve_route(const string& target_nam
 }
 
 void
-XrlFtiTransactionManager::send_fib_client_add_route4_cb(
+XrlFibClientManager::send_fib_client_add_route4_cb(const XrlError& xrl_error,
+						   string target_name)
+{
+    map<string, FibClient4>::iterator iter;
+
+    iter = _fib_clients4.find(target_name);
+    if (iter == _fib_clients4.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient4& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
+void
+XrlFibClientManager::send_fib_client_add_route6_cb(const XrlError& xrl_error,
+						   string target_name)
+{
+    map<string, FibClient6>::iterator iter;
+
+    iter = _fib_clients6.find(target_name);
+    if (iter == _fib_clients6.end()) {
+	// The client has probably gone. Silently ignore.
+	return;
+    }
+
+    FibClient6& fib_client = iter->second;
+    fib_client.send_fib_client_route_change_cb(xrl_error);
+}
+
+void
+XrlFibClientManager::send_fib_client_delete_route4_cb(
     const XrlError& xrl_error,
     string target_name)
 {
@@ -303,7 +337,7 @@ XrlFtiTransactionManager::send_fib_client_add_route4_cb(
 }
 
 void
-XrlFtiTransactionManager::send_fib_client_add_route6_cb(
+XrlFibClientManager::send_fib_client_delete_route6_cb(
     const XrlError& xrl_error,
     string target_name)
 {
@@ -320,7 +354,7 @@ XrlFtiTransactionManager::send_fib_client_add_route6_cb(
 }
 
 void
-XrlFtiTransactionManager::send_fib_client_delete_route4_cb(
+XrlFibClientManager::send_fib_client_resolve_route4_cb(
     const XrlError& xrl_error,
     string target_name)
 {
@@ -337,41 +371,7 @@ XrlFtiTransactionManager::send_fib_client_delete_route4_cb(
 }
 
 void
-XrlFtiTransactionManager::send_fib_client_delete_route6_cb(
-    const XrlError& xrl_error,
-    string target_name)
-{
-    map<string, FibClient6>::iterator iter;
-
-    iter = _fib_clients6.find(target_name);
-    if (iter == _fib_clients6.end()) {
-	// The client has probably gone. Silently ignore.
-	return;
-    }
-
-    FibClient6& fib_client = iter->second;
-    fib_client.send_fib_client_route_change_cb(xrl_error);
-}
-
-void
-XrlFtiTransactionManager::send_fib_client_resolve_route4_cb(
-    const XrlError& xrl_error,
-    string target_name)
-{
-    map<string, FibClient4>::iterator iter;
-
-    iter = _fib_clients4.find(target_name);
-    if (iter == _fib_clients4.end()) {
-	// The client has probably gone. Silently ignore.
-	return;
-    }
-
-    FibClient4& fib_client = iter->second;
-    fib_client.send_fib_client_route_change_cb(xrl_error);
-}
-
-void
-XrlFtiTransactionManager::send_fib_client_resolve_route6_cb(
+XrlFibClientManager::send_fib_client_resolve_route6_cb(
     const XrlError& xrl_error,
     string target_name)
 {
@@ -389,7 +389,7 @@ XrlFtiTransactionManager::send_fib_client_resolve_route6_cb(
 
 template<class F>
 void
-XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
+XrlFibClientManager::FibClient<F>::activate(const list<F>& fte_list)
 {
     bool queue_was_empty = _inform_fib_client_queue.empty();
 
@@ -410,7 +410,7 @@ XrlFtiTransactionManager::FibClient<F>::activate(const list<F>& fte_list)
 
 template<class F>
 void
-XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
+XrlFibClientManager::FibClient<F>::send_fib_client_route_change()
 {
     int success = XORP_ERROR;
 
@@ -428,7 +428,7 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
 	//
 	if (_send_resolves && fte.is_unresolved()) {
 	    ignore_fte = false;
-	    success = _xftm.send_fib_client_resolve_route(_target_name, fte);
+	    success = _xfcm.send_fib_client_resolve_route(_target_name, fte);
 	}
 
 	//
@@ -439,10 +439,10 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
 	    ignore_fte = false;
 	    if (!fte.is_deleted()) {
 		// Send notification of a route being added
-		success = _xftm.send_fib_client_add_route(_target_name, fte);
+		success = _xfcm.send_fib_client_add_route(_target_name, fte);
 	    } else {
 		// Send notification of a route being deleted
-		success = _xftm.send_fib_client_delete_route(_target_name,
+		success = _xfcm.send_fib_client_delete_route(_target_name,
 							     fte);
 	    }
 	}
@@ -466,13 +466,13 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
 	//
 	_inform_fib_client_queue_timer = eventloop().new_oneoff_after(
 	    TimeVal(1, 0),
-	    callback(this, &XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change));
+	    callback(this, &XrlFibClientManager::FibClient<F>::send_fib_client_route_change));
     }
 }
 
 template<class F>
 void
-XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change_cb(
+XrlFibClientManager::FibClient<F>::send_fib_client_route_change_cb(
     const XrlError& xrl_error)
 {
     // If success, then send the next route change
@@ -503,8 +503,8 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change_cb(
 	return;
     _inform_fib_client_queue_timer = eventloop().new_oneoff_after(
 	TimeVal(1, 0),
-	callback(this, &XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change));
+	callback(this, &XrlFibClientManager::FibClient<F>::send_fib_client_route_change));
 }
 
-template class XrlFtiTransactionManager::FibClient<Fte4>;
-template class XrlFtiTransactionManager::FibClient<Fte6>;
+template class XrlFibClientManager::FibClient<Fte4>;
+template class XrlFibClientManager::FibClient<Fte6>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.13 2007/04/27 21:47:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.14 2007/04/27 23:48:57 pavlin Exp $"
 
 
 //
@@ -53,6 +53,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
 			   XrlRouter&			xrl_router,
 			   Profile&			profile,
+			   XrlFibClientManager&		xrl_fib_client_manager,
 			   XrlRawSocket4Manager&	xrsm4,
 			   XrlRawSocket6Manager&	xrsm6,
 			   LibFeaClientBridge&		lib_fea_client_bridge,
@@ -61,8 +62,8 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _eventloop(eventloop),
       _fea_node(fea_node),
       _xrl_router(xrl_router),
-      _xftm(fea_node.fibconfig(), &xrl_router),
       _profile(profile),
+      _xrl_fib_client_manager(xrl_fib_client_manager),
       _xrsm4(xrsm4),
       _xrsm6(xrsm6),
       _lib_fea_client_bridge(lib_fea_client_bridge),
@@ -527,8 +528,9 @@ XrlFeaTarget::fea_fib_0_1_add_fib_client4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    return _xftm.add_fib_client4(client_target_name, send_updates,
-				 send_resolves);
+    return _xrl_fib_client_manager.add_fib_client4(client_target_name,
+						   send_updates,
+						   send_resolves);
 }
 
 XrlCmdError
@@ -541,8 +543,9 @@ XrlFeaTarget::fea_fib_0_1_add_fib_client6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    return _xftm.add_fib_client6(client_target_name, send_updates,
-				 send_resolves);
+    return _xrl_fib_client_manager.add_fib_client6(client_target_name,
+						   send_updates,
+						   send_resolves);
 }
 
 /**
@@ -558,7 +561,7 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client4(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    return _xftm.delete_fib_client4(client_target_name);
+    return _xrl_fib_client_manager.delete_fib_client4(client_target_name);
 }
 
 XrlCmdError
@@ -569,7 +572,7 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    return _xftm.delete_fib_client6(client_target_name);
+    return _xrl_fib_client_manager.delete_fib_client6(client_target_name);
 }
 
 XrlCmdError

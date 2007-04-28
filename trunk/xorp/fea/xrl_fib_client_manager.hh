@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.21 2007/04/28 00:04:22 pavlin Exp $
+// $XORP: xorp/fea/xrl_fib_client_manager.hh,v 1.1 2007/04/28 00:19:54 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -26,28 +26,23 @@
 
 
 /**
- * Helper class for helping with Fti transactions via an Xrl
- * interface.
- *
- * The class provides error messages suitable for Xrl return values
- * and does some extra checking not in the FtiTransactionManager
- * class.
+ * Class for managing clients interested in FIB changes notifications.
  */
-class XrlFtiTransactionManager : public FibTableObserverBase {
+class XrlFibClientManager : public FibTableObserverBase {
 public:
     /**
      * Constructor
      *
-     * @param fibconfig the ForwardingTableInterface configuration object.
+     * @param fibconfig the FibConfig configuration object (@see FibConfig).
      */
-    XrlFtiTransactionManager(FibConfig&	fibconfig,
-			     XrlRouter* xrl_router)
+    XrlFibClientManager(FibConfig&	fibconfig,
+			XrlRouter&	xrl_router)
 	: _fibconfig(fibconfig),
-	  _xrl_fea_fib_client(xrl_router) {
+	  _xrl_fea_fib_client(&xrl_router) {
 	_fibconfig.add_fib_table_observer(this);
     }
 
-    ~XrlFtiTransactionManager() {
+    ~XrlFibClientManager() {
 	_fibconfig.delete_fib_table_observer(this);
     }
 
@@ -206,8 +201,8 @@ private:
     template<class F>
     class FibClient {
     public:
-	FibClient(const string& target_name, XrlFtiTransactionManager& xftm)
-	    : _target_name(target_name), _xftm(xftm),
+	FibClient(const string& target_name, XrlFibClientManager& xfcm)
+	    : _target_name(target_name), _xfcm(xfcm),
 	      _send_updates(false), _send_resolves(false) {}
 
 	void	activate(const list<F>& fte_list);
@@ -219,14 +214,14 @@ private:
 	void set_send_resolves(const bool sendit) { _send_resolves = sendit; }
 
     private:
-	EventLoop& eventloop() { return _xftm.eventloop(); }
+	EventLoop& eventloop() { return _xfcm.eventloop(); }
 	void	send_fib_client_route_change();
 
 	list<F>			_inform_fib_client_queue;
 	XorpTimer		_inform_fib_client_queue_timer;
 
 	string			_target_name;	// Target name of the client
-	XrlFtiTransactionManager& _xftm;
+	XrlFibClientManager&	_xfcm;
 
 	bool			_send_updates;	// Event filters
 	bool			_send_resolves;

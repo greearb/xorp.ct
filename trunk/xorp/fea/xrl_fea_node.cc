@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.3 2007/04/20 05:43:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.4 2007/04/26 22:29:53 pavlin Exp $"
 
 
 //
@@ -54,6 +54,7 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		  finder_hostname.c_str(), finder_port),
       _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().local_config()),
       _xrl_fea_io(eventloop),
+      _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
       _xrsm4(_eventloop, _fea_node.ifconfig().local_config(), _xrl_router),
       _xrsm6(_eventloop, _fea_node.ifconfig().local_config(), _xrl_router),
       _xrl_socket_server(_eventloop, _fea_node.ifconfig_address_table(),
@@ -81,8 +82,8 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		      xorp_module_name(AF_INET6, XORP_MODULE_FEA)),
 #endif
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
-		      _xrsm4, _xrsm6, _lib_fea_client_bridge,
-		      _xrl_socket_server),
+		      _xrl_fib_client_manager, _xrsm4, _xrsm6,
+		      _lib_fea_client_bridge, _xrl_socket_server),
       _is_dummy(false)
 {
     IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();

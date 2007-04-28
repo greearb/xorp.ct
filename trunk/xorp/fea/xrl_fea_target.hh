@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.7 2007/04/27 01:10:30 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.8 2007/04/28 00:19:54 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -33,6 +33,7 @@ class FibConfig;
 class IfConfig;
 class InterfaceManager;
 class LibFeaClientBridge;
+class XrlFibClientManager;
 class XrlRawSocket4Manager;
 class XrlRawSocket6Manager;
 class XrlSocketServer;
@@ -48,10 +49,11 @@ public:
      *
      * @param eventloop the event loop to use.
      */
-    XrlFeaTarget(EventLoop&	eventloop,
-		 FeaNode&	fea_node,
-		 XrlRouter&	xrl_router,
-		 Profile&	profile,
+    XrlFeaTarget(EventLoop&		eventloop,
+		 FeaNode&		fea_node,
+		 XrlRouter&		xrl_router,
+		 Profile&		profile,
+		 XrlFibClientManager&	xrl_fib_client_manager,
 		 XrlRawSocket4Manager&	xrsm4,
 		 XrlRawSocket6Manager&	xrsm6,
 		 LibFeaClientBridge&	lib_fea_client_bridge,
@@ -1308,8 +1310,8 @@ private:
     FeaNode&		_fea_node;	// The corresponding FeaNode
 
     XrlRouter&		       	_xrl_router;
-    XrlFtiTransactionManager	_xftm;
     Profile&			_profile;
+    XrlFibClientManager&	_xrl_fib_client_manager;
     XrlRawSocket4Manager&	_xrsm4;
     XrlRawSocket6Manager&	_xrsm6;
     LibFeaClientBridge&		_lib_fea_client_bridge;
