@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fib_client_manager.hh,v 1.1 2007/04/28 00:19:54 pavlin Exp $
+// $XORP: xorp/fea/xrl_fib_client_manager.hh,v 1.2 2007/04/28 00:49:12 pavlin Exp $
 
-#ifndef __FEA_XRL_FTI_HH__
-#define __FEA_XRL_FTI_HH__
+#ifndef __FEA_XRL_FIB_CLIENT_MANAGER_HH__
+#define __FEA_XRL_FIB_CLIENT_MANAGER_HH__
 
 #include "libxipc/xrl_router.hh"
 
@@ -236,4 +236,4 @@ private:
     XrlFeaFibClientV0p1Client	_xrl_fea_fib_client;
 };
 
-#endif // __FEA_XRL_FTI_HH__
+#endif // __FEA_XRL_FIB_CLIENT_MANAGER_HH__
