@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.3 2007/04/27 01:10:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.4 2007/04/27 20:33:32 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -22,12 +22,11 @@
 #include "libxorp/ipvxnet.hh"
 
 #ifdef HOST_OS_WINDOWS
-#include "win_rtsock.h"
+#include "fea/win_rtsock.h"
 #endif
 
-#include "fibconfig.hh"
-#include "fibconfig_entry_get.hh"
-
+#include "fea/fibconfig.hh"
+#include "fea/fibconfig_entry_get.hh"
 //
 // Get single-entry information from the unicast forwarding table.
 //

@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.33 2007/04/26 06:29:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -45,10 +45,10 @@
 #include <ifaddrs.h>
 #endif
 
-#include "ifconfig.hh"
-#include "ifconfig_get.hh"
-#include "ifconfig_media.hh"
-#include "kernel_utils.hh"
+#include "fea/ifconfig.hh"
+#include "fea/ifconfig_get.hh"
+#include "fea/ifconfig_media.hh"
+#include "fea/kernel_utils.hh"
 
 
 //

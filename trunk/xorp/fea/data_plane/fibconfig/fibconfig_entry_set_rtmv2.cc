@@ -13,16 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.3 2007/04/27 01:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.4 2007/04/27 01:45:33 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
 #ifdef HOST_OS_WINDOWS
-#include "win_rtsock.h"
+#include "fea/win_rtsock.h"
 #endif
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
@@ -31,9 +31,9 @@
 #include <routprot.h>
 #endif
 
-#include "fibconfig.hh"
-#include "fibconfig_entry_set.hh"
-#include "iftree.hh"
+#include "fea/fibconfig.hh"
+#include "fea/fibconfig_entry_set.hh"
+#include "fea/iftree.hh"
 
 
 //

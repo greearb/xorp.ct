@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.1 2007/04/25 07:31:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.2 2007/04/26 06:29:46 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -29,9 +29,9 @@
 #include <net/if.h>
 #endif
 
-#include "ifconfig.hh"
-#include "ifconfig_get.hh"
-#include "kernel_utils.hh"
+#include "fea/ifconfig.hh"
+#include "fea/ifconfig_get.hh"
+#include "fea/kernel_utils.hh"
 
 
 const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V4 = "/proc/net/dev";

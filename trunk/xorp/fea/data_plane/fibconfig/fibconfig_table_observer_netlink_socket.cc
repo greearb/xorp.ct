@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.2 2007/04/26 22:29:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.3 2007/04/27 01:10:32 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -27,8 +27,8 @@
 #include <linux/rtnetlink.h>
 #endif
 
-#include "fibconfig.hh"
-#include "fibconfig_table_observer.hh"
+#include "fea/fibconfig.hh"
+#include "fea/fibconfig_table_observer.hh"
 
 
 //
