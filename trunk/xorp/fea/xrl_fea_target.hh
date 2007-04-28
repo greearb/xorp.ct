@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.6 2007/04/24 01:28:42 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.7 2007/04/27 01:10:30 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -25,7 +25,7 @@
 
 #include "xrl/targets/fea_base.hh"
 
-#include "xrl_fti.hh"
+#include "xrl_fib_client_manager.hh"
 
 class EventLoop;
 class FeaNode;
