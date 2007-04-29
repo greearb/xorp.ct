@@ -12,15 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_entry_get.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_entry_get.cc,v 1.2 2007/04/27 01:10:27 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
-#include "libcomm/comm_api.h"
 
 #include "fibconfig.hh"
 #include "fibconfig_entry_get.hh"
@@ -32,25 +30,14 @@
 
 
 FibConfigEntryGet::FibConfigEntryGet(FibConfig& fibconfig)
-    : _s4(-1),
-      _s6(-1),
-      _is_running(false),
+    : _is_running(false),
       _fibconfig(fibconfig),
       _is_primary(true)
 {
-    
 }
 
 FibConfigEntryGet::~FibConfigEntryGet()
 {
-    if (_s4 >= 0) {
-	comm_close(_s4);
-	_s4 = -1;
-    }
-    if (_s6 >= 0) {
-	comm_close(_s6);
-	_s6 = -1;
-    }
 }
 
 void
@@ -63,20 +50,4 @@ void
 FibConfigEntryGet::register_fibconfig_secondary()
 {
     _fibconfig.register_fibconfig_entry_get_secondary(this);
-}
-
-int
-FibConfigEntryGet::sock(int family)
-{
-    switch (family) {
-    case AF_INET:
-	return _s4;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	return _s6;
-#endif // HAVE_IPV6
-    default:
-	XLOG_FATAL("Unknown address family %d", family);
-    }
-    return (-1);
 }

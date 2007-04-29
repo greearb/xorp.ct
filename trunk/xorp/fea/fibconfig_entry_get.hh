@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.2 2007/04/27 01:10:27 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.3 2007/04/27 20:33:31 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
 #define __FEA_FIBCONFIG_ENTRY_GET_HH__
@@ -137,11 +137,6 @@ public:
 			  bool is_nlm_get_only);
 
 protected:
-    int sock(int family);
-    
-    int	_s4;
-    int _s6;
-
     // Misc other stat
     bool	_is_running;
 
