@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.30 2007/04/26 06:29:44 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.31 2007/04/30 20:44:07 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -69,7 +69,6 @@ public:
     virtual bool pull_config(IfTree& config) = 0;
     
 protected:
-    static string iff_flags(uint32_t flags);
     int sock(int family);
 
     int	_s4;
@@ -213,6 +212,7 @@ public:
 
 private:
     bool read_config(IfTree& it);
+    static string iff_flags(uint32_t flags);
 };
 
 class IfConfigGetIoctl : public IfConfigGet {

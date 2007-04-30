@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.12 2007/02/16 22:45:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.13 2007/04/26 06:29:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,10 +21,6 @@
 #include "libxorp/debug.h"
 
 #include "libcomm/comm_api.h"
-
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
@@ -84,86 +80,4 @@ IfConfigGet::sock(int family)
 	XLOG_FATAL("Unknown address family %d", family);
     }
     return (-1);
-}
-
-/**
- * Generate ifconfig like flags string
- * @param flags interface flags value from routing socket message.
- * @return ifconfig like flags string
- */
-string
-IfConfigGet::iff_flags(uint32_t flags)
-{
-    struct {
-	uint32_t 	value;
-	const char*	name;
-    } iff_fl[] = {
-#define IFF_FLAG_ENTRY(X) { IFF_##X, #X }
-#ifdef IFF_UP
-	IFF_FLAG_ENTRY(UP),
-#endif
-#ifdef IFF_BROADCAST
-	IFF_FLAG_ENTRY(BROADCAST),
-#endif
-#ifdef IFF_DEBUG
-	IFF_FLAG_ENTRY(DEBUG),
-#endif
-#ifdef IFF_LOOPBACK
-	IFF_FLAG_ENTRY(LOOPBACK),
-#endif
-#ifdef IFF_POINTOPOINT
-	IFF_FLAG_ENTRY(POINTOPOINT),
-#endif
-#ifdef IFF_SMART
-	IFF_FLAG_ENTRY(SMART),
-#endif
-#ifdef IFF_RUNNING
-	IFF_FLAG_ENTRY(RUNNING),
-#endif
-#ifdef IFF_NOARP
-	IFF_FLAG_ENTRY(NOARP),
-#endif
-#ifdef IFF_PROMISC
-	IFF_FLAG_ENTRY(PROMISC),
-#endif
-#ifdef IFF_ALLMULTI
-	IFF_FLAG_ENTRY(ALLMULTI),
-#endif
-#ifdef IFF_OACTIVE
-	IFF_FLAG_ENTRY(OACTIVE),
-#endif
-#ifdef IFF_SIMPLEX
-	IFF_FLAG_ENTRY(SIMPLEX),
-#endif
-#ifdef IFF_LINK0
-	IFF_FLAG_ENTRY(LINK0),
-#endif
-#ifdef IFF_LINK1
-	IFF_FLAG_ENTRY(LINK1),
-#endif
-#ifdef IFF_LINK2
-	IFF_FLAG_ENTRY(LINK2),
-#endif
-#ifdef IFF_ALTPHYS
-	IFF_FLAG_ENTRY(ALTPHYS),
-#endif
-#ifdef IFF_MULTICAST
-	IFF_FLAG_ENTRY(MULTICAST),
-#endif
-	{ 0, "" }  // for nitty compilers that don't like trailing ","
-    };
-    const size_t n_iff_fl = sizeof(iff_fl) / sizeof(iff_fl[0]);
-
-    string ret("<");
-    for (size_t i = 0; i < n_iff_fl; i++) {
-	if (0 == (flags & iff_fl[i].value))
-	    continue;
-	flags &= ~iff_fl[i].value;
-	ret += iff_fl[i].name;
-	if (0 == flags)
-	    break;
-	ret += ",";
-    }
-    ret += ">";
-    return ret;
 }
