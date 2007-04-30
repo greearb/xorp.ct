@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.31 2007/04/30 20:44:07 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.32 2007/04/30 20:54:43 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -30,9 +30,12 @@ struct ifaddrs;
 
 class IfConfigGet {
 public:
-    IfConfigGet(IfConfig& ifconfig);
-    
-    virtual ~IfConfigGet();
+    IfConfigGet(IfConfig& ifconfig)
+	: _is_running(false),
+	  _ifconfig(ifconfig),
+	  _is_primary(true)
+    {}
+    virtual ~IfConfigGet() {}
     
     IfConfig&	ifconfig() { return _ifconfig; }
     
@@ -69,14 +72,9 @@ public:
     virtual bool pull_config(IfTree& config) = 0;
     
 protected:
-    int sock(int family);
-
-    int	_s4;
-    int _s6;
-
     // Misc other state
     bool	_is_running;
-    
+
 private:
     IfConfig&	_ifconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
@@ -264,6 +262,9 @@ public:
 
 private:
     bool read_config(IfTree& it);
+
+    int _s4;
+    int _s6;
 };
 
 class IfConfigGetProcLinux : public IfConfigGet {

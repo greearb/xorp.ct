@@ -12,15 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.13 2007/04/26 06:29:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.14 2007/04/30 20:54:43 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
-#include "libcomm/comm_api.h"
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
@@ -30,29 +28,6 @@
 // Get information about network interfaces configuration from the
 // underlying system.
 //
-
-
-IfConfigGet::IfConfigGet(IfConfig& ifconfig)
-    : _s4(-1),
-      _s6(-1),
-      _is_running(false),
-      _ifconfig(ifconfig),
-      _is_primary(true)
-{
-    
-}
-
-IfConfigGet::~IfConfigGet()
-{
-    if (_s4 >= 0) {
-	comm_close(_s4);
-	_s4 = -1;
-    }
-    if (_s6 >= 0) {
-	comm_close(_s6);
-	_s6 = -1;
-    }
-}
 
 void
 IfConfigGet::register_ifconfig_primary()
@@ -64,20 +39,4 @@ void
 IfConfigGet::register_ifconfig_secondary()
 {
     _ifconfig.register_ifconfig_get_secondary(this);
-}
-
-int
-IfConfigGet::sock(int family)
-{
-    switch (family) {
-    case AF_INET:
-	return _s4;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	return _s6;
-#endif // HAVE_IPV6
-    default:
-	XLOG_FATAL("Unknown address family %d", family);
-    }
-    return (-1);
 }
