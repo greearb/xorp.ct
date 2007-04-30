@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_sysctl.cc,v 1.2 2007/04/26 06:29:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_sysctl.cc,v 1.3 2007/04/28 01:54:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -132,7 +132,7 @@ IfConfigGetSysctl::read_config(IfTree& it)
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &buffer[0], &sz, NULL, 0)
 	    == 0) {
 	    // Parse the result
-	    return (parse_buffer_rtm(it, buffer));
+	    return (parse_buffer_routing_socket(ifconfig(), it, buffer));
 	}
 	
 	// Error

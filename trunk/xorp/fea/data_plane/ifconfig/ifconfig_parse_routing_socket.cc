@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.2 2007/04/28 01:54:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -65,7 +65,9 @@
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
-IfConfigGet::parse_buffer_rtm(IfTree& , const vector<uint8_t>& )
+IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ,
+					       IfTree& ,
+					       const vector<uint8_t>& )
 {
     return false;
 }
@@ -121,7 +123,9 @@ ifm_get_link_status(const struct if_msghdr* ifm, const string& if_name,
 }
 
 bool
-IfConfigGet::parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer)
+IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
+					       IfTree& it,
+					       const vector<uint8_t>& buffer)
 {
     AlignData<struct if_msghdr> align_data(buffer);
     bool recognized = false;
@@ -142,18 +146,18 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer)
 	switch (ifm->ifm_type) {
 	case RTM_IFINFO:
 	    if_index_hint = 0;
-	    rtm_ifinfo_to_fea_cfg(ifconfig(), ifm, it, if_index_hint);
+	    rtm_ifinfo_to_fea_cfg(ifconfig, ifm, it, if_index_hint);
 	    recognized = true;
 	    break;
 	case RTM_NEWADDR:
 	case RTM_DELADDR:
-	    rtm_addr_to_fea_cfg(ifconfig(), ifm, it, if_index_hint);
+	    rtm_addr_to_fea_cfg(ifconfig, ifm, it, if_index_hint);
 	    recognized = true;
 	    break;
 #ifdef RTM_IFANNOUNCE
 	case RTM_IFANNOUNCE:
 	    if_index_hint = 0;
-	    rtm_announce_to_fea_cfg(ifconfig(), ifm, it);
+	    rtm_announce_to_fea_cfg(ifconfig, ifm, it);
 	    recognized = true;
 	    break;
 #endif // RTM_IFANNOUNCE

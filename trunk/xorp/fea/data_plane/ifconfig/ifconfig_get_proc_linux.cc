@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.2 2007/04/26 06:29:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.3 2007/04/28 01:54:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -224,7 +224,7 @@ get_proc_linux_iface_name(char* name, char* p)
 // in the IfTree that is partially filled-in with
 // IfConfigGetIoctl::read_config().
 // If the interface is in that list, then we ignore it. If the interface is
-// NOT in that list, then we call IfConfigGet::parse_buffer_ifreq()
+// NOT in that list, then we call IfConfigGetIoctl::parse_buffer_ioctl()
 // to get the rest of the information about it (such as the interface hardware
 // address, MTU, etc) by calling various ioctl()'s.
 //
@@ -289,7 +289,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
 	vector<uint8_t> buffer(sizeof(struct ifreq));
 	memcpy(&buffer[0], &ifreq, sizeof(ifreq));
 
-	ifconfig.ifconfig_get_ioctl().parse_buffer_ifreq(it, AF_INET, buffer);
+	IfConfigGetIoctl::parse_buffer_ioctl(ifconfig, it, AF_INET, buffer);
     }
     if (ferror(fh)) {
 	XLOG_ERROR("%s read failed: %s",
@@ -311,7 +311,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
 // Then, we use ioctl()'s to obtain information such as interface
 // hardware address, MTU, etc.
 //
-// The reason that we do NOT call IfConfigGet::parse_buffer_ifreq()
+// The reason that we do NOT call IfConfigGetIoctl::parse_buffer_ioctl()
 // to fill-in the missing information is because in Linux the in6_ifreq
 // structure has completely different format from the IPv4 equivalent
 // of "struct ifreq" (i.e., there is no in6_ifreq.ifr_name field), and

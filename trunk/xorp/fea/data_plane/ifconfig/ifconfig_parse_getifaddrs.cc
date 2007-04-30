@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.2 2007/04/28 01:54:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -59,10 +59,21 @@
 // (e.g., obtained by getifaddrs(3) mechanism).
 //
 
-#ifdef HAVE_GETIFADDRS
+#ifndef HAVE_GETIFADDRS
 
 bool
-IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
+IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ,
+					       IfTree& ,
+					       const struct ifaddrs* )
+{
+    return (false);
+}
+
+#else // HAVE_GETIFADDRS
+
+bool
+IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
+					       const struct ifaddrs* ifap)
 {
     u_short if_index = 0;
     string if_name, alias_if_name;
@@ -158,7 +169,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap)
 	//
 	// Add the interface (if a new one)
 	//
-	ifconfig().map_ifindex(if_index, alias_if_name);
+	ifconfig.map_ifindex(if_index, alias_if_name);
 	IfTreeInterface* ifp = it.find_interface(alias_if_name);
 	if (ifp == NULL) {
 	    it.add_if(alias_if_name);

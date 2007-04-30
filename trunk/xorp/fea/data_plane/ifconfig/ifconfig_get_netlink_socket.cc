@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.3 2007/04/26 06:29:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.4 2007/04/28 01:54:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -176,7 +176,8 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
     }
     // XXX: reset the multipart message read hackish flag
     ns.set_multipart_message_read(false);
-    if (parse_buffer_nlm(it, _ns_reader.buffer()) != true) {
+    if (parse_buffer_netlink_socket(ifconfig(), it, _ns_reader.buffer())
+	!= true) {
 	return (false);
     }
 
@@ -254,7 +255,9 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
 	    }
 	    // XXX: reset the multipart message read hackish flag
 	    ns.set_multipart_message_read(false);
-	    if (parse_buffer_nlm(it, _ns_reader.buffer()) != true) {
+	    if (parse_buffer_netlink_socket(ifconfig(), it,
+					    _ns_reader.buffer())
+		!= true) {
 		return (false);
 	    }
 	}
@@ -306,7 +309,9 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
 	    }
 	    // XXX: reset the multipart message read hackish flag
 	    ns.set_multipart_message_read(false);
-	    if (parse_buffer_nlm(it, _ns_reader.buffer()) != true) {
+	    if (parse_buffer_netlink_socket(ifconfig(), it,
+					    _ns_reader.buffer())
+		!= true) {
 		return (false);
 	    }
 	}

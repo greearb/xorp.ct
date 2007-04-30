@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.29 2007/04/25 07:57:48 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.30 2007/04/26 06:29:44 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -67,66 +67,6 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool pull_config(IfTree& config) = 0;
-    
-    /**
-     * Parse information about network interface configuration change from
-     * the underlying system.
-     * 
-     * The information to parse is in "struct ifaddrs" format
-     * (e.g., obtained by getifaddrs(3) mechanism).
-     * 
-     * @param it the IfTree storage to store the parsed information.
-     * @param ifap a linked list of the network interfaces on the
-     * local machine.
-     * @return true on success, otherwise false.
-     * @see IfTree.
-     */
-    bool parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap);
-
-    /**
-     * Parse information about network interface configuration change from
-     * the underlying system.
-     * 
-     * The information to parse is in RTM format
-     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
-     * 
-     * @param it the IfTree storage to store the parsed information.
-     * @param buffer the buffer with the data to parse.
-     * @return true on success, otherwise false.
-     * @see IfTree.
-     */
-    bool parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer);
-
-    /**
-     * Parse information about network interface configuration change from
-     * the underlying system.
-     * 
-     * The information to parse is in "struct ifreq" format
-     * (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
-     * 
-     * @param it the IfTree storage to store the parsed information.
-     * @param family the address family to consider only (e.g., AF_INET
-     * or AF_INET6 for IPv4 and IPv6 respectively).
-     * @param buffer the buffer with the data to parse.
-     * @return true on success, otherwise false.
-     * @see IfTree.
-     */
-    bool parse_buffer_ifreq(IfTree& it, int family,
-			    const vector<uint8_t>& buffer);
-
-    /**
-     * Parse information about network interface configuration change from
-     * the underlying system.
-     * 
-     * The information to parse is in NETLINK format
-     * (e.g., obtained by netlink(7) sockets mechanism).
-     * 
-     * @param it the IfTree storage to store the parsed information.
-     * @param buffer the buffer with the data to parse.
-     * @return true on success, otherwise false.
-     * @see IfTree.
-     */
-    bool parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer);
     
 protected:
     static string iff_flags(uint32_t flags);
@@ -205,6 +145,23 @@ public:
      */
     virtual bool pull_config(IfTree& config);
 
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in "struct ifaddrs" format
+     * (e.g., obtained by getifaddrs(3) mechanism).
+     * 
+     * @param ifconfig the IfConfig instance.
+     * @param it the IfTree storage to store the parsed information.
+     * @param ifap a linked list of the network interfaces on the
+     * local machine.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
+    static bool parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
+					const struct ifaddrs* ifap);
+
 private:
     bool read_config(IfTree& it);
 };
@@ -237,7 +194,23 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool pull_config(IfTree& config);
-    
+
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param ifconfig the IfConfig instance.
+     * @param it the IfTree storage to store the parsed information.
+     * @param buffer the buffer with the data to parse.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
+    static bool parse_buffer_routing_socket(IfConfig& ifconfig, IfTree& it,
+					    const vector<uint8_t>& buffer);
+
 private:
     bool read_config(IfTree& it);
 };
@@ -270,7 +243,25 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool pull_config(IfTree& config);
-    
+
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in "struct ifreq" format
+     * (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
+     * 
+     * @param ifconfig the IfConfig instance.
+     * @param it the IfTree storage to store the parsed information.
+     * @param family the address family to consider only (e.g., AF_INET
+     * or AF_INET6 for IPv4 and IPv6 respectively).
+     * @param buffer the buffer with the data to parse.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
+    static bool parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it, int family,
+				   const vector<uint8_t>& buffer);
+
 private:
     bool read_config(IfTree& it);
 };
@@ -341,6 +332,22 @@ public:
      */
     virtual bool pull_config(IfTree& config);
 
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in NETLINK format
+     * (e.g., obtained by netlink(7) sockets mechanism).
+     * 
+     * @param ifconfig the IfConfig instance.
+     * @param it the IfTree storage to store the parsed information.
+     * @param buffer the buffer with the data to parse.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
+    static bool parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& it,
+					    const vector<uint8_t>& buffer);
+    
 private:
     bool read_config(IfTree& it);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.2 2007/04/28 01:54:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -21,6 +21,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
 #include "libxorp/ipvx.hh"
+
+#include "libcomm/comm_api.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -60,7 +62,8 @@
 
 #ifndef HAVE_IOCTL_SIOCGIFCONF
 bool
-IfConfigGet::parse_buffer_ifreq(IfTree& , int , const vector<uint8_t>& )
+IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& , IfTree& , int ,
+				     const vector<uint8_t>& )
 {
     return false;
 }
@@ -68,13 +71,19 @@ IfConfigGet::parse_buffer_ifreq(IfTree& , int , const vector<uint8_t>& )
 #else // HAVE_IOCTL_SIOCGIFCONF
 
 bool
-IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
-				const vector<uint8_t>& buffer)
+IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
+				     int family, const vector<uint8_t>& buffer)
 {
 #ifndef HOST_OS_WINDOWS
+    int s;
     u_short if_index = 0;
     string if_name, alias_if_name;
     size_t offset;
+
+    s = socket(family, SOCK_DGRAM, 0);
+    if (s < 0) {
+	XLOG_FATAL("Could not initialize ioctl() socket");
+    }
 
     for (offset = 0; offset < buffer.size(); ) {
 	bool is_newlink = false;	// True if really a new link
@@ -140,7 +149,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
 			sizeof(ifridx.ifr_name) - 1);
-		if (ioctl(sock(family), SIOCGIFINDEX, &ifridx) < 0) {
+		if (ioctl(s, SIOCGIFINDEX, &ifridx) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFINDEX) for interface %s failed: %s",
 			       if_name.c_str(), strerror(errno));
 		} else {
@@ -167,7 +176,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	// Add the interface (if a new one)
 	//
-	ifconfig().map_ifindex(if_index, alias_if_name);
+	ifconfig.map_ifindex(if_index, alias_if_name);
 	IfTreeInterface* ifp = it.find_interface(alias_if_name);
 	if (ifp == NULL) {
 	    it.add_if(alias_if_name);
@@ -209,7 +218,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    
 #ifdef SIOCGIFHWADDR
 	    memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
-	    if (ioctl(sock(family), SIOCGIFHWADDR, &ifrcopy) < 0) {
+	    if (ioctl(s, SIOCGIFHWADDR, &ifrcopy) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
 			   if_name.c_str(), strerror(errno));
 	    } else {
@@ -231,7 +240,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	unsigned int mtu = 0;
 	memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
-	if (ioctl(sock(family), SIOCGIFMTU, &ifrcopy) < 0) {
+	if (ioctl(s, SIOCGIFMTU, &ifrcopy) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
 	} else {
@@ -254,7 +263,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	unsigned int flags = 0;
 	memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
-	if (ioctl(sock(family), SIOCGIFFLAGS, &ifrcopy) < 0) {
+	if (ioctl(s, SIOCGIFFLAGS, &ifrcopy) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGIFFLAGS) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
 	} else {
@@ -362,7 +371,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		strncpy(ifrcopy.ifr_name, if_name.c_str(),
 			sizeof(ifrcopy.ifr_name) - 1);
 		ifrcopy.ifr_addr.sa_family = family;
-		if (ioctl(sock(family), SIOCGIFADDR, &ifrcopy) < 0) {
+		if (ioctl(s, SIOCGIFADDR, &ifrcopy) < 0) {
 		    // XXX: the interface probably has no address. Ignore.
 		    continue;
 		} else {
@@ -382,7 +391,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		strncpy(ifrcopy6.ifr_name, if_name.c_str(),
 			sizeof(ifrcopy6.ifr_name) - 1);
 		ifrcopy6.ifr_ifru.ifru_addr.sin6_family = family;
-		if (ioctl(sock(family), SIOCGIFADDR_IN6, &ifrcopy6) < 0) {
+		if (ioctl(s, SIOCGIFADDR_IN6, &ifrcopy6) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFADDR_IN6) failed: %s",
 			       strerror(errno));
 		} else {
@@ -407,7 +416,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	case AF_INET:
 #ifdef SIOCGIFNETMASK
 	    memcpy(&ifrcopy, &ip_ifrcopy, sizeof(ifrcopy));
-	    if (ioctl(sock(family), SIOCGIFNETMASK, &ifrcopy) < 0) {
+	    if (ioctl(s, SIOCGIFNETMASK, &ifrcopy) < 0) {
 		if (! vifp->point_to_point()) {
 		    XLOG_ERROR("ioctl(SIOCGIFNETMASK) failed: %s",
 			       strerror(errno));
@@ -428,7 +437,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    struct in6_ifreq ifrcopy6;
 	    
 	    memcpy(&ifrcopy6, &ip_ifrcopy6, sizeof(ifrcopy6));
-	    if (ioctl(sock(family), SIOCGIFNETMASK_IN6, &ifrcopy6) < 0) {
+	    if (ioctl(s, SIOCGIFNETMASK_IN6, &ifrcopy6) < 0) {
 		if (! vifp->point_to_point()) {
 		    XLOG_ERROR("ioctl(SIOCGIFNETMASK_IN6) failed: %s",
 			       strerror(errno));
@@ -456,7 +465,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    case AF_INET:
 #ifdef SIOCGIFBRDADDR
 		memcpy(&ifrcopy, &ip_ifrcopy, sizeof(ifrcopy));
-		if (ioctl(sock(family), SIOCGIFBRDADDR, &ifrcopy) < 0) {
+		if (ioctl(s, SIOCGIFBRDADDR, &ifrcopy) < 0) {
 		    XLOG_ERROR("ioctl(SIOCGIFBRADDR) failed: %s",
 			       strerror(errno));
 		} else {
@@ -486,7 +495,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    case AF_INET:
 #ifdef SIOCGIFDSTADDR
 		memcpy(&ifrcopy, &ip_ifrcopy, sizeof(ifrcopy));
-		if (ioctl(sock(family), SIOCGIFDSTADDR, &ifrcopy) < 0) {
+		if (ioctl(s, SIOCGIFDSTADDR, &ifrcopy) < 0) {
 		    // Probably the p2p address is not configured
 		} else {
 		    // The p2p address is configured
@@ -505,7 +514,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		struct in6_ifreq ifrcopy6;
 		
 		memcpy(&ifrcopy6, &ip_ifrcopy6, sizeof(ifrcopy6));
-		if (ioctl(sock(family), SIOCGIFDSTADDR_IN6, &ifrcopy6) < 0) {
+		if (ioctl(s, SIOCGIFDSTADDR_IN6, &ifrcopy6) < 0) {
 		    // Probably the p2p address is not configured
 		} else {
 		    // The p2p address is configured
@@ -578,7 +587,9 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    break;
 	}
     }
-    
+
+    comm_close(s);
+
     return true;
 #else /* HOST_OS_WINDOWS */
     XLOG_FATAL("WinSock2 does not support struct ifreq.");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.1 2007/04/26 09:59:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.2 2007/04/28 01:54:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -52,7 +52,9 @@
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-IfConfigGet::parse_buffer_nlm(IfTree& , const vector<uint8_t>&)
+IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ,
+						      IfTree& ,
+						      const vector<uint8_t>&)
 {
     return false;
 }
@@ -70,7 +72,9 @@ static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& it,
 				      int rta_len, bool is_deleted);
 
 bool
-IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
+IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
+						      IfTree& it,
+						      const vector<uint8_t>& buffer)
 {
     size_t buffer_bytes = buffer.size();
     AlignData<struct nlmsghdr> align_data(buffer);
@@ -120,9 +124,9 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 	    }
 	    ifinfomsg = reinterpret_cast<const struct ifinfomsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWLINK)
-		nlm_newlink_to_fea_cfg(ifconfig(), it, ifinfomsg, rta_len);
+		nlm_newlink_to_fea_cfg(ifconfig, it, ifinfomsg, rta_len);
 	    else
-		nlm_dellink_to_fea_cfg(ifconfig(), it, ifinfomsg, rta_len);
+		nlm_dellink_to_fea_cfg(ifconfig, it, ifinfomsg, rta_len);
 	    recognized = true;
 	}
 	break;
@@ -139,10 +143,10 @@ IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 	    }
 	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWADDR) {
-		nlm_newdeladdr_to_fea_cfg(ifconfig(), it, ifaddrmsg, rta_len,
+		nlm_newdeladdr_to_fea_cfg(ifconfig, it, ifaddrmsg, rta_len,
 					  false);
 	    } else {
-		nlm_newdeladdr_to_fea_cfg(ifconfig(), it, ifaddrmsg, rta_len,
+		nlm_newdeladdr_to_fea_cfg(ifconfig, it, ifaddrmsg, rta_len,
 					  true);
 	    }
 	    recognized = true;
