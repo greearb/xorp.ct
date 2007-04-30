@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc,v 1.3 2007/04/27 01:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc,v 1.4 2007/04/28 01:54:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -44,7 +44,9 @@
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-FibConfigEntryGet::parse_buffer_nlm(FteX& , const vector<uint8_t>& , bool )
+FibConfigEntryGetNetlink::parse_buffer_netlink_socket(const IfTree& , FteX& ,
+						      const vector<uint8_t>& ,
+						      bool )
 {
     return false;
 }
@@ -52,8 +54,10 @@ FibConfigEntryGet::parse_buffer_nlm(FteX& , const vector<uint8_t>& , bool )
 #else // HAVE_NETLINK_SOCKETS
 
 bool
-FibConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
-				    bool is_nlm_get_only)
+FibConfigEntryGetNetlink::parse_buffer_netlink_socket(const IfTree& iftree,
+						      FteX& fte,
+						      const vector<uint8_t>& buffer,
+						      bool is_nlm_get_only)
 {
     size_t buffer_bytes = buffer.size();
     AlignData<struct nlmsghdr> align_data(buffer);
@@ -115,8 +119,8 @@ FibConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
 	    if (rtmsg->rtm_type == RTN_BROADCAST)
 		break;		// XXX: ignore broadcast entries
 
-	    return (NlmUtils::nlm_get_to_fte_cfg(fte, fibconfig().iftree(),
-						 nlh, rtmsg, rta_len));
+	    return (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg,
+						 rta_len));
 	}
 	break;
 	

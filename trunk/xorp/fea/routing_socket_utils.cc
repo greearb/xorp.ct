@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.38 2007/02/16 22:45:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.39 2007/04/14 07:00:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -307,8 +307,8 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 }
 
 bool
-RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
-    const struct rt_msghdr* rtm)
+RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
+			     const struct rt_msghdr* rtm)
 {
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = rtm->rtm_index;

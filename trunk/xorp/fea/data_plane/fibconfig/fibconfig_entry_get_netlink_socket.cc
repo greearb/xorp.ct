@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.3 2007/04/27 01:10:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.4 2007/04/28 01:54:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -303,7 +303,8 @@ FibConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
 	return (false);
     }
-    if (parse_buffer_nlm(fte, _ns_reader.buffer(), true) != true) {
+    if (parse_buffer_netlink_socket(fibconfig().iftree(), fte,
+				    _ns_reader.buffer(), true) != true) {
 	return (false);
     }
 

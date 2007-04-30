@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.4 2007/04/27 20:33:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.5 2007/04/28 01:54:16 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -99,10 +99,11 @@ FibConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
     // Get the IPv4 routes
     //
     if (fibconfig().have_ipv4()) {
-	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET,
-								   fte_list,
-								   buffer,
-								   filter);
+	FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET,
+							     fibconfig().iftree(),
+							     fte_list,
+							     buffer,
+							     filter);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();
@@ -114,10 +115,11 @@ FibConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
     // Get the IPv6 routes
     //
     if (fibconfig().have_ipv6()) {
-	fibconfig().fibconfig_table_get_primary().parse_buffer_rtm(AF_INET6,
-								   fte_list,
-								   buffer,
-								   filter);
+	FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET6,
+							     fibconfig().iftree(),
+							     fte_list,
+							     buffer,
+							     filter);
 	if (! fte_list.empty()) {
 	    propagate_fib_changes(fte_list);
 	    fte_list.clear();

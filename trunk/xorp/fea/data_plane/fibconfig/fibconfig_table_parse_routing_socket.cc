@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.4 2007/04/27 20:33:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.5 2007/04/28 01:54:16 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -44,8 +44,10 @@
 
 #if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
-FibConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
-				    FibMsgSet)
+FibConfigTableGetSysctl::parse_buffer_routing_socket(int, const IfTree& ,
+						     list<FteX>& ,
+						     const vector<uint8_t>& ,
+						     FibMsgSet)
 {
     return false;
 }
@@ -53,9 +55,11 @@ FibConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
 #else // HAVE_ROUTING_SOCKETS
 
 bool
-FibConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
-				    const vector<uint8_t>& buffer,
-				    FibMsgSet filter)
+FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
+						     const IfTree& iftree,
+						     list<FteX>& fte_list,
+						     const vector<uint8_t>& buffer,
+						     FibMsgSet filter)
 {
     AlignData<struct rt_msghdr> align_data(buffer);
     const struct rt_msghdr* rtm;
@@ -128,8 +132,7 @@ FibConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 #endif
 
 	FteX fte(family);
-	if (RtmUtils::rtm_get_to_fte_cfg(fte, fibconfig().iftree(), rtm)
-	    == true) {
+	if (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm) == true) {
 	    fte_list.push_back(fte);
 	}
     }

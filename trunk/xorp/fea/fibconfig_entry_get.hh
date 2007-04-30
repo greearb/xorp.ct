@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.3 2007/04/27 20:33:31 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.4 2007/04/29 23:42:58 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
 #define __FEA_FIBCONFIG_ENTRY_GET_HH__
@@ -27,6 +27,7 @@
 #include "routing_socket.hh"
 
 
+class IfTree;
 class IPv4;
 class IPv6;
 class FibConfig;
@@ -102,39 +103,6 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte) = 0;
-
-    /**
-     * Parse information about routing entry information received from
-     * the underlying system.
-     * 
-     * The information to parse is in RTM format
-     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
-     * 
-     * @param fte the Fte storage to store the parsed information.
-     * @param buffer the buffer with the data to parse.
-     * @param filter the set of messages that caller is interested in.
-     * @return true on success, otherwise false.
-     * @see FteX.
-     */
-    bool parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
-			  FibMsgSet filter);
-
-    /**
-     * Parse information about routing entry information received from
-     * the underlying system.
-     * 
-     * The information to parse is in NETLINK format
-     * (e.g., obtained by netlink(7) sockets mechanism).
-     * 
-     * @param fte the Fte storage to store the parsed information.
-     * @param buffer the buffer with the data to parse.
-     * @param is_nlm_get_only if true, consider only the entries obtained
-     * by RTM_GETROUTE.
-     * @return true on success, otherwise false.
-     * @see FteX.
-     */
-    bool parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
-			  bool is_nlm_get_only);
 
 protected:
     // Misc other stat
@@ -271,6 +239,24 @@ public:
      */
     virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
+    /**
+     * Parse information about routing entry information received from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param iftree the interface tree to use.
+     * @param fte the Fte storage to store the parsed information.
+     * @param buffer the buffer with the data to parse.
+     * @param filter the set of messages that caller is interested in.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
+    static bool parse_buffer_routing_socket(const IfTree& iftree, FteX& fte,
+					    const vector<uint8_t>& buffer,
+					    FibMsgSet filter);
+
 private:
     /**
      * Lookup a route by destination address.
@@ -356,6 +342,25 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
+
+    /**
+     * Parse information about routing entry information received from
+     * the underlying system.
+     * 
+     * The information to parse is in NETLINK format
+     * (e.g., obtained by netlink(7) sockets mechanism).
+     * 
+     * @param iftree the interface tree to use.
+     * @param fte the Fte storage to store the parsed information.
+     * @param buffer the buffer with the data to parse.
+     * @param is_nlm_get_only if true, consider only the entries obtained
+     * by RTM_GETROUTE.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
+    static bool parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
+					    const vector<uint8_t>& buffer,
+					    bool is_nlm_get_only);
 
 private:
     /**

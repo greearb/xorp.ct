@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.4 2007/04/27 20:33:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.5 2007/04/28 01:54:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -182,7 +182,9 @@ FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &buffer[0], &sz, NULL, 0)
 	    == 0) {
 	    // Parse the result
-	    return (parse_buffer_rtm(family, fte_list, buffer, FibMsg::GETS));
+	    return (parse_buffer_routing_socket(family, fibconfig().iftree(),
+						fte_list, buffer,
+						FibMsg::GETS));
 	}
 	
 	// Error

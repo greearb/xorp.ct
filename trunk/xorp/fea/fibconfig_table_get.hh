@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.3 2007/04/27 20:33:31 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.4 2007/04/29 23:42:58 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -82,44 +82,6 @@ public:
      */
     virtual bool get_table6(list<Fte6>& fte_list) = 0;
 
-    /**
-     * Parse information about routing table information received from
-     * the underlying system.
-     * 
-     * The information to parse is in RTM format
-     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
-     * 
-     * @param family the address family to consider only ((e.g., AF_INET
-     * or AF_INET6 for IPv4 and IPv6 respectively).
-     * @param fte_list the list with the Fte entries to store the result.
-     * @param buffer the buffer with the data to parse.
-     * @param filter the set of messages that caller is interested in.
-     * @return true on success, otherwise false.
-     * @see FteX.
-     */
-    bool parse_buffer_rtm(int family, list<FteX>& fte_list,
-			  const vector<uint8_t>& buffer,
-			  FibMsgSet filter);
-
-    /**
-     * Parse information about routing table information received from
-     * the underlying system.
-     * 
-     * The information to parse is in NETLINK format
-     * (e.g., obtained by netlink(7) sockets mechanism).
-     * 
-     * @param family the address family to consider only ((e.g., AF_INET
-     * or AF_INET6 for IPv4 and IPv6 respectively).
-     * @param fte_list the list with the Fte entries to store the result.
-     * @param buffer the buffer with the data to parse.
-     * @param is_nlm_get_only if true, consider only the entries obtained
-     * by RTM_GETROUTE.
-     * @return true on success, otherwise false.
-     * @see FteX.
-     */
-    bool parse_buffer_nlm(int family, list<FteX>& fte_list,
-			  const vector<uint8_t>& buffer, bool is_nlm_get_only);
-    
 protected:
     // Misc other state
     bool	_is_running;
@@ -214,7 +176,28 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool get_table6(list<Fte6>& fte_list);
-    
+
+    /**
+     * Parse information about routing table information received from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param family the address family to consider only ((e.g., AF_INET
+     * or AF_INET6 for IPv4 and IPv6 respectively).
+     * @param iftree the interface tree to use.
+     * @param fte_list the list with the Fte entries to store the result.
+     * @param buffer the buffer with the data to parse.
+     * @param filter the set of messages that caller is interested in.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
+    static bool parse_buffer_routing_socket(int family, const IfTree& iftree,
+					    list<FteX>& fte_list,
+					    const vector<uint8_t>& buffer,
+					    FibMsgSet filter);
+
 private:
     bool get_table(int family, list<FteX>& fte_list);
     
@@ -261,7 +244,29 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool get_table6(list<Fte6>& fte_list);
-    
+
+    /**
+     * Parse information about routing table information received from
+     * the underlying system.
+     * 
+     * The information to parse is in NETLINK format
+     * (e.g., obtained by netlink(7) sockets mechanism).
+     * 
+     * @param family the address family to consider only ((e.g., AF_INET
+     * or AF_INET6 for IPv4 and IPv6 respectively).
+     * @param iftree the interface tree to use.
+     * @param fte_list the list with the Fte entries to store the result.
+     * @param buffer the buffer with the data to parse.
+     * @param is_nlm_get_only if true, consider only the entries obtained
+     * by RTM_GETROUTE.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
+    static bool parse_buffer_netlink_socket(int family, const IfTree& iftree,
+					    list<FteX>& fte_list,
+					    const vector<uint8_t>& buffer,
+					    bool is_nlm_get_only);
+
 private:
     bool get_table(int family, list<FteX>& fte_list);
 
