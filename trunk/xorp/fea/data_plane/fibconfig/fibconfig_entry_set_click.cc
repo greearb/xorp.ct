@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.3 2007/04/27 01:10:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.4 2007/04/28 01:54:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -81,9 +81,9 @@ FibConfigEntrySetClick::start(string& error_msg)
     // (if any).
     //
     if (ClickSocket::is_duplicate_routes_to_kernel_enabled())
-	register_fibconfig_secondary();
+	fibconfig().register_fibconfig_entry_set_secondary(this);
     else
-	register_fibconfig_primary();
+	fibconfig().register_fibconfig_entry_set_primary(this);
 
     return (XORP_OK);
 }

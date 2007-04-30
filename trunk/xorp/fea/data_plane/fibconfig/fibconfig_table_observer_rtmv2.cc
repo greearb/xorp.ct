@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.5 2007/04/28 01:54:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.6 2007/04/30 05:59:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -57,7 +57,7 @@ FibConfigTableObserverRtmV2::FibConfigTableObserverRtmV2(FibConfig& fibconfig)
     _rso6 = new RtmV2Observer(*_rs6, AF_INET6, *this);
 #endif
 
-    register_fibconfig_primary();
+    fibconfig.register_fibconfig_table_observer_primary(this);
 #endif
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_table_set.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_table_set.cc,v 1.2 2007/04/27 01:10:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,57 +27,3 @@
 //
 // Set whole-table information into the unicast forwarding table.
 //
-
-
-FibConfigTableSet::FibConfigTableSet(FibConfig& fibconfig)
-    : _is_running(false),
-      _fibconfig(fibconfig),
-      _in_configuration(false),
-      _is_primary(true)
-{
-    
-}
-
-FibConfigTableSet::~FibConfigTableSet()
-{
-    
-}
-
-void
-FibConfigTableSet::register_fibconfig_primary()
-{
-    _fibconfig.register_fibconfig_table_set_primary(this);
-}
-
-void
-FibConfigTableSet::register_fibconfig_secondary()
-{
-    _fibconfig.register_fibconfig_table_set_secondary(this);
-
-    //
-    // XXX: push the current config into the new secondary
-    //
-    if (_is_running) {
-	list<Fte4> fte_list4;
-
-	if (_fibconfig.get_table4(fte_list4) == true) {
-	    if (set_table4(fte_list4) != true) {
-		XLOG_ERROR("Cannot push the current IPv4 forwarding table "
-			   "into a new secondary mechanism for setting the "
-			   "forwarding table");
-	    }
-	}
-
-#ifdef HAVE_IPV6
-	list<Fte6> fte_list6;
-
-	if (_fibconfig.get_table6(fte_list6) == true) {
-	    if (set_table6(fte_list6) != true) {
-		XLOG_ERROR("Cannot push the current IPv6 forwarding table "
-			   "into a new secondary mechanism for setting the "
-			   "forwarding table");
-	    }
-	}
-#endif // HAVE_IPV6
-    }
-}

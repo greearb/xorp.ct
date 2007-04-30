@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.2 2007/04/27 01:10:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.3 2007/04/27 23:48:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -378,6 +378,23 @@ FibConfig::register_fibconfig_entry_set_secondary(FibConfigEntrySet *fibconfig_e
     if (fibconfig_entry_set != NULL) {
 	_fibconfig_entry_sets_secondary.push_back(fibconfig_entry_set);
 	fibconfig_entry_set->set_secondary();
+
+	//
+	// XXX: push the current config into the new secondary
+	//
+
+	if (fibconfig_entry_set->is_running()) {
+	    // XXX: nothing to do.
+	    //
+	    // XXX: note that the forwarding table state in the secondary
+	    // methods is pushed by method
+	    // FibConfig::register_fibconfig_table_set_secondary(),
+	    // hence we don't need to do it here again. However, this is based
+	    // on the assumption that for each FibConfigEntrySet secondary
+	    // method there is a corresponding FibConfigTableSet secondary
+	    // method.
+	    //
+	}
     }
     
     return (XORP_OK);
@@ -411,6 +428,33 @@ FibConfig::register_fibconfig_table_set_secondary(FibConfigTableSet *fibconfig_t
     if (fibconfig_table_set != NULL) {
 	_fibconfig_table_sets_secondary.push_back(fibconfig_table_set);
 	fibconfig_table_set->set_secondary();
+
+	//
+	// XXX: push the current config into the new secondary
+	//
+	if (fibconfig_table_set->is_running()) {
+	    list<Fte4> fte_list4;
+
+	    if (get_table4(fte_list4) == true) {
+		if (fibconfig_table_set->set_table4(fte_list4) != true) {
+		    XLOG_ERROR("Cannot push the current IPv4 forwarding table "
+			       "into a new secondary mechanism for setting "
+			       "the forwarding table");
+		}
+	    }
+
+#ifdef HAVE_IPV6
+	    list<Fte6> fte_list6;
+
+	    if (get_table6(fte_list6) == true) {
+		if (fibconfig_table_set->set_table6(fte_list6) != true) {
+		    XLOG_ERROR("Cannot push the current IPv6 forwarding table "
+			       "into a new secondary mechanism for setting "
+			       "the forwarding table");
+		}
+	    }
+#endif // HAVE_IPV6
+	}
     }
     
     return (XORP_OK);

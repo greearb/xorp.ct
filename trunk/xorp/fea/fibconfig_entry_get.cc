@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_entry_get.cc,v 1.2 2007/04/27 01:10:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_entry_get.cc,v 1.3 2007/04/29 23:42:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,27 +27,3 @@
 //
 // Get single-entry information from the unicast forwarding table.
 //
-
-
-FibConfigEntryGet::FibConfigEntryGet(FibConfig& fibconfig)
-    : _is_running(false),
-      _fibconfig(fibconfig),
-      _is_primary(true)
-{
-}
-
-FibConfigEntryGet::~FibConfigEntryGet()
-{
-}
-
-void
-FibConfigEntryGet::register_fibconfig_primary()
-{
-    _fibconfig.register_fibconfig_entry_get_primary(this);
-}
-
-void
-FibConfigEntryGet::register_fibconfig_secondary()
-{
-    _fibconfig.register_fibconfig_entry_get_secondary(this);
-}

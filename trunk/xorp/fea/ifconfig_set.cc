@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.41 2007/04/25 01:57:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.42 2007/04/26 06:29:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,38 +33,6 @@
 // Set information about network interfaces configuration with the
 // underlying system.
 //
-
-
-IfConfigSet::IfConfigSet(IfConfig& ifconfig)
-    : _is_running(false),
-      _ifconfig(ifconfig),
-      _is_primary(true)
-{
-    
-}
-
-IfConfigSet::~IfConfigSet()
-{
-    
-}
-
-void
-IfConfigSet::register_ifconfig_primary()
-{
-    _ifconfig.register_ifconfig_set_primary(this);
-}
-
-void
-IfConfigSet::register_ifconfig_secondary()
-{
-    _ifconfig.register_ifconfig_set_secondary(this);
-
-    //
-    // XXX: push the current config into the new secondary
-    //
-    if (_is_running)
-	push_config(_ifconfig.pushed_config());
-}
 
 bool
 IfConfigSet::push_config(IfTree& it)

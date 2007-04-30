@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer.cc,v 1.9 2007/02/16 22:45:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer.cc,v 1.10 2007/04/26 06:29:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,29 +28,3 @@
 // Observe information change about network interface configuration from
 // the underlying system.
 //
-
-
-IfConfigObserver::IfConfigObserver(IfConfig& ifconfig)
-    : _is_running(false),
-      _ifconfig(ifconfig),
-      _is_primary(true)
-{
-    
-}
-
-IfConfigObserver::~IfConfigObserver()
-{
-    
-}
-
-void
-IfConfigObserver::register_ifconfig_primary()
-{
-    _ifconfig.register_ifconfig_observer_primary(this);
-}
-
-void
-IfConfigObserver::register_ifconfig_secondary()
-{
-    _ifconfig.register_ifconfig_observer_secondary(this);
-}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_table_observer.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_table_observer.cc,v 1.2 2007/04/27 01:10:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,32 +31,6 @@
 // received by the observer would NOT specify the particular entry that
 // has changed.
 //
-
-
-FibConfigTableObserver::FibConfigTableObserver(FibConfig& fibconfig)
-    : _is_running(false),
-      _fibconfig(fibconfig),
-      _is_primary(true)
-{
-    
-}
-
-FibConfigTableObserver::~FibConfigTableObserver()
-{
-    
-}
-
-void
-FibConfigTableObserver::register_fibconfig_primary()
-{
-    _fibconfig.register_fibconfig_table_observer_primary(this);
-}
-
-void
-FibConfigTableObserver::register_fibconfig_secondary()
-{
-    _fibconfig.register_fibconfig_table_observer_secondary(this);
-}
 
 /**
  * Add a FIB table observer.

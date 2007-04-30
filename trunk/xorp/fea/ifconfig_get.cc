@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.14 2007/04/30 20:54:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.15 2007/04/30 21:13:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,15 +28,3 @@
 // Get information about network interfaces configuration from the
 // underlying system.
 //
-
-void
-IfConfigGet::register_ifconfig_primary()
-{
-    _ifconfig.register_ifconfig_get_primary(this);
-}
-
-void
-IfConfigGet::register_ifconfig_secondary()
-{
-    _ifconfig.register_ifconfig_get_secondary(this);
-}

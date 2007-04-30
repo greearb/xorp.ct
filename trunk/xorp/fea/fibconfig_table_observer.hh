@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.1 2007/04/26 22:29:50 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.2 2007/04/27 01:10:29 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
@@ -27,14 +27,15 @@ class FibTableObserverBase;
 
 class FibConfigTableObserver {
 public:
-    FibConfigTableObserver(FibConfig& fibconfig);
-    
-    virtual ~FibConfigTableObserver();
+    FibConfigTableObserver(FibConfig& fibconfig)
+	: _is_running(false),
+	  _fibconfig(fibconfig),
+	  _is_primary(true)
+    {}
+    virtual ~FibConfigTableObserver() {}
     
     FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_fibconfig_primary();
-    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }

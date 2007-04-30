@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc,v 1.3 2007/04/27 01:10:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc,v 1.4 2007/04/28 01:54:16 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -35,7 +35,7 @@ FibConfigTableSetRtmV2::FibConfigTableSetRtmV2(FibConfig& fibconfig)
     : FibConfigTableSet(fibconfig)
 {
 #ifdef HOST_OS_WINDOWS
-    register_fibconfig_primary();
+    fibconfig.register_fibconfig_table_set_primary(this);
 #endif
 }
 

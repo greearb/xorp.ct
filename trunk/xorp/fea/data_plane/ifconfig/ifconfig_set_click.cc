@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.2 2007/04/26 06:29:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.3 2007/04/28 01:54:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -82,7 +82,7 @@ IfConfigSetClick::start(string& error_msg)
     // registration process itself can trigger some startup operations
     // (if any).
     //
-    register_ifconfig_secondary();
+    ifconfig().register_ifconfig_set_secondary(this);
 
     return (XORP_OK);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.4 2007/04/29 23:42:58 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.5 2007/04/30 05:59:33 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -32,14 +32,15 @@ class FibConfig;
 
 class FibConfigTableGet {
 public:
-    FibConfigTableGet(FibConfig& fibconfig);
-    
-    virtual ~FibConfigTableGet();
+    FibConfigTableGet(FibConfig& fibconfig)
+	: _is_running(false),
+	  _fibconfig(fibconfig),
+	  _is_primary(true)
+    {}
+    virtual ~FibConfigTableGet() {}
     
     FibConfig&	fibconfig() { return _fibconfig; }
     
-    virtual void register_fibconfig_primary();
-    virtual void register_fibconfig_secondary();
     virtual void set_primary() { _is_primary = true; }
     virtual void set_secondary() { _is_primary = false; }
     virtual bool is_primary() const { return _is_primary; }

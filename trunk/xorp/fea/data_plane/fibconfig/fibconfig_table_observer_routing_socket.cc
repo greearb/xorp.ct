@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.5 2007/04/28 01:54:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.6 2007/04/30 05:59:34 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -42,7 +42,7 @@ FibConfigTableObserverRtsock::FibConfigTableObserverRtsock(FibConfig& fibconfig)
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
 #ifdef HAVE_ROUTING_SOCKETS
-    register_fibconfig_primary();
+    fibconfig.register_fibconfig_table_observer_primary(this);
 #endif
 }
 

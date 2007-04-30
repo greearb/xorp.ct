@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_dummy.cc,v 1.2 2007/04/26 06:29:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_dummy.cc,v 1.3 2007/04/28 01:54:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -35,7 +35,7 @@ IfConfigGetDummy::IfConfigGetDummy(IfConfig& ifconfig)
     : IfConfigGet(ifconfig)
 {
 #if 0	// XXX: by default Dummy is never registering by itself
-    register_ifconfig_primary();
+    ifconfig.register_ifconfig_get_primary(this);
 #endif
 }
 

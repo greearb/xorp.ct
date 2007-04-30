@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_table_get.cc,v 1.2 2007/04/27 01:10:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_table_get.cc,v 1.3 2007/04/29 23:42:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,27 +27,3 @@
 //
 // Get the whole table information from the unicast forwarding table.
 //
-
-
-FibConfigTableGet::FibConfigTableGet(FibConfig& fibconfig)
-    : _is_running(false),
-      _fibconfig(fibconfig),
-      _is_primary(true)
-{
-}
-
-FibConfigTableGet::~FibConfigTableGet()
-{
-}
-
-void
-FibConfigTableGet::register_fibconfig_primary()
-{
-    _fibconfig.register_fibconfig_table_get_primary(this);
-}
-
-void
-FibConfigTableGet::register_fibconfig_secondary()
-{
-    _fibconfig.register_fibconfig_table_get_secondary(this);
-}

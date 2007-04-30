@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_entry_set.cc,v 1.1 2007/04/26 22:29:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_entry_set.cc,v 1.2 2007/04/27 01:10:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,44 +27,3 @@
 //
 // Set single-entry information into the unicast forwarding table.
 //
-
-
-FibConfigEntrySet::FibConfigEntrySet(FibConfig& fibconfig)
-    : _is_running(false),
-      _fibconfig(fibconfig),
-      _in_configuration(false),
-      _is_primary(true)
-{
-    
-}
-
-FibConfigEntrySet::~FibConfigEntrySet()
-{
-    
-}
-
-void
-FibConfigEntrySet::register_fibconfig_primary()
-{
-    _fibconfig.register_fibconfig_entry_set_primary(this);
-}
-
-void
-FibConfigEntrySet::register_fibconfig_secondary()
-{
-    _fibconfig.register_fibconfig_entry_set_secondary(this);
-
-    //
-    // XXX: push the current config into the new secondary
-    //
-    if (_is_running) {
-	// XXX: nothing to do. 
-	//
-	// XXX: note that the forwarding table state in the secondary methods
-	// is pushed by FibConfigTableSet::register_fibconfig_secondary(),
-	// hence we don't need to do it here again. However, this is based on
-	// the assumption that for each FibConfigEntrySet secondary method
-	// there is a corresponding FibConfigTableSet secondary method.
-	//
-    }
-}
