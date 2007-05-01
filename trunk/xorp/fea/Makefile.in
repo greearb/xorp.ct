@@ -104,11 +104,11 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
 	pa_table.lo pa_transaction.lo profile_vars.lo rawsock.lo \
 	rawsock4.lo rawsock6.lo routing_socket.lo \
-	routing_socket_utilities.lo win_rtm_pipe.lo win_support.lo \
-	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
-	xrl_fea_target.lo xrl_fib_client_manager.lo xrl_mfea_node.lo \
-	xrl_rawsock4.lo xrl_rawsock6.lo xrl_socket_cmds.lo \
-	xrl_socket_server.lo
+	routing_socket_utilities.lo windows_rtm_pipe.lo \
+	windows_rras_support.lo xrl_packet_acl.lo xrl_fea_io.lo \
+	xrl_fea_node.lo xrl_fea_target.lo xrl_fib_client_manager.lo \
+	xrl_mfea_node.lo xrl_rawsock4.lo xrl_rawsock6.lo \
+	xrl_socket_cmds.lo xrl_socket_server.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -457,12 +457,15 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	profile_vars.hh rawsock.hh rawsock4.hh rawsock6.hh \
 	forwarding_plane/control_socket/routing_socket.hh \
 	forwarding_plane/control_socket/routing_socket_utilities.hh \
-	win_rtm_pipe.hh win_rtsock.h win_support.hh xrl_fea_io.hh \
-	xrl_fea_node.hh xrl_fea_target.hh xrl_fib_client_manager.hh \
-	xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh \
-	xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh \
-	addr_table.cc forwarding_plane/control_socket/click_socket.cc \
-	fea_io.cc fea_node.cc fibconfig.cc fibconfig_transaction.cc \
+	forwarding_plane/control_socket/windows_rtm_pipe.hh \
+	forwarding_plane/control_socket/windows_routing_socket.h \
+	forwarding_plane/control_socket/windows_rras_support.hh \
+	xrl_fea_io.hh xrl_fea_node.hh xrl_fea_target.hh \
+	xrl_fib_client_manager.hh xrl_mfea_node.hh xrl_packet_acl.hh \
+	xrl_rawsock4.hh xrl_rawsock6.hh xrl_socket_cmds.hh \
+	xrl_socket_server.hh addr_table.cc \
+	forwarding_plane/control_socket/click_socket.cc fea_io.cc \
+	fea_node.cc fibconfig.cc fibconfig_transaction.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_click.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc \
@@ -535,10 +538,12 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	rawsock.cc rawsock4.cc rawsock6.cc \
 	forwarding_plane/control_socket/routing_socket.cc \
 	forwarding_plane/control_socket/routing_socket_utilities.cc \
-	win_rtm_pipe.cc win_support.cc xrl_packet_acl.cc xrl_fea_io.cc \
-	xrl_fea_node.cc xrl_fea_target.cc xrl_fib_client_manager.cc \
-	xrl_mfea_node.cc xrl_rawsock4.cc xrl_rawsock6.cc \
-	xrl_socket_cmds.cc xrl_socket_server.cc
+	forwarding_plane/control_socket/windows_rtm_pipe.cc \
+	forwarding_plane/control_socket/windows_rras_support.cc \
+	xrl_packet_acl.cc xrl_fea_io.cc xrl_fea_node.cc \
+	xrl_fea_target.cc xrl_fib_client_manager.cc xrl_mfea_node.cc \
+	xrl_rawsock4.cc xrl_rawsock6.cc xrl_socket_cmds.cc \
+	xrl_socket_server.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
@@ -787,8 +792,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/win_rtm_pipe.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/win_support.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windows_rras_support.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windows_rtm_pipe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_fea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_fea_dummy-xorp_fea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fea_io.Plo@am__quote@
@@ -1277,6 +1282,20 @@ routing_socket_utilities.lo: forwarding_plane/control_socket/routing_socket_util
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/routing_socket_utilities.cc' object='routing_socket_utilities.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o routing_socket_utilities.lo `test -f 'forwarding_plane/control_socket/routing_socket_utilities.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/routing_socket_utilities.cc
+
+windows_rtm_pipe.lo: forwarding_plane/control_socket/windows_rtm_pipe.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT windows_rtm_pipe.lo -MD -MP -MF $(DEPDIR)/windows_rtm_pipe.Tpo -c -o windows_rtm_pipe.lo `test -f 'forwarding_plane/control_socket/windows_rtm_pipe.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/windows_rtm_pipe.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/windows_rtm_pipe.Tpo $(DEPDIR)/windows_rtm_pipe.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/windows_rtm_pipe.cc' object='windows_rtm_pipe.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o windows_rtm_pipe.lo `test -f 'forwarding_plane/control_socket/windows_rtm_pipe.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/windows_rtm_pipe.cc
+
+windows_rras_support.lo: forwarding_plane/control_socket/windows_rras_support.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT windows_rras_support.lo -MD -MP -MF $(DEPDIR)/windows_rras_support.Tpo -c -o windows_rras_support.lo `test -f 'forwarding_plane/control_socket/windows_rras_support.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/windows_rras_support.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/windows_rras_support.Tpo $(DEPDIR)/windows_rras_support.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/windows_rras_support.cc' object='windows_rras_support.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o windows_rras_support.lo `test -f 'forwarding_plane/control_socket/windows_rras_support.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/windows_rras_support.cc
 
 xorp_fea_dummy-xorp_fea.o: xorp_fea.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-xorp_fea.o -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo -c -o xorp_fea_dummy-xorp_fea.o `test -f 'xorp_fea.cc' || echo '$(srcdir)/'`xorp_fea.cc

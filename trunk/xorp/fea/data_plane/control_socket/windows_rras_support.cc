@@ -13,20 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/win_support.cc,v 1.1 2006/06/29 11:03:55 bms Exp $"
+#ident "$XORP: xorp/fea/win_support.cc,v 1.2 2007/02/16 22:45:51 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "win_support.hh"
+#include "windows_rras_support.hh"
 
 #ifdef HOST_OS_WINDOWS
 
 #include "libxorp/win_io.h"
-#include "win_rtsock.h"
+#include "windows_routing_socket.h"
 
 #include <routprot.h>
 

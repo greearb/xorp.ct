@@ -13,9 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.5 2006/09/12 08:58:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.6 2007/02/16 22:45:51 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -32,11 +32,11 @@
 
 #ifdef HOST_OS_WINDOWS
 #include "libxorp/win_io.h"
-#include "win_rtsock.h"
+#include "windows_routing_socket.h"
 #endif
 
 #include "libcomm/comm_api.h"
-#include "win_rtm_pipe.hh"
+#include "windows_rtm_pipe.hh"
 
 uint16_t WinRtmPipe::_instance_cnt = 0;
 pid_t WinRtmPipe::_pid = getpid();

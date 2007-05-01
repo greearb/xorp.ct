@@ -47,7 +47,8 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 libxorp_control_socket_la_LIBADD =
 am_libxorp_control_socket_la_OBJECTS = click_socket.lo \
 	netlink_socket.lo netlink_socket_utilities.lo \
-	routing_socket.lo routing_socket_utilities.lo
+	routing_socket.lo routing_socket_utilities.lo \
+	windows_rras_support.lo windows_rtm_pipe.lo
 libxorp_control_socket_la_OBJECTS =  \
 	$(am_libxorp_control_socket_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
@@ -212,11 +213,14 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libxorp_control_socket.la
 
 # -- Library Sources
-libxorp_control_socket_la_SOURCES = click_socket.hh netlink_socket.hh \
-	netlink_socket_utilities.hh routing_socket.hh \
-	routing_socket_utilities.hh system_utilities.hh \
-	click_socket.cc netlink_socket.cc netlink_socket_utilities.cc \
-	routing_socket.cc routing_socket_utilities.cc
+libxorp_control_socket_la_SOURCES = windows_routing_socket.h \
+	click_socket.hh netlink_socket.hh netlink_socket_utilities.hh \
+	routing_socket.hh routing_socket_utilities.hh \
+	system_utilities.hh windows_rras_support.hh \
+	windows_rtm_pipe.hh click_socket.cc netlink_socket.cc \
+	netlink_socket_utilities.cc routing_socket.cc \
+	routing_socket_utilities.cc windows_rras_support.cc \
+	windows_rtm_pipe.cc
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -276,6 +280,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netlink_socket_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket_utilities.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windows_rras_support.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/windows_rtm_pipe.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

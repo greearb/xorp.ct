@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.4 2007/04/27 23:48:56 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.5 2007/05/01 00:14:07 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -51,7 +51,7 @@ typedef uint32_t FibMsgSet;
 #include "fibconfig_table_set.hh"
 #include "fibconfig_table_observer.hh"
 #include "iftree.hh"
-#include "win_support.hh"
+#include "fea/forwarding_plane/control_socket/windows_rras_support.hh"
 
 class EventLoop;
 class FibConfigEntryGet;

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.86 2007/05/01 02:20:36 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.87 2007/05/01 06:36:44 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -124,9 +124,9 @@ libfea_la_SOURCES	+= rawsock4.hh
 libfea_la_SOURCES	+= rawsock6.hh
 libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket.hh
 libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket_utilities.hh
-libfea_la_SOURCES	+= win_rtm_pipe.hh
-libfea_la_SOURCES	+= win_rtsock.h
-libfea_la_SOURCES	+= win_support.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rtm_pipe.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_routing_socket.h
+libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rras_support.hh
 libfea_la_SOURCES	+= xrl_fea_io.hh
 libfea_la_SOURCES	+= xrl_fea_node.hh
 libfea_la_SOURCES	+= xrl_fea_target.hh
@@ -231,8 +231,8 @@ libfea_la_SOURCES	+= rawsock4.cc
 libfea_la_SOURCES	+= rawsock6.cc
 libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket.cc
 libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket_utilities.cc
-libfea_la_SOURCES	+= win_rtm_pipe.cc
-libfea_la_SOURCES	+= win_support.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rtm_pipe.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rras_support.cc
 libfea_la_SOURCES	+= xrl_packet_acl.cc
 libfea_la_SOURCES	+= xrl_fea_io.cc
 libfea_la_SOURCES	+= xrl_fea_node.cc
