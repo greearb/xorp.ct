@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.87 2007/05/01 06:36:44 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.88 2007/05/01 08:21:54 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
 # -- Subdirectories
-SUBDIRS = . tools
+SUBDIRS = forwarding_plane . tools
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_fea xorp_fea_dummy
@@ -28,6 +28,10 @@ noinst_LTLIBRARIES = libfea.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LTLIBRARIES)
+### Forwarding plane libraries
+LDADD		+= $(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la
+LDADD		+= $(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la
+LDADD		+= $(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
@@ -78,7 +82,6 @@ xorp_fea_dummy_SOURCES			= xorp_fea.cc
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
 libfea_la_SOURCES	+= addr_table.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/click_socket.hh
 libfea_la_SOURCES	+= fea_io.hh
 libfea_la_SOURCES	+= fea_node.hh
 libfea_la_SOURCES	+= fte.hh
@@ -93,13 +96,11 @@ libfea_la_SOURCES	+= fibconfig_transaction.hh
 libfea_la_SOURCES	+= ifconfig.hh
 libfea_la_SOURCES	+= ifconfig_addr_table.hh
 libfea_la_SOURCES	+= ifconfig_get.hh
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_media.hh
 libfea_la_SOURCES	+= ifconfig_observer.hh
 libfea_la_SOURCES	+= ifconfig_reporter.hh
 libfea_la_SOURCES	+= ifconfig_set.hh
 libfea_la_SOURCES	+= ifconfig_transaction.hh
 libfea_la_SOURCES	+= iftree.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/system_utilities.hh
 libfea_la_SOURCES	+= libfeaclient_bridge.hh
 libfea_la_SOURCES	+= mfea_dataflow.hh
 libfea_la_SOURCES	+= mfea_kernel_messages.hh
@@ -109,8 +110,6 @@ libfea_la_SOURCES	+= mfea_node_cli.hh
 libfea_la_SOURCES	+= mfea_osdep.hh
 libfea_la_SOURCES	+= mfea_proto_comm.hh
 libfea_la_SOURCES	+= mfea_vif.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket_utilities.hh
 libfea_la_SOURCES	+= nexthop_port_mapper.hh
 libfea_la_SOURCES	+= pa_backend.hh
 libfea_la_SOURCES	+= pa_backend_dummy.hh
@@ -122,11 +121,6 @@ libfea_la_SOURCES	+= profile_vars.hh
 libfea_la_SOURCES	+= rawsock.hh
 libfea_la_SOURCES	+= rawsock4.hh
 libfea_la_SOURCES	+= rawsock6.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket_utilities.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rtm_pipe.hh
-libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_routing_socket.h
-libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rras_support.hh
 libfea_la_SOURCES	+= xrl_fea_io.hh
 libfea_la_SOURCES	+= xrl_fea_node.hh
 libfea_la_SOURCES	+= xrl_fea_target.hh
@@ -139,75 +133,14 @@ libfea_la_SOURCES	+= xrl_socket_cmds.hh
 libfea_la_SOURCES	+= xrl_socket_server.hh
 
 libfea_la_SOURCES	+= addr_table.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/click_socket.cc
 libfea_la_SOURCES	+= fea_io.cc
 libfea_la_SOURCES	+= fea_node.cc
 libfea_la_SOURCES	+= fibconfig.cc
 libfea_la_SOURCES	+= fibconfig_transaction.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_click.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_rtmv2.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_click.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_set_rtmv2.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_get_click.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_get_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_get_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_get_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_get_sysctl.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_parse_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_click.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc
 libfea_la_SOURCES	+= ifconfig.cc
 libfea_la_SOURCES	+= ifconfig_addr_table.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_media.cc
 libfea_la_SOURCES	+= ifconfig_reporter.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set.cc
 libfea_la_SOURCES	+= ifconfig_transaction.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_click.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_ioctl.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_get_sysctl.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_observer_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_click.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_dummy.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_ioctl.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_iphelper.cc
-libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
 libfea_la_SOURCES	+= iftree.cc
 libfea_la_SOURCES	+= libfeaclient_bridge.cc
 libfea_la_SOURCES	+= mfea_config.cc
@@ -217,8 +150,6 @@ libfea_la_SOURCES	+= mfea_node.cc
 libfea_la_SOURCES	+= mfea_node_cli.cc
 libfea_la_SOURCES	+= mfea_proto_comm.cc
 libfea_la_SOURCES	+= mfea_vif.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket_utilities.cc
 libfea_la_SOURCES	+= nexthop_port_mapper.cc
 libfea_la_SOURCES	+= pa_backend_dummy.cc
 libfea_la_SOURCES	+= pa_backend_ipfw2.cc
@@ -229,10 +160,6 @@ libfea_la_SOURCES	+= profile_vars.cc
 libfea_la_SOURCES	+= rawsock.cc
 libfea_la_SOURCES	+= rawsock4.cc
 libfea_la_SOURCES	+= rawsock6.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket_utilities.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rtm_pipe.cc
-libfea_la_SOURCES	+= forwarding_plane/control_socket/windows_rras_support.cc
 libfea_la_SOURCES	+= xrl_packet_acl.cc
 libfea_la_SOURCES	+= xrl_fea_io.cc
 libfea_la_SOURCES	+= xrl_fea_node.cc
