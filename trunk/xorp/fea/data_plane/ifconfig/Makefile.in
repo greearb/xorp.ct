@@ -49,8 +49,8 @@ am_libxorp_ifconfig_la_OBJECTS = ifconfig_get_click.lo \
 	ifconfig_get_dummy.lo ifconfig_get_getifaddrs.lo \
 	ifconfig_get_ioctl.lo ifconfig_get_iphelper.lo \
 	ifconfig_get_netlink_socket.lo ifconfig_get_proc_linux.lo \
-	ifconfig_get_sysctl.lo ifconfig_observer_dummy.lo \
-	ifconfig_observer_iphelper.lo \
+	ifconfig_get_sysctl.lo ifconfig_media.lo \
+	ifconfig_observer_dummy.lo ifconfig_observer_iphelper.lo \
 	ifconfig_observer_netlink_socket.lo \
 	ifconfig_observer_routing_socket.lo \
 	ifconfig_parse_getifaddrs.lo ifconfig_parse_ioctl.lo \
@@ -71,6 +71,15 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libxorp_ifconfig_la_SOURCES)
 DIST_SOURCES = $(libxorp_ifconfig_la_SOURCES)
@@ -213,12 +222,12 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libxorp_ifconfig.la
 
 # -- Library Sources
-libxorp_ifconfig_la_SOURCES = ifconfig_get_click.cc \
+libxorp_ifconfig_la_SOURCES = ifconfig_media.hh ifconfig_get_click.cc \
 	ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc \
 	ifconfig_get_ioctl.cc ifconfig_get_iphelper.cc \
 	ifconfig_get_netlink_socket.cc ifconfig_get_proc_linux.cc \
-	ifconfig_get_sysctl.cc ifconfig_observer_dummy.cc \
-	ifconfig_observer_iphelper.cc \
+	ifconfig_get_sysctl.cc ifconfig_media.cc \
+	ifconfig_observer_dummy.cc ifconfig_observer_iphelper.cc \
 	ifconfig_observer_netlink_socket.cc \
 	ifconfig_observer_routing_socket.cc \
 	ifconfig_parse_getifaddrs.cc ifconfig_parse_ioctl.cc \
@@ -289,6 +298,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_proc_linux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_sysctl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_media.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_netlink_socket.Plo@am__quote@

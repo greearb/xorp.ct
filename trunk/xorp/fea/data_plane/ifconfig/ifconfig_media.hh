@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_media.hh,v 1.2 2006/03/16 00:03:55 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_media.hh,v 1.3 2007/02/16 22:45:43 pavlin Exp $
 
-#ifndef __FEA_IFCONFIG_MEDIA_HH__
-#define __FEA_IFCONFIG_MEDIA_HH__
+#ifndef __FEA_FORWARDING_PLANE_IFCONFIG_IFCONFIG_MEDIA_HH__
+#define __FEA_FORWARDING_PLANE_IFCONFIG_IFCONFIG_MEDIA_HH__
 
 extern int
 ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 			       string& error_msg);
 
-#endif // __FEA_IFCONFIG_MEDIA_HH__
+#endif // __FEA_FORWARDING_PLANE_IFCONFIG_IFCONFIG_MEDIA_HH__

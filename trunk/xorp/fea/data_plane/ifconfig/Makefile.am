@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/fea/forwarding_plane/ifconfig/Makefile.am,v 1.1 2007/05/01 02:33:32 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,7 +10,9 @@ bindir = $(prefix)/$(subdir)
 noinst_LTLIBRARIES = libxorp_ifconfig.la
 
 # -- Library Sources
-libxorp_ifconfig_la_SOURCES	 = ifconfig_get_click.cc
+libxorp_ifconfig_la_SOURCES	 = ifconfig_media.hh
+
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_click.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_dummy.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_getifaddrs.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_ioctl.cc
@@ -18,6 +20,7 @@ libxorp_ifconfig_la_SOURCES	+= ifconfig_get_iphelper.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_netlink_socket.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_proc_linux.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_sysctl.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_media.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_dummy.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_iphelper.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_netlink_socket.cc

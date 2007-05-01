@@ -442,7 +442,8 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
 	fibconfig_table_get.hh fibconfig_table_observer.hh \
 	fibconfig_table_set.hh fibconfig_transaction.hh ifconfig.hh \
-	ifconfig_addr_table.hh ifconfig_get.hh ifconfig_media.hh \
+	ifconfig_addr_table.hh ifconfig_get.hh \
+	forwarding_plane/ifconfig/ifconfig_media.hh \
 	ifconfig_observer.hh ifconfig_reporter.hh ifconfig_set.hh \
 	ifconfig_transaction.hh iftree.hh \
 	forwarding_plane/control_socket/system_utilities.hh \
@@ -499,7 +500,8 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/fibconfig/fibconfig_table_set_netlink_socket.cc \
 	forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc \
 	forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc \
-	ifconfig.cc ifconfig_addr_table.cc ifconfig_media.cc \
+	ifconfig.cc ifconfig_addr_table.cc \
+	forwarding_plane/ifconfig/ifconfig_media.cc \
 	ifconfig_reporter.cc forwarding_plane/ifconfig/ifconfig_set.cc \
 	ifconfig_transaction.cc \
 	forwarding_plane/ifconfig/ifconfig_get_click.cc \
@@ -1086,6 +1088,13 @@ fibconfig_table_set_rtmv2.lo: forwarding_plane/fibconfig/fibconfig_table_set_rtm
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc' object='fibconfig_table_set_rtmv2.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fibconfig_table_set_rtmv2.lo `test -f 'forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc' || echo '$(srcdir)/'`forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc
+
+ifconfig_media.lo: forwarding_plane/ifconfig/ifconfig_media.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_media.lo -MD -MP -MF $(DEPDIR)/ifconfig_media.Tpo -c -o ifconfig_media.lo `test -f 'forwarding_plane/ifconfig/ifconfig_media.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_media.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_media.Tpo $(DEPDIR)/ifconfig_media.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_media.cc' object='ifconfig_media.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_media.lo `test -f 'forwarding_plane/ifconfig/ifconfig_media.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_media.cc
 
 ifconfig_set.lo: forwarding_plane/ifconfig/ifconfig_set.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set.lo -MD -MP -MF $(DEPDIR)/ifconfig_set.Tpo -c -o ifconfig_set.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set.cc
