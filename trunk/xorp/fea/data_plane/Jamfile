@@ -1,0 +1,10 @@
+#
+# $XORP$
+#
+
+SubDir TOP fea forwarding_plane ;
+SubIncludeOnce TOP fea forwarding_plane control_socket ;
+SubIncludeOnce TOP fea forwarding_plane fibconfig ;
+SubIncludeOnce TOP fea forwarding_plane firewall ;
+SubIncludeOnce TOP fea forwarding_plane ifconfig ;
+SubDir TOP fea forwarding_plane ;
