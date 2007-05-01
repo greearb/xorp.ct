@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.8 2007/04/20 07:17:42 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.9 2007/04/24 01:28:41 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -13,87 +13,19 @@ SubIncludeOnce TOP libfeaclient ;
 SubIncludeOnce TOP mrt ;
 SubIncludeOnce TOP cli ;
 SubIncludeOnce TOP cli libtecla ;
+SubIncludeOnce TOP fea forwarding_plane ;
 SubDir TOP fea ;
 
 Library libfea : 
 	addr_table.cc
-	click_socket.cc
 	fea_io.cc
 	fea_node.cc
-	fti_transaction.cc
-	fticonfig.cc
-	fticonfig_entry_get.cc
-	fticonfig_entry_get_click.cc
-	fticonfig_entry_get_dummy.cc
-	fticonfig_entry_get_iphelper.cc
-	fticonfig_entry_get_netlink.cc
-	fticonfig_entry_get_rtmv2.cc
-	fticonfig_entry_get_rtsock.cc
-	fticonfig_entry_observer.cc
-	fticonfig_entry_observer_dummy.cc
-	fticonfig_entry_observer_iphelper.cc
-	fticonfig_entry_observer_netlink.cc
-	fticonfig_entry_observer_rtmv2.cc
-	fticonfig_entry_observer_rtsock.cc
-	fticonfig_entry_parse_nlm.cc
-	fticonfig_entry_parse_rtm.cc
-	fticonfig_entry_set.cc
-	fticonfig_entry_set_click.cc
-	fticonfig_entry_set_dummy.cc
-	fticonfig_entry_set_iphelper.cc
-	fticonfig_entry_set_netlink.cc
-	fticonfig_entry_set_rtmv2.cc
-	fticonfig_entry_set_rtsock.cc
-	fticonfig_table_get.cc
-	fticonfig_table_get_click.cc
-	fticonfig_table_get_dummy.cc
-	fticonfig_table_get_iphelper.cc
-	fticonfig_table_get_netlink.cc
-	fticonfig_table_get_sysctl.cc
-	fticonfig_table_observer.cc
-	fticonfig_table_observer_dummy.cc
-	fticonfig_table_observer_iphelper.cc
-	fticonfig_table_observer_netlink.cc
-	fticonfig_table_observer_rtmv2.cc
-	fticonfig_table_observer_rtsock.cc
-	fticonfig_table_parse_nlm.cc
-	fticonfig_table_parse_rtm.cc
-	fticonfig_table_set.cc
-	fticonfig_table_set_click.cc
-	fticonfig_table_set_dummy.cc
-	fticonfig_table_set_iphelper.cc
-	fticonfig_table_set_netlink.cc
-	fticonfig_table_set_rtmv2.cc
-	fticonfig_table_set_rtsock.cc
+	fibconfig.cc
+	fibconfig_transaction.cc
 	ifconfig.cc
 	ifconfig_addr_table.cc
-	ifconfig_get.cc
-	ifconfig_get_click.cc
-	ifconfig_get_dummy.cc
-	ifconfig_get_getifaddrs.cc
-	ifconfig_get_ioctl.cc
-	ifconfig_get_iphelper.cc
-	ifconfig_get_netlink.cc
-	ifconfig_get_proc_linux.cc
-	ifconfig_get_sysctl.cc
-	ifconfig_media.cc
-	ifconfig_observer.cc
-	ifconfig_observer_dummy.cc
-	ifconfig_observer_iphelper.cc
-	ifconfig_observer_netlink.cc
-	ifconfig_observer_rtsock.cc
-	ifconfig_parse_ifaddrs.cc
-	ifconfig_parse_ifreq.cc
-	ifconfig_parse_nlm.cc
-	ifconfig_parse_rtm.cc
 	ifconfig_reporter.cc
-	ifconfig_set.cc
-	ifconfig_set_click.cc
-	ifconfig_set_dummy.cc
-	ifconfig_set_ioctl.cc
-	ifconfig_set_iphelper.cc
-	ifconfig_set_netlink.cc
-	ifmanager_transaction.cc
+	ifconfig_transaction.cc
 	iftree.cc
 	libfeaclient_bridge.cc
 	mfea_config.cc
@@ -103,8 +35,6 @@ Library libfea :
 	mfea_node_cli.cc
 	mfea_proto_comm.cc
 	mfea_vif.cc
-	netlink_socket.cc
-	netlink_socket_utils.cc
 	nexthop_port_mapper.cc
 	pa_backend_dummy.cc
 	pa_backend_ipfw2.cc
@@ -115,15 +45,11 @@ Library libfea :
 	rawsock.cc
 	rawsock4.cc
 	rawsock6.cc
-	routing_socket.cc
-	routing_socket_utils.cc
-	win_rtm_pipe.cc
-	win_support.cc
 	xrl_packet_acl.cc
 	xrl_fea_io.cc
 	xrl_fea_node.cc
 	xrl_fea_target.cc
-	xrl_fti.cc
+	xrl_fib_client_manager.cc
 	xrl_mfea_node.cc
 	xrl_rawsock4.cc
 	xrl_rawsock6.cc
@@ -133,6 +59,9 @@ Library libfea :
 
 FEA_LDADD =
 	libfea
+	libxorp_ifconfig
+	libxorp_fibconfig
+	libxorp_control_socket
 	libfeafibclientxif
 	libfearawpkt4client
 	libfearawpkt6client
@@ -183,6 +112,9 @@ if $(MAKE_CHECK) {
  Main test_xrl_sockets4_udp : test_xrl_sockets4_udp.cc ;
  LinkLibraries test_xrl_sockets4_udp :
 	libfea
+	libxorp_ifconfig
+	libxorp_fibconfig
+	libxorp_control_socket
 	libsocket4userxif
 	libsocket4xif
 	libsocket6userxif
@@ -198,6 +130,9 @@ if $(MAKE_CHECK) {
  Main test_xrl_sockets4_tcp : test_xrl_sockets4_tcp.cc ;
  LinkLibraries test_xrl_sockets4_tcp :
 	libfea
+	libxorp_ifconfig
+	libxorp_fibconfig
+	libxorp_control_socket
 	libsocket4userxif
 	libsocket4xif
 	libsocket6userxif
