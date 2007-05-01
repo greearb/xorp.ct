@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.3 2007/04/27 20:33:31 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.4 2007/04/27 23:48:56 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -61,6 +61,7 @@ class FibConfigTableGet;
 class FibConfigTableSet;
 class FibConfigTableObserver;
 class FibConfigTransactionManager;
+class FibTableObserverBase;
 class NexthopPortMapper;
 class Profile;
 
@@ -510,6 +511,15 @@ public:
     bool delete_fib_table_observer(FibTableObserverBase* fib_table_observer);
 
     /**
+     * Propagate FIB changes to all FIB table observers.
+     * 
+     * @param fte_list the list with the FIB changes.
+     * @param fibconfig_table_observer the method that reports the FIB changes.
+     */
+    void propagate_fib_changes(const list<FteX>& fte_list,
+			       const FibConfigTableObserver* fibconfig_table_observer);
+
+    /**
      * Return true if the underlying system supports IPv4.
      * 
      * @return true if the underlying system supports IPv4, otherwise false.
@@ -876,6 +886,7 @@ private:
     bool	_have_ipv6;
     bool	_is_dummy;
     bool	_is_running;
+    list<FibTableObserverBase* > _fib_table_observers;
 
 #ifdef HOST_OS_WINDOWS
     //
@@ -885,6 +896,36 @@ private:
     OVERLAPPED  _overlapped;
     int		_enablecnt;
 #endif
+};
+
+/**
+ * A base class that can be used by clients interested in observing
+ * changes in the Forwarding Information Base.
+ */
+class FibTableObserverBase {
+public:
+    FibTableObserverBase() {}
+    virtual ~FibTableObserverBase() {}
+
+    /**
+     * Process a list of IPv4 FIB route changes.
+     * 
+     * The FIB route changes come from the underlying system.
+     * 
+     * @param fte_list the list of Fte entries to add or delete.
+     */
+    virtual void process_fib_changes(const list<Fte4>& fte_list) = 0;
+
+    /**
+     * Process a list of IPv6 FIB route changes.
+     * 
+     * The FIB route changes come from the underlying system.
+     * 
+     * @param fte_list the list of Fte entries to add or delete.
+     */
+    virtual void process_fib_changes(const list<Fte6>& fte_list) = 0;
+
+private:
 };
 
 #endif	// __FEA_FIBCONFIG_HH__

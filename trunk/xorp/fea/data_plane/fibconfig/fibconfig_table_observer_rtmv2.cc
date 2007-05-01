@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.6 2007/04/30 05:59:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.7 2007/04/30 23:40:32 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -130,9 +130,6 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
     list<FteX> fte_list;
     FibMsgSet filter = FibMsg::UPDATES | FibMsg::GETS;
 
-    if (_fib_table_observers.empty())
-	return;		// Nobody is interested in the routes
-
     //
     // Get the IPv4 routes
     //
@@ -143,7 +140,7 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 							     buffer,
 							     filter);
 	if (! fte_list.empty()) {
-	    propagate_fib_changes(fte_list);
+	    fibconfig().propagate_fib_changes(fte_list, this);
 	    fte_list.clear();
 	}
     }
@@ -159,7 +156,7 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 							     buffer,
 							     filter);
 	if (! fte_list.empty()) {
-	    propagate_fib_changes(fte_list);
+	    fibconfig().propagate_fib_changes(fte_list, this);
 	    fte_list.clear();
 	}
     }

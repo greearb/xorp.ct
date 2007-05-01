@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.3 2007/04/27 23:48:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.4 2007/04/30 23:40:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1455,10 +1455,15 @@ FibConfig::get_table6(list<Fte6>& fte_list)
 bool
 FibConfig::add_fib_table_observer(FibTableObserverBase* fib_table_observer)
 {
-    if (_fibconfig_table_observer_primary == NULL)
-	return (false);
+    if (find(_fib_table_observers.begin(),
+	     _fib_table_observers.end(),
+	     fib_table_observer)
+	!= _fib_table_observers.end()) {
+	// XXX: we have already added that observer
+	return (true);
+    }
 
-    _fibconfig_table_observer_primary->add_fib_table_observer(fib_table_observer);
+    _fib_table_observers.push_back(fib_table_observer);
 
     return (true);
 }
@@ -1466,12 +1471,64 @@ FibConfig::add_fib_table_observer(FibTableObserverBase* fib_table_observer)
 bool
 FibConfig::delete_fib_table_observer(FibTableObserverBase* fib_table_observer)
 {
-    if (_fibconfig_table_observer_primary == NULL)
-	return (false);
+    list<FibTableObserverBase* >::iterator iter;
 
-    _fibconfig_table_observer_primary->delete_fib_table_observer(fib_table_observer);
+    iter = find(_fib_table_observers.begin(),
+		_fib_table_observers.end(),
+		fib_table_observer);
+    if (iter == _fib_table_observers.end()) {
+	// XXX: observer not found
+	return (false);
+    }
+
+    _fib_table_observers.erase(iter);
 
     return (true);
+}
+
+void
+FibConfig::propagate_fib_changes(const list<FteX>& fte_list,
+				 const FibConfigTableObserver* fibconfig_table_observer)
+{
+    list<Fte4> fte_list4;
+    list<Fte6> fte_list6;
+    list<FteX>::const_iterator ftex_iter;
+
+    if (fibconfig_table_observer != _fibconfig_table_observer_primary)
+	return;		// XXX: propagate the changes only from the primary
+
+    if (fte_list.empty())
+	return;
+
+    // Copy the FteX list into Fte4 and Fte6 lists
+    for (ftex_iter = fte_list.begin();
+	 ftex_iter != fte_list.end();
+	 ++ftex_iter) {
+	const FteX& ftex = *ftex_iter;
+	if (ftex.net().is_ipv4()) {
+	    // IPv4 entry
+	    Fte4 fte4 = ftex.get_fte4();
+	    fte_list4.push_back(fte4);
+	}
+
+	if (ftex.net().is_ipv6()) {
+	    // IPv6 entry
+	    Fte6 fte6 = ftex.get_fte6();
+	    fte_list6.push_back(fte6);
+	}
+    }
+
+    // Inform all observers about the changes
+    list<FibTableObserverBase* >::iterator iter;
+    for (iter = _fib_table_observers.begin();
+	 iter != _fib_table_observers.end();
+	 ++iter) {
+	FibTableObserverBase* fib_table_observer = *iter;
+	if (! fte_list4.empty())
+	    fib_table_observer->process_fib_changes(fte_list4);
+	if (! fte_list6.empty())
+	    fib_table_observer->process_fib_changes(fte_list6);
+    }
 }
 
 /**

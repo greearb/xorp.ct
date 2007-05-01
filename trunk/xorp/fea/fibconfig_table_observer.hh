@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.2 2007/04/27 01:10:29 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.3 2007/04/30 23:40:28 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
@@ -23,7 +23,6 @@
 
 
 class FibConfig;
-class FibTableObserverBase;
 
 class FibConfigTableObserver {
 public:
@@ -65,30 +64,7 @@ public:
      */
     virtual void receive_data(const vector<uint8_t>& buffer) = 0;
 
-    /**
-     * Add a FIB table observer.
-     * 
-     * @param fib_table_observer the FIB table observer to add.
-     */
-    void add_fib_table_observer(FibTableObserverBase* fib_table_observer);
-
-    /**
-     * Delete a FIB table observer.
-     * 
-     * @param fib_table_observer the FIB table observer to delete.
-     */
-    void delete_fib_table_observer(FibTableObserverBase* fib_table_observer);
-
 protected:
-    /**
-     * Propagate FIB changes to all FIB table observers.
-     * 
-     * @param fte_list the list with the FIB changes.
-     */
-    void propagate_fib_changes(const list<FteX>& fte_list);
-
-    list<FibTableObserverBase* > _fib_table_observers;
-
     // Misc other state
     bool	_is_running;
 
@@ -278,36 +254,6 @@ public:
      * @param buffer the buffer with the received data.
      */
     virtual void receive_data(const vector<uint8_t>& buffer);
-};
-
-/**
- * A base class that can be used by clients interested in observing
- * changes in the Forwarding Information Base.
- */
-class FibTableObserverBase {
-public:
-    FibTableObserverBase() {}
-    virtual ~FibTableObserverBase() {}
-
-    /**
-     * Process a list of IPv4 FIB route changes.
-     * 
-     * The FIB route changes come from the underlying system.
-     * 
-     * @param fte_list the list of Fte entries to add or delete.
-     */
-    virtual void process_fib_changes(const list<Fte4>& fte_list) = 0;
-
-    /**
-     * Process a list of IPv6 FIB route changes.
-     * 
-     * The FIB route changes come from the underlying system.
-     * 
-     * @param fte_list the list of Fte entries to add or delete.
-     */
-    virtual void process_fib_changes(const list<Fte6>& fte_list) = 0;
-
-private:
 };
 
 #endif // __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
