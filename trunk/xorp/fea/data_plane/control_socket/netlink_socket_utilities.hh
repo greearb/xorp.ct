@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.19 2007/04/30 05:59:34 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket_utilities.hh,v 1.1 2007/05/01 01:42:40 pavlin Exp $
 
 #ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
 #define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
@@ -26,8 +26,8 @@
 #include <linux/rtnetlink.h>
 #endif
 
-#include "fte.hh"
-#include "iftree.hh"
+#include "fea/fte.hh"
+#include "fea/iftree.hh"
 
 
 //

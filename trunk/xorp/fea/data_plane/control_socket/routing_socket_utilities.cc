@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/routing_socket_utilities.cc,v 1.2 2007/05/01 01:50:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/control_socket/routing_socket_utilities.cc,v 1.3 2007/05/01 02:40:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -45,7 +45,7 @@
 #include <netinet6/in6_var.h>
 #endif
 #ifdef HOST_OS_WINDOWS
-#include "win_rtsock.h"
+#include "fea/win_rtsock.h"
 #endif
 
 #include "system_utilities.hh"
