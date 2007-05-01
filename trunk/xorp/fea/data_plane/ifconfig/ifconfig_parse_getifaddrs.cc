@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.3 2007/04/30 20:44:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.4 2007/05/01 01:42:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -461,7 +461,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
 	    if (ifa->ifa_addr != NULL) {
 		lcl_addr.copy_in(*ifa->ifa_addr);
 	    }
-	    lcl_addr = kernel_adjust_ipv6_recv(lcl_addr);
+	    lcl_addr = system_adjust_ipv6_recv(lcl_addr);
 	    debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	    
 	    // Get the netmask

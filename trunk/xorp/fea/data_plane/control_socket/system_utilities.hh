@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/kernel_utils.hh,v 1.11 2007/05/01 00:52:02 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/control_socket/system_utilities.hh,v 1.1 2007/05/01 01:42:40 pavlin Exp $
 
 #ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_SYSTEM_UTILITIES_HH__
 #define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_SYSTEM_UTILITIES_HH__
@@ -58,7 +58,7 @@
 //
 #ifdef HAVE_IPV6
 inline IPv6
-kernel_adjust_ipv6_recv(const IPv6& ipv6)
+system_adjust_ipv6_recv(const IPv6& ipv6)
 {
 #ifdef IPV6_STACK_KAME
     in6_addr in6_addr;
@@ -77,14 +77,14 @@ kernel_adjust_ipv6_recv(const IPv6& ipv6)
 #endif // HAVE_IPV6
 
 inline IPvX
-kernel_adjust_ipvx_recv(const IPvX& ipvx)
+system_adjust_ipvx_recv(const IPvX& ipvx)
 {
 #ifndef HAVE_IPV6
     return ipvx;
 #else
     if (! ipvx.is_ipv6())
 	return ipvx;
-    return (kernel_adjust_ipv6_recv(ipvx.get_ipv6()));
+    return (system_adjust_ipv6_recv(ipvx.get_ipv6()));
 #endif // HAVE_IPV6
 }
 
@@ -95,7 +95,7 @@ kernel_adjust_ipvx_recv(const IPvX& ipvx)
 //
 #ifdef HAVE_IPV6
 inline void
-kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
+system_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 {
 #ifdef HAVE_STRUCT_SOCKADDR_IN6_SIN6_SCOPE_ID
 #ifdef IPV6_STACK_KAME
@@ -115,13 +115,13 @@ kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zone_id)
 //
 // XXX: In case of KAME sometimes the local interface index is encoded
 // in the third and fourth octet of an IPv6 address (for link-local
-// unicast/multicast addresses) when we add an unicast route to the kernel.
+// unicast/multicast addresses) when we add an unicast route to the system.
 // E.g., see /usr/src/sbin/route/route.c on FreeBSD-6.2 and search for
 // the __KAME__ marker.
 //
 #ifdef HAVE_IPV6
 inline void
-kernel_adjust_sockaddr_in6_route(struct sockaddr_in6& sin6, uint16_t iface_id)
+system_adjust_sockaddr_in6_route(struct sockaddr_in6& sin6, uint16_t iface_id)
 {
 #ifdef IPV6_STACK_KAME
     if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr)

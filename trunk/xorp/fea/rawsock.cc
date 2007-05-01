@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.44 2007/04/25 01:57:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.45 2007/05/01 01:42:38 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -2399,7 +2399,7 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	dst_address.copy_out(_to6);
-	kernel_adjust_sockaddr_in6_send(_to6, iftree_if->pif_index());
+	system_adjust_sockaddr_in6_send(_to6, iftree_if->pif_index());
 	_sndmh.msg_namelen  = sizeof(_to6);
 	break;
 #endif // HAVE_IPV6

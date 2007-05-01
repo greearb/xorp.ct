@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.41 2007/04/30 05:59:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket_utilities.cc,v 1.1 2007/05/01 01:42:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -250,7 +250,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     } else {
 	// TODO: fix this!!
 	dst_addr.copy_in(family, (uint8_t *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_DST])));
-	dst_addr = kernel_adjust_ipvx_recv(dst_addr);
+	dst_addr = system_adjust_ipvx_recv(dst_addr);
 	if (! dst_addr.is_unicast()) {
 	    // TODO: should we make this check?
 	    fte.zero();

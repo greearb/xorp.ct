@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.6 2007/05/01 01:42:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -356,7 +356,7 @@ FibConfigEntrySetRtsock::add_entry(const FteX& fte)
 	    {
 		struct sockaddr_in6* sin6_nexthop;
 		sin6_nexthop = reinterpret_cast<struct sockaddr_in6*>(sin_nexthop);
-		kernel_adjust_sockaddr_in6_route(*sin6_nexthop, pif_index);
+		system_adjust_sockaddr_in6_route(*sin6_nexthop, pif_index);
 	    }
 	    break;
 #endif // HAVE_IPV6

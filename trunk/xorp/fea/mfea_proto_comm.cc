@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.72 2007/04/14 08:59:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.73 2007/05/01 01:42:38 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -2332,7 +2332,7 @@ ProtoComm::proto_socket_transmit(MfeaVif *mfea_vif, const IPvX& src,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	dst.copy_out(_to6);
-	kernel_adjust_sockaddr_in6_send(_to6, mfea_vif->pif_index());
+	system_adjust_sockaddr_in6_send(_to6, mfea_vif->pif_index());
 	_sndmh.msg_namelen  = sizeof(_to6);
 	break;
 #endif // HAVE_IPV6
