@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.40 2007/04/16 18:53:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.41 2007/04/30 05:59:34 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,9 +33,10 @@
 
 #include "libproto/packet.hh"
 
-#include "kernel_utils.hh"
 #include "netlink_socket.hh"
-#include "netlink_socket_utils.hh"
+#include "netlink_socket_utilities.hh"
+#include "system_utilities.hh"
+
 
 //
 // NETLINK format related utilities for manipulating data

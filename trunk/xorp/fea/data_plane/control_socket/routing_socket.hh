@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.15 2006/08/29 22:42:22 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.16 2007/02/16 22:45:50 pavlin Exp $
 
-#ifndef __FEA_ROUTING_SOCKET_HH__
-#define __FEA_ROUTING_SOCKET_HH__
+#ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__
+#define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__
 
 #include <list>
 
@@ -209,4 +209,4 @@ private:
     vector<uint8_t> _cache_data;	// Cached routing socket data.
 };
 
-#endif // __FEA_ROUTING_SOCKET_HH__
+#endif // __FEA_FORWARDING_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__

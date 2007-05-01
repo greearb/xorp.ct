@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.21 2006/08/29 22:42:22 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.22 2007/02/16 22:45:47 pavlin Exp $
 
-#ifndef __FEA_NETLINK_SOCKET_HH__
-#define __FEA_NETLINK_SOCKET_HH__
+#ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
+#define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
 
 #include <list>
 
@@ -274,4 +274,4 @@ private:
     vector<uint8_t> _cache_data;	// Cached netlink socket data.
 };
 
-#endif // __FEA_NETLINK_SOCKET_HH__
+#endif // __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__

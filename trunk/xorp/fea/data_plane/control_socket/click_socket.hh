@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.22 2006/08/29 22:42:18 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.23 2007/02/16 22:45:36 pavlin Exp $
 
-#ifndef __FEA_CLICK_SOCKET_HH__
-#define __FEA_CLICK_SOCKET_HH__
+#ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__
+#define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__
 
 #include <list>
 
@@ -633,4 +633,4 @@ private:
     string	    _cache_data;	// Cached Click socket data.
 };
 
-#endif // __FEA_CLICK_SOCKET_HH__
+#endif // __FEA_FORWARDING_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__

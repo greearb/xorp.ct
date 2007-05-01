@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.39 2007/04/14 07:00:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.40 2007/04/30 05:59:34 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -48,8 +48,8 @@
 #include "win_rtsock.h"
 #endif
 
-#include "kernel_utils.hh"
-#include "routing_socket_utils.hh"
+#include "system_utilities.hh"
+#include "routing_socket_utilities.hh"
 
 //
 // RTM format related utilities for manipulating data

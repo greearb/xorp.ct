@@ -104,11 +104,11 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	iftree.lo libfeaclient_bridge.lo mfea_config.lo \
 	mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo mfea_node_cli.lo \
 	mfea_proto_comm.lo mfea_vif.lo netlink_socket.lo \
-	netlink_socket_utils.lo nexthop_port_mapper.lo \
+	netlink_socket_utilities.lo nexthop_port_mapper.lo \
 	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
 	pa_table.lo pa_transaction.lo profile_vars.lo rawsock.lo \
 	rawsock4.lo rawsock6.lo routing_socket.lo \
-	routing_socket_utils.lo win_rtm_pipe.lo win_support.lo \
+	routing_socket_utilities.lo win_rtm_pipe.lo win_support.lo \
 	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
 	xrl_fea_target.lo xrl_fib_client_manager.lo xrl_mfea_node.lo \
 	xrl_rawsock4.lo xrl_rawsock6.lo xrl_socket_cmds.lo \
@@ -441,30 +441,34 @@ xorp_fea_dummy_SOURCES = xorp_fea.cc
 
 # -- Library Sources
 libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
-	click_socket.hh fea_io.hh fea_node.hh fte.hh fibconfig.hh \
-	fibconfig_entry_get.hh fibconfig_entry_observer.hh \
-	fibconfig_entry_set.hh fibconfig_table_get.hh \
-	fibconfig_table_observer.hh fibconfig_table_set.hh \
-	fibconfig_transaction.hh ifconfig.hh ifconfig_addr_table.hh \
-	ifconfig_get.hh ifconfig_media.hh ifconfig_observer.hh \
-	ifconfig_reporter.hh ifconfig_set.hh ifconfig_transaction.hh \
-	iftree.hh kernel_utils.hh libfeaclient_bridge.hh \
-	mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh \
-	mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh \
-	mfea_vif.hh netlink_socket.hh netlink_socket_utils.hh \
+	forwarding_plane/control_socket/click_socket.hh fea_io.hh \
+	fea_node.hh fte.hh fibconfig.hh fibconfig_entry_get.hh \
+	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
+	fibconfig_table_get.hh fibconfig_table_observer.hh \
+	fibconfig_table_set.hh fibconfig_transaction.hh ifconfig.hh \
+	ifconfig_addr_table.hh ifconfig_get.hh ifconfig_media.hh \
+	ifconfig_observer.hh ifconfig_reporter.hh ifconfig_set.hh \
+	ifconfig_transaction.hh iftree.hh \
+	forwarding_plane/control_socket/system_utilities.hh \
+	libfeaclient_bridge.hh mfea_dataflow.hh \
+	mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh \
+	mfea_node_cli.hh mfea_osdep.hh mfea_proto_comm.hh mfea_vif.hh \
+	forwarding_plane/control_socket/netlink_socket.hh \
+	forwarding_plane/control_socket/netlink_socket_utilities.hh \
 	nexthop_port_mapper.hh pa_backend.hh pa_backend_dummy.hh \
 	pa_backend_ipfw2.hh pa_entry.hh pa_table.hh pa_transaction.hh \
 	profile_vars.hh rawsock.hh rawsock4.hh rawsock6.hh \
-	routing_socket.hh routing_socket_utils.hh win_rtm_pipe.hh \
-	win_rtsock.h win_support.hh xrl_fea_io.hh xrl_fea_node.hh \
-	xrl_fea_target.hh xrl_fib_client_manager.hh xrl_mfea_node.hh \
-	xrl_packet_acl.hh xrl_rawsock4.hh xrl_rawsock6.hh \
-	xrl_socket_cmds.hh xrl_socket_server.hh addr_table.cc \
-	click_socket.cc fea_io.cc fea_node.cc fibconfig.cc \
-	fibconfig_entry_get.cc fibconfig_entry_observer.cc \
-	fibconfig_entry_set.cc fibconfig_table_get.cc \
-	fibconfig_table_observer.cc fibconfig_table_set.cc \
-	fibconfig_transaction.cc \
+	forwarding_plane/control_socket/routing_socket.hh \
+	forwarding_plane/control_socket/routing_socket_utilities.hh \
+	win_rtm_pipe.hh win_rtsock.h win_support.hh xrl_fea_io.hh \
+	xrl_fea_node.hh xrl_fea_target.hh xrl_fib_client_manager.hh \
+	xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh \
+	xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh \
+	addr_table.cc forwarding_plane/control_socket/click_socket.cc \
+	fea_io.cc fea_node.cc fibconfig.cc fibconfig_entry_get.cc \
+	fibconfig_entry_observer.cc fibconfig_entry_set.cc \
+	fibconfig_table_get.cc fibconfig_table_observer.cc \
+	fibconfig_table_set.cc fibconfig_transaction.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_click.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc \
@@ -528,16 +532,18 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc \
 	iftree.cc libfeaclient_bridge.cc mfea_config.cc \
 	mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc \
-	mfea_proto_comm.cc mfea_vif.cc netlink_socket.cc \
-	netlink_socket_utils.cc nexthop_port_mapper.cc \
-	pa_backend_dummy.cc pa_backend_ipfw2.cc pa_entry.cc \
-	pa_table.cc pa_transaction.cc profile_vars.cc rawsock.cc \
-	rawsock4.cc rawsock6.cc routing_socket.cc \
-	routing_socket_utils.cc win_rtm_pipe.cc win_support.cc \
-	xrl_packet_acl.cc xrl_fea_io.cc xrl_fea_node.cc \
-	xrl_fea_target.cc xrl_fib_client_manager.cc xrl_mfea_node.cc \
-	xrl_rawsock4.cc xrl_rawsock6.cc xrl_socket_cmds.cc \
-	xrl_socket_server.cc
+	mfea_proto_comm.cc mfea_vif.cc \
+	forwarding_plane/control_socket/netlink_socket.cc \
+	forwarding_plane/control_socket/netlink_socket_utilities.cc \
+	nexthop_port_mapper.cc pa_backend_dummy.cc pa_backend_ipfw2.cc \
+	pa_entry.cc pa_table.cc pa_transaction.cc profile_vars.cc \
+	rawsock.cc rawsock4.cc rawsock6.cc \
+	forwarding_plane/control_socket/routing_socket.cc \
+	forwarding_plane/control_socket/routing_socket_utilities.cc \
+	win_rtm_pipe.cc win_support.cc xrl_packet_acl.cc xrl_fea_io.cc \
+	xrl_fea_node.cc xrl_fea_target.cc xrl_fib_client_manager.cc \
+	xrl_mfea_node.cc xrl_rawsock4.cc xrl_rawsock6.cc \
+	xrl_socket_cmds.cc xrl_socket_server.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
@@ -779,7 +785,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_proto_comm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netlink_socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netlink_socket_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netlink_socket_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nexthop_port_mapper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_backend_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_backend_ipfw2.Plo@am__quote@
@@ -791,7 +797,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rawsock4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rawsock6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket_utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routing_socket_utilities.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/win_rtm_pipe.Plo@am__quote@
@@ -829,6 +835,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+click_socket.lo: forwarding_plane/control_socket/click_socket.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT click_socket.lo -MD -MP -MF $(DEPDIR)/click_socket.Tpo -c -o click_socket.lo `test -f 'forwarding_plane/control_socket/click_socket.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/click_socket.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/click_socket.Tpo $(DEPDIR)/click_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/click_socket.cc' object='click_socket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o click_socket.lo `test -f 'forwarding_plane/control_socket/click_socket.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/click_socket.cc
 
 fibconfig_entry_get_click.lo: forwarding_plane/fibconfig/fibconfig_entry_get_click.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fibconfig_entry_get_click.lo -MD -MP -MF $(DEPDIR)/fibconfig_entry_get_click.Tpo -c -o fibconfig_entry_get_click.lo `test -f 'forwarding_plane/fibconfig/fibconfig_entry_get_click.cc' || echo '$(srcdir)/'`forwarding_plane/fibconfig/fibconfig_entry_get_click.cc
@@ -1235,6 +1248,34 @@ ifconfig_set_netlink_socket.lo: forwarding_plane/ifconfig/ifconfig_set_netlink_s
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc' object='ifconfig_set_netlink_socket.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set_netlink_socket.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc
+
+netlink_socket.lo: forwarding_plane/control_socket/netlink_socket.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netlink_socket.lo -MD -MP -MF $(DEPDIR)/netlink_socket.Tpo -c -o netlink_socket.lo `test -f 'forwarding_plane/control_socket/netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/netlink_socket.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/netlink_socket.Tpo $(DEPDIR)/netlink_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/netlink_socket.cc' object='netlink_socket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netlink_socket.lo `test -f 'forwarding_plane/control_socket/netlink_socket.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/netlink_socket.cc
+
+netlink_socket_utilities.lo: forwarding_plane/control_socket/netlink_socket_utilities.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT netlink_socket_utilities.lo -MD -MP -MF $(DEPDIR)/netlink_socket_utilities.Tpo -c -o netlink_socket_utilities.lo `test -f 'forwarding_plane/control_socket/netlink_socket_utilities.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/netlink_socket_utilities.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/netlink_socket_utilities.Tpo $(DEPDIR)/netlink_socket_utilities.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/netlink_socket_utilities.cc' object='netlink_socket_utilities.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o netlink_socket_utilities.lo `test -f 'forwarding_plane/control_socket/netlink_socket_utilities.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/netlink_socket_utilities.cc
+
+routing_socket.lo: forwarding_plane/control_socket/routing_socket.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT routing_socket.lo -MD -MP -MF $(DEPDIR)/routing_socket.Tpo -c -o routing_socket.lo `test -f 'forwarding_plane/control_socket/routing_socket.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/routing_socket.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/routing_socket.Tpo $(DEPDIR)/routing_socket.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/routing_socket.cc' object='routing_socket.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o routing_socket.lo `test -f 'forwarding_plane/control_socket/routing_socket.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/routing_socket.cc
+
+routing_socket_utilities.lo: forwarding_plane/control_socket/routing_socket_utilities.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT routing_socket_utilities.lo -MD -MP -MF $(DEPDIR)/routing_socket_utilities.Tpo -c -o routing_socket_utilities.lo `test -f 'forwarding_plane/control_socket/routing_socket_utilities.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/routing_socket_utilities.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/routing_socket_utilities.Tpo $(DEPDIR)/routing_socket_utilities.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/control_socket/routing_socket_utilities.cc' object='routing_socket_utilities.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o routing_socket_utilities.lo `test -f 'forwarding_plane/control_socket/routing_socket_utilities.cc' || echo '$(srcdir)/'`forwarding_plane/control_socket/routing_socket_utilities.cc
 
 xorp_fea_dummy-xorp_fea.o: xorp_fea.cc
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(xorp_fea_dummy_CXXFLAGS) $(CXXFLAGS) -MT xorp_fea_dummy-xorp_fea.o -MD -MP -MF $(DEPDIR)/xorp_fea_dummy-xorp_fea.Tpo -c -o xorp_fea_dummy-xorp_fea.o `test -f 'xorp_fea.cc' || echo '$(srcdir)/'`xorp_fea.cc

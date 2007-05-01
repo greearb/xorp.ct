@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.71 2007/04/14 07:00:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.72 2007/04/14 08:59:48 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -76,7 +76,7 @@
 #include "mrt/include/netinet/pim.h"
 #endif
 
-#include "kernel_utils.hh"
+#include "fea/forwarding_plane/control_socket/system_utilities.hh"
 
 #include "mfea_node.hh"
 #include "mfea_osdep.hh"

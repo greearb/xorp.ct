@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.31 2006/08/30 08:10:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.32 2007/02/16 22:45:50 pavlin Exp $"
 
 #include "fea_module.h"
 

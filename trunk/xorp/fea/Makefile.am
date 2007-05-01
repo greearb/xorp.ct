@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.82 2007/04/27 21:11:28 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.83 2007/04/28 00:19:54 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -78,7 +78,7 @@ xorp_fea_dummy_SOURCES			= xorp_fea.cc
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
 libfea_la_SOURCES	+= addr_table.hh
-libfea_la_SOURCES	+= click_socket.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/click_socket.hh
 libfea_la_SOURCES	+= fea_io.hh
 libfea_la_SOURCES	+= fea_node.hh
 libfea_la_SOURCES	+= fte.hh
@@ -99,7 +99,7 @@ libfea_la_SOURCES	+= ifconfig_reporter.hh
 libfea_la_SOURCES	+= ifconfig_set.hh
 libfea_la_SOURCES	+= ifconfig_transaction.hh
 libfea_la_SOURCES	+= iftree.hh
-libfea_la_SOURCES	+= kernel_utils.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/system_utilities.hh
 libfea_la_SOURCES	+= libfeaclient_bridge.hh
 libfea_la_SOURCES	+= mfea_dataflow.hh
 libfea_la_SOURCES	+= mfea_kernel_messages.hh
@@ -109,8 +109,8 @@ libfea_la_SOURCES	+= mfea_node_cli.hh
 libfea_la_SOURCES	+= mfea_osdep.hh
 libfea_la_SOURCES	+= mfea_proto_comm.hh
 libfea_la_SOURCES	+= mfea_vif.hh
-libfea_la_SOURCES	+= netlink_socket.hh
-libfea_la_SOURCES	+= netlink_socket_utils.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket_utilities.hh
 libfea_la_SOURCES	+= nexthop_port_mapper.hh
 libfea_la_SOURCES	+= pa_backend.hh
 libfea_la_SOURCES	+= pa_backend_dummy.hh
@@ -122,8 +122,8 @@ libfea_la_SOURCES	+= profile_vars.hh
 libfea_la_SOURCES	+= rawsock.hh
 libfea_la_SOURCES	+= rawsock4.hh
 libfea_la_SOURCES	+= rawsock6.hh
-libfea_la_SOURCES	+= routing_socket.hh
-libfea_la_SOURCES	+= routing_socket_utils.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket.hh
+libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket_utilities.hh
 libfea_la_SOURCES	+= win_rtm_pipe.hh
 libfea_la_SOURCES	+= win_rtsock.h
 libfea_la_SOURCES	+= win_support.hh
@@ -139,7 +139,7 @@ libfea_la_SOURCES	+= xrl_socket_cmds.hh
 libfea_la_SOURCES	+= xrl_socket_server.hh
 
 libfea_la_SOURCES	+= addr_table.cc
-libfea_la_SOURCES	+= click_socket.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/click_socket.cc
 libfea_la_SOURCES	+= fea_io.cc
 libfea_la_SOURCES	+= fea_node.cc
 libfea_la_SOURCES	+= fibconfig.cc
@@ -225,8 +225,8 @@ libfea_la_SOURCES	+= mfea_node.cc
 libfea_la_SOURCES	+= mfea_node_cli.cc
 libfea_la_SOURCES	+= mfea_proto_comm.cc
 libfea_la_SOURCES	+= mfea_vif.cc
-libfea_la_SOURCES	+= netlink_socket.cc
-libfea_la_SOURCES	+= netlink_socket_utils.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/netlink_socket_utilities.cc
 libfea_la_SOURCES	+= nexthop_port_mapper.cc
 libfea_la_SOURCES	+= pa_backend_dummy.cc
 libfea_la_SOURCES	+= pa_backend_ipfw2.cc
@@ -237,8 +237,8 @@ libfea_la_SOURCES	+= profile_vars.cc
 libfea_la_SOURCES	+= rawsock.cc
 libfea_la_SOURCES	+= rawsock4.cc
 libfea_la_SOURCES	+= rawsock6.cc
-libfea_la_SOURCES	+= routing_socket.cc
-libfea_la_SOURCES	+= routing_socket_utils.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket.cc
+libfea_la_SOURCES	+= forwarding_plane/control_socket/routing_socket_utilities.cc
 libfea_la_SOURCES	+= win_rtm_pipe.cc
 libfea_la_SOURCES	+= win_support.cc
 libfea_la_SOURCES	+= xrl_packet_acl.cc

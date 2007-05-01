@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.43 2007/04/19 21:36:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.44 2007/04/25 01:57:44 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -76,7 +76,7 @@
 #endif
 
 #include "iftree.hh"
-#include "kernel_utils.hh"
+#include "forwarding_plane/control_socket/system_utilities.hh"
 #include "rawsock.hh"
 
 

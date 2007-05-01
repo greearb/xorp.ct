@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.3 2007/04/30 23:40:28 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_observer.hh,v 1.4 2007/05/01 00:14:07 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FIBCONFIG_TABLE_OBSERVER_HH__
 
-#include "netlink_socket.hh"
-#include "routing_socket.hh"
+#include "fea/forwarding_plane/control_socket/netlink_socket.hh"
+#include "fea/forwarding_plane/control_socket/routing_socket.hh"
 #include "win_rtm_pipe.hh"
 
 
