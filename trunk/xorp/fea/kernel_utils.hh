@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/kernel_utils.hh,v 1.9 2007/04/14 07:00:50 pavlin Exp $
+// $XORP: xorp/fea/kernel_utils.hh,v 1.10 2007/04/16 18:57:47 pavlin Exp $
 
 #ifndef __FEA_KERNEL_UTILS_HH__
 #define __FEA_KERNEL_UTILS_HH__
@@ -46,10 +46,7 @@
 	    ((caddr_t)(mhdr)->msg_control) + (mhdr)->msg_controllen) ? \
 	    (struct cmsghdr *)NULL : \
 	    (struct cmsghdr *)(void *)((caddr_t)(cmsg) + __CMSG_ALIGN((cmsg)->cmsg_len)))
-
-#else
-#define XORP_CMSG_NXTHDR(mhdr, cmsg) CMSG_NXTHDR(mhdr, cmsg)
-#endif
+#endif // HAVE_BROKEN_MACRO_CMSG_NXTHDR
 
 //
 // XXX: In case of KAME the local interface index (also the link-local
