@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.46 2007/04/26 06:29:45 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.47 2007/04/30 23:40:29 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -68,6 +68,7 @@ public:
      */
     virtual bool push_config(IfTree& config);
 
+protected:
     /**
      * Determine if the interface's underlying provider implements discard
      * semantics natively, or if they are emulated through other means.
@@ -77,7 +78,6 @@ public:
      */
     virtual bool is_discard_emulated(const IfTreeInterface& i) const = 0;
 
-protected:
     /**
      * Start the configuration.
      *
@@ -288,16 +288,8 @@ public:
      */
     virtual bool push_config(IfTree& config);
 
-    /**
-     * Determine if the interface's underlying provider implements discard
-     * semantics natively, or if they are emulated through other means.
-     *
-     * @param i the interface item to inspect.
-     * @return true if discard semantics are emulated.
-     */
-    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
-
 private:
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -370,16 +362,8 @@ public:
      */
     virtual int stop(string& error_msg);
 
-    /**
-     * Determine if the interface's underlying provider implements discard
-     * semantics natively, or if they are emulated through other means.
-     *
-     * @param i the interface item to inspect.
-     * @return true if discard semantics are emulated.
-     */
-    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
-
 private:
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -474,16 +458,8 @@ public:
      */
     virtual int stop(string& error_msg);
 
-    /**
-     * Determine if the interface's underlying provider implements discard
-     * semantics natively, or if they are emulated through other means.
-     *
-     * @param i the interface item to inspect.
-     * @return true if discard semantics are emulated.
-     */
-    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
-
 private:
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -563,15 +539,6 @@ public:
     virtual int stop(string& error_msg);
 
     /**
-     * Determine if the interface's underlying provider implements discard
-     * semantics natively, or if they are emulated through other means.
-     *
-     * @param i the interface item to inspect.
-     * @return true if discard semantics are emulated.
-     */
-    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
-
-    /**
      * Get a reference to the @ref IfTree instance.
      *
      * @return a reference to the @ref IfTree instance.
@@ -594,6 +561,7 @@ public:
 	const string& error_msg);
 
 private:
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -718,16 +686,8 @@ public:
      */
     virtual int stop(string& error_msg);
 
-    /**
-     * Determine if the interface's underlying provider implements discard
-     * semantics natively, or if they are emulated through other means.
-     *
-     * @param i the interface item to inspect.
-     * @return true if discard semantics are emulated.
-     */
-    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
-
 private:
+    virtual bool is_discard_emulated(const IfTreeInterface& i) const;
     virtual int config_begin(string& error_msg);
     virtual int config_end(string& error_msg);
     virtual int add_interface(const string& ifname,
@@ -794,6 +754,7 @@ private:
 				 const IPvX& dst,
 				 uint32_t prefix_len,
 				 string& error_msg);
+
 #ifdef HOST_OS_WINDOWS
 private:
     map<pair<uint32_t, IPAddr>, ULONG>	_nte_map;
