@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.43 2007/04/30 23:40:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set.cc,v 1.1 2007/05/01 02:14:06 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"

@@ -12,9 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket_utilities.cc,v 1.1 2007/05/01 01:42:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket_utilities.cc,v 1.2 2007/05/01 01:50:43 pavlin Exp $"
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
