@@ -51,10 +51,7 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libfea_la_LIBADD =
 am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
-	fea_node.lo fibconfig.lo fibconfig_entry_get.lo \
-	fibconfig_entry_observer.lo fibconfig_entry_set.lo \
-	fibconfig_table_get.lo fibconfig_table_observer.lo \
-	fibconfig_table_set.lo fibconfig_transaction.lo \
+	fea_node.lo fibconfig.lo fibconfig_transaction.lo \
 	fibconfig_entry_get_click.lo fibconfig_entry_get_dummy.lo \
 	fibconfig_entry_get_iphelper.lo \
 	fibconfig_entry_get_netlink_socket.lo \
@@ -86,9 +83,8 @@ am_libfea_la_OBJECTS = addr_table.lo click_socket.lo fea_io.lo \
 	fibconfig_table_set_netlink_socket.lo \
 	fibconfig_table_set_routing_socket.lo \
 	fibconfig_table_set_rtmv2.lo ifconfig.lo \
-	ifconfig_addr_table.lo ifconfig_get.lo ifconfig_media.lo \
-	ifconfig_observer.lo ifconfig_reporter.lo ifconfig_set.lo \
-	ifconfig_transaction.lo ifconfig_get_click.lo \
+	ifconfig_addr_table.lo ifconfig_media.lo ifconfig_reporter.lo \
+	ifconfig_set.lo ifconfig_transaction.lo ifconfig_get_click.lo \
 	ifconfig_get_dummy.lo ifconfig_get_getifaddrs.lo \
 	ifconfig_get_ioctl.lo ifconfig_get_iphelper.lo \
 	ifconfig_get_netlink_socket.lo ifconfig_get_proc_linux.lo \
@@ -465,10 +461,7 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh \
 	xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh \
 	addr_table.cc forwarding_plane/control_socket/click_socket.cc \
-	fea_io.cc fea_node.cc fibconfig.cc fibconfig_entry_get.cc \
-	fibconfig_entry_observer.cc fibconfig_entry_set.cc \
-	fibconfig_table_get.cc fibconfig_table_observer.cc \
-	fibconfig_table_set.cc fibconfig_transaction.cc \
+	fea_io.cc fea_node.cc fibconfig.cc fibconfig_transaction.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_click.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc \
 	forwarding_plane/fibconfig/fibconfig_entry_get_iphelper.cc \
@@ -506,9 +499,8 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/fibconfig/fibconfig_table_set_netlink_socket.cc \
 	forwarding_plane/fibconfig/fibconfig_table_set_routing_socket.cc \
 	forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc \
-	ifconfig.cc ifconfig_addr_table.cc ifconfig_get.cc \
-	ifconfig_media.cc ifconfig_observer.cc ifconfig_reporter.cc \
-	forwarding_plane/ifconfig/ifconfig_set.cc \
+	ifconfig.cc ifconfig_addr_table.cc ifconfig_media.cc \
+	ifconfig_reporter.cc forwarding_plane/ifconfig/ifconfig_set.cc \
 	ifconfig_transaction.cc \
 	forwarding_plane/ifconfig/ifconfig_get_click.cc \
 	forwarding_plane/ifconfig/ifconfig_get_dummy.cc \
@@ -703,14 +695,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get_routing_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_get_rtmv2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_observer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_observer_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_observer_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_observer_netlink_socket.Plo@am__quote@
@@ -718,20 +708,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_observer_rtmv2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_parse_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_parse_routing_socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set_routing_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_entry_set_rtmv2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_get.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_get_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_get_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_get_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_get_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_get_sysctl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_observer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_observer_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_observer_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_observer_netlink_socket.Plo@am__quote@
@@ -739,7 +726,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_observer_rtmv2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_parse_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_parse_routing_socket.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_table_set_iphelper.Plo@am__quote@
@@ -749,7 +735,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_addr_table.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_getifaddrs.Plo@am__quote@
@@ -759,7 +744,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_proc_linux.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_get_sysctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_media.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_observer_netlink_socket.Plo@am__quote@

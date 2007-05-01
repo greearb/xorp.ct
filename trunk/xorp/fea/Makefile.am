@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.84 2007/05/01 01:42:36 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.85 2007/05/01 02:14:05 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -143,12 +143,6 @@ libfea_la_SOURCES	+= forwarding_plane/control_socket/click_socket.cc
 libfea_la_SOURCES	+= fea_io.cc
 libfea_la_SOURCES	+= fea_node.cc
 libfea_la_SOURCES	+= fibconfig.cc
-libfea_la_SOURCES	+= fibconfig_entry_get.cc
-libfea_la_SOURCES	+= fibconfig_entry_observer.cc
-libfea_la_SOURCES	+= fibconfig_entry_set.cc
-libfea_la_SOURCES	+= fibconfig_table_get.cc
-libfea_la_SOURCES	+= fibconfig_table_observer.cc
-libfea_la_SOURCES	+= fibconfig_table_set.cc
 libfea_la_SOURCES	+= fibconfig_transaction.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_click.cc
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_entry_get_dummy.cc
@@ -189,9 +183,7 @@ libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_routing_sock
 libfea_la_SOURCES	+= forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc
 libfea_la_SOURCES	+= ifconfig.cc
 libfea_la_SOURCES	+= ifconfig_addr_table.cc
-libfea_la_SOURCES	+= ifconfig_get.cc
 libfea_la_SOURCES	+= ifconfig_media.cc
-libfea_la_SOURCES	+= ifconfig_observer.cc
 libfea_la_SOURCES	+= ifconfig_reporter.cc
 libfea_la_SOURCES	+= forwarding_plane/ifconfig/ifconfig_set.cc
 libfea_la_SOURCES	+= ifconfig_transaction.cc
