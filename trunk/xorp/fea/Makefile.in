@@ -508,7 +508,8 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh \
 	forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc \
 	ifconfig.cc ifconfig_addr_table.cc ifconfig_get.cc \
 	ifconfig_media.cc ifconfig_observer.cc ifconfig_reporter.cc \
-	ifconfig_set.cc ifconfig_transaction.cc \
+	forwarding_plane/ifconfig/ifconfig_set.cc \
+	ifconfig_transaction.cc \
 	forwarding_plane/ifconfig/ifconfig_get_click.cc \
 	forwarding_plane/ifconfig/ifconfig_get_dummy.cc \
 	forwarding_plane/ifconfig/ifconfig_get_getifaddrs.cc \
@@ -1101,6 +1102,13 @@ fibconfig_table_set_rtmv2.lo: forwarding_plane/fibconfig/fibconfig_table_set_rtm
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc' object='fibconfig_table_set_rtmv2.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fibconfig_table_set_rtmv2.lo `test -f 'forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc' || echo '$(srcdir)/'`forwarding_plane/fibconfig/fibconfig_table_set_rtmv2.cc
+
+ifconfig_set.lo: forwarding_plane/ifconfig/ifconfig_set.cc
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_set.lo -MD -MP -MF $(DEPDIR)/ifconfig_set.Tpo -c -o ifconfig_set.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set.cc
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/ifconfig_set.Tpo $(DEPDIR)/ifconfig_set.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='forwarding_plane/ifconfig/ifconfig_set.cc' object='ifconfig_set.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ifconfig_set.lo `test -f 'forwarding_plane/ifconfig/ifconfig_set.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_set.cc
 
 ifconfig_get_click.lo: forwarding_plane/ifconfig/ifconfig_get_click.cc
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ifconfig_get_click.lo -MD -MP -MF $(DEPDIR)/ifconfig_get_click.Tpo -c -o ifconfig_get_click.lo `test -f 'forwarding_plane/ifconfig/ifconfig_get_click.cc' || echo '$(srcdir)/'`forwarding_plane/ifconfig/ifconfig_get_click.cc

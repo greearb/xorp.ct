@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.42 2007/04/26 06:29:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.43 2007/04/30 23:40:29 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -25,13 +25,18 @@
 #include <net/if.h>
 #endif
 
-#include "ifconfig.hh"
-#include "ifconfig_set.hh"
+#include "fea/ifconfig.hh"
+#include "fea/ifconfig_set.hh"
 
 
 //
 // Set information about network interfaces configuration with the
 // underlying system.
+//
+// This is (almost) platform independent mechanism that can be
+// overwritten by each system-specific implementation by
+// (re)implementing the IfConfigSet::push_config() virtual method
+// in the class that inherits from IfConfigSet.
 //
 
 bool
