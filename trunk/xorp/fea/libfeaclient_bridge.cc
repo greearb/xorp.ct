@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.22 2007/04/23 23:05:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.23 2007/04/25 01:57:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -26,6 +26,7 @@
 #include "libfeaclient/ifmgr_cmds.hh"
 #include "libfeaclient/ifmgr_xrl_replicator.hh"
 
+#include "iftree.hh"
 #include "libfeaclient_bridge.hh"
 
 // ----------------------------------------------------------------------------
@@ -77,18 +78,6 @@ LibFeaClientBridge::remove_libfeaclient_mirror(const string& m)
     return _rm->remove_mirror(m);
 }
 
-const IfMgrIfTree&
-LibFeaClientBridge::libfeaclient_iftree() const
-{
-    return _rm->iftree();
-}
-
-const IfTree&
-LibFeaClientBridge::fea_iftree() const
-{
-    return _iftree;
-}
-
 void
 LibFeaClientBridge::interface_update(const string& ifname,
 				     const Update& update,
@@ -125,14 +114,14 @@ LibFeaClientBridge::interface_update(const string& ifname,
     //
     const IfMgrIfAtom* ifa = _rm->iftree().find_interface(ifname);
     if (ifa == NULL) {
-	XLOG_WARNING("Got update for interface not in libfeaclient tree: "
-		     "%s\n", ifname.c_str());
+	XLOG_WARNING("Got update for interface not in libfeaclient tree: %s",
+		     ifname.c_str());
 	return;
     }
 
     const IfTreeInterface* ifp = _iftree.find_interface(ifname);
     if (ifp == NULL) {
-	XLOG_WARNING("Got update for interface not in FEA tree: %s\n",
+	XLOG_WARNING("Got update for interface not in FEA tree: %s",
 		     ifname.c_str());
 	return;
     }
@@ -147,11 +136,6 @@ LibFeaClientBridge::interface_update(const string& ifname,
     _rm->push(new IfMgrIfSetMac(ifname, ifp->mac()));
     _rm->push(new IfMgrIfSetPifIndex(ifname, ifp->pif_index()));
     _rm->push(new IfMgrIfSetNoCarrier(ifname, ifp->no_carrier()));
-
-    //
-    // XXX TODO / TBD if need doing...
-    // _rm->push(new IfMgrIfSetIfFlags(ifname, ifp->if_flags()) - relevant ????
-    //
 }
 
 
@@ -200,8 +184,8 @@ LibFeaClientBridge::vif_update(const string& ifname,
 
     const IfTreeInterface* ifp = _iftree.find_interface(ifname);
     if (ifp == NULL) {
-	XLOG_WARNING("Got update for vif on interface not in tree:"
-		     "%s/(%s)", ifname.c_str(), vifname.c_str());
+	XLOG_WARNING("Got update for vif on interface not in FEA tree: %s/%s",
+		     ifname.c_str(), vifname.c_str());
 	return;
     }
 
@@ -286,16 +270,15 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 
     const IfTreeInterface* ifp = _iftree.find_interface(ifname);
     if (ifp == NULL) {
-	XLOG_WARNING("Got update for address on interface not in tree: "
-		     "%s/(%s/%s)",
+	XLOG_WARNING("Got update for address on interface not in FEA tree: "
+		     "%s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
     const IfTreeVif* vifp = ifp->find_vif(vifname);
     if (vifp == NULL) {
-	XLOG_WARNING("Got update for address on vif not in FEA tree: "
-		     "%s/%s/(%s)",
+	XLOG_WARNING("Got update for address on vif not in FEA tree: %s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
@@ -328,7 +311,7 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 	const IPv4& end = ap->endpoint();
 	_rm->push(new IfMgrIPv4SetEndpoint(ifname, vifname, addr, end));
     } else {
-	// NB if IfTreeAddr4::bcast() will return IPv4::ZERO() if
+	// XXX: Method IfTreeAddr4::bcast() will return IPv4::ZERO() if
 	// broadcast is not supported.  This happens to be the
 	// correct argument for libfeaclient to signify broadcast
 	// is not supported.
@@ -388,15 +371,14 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
     const IfTreeInterface* ifp = _iftree.find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in tree: "
-		     "%s/(%s/%s)",
+		     "%s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
 
     const IfTreeVif* vifp = ifp->find_vif(vifname);
     if (vifp == NULL) {
-	XLOG_WARNING("Got update for address on vif not in FEA tree: "
-		     "%s/%s/(%s)",
+	XLOG_WARNING("Got update for address on vif not in FEA tree: %s/%s/%s",
 		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
 	return;
     }
