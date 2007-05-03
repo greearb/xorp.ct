@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.68 2007/04/19 21:36:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.69 2007/05/03 09:32:35 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -378,21 +378,11 @@ MfeaNode::status_change(ServiceBase*  service,
 
 void
 MfeaNode::interface_update(const string&	ifname,
-			   const Update&	update,
-			   bool			system)
+			   const Update&	update)
 {
     const Vif* node_vif = NULL;
     bool is_up;
     string error_msg;
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
 
     switch (update) {
     case CREATED:
@@ -445,21 +435,11 @@ MfeaNode::interface_update(const string&	ifname,
 void
 MfeaNode::vif_update(const string&	ifname,
 		     const string&	vifname,
-		     const Update&	update,
-		     bool		system)
+		     const Update&	update)
 {
     const Vif* node_vif = NULL;
     bool is_up;
     string error_msg;
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
 
     switch (update) {
     case CREATED:
@@ -544,23 +524,13 @@ void
 MfeaNode::vifaddr4_update(const string&	ifname,
 			  const string&	vifname,
 			  const IPv4&	addr,
-			  const Update&	update,
-			  bool		system)
+			  const Update&	update)
 {
     const Vif* node_vif = NULL;
     string error_msg;
 
     if (! is_ipv4())
 	return;
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
 
     switch (update) {
     case CREATED:
@@ -671,23 +641,13 @@ void
 MfeaNode::vifaddr6_update(const string&	ifname,
 			  const string&	vifname,
 			  const IPv6&	addr,
-			  const Update&	update,
-			  bool		system)
+			  const Update&	update)
 {
     const Vif* node_vif = NULL;
     string error_msg;
 
     if (! is_ipv6())
 	return;
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
 
     switch (update) {
     case CREATED:
@@ -793,18 +753,9 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 }
 
 void
-MfeaNode::updates_completed(bool system)
+MfeaNode::updates_completed()
 {
     string error_msg;
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
 
     set_config_all_vifs_done(error_msg);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.56 2007/04/26 06:29:44 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.57 2007/04/27 21:24:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -389,16 +389,14 @@ public:
      *
      * @return true if there were updates to report, otherwise false.
      */
-    bool   report_update(const IfTreeInterface& fi,
-			 bool is_system_interfaces_reportee);
+    bool   report_update(const IfTreeInterface& fi);
 
     /**
      * Check IfTreeVif and report updates to IfConfigUpdateReporter.
      *
      * @return true if there were updates to report, otherwise false.
      */
-    bool   report_update(const IfTreeInterface& fi, const IfTreeVif& fv,
-			 bool is_system_interfaces_reportee);
+    bool   report_update(const IfTreeInterface& fi, const IfTreeVif& fv);
 
     /**
      * Check IfTreeAddr4 and report updates to IfConfigUpdateReporter.
@@ -407,8 +405,7 @@ public:
      */
     bool   report_update(const IfTreeInterface&	fi,
 			 const IfTreeVif&	fv,
-			 const IfTreeAddr4&     fa,
-			 bool  is_system_interfaces_reportee);
+			 const IfTreeAddr4&     fa);
 
     /**
      * Check IfTreeAddr6 and report updates to IfConfigUpdateReporter.
@@ -417,13 +414,12 @@ public:
      */
     bool   report_update(const IfTreeInterface&	fi,
 			 const IfTreeVif&	fv,
-			 const IfTreeAddr6&     fa,
-			 bool  is_system_interfaces_reportee);
+			 const IfTreeAddr6&     fa);
 
     /**
      * Report that updates were completed to IfConfigUpdateReporter.
      */
-    void   report_updates_completed(bool is_system_interfaces_reportee);
+    void   report_updates_completed();
 
     /**
      * Check every item within IfTree and report updates to

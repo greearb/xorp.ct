@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.9 2007/02/16 22:45:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.10 2007/04/19 21:36:48 pavlin Exp $"
 
 #include <algorithm>
 
@@ -213,8 +213,7 @@ IfConfigAddressTable::update()
 
 void
 IfConfigAddressTable::interface_update(const string&	/* ifname */,
-				       const Update&	/* update */,
-				       bool		/* system */)
+				       const Update&	/* update */)
 {
     update();
 }
@@ -222,8 +221,7 @@ IfConfigAddressTable::interface_update(const string&	/* ifname */,
 void
 IfConfigAddressTable::vif_update(const string&	/* ifname */,
 				 const string&	/* vifname */,
-				 const Update&	/* update */,
-				 bool		/* system */)
+				 const Update&	/* update */)
 {
     update();
 }
@@ -232,8 +230,7 @@ void
 IfConfigAddressTable::vifaddr4_update(const string&	/* ifname */,
 				      const string&	/* vifname */,
 				      const IPv4&	/* addr */,
-				      const Update&	/* update */,
-				      bool		/* system */)
+				      const Update&	/* update */)
 {
     update();
 }
@@ -242,14 +239,13 @@ void
 IfConfigAddressTable::vifaddr6_update(const string&	/* ifname */,
 				      const string&	/* vifname */,
 				      const IPv6&	/* addr */,
-				      const Update&	/* update */,
-				      bool		/* system */)
+				      const Update&	/* update */)
 {
     update();
 }
 
 void
-IfConfigAddressTable::updates_completed(bool		/* system */)
+IfConfigAddressTable::updates_completed()
 {
     update();
 }

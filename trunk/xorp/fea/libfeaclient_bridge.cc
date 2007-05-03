@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.23 2007/04/25 01:57:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.24 2007/05/02 01:23:24 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -46,11 +46,6 @@ update_name(IfConfigUpdateReporterBase::Update u)
     return "Change";
 }
 
-static const char*
-truth_of(bool v)
-{
-    return v ? "true" : "false";
-}
 
 // ----------------------------------------------------------------------------
 // LibFeaClientBridge implementation
@@ -80,20 +75,10 @@ LibFeaClientBridge::remove_libfeaclient_mirror(const string& m)
 
 void
 LibFeaClientBridge::interface_update(const string& ifname,
-				     const Update& update,
-				     bool	   system)
+				     const Update& update)
 {
-    debug_msg("%s update for interface %s (system = %s)\n",
-	      update_name(update), ifname.c_str(), truth_of(system));
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
+    debug_msg("%s update for interface %s\n",
+	      update_name(update), ifname.c_str());
 
     switch (update) {
     case CREATED:
@@ -142,21 +127,10 @@ LibFeaClientBridge::interface_update(const string& ifname,
 void
 LibFeaClientBridge::vif_update(const string& ifname,
 			       const string& vifname,
-			       const Update& update,
-			       bool	     system)
+			       const Update& update)
 {
-    debug_msg("%s update for vif %s/%s (system = %s)\n",
-	      update_name(update), ifname.c_str(), vifname.c_str(),
-	      truth_of(system));
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
+    debug_msg("%s update for vif %s/%s\n",
+	      update_name(update), ifname.c_str(), vifname.c_str());
 
     switch (update) {
     case CREATED:
@@ -225,21 +199,11 @@ void
 LibFeaClientBridge::vifaddr4_update(const string& ifname,
 				    const string& vifname,
 				    const IPv4&   addr,
-				    const Update& update,
-				    bool	  system)
+				    const Update& update)
 {
-    debug_msg("%s update for address %s/%s/%s (system = %s)\n",
+    debug_msg("%s update for address %s/%s/%s\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
-	      addr.str().c_str(), truth_of(system));
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
+	      addr.str().c_str());
 
     switch (update) {
     case CREATED:
@@ -325,21 +289,11 @@ void
 LibFeaClientBridge::vifaddr6_update(const string& ifname,
 				    const string& vifname,
 				    const IPv6&	  addr,
-				    const Update& update,
-				    bool	  system)
+				    const Update& update)
 {
-    debug_msg("%s update for address %s/%s/%s (system = %s)\n",
+    debug_msg("%s update for address %s/%s/%s\n",
 	      update_name(update), ifname.c_str(), vifname.c_str(),
-	      addr.str().c_str(), truth_of(system));
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
+	      addr.str().c_str());
 
     switch (update) {
     case CREATED:
@@ -413,18 +367,9 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 
 
 void
-LibFeaClientBridge::updates_completed(bool	  system)
+LibFeaClientBridge::updates_completed()
 {
-    debug_msg("Updates completed (system = %s)\n", truth_of(system));
-
-    if (system) {
-	//
-	// XXX: We don't propagate interface-related changes that just
-	// appear beneath us within the system. I.e., all changes
-	// should be through the FEA.
-	//
-	return;
-    }
+    debug_msg("Updates completed\n");
 
     _rm->push(new IfMgrHintUpdatesMade());
 }

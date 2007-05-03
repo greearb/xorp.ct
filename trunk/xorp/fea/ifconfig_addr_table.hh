@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.9 2007/04/18 06:20:57 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.10 2007/04/19 21:36:48 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
@@ -71,27 +71,23 @@ public:
 
 protected:
     void interface_update(const string& ifname,
-			  const Update& update,
-			  bool		system);
+			  const Update& update);
 
     void vif_update(const string&	ifname,
 		    const string&	vifname,
-		    const Update&	update,
-		    bool		system);
+		    const Update&	update);
 
     void vifaddr4_update(const string&	ifname,
 			 const string&	vifname,
 			 const IPv4&	addr,
-			 const Update&	update,
-			 bool system);
+			 const Update&	update);
 
     void vifaddr6_update(const string&	ifname,
 			 const string&	vifname,
 			 const IPv6&	addr,
-			 const Update&	update,
-			 bool		system);
+			 const Update&	update);
 
-    void updates_completed(bool		system);
+    void updates_completed();
 
     /**
      * Walk interface configuration tree and find addresses that are

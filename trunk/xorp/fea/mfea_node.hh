@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.37 2007/02/16 22:45:46 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.38 2007/05/03 09:32:35 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -1128,27 +1128,23 @@ public:
 
 private:
     void interface_update(const string& ifname,
-			  const Update& update,
-			  bool 		is_system_interfaces_reportee);
+			  const Update& update);
 
     void vif_update(const string& ifname,
 		    const string& vifname,
-		    const Update& update,
-		    bool	  is_system_interfaces_reportee);
+		    const Update& update);
 
     void vifaddr4_update(const string& ifname,
 			 const string& vifname,
 			 const IPv4&   addr,
-			 const Update& update,
-			 bool	       is_system_interfaces_reportee);
+			 const Update& update);
 
     void vifaddr6_update(const string& ifname,
 			 const string& vifname,
 			 const IPv6&   addr,
-			 const Update& update,
-			 bool	       is_system_interfaces_reportee);
+			 const Update& update);
 
-    void updates_completed(bool		is_system_interfaces_reportee);
+    void updates_completed();
 
     /**
      * A method invoked when the status of a service changes.
