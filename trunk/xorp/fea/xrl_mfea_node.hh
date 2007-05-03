@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.28 2007/02/16 22:45:52 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.29 2007/04/18 06:21:00 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -23,8 +23,6 @@
 //
 
 #include "libxipc/xrl_std_router.hh"
-
-#include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/mfea_client_xif.hh"
@@ -43,14 +41,14 @@ class XrlMfeaNode : public MfeaNode,
 		    public XrlMfeaTargetBase,
 		    public MfeaNodeCli {
 public:
-    XrlMfeaNode(int		family,
+    XrlMfeaNode(FeaNode&	fea_node,
+		int		family,
 		xorp_module_id	module_id,
 		EventLoop&	eventloop,
 		const string&	class_name,
 		const string&	finder_hostname,
 		uint16_t	finder_port,
-		const string&	finder_target,
-		const string&	fea_target);
+		const string&	finder_target);
     virtual ~XrlMfeaNode();
 
     /**
@@ -654,16 +652,6 @@ private:
      */
     virtual void finder_disconnect_event();
 
-    const ServiceBase* ifmgr_mirror_service_base() const {
-	return dynamic_cast<const ServiceBase*>(&_ifmgr);
-    }
-    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
-
-    void fea_register_startup();
-    void finder_register_interest_fea_cb(const XrlError& xrl_error);
-    void fea_register_shutdown();
-    void finder_deregister_interest_fea_cb(const XrlError& xrl_error);
-
     //
     // Protocol node methods
     //
@@ -857,24 +845,12 @@ private:
     const string		_class_name;
     const string		_instance_name;
     const string		_finder_target;
-    const string		_fea_target;
-
-    IfMgrXrlMirror		_ifmgr;
 
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
 
-    static const TimeVal	RETRY_TIMEVAL;
-
     bool			_is_finder_alive;
-
-    bool			_is_fea_alive;
-    bool			_is_fea_registered;
-    bool			_is_fea_registering;
-    bool			_is_fea_deregistering;
-    XorpTimer			_fea_register_startup_timer;
-    XorpTimer			_fea_register_shutdown_timer;
 };
 
 #endif // __FEA_XRL_MFEA_NODE_HH__

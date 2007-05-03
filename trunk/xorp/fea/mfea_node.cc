@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.67 2007/02/16 22:45:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.68 2007/04/19 21:36:49 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -30,6 +30,7 @@
 #include "mrt/mifset.hh"
 #include "mrt/multicast_defs.h"
 
+#include "fea_node.hh"
 #include "mfea_mrouter.hh"
 #include "mfea_node.hh"
 #include "mfea_proto_comm.hh"
@@ -61,6 +62,7 @@
 
 /**
  * MfeaNode::MfeaNode:
+ * @fea_node: The corresponding FeaNode.
  * @family: The address family (%AF_INET or %AF_INET6
  * for IPv4 and IPv6 respectively).
  * @module_id: The module ID (must be %XORP_MODULE_MFEA).
@@ -68,9 +70,11 @@
  * 
  * MFEA node constructor.
  **/
-MfeaNode::MfeaNode(int family, xorp_module_id module_id,
+MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
 		   EventLoop& eventloop)
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
+      _fea_node(fea_node),
+      _iftree(_fea_node.ifconfig().local_config()),
       _mfea_mrouter(*this),
       _mfea_dft(*this),
       _is_log_trace(false)
@@ -94,6 +98,10 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
     // Set myself as an observer when the node status changes
     //
     set_observer(this);
+
+    // Add myself to receive FEA interface information
+    IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();
+    repl.add_reporter(this);
 }
 
 /**
@@ -105,6 +113,10 @@ MfeaNode::MfeaNode(int family, xorp_module_id module_id,
  **/
 MfeaNode::~MfeaNode()
 {
+    // Remove myself from receiving FEA interface information
+    IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();
+    repl.remove_reporter(this);
+
     //
     // Unset myself as an observer when the node status changes
     //
@@ -161,10 +173,8 @@ MfeaNode::start()
     //
     ProtoNode<MfeaVif>::set_node_status(PROC_STARTUP);
 
-    //
-    // Register with the FEA
-    //
-    fea_register_startup();
+    // XXX: needed to update the status state properly
+    incr_startup_requests_n();
 
     // Start the MfeaMrouter
     _mfea_mrouter.start();
@@ -175,6 +185,9 @@ MfeaNode::start()
 	    _proto_comms[i]->start();
 	}
     }
+
+    // XXX: needed to update the status state properly
+    decr_startup_requests_n();
 
     return (XORP_OK);
 }
@@ -246,6 +259,9 @@ MfeaNode::stop()
     // Perform misc. MFEA-specific stop operations
     //
     
+    // XXX: needed to update the status state properly
+    incr_shutdown_requests_n();
+
     // Stop the vifs
     stop_all_vifs();
     
@@ -267,6 +283,9 @@ MfeaNode::stop()
     // Update the node status
     //
     update_status();
+
+    // XXX: needed to update the status state properly
+    decr_shutdown_requests_n();
 
     return (XORP_OK);
 }
@@ -355,326 +374,438 @@ MfeaNode::status_change(ServiceBase*  service,
 	//
 	return;
     }
-
-    if (service == ifmgr_mirror_service_base()) {
-	if ((old_status == SERVICE_SHUTTING_DOWN)
-	    && (new_status == SERVICE_SHUTDOWN)) {
-	    MfeaNode::decr_shutdown_requests_n();
-	}
-    }
 }
 
 void
-MfeaNode::tree_complete()
+MfeaNode::interface_update(const string&	ifname,
+			   const Update&	update,
+			   bool			system)
 {
-    //
-    // XXX: we use same actions when the tree is completed or updates are made
-    //
-    updates_made();
-
-    decr_startup_requests_n();
-}
-
-void
-MfeaNode::updates_made()
-{
-    map<string, Vif>::iterator mfea_vif_iter;
+    const Vif* node_vif = NULL;
+    bool is_up;
     string error_msg;
 
-    //
-    // Update the local copy of the interface tree
-    //
-    _iftree = ifmgr_iftree();
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
 
-    //
-    // Add new vifs and update existing ones
-    //
-    IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
-    for (ifmgr_iface_iter = _iftree.ifs().begin();
-	 ifmgr_iface_iter != _iftree.ifs().end();
-	 ++ifmgr_iface_iter) {
-	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
+    switch (update) {
+    case CREATED:
+	// XXX: The MFEA vif creation is handled by vif_update()
+	return;
 
-	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
-	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
-	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
-	     ++ifmgr_vif_iter) {
-	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
-	    const string& ifmgr_vif_name = ifmgr_vif.name();
-	    Vif* node_vif = NULL;
-	
-	    mfea_vif_iter = configured_vifs().find(ifmgr_vif_name);
-	    if (mfea_vif_iter != configured_vifs().end()) {
-		node_vif = &(mfea_vif_iter->second);
-	    }
+    case DELETED:
+	// XXX: Ignore any errors, in case the MFEA vif was deleted by
+	// vif_update()
+	delete_config_vif(ifname, error_msg);
+	return;
 
-	    //
-	    // Add a new vif
-	    //
-	    if (node_vif == NULL) {
-		uint32_t vif_index = find_unused_config_vif_index();
-		XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
-		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg) < 0) {
-		    XLOG_ERROR("Cannot add vif %s to the set of configured "
-			       "vifs: %s",
-			       ifmgr_vif_name.c_str(), error_msg.c_str());
-		    continue;
-		}
-		mfea_vif_iter = configured_vifs().find(ifmgr_vif_name);
-		XLOG_ASSERT(mfea_vif_iter != configured_vifs().end());
-		node_vif = &(mfea_vif_iter->second);
-		// FALLTHROUGH
-	    }
-
-	    //
-	    // Update the pif_index
-	    //
-	    set_config_pif_index(ifmgr_vif_name,
-				 ifmgr_vif.pif_index(),
-				 error_msg);
-	
-	    //
-	    // Update the vif flags
-	    //
-	    bool is_up = ifmgr_iface.enabled();
-	    is_up &= (! ifmgr_iface.no_carrier());
-	    is_up &= ifmgr_vif.enabled();
-	    set_config_vif_flags(ifmgr_vif_name,
-				 false,	// is_pim_register
-				 ifmgr_vif.p2p_capable(),
-				 ifmgr_vif.loopback(),
-				 ifmgr_vif.multicast_capable(),
-				 ifmgr_vif.broadcast_capable(),
-				 is_up,
-				 ifmgr_iface.mtu(),
-				 error_msg);
-	
-	}
+    case CHANGED:
+	break;					// FALLTHROUGH
     }
 
     //
-    // Add new vif addresses, update existing ones, and remove old addresses
+    // Update the vif flags (only if the vif already exists)
     //
-    for (ifmgr_iface_iter = _iftree.ifs().begin();
-	 ifmgr_iface_iter != _iftree.ifs().end();
-	 ++ifmgr_iface_iter) {
-	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
-	const string& ifmgr_iface_name = ifmgr_iface.name();
-	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
+    node_vif = configured_vif_find_by_name(ifname);
+    if (node_vif == NULL)
+	return;		// No vif to update
 
-	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
-	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
-	     ++ifmgr_vif_iter) {
-	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
-	    const string& ifmgr_vif_name = ifmgr_vif.name();
-	    Vif* node_vif = NULL;
-
-	    //
-	    // Add new vif addresses and update existing ones
-	    //
-	    mfea_vif_iter = configured_vifs().find(ifmgr_vif_name);
-	    if (mfea_vif_iter != configured_vifs().end()) {
-		node_vif = &(mfea_vif_iter->second);
-	    }
-
-	    if (is_ipv4()) {
-		IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
-
-		for (a4_iter = ifmgr_vif.ipv4addrs().begin();
-		     a4_iter != ifmgr_vif.ipv4addrs().end();
-		     ++a4_iter) {
-		    const IfMgrIPv4Atom& a4 = a4_iter->second;
-		    VifAddr* node_vif_addr = node_vif->find_address(IPvX(a4.addr()));
-		    IPvX addr(a4.addr());
-		    IPvXNet subnet_addr(addr, a4.prefix_len());
-		    IPvX broadcast_addr(IPvX::ZERO(family()));
-		    IPvX peer_addr(IPvX::ZERO(family()));
-		    if (a4.has_broadcast())
-			broadcast_addr = IPvX(a4.broadcast_addr());
-		    if (a4.has_endpoint())
-			peer_addr = IPvX(a4.endpoint_addr());
-
-		    if (node_vif_addr == NULL) {
-			if (add_config_vif_addr(
-				ifmgr_vif_name,
-				addr,
-				subnet_addr,
-				broadcast_addr,
-				peer_addr,
-				error_msg) < 0) {
-			    XLOG_ERROR("Cannot add address %s to vif %s from "
-				       "the set of configured vifs: %s",
-				       cstring(addr), ifmgr_vif_name.c_str(),
-				       error_msg.c_str());
-			}
-			continue;
-		    }
-		    if ((addr == node_vif_addr->addr())
-			&& (subnet_addr == node_vif_addr->subnet_addr())
-			&& (broadcast_addr == node_vif_addr->broadcast_addr())
-			&& (peer_addr == node_vif_addr->peer_addr())) {
-			continue;	// Nothing changed
-		    }
-
-		    // Update the address
-		    if (delete_config_vif_addr(ifmgr_vif_name,
-					       addr,
-					       error_msg) < 0) {
-			XLOG_ERROR("Cannot delete address %s from vif %s "
-				   "from the set of configured vifs: %s",
-				   cstring(addr),
-				   ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		    if (add_config_vif_addr(
-			    ifmgr_vif_name,
-			    addr,
-			    subnet_addr,
-			    broadcast_addr,
-			    peer_addr,
-			    error_msg) < 0) {
-			XLOG_ERROR("Cannot add address %s to vif %s from "
-				   "the set of configured vifs: %s",
-				   cstring(addr), ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		}
-	    }
-
-	    if (is_ipv6()) {
-		IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
-
-		for (a6_iter = ifmgr_vif.ipv6addrs().begin();
-		     a6_iter != ifmgr_vif.ipv6addrs().end();
-		     ++a6_iter) {
-		    const IfMgrIPv6Atom& a6 = a6_iter->second;
-		    VifAddr* node_vif_addr = node_vif->find_address(IPvX(a6.addr()));
-		    IPvX addr(a6.addr());
-		    IPvXNet subnet_addr(addr, a6.prefix_len());
-		    IPvX broadcast_addr(IPvX::ZERO(family()));
-		    IPvX peer_addr(IPvX::ZERO(family()));
-		    if (a6.has_endpoint())
-			peer_addr = IPvX(a6.endpoint_addr());
-
-		    if (node_vif_addr == NULL) {
-			if (add_config_vif_addr(
-				ifmgr_vif_name,
-				addr,
-				subnet_addr,
-				broadcast_addr,
-				peer_addr,
-				error_msg) < 0) {
-			    XLOG_ERROR("Cannot add address %s to vif %s from "
-				       "the set of configured vifs: %s",
-				       cstring(addr), ifmgr_vif_name.c_str(),
-				       error_msg.c_str());
-			}
-			continue;
-		    }
-		    if ((addr == node_vif_addr->addr())
-			&& (subnet_addr == node_vif_addr->subnet_addr())
-			&& (peer_addr == node_vif_addr->peer_addr())) {
-			continue;	// Nothing changed
-		    }
-
-		    // Update the address
-		    if (delete_config_vif_addr(ifmgr_vif_name,
-					       addr,
-					       error_msg) < 0) {
-			XLOG_ERROR("Cannot delete address %s from vif %s "
-				   "from the set of configured vifs: %s",
-				   cstring(addr),
-				   ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		    if (add_config_vif_addr(
-			    ifmgr_vif_name,
-			    addr,
-			    subnet_addr,
-			    broadcast_addr,
-			    peer_addr,
-			    error_msg) < 0) {
-			XLOG_ERROR("Cannot add address %s to vif %s from "
-				   "the set of configured vifs: %s",
-				   cstring(addr), ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		}
-	    }
-
-	    //
-	    // Delete vif addresses that don't exist anymore
-	    //
-	    {
-		list<IPvX> delete_addresses_list;
-		list<VifAddr>::const_iterator vif_addr_iter;
-		for (vif_addr_iter = node_vif->addr_list().begin();
-		     vif_addr_iter != node_vif->addr_list().end();
-		     ++vif_addr_iter) {
-		    const VifAddr& vif_addr = *vif_addr_iter;
-		    if (vif_addr.addr().is_ipv4()
-			&& (_iftree.find_addr(ifmgr_iface_name,
-					      ifmgr_vif_name,
-					      vif_addr.addr().get_ipv4()))
-			    == NULL) {
-			    delete_addresses_list.push_back(vif_addr.addr());
-		    }
-		    if (vif_addr.addr().is_ipv6()
-			&& (_iftree.find_addr(ifmgr_iface_name,
-					      ifmgr_vif_name,
-					      vif_addr.addr().get_ipv6()))
-			    == NULL) {
-			    delete_addresses_list.push_back(vif_addr.addr());
-		    }
-		}
-
-		// Delete the addresses
-		list<IPvX>::iterator ipvx_iter;
-		for (ipvx_iter = delete_addresses_list.begin();
-		     ipvx_iter != delete_addresses_list.end();
-		     ++ipvx_iter) {
-		    const IPvX& ipvx = *ipvx_iter;
-		    if (delete_config_vif_addr(ifmgr_vif_name, ipvx, error_msg)
-			< 0) {
-			XLOG_ERROR("Cannot delete address %s from vif %s from "
-				   "the set of configured vifs: %s",
-				   cstring(ipvx), ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		}
-	    }
-	}
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
+	XLOG_WARNING("Got update for interface not in FEA tree: %s",
+		     ifname.c_str());
+	return;
     }
 
-    //
-    // Remove vifs that don't exist anymore
-    //
-    list<string> delete_vifs_list;
-    for (mfea_vif_iter = configured_vifs().begin();
-	 mfea_vif_iter != configured_vifs().end();
-	 ++mfea_vif_iter) {
-	Vif* node_vif = &mfea_vif_iter->second;
-	if (node_vif->is_pim_register())
-	    continue;		// XXX: don't delete the PIM Register vif
-	if (_iftree.find_vif(node_vif->name(), node_vif->name()) == NULL) {
-	    // Add the vif to the list of old interfaces
-	    delete_vifs_list.push_back(node_vif->name());
-	}
+    // XXX: For any flag updates we need to consider the IfTreeVif as well
+    const IfTreeVif* vifp = ifp->find_vif(node_vif->name());
+    if (vifp == NULL)
+	return;		// No IfTreeVif to consider
+
+    is_up = ifp->enabled();
+    is_up &= (! ifp->no_carrier());
+    is_up &= vifp->enabled();
+    set_config_vif_flags(ifname,
+			 false,		// is_pim_register
+			 node_vif->is_p2p(),
+			 node_vif->is_loopback(),
+			 node_vif->is_multicast_capable(),
+			 node_vif->is_broadcast_capable(),
+			 is_up,
+			 ifp->mtu(),
+			 error_msg);
+}
+
+void
+MfeaNode::vif_update(const string&	ifname,
+		     const string&	vifname,
+		     const Update&	update,
+		     bool		system)
+{
+    const Vif* node_vif = NULL;
+    bool is_up;
+    string error_msg;
+
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
     }
-    // Delete the old vifs
-    list<string>::iterator vif_name_iter;
-    for (vif_name_iter = delete_vifs_list.begin();
-	 vif_name_iter != delete_vifs_list.end();
-	 ++vif_name_iter) {
-	const string& vif_name = *vif_name_iter;
-	if (delete_config_vif(vif_name, error_msg) < 0) {
+
+    switch (update) {
+    case CREATED:
+	node_vif = configured_vif_find_by_name(ifname);
+	if (node_vif != NULL) {
+	    XLOG_WARNING("Got CREATED for vif that is already in the MFEA "
+			 "tree: %s/%s",
+			 ifname.c_str(), vifname.c_str());
+	    return;
+	} else {
+	    uint32_t vif_index = find_unused_config_vif_index();
+	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+	    if (add_config_vif(vifname, vif_index, error_msg) != XORP_OK) {
+		XLOG_ERROR("Cannot add vif %s to the set of configured "
+			   "vifs: %s",
+			   vifname.c_str(), error_msg.c_str());
+		return;
+	    }
+	}
+	
+	break;					// FALLTHROUGH
+
+    case DELETED:
+	if (delete_config_vif(vifname, error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
 		       "vifs: %s",
-		       vif_name.c_str(), error_msg.c_str());
+		       vifname.c_str(), error_msg.c_str());
+	}
+	return;
+
+    case CHANGED:
+	break;					// FALLTHROUGH
+    }
+
+    //
+    // Find the MFEA vif to update
+    //
+    node_vif = configured_vif_find_by_name(ifname);
+    if (node_vif == NULL) {
+	XLOG_WARNING("Got update for vif that is not in the MFEA tree: %s/%s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
+	XLOG_WARNING("Got update for vif on interface not in FEA tree: %s/%s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+
+    const IfTreeVif* vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
+	XLOG_WARNING("Got update for vif not in FEA tree: %s/%s",
+		     ifname.c_str(), vifname.c_str());
+	return;
+    }
+
+    //
+    // Update the pif_index
+    //
+    set_config_pif_index(vifname, vifp->pif_index(), error_msg);
+
+    //
+    // Update the vif flags
+    //
+    is_up = ifp->enabled();
+    is_up &= (! ifp->no_carrier());
+    is_up &= vifp->enabled();
+    set_config_vif_flags(vifname,
+			 false, // is_pim_register
+			 vifp->point_to_point(),
+			 vifp->loopback(),
+			 vifp->multicast(),
+			 vifp->broadcast(),
+			 is_up,
+			 ifp->mtu(),
+			 error_msg);
+}
+
+void
+MfeaNode::vifaddr4_update(const string&	ifname,
+			  const string&	vifname,
+			  const IPv4&	addr,
+			  const Update&	update,
+			  bool		system)
+{
+    const Vif* node_vif = NULL;
+    string error_msg;
+
+    if (! is_ipv4())
+	return;
+
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
+
+    switch (update) {
+    case CREATED:
+	break;					// FALLTHROUGH
+
+    case DELETED:
+	if (delete_config_vif_addr(vifname, IPvX(addr), error_msg)
+	    != XORP_OK) {
+	    XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
+		       "configured vifs: %s",
+		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+	}
+	return;
+
+    case CHANGED:
+	break;					// FALLTHROUGH
+    }
+
+    //
+    // Find the MFEA vif to update
+    //
+    node_vif = configured_vif_find_by_name(ifname);
+    if (node_vif == NULL) {
+	XLOG_WARNING("Got update for address for vif that is not in the "
+		     "MFEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
+	XLOG_WARNING("Got update for address on interface not in FEA tree: "
+		     "%s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    const IfTreeVif* vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
+	XLOG_WARNING("Got update for address on vif not in FEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    const IfTreeAddr4* ap = vifp->find_addr(addr);
+    if (ap == NULL) {
+	XLOG_WARNING("Got update for address not in FEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    // Calculate various addresses
+    IPvXNet subnet_addr(IPvX(addr), ap->prefix_len());
+    IPvX broadcast_addr(IPvX::ZERO(family()));
+    IPvX peer_addr(IPvX::ZERO(family()));
+    if (ap->broadcast())
+	broadcast_addr = IPvX(ap->bcast());
+    if (ap->point_to_point())
+	peer_addr = IPvX(ap->endpoint());
+
+    if (update == CREATED) {
+	// First create the MFEA vif address
+	if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr,
+				broadcast_addr, peer_addr, error_msg)
+	    != XORP_OK) {
+	    XLOG_ERROR("Cannot add address %s to vif %s from the set of "
+		       "configured vifs: %s",
+		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+	    return;
 	}
     }
-    
-    // Done
+
+    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
+    if (node_vif_addr == NULL) {
+	XLOG_WARNING("Got update for address that is not in the "
+		     "MFEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    //
+    // Update the address.
+    //
+    // First we delete it then add it back with the new values.
+    // If there are no changes, we return immediately.
+    //
+    if ((IPvX(addr) == node_vif_addr->addr())
+	&& (subnet_addr == node_vif_addr->subnet_addr()
+	    && (broadcast_addr == node_vif_addr->broadcast_addr())
+	    && (peer_addr == node_vif_addr->peer_addr()))) {
+	return;			// Nothing changed
+    }
+
+    if (delete_config_vif_addr(vifname, IPvX(addr), error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
+		   "configured vifs: %s",
+		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+    if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr, broadcast_addr,
+			    peer_addr, error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
+		   "configured vifs: %s",
+		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+}
+
+void
+MfeaNode::vifaddr6_update(const string&	ifname,
+			  const string&	vifname,
+			  const IPv6&	addr,
+			  const Update&	update,
+			  bool		system)
+{
+    const Vif* node_vif = NULL;
+    string error_msg;
+
+    if (! is_ipv6())
+	return;
+
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
+
+    switch (update) {
+    case CREATED:
+	break;					// FALLTHROUGH
+
+    case DELETED:
+	if (delete_config_vif_addr(vifname, IPvX(addr), error_msg)
+	    != XORP_OK) {
+	    XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
+		       "configured vifs: %s",
+		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+	}
+	return;
+
+    case CHANGED:
+	break;					// FALLTHROUGH
+    }
+
+    //
+    // Find the MFEA vif to update
+    //
+    node_vif = configured_vif_find_by_name(ifname);
+    if (node_vif == NULL) {
+	XLOG_WARNING("Got update for address for vif that is not in the "
+		     "MFEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    if (ifp == NULL) {
+	XLOG_WARNING("Got update for address on interface not in FEA tree: "
+		     "%s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    const IfTreeVif* vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
+	XLOG_WARNING("Got update for address on vif not in FEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    const IfTreeAddr6* ap = vifp->find_addr(addr);
+    if (ap == NULL) {
+	XLOG_WARNING("Got update for address not in FEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    // Calculate various addresses
+    IPvXNet subnet_addr(IPvX(addr), ap->prefix_len());
+    IPvX broadcast_addr(IPvX::ZERO(family()));
+    IPvX peer_addr(IPvX::ZERO(family()));
+    if (ap->point_to_point())
+	peer_addr = IPvX(ap->endpoint());
+
+    if (update == CREATED) {
+	// First create the MFEA vif address
+	if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr,
+				broadcast_addr, peer_addr, error_msg)
+	    != XORP_OK) {
+	    XLOG_ERROR("Cannot add address %s to vif %s from the set of "
+		       "configured vifs: %s",
+		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+	    return;
+	}
+    }
+
+    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
+    if (node_vif_addr == NULL) {
+	XLOG_WARNING("Got update for address that is not in the "
+		     "MFEA tree: %s/%s/%s",
+		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
+	return;
+    }
+
+    //
+    // Update the address.
+    //
+    // First we delete it then add it back with the new values.
+    // If there are no changes, we return immediately.
+    //
+    if ((IPvX(addr) == node_vif_addr->addr())
+	&& (subnet_addr == node_vif_addr->subnet_addr()
+	    && (broadcast_addr == node_vif_addr->broadcast_addr())
+	    && (peer_addr == node_vif_addr->peer_addr()))) {
+	return;			// Nothing changed
+    }
+
+    if (delete_config_vif_addr(vifname, IPvX(addr), error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
+		   "configured vifs: %s",
+		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+    if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr, broadcast_addr,
+			    peer_addr, error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
+		   "configured vifs: %s",
+		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
+    }
+}
+
+void
+MfeaNode::updates_completed(bool system)
+{
+    string error_msg;
+
+    if (system) {
+	//
+	// XXX: We don't propagate interface-related changes that just
+	// appear beneath us within the system. I.e., all changes
+	// should be through the FEA.
+	//
+	return;
+    }
+
     set_config_all_vifs_done(error_msg);
 }
 
@@ -1118,11 +1249,6 @@ MfeaNode::vif_shutdown_completed(const string& vif_name)
 	if (! mfea_vif->is_down())
 	    return;
     }
-
-    //
-    // De-register with the FEA
-    //
-    fea_register_shutdown();
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.52 2007/02/16 22:45:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.53 2007/04/20 20:29:00 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -28,20 +28,19 @@
 #include "mfea_vif.hh"
 #include "xrl_mfea_node.hh"
 
-const TimeVal XrlMfeaNode::RETRY_TIMEVAL = TimeVal(1, 0);
 
 //
 // XrlMfeaNode front-end interface
 //
-XrlMfeaNode::XrlMfeaNode(int		family,
+XrlMfeaNode::XrlMfeaNode(FeaNode&	fea_node,
+			 int		family,
 			 xorp_module_id	module_id,
 			 EventLoop&	eventloop,
 			 const string&	class_name,
 			 const string&	finder_hostname,
 			 uint16_t	finder_port,
-			 const string&	finder_target,
-			 const string&	fea_target)
-    : MfeaNode(family, module_id, eventloop),
+			 const string&	finder_target)
+    : MfeaNode(fea_node, family, module_id, eventloop),
       XrlStdRouter(eventloop, class_name.c_str(), finder_hostname.c_str(),
 		   finder_port),
       XrlMfeaTargetBase(&xrl_router()),
@@ -50,28 +49,16 @@ XrlMfeaNode::XrlMfeaNode(int		family,
       _class_name(xrl_router().class_name()),
       _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
-      _fea_target(fea_target),
-      _ifmgr(eventloop, fea_target.c_str(), xrl_router().finder_address(),
-	     xrl_router().finder_port()),
       _xrl_mfea_client_client(&xrl_router()),
       _xrl_cli_manager_client(&xrl_router()),
       _xrl_finder_client(&xrl_router()),
-      _is_finder_alive(false),
-      _is_fea_alive(false),
-      _is_fea_registered(false),
-      _is_fea_registering(false),
-      _is_fea_deregistering(false)
+      _is_finder_alive(false)
 {
-    _ifmgr.set_observer(dynamic_cast<MfeaNode*>(this));
-    _ifmgr.attach_hint_observer(dynamic_cast<MfeaNode*>(this));
 }
 
 XrlMfeaNode::~XrlMfeaNode()
 {
     shutdown();
-
-    _ifmgr.detach_hint_observer(dynamic_cast<MfeaNode*>(this));
-    _ifmgr.unset_observer(dynamic_cast<MfeaNode*>(this));
 }
 
 bool
@@ -194,222 +181,6 @@ XrlMfeaNode::finder_disconnect_event()
     _is_finder_alive = false;
 
     stop_mfea();
-}
-
-//
-// Register with the FEA
-//
-void
-XrlMfeaNode::fea_register_startup()
-{
-    bool success;
-
-    _fea_register_startup_timer.unschedule();
-    _fea_register_shutdown_timer.unschedule();
-
-    if (! _is_finder_alive)
-	return;		// The Finder is dead
-
-    if (_is_fea_registered)
-	return;		// Already registered
-
-    if (! _is_fea_registering) {
-	MfeaNode::incr_startup_requests_n();		// XXX: for the ifmgr
-
-	_is_fea_registering = true;
-    }
-
-    //
-    // Register interest in the FEA with the Finder
-    //
-    success = _xrl_finder_client.send_register_class_event_interest(
-	_finder_target.c_str(), _instance_name, _fea_target,
-	callback(this, &XrlMfeaNode::finder_register_interest_fea_cb));
-
-    if (! success) {
-	//
-	// If an error, then try again
-	//
-	_fea_register_startup_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlMfeaNode::fea_register_startup));
-	return;
-    }
-}
-
-void
-XrlMfeaNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then the FEA birth event will startup the ifmgr
-	//
-	_is_fea_registering = false;
-	_is_fea_registered = true;
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot register interest in finder events: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	XLOG_ERROR("XRL communication error: %s", xrl_error.str().c_str());
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _fea_register_startup_timer.scheduled()) {
-	    XLOG_FATAL("Failed to register interest in finder events: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMfeaNode::fea_register_startup));
-	}
-	break;
-    }
-}
-
-//
-// De-register with the FEA
-//
-void
-XrlMfeaNode::fea_register_shutdown()
-{
-    bool success;
-
-    _fea_register_startup_timer.unschedule();
-    _fea_register_shutdown_timer.unschedule();
-
-    if (! _is_finder_alive)
-	return;		// The Finder is dead
-
-    if (! _is_fea_alive)
-	return;		// The FEA is not there anymore
-
-    if (! _is_fea_registered)
-	return;		// Not registered
-
-    if (! _is_fea_deregistering) {
-	MfeaNode::incr_shutdown_requests_n();	// XXX: for the ifmgr
-
-	_is_fea_deregistering = true;
-    }
-
-    //
-    // De-register interest in the FEA with the Finder
-    //
-    success = _xrl_finder_client.send_deregister_class_event_interest(
-	_finder_target.c_str(), _instance_name, _fea_target,
-	callback(this, &XrlMfeaNode::finder_deregister_interest_fea_cb));
-
-    if (! success) {
-	//
-	// If an error, then try again
-	//
-	_fea_register_shutdown_timer = _eventloop.new_oneoff_after(
-	    RETRY_TIMEVAL,
-	    callback(this, &XrlMfeaNode::fea_register_shutdown));
-	return;
-    }
-
-    //
-    // XXX: when the shutdown is completed, MfeaNode::status_change()
-    // will be called.
-    //
-    _ifmgr.shutdown();
-}
-
-void
-XrlMfeaNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
-{
-    switch (xrl_error.error_code()) {
-    case OKAY:
-	//
-	// If success, then we are done
-	//
-	_is_fea_deregistering = false;
-	_is_fea_registered = false;
-	break;
-
-    case COMMAND_FAILED:
-	//
-	// If a command failed because the other side rejected it, this is
-	// fatal.
-	//
-	XLOG_FATAL("Cannot deregister interest in finder events: %s",
-		   xrl_error.str().c_str());
-	break;
-
-    case NO_FINDER:
-    case RESOLVE_FAILED:
-    case SEND_FAILED:
-	//
-	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
-	// Probably we caught it here because of event reordering.
-	// In some cases we print an error. In other cases our job is done.
-	//
-	_is_fea_deregistering = false;
-	_is_fea_registered = false;
-	break;
-
-    case BAD_ARGS:
-    case NO_SUCH_METHOD:
-    case INTERNAL_ERROR:
-	//
-	// An error that should happen only if there is something unusual:
-	// e.g., there is XRL mismatch, no enough internal resources, etc.
-	// We don't try to recover from such errors, hence this is fatal.
-	//
-	XLOG_FATAL("Fatal XRL error: %s", xrl_error.str().c_str());
-	break;
-
-    case REPLY_TIMED_OUT:
-    case SEND_FAILED_TRANSIENT:
-	//
-	// If a transient error, then start a timer to try again
-	// (unless the timer is already running).
-	//
-	if (! _fea_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
-		       "Will try again.",
-		       xrl_error.str().c_str());
-	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
-		RETRY_TIMEVAL,
-		callback(this, &XrlMfeaNode::fea_register_shutdown));
-	}
-	break;
-    }
 }
 
 //
@@ -1676,19 +1447,8 @@ XrlMfeaNode::finder_event_observer_0_1_xrl_target_birth(
     const string&	target_class,
     const string&	target_instance)
 {
+    UNUSED(target_class);
     UNUSED(target_instance);
-
-    if (target_class == _fea_target) {
-	//
-	// XXX: when the startup is completed,
-	// IfMgrHintObserver::tree_complete() will be called.
-	//
-	_is_fea_alive = true;
-	if (_ifmgr.startup() != true) {
-	    MfeaNode::set_status(SERVICE_FAILED);
-	    MfeaNode::update_status();
-	}
-    }
 
     return XrlCmdError::OKAY();
 }
@@ -1706,17 +1466,8 @@ XrlMfeaNode::finder_event_observer_0_1_xrl_target_death(
     const string&	target_class,
     const string&	target_instance)
 {
-    bool do_shutdown = false;
-
-    if (target_class == _fea_target) {
-	XLOG_ERROR("FEA (instance %s) has died, shutting down.",
-		   target_instance.c_str());
-	_is_fea_alive = false;
-	do_shutdown = true;
-    }
-
-    if (do_shutdown)
-	stop_mfea();
+    UNUSED(target_class);
+    UNUSED(target_instance);
 
     return XrlCmdError::OKAY();
 }

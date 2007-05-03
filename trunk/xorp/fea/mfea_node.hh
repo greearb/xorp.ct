@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.36 2006/07/03 23:33:36 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.37 2007/02/16 22:45:46 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -32,9 +32,9 @@
 #include "libproto/proto_node.hh"
 #include "libproto/proto_register.hh"
 
-#include "libfeaclient/ifmgr_xrl_mirror.hh"
-
 #include "mrt/mifset.hh"
+
+#include "ifconfig_reporter.hh"
 #include "mfea_dataflow.hh"
 #include "mfea_mrouter.hh"
 
@@ -49,6 +49,8 @@
 //
 
 class EventLoop;
+class FeaNode;
+class IfTree;
 class MfeaVif;
 class ProtoComm;
 class SgCount;
@@ -61,19 +63,21 @@ class VifCount;
  * one instance per address family.
  */
 class MfeaNode : public ProtoNode<MfeaVif>,
-		 public IfMgrHintObserver,
+		 public IfConfigUpdateReporterBase,
 		 public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
      * 
+     * @param fea_node the corresponding FeaNode (@see FeaNode).
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
      * @param module_id the module ID (@ref xorp_module_id). Should be
      * equal to XORP_MODULE_MFEA.
      * @param eventloop the event loop to use.
      */
-    MfeaNode(int family, xorp_module_id module_id, EventLoop& eventloop);
+    MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
+	     EventLoop& eventloop);
     
     /**
      * Destructor
@@ -1122,14 +1126,30 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
 
-protected:
-    //
-    // IfMgrHintObserver methods
-    //
-    void tree_complete();
-    void updates_made();
-
 private:
+    void interface_update(const string& ifname,
+			  const Update& update,
+			  bool 		is_system_interfaces_reportee);
+
+    void vif_update(const string& ifname,
+		    const string& vifname,
+		    const Update& update,
+		    bool	  is_system_interfaces_reportee);
+
+    void vifaddr4_update(const string& ifname,
+			 const string& vifname,
+			 const IPv4&   addr,
+			 const Update& update,
+			 bool	       is_system_interfaces_reportee);
+
+    void vifaddr6_update(const string& ifname,
+			 const string& vifname,
+			 const IPv6&   addr,
+			 const Update& update,
+			 bool	       is_system_interfaces_reportee);
+
+    void updates_completed(bool		is_system_interfaces_reportee);
+
     /**
      * A method invoked when the status of a service changes.
      * 
@@ -1141,45 +1161,14 @@ private:
 		       ServiceStatus old_status,
 		       ServiceStatus new_status);
 
-    /**
-     * Get a reference to the service base of the interface manager.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     *
-     * @return a reference to the service base of the interface manager.
-     */
-    virtual const ServiceBase* ifmgr_mirror_service_base() const = 0;
-
-    /**
-     * Get a reference to the interface manager tree.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     *
-     * @return a reference to the interface manager tree.
-     */
-    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
-
-    /**
-     * Initiate registration with the FEA.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     */
-    virtual void fea_register_startup() = 0;
-
-    /**
-     * Initiate de-registration with the FEA.
-     * 
-     * This is a pure virtual function, and it must be implemented
-     * by the communication-wrapper class that inherits this base class.
-     */
-    virtual void fea_register_shutdown() = 0;
-
     int add_pim_register_vif();
     
     // Private state
+    FeaNode&		_fea_node;
+
+    // A reference to the interface state information
+    const IfTree&	_iftree;
+
     MfeaMrouter		_mfea_mrouter;	// The mrouter state
     vector<ProtoComm *>	_proto_comms;	// The set of active ProtoComm entries
     
@@ -1191,11 +1180,6 @@ private:
     //  - protocol instances interested in receiving kernel signal messages
     ProtoRegister	_proto_register;
     ProtoRegister	_kernel_signal_messages_register;
-
-    //
-    // A local copy with the interface state information
-    //
-    IfMgrIfTree		_iftree;
 
     //
     // Debug and test-related state

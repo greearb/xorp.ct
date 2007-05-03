@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.4 2007/04/26 22:29:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.5 2007/04/28 00:49:12 pavlin Exp $"
 
 
 //
@@ -69,17 +69,15 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		    finder_port,
 		    xrl_finder_targetname,
 		    _cli_node4),
-      _xrl_mfea_node4(AF_INET, XORP_MODULE_MFEA, _eventloop,
+      _xrl_mfea_node4(_fea_node, AF_INET, XORP_MODULE_MFEA, _eventloop,
 		      xorp_module_name(AF_INET, XORP_MODULE_MFEA),
 		      finder_hostname, finder_port,
-		      xrl_finder_targetname,
-		      xorp_module_name(AF_INET, XORP_MODULE_FEA)),
+		      xrl_finder_targetname),
 #ifdef HAVE_IPV6_MULTICAST
-      _xrl_mfea_node6(AF_INET6, XORP_MODULE_MFEA, _eventloop,
+      _xrl_mfea_node6(_fea_node, AF_INET6, XORP_MODULE_MFEA, _eventloop,
 		      xorp_module_name(AF_INET6, XORP_MODULE_MFEA),
 		      finder_hostname, finder_port,
-		      xrl_finder_targetname,
-		      xorp_module_name(AF_INET6, XORP_MODULE_FEA)),
+		      xrl_finder_targetname),
 #endif
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
 		      _xrl_fib_client_manager, _xrsm4, _xrsm6,

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.88 2007/05/01 08:21:54 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.89 2007/05/01 09:15:07 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -38,7 +38,6 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6client.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
 ### MFEA XRL libraries
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaclientxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libmfeabase.la
@@ -53,8 +52,6 @@ LDADD		+= $(top_builddir)/xrl/targets/libclibase.la
 ### libfeaclient libraries
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
-LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 ### Packet ACL front-end XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libpacketaclbase.la
 ### socket server libraries and related
