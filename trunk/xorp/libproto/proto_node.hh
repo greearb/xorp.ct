@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.36 2006/07/03 23:33:37 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.37 2007/02/16 22:46:02 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -546,6 +546,15 @@ public:
      * @return a reference for the map with configured vifs.
      */
     map<string, Vif>& configured_vifs() { return (_configured_vifs); }
+
+    /**
+     * Find a configured virtual interface for a given name.
+     * 
+     * @param name the name to search for.
+     * @return the virtual interface with name @ref name if found,
+     * otherwise NULL.
+     */
+    inline const Vif *configured_vif_find_by_name(const string& name) const;
 
     /**
      * Get the node status (see @ref ProcessStatus).
@@ -1281,6 +1290,18 @@ ProtoNode<V>::set_config_vif_flags(const string& vif_name,
     return (XORP_OK);
 }
 
+template<class V>
+inline const Vif *
+ProtoNode<V>::configured_vif_find_by_name(const string& name) const
+{
+    map<string, Vif>::const_iterator iter;
+
+    iter = _configured_vifs.find(name);
+    if (iter != _configured_vifs.end())
+	return (&iter->second);
+
+    return (NULL);
+}
 
 //
 // Global variables
