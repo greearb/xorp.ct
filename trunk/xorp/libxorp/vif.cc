@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.18 2006/07/03 23:33:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.19 2007/02/16 22:46:28 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -246,6 +246,20 @@ VifAddr *
 Vif::find_address(const IPvX& ipvx_addr)
 {
     list<VifAddr>::iterator iter;
+    
+    for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
+	if ((iter)->is_my_addr(ipvx_addr)) {
+	    return &(*iter);
+	}
+    }
+    
+    return (NULL);
+}
+
+const VifAddr *
+Vif::find_address(const IPvX& ipvx_addr) const
+{
+    list<VifAddr>::const_iterator iter;
     
     for (iter = _addr_list.begin(); iter != _addr_list.end(); ++iter) {
 	if ((iter)->is_my_addr(ipvx_addr)) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.16 2006/11/07 18:55:41 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.17 2007/02/16 22:46:28 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -465,6 +465,15 @@ public:
      * if found, otherwise NULL.
      */
     VifAddr *find_address(const IPvX& ipvx_addr);
+
+    /**
+     * Find a const VifAddr that corresponds to an IPvX address.
+     * 
+     * @param ipvx_addr the IPvX address to search for.
+     * @return a const pointer to the VifAddr for address @ref ipvx_addr
+     * if found, otherwise NULL.
+     */
+    const VifAddr *find_address(const IPvX& ipvx_addr) const;
     
     /**
      * Test if an IPvX address belongs to this vif.
