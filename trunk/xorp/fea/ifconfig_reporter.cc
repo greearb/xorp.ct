@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_reporter.cc,v 1.1 2007/04/18 06:20:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_reporter.cc,v 1.2 2007/05/03 18:46:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,11 +24,39 @@
 #include "libxorp/ipv6.hh"
 
 #include "ifconfig_reporter.hh"
+#include "iftree.hh"
 
 //
 // Mechanism for reporting network interface related information to
 // interested parties.
 //
+
+IfConfigUpdateReporterBase::IfConfigUpdateReporterBase(
+    IfConfigUpdateReplicator& update_replicator)
+    : _update_replicator(update_replicator),
+      _observed_iftree(_update_replicator.observed_iftree())
+{
+}
+
+IfConfigUpdateReporterBase::IfConfigUpdateReporterBase(
+    IfConfigUpdateReplicator& update_replicator,
+    const IfTree& observed_iftree)
+    : _update_replicator(update_replicator),
+      _observed_iftree(observed_iftree)
+{
+}
+
+void
+IfConfigUpdateReporterBase::add_to_replicator()
+{
+    _update_replicator.add_reporter(this);
+}
+
+void
+IfConfigUpdateReporterBase::remove_from_replicator()
+{
+    _update_replicator.remove_reporter(this);
+}
 
 
 // ----------------------------------------------------------------------------
@@ -44,6 +72,47 @@ IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
     if (find(_reporters.begin(), _reporters.end(), rp) != _reporters.end())
 	return false;
     _reporters.push_back(rp);
+
+    //
+    // Propagate all current interface information
+    //
+    Update update = IfConfigUpdateReporterBase::CREATED;
+    IfTree::IfMap::const_iterator if_iter;
+
+    for (if_iter = observed_iftree().ifs().begin();
+	 if_iter != observed_iftree().ifs().end();
+	 ++if_iter) {
+	const IfTreeInterface& iface = if_iter->second;
+	rp->interface_update(iface.ifname(), update);
+
+	IfTreeInterface::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfTreeVif& vif = vif_iter->second;
+	    rp->vif_update(iface.ifname(), vif.vifname(), update);
+
+	    IfTreeVif::IPv4Map::const_iterator a4_iter;
+	    for (a4_iter = vif.ipv4addrs().begin();
+		 a4_iter != vif.ipv4addrs().end();
+		 ++a4_iter) {
+		const IfTreeAddr4& a4 = a4_iter->second;
+		rp->vifaddr4_update(iface.ifname(), vif.vifname(), a4.addr(),
+				    update);
+	    }
+
+	    IfTreeVif::IPv6Map::const_iterator a6_iter;
+	    for (a6_iter = vif.ipv6addrs().begin();
+		 a6_iter != vif.ipv6addrs().end();
+		 ++a6_iter) {
+		const IfTreeAddr6& a6 = a6_iter->second;
+		rp->vifaddr6_update(iface.ifname(), vif.vifname(), a6.addr(),
+				    update);
+	    }
+	}
+    }
+    rp->updates_completed();
+
     return true;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.5 2007/04/28 00:49:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.6 2007/05/03 09:32:36 pavlin Exp $"
 
 
 //
@@ -52,12 +52,13 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _fea_node(eventloop),
       _xrl_router(eventloop, xrl_fea_targetname.c_str(),
 		  finder_hostname.c_str(), finder_port),
-      _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().local_config()),
+      _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().ifconfig_update_replicator()),
       _xrl_fea_io(eventloop),
       _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
       _xrsm4(_eventloop, _fea_node.ifconfig().local_config(), _xrl_router),
       _xrsm6(_eventloop, _fea_node.ifconfig().local_config(), _xrl_router),
-      _xrl_socket_server(_eventloop, _fea_node.ifconfig_address_table(),
+      _xrl_socket_server(_eventloop,
+			 _fea_node.ifconfig().ifconfig_address_table(),
 			 _xrl_router.finder_address(),
 			 _xrl_router.finder_port()),
       _xrl_packet_acl_target(_eventloop,
@@ -84,9 +85,6 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		      _lib_fea_client_bridge, _xrl_socket_server),
       _is_dummy(false)
 {
-    IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();
-    repl.add_reporter(&_lib_fea_client_bridge);
-
     _cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access
 }
 

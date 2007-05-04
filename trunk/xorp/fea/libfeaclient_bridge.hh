@@ -12,16 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.11 2007/05/02 01:23:24 pavlin Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.12 2007/05/03 18:46:27 pavlin Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
 
 #include "ifconfig_reporter.hh"
 
-class XrlRouter;
-class IfTree;
+class IfConfigUpdateReplicator;
 class IfMgrXrlReplicationManager;
+class IfTree;
+class XrlRouter;
 
 /**
  * @short Bridge class to intervene between the FEA's interface
@@ -44,7 +45,8 @@ class IfMgrXrlReplicationManager;
  */
 class LibFeaClientBridge : public IfConfigUpdateReporterBase {
 public:
-    LibFeaClientBridge(XrlRouter& rtr, const IfTree& iftree);
+    LibFeaClientBridge(XrlRouter& rtr,
+		       IfConfigUpdateReplicator& update_replicator);
     ~LibFeaClientBridge();
 
     /**
@@ -85,7 +87,6 @@ protected:
 
 protected:
     IfMgrXrlReplicationManager* _rm;
-    const IfTree&		_iftree;
 };
 
 #endif // __FEA_LIBFEACLIENT_BRIDGE_HH__

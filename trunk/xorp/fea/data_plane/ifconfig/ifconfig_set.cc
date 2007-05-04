@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set.cc,v 1.1 2007/05/01 02:14:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set.cc,v 1.2 2007/05/01 02:40:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -46,7 +46,7 @@ IfConfigSet::push_config(IfTree& it)
     IfTreeInterface::VifMap::iterator vi;
 
     // Clear errors associated with error reporter
-    ifconfig().er().reset();
+    ifconfig().ifconfig_error_reporter().reset();
 
     //
     // Sanity check config - bail on bad interface and bad vif names
@@ -68,9 +68,10 @@ IfConfigSet::push_config(IfTree& it)
 		// XXX: ignore deleted interfaces that are not recognized
 		continue;
 	    }
-	    ifconfig().er().interface_error(i.ifname(),
-					    "interface not recognized");
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().interface_error(
+		i.ifname(),
+		"interface not recognized");
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return false;
 	}
 
@@ -80,9 +81,10 @@ IfConfigSet::push_config(IfTree& it)
 	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
 	    IfTreeVif& v= vi->second;
 	    if (v.vifname() != i.ifname()) {
-		ifconfig().er().vif_error(i.ifname(), v.vifname(),
-					  "bad vif name");
-		XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+		ifconfig().ifconfig_error_reporter().vif_error(i.ifname(),
+							       v.vifname(),
+							       "bad vif name");
+		XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 		return false;
 	    }
 	}
@@ -152,7 +154,7 @@ IfConfigSet::push_config(IfTree& it)
     }
     push_iftree_end();
 
-    if (ifconfig().er().error_count() != 0)
+    if (ifconfig().ifconfig_error_reporter().error_count() != 0)
 	return false;
     
     return true;
@@ -170,8 +172,8 @@ IfConfigSet::push_iftree_begin()
 	if (config_begin(error_msg) < 0) {
 	    error_msg = c_format("Failed to begin configuration: %s",
 				 error_msg.c_str());
-	    ifconfig().er().config_error(error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().config_error(error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 	break;
@@ -190,8 +192,8 @@ IfConfigSet::push_iftree_end()
 	if (config_end(error_msg) < 0) {
 	    error_msg = c_format("Failed to end configuration: %s",
 				 error_msg.c_str());
-	    ifconfig().er().config_error(error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().config_error(error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 	break;
@@ -212,8 +214,9 @@ IfConfigSet::push_interface_begin(const IfTreeInterface& i)
 	if (add_interface(i.ifname(), if_index, error_msg) < 0) {
 	    error_msg = c_format("Failed to add interface: %s",
 				 error_msg.c_str());
-	    ifconfig().er().interface_error(i.ifname(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
+								 error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 	break;
@@ -264,8 +267,9 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    < 0) {
 	    error_msg = c_format("Failed to configure interface: %s",
 				 error_msg.c_str());
-	    ifconfig().er().interface_error(i.ifname(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
+								 error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 	break;
@@ -310,8 +314,9 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    error_msg = c_format("Failed to set MTU to %u bytes: %s",
 				 XORP_UINT_CAST(new_mtu),
 				 error_msg.c_str());
-	    ifconfig().er().interface_error(i.name(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+								 error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    if (was_disabled) {
 		config_interface(i.ifname(), if_index, new_flags, true,
 				 deleted, error_msg);
@@ -361,15 +366,17 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 		error_msg = c_format("Expected Ethernet MAC address, "
 				     "got \"%s\"",
 				     new_mac.str().c_str());
-		ifconfig().er().interface_error(i.name(), error_msg);
-		XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+		ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+								     error_msg);
+		XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 		return;
 	    }
 	} catch (const BadMac& bm) {
 	    error_msg = c_format("Invalid MAC address \"%s\"",
 				 new_mac.str().c_str());
-	    ifconfig().er().interface_error(i.name(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+								 error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 
@@ -387,8 +394,9 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    < 0) {
 	    error_msg = c_format("Failed to set the MAC address: %s",
 				 error_msg.c_str());
-	    ifconfig().er().interface_error(i.name(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+								 error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    if (was_disabled) {
 		config_interface(i.ifname(), if_index, new_flags, true,
 				 deleted, error_msg);
@@ -420,8 +428,10 @@ IfConfigSet::push_vif_begin(const IfTreeInterface&	i,
     do {
 	if (add_vif(i.ifname(), v.vifname(), if_index, error_msg) < 0) {
 	    error_msg = c_format("Failed to add vif: %s", error_msg.c_str());
-	    ifconfig().er().vif_error(i.ifname(), v.vifname(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().vif_error(i.ifname(),
+							   v.vifname(),
+							   error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 	break;
@@ -503,8 +513,10 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 	    < 0) {
 	    error_msg = c_format("Failed to configure vif: %s",
 				 error_msg.c_str());
-	    ifconfig().er().vif_error(i.ifname(), v.vifname(), error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().vif_error(i.ifname(),
+							   v.vifname(),
+							   error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
 	}
 	break;
@@ -549,9 +561,11 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    < 0) {
 	    error_msg = c_format("Failed to delete address: %s",
 				 error_msg.c_str());
-	    ifconfig().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-					  error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().vifaddr_error(i.ifname(),
+							       v.vifname(),
+							       a.addr(),
+							       error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	}
 	return;
     }
@@ -625,9 +639,11 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    < 0) {
 	    error_msg = c_format("Failed to configure address: %s",
 				 error_msg.c_str());
-	    ifconfig().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-					  error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().vifaddr_error(i.ifname(),
+							       v.vifname(),
+							       a.addr(),
+							       error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	}
 	
 	break;
@@ -673,9 +689,11 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    < 0) {
 	    error_msg = c_format("Failed to delete address: %s",
 				 error_msg.c_str());
-	    ifconfig().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-					  error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().vifaddr_error(i.ifname(),
+							       v.vifname(),
+							       a.addr(),
+							       error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	}
 	return;
     }
@@ -731,9 +749,11 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    < 0) {
 	    error_msg = c_format("Failed to configure address: %s",
 				 error_msg.c_str());
-	    ifconfig().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
-					  error_msg);
-	    XLOG_ERROR("%s", ifconfig().er().last_error().c_str());
+	    ifconfig().ifconfig_error_reporter().vifaddr_error(i.ifname(),
+							       v.vifname(),
+							       a.addr(),
+							       error_msg);
+	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	}
 	
 	break;

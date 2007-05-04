@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.63 2007/04/30 23:40:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.64 2007/05/03 18:46:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -58,13 +58,13 @@ map_changes(const IfTreeItem::State&		fci,
 }
 
 IfConfig::IfConfig(EventLoop& eventloop,
-		   IfConfigUpdateReporterBase& ur,
-		   IfConfigErrorReporterBase& er,
 		   NexthopPortMapper& nexthop_port_mapper)
-    : _eventloop(eventloop), _ur(ur), _er(er),
+    : _eventloop(eventloop),
       _nexthop_port_mapper(nexthop_port_mapper),
       _itm(NULL),
       _restore_original_config_on_shutdown(false),
+      _ifconfig_update_replicator(_local_config),
+      _ifconfig_address_table(_ifconfig_update_replicator),
       _ifconfig_get_primary(NULL),
       _ifconfig_set_primary(NULL),
       _ifconfig_observer_primary(NULL),
@@ -857,7 +857,7 @@ IfConfig::report_update(const IfTreeInterface& fi)
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fi.state(), u)) {
-	_ur.interface_update(fi.ifname(), u);
+	_ifconfig_update_replicator.interface_update(fi.ifname(), u);
 	return true;
     }
 
@@ -870,7 +870,7 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fv.state(), u)) {
-	_ur.vif_update(fi.ifname(), fv.vifname(), u);
+	_ifconfig_update_replicator.vif_update(fi.ifname(), fv.vifname(), u);
 	return true;
     }
 
@@ -885,7 +885,8 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fa.state(), u)) {
-	_ur.vifaddr4_update(fi.ifname(), fv.vifname(), fa.addr(), u);
+	_ifconfig_update_replicator.vifaddr4_update(fi.ifname(), fv.vifname(),
+						    fa.addr(), u);
 	return true;
     }
 
@@ -899,7 +900,8 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fa.state(), u)) {
-	_ur.vifaddr6_update(fi.ifname(), fv.ifname(), fa.addr(), u);
+	_ifconfig_update_replicator.vifaddr6_update(fi.ifname(), fv.ifname(),
+						    fa.addr(), u);
 	return true;
     }
 
@@ -909,7 +911,7 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 void
 IfConfig::report_updates_completed()
 {
-    _ur.updates_completed();
+    _ifconfig_update_replicator.updates_completed();
 }
 
 void
@@ -1013,7 +1015,7 @@ IfConfig::report_updates(IfTree& it, bool is_system_interfaces_reportee)
 const string&
 IfConfig::push_error() const
 {
-    return _er.first_error();
+    return _ifconfig_error_reporter.first_error();
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.57 2007/04/27 21:24:38 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.58 2007/05/03 18:46:27 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -20,6 +20,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
 
+#include "ifconfig_addr_table.hh"
 #include "ifconfig_get.hh"
 #include "ifconfig_set.hh"
 #include "ifconfig_observer.hh"
@@ -46,16 +47,9 @@ public:
      * Constructor.
      *
      * @param eventloop the event loop.
-     * @param ur update reporter that receives updates through when
-     *           configurations are pushed down and when triggered
-     *		 spontaneously on the underlying platform.
-     * @param er error reporter that errors are propagated through when
-     *           configurations are pushed down.
      * @param nexthop_port_mapper the next-hop port mapper.
      */
-    IfConfig(EventLoop& eventloop, IfConfigUpdateReporterBase& ur,
-	     IfConfigErrorReporterBase& er,
-	     NexthopPortMapper& nexthop_port_mapper);
+    IfConfig(EventLoop& eventloop, NexthopPortMapper& nexthop_port_mapper);
 
     /**
      * Virtual destructor (in case this class is used as base class).
@@ -124,9 +118,31 @@ public:
     NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
 
     /**
+     * Get the IfConfigUpdateReplicator instance.
+     *
+     * @return a reference to the IfConfigUpdateReplicator instance.
+     * @see IfConfigUpdateReplicator.
+     */
+    IfConfigUpdateReplicator& ifconfig_update_replicator() {
+	return (_ifconfig_update_replicator);
+    }
+
+    /**
      * Get error reporter associated with IfConfig.
      */
-    inline IfConfigErrorReporterBase&	er() { return _er; }
+    IfConfigErrorReporterBase& ifconfig_error_reporter() {
+	return _ifconfig_error_reporter;
+    }
+
+    /**
+     * Get the IfConfigAddressTable instance.
+     *
+     * @return a reference to the IfConfigAddressTable instance.
+     * @see IfConfigAddressTable.
+     */
+    IfConfigAddressTable& ifconfig_address_table() {
+	return (_ifconfig_address_table);
+    }
 
     IfTree& live_config() { return (_live_config); }
     void    set_live_config(const IfTree& it) { _live_config = it; }
@@ -438,8 +454,6 @@ public:
 private:
 
     EventLoop&			_eventloop;
-    IfConfigUpdateReporterBase&	_ur;
-    IfConfigErrorReporterBase&	_er;
     NexthopPortMapper&		_nexthop_port_mapper;
 
     //
@@ -463,6 +477,10 @@ private:
 				//  restore the original config on shutdown
     IfTree		_local_config;	// The IfTree with the local config
     IfTree		_old_local_config; // The IfTree with the old local config
+
+    IfConfigUpdateReplicator	_ifconfig_update_replicator;
+    IfConfigErrorReporter	_ifconfig_error_reporter;
+    IfConfigAddressTable	_ifconfig_address_table;
 
     IfConfigGet*		_ifconfig_get_primary;
     IfConfigSet*		_ifconfig_set_primary;

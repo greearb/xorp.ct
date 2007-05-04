@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.38 2007/05/03 09:32:35 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.39 2007/05/03 18:46:28 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -50,7 +50,6 @@
 
 class EventLoop;
 class FeaNode;
-class IfTree;
 class MfeaVif;
 class ProtoComm;
 class SgCount;
@@ -1161,9 +1160,6 @@ private:
     
     // Private state
     FeaNode&		_fea_node;
-
-    // A reference to the interface state information
-    const IfTree&	_iftree;
 
     MfeaMrouter		_mfea_mrouter;	// The mrouter state
     vector<ProtoComm *>	_proto_comms;	// The set of active ProtoComm entries

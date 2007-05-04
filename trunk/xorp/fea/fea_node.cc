@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.2 2007/04/19 16:45:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.3 2007/04/27 01:10:27 pavlin Exp $"
 
 
 //
@@ -37,9 +37,7 @@ FeaNode::FeaNode(EventLoop& eventloop)
     : _eventloop(eventloop),
       _is_running(false),
       _is_dummy(false),
-      _ifconfig(eventloop, _ifconfig_update_replicator,
-		_ifconfig_error_reporter, _nexthop_port_mapper),
-      _ifconfig_address_table(_ifconfig.local_config()),
+      _ifconfig(eventloop, _nexthop_port_mapper),
       _fibconfig(_eventloop, _profile,
 #ifdef HOST_OS_WINDOWS
 		 // XXX: Windows FibConfig needs to see the live ifconfig tree
@@ -50,7 +48,6 @@ FeaNode::FeaNode(EventLoop& eventloop)
 		 _nexthop_port_mapper),
       _pa_transaction_manager(_eventloop, _pa_table_manager)
 {
-    _ifconfig_update_replicator.add_reporter(&_ifconfig_address_table);
 }
 
 FeaNode::~FeaNode()

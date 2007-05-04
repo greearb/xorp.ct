@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.3 2007/04/26 22:29:49 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.4 2007/04/27 01:10:27 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -27,8 +27,6 @@
 
 #include "fibconfig.hh"
 #include "ifconfig.hh"
-#include "ifconfig_addr_table.hh"
-#include "ifconfig_reporter.hh"
 #include "nexthop_port_mapper.hh"
 #include "pa_table.hh"
 #include "pa_transaction.hh"
@@ -115,22 +113,6 @@ public:
     IfConfig& ifconfig() { return (_ifconfig); }
 
     /**
-     * Get the IfConfigUpdateReplicator instance.
-     *
-     * @return a reference to the IfConfigUpdateReplicator instance.
-     * @see IfConfigUpdateReplicator.
-     */
-    IfConfigUpdateReplicator& ifconfig_update_replicator() { return (_ifconfig_update_replicator); }
-
-    /**
-     * Get the IfConfigAddressTable instance.
-     *
-     * @return a reference to the IfConfigAddressTable instance.
-     * @see IfConfigAddressTable.
-     */
-    IfConfigAddressTable& ifconfig_address_table() { return (_ifconfig_address_table); }
-
-    /**
      * Get the FibConfig instance.
      *
      * @return a reference to the FibConfig instance.
@@ -154,9 +136,6 @@ private:
     NexthopPortMapper		_nexthop_port_mapper;	// Next-hop port mapper
 
     IfConfig			_ifconfig;
-    IfConfigUpdateReplicator	_ifconfig_update_replicator;
-    IfConfigErrorReporter	_ifconfig_error_reporter;
-    IfConfigAddressTable	_ifconfig_address_table;
 
     FibConfig			_fibconfig;
 

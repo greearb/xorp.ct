@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.10 2007/04/19 21:36:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_addr_table.cc,v 1.11 2007/05/03 18:46:27 pavlin Exp $"
 
 #include <algorithm>
 
@@ -23,10 +23,13 @@
 #include "libxorp/debug.h"
 
 #include "ifconfig_addr_table.hh"
+#include "iftree.hh"
 
-IfConfigAddressTable::IfConfigAddressTable(const IfTree& iftree)
-    : _iftree(iftree)
+IfConfigAddressTable::IfConfigAddressTable(
+    IfConfigUpdateReplicator& update_replicator)
+    : IfConfigUpdateReporterBase(update_replicator)
 {
+    add_to_replicator();
     get_valid_addrs(_ipv4addrs, _ipv6addrs);
 }
 
@@ -50,8 +53,8 @@ uint32_t
 IfConfigAddressTable::address_pif_index(const IPv4& addr) const
 {
     // XXX This info should be cached...
-    IfTree::IfMap::const_iterator ii = _iftree.ifs().begin();
-    for (; ii != _iftree.ifs().end(); ++ii) {
+    IfTree::IfMap::const_iterator ii = observed_iftree().ifs().begin();
+    for (; ii != observed_iftree().ifs().end(); ++ii) {
 	const IfTreeInterface& iti = ii->second;
 	if (iti.state() == IfTreeItem::DELETED)
 	    continue;
@@ -77,8 +80,8 @@ uint32_t
 IfConfigAddressTable::address_pif_index(const IPv6& addr) const
 {
     // XXX This info should be cached...
-    IfTree::IfMap::const_iterator ii = _iftree.ifs().begin();
-    for (; ii != _iftree.ifs().end(); ++ii) {
+    IfTree::IfMap::const_iterator ii = observed_iftree().ifs().begin();
+    for (; ii != observed_iftree().ifs().end(); ++ii) {
 	const IfTreeInterface& iti = ii->second;
 	if (iti.state() == IfTreeItem::DELETED)
 	    continue;
@@ -105,9 +108,9 @@ void
 IfConfigAddressTable::get_valid_addrs(set<IPv4>& v4s, set<IPv6>& v6s)
 {
     IfTreeItem::State deleted = IfTreeItem::DELETED;
-    IfTree::IfMap::const_iterator ii = _iftree.ifs().begin();
+    IfTree::IfMap::const_iterator ii = observed_iftree().ifs().begin();
 
-    for (; ii != _iftree.ifs().end(); ++ii) {
+    for (; ii != observed_iftree().ifs().end(); ++ii) {
 	const IfTreeInterface& iti = ii->second;
 	if (iti.enabled() == false || iti.state() == deleted)
 	    continue;

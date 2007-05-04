@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.69 2007/05/03 09:32:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.70 2007/05/03 18:46:27 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -73,8 +73,8 @@
 MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
 		   EventLoop& eventloop)
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
+      IfConfigUpdateReporterBase(fea_node.ifconfig().ifconfig_update_replicator()),
       _fea_node(fea_node),
-      _iftree(_fea_node.ifconfig().local_config()),
       _mfea_mrouter(*this),
       _mfea_dft(*this),
       _is_log_trace(false)
@@ -98,10 +98,6 @@ MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
     // Set myself as an observer when the node status changes
     //
     set_observer(this);
-
-    // Add myself to receive FEA interface information
-    IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();
-    repl.add_reporter(this);
 }
 
 /**
@@ -113,10 +109,6 @@ MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
  **/
 MfeaNode::~MfeaNode()
 {
-    // Remove myself from receiving FEA interface information
-    IfConfigUpdateReplicator& repl = _fea_node.ifconfig_update_replicator();
-    repl.remove_reporter(this);
-
     //
     // Unset myself as an observer when the node status changes
     //
@@ -153,6 +145,9 @@ MfeaNode::start()
 {
     if (! is_enabled())
 	return (XORP_OK);
+
+    // Add myself to receive FEA interface information
+    add_to_replicator();
 
     //
     // Test the service status
@@ -236,6 +231,9 @@ MfeaNode::final_start()
 int
 MfeaNode::stop()
 {
+    // Remove myself from receiving FEA interface information
+    remove_from_replicator();
+
     //
     // Test the service status
     //
@@ -386,8 +384,9 @@ MfeaNode::interface_update(const string&	ifname,
 
     switch (update) {
     case CREATED:
-	// XXX: The MFEA vif creation is handled by vif_update()
-	return;
+	// XXX: The MFEA vif creation is handled by vif_update(),
+	// so we only update the status.
+	break;					// FALLTHROUGH
 
     case DELETED:
 	// XXX: Ignore any errors, in case the MFEA vif was deleted by
@@ -406,7 +405,7 @@ MfeaNode::interface_update(const string&	ifname,
     if (node_vif == NULL)
 	return;		// No vif to update
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for interface not in FEA tree: %s",
 		     ifname.c_str());
@@ -444,12 +443,7 @@ MfeaNode::vif_update(const string&	ifname,
     switch (update) {
     case CREATED:
 	node_vif = configured_vif_find_by_name(ifname);
-	if (node_vif != NULL) {
-	    XLOG_WARNING("Got CREATED for vif that is already in the MFEA "
-			 "tree: %s/%s",
-			 ifname.c_str(), vifname.c_str());
-	    return;
-	} else {
+	if (node_vif == NULL) {
 	    uint32_t vif_index = find_unused_config_vif_index();
 	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	    if (add_config_vif(vifname, vif_index, error_msg) != XORP_OK) {
@@ -459,7 +453,6 @@ MfeaNode::vif_update(const string&	ifname,
 		return;
 	    }
 	}
-	
 	break;					// FALLTHROUGH
 
     case DELETED:
@@ -484,7 +477,7 @@ MfeaNode::vif_update(const string&	ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for vif on interface not in FEA tree: %s/%s",
 		     ifname.c_str(), vifname.c_str());
@@ -560,7 +553,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in FEA tree: "
 		     "%s/%s/%s",
@@ -591,7 +584,8 @@ MfeaNode::vifaddr4_update(const string&	ifname,
     if (ap->point_to_point())
 	peer_addr = IPvX(ap->endpoint());
 
-    if (update == CREATED) {
+    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
+    if (node_vif_addr == NULL) {
 	// First create the MFEA vif address
 	if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr,
 				broadcast_addr, peer_addr, error_msg)
@@ -601,14 +595,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
 	    return;
 	}
-    }
-
-    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
-    if (node_vif_addr == NULL) {
-	XLOG_WARNING("Got update for address that is not in the "
-		     "MFEA tree: %s/%s/%s",
-		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
-	return;
+	node_vif_addr = node_vif->find_address(IPvX(addr));
     }
 
     //
@@ -677,7 +664,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in FEA tree: "
 		     "%s/%s/%s",
@@ -706,7 +693,8 @@ MfeaNode::vifaddr6_update(const string&	ifname,
     if (ap->point_to_point())
 	peer_addr = IPvX(ap->endpoint());
 
-    if (update == CREATED) {
+    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
+    if (node_vif_addr == NULL) {
 	// First create the MFEA vif address
 	if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr,
 				broadcast_addr, peer_addr, error_msg)
@@ -716,14 +704,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
 	    return;
 	}
-    }
-
-    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
-    if (node_vif_addr == NULL) {
-	XLOG_WARNING("Got update for address that is not in the "
-		     "MFEA tree: %s/%s/%s",
-		     ifname.c_str(), vifname.c_str(), addr.str().c_str());
-	return;
+	node_vif_addr = node_vif->find_address(IPvX(addr));
     }
 
     //

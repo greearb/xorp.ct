@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.24 2007/05/02 01:23:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.25 2007/05/03 18:46:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -50,10 +50,12 @@ update_name(IfConfigUpdateReporterBase::Update u)
 // ----------------------------------------------------------------------------
 // LibFeaClientBridge implementation
 
-LibFeaClientBridge::LibFeaClientBridge(XrlRouter& rtr, const IfTree& iftree)
-    : _iftree(iftree)
+LibFeaClientBridge::LibFeaClientBridge(XrlRouter& rtr,
+				       IfConfigUpdateReplicator& update_replicator)
+    : IfConfigUpdateReporterBase(update_replicator)
 {
     _rm = new IfMgrXrlReplicationManager(rtr);
+    add_to_replicator();
 }
 
 LibFeaClientBridge::~LibFeaClientBridge()
@@ -104,7 +106,7 @@ LibFeaClientBridge::interface_update(const string& ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for interface not in FEA tree: %s",
 		     ifname.c_str());
@@ -156,7 +158,7 @@ LibFeaClientBridge::vif_update(const string& ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for vif on interface not in FEA tree: %s/%s",
 		     ifname.c_str(), vifname.c_str());
@@ -232,7 +234,7 @@ LibFeaClientBridge::vifaddr4_update(const string& ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in FEA tree: "
 		     "%s/%s/%s",
@@ -322,7 +324,7 @@ LibFeaClientBridge::vifaddr6_update(const string& ifname,
 	return;
     }
 
-    const IfTreeInterface* ifp = _iftree.find_interface(ifname);
+    const IfTreeInterface* ifp = observed_iftree().find_interface(ifname);
     if (ifp == NULL) {
 	XLOG_WARNING("Got update for address on interface not in tree: "
 		     "%s/%s/%s",

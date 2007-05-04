@@ -12,13 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.10 2007/04/19 21:36:48 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.11 2007/05/03 18:46:27 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
 
 #include "addr_table.hh"
-#include "ifconfig.hh"
 #include "ifconfig_reporter.hh"
 
 /**
@@ -35,10 +34,10 @@ public:
      * Constructor.
      *
      * After construction, instance should be registered with
-     * IfConfigUpdateReporter to receive updates in order to function
+     * IfConfigUpdateReplicator to receive updates in order to function
      * correctly.
      */
-    IfConfigAddressTable(const IfTree& iftree);
+    IfConfigAddressTable(IfConfigUpdateReplicator& update_replicator);
     ~IfConfigAddressTable();
 
     /**
@@ -117,7 +116,6 @@ protected:
     inline void update();
 
 protected:
-    const IfTree&	_iftree;
     set<IPv4>		_ipv4addrs;
     set<IPv6>		_ipv6addrs;
 };

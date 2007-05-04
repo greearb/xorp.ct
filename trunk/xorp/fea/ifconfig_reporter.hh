@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.1 2007/04/18 06:20:57 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.2 2007/05/03 18:46:27 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_REPORTER_HH__
 #define __FEA_IFCONFIG_REPORTER_HH__
@@ -25,6 +25,8 @@
 
 #include <list>
 
+class IfConfigUpdateReplicator;
+class IfTree;
 class IPv4;
 class IPv6;
 
@@ -33,14 +35,51 @@ class IPv6;
  * @short Base class for propagating update information on from IfConfig.
  *
  * When the platform @ref IfConfig updates interfaces it can report
- * updates to an IfConfigUpdateReporter.  The @ref IfConfig instance
- * takes a pointer to the IfConfigUpdateReporter object it should use.
+ * updates to an IfConfigUpdateReporter.
  */
 class IfConfigUpdateReporterBase {
 public:
     enum Update { CREATED, DELETED, CHANGED };
 
+    /**
+     * Constructor for a given replicator.
+     *
+     * @param update_replicator the corresponding replicator
+     * (@see IfConfigUpdateReplicator).
+     */
+    IfConfigUpdateReporterBase(IfConfigUpdateReplicator& update_replicator);
+
+    /**
+     * Constructor for a given replicator and observed tree.
+     *
+     * @param update_replicator the corresponding replicator
+     * (@see IfConfigUpdateReplicator).
+     * @param observed_iftree the corresponding interface tree (@see IfTree).
+     */
+    IfConfigUpdateReporterBase(IfConfigUpdateReplicator& update_replicator,
+			       const IfTree& observed_iftree);
+
+    /**
+     * Destructor.
+     */
     virtual ~IfConfigUpdateReporterBase() {}
+
+    /**
+     * Get a reference to the observed interface tree.
+     *
+     * @return a reference to the observed interface tree (see @IfTree).
+     */
+    const IfTree& observed_iftree() const { return (_observed_iftree); }
+
+    /**
+     * Add itself to the replicator (see @IfConfigUpdateReplicator).
+     */
+    void add_to_replicator();
+
+    /**
+     * Remove itself from the replicator (see @IfConfigUpdateReplicator).
+     */
+    void remove_from_replicator();
 
     virtual void interface_update(const string& ifname,
 				  const Update& u) = 0;
@@ -60,6 +99,10 @@ public:
 				 const Update& u) = 0;
 
     virtual void updates_completed() = 0;
+
+private:
+    IfConfigUpdateReplicator& _update_replicator;
+    const IfTree&	_observed_iftree;
 };
 
 /**
@@ -70,6 +113,9 @@ public:
     typedef IfConfigUpdateReporterBase::Update Update;
 
 public:
+    IfConfigUpdateReplicator(const IfTree& observed_iftree)
+	: IfConfigUpdateReporterBase(*this, observed_iftree)
+    {}
     virtual ~IfConfigUpdateReplicator();
 
     /**
