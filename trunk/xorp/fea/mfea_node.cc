@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.70 2007/05/03 18:46:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.71 2007/05/04 01:43:22 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -109,6 +109,9 @@ MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
  **/
 MfeaNode::~MfeaNode()
 {
+    // Remove myself from receiving FEA interface information
+    remove_from_replicator();
+
     //
     // Unset myself as an observer when the node status changes
     //
@@ -231,9 +234,6 @@ MfeaNode::final_start()
 int
 MfeaNode::stop()
 {
-    // Remove myself from receiving FEA interface information
-    remove_from_replicator();
-
     //
     // Test the service status
     //
