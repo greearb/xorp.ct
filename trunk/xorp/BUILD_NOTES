@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.86 2007/03/16 00:04:26 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.87 2007/03/23 18:49:55 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -765,6 +765,10 @@ gmake check
        setenv LD ${CROSS_ROOT}/bin/${CROSS_ARCH}-ld
        setenv RANLIB ${CROSS_ROOT}/bin/${CROSS_ARCH}-ranlib
        setenv NM ${CROSS_ROOT}/bin/${CROSS_ARCH}-nm
+
+       [Optional]
+       setenv PATH ${PATH}:${CROSS_ROOT}/bin
+       rehash
 
     i) Cross-compile XORP:
 
