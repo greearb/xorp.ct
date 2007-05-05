@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.71 2007/05/04 01:43:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.72 2007/05/04 07:21:36 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -520,6 +520,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 			  const Update&	update)
 {
     const Vif* node_vif = NULL;
+    const IPvX addrx(addr);
     string error_msg;
 
     if (! is_ipv4())
@@ -530,7 +531,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	break;					// FALLTHROUGH
 
     case DELETED:
-	if (delete_config_vif_addr(vifname, IPvX(addr), error_msg)
+	if (delete_config_vif_addr(vifname, addrx, error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		       "configured vifs: %s",
@@ -576,7 +577,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
     }
 
     // Calculate various addresses
-    IPvXNet subnet_addr(IPvX(addr), ap->prefix_len());
+    IPvXNet subnet_addr(addrx, ap->prefix_len());
     IPvX broadcast_addr(IPvX::ZERO(family()));
     IPvX peer_addr(IPvX::ZERO(family()));
     if (ap->broadcast())
@@ -584,10 +585,10 @@ MfeaNode::vifaddr4_update(const string&	ifname,
     if (ap->point_to_point())
 	peer_addr = IPvX(ap->endpoint());
 
-    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
+    const VifAddr* node_vif_addr = node_vif->find_address(addrx);
     if (node_vif_addr == NULL) {
 	// First create the MFEA vif address
-	if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr,
+	if (add_config_vif_addr(vifname, addrx, subnet_addr,
 				broadcast_addr, peer_addr, error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot add address %s to vif %s from the set of "
@@ -595,7 +596,7 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
 	    return;
 	}
-	node_vif_addr = node_vif->find_address(IPvX(addr));
+	node_vif_addr = node_vif->find_address(addrx);
     }
 
     //
@@ -604,19 +605,19 @@ MfeaNode::vifaddr4_update(const string&	ifname,
     // First we delete it then add it back with the new values.
     // If there are no changes, we return immediately.
     //
-    if ((IPvX(addr) == node_vif_addr->addr())
+    if ((addrx == node_vif_addr->addr())
 	&& (subnet_addr == node_vif_addr->subnet_addr()
 	    && (broadcast_addr == node_vif_addr->broadcast_addr())
 	    && (peer_addr == node_vif_addr->peer_addr()))) {
 	return;			// Nothing changed
     }
 
-    if (delete_config_vif_addr(vifname, IPvX(addr), error_msg) != XORP_OK) {
+    if (delete_config_vif_addr(vifname, addrx, error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
     }
-    if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr, broadcast_addr,
+    if (add_config_vif_addr(vifname, addrx, subnet_addr, broadcast_addr,
 			    peer_addr, error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
@@ -631,6 +632,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 			  const Update&	update)
 {
     const Vif* node_vif = NULL;
+    const IPvX addrx(addr);
     string error_msg;
 
     if (! is_ipv6())
@@ -641,7 +643,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	break;					// FALLTHROUGH
 
     case DELETED:
-	if (delete_config_vif_addr(vifname, IPvX(addr), error_msg)
+	if (delete_config_vif_addr(vifname, addrx, error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		       "configured vifs: %s",
@@ -687,16 +689,16 @@ MfeaNode::vifaddr6_update(const string&	ifname,
     }
 
     // Calculate various addresses
-    IPvXNet subnet_addr(IPvX(addr), ap->prefix_len());
+    IPvXNet subnet_addr(addrx, ap->prefix_len());
     IPvX broadcast_addr(IPvX::ZERO(family()));
     IPvX peer_addr(IPvX::ZERO(family()));
     if (ap->point_to_point())
 	peer_addr = IPvX(ap->endpoint());
 
-    const VifAddr* node_vif_addr = node_vif->find_address(IPvX(addr));
+    const VifAddr* node_vif_addr = node_vif->find_address(addrx);
     if (node_vif_addr == NULL) {
 	// First create the MFEA vif address
-	if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr,
+	if (add_config_vif_addr(vifname, addrx, subnet_addr,
 				broadcast_addr, peer_addr, error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot add address %s to vif %s from the set of "
@@ -704,7 +706,7 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 		       addr.str().c_str(), vifname.c_str(), error_msg.c_str());
 	    return;
 	}
-	node_vif_addr = node_vif->find_address(IPvX(addr));
+	node_vif_addr = node_vif->find_address(addrx);
     }
 
     //
@@ -713,19 +715,19 @@ MfeaNode::vifaddr6_update(const string&	ifname,
     // First we delete it then add it back with the new values.
     // If there are no changes, we return immediately.
     //
-    if ((IPvX(addr) == node_vif_addr->addr())
+    if ((addrx == node_vif_addr->addr())
 	&& (subnet_addr == node_vif_addr->subnet_addr()
 	    && (broadcast_addr == node_vif_addr->broadcast_addr())
 	    && (peer_addr == node_vif_addr->peer_addr()))) {
 	return;			// Nothing changed
     }
 
-    if (delete_config_vif_addr(vifname, IPvX(addr), error_msg) != XORP_OK) {
+    if (delete_config_vif_addr(vifname, addrx, error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
     }
-    if (add_config_vif_addr(vifname, IPvX(addr), subnet_addr, broadcast_addr,
+    if (add_config_vif_addr(vifname, addrx, subnet_addr, broadcast_addr,
 			    peer_addr, error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
