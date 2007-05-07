@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.53 2007/04/20 20:29:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.54 2007/05/03 09:32:36 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -52,6 +52,7 @@ XrlMfeaNode::XrlMfeaNode(FeaNode&	fea_node,
       _xrl_mfea_client_client(&xrl_router()),
       _xrl_cli_manager_client(&xrl_router()),
       _xrl_finder_client(&xrl_router()),
+      _lib_mfea_client_bridge(xrl_router(), MfeaNode::mfea_iftree_update_replicator()),
       _is_finder_alive(false)
 {
 }

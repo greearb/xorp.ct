@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.29 2007/04/18 06:21:00 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.30 2007/05/03 09:32:36 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -29,6 +29,7 @@
 #include "xrl/interfaces/cli_manager_xif.hh"
 #include "xrl/targets/mfea_base.hh"
 
+#include "libfeaclient_bridge.hh"
 #include "mfea_node.hh"
 #include "mfea_node_cli.hh"
 
@@ -849,6 +850,8 @@ private:
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
     XrlCliManagerV0p1Client	_xrl_cli_manager_client;
     XrlFinderEventNotifierV0p1Client	_xrl_finder_client;
+
+    LibFeaClientBridge		_lib_mfea_client_bridge;    // The MFEA clients
 
     bool			_is_finder_alive;
 };

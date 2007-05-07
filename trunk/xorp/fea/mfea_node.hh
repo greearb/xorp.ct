@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.39 2007/05/03 18:46:28 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.40 2007/05/04 01:43:23 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -35,6 +35,7 @@
 #include "mrt/mifset.hh"
 
 #include "ifconfig_reporter.hh"
+#include "iftree.hh"
 #include "mfea_dataflow.hh"
 #include "mfea_mrouter.hh"
 
@@ -1125,6 +1126,11 @@ public:
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
 
+protected:
+    IfConfigUpdateReplicator&	mfea_iftree_update_replicator() {
+	return (_mfea_iftree_update_replicator);
+    }
+
 private:
     void interface_update(const string& ifname,
 			  const Update& update);
@@ -1172,6 +1178,12 @@ private:
     //  - protocol instances interested in receiving kernel signal messages
     ProtoRegister	_proto_register;
     ProtoRegister	_kernel_signal_messages_register;
+
+    //
+    // Interface tree propagation
+    //
+    IfTree			_mfea_iftree;
+    IfConfigUpdateReplicator	_mfea_iftree_update_replicator;
 
     //
     // Debug and test-related state
