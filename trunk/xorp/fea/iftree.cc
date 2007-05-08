@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.41 2007/05/08 00:07:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.42 2007/05/08 00:49:01 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
+#include "libxorp/vif.hh"
 
 #include "iftree.hh"
 
@@ -947,7 +948,7 @@ IfTreeInterface::str() const
 
 IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
     : IfTreeItem(), _ifname(ifname), _vifname(vifname),
-      _pif_index(0), _enabled(false),
+      _pif_index(0), _vif_index(Vif::VIF_INDEX_INVALID), _enabled(false),
       _broadcast(false), _loopback(false), _point_to_point(false),
       _multicast(false), _pim_register(false)
 {}
@@ -1083,15 +1084,23 @@ string
 IfTreeVif::str() const
 {
     string pim_register_str;
+    string vif_index_str;
 
     //
     // XXX: Conditionally print the pim_register flag, because it is
     // used only by the MFEA.
     //
-    if (_pim_register)
+    if (_pim_register) {
 	pim_register_str = c_format("{ pim_register := %s } ",
 				    true_false(_pim_register));
-    pim_register_str += string(" ");	// XXX: unconditional extra space
+    }
+    // XXX: Conditionally print the vif_index, because it is rarely used
+    if (_vif_index != Vif::VIF_INDEX_INVALID) {
+	vif_index_str = c_format("{ vif_index := %u } ",
+				 XORP_UINT_CAST(_vif_index));
+    }
+    vif_index_str += pim_register_str;
+    vif_index_str += string(" ");	// XXX: unconditional extra space
 
     return c_format("VIF %s { enabled := %s } { broadcast := %s } "
 		    "{ loopback := %s } { point_to_point := %s } "
@@ -1099,7 +1108,7 @@ IfTreeVif::str() const
 		    _vifname.c_str(), true_false(_enabled),
 		    true_false(_broadcast), true_false(_loopback),
 		    true_false(_point_to_point), true_false(_multicast))
-	+ pim_register_str + IfTreeItem::str();
+	+ vif_index_str + IfTreeItem::str();
 }
 
 /* ------------------------------------------------------------------------- */

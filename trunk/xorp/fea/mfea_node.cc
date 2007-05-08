@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.76 2007/05/08 00:49:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.77 2007/05/08 19:23:14 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -464,6 +464,7 @@ MfeaNode::vif_update(const string&	ifname,
     IfTreeVif* mfea_vifp;
     const Vif* node_vif = NULL;
     bool is_up;
+    uint32_t vif_index = Vif::VIF_INDEX_INVALID;
     string error_msg;
 
     switch (update) {
@@ -480,7 +481,7 @@ MfeaNode::vif_update(const string&	ifname,
 
 	node_vif = configured_vif_find_by_name(ifname);
 	if (node_vif == NULL) {
-	    uint32_t vif_index = find_unused_config_vif_index();
+	    vif_index = find_unused_config_vif_index();
 	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	    if (add_config_vif(vifname, vif_index, error_msg) != XORP_OK) {
 		XLOG_ERROR("Cannot add vif %s to the set of configured "
@@ -537,6 +538,7 @@ MfeaNode::vif_update(const string&	ifname,
 	return;
     }
     mfea_vifp->copy_state(*vifp);
+    mfea_vifp->set_vif_index(vif_index);
     _mfea_iftree_update_replicator.vif_update(ifname, vifname, update);
 
     //
@@ -1011,6 +1013,7 @@ MfeaNode::add_pim_register_vif()
 	mfea_vifp = mfea_ifp->find_vif(register_vif.name());
 	XLOG_ASSERT(mfea_vif != NULL);
 	mfea_vifp->set_pif_index(register_vif.pif_index());
+	mfea_vifp->set_vif_index(register_vif.vif_index());
 	mfea_vifp->set_enabled(register_vif.is_underlying_vif_up());
 	mfea_vifp->set_pim_register(register_vif.is_pim_register());
 	_mfea_iftree_update_replicator.vif_update(mfea_ifp->ifname(),
