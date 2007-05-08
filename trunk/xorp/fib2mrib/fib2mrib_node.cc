@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.34 2007/04/19 21:36:51 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.35 2007/04/23 23:05:09 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -1158,8 +1158,8 @@ Fib2mribNode::update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route)
     // or the address of the next-hop router.
     //
     IfMgrIfTree::IfMap::const_iterator if_iter;
-    for (if_iter = iftree.ifs().begin();
-	 if_iter != iftree.ifs().end();
+    for (if_iter = iftree.interfaces().begin();
+	 if_iter != iftree.interfaces().end();
 	 ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 

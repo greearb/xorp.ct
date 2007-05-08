@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.20 2007/04/19 21:36:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.21 2007/04/19 23:53:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -293,8 +293,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
     //
     // Iterate for all interface, vifs, and addresses, and print them
     //
-    for (ifmgr_iface_iter = ifmgr_iftree().ifs().begin();
-	 ifmgr_iface_iter != ifmgr_iftree().ifs().end();
+    for (ifmgr_iface_iter = ifmgr_iftree().interfaces().begin();
+	 ifmgr_iface_iter != ifmgr_iftree().interfaces().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
 	const string& ifmgr_iface_name = ifmgr_iface.name();

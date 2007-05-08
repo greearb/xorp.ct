@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.19 2007/04/23 23:05:09 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.20 2007/04/23 23:23:55 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -26,8 +26,8 @@ const IPv6 IfMgrIPv6Atom::_ZERO_ADDR = IPv6::ZERO();
 const IfMgrIfAtom*
 IfMgrIfTree::find_interface(const string& ifname) const
 {
-    IfMgrIfTree::IfMap::const_iterator ii = ifs().find(ifname);
-    if (ii == ifs().end())
+    IfMgrIfTree::IfMap::const_iterator ii = interfaces().find(ifname);
+    if (ii == interfaces().end())
 	return (NULL);
 
     return (&ii->second);
@@ -36,8 +36,8 @@ IfMgrIfTree::find_interface(const string& ifname) const
 IfMgrIfAtom*
 IfMgrIfTree::find_interface(const string& ifname)
 {
-    IfMgrIfTree::IfMap::iterator ii = ifs().find(ifname);
-    if (ii == ifs().end())
+    IfMgrIfTree::IfMap::iterator ii = interfaces().find(ifname);
+    if (ii == interfaces().end())
 	return (NULL);
 
     return (&ii->second);
@@ -114,7 +114,7 @@ IfMgrIfTree::find_addr(const string& ifname,
 bool
 IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 {
-    return (o.ifs() == ifs());
+    return (o.interfaces() == interfaces());
 }
 
 bool
@@ -123,7 +123,7 @@ IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -173,7 +173,7 @@ IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -240,7 +240,7 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up
@@ -307,7 +307,7 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+    for (if_iter = interfaces().begin(); if_iter != interfaces().end(); ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
 	// Test if interface is enabled and the link state is up

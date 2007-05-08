@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.27 2007/04/19 23:53:05 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.28 2007/04/23 23:05:09 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -52,12 +52,12 @@ public:
     /**
      * Interface collection accessor.
      */
-    inline const IfMap& ifs() const			{ return _ifs; }
+    inline const IfMap& interfaces() const		{ return _interfaces; }
 
     /**
      * Interface collection accessor.
      */
-    inline IfMap& ifs()					{ return _ifs; }
+    inline IfMap& interfaces()				{ return _interfaces; }
 
     /**
      * Clear all interface state.
@@ -247,7 +247,7 @@ public:
 			       string& vifname) const;
 
 protected:
-    IfMap	_ifs;		// The interface configuration state
+    IfMap	_interfaces;		// The interface configuration state
 };
 
 
@@ -518,7 +518,7 @@ struct IfMgrIP<IPv6>
 inline void
 IfMgrIfTree::clear()
 {
-    _ifs.clear();
+    _interfaces.clear();
 }
 
 

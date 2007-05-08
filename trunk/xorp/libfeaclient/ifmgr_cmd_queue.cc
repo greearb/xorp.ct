@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.14 2007/04/19 21:36:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.15 2007/04/19 23:53:05 pavlin Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -215,10 +215,10 @@ IfMgrCommandIfClusteringQueue::change_active_interface()
 void
 IfMgrIfTreeToCommands::convert(IfMgrCommandSinkBase& s) const
 {
-    const IfMgrIfTree::IfMap& ifs = _tree.ifs();
+    const IfMgrIfTree::IfMap& interfaces = _tree.interfaces();
     IfMgrIfTree::IfMap::const_iterator cii;
 
-    for (cii = ifs.begin(); cii != ifs.end(); ++cii) {
+    for (cii = interfaces.begin(); cii != interfaces.end(); ++cii) {
 	IfMgrIfAtomToCommands(cii->second).convert(s);
     }
     s.push(new IfMgrHintTreeComplete());

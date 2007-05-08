@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.44 2007/02/16 22:47:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.45 2007/04/19 21:36:52 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -317,8 +317,8 @@ VifManager::updates_made()
     //
     // Remove vifs that don't exist anymore
     //
-    for (ifmgr_iface_iter = _old_iftree.ifs().begin();
-	 ifmgr_iface_iter != _old_iftree.ifs().end();
+    for (ifmgr_iface_iter = _old_iftree.interfaces().begin();
+	 ifmgr_iface_iter != _old_iftree.interfaces().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
 	const string& ifmgr_iface_name = ifmgr_iface.name();
@@ -335,8 +335,8 @@ VifManager::updates_made()
     //
     // Add new vifs, update existing ones and remove old addresses
     //
-    for (ifmgr_iface_iter = _iftree.ifs().begin();
-	 ifmgr_iface_iter != _iftree.ifs().end();
+    for (ifmgr_iface_iter = _iftree.interfaces().begin();
+	 ifmgr_iface_iter != _iftree.interfaces().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
 	const string& ifmgr_iface_name = ifmgr_iface.name();
@@ -457,8 +457,8 @@ VifManager::updates_made()
     //
     // Add new vif addresses, and update existing ones
     //
-    for (ifmgr_iface_iter = _iftree.ifs().begin();
-	 ifmgr_iface_iter != _iftree.ifs().end();
+    for (ifmgr_iface_iter = _iftree.interfaces().begin();
+	 ifmgr_iface_iter != _iftree.interfaces().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
 	const string& ifmgr_iface_name = ifmgr_iface.name();

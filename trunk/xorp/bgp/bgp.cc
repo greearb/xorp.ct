@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.83 2007/04/19 21:36:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.84 2007/04/23 23:05:08 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -464,7 +464,7 @@ BGPMain::updates_made()
     //
     // Check whether the old interfaces, vifs and addresses are still there
     //
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	bool is_old_interface_enabled = false;
 	bool is_new_interface_enabled = false;
 	bool is_old_vif_enabled = false;
@@ -582,8 +582,8 @@ BGPMain::updates_made()
     //
     // Check for new interfaces, vifs and addresses
     //
-    for (ii = ifmgr_iftree().ifs().begin();
-	 ii != ifmgr_iftree().ifs().end();
+    for (ii = ifmgr_iftree().interfaces().begin();
+	 ii != ifmgr_iftree().interfaces().end();
 	 ++ii) {
 	if_atom = &ii->second;
 

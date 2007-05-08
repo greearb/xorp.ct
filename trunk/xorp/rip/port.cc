@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.68 2007/04/14 08:59:52 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.69 2007/04/19 21:36:53 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -996,8 +996,8 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    
 	    const IfMgrIfTree& iftree = _pm.iftree();
 	    IfMgrIfTree::IfMap::const_iterator if_iter;
-	    for (if_iter = iftree.ifs().begin();
-		 if_iter != iftree.ifs().end();
+	    for (if_iter = iftree.interfaces().begin();
+		 if_iter != iftree.interfaces().end();
 		 ++if_iter) {
 		const IfMgrIfAtom& iface = if_iter->second;
 
@@ -1175,8 +1175,8 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	    
 	    const IfMgrIfTree& iftree = _pm.iftree();
 	    IfMgrIfTree::IfMap::const_iterator if_iter;
-	    for (if_iter = iftree.ifs().begin();
-		 if_iter != iftree.ifs().end();
+	    for (if_iter = iftree.interfaces().begin();
+		 if_iter != iftree.interfaces().end();
 		 ++if_iter) {
 		const IfMgrIfAtom& iface = if_iter->second;
 

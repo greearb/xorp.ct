@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.19 2007/04/19 23:53:05 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.20 2007/04/23 23:05:09 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -127,14 +127,14 @@ IfMgrCommandBase::~IfMgrCommandBase()
 bool
 IfMgrIfAdd::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    if (ifs.find(n) != ifs.end())
+    if (interfaces.find(n) != interfaces.end())
 	return true;	// Not a failure to add something that already exists
 
     pair<IfMgrIfTree::IfMap::iterator, bool> r =
-	ifs.insert( make_pair(n, IfMgrIfAtom(n)) );
+	interfaces.insert( make_pair(n, IfMgrIfAtom(n)) );
     return r.second;
 }
 
@@ -160,14 +160,14 @@ IfMgrIfAdd::str() const
 bool
 IfMgrIfRemove::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return true;	// Not a failure if the interface doesn't exist anymore
 
-    ifs.erase(i);
+    interfaces.erase(i);
     return true;
 }
 
@@ -193,11 +193,11 @@ IfMgrIfRemove::str() const
 bool
 IfMgrIfSetEnabled::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return false;
 
     IfMgrIfAtom& interface = i->second;
@@ -228,11 +228,11 @@ IfMgrIfSetEnabled::str() const
 bool
 IfMgrIfSetDiscard::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return false;
 
     IfMgrIfAtom& interface = i->second;
@@ -263,11 +263,11 @@ IfMgrIfSetDiscard::str() const
 bool
 IfMgrIfSetMtu::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return false;
 
     IfMgrIfAtom& interface = i->second;
@@ -298,11 +298,11 @@ IfMgrIfSetMtu::str() const
 bool
 IfMgrIfSetMac::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return false;
 
     IfMgrIfAtom& interface = i->second;
@@ -332,11 +332,11 @@ IfMgrIfSetMac::str() const
 bool
 IfMgrIfSetPifIndex::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return false;
 
     IfMgrIfAtom& interface = i->second;
@@ -367,11 +367,11 @@ IfMgrIfSetPifIndex::str() const
 bool
 IfMgrIfSetNoCarrier::execute(IfMgrIfTree& t) const
 {
-    IfMgrIfTree::IfMap& ifs = t.ifs();
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
     const string& n = ifname();
 
-    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i == ifs.end())
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
 	return false;
 
     IfMgrIfAtom& interface = i->second;
