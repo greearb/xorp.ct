@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.20 2007/04/23 23:05:09 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.21 2007/05/08 01:15:51 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -699,6 +699,38 @@ IfMgrVifSetPifIndex::str() const
 {
     return vif_str_begin(this, "SetPifIndex")
 	+ ", " + c_format("%u", XORP_UINT_CAST(pif_index())) + vif_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrVifSetVifIndex
+
+bool
+IfMgrVifSetVifIndex::execute(IfMgrIfTree& tree) const
+{
+    IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
+    if (vifa == NULL)
+	return false;
+
+    vifa->set_vif_index(vif_index());
+    return true;
+}
+
+bool
+IfMgrVifSetVifIndex::forward(XrlSender&		   sender,
+			     const string&	   xrl_target,
+			     const IfMgrXrlSendCB& xscb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_vif_set_vif_index(xt, ifname(), vifname(), vif_index(),
+				    xscb);
+}
+
+string
+IfMgrVifSetVifIndex::str() const
+{
+    return vif_str_begin(this, "SetVifIndex")
+	+ ", " + c_format("%u", XORP_UINT_CAST(vif_index())) + vif_str_end();
 }
 
 

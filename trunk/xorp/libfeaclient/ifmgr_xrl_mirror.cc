@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.21 2007/04/19 21:36:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.22 2007/04/19 23:53:05 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -157,7 +157,13 @@ protected:
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
-	const uint32_t&	index);
+	const uint32_t&	pif_index);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_vif_index(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	vif_index);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv4_add(
 	// Input values,
@@ -541,6 +547,20 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_pif_index(
 	)
 {
     _dispatcher.push(new IfMgrVifSetPifIndex(ifname, vifname, pif_index));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vif_index(
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	vif_index
+	)
+{
+    _dispatcher.push(new IfMgrVifSetVifIndex(ifname, vifname, vif_index));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

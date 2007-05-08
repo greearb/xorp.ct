@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.28 2007/04/23 23:05:09 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.29 2007/05/08 01:15:51 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -29,6 +29,7 @@
 #include "libxorp/ipv6net.hh"
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
+#include "libxorp/vif.hh"
 
 class IfMgrIfAtom;
 class IfMgrVifAtom;
@@ -345,7 +346,10 @@ public:
     inline void		set_pim_register(bool v)	{ _pim_register = v; }
 
     inline uint32_t	pif_index() const		{ return _pif_index; }
-    inline uint32_t	set_pif_index(uint32_t v) 	{ return _pif_index = v; }
+    inline void		set_pif_index(uint32_t v) 	{ _pif_index = v; }
+
+    inline uint32_t	vif_index() const		{ return _vif_index; }
+    inline void		set_vif_index(uint32_t v) 	{ _vif_index = v; }
 
     inline const IPv4Map& ipv4addrs() const		{ return _ipv4addrs; }
     inline IPv4Map&	ipv4addrs() 			{ return _ipv4addrs; }
@@ -372,6 +376,7 @@ protected:
     bool	_loopback;		// True if loopback vif
     bool	_pim_register;		// True if PIM Register vif
     uint32_t	_pif_index;		// Physical interface index
+    uint32_t	_vif_index;		// Virtual interface index
 
     IPv4Map	_ipv4addrs;		// The IPv4 addresses
     IPv6Map	_ipv6addrs;		// The IPv6 addresses
@@ -549,7 +554,8 @@ IfMgrVifAtom::IfMgrVifAtom(const string& name)
       _p2p_capable(false),
       _loopback(false),
       _pim_register(false),
-      _pif_index(0)
+      _pif_index(0),
+      _vif_index(Vif::VIF_INDEX_INVALID)
 {
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.15 2007/04/19 21:36:51 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.16 2007/04/19 23:53:05 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -453,6 +453,33 @@ public:
 
 protected:
     uint32_t	_pif_index;
+};
+
+/**
+ * @short Command to associate a virtual interface id with a virtual
+ * interface.
+ */
+class IfMgrVifSetVifIndex : public IfMgrVifCommandBase {
+public:
+    inline IfMgrVifSetVifIndex(const string&	ifname,
+			       const string&	vifname,
+			       uint32_t		vif_index)
+	: IfMgrVifCommandBase(ifname, vifname),
+	  _vif_index(vif_index)
+    {}
+
+    inline uint32_t vif_index() const 			{ return _vif_index; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    uint32_t	_vif_index;
 };
 
 
