@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.74 2007/05/07 23:48:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.75 2007/05/08 00:07:57 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -387,7 +387,7 @@ MfeaNode::interface_update(const string&	ifname,
     switch (update) {
     case CREATED:
 	// Update the MFEA iftree
-	_mfea_iftree.add_if(ifname);
+	_mfea_iftree.add_interface(ifname);
 
 	// XXX: The MFEA vif creation is handled by vif_update(),
 	// so we only update the status.
@@ -395,7 +395,7 @@ MfeaNode::interface_update(const string&	ifname,
 
     case DELETED:
 	// Update the MFEA iftree
-	_mfea_iftree.remove_if(ifname);
+	_mfea_iftree.remove_interface(ifname);
 	_mfea_iftree_update_replicator.interface_update(ifname, update);
 
 	// XXX: Ignore any errors, in case the MFEA vif was deleted by
@@ -998,7 +998,7 @@ MfeaNode::add_pim_register_vif()
 	//
 	IfTreeInterface* mfea_ifp;
 	IfTreeVif* mfea_vifp;
-	_mfea_iftree.add_if(register_vif.name());
+	_mfea_iftree.add_interface(register_vif.name());
 	mfea_ifp = _mfea_iftree.find_interface(register_vif.name());
 	XLOG_ASSERT(mfea_ifp != NULL);
 	mfea_ifp->set_pif_index(register_vif.pif_index());

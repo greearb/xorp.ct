@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.5 2007/05/01 01:50:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.6 2007/05/01 06:36:45 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -180,7 +180,7 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
 	ifconfig.map_ifindex(if_index, alias_if_name);
 	IfTreeInterface* ifp = it.find_interface(alias_if_name);
 	if (ifp == NULL) {
-	    it.add_if(alias_if_name);
+	    it.add_interface(alias_if_name);
 	    is_newlink = true;
 	    ifp = it.find_interface(alias_if_name);
 	    XLOG_ASSERT(ifp != NULL);
@@ -270,8 +270,8 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
 	} else {
 	    flags = ifrcopy.ifr_flags;
 	}
-	if (is_newlink || (flags != ifp->if_flags())) {
-	    ifp->set_if_flags(flags);
+	if (is_newlink || (flags != ifp->interface_flags())) {
+	    ifp->set_interface_flags(flags);
 	    ifp->set_enabled(flags & IFF_UP);
 	}
 	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
@@ -309,7 +309,7 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
 	//
 	// Set the vif flags
 	//
-	if (is_newlink || (flags != ifp->if_flags())) {
+	if (is_newlink || (flags != ifp->interface_flags())) {
 	    vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
 	    vifp->set_broadcast(flags & IFF_BROADCAST);
 	    vifp->set_loopback(flags & IFF_LOOPBACK);

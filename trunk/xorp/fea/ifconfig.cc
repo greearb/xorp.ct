@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.64 2007/05/03 18:46:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.65 2007/05/04 01:43:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -931,8 +931,8 @@ IfConfig::report_updates(IfTree& it, bool is_system_interfaces_reportee)
     //
     // Walk config looking for changes to report
     //
-    for (IfTree::IfMap::const_iterator ii = it.ifs().begin();
-	 ii != it.ifs().end(); ++ii) {
+    for (IfTree::IfMap::const_iterator ii = it.interfaces().begin();
+	 ii != it.interfaces().end(); ++ii) {
 
 	const IfTreeInterface& interface = ii->second;
 	updated |= report_update(interface);
@@ -974,8 +974,8 @@ IfConfig::report_updates(IfTree& it, bool is_system_interfaces_reportee)
     //
     // Disable all flipped interfaces
     updated = false;
-    for (IfTree::IfMap::iterator ii = it.ifs().begin();
-	 ii != it.ifs().end(); ++ii) {
+    for (IfTree::IfMap::iterator ii = it.interfaces().begin();
+	 ii != it.interfaces().end(); ++ii) {
 	IfTreeInterface& interface = ii->second;
 	if (! interface.flipped())
 	    continue;
@@ -993,8 +993,8 @@ IfConfig::report_updates(IfTree& it, bool is_system_interfaces_reportee)
 
     // Enable all flipped interfaces
     updated = false;
-    for (IfTree::IfMap::iterator ii = it.ifs().begin();
-	 ii != it.ifs().end(); ++ii) {
+    for (IfTree::IfMap::iterator ii = it.interfaces().begin();
+	 ii != it.interfaces().end(); ++ii) {
 	IfTreeInterface& interface = ii->second;
 
 	if (! interface.flipped())

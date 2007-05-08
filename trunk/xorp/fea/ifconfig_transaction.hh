@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.3 2007/04/27 21:47:26 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.4 2007/04/27 23:48:57 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -88,7 +88,7 @@ public:
     AddInterface(IfTree& it, const string& ifname)
 	: IfConfigTransactionOperation(it, ifname) {}
 
-    bool dispatch() 		{ iftree().add_if(ifname()); return true; }
+    bool dispatch() 	{ iftree().add_interface(ifname()); return true; }
 
     string str() const 		{ return string("AddInterface: ") + ifname(); }
 
@@ -103,7 +103,7 @@ public:
     RemoveInterface(IfTree& it, const string& ifname)
 	: IfConfigTransactionOperation(it, ifname) {}
 
-    bool dispatch() 		{ return iftree().remove_if(ifname()); }
+    bool dispatch() 		{ return iftree().remove_interface(ifname()); }
 
     string str() const {
 	return string("RemoveInterface: ") + ifname();
@@ -128,7 +128,7 @@ public:
 	if (ifp == NULL)
 	    return false;
 	
-	return iftree().update_if(*ifp);
+	return iftree().update_interface(*ifp);
     }
 
     string str() const {

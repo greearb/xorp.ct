@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_reporter.cc,v 1.2 2007/05/03 18:46:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_reporter.cc,v 1.3 2007/05/04 01:43:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -79,8 +79,8 @@ IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
     Update update = IfConfigUpdateReporterBase::CREATED;
     IfTree::IfMap::const_iterator if_iter;
 
-    for (if_iter = observed_iftree().ifs().begin();
-	 if_iter != observed_iftree().ifs().end();
+    for (if_iter = observed_iftree().interfaces().begin();
+	 if_iter != observed_iftree().interfaces().end();
 	 ++if_iter) {
 	const IfTreeInterface& iface = if_iter->second;
 	rp->interface_update(iface.ifname(), update);

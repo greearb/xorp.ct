@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set.cc,v 1.2 2007/05/01 02:40:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set.cc,v 1.3 2007/05/04 01:43:23 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -51,7 +51,7 @@ IfConfigSet::push_config(IfTree& it)
     //
     // Sanity check config - bail on bad interface and bad vif names
     //
-    for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
+    for (ii = it.interfaces().begin(); ii != it.interfaces().end(); ++ii) {
 	IfTreeInterface& i = ii->second;
 	//
 	// Skip the ifindex check if the interface has no mapping to
@@ -94,7 +94,7 @@ IfConfigSet::push_config(IfTree& it)
     // Walk config
     //
     push_iftree_begin();
-    for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
+    for (ii = it.interfaces().begin(); ii != it.interfaces().end(); ++ii) {
 	IfTreeInterface& i = ii->second;
 
 	// Set the "discard_emulated" flag if the discard interface is emulated
@@ -248,7 +248,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 
 	// Get the flags from the pulled config
 	if (ifp != NULL)
-	    pulled_flags = ifp->if_flags();
+	    pulled_flags = ifp->interface_flags();
 	new_flags = pulled_flags;
 
 	pulled_up = pulled_flags & IFF_UP;
@@ -471,7 +471,7 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 
 	// Get the flags from the pulled config
 	if (ifp != NULL)
-	    pulled_flags = ifp->if_flags();
+	    pulled_flags = ifp->interface_flags();
 	new_flags = pulled_flags;
 
 	pulled_up = pulled_flags & IFF_UP;

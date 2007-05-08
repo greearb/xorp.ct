@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.40 2007/04/25 01:57:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.41 2007/05/08 00:07:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -61,27 +61,27 @@ IfTreeItem::str() const
 void
 IfTree::clear()
 {
-    _ifs.clear();
+    _interfaces.clear();
 }
 
 bool
-IfTree::add_if(const string& ifname)
+IfTree::add_interface(const string& ifname)
 {
     IfTreeInterface* ifp = find_interface(ifname);
     if (ifp != NULL) {
 	ifp->mark(CREATED);
 	return true;
     }
-    _ifs.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
+    _interfaces.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
     return true;
 }
 
 IfTreeInterface *
 IfTree::find_interface(const string& ifname)
 {
-    IfTree::IfMap::iterator iter = _ifs.find(ifname);
+    IfTree::IfMap::iterator iter = _interfaces.find(ifname);
 
-    if (iter == ifs().end())
+    if (iter == interfaces().end())
 	return (NULL);
 
     return (&iter->second);
@@ -90,9 +90,9 @@ IfTree::find_interface(const string& ifname)
 const IfTreeInterface *
 IfTree::find_interface(const string& ifname) const
 {
-    IfTree::IfMap::const_iterator iter = _ifs.find(ifname);
+    IfTree::IfMap::const_iterator iter = _interfaces.find(ifname);
 
-    if (iter == ifs().end())
+    if (iter == interfaces().end())
 	return (NULL);
 
     return (&iter->second);
@@ -102,7 +102,7 @@ IfTreeInterface *
 IfTree::find_interface(uint32_t ifindex)
 {
     IfTree::IfMap::iterator iter;
-    for (iter = _ifs.begin(); iter != _ifs.end(); ++iter) {
+    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
 	if (iter->second.pif_index() == ifindex)
 	    return (&iter->second);
     }
@@ -114,7 +114,7 @@ const IfTreeInterface *
 IfTree::find_interface(uint32_t ifindex) const
 {
     IfTree::IfMap::const_iterator iter;
-    for (iter = _ifs.begin(); iter != _ifs.end(); ++iter) {
+    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
 	if (iter->second.pif_index() == ifindex)
 	    return (&iter->second);
     }
@@ -193,7 +193,7 @@ IfTree::find_addr(const string& ifname, const string& vifname,
 }
 
 bool
-IfTree::remove_if(const string& ifname)
+IfTree::remove_interface(const string& ifname)
 {
     IfTreeInterface* ifp = find_interface(ifname);
     if (ifp == NULL)
@@ -211,7 +211,7 @@ IfTree::remove_if(const string& ifname)
  * @return true on success, false if an error.
  */
 bool
-IfTree::update_if(const IfTreeInterface& other_iface)
+IfTree::update_interface(const IfTreeInterface& other_iface)
 {
     IfTreeInterface* this_ifp;
     IfTreeInterface::VifMap::iterator vi;
@@ -222,7 +222,7 @@ IfTree::update_if(const IfTreeInterface& other_iface)
     //
     this_ifp = find_interface(other_iface.ifname());
     if (this_ifp == NULL) {
-	add_if(other_iface.ifname());
+	add_interface(other_iface.ifname());
 	this_ifp = find_interface(other_iface.ifname());
 	XLOG_ASSERT(this_ifp != NULL);
     }
@@ -339,13 +339,13 @@ IfTree::update_if(const IfTreeInterface& other_iface)
 void
 IfTree::finalize_state()
 {
-    IfMap::iterator ii = _ifs.begin();
-    while (ii != _ifs.end()) {
+    IfMap::iterator ii = _interfaces.begin();
+    while (ii != _interfaces.end()) {
 	//
 	// If interface is marked as deleted, delete it.
 	//
 	if (ii->second.is_marked(DELETED)) {
-	    _ifs.erase(ii++);
+	    _interfaces.erase(ii++);
 	    continue;
 	}
 	//
@@ -361,7 +361,9 @@ string
 IfTree::str() const
 {
     string r;
-    for (IfMap::const_iterator ii = ifs().begin(); ii != ifs().end(); ++ii) {
+    IfMap::const_iterator ii;
+
+    for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	r += fi.str() + string("\n");
 	for (IfTreeInterface::VifMap::const_iterator vi = fi.vifs().begin();
@@ -418,7 +420,7 @@ IfTree::align_with(const IfTree& other)
 {
     IfTree::IfMap::iterator ii;
 
-    for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
+    for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
 	const string& ifname = ii->second.ifname();
 	const IfTreeInterface* other_ifp = other.find_interface(ifname);
 	bool flipped = ii->second.flipped();
@@ -548,7 +550,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
     //
     // Mark all entries in the local tree as created
     //
-    for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
+    for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
 	ii->second.mark(CREATED);
 	IfTreeInterface::VifMap::iterator vi;
 	for (vi = ii->second.vifs().begin();
@@ -567,7 +569,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	}
     }
 
-    for (oi = other.ifs().begin(); oi != other.ifs().end(); ++oi) {
+    for (oi = other.interfaces().begin(); oi != other.interfaces().end(); ++oi) {
 	if (! oi->second.enabled())
 	    continue;		// XXX: ignore disabled state
 	const string& ifname = oi->second.ifname();
@@ -581,7 +583,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    // "discard_emulated".
 	    //
 	    if (! (oi->second.is_soft() || oi->second.is_discard_emulated())) {
-		add_if(ifname);
+		add_interface(ifname);
 		ifp = find_interface(ifname);
 		XLOG_ASSERT(ifp != NULL);
 		ifp->copy_state(oi->second);
@@ -662,8 +664,8 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 {
     IfTree::IfMap::iterator ii;
 
-    ii = _ifs.begin();
-    while (ii != _ifs.end()) {
+    ii = _interfaces.begin();
+    while (ii != _interfaces.end()) {
 	const string& ifname = ii->second.ifname();
 	if (! ii->second.is_marked(DELETED)) {
 	    ++ii;
@@ -673,7 +675,7 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	old_ifp = old_iftree.find_interface(ifname);
 	if (old_ifp == NULL) {
 	    // Remove this item from the local tree
-	    _ifs.erase(ii++);
+	    _interfaces.erase(ii++);
 	    continue;
 	}
 
@@ -759,7 +761,7 @@ IfTree::track_live_config_state(const IfTree& other)
     IfTreeInterface* ifp;
     IfTree::IfMap::const_iterator oi;
 
-    for (oi = other.ifs().begin(); oi != other.ifs().end(); ++oi) {
+    for (oi = other.interfaces().begin(); oi != other.interfaces().end(); ++oi) {
 	const string& ifname = oi->second.ifname();
 	ifp = find_interface(ifname);
 	if (ifp == NULL)
@@ -781,7 +783,7 @@ IfTree::track_live_config_state(const IfTree& other)
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
       _enabled(false), _discard(false), _is_discard_emulated(false),
-      _mtu(0), _no_carrier(false), _flipped(false), _if_flags(0)
+      _mtu(0), _no_carrier(false), _flipped(false), _interface_flags(0)
 {}
 
 bool
@@ -935,7 +937,7 @@ IfTreeInterface::str() const
 		    _mac.str().c_str(),
 		    true_false(_no_carrier),
 		    true_false(_flipped),
-		    XORP_UINT_CAST(_if_flags))
+		    XORP_UINT_CAST(_interface_flags))
 	+ string(" ")
 	+ IfTreeItem::str();
 }

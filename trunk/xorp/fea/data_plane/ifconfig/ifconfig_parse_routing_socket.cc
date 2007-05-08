@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.7 2007/05/01 01:50:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.8 2007/05/01 06:36:45 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -338,8 +338,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	// Set the flags
 	//
 	unsigned int flags = ifm->ifm_flags;
-	if (is_newlink || (flags != ifp->if_flags())) {
-	    ifp->set_if_flags(flags);
+	if (is_newlink || (flags != ifp->interface_flags())) {
+	    ifp->set_interface_flags(flags);
 	    ifp->set_enabled(flags & IFF_UP);
 	}
 	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
@@ -374,7 +374,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	//
 	// Set the vif flags
 	//
-	if (is_newlink || (flags != ifp->if_flags())) {
+	if (is_newlink || (flags != ifp->interface_flags())) {
 	    vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
 	    vifp->set_broadcast(flags & IFF_BROADCAST);
 	    vifp->set_loopback(flags & IFF_LOOPBACK);
@@ -468,7 +468,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     ifconfig.map_ifindex(if_index, if_name);
     IfTreeInterface* ifp = it.find_interface(if_name);
     if (ifp == NULL) {
-	it.add_if(if_name);
+	it.add_interface(if_name);
 	is_newlink = true;
 	ifp = it.find_interface(if_name);
 	XLOG_ASSERT(ifp != NULL);
@@ -543,8 +543,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     // Set the flags
     //
     unsigned int flags = ifm->ifm_flags;
-    if (is_newlink || (flags != ifp->if_flags())) {
-	ifp->set_if_flags(flags);
+    if (is_newlink || (flags != ifp->interface_flags())) {
+	ifp->set_interface_flags(flags);
 	ifp->set_enabled(flags & IFF_UP);
     }
     debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
@@ -577,7 +577,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     //
     // Set the vif flags
     //
-    if (is_newlink || (flags != ifp->if_flags())) {
+    if (is_newlink || (flags != ifp->interface_flags())) {
 	vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
 	vifp->set_broadcast(flags & IFF_BROADCAST);
 	vifp->set_loopback(flags & IFF_LOOPBACK);
@@ -806,7 +806,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	debug_msg("Mapping %d -> %s\n", if_index, if_name.c_str());
 	ifconfig.map_ifindex(if_index, if_name);
 	
-	it.add_if(if_name);
+	it.add_interface(if_name);
 	IfTreeInterface* ifp = it.find_interface(if_name);
 	// XXX: vifname == ifname on this platform
 	if (ifp != NULL) {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.3 2007/04/28 01:54:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.4 2007/04/30 23:40:33 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -157,7 +157,7 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 	// Name
 	IfTreeInterface* ifp = it.find_interface(if_name);
 	if (ifp == NULL) {
-	    it.add_if(if_name);
+	    it.add_interface(if_name);
 	    is_newlink = true;
 	    ifp = it.find_interface(if_name);
 	    XLOG_ASSERT(ifp != NULL);

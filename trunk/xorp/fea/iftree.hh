@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.41 2007/04/25 01:57:44 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.42 2007/05/08 00:07:57 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -123,7 +123,7 @@ public:
      *
      * @return true on success, false if an error.
      */
-    bool add_if(const string& ifname);
+    bool add_interface(const string& ifname);
 
     /**
      * Label interface as ready for deletion.  Deletion does not occur
@@ -133,7 +133,7 @@ public:
      *
      * @return true on success, false if ifname is invalid.
      */
-    bool remove_if(const string& ifname);
+    bool remove_interface(const string& ifname);
 
     /**
      * Create a new interface or update its state if it already exists.
@@ -142,7 +142,7 @@ public:
      *
      * @return true on success, false if an error.
      */
-    bool update_if(const IfTreeInterface& other_iface);
+    bool update_interface(const IfTreeInterface& other_iface);
 
     /**
      * Find an interface.
@@ -250,14 +250,14 @@ public:
      *
      * @return the map with the stored interfaces.
      */
-    inline IfMap& ifs() { return _ifs; }
+    inline IfMap& interfaces() { return _interfaces; }
 
     /**
      * Get the const map with the stored interfaces.
      *
      * @return the const map with the stored interfaces.
      */
-    inline const IfMap& ifs() const { return _ifs; }
+    inline const IfMap& interfaces() const { return _interfaces; }
 
     /**
      * Align user supplied configuration with the device configuration.
@@ -354,7 +354,7 @@ public:
     string str() const;
 
 protected:
-    IfMap	_ifs;
+    IfMap	_interfaces;
 };
 
 
@@ -430,7 +430,7 @@ public:
      *
      * @return the system-specific interface flags.
      */
-    inline uint32_t if_flags() const	{ return _if_flags; }
+    inline uint32_t interface_flags() const	{ return _interface_flags; }
 
     /**
      * Store the system-specific interface flags.
@@ -438,10 +438,9 @@ public:
      * Typically, this value is read from the underlying system, and is
      * used only for internal purpose.
      *
-     * @param if_flags the value of the system-specific interface flags to
-     * store.
+     * @param v the value of the system-specific interface flags to store.
      */
-    inline void set_if_flags(uint32_t if_flags) { _if_flags = if_flags; mark(CHANGED); }
+    inline void set_interface_flags(uint32_t v) { _interface_flags = v; mark(CHANGED); }
 
     inline const VifMap& vifs() const	{ return _vifs; }
     inline VifMap& vifs()		{ return _vifs; }
@@ -535,7 +534,7 @@ public:
 	set_mac(o.mac());
 	set_no_carrier(o.no_carrier());
 	set_flipped(o.flipped());
-	set_if_flags(o.if_flags());
+	set_interface_flags(o.interface_flags());
     }
 
     /**
@@ -552,7 +551,7 @@ public:
 		&& (mac() == o.mac())
 		&& (no_carrier() == o.no_carrier())
 		&& (flipped() == o.flipped())
-		&& (if_flags() == o.if_flags()));
+		&& (interface_flags() == o.interface_flags()));
     }
 
     void finalize_state();
@@ -569,7 +568,7 @@ protected:
     Mac 	 _mac;
     bool	 _no_carrier;
     bool	 _flipped;	// If true, interface -> down, then -> up
-    uint32_t	 _if_flags;	// The system-specific interface flags
+    uint32_t	 _interface_flags;	// The system-specific interface flags
     VifMap	 _vifs;
 };
 

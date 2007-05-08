@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.3 2007/04/28 01:54:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.4 2007/04/30 23:40:34 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -152,7 +152,7 @@ IfConfigSetClick::add_interface(const string& ifname,
 	//
 	// Add the new interface
 	//
-	if (_iftree.add_if(ifname) != true) {
+	if (_iftree.add_interface(ifname) != true) {
 	    error_msg = c_format("Cannot add interface '%s'", ifname.c_str());
 	    return (XORP_ERROR);
 	}
@@ -238,14 +238,14 @@ IfConfigSetClick::config_interface(const string& ifname,
     if (ifp->pif_index() != if_index)
 	ifp->set_pif_index(if_index);
 
-    if (ifp->if_flags() != flags)
-	ifp->set_if_flags(flags);
+    if (ifp->interface_flags() != flags)
+	ifp->set_interface_flags(flags);
 
     if (ifp->enabled() != is_up)
 	ifp->set_enabled(is_up);
 
     if (is_deleted)
-	_iftree.remove_if(ifname);
+	_iftree.remove_interface(ifname);
 
     return (XORP_OK);
 }
@@ -806,7 +806,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
     //
     preamble = "";
     config += preamble + c_format("interfaces {\n");
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	preamble = "    ";
 	config += preamble + c_format("interface %s {\n",
@@ -955,7 +955,7 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     // XXX: The last port in xorp_rt is reserved for local delivery
     //
     local_xorp_rt_port = 0;
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    local_xorp_rt_port++;
@@ -969,7 +969,7 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     //
     ifconfig().nexthop_port_mapper().clear();
     xorp_rt_port = 0;
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    const IfTreeVif& fv = vi->second;

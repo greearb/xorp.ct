@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.6 2007/05/01 01:42:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.7 2007/05/01 01:50:44 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -383,7 +383,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
 	// Add the interface (if a new one)
 	//
 	ifconfig.map_ifindex(if_index, alias_if_name);
-	it.add_if(alias_if_name);
+	it.add_interface(alias_if_name);
 	IfTreeInterface* ifp = it.find_interface(alias_if_name);
 	XLOG_ASSERT(ifp != NULL);
 
@@ -443,7 +443,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
 	} else {
 	    flags = ifreq.ifr_flags;
 	}
-	ifp->set_if_flags(flags);
+	ifp->set_interface_flags(flags);
 	ifp->set_enabled(flags & IFF_UP);
 	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
 

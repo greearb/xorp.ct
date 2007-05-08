@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/routing_socket_utilities.cc,v 1.4 2007/05/01 02:43:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/control_socket/routing_socket_utilities.cc,v 1.5 2007/05/01 08:21:56 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -453,8 +453,8 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	// have to walk for it.
 	//
 	const IfTreeInterface* pi = NULL;
-	for (IfTree::IfMap::const_iterator ii = iftree.ifs().begin();
-	     ii != iftree.ifs().end(); ++ii) {
+	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
+	     ii != iftree.interfaces().end(); ++ii) {
 		if (ii->second.discard()) {
 			pi = &ii->second;
 			break;

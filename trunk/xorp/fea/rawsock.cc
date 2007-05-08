@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.45 2007/05/01 01:42:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.46 2007/05/01 01:50:42 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -2547,7 +2547,7 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
     iftree_if = NULL;
     iftree_vif = NULL;
 
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    const IfTreeVif& fv = vi->second;
@@ -2625,7 +2625,7 @@ RawSocket::find_interface_vif_by_addr(
     iftree_if = NULL;
     iftree_vif = NULL;
 
-    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    const IfTreeVif& fv = vi->second;
