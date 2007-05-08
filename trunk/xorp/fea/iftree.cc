@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.39 2007/04/24 05:53:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.40 2007/04/25 01:57:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -947,7 +947,7 @@ IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
     : IfTreeItem(), _ifname(ifname), _vifname(vifname),
       _pif_index(0), _enabled(false),
       _broadcast(false), _loopback(false), _point_to_point(false),
-      _multicast(false)
+      _multicast(false), _pim_register(false)
 {}
 
 bool
@@ -1080,13 +1080,24 @@ IfTreeVif::finalize_state()
 string
 IfTreeVif::str() const
 {
+    string pim_register_str;
+
+    //
+    // XXX: Conditionally print the pim_register flag, because it is
+    // used only by the MFEA.
+    //
+    if (_pim_register)
+	pim_register_str = c_format("{ pim_register := %s } ",
+				    true_false(_pim_register));
+    pim_register_str += string(" ");	// XXX: unconditional extra space
+
     return c_format("VIF %s { enabled := %s } { broadcast := %s } "
 		    "{ loopback := %s } { point_to_point := %s } "
 		    "{ multicast := %s } ",
 		    _vifname.c_str(), true_false(_enabled),
 		    true_false(_broadcast), true_false(_loopback),
 		    true_false(_point_to_point), true_false(_multicast))
-	+ string(" ") + IfTreeItem::str();
+	+ pim_register_str + IfTreeItem::str();
 }
 
 /* ------------------------------------------------------------------------- */

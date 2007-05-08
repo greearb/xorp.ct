@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.40 2007/04/24 05:53:07 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.41 2007/04/25 01:57:44 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -596,12 +596,14 @@ public:
     inline bool loopback() const	{ return _loopback; }
     inline bool point_to_point() const	{ return _point_to_point; }
     inline bool multicast() const	{ return _multicast; }
+    inline bool pim_register() const	{ return _pim_register; }
 
     inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
     inline void set_broadcast(bool v)	{ _broadcast = v; mark(CHANGED); }
     inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
     inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
     inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
+    inline void set_pim_register(bool v) { _pim_register = v; mark(CHANGED); }
 
     inline const IPv4Map& ipv4addrs() const { return _ipv4addrs; }
     inline IPv4Map& ipv4addrs()		{ return _ipv4addrs; }
@@ -693,6 +695,7 @@ public:
 	set_loopback(o.loopback());
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
+	set_pim_register(o.pim_register());
     }
 
     /**
@@ -708,7 +711,8 @@ public:
 		&& (broadcast() == o.broadcast())
 		&& (loopback() == o.loopback())
 		&& (point_to_point() == o.point_to_point())
-		&& (multicast() == o.multicast()));
+		&& (multicast() == o.multicast())
+		&& (pim_register() == o.pim_register()));
     }
 
     void finalize_state();
@@ -719,12 +723,13 @@ protected:
     const string _ifname;
     const string _vifname;
 
-    uint32_t	 _pif_index;
-    bool 	 _enabled;
-    bool	 _broadcast;
-    bool	 _loopback;
-    bool	 _point_to_point;
-    bool	 _multicast;
+    uint32_t	_pif_index;
+    bool 	_enabled;
+    bool	_broadcast;
+    bool	_loopback;
+    bool	_point_to_point;
+    bool	_multicast;
+    bool	_pim_register;
 
     IPv4Map	 _ipv4addrs;
     IPv6Map	 _ipv6addrs;
