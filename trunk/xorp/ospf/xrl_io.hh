@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.25 2007/02/27 18:33:14 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.26 2007/03/12 10:16:04 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -217,6 +217,7 @@ class XrlIO : public IO<A>,
 	      int32_t ip_ttl,
 	      int32_t ip_tos,
 	      bool ip_router_alert,
+	      bool ip_internet_control,
 	      const vector<uint8_t>& payload);
 
     /**

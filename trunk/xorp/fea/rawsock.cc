@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.46 2007/05/01 01:50:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.47 2007/05/08 00:49:01 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1184,6 +1184,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     int32_t	ip_ttl = -1;		// a.k.a. Hop-Limit in IPv6
     int32_t	ip_tos = -1;
     bool	is_router_alert = false; // Router Alert option received
+    bool	ip_internet_control = false; // IP Internet Control pkt rcvd
     uint32_t	pif_index = 0;
     vector<uint8_t> ext_headers_type;
     vector<vector<uint8_t> > ext_headers_payload;
@@ -1390,6 +1391,9 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	dst_address = ip4.ip_dst();
 	ip_ttl = ip4.ip_ttl();
 	ip_tos = ip4.ip_tos();
+
+	if (ip_tos == IPTOS_PREC_INTERNETCONTROL)
+	    ip_internet_control = true;
 	
 	ip_hdr_len  = ip4.ip_header_len();
 #ifdef IPV4_RAW_INPUT_IS_RAW
@@ -1627,6 +1631,12 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		    continue;
 		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_tos = int_val;
+
+		//
+		// TODO: XXX: Here we need to compute ip_internet_control
+		// for IPv6, but we don't know how.
+		//
+
 		break;
 #endif // IPV6_TCLASS
 
@@ -1761,6 +1771,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		      iftree_vif->vifname(),
 		      src_address, dst_address, ip_ttl, ip_tos,
 		      is_router_alert,
+		      ip_internet_control,
 		      ext_headers_type,
 		      ext_headers_payload,
 		      payload);
@@ -1776,6 +1787,7 @@ RawSocket::proto_socket_write(const string& if_name,
 			      int32_t ip_ttl,
 			      int32_t ip_tos,
 			      bool is_router_alert,
+			      bool ip_internet_control,
 			      const vector<uint8_t>& ext_headers_type,
 			      const vector<vector<uint8_t> >& ext_headers_payload,
 			      const vector<uint8_t>& payload,
@@ -1837,14 +1849,14 @@ RawSocket::proto_socket_write(const string& if_name,
     case AF_INET:
 	// Assign the TTL
 	if (ip_ttl < 0) {
-	    if (is_router_alert)
+	    if (ip_internet_control)
 		ip_ttl = MINTTL;
 	    else
 		ip_ttl = IPDEFTTL;
 	}
 	// Assign the TOS
 	if (ip_tos < 0) {
-	    if (is_router_alert)
+	    if (ip_internet_control)
 		ip_tos = IPTOS_PREC_INTERNETCONTROL;  // Internet Control
 	    else
 		ip_tos = 0;
@@ -1855,14 +1867,14 @@ RawSocket::proto_socket_write(const string& if_name,
     {
 	// Assign the TTL
 	if (ip_ttl < 0) {
-	    if (is_router_alert)
+	    if (ip_internet_control)
 		ip_ttl = MINTTL;
 	    else
 		ip_ttl = IPDEFTTL;
 	}
 	// Assign the TOS
 	if (ip_tos < 0) {
-	    if (is_router_alert) {
+	    if (ip_internet_control) {
 		// TODO: XXX: IPTOS for IPv6 is bogus??
 		// ip_tos = IPTOS_PREC_INTERNETCONTROL;  // Internet Control
 		ip_tos = 0;

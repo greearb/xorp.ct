@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.53 2007/02/23 21:09:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.54 2007/03/12 10:16:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -167,6 +167,7 @@ XrlOspfV2Target::raw_packet4_client_0_1_recv(
     const int32_t&	ip_ttl,
     const int32_t&	ip_tos,
     const bool&		ip_router_alert,
+    const bool&		ip_internet_control,
     const vector<uint8_t>& payload)
 {
     _xrl_io.recv(if_name,
@@ -177,6 +178,7 @@ XrlOspfV2Target::raw_packet4_client_0_1_recv(
 		 ip_ttl,
 		 ip_tos,
 		 ip_router_alert,
+		 ip_internet_control,
 		 payload);
 
     return XrlCmdError::OKAY();
@@ -193,6 +195,7 @@ XrlOspfV3Target::raw_packet4_client_0_1_recv(
     const int32_t&	/*ip_ttl*/,
     const int32_t&	/*ip_tos*/,
     const bool&		/*ip_router_alert*/,
+    const bool&		/*ip_internet_control*/,
     const vector<uint8_t>& /*payload*/)
 {
 #if	0
@@ -204,6 +207,7 @@ XrlOspfV3Target::raw_packet4_client_0_1_recv(
 		      ip_ttl,
 		      ip_tos,
 		      ip_router_alert,
+		      ip_internet_control,
 		      payload);
 #else
     XLOG_UNFINISHED();
@@ -223,6 +227,7 @@ XrlOspfV3Target::raw_packet6_client_0_1_recv(
     const int32_t&	ip_ttl,
     const int32_t&	ip_tos,
     const bool&		ip_router_alert,
+    const bool&		ip_internet_control,
     const XrlAtomList&	ext_headers_type,
     const XrlAtomList&	ext_headers_payload,
     const vector<uint8_t>& payload)
@@ -238,6 +243,7 @@ XrlOspfV3Target::raw_packet6_client_0_1_recv(
 		      ip_ttl,
 		      ip_tos,
 		      ip_router_alert,
+		      ip_internet_control,
 		      payload);
 
     return XrlCmdError::OKAY();

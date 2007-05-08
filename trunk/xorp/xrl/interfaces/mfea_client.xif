@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.7 2006/07/03 23:33:42 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.8 2007/04/20 00:14:53 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -85,6 +85,7 @@ interface mfea_client/0.1 {
 	 * negative value, it should be ignored.
 	 * @param is_router_alert if true, the IP Router Alert option in
 	 * the IP packet was set (when applicable).
+	 * @param ip_internet_control if true, then this is IP control traffic.
 	 * @param protocol_message the protocol message.
 	 */
 	recv_protocol_message4	? xrl_sender_name:txt			\
@@ -94,6 +95,7 @@ interface mfea_client/0.1 {
 				& dest_address:ipv4			\
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
+				& ip_internet_control:bool		\
 				& protocol_message:binary
 	recv_protocol_message6	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
@@ -102,6 +104,7 @@ interface mfea_client/0.1 {
 				& dest_address:ipv6			\
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
+				& ip_internet_control:bool		\
 				& protocol_message:binary
 	
 	/**

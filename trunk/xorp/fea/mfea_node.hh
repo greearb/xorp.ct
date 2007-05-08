@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.40 2007/05/04 01:43:23 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.41 2007/05/07 23:48:25 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -598,6 +598,8 @@ public:
      * @param is_router_alert if true, set the Router Alert IP option for
      * the IP packet of the outgoung message.
      * 
+     * @param ip_internet_control if true, then this is IP control traffic.
+     * 
      * @param rcvbuf the data buffer with the received message.
      * 
      * @param rcvlen the data length in @ref rcvbuf.
@@ -611,8 +613,8 @@ public:
 			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
-			   const uint8_t *rcvbuf, size_t rcvlen,
-			   string& error_msg);
+			   bool ip_internet_control, const uint8_t *rcvbuf,
+			   size_t rcvlen, string& error_msg);
     /**
      * Process an incoming message from the kernel.
      * 
@@ -639,6 +641,8 @@ public:
      * @param is_router_alert if true, the Router Alert IP option for the IP
      * packet of the incoming message was set.
      * 
+     * @param ip_internet_control if true, then this is IP control traffic.
+     * 
      * @param rcvbuf the data buffer with the received message.
      * 
      * @param rcvlen the data length in @ref rcvbuf.
@@ -649,6 +653,7 @@ public:
 				uint32_t vif_index,
 				const IPvX& src, const IPvX& dst,
 				int ip_ttl, int ip_tos, bool is_router_alert,
+				bool ip_internet_control,
 				const uint8_t *rcvbuf, size_t rcvlen);
     
     /**

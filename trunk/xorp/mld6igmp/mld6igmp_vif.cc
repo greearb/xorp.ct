@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.83 2006/12/18 23:52:37 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.84 2007/02/16 22:46:37 pavlin Exp $"
 
 
 //
@@ -458,6 +458,8 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     uint16_t cksum;
     int ret_value;
     size_t datalen;
+    bool is_router_alert = true;	// XXX: always use Router Alert option
+    bool ip_internet_control = true;	// XXX: always true
     
     if (! (is_up() || is_pending_down())) {
 	error_msg = c_format("vif %s is not UP", name().c_str());
@@ -519,8 +521,10 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     // Send the message
     //
     ret_value = mld6igmp_node().mld6igmp_send(vif_index(), src, dst,
-					      MINTTL, -1, true, buffer,
-					      error_msg);
+					      MINTTL, -1,
+					      is_router_alert,
+					      ip_internet_control,
+					      buffer, error_msg);
     
     return (ret_value);
     
@@ -858,6 +862,7 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
  * it should be ignored.
  * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
+ * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the received message.
  * @error_msg: The error message (if error).
  * 
@@ -871,6 +876,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 			   int ip_ttl,
 			   int ip_tos,
 			   bool is_router_alert,
+			   bool ip_internet_control,
 			   buffer_t *buffer,
 			   string& error_msg)
 {
@@ -882,7 +888,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
     }
     
     ret_value = mld6igmp_process(src, dst, ip_ttl, ip_tos, is_router_alert,
-				 buffer, error_msg);
+				 ip_internet_control, buffer, error_msg);
     
     return (ret_value);
 }
@@ -897,6 +903,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
  * it should be ignored.
  * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
+ * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the message.
  * @error_msg: The error message (if error).
  * 
@@ -911,6 +918,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 			      int ip_ttl,
 			      int ip_tos,
 			      bool is_router_alert,
+			      bool ip_internet_control,
 			      buffer_t *buffer,
 			      string& error_msg)
 {
@@ -1149,10 +1157,12 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	return (XORP_ERROR);
     }
     //
-    // TODO: check the TTL and TOS if we are running in secure mode
+    // TODO: check the TTL, TOS and ip_internet_control flag if we are
+    // running in secure mode.
     //
     UNUSED(ip_ttl);
     UNUSED(ip_tos);
+    UNUSED(ip_internet_control);
 #if 0
     if (ip_ttl != MINTTL) {
 	error_msg = c_format("RX %s from %s to %s on vif %s: "

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.15 2006/06/15 06:04:36 pavlin Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.16 2007/02/16 22:45:50 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -58,6 +58,7 @@ struct IPv6HeaderInfo {
     int32_t	ip_ttl;
     int32_t	ip_tos;
     bool	ip_router_alert;
+    bool	ip_internet_control;
     vector<uint8_t> ext_headers_type;
     vector<vector<uint8_t> > ext_headers_payload;
 };
@@ -202,6 +203,7 @@ public:
      * set internally before transmission.
      * @param ip_router_alert if true, then add the IP Router Alert option to
      * the IP packet.
+     * @param ip_internet_control if true, then this is IP control traffic.
      * @param ext_headers_type a vector of integers with the types of the
      * optional extention headers.
      * @param ext_headers_payload a vector of payload data, one for each
@@ -218,6 +220,7 @@ public:
 				   int32_t		ip_ttl,
 				   int32_t		ip_tos,
 				   bool			ip_router_alert,
+				   bool			ip_internet_control,
 				   const vector<uint8_t>& ext_headers_type,
 				   const vector<vector<uint8_t> >& ext_headers_payload,
 				   const vector<uint8_t>& payload,
@@ -264,6 +267,7 @@ protected:
 				  int32_t		ip_ttl,
 				  int32_t		ip_tos,
 				  bool			ip_router_alert,
+				  bool			ip_internet_control,
 				  const vector<uint8_t>& ext_headers_type,
 				  const vector<vector<uint8_t> >& ext_headers_payload,
 				  const vector<uint8_t>& payload);

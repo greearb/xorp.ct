@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.16 2006/06/15 06:04:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.17 2007/02/16 22:45:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -115,6 +115,7 @@ FilterRawSocket6::proto_socket_write(const string&	if_name,
 				     int32_t		ip_ttl,
 				     int32_t		ip_tos,
 				     bool		ip_router_alert,
+				     bool		ip_internet_control,
 				     const vector<uint8_t>& ext_headers_type,
 				     const vector<vector<uint8_t> >& ext_headers_payload,
 				     const vector<uint8_t>& payload,
@@ -127,6 +128,7 @@ FilterRawSocket6::proto_socket_write(const string&	if_name,
 					   ip_ttl,
 					   ip_tos,
 					   ip_router_alert,
+					   ip_internet_control,
 					   ext_headers_type,
 					   ext_headers_payload,
 					   payload,
@@ -141,6 +143,7 @@ FilterRawSocket6::process_recv_data(const string&	if_name,
 				    int32_t		ip_ttl,
 				    int32_t		ip_tos,
 				    bool		ip_router_alert,
+				    bool		ip_internet_control,
 				    const vector<uint8_t>& ext_headers_type,
 				    const vector<vector<uint8_t> >& ext_headers_payload,
 				    const vector<uint8_t>& payload)
@@ -158,6 +161,7 @@ FilterRawSocket6::process_recv_data(const string&	if_name,
     header.ip_ttl = ip_ttl;
     header.ip_tos = ip_tos;
     header.ip_router_alert = ip_router_alert;
+    header.ip_internet_control = ip_internet_control;
     header.ext_headers_type = ext_headers_type;
     header.ext_headers_payload = ext_headers_payload;
 

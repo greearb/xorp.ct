@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.16 2006/06/15 06:04:36 pavlin Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.17 2007/02/16 22:45:49 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
@@ -58,6 +58,7 @@ struct IPv4HeaderInfo {
     int32_t	ip_ttl;
     int32_t	ip_tos;
     bool	ip_router_alert;
+    bool	ip_internet_control;
 };
 
 /**
@@ -200,6 +201,7 @@ public:
      * set internally before transmission.
      * @param ip_router_alert if true, then add the IP Router Alert option to
      * the IP packet.
+     * @param ip_internet_control if true, then this is IP control traffic.
      * @param payload the payload, everything after the IP header and options.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -211,6 +213,7 @@ public:
 				   int32_t		ip_ttl,
 				   int32_t		ip_tos,
 				   bool			ip_router_alert,
+				   bool			ip_internet_control,
 				   const vector<uint8_t>& payload,
 				   string&		error_msg);
 
@@ -255,6 +258,7 @@ protected:
 				  int32_t		ip_ttl,
 				  int32_t		ip_tos,
 				  bool			ip_router_alert,
+				  bool			ip_internet_control,
 				  const vector<uint8_t>& ext_headers_type,
 				  const vector<vector<uint8_t> >& ext_headers_payload,
 				  const vector<uint8_t>& payload);

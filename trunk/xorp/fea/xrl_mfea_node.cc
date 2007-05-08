@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.54 2007/05/03 09:32:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.55 2007/05/07 23:48:25 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -203,6 +203,7 @@ XrlMfeaNode::finder_disconnect_event()
  * it should be ignored.
  * @is_router_alert: If true, the Router Alert IP option for the IP
  * packet of the incoming message was set.
+ * @param ip_internet_control if true, then this is IP control traffic.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
  * @error_msg: The error message (if error).
@@ -220,6 +221,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 			int ip_ttl,
 			int ip_tos,
 			bool is_router_alert,
+			bool ip_internet_control,
 			const uint8_t *sndbuf,
 			size_t sndlen,
 			string& error_msg
@@ -261,6 +263,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 		ip_ttl,
 		ip_tos,
 		is_router_alert,
+		ip_internet_control,
 		snd_vector,
 		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb));
 	    break;
@@ -279,6 +282,7 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 		ip_ttl,
 		ip_tos,
 		is_router_alert,
+		ip_internet_control,
 		snd_vector,
 		callback(this, &XrlMfeaNode::mfea_client_client_send_recv_protocol_message_cb));
 	    break;
@@ -2429,6 +2433,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
     const int32_t&	ip_ttl, 
     const int32_t&	ip_tos, 
     const bool&		is_router_alert, 
+    const bool&		ip_internet_control,
     const vector<uint8_t>& protocol_message)
 {
     string error_msg;
@@ -2463,6 +2468,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
+			     ip_internet_control,
 			     &protocol_message[0],
 			     protocol_message.size(),
 			     error_msg) < 0) {
@@ -2495,6 +2501,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
     const int32_t&	ip_ttl, 
     const int32_t&	ip_tos, 
     const bool&		is_router_alert, 
+    const bool&		ip_internet_control,
     const vector<uint8_t>& protocol_message)
 {
     string error_msg;
@@ -2529,6 +2536,7 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
+			     ip_internet_control,
 			     &protocol_message[0],
 			     protocol_message.size(),
 			     error_msg) < 0) {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.4 2005/09/21 04:58:20 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.5 2006/06/15 06:02:43 pavlin Exp $ */
 
 /*
  * Interface for sending IPv6 packets on a raw socket.
@@ -26,6 +26,7 @@ interface raw_packet6/0.1 {
 	 *               internally before transmission.
 	 * @param ip_router_alert if true, then add the IP Router Alert option
 	 *                        to the IP packet.
+	 * @param ip_internet_control if true, then this is IP control traffic.
 	 * @param ext_headers_type a list of u32 integers with the types
 	 *                         of the optional extention headers.
 	 * @param ext_headers_payload a list of payload data, one for each
@@ -42,6 +43,7 @@ interface raw_packet6/0.1 {
 		& ip_ttl:i32						\
 		& ip_tos:i32						\
 		& ip_router_alert:bool 					\
+		& ip_internet_control:bool				\
 		& ext_headers_type:list					\
 		& ext_headers_payload:list				\
 		& payload:binary

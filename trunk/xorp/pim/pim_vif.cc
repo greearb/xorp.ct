@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.65 2007/02/16 22:46:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.66 2007/04/14 08:59:52 pavlin Exp $"
 
 
 //
@@ -542,6 +542,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     // messages don't include the IP Router Alert option.
     //
     bool is_router_alert = false;
+    bool ip_internet_control = true;	// XXX: might be overwritten below
 
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
@@ -574,6 +575,9 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     if (dst.is_unicast()) {
 	switch (message_type) {
 	case PIM_REGISTER:
+	    // XXX: The ip_tos is copied from the inner IP header
+	    ip_internet_control = false;
+	    // FALLTHROUGH
 	case PIM_REGISTER_STOP:
 	case PIM_CAND_RP_ADV:
 	    ttl = IPDEFTTL;
@@ -704,7 +708,8 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     // Send the message
     //
     ret_value = pim_node().pim_send(vif_index(), src, dst, ttl, ip_tos,
-				    is_router_alert, buffer, error_msg);
+				    is_router_alert, ip_internet_control,
+				    buffer, error_msg);
     
     //
     // Actions after the message is sent
@@ -787,6 +792,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
  * it should be ignored.
  * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
+ * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the received message.
  * 
  * Receive PIM message and pass it for processing.
@@ -799,6 +805,7 @@ PimVif::pim_recv(const IPvX& src,
 		 int ip_ttl,
 		 int ip_tos,
 		 bool is_router_alert,
+		 bool ip_internet_control,
 		 buffer_t *buffer)
 {
     int ret_value = XORP_ERROR;
@@ -809,7 +816,7 @@ PimVif::pim_recv(const IPvX& src,
     }
     
     ret_value = pim_process(src, dst, ip_ttl, ip_tos, is_router_alert,
-			    buffer);
+			    ip_internet_control, buffer);
     
     return (ret_value);
 }
@@ -824,6 +831,7 @@ PimVif::pim_recv(const IPvX& src,
  * it should be ignored.
  * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
+ * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the message.
  * 
  * Process PIM message and pass the control to the type-specific functions.
@@ -835,6 +843,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		    int ip_ttl,
 		    int ip_tos,
 		    bool is_router_alert,
+		    bool ip_internet_control,
 		    buffer_t *buffer)
 {
     uint8_t pim_vt;
@@ -1016,10 +1025,12 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		goto ret_label;
 	    }
 	    //
-	    // TODO: check the TTL and TOS if we are running in secure mode
+	    // TODO: check the TTL, TOS and ip_internet_control flag if we are
+	    // running in secure mode.
 	    //
 	    UNUSED(ip_ttl);
 	    UNUSED(ip_tos);
+	    UNUSED(ip_internet_control);
 #if 0
 	    if (ip_ttl != MINTTL) {
 		XLOG_WARNING("RX %s from %s to %s on vif %s: "

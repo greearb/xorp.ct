@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.30 2007/05/03 09:32:36 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.31 2007/05/07 23:48:25 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -441,6 +441,8 @@ protected:
      *  
      *  @param is_router_alert set/reset the IP Router Alert option in the IP
      *  packet to send (when applicable).
+     *
+     *  @param ip_internet_control if true, then this is IP control traffic.
      */
     XrlCmdError mfea_0_1_send_protocol_message4(
 	// Input values, 
@@ -454,6 +456,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	protocol_message);
 
     XrlCmdError mfea_0_1_send_protocol_message6(
@@ -468,6 +471,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	protocol_message);
     
     /**
@@ -661,6 +665,7 @@ private:
 		   uint32_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool is_router_alert,
+		   bool ip_internet_control,
 		   const uint8_t* sndbuf, size_t sndlen, string& error_msg);
     //
     // XXX: mfea_client_client_send_recv_protocol_message_cb() in fact

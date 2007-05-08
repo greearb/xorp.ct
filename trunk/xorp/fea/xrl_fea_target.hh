@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.8 2007/04/28 00:19:54 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.9 2007/04/28 00:49:12 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1011,6 +1011,8 @@ public:
      *  @param ip_router_alert if true, then add the IP Router Alert option to
      *  the IP packet.
      *
+     *  @param ip_internet_control if true, then this is IP control traffic.
+     *
      *  @param payload the payload, everything after the IP header and options.
      */
     XrlCmdError raw_packet4_0_1_send(
@@ -1023,6 +1025,7 @@ public:
 	const int32_t&	ip_ttl,
 	const int32_t&	ip_tos,
 	const bool&	ip_router_alert,
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	payload);
 
     /**
@@ -1149,6 +1152,8 @@ public:
      *  @param ip_router_alert if true, then add the IP Router Alert option to
      *  the IP packet.
      *
+     *  @param ip_internet_control if true, then this is IP control traffic.
+     *
      *  @param ext_headers_type a list of u32 integers with the types of the
      *  optional extention headers.
      *
@@ -1168,6 +1173,7 @@ public:
 	const int32_t&	ip_ttl,
 	const int32_t&	ip_tos,
 	const bool&	ip_router_alert,
+	const bool&	ip_internet_control,
 	const XrlAtomList&	ext_headers_type,
 	const XrlAtomList&	ext_headers_payload,
 	const vector<uint8_t>&	payload);

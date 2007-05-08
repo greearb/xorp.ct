@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.39 2007/04/18 01:01:18 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.40 2007/04/20 00:14:52 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -318,6 +318,8 @@ protected:
      *  @param is_router_alert if true, the IP Router Alert option in
      *  the IP packet was set (when applicable).
      *  
+     *  @param ip_internet_control if true, then this is IP control traffic.
+     *  
      *  @param protocol_message the protocol message.
      */
     XrlCmdError mfea_client_0_1_recv_protocol_message4(
@@ -332,6 +334,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	protocol_message);
 
     XrlCmdError mfea_client_0_1_recv_protocol_message6(
@@ -346,6 +349,7 @@ protected:
 	const int32_t&	ip_ttl, 
 	const int32_t&	ip_tos, 
 	const bool&	is_router_alert, 
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	protocol_message);
     
     /**
@@ -852,6 +856,7 @@ private:
 		   uint32_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool is_router_alert,
+		   bool ip_internet_control,
 		   const uint8_t* sndbuf, size_t sndlen, string& error_msg);
     void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
     
@@ -986,6 +991,7 @@ private:
 			    int			ip_ttl,
 			    int			ip_tos,
 			    bool		is_router_alert,
+			    bool		ip_internet_control,
 			    const uint8_t*	sndbuf,
 			    size_t		sndlen)
 	    : XrlTaskBase(xrl_mld6igmp_node),
@@ -996,7 +1002,8 @@ private:
 	      _dst(dst),
 	      _ip_ttl(ip_ttl),
 	      _ip_tos(ip_tos),
-	      _is_router_alert(is_router_alert) {
+	      _is_router_alert(is_router_alert),
+	      _ip_internet_control(ip_internet_control) {
 		  _message.resize(sndlen);
 		  for (size_t i = 0; i < sndlen; i++)
 		      _message[i] = sndbuf[i];
@@ -1013,6 +1020,7 @@ private:
 	int		ip_ttl() const { return _ip_ttl; }
 	int		ip_tos() const { return _ip_tos; }
 	bool		is_router_alert() const { return _is_router_alert; }
+	bool		ip_internet_control() const { return _ip_internet_control; }
 	const vector<uint8_t>& message() const { return _message; }
 
     private:
@@ -1024,6 +1032,7 @@ private:
 	int		_ip_ttl;
 	int		_ip_tos;
 	bool		_is_router_alert;
+	bool		_ip_internet_control;
 	vector<uint8_t>	_message;
     };
 

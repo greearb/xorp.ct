@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.39 2007/03/12 10:16:05 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.40 2007/03/20 22:09:54 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -75,6 +75,8 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      *
      *  @param ip_router_alert if true, the IP Router Alert option was included
      *  in the IP packet.
+     *
+     *  @param ip_internet_control if true, then this is IP control traffic.
      */
     XrlCmdError raw_packet4_client_0_1_recv(
 	// Input values,
@@ -86,6 +88,7 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const int32_t&	ip_ttl,
 	const int32_t&	ip_tos,
 	const bool&	ip_router_alert,
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	payload);
 
     /**
@@ -660,6 +663,8 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      *
      *  @param ip_router_alert if true, the IP Router Alert option was included
      *  in the IP packet.
+     *
+     *  @param ip_internet_control if true, then this is IP control traffic.
      */
     XrlCmdError raw_packet4_client_0_1_recv(
 	// Input values,
@@ -671,6 +676,7 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	const int32_t&	ip_ttl,
 	const int32_t&	ip_tos,
 	const bool&	ip_router_alert,
+	const bool&	ip_internet_control,
 	const vector<uint8_t>&	payload);
 
     /**
@@ -695,6 +701,8 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      *  @param ip_router_alert if true, the IP Router Alert option was included
      *  in the IP packet.
      *
+     *  @param ip_internet_control if true, then this is IP control traffic.
+     *
      *  @param ext_headers_type a list of u32 integers with the types of the
      *  optional extention headers.
      *
@@ -712,6 +720,7 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	const int32_t&	ip_ttl,
 	const int32_t&	ip_tos,
 	const bool&	ip_router_alert,
+	const bool&	ip_internet_control,
 	const XrlAtomList&	ext_headers_type,
 	const XrlAtomList&	ext_headers_payload,
 	const vector<uint8_t>&	payload);

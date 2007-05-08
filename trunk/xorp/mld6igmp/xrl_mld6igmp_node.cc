@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.59 2007/02/16 22:46:37 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.60 2007/04/20 00:14:52 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1346,6 +1346,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * the TOS will be set by the lower layers.
  * @is_router_alert: If true, the Router Alert IP option for the IP
+ * @ip_internet_control: If true, then this is IP control traffic.
  * packet of the incoming message should be set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
@@ -1364,6 +1365,7 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 			    int ip_ttl,
 			    int ip_tos,
 			    bool is_router_alert,
+			    bool ip_internet_control,
 			    const uint8_t *sndbuf,
 			    size_t sndlen,
 			    string& error_msg)
@@ -1377,6 +1379,7 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 				     ip_ttl,
 				     ip_tos,
 				     is_router_alert,
+				     ip_internet_control,
 				     sndbuf,
 				     sndlen));
     error_msg = "";
@@ -1440,6 +1443,7 @@ XrlMld6igmpNode::send_protocol_message()
 		entry->ip_ttl(),
 		entry->ip_tos(),
 		entry->is_router_alert(),
+		entry->ip_internet_control(),
 		entry->message(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_protocol_message_cb));
 	    if (success)
@@ -1460,6 +1464,7 @@ XrlMld6igmpNode::send_protocol_message()
 		entry->ip_ttl(),
 		entry->ip_tos(),
 		entry->is_router_alert(),
+		entry->ip_internet_control(),
 		entry->message(),
 		callback(this, &XrlMld6igmpNode::mfea_client_send_protocol_message_cb));
 	    if (success)
@@ -2079,6 +2084,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
     const int32_t&	ip_ttl, 
     const int32_t&	ip_tos, 
     const bool&		is_router_alert, 
+    const bool&		ip_internet_control,
     const vector<uint8_t>& protocol_message)
 {
     string error_msg;
@@ -2113,6 +2119,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
+			     ip_internet_control,
 			     &protocol_message[0],
 			     protocol_message.size(),
 			     error_msg);
@@ -2138,6 +2145,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
     const int32_t&	ip_ttl, 
     const int32_t&	ip_tos, 
     const bool&		is_router_alert, 
+    const bool&		ip_internet_control,
     const vector<uint8_t>& protocol_message)
 {
     string error_msg;
@@ -2172,6 +2180,7 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
 			     ip_ttl,
 			     ip_tos,
 			     is_router_alert,
+			     ip_internet_control,
 			     &protocol_message[0],
 			     protocol_message.size(),
 			     error_msg);

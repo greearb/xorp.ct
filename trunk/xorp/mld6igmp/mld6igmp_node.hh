@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.30 2006/12/18 23:52:37 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.31 2007/02/16 22:46:36 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -308,6 +308,8 @@ public:
      * @param is_router_alert if true, the IP Router Alert option in
      * the IP packet was set (when applicable).
      * 
+     * @param ip_internet_control if true, then this is IP control traffic.
+     * 
      * @param rcvbuf the data buffer with the received message.
      * 
      * @param rcvlen the data length in @ref rcvbuf.
@@ -321,6 +323,7 @@ public:
 			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
+			   bool ip_internet_control,
 			   const uint8_t *rcvbuf, size_t rcvlen,
 			   string& error_msg);
     
@@ -339,6 +342,7 @@ public:
      * negative value, the TOS will be set by the lower layers.
      * @param is_router_alert if true, set the IP Router Alert option in
      * the IP packet to send (when applicable).
+     * @param ip_internet_control if true, then this is IP control traffic.
      * @param buffer the data buffer with the message to send.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -347,6 +351,7 @@ public:
 			      const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos,
 			      bool is_router_alert,
+			      bool ip_internet_control,
 			      buffer_t *buffer,
 			      string& error_msg);
     

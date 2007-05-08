@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.27 2006/10/13 20:48:17 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.28 2007/02/16 22:45:28 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -269,6 +269,7 @@ public:
 		   int			, // ip_ttl,
 		   int			, // ip_tos,
 		   bool			, // is_router_alert,
+		   bool			, // ip_internet_control,
 		   const uint8_t *	, // rcvbuf,
 		   size_t		, // rcvlen
 		   string&		  // error_msg
@@ -284,6 +285,7 @@ public:
 		   int			, // ip_ttl,
 		   int			, // ip_tos,
 		   bool			, // is_router_alert,
+		   bool			, // ip_internet_control,
 		   const uint8_t *	, // sndbuf,
 		   size_t		, // sndlen
 		   string&		  // error_msg

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.37 2007/02/16 22:46:02 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.38 2007/05/03 09:28:26 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -251,6 +251,8 @@ public:
      * @param is_router_alert if true, the Router Alert IP option for the IP
      * packet of the incoming message was set.
      * 
+     * @param ip_internet_control if true, then this is IP control traffic.
+     * 
      * @param rcvbuf the data buffer with the received message.
      * 
      * @param rcvlen the data length in @ref rcvbuf.
@@ -267,6 +269,7 @@ public:
 			   int ip_ttl,
 			   int ip_tos,
 			   bool is_router_alert,
+			   bool ip_internet_control,
 			   const uint8_t *rcvbuf,
 			   size_t rcvlen,
 			   string& error_msg) = 0;
@@ -298,6 +301,8 @@ public:
      * @param is_router_alert if true, set the Router Alert IP option for
      * the IP packet of the outgoung message.
      * 
+     * @param ip_internet_control if true, then this is IP control traffic.
+     * 
      * @param sndbuf the data buffer with the outgoing message.
      * 
      * @param sndlen the data length in @ref sndbuf.
@@ -314,6 +319,7 @@ public:
 			   int ip_ttl,
 			   int ip_tos,
 			   bool is_router_alert,
+			   bool ip_internet_control,
 			   const uint8_t *sndbuf,
 			   size_t sndlen,
 			   string& error_msg) = 0;

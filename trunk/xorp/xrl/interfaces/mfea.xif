@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.6 2003/12/20 01:43:35 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.7 2005/01/28 03:34:21 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -168,6 +168,7 @@ interface mfea/0.1 {
 	 * negative value, the TOS will be set by the lower layers.
 	 * @param is_router_alert set/reset the IP Router Alert option in
 	 * the IP packet to send (when applicable).
+	 * @param ip_internet_control if true, then this is IP control traffic.
 	 */
 	send_protocol_message4	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
@@ -175,6 +176,7 @@ interface mfea/0.1 {
 				& source_address:ipv4 & dest_address:ipv4 \
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
+				& ip_internet_control:bool		\
 				& protocol_message:binary
 	send_protocol_message6	? xrl_sender_name:txt			\
 				& protocol_name:txt & protocol_id:u32	\
@@ -182,6 +184,7 @@ interface mfea/0.1 {
 				& source_address:ipv6 & dest_address:ipv6 \
 				& ip_ttl:i32 & ip_tos:i32		\
 				& is_router_alert:bool			\
+				& ip_internet_control:bool		\
 				& protocol_message:binary
 	
 	/**

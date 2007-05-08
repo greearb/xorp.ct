@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.15 2007/04/28 00:49:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.16 2007/05/08 00:49:02 pavlin Exp $"
 
 
 //
@@ -2387,6 +2387,7 @@ XrlFeaTarget::raw_packet4_0_1_send(
     const int32_t&		ip_ttl,
     const int32_t&		ip_tos,
     const bool&			ip_router_alert,
+    const bool&			ip_internet_control,
     const vector<uint8_t>&	payload)
 {
     if (! have_ipv4())
@@ -2394,7 +2395,7 @@ XrlFeaTarget::raw_packet4_0_1_send(
 
     return _xrsm4.send(if_name, vif_name, src_address, dst_address,
 		       ip_protocol, ip_ttl, ip_tos, ip_router_alert,
-		       payload);
+		       ip_internet_control, payload);
 }
 
 XrlCmdError
@@ -2467,6 +2468,7 @@ XrlFeaTarget::raw_packet6_0_1_send(
     const int32_t&	ip_ttl,
     const int32_t&	ip_tos,
     const bool&		ip_router_alert,
+    const bool&		ip_internet_control,
     const XrlAtomList&	ext_headers_type,
     const XrlAtomList&	ext_headers_payload,
     const vector<uint8_t>&	payload)
@@ -2505,8 +2507,8 @@ XrlFeaTarget::raw_packet6_0_1_send(
 
     return _xrsm6.send(if_name, vif_name, src_address, dst_address,
 		       ip_protocol, ip_ttl, ip_tos, ip_router_alert,
-		       ext_headers_type_vector, ext_headers_payload_vector,
-		       payload);
+		       ip_internet_control, ext_headers_type_vector,
+		       ext_headers_payload_vector, payload);
 }
 
 XrlCmdError

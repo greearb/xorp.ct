@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.73 2007/05/01 01:42:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.74 2007/05/01 01:50:42 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1222,6 +1222,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
     int		ip_ttl = -1;		// a.k.a. Hop-Limit in IPv6
     int		ip_tos = -1;
     bool	is_router_alert = false; // Router Alert option received
+    bool	ip_internet_control = false; // IP Internet Control pkt rcvd
     int		pif_index = 0;
     MfeaVif	*mfea_vif = NULL;
     void	*cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
@@ -1426,6 +1427,9 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	dst = ip4.ip_dst();
 	ip_ttl = ip4.ip_ttl();
 	ip_tos = ip4.ip_tos();
+
+	if (ip_tos == IPTOS_PREC_INTERNETCONTROL)
+	    ip_internet_control = true;
 	
 	ip_hdr_len  = ip4.ip_header_len();
 #ifdef IPV4_RAW_INPUT_IS_RAW
@@ -1662,6 +1666,11 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		    continue;
 		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_tos = int_val;
+
+		//
+		// TODO: XXX: Here we need to compute ip_internet_control
+		// for IPv6, but we don't know how.
+		//
 	    }
 	    break;
 #endif // IPV6_TCLASS
@@ -1758,7 +1767,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
     if (mfea_node().proto_comm_recv(module_id(),
 				    mfea_vif->vif_index(),
 				    src, dst, ip_ttl, ip_tos,
-				    is_router_alert,
+				    is_router_alert, ip_internet_control,
 				    _rcvbuf + ip_hdr_len, nbytes - ip_hdr_len)
 	!= XORP_OK) {
 	return;			// Error
@@ -1779,6 +1788,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
  * @ip_tos: The TOS (a.k.a. Traffic Class in IPv6) of the packet. If it has a
  * negative value, the TOS will be set here or by the lower layers.
  * @is_router_alert: If true, then the IP packet with the data should
+ * @ip_internet_control: If true, then this is IP control traffic.
  * have the Router Alert option included.
  * @databuf: The data buffer.
  * @datalen: The length of the data in @databuf.
@@ -1792,8 +1802,8 @@ int
 ProtoComm::proto_socket_write(uint32_t vif_index,
 			      const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos, bool is_router_alert,
-			      const uint8_t *databuf, size_t datalen,
-			      string& error_msg)
+			      bool ip_internet_control, const uint8_t *databuf,
+			      size_t datalen, string& error_msg)
 {
     size_t	ip_hdr_len = 0;
     int		int_val;
@@ -1834,14 +1844,14 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     case AF_INET:
 	// Assign the TTL
 	if (ip_ttl < 0) {
-	    if (is_router_alert)
+	    if (ip_internet_control)
 		ip_ttl = MINTTL;
 	    else
 		ip_ttl = IPDEFTTL;
 	}
 	// Assign the TOS
 	if (ip_tos < 0) {
-	    if (is_router_alert)
+	    if (ip_internet_control)
 		ip_tos = IPTOS_PREC_INTERNETCONTROL;  // Internet Control
 	    else
 		ip_tos = 0;
@@ -1852,14 +1862,14 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     {
 	// Assign the TTL
 	if (ip_ttl < 0) {
-	    if (is_router_alert)
+	    if (ip_internet_control)
 		ip_ttl = MINTTL;
 	    else
 		ip_ttl = IPDEFTTL;
 	}
 	// Assign the TOS
 	if (ip_tos < 0) {
-	    if (is_router_alert) {
+	    if (ip_internet_control) {
 		// TODO: XXX: IPTOS for IPv6 is bogus??
 		// ip_tos = IPTOS_PREC_INTERNETCONTROL;  // Internet Control
 		ip_tos = 0;

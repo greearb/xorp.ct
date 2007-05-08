@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.42 2007/04/23 23:05:10 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.43 2007/05/08 01:15:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,17 +52,19 @@ XrlIO<A>::recv(const string& interface,
 	       int32_t ip_ttl,
 	       int32_t ip_tos,
 	       bool ip_router_alert,
+	       bool ip_internet_control,
 	       const vector<uint8_t>& payload)
 {
     debug_msg("recv(interface = %s, vif = %s, src = %s, dst = %s, "
 	      "protocol = %u, ttl = %d tos = 0x%x router_alert = %s, "
-	      "payload_size = %u\n",
+	      "internet_control = %s payload_size = %u\n",
 	      interface.c_str(), vif.c_str(),
 	      src.str().c_str(), dst.str().c_str(),
 	      XORP_UINT_CAST(ip_protocol),
 	      XORP_INT_CAST(ip_ttl),
 	      ip_tos,
 	      (ip_router_alert)? "true" : "false",
+	      (ip_internet_control)? "true" : "false",
 	      XORP_UINT_CAST(payload.size()));
 
     if (IO<A>::_receive_cb.is_empty())
@@ -106,6 +108,7 @@ XrlIO<IPv4>::send(const string& interface, const string& vif,
 	-1,		// XXX: let the FEA set it
 	-1,		// XXX: let the FEA set it
 	get_ip_router_alert(),
+	true,		// ip_internet_control
 	payload,
 	callback(this, &XrlIO::send_cb, interface, vif));
 
@@ -142,6 +145,7 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	dst.is_multicast() ? 1 : -1,		// XXX: let the FEA set it
 	-1,					// XXX: let the FEA set it
 	get_ip_router_alert(),
+	true,					// ip_internet_control
 	ext_headers_type,
 	ext_headers_payload,
 	payload,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.11 2006/03/16 00:04:04 pavlin Exp $
+// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.12 2007/02/16 22:45:53 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK4_HH__
 #define __FEA_XRL_RAWSOCK4_HH__
@@ -66,6 +66,7 @@ public:
      * transmission.
      * @param ip_router_alert if true, then add the IP Router Alert option to
      * the IP packet.
+     * @param ip_internet_control if true, then this is IP control traffic.
      * @param payload the payload, everything after the IP header and options.
      */
     XrlCmdError send(
@@ -77,6 +78,7 @@ public:
 	int32_t		ip_ttl,
 	int32_t		ip_tos,
 	bool		ip_router_alert,
+	bool		ip_internet_control,
 	const vector<uint8_t>&	payload);
 
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.22 2006/10/06 20:55:20 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.23 2007/02/16 22:45:47 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -241,6 +241,7 @@ public:
      * layers.
      * @param is_router_alert if true, then the IP packet with the data
      * should have the Router Alert option included.
+     * @param ip_internet_control if true, then this is IP control traffic.
      * @param databuf the data buffer.
      * @param datalen the length of the data in @ref databuf.
      * @param error_msg the error message (if error).
@@ -250,6 +251,7 @@ public:
 				   const IPvX& src, const IPvX& dst,
 				   int ip_ttl, int ip_tos,
 				   bool is_router_alert,
+				   bool ip_internet_control,
 				   const uint8_t *databuf, size_t datalen,
 				   string& error_msg);
     

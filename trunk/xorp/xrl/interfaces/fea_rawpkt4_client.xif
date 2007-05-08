@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt4_client.xif,v 1.1 2004/11/29 00:32:06 bms Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt4_client.xif,v 1.2 2005/09/07 20:15:46 pavlin Exp $ */
 
 /*
  * Interface for receiving IPv4 packets on a raw socket. 
@@ -20,6 +20,7 @@ interface raw_packet4_client/0.1 {
 	 *               unknown.
 	 * @param ip_router_alert if true, the IP Router Alert option was
 	 *                        included in the IP packet.
+	 * @param ip_internet_control if true, then this is IP control traffic.
 	 * @param packet the payload, everything after the IP header and
 	 *                options.
 	 */
@@ -31,5 +32,6 @@ interface raw_packet4_client/0.1 {
 		& ip_ttl:i32						\
 		& ip_tos:i32						\
 		& ip_router_alert:bool					\
+		& ip_internet_control:bool				\
 		& payload:binary
 }

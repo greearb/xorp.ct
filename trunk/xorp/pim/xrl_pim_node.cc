@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.95 2006/07/03 23:33:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.96 2007/04/20 00:14:52 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -2451,6 +2451,7 @@ XrlPimNode::schedule_add_protocol_mld6igmp()
  * the TOS will be set by the lower layers.
  * @is_router_alert: If true, the Router Alert IP option for the IP
  * packet of the incoming message should be set.
+ * @ip_internet_control: If true, then this is IP control traffic.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
  * @error_msg: The error message (if error).
@@ -2468,6 +2469,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 		       int ip_ttl,
 		       int ip_tos,
 		       bool is_router_alert,
+		       bool ip_internet_control,
 		       const uint8_t *sndbuf,
 		       size_t sndlen,
 		       string& error_msg)
@@ -2481,6 +2483,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 				     ip_ttl,
 				     ip_tos,
 				     is_router_alert,
+				     ip_internet_control,
 				     sndbuf,
 				     sndlen));
     error_msg = "";
@@ -2544,6 +2547,7 @@ XrlPimNode::send_protocol_message()
 		entry->ip_ttl(),
 		entry->ip_tos(),
 		entry->is_router_alert(),
+		entry->ip_internet_control(),
 		entry->message(),
 		callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
 	    if (success)
@@ -2564,6 +2568,7 @@ XrlPimNode::send_protocol_message()
 		entry->ip_ttl(),
 		entry->ip_tos(),
 		entry->is_router_alert(),
+		entry->ip_internet_control(),
 		entry->message(),
 		callback(this, &XrlPimNode::mfea_client_send_protocol_message_cb));
 	    if (success)
@@ -3206,6 +3211,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
     const int32_t&	ip_ttl, 
     const int32_t&	ip_tos, 
     const bool&		is_router_alert, 
+    const bool&		ip_internet_control,
     const vector<uint8_t>& protocol_message)
 {
     string error_msg;
@@ -3240,6 +3246,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
 			ip_ttl,
 			ip_tos,
 			is_router_alert,
+			ip_internet_control,
 			&protocol_message[0],
 			protocol_message.size(),
 			error_msg);
@@ -3265,6 +3272,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
     const int32_t&	ip_ttl, 
     const int32_t&	ip_tos, 
     const bool&		is_router_alert, 
+    const bool&		ip_internet_control,
     const vector<uint8_t>& protocol_message)
 {
     string error_msg;
@@ -3299,6 +3307,7 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
 			ip_ttl,
 			ip_tos,
 			is_router_alert,
+			ip_internet_control,
 			&protocol_message[0],
 			protocol_message.size(),
 			error_msg);

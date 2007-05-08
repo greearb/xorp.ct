@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.20 2007/04/19 21:36:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.21 2007/04/25 01:57:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -129,6 +129,7 @@ public:
 		     header.ip_ttl,
 		     header.ip_tos,
 		     header.ip_router_alert,
+		     header.ip_internet_control,
 		     payload,
 		     callback(&_rsm,
 			      &XrlRawSocket4Manager::xrl_send_recv_cb,
@@ -237,6 +238,7 @@ XrlRawSocket4Manager::send(const string&	if_name,
 			   int32_t		ip_ttl,
 			   int32_t		ip_tos,
 			   bool			ip_router_alert,
+			   bool			ip_internet_control,
 			   const vector<uint8_t>& payload)
 {
     string error_msg;
@@ -258,6 +260,7 @@ XrlRawSocket4Manager::send(const string&	if_name,
 			       ip_ttl,
 			       ip_tos,
 			       ip_router_alert,
+			       ip_internet_control,
 			       payload,
 			       error_msg)
 	!= XORP_OK) {
