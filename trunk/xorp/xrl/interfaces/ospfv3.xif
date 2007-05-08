@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.9 2007/02/23 01:54:25 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.10 2007/03/12 10:16:05 atanu Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
@@ -52,7 +52,7 @@ interface ospfv3/0.1 {
      * @param ifname the interface.
      * @param vifname virtual interface.
      * @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
-     * @param area
+     * @param area id of the area
      */
     create_peer ? ifname:txt \
 		& vifname:txt \
