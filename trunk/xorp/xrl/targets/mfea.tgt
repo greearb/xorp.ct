@@ -1,11 +1,13 @@
-/* $XORP: xorp/xrl/targets/mfea.tgt,v 1.4 2004/05/06 20:18:31 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/mfea.tgt,v 1.5 2005/02/15 02:08:38 pavlin Exp $ */
 
 #include "common.xif"
 #include "cli_processor.xif"
+#include "fea_ifmgr_replicator.xif"
 #include "finder_event_observer.xif"
 #include "mfea.xif"
 
 target mfea implements		common/0.1,				\
 				cli_processor/0.1,			\
+				ifmgr_replicator/0.1,			\
 				finder_event_observer/0.1,		\
 				mfea/0.1

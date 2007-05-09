@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.31 2007/05/07 23:48:25 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.32 2007/05/08 19:23:15 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -181,6 +181,20 @@ protected:
 	string&	ret_cli_term_name, 
 	uint32_t& ret_cli_session_id,
 	string&	ret_command_output);
+
+    /**
+     *  Register remote mirror of interface state.
+     */
+    XrlCmdError ifmgr_replicator_0_1_register_ifmgr_mirror(
+	// Input values,
+	const string&	clientname);
+
+    /**
+     *  Register remote mirror of interface state.
+     */
+    XrlCmdError ifmgr_replicator_0_1_unregister_ifmgr_mirror(
+	// Input values,
+	const string&	clientname);
 
     /**
      *  Test if the underlying system supports IPv4 multicast routing.

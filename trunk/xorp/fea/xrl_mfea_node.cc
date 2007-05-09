@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.55 2007/05/07 23:48:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.56 2007/05/08 19:23:15 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -1501,6 +1501,39 @@ XrlMfeaNode::cli_processor_0_1_process_command(
 				     ret_cli_session_id,
 				     ret_command_output);
     
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::ifmgr_replicator_0_1_register_ifmgr_mirror(
+    // Input values,
+    const string&	clientname)
+{
+    string error_msg;
+
+    if (_lib_mfea_client_bridge.add_libfeaclient_mirror(clientname) == false) {
+	error_msg = c_format("Cannot register ifmgr mirror client %s",
+			     clientname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlMfeaNode::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
+    // Input values,
+    const string&	clientname)
+{
+    string error_msg;
+
+    if (_lib_mfea_client_bridge.remove_libfeaclient_mirror(clientname)
+	== false) {
+	error_msg = c_format("Cannot unregister ifmgr mirror client %s",
+			     clientname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     return XrlCmdError::OKAY();
 }
 
