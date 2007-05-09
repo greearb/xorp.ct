@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.16 2007/05/08 00:49:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.17 2007/05/08 19:23:15 pavlin Exp $"
 
 
 //
@@ -1738,23 +1738,34 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
 
 XrlCmdError
 XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(
-	const string& clientname
-	)
+    // Input values,
+    const string&	clientname)
 {
+    string error_msg;
+
     if (_lib_fea_client_bridge.add_libfeaclient_mirror(clientname) == false) {
-	return XrlCmdError::COMMAND_FAILED();
+	error_msg = c_format("Cannot register ifmgr mirror client %s",
+			     clientname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
-	const string& clientname
-	)
+    // Input values,
+    const string&	clientname)
 {
-    if (_lib_fea_client_bridge.remove_libfeaclient_mirror(clientname) == false) {
-	return XrlCmdError::COMMAND_FAILED();
+    string error_msg;
+
+    if (_lib_fea_client_bridge.remove_libfeaclient_mirror(clientname)
+	== false) {
+	error_msg = c_format("Cannot unregister ifmgr mirror client %s",
+			     clientname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
+
     return XrlCmdError::OKAY();
 }
 
