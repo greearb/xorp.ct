@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.35 2005/02/27 20:49:46 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.36 2007/04/18 01:16:50 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -20,13 +20,17 @@ noinst_LTLIBRARIES = libpim.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 ### XRL libraries
-LDADD		+= $(top_builddir)/xrl/targets/libpimbase.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+LDADD		+= $(top_builddir)/xrl/targets/libpimbase.la
 ### XORP misc libraries
 LDADD		+= $(top_builddir)/mrt/libmrt.la
 LDADD		+= $(top_builddir)/libproto/libproto.la

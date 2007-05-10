@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.16 2006/12/23 19:01:31 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.17 2007/02/16 22:46:36 pavlin Exp $"
 
 
 //
@@ -132,9 +132,6 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 	}
     }
 
-    // TODO: XXX: PAVPAVPAV: remove it!!
-    Mld6igmpNode::set_vif_setup_completed(true);
-    
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     

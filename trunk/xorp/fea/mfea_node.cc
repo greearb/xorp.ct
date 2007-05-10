@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.77 2007/05/08 19:23:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.78 2007/05/08 22:16:03 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -400,7 +400,7 @@ MfeaNode::interface_update(const string&	ifname,
 
 	// XXX: Ignore any errors, in case the MFEA vif was deleted by
 	// vif_update()
-	delete_config_vif(ifname, error_msg);
+	ProtoNode<MfeaVif>::delete_config_vif(ifname, error_msg);
 	return;
 
     case CHANGED:
@@ -444,15 +444,15 @@ MfeaNode::interface_update(const string&	ifname,
     is_up = ifp->enabled();
     is_up &= (! ifp->no_carrier());
     is_up &= vifp->enabled();
-    set_config_vif_flags(ifname,
-			 false,		// is_pim_register
-			 node_vif->is_p2p(),
-			 node_vif->is_loopback(),
-			 node_vif->is_multicast_capable(),
-			 node_vif->is_broadcast_capable(),
-			 is_up,
-			 ifp->mtu(),
-			 error_msg);
+    ProtoNode<MfeaVif>::set_config_vif_flags(ifname,
+					     false,	// is_pim_register
+					     node_vif->is_p2p(),
+					     node_vif->is_loopback(),
+					     node_vif->is_multicast_capable(),
+					     node_vif->is_broadcast_capable(),
+					     is_up,
+					     ifp->mtu(),
+					     error_msg);
 }
 
 void
@@ -483,7 +483,9 @@ MfeaNode::vif_update(const string&	ifname,
 	if (node_vif == NULL) {
 	    vif_index = find_unused_config_vif_index();
 	    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
-	    if (add_config_vif(vifname, vif_index, error_msg) != XORP_OK) {
+	    if (ProtoNode<MfeaVif>::add_config_vif(vifname, vif_index,
+						   error_msg)
+		!= XORP_OK) {
 		XLOG_ERROR("Cannot add vif %s to the set of configured "
 			   "vifs: %s",
 			   vifname.c_str(), error_msg.c_str());
@@ -500,7 +502,8 @@ MfeaNode::vif_update(const string&	ifname,
 	}
 	_mfea_iftree_update_replicator.vif_update(ifname, vifname, update);
 
-	if (delete_config_vif(vifname, error_msg) != XORP_OK) {
+	if (ProtoNode<MfeaVif>::delete_config_vif(vifname, error_msg)
+	    != XORP_OK) {
 	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
 		       "vifs: %s",
 		       vifname.c_str(), error_msg.c_str());
@@ -554,7 +557,8 @@ MfeaNode::vif_update(const string&	ifname,
     //
     // Update the pif_index
     //
-    set_config_pif_index(vifname, vifp->pif_index(), error_msg);
+    ProtoNode<MfeaVif>::set_config_pif_index(vifname, vifp->pif_index(),
+					     error_msg);
 
     //
     // Update the vif flags
@@ -562,15 +566,15 @@ MfeaNode::vif_update(const string&	ifname,
     is_up = ifp->enabled();
     is_up &= (! ifp->no_carrier());
     is_up &= vifp->enabled();
-    set_config_vif_flags(vifname,
-			 false, // is_pim_register
-			 vifp->point_to_point(),
-			 vifp->loopback(),
-			 vifp->multicast(),
-			 vifp->broadcast(),
-			 is_up,
-			 ifp->mtu(),
-			 error_msg);
+    ProtoNode<MfeaVif>::set_config_vif_flags(vifname,
+					     false,	// is_pim_register
+					     vifp->point_to_point(),
+					     vifp->loopback(),
+					     vifp->multicast(),
+					     vifp->broadcast(),
+					     is_up,
+					     ifp->mtu(),
+					     error_msg);
 }
 
 void
@@ -611,7 +615,8 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	_mfea_iftree_update_replicator.vifaddr4_update(ifname, vifname, addr,
 						       update);
 
-	if (delete_config_vif_addr(vifname, addrx, error_msg)
+	if (ProtoNode<MfeaVif>::delete_config_vif_addr(vifname, addrx,
+						       error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		       "configured vifs: %s",
@@ -683,8 +688,10 @@ MfeaNode::vifaddr4_update(const string&	ifname,
     const VifAddr* node_vif_addr = node_vif->find_address(addrx);
     if (node_vif_addr == NULL) {
 	// First create the MFEA vif address
-	if (add_config_vif_addr(vifname, addrx, subnet_addr,
-				broadcast_addr, peer_addr, error_msg)
+	if (ProtoNode<MfeaVif>::add_config_vif_addr(vifname, addrx,
+						    subnet_addr,
+						    broadcast_addr,
+						    peer_addr, error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		       "configured vifs: %s",
@@ -707,13 +714,16 @@ MfeaNode::vifaddr4_update(const string&	ifname,
 	return;			// Nothing changed
     }
 
-    if (delete_config_vif_addr(vifname, addrx, error_msg) != XORP_OK) {
+    if (ProtoNode<MfeaVif>::delete_config_vif_addr(vifname, addrx, error_msg)
+	!= XORP_OK) {
 	XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
     }
-    if (add_config_vif_addr(vifname, addrx, subnet_addr, broadcast_addr,
-			    peer_addr, error_msg) != XORP_OK) {
+    if (ProtoNode<MfeaVif>::add_config_vif_addr(vifname, addrx, subnet_addr,
+						broadcast_addr, peer_addr,
+						error_msg)
+	!= XORP_OK) {
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
@@ -758,7 +768,8 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	_mfea_iftree_update_replicator.vifaddr6_update(ifname, vifname, addr,
 						       update);
 
-	if (delete_config_vif_addr(vifname, addrx, error_msg)
+	if (ProtoNode<MfeaVif>::delete_config_vif_addr(vifname, addrx,
+						       error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		       "configured vifs: %s",
@@ -828,8 +839,10 @@ MfeaNode::vifaddr6_update(const string&	ifname,
     const VifAddr* node_vif_addr = node_vif->find_address(addrx);
     if (node_vif_addr == NULL) {
 	// First create the MFEA vif address
-	if (add_config_vif_addr(vifname, addrx, subnet_addr,
-				broadcast_addr, peer_addr, error_msg)
+	if (ProtoNode<MfeaVif>::add_config_vif_addr(vifname, addrx,
+						    subnet_addr,
+						    broadcast_addr, peer_addr,
+						    error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		       "configured vifs: %s",
@@ -852,13 +865,16 @@ MfeaNode::vifaddr6_update(const string&	ifname,
 	return;			// Nothing changed
     }
 
-    if (delete_config_vif_addr(vifname, addrx, error_msg) != XORP_OK) {
+    if (ProtoNode<MfeaVif>::delete_config_vif_addr(vifname, addrx, error_msg)
+	!= XORP_OK) {
 	XLOG_ERROR("Cannot delete address %s from vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());
     }
-    if (add_config_vif_addr(vifname, addrx, subnet_addr, broadcast_addr,
-			    peer_addr, error_msg) != XORP_OK) {
+    if (ProtoNode<MfeaVif>::add_config_vif_addr(vifname, addrx, subnet_addr,
+						broadcast_addr, peer_addr,
+						error_msg)
+	!= XORP_OK) {
 	XLOG_ERROR("Cannot add address %s to vif %s from the set of "
 		   "configured vifs: %s",
 		   addr.str().c_str(), vifname.c_str(), error_msg.c_str());

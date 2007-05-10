@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.63 2007/02/16 22:46:49 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.64 2007/05/08 19:23:18 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -28,6 +28,7 @@
 
 #include "libxorp/vif.hh"
 #include "libproto/proto_node.hh"
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "mrt/buffer.h"
 #include "mrt/mifset.hh"
 #include "pim_bsr.hh"
@@ -60,7 +61,9 @@ class PimVif;
  * There should be one node per PIM instance. There should be
  * one instance per address family.
  */
-class PimNode : public ProtoNode<PimVif>, public ServiceChangeObserverBase {
+class PimNode : public ProtoNode<PimVif>,
+		public IfMgrHintObserver,
+		public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
@@ -1284,7 +1287,14 @@ public:
     int	pimstat_rx_prune_sg_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
     int	pimstat_rx_join_sg_rpt_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
     int pimstat_rx_prune_sg_rpt_per_vif(const string& vif_name, uint32_t& result, string& error_msg) const;
-    
+
+protected:
+    //
+    // IfMgrHintObserver methods
+    //
+    void tree_complete();
+    void updates_made();
+
 private:
     /**
      * A method invoked when the status of a service changes.
@@ -1296,6 +1306,26 @@ private:
     void status_change(ServiceBase*  service,
 		       ServiceStatus old_status,
 		       ServiceStatus new_status);
+
+    /**
+     * Get a reference to the service base of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the service base of the interface manager.
+     */
+    virtual const ServiceBase* ifmgr_mirror_service_base() const = 0;
+
+    /**
+     * Get a reference to the interface manager tree.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the interface manager tree.
+     */
+    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
      * Initiate registration with the MFEA.
@@ -1350,6 +1380,10 @@ private:
     ConfigParam<uint32_t>	_switch_to_spt_threshold_interval_sec;
     ConfigParam<uint32_t>	_switch_to_spt_threshold_bytes;
 
+    //
+    // A local copy with the interface state information
+    //
+    IfMgrIfTree	_iftree;
 
     //
     // Debug and test-related state

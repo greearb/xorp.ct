@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.50 2007/02/16 22:46:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.51 2007/04/14 08:59:51 pavlin Exp $"
 
 
 //
@@ -158,9 +158,6 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 		pim_vif->pim_hello_send(dummy_error_msg);
 	}
     }
-    
-    // TODO: XXX: PAVPAVPAV: remove it!!
-    PimNode::set_vif_setup_completed(true);
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);

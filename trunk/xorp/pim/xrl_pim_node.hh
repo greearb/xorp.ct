@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.70 2007/04/20 00:14:53 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.71 2007/05/08 19:23:19 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -27,6 +27,8 @@
 #include "libxorp/transaction.hh"
 
 #include "libxipc/xrl_std_router.hh"
+
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
@@ -205,108 +207,6 @@ protected:
 	uint32_t& ret_cli_session_id,
 	string&	ret_command_output);
     
-    /**
-     *  Add a new vif.
-     *  
-     *  @param vif_name the name of the new vif.
-     *  
-     *  @param vif_index the index of the new vif.
-     */
-    XrlCmdError mfea_client_0_1_new_vif(
-	// Input values, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
-
-    /**
-     *  Delete an existing vif.
-     *  
-     *  @param vif_name the name of the vif to delete.
-     */
-    XrlCmdError mfea_client_0_1_delete_vif(
-	// Input values, 
-	const string&	vif_name);
-
-    /**
-     *  Add an address to a vif.
-     *  
-     *  @param vif_name the name of the vif.
-     *  
-     *  @param addr the unicast address to add.
-     *  
-     *  @param subnet the subnet address to add.
-     *  
-     *  @param broadcast the broadcast address (when applicable).
-     *  
-     *  @param peer the peer address (when applicable).
-     */
-    XrlCmdError mfea_client_0_1_add_vif_addr4(
-	// Input values, 
-	const string&	vif_name, 
-	const IPv4&	addr, 
-	const IPv4Net&	subnet, 
-	const IPv4&	broadcast, 
-	const IPv4&	peer);
-
-    XrlCmdError mfea_client_0_1_add_vif_addr6(
-	// Input values, 
-	const string&	vif_name, 
-	const IPv6&	addr, 
-	const IPv6Net&	subnet, 
-	const IPv6&	broadcast, 
-	const IPv6&	peer);
-
-    /**
-     *  Delete an address from a vif.
-     *  
-     *  @param vif_name the name of the vif.
-     *  
-     *  @param addr the unicast address to delete.
-     */
-    XrlCmdError mfea_client_0_1_delete_vif_addr4(
-	// Input values, 
-	const string&	vif_name, 
-	const IPv4&	addr);
-    
-    XrlCmdError mfea_client_0_1_delete_vif_addr6(
-	// Input values, 
-	const string&	vif_name, 
-	const IPv6&	addr);
-
-    /**
-     *  Set flags to a vif.
-     *  
-     *  @param vif_name the name of the vif.
-     *  
-     *  @param is_pim_register true if this is a PIM Register vif.
-     *  
-     *  @param is_p2p true if this is a point-to-point vif.
-     *  
-     *  @param is_loopback true if this is a loopback interface.
-     *  
-     *  @param is_multicast true if the vif is multicast-capable.
-     *  
-     *  @param is_broadcast true if the vif is broadcast-capable.
-     *  
-     *  @param is_up true if the vif is UP and running.
-     *
-     *  @param mtu the MTU of the vif.
-     */
-    XrlCmdError mfea_client_0_1_set_vif_flags(
-	// Input values, 
-	const string&	vif_name, 
-	const bool&	is_pim_register, 
-	const bool&	is_p2p, 
-	const bool&	is_loopback, 
-	const bool&	is_multicast, 
-	const bool&	is_broadcast, 
-	const bool&	is_up,
-	const uint32_t&	mtu);
-
-    /**
-     *  Complete all transactions with vif information.
-     */
-    XrlCmdError mfea_client_0_1_set_all_vifs_done();
-
     /**
      *  Receive a protocol message from the MFEA.
      *  
@@ -2173,6 +2073,11 @@ protected:
 private:
     class XrlTaskBase;
 
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(&_ifmgr);
+    }
+    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
+
     /**
      * Called when Finder connection is established.
      *
@@ -2565,6 +2470,8 @@ private:
     const string		_mfea_target;
     const string		_rib_target;
     const string		_mld6igmp_target;
+
+    IfMgrXrlMirror		_ifmgr;
 
     TransactionManager		_mrib_transaction_manager;
     XrlMfeaV0p1Client		_xrl_mfea_client;

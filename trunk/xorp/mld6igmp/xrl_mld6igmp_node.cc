@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.60 2007/04/20 00:14:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.61 2007/05/08 19:23:17 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -52,6 +52,8 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
       _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
       _mfea_target(mfea_target),
+      _ifmgr(eventloop, mfea_target.c_str(), xrl_router().finder_address(),
+	     xrl_router().finder_port()),
       _xrl_mfea_client(&xrl_router()),
       _xrl_mld6igmp_client_client(&xrl_router()),
       _xrl_cli_manager_client(&xrl_router()),
@@ -63,12 +65,17 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
       _is_mfea_deregistering(false),
       _is_mfea_add_protocol_registered(false)
 {
-
+    _ifmgr.set_observer(dynamic_cast<Mld6igmpNode*>(this));
+    _ifmgr.attach_hint_observer(dynamic_cast<Mld6igmpNode*>(this));
 }
 
 XrlMld6igmpNode::~XrlMld6igmpNode()
 {
     shutdown();
+
+    _ifmgr.detach_hint_observer(dynamic_cast<Mld6igmpNode*>(this));
+    _ifmgr.unset_observer(dynamic_cast<Mld6igmpNode*>(this));
+
     delete_pointers_list(_xrl_tasks_queue);
 }
 
@@ -259,10 +266,7 @@ XrlMld6igmpNode::mfea_register_startup()
 
     if (! _is_mfea_registering) {
 	Mld6igmpNode::incr_startup_requests_n();  // XXX: for add_protocol
-	// XXX: another incr to wait for network interface information
-	// on startup.
-	Mld6igmpNode::set_vif_setup_completed(false);
-	Mld6igmpNode::incr_startup_requests_n();
+	Mld6igmpNode::incr_startup_requests_n();  // XXX: for ifmgr
 
 	_is_mfea_registering = true;
     }
@@ -292,7 +296,7 @@ XrlMld6igmpNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
     case OKAY:
 	//
 	// If success, then the MFEA birth event will startup the MFEA
-	// registration.
+	// registration and the ifmgr.
 	//
 	_is_mfea_registering = false;
 	_is_mfea_registered = true;
@@ -369,6 +373,7 @@ XrlMld6igmpNode::mfea_register_shutdown()
 
     if (! _is_mfea_deregistering) {
 	Mld6igmpNode::incr_shutdown_requests_n();  // XXX: for delete_protocol
+	Mld6igmpNode::incr_shutdown_requests_n();  // XXX: for the ifmgr
 
 	_is_mfea_deregistering = true;
     }
@@ -389,6 +394,12 @@ XrlMld6igmpNode::mfea_register_shutdown()
 	    callback(this, &XrlMld6igmpNode::mfea_register_shutdown));
 	return;
     }
+
+    //
+    // XXX: when the shutdown is completed, Mld6igmpNode::status_change()
+    // will be called.
+    //
+    _ifmgr.shutdown();
 
     add_task(new MfeaAddDeleteProtocol(*this, false));
 }
@@ -1812,7 +1823,16 @@ XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_birth(
 {
     if (target_class == _mfea_target) {
 	_is_mfea_alive = true;
-	add_task(new MfeaAddDeleteProtocol(*this, true));
+	//
+	// XXX: when the startup is completed,
+	// IfMgrHintObserver::tree_complete() will be called.
+	//
+	if (_ifmgr.startup() != true) {
+	    Mld6igmpNode::set_status(SERVICE_FAILED);
+	    Mld6igmpNode::update_status();
+	} else {
+	    add_task(new MfeaAddDeleteProtocol(*this, true));
+	}
     }
 
     return XrlCmdError::OKAY();
@@ -1870,204 +1890,6 @@ XrlMld6igmpNode::cli_processor_0_1_process_command(
 					 ret_cli_term_name,
 					 ret_cli_session_id,
 					 ret_command_output);
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_new_vif(
-    // Input values, 
-    const string&	vif_name, 
-    const uint32_t&	vif_index)
-{
-    string error_msg;
-    
-    if (Mld6igmpNode::add_config_vif(vif_name, vif_index, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_delete_vif(
-    // Input values, 
-    const string&	vif_name)
-{
-    string error_msg;
-    
-    if (Mld6igmpNode::delete_config_vif(vif_name, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_add_vif_addr4(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv4&		addr, 
-    const IPv4Net&	subnet, 
-    const IPv4&		broadcast, 
-    const IPv4&		peer)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! Mld6igmpNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    if (Mld6igmpNode::add_config_vif_addr(vif_name,
-					  IPvX(addr),
-					  IPvXNet(subnet),
-					  IPvX(broadcast),
-					  IPvX(peer),
-					  error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_add_vif_addr6(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv6&		addr, 
-    const IPv6Net&	subnet, 
-    const IPv6&		broadcast, 
-    const IPv6&		peer)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! Mld6igmpNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (Mld6igmpNode::add_config_vif_addr(vif_name,
-					  IPvX(addr),
-					  IPvXNet(subnet),
-					  IPvX(broadcast),
-					  IPvX(peer),
-					  error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr4(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv4&		addr)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! Mld6igmpNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (Mld6igmpNode::delete_config_vif_addr(vif_name,
-					     IPvX(addr),
-					     error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_delete_vif_addr6(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv6&		addr)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! Mld6igmpNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (Mld6igmpNode::delete_config_vif_addr(vif_name,
-					     IPvX(addr),
-					     error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
-    // Input values, 
-    const string&	vif_name, 
-    const bool&		is_pim_register, 
-    const bool&		is_p2p, 
-    const bool&		is_loopback, 
-    const bool&		is_multicast, 
-    const bool&		is_broadcast, 
-    const bool&		is_up,
-    const uint32_t&	mtu)
-{
-    string error_msg;
-    
-    if (Mld6igmpNode::set_config_vif_flags(vif_name,
-					   is_pim_register,
-					   is_p2p,
-					   is_loopback,
-					   is_multicast,
-					   is_broadcast,
-					   is_up,
-					   mtu,
-					   error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlMld6igmpNode::mfea_client_0_1_set_all_vifs_done()
-{
-    string error_msg;
-    bool old_is_vif_setup_completed = Mld6igmpNode::is_vif_setup_completed();
-
-    if (Mld6igmpNode::set_config_all_vifs_done(error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-
-    if (Mld6igmpNode::is_vif_setup_completed()
-	&& ! old_is_vif_setup_completed) {
-	// XXX: a decr to compensate the wait for network interface
-	// information on startup.
-	Mld6igmpNode::decr_startup_requests_n();
-    }
-
     return XrlCmdError::OKAY();
 }
 

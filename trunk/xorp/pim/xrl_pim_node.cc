@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.96 2007/04/20 00:14:52 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.97 2007/05/08 19:23:18 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -57,6 +57,8 @@ XrlPimNode::XrlPimNode(int		family,
       _mfea_target(mfea_target),
       _rib_target(rib_target),
       _mld6igmp_target(mld6igmp_target),
+      _ifmgr(eventloop, mfea_target.c_str(), xrl_router().finder_address(),
+	     xrl_router().finder_port()),
       _mrib_transaction_manager(eventloop),
       _xrl_mfea_client(&xrl_router()),
       _xrl_rib_client(&xrl_router()),
@@ -80,12 +82,17 @@ XrlPimNode::XrlPimNode(int		family,
       _is_mld6igmp_registering(false),
       _is_mld6igmp_deregistering(false)
 {
-
+    _ifmgr.set_observer(dynamic_cast<PimNode*>(this));
+    _ifmgr.attach_hint_observer(dynamic_cast<PimNode*>(this));
 }
 
 XrlPimNode::~XrlPimNode()
 {
     shutdown();
+
+    _ifmgr.detach_hint_observer(dynamic_cast<PimNode*>(this));
+    _ifmgr.unset_observer(dynamic_cast<PimNode*>(this));
+
     delete_pointers_list(_xrl_tasks_queue);
 }
 
@@ -310,10 +317,7 @@ XrlPimNode::mfea_register_startup()
 
     if (! _is_mfea_registering) {
 	PimNode::incr_startup_requests_n();	// XXX: for add_protocol
-	// XXX: another incr to wait for network interface information
-	// on startup.
-	PimNode::set_vif_setup_completed(false);
-	PimNode::incr_startup_requests_n();
+	PimNode::incr_startup_requests_n();  // XXX: for ifmgr
 
 	if (! _is_mfea_allow_signal_messages_registered)
 	    PimNode::incr_startup_requests_n();
@@ -346,7 +350,7 @@ XrlPimNode::finder_register_interest_mfea_cb(const XrlError& xrl_error)
     case OKAY:
 	//
 	// If success, then the MFEA birth event will startup the MFEA
-	// registration.
+	// registration and the ifmgr.
 	//
 	_is_mfea_registering = false;
 	_is_mfea_registered = true;
@@ -423,6 +427,7 @@ XrlPimNode::mfea_register_shutdown()
 
     if (! _is_mfea_deregistering) {
 	PimNode::incr_shutdown_requests_n();	// XXX: for delete_protocol
+	PimNode::incr_shutdown_requests_n();	// XXX: for the ifmgr
 
 	_is_mfea_deregistering = true;
     }
@@ -443,6 +448,12 @@ XrlPimNode::mfea_register_shutdown()
 	    callback(this, &XrlPimNode::mfea_register_shutdown));
 	return;
     }
+
+    //
+    // XXX: when the shutdown is completed, PimNode::status_change()
+    // will be called.
+    //
+    _ifmgr.shutdown();
 
     add_task(new MfeaAddDeleteProtocol(*this, false));
 }
@@ -2914,8 +2925,17 @@ XrlPimNode::finder_event_observer_0_1_xrl_target_birth(
 {
     if (target_class == _mfea_target) {
 	_is_mfea_alive = true;
-	add_task(new MfeaAddDeleteProtocol(*this, true));
-	add_task(new MfeaAllowSignalMessages(*this));
+	//
+	// XXX: when the startup is completed,
+	// IfMgrHintObserver::tree_complete() will be called.
+	//
+	if (_ifmgr.startup() != true) {
+	    PimNode::set_status(SERVICE_FAILED);
+	    PimNode::update_status();
+	} else {
+	    add_task(new MfeaAddDeleteProtocol(*this, true));
+	    add_task(new MfeaAllowSignalMessages(*this));
+	}
     }
 
     if (target_class == _rib_target) {
@@ -2998,202 +3018,6 @@ XrlPimNode::cli_processor_0_1_process_command(
 				    ret_cli_term_name,
 				    ret_cli_session_id,
 				    ret_command_output);
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_new_vif(
-    // Input values, 
-    const string&	vif_name, 
-    const uint32_t&	vif_index)
-{
-    string error_msg;
-    
-    if (PimNode::add_config_vif(vif_name, vif_index, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_delete_vif(
-    // Input values, 
-    const string&	vif_name)
-{
-    string error_msg;
-    
-    if (PimNode::delete_config_vif(vif_name, error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_add_vif_addr4(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv4&		addr, 
-    const IPv4Net&	subnet, 
-    const IPv4&		broadcast, 
-    const IPv4&		peer)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::add_config_vif_addr(vif_name,
-				     IPvX(addr),
-				     IPvXNet(subnet),
-				     IPvX(broadcast),
-				     IPvX(peer),
-				     error_msg)
-	    != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_add_vif_addr6(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv6&		addr, 
-    const IPv6Net&	subnet, 
-    const IPv6&		broadcast, 
-    const IPv6&		peer)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::add_config_vif_addr(vif_name,
-				     IPvX(addr),
-				     IPvXNet(subnet),
-				     IPvX(broadcast),
-				     IPvX(peer),
-				     error_msg)
-	    != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_delete_vif_addr4(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv4&		addr)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv4()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv4");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::delete_config_vif_addr(vif_name,
-					IPvX(addr),
-					error_msg)
-	    != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_delete_vif_addr6(
-    // Input values, 
-    const string&	vif_name, 
-    const IPv6&		addr)
-{
-    string error_msg;
-
-    //
-    // Verify the address family
-    //
-    if (! PimNode::is_ipv6()) {
-	error_msg = c_format("Received protocol message with "
-			     "invalid address family: IPv6");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (PimNode::delete_config_vif_addr(vif_name,
-					IPvX(addr),
-					error_msg)
-	    != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_set_vif_flags(
-    // Input values, 
-    const string&	vif_name, 
-    const bool&		is_pim_register, 
-    const bool&		is_p2p, 
-    const bool&		is_loopback, 
-    const bool&		is_multicast, 
-    const bool&		is_broadcast, 
-    const bool&		is_up,
-    const uint32_t&	mtu) 
-{
-    string error_msg;
-    
-    if (PimNode::set_config_vif_flags(vif_name,
-				      is_pim_register,
-				      is_p2p,
-				      is_loopback,
-				      is_multicast,
-				      is_broadcast,
-				      is_up,
-				      mtu,
-				      error_msg)
-	    != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlPimNode::mfea_client_0_1_set_all_vifs_done()
-{
-    string error_msg;
-    bool old_is_vif_setup_completed = PimNode::is_vif_setup_completed();
-
-    if (PimNode::set_config_all_vifs_done(error_msg) != XORP_OK)
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-
-    if (PimNode::is_vif_setup_completed()
-	&& ! old_is_vif_setup_completed) {
-	// XXX: a decr to compensate the wait for network interface
-	// information on startup.
-	PimNode::decr_startup_requests_n();
-    }
     
     return XrlCmdError::OKAY();
 }

@@ -61,11 +61,15 @@ am_xorp_igmp_OBJECTS = xorp_igmp.$(OBJEXT)
 xorp_igmp_OBJECTS = $(am_xorp_igmp_OBJECTS)
 xorp_igmp_LDADD = $(LDADD)
 xorp_igmp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
 	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -75,11 +79,15 @@ am_xorp_mld_OBJECTS = xorp_mld.$(OBJEXT)
 xorp_mld_OBJECTS = $(am_xorp_mld_OBJECTS)
 xorp_mld_LDADD = $(LDADD)
 xorp_mld_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
 	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -252,11 +260,15 @@ noinst_LTLIBRARIES = libmld6igmp.la
 ### XRL libraries
 ### XORP misc libraries
 LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/xrl/targets/libmld6igmpbase.la \
 	$(top_builddir)/mrt/libmrt.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \

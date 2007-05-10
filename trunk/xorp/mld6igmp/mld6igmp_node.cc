@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.53 2007/04/20 00:36:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.54 2007/05/08 19:23:16 pavlin Exp $"
 
 
 //
@@ -301,33 +301,357 @@ Mld6igmpNode::status_change(ServiceBase*  service,
 			    ServiceStatus old_status,
 			    ServiceStatus new_status)
 {
-    XLOG_ASSERT(this == service);
-
-    if ((old_status == SERVICE_STARTING)
-	&& (new_status == SERVICE_RUNNING)) {
-	// The startup process has completed
-	if (final_start() < 0) {
-	    XLOG_ERROR("Cannot complete the startup process; "
-		       "current state is %s",
-		       ProtoNode<Mld6igmpVif>::state_str().c_str());
+    if (service == this) {
+	if ((old_status == SERVICE_STARTING)
+	    && (new_status == SERVICE_RUNNING)) {
+	    // The startup process has completed
+	    if (final_start() < 0) {
+		XLOG_ERROR("Cannot complete the startup process; "
+			   "current state is %s",
+			   ProtoNode<Mld6igmpVif>::state_str().c_str());
+		return;
+	    }
+	    ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
 	    return;
 	}
-	ProtoNode<Mld6igmpVif>::set_node_status(PROC_READY);
+
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
+	    // The shutdown process has completed
+	    final_stop();
+	    // Set the node status
+	    ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
+	    return;
+	}
+
+	//
+	// TODO: check if there was an error
+	//
 	return;
     }
 
-    if ((old_status == SERVICE_SHUTTING_DOWN)
-	&& (new_status == SERVICE_SHUTDOWN)) {
-	// The shutdown process has completed
-	final_stop();
-	// Set the node status
-	ProtoNode<Mld6igmpVif>::set_node_status(PROC_DONE);
-	return;
+    if (service == ifmgr_mirror_service_base()) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
+	    decr_shutdown_requests_n();
+	}
+    }
+}
+
+void
+Mld6igmpNode::tree_complete()
+{
+    decr_startup_requests_n();
+
+    //
+    // XXX: we use same actions when the tree is completed or updates are made
+    //
+    updates_made();
+}
+
+void
+Mld6igmpNode::updates_made()
+{
+    map<string, Vif>::iterator mld6igmp_vif_iter;
+    string error_msg;
+
+    //
+    // Update the local copy of the interface tree
+    //
+    _iftree = ifmgr_iftree();
+
+    //
+    // Add new vifs and update existing ones
+    //
+    IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
+    for (ifmgr_iface_iter = _iftree.interfaces().begin();
+	 ifmgr_iface_iter != _iftree.interfaces().end();
+	 ++ifmgr_iface_iter) {
+	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
+
+	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
+	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
+	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
+	     ++ifmgr_vif_iter) {
+	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
+	    const string& ifmgr_vif_name = ifmgr_vif.name();
+	    Vif* node_vif = NULL;
+	
+	    mld6igmp_vif_iter = configured_vifs().find(ifmgr_vif_name);
+	    if (mld6igmp_vif_iter != configured_vifs().end()) {
+		node_vif = &(mld6igmp_vif_iter->second);
+	    }
+
+	    //
+	    // Add a new vif
+	    //
+	    if (node_vif == NULL) {
+		uint32_t vif_index = ifmgr_vif.vif_index();
+		XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
+		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg) < 0) {
+		    XLOG_ERROR("Cannot add vif %s to the set of configured "
+			       "vifs: %s",
+			       ifmgr_vif_name.c_str(), error_msg.c_str());
+		    continue;
+		}
+		mld6igmp_vif_iter = configured_vifs().find(ifmgr_vif_name);
+		XLOG_ASSERT(mld6igmp_vif_iter != configured_vifs().end());
+		node_vif = &(mld6igmp_vif_iter->second);
+		// FALLTHROUGH
+	    }
+
+	    //
+	    // Update the pif_index
+	    //
+	    set_config_pif_index(ifmgr_vif_name,
+				 ifmgr_vif.pif_index(),
+				 error_msg);
+	
+	    //
+	    // Update the vif flags
+	    //
+	    bool is_up = ifmgr_iface.enabled();
+	    is_up &= (! ifmgr_iface.no_carrier());
+	    is_up &= ifmgr_vif.enabled();
+	    set_config_vif_flags(ifmgr_vif_name,
+				 ifmgr_vif.pim_register(),
+				 ifmgr_vif.p2p_capable(),
+				 ifmgr_vif.loopback(),
+				 ifmgr_vif.multicast_capable(),
+				 ifmgr_vif.broadcast_capable(),
+				 is_up,
+				 ifmgr_iface.mtu(),
+				 error_msg);
+	
+	}
     }
 
     //
-    // TODO: check if there was an error
+    // Add new vif addresses, update existing ones, and remove old addresses
     //
+    for (ifmgr_iface_iter = _iftree.interfaces().begin();
+	 ifmgr_iface_iter != _iftree.interfaces().end();
+	 ++ifmgr_iface_iter) {
+	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
+	const string& ifmgr_iface_name = ifmgr_iface.name();
+	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
+
+	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
+	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
+	     ++ifmgr_vif_iter) {
+	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
+	    const string& ifmgr_vif_name = ifmgr_vif.name();
+	    Vif* node_vif = NULL;
+
+	    //
+	    // Add new vif addresses and update existing ones
+	    //
+	    mld6igmp_vif_iter = configured_vifs().find(ifmgr_vif_name);
+	    if (mld6igmp_vif_iter != configured_vifs().end()) {
+		node_vif = &(mld6igmp_vif_iter->second);
+	    }
+
+	    if (is_ipv4()) {
+		IfMgrVifAtom::IPv4Map::const_iterator a4_iter;
+
+		for (a4_iter = ifmgr_vif.ipv4addrs().begin();
+		     a4_iter != ifmgr_vif.ipv4addrs().end();
+		     ++a4_iter) {
+		    const IfMgrIPv4Atom& a4 = a4_iter->second;
+		    VifAddr* node_vif_addr = node_vif->find_address(IPvX(a4.addr()));
+		    IPvX addr(a4.addr());
+		    IPvXNet subnet_addr(addr, a4.prefix_len());
+		    IPvX broadcast_addr(IPvX::ZERO(family()));
+		    IPvX peer_addr(IPvX::ZERO(family()));
+		    if (a4.has_broadcast())
+			broadcast_addr = IPvX(a4.broadcast_addr());
+		    if (a4.has_endpoint())
+			peer_addr = IPvX(a4.endpoint_addr());
+
+		    if (node_vif_addr == NULL) {
+			if (add_config_vif_addr(
+				ifmgr_vif_name,
+				addr,
+				subnet_addr,
+				broadcast_addr,
+				peer_addr,
+				error_msg) < 0) {
+			    XLOG_ERROR("Cannot add address %s to vif %s from "
+				       "the set of configured vifs: %s",
+				       cstring(addr), ifmgr_vif_name.c_str(),
+				       error_msg.c_str());
+			}
+			continue;
+		    }
+		    if ((addr == node_vif_addr->addr())
+			&& (subnet_addr == node_vif_addr->subnet_addr())
+			&& (broadcast_addr == node_vif_addr->broadcast_addr())
+			&& (peer_addr == node_vif_addr->peer_addr())) {
+			continue;	// Nothing changed
+		    }
+
+		    // Update the address
+		    if (delete_config_vif_addr(ifmgr_vif_name,
+					       addr,
+					       error_msg) < 0) {
+			XLOG_ERROR("Cannot delete address %s from vif %s "
+				   "from the set of configured vifs: %s",
+				   cstring(addr),
+				   ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		    if (add_config_vif_addr(
+			    ifmgr_vif_name,
+			    addr,
+			    subnet_addr,
+			    broadcast_addr,
+			    peer_addr,
+			    error_msg) < 0) {
+			XLOG_ERROR("Cannot add address %s to vif %s from "
+				   "the set of configured vifs: %s",
+				   cstring(addr), ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		}
+	    }
+
+	    if (is_ipv6()) {
+		IfMgrVifAtom::IPv6Map::const_iterator a6_iter;
+
+		for (a6_iter = ifmgr_vif.ipv6addrs().begin();
+		     a6_iter != ifmgr_vif.ipv6addrs().end();
+		     ++a6_iter) {
+		    const IfMgrIPv6Atom& a6 = a6_iter->second;
+		    VifAddr* node_vif_addr = node_vif->find_address(IPvX(a6.addr()));
+		    IPvX addr(a6.addr());
+		    IPvXNet subnet_addr(addr, a6.prefix_len());
+		    IPvX broadcast_addr(IPvX::ZERO(family()));
+		    IPvX peer_addr(IPvX::ZERO(family()));
+		    if (a6.has_endpoint())
+			peer_addr = IPvX(a6.endpoint_addr());
+
+		    if (node_vif_addr == NULL) {
+			if (add_config_vif_addr(
+				ifmgr_vif_name,
+				addr,
+				subnet_addr,
+				broadcast_addr,
+				peer_addr,
+				error_msg) < 0) {
+			    XLOG_ERROR("Cannot add address %s to vif %s from "
+				       "the set of configured vifs: %s",
+				       cstring(addr), ifmgr_vif_name.c_str(),
+				       error_msg.c_str());
+			}
+			continue;
+		    }
+		    if ((addr == node_vif_addr->addr())
+			&& (subnet_addr == node_vif_addr->subnet_addr())
+			&& (peer_addr == node_vif_addr->peer_addr())) {
+			continue;	// Nothing changed
+		    }
+
+		    // Update the address
+		    if (delete_config_vif_addr(ifmgr_vif_name,
+					       addr,
+					       error_msg) < 0) {
+			XLOG_ERROR("Cannot delete address %s from vif %s "
+				   "from the set of configured vifs: %s",
+				   cstring(addr),
+				   ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		    if (add_config_vif_addr(
+			    ifmgr_vif_name,
+			    addr,
+			    subnet_addr,
+			    broadcast_addr,
+			    peer_addr,
+			    error_msg) < 0) {
+			XLOG_ERROR("Cannot add address %s to vif %s from "
+				   "the set of configured vifs: %s",
+				   cstring(addr), ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		}
+	    }
+
+	    //
+	    // Delete vif addresses that don't exist anymore
+	    //
+	    {
+		list<IPvX> delete_addresses_list;
+		list<VifAddr>::const_iterator vif_addr_iter;
+		for (vif_addr_iter = node_vif->addr_list().begin();
+		     vif_addr_iter != node_vif->addr_list().end();
+		     ++vif_addr_iter) {
+		    const VifAddr& vif_addr = *vif_addr_iter;
+		    if (vif_addr.addr().is_ipv4()
+			&& (_iftree.find_addr(ifmgr_iface_name,
+					      ifmgr_vif_name,
+					      vif_addr.addr().get_ipv4()))
+			    == NULL) {
+			    delete_addresses_list.push_back(vif_addr.addr());
+		    }
+		    if (vif_addr.addr().is_ipv6()
+			&& (_iftree.find_addr(ifmgr_iface_name,
+					      ifmgr_vif_name,
+					      vif_addr.addr().get_ipv6()))
+			    == NULL) {
+			    delete_addresses_list.push_back(vif_addr.addr());
+		    }
+		}
+
+		// Delete the addresses
+		list<IPvX>::iterator ipvx_iter;
+		for (ipvx_iter = delete_addresses_list.begin();
+		     ipvx_iter != delete_addresses_list.end();
+		     ++ipvx_iter) {
+		    const IPvX& ipvx = *ipvx_iter;
+		    if (delete_config_vif_addr(ifmgr_vif_name, ipvx, error_msg)
+			< 0) {
+			XLOG_ERROR("Cannot delete address %s from vif %s from "
+				   "the set of configured vifs: %s",
+				   cstring(ipvx), ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		}
+	    }
+	}
+    }
+
+    //
+    // Remove vifs that don't exist anymore
+    //
+    list<string> delete_vifs_list;
+    for (mld6igmp_vif_iter = configured_vifs().begin();
+	 mld6igmp_vif_iter != configured_vifs().end();
+	 ++mld6igmp_vif_iter) {
+	Vif* node_vif = &mld6igmp_vif_iter->second;
+#if 0
+	if (node_vif->is_pim_register())
+	    continue;		// XXX: don't delete the PIM Register vif
+#endif
+	if (_iftree.find_vif(node_vif->name(), node_vif->name()) == NULL) {
+	    // Add the vif to the list of old interfaces
+	    delete_vifs_list.push_back(node_vif->name());
+	}
+    }
+    // Delete the old vifs
+    list<string>::iterator vif_name_iter;
+    for (vif_name_iter = delete_vifs_list.begin();
+	 vif_name_iter != delete_vifs_list.end();
+	 ++vif_name_iter) {
+	const string& vif_name = *vif_name_iter;
+	if (delete_config_vif(vif_name, error_msg) < 0) {
+	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
+		       "vifs: %s",
+		       vif_name.c_str(), error_msg.c_str());
+	}
+    }
+    
+    // Done
+    set_config_all_vifs_done(error_msg);
 }
 
 /**

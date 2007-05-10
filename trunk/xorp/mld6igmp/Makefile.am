@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.32 2006/06/07 05:36:34 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.33 2007/04/18 01:18:10 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -20,12 +20,16 @@ noinst_LTLIBRARIES = libmld6igmp.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 ### XRL libraries
-LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+LDADD		+= $(top_builddir)/xrl/targets/libmld6igmpbase.la
 ### XORP misc libraries
 LDADD		+= $(top_builddir)/mrt/libmrt.la
 LDADD		+= $(top_builddir)/libproto/libproto.la

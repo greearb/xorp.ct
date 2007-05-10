@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.32 2007/05/08 19:23:15 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.33 2007/05/09 00:27:46 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -727,122 +727,6 @@ private:
     
     void mfea_client_client_send_recv_dataflow_signal_cb(const XrlError& xrl_error);
 
-    /**
-     * Send a message to a client to add a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif to add.
-     * @param vif_index the vif index of the vif to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_add_config_vif(const string& dst_module_instance_name,
-			    xorp_module_id dst_module_id,
-			    const string& vif_name,
-			    uint32_t vif_index);
-    
-    /**
-     * Send a message to a client to delete a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_delete_config_vif(const string& dst_module_instance_name,
-			       xorp_module_id dst_module_id,
-			       const string& vif_name);
-    
-    /**
-     * Send a message to a client to add an address to a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif.
-     * @param addr the address to add.
-     * @param subnet the subnet address to add.
-     * @param broadcast the broadcast address to add.
-     * @param peer the peer address to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_add_config_vif_addr(const string& dst_module_instance_name,
-				 xorp_module_id dst_module_id,
-				 const string& vif_name,
-				 const IPvX& addr,
-				 const IPvXNet& subnet,
-				 const IPvX& broadcast,
-				 const IPvX& peer);
-    
-    /**
-     * Send a message to a client to delete an address from a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif.
-     * @param addr the address to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_delete_config_vif_addr(const string& dst_module_instance_name,
-				    xorp_module_id dst_module_id,
-				    const string& vif_name,
-				    const IPvX& addr);
-    
-    /**
-     * Send a message to a client to set the vif flags of a configured vif.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @param vif_name the name of the vif.
-     * @param is_pim_register true if the vif is a PIM Register interface.
-     * @param is_p2p true if the vif is point-to-point interface.
-     * @param is_loopback true if the vif is a loopback interface.
-     * @param is_multicast true if the vif is multicast capable.
-     * @param is_broadcast true if the vif is broadcast capable.
-     * @param is_up true if the underlying vif is UP.
-     * @param mtu the MTU of the vif.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_set_config_vif_flags(const string& dst_module_instance_name,
-				  xorp_module_id dst_module_id,
-				  const string& vif_name,
-				  bool is_pim_register,
-				  bool is_p2p,
-				  bool is_loopback,
-				  bool is_multicast,
-				  bool is_broadcast,
-				  bool is_up,
-				  uint32_t mtu);
-    
-    /**
-     * Send a message to a client to complete the set of vif configuration
-     * changes.
-     * 
-     * @param dst_module_instance_name the name of the protocol
-     * instance-destination of the message.
-     * @param dst_module_id the module ID of the protocol-destination
-     * of the message.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	send_set_config_all_vifs_done(const string& dst_module_instance_name,
-				      xorp_module_id dst_module_id);
-    
-    void mfea_client_client_send_new_vif_cb(const XrlError& xrl_error);
-    void mfea_client_client_send_delete_vif_cb(const XrlError& xrl_error);
-    void mfea_client_client_send_add_vif_addr_cb(const XrlError& xrl_error);
-    void mfea_client_client_send_delete_vif_addr_cb(const XrlError& xrl_error);
-    void mfea_client_client_send_set_vif_flags_cb(const XrlError& xrl_error);
-    void mfea_client_client_send_set_all_vifs_done_cb(const XrlError& xrl_error);
-    
     //
     // Protocol node CLI methods
     //

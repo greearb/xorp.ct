@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.31 2007/02/16 22:46:36 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.32 2007/05/08 19:23:16 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -27,6 +27,7 @@
 
 #include "libxorp/vif.hh"
 #include "libproto/proto_node.hh"
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "mrt/buffer.h"
 #include "mrt/multicast_defs.h"
 
@@ -51,7 +52,9 @@ class Mld6igmpVif;
  * There should be one node per MLD or IGMP instance. There should be
  * one instance per address family.
  */
-class Mld6igmpNode : public ProtoNode<Mld6igmpVif>, public ServiceChangeObserverBase {
+class Mld6igmpNode : public ProtoNode<Mld6igmpVif>,
+		     public IfMgrHintObserver,
+		     public ServiceChangeObserverBase {
 public:
     /**
      * Constructor for a given address family, module ID, and event loop.
@@ -796,7 +799,14 @@ public:
      * @param is_enabled if true, trace log is enabled, otherwise is disabled.
      */
     void	set_log_trace(bool is_enabled) { _is_log_trace = is_enabled; }
-    
+
+protected:
+    //
+    // IfMgrHintObserver methods
+    //
+    void tree_complete();
+    void updates_made();
+
 private:
     /**
      * A method invoked when the status of a service changes.
@@ -808,6 +818,26 @@ private:
     void status_change(ServiceBase*  service,
 		       ServiceStatus old_status,
 		       ServiceStatus new_status);
+
+    /**
+     * Get a reference to the service base of the interface manager.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the service base of the interface manager.
+     */
+    virtual const ServiceBase* ifmgr_mirror_service_base() const = 0;
+
+    /**
+     * Get a reference to the interface manager tree.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     *
+     * @return a reference to the interface manager tree.
+     */
+    virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
      * Initiate registration with the MFEA.
@@ -831,6 +861,11 @@ private:
     // Status-related state
     //
     size_t	_waiting_for_mfea_startup_events;
+
+    //
+    // A local copy with the interface state information
+    //
+    IfMgrIfTree	_iftree;
     
     //
     // Debug and test-related state

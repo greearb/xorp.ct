@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.38 2007/05/03 09:28:26 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.39 2007/05/08 19:23:16 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -59,7 +59,6 @@ public:
 	      EventLoop& init_eventloop)
 	: ProtoUnit(init_family, init_module_id),
 	  _eventloop(init_eventloop),
-	  _is_vif_setup_completed(false),
 	  _node_status(PROC_NULL),
 	  _startup_requests_n(0),
 	  _shutdown_requests_n(0) {}
@@ -206,22 +205,6 @@ public:
      * @return the event loop this node is added to.
      */
     EventLoop& eventloop() { return (_eventloop); }
-    
-    /**
-     * Test if the vif setup is completed.
-     * 
-     * @return true if the vif setup is completed, otherwise false.
-     */
-    bool is_vif_setup_completed() const { return (_is_vif_setup_completed); }
-    
-    /**
-     * Set/reset the flag that indicates whether the vif setup is completed.
-     * 
-     * @param v if true, set the flag that the vif setup is completed,
-     * otherwise reset it.
-     */
-    void set_vif_setup_completed(bool v) { _is_vif_setup_completed = v; }
-    
     
     /**
      * Receive a protocol message.
@@ -602,8 +585,6 @@ private:
     
     map<string, uint32_t> _vif_name2vif_index_map;
     
-    bool	_is_vif_setup_completed;	// True if the vifs are setup
-    
     ProcessStatus	_node_status;		// The node status
 
     //
@@ -861,9 +842,6 @@ template<class V>
 inline int
 ProtoNode<V>::add_vif(V *vif)
 {
-    // XXX: vif setup is not completed, if we are trying to add a vif
-    _is_vif_setup_completed = false;
-    
     if (vif == NULL) {
 	XLOG_ERROR("Cannot add NULL vif");
 	return (XORP_ERROR);
@@ -907,9 +885,6 @@ template<class V>
 inline int
 ProtoNode<V>::delete_vif(const V *vif)
 {
-    // XXX: vif setup is not completed, if we are trying to delete a vif
-    _is_vif_setup_completed = false;
-    
     if (vif == NULL) {
 	XLOG_ERROR("Cannot delete NULL vif");
 	return (XORP_ERROR);
