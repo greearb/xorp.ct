@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt6_client.xif,v 1.4 2006/06/15 06:02:43 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt6_client.xif,v 1.5 2007/05/08 19:23:20 pavlin Exp $ */
 
 /*
  * Interface for receiving IPv6 packets on a raw socket.
@@ -26,7 +26,7 @@ interface raw_packet6_client/0.1 {
 	 * @param ext_headers_payload a list of payload data, one for each
 	 *                            optional extention header. The number
 	 *                            of entries must match ext_headers_type.
-	 * @param packet the payload, everything after the IP header and
+	 * @param payload the payload, everything after the IP header and
 	 *                options.
 	 */
 	recv	? if_name:txt						\
