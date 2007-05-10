@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/Jamfile,v 1.2 2007/04/18 01:18:10 pavlin Exp $
+# $XORP: xorp/mld6igmp/Jamfile,v 1.3 2007/04/20 07:17:44 pavlin Exp $
 #
 
 SubDir TOP mld6igmp ;
@@ -9,6 +9,7 @@ SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
+SubIncludeOnce TOP libfeaclient ;
 SubIncludeOnce TOP mrt ;
 SubDir TOP mld6igmp ;
 
@@ -21,11 +22,15 @@ Library libmld6igmp :
 
 MLD6IGMP_LINKLIBS_COMMON = 
 	libmld6igmp
-	libmld6igmpbase
+	libfeaclient
 	libmld6igmpclientxif
 	libmfeaxif
+	libfeaifmgrmirrorxif
+	libfeaifmgrreplicatorxif
 	libclimanagerxif
 	libfindereventnotifierxif
+	libfeaifmgrmirrorbase
+	libmld6igmpbase
 	libmrt
 	libproto
 	libxipc
