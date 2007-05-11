@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.18 2007/02/16 22:46:35 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.19 2007/04/14 07:00:54 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
@@ -27,6 +27,9 @@
  * MLDv1 (RFC 2710), and MLDv2 (RFC 3810).
  */
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #ifdef HAVE_NETINET_ICMP6_H
 #include <netinet/icmp6.h>
 #endif
@@ -35,6 +38,10 @@
 /*
  * Constants definitions
  */
+#ifndef IPPROTO_ICMPV6
+#define IPPROTO_ICMPV6				58
+#endif
+
 /* MLD versions definition */
 #define MLD_V1					1
 #define MLD_V2					2
