@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.22 2006/12/15 02:06:31 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.23 2007/02/16 22:46:49 pavlin Exp $
  */
 
 
@@ -33,6 +33,9 @@
 /* XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h> */
 #define _PIM_VT 1
 
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
@@ -68,6 +71,10 @@
 /*
  * Constants definitions
  */
+#ifndef IPPROTO_PIM
+#define IPPROTO_PIM				103
+#endif
+
 /* PIM versions definition */
 #define PIMSM_V1				1
 #define PIMSM_V2				2
