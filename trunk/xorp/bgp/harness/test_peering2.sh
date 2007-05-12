@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.55 2006/08/16 22:10:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.56 2007/05/12 23:01:33 zec Exp $
 #
 
 #
@@ -778,6 +778,7 @@ test15()
 
     # Establish the EBGP peering.
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+    sleep 2
     coord peer1 assert established
 
     # Save the traffic that we send on peer1
