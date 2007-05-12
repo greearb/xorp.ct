@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.54 2006/04/04 12:07:45 bms Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.55 2006/08/16 22:10:14 atanu Exp $
 #
 
 #
@@ -263,6 +263,7 @@ test2()
 	sleep 2
 
 	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
+	sleep 2
 	coord peer1 assert established
 
 	# Wait for the BGP process to send all the updates to peer1
