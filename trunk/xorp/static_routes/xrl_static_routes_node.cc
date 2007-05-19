@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.36 2007/01/23 01:57:37 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.37 2007/02/16 22:47:30 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -172,7 +172,7 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot register interest in finder events: %s",
+	XLOG_FATAL("Cannot register interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -181,7 +181,7 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -206,7 +206,7 @@ XrlStaticRoutesNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _fea_register_startup_timer.scheduled()) {
-	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
@@ -285,7 +285,7 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+	XLOG_FATAL("Cannot deregister interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -294,7 +294,7 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -320,7 +320,7 @@ XrlStaticRoutesNode::finder_deregister_interest_fea_cb(
 	// (unless the timer is already running).
 	//
 	if (! _fea_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
@@ -393,7 +393,7 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot register interest in finder events: %s",
+	XLOG_FATAL("Cannot register interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -402,7 +402,7 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -427,7 +427,7 @@ XrlStaticRoutesNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _rib_register_startup_timer.scheduled()) {
-	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
@@ -505,7 +505,7 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+	XLOG_FATAL("Cannot deregister interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -514,7 +514,7 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -540,7 +540,7 @@ XrlStaticRoutesNode::finder_deregister_interest_rib_cb(
 	// (unless the timer is already running).
 	//
 	if (! _rib_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
@@ -635,7 +635,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table4_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -699,7 +699,7 @@ XrlStaticRoutesNode::rib_client_send_add_igp_table6_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -813,7 +813,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -877,7 +877,7 @@ XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -1986,7 +1986,7 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//

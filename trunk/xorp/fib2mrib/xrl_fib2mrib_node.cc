@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.35 2006/03/16 00:04:09 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.36 2007/02/16 22:45:58 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -184,7 +184,7 @@ XrlFib2mribNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot register interest in finder events: %s",
+	XLOG_FATAL("Cannot register interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -193,7 +193,7 @@ XrlFib2mribNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -218,7 +218,7 @@ XrlFib2mribNode::finder_register_interest_fea_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _fea_register_startup_timer.scheduled()) {
-	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_register_startup_timer = _eventloop.new_oneoff_after(
@@ -303,7 +303,7 @@ XrlFib2mribNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+	XLOG_FATAL("Cannot deregister interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -312,7 +312,7 @@ XrlFib2mribNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -338,7 +338,7 @@ XrlFib2mribNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _fea_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _fea_register_shutdown_timer = _eventloop.new_oneoff_after(
@@ -411,7 +411,7 @@ XrlFib2mribNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot register interest in finder events: %s",
+	XLOG_FATAL("Cannot register interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -420,7 +420,7 @@ XrlFib2mribNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -445,7 +445,7 @@ XrlFib2mribNode::finder_register_interest_rib_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _rib_register_startup_timer.scheduled()) {
-	    XLOG_ERROR("Failed to register interest in finder events: %s. "
+	    XLOG_ERROR("Failed to register interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_register_startup_timer = _eventloop.new_oneoff_after(
@@ -522,7 +522,7 @@ XrlFib2mribNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 	// If a command failed because the other side rejected it, this is
 	// fatal.
 	//
-	XLOG_FATAL("Cannot deregister interest in finder events: %s",
+	XLOG_FATAL("Cannot deregister interest in Finder events: %s",
 		   xrl_error.str().c_str());
 	break;
 
@@ -531,7 +531,7 @@ XrlFib2mribNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -557,7 +557,7 @@ XrlFib2mribNode::finder_deregister_interest_rib_cb(const XrlError& xrl_error)
 	// (unless the timer is already running).
 	//
 	if (! _rib_register_shutdown_timer.scheduled()) {
-	    XLOG_ERROR("Failed to deregister interest in finder events: %s. "
+	    XLOG_ERROR("Failed to deregister interest in Finder events: %s. "
 		       "Will try again.",
 		       xrl_error.str().c_str());
 	    _rib_register_shutdown_timer = _eventloop.new_oneoff_after(
@@ -680,7 +680,7 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv4_cb(const XrlError& xrl_error,
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -749,7 +749,7 @@ XrlFib2mribNode::fea_fti_client_send_have_ipv6_cb(const XrlError& xrl_error,
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -814,7 +814,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -878,7 +878,7 @@ XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -986,7 +986,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -1054,7 +1054,7 @@ XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -1174,7 +1174,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table4_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -1237,7 +1237,7 @@ XrlFib2mribNode::rib_client_send_add_igp_table6_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -1351,7 +1351,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table4_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -1415,7 +1415,7 @@ XrlFib2mribNode::rib_client_send_delete_igp_table6_cb(
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
@@ -2185,7 +2185,7 @@ XrlFib2mribNode::send_rib_route_change_cb(const XrlError& xrl_error)
     case SEND_FAILED:
 	//
 	// A communication error that should have been caught elsewhere
-	// (e.g., by tracking the status of the finder and the other targets).
+	// (e.g., by tracking the status of the Finder and the other targets).
 	// Probably we caught it here because of event reordering.
 	// In some cases we print an error. In other cases our job is done.
 	//
