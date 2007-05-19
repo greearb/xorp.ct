@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.42 2007/05/10 00:08:18 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.43 2007/05/19 01:52:45 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -95,6 +95,12 @@ public:
     int disable_mld6igmp();
     int start_mld6igmp();
     int stop_mld6igmp();
+
+    // XrlTask relatedMethods that need to be public
+    void send_register_unregister_interest();
+    void send_register_unregister_receiver();
+    void send_join_leave_multicast_group();
+    void send_protocol_message();
 
 protected:
     //
@@ -654,7 +660,6 @@ private:
     void mfea_register_startup();
     void fea_register_shutdown();
     void mfea_register_shutdown();
-    void send_register_unregister_interest();
     void finder_send_register_unregister_interest_cb(const XrlError& xrl_error);
 
     //
@@ -665,14 +670,12 @@ private:
 			  bool enable_multicast_loopback);
     int unregister_receiver(const string& if_name, const string& vif_name,
 			    uint8_t ip_protocol);
-    void send_register_unregister_receiver();
     void fea_client_send_register_unregister_receiver_cb(const XrlError& xrl_error);
 
     int join_multicast_group(const string& if_name, const string& vif_name,
 			     uint8_t ip_protocol, const IPvX& group_address);
     int leave_multicast_group(const string& if_name, const string& vif_name,
 			      uint8_t ip_protocol, const IPvX& group_address);
-    void send_join_leave_multicast_group();
     void fea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
 
     int	proto_send(const string& if_name,
@@ -687,7 +690,6 @@ private:
 		   const uint8_t* sndbuf,
 		   size_t sndlen,
 		   string& error_msg);
-    void send_protocol_message();
     void fea_client_send_protocol_message_cb(const XrlError& xrl_error);
     
     int send_add_membership(const string& dst_module_instance_name,

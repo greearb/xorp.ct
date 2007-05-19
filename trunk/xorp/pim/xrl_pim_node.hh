@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.72 2007/05/10 00:08:20 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.73 2007/05/19 01:52:47 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -108,6 +108,15 @@ public:
     int disable_bsr();
     int start_bsr();
     int stop_bsr();
+
+    // XrlTask relatedMethods that need to be public
+    void send_register_unregister_interest();
+    void send_register_unregister_receiver();
+    void send_register_unregister_protocol();
+    void send_join_leave_multicast_group();
+    void send_protocol_message();
+    void send_add_delete_mfc();
+    void send_add_delete_dataflow_monitor();
 
 protected:    
     //
@@ -2108,7 +2117,6 @@ private:
     void mfea_register_startup();
     void fea_register_shutdown();
     void mfea_register_shutdown();
-    void send_register_unregister_interest();
     void finder_send_register_unregister_interest_cb(const XrlError& xrl_error);
 
     void rib_register_startup();
@@ -2129,20 +2137,17 @@ private:
 			  bool enable_multicast_loopback);
     int unregister_receiver(const string& if_name, const string& vif_name,
 			    uint8_t ip_protocol);
-    void send_register_unregister_receiver();
     void fea_client_send_register_unregister_receiver_cb(const XrlError& xrl_error);
 
     int register_protocol(const string& if_name, const string& vif_name,
 			  uint8_t ip_protocol);
     int unregister_protocol(const string& if_name, const string& vif_name);
-    void send_register_unregister_protocol();
     void mfea_client_send_register_unregister_protocol_cb(const XrlError& xrl_error);
 
     int join_multicast_group(const string& if_name, const string& vif_name,
 			     uint8_t ip_protocol, const IPvX& group_address);
     int leave_multicast_group(const string& if_name, const string& vif_name,
 			      uint8_t ip_protocol, const IPvX& group_address);
-    void send_join_leave_multicast_group();
     void fea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
 
     int	proto_send(const string& if_name,
@@ -2157,12 +2162,10 @@ private:
 		   const uint8_t* sndbuf,
 		   size_t sndlen,
 		   string& error_msg);
-    void send_protocol_message();
     void fea_client_send_protocol_message_cb(const XrlError& xrl_error);
 
     int add_mfc_to_kernel(const PimMfc& pim_mfc);
     int delete_mfc_from_kernel(const PimMfc& pim_mfc);
-    void send_add_delete_mfc();
     void mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error);
 
     int add_dataflow_monitor(const IPvX& source_addr,
@@ -2187,7 +2190,6 @@ private:
 				bool is_leq_upcall);
     int delete_all_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr);
-    void send_add_delete_dataflow_monitor();
     void mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error);
 
     int add_protocol_mld6igmp(uint32_t vif_index);
