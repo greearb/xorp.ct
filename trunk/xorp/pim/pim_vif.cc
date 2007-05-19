@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.66 2007/04/14 08:59:52 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.67 2007/05/08 19:23:18 pavlin Exp $"
 
 
 //
@@ -302,10 +302,28 @@ PimVif::start(string& error_msg)
     }
     
     //
-    // Start the vif with the kernel
+    // Register as a receiver with the kernel
     //
-    if (pim_node().start_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	error_msg = c_format("cannot start protocol vif %s with the kernel",
+    if (pim_node().register_receiver(name(),
+				     name(),
+				     pim_node().ip_protocol_number(),
+				     false)
+	!= XORP_OK) {
+	error_msg = c_format("cannot register as a receiver on vif %s "
+			     "with the kernel",
+			     name().c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Register as a protocol with the MFEA
+    //
+    if (pim_node().register_protocol(name(),
+				     name(),
+				     pim_node().ip_protocol_number())
+	!= XORP_OK) {
+	error_msg = c_format("cannot register as a protocol on vif %s "
+			     "with the MFEA",
 			     name().c_str());
 	return (XORP_ERROR);
     }
@@ -314,10 +332,14 @@ PimVif::start(string& error_msg)
 	//
 	// Join the appropriate multicast groups: ALL-PIM-ROUTERS
 	//
-	const IPvX group1 = IPvX::PIM_ROUTERS(family());
-	if (pim_node().join_multicast_group(vif_index(), group1) != XORP_OK) {
+	const IPvX group = IPvX::PIM_ROUTERS(family());
+	if (pim_node().join_multicast_group(name(),
+					    name(),
+					    pim_node().ip_protocol_number(),
+					    group)
+	    != XORP_OK) {
 	    error_msg = c_format("cannot join group %s on vif %s",
-				 cstring(group1), name().c_str());
+				 cstring(group), name().c_str());
 	    return (XORP_ERROR);
 	}
 	
@@ -384,7 +406,7 @@ PimVif::stop(string& error_msg)
     // Add the shutdown operation of this vif as a shutdown task
     // for the node.
     //
-    pim_node().incr_shutdown_requests_n();
+    pim_node().incr_shutdown_requests_n();	// XXX: for PIM-stop-vif
 
     if (! is_pim_register()) {
 	//
@@ -454,14 +476,26 @@ PimVif::final_stop(string& error_msg)
     }
     
     //
-    // Stop the vif with the kernel
+    // Unregister as a protocol with the MFEA
     //
-    if (pim_node().stop_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	XLOG_ERROR("Cannot stop protocol vif %s with the kernel",
+    if (pim_node().unregister_protocol(name(), name()) != XORP_OK) {
+	XLOG_ERROR("Cannot unregister as a protocol on vif %s with the MFEA",
 		   name().c_str());
 	ret_value = XORP_ERROR;
     }
-    
+
+    //
+    // Unregister as a receiver with the kernel
+    //
+    if (pim_node().unregister_receiver(name(),
+				       name(),
+				       pim_node().ip_protocol_number())
+	!= XORP_OK) {
+	XLOG_ERROR("Cannot unregister as a receiver on vif %s with the kernel",
+		   name().c_str());
+	ret_value = XORP_ERROR;
+    }
+
     XLOG_INFO("Interface stopped: %s%s",
 	      this->str().c_str(), flags_string().c_str());
 
@@ -474,7 +508,7 @@ PimVif::final_stop(string& error_msg)
     // Remove the shutdown operation of this vif as a shutdown task
     // for the node.
     //
-    pim_node().decr_shutdown_requests_n();
+    pim_node().decr_shutdown_requests_n();	// XXX: for PIM-stop-vif
 
     return (ret_value);
 }
@@ -541,7 +575,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     // XXX: According to newer revisions of the PIM-SM spec, the PIM-SM control
     // messages don't include the IP Router Alert option.
     //
-    bool is_router_alert = false;
+    bool ip_router_alert = false;
     bool ip_internet_control = true;	// XXX: might be overwritten below
 
     if (! (is_up() || is_pending_down()))
@@ -581,7 +615,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	case PIM_REGISTER_STOP:
 	case PIM_CAND_RP_ADV:
 	    ttl = IPDEFTTL;
-	    is_router_alert = false;
+	    ip_router_alert = false;
 	    break;
 	default:
 	    break;
@@ -707,8 +741,12 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     //
     // Send the message
     //
-    ret_value = pim_node().pim_send(vif_index(), src, dst, ttl, ip_tos,
-				    is_router_alert, ip_internet_control,
+    ret_value = pim_node().pim_send(name(), name(),
+				    src, dst,
+				    pim_node().ip_protocol_number(),
+				    ttl, ip_tos,
+				    ip_router_alert,
+				    ip_internet_control,
 				    buffer, error_msg);
     
     //
@@ -790,7 +828,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @is_router_alert: True if the received IP packet had the Router Alert
+ * @ip_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the received message.
@@ -804,7 +842,7 @@ PimVif::pim_recv(const IPvX& src,
 		 const IPvX& dst,
 		 int ip_ttl,
 		 int ip_tos,
-		 bool is_router_alert,
+		 bool ip_router_alert,
 		 bool ip_internet_control,
 		 buffer_t *buffer)
 {
@@ -815,7 +853,7 @@ PimVif::pim_recv(const IPvX& src,
 	return (XORP_ERROR);
     }
     
-    ret_value = pim_process(src, dst, ip_ttl, ip_tos, is_router_alert,
+    ret_value = pim_process(src, dst, ip_ttl, ip_tos, ip_router_alert,
 			    ip_internet_control, buffer);
     
     return (ret_value);
@@ -829,7 +867,7 @@ PimVif::pim_recv(const IPvX& src,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @is_router_alert: True if the received IP packet had the Router Alert
+ * @ip_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the message.
@@ -842,7 +880,7 @@ int
 PimVif::pim_process(const IPvX& src, const IPvX& dst,
 		    int ip_ttl,
 		    int ip_tos,
-		    bool is_router_alert,
+		    bool ip_router_alert,
 		    bool ip_internet_control,
 		    buffer_t *buffer)
 {
@@ -1015,7 +1053,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 	case PIM_GRAFT:
 	case PIM_GRAFT_ACK:
 	case PIM_BOOTSTRAP:
-	    if (! is_router_alert) {
+	    if (! ip_router_alert) {
 		XLOG_WARNING("RX %s from %s to %s on vif %s: "
 			     "missing IP Router Alert option",
 			     PIMTYPE2ASCII(message_type),

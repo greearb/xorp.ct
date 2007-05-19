@@ -1,8 +1,10 @@
-/* $XORP: xorp/xrl/targets/pim.tgt,v 1.4 2004/05/12 21:58:40 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/pim.tgt,v 1.5 2005/02/19 02:51:55 pavlin Exp $ */
 
 #include "common.xif"
 #include "cli_processor.xif"
 #include "finder_event_observer.xif"
+#include "fea_rawpkt4_client.xif"
+#include "fea_rawpkt6_client.xif"
 #include "mfea_client.xif"
 #include "redist_transaction4.xif"
 #include "redist_transaction6.xif"
@@ -12,6 +14,8 @@
 target pim implements		common/0.1,				\
 				cli_processor/0.1,			\
 				finder_event_observer/0.1,		\
+				raw_packet4_client/0.1,			\
+				raw_packet6_client/0.1,			\
 				mfea_client/0.1,			\
 				redist_transaction4/0.1,		\
 				redist_transaction6/0.1,		\

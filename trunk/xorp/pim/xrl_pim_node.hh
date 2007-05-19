@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.71 2007/05/08 19:23:19 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.72 2007/05/10 00:08:20 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -31,6 +31,8 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
+#include "xrl/interfaces/fea_rawpkt4_xif.hh"
+#include "xrl/interfaces/fea_rawpkt6_xif.hh"
 #include "xrl/interfaces/mfea_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/mld6igmp_xif.hh"
@@ -57,6 +59,7 @@ public:
 	       const string&	finder_hostname,
 	       uint16_t		finder_port,
 	       const string&	finder_target,
+	       const string&	fea_target,
 	       const string&	mfea_target,
 	       const string&	rib_target,
 	       const string&	mld6igmp_target);
@@ -105,18 +108,6 @@ public:
     int disable_bsr();
     int start_bsr();
     int stop_bsr();
-
-    //
-    // Methods used by the classed derived from XrlTaskBase, that need to
-    // be public.
-    //
-    void send_mfea_add_delete_protocol();
-    void send_mfea_allow_signal_messages();
-    void send_start_stop_protocol_kernel_vif();
-    void send_join_leave_multicast_group();
-    void send_protocol_message();
-    void send_add_delete_mfc();
-    void send_add_delete_dataflow_monitor();
 
 protected:    
     //
@@ -206,78 +197,95 @@ protected:
 	string&	ret_cli_term_name, 
 	uint32_t& ret_cli_session_id,
 	string&	ret_command_output);
-    
-    /**
-     *  Receive a protocol message from the MFEA.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol that sends a message.
-     *  
-     *  @param protocol_id the ID of the protocol that sends a message (both
-     *  sides must agree on the particular values).
-     *  
-     *  @param vif_name the name of the vif the message was received on.
-     *  
-     *  @param vif_index the index of the vif the message was received on.
-     *  
-     *  @param source_address the address of the sender.
-     *  
-     *  @param dest_address the destination address.
-     *  
-     *  @param ip_ttl the TTL of the received IP packet. If it has a negative
-     *  value, it should be ignored.
-     *  
-     *  @param ip_tos the TOS of the received IP packet. If it has a negative
-     *  value, it should be ignored.
-     *  
-     *  @param is_router_alert if true, the IP Router Alert option in
-     *  the IP packet was set (when applicable).
-     *  
-     *  @param ip_internet_control if true, then this is IP control traffic.
-     *  
-     *  @param protocol_message the protocol message.
-     */
-    XrlCmdError mfea_client_0_1_recv_protocol_message4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv4&	source_address, 
-	const IPv4&	dest_address, 
-	const int32_t&	ip_ttl, 
-	const int32_t&	ip_tos, 
-	const bool&	is_router_alert, 
-	const bool&	ip_internet_control,
-	const vector<uint8_t>&	protocol_message);
 
-    XrlCmdError mfea_client_0_1_recv_protocol_message6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv6&	source_address, 
-	const IPv6&	dest_address, 
-	const int32_t&	ip_ttl, 
-	const int32_t&	ip_tos, 
-	const bool&	is_router_alert, 
+    /**
+     *  Receive an IPv4 packet from a raw socket.
+     *
+     *  @param if_name the interface name the packet arrived on.
+     *
+     *  @param vif_name the vif name the packet arrived on.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     *  the received value is unknown.
+     *
+     *  @param ip_tos the Type of Service (Diffserv/ECN bits for IPv4). If it
+     *  has a negative value, then the received value is unknown.
+     *
+     *  @param ip_router_alert if true, the IP Router Alert option was included
+     *  in the IP packet.
+     *
+     *  @param ip_internet_control if true, then this is IP control traffic.
+     */
+    XrlCmdError raw_packet4_client_0_1_recv(
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv4&	src_address,
+	const IPv4&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
 	const bool&	ip_internet_control,
-	const vector<uint8_t>&	protocol_message);
+	const vector<uint8_t>&	payload);
+
+    /**
+     *  Receive an IPv6 packet from a raw socket.
+     *
+     *  @param if_name the interface name the packet arrived on.
+     *
+     *  @param vif_name the vif name the packet arrived on.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     *  the received value is unknown.
+     *
+     *  @param ip_tos the Type Of Service (IP traffic class for IPv4). If it
+     *  has a negative value, then the received value is unknown.
+     *
+     *  @param ip_router_alert if true, the IP Router Alert option was included
+     *  in the IP packet.
+     *
+     *  @param ip_internet_control if true, then this is IP control traffic.
+     *
+     *  @param ext_headers_type a list of u32 integers with the types of the
+     *  optional extention headers.
+     *
+     *  @param ext_headers_payload a list of payload data, one for each
+     *  optional extention header. The number of entries must match
+     *  ext_headers_type.
+     */
+    XrlCmdError raw_packet6_client_0_1_recv(
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv6&	src_address,
+	const IPv6&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
+	const bool&	ip_internet_control,
+	const XrlAtomList&	ext_headers_type,
+	const XrlAtomList&	ext_headers_payload,
+	const vector<uint8_t>&	payload);
     
     /**
      *  
      *  Receive a kernel signal message from the MFEA.
      *  
      *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol that sends a message.
-     *  
-     *  @param protocol_id the ID of the protocol that sends a message (both
-     *  sides must agree on the particular values).
      *  
      *  @param message_type the type of the kernel signal message (TODO:
      *  integer for now: the particular types are well-known by both sides).
@@ -295,8 +303,6 @@ protected:
     XrlCmdError mfea_client_0_1_recv_kernel_signal_message4(
 	// Input values, 
 	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
 	const uint32_t&	message_type, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
@@ -307,8 +313,6 @@ protected:
     XrlCmdError mfea_client_0_1_recv_kernel_signal_message6(
 	// Input values, 
 	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
 	const uint32_t&	message_type, 
 	const string&	vif_name, 
 	const uint32_t&	vif_index, 
@@ -2100,13 +2104,12 @@ private:
     void pop_xrl_task();
     void retry_xrl_task();
 
+    void fea_register_startup();
     void mfea_register_startup();
-    void finder_register_interest_mfea_cb(const XrlError& xrl_error);
+    void fea_register_shutdown();
     void mfea_register_shutdown();
-    void finder_deregister_interest_mfea_cb(const XrlError& xrl_error);
-
-    void mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_error);
-    void mfea_client_send_allow_signal_messages_cb(const XrlError& xrl_error);
+    void send_register_unregister_interest();
+    void finder_send_register_unregister_interest_cb(const XrlError& xrl_error);
 
     void rib_register_startup();
     void finder_register_interest_rib_cb(const XrlError& xrl_error);
@@ -2121,25 +2124,45 @@ private:
     //
     // Protocol node methods
     //
-    int start_protocol_kernel_vif(uint32_t vif_index);
-    int stop_protocol_kernel_vif(uint32_t vif_index);
-    void mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error);
+    int register_receiver(const string& if_name, const string& vif_name,
+			  uint8_t ip_protocol,
+			  bool enable_multicast_loopback);
+    int unregister_receiver(const string& if_name, const string& vif_name,
+			    uint8_t ip_protocol);
+    void send_register_unregister_receiver();
+    void fea_client_send_register_unregister_receiver_cb(const XrlError& xrl_error);
 
-    int join_multicast_group(uint32_t vif_index, const IPvX& multicast_group);
-    int leave_multicast_group(uint32_t vif_index, const IPvX& multicast_group);
-    void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
+    int register_protocol(const string& if_name, const string& vif_name,
+			  uint8_t ip_protocol);
+    int unregister_protocol(const string& if_name, const string& vif_name);
+    void send_register_unregister_protocol();
+    void mfea_client_send_register_unregister_protocol_cb(const XrlError& xrl_error);
 
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint32_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl, int ip_tos,  bool is_router_alert,
+    int join_multicast_group(const string& if_name, const string& vif_name,
+			     uint8_t ip_protocol, const IPvX& group_address);
+    int leave_multicast_group(const string& if_name, const string& vif_name,
+			      uint8_t ip_protocol, const IPvX& group_address);
+    void send_join_leave_multicast_group();
+    void fea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
+
+    int	proto_send(const string& if_name,
+		   const string& vif_name,
+		   const IPvX& src_address,
+		   const IPvX& dst_address,
+		   uint8_t ip_protocol,
+		   int32_t ip_ttl,
+		   int32_t ip_tos,
+		   bool ip_router_alert,
 		   bool ip_internet_control,
-		   const uint8_t* sndbuf, size_t sndlen, string& error_msg);
-    void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
-    
+		   const uint8_t* sndbuf,
+		   size_t sndlen,
+		   string& error_msg);
+    void send_protocol_message();
+    void fea_client_send_protocol_message_cb(const XrlError& xrl_error);
+
     int add_mfc_to_kernel(const PimMfc& pim_mfc);
     int delete_mfc_from_kernel(const PimMfc& pim_mfc);
+    void send_add_delete_mfc();
     void mfea_client_send_add_delete_mfc_cb(const XrlError& xrl_error);
 
     int add_dataflow_monitor(const IPvX& source_addr,
@@ -2164,6 +2187,7 @@ private:
 				bool is_leq_upcall);
     int delete_all_dataflow_monitor(const IPvX& source_addr,
 				    const IPvX& group_addr);
+    void send_add_delete_dataflow_monitor();
     void mfea_client_send_add_delete_dataflow_monitor_cb(const XrlError& xrl_error);
 
     int add_protocol_mld6igmp(uint32_t vif_index);
@@ -2198,6 +2222,7 @@ private:
 	virtual ~XrlTaskBase() {}
 
 	virtual void dispatch() = 0;
+	virtual const char* operation_name() const = 0;
 
     protected:
 	XrlPimNode&	_xrl_pim_node;
@@ -2205,58 +2230,106 @@ private:
     };
 
     /**
-     * Class for handling the task of start/stop a protocol interface with
-     * the MFEA
+     * Class for handling the task to register/unregister interest
+     * in the FEA or MFEA with the Finder.
      */
-    class StartStopProtocolKernelVif : public XrlTaskBase {
+    class RegisterUnregisterInterest : public XrlTaskBase {
     public:
-	StartStopProtocolKernelVif(XrlPimNode&	xrl_pim_node,
-				   uint32_t	vif_index,
-				   bool		is_start)
+	RegisterUnregisterInterest(XrlPimNode&		xrl_pim_node,
+				   const string&	target_name,
+				   bool			is_register)
 	    : XrlTaskBase(xrl_pim_node),
-	      _vif_index(vif_index),
-	      _is_start(is_start) {}
+	      _target_name(target_name),
+	      _is_register(is_register) {}
 
 	void		dispatch() {
-	    _xrl_pim_node.send_start_stop_protocol_kernel_vif();
+	    _xrl_pim_node.send_register_unregister_interest();
 	}
-	uint32_t	vif_index() const { return _vif_index; }
-	bool		is_start() const { return _is_start; }
+	const char*	operation_name() const {
+	    return ((_is_register)? "register" : "unregister");
+	}
+	const string&	target_name() const { return _target_name; }
+	bool		is_register() const { return _is_register; }
 
     private:
-	uint32_t	_vif_index;
-	bool		_is_start;
+	string		_target_name;
+	bool		_is_register;
     };
 
     /**
-     * Class for handling the task of adding/deleting a protocol with the MFEA
+     * Class for handling the task to register/unregister with the FEA
+     * as a receiver on an interface.
      */
-    class MfeaAddDeleteProtocol : public XrlTaskBase {
+    class RegisterUnregisterReceiver : public XrlTaskBase {
     public:
-	MfeaAddDeleteProtocol(XrlPimNode&	xrl_pim_node,
-			      bool		is_add)
+	RegisterUnregisterReceiver(XrlPimNode&		xrl_pim_node,
+				   const string&	if_name,
+				   const string&	vif_name,
+				   uint8_t		ip_protocol,
+				   bool			enable_multicast_loopback,
+				   bool			is_register)
 	    : XrlTaskBase(xrl_pim_node),
-	      _is_add(is_add) {}
+	      _if_name(if_name),
+	      _vif_name(vif_name),
+	      _ip_protocol(ip_protocol),
+	      _enable_multicast_loopback(enable_multicast_loopback),
+	      _is_register(is_register) {}
 
 	void		dispatch() {
-	    _xrl_pim_node.send_mfea_add_delete_protocol();
+	    _xrl_pim_node.send_register_unregister_receiver();
 	}
-	bool		is_add() const { return _is_add; }
+	const char*	operation_name() const {
+	    return ((_is_register)? "register" : "unregister");
+	}
+	const string&	if_name() const { return _if_name; }
+	const string&	vif_name() const { return _vif_name; }
+	uint8_t		ip_protocol() const { return _ip_protocol; }
+	bool		enable_multicast_loopback() const {
+	    return _enable_multicast_loopback;
+	}
+	bool		is_register() const { return _is_register; }
 
     private:
-	bool		_is_add;
+	string		_if_name;
+	string		_vif_name;
+	uint8_t		_ip_protocol;
+	bool		_enable_multicast_loopback;
+	bool		_is_register;
     };
 
-    class MfeaAllowSignalMessages : public XrlTaskBase {
+    /**
+     * Class for handling the task to register/unregister with the MFEA
+     * as a protocol on an interface.
+     */
+    class RegisterUnregisterProtocol : public XrlTaskBase {
     public:
-	MfeaAllowSignalMessages(XrlPimNode&	xrl_pim_node)
-	    : XrlTaskBase(xrl_pim_node) {}
+	RegisterUnregisterProtocol(XrlPimNode&		xrl_pim_node,
+				   const string&	if_name,
+				   const string&	vif_name,
+				   uint8_t		ip_protocol,
+				   bool			is_register)
+	    : XrlTaskBase(xrl_pim_node),
+	      _if_name(if_name),
+	      _vif_name(vif_name),
+	      _ip_protocol(ip_protocol),
+	      _is_register(is_register) {}
 
 	void		dispatch() {
-	    _xrl_pim_node.send_mfea_allow_signal_messages();
+	    _xrl_pim_node.send_register_unregister_protocol();
 	}
+	const char*	operation_name() const {
+	    return ((_is_register)? "register" : "unregister");
+	}
+	const string&	if_name() const { return _if_name; }
+	const string&	vif_name() const { return _vif_name; }
+	uint8_t		ip_protocol() const { return _ip_protocol; }
+	bool		is_register() const { return _is_register; }
 
     private:
+	string		_if_name;
+	string		_vif_name;
+	uint8_t		_ip_protocol;
+	bool		_is_register;
     };
 
     /**
@@ -2264,25 +2337,36 @@ private:
      */
     class JoinLeaveMulticastGroup : public XrlTaskBase {
     public:
-	JoinLeaveMulticastGroup(XrlPimNode&	xrl_pim_node,
-				uint32_t	vif_index,
-				const IPvX&	multicast_group,
-				bool		is_join)
+	JoinLeaveMulticastGroup(XrlPimNode&		xrl_pim_node,
+				const string&		if_name,
+				const string&		vif_name,
+				uint8_t			ip_protocol,
+				const IPvX&		group_address,
+				bool			is_join)
 	    : XrlTaskBase(xrl_pim_node),
-	      _vif_index(vif_index),
-	      _multicast_group(multicast_group),
+	      _if_name(if_name),
+	      _vif_name(vif_name),
+	      _ip_protocol(ip_protocol),
+	      _group_address(group_address),
 	      _is_join(is_join) {}
 
 	void		dispatch() {
 	    _xrl_pim_node.send_join_leave_multicast_group();
 	}
-	uint32_t	vif_index() const { return _vif_index; }
-	const IPvX&	multicast_group() const { return _multicast_group; }
+	const char*	operation_name() const {
+	    return ((_is_join)? "join" : "leave");
+	}
+	const string&	if_name() const { return _if_name; }
+	const string&	vif_name() const { return _vif_name; }
+	uint8_t		ip_protocol() const { return _ip_protocol; }
+	const IPvX&	group_address() const { return _group_address; }
 	bool		is_join() const { return _is_join; }
 
     private:
-	uint32_t	_vif_index;
-	IPvX		_multicast_group;
+	string		_if_name;
+	string		_vif_name;
+	uint8_t		_ip_protocol;
+	IPvX		_group_address;
 	bool		_is_join;
     };
 
@@ -2292,57 +2376,60 @@ private:
     class SendProtocolMessage : public XrlTaskBase {
     public:
 	SendProtocolMessage(XrlPimNode&		xrl_pim_node,
-			    const string&	dst_module_instance_name,
-			    xorp_module_id	dst_module_id,
-			    uint32_t		vif_index,
-			    const IPvX&		src,
-			    const IPvX&		dst,
-			    int			ip_ttl,
-			    int			ip_tos,
-			    bool		is_router_alert,
+			    const string&	if_name,
+			    const string&	vif_name,
+			    const IPvX&		src_address,
+			    const IPvX&		dst_address,
+			    uint8_t		ip_protocol,
+			    int32_t		ip_ttl,
+			    int32_t		ip_tos,
+			    bool		ip_router_alert,
 			    bool		ip_internet_control,
 			    const uint8_t*	sndbuf,
 			    size_t		sndlen)
 	    : XrlTaskBase(xrl_pim_node),
-	      _dst_module_instance_name(dst_module_instance_name),
-	      _dst_module_id(dst_module_id),
-	      _vif_index(vif_index),
-	      _src(src),
-	      _dst(dst),
+	      _if_name(if_name),
+	      _vif_name(vif_name),
+	      _src_address(src_address),
+	      _dst_address(dst_address),
+	      _ip_protocol(ip_protocol),
 	      _ip_ttl(ip_ttl),
 	      _ip_tos(ip_tos),
-	      _is_router_alert(is_router_alert),
+	      _ip_router_alert(ip_router_alert),
 	      _ip_internet_control(ip_internet_control) {
-		  _message.resize(sndlen);
-		  for (size_t i = 0; i < sndlen; i++)
-		      _message[i] = sndbuf[i];
-	      }
+	    _payload.resize(sndlen);
+	    for (size_t i = 0; i < sndlen; i++)
+		_payload[i] = sndbuf[i];
+	}
 
 	void		dispatch() {
 	    _xrl_pim_node.send_protocol_message();
 	}
-	const string&	dst_module_instance_name() const { return _dst_module_instance_name; }
-	xorp_module_id	dst_module_id() const { return _dst_module_id; }
-	uint32_t	vif_index() const { return _vif_index; }
-	const IPvX&	src() const { return _src; }
-	const IPvX&	dst() const { return _dst; }
-	int		ip_ttl() const { return _ip_ttl; }
-	int		ip_tos() const { return _ip_tos; }
-	bool		is_router_alert() const { return _is_router_alert; }
+	const char*	operation_name() const {
+	    return ("send");
+	}
+	const string&	if_name() const { return _if_name; }
+	const string&	vif_name() const { return _vif_name; }
+	const IPvX&	src_address() const { return _src_address; }
+	const IPvX&	dst_address() const { return _dst_address; }
+	uint8_t		ip_protocol() const { return _ip_protocol; }
+	int32_t		ip_ttl() const { return _ip_ttl; }
+	int32_t		ip_tos() const { return _ip_tos; }
+	bool		ip_router_alert() const { return _ip_router_alert; }
 	bool		ip_internet_control() const { return _ip_internet_control; }
-	const vector<uint8_t>& message() const { return _message; }
+	const vector<uint8_t>& payload() const { return _payload; }
 
     private:
-	string		_dst_module_instance_name;
-	xorp_module_id	_dst_module_id;
-	uint32_t	_vif_index;
-	IPvX		_src;
-	IPvX		_dst;
-	int		_ip_ttl;
-	int		_ip_tos;
-	bool		_is_router_alert;
+	string		_if_name;
+	string		_vif_name;
+	IPvX		_src_address;
+	IPvX		_dst_address;
+	uint8_t		_ip_protocol;
+	int32_t		_ip_ttl;
+	int32_t		_ip_tos;
+	bool		_ip_router_alert;
 	bool		_ip_internet_control;
-	vector<uint8_t>	_message;
+	vector<uint8_t>	_payload;
     };
 
     /**
@@ -2364,6 +2451,9 @@ private:
 
 	void		dispatch() {
 	    _xrl_pim_node.send_add_delete_mfc();
+	}
+	const char*	operation_name() const {
+	    return ((_is_add)? "add" : "delete");
 	}
 	const IPvX&	source_addr() const { return _source_addr; }
 	const IPvX&	group_addr() const { return _group_addr; }
@@ -2433,6 +2523,9 @@ private:
 	void		dispatch() {
 	    _xrl_pim_node.send_add_delete_dataflow_monitor();
 	}
+	const char*	operation_name() const {
+	    return ((_is_delete_all)? "delete all" : (_is_add)? "add" : "delete");
+	}
 
 	const IPvX&	source_addr() const { return _source_addr; }
 	const IPvX&	group_addr() const { return _group_addr; }
@@ -2462,11 +2555,11 @@ private:
 	bool		_is_delete_all;
     };
 
-
     EventLoop&			_eventloop;
     const string		_class_name;
     const string		_instance_name;
     const string		_finder_target;
+    const string		_fea_target;
     const string		_mfea_target;
     const string		_rib_target;
     const string		_mld6igmp_target;
@@ -2474,6 +2567,8 @@ private:
     IfMgrXrlMirror		_ifmgr;
 
     TransactionManager		_mrib_transaction_manager;
+    XrlRawPacket4V0p1Client	_xrl_fea_client4;
+    XrlRawPacket6V0p1Client	_xrl_fea_client6;
     XrlMfeaV0p1Client		_xrl_mfea_client;
     XrlRibV0p1Client		_xrl_rib_client;
     XrlMld6igmpV0p1Client	_xrl_mld6igmp_client;
@@ -2484,14 +2579,11 @@ private:
 
     bool			_is_finder_alive;
 
+    bool			_is_fea_alive;
+    bool			_is_fea_registered;
+
     bool			_is_mfea_alive;
     bool			_is_mfea_registered;
-    bool			_is_mfea_registering;
-    bool			_is_mfea_deregistering;
-    XorpTimer			_mfea_register_startup_timer;
-    XorpTimer			_mfea_register_shutdown_timer;
-    bool			_is_mfea_add_protocol_registered;
-    bool			_is_mfea_allow_signal_messages_registered;
 
     bool			_is_rib_alive;
     bool			_is_rib_registered;

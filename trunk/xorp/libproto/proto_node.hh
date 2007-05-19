@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.39 2007/05/08 19:23:16 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.40 2007/05/10 00:08:17 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -205,108 +205,81 @@ public:
      * @return the event loop this node is added to.
      */
     EventLoop& eventloop() { return (_eventloop); }
-    
+
     /**
-     * Receive a protocol message.
-     * 
+     * Receive a protocol packet.
+     *
      * This is a pure virtual function, and it must be implemented
      * by the particular protocol node class that inherits this base class.
-     * 
-     * @param src_module_instance_name the module instance name of the
-     * module-origin of the message.
-     * 
-     * @param src_module_id the module ID (@ref xorp_module_id) of the
-     * module-origin of the message.
-     * 
-     * @param vif_index the vif index of the interface used to receive this
-     * message.
-     * 
-     * @param src the source address of the message.
-     * 
-     * @param dst the destination address of the message.
-     * 
-     * @param ip_ttl the IP TTL (Time To Live) of the message. If it has
-     * a negative value, it should be ignored.
-     * 
-     * @param ip_tos the IP TOS (Type of Service) of the message. If it has
-     * a negative value, it should be ignored.
-     * 
-     * @param is_router_alert if true, the Router Alert IP option for the IP
-     * packet of the incoming message was set.
-     * 
+     *
+     * @param if_name the interface name the packet arrived on.
+     * @param vif_name the vif name the packet arrived on.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_protocol the IP protocol number.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     * the received value is unknown.
+     * @param ip_tos the Type of Service (Diffserv/ECN bits for IPv4). If it
+     * has a negative value, then the received value is unknown.
+     * @param ip_router_alert if true, the IP Router Alert option was included
+     * in the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
-     * 
-     * @param rcvbuf the data buffer with the received message.
-     * 
-     * @param rcvlen the data length in @ref rcvbuf.
-     * 
+     * @param payload the payload, everything after the IP header and options.
      * @param error_msg the error message (if error).
-     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int	proto_recv(const string& src_module_instance_name,
-			   xorp_module_id src_module_id,
-			   uint32_t vif_index,
-			   const IPvX& src,
-			   const IPvX& dst,
-			   int ip_ttl,
-			   int ip_tos,
-			   bool is_router_alert,
+    virtual int proto_recv(const string& if_name,
+			   const string& vif_name,
+			   const IPvX& src_address,
+			   const IPvX& dst_address,
+			   uint8_t ip_protocol,
+			   int32_t ip_ttl,
+			   int32_t ip_tos,
+			   bool ip_router_alert,
 			   bool ip_internet_control,
-			   const uint8_t *rcvbuf,
-			   size_t rcvlen,
+			   const vector<uint8_t>& payload,
 			   string& error_msg) = 0;
     
     /**
-     * Send a protocol message.
-     * 
+     * Send a protocol packet.
+     *
      * This is a pure virtual function, and it must be implemented
      * by the particular protocol node class that inherits this base class.
      * 
-     * @param dst_module_instance_name the module instance name of the
-     * module-recepient of the message.
-     * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
-     * module-recepient of the message.
-     * 
-     * @param vif_index the vif index of the interface to send this message.
-     * 
-     * @param src the source address of the message.
-     * 
-     * @param dst the destination address of the message.
-     * 
-     * @param ip_ttl the IP TTL of the message. If it has a negative value,
-     * the TTL will be set by the lower layers.
-     * 
-     * @param ip_tos the IP TOS of the message. If it has a negative value,
-     * the TOS will be set by the lower layers.
-     * 
-     * @param is_router_alert if true, set the Router Alert IP option for
-     * the IP packet of the outgoung message.
-     * 
+     * @param if_name the interface to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param vif_name the vif to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_protocol the IP protocol number. It must be between 1 and
+     * 255.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value, the
+     * TTL will be set internally before transmission.
+     * @param ip_tos the Type Of Service (Diffserv/ECN bits for IPv4). If it
+     * has a negative value, the TOS will be set internally before
+     * transmission.
+     * @param ip_router_alert if true, then add the IP Router Alert option to
+     * the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
-     * 
-     * @param sndbuf the data buffer with the outgoing message.
-     * 
+     * @param sndbuf the data buffer with the outgoing packet.
      * @param sndlen the data length in @ref sndbuf.
-     * 
      * @param error_msg the error message (if error).
-     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int	proto_send(const string& dst_module_instance_name,
-			   xorp_module_id dst_module_id,
-			   uint32_t vif_index,
-			   const IPvX& src,
-			   const IPvX& dst,
-			   int ip_ttl,
-			   int ip_tos,
-			   bool is_router_alert,
+    virtual int	proto_send(const string& if_name,
+			   const string& vif_name,
+			   const IPvX& src_address,
+			   const IPvX& dst_address,
+			   uint8_t ip_protocol,
+			   int32_t ip_ttl,
+			   int32_t ip_tos,
+			   bool ip_router_alert,
 			   bool ip_internet_control,
-			   const uint8_t *sndbuf,
+			   const uint8_t* sndbuf,
 			   size_t sndlen,
 			   string& error_msg) = 0;
-    
+
     /**
      * Receive a signal message.
      * 
@@ -314,9 +287,6 @@ public:
      * by the particular protocol node class that inherits this base class.
      * 
      * @param src_module_instance_name the module instance name of the
-     * module-origin of the message.
-     * 
-     * @param src_module_id the module ID (@ref xorp_module_id) of the
      * module-origin of the message.
      * 
      * @param message_type the message type. The particular values are
@@ -338,7 +308,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	signal_message_recv(const string& src_module_instance_name,
-				    xorp_module_id src_module_id,
 				    int message_type,
 				    uint32_t vif_index,
 				    const IPvX& src,
@@ -353,9 +322,6 @@ public:
      * by the particular protocol node class that inherits this base class.
      * 
      * @param dst_module_instance_name the module instance name of the
-     * module-recepient of the message.
-     * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
      * module-recepient of the message.
      * 
      * @param message_type the message type. The particular values are
@@ -377,7 +343,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	signal_message_send(const string& dst_module_instance_name,
-				    xorp_module_id dst_module_id,
 				    int message_type,
 				    uint32_t vif_index,
 				    const IPvX& src,

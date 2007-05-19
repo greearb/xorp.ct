@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.13 2007/02/16 22:45:49 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.14 2007/05/08 19:23:14 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -281,56 +281,56 @@ public:
      * 
      * @param if_name the interface name.
      * @param vif_name the vif name.
-     * @param iftree_if return-by-reference a pointer to the interface.
-     * @param iftree_vif return-by-reference a pointer to the vif.
+     * @param ifp return-by-reference a pointer to the interface.
+     * @param vifp return-by-reference a pointer to the vif.
      * @return true if a match is found, otherwise false.
      */
     bool	find_interface_vif_by_name(
-	const string& if_name,
-	const string& vif_name,
-	const IfTreeInterface*& iftree_if,
-	const IfTreeVif*& iftree_vif) const;
+	const string&		if_name,
+	const string&		vif_name,
+	const IfTreeInterface*&	ifp,
+	const IfTreeVif*&	vifp) const;
 
     /**
      * Find an interface and a vif by physical interface index.
      * 
      * @param pif_index the physical interface index.
-     * @param iftree_if return-by-reference a pointer to the interface.
-     * @param iftree_vif return-by-reference a pointer to the vif.
+     * @param ifp return-by-reference a pointer to the interface.
+     * @param vifp return-by-reference a pointer to the vif.
      * @return true if a match is found, otherwise false.
      */
     bool	find_interface_vif_by_pif_index(
-	uint32_t pif_index,
-	const IfTreeInterface*& iftree_if,
-	const IfTreeVif*& iftree_vif) const;
+	uint32_t		pif_index,
+	const IfTreeInterface*&	ifp,
+	const IfTreeVif*&	vifp) const;
 
     /**
      * Find an interface and a vif by an address that shares the same subnet
      * or p2p address.
      * 
      * @param addr the address.
-     * @param iftree_if return-by-reference a pointer to the interface.
-     * @param iftree_vif return-by-reference a pointer to the vif.
+     * @param ifp return-by-reference a pointer to the interface.
+     * @param vifp return-by-reference a pointer to the vif.
      * @return true if a match is found, otherwise false.
      */
     bool	find_interface_vif_same_subnet_or_p2p(
-	const IPvX& addr,
-	const IfTreeInterface*& iftree_if,
-	const IfTreeVif*& iftree_vif) const;
+	const IPvX&		addr,
+	const IfTreeInterface*&	ifp,
+	const IfTreeVif*&	vifp) const;
 
     /**
      * Find an interface and a vif by an address that belongs to that interface
      * and vif.
      * 
      * @param addr the address.
-     * @param iftree_if return-by-reference a pointer to the interface.
-     * @param iftree_vif return-by-reference a pointer to the vif.
+     * @param ifp return-by-reference a pointer to the interface.
+     * @param vifp return-by-reference a pointer to the vif.
      * @return true if a match is found, otherwise false.
      */
     bool	find_interface_vif_by_addr(
-	const IPvX& addr,
-	const IfTreeInterface*& iftree_if,
-	const IfTreeVif*& iftree_vif) const;
+	const IPvX&		addr,
+	const IfTreeInterface*&	ifp,
+	const IfTreeVif*&	vifp) const;
 
 private:
     /**
@@ -366,15 +366,15 @@ private:
     /**
      * Transmit a packet on a protocol socket.
      *
-     * @param iftree_if the interface to send the packet on.
-     * @param iftree_vif the vif to send the packet on.
+     * @param ifp the interface to send the packet on.
+     * @param vifp the vif to send the packet on.
      * @param src_address the IP source address.
      * @param dst_address the IP destination address.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		proto_socket_transmit(const IfTreeInterface* iftree_if,
-				      const IfTreeVif*	iftree_vif,
+    int		proto_socket_transmit(const IfTreeInterface* ifp,
+				      const IfTreeVif*	vifp,
 				      const IPvX&	src_address,
 				      const IPvX&	dst_address,
 				      string&		error_msg);

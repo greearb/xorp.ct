@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.78 2007/05/08 22:16:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.79 2007/05/10 00:08:16 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -33,7 +33,6 @@
 #include "fea_node.hh"
 #include "mfea_mrouter.hh"
 #include "mfea_node.hh"
-#include "mfea_proto_comm.hh"
 #include "mfea_kernel_messages.hh"
 #include "mfea_vif.hh"
 
@@ -87,9 +86,6 @@ MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
 		   module_id, XORP_MODULE_MFEA);
     }
     
-    for (size_t i = 0; i < _proto_comms.size(); i++)
-	_proto_comms[i] = NULL;
-
     //
     // Set the node status
     //
@@ -123,13 +119,6 @@ MfeaNode::~MfeaNode()
     ProtoNode<MfeaVif>::set_node_status(PROC_NULL);
     
     delete_all_vifs();
-    
-    // Delete the ProtoComm entries
-    for (size_t i = 0; i < _proto_comms.size(); i++) {
-	if (_proto_comms[i] != NULL)
-	    delete _proto_comms[i];
-	_proto_comms[i] = NULL;
-    }
 }
 
 /**
@@ -178,13 +167,6 @@ MfeaNode::start()
     // Start the MfeaMrouter
     _mfea_mrouter.start();
     
-    // Start the ProtoComm entries
-    for (size_t i = 0; i < _proto_comms.size(); i++) {
-	if (_proto_comms[i] != NULL) {
-	    _proto_comms[i]->start();
-	}
-    }
-
     // XXX: needed to update the status state properly
     decr_startup_requests_n();
 
@@ -264,12 +246,6 @@ MfeaNode::stop()
     // Stop the vifs
     stop_all_vifs();
     
-    // Stop the ProtoComm entries
-    for (size_t i = 0; i < _proto_comms.size(); i++) {
-	if (_proto_comms[i] != NULL)
-	    _proto_comms[i]->stop();
-    }
-
     // Stop the MfeaMrouter
     _mfea_mrouter.stop();
 
@@ -1394,439 +1370,125 @@ MfeaNode::vif_shutdown_completed(const string& vif_name)
     }
 }
 
-/**
- * MfeaNode::add_protocol:
- * @module_instance_name: The module instance name of the protocol to add.
- * @module_id: The #xorp_module_id of the protocol to add.
- * 
- * A method used by a protocol instance to register with this #MfeaNode.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
-MfeaNode::add_protocol(const string& module_instance_name,
-		       xorp_module_id module_id)
+MfeaNode::register_protocol(const string&	module_instance_name,
+			    const string&	if_name,
+			    const string&	vif_name,
+			    uint8_t		ip_protocol,
+			    string&		error_msg)
 {
-    ProtoComm *proto_comm;
-    int ip_protocol;
-    size_t i;
-    
-    // Add the state
-    if (_proto_register.add_protocol(module_instance_name, module_id) < 0) {
-	XLOG_ERROR("Cannot add protocol instance %s with module_id = %d",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Already added
-    }
-    
-    // Test if we have already the appropriate ProtoComm
-    if (proto_comm_find_by_module_id(module_id) != NULL)
-	return (XORP_OK);
-    
-    //
-    // Get the IP protocol number (IPPROTO_*)
-    //
-    ip_protocol = -1;
-    switch (module_id) {
-    case XORP_MODULE_MLD6IGMP:
-	switch (family()) {
-	case AF_INET:
-	    ip_protocol = IPPROTO_IGMP;
-	    break;
-#ifdef HAVE_IPV6
-	case AF_INET6:
-	    ip_protocol = IPPROTO_ICMPV6;
-	    break;
-#endif // HAVE_IPV6
-	default:
-	    XLOG_UNREACHABLE();
-	    _proto_register.delete_protocol(module_instance_name, module_id);
-	    return (XORP_ERROR);
-	}
-	break;
-    case XORP_MODULE_PIMSM:
-    case XORP_MODULE_PIMDM:
-	ip_protocol = IPPROTO_PIM;
-	break;
-    default:
-	XLOG_UNREACHABLE();
-	_proto_register.delete_protocol(module_instance_name, module_id);
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+
+    if (mfea_vif == NULL) {
+	error_msg = c_format("Cannot register module %s on interface %s "
+			     "vif %s: no such vif",
+			     module_instance_name.c_str(),
+			     if_name.c_str(),
+			     vif_name.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    
-    proto_comm = new ProtoComm(*this, ip_protocol, module_id);
-    
-    // Add the new entry
-    for (i = 0; i < _proto_comms.size(); i++) {
-	if (_proto_comms[i] == NULL)
-	    break;
+
+    if (mfea_vif->register_protocol(module_instance_name, ip_protocol,
+				    error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
     }
-    if (i < _proto_comms.size()) {
-	_proto_comms[i] = proto_comm;
-    } else {
-	_proto_comms.push_back(proto_comm);
+
+    //
+    // Insert into the global state for registered module instance names
+    // and IP protocols.
+    //
+    if ((ip_protocol == IPPROTO_PIM)
+	&& (_registered_ip_protocols.find(ip_protocol)
+	    == _registered_ip_protocols.end())) {
+
+	// If necessary, start PIM processing
+	if (mfea_mrouter().start_pim(error_msg) != XORP_OK) {
+	    string dummy_error_msg;
+	    mfea_vif->unregister_protocol(module_instance_name,
+					  dummy_error_msg);
+	    error_msg = c_format("Cannot start PIM processing: %s",
+				 error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
-    
+    _registered_module_instance_names.insert(module_instance_name);
+    _registered_ip_protocols.insert(ip_protocol);
+
     return (XORP_OK);
 }
 
-/**
- * MfeaNode::delete_protocol:
- * @module_instance_name: The module instance name of the protocol to delete.
- * @module_id: The #xorp_module_id of the protocol to delete.
- * 
- * A method used by a protocol instance to deregister with this #MfeaNode.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
-MfeaNode::delete_protocol(const string& module_instance_name,
-			  xorp_module_id module_id)
+MfeaNode::unregister_protocol(const string&	module_instance_name,
+			      const string&	if_name,
+			      const string&	vif_name,
+			      string&		error_msg)
 {
+    MfeaVif *mfea_vif = vif_find_by_name(vif_name);
+
+    if (mfea_vif == NULL) {
+	error_msg = c_format("Cannot unregister module %s on interface %s "
+			     "vif %s: no such vif",
+			     module_instance_name.c_str(),
+			     if_name.c_str(),
+			     vif_name.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    uint8_t ip_protocol = mfea_vif->registered_ip_protocol();
+    if (mfea_vif->unregister_protocol(module_instance_name, error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+
+    //
+    // If necessary, remove from the global state for registered module
+    // instance names and IP protocols.
+    //
+    bool name_found = false;
+    bool ip_protocol_found = false;
     vector<MfeaVif *>::iterator iter;
 
-    // Explicitly stop the protocol on all vifs
     for (iter = proto_vifs().begin(); iter != proto_vifs().end(); ++iter) {
-	MfeaVif *mfea_vif = (*iter);
+	mfea_vif = (*iter);
 	if (mfea_vif == NULL)
 	    continue;
-	// TODO: XXX: PAVPAVPAV: shall we ignore the disabled vifs??
-	mfea_vif->stop_protocol(module_instance_name, module_id);
+	if (mfea_vif->registered_module_instance_name()
+	    == module_instance_name) {
+	    name_found = true;
+	}
+	if (mfea_vif->registered_ip_protocol() == ip_protocol) {
+	    ip_protocol_found = true;
+	}
+	if (name_found && ip_protocol_found)
+	    break;
     }
     
-    // Delete kernel signal registration
-    if (_kernel_signal_messages_register.is_registered(module_instance_name,
-						       module_id)) {
-	delete_allow_kernel_signal_messages(module_instance_name, module_id);
-    }
-    
-    // Delete the state
-    if (_proto_register.delete_protocol(module_instance_name, module_id) < 0) {
-	XLOG_ERROR("Cannot delete protocol instance %s with module_id = %d",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Probably not added before
-    }
-    
-    if (! _proto_register.is_registered(module_id)) {
-	//
-	// The last registered protocol instance
-	//
-	ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
-	
-	if (proto_comm == NULL)
-	    return (XORP_ERROR);
-	
-	// Remove the pointer storage for this ProtoComm entry
-	for (size_t i = 0; i < _proto_comms.size(); i++) {
-	    if (_proto_comms[i] == proto_comm) {
-		_proto_comms[i] = NULL;
-		break;
+    if (! name_found)
+	_registered_module_instance_names.erase(module_instance_name);
+
+    if (! ip_protocol_found) {
+	_registered_ip_protocols.erase(ip_protocol);
+
+	// If necessary, stop PIM processing
+	if (ip_protocol == IPPROTO_PIM) {
+	    if (mfea_mrouter().stop_pim(error_msg) != XORP_OK) {
+		error_msg = c_format("Cannot stop PIM processing: %s",
+				     error_msg.c_str());
+		// XXX: don't return error, but just print the error message
+		XLOG_ERROR("%s", error_msg.c_str());
 	    }
 	}
-	if (_proto_comms[_proto_comms.size() - 1] == NULL) {
-	    // Remove the last entry, if not used anymore
-	    _proto_comms.pop_back();
-	}
-	
-	delete proto_comm;
     }
-    
-    return (XORP_OK);
-}
 
-/**
- * MfeaNode::start_protocol:
- * @module_id: The #xorp_module_id of the protocol to start.
- * 
- * Start operation for protocol with #xorp_module_id of @module_id.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::start_protocol(xorp_module_id module_id)
-{
-    ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
-    
-    if (proto_comm == NULL)
-	return (XORP_ERROR);
-    
-    if (proto_comm->is_up())
-	return (XORP_OK);		// Already running
-    
-    if (proto_comm->start() < 0)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::stop_protocol:
- * @module_id: The #xorp_module_id of the protocol to stop.
- * 
- * Stop operation for protocol with #xorp_module_id of @module_id.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::stop_protocol(xorp_module_id module_id)
-{
-    ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
-    
-    if (proto_comm == NULL)
-	return (XORP_ERROR);
-    
-    if (proto_comm->stop() < 0)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::start_protocol_vif:
- * @module_instance_name: The module instance name of the protocol to start
- * on vif with vif_index of @vif_index.
- * @module_id: The #xorp_module_id of the protocol to start on vif with
- * vif_index of @vif_index.
- * @vif_index: The index of the vif the protocol start to apply to.
- * 
- * Start a protocol on an interface with vif_index of @vif_index.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::start_protocol_vif(const string& module_instance_name,
-			     xorp_module_id module_id,
-			     uint32_t vif_index)
-{
-    MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
-    
-    if (mfea_vif == NULL) {
-	XLOG_ERROR("Cannot start protocol instance %s on vif_index %d: "
-		   "no such vif",
-		   module_instance_name.c_str(), vif_index);
-	return (XORP_ERROR);
-    }
-    
-    if (mfea_vif->start_protocol(module_instance_name, module_id) < 0)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::stop_protocol_vif:
- * @module_instance_name: The module instance name of the protocol to stop
- * on vif with vif_index of @vif_index.
- * @module_id: The #xorp_module_id of the protocol to stop on vif with
- * vif_index of @vif_index.
- * @vif_index: The index of the vif the protocol stop to apply to.
- * 
- * Stop a protocol on an interface with vif_index of @vif_index.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::stop_protocol_vif(const string& module_instance_name,
-			    xorp_module_id module_id,
-			    uint32_t vif_index)
-{
-    MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
-    
-    if (mfea_vif == NULL) {
-	XLOG_ERROR("Cannot stop protocol instance %s on vif_index %d: "
-		   "no such vif",
-		   module_instance_name.c_str(), vif_index);
-	return (XORP_ERROR);
-    }
-    
-    if (mfea_vif->stop_protocol(module_instance_name, module_id) < 0)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::add_allow_kernel_signal_messages:
- * @module_instance_name: The module instance name of the protocol to add.
- * @module_id: The #xorp_module_id of the protocol to add to receive kernel
- * signal messages.
- * 
- * Add a protocol to the set of protocols that are interested in
- * receiving kernel signal messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::add_allow_kernel_signal_messages(const string& module_instance_name,
-					   xorp_module_id module_id)
-{
-    // Add the state
-    if (_kernel_signal_messages_register.add_protocol(module_instance_name,
-						      module_id)
-	< 0) {
-	XLOG_ERROR("Cannot add protocol instance %s with module_id = %d "
-		   "to receive kernel signal messages",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Already added
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::delete_allow_kernel_signal_messages:
- * @module_instance_name: The module instance name of the protocol to delete.
- * @module_id: The #xorp_module_id of the protocol to delete from receiving
- * kernel signal messages.
- * 
- * Delete a protocol from the set of protocols that are interested in
- * receiving kernel signal messages.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name,
-					      xorp_module_id module_id)
-{
-    // Delete the state
-    if (_kernel_signal_messages_register.delete_protocol(module_instance_name,
-							 module_id)
-	< 0) {
-	XLOG_ERROR("Cannot delete protocol instance %s with module_id = %d "
-		   "from receiving kernel signal messages",
-		   module_instance_name.c_str(), module_id);
-	return (XORP_ERROR);	// Probably not added before
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::proto_recv:
- * @src_module_instance_name: The module instance name of the module-origin
- * of the message.
- * @src_module_id: The #xorp_module_id of the module-origin of the message.
- * @vif_index: The vif index of the interface to use to send this message.
- * @src: The source address of the message.
- * @dst: The destination address of the message.
- * @ip_ttl: The IP TTL of the message. If it has a negative value,
- * it should be ignored.
- * @ip_tos: The IP TOS of the message. If it has a negative value,
- * it should be ignored.
- * @is_router_alert: If true, set the Router Alert IP option for the IP
- * packet of the outgoung message.
- * @ip_internet_control: If true, then this is IP control traffic.
- * @rcvbuf: The data buffer with the message to send.
- * @rcvlen: The data length in @rcvbuf.
- * @error_msg: The error message (if error).
- * 
- * Receive a protocol message from a user-level process, and send it
- * through the kernel.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::proto_recv(const string&	, // src_module_instance_name,
-		     xorp_module_id src_module_id,
-		     uint32_t vif_index,
-		     const IPvX& src, const IPvX& dst,
-		     int ip_ttl, int ip_tos, bool is_router_alert,
-		     bool ip_internet_control, const uint8_t *rcvbuf,
-		     size_t rcvlen, string& error_msg)
-{
-    ProtoComm *proto_comm;
-    
-    if (! is_up()) {
-	error_msg = c_format("MFEA node is not UP");
-	return (XORP_ERROR);
-    }
-    
-    // TODO: for now @src_module_id that comes by the
-    // upper-layer protocol is used to find-out the ProtoComm entry.
-    proto_comm = proto_comm_find_by_module_id(src_module_id);
-    if (proto_comm == NULL) {
-	error_msg = c_format("Protocol with module ID %u is not registered",
-			     XORP_UINT_CAST(src_module_id));
-	return (XORP_ERROR);
-    }
-    
-    if (proto_comm->proto_socket_write(vif_index,
-				       src, dst,
-				       ip_ttl,
-				       ip_tos,
-				       is_router_alert,
-				       ip_internet_control,
-				       rcvbuf,
-				       rcvlen,
-				       error_msg) < 0) {
-	return (XORP_ERROR);
-    }
-    
-    return (XORP_OK);
-}
-
-// The function to process incoming messages from the kernel
-int
-MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
-			  uint32_t vif_index,
-			  const IPvX& src, const IPvX& dst,
-			  int ip_ttl, int ip_tos, bool is_router_alert,
-			  bool ip_internet_control, const uint8_t *rcvbuf,
-			  size_t rcvlen)
-{
-    string error_msg;
-
-    XLOG_TRACE(false & is_log_trace(),	// XXX: unconditionally disabled
-	       "RX packet for dst_module_name %s: "
-	       "vif_index = %d src = %s dst = %s ttl = %d tos = %#x "
-	       "router_alert = %d ip_internet_control = %d rcvbuf = %p "
-	       "rcvlen = %u",
-	       xorp_module_name(family(), dst_module_id), vif_index,
-	       cstring(src), cstring(dst), ip_ttl, ip_tos, is_router_alert,
-	       ip_internet_control, rcvbuf, XORP_UINT_CAST(rcvlen));
-    
-    //
-    // Test if we should accept or drop the message
-    //
-    MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
-    if (mfea_vif == NULL)
-	return (XORP_ERROR);
-    ProtoRegister& pr = mfea_vif->proto_register();
-    if (! pr.is_registered(dst_module_id))
-	return (XORP_ERROR);	// The message is not expected
-    
-    if (! is_up())
-	return (XORP_ERROR);
-    
-    //
-    // Send the message to all interested protocol instances
-    //
-
-    list<string>::const_iterator iter;
-    for (iter = pr.module_instance_name_list(dst_module_id).begin();
-	 iter != pr.module_instance_name_list(dst_module_id).end();
-	 ++iter) {
-	const string& dst_module_instance_name = *iter;
-	proto_send(dst_module_instance_name,
-		   dst_module_id,
-		   vif_index,
-		   src, dst,
-		   ip_ttl,
-		   ip_tos,
-		   is_router_alert,
-		   ip_internet_control,
-		   rcvbuf,
-		   rcvlen,
-		   error_msg);
-    }
-    
     return (XORP_OK);
 }
 
 /**
  * MfeaNode::signal_message_recv:
  * @src_module_instance_name: Unused.
- * @src_module_id: The #xorp_module_id module ID of the associated #ProtoComm
- * entry. XXX: in the future it may become irrelevant.
  * @message_type: The message type of the kernel signal
  * (%IGMPMSG_* or %MRT6MSG_*)
  * @vif_index: The vif index of the related interface (message-specific).
@@ -1842,7 +1504,6 @@ MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
  **/
 int
 MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
-			      xorp_module_id src_module_id,
 			      int message_type,
 			      uint32_t vif_index,
 			      const IPvX& src, const IPvX& dst,
@@ -1854,8 +1515,6 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 	       message_type, vif_index,
 	       cstring(src), cstring(dst));
 
-    UNUSED(src_module_id);
-    
     if (! is_up())
 	return (XORP_ERROR);
     
@@ -1978,15 +1637,12 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
     //
     // Send the signal to all upper-layer protocols that expect it.
     //
-    ProtoRegister& pr = _kernel_signal_messages_register;
-    const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
-    
-    list<pair<string, xorp_module_id> >::const_iterator iter;
-    for (iter = module_list.begin(); iter != module_list.end(); ++iter) {
-	const string& dst_module_instance_name = (*iter).first;
-	xorp_module_id dst_module_id = (*iter).second;
+    set<string>::const_iterator iter;
+    for (iter = _registered_module_instance_names.begin();
+	 iter != _registered_module_instance_names.end();
+	 ++iter) {
+	const string& dst_module_instance_name = (*iter);
 	signal_message_send(dst_module_instance_name,
-			    dst_module_id,
 			    message_type,
 			    vif_index,
 			    src, dst,
@@ -2045,16 +1701,12 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
     //
     // Send the signal to all upper-layer protocols that expect it.
     //
-    ProtoRegister& pr = _kernel_signal_messages_register;
-    const list<pair<string, xorp_module_id> >& module_list = pr.all_module_instance_name_list();
-    
-    list<pair<string, xorp_module_id> >::const_iterator iter;
-    for (iter = module_list.begin(); iter != module_list.end(); ++iter) {
-	const string& dst_module_instance_name = (*iter).first;
-	xorp_module_id dst_module_id = (*iter).second;
-	
+    set<string>::const_iterator iter;
+    for (iter = _registered_module_instance_names.begin();
+	 iter != _registered_module_instance_names.end();
+	 ++iter) {
+	const string& dst_module_instance_name = (*iter);
 	dataflow_signal_send(dst_module_instance_name,
-			     dst_module_id,
 			     source,
 			     group,
 			     threshold_interval.sec(),
@@ -2069,93 +1721,6 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
 			     is_threshold_in_bytes,
 			     is_geq_upcall,
 			     is_leq_upcall);
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::join_multicast_group:
- * @module_instance_name: The module instance name of the protocol to join the
- * multicast group.
- * @module_id: The #xorp_module_id of the protocol to join the multicast
- * group.
- * @vif_index: The vif index of the interface to join.
- * @group: The multicast group to join.
- * 
- * Join a multicast group.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::join_multicast_group(const string& module_instance_name,
-			       xorp_module_id module_id,
-			       uint32_t vif_index,
-			       const IPvX& group)
-{
-    ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
-    MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
-    
-    if ((proto_comm == NULL) || (mfea_vif == NULL))
-	return (XORP_ERROR);
-    
-    bool has_group = mfea_vif->has_multicast_group(group);
-    
-    // Add the state for the group
-    if (mfea_vif->add_multicast_group(module_instance_name,
-				      module_id,
-				      group) < 0) {
-	return (XORP_ERROR);
-    }
-    
-    if (! has_group) {
-	if (proto_comm->join_multicast_group(vif_index, group) < 0) {
-	    mfea_vif->delete_multicast_group(module_instance_name,
-					     module_id,
-					     group);
-	    return (XORP_ERROR);
-	}
-    }
-    
-    return (XORP_OK);
-}
-
-/**
- * MfeaNode::leave_multicast_group:
- * @module_instance_name: The module instance name of the protocol to leave the
- * multicast group.
- * @module_id: The #xorp_module_id of the protocol to leave the multicast
- * group.
- * @vif_index: The vif index of the interface to leave.
- * @group: The multicast group to leave.
- * 
- * Leave a multicast group.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaNode::leave_multicast_group(const string& module_instance_name,
-				xorp_module_id module_id,
-				uint32_t vif_index,
-				const IPvX& group)
-{
-    ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
-    MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
-    
-    if ((proto_comm == NULL) || (mfea_vif == NULL))
-	return (XORP_ERROR);
-    
-    // Delete the state for the group
-    if (mfea_vif->delete_multicast_group(module_instance_name,
-					 module_id,
-					 group) < 0) {
-	return (XORP_ERROR);
-    }
-    
-    if (! mfea_vif->has_multicast_group(group)) {
-	if (proto_comm->leave_multicast_group(vif_index, group) < 0) {
-	    return (XORP_ERROR);
-	}
     }
     
     return (XORP_OK);
@@ -2606,47 +2171,4 @@ MfeaNode::get_vif_count(uint32_t vif_index, VifCount& vif_count)
     }
     
     return (XORP_OK);
-}
-
-/**
- * MfeaNode::proto_comm_find_by_module_id:
- * @module_id: The #xorp_module_id to search for.
- * 
- * Return the #ProtoComm entry that corresponds to @module_id.
- * 
- * Return value: The corresponding #ProtoComm entry if found, otherwise NULL.
- **/
-ProtoComm *
-MfeaNode::proto_comm_find_by_module_id(xorp_module_id module_id) const
-{
-    for (size_t i = 0; i < _proto_comms.size(); i++) {
-	if (_proto_comms[i] != NULL) {
-	    if (_proto_comms[i]->module_id() == module_id)
-		return (_proto_comms[i]);
-	}
-    }
-    
-    return (NULL);
-}
-
-/**
- * MfeaNode::proto_comm_find_by_ip_protocol:
- * @ip_protocol: The IP protocol number to search for.
- * 
- * Return the #ProtoComm entry that corresponds to @ip_protocol IP protocol
- * number.
- * 
- * Return value: The corresponding #ProtoComm entry if found, otherwise NULL.
- **/
-ProtoComm *
-MfeaNode::proto_comm_find_by_ip_protocol(int ip_protocol) const
-{
-    for (size_t i = 0; i < _proto_comms.size(); i++) {
-	if (_proto_comms[i] != NULL) {
-	    if (_proto_comms[i]->ip_protocol() == ip_protocol)
-		return (_proto_comms[i]);
-	}
-    }
-    
-    return (NULL);
 }

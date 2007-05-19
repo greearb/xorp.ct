@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.15 2006/03/19 23:32:20 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.16 2007/02/16 22:45:46 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -28,7 +28,6 @@
 #endif
 
 #include "libxorp/eventloop.hh"
-#include "libproto/proto_register.hh"
 #include "libproto/proto_unit.hh"
 
 
@@ -126,16 +125,6 @@ public:
     XorpFd	open_mrouter_socket();
     
     /**
-     * Adopt control over the mrouter socket.
-     * 
-     * When the MfeaMrouter adopts control over the mrouter socket,
-     * it is the one that will be reading from that socket.
-     * 
-     * @return the socket value.
-     */
-    XorpFd	adopt_mrouter_socket();
-    
-    /**
      * Close the mrouter socket.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -157,18 +146,20 @@ public:
     int		stop_mrt();
     
     /**
-     * Start/enable PIM routing in the kernel.
+     * Start/enable PIM processing in the kernel.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		start_pim();
+    int		start_pim(string& error_msg);
     
     /**
-     * Stop/disable PIM routing in the kernel.
+     * Stop/disable PIM processing in the kernel.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_pim();
+    int		stop_pim(string& error_msg);
     
     /**
      * Add a virtual multicast interface to the kernel.

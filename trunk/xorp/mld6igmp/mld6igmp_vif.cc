@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.84 2007/02/16 22:46:37 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.85 2007/05/08 19:23:16 pavlin Exp $"
 
 
 //
@@ -248,10 +248,15 @@ Mld6igmpVif::start(string& error_msg)
     set_i_am_querier(true);
     
     //
-    // Start the vif with the kernel
+    // Register as a receiver with the kernel
     //
-    if (mld6igmp_node().start_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	error_msg = c_format("cannot start protocol vif %s with the kernel",
+    if (mld6igmp_node().register_receiver(name(),
+					  name(),
+					  mld6igmp_node().ip_protocol_number(),
+					  true)
+	!= XORP_OK) {
+	error_msg = c_format("cannot register as a receiver on vif %s "
+			     "with the kernel",
 			     name().c_str());
 	return (XORP_ERROR);
     }
@@ -269,7 +274,10 @@ Mld6igmpVif::start(string& error_msg)
 	 groups_iter != groups.end();
 	 ++groups_iter) {
 	const IPvX& group = *groups_iter;
-	if (mld6igmp_node().join_multicast_group(vif_index(), group)
+	if (mld6igmp_node().join_multicast_group(name(),
+						 name(),
+						 mld6igmp_node().ip_protocol_number(),
+						 group)
 	    != XORP_OK) {
 	    error_msg = c_format("cannot join group %s on vif %s",
 				 cstring(group), name().c_str());
@@ -378,10 +386,13 @@ Mld6igmpVif::stop(string& error_msg)
     _group_records.delete_payload_and_clear();
     
     //
-    // Stop the vif with the kernel
+    // Unregister as a receiver with the kernel
     //
-    if (mld6igmp_node().stop_protocol_kernel_vif(vif_index()) != XORP_OK) {
-	XLOG_ERROR("Cannot stop protocol vif %s with the kernel",
+    if (mld6igmp_node().unregister_receiver(name(),
+					    name(),
+					    mld6igmp_node().ip_protocol_number())
+	!= XORP_OK) {
+	XLOG_ERROR("Cannot unregister as a receiver on vif %s with the kernel",
 		   name().c_str());
 	ret_value = XORP_ERROR;
     }
@@ -458,7 +469,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     uint16_t cksum;
     int ret_value;
     size_t datalen;
-    bool is_router_alert = true;	// XXX: always use Router Alert option
+    bool ip_router_alert = true;	// XXX: always use Router Alert option
     bool ip_internet_control = true;	// XXX: always true
     
     if (! (is_up() || is_pending_down())) {
@@ -520,9 +531,11 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     //
     // Send the message
     //
-    ret_value = mld6igmp_node().mld6igmp_send(vif_index(), src, dst,
+    ret_value = mld6igmp_node().mld6igmp_send(name(), name(),
+					      src, dst,
+					      mld6igmp_node().ip_protocol_number(),
 					      MINTTL, -1,
-					      is_router_alert,
+					      ip_router_alert,
 					      ip_internet_control,
 					      buffer, error_msg);
     
@@ -860,7 +873,7 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @is_router_alert: True if the received IP packet had the Router Alert
+ * @ip_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the received message.
@@ -875,7 +888,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 			   const IPvX& dst,
 			   int ip_ttl,
 			   int ip_tos,
-			   bool is_router_alert,
+			   bool ip_router_alert,
 			   bool ip_internet_control,
 			   buffer_t *buffer,
 			   string& error_msg)
@@ -887,7 +900,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 	return (XORP_ERROR);
     }
     
-    ret_value = mld6igmp_process(src, dst, ip_ttl, ip_tos, is_router_alert,
+    ret_value = mld6igmp_process(src, dst, ip_ttl, ip_tos, ip_router_alert,
 				 ip_internet_control, buffer, error_msg);
     
     return (ret_value);
@@ -901,7 +914,7 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
  * it should be ignored.
  * @ip_tos: The IP TOS of the message. If it has a negative value,
  * it should be ignored.
- * @is_router_alert: True if the received IP packet had the Router Alert
+ * @ip_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the message.
@@ -917,7 +930,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 			      const IPvX& dst,
 			      int ip_ttl,
 			      int ip_tos,
-			      bool is_router_alert,
+			      bool ip_router_alert,
 			      bool ip_internet_control,
 			      buffer_t *buffer,
 			      string& error_msg)
@@ -1147,7 +1160,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     // IP Router Alert option check.
     //
-    if (check_router_alert_option && (! is_router_alert)) {
+    if (check_router_alert_option && (! ip_router_alert)) {
 	error_msg = c_format("RX %s from %s to %s on vif %s: "
 			     "missing IP Router Alert option",
 			     proto_message_type2ascii(message_type),

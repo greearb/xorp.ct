@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.46 2007/02/16 22:46:37 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.47 2007/05/08 19:23:17 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -115,15 +115,15 @@ public:
      * it should be ignored.
      * @param ip_ttl the IP TOS of the message. If it has a negative value,
      * it should be ignored.
-     * @param is_router_alert if true, the IP Router Alert option in
+     * @param ip_router_alert if true, the IP Router Alert option in the IP
+     * packet was set (when applicable).
      * @param ip_internet_control if true, then this is IP control traffic.
-     * the IP packet was set (when applicable).
      * @param buffer the data buffer with the received message.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		mld6igmp_recv(const IPvX& src, const IPvX& dst,
-			      int ip_ttl, int ip_tos, bool is_router_alert,
+			      int ip_ttl, int ip_tos, bool ip_router_alert,
 			      bool ip_internet_control,
 			      buffer_t *buffer, string& error_msg);
     
@@ -703,7 +703,7 @@ private:
 				 const IPvX& dst,
 				 int ip_ttl,
 				 int ip_tos,
-				 bool is_router_alert,
+				 bool ip_router_alert,
 				 bool ip_internet_control,
 				 buffer_t *buffer,
 				 string& error_msg);

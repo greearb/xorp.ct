@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.33 2007/05/09 00:27:46 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.34 2007/05/10 00:08:17 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -216,162 +216,58 @@ protected:
 	// Output values, 
 	bool&	result);
 
-   /**
-     *  Add/delete a protocol in the Multicast FEA.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol to add/delete.
-     *  
-     *  @param protocol_id the ID of the protocol to add/delete
-     *  (both sides must agree on the particular values).
-     */
-    XrlCmdError mfea_0_1_add_protocol4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id);
-
-    XrlCmdError mfea_0_1_add_protocol6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id);
-
-    XrlCmdError mfea_0_1_delete_protocol4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id);
-
-    XrlCmdError mfea_0_1_delete_protocol6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id);
-
     /**
-     *  Start/stop a protocol on an interface in the Multicast FEA.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol to start/stop on the
-     *  particular vif.
-     *  
-     *  @param protocol_id the ID of the protocol to add/stop on the particular
-     *  vif (both sides must agree on the particular values).
-     *  
-     *  @param vif_name the name of the vif to start/stop for the particular
-     *  protocol.
-     *  
-     *  @param vif_index the index of the vif to start/stop for the particular
-     *  protocol.
-     */
-    XrlCmdError mfea_0_1_start_protocol_vif4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
-
-    XrlCmdError mfea_0_1_start_protocol_vif6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
-
-    XrlCmdError mfea_0_1_stop_protocol_vif4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
-
-    XrlCmdError mfea_0_1_stop_protocol_vif6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index);
-
-    /**
-     *  Enable/disable the receiving of kernel-originated signal messages.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol to add.
-     *  
-     *  @param protocol_id the ID of the protocol to add (both sides must agree
-     *  on the particular values).
-     *  
-     *  @param is_allow if true, enable the receiving of kernel-originated
-     *  signal messages by protocol
-     */
-    XrlCmdError mfea_0_1_allow_signal_messages(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const bool&	is_allow);
-    
-    /**
-     *  Join/leave a multicast group.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol that joins/leave the
-     *  group.
-     *  
-     *  @param protocol_id the ID of the protocol that joins/leave the group
-     *  (both sides must agree on the particular values).
+     *  Register a protocol on an interface in the Multicast FEA. There could
+     *  be only one registered protocol per interface/vif.
      *
-     *  @param vif_name the name of the vif to join/leave the multicast group.
-     *  
-     *  @param vif_index the index of the vif to join/leave the multicast
-     *  group.
-     *  
-     *  @param group_address the multicast group to join/leave
+     *  @param xrl_sender_name the XRL name of the originator of this XRL.
+     *
+     *  @param if_name the name of the interface to register for the particular
+     *  protocol.
+     *
+     *  @param vif_name the name of the vif to register for the particular
+     *  protocol.
+     *
+     *  @param ip_protocol the IP protocol number. It must be between 1 and
+     *  255.
      */
-    XrlCmdError mfea_0_1_join_multicast_group4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv4&	group_address);
+    XrlCmdError mfea_0_1_register_protocol4(
+	// Input values,
+	const string&	xrl_sender_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol);
 
-    XrlCmdError mfea_0_1_join_multicast_group6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv6&	group_address);
+    XrlCmdError mfea_0_1_register_protocol6(
+	// Input values,
+	const string&	xrl_sender_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol);
 
-    XrlCmdError mfea_0_1_leave_multicast_group4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv4&	group_address);
+    /**
+     *  Unregister a protocol on an interface in the Multicast FEA. There could
+     *  be only one registered protocol per interface/vif.
+     *
+     *  @param xrl_sender_name the XRL name of the originator of this XRL.
+     *
+     *  @param if_name the name of the interface to unregister for the
+     *  particular protocol.
+     *
+     *  @param vif_name the name of the vif to unregister for the particular
+     *  protocol.
+     */
+    XrlCmdError mfea_0_1_unregister_protocol4(
+	// Input values,
+	const string&	xrl_sender_name,
+	const string&	if_name,
+	const string&	vif_name);
 
-    XrlCmdError mfea_0_1_leave_multicast_group6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv6&	group_address);
+    XrlCmdError mfea_0_1_unregister_protocol6(
+	// Input values,
+	const string&	xrl_sender_name,
+	const string&	if_name,
+	const string&	vif_name);
 
     /**
      *  Add/delete a Multicast Forwarding Cache with the kernel.
@@ -429,65 +325,6 @@ protected:
 	const IPv6&	source_address, 
 	const IPv6&	group_address);
 
-    /**
-     *  Send a protocol message to the MFEA.
-     *  
-     *  @param xrl_sender_name the XRL name of the originator of this XRL.
-     *  
-     *  @param protocol_name the name of the protocol that sends a message.
-     *  
-     *  @param protocol_id the ID of the protocol that sends a message (both
-     *  sides must agree on the particular values).
-     *  
-     *  @param vif_name the name of the vif to send the message.
-     *  
-     *  @param vif_index the vif index of the vif to send the message.
-     *  
-     *  @param source_address the address of the sender.
-     *  
-     *  @param dest_address the destination address.
-     *  
-     *  @param ip_ttl the TTL of the IP packet to send. If it has a negative
-     *  value, the TTL will be set by the lower layers.
-     *  
-     *  @param ip_tos the TOS of the IP packet to send. If it has a negative
-     *  value, the TOS will be set by the lower layers.
-     *  
-     *  @param is_router_alert set/reset the IP Router Alert option in the IP
-     *  packet to send (when applicable).
-     *
-     *  @param ip_internet_control if true, then this is IP control traffic.
-     */
-    XrlCmdError mfea_0_1_send_protocol_message4(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv4&	source_address, 
-	const IPv4&	dest_address, 
-	const int32_t&	ip_ttl, 
-	const int32_t&	ip_tos, 
-	const bool&	is_router_alert, 
-	const bool&	ip_internet_control,
-	const vector<uint8_t>&	protocol_message);
-
-    XrlCmdError mfea_0_1_send_protocol_message6(
-	// Input values, 
-	const string&	xrl_sender_name, 
-	const string&	protocol_name, 
-	const uint32_t&	protocol_id, 
-	const string&	vif_name, 
-	const uint32_t&	vif_index, 
-	const IPv6&	source_address, 
-	const IPv6&	dest_address, 
-	const int32_t&	ip_ttl, 
-	const int32_t&	ip_tos, 
-	const bool&	is_router_alert, 
-	const bool&	ip_internet_control,
-	const vector<uint8_t>&	protocol_message);
-    
     /**
      *  Add/delete a dataflow monitor with the MFEA.
      *  
@@ -674,25 +511,7 @@ private:
     //
     // Protocol node methods
     //
-    int	proto_send(const string& dst_module_instance_name,
-		   xorp_module_id dst_module_id,
-		   uint32_t vif_index,
-		   const IPvX& src, const IPvX& dst,
-		   int ip_ttl, int ip_tos, bool is_router_alert,
-		   bool ip_internet_control,
-		   const uint8_t* sndbuf, size_t sndlen, string& error_msg);
-    //
-    // XXX: mfea_client_client_send_recv_protocol_message_cb() in fact
-    // is the callback when proto_send() calls send_recv_protocol_message()
-    // so the destination protocol will receive a protocol message.
-    // Sigh, the 'recv' part in the name is rather confusing, but that
-    // is in the name of consistency between the XRL calling function
-    // and the return result callback...
-    //
-    void mfea_client_client_send_recv_protocol_message_cb(const XrlError& xrl_error);
-
     int signal_message_send(const string& dst_module_instance_name,
-			    xorp_module_id dst_module_id,
 			    int message_type,
 			    uint32_t vif_index,
 			    const IPvX& src, const IPvX& dst,
@@ -709,7 +528,6 @@ private:
     void mfea_client_client_send_recv_kernel_signal_message_cb(const XrlError& xrl_error);
 
     int dataflow_signal_send(const string& dst_module_instance_name,
-			     xorp_module_id dst_module_id,
 			     const IPvX& source_addr,
 			     const IPvX& group_addr,
 			     uint32_t threshold_interval_sec,

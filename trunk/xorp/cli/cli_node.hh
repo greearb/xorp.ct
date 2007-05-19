@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.28 2007/02/16 22:45:28 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.29 2007/05/08 19:23:13 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -261,40 +261,40 @@ public:
     /**
      * UNUSED
      */
-    int	proto_recv(const string&	, // src_module_instance_name,
-		   xorp_module_id	, // src_module_id,
-		   uint32_t		, // vif_index,
-		   const IPvX&		, // src,
-		   const IPvX&		, // dst,
-		   int			, // ip_ttl,
-		   int			, // ip_tos,
-		   bool			, // is_router_alert,
+    int proto_recv(const string&	, // if_name,
+		   const string&	, // vif_name,
+		   const IPvX&		, // src_address,
+		   const IPvX&		, // dst_address,
+		   uint8_t		, // ip_protocol,
+		   int32_t		, // ip_ttl,
+		   int32_t		, // ip_tos,
+		   bool			, // ip_router_alert,
 		   bool			, // ip_internet_control,
-		   const uint8_t *	, // rcvbuf,
-		   size_t		, // rcvlen
+		   const vector<uint8_t>& , // payload,
 		   string&		  // error_msg
 	) { assert (false); return (XORP_ERROR); }
+
     /**
      * UNUSED
      */
-    int	proto_send(const string&	, // dst_module_instance_name,
-		   xorp_module_id	, // dst_module_id,
-		   uint32_t		, // vif_index,
-		   const IPvX&		, // src,
-		   const IPvX&		, // dst,
-		   int			, // ip_ttl,
-		   int			, // ip_tos,
-		   bool			, // is_router_alert,
+    int	proto_send(const string&	, // if_name,
+		   const string&	, // vif_name,
+		   const IPvX&		, // src_address,
+		   const IPvX&		, // dst_address,
+		   uint8_t		, // ip_protocol,
+		   int32_t		, // ip_ttl,
+		   int32_t		, // ip_tos,
+		   bool			, // ip_router_alert,
 		   bool			, // ip_internet_control,
-		   const uint8_t *	, // sndbuf,
-		   size_t		, // sndlen
+		   const uint8_t*	, // sndbuf,
+		   size_t		, // sndlen,
 		   string&		  // error_msg
 	) { assert (false); return (XORP_ERROR); }
+
     /**
      * UNUSED
      */
     int	signal_message_recv(const string&	, // src_module_instance_name,
-			    xorp_module_id	, // src_module_id,
 			    int			, // message_type,
 			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
@@ -306,7 +306,6 @@ public:
      * UNUSED
      */
     int	signal_message_send(const string&	, // dst_module_instance_name,
-			    xorp_module_id	, // dst_module_id,
 			    int			, // message_type,
 			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,

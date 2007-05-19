@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.7 2005/01/28 03:34:21 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea.xif,v 1.8 2007/05/08 19:23:20 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction XRL interface.
@@ -24,99 +24,41 @@ interface mfea/0.1 {
 	have_multicast_routing6 -> result:bool
 
 	/**
-	 * Add/delete a protocol in the Multicast FEA.
+	 * Register a protocol on an interface in the Multicast FEA.
+	 *
+	 * There could be only one registered protocol per interface/vif.
 	 *
 	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol to add/delete.
-	 * @param protocol_id the ID of the protocol to add/delete
-	 * (both sides must agree on the particular values).
+	 * @param if_name the name of the interface to register for the
+	 * particular protocol.
+	 * @param vif_name the name of the vif to register for the
+	 * particular protocol.
+	 * @param ip_protocol the IP protocol number. It must be between
+	 * 1 and 255.
 	 */
-	/* TODO: the protocol names have to be globally defined */
-	add_protocol4	? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32
-	add_protocol6	? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32
-	
-	delete_protocol4 ? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32
-	delete_protocol6 ? xrl_sender_name:txt				\
-			& protocol_name:txt & protocol_id:u32
+	register_protocol4 ? xrl_sender_name:txt			\
+			& if_name:txt & vif_name:txt			\
+			& ip_protocol:u32
+	register_protocol6 ? xrl_sender_name:txt			\
+			& if_name:txt & vif_name:txt			\
+			& ip_protocol:u32
 
 	/**
-	 * Start/stop a protocol on an interface in the Multicast FEA.
+	 * Unregister a protocol on an interface in the Multicast FEA.
+	 *
+	 * There could be only one registered protocol per interface/vif.
 	 *
 	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol to start/stop on
-	 * the particular vif.
-	 * @param protocol_id the ID of the protocol to add/stop on the
-	 * particular vif (both sides must agree on the particular values).
-	 * @param vif_name the name of the vif to start/stop for the
+	 * @param if_name the name of the interface to unregister for the
 	 * particular protocol.
-	 * @param vif_index the index of the vif to start/stop for the
+	 * @param vif_name the name of the vif to unregister for the
 	 * particular protocol.
 	 */
-	/* TODO: the protocol names have to be globally defined */
-	start_protocol_vif4 ? xrl_sender_name:txt			\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
-	start_protocol_vif6 ? xrl_sender_name:txt			\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
-	
-	stop_protocol_vif4 ? xrl_sender_name:txt			\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
-	stop_protocol_vif6 ? xrl_sender_name:txt			\
-			& protocol_name:txt & protocol_id:u32		\
-			& vif_name:txt & vif_index:u32
+	unregister_protocol4 ? xrl_sender_name:txt			\
+			& if_name:txt & vif_name:txt
+	unregister_protocol6 ? xrl_sender_name:txt			\
+			& if_name:txt & vif_name:txt
 
-	/**
-	 * Enable/disable the receiving of kernel-originated signal messages.
-	 *
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol to add.
-	 * @param protocol_id the ID of the protocol to add (both sides must
-	 * agree on the particular values).
-	 * @param is_allow if true, enable the receiving of kernel-originated
-	 * signal messages by protocol 'protocol_name'.
-	 */
-	 /* TODO: enable/disable per message type? */
-	allow_signal_messages	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& is_allow:bool
-	
-	/**
-	 * Join/leave a multicast group.
-	 *
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol that joins/leave
-	 * the group.
-	 * @param protocol_id the ID of the protocol that joins/leave
-	 * the group (both sides must agree on the particular values).
-	 * @param vif_name the name of the vif to join/leave the multicast
-	 * group.
-	 * @param vif_index the index of the vif to join/leave the multicast
-	 * group.
-	 * @param group_address the multicast group to join/leave.
-	 */
-	join_multicast_group4	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv4
-	join_multicast_group6	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv6
-	
-	leave_multicast_group4	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv4
-	leave_multicast_group6	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& group_address:ipv6
-	
 	/**
 	 * Add/delete a Multicast Forwarding Cache with the kernel.
 	 *
@@ -150,42 +92,6 @@ interface mfea/0.1 {
 			& source_address:ipv4 & group_address:ipv4
 	delete_mfc6	? xrl_sender_name:txt				\
 			& source_address:ipv6 & group_address:ipv6
-	
-	/**
-	 * Send a protocol message to the MFEA.
-	 *
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol that sends a message.
-	 * @param protocol_id the ID of the protocol that sends a message
-	 * (both sides must agree on the particular values).
-	 * @param vif_name the name of the vif to send the message.
-	 * @param vif_index the vif index of the vif to send the message.
-	 * @param source_address the address of the sender.
-	 * @param dest_address the destination address.
-	 * @param ip_ttl the TTL of the IP packet to send. If it has a
-	 * negative value, the TTL will be set by the lower layers.
-	 * @param ip_tos the TOS of the IP packet to send. If it has a
-	 * negative value, the TOS will be set by the lower layers.
-	 * @param is_router_alert set/reset the IP Router Alert option in
-	 * the IP packet to send (when applicable).
-	 * @param ip_internet_control if true, then this is IP control traffic.
-	 */
-	send_protocol_message4	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& source_address:ipv4 & dest_address:ipv4 \
-				& ip_ttl:i32 & ip_tos:i32		\
-				& is_router_alert:bool			\
-				& ip_internet_control:bool		\
-				& protocol_message:binary
-	send_protocol_message6	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& source_address:ipv6 & dest_address:ipv6 \
-				& ip_ttl:i32 & ip_tos:i32		\
-				& is_router_alert:bool			\
-				& ip_internet_control:bool		\
-				& protocol_message:binary
 	
 	/**
 	 * Add/delete a dataflow monitor with the MFEA.

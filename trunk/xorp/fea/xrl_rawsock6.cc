@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.14 2007/04/25 01:57:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.15 2007/05/08 19:23:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,7 +31,7 @@ class XrlFilterRawSocket6 : public FilterRawSocket6::InputFilter {
 public:
     XrlFilterRawSocket6(XrlRawSocket6Manager&	rsm,
 			const string&		xrl_target_name,
-			uint32_t		ip_protocol)
+			uint8_t			ip_protocol)
 	: _rsm(rsm),
 	  _xrl_target_name(xrl_target_name),
 	  _ip_protocol(ip_protocol)
@@ -39,12 +39,12 @@ public:
 
     XrlRawSocket6Manager& manager()		{ return _rsm; }
     const string&	xrl_target_name() const	{ return _xrl_target_name; }
-    uint32_t		ip_protocol() const	{ return _ip_protocol; }
+    uint8_t		ip_protocol() const	{ return _ip_protocol; }
 
 protected:
     XrlRawSocket6Manager&	_rsm;
     const string		_xrl_target_name;
-    const uint32_t		_ip_protocol;
+    const uint8_t		_ip_protocol;
 };
 
 //
@@ -58,7 +58,7 @@ public:
 		       const string&		xrl_target_name,
 		       const string&		if_name,
 		       const string&		vif_name,
-		       uint32_t			ip_protocol)
+		       uint8_t			ip_protocol)
 	: XrlFilterRawSocket6(rsm, xrl_target_name, ip_protocol),
 	  _rs(rs),
 	  _if_name(if_name),
@@ -184,15 +184,14 @@ public:
 
 protected:
     bool is_my_address(const IPv6& addr) const {
-	const IfTreeInterface* iftree_if = NULL;
-	const IfTreeVif* iftree_vif = NULL;
+	const IfTreeInterface* ifp = NULL;
+	const IfTreeVif* vifp = NULL;
 
-	if (_rs.find_interface_vif_by_addr(IPvX(addr), iftree_if, iftree_vif)
-	    != true) {
+	if (_rs.find_interface_vif_by_addr(IPvX(addr), ifp, vifp) != true) {
 	    return (false);
 	}
-	if (iftree_if->enabled() && iftree_vif->enabled()) {
-	    const IfTreeAddr6* ap = iftree_vif->find_addr(addr);
+	if (ifp->enabled() && vifp->enabled()) {
+	    const IfTreeAddr6* ap = vifp->find_addr(addr);
 	    if (ap != NULL) {
 		if (ap->enabled())
 		    return (true);
@@ -248,7 +247,7 @@ XrlRawSocket6Manager::send(const string&	if_name,
 			   const string&	vif_name,
 			   const IPv6&		src_address,
 			   const IPv6&		dst_address,
-			   uint32_t		ip_protocol,
+			   uint8_t		ip_protocol,
 			   int32_t		ip_ttl,
 			   int32_t		ip_tos,
 			   bool			ip_router_alert,
@@ -292,7 +291,7 @@ XrlCmdError
 XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
 					const string&	if_name,
 					const string&	vif_name,
-					uint32_t	ip_protocol,
+					uint8_t		ip_protocol,
 					bool		enable_multicast_loopback)
 {
     XrlVifInputFilter6* filter;
@@ -350,7 +349,7 @@ XrlCmdError
 XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
 					  const string&	if_name,
 					  const string&	vif_name,
-					  uint32_t	ip_protocol)
+					  uint8_t	ip_protocol)
 {
     string error_msg;
 
@@ -416,7 +415,7 @@ XrlCmdError
 XrlRawSocket6Manager::join_multicast_group(const string& xrl_target_name,
 					   const string& if_name,
 					   const string& vif_name,
-					   uint32_t	 ip_protocol,
+					   uint8_t	 ip_protocol,
 					   const IPv6&	 group_address)
 {
     string error_msg;
@@ -460,7 +459,7 @@ XrlCmdError
 XrlRawSocket6Manager::leave_multicast_group(const string& xrl_target_name,
 					    const string& if_name,
 					    const string& vif_name,
-					    uint32_t	  ip_protocol,
+					    uint8_t	  ip_protocol,
 					    const IPv6&	  group_address)
 {
     string error_msg;

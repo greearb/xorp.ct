@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.64 2007/04/20 06:23:23 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.65 2007/05/09 00:27:45 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -196,7 +196,8 @@ $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif 			\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-		$(INTERFACES_DIR)/mfea_client.xif			\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/mld6igmp.xif
 
 # OSPF V2
@@ -228,6 +229,8 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/redist_transaction4.xif		\
 		$(INTERFACES_DIR)/redist_transaction6.xif		\
@@ -272,7 +275,7 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 
-# RIP NG
+# RIPng
 libripngbase_la_SOURCES = ripng_base.hh ripng_base.cc
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\

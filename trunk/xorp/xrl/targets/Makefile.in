@@ -470,7 +470,7 @@ libribclientbase_la_SOURCES = ribclient_base.hh ribclient_base.cc
 # RIP
 libripbase_la_SOURCES = rip_base.hh rip_base.cc
 
-# RIP NG
+# RIPng
 libripngbase_la_SOURCES = ripng_base.hh ripng_base.cc
 
 # RTRMGR
@@ -972,7 +972,8 @@ $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif 			\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
-		$(INTERFACES_DIR)/mfea_client.xif			\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/mld6igmp.xif
 $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
@@ -992,6 +993,8 @@ $(srcdir)/pim_base.hh $(srcdir)/pim_base.cc:				\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/cli_processor.xif			\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/redist_transaction4.xif		\
 		$(INTERFACES_DIR)/redist_transaction6.xif		\

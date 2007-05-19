@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.9 2007/05/08 19:23:20 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.10 2007/05/10 00:08:20 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -7,50 +7,9 @@
 
 interface mfea_client/0.1 {
 	/**
-	 * Receive a protocol message from the MFEA.
-	 *
-	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol that sends a message.
-	 * @param protocol_id the ID of the protocol that sends a message
-	 * (both sides must agree on the particular values).
-	 * @param vif_name the name of the vif the message was received on.
-	 * @param vif_index the index of the vif the message was received on.
-	 * @param source_address the address of the sender.
-	 * @param dest_address the destination address.
-	 * @param ip_ttl the TTL of the received IP packet. If it has a
-	 * negative value, it should be ignored.
-	 * @param ip_tos the TOS of the received IP packet. If it has a
-	 * negative value, it should be ignored.
-	 * @param is_router_alert if true, the IP Router Alert option in
-	 * the IP packet was set (when applicable).
-	 * @param ip_internet_control if true, then this is IP control traffic.
-	 * @param protocol_message the protocol message.
-	 */
-	recv_protocol_message4	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& source_address:ipv4			\
-				& dest_address:ipv4			\
-				& ip_ttl:i32 & ip_tos:i32		\
-				& is_router_alert:bool			\
-				& ip_internet_control:bool		\
-				& protocol_message:binary
-	recv_protocol_message6	? xrl_sender_name:txt			\
-				& protocol_name:txt & protocol_id:u32	\
-				& vif_name:txt & vif_index:u32		\
-				& source_address:ipv6			\
-				& dest_address:ipv6			\
-				& ip_ttl:i32 & ip_tos:i32		\
-				& is_router_alert:bool			\
-				& ip_internet_control:bool		\
-				& protocol_message:binary
-	
-	/**
 	 * Receive a kernel signal message from the MFEA.
 	 *
 	 * @param xrl_sender_name the XRL name of the originator of this XRL.
-	 * @param protocol_name the name of the protocol that sends a message.
-	 * @param protocol_id the ID of the protocol that sends a message
 	 * (both sides must agree on the particular values).
 	 * @param message_type the type of the kernel signal message (TODO:
 	 * integer for now: the particular types are well-known by both sides).
@@ -61,14 +20,12 @@ interface mfea_client/0.1 {
 	 * @param protocol_message the protocol message.
 	 */
 	recv_kernel_signal_message4	? xrl_sender_name:txt		\
-					& protocol_name:txt & protocol_id:u32 \
 					& message_type:u32		\
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv4		\
 					& dest_address:ipv4		\
 					& protocol_message:binary
 	recv_kernel_signal_message6	? xrl_sender_name:txt		\
-					& protocol_name:txt & protocol_id:u32 \
 					& message_type:u32		\
 					& vif_name:txt & vif_index:u32	\
 					& source_address:ipv6		\

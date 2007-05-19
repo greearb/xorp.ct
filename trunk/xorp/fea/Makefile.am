@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.89 2007/05/01 09:15:07 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.90 2007/05/03 09:32:35 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -105,7 +105,6 @@ libfea_la_SOURCES	+= mfea_mrouter.hh
 libfea_la_SOURCES	+= mfea_node.hh
 libfea_la_SOURCES	+= mfea_node_cli.hh
 libfea_la_SOURCES	+= mfea_osdep.hh
-libfea_la_SOURCES	+= mfea_proto_comm.hh
 libfea_la_SOURCES	+= mfea_vif.hh
 libfea_la_SOURCES	+= nexthop_port_mapper.hh
 libfea_la_SOURCES	+= pa_backend.hh
@@ -145,7 +144,6 @@ libfea_la_SOURCES	+= mfea_dataflow.cc
 libfea_la_SOURCES	+= mfea_mrouter.cc
 libfea_la_SOURCES	+= mfea_node.cc
 libfea_la_SOURCES	+= mfea_node_cli.cc
-libfea_la_SOURCES	+= mfea_proto_comm.cc
 libfea_la_SOURCES	+= mfea_vif.cc
 libfea_la_SOURCES	+= nexthop_port_mapper.cc
 libfea_la_SOURCES	+= pa_backend_dummy.cc

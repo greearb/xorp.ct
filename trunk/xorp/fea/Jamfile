@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.10 2007/05/01 16:56:51 bms Exp $
+# $XORP: xorp/fea/Jamfile,v 1.11 2007/05/03 09:32:35 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -33,7 +33,6 @@ Library libfea :
 	mfea_mrouter.cc
 	mfea_node.cc
 	mfea_node_cli.cc
-	mfea_proto_comm.cc
 	mfea_vif.cc
 	nexthop_port_mapper.cc
 	pa_backend_dummy.cc

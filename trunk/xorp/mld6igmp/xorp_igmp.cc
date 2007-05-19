@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xorp_igmp.cc,v 1.12 2006/03/16 00:04:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_igmp.cc,v 1.13 2007/02/16 22:46:37 pavlin Exp $"
 
 
 //
@@ -103,6 +103,8 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port)
 				       finder_hostname,
 				       finder_port,
 				       "finder",
+				       xorp_module_name(AF_INET,
+							XORP_MODULE_FEA),
 				       xorp_module_name(AF_INET,
 							XORP_MODULE_MFEA));
     wait_until_xrl_router_is_ready(eventloop, xrl_mld6igmp_node4.xrl_router());

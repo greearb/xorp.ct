@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.17 2006/08/23 06:13:45 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.18 2006/10/03 23:51:55 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -39,7 +39,6 @@ libproto_la_SOURCES	+= config_node_id.hh
 libproto_la_SOURCES	+= packet.hh
 libproto_la_SOURCES	+= proto_node.hh
 libproto_la_SOURCES	+= proto_node_cli.hh
-libproto_la_SOURCES	+= proto_register.hh
 libproto_la_SOURCES	+= proto_state.hh
 libproto_la_SOURCES	+= proto_unit.hh
 libproto_la_SOURCES	+= spt.hh
@@ -48,7 +47,6 @@ libproto_la_SOURCES	+= checksum.c
 
 libproto_la_SOURCES	+= packet.cc
 libproto_la_SOURCES	+= proto_node_cli.cc
-libproto_la_SOURCES	+= proto_register.cc
 libproto_la_SOURCES	+= proto_state.cc
 libproto_la_SOURCES	+= proto_unit.cc
 libproto_la_SOURCES	+= spt.cc

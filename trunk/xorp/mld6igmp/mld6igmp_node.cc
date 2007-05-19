@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.54 2007/05/08 19:23:16 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.55 2007/05/10 00:08:18 pavlin Exp $"
 
 
 //
@@ -145,8 +145,9 @@ Mld6igmpNode::start()
 	return (XORP_ERROR);
 
     //
-    // Register with the MFEA
+    // Register with the FEA and MFEA
     //
+    fea_register_startup();
     mfea_register_startup();
 
     //
@@ -296,6 +297,24 @@ Mld6igmpNode::disable()
     XLOG_INFO("Protocol disabled");
 }
 
+/**
+ * Get the IP protocol number.
+ *
+ * @return the IP protocol number.
+ */
+uint8_t
+Mld6igmpNode::ip_protocol_number() const
+{
+    if (proto_is_igmp())
+	return (IPPROTO_IGMP);
+
+    if (proto_is_mld6())
+	return (IPPROTO_ICMPV6);
+
+    XLOG_UNREACHABLE();
+    return (0);
+}
+
 void
 Mld6igmpNode::status_change(ServiceBase*  service,
 			    ServiceStatus old_status,
@@ -333,7 +352,7 @@ Mld6igmpNode::status_change(ServiceBase*  service,
     if (service == ifmgr_mirror_service_base()) {
 	if ((old_status == SERVICE_SHUTTING_DOWN)
 	    && (new_status == SERVICE_SHUTDOWN)) {
-	    decr_shutdown_requests_n();
+	    decr_shutdown_requests_n();			// XXX: for the ifmgr
 	}
     }
 }
@@ -341,7 +360,7 @@ Mld6igmpNode::status_change(ServiceBase*  service,
 void
 Mld6igmpNode::tree_complete()
 {
-    decr_startup_requests_n();
+    decr_startup_requests_n();				// XXX: for the ifmgr
 
     //
     // XXX: we use same actions when the tree is completed or updates are made
@@ -1266,56 +1285,46 @@ Mld6igmpNode::vif_shutdown_completed(const string& vif_name)
     }
 
     //
-    // De-register with the MFEA
+    // De-register with the FEA and MFEA
     //
     if (ServiceBase::status() == SERVICE_SHUTTING_DOWN) {
 	mfea_register_shutdown();
+	fea_register_shutdown();
     }
 
     UNUSED(vif_name);
 }
 
-/**
- * Mld6igmpNode::proto_recv:
- * @src_module_instance_name: The module instance name of the module-origin
- * of the message.
- * @src_module_id: The #xorp_module_id of the module-origin of the message.
- * @vif_index: The vif index of the interface used to receive this message.
- * @src: The source address of the message.
- * @dst: The destination address of the message.
- * @ip_ttl: The IP TTL of the message. If it has a negative value,
- * it should be ignored.
- * @ip_tos: The IP TOS of the message. If it has a negative value,
- * it should be ignored.
- * @is_router_alert: If true, the Router Alert IP option for the IP
- * packet of the incoming message was set.
- * @ip_internet_control: If true, then this is IP control traffic.
- * @rcvbuf: The data buffer with the received message.
- * @rcvlen: The data length in @rcvbuf.
- * @error_msg: The error message (if error).
- * 
- * Receive a protocol message from the kernel.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
-Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
-			 xorp_module_id src_module_id,
-			 uint32_t vif_index,
-			 const IPvX& src, const IPvX& dst,
-			 int ip_ttl, int ip_tos, bool is_router_alert,
-			 bool ip_internet_control, const uint8_t *rcvbuf,
-			 size_t rcvlen, string& error_msg)
+Mld6igmpNode::proto_recv(const string& if_name,
+			 const string& vif_name,
+			 const IPvX& src_address,
+			 const IPvX& dst_address,
+			 uint8_t ip_protocol,
+			 int32_t ip_ttl,
+			 int32_t ip_tos,
+			 bool ip_router_alert,
+			 bool ip_internet_control,
+			 const vector<uint8_t>& payload,
+			 string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = NULL;
     int ret_value = XORP_ERROR;
     
-    debug_msg("Received message from %s to %s: "
-	      "ip_ttl = %d ip_tos = %#x router_alert = %d "
+    debug_msg("Received message on %s/%s from %s to %s: "
+	      "ip_ttl = %d ip_tos = %#x ip_router_alert = %d "
 	      "ip_internet_control = %d rcvlen = %u\n",
-	      cstring(src), cstring(dst),
-	      ip_ttl, ip_tos, is_router_alert, ip_internet_control,
-	      XORP_UINT_CAST(rcvlen));
+	      if_name.c_str(), vif_name.c_str(),
+	      cstring(src_address), cstring(dst_address),
+	      ip_ttl, ip_tos, ip_router_alert, ip_internet_control,
+	      XORP_UINT_CAST(payload.size()));
+
+    UNUSED(if_name);
+    //
+    // XXX: We registered to receive only one protocol, hence we ignore
+    // the ip_protocol value.
+    //
+    UNUSED(ip_protocol);
 
     //
     // Check whether the node is up.
@@ -1328,19 +1337,21 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     //
     // Find the vif for that packet
     //
-    mld6igmp_vif = vif_find_by_vif_index(vif_index);
+    mld6igmp_vif = vif_find_by_name(vif_name);
     if (mld6igmp_vif == NULL) {
-	error_msg = c_format("Cannot find vif with vif_index = %u", vif_index);
+	error_msg = c_format("Cannot find vif with vif_name = %s",
+			     vif_name.c_str());
 	return (XORP_ERROR);
     }
     
     // Copy the data to the receiving #buffer_t
     BUFFER_RESET(_buffer_recv);
-    BUFFER_PUT_DATA(rcvbuf, _buffer_recv, rcvlen);
+    BUFFER_PUT_DATA(&payload[0], _buffer_recv, payload.size());
     
     // Process the data by the vif
-    ret_value = mld6igmp_vif->mld6igmp_recv(src, dst, ip_ttl, ip_tos,
-					    is_router_alert,
+    ret_value = mld6igmp_vif->mld6igmp_recv(src_address, dst_address,
+					    ip_ttl, ip_tos,
+					    ip_router_alert,
 					    ip_internet_control,
 					    _buffer_recv,
 					    error_msg);
@@ -1350,46 +1361,29 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
  buflen_error:
     XLOG_UNREACHABLE();
     return (XORP_ERROR);
-    
-    UNUSED(src_module_id);
 }
 
-/**
- * Mld6igmpNode::mld6igmp_send:
- * @vif_index: The vif index of the interface to send this message.
- * @src: The source address of the message.
- * @dst: The destination address of the message.
- * @ip_ttl: The IP TTL of the message. If it has a negative value,
- * the TTL will be set by the lower layers.
- * @ip_tos: The IP TOS of the message. If it has a negative value,
- * the TOS will be set by the lower layers.
- * @is_router_alert: If true, set the Router Alert IP option for the IP
- * packet of the outgoung message.
- * @ip_internet_control: If true, then this is IP control traffic.
- * @buffer: The #buffer_t data buffer with the message to send.
- * @error_msg: The error message (if error).
- * 
- * Send a MLD or IGMP message.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
-Mld6igmpNode::mld6igmp_send(uint32_t vif_index,
-			    const IPvX& src, const IPvX& dst,
-			    int ip_ttl, int ip_tos, bool is_router_alert,
+Mld6igmpNode::mld6igmp_send(const string& if_name,
+			    const string& vif_name,
+			    const IPvX& src_address,
+			    const IPvX& dst_address,
+			    uint8_t ip_protocol,
+			    int32_t ip_ttl,
+			    int32_t ip_tos,
+			    bool ip_router_alert,
 			    bool ip_internet_control,
-			    buffer_t *buffer, string& error_msg)
+			    buffer_t *buffer,
+			    string& error_msg)
 {
     if (! is_up()) {
 	error_msg = c_format("MLD/IGMP node is not UP");
 	return (XORP_ERROR);
     }
     
-    // TODO: the target name of the MFEA must be configurable.
-    if (proto_send(xorp_module_name(family(), XORP_MODULE_MFEA),
-		   XORP_MODULE_MFEA,
-		   vif_index, src, dst,
-		   ip_ttl, ip_tos, is_router_alert, ip_internet_control,
+    if (proto_send(if_name, vif_name, src_address, dst_address,
+		   ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+		   ip_internet_control,
 		   BUFFER_DATA_HEAD(buffer),
 		   BUFFER_DATA_SIZE(buffer),
 		   error_msg) < 0) {

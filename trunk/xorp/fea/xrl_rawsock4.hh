@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.12 2007/02/16 22:45:53 pavlin Exp $
+// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.13 2007/05/08 19:23:15 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK4_HH__
 #define __FEA_XRL_RAWSOCK4_HH__
@@ -74,7 +74,7 @@ public:
 	const string&	vif_name,
 	const IPv4&	src_address,
 	const IPv4&	dst_address,
-	uint32_t	ip_protocol,
+	uint8_t		ip_protocol,
 	int32_t		ip_ttl,
 	int32_t		ip_tos,
 	bool		ip_router_alert,
@@ -100,7 +100,7 @@ public:
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	uint32_t	ip_protocol,
+	uint8_t		ip_protocol,
 	bool		enable_multicast_loopback);
 
     /**
@@ -118,7 +118,7 @@ public:
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	uint32_t	ip_protocol);
+	uint8_t		ip_protocol);
 
     /**
      * Join an IPv4 multicast group.
@@ -135,7 +135,7 @@ public:
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	uint32_t	ip_protocol,
+	uint8_t		ip_protocol,
 	const IPv4&	group_address);
 
     /**
@@ -154,7 +154,7 @@ public:
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	uint32_t	ip_protocol,
+	uint8_t		ip_protocol,
 	const IPv4&	group_address);
 
     XrlRouter&		router() { return _xrlrouter; }

@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/libproto/Jamfile,v 1.1 2007/01/11 22:30:47 bms Exp $
 #
 
 SubDir TOP libproto ;
@@ -11,7 +11,7 @@ SubDir TOP libproto ;
 # XXX: -Werror ?
 Library libproto : 
 	checksum.c
-	packet.cc proto_node_cli.cc proto_register.cc
+	packet.cc proto_node_cli.cc
 	proto_state.cc proto_unit.cc spt.cc
 	;
 

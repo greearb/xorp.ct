@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.36 2007/04/18 01:16:50 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.37 2007/05/10 00:08:19 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -25,6 +25,8 @@ LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libmfeaxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_vif.hh,v 1.8 2006/03/16 00:03:59 pavlin Exp $
+// $XORP: xorp/fea/mfea_vif.hh,v 1.9 2007/02/16 22:45:47 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_VIF_HH__
@@ -30,7 +30,6 @@
 #include <utility>
 
 #include "libxorp/vif.hh"
-#include "libproto/proto_register.hh"
 #include "libproto/proto_unit.hh"
 
 
@@ -102,56 +101,34 @@ public:
      * If the unit was runnning, it will be stop first.
      */
     void	disable();
-    
-    /**
-     * Start a protocol on a single virtual interface.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to start on this vif.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to start on this vif.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start_protocol(const string& module_instance_name,
-			       xorp_module_id module_id);
 
     /**
-     * Stop a protocol on a single virtual interface.
-     * 
+     * Register a protocol on a single virtual interface.
+     *
+     * There could be only one registered protocol per interface/vif.
+     *
      * @param module_instance_name the module instance name of the protocol
-     * to stop on this vif.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to stop on this vif.
+     * to register.
+     * @param ip_protocol the IP protocol number. It must be between 1 and
+     * 255.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		stop_protocol(const string& module_instance_name,
-			      xorp_module_id module_id);
-    
+    int register_protocol(const string&	module_instance_name,
+			  uint8_t	ip_protocol,
+			  string&	error_msg);
+
     /**
-     * Leave all previously joined multicast groups on this interface.
-     * 
-     * @return the number of groups that were successfully left,
-     * or XORP_ERROR if error.
-     */
-    int		leave_all_multicast_groups();
-    
-    /**
-     * Leave all previously joined multicast groups on this interface
-     * by a given module.
-     * 
-     * Leave all previously joined multicast groups on this interface
-     * that were joined by a module with name @ref module_instance_name
-     * and module ID @ref module_id.
-     * 
+     * Unregister a protocol on a single virtual interface.
+     *
      * @param module_instance_name the module instance name of the protocol
-     * that leaves all groups.
-     * @param module_id the module ID of the protocol that leaves all groups
-     * @return the number of groups that were successfully left,
-     * or XORP_ERROR if error.
+     * to unregister.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		leave_all_multicast_groups(const string& module_instance_name,
-					   xorp_module_id module_id);
-    
+    int unregister_protocol(const string&	module_instance_name,
+			    string&		error_msg);
+
     /**
      * Get the minimum TTL a multicast packet must have to be forwarded
      * on this virtual interface.
@@ -187,66 +164,25 @@ public:
      * on this virtual interface.
      */
     void	set_max_rate_limit(uint32_t v) { _max_rate_limit = v; }
-    
-    
+
     /**
-     * Get the set of protocol instances that are registered to
-     * send/receive data packets on this vif.
-     * 
-     * @return the set of protocol instances that are registered to
-     * send/receive data packets on this vif.
+     * Get the registered module instance name.
+     *
+     * @return the registered module instance name.
      */
-    ProtoRegister& proto_register() { return (_proto_register); }
-    
-    /**
-     * Add a multicast group to the set of groups joined on this virtual
-     * interface.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * that has joined the group.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * that has joined the group.
-     * @param group the group address.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int	add_multicast_group(const string& module_instance_name,
-			    xorp_module_id module_id,
-			    const IPvX& group) {
-	return (_joined_groups.add_multicast_group(module_instance_name,
-						   module_id,
-						   group));
+    const string& registered_module_instance_name() const {
+	return (_registered_module_instance_name);
     }
 
     /**
-     * Delete a multicast group from the set of groups joined on this virtual
-     * interface.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * that has left the group.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * that has left the group.
-     * @param group the group address.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * Get the registered IP protocol.
+     *
+     * @return the registered IP protocol.
      */
-    int	delete_multicast_group(const string& module_instance_name,
-			       xorp_module_id module_id,
-			       const IPvX& group) {
-	return (_joined_groups.delete_multicast_group(module_instance_name,
-						      module_id,
-						      group));
+    uint8_t registered_ip_protocol() const {
+	return (_registered_ip_protocol);
     }
-    
-    /**
-     * Test if a multicast group is still joined on this virtual interface.
-     * 
-     * @param group the group address.
-     * @return true if @ref group is still joined on this virtual address,
-     * otherwise false.
-     */
-    bool	has_multicast_group(const IPvX& group) const {
-	return (_joined_groups.has_multicast_group(group));
-    }
-    
+
 private:
     // Private functions
     MfeaNode&	mfea_node() const	{ return (_mfea_node);		}
@@ -266,34 +202,15 @@ private:
     MfeaNode&	_mfea_node;		// The MFEA node I belong to
     uint8_t	_min_ttl_threshold; // Min. TTL required to forward mcast pkts
     uint32_t	_max_rate_limit;    // Max. bw rate allowed to forward mcast
-    
-    // State to keep track of which protocols have started on this vif.
-    ProtoRegister _proto_register;
-    
-    // Class to keep track of joined groups per vif
-    class JoinedGroups {
-    public:
-	int	add_multicast_group(const string& module_instance_name,
-				    xorp_module_id module_id,
-				    const IPvX& group);
-	int	delete_multicast_group(const string& module_instance_name,
-				       xorp_module_id module_id,
-				       const IPvX& group);
-	bool	has_multicast_group(const IPvX& group) const;
-	set<IPvX>& joined_multicast_groups() {
-	    return (_joined_multicast_groups);
-	}
-	list<pair<pair<string, xorp_module_id>, IPvX> >& joined_state() {
-	    return (_joined_state);
-	}
-	
-    private:
-	set<IPvX>	_joined_multicast_groups; // The joined mcast groups
-	// The state about who joined which group.
-	list<pair<pair<string, xorp_module_id>, IPvX> > _joined_state;
-    };
-    
-    JoinedGroups _joined_groups;	// State with joined multicast groups
+
+    //
+    // State to keep information about the registered multicast routing
+    // protocol for this vif.
+    // There can be only one protocol instance registered which will be
+    // responsible for the multicast routing on the vif.
+    //
+    string	_registered_module_instance_name;
+    uint8_t	_registered_ip_protocol;
 };
 
 //

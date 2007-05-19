@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.17 2007/02/16 22:45:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.18 2007/05/08 19:23:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -26,7 +26,7 @@
 /* ------------------------------------------------------------------------- */
 /* RawSocket6 methods */
 
-RawSocket6::RawSocket6(EventLoop& eventloop, uint32_t ip_protocol,
+RawSocket6::RawSocket6(EventLoop& eventloop, uint8_t ip_protocol,
 		       const IfTree& iftree)
     : RawSocket(eventloop, IPv6::af(), ip_protocol, iftree)
 {

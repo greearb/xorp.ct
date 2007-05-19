@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.42 2007/05/08 19:23:14 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.43 2007/05/10 00:08:16 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -24,13 +24,13 @@
 //
 
 
+#include <set>
 #include <vector>
 
 #include "libxorp/ipvx.hh"
 #include "libxorp/config_param.hh"
 
 #include "libproto/proto_node.hh"
-#include "libproto/proto_register.hh"
 
 #include "mrt/mifset.hh"
 
@@ -52,7 +52,6 @@
 class EventLoop;
 class FeaNode;
 class MfeaVif;
-class ProtoComm;
 class SgCount;
 class VifCount;
 
@@ -299,190 +298,79 @@ public:
     void	vif_shutdown_completed(const string& vif_name);
 
     /**
-     * Start operation for a given protocol.
-     * 
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to start.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start_protocol(xorp_module_id module_id);
-    
-    /**
-     * Stop operation for a given protocol.
-     * 
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to stop.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		stop_protocol(xorp_module_id module_id);
-    
-    /**
-     * A method used by a protocol instance to register with this MfeaNode.
-     * 
+     * Register a protocol on an interface in the Multicast FEA.
+     *
+     * There could be only one registered protocol per interface/vif.
+     *
      * @param module_instance_name the module instance name of the protocol
-     * to add.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to add.
+     * to register.
+     * @param if_name the name of the interface to register for the particular
+     * protocol.
+     * @param vif_name the name of the vif to register for the particular
+     * protocol.
+     * @param ip_protocol the IP protocol number. It must be between 1 and
+     * 255.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_protocol(const string& module_instance_name,
-			     xorp_module_id module_id);
-    
-    /**
-     * A method used by a protocol instance to deregister with this MfeaNode.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to delete.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		delete_protocol(const string& module_instance_name,
-				xorp_module_id module_id);
-    
-    /**
-     * Start a protocol on an interface.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to start on the interface.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to start on the interface.
-     * @param vif_index the vif index of the interface to start the
-     * protocol on.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		start_protocol_vif(const string& module_instance_name,
-				   xorp_module_id module_id,
-				   uint32_t vif_index);
+    int register_protocol(const string&		module_instance_name,
+			  const string&		if_name,
+			  const string&		vif_name,
+			  uint8_t		ip_protocol,
+			  string&		error_msg);
 
     /**
-     * Stop a protocol on an interface.
-     * 
+     * Unregister a protocol on an interface in the Multicast FEA.
+     *
+     * There could be only one registered protocol per interface/vif.
+     *
      * @param module_instance_name the module instance name of the protocol
-     * to stop on the interface.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to stop on the interface.
-     * @param vif_index the vif index of the interface to stop the
-     * protocol on.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		stop_protocol_vif(const string& module_instance_name,
-				  xorp_module_id module_id,
-				  uint32_t vif_index);
-    
-    /**
-     * Add a protocol to receive kernel signal messages.
-     * 
-     * Add a protocol to the set of protocols that are interested in
-     * receiving kernel signal messages.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to add.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to add.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		add_allow_kernel_signal_messages(const string& module_instance_name,
-						 xorp_module_id module_id);
-    
-    /**
-     * Delete a protocol from receiving kernel signal messages.
-     * 
-     * Delete a protocol from the set of protocols that are interested in
-     * receiving kernel signal messages.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to delete.
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to delete.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		delete_allow_kernel_signal_messages(const string& module_instance_name,
-						    xorp_module_id module_id);
-    
-    /**
-     * Receive a protocol message from an user-level protocol.
-     * 
-     * @param src_module_instance_name the module instance name of the
-     * module-origin of the message.
-     * 
-     * @param src_module_id the module ID (@ref xorp_module_id) of the
-     * module-origin of the message.
-     * 
-     * @param vif_index the vif index of the interface used to receive this
-     * message.
-     * 
-     * @param src the source address of the message.
-     * 
-     * @param dst the destination address of the message.
-     * 
-     * @param ip_ttl the IP TTL of the message. If it has a negative value,
-     * the TTL will be set by the lower layers (including the MFEA).
-     * 
-     * @param ip_tos the IP TOS of the message. If it has a negative value,
-     * the TOS will be set by the lower layers (including the MFEA).
-     * 
-     * @param is_router_alert if true, set the Router Alert IP option for
-     * the IP packet of the outgoung message.
-     * 
-     * @param ip_internet_control if true, then this is IP control traffic.
-     * 
-     * @param rcvbuf the data buffer with the received message.
-     * 
-     * @param rcvlen the data length in @ref rcvbuf.
-     * 
+     * to unregister.
+     * @param if_name the name of the interface to unregister for the
+     * particular protocol.
+     * @param vif_name the name of the vif to unregister for the particular
+     * protocol.
      * @param error_msg the error message (if error).
-     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		proto_recv(const string& src_module_instance_name,
-			   xorp_module_id src_module_id,
-			   uint32_t vif_index,
-			   const IPvX& src, const IPvX& dst,
-			   int ip_ttl, int ip_tos, bool is_router_alert,
-			   bool ip_internet_control, const uint8_t *rcvbuf,
-			   size_t rcvlen, string& error_msg);
+    int unregister_protocol(const string&	module_instance_name,
+			    const string&	if_name,
+			    const string&	vif_name,
+			    string&		error_msg);
+
     /**
-     * Process an incoming message from the kernel.
-     * 
-     * This method sends the protocol message to an user-level protocol module.
-     * Note: it uses the pure virtual ProtoNode::proto_send() method
-     * that is implemented somewhere else (at a class that inherits this one).
-     * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
-     * module-recepient of the message.
-     * 
-     * @param vif_index the vif index of the interface used to receive this
-     * message.
-     * 
-     * @param src the source address of the message.
-     * 
-     * @param dst the destination address of the message.
-     * 
-     * @param ip_ttl the IP TTL (Time To Live) of the message. If it has
-     * a negative value, it should be ignored.
-     * 
-     * @param ip_tos the IP TOS (Type of Service) of the message. If it has
-     * a negative value, it should be ignored.
-     * 
-     * @param is_router_alert if true, the Router Alert IP option for the IP
-     * packet of the incoming message was set.
-     * 
-     * @param ip_internet_control if true, then this is IP control traffic.
-     * 
-     * @param rcvbuf the data buffer with the received message.
-     * 
-     * @param rcvlen the data length in @ref rcvbuf.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * UNUSED
      */
-    int		proto_comm_recv(xorp_module_id dst_module_id,
-				uint32_t vif_index,
-				const IPvX& src, const IPvX& dst,
-				int ip_ttl, int ip_tos, bool is_router_alert,
-				bool ip_internet_control,
-				const uint8_t *rcvbuf, size_t rcvlen);
-    
+    int proto_recv(const string&	, // if_name,
+		   const string&	, // vif_name,
+		   const IPvX&		, // src_address,
+		   const IPvX&		, // dst_address,
+		   uint8_t		, // ip_protocol,
+		   int32_t		, // ip_ttl,
+		   int32_t		, // ip_tos,
+		   bool			, // ip_router_alert,
+		   bool			, // ip_internet_control,
+		   const vector<uint8_t>& , // payload,
+		   string&		// error_msg
+	) { assert (false); return (XORP_ERROR); }
+
+    /**
+     * UNUSED
+     */
+    int	proto_send(const string&	, // if_name,
+		   const string&	, // vif_name,
+		   const IPvX&		, // src_address,
+		   const IPvX&		, // dst_address,
+		   uint8_t		, // ip_protocol,
+		   int32_t		, // ip_ttl,
+		   int32_t		, // ip_tos,
+		   bool			, // ip_router_alert,
+		   bool			, // ip_internet_control,
+		   const uint8_t*	, // sndbuf,
+		   size_t		, // sndlen,
+		   string&		  // error_msg
+	) { assert (false); return (XORP_ERROR); }
+
     /**
      * Process NOCACHE, WRONGVIF/WRONGMIF, WHOLEPKT signals from the
      * kernel.
@@ -490,9 +378,6 @@ public:
      * The signal is sent to all user-level protocols that expect it.
      * 
      * @param src_module_instance_name unused.
-     * @param src_module_id the @ref xorp_module_id module ID of the
-     * associated @ref ProtoComm entry. Note: in the future it may become
-     * irrelevant.
      * @param message_type the message type of the kernel signal (for IPv4
      * and IPv6 respectively):
      * 
@@ -518,7 +403,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		signal_message_recv(const string& src_module_instance_name,
-				    xorp_module_id src_module_id,
 				    int message_type,
 				    uint32_t vif_index,
 				    const IPvX& src,
@@ -596,9 +480,6 @@ public:
      * @param dst_module_instance_name the module instance name of the
      * module-recepient of the message.
      * 
-     * @param dst_module_id the module ID (@ref xorp_module_id) of the
-     * module-recepient of the message.
-     * 
      * @param source_addr the source address of the dataflow.
      * 
      * @param group_addr the group address of the dataflow.
@@ -638,7 +519,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int dataflow_signal_send(const string& dst_module_instance_name,
-				     xorp_module_id dst_module_id,
 				     const IPvX& source_addr,
 				     const IPvX& group_addr,
 				     uint32_t threshold_interval_sec,
@@ -653,46 +533,6 @@ public:
 				     bool is_threshold_in_bytes,
 				     bool is_geq_upcall,
 				     bool is_leq_upcall) = 0;
-    
-    /**
-     * Join a multicast group.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to join the multicast group.
-     * 
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to join the multicast group.
-     * 
-     * @param vif_index the vif index of the interface to join.
-     * 
-     * @param group the multicast group to join.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		join_multicast_group(const string& module_instance_name,
-				     xorp_module_id module_id,
-				     uint32_t vif_index,
-				     const IPvX& group);
-    
-    /**
-     * Leave a multicast group.
-     * 
-     * @param module_instance_name the module instance name of the protocol
-     * to leave the multicast group.
-     * 
-     * @param module_id the module ID (@ref xorp_module_id) of the protocol
-     * to leave the multicast group.
-     * 
-     * @param vif_index the vif index of the interface to leave.
-     * 
-     * @param group the multicast group to leave.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		leave_multicast_group(const string& module_instance_name,
-				      xorp_module_id module_id,
-				      uint32_t vif_index,
-				      const IPvX& group);
     
     /**
      * Add Multicast Forwarding Cache (MFC) to the kernel.
@@ -916,31 +756,6 @@ public:
     MfeaDft&	mfea_dft() { return (_mfea_dft); }
     
     /**
-     * Get a reference to the vector-array of installed @ref ProtoComm entries.
-     * 
-     * @return a reference to the vector-array of installed @ref ProtoComm
-     * entries.
-     */
-    vector<ProtoComm *>& proto_comms() { return (_proto_comms); }
-    
-    /**
-     * Find an @ref ProtoComm entry for a given module ID
-     * (@ref xorp_module_id).
-     * 
-     * @param module_id the module ID (@ref xorp_module_id) to search for.
-     * @return the corresponding @ref ProtoComm entry if found, otherwise NULL.
-     */
-    ProtoComm	*proto_comm_find_by_module_id(xorp_module_id module_id) const;
-
-    /**
-     * Find an @ref ProtoComm entry for a given IP protocol number.
-     * 
-     * @param ip_protocol the IP protocol number ot search for.
-     * @return the corresponding @ref ProtoComm entry if found, otherwise NULL.
-     */
-    ProtoComm	*proto_comm_find_by_ip_protocol(int ip_protocol) const;
-    
-    /**
      * Test if trace log is enabled.
      * 
      * This method is used to test whether to output trace log debug messges.
@@ -1000,16 +815,14 @@ private:
     FeaNode&		_fea_node;
 
     MfeaMrouter		_mfea_mrouter;	// The mrouter state
-    vector<ProtoComm *>	_proto_comms;	// The set of active ProtoComm entries
-    
-    MfeaDft	_mfea_dft;		// The dataflow monitoring table
+    MfeaDft		_mfea_dft;	// The dataflow monitoring table
     
     //
     // The state to register:
-    //  - protocol instances
-    //  - protocol instances interested in receiving kernel signal messages
-    ProtoRegister	_proto_register;
-    ProtoRegister	_kernel_signal_messages_register;
+    //  - Protocol module instance names
+    //  - IP protocol numbers
+    set<string>		_registered_module_instance_names;
+    set<uint8_t>	_registered_ip_protocols;
 
     //
     // Interface tree propagation

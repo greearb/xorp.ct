@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.32 2007/05/08 19:23:16 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.33 2007/05/10 00:08:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -130,7 +130,14 @@ public:
      * If the unit was runnning, it will be stop first.
      */
     void	disable();
-    
+
+    /**
+     * Get the IP protocol number.
+     *
+     * @return the IP protocol number.
+     */
+    uint8_t	ip_protocol_number() const;
+
     /**
      * Install a new MLD/IGMP vif.
      * 
@@ -287,73 +294,67 @@ public:
     void	vif_shutdown_completed(const string& vif_name);
 
     /**
-     * Receive a protocol message.
-     * 
-     * @param src_module_instance_name the module instance name of the
-     * module-origin of the message.
-     * 
-     * @param src_module_id the module ID (@ref xorp_module_id) of the
-     * module-origin of the message.
-     * 
-     * @param vif_index the vif index of the interface used to receive this
-     * message.
-     * 
-     * @param src the source address of the message.
-     * 
-     * @param dst the destination address of the message.
-     * 
-     * @param ip_ttl the IP TTL of the message. If it has a negative value,
-     * it should be ignored.
-     * 
-     * @param ip_tos the IP TOS of the message. If it has a negative value,
-     * it should be ignored.
-     * 
-     * @param is_router_alert if true, the IP Router Alert option in
-     * the IP packet was set (when applicable).
-     * 
+     * Receive a protocol packet.
+     *
+     * @param if_name the interface name the packet arrived on.
+     * @param vif_name the vif name the packet arrived on.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_protocol the IP protocol number.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     * the received value is unknown.
+     * @param ip_tos the Type of Service (Diffserv/ECN bits for IPv4). If it
+     * has a negative value, then the received value is unknown.
+     * @param ip_router_alert if true, the IP Router Alert option was included
+     * in the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
-     * 
-     * @param rcvbuf the data buffer with the received message.
-     * 
-     * @param rcvlen the data length in @ref rcvbuf.
-     * 
+     * @param payload the payload, everything after the IP header and options.
      * @param error_msg the error message (if error).
-     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		proto_recv(const string& src_module_instance_name,
-			   xorp_module_id src_module_id,
-			   uint32_t vif_index,
-			   const IPvX& src, const IPvX& dst,
-			   int ip_ttl, int ip_tos, bool is_router_alert,
+    int		proto_recv(const string& if_name,
+			   const string& vif_name,
+			   const IPvX& src_address,
+			   const IPvX& dst_address,
+			   uint8_t ip_protocol,
+			   int32_t ip_ttl,
+			   int32_t ip_tos,
+			   bool ip_router_alert,
 			   bool ip_internet_control,
-			   const uint8_t *rcvbuf, size_t rcvlen,
+			   const vector<uint8_t>& payload,
 			   string& error_msg);
     
     /**
-     * Send a protocol message.
-     * 
-     * Note: this method uses the pure virtual ProtoNode::proto_send() method
-     * that is implemented somewhere else (in a class that inherits this one).
-     * 
-     * @param vif_index the vif index of the vif to send the message.
-     * @param src the source address of the message.
-     * @param dst the destination address of the message.
-     * @param ip_ttl the TTL of the IP packet to send. If it has a
-     * negative value, the TTL will be set by the lower layers.
-     * @param ip_tos the TOS of the IP packet to send. If it has a
-     * negative value, the TOS will be set by the lower layers.
-     * @param is_router_alert if true, set the IP Router Alert option in
-     * the IP packet to send (when applicable).
+     * Send a protocol packet.
+     *
+     * @param if_name the interface to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param vif_name the vif to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_protocol the IP protocol number. It must be between 1 and
+     * 255.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value, the
+     * TTL will be set internally before transmission.
+     * @param ip_tos the Type Of Service (Diffserv/ECN bits for IPv4). If it
+     * has a negative value, the TOS will be set internally before
+     * transmission.
+     * @param ip_router_alert if true, then add the IP Router Alert option to
+     * the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
-     * @param buffer the data buffer with the message to send.
+     * @param buffer the data buffer with the packet to send.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		mld6igmp_send(uint32_t vif_index,
-			      const IPvX& src, const IPvX& dst,
-			      int ip_ttl, int ip_tos,
-			      bool is_router_alert,
+    int		mld6igmp_send(const string& if_name,
+			      const string& vif_name,
+			      const IPvX& src_address,
+			      const IPvX& dst_address,
+			      uint8_t ip_protocol,
+			      int32_t ip_ttl,
+			      int32_t ip_tos,
+			      bool ip_router_alert,
 			      bool ip_internet_control,
 			      buffer_t *buffer,
 			      string& error_msg);
@@ -362,7 +363,6 @@ public:
      * Receive signal message: not used by MLD/IGMP.
      */
     int	signal_message_recv(const string&	, // src_module_instance_name,
-			    xorp_module_id	, // src_module_id,
 			    int			, // message_type,
 			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
@@ -375,7 +375,6 @@ public:
      * Send signal message: not used by MLD/IGMP.
      */
     int	signal_message_send(const string&	, // dst_module_instance_name,
-			    xorp_module_id	, // dst_module_id,
 			    int			, // message_type,
 			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
@@ -385,27 +384,44 @@ public:
 	) { XLOG_UNREACHABLE(); return (XORP_ERROR); }
     
     /**
-     * Start a protocol vif with the kernel.
+     * Register as a receiver to receive packets.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
      * 
-     * @param vif_index the vif index of the interface to start.
+     * @param if_name the interface through which packets should be accepted.
+     * @param vif_name the vif through which packets should be accepted.
+     * @param ip_protocol the IP protocol number that the receiver is
+     * interested in. It must be between 0 and 255. A protocol number of 0 is
+     * used to specify all protocols.
+     * @param enable_multicast_loopback if true then enable delivering
+     * of multicast datagrams back to this host (assuming the host is
+     * a member of the same multicast group).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start_protocol_kernel_vif(uint32_t vif_index) = 0;
-    
+    virtual int register_receiver(const string& if_name,
+				  const string& vif_name,
+				  uint8_t ip_protocol,
+				  bool enable_multicast_loopback) = 0;
+
     /**
-     * Stop a protocol vif with the kernel.
+     * Unregister as a receiver to receive packets.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
      * 
-     * @param vif_index the vif index of the interface to stop.
+     * @param if_name the interface through which packets should not be
+     * accepted.
+     * @param vif_name the vif through which packets should not be accepted.
+     * @param ip_protocol the IP Protocol number that the receiver is
+     * not interested in anymore. It must be between 0 and 255. A protocol
+     * number of 0 is used to specify all protocols.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop_protocol_kernel_vif(uint32_t vif_index) = 0;
-    
+    virtual int unregister_receiver(const string& if_name,
+				    const string& vif_name,
+				    uint8_t ip_protocol) = 0;
+
     /**
      * Join a multicast group on an interface.
      * 
@@ -414,13 +430,17 @@ public:
      * 
      * TODO: add a source address as well!!
      * 
-     * @param vif_index the vif index of the interface to join.
-     * @param multicast_group the multicast group address.
+     * @param if_name the interface name to join.
+     * @param vif_name the vif name to join.
+     * @param ip_protocol the IP protocol number that the receiver is
+     * interested in.
+     * @param group_address the multicast group address to join.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int join_multicast_group(uint32_t vif_index,
-				     const IPvX& multicast_group) = 0;
-    
+    virtual int join_multicast_group(const string& if_name,
+				     const string& vif_name,
+				     uint8_t ip_protocol,
+				     const IPvX& group_address) = 0;
     /**
      * Leave a multicast group on an interface.
      * 
@@ -429,13 +449,18 @@ public:
      * 
      * TODO: add a source address as well!!
      * 
-     * @param vif_index the vif index of the interface to leave.
-     * @param multicast_group the multicast group address.
+     * @param if_name the interface name to leave.
+     * @param vif_name the vif name to leave.
+     * @param ip_protocol the IP protocol number that the receiver is
+     * not interested in anymore.
+     * @param group_address the multicast group address to leave.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int leave_multicast_group(uint32_t vif_index,
-				      const IPvX& multicast_group) = 0;
-    
+    virtual int leave_multicast_group(const string& if_name,
+				      const string& vif_name,
+				      uint8_t ip_protocol,
+				      const IPvX& group_address) = 0;
+
     /**
      * Add a protocol that needs to be notified about multicast membership
      * changes.
@@ -840,12 +865,28 @@ private:
     virtual const IfMgrIfTree&	ifmgr_iftree() const = 0;
 
     /**
+     * Initiate registration with the FEA.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void fea_register_startup() = 0;
+
+    /**
      * Initiate registration with the MFEA.
      * 
      * This is a pure virtual function, and it must be implemented
      * by the communication-wrapper class that inherits this base class.
      */
     virtual void mfea_register_startup() = 0;
+
+    /**
+     * Initiate de-registration with the FEA.
+     * 
+     * This is a pure virtual function, and it must be implemented
+     * by the communication-wrapper class that inherits this base class.
+     */
+    virtual void fea_register_shutdown() = 0;
 
     /**
      * Initiate de-registration with the MFEA.

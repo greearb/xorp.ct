@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.47 2007/05/08 00:49:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.48 2007/05/08 19:23:14 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -75,8 +75,9 @@
 #include "mrt/include/netinet/pim.h"
 #endif
 
-#include "iftree.hh"
 #include "forwarding_plane/control_socket/system_utilities.hh"
+
+#include "iftree.hh"
 #include "rawsock.hh"
 
 
@@ -621,20 +622,10 @@ RawSocket::set_default_multicast_interface(const string& if_name,
 					   const string& vif_name,
 					   string& error_msg)
 {
-    const IfTreeInterface* ifp;
     const IfTreeVif* vifp;
 
-    // Find the interface
-    ifp = _iftree.find_interface(if_name);
-    if (ifp == NULL) {
-	error_msg = c_format("Setting the default multicast interface failed:"
-			     "interface %s not found",
-			     if_name.c_str());
-	return (XORP_ERROR);
-    }
-
     // Find the vif
-    vifp = ifp->find_vif(vif_name);
+    vifp = _iftree.find_vif(if_name, vif_name);
     if (vifp == NULL) {
 	error_msg = c_format("Setting the default multicast interface failed:"
 			     "interface %s vif %s not found",
@@ -704,21 +695,10 @@ RawSocket::join_multicast_group(const string& if_name,
 				const IPvX& group,
 				string& error_msg)
 {
-    const IfTreeInterface* ifp;
     const IfTreeVif* vifp;
 
-    // Find the interface
-    ifp = _iftree.find_interface(if_name);
-    if (ifp == NULL) {
-	error_msg = c_format("Joining multicast group %s failed: "
-			     "interface %s not found",
-			     cstring(group),
-			     if_name.c_str());
-	return (XORP_ERROR);
-    }
-
     // Find the vif
-    vifp = ifp->find_vif(vif_name);
+    vifp = _iftree.find_vif(if_name, vif_name);
     if (vifp == NULL) {
 	error_msg = c_format("Joining multicast group %s failed: "
 			     "interface %s vif %s not found",
@@ -729,7 +709,7 @@ RawSocket::join_multicast_group(const string& if_name,
     }
     
 #if 0	// TODO: enable or disable the enabled() check?
-    if (! (ifp->enabled() || vifp->enabled())) {
+    if (! vifp->enabled()) {
 	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
 			     "interface/vif is DOWN",
 			     cstring(group),
@@ -814,21 +794,10 @@ RawSocket::leave_multicast_group(const string& if_name,
 				 const IPvX& group,
 				 string& error_msg)
 {
-    const IfTreeInterface* ifp;
     const IfTreeVif* vifp;
 
-    // Find the interface
-    ifp = _iftree.find_interface(if_name);
-    if (ifp == NULL) {
-	error_msg = c_format("Leaving multicast group %s failed: "
-			     "interface %s not found",
-			     cstring(group),
-			     if_name.c_str());
-	return (XORP_ERROR);
-    }
-
     // Find the vif
-    vifp = ifp->find_vif(vif_name);
+    vifp = _iftree.find_vif(if_name, vif_name);
     if (vifp == NULL) {
 	error_msg = c_format("Leaving multicast group %s failed: "
 			     "interface %s vif %s not found",
@@ -839,7 +808,7 @@ RawSocket::leave_multicast_group(const string& if_name,
     }
     
 #if 0	// TODO: enable or disable the enabled() check?
-    if (! (ifp->enabled() || vifp->enabled())) {
+    if (! vifp->enabled()) {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
 			     "interface/vif is DOWN",
 			     cstring(group),
@@ -937,7 +906,7 @@ RawSocket::open_proto_sockets(string& error_msg)
 				 _ip_protocol, errstr);
 	    return (XORP_ERROR);
 	}
-    } while (false);
+    }
 
     if (! _proto_socket_out.is_valid()) {
 	_proto_socket_out = socket(family(), SOCK_RAW, _ip_protocol);
@@ -953,7 +922,7 @@ RawSocket::open_proto_sockets(string& error_msg)
 				 _ip_protocol, errstr);
 	    return (XORP_ERROR);
 	}
-    } while (false);
+    }
 
 #ifdef HOST_OS_WINDOWS
     switch (family()) {
@@ -1008,7 +977,10 @@ RawSocket::open_proto_sockets(string& error_msg)
     }
 #endif // HOST_OS_WINDOWS
 
+    //
     // Set various socket options
+    //
+
     // Lots of input buffering
     if (comm_sock_set_rcvbuf(_proto_socket_in, SO_RCV_BUF_SIZE_MAX,
 			     SO_RCV_BUF_SIZE_MIN)
@@ -1111,11 +1083,11 @@ RawSocket::open_proto_sockets(string& error_msg)
 #endif // HOST_OS_WINDOWS
 
     // Assign a method to read from this socket
-    if (eventloop().add_ioevent_cb(_proto_socket_in,
-				   IOT_READ,
+    if (eventloop().add_ioevent_cb(_proto_socket_in, IOT_READ,
 				   callback(this,
 					    &RawSocket::proto_socket_read))
 	== false) {
+	close_proto_sockets(dummy_error_msg);
 	error_msg = c_format("Cannot add a protocol socket to the set of "
 			     "sockets to read from in the event loop");
 	return (XORP_ERROR);
@@ -1183,8 +1155,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     int		int_val;
     int32_t	ip_ttl = -1;		// a.k.a. Hop-Limit in IPv6
     int32_t	ip_tos = -1;
-    bool	is_router_alert = false; // Router Alert option received
-    bool	ip_internet_control = false; // IP Internet Control pkt rcvd
+    bool	ip_router_alert = false;	// Router Alert option received
+    bool	ip_internet_control = false;	// IP Internet Control pkt rcvd
     uint32_t	pif_index = 0;
     vector<uint8_t> ext_headers_type;
     vector<vector<uint8_t> > ext_headers_payload;
@@ -1305,7 +1277,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    // XXX: Packets sent up from kernel to daemon have
 	    //      igmpmsg.im_mbz = ip->ip_p = 0
 	    //
-	    // TODO: not implemented
+	    // XXX: Those kernel upcall messages should be received and
+	    // processed by the MFEA, hence we silently ignore them here.
 	    // kernel_call_process(_rcvbuf, nbytes);
 	    return;		// OK
 	}
@@ -1346,7 +1319,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    // April 2000, FreeBSD-4.0) which don't have the
 	    //     'icmp6_type = 0' mechanism.
 	    //
-	    // TODO: not implemented
+	    // XXX: Those kernel upcall messages should be received and
+	    // processed by the MFEA, hence we silently ignore them here.
 	    // kernel_call_process(_rcvbuf, nbytes);
 	    return;		// OK
 	}
@@ -1508,7 +1482,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		if (test_ip_options_len < option_len)
 		    break;
 		if ((option_value == IPOPT_RA) && (option_len == 4)) {
-		    is_router_alert = true;
+		    ip_router_alert = true;
 		    break;
 		}
 		if (option_len == 0)
@@ -1600,7 +1574,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		    if (currentlen == -1)
 			break;
 		    if (type == IP6OPT_ROUTER_ALERT) {
-			is_router_alert = true;
+			ip_router_alert = true;
 			break;
 		    }
 		}
@@ -1616,7 +1590,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		uint8_t *tptr = NULL;
 		while (inet6_option_next(cmsgp, &tptr) == 0) {
 		    if (*tptr == IP6OPT_ROUTER_ALERT) {
-			is_router_alert = true;
+			ip_router_alert = true;
 			break;
 		    }
 		}
@@ -1627,6 +1601,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 
 #ifdef IPV6_TCLASS
 	    case IPV6_TCLASS:
+	    {
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
 		int_val = extract_host_int(CMSG_DATA(cmsgp));
@@ -1636,8 +1611,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		// TODO: XXX: Here we need to compute ip_internet_control
 		// for IPv6, but we don't know how.
 		//
-
-		break;
+	    }
+	    break;
 #endif // IPV6_TCLASS
 
 #ifdef IPV6_RTHDR
@@ -1701,7 +1676,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     if (ip_ttl < 0) {
 	// TODO: what about ip_ttl = 0? Is it OK?
 	XLOG_ERROR("proto_socket_read() failed: "
-		   "invalid TTL (hop-limit) from %s to %s: %d",
+		   "invalid Hop-Limit (TTL) from %s to %s: %d",
 		   cstring(src_address), cstring(dst_address), ip_ttl);
 	return;			// Error
     }
@@ -1729,8 +1704,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     // XXX: note that in case of IPv4 (except Linux?) we may be able
     // only to "guess" by using the sender or the destination address.
     //
-    const IfTreeInterface* iftree_if = NULL;
-    const IfTreeVif* iftree_vif = NULL;
+    const IfTreeInterface* ifp = NULL;
+    const IfTreeVif* vifp = NULL;
     do {
 	//
 	// Find interface and vif based on src address, if a directly
@@ -1739,27 +1714,26 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// However, check first whether we can use 'pif_index' instead.
 	//
 	if (pif_index != 0) {
-	    find_interface_vif_by_pif_index(pif_index, iftree_if, iftree_vif);
+	    find_interface_vif_by_pif_index(pif_index, ifp, vifp);
 	    break;
 	}
 	
 	if (dst_address.is_multicast()) {
-	    find_interface_vif_same_subnet_or_p2p(src_address, iftree_if,
-						  iftree_vif);
+	    find_interface_vif_same_subnet_or_p2p(src_address, ifp, vifp);
 	} else {
-	    find_interface_vif_by_addr(dst_address, iftree_if, iftree_vif);
+	    find_interface_vif_by_addr(dst_address, ifp, vifp);
 	}
 	break;
     } while (false);
     
-    if ((iftree_if == NULL) || (iftree_vif == NULL)) {
+    if ((ifp == NULL) || (vifp == NULL)) {
 	// No vif found. Ignore this packet.
 	XLOG_WARNING("proto_socket_read() failed: "
 		     "RX packet from %s to %s: no vif found",
 		     cstring(src_address), cstring(dst_address));
 	return;			// Error
     }
-    if (! (iftree_if->enabled() || iftree_vif->enabled())) {
+    if (! (ifp->enabled() || vifp->enabled())) {
 	// This vif is down. Silently ignore this packet.
 	return;			// Error
     }
@@ -1767,10 +1741,11 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     // Process the result
     vector<uint8_t> payload(nbytes - ip_hdr_len);
     memcpy(&payload[0], _rcvbuf + ip_hdr_len, nbytes - ip_hdr_len);
-    process_recv_data(iftree_if->ifname(),
-		      iftree_vif->vifname(),
-		      src_address, dst_address, ip_ttl, ip_tos,
-		      is_router_alert,
+    process_recv_data(ifp->ifname(),
+		      vifp->vifname(),
+		      src_address, dst_address,
+		      ip_ttl, ip_tos,
+		      ip_router_alert,
 		      ip_internet_control,
 		      ext_headers_type,
 		      ext_headers_payload,
@@ -1786,7 +1761,7 @@ RawSocket::proto_socket_write(const string& if_name,
 			      const IPvX& dst_address,
 			      int32_t ip_ttl,
 			      int32_t ip_tos,
-			      bool is_router_alert,
+			      bool ip_router_alert,
 			      bool ip_internet_control,
 			      const vector<uint8_t>& ext_headers_type,
 			      const vector<vector<uint8_t> >& ext_headers_payload,
@@ -1796,8 +1771,8 @@ RawSocket::proto_socket_write(const string& if_name,
     size_t	ip_hdr_len = 0;
     int		int_val;
     int		ret_value = XORP_OK;
-    const IfTreeInterface* iftree_if = NULL;
-    const IfTreeVif* iftree_vif = NULL;
+    const IfTreeInterface* ifp = NULL;
+    const IfTreeVif* vifp = NULL;
     void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
@@ -1805,26 +1780,26 @@ RawSocket::proto_socket_write(const string& if_name,
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
-    find_interface_vif_by_name(if_name, vif_name, iftree_if, iftree_vif);
+    find_interface_vif_by_name(if_name, vif_name, ifp, vifp);
     
-    if (iftree_if == NULL) {
+    if (ifp == NULL) {
 	error_msg = c_format("No interface %s", if_name.c_str());
 	return (XORP_ERROR);
     }	
-    if (iftree_vif == NULL) {
+    if (vifp == NULL) {
 	error_msg = c_format("No interface %s vif %s",
 			     if_name.c_str(), vif_name.c_str());
 	return (XORP_ERROR);
     }
-    if (! iftree_if->enabled()) {
+    if (! ifp->enabled()) {
 	error_msg = c_format("Interface %s is down",
-			     iftree_if->ifname().c_str());
+			     ifp->ifname().c_str());
 	return (XORP_ERROR);
     }
-    if (! iftree_vif->enabled()) {
+    if (! vifp->enabled()) {
 	error_msg = c_format("Interface %s vif %s is down",
-			     iftree_if->ifname().c_str(),
-			     iftree_vif->vifname().c_str());
+			     ifp->ifname().c_str(),
+			     vifp->vifname().c_str());
 	return (XORP_ERROR);
     }
 
@@ -1942,13 +1917,13 @@ RawSocket::proto_socket_write(const string& if_name,
 #endif
 	    // Calculate the final packet size and whether it fits in the MTU
 	    ip_hdr_len = IpHeader4::SIZE;
-	    if (is_router_alert)
+	    if (ip_router_alert)
 		ip_hdr_len += sizeof(ra_opt4);
 
-	    if (ip_hdr_len + payload.size() <= iftree_if->mtu())
+	    if (ip_hdr_len + payload.size() <= ifp->mtu())
 		break;
 
-	    if (iftree_vif->find_addr(src_address.get_ipv4()) != NULL) {
+	    if (vifp->find_addr(src_address.get_ipv4()) != NULL) {
 		do_ip_hdr_include = false;
 		break;
 	    }
@@ -1974,7 +1949,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	    // Include the Router Alert option
 	    //
 #ifdef IP_OPTIONS
-	    if (is_router_alert) {
+	    if (ip_router_alert) {
 		if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_OPTIONS,
 			       XORP_SOCKOPT_CAST(&ra_opt4),
 			       sizeof(ra_opt4))
@@ -2041,7 +2016,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	    _sndiov[0].iov_len = payload.size();
 
 	    // Transmit the packet
-	    ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+	    ret_value = proto_socket_transmit(ifp, vifp,
 					      src_address, dst_address,
 					      error_msg);
 	    break;
@@ -2051,7 +2026,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	// Set the IPv4 header
 	//
 	IpHeader4Writer ip4(_sndbuf);
-	if (is_router_alert) {
+	if (ip_router_alert) {
 	    // Include the Router Alert option
 	    uint8_t* ip_option_p = ip4.data() + ip4.size();
 	    //
@@ -2083,7 +2058,7 @@ RawSocket::proto_socket_write(const string& if_name,
 
 	if (! do_fragmentation) {
 	    // Transmit the packet
-	    ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+	    ret_value = proto_socket_transmit(ifp, vifp,
 					      src_address, dst_address,
 					      error_msg);
 	    break;
@@ -2100,7 +2075,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	if (_ip_id == 0)
 	    _ip_id++;
 	ip4.set_ip_id(_ip_id);
-	if (ip4.fragment(iftree_if->mtu(), fragments, false, error_msg)
+	if (ip4.fragment(ifp->mtu(), fragments, false, error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -2109,7 +2084,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	    vector<uint8_t>& ip_fragment = *iter;
 	    _sndiov[0].iov_len = ip_fragment.size();
 	    memcpy(_sndbuf, &ip_fragment[0], ip_fragment.size());
-	    ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+	    ret_value = proto_socket_transmit(ifp, vifp,
 					      src_address, dst_address,
 					      error_msg);
 	    if (ret_value != XORP_OK)
@@ -2137,7 +2112,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	// Space for IPV6_PKTINFO
 	ctllen = CMSG_SPACE(sizeof(struct in6_pktinfo));
 	
-	if (is_router_alert) {
+	if (ip_router_alert) {
 	    // Space for Router Alert option
 #ifdef HAVE_RFC3542
 	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1) {
@@ -2206,17 +2181,15 @@ RawSocket::proto_socket_write(const string& if_name,
 	cmsg_data = CMSG_DATA(cmsgp);
 	sndpktinfo = reinterpret_cast<struct in6_pktinfo *>(cmsg_data);
 	memset(sndpktinfo, 0, sizeof(*sndpktinfo));
-	if ((iftree_if->pif_index() > 0)
-	    && !(dst_address.is_unicast()
-		 && !dst_address.is_linklocal_unicast())) {
+	if (dst_address.is_unicast() && !dst_address.is_linklocal_unicast()) {
 	    //
 	    // XXX: don't set the outgoing interface index if we are
 	    // sending an unicast packet to a non-link local unicast address.
 	    // Otherwise, the sending may fail with EHOSTUNREACH error.
 	    //
-	    sndpktinfo->ipi6_ifindex = iftree_if->pif_index();
-	} else {
 	    sndpktinfo->ipi6_ifindex = 0;		// Let kernel fill in
+	} else {
+	    sndpktinfo->ipi6_ifindex = ifp->pif_index();
 	}
 	src_address.copy_out(sndpktinfo->ipi6_addr);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
@@ -2224,7 +2197,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	//
 	// Include the Router Alert option if needed
 	//
-	if (is_router_alert) {
+	if (ip_router_alert) {
 #ifdef HAVE_RFC3542
 	    int currentlen;
 	    void *hbhbuf, *optp = NULL;
@@ -2334,7 +2307,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	_sndiov[0].iov_len  = payload.size();
 
 	// Transmit the packet
-	ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+	ret_value = proto_socket_transmit(ifp, vifp,
 					  src_address, dst_address,
 					  error_msg);
     }
@@ -2351,8 +2324,8 @@ RawSocket::proto_socket_write(const string& if_name,
 }
 
 int
-RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
-				 const IfTreeVif*	iftree_vif,
+RawSocket::proto_socket_transmit(const IfTreeInterface* ifp,
+				 const IfTreeVif*	vifp,
 				 const IPvX&		src_address,
 				 const IPvX&		dst_address,
 				 string&		error_msg)
@@ -2378,8 +2351,8 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
     // Multicast-related setting
     //
     if (dst_address.is_multicast()) {
-	if (set_default_multicast_interface(iftree_if->ifname(),
-					    iftree_vif->vifname(),
+	if (set_default_multicast_interface(ifp->ifname(),
+					    vifp->vifname(),
 					    error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
@@ -2411,7 +2384,7 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	dst_address.copy_out(_to6);
-	system_adjust_sockaddr_in6_send(_to6, iftree_if->pif_index());
+	system_adjust_sockaddr_in6_send(_to6, ifp->pif_index());
 	_sndmh.msg_namelen  = sizeof(_to6);
 	break;
 #endif // HAVE_IPV6
@@ -2432,8 +2405,8 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
 				 XORP_UINT_CAST(_sndiov[0].iov_len),
 				 cstring(src_address),
 				 cstring(dst_address),
-				 iftree_if->ifname().c_str(),
-				 iftree_vif->vifname().c_str(),
+				 ifp->ifname().c_str(),
+				 vifp->vifname().c_str(),
 				 strerror(errno));
 	}
     }
@@ -2478,8 +2451,8 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
 			     XORP_UINT_CAST(_sndiov[0].iov_len),
 			     cstring(src_address),
 			     cstring(dst_address),
-			     iftree_if->ifname().c_str(),
-			     iftree_vif->vifname().c_str(),
+			     ifp->ifname().c_str(),
+			     vifp->vifname().c_str(),
 			     win_strerror(GetLastError()));
 	XLOG_ERROR("%s", error_msg.c_str());
     }
@@ -2499,21 +2472,21 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
 bool
 RawSocket::find_interface_vif_by_name(const string& if_name,
 				      const string& vif_name,
-				      const IfTreeInterface*& iftree_if,
-				      const IfTreeVif*& iftree_vif) const
+				      const IfTreeInterface*& ifp,
+				      const IfTreeVif*& vifp) const
 {
-    iftree_if = NULL;
-    iftree_vif = NULL;
+    ifp = NULL;
+    vifp = NULL;
 
     // Find the interface
-    iftree_if = _iftree.find_interface(if_name);
-    if (iftree_if == NULL)
+    ifp = _iftree.find_interface(if_name);
+    if (ifp == NULL)
 	return (false);
 
     // Find the vif
-    iftree_vif = iftree_if->find_vif(vif_name);
-    if (iftree_vif == NULL) {
-	iftree_if = NULL;
+    vifp = ifp->find_vif(vif_name);
+    if (vifp == NULL) {
+	ifp = NULL;
 	return (false);
     }
 
@@ -2523,21 +2496,21 @@ RawSocket::find_interface_vif_by_name(const string& if_name,
 
 bool
 RawSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
-					   const IfTreeInterface*& iftree_if,
-					   const IfTreeVif*& iftree_vif) const
+					   const IfTreeInterface*& ifp,
+					   const IfTreeVif*& vifp) const
 {
-    iftree_if = NULL;
-    iftree_vif = NULL;
+    ifp = NULL;
+    vifp = NULL;
 
     // Find the interface
-    iftree_if = _iftree.find_interface(pif_index);
-    if (iftree_if == NULL)
+    ifp = _iftree.find_interface(pif_index);
+    if (ifp == NULL)
 	return (false);
 
     // Find the vif
-    iftree_vif = iftree_if->find_vif(pif_index);
-    if (iftree_vif == NULL) {
-	iftree_if = NULL;
+    vifp = ifp->find_vif(pif_index);
+    if (vifp == NULL) {
+	ifp = NULL;
 	return (false);
     }
 
@@ -2546,18 +2519,17 @@ RawSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
 }
 
 bool
-RawSocket::find_interface_vif_same_subnet_or_p2p(
-    const IPvX& addr,
-    const IfTreeInterface*& iftree_if,
-    const IfTreeVif*& iftree_vif) const
+RawSocket::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
+						 const IfTreeInterface*& ifp,
+						 const IfTreeVif*& vifp) const
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
     IfTreeVif::IPv4Map::const_iterator ai4;
     IfTreeVif::IPv6Map::const_iterator ai6;
 
-    iftree_if = NULL;
-    iftree_vif = NULL;
+    ifp = NULL;
+    vifp = NULL;
 
     for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
@@ -2573,8 +2545,8 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 		    IPv4Net subnet(a4.addr(), a4.prefix_len());
 		    if (subnet.contains(addr4)) {
 			// Found a match
-			iftree_if = &fi;
-			iftree_vif = &fv;
+			ifp = &fi;
+			vifp = &fv;
 			return (true);
 		    }
 
@@ -2583,8 +2555,8 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 			continue;
 		    if ((a4.addr() == addr4) || (a4.endpoint() == addr4)) {
 			// Found a match
-			iftree_if = &fi;
-			iftree_vif = &fv;
+			ifp = &fi;
+			vifp = &fv;
 			return (true);
 		    }
 		}
@@ -2600,8 +2572,8 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 		    IPv6Net subnet(a6.addr(), a6.prefix_len());
 		    if (subnet.contains(addr6)) {
 			// Found a match
-			iftree_if = &fi;
-			iftree_vif = &fv;
+			ifp = &fi;
+			vifp = &fv;
 			return (true);
 		    }
 
@@ -2610,8 +2582,8 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 			continue;
 		    if ((a6.addr() == addr6) || (a6.endpoint() == addr6)) {
 			// Found a match
-			iftree_if = &fi;
-			iftree_vif = &fv;
+			ifp = &fi;
+			vifp = &fv;
 			return (true);
 		    }
 		}
@@ -2626,16 +2598,16 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(
 bool
 RawSocket::find_interface_vif_by_addr(
     const IPvX& addr,
-    const IfTreeInterface*& iftree_if,
-    const IfTreeVif*& iftree_vif) const
+    const IfTreeInterface*& ifp,
+    const IfTreeVif*& vifp) const
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
     IfTreeVif::IPv4Map::const_iterator ai4;
     IfTreeVif::IPv6Map::const_iterator ai6;
 
-    iftree_if = NULL;
-    iftree_vif = NULL;
+    ifp = NULL;
+    vifp = NULL;
 
     for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
 	const IfTreeInterface& fi = ii->second;
@@ -2649,8 +2621,8 @@ RawSocket::find_interface_vif_by_addr(
 
 		    if (a4.addr() == addr4) {
 			// Found a match
-			iftree_if = &fi;
-			iftree_vif = &fv;
+			ifp = &fi;
+			vifp = &fv;
 			return (true);
 		    }
 		}
@@ -2664,8 +2636,8 @@ RawSocket::find_interface_vif_by_addr(
 
 		    if (a6.addr() == addr6) {
 			// Found a match
-			iftree_if = &fi;
-			iftree_vif = &fv;
+			ifp = &fi;
+			vifp = &fv;
 			return (true);
 		    }
 		}

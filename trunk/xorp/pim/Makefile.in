@@ -72,6 +72,8 @@ xorp_pimsm4_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -91,6 +93,8 @@ xorp_pimsm6_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -273,6 +277,8 @@ LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \

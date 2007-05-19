@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.12 2007/02/16 22:46:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm4.cc,v 1.13 2007/04/14 08:59:52 pavlin Exp $"
 
 
 //
@@ -111,6 +111,7 @@ pim_main(const string& finder_hostname, uint16_t finder_port)
 			       finder_hostname,
 			       finder_port,
 			       "finder",
+			       xorp_module_name(AF_INET, XORP_MODULE_FEA),
 			       xorp_module_name(AF_INET, XORP_MODULE_MFEA),
 			       xorp_module_name(AF_INET, XORP_MODULE_RIB),
 			       xorp_module_name(AF_INET, XORP_MODULE_MLD6IGMP));

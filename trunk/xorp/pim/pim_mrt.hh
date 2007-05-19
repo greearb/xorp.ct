@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.19 2006/03/16 00:04:52 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.20 2007/02/16 22:46:48 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -130,17 +130,14 @@ public:
     // MFC-related methods
     //
     int signal_message_nocache_recv(const string& src_module_instance_name,
-				    xorp_module_id src_module_id,
 				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst);
     int signal_message_wrongvif_recv(const string& src_module_instance_name,
-				     xorp_module_id src_module_id,
 				     uint32_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst);
     int signal_message_wholepkt_recv(const string& src_module_instance_name,
-				     xorp_module_id src_module_id,
 				     uint32_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst,

@@ -63,7 +63,8 @@ xorp_igmp_LDADD = $(LDADD)
 xorp_igmp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -81,7 +82,8 @@ xorp_mld_LDADD = $(LDADD)
 xorp_mld_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
@@ -262,7 +264,8 @@ noinst_LTLIBRARIES = libmld6igmp.la
 LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la \
-	$(top_builddir)/xrl/interfaces/libmfeaxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \

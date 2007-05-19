@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.17 2007/02/16 22:45:49 pavlin Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.18 2007/05/08 19:23:14 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
@@ -33,7 +33,7 @@
  */
 class RawSocket4 : public RawSocket {
 public:
-    RawSocket4(EventLoop& eventloop, uint32_t ip_protocol,
+    RawSocket4(EventLoop& eventloop, uint8_t ip_protocol,
 	       const IfTree& iftree);
 
     virtual ~RawSocket4();
@@ -54,7 +54,7 @@ struct IPv4HeaderInfo {
     string	vif_name;
     IPv4	src_address;
     IPv4	dst_address;
-    uint32_t	ip_protocol;
+    uint8_t	ip_protocol;
     int32_t	ip_ttl;
     int32_t	ip_tos;
     bool	ip_router_alert;
