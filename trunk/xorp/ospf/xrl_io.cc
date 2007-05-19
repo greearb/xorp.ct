@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.43 2007/05/08 01:15:51 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.44 2007/05/08 19:23:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -48,7 +48,7 @@ XrlIO<A>::recv(const string& interface,
 	       const string& vif,
 	       A src,
 	       A dst,
-	       uint32_t ip_protocol,
+	       uint8_t ip_protocol,
 	       int32_t ip_ttl,
 	       int32_t ip_tos,
 	       bool ip_router_alert,
