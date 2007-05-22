@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.23 2007/05/19 01:52:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.24 2007/05/22 21:04:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -37,7 +37,6 @@ public:
 	  _ip_protocol(ip_protocol)
     {}
 
-    XrlRawSocket4Manager& manager()		{ return _rsm; }
     const string&	xrl_target_name() const { return _xrl_target_name; }
     uint8_t		ip_protocol() const	{ return _ip_protocol; }
 
@@ -110,30 +109,8 @@ public:
 	    return;
 	}
 
-	//
-	// Instantiate client sending interface
-	//
-	XrlRawPacket4ClientV0p1Client cl(&_rsm.router());
-
-	//
-	// Send notification, note callback goes to owning
-	// XrlRawSocket4Manager instance since send failure to xrl_target
-	// is useful for reaping all filters to connected to target.
-	//
-	cl.send_recv(_xrl_target_name.c_str(),
-		     header.if_name,
-		     header.vif_name,
-		     header.src_address,
-		     header.dst_address,
-		     header.ip_protocol,
-		     header.ip_ttl,
-		     header.ip_tos,
-		     header.ip_router_alert,
-		     header.ip_internet_control,
-		     payload,
-		     callback(&_rsm,
-			      &XrlRawSocket4Manager::xrl_send_recv_cb,
-			      _xrl_target_name));
+	// Forward the packet
+	_rsm.recv_and_forward(_xrl_target_name, header, payload);
     }
 
     void bye() {}
@@ -198,8 +175,8 @@ protected:
 
 XrlRawSocket4Manager::XrlRawSocket4Manager(EventLoop&		eventloop,
 					   const IfTree&	iftree,
-					   XrlRouter&		xr)
-    : _eventloop(eventloop), _iftree(iftree), _xrlrouter(xr)
+					   XrlRouter&		xrl_router)
+    : _eventloop(eventloop), _iftree(iftree), _xrl_router(xrl_router)
 {
 }
 
@@ -377,7 +354,7 @@ XrlRawSocket4Manager::unregister_receiver(const string&	xrl_target_name,
 	    // this protocol socket (and hence no filters), remove it
 	    // from the table and delete it.
 	    //
-	    if (rs->empty()) {
+	    if (rs->no_input_filters()) {
 		_sockets.erase(ip_protocol);
 		delete rs;
 	    }
@@ -479,13 +456,42 @@ XrlRawSocket4Manager::leave_multicast_group(const string& xrl_target_name,
 }
 
 void
-XrlRawSocket4Manager::xrl_send_recv_cb(const XrlError& e,
+XrlRawSocket4Manager::recv_and_forward(const string& xrl_target_name,
+				       const struct IPv4HeaderInfo& header,
+				       const vector<uint8_t>& payload)
+{
+    //
+    // Instantiate client sending interface
+    //
+    XrlRawPacket4ClientV0p1Client cl(&xrl_router());
+
+    //
+    // Send notification
+    //
+    cl.send_recv(xrl_target_name.c_str(),
+		 header.if_name,
+		 header.vif_name,
+		 header.src_address,
+		 header.dst_address,
+		 header.ip_protocol,
+		 header.ip_ttl,
+		 header.ip_tos,
+		 header.ip_router_alert,
+		 header.ip_internet_control,
+		 payload,
+		 callback(this,
+			  &XrlRawSocket4Manager::xrl_send_recv_cb,
+			  xrl_target_name));
+}
+
+void
+XrlRawSocket4Manager::xrl_send_recv_cb(const XrlError& xrl_error,
 				       string xrl_target_name)
 {
-    if (e == XrlError::OKAY())
+    if (xrl_error == XrlError::OKAY())
 	return;
 
-    debug_msg("xrl_send_recv_cb: error %s\n", e.str().c_str());
+    debug_msg("xrl_send_recv_cb: error %s\n", xrl_error.str().c_str());
 
     //
     // Sending Xrl generated an error.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.16 2007/05/19 01:52:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.17 2007/05/22 21:04:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -37,7 +37,6 @@ public:
 	  _ip_protocol(ip_protocol)
     {}
 
-    XrlRawSocket6Manager& manager()		{ return _rsm; }
     const string&	xrl_target_name() const	{ return _xrl_target_name; }
     uint8_t		ip_protocol() const	{ return _ip_protocol; }
 
@@ -110,44 +109,8 @@ public:
 	    return;
 	}
 
-	//
-	// Create the extention headers info
-	//
-	XLOG_ASSERT(header.ext_headers_type.size()
-		    == header.ext_headers_payload.size());
-	XrlAtomList ext_headers_type_list, ext_headers_payload_list;
-	size_t i;
-	for (i = 0; i < header.ext_headers_type.size(); i++) {
-	    ext_headers_type_list.append(XrlAtom(static_cast<uint32_t>(header.ext_headers_type[i])));
-	    ext_headers_payload_list.append(XrlAtom(header.ext_headers_payload[i]));
-	}
-
-	//
-	// Instantiate client sending interface
-	//
-	XrlRawPacket6ClientV0p1Client cl(&_rsm.router());
-
-	//
-	// Send notification, note callback goes to owning
-	// XrlRawSocket6Manager instance since send failure to xrl_target
-	// is useful for reaping all filters to connected to target.
-	//
-	cl.send_recv(_xrl_target_name.c_str(),
-		     header.if_name,
-		     header.vif_name,
-		     header.src_address,
-		     header.dst_address,
-		     header.ip_protocol,
-		     header.ip_ttl,
-		     header.ip_tos,
-		     header.ip_router_alert,
-		     header.ip_internet_control,
-		     ext_headers_type_list,
-		     ext_headers_payload_list,
-		     payload,
-		     callback(&_rsm,
-			      &XrlRawSocket6Manager::xrl_send_recv_cb,
-			      _xrl_target_name));
+	// Forward the packet
+	_rsm.recv_and_forward(_xrl_target_name, header, payload);
     }
 
     void bye() {}
@@ -212,8 +175,8 @@ protected:
 
 XrlRawSocket6Manager::XrlRawSocket6Manager(EventLoop&		eventloop,
 					   const IfTree&	iftree,
-					   XrlRouter&		xr)
-    : _eventloop(eventloop), _iftree(iftree), _xrlrouter(xr)
+					   XrlRouter&		xrl_router)
+    : _eventloop(eventloop), _iftree(iftree), _xrl_router(xrl_router)
 {
 }
 
@@ -395,7 +358,7 @@ XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
 	    // this protocol socket (and hence no filters), remove it
 	    // from the table and delete it.
 	    //
-	    if (rs->empty()) {
+	    if (rs->no_input_filters()) {
 		_sockets.erase(ip_protocol);
 		delete rs;
 	    }
@@ -497,13 +460,56 @@ XrlRawSocket6Manager::leave_multicast_group(const string& xrl_target_name,
 }
 
 void
-XrlRawSocket6Manager::xrl_send_recv_cb(const XrlError& e,
+XrlRawSocket6Manager::recv_and_forward(const string& xrl_target_name,
+				       const struct IPv6HeaderInfo& header,
+				       const vector<uint8_t>& payload)
+{
+    //
+    // Create the extention headers info
+    //
+    XLOG_ASSERT(header.ext_headers_type.size()
+		== header.ext_headers_payload.size());
+    XrlAtomList ext_headers_type_list, ext_headers_payload_list;
+    size_t i;
+    for (i = 0; i < header.ext_headers_type.size(); i++) {
+	ext_headers_type_list.append(XrlAtom(static_cast<uint32_t>(header.ext_headers_type[i])));
+	ext_headers_payload_list.append(XrlAtom(header.ext_headers_payload[i]));
+    }
+
+    //
+    // Instantiate client sending interface
+    //
+    XrlRawPacket6ClientV0p1Client cl(&xrl_router());
+
+    //
+    // Send notification
+    //
+    cl.send_recv(xrl_target_name.c_str(),
+		 header.if_name,
+		 header.vif_name,
+		 header.src_address,
+		 header.dst_address,
+		 header.ip_protocol,
+		 header.ip_ttl,
+		 header.ip_tos,
+		 header.ip_router_alert,
+		 header.ip_internet_control,
+		 ext_headers_type_list,
+		 ext_headers_payload_list,
+		 payload,
+		 callback(this,
+			  &XrlRawSocket6Manager::xrl_send_recv_cb,
+			  xrl_target_name));
+}
+
+void
+XrlRawSocket6Manager::xrl_send_recv_cb(const XrlError& xrl_error,
 				       string xrl_target_name)
 {
-    if (e == XrlError::OKAY())
+    if (xrl_error == XrlError::OKAY())
 	return;
 
-    debug_msg("xrl_send_recv_cb: error %s\n", e.str().c_str());
+    debug_msg("xrl_send_recv_cb: error %s\n", xrl_error.str().c_str());
 
     //
     // Sending Xrl generated an error.

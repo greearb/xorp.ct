@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.18 2007/05/08 19:23:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.19 2007/05/19 01:52:41 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,23 +42,23 @@ RawSocket6::~RawSocket6()
 /* ------------------------------------------------------------------------- */
 /* FilterRawSocket6 methods */
 
-FilterRawSocket6::FilterRawSocket6(EventLoop& eventloop, uint32_t protocol,
+FilterRawSocket6::FilterRawSocket6(EventLoop& eventloop, uint8_t ip_protocol,
 				   const IfTree& iftree)
-    : RawSocket6(eventloop, protocol, iftree)
+    : RawSocket6(eventloop, ip_protocol, iftree)
 {
 }
 
 FilterRawSocket6::~FilterRawSocket6()
 {
-    if (_filters.empty() == false) {
+    if (_input_filters.empty() == false) {
 	string dummy_error_msg;
 	RawSocket6::stop(dummy_error_msg);
 
 	do {
-	    InputFilter* i = _filters.front();
-	    _filters.erase(_filters.begin());
+	    InputFilter* i = _input_filters.front();
+	    _input_filters.erase(_input_filters.begin());
 	    i->bye();
-	} while (_filters.empty() == false);
+	} while (_input_filters.empty() == false);
     }
 }
 
@@ -70,13 +70,14 @@ FilterRawSocket6::add_filter(InputFilter* filter)
 	return false;
     }
 
-    if (find(_filters.begin(), _filters.end(), filter) != _filters.end()) {
+    if (find(_input_filters.begin(), _input_filters.end(), filter)
+	!= _input_filters.end()) {
 	debug_msg("filter already exists\n");
 	return false;
     }
 
-    _filters.push_back(filter);
-    if (_filters.front() == filter) {
+    _input_filters.push_back(filter);
+    if (_input_filters.front() == filter) {
 	string error_msg;
 	if (RawSocket6::start(error_msg) != XORP_OK) {
 	    XLOG_ERROR("%s", error_msg.c_str());
@@ -90,14 +91,14 @@ bool
 FilterRawSocket6::remove_filter(InputFilter* filter)
 {
     list<InputFilter*>::iterator i;
-    i = find(_filters.begin(), _filters.end(), filter);
-    if (i == _filters.end()) {
+    i = find(_input_filters.begin(), _input_filters.end(), filter);
+    if (i == _input_filters.end()) {
 	debug_msg("filter does not exist\n");
 	return false;
     }
 
-    _filters.erase(i);
-    if (_filters.empty()) {
+    _input_filters.erase(i);
+    if (_input_filters.empty()) {
 	string error_msg;
 	if (RawSocket6::stop(error_msg) != XORP_OK) {
 	    XLOG_ERROR("%s", error_msg.c_str());
@@ -165,8 +166,8 @@ FilterRawSocket6::process_recv_data(const string&	if_name,
     header.ext_headers_type = ext_headers_type;
     header.ext_headers_payload = ext_headers_payload;
 
-    for (list<InputFilter*>::iterator i = _filters.begin();
-	 i != _filters.end(); ++i) {
+    for (list<InputFilter*>::iterator i = _input_filters.begin();
+	 i != _input_filters.end(); ++i) {
 	(*i)->recv(header, payload);
     }
 }

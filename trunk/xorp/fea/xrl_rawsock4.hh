@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.14 2007/05/19 01:52:42 pavlin Exp $
+// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.15 2007/05/22 21:04:59 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK4_HH__
 #define __FEA_XRL_RAWSOCK4_HH__
 
 #include <map>
-#include "libxorp/ref_ptr.hh"
+
 #include "libxipc/xrl_router.hh"
 
 #include "rawsock4.hh"
@@ -44,7 +44,7 @@ public:
      * Constructor for XrlRawSocket4Manager instances.
      */
     XrlRawSocket4Manager(EventLoop& eventloop, const IfTree& iftree,
-			 XrlRouter& xr);
+			 XrlRouter& xrl_router);
 
     ~XrlRawSocket4Manager();
 
@@ -166,18 +166,30 @@ public:
 			      const IPv4&	group_address,
 			      string&		error_msg);
 
-    XrlRouter&		router() { return _xrlrouter; }
+    /**
+     * Received an IPv4 packet on a raw socket and forward it to the
+     * recipient.
+     *
+     * @param xrl_target_name the XRL target name to send the IP packet to.
+     * @param header the IPv4 header information.
+     * @param payload the payload, everything after the IP header and options.
+     */
+    void recv_and_forward(const string&			xrl_target_name,
+			  const struct IPv4HeaderInfo&	header,
+			  const vector<uint8_t>&	payload);
+
+    XrlRouter&		xrl_router() { return _xrl_router; }
     const IfTree&	iftree() const { return _iftree; }
 
     /**
      * Method to be called by Xrl sending filter invoker
      */
-    void xrl_send_recv_cb(const XrlError& e, string xrl_target_name);
+    void xrl_send_recv_cb(const XrlError& xrl_error, string xrl_target_name);
 
 protected:
     EventLoop&		_eventloop;
     const IfTree&	_iftree;
-    XrlRouter&		_xrlrouter;
+    XrlRouter&		_xrl_router;
 
     // Collection of IPv4 raw sockets keyed by protocol
     typedef map<uint8_t, FilterRawSocket4*> SocketTable4;

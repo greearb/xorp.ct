@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.17 2007/05/08 19:23:14 pavlin Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.18 2007/05/19 01:52:41 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -165,7 +165,7 @@ public:
     };
 
 public:
-    FilterRawSocket6(EventLoop& eventloop, uint32_t protocol,
+    FilterRawSocket6(EventLoop& eventloop, uint8_t ip_protocol,
 		     const IfTree& iftree);
     ~FilterRawSocket6();
 
@@ -185,7 +185,7 @@ public:
     /**
      * @return true if there are no filters associated with this instance.
      */
-    bool empty() const { return _filters.empty(); }
+    bool no_input_filters() const { return _input_filters.empty(); }
 
     /**
      * Send a packet on a raw socket.
@@ -277,7 +277,7 @@ private:
     FilterRawSocket6& operator=(const FilterRawSocket6&); // Not implemented.
 
 protected:
-    list<InputFilter*>		_filters;
+    list<InputFilter*>		_input_filters;
     typedef map<JoinedMulticastGroup, JoinedMulticastGroup> JoinedGroupsTable;
     JoinedGroupsTable		_joined_groups_table;
 };
