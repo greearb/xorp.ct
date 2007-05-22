@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.13 2007/05/08 19:23:15 pavlin Exp $
+// $XORP: xorp/fea/xrl_rawsock4.hh,v 1.14 2007/05/19 01:52:42 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK4_HH__
 #define __FEA_XRL_RAWSOCK4_HH__
@@ -68,18 +68,20 @@ public:
      * the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
      * @param payload the payload, everything after the IP header and options.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    XrlCmdError send(
-	const string&	if_name,
-	const string&	vif_name,
-	const IPv4&	src_address,
-	const IPv4&	dst_address,
-	uint8_t		ip_protocol,
-	int32_t		ip_ttl,
-	int32_t		ip_tos,
-	bool		ip_router_alert,
-	bool		ip_internet_control,
-	const vector<uint8_t>&	payload);
+    int send(const string&	if_name,
+	     const string&	vif_name,
+	     const IPv4&	src_address,
+	     const IPv4&	dst_address,
+	     uint8_t		ip_protocol,
+	     int32_t		ip_ttl,
+	     int32_t		ip_tos,
+	     bool		ip_router_alert,
+	     bool		ip_internet_control,
+	     const vector<uint8_t>&	payload,
+	     string&		error_msg);
 
     /**
      * Register to receive IPv4 packets. The receiver is expected to support
@@ -91,17 +93,18 @@ public:
      * @param ip_protocol the IP protocol number that the receiver is
      * interested in. It must be between 0 and 255. A protocol number of 0 is
      * used to specify all protocols.
-     *
-     *  @param enable_multicast_loopback if true then enable delivering of
-     *  multicast datagrams back to this host (assuming the host is a member of
-     *  the same multicast group.
+     * @param enable_multicast_loopback if true then enable delivering of
+     * multicast datagrams back to this host (assuming the host is a member of
+     * the same multicast group.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    XrlCmdError register_receiver(
-	const string&	xrl_target_name,
-	const string&	if_name,
-	const string&	vif_name,
-	uint8_t		ip_protocol,
-	bool		enable_multicast_loopback);
+    int register_receiver(const string&	xrl_target_name,
+			  const string&	if_name,
+			  const string&	vif_name,
+			  uint8_t	ip_protocol,
+			  bool		enable_multicast_loopback,
+			  string&	error_msg);
 
     /**
      * Unregister to receive IPv4 packets.
@@ -113,12 +116,14 @@ public:
      * @param ip_protocol the IP Protocol number that the receiver is not
      * interested in anymore. It must be between 0 and 255. A protocol number
      * of 0 is used to specify all protocols.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    XrlCmdError unregister_receiver(
-	const string&	xrl_target_name,
-	const string&	if_name,
-	const string&	vif_name,
-	uint8_t		ip_protocol);
+    int unregister_receiver(const string&	xrl_target_name,
+			    const string&	if_name,
+			    const string&	vif_name,
+			    uint8_t		ip_protocol,
+			    string&		error_msg);
 
     /**
      * Join an IPv4 multicast group.
@@ -130,13 +135,15 @@ public:
      * interested in. It must be between 0 and 255. A protocol number of 0 is
      * used to specify all protocols.
      * @param group_address the multicast group address to join.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    XrlCmdError join_multicast_group(
-	const string&	xrl_target_name,
-	const string&	if_name,
-	const string&	vif_name,
-	uint8_t		ip_protocol,
-	const IPv4&	group_address);
+    int join_multicast_group(const string&	xrl_target_name,
+			     const string&	if_name,
+			     const string&	vif_name,
+			     uint8_t		ip_protocol,
+			     const IPv4&	group_address,
+			     string&		error_msg);
 
     /**
      * Leave an IPv4 multicast group.
@@ -149,13 +156,15 @@ public:
      * interested in anymore. It must be between 0 and 255. A protocol number
      * of 0 is used to specify all protocols.
      * @param group_address the multicast group address to leave.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    XrlCmdError leave_multicast_group(
-	const string&	xrl_target_name,
-	const string&	if_name,
-	const string&	vif_name,
-	uint8_t		ip_protocol,
-	const IPv4&	group_address);
+    int leave_multicast_group(const string&	xrl_target_name,
+			      const string&	if_name,
+			      const string&	vif_name,
+			      uint8_t		ip_protocol,
+			      const IPv4&	group_address,
+			      string&		error_msg);
 
     XrlRouter&		router() { return _xrlrouter; }
     const IfTree&	iftree() const { return _iftree; }

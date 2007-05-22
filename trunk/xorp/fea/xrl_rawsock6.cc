@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.15 2007/05/08 19:23:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.16 2007/05/19 01:52:42 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -242,7 +242,7 @@ XrlRawSocket6Manager::erase_filters(const FilterBag6::iterator& begin,
     }
 }
 
-XrlCmdError
+int
 XrlRawSocket6Manager::send(const string&	if_name,
 			   const string&	vif_name,
 			   const IPv6&		src_address,
@@ -254,16 +254,15 @@ XrlRawSocket6Manager::send(const string&	if_name,
 			   bool			ip_internet_control,
 			   const vector<uint8_t>& ext_headers_type,
 			   const vector<vector<uint8_t> >& ext_headers_payload,
-			   const vector<uint8_t>& payload)
+			   const vector<uint8_t>& payload,
+			   string&		error_msg)
 {
-    string error_msg;
-
     // Find the socket associated with this protocol
     SocketTable6::iterator sti = _sockets.find(ip_protocol);
     if (sti == _sockets.end()) {
 	error_msg = c_format("Protocol %u is not registered",
 			     XORP_UINT_CAST(ip_protocol));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
+	return (XORP_ERROR);
     }
     FilterRawSocket6* rs = sti->second;
     XLOG_ASSERT(rs != NULL);
@@ -281,20 +280,23 @@ XrlRawSocket6Manager::send(const string&	if_name,
 			       payload,
 			       error_msg)
 	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
+	return (XORP_ERROR);
     }
 
-    return XrlCmdError::OKAY();
+    return (XORP_OK);
 }
 
-XrlCmdError
+int
 XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
 					const string&	if_name,
 					const string&	vif_name,
 					uint8_t		ip_protocol,
-					bool		enable_multicast_loopback)
+					bool		enable_multicast_loopback,
+					string&		error_msg)
 {
     XrlVifInputFilter6* filter;
+
+    error_msg = "";
 
     //
     // Look in the SocketTable for a socket matching this protocol.
@@ -325,7 +327,7 @@ XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
 	    (filter->vif_name() == vif_name)) {
 	    // Already have this filter
 	    filter->set_enable_multicast_loopback(enable_multicast_loopback);
-	    return XrlCmdError::OKAY();
+	    return (XORP_OK);
 	}
     }
 
@@ -342,17 +344,16 @@ XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
     // Add the filter to those associated with xrl_target_name
     _filters.insert(FilterBag6::value_type(xrl_target_name, filter));
 
-    return XrlCmdError::OKAY();
+    return (XORP_OK);
 }
 
-XrlCmdError
+int
 XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
 					  const string&	if_name,
 					  const string&	vif_name,
-					  uint8_t	ip_protocol)
+					  uint8_t	ip_protocol,
+					  string&	error_msg)
 {
-    string error_msg;
-
     //
     // Find the socket associated with this protocol
     //
@@ -360,7 +361,7 @@ XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
     if (sti == _sockets.end()) {
 	error_msg = c_format("Protocol %u is not registered",
 			     XORP_UINT_CAST(ip_protocol));
-	return XrlCmdError::COMMAND_FAILED(error_msg);
+	return (XORP_ERROR);
     }
     FilterRawSocket6* rs = sti->second;
     XLOG_ASSERT(rs != NULL);
@@ -399,7 +400,7 @@ XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
 		delete rs;
 	    }
 
-	    return XrlCmdError::OKAY();
+	    return (XORP_OK);
 	}
     }
 
@@ -408,18 +409,17 @@ XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
 			 xrl_target_name.c_str(),
 			 if_name.c_str(),
 			 vif_name.c_str());
-    return XrlCmdError::COMMAND_FAILED(error_msg);
+    return (XORP_ERROR);
 }
 
-XrlCmdError
+int
 XrlRawSocket6Manager::join_multicast_group(const string& xrl_target_name,
 					   const string& if_name,
 					   const string& vif_name,
 					   uint8_t	 ip_protocol,
-					   const IPv6&	 group_address)
+					   const IPv6&	 group_address,
+					   string&	 error_msg)
 {
-    string error_msg;
-
     //
     // Search if we have already the filter
     //
@@ -437,9 +437,9 @@ XrlRawSocket6Manager::join_multicast_group(const string& xrl_target_name,
 	    // Filter found
 	    if (filter->join_multicast_group(group_address, error_msg)
 		!= XORP_OK) {
-		return XrlCmdError::COMMAND_FAILED(error_msg);
+		return (XORP_ERROR);
 	    }
-	    return XrlCmdError::OKAY();
+	    return (XORP_OK);
 	}
     }
 
@@ -451,19 +451,17 @@ XrlRawSocket6Manager::join_multicast_group(const string& xrl_target_name,
 			 vif_name.c_str(),
 			 XORP_UINT_CAST(ip_protocol),
 			 xrl_target_name.c_str());
-
-    return XrlCmdError::COMMAND_FAILED(error_msg);
+    return (XORP_ERROR);
 }
 
-XrlCmdError
+int
 XrlRawSocket6Manager::leave_multicast_group(const string& xrl_target_name,
 					    const string& if_name,
 					    const string& vif_name,
 					    uint8_t	  ip_protocol,
-					    const IPv6&	  group_address)
+					    const IPv6&	  group_address,
+					    string&	  error_msg)
 {
-    string error_msg;
-
     //
     // Search if we have already the filter
     //
@@ -481,9 +479,9 @@ XrlRawSocket6Manager::leave_multicast_group(const string& xrl_target_name,
 	    // Filter found
 	    if (filter->leave_multicast_group(group_address, error_msg)
 		!= XORP_OK) {
-		return XrlCmdError::COMMAND_FAILED(error_msg);
+		return (XORP_ERROR);
 	    }
-	    return XrlCmdError::OKAY();
+	    return (XORP_OK);
 	}
     }
 
@@ -495,8 +493,7 @@ XrlRawSocket6Manager::leave_multicast_group(const string& xrl_target_name,
 			 vif_name.c_str(),
 			 XORP_UINT_CAST(ip_protocol),
 			 xrl_target_name.c_str());
-
-    return XrlCmdError::COMMAND_FAILED(error_msg);
+    return (XORP_ERROR);
 }
 
 void
