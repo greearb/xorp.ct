@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.90 2007/02/27 18:33:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.91 2007/03/12 10:16:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -606,7 +606,7 @@ template <typename A>
 bool
 Ospf<A>::originate_default_route(OspfTypes::AreaID area, bool enable)
 {
-    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     return _peer_manager.originate_default_route(area, enable);
 }
@@ -624,7 +624,7 @@ template <typename A>
 bool
 Ospf<A>::summaries(OspfTypes::AreaID area, bool enable)
 {
-    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     return _peer_manager.summaries(area, enable);
 }
@@ -641,7 +641,7 @@ bool
 Ospf<A>::area_range_add(OspfTypes::AreaID area, IPNet<A> net, bool advertise)
 {
     debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     return _peer_manager.area_range_add(area, net, advertise);
 }
@@ -661,7 +661,7 @@ Ospf<A>::area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
 				 bool advertise)
 {
     debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     return _peer_manager.area_range_change_state(area, net, advertise);
 }
@@ -709,14 +709,14 @@ Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
 		   const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, pb(equal),
-	      pb(discard), cstring(policytags));
+	      cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	      bool_c_str(discard), cstring(policytags));
 
     XLOG_TRACE(trace()._routes,
 	       "Add route "
 	       "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, pb(equal),
-	      pb(discard), cstring(policytags));
+	       cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	       bool_c_str(discard), cstring(policytags));
 
     return _io->add_route(net, nexthop, nexthop_id, metric, equal, discard,
 			  policytags);
@@ -729,14 +729,14 @@ Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
 		       const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, pb(equal),
-	      pb(discard), cstring(policytags));
+	      cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	      bool_c_str(discard), cstring(policytags));
 
     XLOG_TRACE(trace()._routes,
 	       "Replace route "
 	       "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, pb(equal),
-	      pb(discard), cstring(policytags));
+	       cstring(net), cstring(nexthop), metric, bool_c_str(equal),
+	       bool_c_str(discard), cstring(policytags));
 
     return _io->replace_route(net, nexthop, nexthop_id, metric, equal, discard,
 			      policytags);

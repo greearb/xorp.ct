@@ -13,7 +13,7 @@
  * legally binding. 
  */
 
-#ident "$XORP: xorp/libxorp/utility.c,v 1.7 2006/10/12 01:24:56 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utility.c,v 1.8 2007/02/16 22:46:28 pavlin Exp $"
 
 
 /*
@@ -149,4 +149,16 @@ xorp_toupper(int c)
 	return toupper(c);
     else
 	return c;
+}
+
+/*
+ * Function to return C-string representation of a boolean: "true" of "false".
+ */
+const char *
+bool_c_str(int v)
+{
+    if (v)
+	return ("true");
+    else
+	return ("false");
 }

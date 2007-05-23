@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.26 2006/03/16 00:03:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.27 2007/02/16 22:45:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -194,7 +194,7 @@ NhLookupTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	new_msg_needs_queuing = true;
     }
 
-    debug_msg("need queuing %s\n", new_msg_needs_queuing ? "true" : "false");
+    debug_msg("need queuing %s\n", bool_c_str(new_msg_needs_queuing));
 
     const InternalMessage<A>* real_old_msg = &old_rtmsg;
     bool propagate_as_add = false;

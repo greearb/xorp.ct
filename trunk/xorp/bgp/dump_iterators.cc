@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.31 2006/03/16 00:03:28 pavlin Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.32 2007/02/16 22:45:11 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -57,7 +57,7 @@ string
 PeerDumpState<A>::str() const
 {
     return c_format("peer: %p routes_dumped: %s last_net: %s, genid: %d\n",
-		    _peer, _routes_dumped ? "true" : "false",
+		    _peer, bool_c_str(_routes_dumped),
 		    _last_net_before_down.str().c_str(),
 		    XORP_INT_CAST(_genid));
 

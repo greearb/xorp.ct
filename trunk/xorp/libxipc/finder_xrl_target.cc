@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.25 2007/02/16 22:46:06 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.26 2007/04/14 08:59:49 pavlin Exp $"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 #include "libxorp/random.h"
@@ -177,7 +178,7 @@ FinderXrlTarget::finder_0_2_set_finder_client_enabled(const string& tgt_name,
 						      const bool&   en)
 {
     finder_trace_init("set_finder_client_enabled(\"%s\", %s)",
-		      tgt_name.c_str(), (en) ? "true" : "false");
+		      tgt_name.c_str(), bool_c_str(en));
 
     if (_finder.active_messenger_represents_target(tgt_name)) {
 	_finder.set_target_enabled(tgt_name, en);

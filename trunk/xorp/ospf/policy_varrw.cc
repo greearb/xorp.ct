@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.11 2007/02/16 22:46:42 pavlin Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.12 2007/02/23 21:08:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -68,7 +68,7 @@ OspfVarRW<IPv4>::start_read()
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv4::id, _nexthop.str().c_str()));
     initialize(VAR_METRIC, _ef.create(ElemU32::id,
 				      c_format("%u", _metric).c_str()));
-    initialize(VAR_EBIT, _ef.create(ElemBool::id, pb(_e_bit)));
+    initialize(VAR_EBIT, _ef.create(ElemBool::id, bool_c_str(_e_bit)));
     initialize(VAR_TAG, _ef.create(ElemU32::id,
 				   c_format("%u", _tag).c_str()));
 }
@@ -83,7 +83,7 @@ OspfVarRW<IPv6>::start_read()
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv6::id, _nexthop.str().c_str()));
     initialize(VAR_METRIC, _ef.create(ElemU32::id,
 				      c_format("%u", _metric).c_str()));
-    initialize(VAR_EBIT, _ef.create(ElemBool::id, pb(_e_bit)));
+    initialize(VAR_EBIT, _ef.create(ElemBool::id, bool_c_str(_e_bit)));
     initialize(VAR_TAG, _ef.create(ElemU32::id,
 				   c_format("%u", _tag).c_str()));
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.42 2007/05/08 00:49:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.43 2007/05/08 22:16:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,14 +24,6 @@
 
 #include "iftree.hh"
 
-
-/* ------------------------------------------------------------------------- */
-/* Misc */
-
-static inline const char* true_false(bool b)
-{
-    return b ? "true" : "false";
-}
 
 /* ------------------------------------------------------------------------- */
 /* IfTreeItem code */
@@ -933,11 +925,11 @@ IfTreeInterface::str() const
 		    "{ mtu := %u } { mac := %s } {no_carrier = %s} "
 		    "{ flipped := %s } { flags := %u }",
 		    _ifname.c_str(),
-		    true_false(_enabled),
+		    bool_c_str(_enabled),
 		    XORP_UINT_CAST(_mtu),
 		    _mac.str().c_str(),
-		    true_false(_no_carrier),
-		    true_false(_flipped),
+		    bool_c_str(_no_carrier),
+		    bool_c_str(_flipped),
 		    XORP_UINT_CAST(_interface_flags))
 	+ string(" ")
 	+ IfTreeItem::str();
@@ -1092,7 +1084,7 @@ IfTreeVif::str() const
     //
     if (_pim_register) {
 	pim_register_str = c_format("{ pim_register := %s } ",
-				    true_false(_pim_register));
+				    bool_c_str(_pim_register));
     }
     // XXX: Conditionally print the vif_index, because it is rarely used
     if (_vif_index != Vif::VIF_INDEX_INVALID) {
@@ -1105,9 +1097,9 @@ IfTreeVif::str() const
     return c_format("VIF %s { enabled := %s } { broadcast := %s } "
 		    "{ loopback := %s } { point_to_point := %s } "
 		    "{ multicast := %s } ",
-		    _vifname.c_str(), true_false(_enabled),
-		    true_false(_broadcast), true_false(_loopback),
-		    true_false(_point_to_point), true_false(_multicast))
+		    _vifname.c_str(), bool_c_str(_enabled),
+		    bool_c_str(_broadcast), bool_c_str(_loopback),
+		    bool_c_str(_point_to_point), bool_c_str(_multicast))
 	+ vif_index_str + IfTreeItem::str();
 }
 
@@ -1168,9 +1160,9 @@ IfTreeAddr4::str() const
 			"{ loopback := %s } { point_to_point := %s } "
 			"{ multicast := %s } "
 			"{ prefix_len := %u }",
-			_addr.str().c_str(), true_false(_enabled),
-			true_false(_broadcast), true_false(_loopback),
-			true_false(_point_to_point), true_false(_multicast),
+			_addr.str().c_str(), bool_c_str(_enabled),
+			bool_c_str(_broadcast), bool_c_str(_loopback),
+			bool_c_str(_point_to_point), bool_c_str(_multicast),
 			XORP_UINT_CAST(_prefix_len));
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
@@ -1222,9 +1214,9 @@ IfTreeAddr6::str() const
 			"{ loopback := %s } { point_to_point := %s } "
 			"{ multicast := %s } "
 			"{ prefix_len := %u }",
-			_addr.str().c_str(), true_false(_enabled),
-			true_false(_loopback),
-			true_false(_point_to_point), true_false(_multicast),
+			_addr.str().c_str(), bool_c_str(_enabled),
+			bool_c_str(_loopback),
+			bool_c_str(_point_to_point), bool_c_str(_multicast),
 			XORP_UINT_CAST(_prefix_len));
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());

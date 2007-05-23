@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.8 2007/05/01 06:36:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.9 2007/05/08 00:49:03 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -342,7 +342,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	    ifp->set_interface_flags(flags);
 	    ifp->set_enabled(flags & IFF_UP);
 	}
-	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
+	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 	
 	// XXX: vifname == ifname on this platform
 	IfTreeVif* vifp = it.find_vif(if_name, if_name);
@@ -369,7 +369,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	    if (is_newlink || (no_carrier != ifp->no_carrier()))
 		ifp->set_no_carrier(no_carrier);
 	}
-	debug_msg("no_carrier: %s\n", ifp->no_carrier() ? "true" : "false");
+	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
 	
 	//
 	// Set the vif flags
@@ -381,12 +381,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	    vifp->set_point_to_point(flags & IFF_POINTOPOINT);
 	    vifp->set_multicast(flags & IFF_MULTICAST);
 	}
-	debug_msg("vif enabled: %s\n", vifp->enabled() ? "true" : "false");
-	debug_msg("vif broadcast: %s\n", vifp->broadcast() ? "true" : "false");
-	debug_msg("vif loopback: %s\n", vifp->loopback() ? "true" : "false");
-	debug_msg("vif point_to_point: %s\n", vifp->point_to_point() ? "true"
-		  : "false");
-	debug_msg("vif multicast: %s\n", vifp->multicast() ? "true" : "false");
+	debug_msg("vif enabled: %s\n", bool_c_str(vifp->enabled()));
+	debug_msg("vif broadcast: %s\n", bool_c_str(vifp->broadcast()));
+	debug_msg("vif loopback: %s\n", bool_c_str(vifp->loopback()));
+	debug_msg("vif point_to_point: %s\n", bool_c_str(vifp->point_to_point()));
+	debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
 	return;
     }
     
@@ -547,7 +546,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	ifp->set_interface_flags(flags);
 	ifp->set_enabled(flags & IFF_UP);
     }
-    debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
+    debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 
     //
     // Get the link status
@@ -560,7 +559,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	if (is_newlink || (no_carrier != ifp->no_carrier()))
 	    ifp->set_no_carrier(no_carrier);
     }
-    debug_msg("no_carrier: %s\n", ifp->no_carrier() ? "true" : "false");
+    debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
     
     // XXX: vifname == ifname on this platform
     if (is_newlink)
@@ -584,12 +583,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	vifp->set_point_to_point(flags & IFF_POINTOPOINT);
 	vifp->set_multicast(flags & IFF_MULTICAST);
     }
-    debug_msg("vif enabled: %s\n", vifp->enabled() ? "true" : "false");
-    debug_msg("vif broadcast: %s\n", vifp->broadcast() ? "true" : "false");
-    debug_msg("vif loopback: %s\n", vifp->loopback() ? "true" : "false");
-    debug_msg("vif point_to_point: %s\n", vifp->point_to_point() ? "true"
-	      : "false");
-    debug_msg("vif multicast: %s\n", vifp->multicast() ? "true" : "false");
+    debug_msg("vif enabled: %s\n", bool_c_str(vifp->enabled()));
+    debug_msg("vif broadcast: %s\n", bool_c_str(vifp->broadcast()));
+    debug_msg("vif loopback: %s\n", bool_c_str(vifp->loopback()));
+    debug_msg("vif point_to_point: %s\n", bool_c_str(vifp->point_to_point()));
+    debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
 }
 
 static void

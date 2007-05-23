@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.12 2006/03/29 22:41:24 atanu Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.13 2007/02/16 22:46:03 pavlin Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -47,8 +47,8 @@ RouteCmd<string>::str() const
     return c() + " node: " + _node + " nexthop: " + _nexthop +
 	" prevhop: " + _prevhop +
 	" weight: " + c_format("%d", _weight) + 
-	" next hop changed: " + (_next_hop_changed ? "true" : "false") +
-	" weight changed: " + (_weight_changed ? "true" : "false");
+	" next hop changed: " + bool_c_str(_next_hop_changed) +
+	" weight changed: " + bool_c_str(_weight_changed);
 
 }
 

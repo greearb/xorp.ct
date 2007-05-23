@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.25 2006/10/12 01:24:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.26 2007/02/16 22:46:10 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -482,8 +482,7 @@ XrlAtom::value() const
     case xrlatom_no_type:
 	break;
     case xrlatom_boolean:
-	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]),
-		 _boolean ? "true" : "false");
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), bool_c_str(_boolean));
 	return xrlatom_encode_value(tmp, strlen(tmp));
 	break;
     case xrlatom_int32:

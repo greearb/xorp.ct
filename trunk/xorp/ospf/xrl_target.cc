@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.54 2007/03/12 10:16:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.55 2007/05/08 19:23:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -340,8 +340,8 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
 					       const XrlAtomList& policytags)
 {
     debug_msg("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
-	      cstring(network), cstring(nexthop), pb(unicast), pb(multicast),
-	      metric);
+	      cstring(network), cstring(nexthop), bool_c_str(unicast),
+	      bool_c_str(multicast), metric);
 
     if (!unicast)
 	return XrlCmdError::OKAY();
@@ -362,8 +362,8 @@ XrlOspfV3Target::policy_redist6_0_1_add_route6(const IPv6Net& network,
 					       const XrlAtomList& policytags)
 {
     debug_msg("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
-	      cstring(network), cstring(nexthop), pb(unicast), pb(multicast),
-	      metric);
+	      cstring(network), cstring(nexthop), bool_c_str(unicast),
+	      bool_c_str(multicast), metric);
 
     if (!unicast)
 	return XrlCmdError::OKAY();
@@ -381,7 +381,7 @@ XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
 						  const bool& multicast)
 {
     debug_msg("Net: %s Unicast: %s Multicast %s\n",
-	      cstring(network), pb(unicast), pb(multicast));
+	      cstring(network), bool_c_str(unicast), bool_c_str(multicast));
 
     if (!unicast)
 	return XrlCmdError::OKAY();
@@ -399,7 +399,7 @@ XrlOspfV3Target::policy_redist6_0_1_delete_route6(const IPv6Net& network,
 						  const bool& multicast)
 {
     debug_msg("Net: %s Unicast: %s Multicast %s\n",
-	      cstring(network), pb(unicast), pb(multicast));
+	      cstring(network), bool_c_str(unicast), bool_c_str(multicast));
 
     if (!unicast)
 	return XrlCmdError::OKAY();
@@ -642,7 +642,7 @@ XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
 					   const bool& enable)
 {
     debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
-	      vifname.c_str(), pb(enable));
+	      vifname.c_str(), bool_c_str(enable));
 
     OspfTypes::PeerID peerid;
     try {
@@ -662,7 +662,7 @@ XrlOspfV3Target::ospfv3_0_1_set_peer_state(const string& ifname,
 					   const bool& enable)
 {
     debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
-	      vifname.c_str(), pb(enable));
+	      vifname.c_str(), bool_c_str(enable));
 
     OspfTypes::PeerID peerid;
     try {
@@ -725,7 +725,7 @@ XrlOspfV3Target::ospfv3_0_1_set_address_state_peer(const string& ifname,
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s address %s enable %s\n",
 	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
-	      cstring(addr), pb(enable));
+	      cstring(addr), bool_c_str(enable));
 
     OspfTypes::PeerID peerid;
     try {
@@ -1339,7 +1339,7 @@ XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s passive %s\n",
 	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
-	      pb(passive));
+	      bool_c_str(passive));
 
     if (!_ospf.set_passive(ifname, vifname, area, passive))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
@@ -1356,7 +1356,7 @@ XrlOspfV3Target::ospfv3_0_1_set_passive(const string& ifname,
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("interface %s vif %s area %s passive %s\n",
 	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
-	      pb(passive));
+	      bool_c_str(passive));
 
     if (!_ospf_ipv6.set_passive(ifname, vifname, area, passive))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
@@ -1369,7 +1369,7 @@ XrlOspfV2Target::ospfv2_0_1_originate_default_route(const IPv4&	a,
 						    const bool&	enable)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     if (!_ospf.originate_default_route(area, enable))
 	return XrlCmdError::
@@ -1383,7 +1383,7 @@ XrlOspfV3Target::ospfv3_0_1_originate_default_route(const IPv4&	a,
 						    const bool&	enable)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     if (!_ospf_ipv6.originate_default_route(area, enable))
 	return XrlCmdError::
@@ -1425,7 +1425,7 @@ XrlOspfV2Target::ospfv2_0_1_summaries(const IPv4& a,
 				      const bool& enable)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     if (!_ospf.summaries(area, enable))
 	return XrlCmdError::
@@ -1439,7 +1439,7 @@ XrlOspfV3Target::ospfv3_0_1_summaries(const IPv4& a,
 				      const bool& enable)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     if (!_ospf_ipv6.summaries(area, enable))
 	return XrlCmdError::
@@ -1455,14 +1455,14 @@ XrlOspfV2Target::ospfv2_0_1_area_range_add(const IPv4& a,
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     if (!_ospf.area_range_add(area, net, advertise))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to add area range "
 				    "area %s net %s advertise %s\n",
 				    pr_id(area).c_str(), cstring(net),
-				    pb(advertise)));
+				    bool_c_str(advertise)));
 
     return XrlCmdError::OKAY();
 }
@@ -1474,14 +1474,14 @@ XrlOspfV3Target::ospfv3_0_1_area_range_add(const IPv4& a,
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     if (!_ospf_ipv6.area_range_add(area, net, advertise))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to add area range "
 				    "area %s net %s advertise %s\n",
 				    pr_id(area).c_str(), cstring(net),
-				    pb(advertise)));
+				    bool_c_str(advertise)));
 
     return XrlCmdError::OKAY();
 }
@@ -1527,14 +1527,14 @@ XrlOspfV2Target::ospfv2_0_1_area_range_change_state(const IPv4& a,
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     if (!_ospf.area_range_change_state(area, net, advertise))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to change area range "
 				    "area %s net %s advertise %s\n",
 				    pr_id(area).c_str(), cstring(net),
-				    pb(advertise)));
+				    bool_c_str(advertise)));
 
     return XrlCmdError::OKAY();
 }
@@ -1546,14 +1546,14 @@ XrlOspfV3Target::ospfv3_0_1_area_range_change_state(const IPv4& a,
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     if (!_ospf_ipv6.area_range_change_state(area, net, advertise))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to change area range "
 				    "area %s net %s advertise %s\n",
 				    pr_id(area).c_str(), cstring(net),
-				    pb(advertise)));
+				    bool_c_str(advertise)));
 
     return XrlCmdError::OKAY();
 }
@@ -1561,7 +1561,8 @@ XrlOspfV3Target::ospfv3_0_1_area_range_change_state(const IPv4& a,
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_trace(const string&	tvar, const bool& enable)
 {
-    debug_msg("trace variable %s enable %s\n", tvar.c_str(), pb(enable));
+    debug_msg("trace variable %s enable %s\n", tvar.c_str(),
+	      bool_c_str(enable));
 
     if (tvar == "all") {
 	_ospf.trace().all(enable);
@@ -1576,7 +1577,8 @@ XrlOspfV2Target::ospfv2_0_1_trace(const string&	tvar, const bool& enable)
 XrlCmdError
 XrlOspfV3Target::ospfv3_0_1_trace(const string&	tvar, const bool& enable)
 {
-    debug_msg("trace variable %s enable %s\n", tvar.c_str(), pb(enable));
+    debug_msg("trace variable %s enable %s\n", tvar.c_str(),
+	      bool_c_str(enable));
 
     if (tvar == "all") {
 	_ospf_ipv6.trace().all(enable);
@@ -1603,7 +1605,8 @@ XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
 	return XrlCmdError::COMMAND_FAILED("Unable to get LSA");
 
     debug_msg("area %s index %u valid %s toohigh %s self %s\n",
-	      pr_id(area).c_str(), index, pb(valid), pb(toohigh), pb(self));
+	      pr_id(area).c_str(), index, bool_c_str(valid),
+	      bool_c_str(toohigh), bool_c_str(self));
 
     return XrlCmdError::OKAY();
 }
@@ -1623,7 +1626,8 @@ XrlOspfV3Target::XrlOspfV3Target::ospfv3_0_1_get_lsa(const IPv4& a,
 	return XrlCmdError::COMMAND_FAILED("Unable to get LSA");
 
     debug_msg("area %s index %u valid %s toohigh %s self %s\n",
-	      pr_id(area).c_str(), index, pb(valid), pb(toohigh), pb(self));
+	      pr_id(area).c_str(), index, bool_c_str(valid),
+	      bool_c_str(toohigh), bool_c_str(self));
 
     return XrlCmdError::OKAY();
 }

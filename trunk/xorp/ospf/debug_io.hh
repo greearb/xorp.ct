@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.22 2007/02/27 18:33:13 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.23 2007/03/12 10:16:03 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -277,8 +277,8 @@ class DebugIO : public IO<A> {
 	    " nexthop: " << nexthop.str() <<
 	    " nexthop_id: " << nexthop_id <<
 	    " metric: " << metric <<
-	    " equal: " << pb(equal) <<
-	    " discard: " << pb(discard) << 
+	    " equal: " << bool_c_str(equal) <<
+	    " discard: " << bool_c_str(discard) << 
 	    " policy: " << policytags.str() << endl;
 
 	XLOG_ASSERT(0 == _routing_table.count(net));
@@ -305,8 +305,8 @@ class DebugIO : public IO<A> {
 	    " nexthop: " << nexthop.str() <<
 	    " nexthop_id: " << nexthop_id <<
 	    " metric: " << metric <<
-	    " equal: " << pb(equal) <<
-	    " discard: " << pb(discard) <<
+	    " equal: " << bool_c_str(equal) <<
+	    " discard: " << bool_c_str(discard) <<
 	    " policy: " << policytags.str() << endl;
 
 	if (!delete_route(net))
@@ -349,8 +349,8 @@ class DebugIO : public IO<A> {
 	DOUT(_info) << "Net: " << net.str() <<
 	    " nexthop: " << nexthop.str() <<
 	    " metric: " << metric <<
-	    " equal: " << pb(equal) <<
-	    " discard: " << pb(discard) << endl;
+	    " equal: " << bool_c_str(equal) <<
+	    " discard: " << bool_c_str(discard) << endl;
 
 	if (0 == _routing_table.count(net)) {
 	    DOUT(_info) << "Net: " << net.str() << " not in table\n";
@@ -369,13 +369,13 @@ class DebugIO : public IO<A> {
 	    return false;
 	}
 	if (dre._equal != equal) {
-	    DOUT(_info) << "Equal mismatch: " << pb(equal) << " " <<
-		pb(dre._equal) << endl;
+	    DOUT(_info) << "Equal mismatch: " << bool_c_str(equal) << " " <<
+		bool_c_str(dre._equal) << endl;
 	    return false;
 	}
 	if (dre._discard != discard) {
-	    DOUT(_info) << "Discard mismatch: " << pb(discard) << " " <<
-		pb(dre._discard) << endl;
+	    DOUT(_info) << "Discard mismatch: " << bool_c_str(discard) << " " <<
+		bool_c_str(dre._discard) << endl;
 	    return false;
 	}
 

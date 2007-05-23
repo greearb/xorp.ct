@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.40 2006/03/16 00:04:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.41 2007/02/16 22:46:49 pavlin Exp $"
 
 
 //
@@ -1116,8 +1116,7 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
     }
     if (pim_mre->is_sg()) {
 	cli_print(c_format("    KAT(S,G) running:          %s\n",
-			   pim_mre->is_keepalive_timer_running()?
-			   "true" : "false"));
+			   bool_c_str(pim_mre->is_keepalive_timer_running())));
     }
     
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.5 2007/04/30 23:40:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.6 2007/05/01 01:42:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -181,8 +181,8 @@ IfConfigSetNetlinkSocket::config_interface(const string& ifname,
 	      "is_deleted = %s)\n",
 	      ifname.c_str(), if_index,
 	      XORP_UINT_CAST(flags),
-	      (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false");
+	      bool_c_str(is_up),
+	      bool_c_str(is_deleted));
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -214,12 +214,12 @@ IfConfigSetNetlinkSocket::config_vif(const string& ifname,
 	      "point_to_point = %s multicast = %s)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      XORP_UINT_CAST(flags),
-	      (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false",
-	      (broadcast)? "true" : "false",
-	      (loopback)? "true" : "false",
-	      (point_to_point)? "true" : "false",
-	      (multicast)? "true" : "false");
+	      bool_c_str(is_up),
+	      bool_c_str(is_deleted),
+	      bool_c_str(broadcast),
+	      bool_c_str(loopback),
+	      bool_c_str(point_to_point),
+	      bool_c_str(multicast));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -290,7 +290,7 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
-	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
+	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
 	      addr.str().c_str(), dst_or_bcast.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
 
@@ -408,8 +408,8 @@ IfConfigSetNetlinkSocket::config_interface(const string& ifname,
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
 	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false");
+	      ifname.c_str(), if_index, flags, bool_c_str(is_up),
+	      bool_c_str(is_deleted));
 
 #ifndef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
@@ -519,12 +519,12 @@ IfConfigSetNetlinkSocket::config_vif(const string& ifname,
 	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
 	      "point_to_point = %s multicast = %s)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, flags,
-	      (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false",
-	      (broadcast)? "true" : "false",
-	      (loopback)? "true" : "false",
-	      (point_to_point)? "true" : "false",
-	      (multicast)? "true" : "false");
+	      bool_c_str(is_up),
+	      bool_c_str(is_deleted),
+	      bool_c_str(broadcast),
+	      bool_c_str(loopback),
+	      bool_c_str(point_to_point),
+	      bool_c_str(multicast));
 
     // XXX: nothing to do
 
@@ -792,8 +792,8 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
-	      (is_broadcast)? "true" : "false",
-	      (is_p2p)? "true" : "false", addr.str().c_str(),
+	      bool_c_str(is_broadcast),
+	      bool_c_str(is_p2p), addr.str().c_str(),
 	      dst_or_bcast.str().c_str(), prefix_len);
 
     UNUSED(ifname);

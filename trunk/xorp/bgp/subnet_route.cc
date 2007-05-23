@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.21 2006/03/16 00:03:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.22 2007/02/16 22:45:19 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -201,11 +201,7 @@ SubnetRoute<A>::set_in_use(bool used) const {
     }
 
 #ifdef DEBUG_FLAGS
-    printf("set_in_use: %p = ", this);
-    if (used)
-	printf("true");
-    else 
-	printf("false");
+    printf("set_in_use: %p = %s", this, bool_c_str(used));
     printf("\n%s\n", str().c_str());
 #endif
 }
@@ -223,11 +219,7 @@ SubnetRoute<A>::set_nexthop_resolved(bool resolvable) const {
     }
 
 #ifdef DEBUG_FLAGS
-    printf("set_nexthop_resolved: %p = ", this);
-    if (resolvable)
-	printf("true");
-    else 
-	printf("false");
+    printf("set_nexthop_resolved: %p = %s", this, bool_c_str(resolvable));
     printf("\n%s\n", str().c_str());
 #endif
 }
@@ -242,11 +234,7 @@ SubnetRoute<A>::set_filtered(bool filtered) const {
     }
 
 #ifdef DEBUG_FLAGS
-    printf("set_filtered: %p = ", this);
-    if (filtered)
-	printf("true");
-    else 
-	printf("false");
+    printf("set_filtered: %p = %s", this, bool_c_str(filtered));
     printf("\n%s\n", str().c_str());
 #endif
 }

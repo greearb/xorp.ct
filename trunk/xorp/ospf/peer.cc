@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.277 2007/03/29 23:49:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.278 2007/03/30 04:37:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4276,7 +4276,8 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 		       "Neighbour(%s) sequence mismatch: "
 		       "MS expected %s got %s",
 		       pr_id(get_candidate_id()).c_str(),
-		       pb(_last_dd.get_ms_bit()), pb(dd->get_ms_bit()));
+		       bool_c_str(_last_dd.get_ms_bit()),
+		       bool_c_str(dd->get_ms_bit()));
 	    event_sequence_number_mismatch();
 	    break;
 	}

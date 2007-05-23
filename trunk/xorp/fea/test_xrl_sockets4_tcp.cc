@@ -850,8 +850,8 @@ verify_server_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
     if (pu->server_closed() != closed) {
 	verbose_err("Server socket close state (%s) "
 		    "does not matched expected (%s)\n",
-		    pu->server_closed() ? "true" : "false",
-		    closed ? "true" : "false");
+		    bool_c_str(pu->server_closed()),
+		    bool_c_str(closed));
 	*eflag = true;
     }
 }
@@ -873,8 +873,8 @@ verify_server_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
     if (pu->client_closed() != closed) {
 	verbose_err("Server client socket close state (%s) "
 		    "does not matched expected (%s)\n",
-		    pu->client_closed() ? "true" : "false",
-		    closed ? "true" : "false");
+		    bool_c_str(pu->client_closed()),
+		    bool_c_str(closed));
 	*eflag = true;
     }
 }
@@ -926,8 +926,8 @@ verify_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
     if (pu->closed() != closed) {
 	verbose_err("Client socket close state (%s) "
 		    "does not matched expected (%s)\n",
-		    pu->closed() ? "true" : "false",
-		    closed ? "true" : "false");
+		    bool_c_str(pu->closed()),
+		    bool_c_str(closed));
 	*eflag = true;
     }
 }

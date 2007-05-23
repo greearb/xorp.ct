@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.13 2006/11/03 23:11:34 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.14 2007/02/16 22:46:03 pavlin Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -474,8 +474,8 @@ class RouteCmd {
 	    " nexthop: " + _nexthop.str() +
 	    " prevhop: " + _prevhop.str() +
 	    " weight: " + c_format("%d", _weight) +
-	    " next hop changed: " + (_next_hop_changed ? "true" : "false") +
-	    " weight changed: " + (_weight_changed ? "true" : "false");
+	    " next hop changed: " + bool_c_str(_next_hop_changed) +
+	    " weight changed: " + bool_c_str(_weight_changed);
     }
 
  private:

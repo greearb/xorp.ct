@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.5 2007/05/01 00:14:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.6 2007/05/01 08:21:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -2048,7 +2048,7 @@ FibConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: "
-			     "IPv4 is not supported", (v) ? "true": "false");
+			     "IPv4 is not supported", bool_c_str(v));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -2075,7 +2075,7 @@ FibConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
 	    != 0) {
 	    error_msg = c_format("Set sysctl(IPCTL_FORWARDING) to %s failed: %s",
-				 (v) ? "true" : "false", strerror(errno));
+				 bool_c_str(v), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
@@ -2143,7 +2143,7 @@ FibConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	strioctl.ic_dp = buf;
 	if (ioctl(fd, I_STR, &strioctl) < 0) {
 	    error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: %s",
-				 (v) ? "true": "false", strerror(errno));
+				 bool_c_str(v), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    close(fd);
 	    return (XORP_ERROR);
@@ -2222,7 +2222,7 @@ FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
     }
 
     error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
-			 "IPv6 is not supported", (v) ? "true": "false");
+			 "IPv6 is not supported", bool_c_str(v));
     XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
@@ -2238,7 +2238,7 @@ FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	}
 
 	error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
-			     "IPv6 is not supported", (v) ? "true": "false");
+			     "IPv6 is not supported", bool_c_str(v));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -2270,7 +2270,7 @@ FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
 	    != 0) {
 	    error_msg = c_format("Set sysctl(IPV6CTL_FORWARDING) to %s failed: %s",
-				 (v) ? "true" : "false", strerror(errno));
+				 bool_c_str(v), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    // Restore the old accept_rtadv value
 	    if (old_value_accept_rtadv != !v) {
@@ -2350,7 +2350,7 @@ FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	strioctl.ic_dp = buf;
 	if (ioctl(fd, I_STR, &strioctl) < 0) {
 	    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: %s",
-				 (v) ? "true": "false", strerror(errno));
+				 bool_c_str(v), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    close(fd);
 	    return (XORP_ERROR);
@@ -2414,7 +2414,7 @@ FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
     error_msg = c_format("Cannot set the acceptance of IPv6 "
 			 "Router Advertisement messages to %s: "
 			 "IPv6 is not supported",
-			 (v) ? "true": "false");
+			 bool_c_str(v));
     XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
@@ -2432,7 +2432,7 @@ FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	error_msg = c_format("Cannot set the acceptance of IPv6 "
 			     "Router Advertisement messages to %s: "
 			     "IPv6 is not supported",
-			     (v) ? "true": "false");
+			     bool_c_str(v));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -2459,7 +2459,7 @@ FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
 	    != 0) {
 	    error_msg = c_format("Set sysctl(IPV6CTL_ACCEPT_RTADV) to %s failed: %s",
-				 (v) ? "true" : "false", strerror(errno));
+				 bool_c_str(v), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
@@ -2522,7 +2522,7 @@ FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	strioctl.ic_dp = buf;
 	if (ioctl(fd, I_STR, &strioctl) < 0) {
 	    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: %s",
-				 (v) ? "true": "false", strerror(errno));
+				 bool_c_str(v), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    close(fd);
 	    return (XORP_ERROR);

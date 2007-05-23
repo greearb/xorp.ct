@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.21 2007/05/08 01:15:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.22 2007/05/08 21:47:23 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -24,12 +24,6 @@
 
 // ----------------------------------------------------------------------------
 // Helper functions
-
-static const char*
-bool2str(bool t)
-{
-    return t ? "true" : "false";
-}
 
 /*
  * Makes string starting: IfMgrIfXXX("if0"
@@ -219,7 +213,7 @@ string
 IfMgrIfSetEnabled::str() const
 {
     return if_str_begin(this, "SetEnabled")
-	+ "\", " + bool2str(enabled()) + if_str_end();
+	+ "\", " + bool_c_str(enabled()) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -254,7 +248,7 @@ string
 IfMgrIfSetDiscard::str() const
 {
     return if_str_begin(this, "SetDiscard")
-	+ "\", " + bool2str(discard()) + if_str_end();
+	+ "\", " + bool_c_str(discard()) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -393,7 +387,7 @@ string
 IfMgrIfSetNoCarrier::str() const
 {
     return if_str_begin(this, "NoCarrier") + ", " +
-	c_format("%s", no_carrier()? "true" : "false") + if_str_end();
+	c_format("%s", bool_c_str(no_carrier())) + if_str_end();
 }
 
 
@@ -506,7 +500,7 @@ string
 IfMgrVifSetEnabled::str() const
 {
     return vif_str_begin(this, "SetEnabled")
-	+ ", " + bool2str(enabled()) + vif_str_end();
+	+ ", " + bool_c_str(enabled()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -538,7 +532,7 @@ string
 IfMgrVifSetMulticastCapable::str() const
 {
     return vif_str_begin(this, "SetMulticastCapable")
-	+ ", " + bool2str(multicast_capable()) + vif_str_end();
+	+ ", " + bool_c_str(multicast_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -570,7 +564,7 @@ string
 IfMgrVifSetBroadcastCapable::str() const
 {
     return vif_str_begin(this, "SetBroadcastCapable")
-	+ ", " + bool2str(broadcast_capable()) + vif_str_end();
+	+ ", " + bool_c_str(broadcast_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -602,7 +596,7 @@ string
 IfMgrVifSetP2PCapable::str() const
 {
     return vif_str_begin(this, "SetP2PCapable")
-	+ ", " + bool2str(p2p_capable()) + vif_str_end();
+	+ ", " + bool_c_str(p2p_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -634,7 +628,7 @@ string
 IfMgrVifSetLoopbackCapable::str() const
 {
     return vif_str_begin(this, "SetLoopbackCapable")
-	+ ", " + bool2str(loopback_capable()) + vif_str_end();
+	+ ", " + bool_c_str(loopback_capable()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -666,7 +660,7 @@ string
 IfMgrVifSetPimRegister::str() const
 {
     return vif_str_begin(this, "SetPimRegister")
-	+ ", " + bool2str(pim_register()) + vif_str_end();
+	+ ", " + bool_c_str(pim_register()) + vif_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -868,7 +862,7 @@ string
 IfMgrIPv4SetEnabled::str() const
 {
     return ipv4_str_begin(this, "SetEnabled") + ", " +
-	bool2str(enabled()) + ipv4_str_end();
+	bool_c_str(enabled()) + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -900,7 +894,7 @@ string
 IfMgrIPv4SetMulticastCapable::str() const
 {
     return ipv4_str_begin(this, "SetMulticastCapable") + ", " +
-	bool2str(multicast_capable()) + ipv4_str_end();
+	bool_c_str(multicast_capable()) + ipv4_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -932,7 +926,7 @@ string
 IfMgrIPv4SetLoopback::str() const
 {
     return ipv4_str_begin(this, "SetLoopback") + ", " +
-	bool2str(loopback()) + ipv4_str_end();
+	bool_c_str(loopback()) + ipv4_str_end();
 }
 
 
@@ -1134,7 +1128,7 @@ string
 IfMgrIPv6SetEnabled::str() const
 {
     return ipv6_str_begin(this, "SetEnabled") + ", " +
-	bool2str(enabled()) + ipv6_str_end();
+	bool_c_str(enabled()) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -1166,7 +1160,7 @@ string
 IfMgrIPv6SetMulticastCapable::str() const
 {
     return ipv6_str_begin(this, "SetMulticastCapable") + ", " +
-	bool2str(multicast_capable()) + ipv6_str_end();
+	bool_c_str(multicast_capable()) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -1198,7 +1192,7 @@ string
 IfMgrIPv6SetLoopback::str() const
 {
     return ipv6_str_begin(this, "SetLoopback") + ", " +
-	bool2str(loopback()) + ipv6_str_end();
+	bool_c_str(loopback()) + ipv6_str_end();
 }
 
 // ----------------------------------------------------------------------------

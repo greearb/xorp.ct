@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.42 2007/01/31 20:36:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.43 2007/02/16 22:46:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -773,9 +773,9 @@ DataDescriptionPacket::str() const
     output += c_format("\tInterface MTU %u\n", get_interface_mtu());
     output += c_format("\tOptions %#x %s\n", get_options(),
 		       cstring(Options(get_version(), get_options())));
-    output += c_format("\tI-bit %s\n", get_i_bit() ? "true" : "false");
-    output += c_format("\tM-bit %s\n", get_m_bit() ? "true" : "false");
-    output += c_format("\tMS-bit %s\n", get_ms_bit() ? "true" : "false");
+    output += c_format("\tI-bit %s\n", bool_c_str(get_i_bit()));
+    output += c_format("\tM-bit %s\n", bool_c_str(get_m_bit()));
+    output += c_format("\tMS-bit %s\n", bool_c_str(get_ms_bit()));
     output += c_format("\tDD sequence number %u", get_dd_seqno());
 
     list<Lsa_header> li = _lsa_headers;

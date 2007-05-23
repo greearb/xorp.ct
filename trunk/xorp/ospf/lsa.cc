@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.102 2007/03/19 01:39:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.103 2007/03/19 05:47:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -968,19 +968,19 @@ RouterLsa::str() const
 
     output += "\n";
 
-    output += c_format("\tbit Nt %s\n", pb(get_nt_bit()));
+    output += c_format("\tbit Nt %s\n", bool_c_str(get_nt_bit()));
 
     switch(version) {
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
-	output += c_format("\tbit W %s\n", pb(get_w_bit()));
+	output += c_format("\tbit W %s\n", bool_c_str(get_w_bit()));
 	break;
     }
 
-    output += c_format("\tbit V %s\n", pb(get_v_bit()));
-    output += c_format("\tbit E %s\n", pb(get_e_bit()));
-    output += c_format("\tbit B %s", pb(get_b_bit()));
+    output += c_format("\tbit V %s\n", bool_c_str(get_v_bit()));
+    output += c_format("\tbit E %s\n", bool_c_str(get_e_bit()));
+    output += c_format("\tbit B %s", bool_c_str(get_b_bit()));
 
     switch(version) {
     case OspfTypes::V2:
@@ -1631,7 +1631,7 @@ ASExternalLsa::str() const
     switch(version) {
     case OspfTypes::V2:
 	output += c_format("\n\tNetwork Mask %#x", get_network_mask());
-	output += c_format("\n\tbit E %s", pb(get_e_bit()));
+	output += c_format("\n\tbit E %s", bool_c_str(get_e_bit()));
 	output += c_format("\n\tMetric %d %#x", get_metric(), get_metric());
 	if (get_metric() == OspfTypes::LSInfinity)
 	    output += c_format(" LSInfinity");
@@ -1641,9 +1641,9 @@ ASExternalLsa::str() const
 			   get_external_route_tag());
 	break;
     case OspfTypes::V3:
-	output += c_format("\n\tbit E %s", pb(get_e_bit()));
-	output += c_format("\n\tbit F %s", pb(get_f_bit()));
-	output += c_format("\n\tbit T %s", pb(get_t_bit()));
+	output += c_format("\n\tbit E %s", bool_c_str(get_e_bit()));
+	output += c_format("\n\tbit F %s", bool_c_str(get_f_bit()));
+	output += c_format("\n\tbit T %s", bool_c_str(get_t_bit()));
 	output += c_format("\n\tMetric %d %#x", get_metric(), get_metric());
 	if (get_metric() == OspfTypes::LSInfinity)
 	    output += c_format(" LSInfinity");

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.60 2007/02/27 18:33:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.61 2007/03/30 00:42:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -414,7 +414,7 @@ RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 			      RouteEntry<A>& rt)
 {
     debug_msg("DELETE ROUTE area %s %s filtered %s\n", pr_id(area).c_str(), 
-	      cstring(net), pb(rt.get_filtered()));
+	      cstring(net), bool_c_str(rt.get_filtered()));
 
     bool result;
     if (!rt.get_discard()) {

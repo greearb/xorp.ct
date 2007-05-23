@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.4 2007/04/30 23:40:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set_click.cc,v 1.5 2007/05/08 00:49:03 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -221,8 +221,8 @@ IfConfigSetClick::config_interface(const string& ifname,
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
 	      "is_deleted = %s)\n",
 	      ifname.c_str(), XORP_UINT_CAST(if_index),
-	      XORP_UINT_CAST(flags), (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false");
+	      XORP_UINT_CAST(flags), bool_c_str(is_up),
+	      bool_c_str(is_deleted));
 
     ifp = _iftree.find_interface(ifname);
     if (ifp == NULL) {
@@ -272,12 +272,12 @@ IfConfigSetClick::config_vif(const string& ifname,
 	      "point_to_point = %s multicast = %s)\n",
 	      ifname.c_str(), vifname.c_str(),
 	      if_index, XORP_UINT_CAST(flags),
-	      (is_up)? "true" : "false",
-	      (is_deleted)? "true" : "false",
-	      (broadcast)? "true" : "false",
-	      (loopback)? "true" : "false",
-	      (point_to_point)? "true" : "false",
-	      (multicast)? "true" : "false");
+	      bool_c_str(is_up),
+	      bool_c_str(is_deleted),
+	      bool_c_str(broadcast),
+	      bool_c_str(loopback),
+	      bool_c_str(point_to_point),
+	      bool_c_str(multicast));
 
     UNUSED(if_index);
     UNUSED(flags);
@@ -416,9 +416,8 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
-	      (is_broadcast)? "true" : "false",
-	      (is_p2p)? "true" : "false", addr.str().c_str(),
-	      dst_or_bcast.str().c_str(),
+	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(if_index);
@@ -813,9 +812,9 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 				      fi.ifname().c_str());
 	preamble = "\t";
 	config += preamble + c_format("disable: %s\n",
-				      (! fi.enabled()) ? "true" : "false");
+				      bool_c_str(! fi.enabled()));
 	config += preamble + c_format("discard: %s\n",
-				      fi.discard() ? "true" : "false");
+				      bool_c_str(fi.discard()));
 	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
 	config += preamble + c_format("mtu: %u\n", XORP_UINT_CAST(fi.mtu()));
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
@@ -824,7 +823,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	    config += preamble + c_format("vif %s {\n", fv.vifname().c_str());
 	    preamble = "\t    ";
 	    config += preamble + c_format("disable: %s\n",
-					  (! fv.enabled()) ? "true" : "false");
+					  bool_c_str(! fv.enabled()));
 	    for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
 		const IfTreeAddr4& fa4 = ai4->second;
 		preamble = "\t    ";
@@ -842,13 +841,13 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 						  fa4.endpoint().str().c_str());
 		}
 		config += preamble + c_format("multicast-capable: %s\n",
-					      fa4.multicast() ? "true" : "false");
+					      bool_c_str(fa4.multicast()));
 		config += preamble + c_format("point-to-point: %s\n",
-					      fa4.point_to_point() ? "true" : "false");
+					      bool_c_str(fa4.point_to_point()));
 		config += preamble + c_format("loopback: %s\n",
-					      fa4.loopback() ? "true" : "false");
+					      bool_c_str(fa4.loopback()));
 		config += preamble + c_format("disable: %s\n",
-					      (! fa4.enabled()) ? "true" : "false");
+					      bool_c_str(! fa4.enabled()));
 		preamble = "\t    ";
 		config += preamble + c_format("}\n");
 	    }
@@ -865,13 +864,13 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 						  fa6.endpoint().str().c_str());
 		}
 		config += preamble + c_format("multicast-capable: %s\n",
-					      fa6.multicast() ? "true" : "false");
+					      bool_c_str(fa6.multicast()));
 		config += preamble + c_format("point-to-point: %s\n",
-					      fa6.point_to_point() ? "true" : "false");
+					      bool_c_str(fa6.point_to_point()));
 		config += preamble + c_format("loopback: %s\n",
-					      fa6.loopback() ? "true" : "false");
+					      bool_c_str(fa6.loopback()));
 		config += preamble + c_format("disable: %s\n",
-					      (! fa6.enabled()) ? "true" : "false");
+					      bool_c_str(! fa6.enabled()));
 		preamble = "\t    ";
 		config += preamble + c_format("}\n");
 	    }
@@ -906,14 +905,12 @@ IfConfigSetClick::regenerate_xorp_fea_click_config() const
 	do {
 	    preamble = "\t";
 	    config += preamble + c_format("disable: %s\n",
-					  (! ClickSocket::is_enabled()) ?
-					  "true" : "false");
+					  bool_c_str(! ClickSocket::is_enabled()));
 	    do {
 		config += preamble + c_format("kernel-click {\n");
 		preamble = "\t    ";
 		config += preamble + c_format("disable: %s\n",
-					      (! ClickSocket::is_kernel_click()) ?
-					      "true" : "false");
+					      bool_c_str(! ClickSocket::is_kernel_click()));
 		preamble = "\t";
 		config += preamble + c_format("}\n");
 	    } while (false);
@@ -921,8 +918,7 @@ IfConfigSetClick::regenerate_xorp_fea_click_config() const
 		config += preamble + c_format("user-click {\n");
 		preamble = "\t    ";
 		config += preamble + c_format("disable: %s\n",
-					      (! ClickSocket::is_user_click()) ?
-					      "true" : "false");
+					      bool_c_str(! ClickSocket::is_user_click()));
 		preamble = "\t";
 		config += preamble + c_format("}\n");
 	    } while (false);

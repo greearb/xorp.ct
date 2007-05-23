@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.277 2007/03/30 01:19:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.278 2007/04/25 01:40:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -632,7 +632,7 @@ template <typename A>
 bool
 AreaRouter<A>::area_range_add(IPNet<A> net, bool advertise)
 {
-    debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
+    debug_msg("Net %s advertise %s\n", cstring(net), bool_c_str(advertise));
 
     Range r;
     r._advertise = advertise;
@@ -660,7 +660,7 @@ template <typename A>
 bool
 AreaRouter<A>::area_range_change_state(IPNet<A> net, bool advertise)
 {
-    debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
+    debug_msg("Net %s advertise %s\n", cstring(net), bool_c_str(advertise));
 
     typename Trie<A, Range>::iterator i = _area_range.lookup_node(net);
     if (_area_range.end() == i) {
@@ -683,7 +683,7 @@ template <typename A>
 bool
 AreaRouter<A>::area_range_covered(IPNet<A> net, bool& advertise)
 {
-    debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
+    debug_msg("Net %s advertise %s\n", cstring(net), bool_c_str(advertise));
 
     typename Trie<A, Range>::iterator i = _area_range.find(net);
     if (_area_range.end() == i)
@@ -1183,7 +1183,7 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 				RouteEntry<A>& rt, bool push)
 {
     debug_msg("Area %s net %s rentry %s push %s\n", pr_id(area).c_str(),
-	      cstring(net), cstring(rt), pb(push));
+	      cstring(net), cstring(rt), bool_c_str(push));
 
     XLOG_ASSERT(area != _area);
     XLOG_ASSERT(area == rt.get_area());
@@ -2303,8 +2303,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 {
     debug_msg("PeerID %u NeighbourID %u %s\nbackup %s dr %s\n", peerid, nid,
 	      pp_lsas(lsas).c_str(),
-	      backup ? "true" : "false",
-	      dr ? "true" : "false");
+	      bool_c_str(backup), bool_c_str(dr));
 
     OspfTypes::Version version = _ospf.get_version();
 
@@ -2515,7 +2514,8 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 
 	    debug_msg("LSA multicast out on peer: %s "
 		      "LSA from DR: %s interface in state backup: %s\n",
-		      pb(multicast_on_peer), pb(dr), pb(backup));
+		      bool_c_str(multicast_on_peer), bool_c_str(dr),
+		      bool_c_str(backup));
 	    if (!multicast_on_peer) {
 		if ((backup && dr) || !backup)
 		    delayed_ack.push_back(lsah);
@@ -3255,7 +3255,7 @@ template <typename A>
 void
 AreaRouter<A>::stub_networksV3(bool timer)
 {
-    debug_msg("timer %s\n", pb(timer));
+    debug_msg("timer %s\n", bool_c_str(timer));
 
     OspfTypes::Version version = _ospf.get_version();
     Ls_request lsr(version,
@@ -3644,7 +3644,7 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
     // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
     debug_msg("lsar: %s\nexists: %s index: %u\n", cstring((*lsar)),
-	      lsa_exists ? "true" : "false", XORP_UINT_CAST(index));
+	      bool_c_str(lsa_exists), XORP_UINT_CAST(index));
     if (lsa_exists)
 	debug_msg("database copy: %s\n", cstring((*_db[index])));
 
@@ -3725,7 +3725,7 @@ template <typename A>
 void
 AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 {
-    debug_msg("%s known %s\n", cstring(*lsar), known ? "true" : "false");
+    debug_msg("%s known %s\n", cstring(*lsar), bool_c_str(known));
 }
 
 template <typename A>

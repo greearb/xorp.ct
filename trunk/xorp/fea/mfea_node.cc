@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.79 2007/05/10 00:08:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.80 2007/05/19 01:52:40 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1895,8 +1895,8 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			     "the GEQ and LEQ flags are mutually exclusive "
 			     "(GEQ = %s; LEQ = %s)",
 			     cstring(source), cstring(group),
-			     (is_geq_upcall)? "true" : "false",
-			     (is_leq_upcall)? "true" : "false");
+			     bool_c_str(is_geq_upcall),
+			     bool_c_str(is_leq_upcall));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
     }
@@ -1907,8 +1907,8 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			     "(is_threshold_in_packets = %s; "
 			     "is_threshold_in_bytes = %s)",
 			     cstring(source), cstring(group),
-			     (is_threshold_in_packets)? "true" : "false",
-			     (is_threshold_in_bytes)? "true" : "false");
+			     bool_c_str(is_threshold_in_packets),
+			     bool_c_str(is_threshold_in_bytes));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
     }
@@ -1992,8 +1992,8 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 			     "the GEQ and LEQ flags are mutually exclusive "
 			     "(GEQ = %s; LEQ = %s)",
 			     cstring(source), cstring(group),
-			     (is_geq_upcall)? "true" : "false",
-			     (is_leq_upcall)? "true" : "false");
+			     bool_c_str(is_geq_upcall),
+			     bool_c_str(is_leq_upcall));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
     }
@@ -2004,8 +2004,8 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 			     "(is_threshold_in_packets = %s; "
 			     "is_threshold_in_bytes = %s)",
 			     cstring(source), cstring(group),
-			     (is_threshold_in_packets)? "true" : "false",
-			     (is_threshold_in_bytes)? "true" : "false");
+			     bool_c_str(is_threshold_in_packets),
+			     bool_c_str(is_threshold_in_bytes));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);		// Invalid arguments
     }

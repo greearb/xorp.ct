@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.4 2007/04/27 23:48:57 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.5 2007/05/08 00:49:01 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -181,7 +181,7 @@ public:
 
     string str() const {
 	return c_format("SetInterfaceEnabled: %s %s",
-			ifname().c_str(), _en ? "true" : "false");
+			ifname().c_str(), bool_c_str(_en));
     }
 
 private:
@@ -207,7 +207,7 @@ public:
 
     string str() const {
 	return c_format("SetInterfaceDiscard: %s %s",
-			ifname().c_str(), _discard ? "true" : "false");
+			ifname().c_str(), bool_c_str(_discard));
     }
 
 private:
@@ -381,7 +381,7 @@ public:
 
     string str() const {
 	return c_format("SetVifEnabled: %s %s",
-			path().c_str(), _en ? "true" : "false");
+			path().c_str(), bool_c_str(_en));
     }
 
 private:
@@ -546,7 +546,7 @@ public:
 
     string str() const {
 	return c_format("SetAddr4Enabled: %s %s",
-			path().c_str(), _en ? "true" : "false");
+			path().c_str(), bool_c_str(_en));
     }
 
 protected:
@@ -698,7 +698,7 @@ public:
 
     string str() const {
 	return c_format("SetAddr6Enabled: %s %s",
-			path().c_str(), _en ? "true" : "false");
+			path().c_str(), bool_c_str(_en));
     }
 
 protected:

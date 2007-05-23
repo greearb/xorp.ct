@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.24 2007/02/16 22:47:17 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.25 2007/04/23 23:05:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -296,7 +296,7 @@ XrlPortManager<A>::updates_made()
 	    XLOG_INFO("Detected iftree change on %s %s %s setting transport enabled %s",
 		      xio->ifname().c_str(), xio->vifname().c_str(),
 		      xio->address().str().c_str(),
-		      (fea_en ? "true" : "false"));
+		      bool_c_str(fea_en));
 	    xio->set_enabled(fea_en);
 	}
     }

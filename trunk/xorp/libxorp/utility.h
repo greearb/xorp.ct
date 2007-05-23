@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.13 2006/03/16 00:04:37 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.14 2007/02/16 22:46:28 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -115,6 +115,11 @@ extern int xorp_toupper(int c);
  * implementation is inside file "libxorp/strptime.c".
  */
 extern char *xorp_strptime(const char *buf, const char *fmt, struct tm *tm);
+
+/*
+ * Function to return C-string representation of a boolean: "true" of "false".
+ */
+extern const char *bool_c_str(int v);
 
 #ifdef __cplusplus
 }

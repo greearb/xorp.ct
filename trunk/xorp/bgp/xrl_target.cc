@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.63 2006/10/12 01:24:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.64 2007/02/16 22:45:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -186,7 +186,7 @@ XrlCmdError
 XrlBgpTarget::bgp_0_2_set_confederation_identifier(const uint32_t& as,
 						   const bool& disable)
 {
-    debug_msg("as %u disable %s\n", as, disable ? "true" : "false");
+    debug_msg("as %u disable %s\n", as, bool_c_str(disable));
 
     _bgp.set_confederation_identifier(as, disable);
 
@@ -198,7 +198,7 @@ XrlBgpTarget::bgp_0_2_set_cluster_id(const IPv4& cluster_id,
 				     const bool& disable)
 {
     debug_msg("Cluster ID %s disable %s\n", cstring(cluster_id),
-	      disable ? "true" : "false");
+	      bool_c_str(disable));
 
     _bgp.set_cluster_id(cluster_id, disable);
 
@@ -214,7 +214,7 @@ XrlBgpTarget::bgp_0_2_set_damping(const uint32_t& half_life,
 {
     debug_msg("Damping half-life %u max-supress %u reuse %u suppress %u"
 	      " disable %s\n", half_life, max_suppress, reuse, suppress,
-	      disable ? "true" : "false");
+	      bool_c_str(disable));
     
     if (half_life < 1 || half_life > 45)
 	return XrlCmdError::
@@ -540,7 +540,7 @@ XrlBgpTarget::bgp_0_2_set_route_reflector_client(
 	      " state %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      state ? "true" : "false");
+	      bool_c_str(state));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -568,7 +568,7 @@ XrlBgpTarget::bgp_0_2_set_confederation_member(
 	      " state %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      state ? "true" : "false");
+	      bool_c_str(state));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
@@ -597,7 +597,7 @@ XrlBgpTarget::bgp_0_2_set_prefix_limit(
 	      " maximum %u state %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      XORP_UINT_CAST(maximum), state ? "true" : "false");
+	      XORP_UINT_CAST(maximum), bool_c_str(state));
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),

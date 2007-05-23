@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.65 2006/10/12 01:25:13 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.66 2007/02/16 22:47:27 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -153,7 +153,7 @@ XorpShell::XorpShell(EventLoop& eventloop,
     XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
 	       xrl_targets_dir.c_str());
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
-	       _verbose ? "true" : "false");
+	       bool_c_str(_verbose));
 
     // Read the router config template files
     _tt = new TemplateTree(xorp_root_dir, _verbose);
@@ -812,7 +812,7 @@ display_defaults()
     fprintf(stderr, "  Xrl targets directory      := %s\n",
 	    xorp_xrl_targets_dir().c_str());
     fprintf(stderr, "  Print verbose information  := %s\n",
-	    default_verbose ? "true" : "false");
+	    bool_c_str(default_verbose));
 }
 
 int

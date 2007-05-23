@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.84 2007/04/23 23:05:08 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.85 2007/05/08 01:15:49 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -680,7 +680,7 @@ BGPMain::address_status_change4(const string& interface, const string& vif,
 {
     debug_msg("interface %s vif %s address %s prefix_len %u state %s\n",
 	      interface.c_str(), vif.c_str(), cstring(source), prefix_len,
-	      pb(state));
+	      bool_c_str(state));
 
     if (state) {
 	_interfaces_ipv4.insert(make_pair(source, prefix_len));
@@ -698,7 +698,7 @@ BGPMain::address_status_change6(const string& interface, const string& vif,
 {
     debug_msg("interface %s vif %s address %s prefix_len %u state %s\n",
 	      interface.c_str(), vif.c_str(), cstring(source), prefix_len,
-	      pb(state));
+	      bool_c_str(state));
 
     if (state) {
 	_interfaces_ipv6.insert(make_pair(source, prefix_len));
@@ -1974,7 +1974,7 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
 	return false;
     }
     
-    debug_msg("Peer %s. %s\n", iptuple.str().c_str(),toggle ? "true" :"false");
+    debug_msg("Peer %s. %s\n", iptuple.str().c_str(), bool_c_str(toggle));
 
     BGPPeerData *peerdata = const_cast<BGPPeerData *>(peer->peerdata());
     if (toggle) {

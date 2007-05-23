@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.63 2007/02/16 22:45:10 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.64 2007/03/28 02:14:23 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -1216,12 +1216,5 @@ BGPMain::get_route_list_next(
 // };
 // template <> const char* NameOf<IPv4>::get() { return "IPv4"; }
 // template <> const char* NameOf<IPv6>::get() { return "IPv6"; }
-
-inline
-const char *
-pb(const bool val)
-{
-    return val ? "true" : "false";
-}
 
 #endif // __BGP_MAIN_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.44 2007/05/08 19:23:17 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.45 2007/05/19 00:57:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,8 +63,8 @@ XrlIO<A>::recv(const string& interface,
 	      XORP_UINT_CAST(ip_protocol),
 	      XORP_INT_CAST(ip_ttl),
 	      ip_tos,
-	      (ip_router_alert)? "true" : "false",
-	      (ip_internet_control)? "true" : "false",
+	      bool_c_str(ip_router_alert),
+	      bool_c_str(ip_internet_control),
 	      XORP_UINT_CAST(payload.size()));
 
     if (IO<A>::_receive_cb.is_empty())
@@ -833,8 +833,8 @@ XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
 		    const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false", cstring(policytags));
+	      cstring(net), cstring(nexthop), metric,
+	      bool_c_str(equal), bool_c_str(discard), cstring(policytags));
 
     _rib_queue.queue_add_route(_ribname, net, nexthop, nexthop_id, metric,
 			       policytags);
@@ -849,8 +849,8 @@ XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t nexthop_id,
 			const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false", cstring(policytags));
+	      cstring(net), cstring(nexthop), metric,
+	      bool_c_str(equal), bool_c_str(discard), cstring(policytags));
 
     // XXX - The queue should support replace see TODO 36.
     _rib_queue.queue_delete_route(_ribname, net);

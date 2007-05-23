@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.6 2007/02/14 13:16:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.7 2007/02/16 22:46:43 pavlin Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -203,7 +203,7 @@ Routing<A>::cmd(Args& args) throw(InvalidString)
 	    A nexthop(get_next_word(args, "verify_routing_entry").c_str());
 	    uint32_t metric = get_next_number(args, "verify_routing_entry");
 	    bool equal = get_next_word(args, "verify_routing_entry") 
-		== "true"? true : false;
+		== "true" ? true : false;
 	    bool discard = get_next_word(args, "verify_routing_entry") == 
 		"true" ? true : false;
 	    if (!_io.routing_table_verify(net, nexthop, metric, equal,discard))

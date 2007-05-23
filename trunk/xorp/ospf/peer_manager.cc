@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.140 2007/03/22 01:44:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.141 2007/03/29 23:49:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -248,7 +248,7 @@ PeerManager<A>::area_range_add(OspfTypes::AreaID area, IPNet<A> net,
 			       bool advertise)
 {
     debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     AreaRouter<A> *area_router = get_area_router(area);
 
@@ -284,7 +284,7 @@ PeerManager<A>::area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
 					bool advertise)
 {
     debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
-	      cstring(net), pb(advertise));
+	      cstring(net), bool_c_str(advertise));
 
     AreaRouter<A> *area_router = get_area_router(area);
 
@@ -672,7 +672,7 @@ PeerManager<A>::set_address_state_peer(const OspfTypes::PeerID peerid,
 				       bool enable)
 {
     debug_msg("PeerID %u, area %s address %s enable %s\n",
-	      peerid, pr_id(area).c_str(), cstring(addr), pb(enable));
+	      peerid, pr_id(area).c_str(), cstring(addr), bool_c_str(enable));
 
     if (0 == _peers.count(peerid)) {
 	XLOG_ERROR("Unknown PeerID %u", peerid);
@@ -802,7 +802,7 @@ PeerManager<A>::vif_status_change(const string& interface, const string& vif,
 				  bool state)
 {
     debug_msg("interface %s vif %s state %s\n",
-	      interface.c_str(), vif.c_str(), pb(state));
+	      interface.c_str(), vif.c_str(), bool_c_str(state));
 
     OspfTypes::PeerID peerid;
 
@@ -831,7 +831,8 @@ PeerManager<A>::address_status_change(const string& interface,
 				      bool state)
 {
     debug_msg("interface %s vif %s address %s state %s\n",
-	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
+	      interface.c_str(), vif.c_str(), cstring(source),
+	      bool_c_str(state));
 
     OspfTypes::PeerID peerid;
 
@@ -1694,7 +1695,7 @@ template <typename A>
 bool
 PeerManager<A>::originate_default_route(OspfTypes::AreaID area, bool enable)
 {
-    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     AreaRouter<A> *area_router = get_area_router(area);
 
@@ -1728,7 +1729,7 @@ template <typename A>
 bool
 PeerManager<A>::summaries(OspfTypes::AreaID area, bool enable)
 {
-    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), bool_c_str(enable));
 
     AreaRouter<A> *area_router = get_area_router(area);
 

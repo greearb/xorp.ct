@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.70 2006/08/12 00:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.71 2007/02/16 22:47:22 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -117,11 +117,11 @@ display_defaults()
     fprintf(stderr, "  Xrl targets directory      := %s\n",
 	    xorp_xrl_targets_dir().c_str());
     fprintf(stderr, "  Execute Xrls               := %s\n",
-	    default_do_exec ? "true" : "false");
+	    bool_c_str(default_do_exec));
     fprintf(stderr, "  Restart failed processes   := %s\n",
-	    default_do_restart ? "true" : "false");
+	    bool_c_str(default_do_restart));
     fprintf(stderr, "  Print verbose information  := %s\n",
-	    default_verbose ? "true" : "false");
+	    bool_c_str(default_verbose));
 }
 
 // the following two functions are an ugly hack to cause the C code in
@@ -196,11 +196,11 @@ Rtrmgr::run()
     XLOG_TRACE(_verbose, "Xrl targets directory      := %s\n",
 	       xrl_targets_dir.c_str());
     XLOG_TRACE(_verbose, "Execute Xrls               := %s\n",
-	       do_exec ? "true" : "false");
+	       bool_c_str(do_exec));
     XLOG_TRACE(_verbose, "Restart failed processes   := %s\n",
-	       do_restart ? "true" : "false");
+	       bool_c_str(do_restart));
     XLOG_TRACE(_verbose, "Print verbose information  := %s\n",
-	       _verbose ? "true" : "false");
+	       bool_c_str(_verbose));
 
 
     XRLdb* xrldb = NULL;

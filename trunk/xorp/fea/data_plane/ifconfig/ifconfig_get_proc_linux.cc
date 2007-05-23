@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.7 2007/05/01 01:50:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.8 2007/05/08 00:49:03 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -445,7 +445,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
 	}
 	ifp->set_interface_flags(flags);
 	ifp->set_enabled(flags & IFF_UP);
-	debug_msg("enabled: %s\n", ifp->enabled() ? "true" : "false");
+	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 
 	//
 	// Get the link status
@@ -456,7 +456,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
 	else
 	    no_carrier = false;
 	ifp->set_no_carrier(no_carrier);
-	debug_msg("no_carrier: %s\n", ifp->no_carrier() ? "true" : "false");
+	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
 	
 	// XXX: vifname == ifname on this platform
 	ifp->add_vif(alias_if_name);
@@ -476,12 +476,12 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
 	vifp->set_loopback(flags & IFF_LOOPBACK);
 	vifp->set_point_to_point(flags & IFF_POINTOPOINT);
 	vifp->set_multicast(flags & IFF_MULTICAST);
-	debug_msg("vif enabled: %s\n", vifp->enabled() ? "true" : "false");
-	debug_msg("vif broadcast: %s\n", vifp->broadcast() ? "true" : "false");
-	debug_msg("vif loopback: %s\n", vifp->loopback() ? "true" : "false");
-	debug_msg("vif point_to_point: %s\n", vifp->point_to_point() ? "true"
-		  : "false");
-	debug_msg("vif multicast: %s\n", vifp->multicast() ? "true" : "false");
+	debug_msg("vif enabled: %s\n", bool_c_str(vifp->enabled()));
+	debug_msg("vif broadcast: %s\n", bool_c_str(vifp->broadcast()));
+	debug_msg("vif loopback: %s\n", bool_c_str(vifp->loopback()));
+	debug_msg("vif point_to_point: %s\n",
+		  bool_c_str(vifp->point_to_point()));
+	debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
 	
 	//
 	// Get the IP address, netmask, P2P destination

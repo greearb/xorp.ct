@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.59 2007/02/16 22:47:12 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.60 2007/03/22 20:48:18 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -370,8 +370,8 @@ XrlRibTarget::rib_0_1_add_route4(const string&	protocol,
     debug_msg("add_route4 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
@@ -420,8 +420,8 @@ XrlRibTarget::rib_0_1_add_route6(const string&	protocol,
     debug_msg("add_route6 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
@@ -472,8 +472,8 @@ XrlRibTarget::rib_0_1_replace_route4(const string&	protocol,
     debug_msg("replace_route4 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
@@ -520,8 +520,8 @@ XrlRibTarget::rib_0_1_replace_route6(const string&	protocol,
     debug_msg("replace_route6 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      XORP_UINT_CAST(metric));
@@ -565,8 +565,8 @@ XrlRibTarget::rib_0_1_delete_route4(const string&	protocol,
     debug_msg("delete_route4 protocol: %s unicast: %s multicast: %s "
 	      "network %s\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str());
 
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
@@ -600,8 +600,8 @@ XrlRibTarget::rib_0_1_delete_route6(const string&	protocol,
     debug_msg("delete_route6 protocol: %s unicast: %s multicast: %s "
 	      "network %s\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str());
 
     if (_rib_manager->profile().enabled(profile_route_ribin)) {
@@ -640,8 +640,8 @@ XrlRibTarget::rib_0_1_add_interface_route4(const string&	protocol,
     debug_msg("add_interface_route4 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
@@ -694,8 +694,8 @@ XrlRibTarget::rib_0_1_add_interface_route6(const string&	protocol,
     debug_msg("add_interface_route6 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
@@ -748,8 +748,8 @@ XrlRibTarget::rib_0_1_replace_interface_route4(const string&	    protocol,
     debug_msg("replace_interface_route4 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
@@ -802,8 +802,8 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
     debug_msg("replace_interface_route6 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
 	      protocol.c_str(),
-	      unicast ? "true" : "false",
-	      multicast ? "true" : "false",
+	      bool_c_str(unicast),
+	      bool_c_str(multicast),
 	      network.str().c_str(),
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
