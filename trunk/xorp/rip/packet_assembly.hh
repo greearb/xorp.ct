@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_assembly.hh,v 1.11 2006/08/20 06:19:27 pavlin Exp $
+// $XORP: xorp/rip/packet_assembly.hh,v 1.12 2007/02/16 22:47:14 pavlin Exp $
 
 #ifndef __RIP_PACKET_ASSEMBLY_HH__
 #define __RIP_PACKET_ASSEMBLY_HH__
@@ -63,12 +63,12 @@ public:
     /**
      * IPv4 Specific authentication handler accessor.
      */
-    inline AuthHandlerBase&	  ah()			{ return _ah; }
+    AuthHandlerBase&	  ah()			{ return _ah; }
 
     /**
      * IPv4 Specific authentication handler accessor.
      */
-    inline const AuthHandlerBase& ah() const		{ return _ah; }
+    const AuthHandlerBase& ah() const		{ return _ah; }
 };
 
 
@@ -90,17 +90,17 @@ private:
     IPv6     _lnh;
 
 public:
-    inline PacketAssemblerSpecState(Port<IPv6>& )
+    PacketAssemblerSpecState(Port<IPv6>& )
 	: _max_entries(25), _lnh(IPv6::ALL_ONES())
     {}
-    inline PacketAssemblerSpecState()
+    PacketAssemblerSpecState()
 	: _max_entries(25), _lnh(IPv6::ALL_ONES())
     {}
 
-    inline uint32_t	max_entries() const;
-    inline void		reset_last_nexthop();
-    inline void		set_last_nexthop(const IPv6& ip6);
-    inline const IPv6&	last_nexthop() const;
+    uint32_t	max_entries() const;
+    void	reset_last_nexthop();
+    void	set_last_nexthop(const IPv6& ip6);
+    const IPv6&	last_nexthop() const;
 };
 
 inline uint32_t
@@ -149,24 +149,24 @@ public:
      *
      * @param port Port to take configuration information from.
      */
-    inline ResponsePacketAssembler(Port<A>& port);
+    ResponsePacketAssembler(Port<A>& port);
 
     /**
      * Constructor.
      *
      * @param sp Specialized state.
      */
-    inline ResponsePacketAssembler(SpState& sp);
+    ResponsePacketAssembler(SpState& sp);
 
     /**
      * Destructor.
      */
-    inline ~ResponsePacketAssembler();
+    ~ResponsePacketAssembler();
 
     /**
      * Start assembling RIP response packet.
      */
-    inline void packet_start(RipPacket<A>* pkt);
+    void packet_start(RipPacket<A>* pkt);
 
     /**
      * Add a route to RIP response packet.
@@ -174,17 +174,17 @@ public:
      * @return true if route was added, false if packet is full and would
      * have indicated this if only @ref packet_full was called.
      */
-    inline bool packet_add_route(const Net&	net,
-				 const Addr&	nexthop,
-				 uint16_t	cost,
-				 uint16_t	tag);
+    bool packet_add_route(const Net&	net,
+			  const Addr&	nexthop,
+			  uint16_t	cost,
+			  uint16_t	tag);
 
     /**
      * Ready-to-go accessor.
      *
      * @return true if packet has no more space for route entries.
      */
-    inline bool packet_full() const;
+    bool packet_full() const;
 
     /**
      * Finish packet.  Some packet types require final stage processing
@@ -195,7 +195,7 @@ public:
      * authenticated RIP packets (one copy for each valid authentication key).
      * @return true on success, false if a failure is detected.
      */
-    inline bool packet_finish(list<RipPacket<A>* >& auth_packets);
+    bool packet_finish(list<RipPacket<A>* >& auth_packets);
 
 private:
     /**
@@ -229,7 +229,7 @@ public:
     typedef PacketAssemblerSpecState<A> SpState;
 
 public:
-    inline RequestTablePacketAssembler(Port<A>& port) : _sp_state(port) {}
+    RequestTablePacketAssembler(Port<A>& port) : _sp_state(port) {}
 
     /**
      * Take RipPacket packet and make it into a table request packet.
@@ -239,8 +239,8 @@ public:
      * @return true on success, false if an error is encountered.  Should
      * an error be encountered the reason is written to the xlog facility.
      */
-    inline bool prepare(RipPacket<A>*		pkt,
-			list<RipPacket<A>* >&	auth_packets);
+    bool prepare(RipPacket<A>*		pkt,
+		 list<RipPacket<A>* >&	auth_packets);
 
 protected:
     SpState _sp_state;

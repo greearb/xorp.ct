@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_error.hh,v 1.16 2006/10/12 01:24:49 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_error.hh,v 1.17 2007/02/16 22:46:11 pavlin Exp $
 
 #ifndef	__LIBXIPC_XRL_ERROR_HH__
 #define __LIBXIPC_XRL_ERROR_HH__
@@ -128,7 +128,7 @@ public:
     /**
      * @return string containing error_code(), error_msg(), and note().
      */
-    inline string str() const {
+    string str() const {
 	string r = c_format("%d ", error_code()) + error_msg();
 	return note().size() ? (r + " " + note()) : r;
     }
@@ -167,21 +167,19 @@ public:
      * still return OKAY(), but the return list should indicate the
      * error.
      */
-    inline static const XrlCmdError OKAY() { return XrlError::OKAY(); }
+    static const XrlCmdError OKAY() { return XrlError::OKAY(); }
 
     /**
      * Return value when the method arguments are incorrect.
      */
-    inline static const XrlCmdError BAD_ARGS(const string& reason = "")
-    {
+    static const XrlCmdError BAD_ARGS(const string& reason = "") {
 	return XrlError(XrlError::BAD_ARGS().error_code(), reason);
     }
 
     /**
      * Return value when the method could not be execute.
      */
-    inline static const XrlCmdError COMMAND_FAILED(const string& reason = "")
-    {
+    static const XrlCmdError COMMAND_FAILED(const string& reason = "") {
 	return XrlError(XrlError::COMMAND_FAILED().error_code(), reason);
     }
 
@@ -193,26 +191,18 @@ public:
     /**
      * @return string containing representation of command error.
      */
-    inline string str() const
-    {
-	return string("XrlCmdError ") + _xrl_error.str();
-    }
+    string str() const { return string("XrlCmdError ") + _xrl_error.str(); }
 
     /**
      * @return the unique identifer number associated with error.
      */
-    inline XrlErrorCode error_code() const
-    {
-	return _xrl_error.error_code();
-    }
+    XrlErrorCode error_code() const { return _xrl_error.error_code(); }
 
     /**
      * @return note associated with origin of error (i.e., the reason).
      */
-    inline string note() const
-    {
-	return _xrl_error.note();
-    }
+    string note() const { return _xrl_error.note(); }
+
 private:
     XrlCmdError(const XrlError& xe) : _xrl_error(xe) {}
     const XrlError _xrl_error;

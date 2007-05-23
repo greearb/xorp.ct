@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.18 2007/04/18 06:21:01 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.19 2007/04/19 21:36:50 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -322,10 +322,10 @@ public:
     void reject_connection(const string& sockid);
     void accept_connection(const string& sockid);
 
-    inline EventLoop& eventloop()			{ return _eventloop; }
-    inline const EventLoop& eventloop()	const		{ return _eventloop; }
+    EventLoop& eventloop()			{ return _eventloop; }
+    const EventLoop& eventloop() const		{ return _eventloop; }
 
-    inline const AddressTableBase& address_table() const { return _atable; }
+    const AddressTableBase& address_table() const { return _atable; }
 
 protected:
     void invalidate_address(const IPv4& addr, const string& why);
@@ -341,14 +341,14 @@ protected:
 			  XrlSender&		xs,
 			  const string&		target_name);
 	~RemoteSocketOwner();
-	inline const string& tgt_name() const		{ return _tname; }
+	const string& tgt_name() const		{ return _tname; }
 
 	void incr_socket_count();
 	void decr_socket_count();
 	uint32_t socket_count() const;
 
-	inline void set_watched(bool a)			{ _watched = a; }
-	inline bool watched() const			{ return _watched; }
+	void set_watched(bool a)		{ _watched = a; }
+	bool watched() const			{ return _watched; }
 
     protected:
 	void xrl_cb(const XrlError& xe);
@@ -388,13 +388,13 @@ public:
 		     XorpFd		fd);
 	~RemoteSocket();
 
-	inline XorpFd  fd() const			{ return _fd;	      }
-	inline const string& sockid() const		{ return _sockid;     }
-	inline bool addr_is(const A& a) const		{ return a == _addr;  }
-	inline const RemoteSocketOwner& owner() const	{ return _owner; }
-	inline RemoteSocketOwner& owner()		{ return _owner; }
+	XorpFd fd() const			{ return _fd;	      }
+	const string& sockid() const		{ return _sockid;     }
+	bool addr_is(const A& a) const		{ return a == _addr;  }
+	const RemoteSocketOwner& owner() const	{ return _owner; }
+	RemoteSocketOwner& owner()		{ return _owner; }
 
-	void set_addr(const A& addr)			{ _addr(addr); }
+	void set_addr(const A& addr)		{ _addr(addr); }
 
 	void set_data_recv_enable(bool en);
 	void data_io_cb(XorpFd fd, IoEventType);

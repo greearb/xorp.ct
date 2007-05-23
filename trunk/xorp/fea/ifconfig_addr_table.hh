@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.11 2007/05/03 18:46:27 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.12 2007/05/04 01:43:22 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
@@ -113,7 +113,7 @@ protected:
      * announces those that have disappeared (calls @ref
      * get_valid_addrs and then @ref set_addrs).
      */
-    inline void update();
+    void update();
 
 protected:
     set<IPv4>		_ipv4addrs;

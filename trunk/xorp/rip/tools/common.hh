@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/tools/common.hh,v 1.4 2006/03/16 00:05:56 pavlin Exp $
+// $XORP: xorp/rip/tools/common.hh,v 1.5 2007/02/16 22:47:20 pavlin Exp $
 
 #ifndef __RIP_TOOLS_COMMON_HH__
 #define __RIP_TOOLS_COMMON_HH__
@@ -85,9 +85,9 @@ public:
     bool shutdown();
     void dispatch_complete(const XrlError& xe, const XrlJobBase* cmd);
 
-    inline XrlSender* sender()			{ return _rtr; }
-    inline const string& target() const		{ return _tgt; }
-    inline void enqueue(const Job& cmd)		{ _jobs.push_back(cmd); }
+    XrlSender* sender()			{ return _rtr; }
+    const string& target() const	{ return _tgt; }
+    void enqueue(const Job& cmd)	{ _jobs.push_back(cmd); }
 
 protected:
     bool xrl_router_ready_poll();

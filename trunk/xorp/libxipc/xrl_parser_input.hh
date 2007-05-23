@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.7 2006/03/16 00:04:22 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_parser_input.hh,v 1.8 2007/02/16 22:46:11 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PARSER_INPUT_HH__
 #define __LIBXIPC_XRL_PARSER_INPUT_HH__
@@ -103,10 +103,10 @@ protected:
 	FileState(istream* input, const char* fname) :
 	    _input(input), _fname(fname), _line(0) {}
 	// Accessors
-	inline istream*	input() const { return _input; }
-	inline const char* 	filename() const { return _fname; }
-	inline int 		line() const { return _line; }
-	inline void 		incr_line() { _line++; }
+	istream*	input() const { return _input; }
+	const char* 	filename() const { return _fname; }
+	int 		line() const { return _line; }
+	void 		incr_line() { _line++; }
     private:
 	istream*   _input;
 	const char* _fname;

@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.33 2007/02/16 22:46:27 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.34 2007/04/20 20:29:01 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -339,7 +339,7 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    inline XorpTimer new_timer(const BasicTimerCallback& cb) {
+    XorpTimer new_timer(const BasicTimerCallback& cb) {
 	return XorpTimer(this, cb);
     }
 
@@ -437,9 +437,9 @@ private:
     void schedule_node(TimerNode* t);		// insert in time ordered pos.
     void unschedule_node(TimerNode* t);		// remove from list
 
-    inline void acquire_lock() const		{ /* nothing, for now */ }
-    inline bool attempt_lock() const		{ return true; }
-    inline void release_lock() const		{ /* nothing, for now */ }
+    void acquire_lock() const		{ /* nothing, for now */ }
+    bool attempt_lock() const		{ return true; }
+    void release_lock() const		{ /* nothing, for now */ }
 
 
     // find or create the heap assoicated with this priority level

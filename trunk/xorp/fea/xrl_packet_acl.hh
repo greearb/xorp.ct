@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_packet_acl.hh,v 1.5 2007/02/16 22:45:53 pavlin Exp $
+// $XORP: xorp/fea/xrl_packet_acl.hh,v 1.6 2007/04/18 06:21:01 pavlin Exp $
 
 #ifndef __FEA_XRL_PACKET_ACL_HH__
 #define __FEA_XRL_PACKET_ACL_HH__
@@ -375,9 +375,9 @@ protected:
 		      const PaSnapshot4* snap4,
 		      size_t idx = 0);
 	~PaBrowseState();
-	inline size_t index() const		{ return _idx; }
-	inline void set_index(size_t idx)	{ _idx = idx; }
-	inline const PaSnapshot4* snap4() const	{ return _snap4; }
+	size_t index() const			{ return _idx; }
+	void set_index(size_t idx)		{ _idx = idx; }
+	const PaSnapshot4* snap4() const	{ return _snap4; }
 	void defer_timeout();
 	void cancel_timeout();
     private:

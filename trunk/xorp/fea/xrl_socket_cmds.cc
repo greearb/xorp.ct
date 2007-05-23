@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.11 2007/03/28 13:49:34 schooley Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.12 2007/03/28 19:31:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -208,7 +208,7 @@ XrlSocketCommandDispatcher::~XrlSocketCommandDispatcher()
 {
 }
 
-inline bool
+bool
 XrlSocketCommandDispatcher::dispatch_head()
 {
     const Command& cmd = _cmds.front();

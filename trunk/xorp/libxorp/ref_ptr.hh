@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.21 2006/11/08 15:42:13 pavlin Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.22 2007/02/16 22:46:22 pavlin Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -94,7 +94,7 @@ public:
     /**
      * Return number of valid ref pointer entries in pool.
      */
-    inline int32_t balance() const { return _balance; }
+    int32_t balance() const { return _balance; }
 
     /**
      * @return singleton ref_counter_pool.
@@ -173,47 +173,37 @@ public:
      * Dereference reference counted object.
      * @return reference to object.
      */
-    inline _Tp& operator*() const {
-        return *_M_ptr;
-    }
+    _Tp& operator*() const { return *_M_ptr; }
 
     /**
      * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
-    inline _Tp* operator->() const {
-        return _M_ptr;
-    }
+    _Tp* operator->() const { return _M_ptr; }
 
     /**
      * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
-    inline _Tp* get() const {
-	return _M_ptr;
-    }
+    _Tp* get() const { return _M_ptr; }
 
     /**
      * Equality Operator
      * @return true if reference pointers refer to same object.
      */
-    inline bool operator==(const ref_ptr& rp) const {
-	return _M_ptr == rp._M_ptr;
-    }
+    bool operator==(const ref_ptr& rp) const { return _M_ptr == rp._M_ptr; }
 
     /**
      * Check if reference pointer refers to an object or whether it has
      * been assigned a null object.
      * @return true if reference pointer refers to a null object.
      */
-    inline bool is_empty() const {
-	return _M_ptr == 0;
-    }
+    bool is_empty() const { return _M_ptr == 0; }
 
     /**
      * @return true if reference pointer represents only reference to object.
      */
-    inline bool is_only() const {
+    bool is_only() const {
 	return ref_counter_pool::instance().count(_M_index) == 1;
     }
 
@@ -230,9 +220,7 @@ public:
      * object is set to null, and the former object is destructed if
      * necessary.
      */
-    inline void release() const {
-	unref();
-    }
+    void release() const { unref(); }
 
     ref_ptr(_Tp* data, int32_t index) : _M_ptr(data), _M_index(index)
     {
@@ -424,7 +412,7 @@ public:
      * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
-    inline _Tp* get() const {
+    _Tp* get() const {
 	return reinterpret_cast<_Tp*>
 	    (cref_counter_pool::instance().data(_M_index));
     }
@@ -433,35 +421,31 @@ public:
      * Dereference reference counted object.
      * @return reference to object.
      */
-    inline _Tp& operator*() const { return *(get()); }
+    _Tp& operator*() const { return *(get()); }
 
     /**
      * Dereference pointer to reference counted object.
      * @return pointer to object.
      */
-    inline _Tp* operator->() const { return get(); }
+    _Tp* operator->() const { return get(); }
 
     /**
      * Equality Operator
      * @return true if reference pointers refer to same object.
      */
-    inline bool operator==(const cref_ptr& rp) const {
-	return get() == rp.get();
-    }
+    bool operator==(const cref_ptr& rp) const { return get() == rp.get(); }
 
     /**
      * Check if reference pointer refers to an object or whether it has
      * been assigned a null object.
      * @return true if reference pointer refers to a null object.
      */
-    inline bool is_empty() const {
-	return _M_index < 0 || 0 == get();
-    }
+    bool is_empty() const { return _M_index < 0 || 0 == get(); }
 
     /**
      * @return true if reference pointer represents only reference to object.
      */
-    inline bool is_only() const {
+    bool is_only() const {
 	return cref_counter_pool::instance().count(_M_index) == 1;
     }
 
@@ -478,9 +462,7 @@ public:
      * object is set to null, and the former object is destructed if
      * necessary.
      */
-    inline void release() const {
-	unref();
-    }
+    void release() const { unref(); }
 
 private:
     /**

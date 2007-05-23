@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.10 2006/03/16 00:04:10 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmd_queue.hh,v 1.11 2007/02/16 22:45:59 pavlin Exp $
 
 #ifndef __IFMGR_CMD_QUEUE_HH__
 #define __IFMGR_CMD_QUEUE_HH__
@@ -258,7 +258,7 @@ public:
     /**
      * Constructor
      */
-    inline IfMgrIfTreeToCommands(const IfMgrIfTree& tree)
+    IfMgrIfTreeToCommands(const IfMgrIfTree& tree)
 	: _tree(tree)
     {}
 
@@ -282,7 +282,7 @@ public:
     /**
      * Constructor
      */
-    inline IfMgrIfAtomToCommands(const IfMgrIfAtom& interface)
+    IfMgrIfAtomToCommands(const IfMgrIfAtom& interface)
 	: _i(interface)
     {}
 
@@ -310,7 +310,7 @@ public:
      * @param ifn the name of the interface the vif belongs to.
      * @param vif the vif to be converted into a sequence of commands.
      */
-    inline IfMgrVifAtomToCommands(const string& ifn, const IfMgrVifAtom& vif)
+    IfMgrVifAtomToCommands(const string& ifn, const IfMgrVifAtom& vif)
 	: _ifn(ifn), _v(vif)
     {}
 
@@ -341,9 +341,9 @@ public:
      * @param vifn the name of the vif owning the address.
      * @param a address atom to be converted into a sequence of commands.
      */
-    inline IfMgrIPv4AtomToCommands(const string& ifn,
-				   const string& vifn,
-				   const IfMgrIPv4Atom& a)
+    IfMgrIPv4AtomToCommands(const string& ifn,
+			    const string& vifn,
+			    const IfMgrIPv4Atom& a)
 	: _ifn(ifn), _vifn(vifn), _a(a)
     {}
 
@@ -375,9 +375,9 @@ public:
      * @param vifn the name of the vif owning the address.
      * @param a address atom to be converted into a sequence of commands.
      */
-    inline IfMgrIPv6AtomToCommands(const string& ifn,
-				   const string& vifn,
-				   const IfMgrIPv6Atom& a)
+    IfMgrIPv6AtomToCommands(const string& ifn,
+			    const string& vifn,
+			    const IfMgrIPv6Atom& a)
 	: _ifn(ifn), _vifn(vifn), _a(a)
     {}
 

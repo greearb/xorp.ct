@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.21 2006/08/15 23:03:53 mjh Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.22 2007/02/16 22:45:17 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -34,16 +34,10 @@ public:
     NextTableMapIterator(const typename multimap<uint32_t, PeerTableInfo<A>*>::iterator& iter) {
 	_iter = iter;
     }
-    BGPRouteTable<A>* first() {
-	return _iter->second->route_table();
-    }
-    PeerTableInfo<A>& second() {
-	return *(_iter->second);
-    }
-    inline void operator ++(int) {
-	_iter++;
-    }
-    inline bool operator==(const NextTableMapIterator& them) const {
+    BGPRouteTable<A>* first() { return _iter->second->route_table(); }
+    PeerTableInfo<A>& second() { return *(_iter->second); }
+    void operator ++(int) { _iter++; }
+    bool operator==(const NextTableMapIterator& them) const {
 	return _iter == them._iter;
     }
 private:

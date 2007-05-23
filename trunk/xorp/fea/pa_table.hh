@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_table.hh,v 1.3 2006/03/16 00:04:00 pavlin Exp $
+// $XORP: xorp/fea/pa_table.hh,v 1.4 2007/02/16 22:45:49 pavlin Exp $
 
 #ifndef __FEA_PA_TABLE_HH__
 #define __FEA_PA_TABLE_HH__
@@ -71,7 +71,7 @@ class PaSnapshot4 {
 public:
     PaSnapshot4(const PaTableManager& parent);
     bool restore(PaTableManager& parent) const;
-    inline const PaSnapTable4& data() const { return _pal4; }
+    const PaSnapTable4& data() const { return _pal4; }
 protected:
     PaSnapTable4	_pal4;
 };
@@ -80,7 +80,7 @@ class PaSnapshot6 {
 public:
     PaSnapshot6(const PaTableManager& parent);
     bool restore(PaTableManager& parent) const;
-    inline const PaSnapTable6& data() const { return _pal6; }
+    const PaSnapTable6& data() const { return _pal6; }
 protected:
     PaSnapTable6	_pal6;
 };

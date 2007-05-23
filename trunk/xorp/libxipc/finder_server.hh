@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_server.hh,v 1.15 2006/03/16 00:04:16 pavlin Exp $
+// $XORP: xorp/libxipc/finder_server.hh,v 1.16 2007/02/16 22:46:06 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_SERVER_HH__
 #define __LIBXIPC_FINDER_SERVER_HH__
@@ -70,7 +70,7 @@ public:
     /**
      * Accessor to the number of connections the Finder has.
      */
-    inline uint32_t connection_count() const	{ return _f.messengers(); }
+    uint32_t connection_count() const	{ return _f.messengers(); }
 
     IPv4 addr() const { return _listeners.front()->address(); }
     uint16_t port() const { return _listeners.front()->port(); }

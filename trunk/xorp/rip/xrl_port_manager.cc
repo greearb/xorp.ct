@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.25 2007/04/23 23:05:10 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.26 2007/05/23 04:08:30 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -102,8 +102,8 @@ address_enabled(const IfMgrIfTree&	iftree,
  */
 template <typename A>
 struct port_has_address {
-    inline port_has_address(const A& addr) : _addr(addr) {}
-    inline bool operator() (const Port<A>* p) {
+    port_has_address(const A& addr) : _addr(addr) {}
+    bool operator() (const Port<A>* p) {
 	const PortIOBase<A>* io = p->io_handler();
 	return io && io->address() == _addr;
     }
@@ -117,7 +117,7 @@ private:
  */
 template <typename A>
 struct port_has_io_in_state {
-    inline port_has_io_in_state(ServiceStatus st) : _st(st) {}
+    port_has_io_in_state(ServiceStatus st) : _st(st) {}
 
     bool operator() (const Port<A>* p) const
     {
@@ -140,14 +140,14 @@ protected:
  */
 template <typename A>
 struct is_port_for {
-    inline is_port_for(const string* sockid, const A* addr, IfMgrXrlMirror* im)
+    is_port_for(const string* sockid, const A* addr, IfMgrXrlMirror* im)
 	: _psid(sockid), _pa(addr), _pim(im)
     {}
 
-    inline bool operator() (Port<A>*& p);
+    bool operator() (Port<A>*& p);
 
 protected:
-    inline bool link_addr_valid() const;
+    bool link_addr_valid() const;
 
 private:
     const string* 	_psid;

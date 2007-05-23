@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.38 2006/12/06 00:19:18 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.39 2007/02/16 22:46:41 pavlin Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -162,8 +162,7 @@ class Packet {
     /**
      * @return the standard header length for this version of OSPF.
      */
-    inline size_t
-    get_standard_header_length() {
+    size_t get_standard_header_length() {
 	switch(_version) {
 	case OspfTypes::V2:
 	    return STANDARD_HEADER_V2;

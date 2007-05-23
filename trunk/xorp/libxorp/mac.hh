@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.10 2006/10/12 01:24:53 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.11 2007/02/16 22:46:20 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -61,7 +61,7 @@ public:
     /**
      * @return string representation of MAC address.
      */
-    inline const string& str() const { return _srep; }
+    const string& str() const { return _srep; }
 
     /**
      * Get the normalized string of MAC address.
@@ -80,10 +80,10 @@ public:
     /**
      * @return true if MAC address value is unset.
      */
-    inline bool empty() const { return _srep.empty(); }
+    bool empty() const { return _srep.empty(); }
 
 protected:
-    inline void set_rep(const string& s) { _srep = s; }
+    void set_rep(const string& s) { _srep = s; }
     string _srep;
 };
 

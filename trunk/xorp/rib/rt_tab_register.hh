@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.16 2006/11/12 23:37:38 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.17 2007/02/16 22:47:11 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -212,18 +212,18 @@ public:
     /**
      * @return the number of modules interested in this RouteRegister.
      */
-    inline int size() const			{ return _modules.size(); }
+    int size() const			{ return _modules.size(); }
 
     /**
      * @return the subnet of this RouteRegister's route for which this
      * registration is valid.
      */
-    inline const IPNet<A>& valid_subnet() const { return _valid_subnet; }
+    const IPNet<A>& valid_subnet() const { return _valid_subnet; }
 
     /**
      * @return the RouteRegister's route.
      */
-    inline const IPRouteEntry<A>* route() const { return _route; }
+    const IPRouteEntry<A>* route() const { return _route; }
 
     /**
      * @return the module names interested in this RouteRegister as a

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.19 2007/02/16 22:45:36 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.20 2007/05/23 04:08:23 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -86,7 +86,7 @@ public:
     /**
      * @return true if this is a host route.
      */
-    inline bool is_host_route() const {
+    bool is_host_route() const {
  	return _net.prefix_len() == _net.masked_addr().addr_bitlen();
     }
 
@@ -207,8 +207,7 @@ public:
      *
      * @return the corresponding Fte4 entry.
      */
-    inline Fte4 get_fte4() const throw (InvalidCast)
-    {
+    Fte4 get_fte4() const throw (InvalidCast) {
 	Fte4 fte4(net().get_ipv4net(),
 		  nexthop().get_ipv4(),
 		  ifname(),
@@ -230,8 +229,7 @@ public:
      *
      * @return the corresponding Fte6 entry.
      */
-    inline Fte6 get_fte6() const throw (InvalidCast)
-    {
+    Fte6 get_fte6() const throw (InvalidCast) {
 	Fte6 fte6(net().get_ipv6net(),
 		  nexthop().get_ipv6(),
 		  ifname(),

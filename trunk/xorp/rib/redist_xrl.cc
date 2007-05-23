@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.29 2006/07/11 21:31:57 zec Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.30 2007/02/16 22:47:07 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -58,15 +58,15 @@ public:
     /**
      * Get number of times dispatch() invoked on instance.
      */
-    inline uint32_t dispatch_attempts() const		{ return _attempts; }
+    uint32_t dispatch_attempts() const			{ return _attempts; }
 
 protected:
-    inline void incr_dispatch_attempts()		{ _attempts++; }
-    inline RedistXrlOutput<A>* parent()			{ return _parent; }
-    inline const RedistXrlOutput<A>* parent() const	{ return _parent; }
+    void incr_dispatch_attempts()			{ _attempts++; }
+    RedistXrlOutput<A>* parent()			{ return _parent; }
+    const RedistXrlOutput<A>* parent() const		{ return _parent; }
 
-    inline void signal_complete_ok()	{ _parent->task_completed(this); }
-    inline void signal_fatal_failure()	{ _parent->task_failed_fatally(this); }
+    void signal_complete_ok()		{ _parent->task_completed(this); }
+    void signal_fatal_failure()		{ _parent->task_failed_fatally(this); }
 
 private:
     RedistXrlOutput<A>* _parent;

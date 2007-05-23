@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/transaction.hh,v 1.9 2006/10/12 01:24:56 pavlin Exp $
+// $XORP: xorp/libxorp/transaction.hh,v 1.10 2007/02/16 22:46:28 pavlin Exp $
 
 #ifndef __LIBXORP_TRANSACTION_HH__
 #define __LIBXORP_TRANSACTION_HH__
@@ -151,21 +151,21 @@ public:
      * 
      * @return the inter-operation additional timeout.
      */
-    inline uint32_t timeout_ms() const 	{ return _timeout_ms; }
+    uint32_t timeout_ms() const 	{ return _timeout_ms; }
 
     /**
      * Get the maximum number of uncommited pending transactions.
      * 
      * @return the maximum number of uncommitted transactions pending commit.
      */
-    inline uint32_t max_pending() const { return _max_pending; }
+    uint32_t max_pending() const { return _max_pending; }
 
     /**
      * Get the current number of uncommited pending transactions.
      * 
      * @return the current number of uncommitted transactions pending commit.
      */
-    inline uint32_t pending() const 	{ return _transactions.size(); }
+    uint32_t pending() const 	{ return _transactions.size(); }
 
 protected:
 
@@ -227,25 +227,25 @@ protected:
 	{}
 
 	/** Add an operation to list */
-	inline void add(const Operation& op);
+	void add(const Operation& op);
 
 	/** Dispatch all operations on list */
-	inline void commit();
+	void commit();
 
 	/** Flush all operations on list */
-	inline void flush();
+	void flush();
 	
 	/** Defer timeout by TransactionManagers timeout interval */
-	inline void defer_timeout();
+	void defer_timeout();
 
 	/** Cancel timeout timer */
-	inline void cancel_timeout();
+	void cancel_timeout();
 	
 	/** Get the list of operations */
-	inline OperationList& operations() { return _ops; }
+	OperationList& operations() { return _ops; }
 
 	/** Get the length of the operations list. */
-	inline uint32_t size() const { return _op_count; }
+	uint32_t size() const { return _op_count; }
 	
     private:
 	TransactionManager& _mgr;

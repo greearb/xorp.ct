@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.26 2006/09/17 16:17:25 mjh Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.27 2007/02/16 22:45:16 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -34,8 +34,8 @@ class CacheRoute {
 public:
     CacheRoute(const SubnetRoute<A>* route, uint32_t genid) 
 	: _routeref(route), _genid(genid) {}
-    inline const SubnetRoute<A>* route() const {return _routeref.route();}
-    inline uint32_t genid() const {return _genid;}
+    const SubnetRoute<A>* route() const { return _routeref.route(); }
+    uint32_t genid() const { return _genid; }
 private:
     SubnetRouteConstRef<A> _routeref;
     uint32_t _genid;

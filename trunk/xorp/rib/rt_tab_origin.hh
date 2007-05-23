@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_origin.hh,v 1.18 2006/03/16 00:05:38 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_origin.hh,v 1.19 2007/02/16 22:47:10 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_ORIGIN_HH__
 #define __RIB_RT_TAB_ORIGIN_HH__
@@ -164,17 +164,17 @@ public:
      * Get the number of times routing protocol has been shutdown and
      * restarted.
      */
-    inline uint32_t generation() const;
+    uint32_t generation() const;
 
     /**
      * Get the number of routes held internally.
      */
-    inline uint32_t route_count() const;
+    uint32_t route_count() const;
 
     /**
      * Get the trie.
      */
-    inline const RouteContainer& route_container() const;
+    const RouteContainer& route_container() const;
 
 private:
     uint32_t		_admin_distance;	// 0 .. 255

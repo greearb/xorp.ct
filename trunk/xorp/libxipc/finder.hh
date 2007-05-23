@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder.hh,v 1.21 2006/10/12 01:24:46 pavlin Exp $
+// $XORP: xorp/libxipc/finder.hh,v 1.22 2007/02/16 22:46:04 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_HH__
 #define __LIBXIPC_FINDER_HH__
@@ -127,7 +127,7 @@ protected:
 			       const string& class_name,
 			       const string& instance_name);
 
-    inline bool hello_timer_running() const { return _hello.scheduled(); }
+    bool hello_timer_running() const { return _hello.scheduled(); }
     void start_hello_timer();
     bool send_hello();
 
@@ -145,7 +145,7 @@ protected:
 
     bool class_exists(const string& class_name) const;
 
-    inline EventLoop& eventloop() const { return _e; }
+    EventLoop& eventloop() const { return _e; }
 
     Finder(const Finder&);		// Not implemented
     Finder& operator=(const Finder&);	// Not implemented

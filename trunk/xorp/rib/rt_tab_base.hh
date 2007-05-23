@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_base.hh,v 1.20 2006/03/16 00:05:34 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_base.hh,v 1.21 2007/02/16 22:47:09 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_BASE_HH__
 #define __RIB_RT_TAB_BASE_HH__
@@ -174,9 +174,9 @@ public:
     virtual string str() const = 0;
     virtual void flush() {}
 
-    inline const string& tablename() const	{ return _tablename; }
-    inline RouteTable* next_table()		{ return _next_table; }
-    inline const RouteTable* next_table() const	{ return _next_table; }
+    const string& tablename() const		{ return _tablename; }
+    RouteTable* next_table()			{ return _next_table; }
+    const RouteTable* next_table() const	{ return _next_table; }
 
     // this call should be received and dealt with by the PolicyRedistTable. 
     virtual void replace_policytags(const IPRouteEntry<A>& route,
@@ -184,7 +184,7 @@ public:
 				    RouteTable* caller);
 
 protected:
-    inline void set_tablename(const string& s) { _tablename = s; }
+    void set_tablename(const string& s) { _tablename = s; }
 
 private:
     string	_tablename;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.15 2006/10/12 01:24:46 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.16 2007/02/16 22:46:00 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -146,7 +146,7 @@ public:
      * @return interface configuration tree.  Should only be trusted when
      * status() is SERVICE_READY.
      */
-    inline const IfMgrIfTree& iftree() const		{ return _iftree; }
+    const IfMgrIfTree& iftree() const		{ return _iftree; }
 
     /**
      * Attach an observer interested in receiving IfMgr hints.

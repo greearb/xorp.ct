@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/system.hh,v 1.10 2006/03/16 00:05:52 pavlin Exp $
+// $XORP: xorp/rip/system.hh,v 1.11 2007/02/16 22:47:16 pavlin Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
@@ -42,25 +42,25 @@ public:
      * Get @ref EventLoop instance that each object in system should
      * use.
      */
-    inline EventLoop& eventloop()			{ return _e; }
+    EventLoop& eventloop()			{ return _e; }
 
     /**
      * Get @ref EventLoop instance that each object in RIP system
      * should use.
      */
-    inline const EventLoop& eventloop() const		{ return _e; }
+    const EventLoop& eventloop() const		{ return _e; }
 
     /**
      * Get the Route Database that each object in the RIP system
      * should use.
      */
-    inline RouteDatabase& route_db()			{ return _rtdb; }
+    RouteDatabase& route_db()			{ return _rtdb; }
 
     /**
      * Get the Route Database that each object in the RIP system
      * should use.
      */
-    inline const RouteDatabase& route_db() const	{ return _rtdb; }
+    const RouteDatabase& route_db() const	{ return _rtdb; }
 
     /**
      * Set the port manager object associated with the system.
@@ -70,17 +70,17 @@ public:
      * @return true if port manager has not previously been set and
      * pointer is not null, false otherwise.
      */
-    inline bool set_port_manager(PortManager* pm);
+    bool set_port_manager(PortManager* pm);
 
     /**
      * Get pointer to PortManager that the RIP system is using.
      */
-    inline PortManager* port_manager()			{ return _pm; }
+    PortManager* port_manager()			{ return _pm; }
 
     /**
      * Get pointer PortManager that the RIP system is using.
      */
-    inline const PortManager* port_manager() const	{ return _pm; }
+    const PortManager* port_manager() const	{ return _pm; }
 
     /**
      * Configure a policy filter.

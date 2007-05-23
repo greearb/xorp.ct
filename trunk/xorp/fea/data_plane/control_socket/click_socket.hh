@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.23 2007/02/16 22:45:36 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/control_socket/click_socket.hh,v 1.1 2007/05/01 01:42:40 pavlin Exp $
 
 #ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__
 #define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_CLICK_SOCKET_HH__
@@ -308,14 +308,14 @@ public:
      * @return the sequence number for the next message written into
      * Click.
      */
-    inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
+    uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
      * Get the cached process identifier value.
      * 
      * @return the cached process identifier value.
      */
-    inline pid_t pid() const { return _pid; }
+    pid_t pid() const { return _pid; }
 
     /**
      * Force socket to read data from kernel-level Click.
@@ -491,7 +491,7 @@ private:
 private:
     static const size_t CLSOCK_BYTES = 8*1024; // Initial guess at msg size
 
-    static inline const IPv4 DEFAULT_USER_CLICK_CONTROL_ADDRESS() {
+    inline const IPv4 DEFAULT_USER_CLICK_CONTROL_ADDRESS() {
 	return (IPv4::LOOPBACK());
     }
     static const uint16_t DEFAULT_USER_CLICK_CONTROL_SOCKET_PORT = 13000;

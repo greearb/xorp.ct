@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.20 2006/03/16 00:04:14 pavlin Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.21 2007/02/16 22:46:05 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -38,10 +38,10 @@ struct FinderDBEntry
     FinderDBEntry(const string& key);
     FinderDBEntry(const string& key, const string& value);
 
-    inline const string& key() const		{ return _key; }
-    inline const list<string>& values() const	{ return _values; }
-    inline list<string>& values()		{ return _values; }
-    inline void clear();
+    const string& key() const		{ return _key; }
+    const list<string>& values() const	{ return _values; }
+    list<string>& values()		{ return _values; }
+    void clear();
 
 protected:
     string	 _key;
@@ -232,12 +232,12 @@ public:
     /**
      * Get list of operations pending.
      */
-    inline OperationQueue& todo_list()		{ return _todo_list; }
+    OperationQueue& todo_list()		{ return _todo_list; }
 
     /**
      * Get List of operations done and are repeatable.
      */
-    inline OperationQueue& done_list()		{ return _done_list; }
+    OperationQueue& done_list()		{ return _done_list; }
 
     /**
      * Notify successful completion of an operation on the todo list.
@@ -252,18 +252,18 @@ public:
     /**
      * Get the Xrl Commands implemented by the FinderClient.
      */
-    inline XrlCmdMap& commands()		{ return _commands; }
+    XrlCmdMap& commands()		{ return _commands; }
 
     /**
      * @return true if FinderClient has registered Xrls and is considered
      * operational.
      */
-    inline bool ready() const			{ return _xrls_registered; }
+    bool ready() const			{ return _xrls_registered; }
 
     /**
      * @return true if a connection is established with the Finder.
      */
-    inline bool connected() const		{ return _messenger != 0; }
+    bool connected() const		{ return _messenger != 0; }
 
     /**
      * Attach a FinderClientObserver instance to receive event notifications.
@@ -304,8 +304,8 @@ protected:
     void prepare_for_restart();
 
 protected:
-    inline InstanceList::iterator find_instance(const string& instance);
-    inline InstanceList::const_iterator find_instance(const string& instance) const;
+    InstanceList::iterator find_instance(const string& instance);
+    InstanceList::const_iterator find_instance(const string& instance) const;
 
 protected:
     OperationQueue	 _todo_list;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_redist.hh,v 1.14 2006/03/16 00:05:40 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_redist.hh,v 1.15 2007/02/16 22:47:10 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REDIST_HH__
 #define __RIB_RT_TAB_REDIST_HH__
@@ -33,7 +33,7 @@ class RedistPolicy;
  */
 template <typename A>
 struct RedistNetCmp {
-    inline bool operator() (const IPNet<A>& l, const IPNet<A>& r) const;
+    bool operator() (const IPNet<A>& l, const IPNet<A>& r) const;
 };
 
 
@@ -111,7 +111,7 @@ public:
      * Get nets of live routes seen by RedistTable since it was
      * instantiated.
      */
-    inline const RouteIndex& route_index() const { return _rt_index; }
+    const RouteIndex& route_index() const { return _rt_index; }
 
 protected:
     RouteTable<A>*	_parent;	// Immediately upstream table.  May
@@ -210,13 +210,13 @@ public:
      * Method available to instances of RedistTable to announce events
      * to the Redistributor instance.
      */
-    inline RedistEventInterface& redist_event()		{ return _rei; }
+    RedistEventInterface& redist_event()		{ return _rei; }
 
     /**
      * Method available to instances of RedistOutput to
      * announce transport events to the Redistributor instance.
      */
-    inline OutputEventInterface& output_event()		{ return _oei; }
+    OutputEventInterface& output_event()		{ return _oei; }
 
     /**
      * Indicate dump status.  When Redistributor is first connected it dumps
@@ -225,7 +225,7 @@ public:
      * @return true if route dump is in process, false if route dump is
      * either not started or finished.
      */
-    inline bool dumping() const				{ return _dumping; }
+    bool dumping() const				{ return _dumping; }
 
 private:
     /**
@@ -239,9 +239,9 @@ private:
     void unschedule_dump_timer();
     void dump_a_route();
 
-    inline const IPNet<A>& last_dumped_net() const	{ return _last_net; }
-    inline RedistTable<A>* redist_table()		{ return _table; }
-    inline RedistOutput<A>* output()			{ return _output; }
+    const IPNet<A>& last_dumped_net() const	{ return _last_net; }
+    RedistTable<A>* redist_table()		{ return _table; }
+    RedistOutput<A>* output()			{ return _output; }
 
 private:
     // The following are not implemented
@@ -301,9 +301,9 @@ public:
     virtual void finishing_route_dump()				= 0;
 
 protected:
-    inline void announce_low_water()	{ _r->output_event().low_water(); }
-    inline void announce_high_water()	{ _r->output_event().high_water(); }
-    inline void announce_fatal_error()	{ _r->output_event().fatal_error(); }
+    void announce_low_water()		{ _r->output_event().low_water(); }
+    void announce_high_water()		{ _r->output_event().high_water(); }
+    void announce_fatal_error()		{ _r->output_event().fatal_error(); }
 
 private:
     // The following are not implemented

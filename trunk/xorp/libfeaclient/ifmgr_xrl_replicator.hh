@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.10 2006/03/16 00:04:11 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.11 2007/02/16 22:46:00 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 #define __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
@@ -68,7 +68,7 @@ public:
     /**
      * Accessor for xrl target name.
      */
-    inline const string& xrl_target_name() const	{ return _tgt; }
+    const string& xrl_target_name() const	{ return _tgt; }
 
     /**
      * Test whether the queue with the commands is empty.
@@ -220,7 +220,7 @@ public:
      */
     void push_manager_queue(IfMgrManagedXrlReplicator* r);
 
-    inline const IfMgrIfTree& iftree() const		{ return _iftree; }
+    const IfMgrIfTree& iftree() const		{ return _iftree; }
 
 private:
     typedef list<IfMgrManagedXrlReplicator*> Outputs;

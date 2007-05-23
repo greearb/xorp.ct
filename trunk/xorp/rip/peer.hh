@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/peer.hh,v 1.10 2006/06/27 21:50:48 pavlin Exp $
+// $XORP: xorp/rip/peer.hh,v 1.11 2007/02/16 22:47:14 pavlin Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -32,63 +32,63 @@ public:
     /**
      * Get the total number of packets received.
      */
-    inline uint32_t packets_recv() const	{ return _packets_recv; }
+    uint32_t packets_recv() const		{ return _packets_recv; }
 
     /**
      * Increment the total number of packets received.
      */
-    inline void incr_packets_recv()		{ _packets_recv++; }
+    void incr_packets_recv()			{ _packets_recv++; }
 
     /**
      * Get the total number of update packets received.
      */
-    inline uint32_t update_packets_recv() const	{ return _updates_recv; }
+    uint32_t update_packets_recv() const	{ return _updates_recv; }
 
     /**
      * Increment the total number of update packets received.
      */
-    inline void incr_update_packets_recv()	{ _updates_recv++; }
+    void incr_update_packets_recv()		{ _updates_recv++; }
 
     /**
      * Get the total number of table request packets received.
      */
-    inline uint32_t table_requests_recv() const	{ return _requests_recv; }
+    uint32_t table_requests_recv() const	{ return _requests_recv; }
 
     /**
      * Increment the total number of table request packets received.
      */
-    inline void incr_table_requests_recv()	{ _requests_recv++; }
+    void incr_table_requests_recv()		{ _requests_recv++; }
 
     /**
      * Get the number of bad routes received (eg invalid metric,
      * invalid address family).
      */
-    inline uint32_t bad_routes() const		{ return _bad_routes; }
+    uint32_t bad_routes() const			{ return _bad_routes; }
 
     /**
      * Increment the number of bad routes received.
      */
-    inline void incr_bad_routes()		{ _bad_routes++; }
+    void incr_bad_routes()			{ _bad_routes++; }
 
     /**
      * Get the number of bad response packets received.
      */
-    inline uint32_t bad_packets() const		{ return _bad_packets; }
+    uint32_t bad_packets() const		{ return _bad_packets; }
 
     /**
      * Increment the number of bad response packets received.
      */
-    inline void incr_bad_packets()		{ _bad_packets++; }
+    void incr_bad_packets()			{ _bad_packets++; }
 
     /**
      * Get the number of bad authentication packets received.
      */
-    inline uint32_t bad_auth_packets() const	{ return _bad_auth_packets; }
+    uint32_t bad_auth_packets() const		{ return _bad_auth_packets; }
 
     /**
      * Increment the number of bad authentication packets received.
      */
-    inline void incr_bad_auth_packets()		{ _bad_auth_packets++; }
+    void incr_bad_auth_packets()		{ _bad_auth_packets++; }
 
 protected:
     uint32_t _packets_recv;
@@ -152,37 +152,37 @@ public:
     /**
      * Get address of Peer.
      */
-    inline const Addr& address() const			{ return _addr; }
+    const Addr& address() const			{ return _addr; }
 
     /**
      * Get counters associated with Peer.
      */
-    inline PeerCounters& counters()			{ return _counters; }
+    PeerCounters& counters()			{ return _counters; }
 
     /**
      * Get counters associated with Peer.
      */
-    inline const PeerCounters& counters() const		{ return _counters; }
+    const PeerCounters& counters() const	{ return _counters; }
 
     /**
      * Get port associated with Peer.
      */
-    inline RipPort& port()				{ return _port; }
+    RipPort& port()				{ return _port; }
 
     /**
      * Get port associated with Peer.
      */
-    inline const RipPort& port() const			{ return _port; }
+    const RipPort& port() const			{ return _port; }
 
     /**
      * Set last active time.
      */
-    inline void set_last_active(const TimeVal& t)	{ _last_active = t; }
+    void set_last_active(const TimeVal& t)	{ _last_active = t; }
 
     /**
      * Get last active time.
      */
-    inline const TimeVal& last_active() const	     { return _last_active; }
+    const TimeVal& last_active() const		{ return _last_active; }
 
     /**
      * Update Route Entry in database for specified route.
@@ -232,11 +232,9 @@ template <typename A>
 struct peer_has_address {
     peer_has_address(const A& addr) : _a(addr) {}
 
-    inline bool
-    operator() (const Peer<A>& p) const { return p.address() == _a; }
+    bool operator() (const Peer<A>& p) const { return p.address() == _a; }
 
-    inline bool
-    operator() (const Peer<A>* p) const { return p->address() == _a; }
+    bool operator() (const Peer<A>* p) const { return p->address() == _a; }
 
 private:
     A _a;

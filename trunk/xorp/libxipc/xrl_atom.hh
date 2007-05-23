@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.11 2006/10/12 01:24:48 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.12 2007/02/16 22:46:10 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -291,24 +291,22 @@ public:
     // ... Your type's constructors here ...
 
     // Copy operations
-    inline XrlAtom(const XrlAtom& x) {
-	copy(x);
-    }
-    inline XrlAtom& operator=(const XrlAtom& x) {
+    XrlAtom(const XrlAtom& x) { copy(x); }
+    XrlAtom& operator=(const XrlAtom& x) {
 	discard_dynamic(); copy(x); return *this;
     }
     void copy(const XrlAtom& x);
 
     // Accessor operations
-    inline const string& name() const { return _atom_name; }
+    const string& name() const { return _atom_name; }
     void set_name(const string& n) throw (BadName) { set_name (n.c_str()); }
 
     string str() const;
     const string type_name() const;
     const string value() const;
 
-    inline const bool&		has_data() const { return _have_data; }
-    inline const XrlAtomType&	type() const { return _type; }
+    const bool&		has_data() const { return _have_data; }
+    const XrlAtomType&	type() const { return _type; }
 
     // The following accessors may throw accessor exceptions...
     const bool&		   boolean() const throw (NoData, WrongType);
@@ -331,7 +329,7 @@ public:
     bool operator==(const XrlAtom& x) const;
 
     // Binary packing and unpacking operations
-    inline bool  packed_bytes_fixed() const;
+    bool packed_bytes_fixed() const;
     size_t packed_bytes() const;
     size_t pack(uint8_t* buffer, size_t bytes_available) const;
 
@@ -339,43 +337,44 @@ public:
 
     static bool valid_type(const string& s);
     static bool valid_name(const string& s);
-    inline static XrlAtomType lookup_type(const string& s)
-    { return resolve_type_c_str(s.c_str()); }
+    static XrlAtomType lookup_type(const string& s) {
+	return resolve_type_c_str(s.c_str());
+    }
 
 private:
 
     void discard_dynamic();
-    inline void type_and_data_okay(const XrlAtomType& t) const
+    void type_and_data_okay(const XrlAtomType& t) const
 	throw (NoData, WrongType);
 
     void set_name(const char *n) throw (BadName);
     static XrlAtomType resolve_type_c_str(const char*);
     ssize_t data_from_c_str(const char* c_str);
 
-    inline size_t pack_name(uint8_t* buffer) const;
-    inline size_t pack_boolean(uint8_t* buffer) const;
-    inline size_t pack_uint32(uint8_t* buffer) const;
-    inline size_t pack_ipv4(uint8_t* buffer) const;
-    inline size_t pack_ipv4net(uint8_t* buffer) const;
-    inline size_t pack_ipv6(uint8_t* buffer) const;
-    inline size_t pack_ipv6net(uint8_t* buffer) const;
-    inline size_t pack_mac(uint8_t* buffer) const;
-    inline size_t pack_text(uint8_t* buffer) const;
-    inline size_t pack_list(uint8_t* buffer, size_t buffer_bytes) const;
-    inline size_t pack_binary(uint8_t* buffer) const;
+    size_t pack_name(uint8_t* buffer) const;
+    size_t pack_boolean(uint8_t* buffer) const;
+    size_t pack_uint32(uint8_t* buffer) const;
+    size_t pack_ipv4(uint8_t* buffer) const;
+    size_t pack_ipv4net(uint8_t* buffer) const;
+    size_t pack_ipv6(uint8_t* buffer) const;
+    size_t pack_ipv6net(uint8_t* buffer) const;
+    size_t pack_mac(uint8_t* buffer) const;
+    size_t pack_text(uint8_t* buffer) const;
+    size_t pack_list(uint8_t* buffer, size_t buffer_bytes) const;
+    size_t pack_binary(uint8_t* buffer) const;
 
-    inline size_t unpack_name(const uint8_t* buffer, size_t buffer_bytes)
+    size_t unpack_name(const uint8_t* buffer, size_t buffer_bytes)
 	throw (BadName);
-    inline size_t unpack_boolean(const uint8_t* buffer);
-    inline size_t unpack_uint32(const uint8_t* buffer);
-    inline size_t unpack_ipv4(const uint8_t* buffer);
-    inline size_t unpack_ipv4net(const uint8_t* buffer);
-    inline size_t unpack_ipv6(const uint8_t* buffer);
-    inline size_t unpack_ipv6net(const uint8_t* buffer);
-    inline size_t unpack_mac(const uint8_t* buffer, size_t buffer_bytes);
-    inline size_t unpack_text(const uint8_t* buffer, size_t buffer_bytes);
-    inline size_t unpack_list(const uint8_t* buffer, size_t buffer_bytes);
-    inline size_t unpack_binary(const uint8_t* buffer, size_t buffer_bytes);
+    size_t unpack_boolean(const uint8_t* buffer);
+    size_t unpack_uint32(const uint8_t* buffer);
+    size_t unpack_ipv4(const uint8_t* buffer);
+    size_t unpack_ipv4net(const uint8_t* buffer);
+    size_t unpack_ipv6(const uint8_t* buffer);
+    size_t unpack_ipv6net(const uint8_t* buffer);
+    size_t unpack_mac(const uint8_t* buffer, size_t buffer_bytes);
+    size_t unpack_text(const uint8_t* buffer, size_t buffer_bytes);
+    size_t unpack_list(const uint8_t* buffer, size_t buffer_bytes);
+    size_t unpack_binary(const uint8_t* buffer, size_t buffer_bytes);
 
 private:
     XrlAtomType	_type;
@@ -409,10 +408,10 @@ public:
 		 const XrlAtomType& type,
 		 const string&	    m)
 	: _xa(XrlAtom(name, type)), _spell(m) {}
-    inline const string& atom_name() const { return _xa.name(); }
-    inline const XrlAtomType& atom_type() const { return _xa.type(); }
-    inline const XrlAtom& atom() const { return _xa; }
-    inline const string& spell() const { return _spell; }
+    const string& atom_name() const { return _xa.name(); }
+    const XrlAtomType& atom_type() const { return _xa.type(); }
+    const XrlAtom& atom() const { return _xa; }
+    const string& spell() const { return _spell; }
 
 protected:
     const XrlAtom	_xa;

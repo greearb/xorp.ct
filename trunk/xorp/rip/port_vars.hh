@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_vars.hh,v 1.11 2006/07/19 00:43:39 pavlin Exp $
+// $XORP: xorp/rip/port_vars.hh,v 1.12 2007/02/16 22:47:15 pavlin Exp $
 
 #ifndef __RIP_PORT_VARS_HH__
 #define __RIP_PORT_VARS_HH__
@@ -34,113 +34,113 @@ public:
     /**
      * Get the total number of packets received.
      */
-    inline uint32_t packets_recv() const	{ return _packets_recv; }
+    uint32_t packets_recv() const	{ return _packets_recv; }
 
     /**
      * Increment the total number of packets received.
      */
-    inline void incr_packets_recv()		{ _packets_recv++; }
+    void incr_packets_recv()		{ _packets_recv++; }
 
     /**
      * Get total number of update packets received.
      */
-    inline uint32_t update_packets_recv() const { return _updates_recv; }
+    uint32_t update_packets_recv() const { return _updates_recv; }
 
     /**
      * Increment total number of update packets received.
      */
-    inline void incr_update_packets_recv() { _updates_recv++; }
+    void incr_update_packets_recv()	{ _updates_recv++; }
 
     /**
      * Get the number of bad routes received (eg invalid metric,
      * invalid address family).
      */
-    inline uint32_t bad_routes() const		{ return _bad_routes; }
+    uint32_t bad_routes() const		{ return _bad_routes; }
 
     /**
      * Increment the number of bad routes received.
      */
-    inline void incr_bad_routes()		{ _bad_routes++; }
+    void incr_bad_routes()		{ _bad_routes++; }
 
     /**
      * Get the number of bad response packets received.
      */
-    inline uint32_t bad_packets() const		{ return _bad_packets; }
+    uint32_t bad_packets() const	{ return _bad_packets; }
 
     /**
      * Increment the number of bad response packets received.
      */
-    inline void incr_bad_packets()		{ _bad_packets++; }
+    void incr_bad_packets()		{ _bad_packets++; }
 
     /**
      * Get the number of authentication failing packets received.
      */
-    inline uint32_t bad_auth_packets() const	{ return _bad_auth_packets; }
+    uint32_t bad_auth_packets() const	{ return _bad_auth_packets; }
 
     /**
      * Increment the number of bad authentication packets received.
      */
-    inline void incr_bad_auth_packets()		{ _bad_auth_packets++; }
+    void incr_bad_auth_packets()	{ _bad_auth_packets++; }
 
     /**
      * Get the number of triggered updates sent.
      */
-    inline uint32_t triggered_updates() const	{ return _triggered_updates; }
+    uint32_t triggered_updates() const	{ return _triggered_updates; }
 
     /**
      * Increment the number of triggered updates sent.
      */
-    inline void incr_triggered_updates() 	{ _triggered_updates++; }
+    void incr_triggered_updates() 	{ _triggered_updates++; }
 
     /**
      * Get the number of unsolicited updates sent.
      */
-    inline uint32_t unsolicited_updates() const	{ return _unsol_updates; }
+    uint32_t unsolicited_updates() const	{ return _unsol_updates; }
 
     /**
      * Increment the number of unsolicited updates sent.
      */
-    inline void incr_unsolicited_updates() 	{ _unsol_updates++; }
+    void incr_unsolicited_updates()		{ _unsol_updates++; }
 
     /**
      * Get the number of table requests sent.
      */
-    inline uint32_t table_requests_sent() const	{ return _tr_sent; }
+    uint32_t table_requests_sent() const	{ return _tr_sent; }
 
     /**
      * Increment the number of table requests updates sent.
      */
-    inline void incr_table_requests_sent() 	{ _tr_sent++; }
+    void incr_table_requests_sent()		{ _tr_sent++; }
 
     /**
      * Get the number of table requests received.
      */
-    inline uint32_t table_requests_recv() const	{ return _tr_recv; }
+    uint32_t table_requests_recv() const	{ return _tr_recv; }
 
     /**
      * Increment the number of table requests updates received.
      */
-    inline void incr_table_requests_recv() 	{ _tr_recv++; }
+    void incr_table_requests_recv()		{ _tr_recv++; }
 
     /**
      * Get number of non-RIP request packets received.
      */
-    inline uint32_t non_rip_requests_recv() const { return _nr_req_recv; }
+    uint32_t non_rip_requests_recv() const	{ return _nr_req_recv; }
 
     /**
      * Increment the number of non-RIP request packets received.
      */
-    inline void incr_non_rip_requests_recv() { _nr_req_recv++; }
+    void incr_non_rip_requests_recv()		{ _nr_req_recv++; }
 
     /**
      * Get number of non-RIP update packets sent.
      */
-    inline uint32_t non_rip_updates_sent() const { return _nr_updates; }
+    uint32_t non_rip_updates_sent() const	{ return _nr_updates; }
 
     /**
      * Increment the number of non-RIP request packets received.
      */
-    inline void incr_non_rip_updates_sent() { _nr_updates++; }
+    void incr_non_rip_updates_sent()		{ _nr_updates++; }
 
 protected:
     uint32_t _packets_recv;
@@ -167,33 +167,33 @@ public:
      * Initialize contants with default values from RIPv2 spec.  The values
      * are defined in constants.hh.
      */
-    inline PortTimerConstants();
+    PortTimerConstants();
 
     /**
      * Set the route expiration time.
      * @param t the expiration time in seconds.
      * @return true on success.
      */
-    inline bool set_expiry_secs(uint32_t t);
+    bool set_expiry_secs(uint32_t t);
 
     /**
      * Get the route route expiration time.
      * @return expiry time in seconds.
      */
-    inline uint32_t expiry_secs() const;
+    uint32_t expiry_secs() const;
 
     /**
      * Set the route deletion time.
      * @param t the deletion time in seconds (must be >= 1).
      * @return true on success, false if t == 0.
      */
-    inline bool set_deletion_secs(uint32_t t);
+    bool set_deletion_secs(uint32_t t);
 
     /**
      * Get the route deletion time.
      * @return deletion time in seconds.
      */
-    inline uint32_t deletion_secs() const;
+    uint32_t deletion_secs() const;
 
     /**
      * Set request packet transmission period.  Request packets are only
@@ -201,26 +201,26 @@ public:
      * @param t inter-packet interval in seconds.
      * @return true on success.
      */
-    inline bool set_table_request_period_secs(uint32_t t);
+    bool set_table_request_period_secs(uint32_t t);
 
     /**
      * Set request packet transmission period.
      * @return inter-packet interval in seconds.
      */
-    inline uint32_t table_request_period_secs() const;
+    uint32_t table_request_period_secs() const;
 
     /**
      * Set unsolicitied response time.
      * @param t_secs unsolicited response time in seconds.
      * @return true on success.
      */
-    inline bool set_update_interval(uint32_t t_secs);
+    bool set_update_interval(uint32_t t_secs);
 
     /**
      * Get unsolicitied response time.
      * @return unsolicited response time in seconds.
      */
-    inline uint32_t update_interval();
+    uint32_t update_interval();
 
     /**
      * Set unsolicitied response time jitter.
@@ -228,27 +228,27 @@ public:
      * (in percents of the time period).
      * @return true on success.
      */
-    inline bool set_update_jitter(uint32_t t_jitter);
+    bool set_update_jitter(uint32_t t_jitter);
 
     /**
      * Get unsolicitied response time jitter.
      * @return unsolicited response time jitter
      * (in percents of the time period).
      */
-    inline uint32_t update_jitter();
+    uint32_t update_jitter();
 
     /**
      * Set the triggered update delay.
      * @param t_secs the triggered update delay in seconds.
      * @return true on success.
      */
-    inline bool set_triggered_update_delay(uint32_t t_secs);
+    bool set_triggered_update_delay(uint32_t t_secs);
 
     /**
      * Get the triggered update delay.
      * @return the triggered update delay in seconds.
      */
-    inline uint32_t triggered_update_delay() const;
+    uint32_t triggered_update_delay() const;
 
     /**
      * Set the triggered update jitter.
@@ -256,13 +256,13 @@ public:
      * (in percents of the time delay).
      * @return true on success.
      */
-    inline bool set_triggered_update_jitter(uint32_t t_jitter);
+    bool set_triggered_update_jitter(uint32_t t_jitter);
 
     /**
      * Get the triggered update jitter.
      * @return the triggered update jitter (in percents of the time delay).
      */
-    inline uint32_t triggered_update_jitter() const;
+    uint32_t triggered_update_jitter() const;
 
     /**
      * Set the interpacket packet delay.
@@ -271,12 +271,12 @@ public:
      * @return true on success, false if t is greater than
      * MAXIMUM_INTERPACKET_DELAY_MS.
      */
-    inline bool	set_interpacket_delay_ms(uint32_t t);
+    bool set_interpacket_delay_ms(uint32_t t);
 
     /**
      * Get the interpacket packet delay in milliseconds.
      */
-    inline uint32_t interpacket_delay_ms() const;
+    uint32_t interpacket_delay_ms() const;
 
     /**
      * Set the interquery gap.  This is the minimum temporal gap between
@@ -285,7 +285,7 @@ public:
      * @param t the interquery delay in milliseconds.
      * @return true on success.
      */
-    inline bool	set_interquery_delay_ms(uint32_t t);
+    bool set_interquery_delay_ms(uint32_t t);
 
     /**
      * Get the interquery gap.  This is the minimum temporal gap between
@@ -293,7 +293,7 @@ public:
      * queries are ignored.
      * @return the interquery delay in milliseconds.
      */
-    inline uint32_t interquery_delay_ms() const;
+    uint32_t interquery_delay_ms() const;
 
 protected:
     uint32_t _expiry_secs;
@@ -311,6 +311,7 @@ protected:
 // ----------------------------------------------------------------------------
 // Inline PortTimerConstants accessor and modifiers.
 
+inline
 PortTimerConstants::PortTimerConstants()
     : _expiry_secs(DEFAULT_EXPIRY_SECS),
       _deletion_secs(DEFAULT_DELETION_SECS),

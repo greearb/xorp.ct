@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.25 2006/11/07 18:55:42 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.26 2007/02/16 22:47:14 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -70,9 +70,9 @@ public:
     uint8_t unused0() const	{ return extract_8(_unused0); }
     uint8_t unused1() const	{ return extract_8(_unused1); }
 
-    inline bool valid_command() const;
-    inline bool valid_version(uint8_t v) const { return version() == v; }
-    inline bool valid_padding() const;
+    bool valid_command() const;
+    bool valid_version(uint8_t v) const { return version() == v; }
+    bool valid_padding() const;
 
 protected:
     // Sizes of the fields
@@ -123,7 +123,7 @@ public:
 	  _unused1(_data + _unused1_offset)
     {}
 
-    inline void initialize(uint8_t cmd, uint8_t vers);
+    void initialize(uint8_t cmd, uint8_t vers);
 
 private:
     uint8_t* _data;		// The buffer data
@@ -231,23 +231,23 @@ public:
      */
     static size_t size()	{ return PacketRouteEntry<IPv4>::SIZE; }
 
-    inline uint16_t addr_family() const 	{ return extract_16(_af); }
-    inline uint16_t tag() const			{ return extract_16(_tag); }
-    inline IPv4     addr() const		{ return IPv4(_addr); }
-    inline uint32_t prefix_len() const;
-    inline IPv4Net  net() const;
-    inline IPv4     nexthop() const		{ return IPv4(_nh); }
-    inline uint32_t metric() const		{ return extract_32(_metric); }
+    uint16_t	addr_family() const 	{ return extract_16(_af); }
+    uint16_t	tag() const		{ return extract_16(_tag); }
+    IPv4	addr() const		{ return IPv4(_addr); }
+    uint32_t	prefix_len() const;
+    IPv4Net	net() const;
+    IPv4	nexthop() const		{ return IPv4(_nh); }
+    uint32_t	metric() const		{ return extract_32(_metric); }
 
     /**
      * @return true if route entry has properties of a table request.
      */
-    inline bool     is_table_request() const;
+    bool	is_table_request() const;
 
     /**
      * @return true if route entry has properties of an authentication entry.
      */
-    inline bool     is_auth_entry() const;
+    bool	is_auth_entry() const;
 
     static const uint16_t ADDR_FAMILY = 2;
     static const uint16_t ADDR_FAMILY_DUMP = 0;
@@ -326,15 +326,15 @@ public:
     /**
      * Initialize fields as a regular routing entry.
      */
-    inline void initialize(uint16_t	  tag,
-			   const IPv4Net& net,
-			   IPv4		  nh,
-			   uint32_t	  cost);
+    void initialize(uint16_t		tag,
+		    const IPv4Net&	net,
+		    IPv4		nh,
+		    uint32_t		cost);
 
     /**
      * Initialize fields as a route table request.
      */
-    inline void     initialize_table_request();
+    void initialize_table_request();
 
 private:
     uint8_t* _data;		// The buffer data
@@ -416,9 +416,9 @@ public:
      */
     static size_t size()	{ return PlaintextPacketRouteEntry4::SIZE; }
 
-    inline uint16_t addr_family() const		{ return extract_16(_af); }
-    inline uint16_t auth_type() const		{ return extract_16(_auth); }
-    inline string   password() const;
+    uint16_t addr_family() const	{ return extract_16(_af); }
+    uint16_t auth_type() const		{ return extract_16(_auth); }
+    string   password() const;
 
     static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 2;
@@ -465,7 +465,7 @@ public:
     /**
      * Initialize the entry.
      */
-    inline void initialize(const string& s);
+    void initialize(const string& s);
 
 private:
     uint8_t* _data;		// The buffer data
@@ -540,14 +540,14 @@ public:
      *
      * @return the RIP IPv4 MD5 authentication route entry size.
      */
-    static size_t size()	{ return MD5PacketRouteEntry4::SIZE; }
+    static size_t size()		{ return MD5PacketRouteEntry4::SIZE; }
 
-    inline uint16_t addr_family() const		{ return extract_16(_af); }
-    inline uint16_t auth_type() const		{ return extract_16(_auth); }
-    inline uint16_t auth_off() const		{ return extract_16(_auth_off); }
-    inline uint8_t  key_id() const		{ return extract_8(_key_id); }
-    inline uint8_t  auth_bytes() const		{ return extract_8(_auth_bytes); }
-    inline uint32_t seqno() const		{ return extract_32(_seqno); }
+    uint16_t addr_family() const	{ return extract_16(_af); }
+    uint16_t auth_type() const		{ return extract_16(_auth); }
+    uint16_t auth_off() const		{ return extract_16(_auth_off); }
+    uint8_t  key_id() const		{ return extract_8(_key_id); }
+    uint8_t  auth_bytes() const		{ return extract_8(_auth_bytes); }
+    uint32_t seqno() const		{ return extract_32(_seqno); }
 
     static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 3;
@@ -601,18 +601,18 @@ public:
 	  _mbz(_data + _mbz_offset)
     {}
 
-    inline void set_auth_off(uint16_t b) 	{ embed_16(_auth_off, b); }
-    inline void set_key_id(uint8_t id)		{ embed_8(_key_id, id); }
-    inline void set_auth_bytes(uint8_t b)	{ embed_8(_auth_bytes, b); }
-    inline void set_seqno(uint32_t sno)		{ embed_32(_seqno, sno); }
+    void set_auth_off(uint16_t b) 	{ embed_16(_auth_off, b); }
+    void set_key_id(uint8_t id)		{ embed_8(_key_id, id); }
+    void set_auth_bytes(uint8_t b)	{ embed_8(_auth_bytes, b); }
+    void set_seqno(uint32_t sno)	{ embed_32(_seqno, sno); }
 
     /**
      * Initialize the entry.
      */
-    inline void initialize(uint16_t pkt_bytes,
-			   uint8_t  key_id,
-			   uint8_t  auth_bytes,
-			   uint32_t seqno);
+    void initialize(uint16_t pkt_bytes,
+		    uint8_t  key_id,
+		    uint8_t  auth_bytes,
+		    uint32_t seqno);
 
 private:
     uint8_t* _data;		// The buffer data
@@ -673,13 +673,13 @@ public:
      *
      * @return the RIP IPv4 MD5 authentication trailer size.
      */
-    static size_t size()	{ return MD5PacketTrailer::SIZE; }
+    static size_t size()		{ return MD5PacketTrailer::SIZE; }
 
-    inline uint16_t addr_family() const		{ return extract_16(_af); }
-    inline const uint8_t* auth_data() const	{ return _auth_data; }
-    inline uint32_t auth_data_bytes() const	{ return _auth_data_sizeof; }
-    inline uint32_t auth_data_offset() const	{ return _auth_data_offset; }
-    inline bool valid() const;
+    uint16_t addr_family() const	{ return extract_16(_af); }
+    const uint8_t* auth_data() const	{ return _auth_data; }
+    uint32_t auth_data_bytes() const	{ return _auth_data_sizeof; }
+    uint32_t auth_data_offset() const	{ return _auth_data_offset; }
+    bool valid() const;
 
 protected:
     // Sizes of the fields
@@ -701,7 +701,7 @@ private:
     const uint8_t* _auth_data;	// 16 bytes of data
 };
 
-bool
+inline bool
 MD5PacketTrailer::valid() const
 {
     return (addr_family() == 0xffff) && (extract_16(_one) == 1);
@@ -723,9 +723,9 @@ public:
     /**
      * Initialize the entry.
      */
-    inline void initialize();
+    void initialize();
 
-    inline uint8_t* auth_data()				{ return _auth_data; }
+    uint8_t* auth_data()	{ return _auth_data; }
 
 private:
     uint8_t* _data;		// The buffer data
@@ -784,19 +784,19 @@ public:
      */
     static size_t size()	{ return PacketRouteEntry<IPv6>::SIZE; }
 
-    inline bool	    is_nexthop() const;
+    bool	    is_nexthop() const;
 
     /**
      * @return true if route entry has properties of a table request.
      */
-    inline bool	    is_table_request() const;
+    bool	    is_table_request() const;
 
-    inline IPv6	    nexthop() const;
+    IPv6	    nexthop() const;
 
-    inline uint16_t tag() const;
-    inline uint32_t prefix_len() const { return extract_8(_prefix_len); }
-    inline IPv6Net  net() const;
-    inline uint8_t  metric() const;
+    uint16_t tag() const;
+    uint32_t prefix_len() const { return extract_8(_prefix_len); }
+    IPv6Net  net() const;
+    uint8_t  metric() const;
 
     static const uint8_t NEXTHOP_METRIC = 0xff;
 
@@ -885,19 +885,19 @@ public:
     /**
      * Initialize fields as a regular routing entry.
      */
-    inline void	    initialize_route(uint16_t		route_tag,
+    void	    initialize_route(uint16_t		route_tag,
 				     const IPv6Net&	net,
 				     uint8_t		cost);
 
     /**
      * Initialize fields as a nexthop entry.
      */
-    inline void	    initialize_nexthop(const IPv6& nexthop);
+    void	    initialize_nexthop(const IPv6& nexthop);
 
     /**
      * Initialize fields as a route table request.
      */
-    inline void	    initialize_table_request();
+    void	    initialize_table_request();
 
 private:
     uint8_t* _data;		// The buffer data
@@ -952,17 +952,17 @@ public:
     /**
      * @return destination address of packet.
      */
-    inline const Addr&	address() const	{ return _addr; }
+    const Addr&	address() const	{ return _addr; }
 
     /**
      * @return destination port of packet.
      */
-    inline uint16_t	port() const	{ return _port; }
+    uint16_t	port() const	{ return _port; }
 
     /**
      * @return the maximum number of route entries packet may have.
      */
-    inline uint32_t	max_entries() const	{ return _max_entries; }
+    uint32_t	max_entries() const	{ return _max_entries; }
 
     /**
      * Set the maximum number of route entries a packet may have.
@@ -970,7 +970,7 @@ public:
      * methods as it resizes the internal storage and will cause
      * appended data to be lost.
      */
-    inline void		set_max_entries(uint32_t max_entries);
+    void	set_max_entries(uint32_t max_entries);
 
     RipPacket(const Addr& addr,
 	      uint16_t	  port,
@@ -983,12 +983,12 @@ public:
     /**
      * @return const pointer to the beginning of the RIP packet header.
      */
-    inline const uint8_t* header_ptr() const;
+    const uint8_t* header_ptr() const;
 
     /**
      * @return pointer to the beginning of the RIP packet header.
      */
-    inline uint8_t* header_ptr();
+    uint8_t* header_ptr();
 
     /**
      * Route entry accessor.
@@ -997,7 +997,7 @@ public:
      * @return const pointer to route entry, or 0 if entry_no is greater than
      * the maximum route entries associated with packet.
      */
-    inline const uint8_t* route_entry_ptr(uint32_t entry_no) const;
+    const uint8_t* route_entry_ptr(uint32_t entry_no) const;
 
     /**
      * Route entry accessor.
@@ -1006,16 +1006,16 @@ public:
      * @return pointer to route entry, or 0 if entry_no is greater than
      * the maximum route entries associated with packet.
      */
-    inline uint8_t* route_entry_ptr(uint32_t entry_no);
+    uint8_t* route_entry_ptr(uint32_t entry_no);
 
     void append_data(const uint8_t* data, uint32_t data_bytes);
     void append_data(const vector<uint8_t>& data);
 
-    inline vector<uint8_t>& 	  data()	    { return _data; }
-    inline const vector<uint8_t>& data() const	    { return _data; }
-    inline uint32_t 		  data_bytes() const { return _data.size(); }
-    inline const uint8_t*	  data_ptr() const  { return base_ptr(); }
-    inline uint8_t*	  	  data_ptr()	    { return base_ptr(); }
+    vector<uint8_t>& 	  data()		{ return _data; }
+    const vector<uint8_t>& data() const		{ return _data; }
+    uint32_t 		  data_bytes() const	{ return _data.size(); }
+    const uint8_t*	  data_ptr() const	{ return base_ptr(); }
+    uint8_t*	  	  data_ptr()		{ return base_ptr(); }
 
 private:
     Addr	    _addr;	// Src addr on inbound, dst address on outbound

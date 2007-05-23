@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_messenger.hh,v 1.17 2006/03/16 00:04:14 pavlin Exp $
+// $XORP: xorp/libxipc/finder_messenger.hh,v 1.18 2007/02/16 22:46:05 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_MESSENGER_HH__
 #define __LIBXIPC_FINDER_MESSENGER_HH__
@@ -91,8 +91,8 @@ public:
     virtual bool send(const Xrl& xrl, const SendCallback& scb) = 0;
     virtual bool pending() const = 0;
 
-    inline XrlCmdMap& command_map();
-    inline EventLoop& eventloop();
+    XrlCmdMap& command_map();
+    EventLoop& eventloop();
 
     void unhook_manager();
     FinderMessengerManager* manager();

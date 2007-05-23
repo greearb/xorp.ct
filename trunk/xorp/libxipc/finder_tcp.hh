@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.19 2006/10/12 01:24:46 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.20 2007/02/16 22:46:06 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -159,12 +159,12 @@ public:
     /**
      * Get interface address listener is operating on.
      */
-    inline IPv4 address() const		{ return _addr; }
+    IPv4 address() const		{ return _addr; }
 
     /**
      * Get port listener is bound to.
      */
-    inline uint16_t port() const	{ return _port; }
+    uint16_t port() const		{ return _port; }
 
 protected:
     /**
@@ -176,7 +176,7 @@ protected:
     FinderTcpListenerBase(const FinderTcpListenerBase&);	    // Not impl
     FinderTcpListenerBase& operator=(const FinderTcpListenerBase&); // Not impl
 
-    inline EventLoop& eventloop() const { return _e; }
+    EventLoop& eventloop() const { return _e; }
 
 protected:
     EventLoop&	_e;

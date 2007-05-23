@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.15 2006/03/16 00:04:17 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.16 2007/02/16 22:46:06 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -40,7 +40,7 @@ public:
 
     bool pending() const;
 
-    inline void close() { FinderTcpBase::close(); }
+    void close()	{ FinderTcpBase::close(); }
     
 protected:
     // FinderTcpBase methods

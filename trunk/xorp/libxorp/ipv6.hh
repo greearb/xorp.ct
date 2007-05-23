@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.34 2006/12/13 02:30:52 atanu Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.35 2007/02/16 22:46:20 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -175,7 +175,7 @@ public:
      *
      * @return address complement (i.e., all 0s become 1s, and vice-versa).
      */
-    inline IPv6 operator~() const;
+    IPv6 operator~() const;
 
     /**
      * OR Operator
@@ -183,7 +183,7 @@ public:
      * @param other the right-hand operand to OR with.
      * @return bitwise OR of two addresses.
      */
-    inline IPv6 operator|(const IPv6& other) const;
+    IPv6 operator|(const IPv6& other) const;
 
     /**
      * AND Operator
@@ -191,7 +191,7 @@ public:
      * @param other the right-hand operand to AND with.
      * @return bitwise AND of two addresses.
      */
-    inline IPv6 operator&(const IPv6& other) const;
+    IPv6 operator&(const IPv6& other) const;
 
     /**
      * XOR Operator
@@ -199,7 +199,7 @@ public:
      * @param other the right-hand operand to XOR with.
      * @return bitwize eXclusive-OR of two addresses.
      */
-    inline IPv6 operator^(const IPv6& other) const;
+    IPv6 operator^(const IPv6& other) const;
 
     /**
      * Operator <<
@@ -347,7 +347,7 @@ public:
      *
      * @return true if the address is numerically zero.
      */
-    inline bool is_zero() const		{ return *this == ZERO(); }
+    bool is_zero() const		{ return *this == ZERO(); }
 
     /**
      * Test if this address is a valid unicast address.
@@ -421,7 +421,7 @@ public:
      *
      * @return address size in number of octets.
      */
-    inline static size_t addr_bytelen() {
+    static size_t addr_bytelen() {
 	static_assert(sizeof(IPv6) == 4 * sizeof(uint32_t));
 	return sizeof(IPv6);
     }
@@ -436,7 +436,7 @@ public:
      *
      * @return address size in number of bits.
      */
-    inline static uint32_t addr_bitlen() {
+    static uint32_t addr_bitlen() {
 	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen());
     }
 
@@ -471,7 +471,7 @@ public:
      * @return a new IPv6 address created by masking this address with a mask
      * of length @ref prefix_len.
      */
-    inline IPv6 mask_by_prefix_len(uint32_t prefix_len) const
+    IPv6 mask_by_prefix_len(uint32_t prefix_len) const
 	throw (InvalidNetmaskLength) {
 	return (*this) & make_prefix(prefix_len);
     }
@@ -515,14 +515,14 @@ public:
      *
      * @return the address family of this address.
      */
-    inline static int af() { return AF; }
+    static int af() { return AF; }
 
     /**
      * Get the IP protocol version.
      *
      * @return the IP protocol version of this address.
      */
-    inline static uint32_t ip_version() { return IPV; }
+    static uint32_t ip_version() { return IPV; }
 
     /**
      * Get the human-readable string with the IP protocol version.
@@ -540,38 +540,38 @@ public:
      * @return the first @ref len bits starting from the rightmost
      * position @ref lsb. The returned bits are in host order.
      */
-    inline uint32_t bits(uint32_t lsb, uint32_t len) const;
+    uint32_t bits(uint32_t lsb, uint32_t len) const;
 
     /**
      * Count the number of bits that are set in this address.
      *
      * @return the number of bits that are set in this address.
      */
-    inline uint32_t bit_count() const;
+    uint32_t bit_count() const;
 
     /**
      * Count the number of leading zeroes in this address.
      *
      * @return the number of leading zeroes in this address.
      */
-    inline uint32_t leading_zero_count() const;
+    uint32_t leading_zero_count() const;
 
     /**
      * Pre-defined IPv6 address constants.
      */
-    inline static const IPv6& ZERO(int af = AF_INET6);
-    inline static const IPv6& ANY(int af = AF_INET6);
-    inline static const IPv6& ALL_ONES(int af = AF_INET6);
-    inline static const IPv6& LOOPBACK(int af = AF_INET6);
-    inline static const IPv6& MULTICAST_BASE(int af = AF_INET6);
-    inline static const IPv6& MULTICAST_ALL_SYSTEMS(int af = AF_INET6);
-    inline static const IPv6& MULTICAST_ALL_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& DVMRP_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& OSPFIGP_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& RIP2_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& PIM_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& SSM_ROUTERS(int af = AF_INET6);
+    static const IPv6& ZERO(int af = AF_INET6);
+    static const IPv6& ANY(int af = AF_INET6);
+    static const IPv6& ALL_ONES(int af = AF_INET6);
+    static const IPv6& LOOPBACK(int af = AF_INET6);
+    static const IPv6& MULTICAST_BASE(int af = AF_INET6);
+    static const IPv6& MULTICAST_ALL_SYSTEMS(int af = AF_INET6);
+    static const IPv6& MULTICAST_ALL_ROUTERS(int af = AF_INET6);
+    static const IPv6& DVMRP_ROUTERS(int af = AF_INET6);
+    static const IPv6& OSPFIGP_ROUTERS(int af = AF_INET6);
+    static const IPv6& OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET6);
+    static const IPv6& RIP2_ROUTERS(int af = AF_INET6);
+    static const IPv6& PIM_ROUTERS(int af = AF_INET6);
+    static const IPv6& SSM_ROUTERS(int af = AF_INET6);
 
     /**
      * Number of bits in address as a constant.

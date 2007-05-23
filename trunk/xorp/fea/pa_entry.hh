@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_entry.hh,v 1.3 2006/03/16 00:04:00 pavlin Exp $
+// $XORP: xorp/fea/pa_entry.hh,v 1.4 2007/02/16 22:45:48 pavlin Exp $
 
 #ifndef __FEA_PA_ENTRY_HH__
 #define __FEA_PA_ENTRY_HH__
@@ -71,8 +71,8 @@ public:
     /**
      * @return A string representation of the action.
      */
-    inline string str() const { return convert(_action); }
-    inline PaAction action() const { return _action; }
+    string str() const { return convert(_action); }
+    PaAction action() const { return _action; }
 
 protected:
     PaAction	_action;
@@ -119,7 +119,7 @@ public:
     /**
      * Reset all members.
      */
-    inline void zero() {
+    void zero() {
 	_ifname.erase();
 	_vifname.erase();
 	_src = IPNet<N>(N::ZERO(_src.af()), 0);
@@ -137,7 +137,7 @@ public:
      *
      * @return true if the rule-match portion of the PaEntry is matched.
      */
-    inline bool match(const PaEntry<N>& e) const {
+    bool match(const PaEntry<N>& e) const {
 	return (_ifname == e.ifname() &&
 		_vifname == e.vifname() &&
 		_src == e.src() &&

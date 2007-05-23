@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.5 2007/05/08 00:49:01 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.6 2007/05/23 04:08:23 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -32,9 +32,9 @@ public:
 	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
     {}
 
-    inline void reset_error()			{ _first_error.erase(); }
+    void reset_error()			{ _first_error.erase(); }
 
-    inline const string& error() const 		{ return _first_error; }
+    const string& error() const 	{ return _first_error; }
 
     virtual void pre_commit(uint32_t tid);
 
@@ -68,9 +68,9 @@ public:
      */
     virtual string path() const 		{ return _ifname; }
 
-    inline const string& ifname() const		{ return _ifname; }
+    const string& ifname() const		{ return _ifname; }
 
-    inline const IfTree& iftree() const		{ return _it; }
+    const IfTree& iftree() const		{ return _it; }
 
 protected:
     inline IfTree& iftree() 			{ return _it; }
@@ -152,11 +152,11 @@ public:
     bool path_valid() const	{ return interface() != 0; }
 
 protected:
-    inline IfTreeInterface* interface() {
+    IfTreeInterface* interface() {
 	IfTreeInterface* ifp = iftree().find_interface(ifname());
 	return (ifp);
     }
-    inline const IfTreeInterface* interface() const {
+    const IfTreeInterface* interface() const {
 	const IfTreeInterface* ifp = iftree().find_interface(ifname());
 	return (ifp);
     }

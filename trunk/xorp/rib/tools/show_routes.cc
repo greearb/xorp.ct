@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.22 2006/06/21 23:36:37 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.23 2007/02/16 22:47:13 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -70,7 +70,7 @@ struct ShowRoutesOptions {
     string	finder_host;
     uint16_t	finder_port;
 
-    inline ShowRoutesOptions()
+    ShowRoutesOptions()
 	: ribin(false),
 	  ipv4(true),
 	  unicast(true),

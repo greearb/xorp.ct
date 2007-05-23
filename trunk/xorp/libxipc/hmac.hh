@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/hmac.hh,v 1.7 2006/03/16 00:04:17 pavlin Exp $
+// $XORP: xorp/libxipc/hmac.hh,v 1.8 2007/02/16 22:46:07 pavlin Exp $
 
 #ifndef __LIBXIPC_HMAC_HH__
 #define __LIBXIPC_HMAC_HH__
@@ -26,7 +26,7 @@ public:
     virtual ~HMAC() {}
     virtual size_t signature_size() const = 0;
     virtual const string signature(const string& message) const = 0;
-    inline const string& key() const { return _key; }
+    const string& key() const { return _key; }
 
     virtual HMAC* clone() const = 0;
 protected:
@@ -45,7 +45,7 @@ public:
 	return new HMACMD5(key());
     }
 protected:
-    inline uint32_t d8tod32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) const {
+    uint32_t d8tod32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) const {
 	return (a << 24) | (b << 16) | (c << 8) | d;
     }
     static const char* SIG;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.8 2006/03/16 00:05:54 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.9 2007/02/16 22:47:17 pavlin Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -84,9 +84,9 @@ public:
     /**
      * Get name of socket server used to instantiate socket.
      */
-    inline const string& socket_server() const		{ return _ss; }
+    const string& socket_server() const		{ return _ss; }
 
-    inline const string& socket_id() const		{ return _sid; }
+    const string& socket_id() const		{ return _sid; }
 
 private:
     bool request_socket_server();

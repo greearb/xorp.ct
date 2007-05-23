@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.12 2006/03/16 00:04:17 pavlin Exp $
+// $XORP: xorp/libxipc/finder_xrl_queue.hh,v 1.13 2007/02/16 22:46:06 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_XRL_QUEUE_HH__
 #define __LIBXIPC_FINDER_XRL_QUEUE_HH__
@@ -41,7 +41,7 @@ public:
     FinderXrlCommandQueue(const FinderXrlCommandQueue& oq);
     ~FinderXrlCommandQueue();
 
-    inline FinderMessengerBase& messenger() { return *_m; }
+    FinderMessengerBase& messenger()	{ return *_m; }
 
     void enqueue(const Command& cmd);
 
@@ -74,8 +74,8 @@ public:
     FinderXrlCommandBase(FinderXrlCommandQueue& q) : _queue(q) {}
     virtual ~FinderXrlCommandBase() {}
 
-    inline FinderXrlCommandQueue& queue()	{ return _queue; }
-    inline FinderMessengerBase& messenger()	{ return _queue.messenger(); }
+    FinderXrlCommandQueue& queue()	{ return _queue; }
+    FinderMessengerBase& messenger()	{ return _queue.messenger(); }
 
     virtual bool dispatch() = 0;
 

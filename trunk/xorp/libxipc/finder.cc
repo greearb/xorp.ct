@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.22 2006/06/21 23:36:33 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.23 2007/02/16 22:46:04 pavlin Exp $"
 
 #include <set>
 
@@ -35,8 +35,7 @@
 // the target, eg unresolved xrl to resolved xrls, name-to-values, etc...
 //
 
-class FinderTarget
-{
+class FinderTarget {
 public:
     typedef Finder::Resolveables Resolveables;
     typedef map<string, Resolveables> ResolveMap;
@@ -49,42 +48,30 @@ public:
 	  _enabled(false), _messenger(fm)
     {}
 
-    ~FinderTarget()
-    {
+    ~FinderTarget() {
 	debug_msg("Destructing %s\n", name().c_str());
     }
 
-    inline const string& name() const		{ return _name; }
-    inline const string& class_name() const	{ return _class_name; }
-    inline const string& cookie() const		{ return _cookie; }
-    inline bool enabled() const			{ return _enabled; }
-    inline void set_enabled(bool en)		{ _enabled = en; }
+    const string& name() const		{ return _name; }
+    const string& class_name() const	{ return _class_name; }
+    const string& cookie() const	{ return _cookie; }
+    bool enabled() const		{ return _enabled; }
+    void set_enabled(bool en)		{ _enabled = en; }
 
-    inline const FinderMessengerBase* messenger() const
-    {
-	return _messenger;
-    }
+    const FinderMessengerBase* messenger() const { return _messenger; }
 
-    inline FinderMessengerBase* messenger()
-    {
-	return _messenger;
-    }
+    FinderMessengerBase* messenger() { return _messenger; }
 
-    inline const ResolveMap& resolve_map() const
-    {
-	return _resolutions;
-    }
+    const ResolveMap& resolve_map() const { return _resolutions; }
 
-    bool add_resolution(const string& key, const string& value)
-    {
+    bool add_resolution(const string& key, const string& value) {
 	Resolveables& r = _resolutions[key];
 	if (find(r.begin(), r.end(), value) == r.end())
 	    r.push_back(value);
 	return true;
     }
 
-    bool remove_resolutions(const string& key)
-    {
+    bool remove_resolutions(const string& key) {
 	ResolveMap::iterator i = _resolutions.find(key);
 	if (_resolutions.end() != i) {
 	    _resolutions.erase(i);
@@ -93,8 +80,7 @@ public:
 	return false;
     }
 
-    const Resolveables* resolveables(const string& key) const
-    {
+    const Resolveables* resolveables(const string& key) const {
 	ResolveMap::const_iterator i = _resolutions.find(key);
 	if (_resolutions.end() == i) {
 	    debug_msg("Looking for \"%s\"\n", key.c_str());
@@ -106,22 +92,19 @@ public:
 	return &i->second;
     }
 
-    bool add_class_watch(const string& class_name)
-    {
+    bool add_class_watch(const string& class_name) {
 	pair<set<string>::iterator,bool> r = _classwatches.insert(class_name);
 	return r.second;
     }
 
-    void remove_class_watch(const string& class_name)
-    {
+    void remove_class_watch(const string& class_name) {
 	set<string>::iterator i = _classwatches.find(class_name);
  	if (i != _classwatches.end()) {
 	    _classwatches.erase(i);
 	}
     }
 
-    bool has_class_watch(const string& class_name) const
-    {
+    bool has_class_watch(const string& class_name) const {
 #ifdef DEBUG_LOGGING
 	debug_msg("tgt %s has watches on:\n", _name.c_str());
 	set<string>::const_iterator wi = _classwatches.begin();
@@ -133,22 +116,19 @@ public:
 	return _classwatches.find(class_name) != _classwatches.end();
     }
 
-    bool add_instance_watch(const string& instance_name)
-    {
+    bool add_instance_watch(const string& instance_name) {
 	pair<set<string>::iterator,bool> r = _instancewatches.insert(instance_name);
 	return r.second;
     }
 
-    void remove_instance_watch(const string& instance_name)
-    {
+    void remove_instance_watch(const string& instance_name) {
 	set<string>::iterator i = _instancewatches.find(instance_name);
  	if (i != _instancewatches.end()) {
 	    _instancewatches.erase(i);
 	}
     }
 
-    bool has_instance_watch(const string& instance_name) const
-    {
+    bool has_instance_watch(const string& instance_name) const {
 #ifdef DEBUG_LOGGING
 	debug_msg("tgt %s has watches on:\n", _name.c_str());
 	set<string>::const_iterator wi = _instancewatches.begin();
@@ -182,20 +162,17 @@ protected:
 // exist.
 //
 
-class FinderClass
-{
+class FinderClass {
 public:
     FinderClass(const string& name, bool singleton)
 	: _name(name), _singleton(singleton)
     {}
 
-    inline const string& name() const			{ return _name; }
-    inline bool singleton() const			{ return _singleton; }
-    inline const list<string>& instances() const	{ return _instances; }
+    const string& name() const			{ return _name; }
+    bool singleton() const			{ return _singleton; }
+    const list<string>& instances() const	{ return _instances; }
 
-    inline bool
-    add_instance(const string& instance)
-    {
+    bool add_instance(const string& instance) {
 	list<string>::const_iterator i = find(_instances.begin(),
 					      _instances.end(),
 					      instance);
@@ -213,9 +190,7 @@ public:
 	return true;
     }
 
-    inline bool
-    remove_instance(const string& instance)
-    {
+    bool remove_instance(const string& instance) {
 	list<string>::iterator i = find(_instances.begin(), _instances.end(),
 					instance);
 	if (i == _instances.end()) {
@@ -244,8 +219,7 @@ protected:
 //
 // Used as part of event logging.
 //
-class FinderEvent
-{
+class FinderEvent {
 public:
     enum Tag {
 	TARGET_BIRTH = 0x1,
@@ -265,9 +239,9 @@ public:
 		  (_tag == TARGET_BIRTH) ? "birth" : "death",
 		  _class_name.c_str(), _instance_name.c_str());
     }
-    inline const Tag& tag() const		{ return _tag; }
-    inline const string& instance_name() const	{ return _instance_name; }
-    inline const string& class_name() const	{ return _class_name; }
+    const Tag& tag() const		{ return _tag; }
+    const string& instance_name() const	{ return _instance_name; }
+    const string& class_name() const	{ return _class_name; }
 
 protected:
     Tag	   _tag;
@@ -284,8 +258,7 @@ protected:
 // renders the Xrl passed to it into a pre-supplied string buffer.
 //
 
-class XrlFakeSender : public XrlSender
-{
+class XrlFakeSender : public XrlSender {
 public:
     XrlFakeSender(string& outbuf) : _buf(outbuf)
     {}
@@ -293,16 +266,12 @@ public:
     ~XrlFakeSender()
     {}
 
-    bool send(const Xrl& x, const XrlSender::Callback&)
-    {
+    bool send(const Xrl& x, const XrlSender::Callback&) {
 	_buf = x.str();
 	return true;
     }
 
-    bool pending() const
-    {
-	return false;
-    }
+    bool pending() const { return false; }
 
 private:
     string& _buf;

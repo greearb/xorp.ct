@@ -44,8 +44,8 @@ static const uint8_t FILLER_VALUE = 0xe7;
 
 static bool s_verbose = false;
 
-inline bool verbose()           { return s_verbose; }
-inline void set_verbose(bool v) { s_verbose = v; }
+bool verbose()           { return s_verbose; }
+void set_verbose(bool v) { s_verbose = v; }
 
 #define verbose_log(x...)                                                     \
 do {                                                                          \
@@ -134,16 +134,16 @@ TestAddressTable::address_valid(const IPv6& addr) const
 // Scheduling Time class
 class SchedulingTime {
 private:
-	int _time;
-	int _increment;
+    int _time;
+    int _increment;
 	
 public:
-	SchedulingTime(int start_time =0, int increment =250) 
+    SchedulingTime(int start_time =0, int increment =250) 
 	: _time(start_time), _increment(increment) {}
 	
-	inline int now() { return _time; } 
-	inline int next() { _time += _increment; return _time; }
-	inline int next(int inc) { _time += inc; return _time; }
+    int now() { return _time; } 
+    int next() { _time += _increment; return _time; }
+    int next(int inc) { _time += inc; return _time; }
 };
 
 //
@@ -168,11 +168,11 @@ public:
 	_r = 0;
     }
 
-    inline uint32_t bytes_received() const	{ return _b_rcv; }
-    inline uint32_t bytes_sent() const		{ return _b_snd; }
-    inline uint32_t packets_received() const	{ return _p_rcv; }
-    inline uint32_t packets_sent() const	{ return _p_snd; }
-    inline uint32_t xrl_errors() const		{ return _x_err; }
+    uint32_t bytes_received() const	{ return _b_rcv; }
+    uint32_t bytes_sent() const		{ return _b_snd; }
+    uint32_t packets_received() const	{ return _p_rcv; }
+    uint32_t packets_sent() const	{ return _p_snd; }
+    uint32_t xrl_errors() const		{ return _x_err; }
 
     /**
      * Stop sending packets.
@@ -284,12 +284,12 @@ class TestSocket4TCPServer : public TestSocket4TCP {
 
 public:
     TestSocket4TCPServer(EventLoop& e, const string& ssname,
-		   IPv4 finder_host, uint16_t finder_port)
+			 IPv4 finder_host, uint16_t finder_port)
 	: TestSocket4TCP(e, ssname, finder_host, finder_port),
 	  _server_closed(true), _client_closed(true) {}
 
-    inline bool	server_closed() const { return _server_closed; }
-    inline bool	client_closed() const { return _client_closed; }
+    bool server_closed() const { return _server_closed; }
+    bool client_closed() const { return _client_closed; }
 
     /**
      * Bind to interface and port.
@@ -542,7 +542,7 @@ public:
 	: TestSocket4TCP(e, ssname, finder_host, finder_port),
 	  _closed(true) {}
 
-    inline bool	closed() const { return _closed; }
+    bool closed() const { return _closed; }
 
     /**
      * Bind to interface and port, and connect to remote address and port.

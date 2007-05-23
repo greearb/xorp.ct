@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.52 2006/03/16 00:04:23 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.53 2007/02/16 22:46:13 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -46,7 +46,7 @@ public:
     TraceXrl() {
 	_do_trace = !(getenv("XRLTRACE") == 0);
     }
-    inline bool on() const { return _do_trace; }
+    bool on() const { return _do_trace; }
     operator bool() { return _do_trace; }
 
 protected:
@@ -74,8 +74,8 @@ public:
 	: _xrl(x), _xcb(xcb)
     {}
 
-    inline const Xrl& xrl() const		{ return _xrl; }
-    inline XrlCallback& cb()			{ return _xcb; }
+    const Xrl& xrl() const		{ return _xrl; }
+    XrlCallback& cb()			{ return _xcb; }
 
 protected:
     Xrl				_xrl;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.15 2006/10/12 01:25:10 pavlin Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.16 2007/02/16 22:47:16 pavlin Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -75,7 +75,7 @@ public:
     /**
      * Get network.
      */
-    inline const IPNet<A>& net() const		{ return _net; }
+    const IPNet<A>& net() const		{ return _net; }
 
     /**
      * Set next hop.
@@ -91,7 +91,7 @@ public:
      *
      * @return nexthop address associated with the route entry.
      */
-    inline const A& nexthop() const		{ return _nh; }
+    const A& nexthop() const		{ return _nh; }
 
     /**
      * Set the cost metric.
@@ -125,14 +125,14 @@ public:
      *
      * @return a pointer to the origin associated with the route entry.
      */
-    inline const Origin* origin() const 	{ return _origin; }
+    const Origin* origin() const 	{ return _origin; }
 
     /**
      * Get the origin.
      *
      * @return a pointer to the origin associated with the route entry.
      */
-    inline Origin* origin()			{ return _origin; }
+    Origin* origin()			{ return _origin; }
 
     /**
      * Set the tag value.
@@ -148,17 +148,17 @@ public:
      *
      * @return tag value associated with the route entry.
      */
-    inline uint16_t tag() const 		{ return _tag; }
+    uint16_t tag() const 		{ return _tag; }
 
     /**
      * Set a Timer Event associated with this route.
      */
-    inline void set_timer(const XorpTimer& t) 	{ _timer = t; }
+    void set_timer(const XorpTimer& t) 	{ _timer = t; }
 
     /**
      * Get Timer associated with route.
      */
-    inline const XorpTimer& timer() const 	{ return _timer; }
+    const XorpTimer& timer() const 	{ return _timer; }
 
     /**
      * @return policy-tags associated with route.
@@ -185,16 +185,16 @@ public:
 
 private:
     friend class RouteEntryRef<A>;
-    inline void ref()				{ _ref_cnt++; }
-    inline uint16_t unref()			{ return --_ref_cnt; }
-    inline uint16_t ref_cnt() const		{ return _ref_cnt; }
+    void ref()				{ _ref_cnt++; }
+    uint16_t unref()			{ return --_ref_cnt; }
+    uint16_t ref_cnt() const		{ return _ref_cnt; }
 
 protected:
     RouteEntry(const RouteEntry&);			// Not implemented.
     RouteEntry& operator=(const RouteEntry&);		// Not implemented.
 
-    inline void dissociate();
-    inline void associate(Origin* o);
+    void dissociate();
+    void associate(Origin* o);
 
 
 protected:
@@ -226,8 +226,7 @@ private:
     RouteEntry<A>* _rt;
 
 protected:
-    inline void release()
-    {
+    void release() {
 	if (_rt && _rt->unref() == 0) delete _rt;
     }
 
@@ -243,28 +242,18 @@ public:
 	if (_rt) _rt->ref();
     }
 
-    inline RouteEntryRef& operator=(const RouteEntryRef& o)
-    {
+    RouteEntryRef& operator=(const RouteEntryRef& o) {
 	release();
 	_rt = o._rt;
 	if (_rt) _rt->ref();
 	return *this;
     }
 
-    inline RouteEntry<A>* get() const
-    {
-        return _rt;
-    }
+    RouteEntry<A>* get() const { return _rt; }
 
-    inline RouteEntry<A>* operator->() const
-    {
-        return _rt;
-    }
+    RouteEntry<A>* operator->() const { return _rt; }
 
-    inline bool operator==(const RouteEntryRef& o) const
-    {
-	return _rt == o._rt;
-    }
+    bool operator==(const RouteEntryRef& o) const { return _rt == o._rt; }
 };
 
 

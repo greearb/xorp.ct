@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_transaction.hh,v 1.4 2006/03/27 01:04:28 pavlin Exp $
+// $XORP: xorp/fea/pa_transaction.hh,v 1.5 2007/02/16 22:45:49 pavlin Exp $
 
 #ifndef __FEA_PA_TRANSACTION_HH__
 #define __FEA_PA_TRANSACTION_HH__
@@ -196,17 +196,17 @@ public:
      * @return maximum number of pending operations in a transaction allowed
      * by this class.
      */
-    inline size_t retrieve_max_ops() const { return MAX_OPS_PENDING; }
+    size_t retrieve_max_ops() const { return MAX_OPS_PENDING; }
 
     /**
      * @return the PaTableManager associated with this PaTransactionManager.
      */
-    inline PaTableManager& ptm() const { return _ptm; }
+    PaTableManager& ptm() const { return _ptm; }
 
     /**
      * @return pointer to the current PaBackend in use.
      */
-    inline PaBackend* get_backend() const { return _pbp; }
+    PaBackend* get_backend() const { return _pbp; }
 
     /**
      * @return true if the named PaBackend was successfully constructed.
@@ -226,26 +226,24 @@ protected:
 		      const PaBackend::Snapshot4Base* bsn4);
 	~PaTransaction();
 
-	inline const PaSnapshot4* snap4() const { return _snap4; }
+	const PaSnapshot4* snap4() const { return _snap4; }
 
-	inline void set_snap4(const PaSnapshot4* sn4)
-	    { _snap4 = sn4; }
+	void set_snap4(const PaSnapshot4* sn4) { _snap4 = sn4; }
 
-	inline const PaBackend::Snapshot4Base* bsnap4() const { return _bsnap4; }
+	const PaBackend::Snapshot4Base* bsnap4() const { return _bsnap4; }
 
-	inline void set_bsnap4(const PaBackend::Snapshot4Base* bsn4)
-	    { _bsnap4 = bsn4; }
+	void set_bsnap4(const PaBackend::Snapshot4Base* bsn4) {
+	    _bsnap4 = bsn4;
+	}
 
 #ifdef notyet
-	inline const PaSnapshot6* snap6() const { return _snap6; }
+	const PaSnapshot6* snap6() const { return _snap6; }
 
-	inline void set_snap6(const PaSnapshot6* sn6)
-	    { _snap6 = sn6; }
+	void set_snap6(const PaSnapshot6* sn6) { _snap6 = sn6; }
 
-	inline const PaBackend::Snapshot6Base* bsnap6() const { return _bsnap6; }
+	const PaBackend::Snapshot6Base* bsnap6() const { return _bsnap6; }
 
-	inline void set_bsnap6(PaBackend::Snapshot6Base* bsn6)
-	    { _bsnap6 = bsn6; }
+	void set_bsnap6(PaBackend::Snapshot6Base* bsn6) { _bsnap6 = bsn6; }
 #endif
     private:
 	const PaSnapshot4*		_snap4;
@@ -256,8 +254,8 @@ protected:
 #endif
     };
 
-    inline void unset_error();
-    inline bool set_unset_error(const string& error);
+    void unset_error();
+    bool set_unset_error(const string& error);
 
     /* Methods overridden from TransactionManager */
     void pre_commit(uint32_t tid);

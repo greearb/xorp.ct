@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend_pf.hh,v 1.2 2006/06/30 14:04:49 bms Exp $
+// $XORP: xorp/fea/pa_backend_pf.hh,v 1.3 2007/02/16 22:45:48 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_PF_HH__
 #define __FEA_PA_BACKEND_PF_HH__
@@ -64,7 +64,7 @@ protected:
 	Snapshot4(const PaBackend::Snapshot4Base& snap4)
 	    throw(PaInvalidSnapshotException);
 	virtual ~Snapshot4();
-	inline uint8_t get_ruleset() const { return _ruleset; }
+	uint8_t get_ruleset() const { return _ruleset; }
     private:
 	Snapshot4(PaPfBackend& parent, uint8_t ruleset)
 	    throw(PaInvalidSnapshotException);
@@ -128,7 +128,7 @@ protected:
     // Snapshot4 is a friend of PaPfBackend in this scope, which
     // makes no sense (under g++ 2.95).
 public:
-    inline Snapshot4** get_snapshotdb() { return _snapshot4db; }
+    Snapshot4** get_snapshotdb() { return _snapshot4db; }
 #endif // HAVE_PACKETFILTER_PF
 
 protected:

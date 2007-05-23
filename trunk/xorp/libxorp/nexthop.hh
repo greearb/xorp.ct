@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/nexthop.hh,v 1.5 2006/03/16 00:04:31 pavlin Exp $
+// $XORP: xorp/libxorp/nexthop.hh,v 1.6 2007/02/16 22:46:21 pavlin Exp $
 
 #ifndef __LIBXORP_NEXTHOP_HH__
 #define __LIBXORP_NEXTHOP_HH__
@@ -104,7 +104,7 @@ public:
      * 
      * @return the address of the nexthop.
      */
-    inline const A& addr() { return _addr; }
+    const A& addr() const { return _addr; }
     
 protected:
     A _addr;

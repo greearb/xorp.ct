@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.6 2006/03/16 00:04:32 pavlin Exp $
+// $XORP: xorp/libxorp/safe_callback_obj.hh,v 1.7 2007/02/16 22:46:22 pavlin Exp $
 
 #ifndef __LIBXORP_SAFE_CALLBACK_OBJ_HH__
 #define __LIBXORP_SAFE_CALLBACK_OBJ_HH__
@@ -34,11 +34,11 @@ struct SafeCallbackBase;
  */
 class CallbackSafeObject {
 public:
-    inline CallbackSafeObject() {}
+    CallbackSafeObject() {}
     virtual ~CallbackSafeObject();
 
-    inline void ref_cb(SafeCallbackBase* scb);
-    inline void unref_cb(SafeCallbackBase* scb);
+    void ref_cb(SafeCallbackBase* scb);
+    void unref_cb(SafeCallbackBase* scb);
 
 protected:
     // Copy operations are not supported.  It's hard to know what the

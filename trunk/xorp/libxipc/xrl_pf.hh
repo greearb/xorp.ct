@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.27 2006/03/16 00:04:22 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.28 2007/02/16 22:46:11 pavlin Exp $
 
 // XRL Protocol Family Header
 
@@ -50,8 +50,8 @@ public:
 
     bool set_dispatcher(const XrlDispatcher* d);
 
-    inline const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
-    inline EventLoop& eventloop() const			{ return _eventloop; }
+    const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
+    EventLoop& eventloop() const		{ return _eventloop; }
 
     virtual bool response_pending() const = 0;
 
@@ -96,8 +96,8 @@ public:
     virtual const char* protocol() const = 0;
     virtual bool alive() const = 0;
 
-    inline const string& address() const		{ return _address; }
-    inline EventLoop& eventloop() const			{ return _eventloop; }
+    const string& address() const		{ return _address; }
+    EventLoop& eventloop() const		{ return _eventloop; }
 
 private:
     XrlPFSender(const XrlPFSender&);			// Not implemented

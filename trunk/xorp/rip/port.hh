@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.28 2006/08/20 06:19:27 pavlin Exp $
+// $XORP: xorp/rip/port.hh,v 1.29 2007/02/16 22:47:15 pavlin Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -127,13 +127,13 @@ public:
      * Get the maximum number of route entries placed in each RIPng response
      * packet.
      */
-    inline uint32_t max_entries_per_packet() const	{ return _mepp; }
+    uint32_t max_entries_per_packet() const	{ return _mepp; }
 
     /**
      * Set the maximum number of route entries placed in each RIPng response
      * packet.
      */
-    inline void set_max_entries_per_packet(uint32_t n)	{ _mepp = n; }
+    void set_max_entries_per_packet(uint32_t n)	{ _mepp = n; }
 };
 
 
@@ -160,7 +160,7 @@ public:
 
     ~Port();
 
-    PortManagerBase<A>& port_manager() { return _pm; }
+    PortManagerBase<A>& port_manager()		{ return _pm; }
 
     /**
      * Set enabled state.  When a port is enabled it can perform input
@@ -172,69 +172,69 @@ public:
     /**
      * Get enabled state.
      */
-    bool enabled() const				{ return _en; }
+    bool enabled() const			{ return _en; }
 
     /**
      * Get timer constants in use for routes received on this port.
      */
-    inline PortTimerConstants& constants()		{ return _constants; }
+    PortTimerConstants& constants()		{ return _constants; }
 
     /**
      * Get timer constants in use for routes received on this port.
      */
-    inline const PortTimerConstants& constants() const	{ return _constants; }
+    const PortTimerConstants& constants() const	{ return _constants; }
 
     /**
      * Get Address Family specific state associated with port.  This is
      * state that only has meaning within the IP address family.
      */
-    inline PortAFSpecState<A>& af_state()		{ return _af_state; }
+    PortAFSpecState<A>& af_state()		{ return _af_state; }
 
     /**
      * Get Address Family specific state associated with port.  This is
      * state that only has meaning within the IP address family.
      */
-    inline const PortAFSpecState<A>& af_state() const	{ return _af_state; }
+    const PortAFSpecState<A>& af_state() const	{ return _af_state; }
 
     /**
      * Get cost metric associated with Port.
      */
-    inline uint32_t cost() const			{ return _cost; }
+    uint32_t cost() const			{ return _cost; }
 
     /**
      * Set cost metric associated with Port.
      */
-    inline void set_cost(uint32_t cost)			{ _cost = cost; }
+    void set_cost(uint32_t cost)		{ _cost = cost; }
 
     /**
      * Get horizon type associated with Port.
      */
-    inline const RipHorizon& horizon() const		{ return _horizon; }
+    const RipHorizon& horizon() const		{ return _horizon; }
 
     /**
      * Set horizon type associated with Port.
      * @param h horizon type.
      */
-    inline void set_horizon(const RipHorizon& h)	{ _horizon = h; }
+    void set_horizon(const RipHorizon& h)	{ _horizon = h; }
 
     /**
      * Determine whether Port address should be advertised.
      * @return true if port should be advertised to other hosts, false
      * otherwise.
      */
-    bool advertise() const				{ return _advertise; }
+    bool advertise() const			{ return _advertise; }
 
     /**
      * Set Port advertisement status.
      * @param en true if port should be advertised, false otherwise.
      */
-    inline void set_advertise(bool en)			{ _advertise = en; }
+    void set_advertise(bool en)			{ _advertise = en; }
 
     /**
      * Include default route in RIP response messages.
      * @return true if default route is advertised.
      */
-    inline bool advertise_default_route() const		{ return _adv_def_rt; }
+    bool advertise_default_route() const	{ return _adv_def_rt; }
 
     /**
      * Configure whether default route is advertised in RIP response
@@ -247,7 +247,7 @@ public:
      * Accept default route if found in RIP response messages.
      * @return true if default route should be accepted.
      */
-    inline bool accept_default_route() const		{ return _acc_def_rt; }
+    bool accept_default_route() const		{ return _acc_def_rt; }
 
     /**
      * Accept default route if found in RIP response messages.
@@ -259,7 +259,7 @@ public:
      * Accept routes, but do not advertise them.
      * @return true if this port is passive.
      */
-    inline bool passive() const				{ return _passive; }
+    bool passive() const			{ return _passive; }
 
     /**
      * Accept routes, but do not advertise them.
@@ -271,7 +271,7 @@ public:
      * Accept and respond to non-RIP requests.  Testing and Debugging
      * tools typically send requests from non-RIP IP ports.
      */
-    inline bool accept_non_rip_requests() const	{ return _acc_non_rip_reqs; }
+    bool accept_non_rip_requests() const	{ return _acc_non_rip_reqs; }
 
     /**
      * Accept and respond to non-RIP requests.  Testing and Debugging
@@ -282,7 +282,7 @@ public:
     /**
      * Get Peers associated with this Port.
      */
-    inline const PeerList& peers() const		{ return _peers; }
+    const PeerList& peers() const		{ return _peers; }
 
     /**
      * Get Peers associated with this Port.
@@ -290,17 +290,17 @@ public:
      * NB This method is a backdoor for testing purposes and should
      * not be relied upon to exist in future.
      */
-    inline PeerList& peers()				{ return _peers; }
+    PeerList& peers()				{ return _peers; }
 
     /**
      * Get counters associated with Port.
      */
-    inline const PortCounters& counters() const		{ return _counters; }
+    const PortCounters& counters() const	{ return _counters; }
 
     /**
      *  Get counters associated with Port.
      */
-    inline PortCounters& counters()			{ return _counters; }
+    PortCounters& counters()			{ return _counters; }
 
     /**
      * Get Peer identified by address.

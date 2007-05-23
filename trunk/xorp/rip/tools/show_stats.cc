@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.12 2006/03/16 00:05:57 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.13 2007/02/16 22:47:20 pavlin Exp $"
 
 #include <iomanip>
 
@@ -132,9 +132,9 @@ pretty_print_counters(const XrlAtomList* descriptions,
 
 template <typename A>
 struct GetListAtom {
-    inline GetListAtom(const XrlAtomList& xal) : _xal(xal) {}
-    inline GetListAtom(const XrlAtomList* pxal) : _xal(*pxal) {}
-    inline const A& at(uint32_t index);
+    GetListAtom(const XrlAtomList& xal) : _xal(xal) {}
+    GetListAtom(const XrlAtomList* pxal) : _xal(*pxal) {}
+    const A& at(uint32_t index);
 
 private:
     const XrlAtomList& _xal;
@@ -174,9 +174,9 @@ public:
 		   const A& 		addr)
 	: XrlJobBase(jq), _ifname(ifname), _vifname(vifname), _addr(addr)
     {}
-    inline const string& ifname() const 		{ return _ifname; }
-    inline const string& vifname()const			{ return _vifname; }
-    inline const A& addr() const			{ return _addr;	}
+    const string& ifname() const 		{ return _ifname; }
+    const string& vifname()const		{ return _vifname; }
+    const A& addr() const			{ return _addr;	}
 
 protected:
     string	_ifname;

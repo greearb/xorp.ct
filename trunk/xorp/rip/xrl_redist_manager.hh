@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.8 2006/10/12 01:25:10 pavlin Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.9 2007/02/16 22:47:18 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
@@ -69,9 +69,9 @@ public:
 
     void delete_route(const string& protocol, const Net& net);
 
-    inline EventLoop&	eventloop()			{ return _e; }
-    inline RouteDB<A>&	route_db()			{ return _rdb; }
-    inline XrlRouter&	xrl_router()			{ return _xr; }
+    EventLoop&	eventloop()			{ return _e; }
+    RouteDB<A>&	route_db()			{ return _rdb; }
+    XrlRouter&	xrl_router()			{ return _xr; }
 
     void job_completed(const RedistJob<A>* job);
 

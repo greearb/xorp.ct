@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.29 2007/02/16 22:46:22 pavlin Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.30 2007/03/15 06:49:26 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -508,13 +508,12 @@ public:
 	}
     }
 
-    inline void force_valid() const
-    {
+    void force_valid() const {
 	while (_cur && _cur->deleted())
 	    next();
     }
 
-    inline Node *cur() const { return _cur; }
+    Node *cur() const { return _cur; }
 
     bool operator==(const RefTriePostOrderIterator & x) const
     {
@@ -758,8 +757,7 @@ public:
 	}
     }
 
-    inline void force_valid() const
-    {
+    void force_valid() const {
 	while (_cur && _cur->deleted())
 	    next();
     }

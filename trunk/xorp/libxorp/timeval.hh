@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.30 2007/02/16 22:46:27 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.31 2007/04/14 08:59:50 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -90,7 +90,7 @@ public:
      *
      * @param d the double-float time value to initialize this object with.
      */
-    explicit inline TimeVal(const double& d);
+    explicit TimeVal(const double& d);
 
     /**
      * Get the number of seconds.
@@ -140,17 +140,17 @@ public:
     /**
      * Get zero value.
      */
-    inline static TimeVal ZERO();
+    static TimeVal ZERO();
 
     /**
      * Get the maximum permitted value.
      */
-    inline static TimeVal MAXIMUM();
+    static TimeVal MAXIMUM();
 
     /**
      * Get the minimum permitted value.
      */
-    inline static TimeVal MINIMUM();
+    static TimeVal MINIMUM();
 
     /**
      * Copy the time value from a timeval structure.
@@ -158,7 +158,7 @@ public:
      * @param timeval the storage to copy the time from.
      * @return the number of copied octets.
      */
-    inline size_t copy_in(const timeval& timeval);
+    size_t copy_in(const timeval& timeval);
 
     /**
      * Copy the time value to a timeval structure.
@@ -166,7 +166,7 @@ public:
      * @param timeval the storage to copy the time to.
      * @return the number of copied octets.
      */
-    inline size_t copy_out(timeval& timeval) const;
+    size_t copy_out(timeval& timeval) const;
 
     /**
      * Return an int32_t containing the total number of milliseconds
@@ -176,7 +176,7 @@ public:
      *
      * @return the number of milliseconds in total.
      */
-    inline int32_t to_ms() const;
+    int32_t to_ms() const;
 
 #ifdef HOST_OS_WINDOWS
     /**
@@ -185,7 +185,7 @@ public:
      * @param filetime the storage to copy the time from.
      * @return the number of copied octets.
      */
-    inline size_t copy_in(const FILETIME& filetime);
+    size_t copy_in(const FILETIME& filetime);
 
     /**
      * Copy the time value to a FILETIME structure.
@@ -193,7 +193,7 @@ public:
      * @param filetime the storage to copy the time to.
      * @return the number of copied octets.
      */
-    inline size_t copy_out(FILETIME& filetime) const;
+    size_t copy_out(FILETIME& filetime) const;
 
 #endif /* HOST_OS_WINDOWS */
 
@@ -207,7 +207,7 @@ public:
     /**
      * Assignment Operator
      */
-    inline TimeVal& operator=(const TimeVal& other);
+    TimeVal& operator=(const TimeVal& other);
 
     /**
      * Equality Operator
@@ -216,7 +216,7 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    inline bool operator==(const TimeVal& other) const;
+    bool operator==(const TimeVal& other) const;
 
     /**
      * Less-Than Operator
@@ -225,7 +225,7 @@ public:
      * @return true if the left-hand operand is numerically smaller than the
      * right-hand operand.
      */
-    inline bool operator<(const TimeVal& other) const;
+    bool operator<(const TimeVal& other) const;
 
     /**
      * Assign-Sum Operator
@@ -233,7 +233,7 @@ public:
      * @param delta the TimeVal value to add to this TimeVal object.
      * @return the TimeVal value after the addition of @ref delta.
      */
-    inline const TimeVal& operator+=(const TimeVal& delta);
+    const TimeVal& operator+=(const TimeVal& delta);
 
     /**
      * Addition Operator
@@ -242,7 +242,7 @@ public:
      * TimeVal object.
      * @return the TimeVal value after the addition of @ref other.
      */
-    inline TimeVal operator+(const TimeVal& other) const;
+    TimeVal operator+(const TimeVal& other) const;
 
     /**
      * Assign-Difference Operator
@@ -250,7 +250,7 @@ public:
      * @param delta the TimeVal value to substract from this TimeVal object.
      * @return the TimeVal value after the substraction of @ref delta.
      */
-    inline const TimeVal& operator-=(const TimeVal& delta);
+    const TimeVal& operator-=(const TimeVal& delta);
 
     /**
      * Substraction Operator
@@ -259,7 +259,7 @@ public:
      * TimeVal object.
      * @return the TimeVal value after the substraction of @ref other.
      */
-    inline TimeVal operator-(const TimeVal& other) const;
+    TimeVal operator-(const TimeVal& other) const;
 
     /**
      * Multiplication Operator for integer operand
@@ -269,7 +269,7 @@ public:
      * @return the TimeVal value of multiplying the value of this object
      * by @ref n.
      */
-    inline TimeVal operator*(int n) const;
+    TimeVal operator*(int n) const;
 
     /**
      * Multiplication Operator for unsigned integer operand
@@ -279,7 +279,7 @@ public:
      * @return the TimeVal value of multiplying the value of this object
      * by @ref n.
      */
-    inline TimeVal operator*(unsigned int n) const;
+    TimeVal operator*(unsigned int n) const;
 
     /**
      * Multiplication Operator for double float operand
@@ -289,7 +289,7 @@ public:
      * @return the TimeVal value of multiplying the value of this object
      * by @ref d.
      */
-    inline TimeVal operator*(const double& d) const;
+    TimeVal operator*(const double& d) const;
 
     /**
      * Division Operator for integer operand
@@ -299,7 +299,7 @@ public:
      * @return the TimeVal value of dividing the value of this object
      * by @ref n.
      */
-    inline TimeVal operator/(int n) const;
+    TimeVal operator/(int n) const;
 
     /**
      * Division Operator for unsigned integer operand
@@ -309,7 +309,7 @@ public:
      * @return the TimeVal value of dividing the value of this object
      * by @ref n.
      */
-    inline TimeVal operator/(unsigned int n) const;
+    TimeVal operator/(unsigned int n) const;
 
     /**
      * Division Operator for double-float operand
@@ -319,7 +319,7 @@ public:
      * @return the TimeVal value of dividing the value of this object
      * by @ref d.
      */
-    inline TimeVal operator/(const double& d) const;
+    TimeVal operator/(const double& d) const;
 
 private:
     TimeVal(int i);		// Not implemented

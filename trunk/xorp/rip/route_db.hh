@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.24 2006/10/12 01:25:10 pavlin Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.25 2007/02/16 22:47:16 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -183,7 +183,7 @@ public:
      */
     const UpdateQueue<A>& update_queue() const;
 
-    inline EventLoop& eventloop() 			{ return _eventloop; }
+    EventLoop& eventloop() 			{ return _eventloop; }
 
     /**
      * Push routes through policy filters for re-filtering.
@@ -261,7 +261,7 @@ public:
     /**
      * @return current state of instance.
      */
-    inline State state() const			{ return _state; }
+    State state() const			{ return _state; }
 
     /**
      * Move iterator to next available route.

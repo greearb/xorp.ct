@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.16 2007/02/16 22:45:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.17 2007/04/19 21:36:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -45,8 +45,8 @@ static const uint8_t FILLER_VALUE = 0xe7;
 
 static bool s_verbose = false;
 
-inline bool verbose()           { return s_verbose; }
-inline void set_verbose(bool v) { s_verbose = v; }
+bool verbose()           { return s_verbose; }
+void set_verbose(bool v) { s_verbose = v; }
 
 #define verbose_log(x...)                                                     \
 do {                                                                          \
@@ -153,12 +153,12 @@ public:
 	_r = 0;
     }
 
-    inline uint32_t bytes_received() const	{ return _b_rcv; }
-    inline uint32_t bytes_sent() const		{ return _b_snd; }
-    inline uint32_t packets_received() const	{ return _p_rcv; }
-    inline uint32_t packets_sent() const	{ return _p_snd; }
-    inline uint32_t xrl_errors() const		{ return _x_err; }
-    inline bool	    closed() const		{ return _closed; }
+    uint32_t bytes_received() const	{ return _b_rcv; }
+    uint32_t bytes_sent() const		{ return _b_snd; }
+    uint32_t packets_received() const	{ return _p_rcv; }
+    uint32_t packets_sent() const	{ return _p_snd; }
+    uint32_t xrl_errors() const		{ return _x_err; }
+    bool closed() const			{ return _closed; }
 
     /**
      * Bind to interface and port.

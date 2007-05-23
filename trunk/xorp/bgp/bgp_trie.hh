@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_trie.hh,v 1.16 2007/02/16 22:45:10 pavlin Exp $
+// $XORP: xorp/bgp/bgp_trie.hh,v 1.17 2007/03/15 06:51:00 pavlin Exp $
 
 #ifndef __BGP_BGP_TRIE_HH__
 #define __BGP_BGP_TRIE_HH__
@@ -48,13 +48,9 @@ public:
     bool unchain() const;
 
 protected:
-    inline void set_next(const ChainedSubnetRoute<A> *next) const {
-	_next = next;
-    }
+    void set_next(const ChainedSubnetRoute<A> *next) const { _next = next; }
 
-    inline void set_prev(const ChainedSubnetRoute<A> *prev) const {
-	_prev = prev;
-    }
+    void set_prev(const ChainedSubnetRoute<A> *prev) const { _prev = prev; }
 
     ChainedSubnetRoute& operator=(const ChainedSubnetRoute& csr); // Not impl.
 

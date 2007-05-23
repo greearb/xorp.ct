@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.14 2006/03/16 00:05:53 pavlin Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.15 2007/02/16 22:47:17 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -73,8 +73,7 @@ public:
 	: _st(in_state), _o(out)
     {}
 
-    inline void operator() (const ServiceBase* sb)
-    {
+    void operator() (const ServiceBase* sb) {
 	if (sb->status() != _st) return;
 	if (_o.empty() == false)
 	    _o += ", ";
@@ -175,9 +174,7 @@ public:
 	XLOG_ASSERT(_st == SERVICE_RUNNING);
 	_t.set_status(PROC_READY, "");
     }
-    inline bool have_status(ServiceStatus st) {
-	return _st & st;
-    }
+    bool have_status(ServiceStatus st) { return _st & st; }
 
 protected:
     typename XrlTarget<A>::Type&	_t;

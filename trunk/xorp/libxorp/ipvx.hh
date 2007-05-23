@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.27 2006/12/13 02:30:52 atanu Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.28 2007/02/16 22:46:20 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -498,7 +498,7 @@ public:
      * @return address size in number of bits for an address of
      * address family of @ref family.
      */
-    inline static uint32_t addr_bitlen(int family) throw (InvalidFamily) {
+    static uint32_t addr_bitlen(int family) throw (InvalidFamily) {
 	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen(family));
     }
 
@@ -512,7 +512,7 @@ public:
      * @param family the address family.
      * @return address size in number of bits for this IPvX address.
      */
-    inline uint32_t addr_bitlen() const {
+    uint32_t addr_bitlen() const {
 	return uint32_t(8 * sizeof(uint8_t) * addr_bytelen());
     }
 
@@ -706,28 +706,28 @@ public:
      *
      * @return true if the address is IPv4.
      */
-    inline bool is_ipv4() const { return (_af == AF_INET); }
+    bool is_ipv4() const { return (_af == AF_INET); }
 
     /**
      * Test if this address is IPv6 address.
      *
      * @return true if the address is IPv6.
      */
-    inline bool is_ipv6() const { return (_af == AF_INET6); }
+    bool is_ipv6() const { return (_af == AF_INET6); }
 
     /**
      * Get IPv4 address.
      *
      * @return IPv4 address contained with IPvX structure.
      */
-    inline IPv4 get_ipv4() const throw (InvalidCast);
+    IPv4 get_ipv4() const throw (InvalidCast);
 
     /**
      * Get IPv6 address.
      *
      * @return IPv6 address contained with IPvX structure.
      */
-    inline IPv6 get_ipv6() const throw (InvalidCast);
+    IPv6 get_ipv6() const throw (InvalidCast);
 
     /**
      * Assign address value to an IPv4 address.
@@ -735,7 +735,7 @@ public:
      * @param to_ipv4 IPv4 address to be assigned IPv4 value contained
      * within this address.
      */
-    inline void get(IPv4& to_ipv4) const throw (InvalidCast) {
+    void get(IPv4& to_ipv4) const throw (InvalidCast) {
 	to_ipv4 = get_ipv4();
     }
 
@@ -745,7 +745,7 @@ public:
      * @param to_ipv6 IPv6 address to be assigned IPv4 value contained
      * within this address.
      */
-    inline void get(IPv6& to_ipv6) const throw (InvalidCast) {
+    void get(IPv6& to_ipv6) const throw (InvalidCast) {
 	to_ipv6 = get_ipv6();
     }
 
@@ -754,7 +754,7 @@ public:
      *
      * @return the address family of this address (AF_INET or AF_INET6).
      */
-    inline int af() const { return (_af); }
+    int af() const { return (_af); }
 
     /**
      * Get the IP protocol version.
@@ -779,21 +779,21 @@ public:
      * @return the first @ref len bits starting from the rightmost
      * position @ref lsb. The returned bits are in host order.
      */
-    inline uint32_t bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily);
+    uint32_t bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily);
 
     /**
      * Count the number of bits that are set in this address.
      *
      * @return the number of bits that are set in this address.
      */
-    inline uint32_t bit_count() const;
+    uint32_t bit_count() const;
 
     /**
      * Count the number of leading zeroes in this address.
      *
      * @return the number of leading zeroes in this address.
      */
-    inline uint32_t leading_zero_count() const;
+    uint32_t leading_zero_count() const;
 
     /**
      * Pre-defined IPvX address constants.

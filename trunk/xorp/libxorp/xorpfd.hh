@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/xorpfd.hh,v 1.6 2007/02/16 22:46:29 pavlin Exp $
+// $XORP: xorp/libxorp/xorpfd.hh,v 1.7 2007/04/20 20:29:01 pavlin Exp $
 
 #ifndef __LIBXORP_XORPFD_HH__
 #define __LIBXORP_XORPFD_HH__
@@ -74,13 +74,13 @@ public:
 
     XorpFd(int fd) : _filedesc(fd) {}
 
-    inline operator int() const	    { return _filedesc; }
+    operator int() const	{ return _filedesc; }
 
-    inline string str() const	    { return c_format("%d", _filedesc); }
+    string str() const		{ return c_format("%d", _filedesc); }
 
-    inline void clear()		    { _filedesc = BAD_XORPFD; }
+    void clear()		{ _filedesc = BAD_XORPFD; }
 
-    inline bool is_valid() const    { return (_filedesc != BAD_XORPFD); }
+    bool is_valid() const	{ return (_filedesc != BAD_XORPFD); }
 
 private:
     int	    _filedesc;
@@ -105,7 +105,7 @@ private:
     // Helper function to return what kind of object the encapsulated
     // Windows object handle points to. Optimized for sockets.
     //
-    inline WinFdType get_type() const {
+    WinFdType get_type() const {
 	if (!this->is_valid())
 	    return (FDTYPE_ERROR);
 
@@ -165,27 +165,25 @@ public:
      : _filedesc(rhand._filedesc), _type(rhand._type)
     {}
 
-    inline operator HANDLE() const { return _filedesc; }
+    operator HANDLE() const { return _filedesc; }
 
-    inline operator SOCKET() const {
-	return reinterpret_cast<SOCKET>(_filedesc);
-    }
+    operator SOCKET() const { return reinterpret_cast<SOCKET>(_filedesc); }
 
-    inline void clear() { _filedesc = BAD_XORPFD; _type = FDTYPE_ERROR; }
+    void clear() { _filedesc = BAD_XORPFD; _type = FDTYPE_ERROR; }
 
-    inline string str() const { return c_format("%p", _filedesc); }
+    string str() const { return c_format("%p", _filedesc); }
 
-    inline bool is_valid() const { return (_filedesc != BAD_XORPFD); }
+    bool is_valid() const { return (_filedesc != BAD_XORPFD); }
 
-    inline WinFdType type() const { return _type; }
+    WinFdType type() const { return _type; }
 
-    inline bool is_console() const { return (_type == FDTYPE_CONSOLE); }
+    bool is_console() const { return (_type == FDTYPE_CONSOLE); }
 
-    inline bool is_process() const { return (_type == FDTYPE_PROCESS); }
+    bool is_process() const { return (_type == FDTYPE_PROCESS); }
 
-    inline bool is_pipe() const { return (_type == FDTYPE_PIPE); }
+    bool is_pipe() const { return (_type == FDTYPE_PIPE); }
 
-    inline bool is_socket() const { return (_type == FDTYPE_SOCKET); }
+    bool is_socket() const { return (_type == FDTYPE_SOCKET); }
 
     // On Windows, HANDLE is a void *.
     // Because there are several cast operators, and any may be
@@ -193,19 +191,19 @@ public:
     // an instance of XorpFd, we must disambiguate by providing
     // comparison operators here.
 
-    inline bool operator ==(const XorpFd& rhand) const {
+    bool operator ==(const XorpFd& rhand) const {
 	return (_filedesc == rhand._filedesc);
     }
 
-    inline bool operator !=(const XorpFd& rhand) const {
+    bool operator !=(const XorpFd& rhand) const {
 	return (_filedesc != rhand._filedesc);
     }
 
-    inline bool operator >(const XorpFd& rhand) const {
+    bool operator >(const XorpFd& rhand) const {
 	return (_filedesc > rhand._filedesc);
     }
 
-    inline bool operator <(const XorpFd& rhand) const {
+    bool operator <(const XorpFd& rhand) const {
 	return (_filedesc < rhand._filedesc);
     }
 

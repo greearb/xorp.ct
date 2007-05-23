@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.2 2007/05/03 18:46:27 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.3 2007/05/04 01:43:22 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_REPORTER_HH__
 #define __FEA_IFCONFIG_REPORTER_HH__
@@ -211,28 +211,28 @@ public:
     /**
      * @return error message of first error encountered.
      */
-    inline const string& first_error() const	{ return _first_error; }
+    const string& first_error() const		{ return _first_error; }
 
     /**
      * @return error message of last error encountered.
      */
-    inline const string& last_error() const	{ return _last_error; }
+    const string& last_error() const		{ return _last_error; }
 
     /**
      * @return number of errors reported.
      */
-    inline uint32_t error_count() const		{ return _error_cnt; }
+    uint32_t error_count() const		{ return _error_cnt; }
 
     /**
      * Reset error count and error message.
      */
-    inline void reset() {
+    void reset() {
 	_first_error.erase();
 	_last_error.erase();
 	_error_cnt = 0;
     }
 
-    inline void	log_error(const string& s) {
+    void log_error(const string& s) {
 	if (0 == _error_cnt)
 	    _first_error = s;
 	_last_error = s;

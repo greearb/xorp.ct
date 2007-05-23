@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/service.hh,v 1.8 2006/03/16 00:04:32 pavlin Exp $
+// $XORP: xorp/libxorp/service.hh,v 1.9 2007/02/16 22:46:23 pavlin Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
@@ -133,18 +133,18 @@ public:
      *
      * @return name of service.  May be empty if not set in constructor.
      */
-    inline const string& service_name() const		{ return _name; }
+    const string& service_name() const		{ return _name; }
 
     /**
      * Get the current status.
      */
-    inline ServiceStatus status() const			{ return _status; }
+    ServiceStatus status() const		{ return _status; }
 
     /**
      * Get annotation associated with current status.  The annotation when
      * set is an explanation of the state, ie "waiting for Y"
      */
-    inline const string& status_note() const		{ return _note; }
+    const string& status_note() const		{ return _note; }
 
     /**
      * Get a character representation of the current service status.

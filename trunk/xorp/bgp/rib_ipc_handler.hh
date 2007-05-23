@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.44 2006/11/07 18:55:39 pavlin Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.45 2007/02/16 22:45:15 pavlin Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -73,7 +73,7 @@ private:
     /**
      * Flow control hysteresis
      */
-    inline bool flow_controlled() {
+    bool flow_controlled() {
 	if (_flying >= XRL_HIWAT)
 	    _flow_controlled = true;
 	else if (_flying <= XRL_LOWAT)
@@ -95,7 +95,7 @@ private:
      */
     bool sendit_spec(Queued& q, const char *bgp);
 
-    inline EventLoop& eventloop() const;
+    EventLoop& eventloop() const;
 
     void route_command_done(const XrlError& error, const string comment);
 };

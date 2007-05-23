@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.22 2007/02/16 22:45:47 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket.hh,v 1.1 2007/05/01 01:42:40 pavlin Exp $
 
 #ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
 #define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
@@ -59,7 +59,7 @@ public:
      * 
      * @return true if the netlink socket is open, otherwise false.
      */
-    inline bool is_open() const { return _fd >= 0; }
+    bool is_open() const { return _fd >= 0; }
 
     /**
      * Write data to netlink socket.
@@ -91,14 +91,14 @@ public:
      * @return the sequence number for the next message written into the
      * kernel.
      */
-    inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
+    uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
      * Get cached netlink socket identifier value.
      * 
      * @return the cached netlink socket identifier value.
      */
-    inline uint32_t nl_pid() const { return _nl_pid; }
+    uint32_t nl_pid() const { return _nl_pid; }
 
     /**
      * Force socket to read data.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_damping.hh,v 1.2 2006/03/16 00:03:32 pavlin Exp $
+// $XORP: xorp/bgp/route_table_damping.hh,v 1.3 2007/02/16 22:45:16 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DAMPING_HH__
 #define __BGP_ROUTE_TABLE_DAMPING_HH__
@@ -50,9 +50,9 @@ class DampRoute {
 public:
     DampRoute(const SubnetRoute<A>* route, uint32_t genid) 
 	: _routeref(route), _genid(genid) {}
-    inline const SubnetRoute<A>* route() const {return _routeref.route();}
-    inline uint32_t genid() const {return _genid;}
-    inline XorpTimer& timer() { return _timer; }
+    const SubnetRoute<A>* route() const { return _routeref.route(); }
+    uint32_t genid() const { return _genid; }
+    XorpTimer& timer() { return _timer; }
 private:
     SubnetRouteConstRef<A> _routeref;
     uint32_t _genid;
@@ -98,7 +98,7 @@ public:
 
  private:
 
-    inline bool damping() const {
+    bool damping() const {
 	if (_peer->ibgp())
 	    return false;
 
@@ -108,9 +108,7 @@ public:
 	return _damping.get_damping();
     }
 
-    inline bool damping_global() const {
-	return _damping.get_damping();
-    }
+    bool damping_global() const { return _damping.get_damping(); }
 
     /**
      * Update the figure of merit for this route.

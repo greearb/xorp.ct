@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.13 2006/11/07 00:46:51 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.14 2007/02/16 22:47:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -42,8 +42,7 @@
 template <typename A>
 struct is_redistributor_of {
     is_redistributor_of(const string& name) : _n(name) {}
-    inline bool operator() (const RouteRedistributor<A>* rr) const
-    {
+    bool operator() (const RouteRedistributor<A>* rr) const {
 	return rr->protocol() == _n;
     }
     const string _n;
@@ -75,20 +74,20 @@ public:
     /**
      * Signal to parent XrlRedistManager that dispatch is completed.
      */
-    inline void signal_complete()		{ _xrm.job_completed(this); }
+    void signal_complete()			{ _xrm.job_completed(this); }
 
     /**
      * Return number of times dispatch invoked.
      */
-    inline uint32_t dispatch_attempts() const		{ return _attempts; }
+    uint32_t dispatch_attempts() const		{ return _attempts; }
 
     /**
      * Increment number of dispatch attempts.
      */
-    inline void incr_dispatch_attempts()		{ _attempts++; }
+    void incr_dispatch_attempts()		{ _attempts++; }
 
-    inline XrlRedistManager<A>& manager()		{ return _xrm; }
-    inline const XrlRedistManager<A>& manager() const	{ return _xrm; }
+    XrlRedistManager<A>& manager()		{ return _xrm; }
+    const XrlRedistManager<A>& manager() const	{ return _xrm; }
 
 
 protected:
@@ -116,9 +115,9 @@ public:
     {}
     bool dispatch();
     void dispatch_complete(const XrlError& xe);
-    inline const string& protocol() const		{ return _protocol; }
-    inline const uint16_t& cost() const			{ return _cost; }
-    inline const uint16_t& tag() const			{ return _tag; }
+    const string& protocol() const		{ return _protocol; }
+    const uint16_t& cost() const		{ return _cost; }
+    const uint16_t& tag() const			{ return _tag; }
     string str() const;
 protected:
     RedistList& _redists;
@@ -212,7 +211,7 @@ public:
     {}
     bool dispatch();
     void dispatch_complete(const XrlError& xe);
-    inline const string& protocol() const		{ return _protocol; }
+    const string& protocol() const		{ return _protocol; }
     string str() const;
 
 protected:

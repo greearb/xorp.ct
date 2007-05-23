@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_msgs.hh,v 1.7 2006/03/16 00:04:15 pavlin Exp $
+// $XORP: xorp/libxipc/finder_msgs.hh,v 1.8 2007/02/16 22:46:06 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_MSGS_HH__
 #define __LIBXIPC_FINDER_MSGS_HH__
@@ -61,7 +61,7 @@ protected:
 class FinderXrlMessage : public FinderMessageBase {
 public:
     FinderXrlMessage(const Xrl& xrl);
-    inline uint32_t seqno() const { return _seqno; }
+    uint32_t seqno() const { return _seqno; }
     
 protected:
     uint32_t _seqno;

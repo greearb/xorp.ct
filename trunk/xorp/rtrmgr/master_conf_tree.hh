@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.37 2006/03/16 00:05:59 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.38 2007/02/16 22:47:22 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -103,17 +103,17 @@ public:
 	return _root_node;
     }
 
-    inline MasterConfigTreeNode& master_root_node() {
+    MasterConfigTreeNode& master_root_node() {
 	return (MasterConfigTreeNode&)_root_node;
     }
-    inline const MasterConfigTreeNode& const_master_root_node() const {
+    const MasterConfigTreeNode& const_master_root_node() const {
 	return (const MasterConfigTreeNode&)_root_node;
     }
 
-    inline MasterConfigTreeNode* find_node(const list<string>& path) {
+    MasterConfigTreeNode* find_node(const list<string>& path) {
 	return (MasterConfigTreeNode*)(ConfigTree::find_node(path));
     }
-    inline MasterConfigTreeNode* find_config_module(const string& module_name){
+    MasterConfigTreeNode* find_config_module(const string& module_name) {
 	return (MasterConfigTreeNode*)(ConfigTree::find_config_module(module_name));
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.43 2007/05/08 00:49:01 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.44 2007/05/08 22:16:03 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -44,7 +44,7 @@ public:
 	CHANGED = 0x04
     };
 
-    inline bool set_state(State st) {
+    bool set_state(State st) {
 	if (bits(st) > 1) {
 	    return false;
 	}
@@ -52,9 +52,9 @@ public:
 	return true;
     }
 
-    inline State state() const 			{ return _st; }
+    State state() const 		{ return _st; }
 
-    inline bool mark(State st) {
+    bool mark(State st) {
 	if (bits(st) > 1) {
 	    return false;
 	}
@@ -68,11 +68,11 @@ public:
 	_st = st;
 	return true;
     }
-    inline bool is_marked(State st) const	{ return st == _st; }
+    bool is_marked(State st) const	{ return st == _st; }
 
-    inline void set_soft(bool en)	{ _soft = en; }
+    void set_soft(bool en)		{ _soft = en; }
 
-    inline bool is_soft() const		{ return _soft; }
+    bool is_soft() const		{ return _soft; }
 
     /**
      * Virtual method to be implemented to flush out state associated
@@ -85,7 +85,7 @@ public:
     string str() const;
 
 protected:
-    inline static uint32_t bits(State st) {
+    static uint32_t bits(State st) {
 	uint32_t c;
 	for (c = 0; st != NO_CHANGE; c += st & 0x01)
 	    st = State(st >> 1);
@@ -250,14 +250,14 @@ public:
      *
      * @return the map with the stored interfaces.
      */
-    inline IfMap& interfaces() { return _interfaces; }
+    IfMap& interfaces() { return _interfaces; }
 
     /**
      * Get the const map with the stored interfaces.
      *
      * @return the const map with the stored interfaces.
      */
-    inline const IfMap& interfaces() const { return _interfaces; }
+    const IfMap& interfaces() const { return _interfaces; }
 
     /**
      * Align user supplied configuration with the device configuration.
@@ -367,41 +367,31 @@ public:
 
     IfTreeInterface(const string& ifname);
 
-    inline const string& name() const	{ return _ifname; }
+    const string& name() const		{ return _ifname; }
 
-    inline const string& ifname() const	{ return _ifname; }
+    const string& ifname() const	{ return _ifname; }
 
-    inline uint32_t pif_index() const	{ return _pif_index; }
-    inline void set_pif_index(uint32_t v) { _pif_index = v; mark(CHANGED); }
+    uint32_t pif_index() const		{ return _pif_index; }
+    void set_pif_index(uint32_t v)	{ _pif_index = v; mark(CHANGED); }
 
-    inline bool enabled() const		{ return _enabled; }
+    bool enabled() const		{ return _enabled; }
+    void set_enabled(bool en)		{ _enabled = en; mark(CHANGED); }
 
-    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
+    uint32_t mtu() const		{ return _mtu; }
+    void set_mtu(uint32_t mtu)		{ _mtu = mtu; mark(CHANGED); }
 
-    inline uint32_t mtu() const		{ return _mtu; }
+    const Mac& mac() const		{ return _mac; }
+    void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
 
-    inline void set_mtu(uint32_t mtu)	{ _mtu = mtu; mark(CHANGED); }
+    bool no_carrier() const		{ return _no_carrier; }
+    void set_no_carrier(bool v)		{ _no_carrier = v; mark(CHANGED); }
 
-    inline const Mac& mac() const	{ return _mac; }
+    bool discard() const		{ return _discard; }
+    void set_discard(bool discard)	{ _discard = discard; mark(CHANGED); }
 
-    inline void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
-
-    inline bool no_carrier() const	{ return _no_carrier; }
-
-    inline void set_no_carrier(bool v)	{ _no_carrier = v; mark(CHANGED); }
-
-    inline bool discard() const		{ return _discard; }
-
-    inline void set_discard(bool discard) {
-	_discard = discard;
-	mark(CHANGED);
-    }
-
-    inline bool is_discard_emulated() const { return _is_discard_emulated; }
-
-    inline void set_discard_emulated(bool v) {
-	_is_discard_emulated = v;
-	mark(CHANGED);
+    bool is_discard_emulated() const	{ return _is_discard_emulated; }
+    void set_discard_emulated(bool v)	{
+	_is_discard_emulated = v; mark(CHANGED);
     }
 
     /**
@@ -412,7 +402,7 @@ public:
      *
      * @return true if the interface has been flipped, otherwise false.
      */
-    inline bool flipped() const		{ return _flipped; }
+    bool flipped() const		{ return _flipped; }
 
     /**
      * Set the value of the flipped flag.
@@ -420,7 +410,7 @@ public:
      * @param v if true, then the flipped flag is enabled, otherwise is
      * disabled.
      */
-    inline void set_flipped(bool v)	{ _flipped = v; mark(CHANGED); }
+    void set_flipped(bool v)		{ _flipped = v; mark(CHANGED); }
 
     /**
      * Get the system-specific interface flags.
@@ -430,7 +420,7 @@ public:
      *
      * @return the system-specific interface flags.
      */
-    inline uint32_t interface_flags() const	{ return _interface_flags; }
+    uint32_t interface_flags() const	{ return _interface_flags; }
 
     /**
      * Store the system-specific interface flags.
@@ -440,10 +430,13 @@ public:
      *
      * @param v the value of the system-specific interface flags to store.
      */
-    inline void set_interface_flags(uint32_t v) { _interface_flags = v; mark(CHANGED); }
+    void set_interface_flags(uint32_t v)	{
+	_interface_flags = v;
+	mark(CHANGED);
+    }
 
-    inline const VifMap& vifs() const	{ return _vifs; }
-    inline VifMap& vifs()		{ return _vifs; }
+    const VifMap& vifs() const		{ return _vifs; }
+    VifMap& vifs()			{ return _vifs; }
 
     bool add_vif(const string& vifname);
 
@@ -526,8 +519,7 @@ public:
     /**
      * Copy state of internal variables from another IfTreeInterface.
      */
-    inline void copy_state(const IfTreeInterface& o)
-    {
+    void copy_state(const IfTreeInterface& o) {
 	set_pif_index(o.pif_index());
 	set_enabled(o.enabled());
 	set_mtu(o.mtu());
@@ -543,8 +535,7 @@ public:
      * @param o the IfTreeInterface to compare against.
      * @return true if the interface-specific internal state is same.
      */
-    inline bool is_same_state(const IfTreeInterface& o)
-    {
+    bool is_same_state(const IfTreeInterface& o) {
 	return ((pif_index() == o.pif_index())
 		&& (enabled() == o.enabled())
 		&& (mtu() == o.mtu())
@@ -587,30 +578,31 @@ public:
 
     const string& vifname() const	{ return _vifname; }
 
-    inline uint32_t pif_index() const	{ return _pif_index; }
-    inline void set_pif_index(uint32_t v) { _pif_index = v; mark(CHANGED); }
-    inline uint32_t vif_index() const	{ return _vif_index; }
-    inline void set_vif_index(uint32_t v) { _vif_index = v; mark(CHANGED); }
+    uint32_t pif_index() const		{ return _pif_index; }
+    void set_pif_index(uint32_t v)	{ _pif_index = v; mark(CHANGED); }
 
-    inline bool enabled() const		{ return _enabled; }
-    inline bool broadcast() const	{ return _broadcast; }
-    inline bool loopback() const	{ return _loopback; }
-    inline bool point_to_point() const	{ return _point_to_point; }
-    inline bool multicast() const	{ return _multicast; }
-    inline bool pim_register() const	{ return _pim_register; }
+    uint32_t vif_index() const		{ return _vif_index; }
+    void set_vif_index(uint32_t v)	{ _vif_index = v; mark(CHANGED); }
 
-    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
-    inline void set_broadcast(bool v)	{ _broadcast = v; mark(CHANGED); }
-    inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
-    inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
-    inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
-    inline void set_pim_register(bool v) { _pim_register = v; mark(CHANGED); }
+    bool enabled() const		{ return _enabled; }
+    bool broadcast() const		{ return _broadcast; }
+    bool loopback() const		{ return _loopback; }
+    bool point_to_point() const		{ return _point_to_point; }
+    bool multicast() const		{ return _multicast; }
+    bool pim_register() const		{ return _pim_register; }
 
-    inline const IPv4Map& ipv4addrs() const { return _ipv4addrs; }
-    inline IPv4Map& ipv4addrs()		{ return _ipv4addrs; }
+    void set_enabled(bool en)		{ _enabled = en; mark(CHANGED); }
+    void set_broadcast(bool v)		{ _broadcast = v; mark(CHANGED); }
+    void set_loopback(bool v)		{ _loopback = v; mark(CHANGED); }
+    void set_point_to_point(bool v)	{ _point_to_point = v; mark(CHANGED); }
+    void set_multicast(bool v)		{ _multicast = v; mark(CHANGED); }
+    void set_pim_register(bool v)	{ _pim_register = v; mark(CHANGED); }
 
-    inline const IPv6Map& ipv6addrs() const { return _ipv6addrs; }
-    inline IPv6Map& ipv6addrs()		{ return _ipv6addrs; }
+    const IPv4Map& ipv4addrs() const	{ return _ipv4addrs; }
+    IPv4Map& ipv4addrs()		{ return _ipv4addrs; }
+
+    const IPv6Map& ipv6addrs() const	{ return _ipv6addrs; }
+    IPv6Map& ipv6addrs()		{ return _ipv6addrs; }
 
     /**
      * Add IPv4 address.
@@ -688,8 +680,7 @@ public:
     /**
      * Copy state of internal variables from another IfTreeVif.
      */
-    inline void copy_state(const IfTreeVif& o)
-    {
+    void copy_state(const IfTreeVif& o) {
 	set_pif_index(o.pif_index());
 	set_vif_index(o.vif_index());
 	set_enabled(o.enabled());
@@ -706,8 +697,7 @@ public:
      * @param o the IfTreeVif to compare against.
      * @return true if the vif-specific internal state is same.
      */
-    inline bool is_same_state(const IfTreeVif& o)
-    {
+    bool is_same_state(const IfTreeVif& o) {
 	return ((pif_index() == o.pif_index())
 		&& (vif_index() == o.vif_index())
 		&& (enabled() == o.enabled())
@@ -751,24 +741,24 @@ public:
 	  _prefix_len(0)
     {}
 
-    inline const IPv4& addr() const	{ return _addr; }
+    const IPv4& addr() const		{ return _addr; }
 
-    inline bool enabled() const		{ return _enabled; }
-    inline bool broadcast() const	{ return _broadcast; }
-    inline bool loopback() const	{ return _loopback; }
-    inline bool point_to_point() const	{ return _point_to_point; }
-    inline bool multicast() const	{ return _multicast; }
+    bool enabled() const		{ return _enabled; }
+    bool broadcast() const		{ return _broadcast; }
+    bool loopback() const		{ return _loopback; }
+    bool point_to_point() const		{ return _point_to_point; }
+    bool multicast() const		{ return _multicast; }
 
-    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
-    inline void set_broadcast(bool v)	{ _broadcast = v; mark(CHANGED); }
-    inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
-    inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
-    inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
+    void set_enabled(bool en)		{ _enabled = en; mark(CHANGED); }
+    void set_broadcast(bool v)		{ _broadcast = v; mark(CHANGED); }
+    void set_loopback(bool v)		{ _loopback = v; mark(CHANGED); }
+    void set_point_to_point(bool v)	{ _point_to_point = v; mark(CHANGED); }
+    void set_multicast(bool v)		{ _multicast = v; mark(CHANGED); }
 
     /**
      * Get prefix length associates with address.
      */
-    inline uint32_t prefix_len() const	{ return _prefix_len; }
+    uint32_t prefix_len() const		{ return _prefix_len; }
 
     /**
      * Set prefix length associate with address.
@@ -805,8 +795,7 @@ public:
     /**
      * Copy state of internal variables from another IfTreeAddr4.
      */
-    inline void copy_state(const IfTreeAddr4& o)
-    {
+    void copy_state(const IfTreeAddr4& o) {
 	set_enabled(o.enabled());
 	set_broadcast(o.broadcast());
 	set_loopback(o.loopback());
@@ -825,8 +814,7 @@ public:
      * @param o the IfTreeAddr4 to compare against.
      * @return true if the address-specific internal state is same.
      */
-    inline bool is_same_state(const IfTreeAddr4& o)
-    {
+    bool is_same_state(const IfTreeAddr4& o) {
 	return ((enabled() == o.enabled())
 		&& (broadcast() == o.broadcast())
 		&& (loopback() == o.loopback())
@@ -869,20 +857,20 @@ public:
 
     const IPv6& addr() const		{ return _addr; }
 
-    inline bool enabled() const		{ return _enabled; }
-    inline bool loopback() const	{ return _loopback; }
-    inline bool point_to_point() const	{ return _point_to_point; }
-    inline bool multicast() const	{ return _multicast; }
+    bool enabled() const		{ return _enabled; }
+    bool loopback() const		{ return _loopback; }
+    bool point_to_point() const		{ return _point_to_point; }
+    bool multicast() const		{ return _multicast; }
 
-    inline void set_enabled(bool en)	{ _enabled = en; mark(CHANGED); }
-    inline void set_loopback(bool v)	{ _loopback = v; mark(CHANGED); }
-    inline void set_point_to_point(bool v) { _point_to_point = v; mark(CHANGED); }
-    inline void set_multicast(bool v)	{ _multicast = v; mark(CHANGED); }
+    void set_enabled(bool en)		{ _enabled = en; mark(CHANGED); }
+    void set_loopback(bool v)		{ _loopback = v; mark(CHANGED); }
+    void set_point_to_point(bool v)	{ _point_to_point = v; mark(CHANGED); }
+    void set_multicast(bool v)		{ _multicast = v; mark(CHANGED); }
 
     /**
      * Get prefix length associated with address.
      */
-    inline uint32_t prefix_len() const	{ return _prefix_len; }
+    uint32_t prefix_len() const		{ return _prefix_len; }
 
     /**
      * Set prefix length associate with address.
@@ -897,8 +885,7 @@ public:
     /**
      * Copy state of internal variables from another IfTreeAddr6.
      */
-    inline void copy_state(const IfTreeAddr6& o)
-    {
+    void copy_state(const IfTreeAddr6& o) {
 	set_enabled(o.enabled());
 	set_loopback(o.loopback());
 	set_point_to_point(o.point_to_point());
@@ -914,8 +901,7 @@ public:
      * @param o the IfTreeAddr6 to compare against.
      * @return true if the address-specific internal state is same.
      */
-    inline bool is_same_state(const IfTreeAddr6& o)
-    {
+    bool is_same_state(const IfTreeAddr6& o) {
 	return ((enabled() == o.enabled())
 		&& (loopback() == o.loopback())
 		&& (point_to_point() == o.point_to_point())

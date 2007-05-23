@@ -602,7 +602,7 @@ def output_rest(l_types, b_types, dbg):
              % (joining_csv(class_args(l_types) + class_args(b_types)))
         o += "struct Xorp%sMemberCallbackFactory%dB%d\n" % (CONST, nl, nb)
         o += "{\n"
-        o += "    inline static Xorp%sMemberCallback%dB%d<R, O%s>*\n" \
+        o += "    static Xorp%sMemberCallback%dB%d<R, O%s>*\n" \
              % (CONST, nl, nb, joining_csv(l_types + b_types))
         o += "    make(%s" % starting_csv(flatten_pair_list(debug_args))
         o += "O* o, R (O::*p)(%s)%s%s)\n" \
@@ -620,7 +620,7 @@ def output_rest(l_types, b_types, dbg):
         o += "struct Xorp%sMemberCallbackFactory%dB%d<R, O%s, false>\n" \
              % (CONST, nl, nb, joining_csv(l_types + b_types))
         o += "{\n"
-        o += "    inline static Xorp%sMemberCallback%dB%d<R, O%s>*\n" \
+        o += "    static Xorp%sMemberCallback%dB%d<R, O%s>*\n" \
              % (CONST, nl, nb, joining_csv(l_types + b_types))
         o += "    make(%s" % starting_csv(flatten_pair_list(debug_args))
         o += "O* o, R (O::*p)(%s)%s%s)\n" \

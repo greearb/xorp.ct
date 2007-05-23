@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.17 2007/02/16 22:46:28 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.18 2007/02/28 01:26:51 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -42,25 +42,25 @@ private:
 public:
     IoEventTuple(XorpFd fd, IoEventType type) : _fd(fd), _type(type) {}
 
-    inline XorpFd fd()		{ return (_fd); };
-    inline IoEventType type()	{ return (_type); };
+    XorpFd fd()		{ return (_fd); };
+    IoEventType type()	{ return (_type); };
 
-    inline bool operator ==(const IoEventTuple& rhand) const {
+    bool operator ==(const IoEventTuple& rhand) const {
 	return ((_fd == rhand._fd) && (_type == rhand._type));
     }
 
-    inline bool operator !=(const IoEventTuple& rhand) const {
+    bool operator !=(const IoEventTuple& rhand) const {
 	return (!((_fd == rhand._fd) && (_type == rhand._type)));
     }
 
-    inline bool operator >(const IoEventTuple& rhand) const {
+    bool operator >(const IoEventTuple& rhand) const {
 	if (_fd != rhand._fd)
 	    return ((int)_type > (int)rhand._type);
 	else
 	    return (_fd > rhand._fd);
     }
 
-    inline bool operator <(const IoEventTuple& rhand) const {
+    bool operator <(const IoEventTuple& rhand) const {
 	if (_fd != rhand._fd)
 	    return (_fd < rhand._fd);
 	else
@@ -207,7 +207,7 @@ public:
      *
      * @param timeout the maximum period to wait for.
      */
-    inline void wait_and_dispatch(TimeVal* timeout) {
+    void wait_and_dispatch(TimeVal* timeout) {
 	if (timeout == NULL || *timeout == TimeVal::MAXIMUM())
 	    wait_and_dispatch(INFINITE);
 	else

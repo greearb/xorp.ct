@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/coding-style.txt,v 1.4 2003/10/01 20:36:07 hodson Exp $
+# $XORP: xorp/devnotes/coding-style.txt,v 1.5 2006/10/11 18:52:42 pavlin Exp $
 #
 
 	Provisional XORP C++ coding style
@@ -51,9 +51,9 @@ from our default coding styles that all are equally peturbed.
 
   For the sake of readability, try to place white space either side of
   braces. E.g., prefer:
-	inline bool foo() { return _some_value; }
+	bool foo() { return _some_value; }
   to:
-	inline bool foo() {return some_value;}
+	bool foo() {return some_value;}
 
 - REFERENCE AND POINTER ANNOTATIONS
 

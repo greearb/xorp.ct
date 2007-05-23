@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/win_rtm_pipe.hh,v 1.3 2007/02/16 22:45:51 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/control_socket/windows_rtm_pipe.hh,v 1.1 2007/05/01 08:21:56 pavlin Exp $
 
 #ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
 #define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
@@ -61,7 +61,7 @@ public:
      * 
      * @return true if the routing socket is open, otherwise false.
      */
-    inline bool is_open() const { return _fd.is_valid(); }
+    bool is_open() const { return _fd.is_valid(); }
 
     /**
      * Write data to routing socket.
@@ -82,14 +82,14 @@ public:
      * @return the sequence number for the next message written into the
      * kernel.
      */
-    inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
+    uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
      * Get the cached process identifier value.
      * 
      * @return the cached process identifier value.
      */
-    inline pid_t pid() const { return _pid; }
+    pid_t pid() const { return _pid; }
 
     /**
      * Force socket to read data.

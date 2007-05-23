@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/output.hh,v 1.10 2006/03/16 00:05:48 pavlin Exp $
+// $XORP: xorp/rip/output.hh,v 1.11 2007/02/16 22:47:14 pavlin Exp $
 
 #ifndef __RIP_OUTPUT_HH__
 #define __RIP_OUTPUT_HH__
@@ -61,41 +61,41 @@ public:
     /**
      * Accessor for destination IP address applied to output packets.
      */
-    inline const A& ip_addr() const			{ return _ip_addr; }
+    const A& ip_addr() const			{ return _ip_addr; }
 
     /**
      * Accessor for destination IP port applied to output packets.
      */
-    inline uint16_t ip_port() const			{ return _ip_port; }
+    uint16_t ip_port() const			{ return _ip_port; }
 
     /**
      * @return true if output process is generating packets.
      */
-    inline bool running() const;
+    bool running() const;
 
     /**
      * Start packet train if sufficient data is available.  This instance
      * will remain in "running" so long as data is available and will
      * continue to generate packets until the data is exhausted.
      */
-    inline void start();
+    void start();
 
     /**
      * Stop packet train.
      */
-    inline void stop();
+    void stop();
 
     /**
      * Get number of packets placed on packet queue for output.
      */
-    inline void packets_sent() const			{ return _pkts_out; }
+    void packets_sent() const			{ return _pkts_out; }
 
 protected:
     /**
      * Accessor for the inter-packet gap the output process should when
      * generating packet trains.
      */
-    inline uint32_t interpacket_gap_ms() const;
+    uint32_t interpacket_gap_ms() const;
 
     /**
      * Derived classes should implement this to start output processing.
@@ -118,7 +118,7 @@ protected:
      */
     virtual void output_packet() = 0;
 
-    inline void incr_packets_sent()			{ _pkts_out++; }
+    void incr_packets_sent()			{ _pkts_out++; }
 
     /**
      * Policy filters the route.

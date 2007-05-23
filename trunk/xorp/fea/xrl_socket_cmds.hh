@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.10 2007/03/28 13:41:44 schooley Exp $
+// $XORP: xorp/fea/xrl_socket_cmds.hh,v 1.11 2007/03/28 13:49:34 schooley Exp $
 
 #ifndef __FEA_XRL_SOCKET_CMDS_HH__
 #define __FEA_XRL_SOCKET_CMDS_HH__
@@ -37,7 +37,7 @@ public:
     virtual bool execute(XrlSender& xs, const CommandCallback&) = 0;
     virtual string str() const = 0;
 
-    inline const char* target() const			{ return _t.c_str(); }
+    const char* target() const			{ return _t.c_str(); }
 
 protected:
     string _t;
@@ -46,16 +46,15 @@ protected:
 template <typename A>
 class SocketUserSendRecvEvent : public XrlSocketCommandBase {
 public:
-    inline SocketUserSendRecvEvent(const string& tgt, const string& sockid)
+    SocketUserSendRecvEvent(const string& tgt, const string& sockid)
 	: XrlSocketCommandBase(tgt), _sockid(sockid), _src_port(0xffffffff)
     {}
-    inline void set_source_host(const A& host)		{ _src_host = host; }
-    inline void set_source_port(uint16_t port)		{ _src_port = port; }
-    inline void set_source(const typename A::SockAddrType& sa,
-			   socklen_t salen);
+    void set_source_host(const A& host)		{ _src_host = host; }
+    void set_source_port(uint16_t port)		{ _src_port = port; }
+    void set_source(const typename A::SockAddrType& sa, socklen_t salen);
 
-    inline vector<uint8_t>& data()			{ return _data; }
-    inline const vector<uint8_t>& data() const		{ return _data; }
+    vector<uint8_t>& data()			{ return _data; }
+    const vector<uint8_t>& data() const		{ return _data; }
 
     bool execute(XrlSender& xs, const CommandCallback& cb);
     string str() const;
@@ -92,12 +91,12 @@ SocketUserSendRecvEvent<IPv6>::set_source(const IPv6::SockAddrType& sin6,
 template <typename A>
 class SocketUserSendConnectEvent : public XrlSocketCommandBase {
 public:
-    inline SocketUserSendConnectEvent(XrlSocketServer* ss,
-				      const string&	tgt,
-				      const string&	sockid,
-				      const A&		host,
-				      uint16_t		port,
-				      const string&	new_sockid)
+    SocketUserSendConnectEvent(XrlSocketServer* ss,
+			       const string&	tgt,
+			       const string&	sockid,
+			       const A&		host,
+			       uint16_t		port,
+			       const string&	new_sockid)
 	: XrlSocketCommandBase(tgt), _ss(ss), _sockid(sockid),
 	  _src_host(host), _src_port(port), _new_sockid(new_sockid)
     {}
@@ -117,10 +116,10 @@ private:
 template <typename A>
 class SocketUserSendErrorEvent : public XrlSocketCommandBase {
 public:
-    inline SocketUserSendErrorEvent(const string&	tgt,
-				    const string&	sockid,
-				    const string&	error,
-				    bool		fatal)
+    SocketUserSendErrorEvent(const string&	tgt,
+			     const string&	sockid,
+			     const string&	error,
+			     bool		fatal)
 	: XrlSocketCommandBase(tgt), _sockid(sockid),
 	  _error(error), _fatal(fatal)
     {}
@@ -136,9 +135,9 @@ private:
 template <typename A>
 class SocketUserSendCloseEvent : public XrlSocketCommandBase {
 public:
-    inline SocketUserSendCloseEvent(const string&	tgt,
-				    const string&	sockid,
-				    const string&	reason)
+    SocketUserSendCloseEvent(const string&	tgt,
+			     const string&	sockid,
+			     const string&	reason)
 	: XrlSocketCommandBase(tgt), _sockid(sockid), _reason(reason)
     {}
     bool execute(XrlSender& xs, const CommandCallback& cb);
@@ -164,7 +163,8 @@ public:
      */
     void enqueue(const Command& cmd);
 
-    inline bool queue_empty() const		{ return _cmds.empty(); }
+    bool queue_empty() const		{ return _cmds.empty(); }
+
 protected:
     /**
      * Send next Xrl enqueued (if any).
@@ -183,7 +183,7 @@ protected:
     virtual void xrl_cb(const XrlError& xe) = 0;
 
 private:
-    inline bool dispatch_head();
+    bool dispatch_head();
 
 private:
     XrlSender&	  _xs;

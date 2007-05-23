@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_cmd_map.hh,v 1.16 2006/03/16 00:04:21 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_cmd_map.hh,v 1.17 2007/02/16 22:46:10 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_CMD_MAP_HH__
 #define __LIBXIPC_XRL_CMD_MAP_HH__
@@ -31,11 +31,9 @@ struct XrlCmdEntry {
     XrlCmdEntry(const string& s, XrlRecvCallback cb) :
 	_name(s), _cb(cb) {}
 
-    inline const string& name() const { return _name; }
+    const string& name() const { return _name; }
 
-    inline const XrlCmdError
-    dispatch(const XrlArgs& inputs, XrlArgs* outputs) const
-    {
+    const XrlCmdError dispatch(const XrlArgs& inputs, XrlArgs* outputs) const {
 	return _cb->dispatch(inputs, outputs);
     }
 

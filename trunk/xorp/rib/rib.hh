@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.37 2007/02/16 22:47:08 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.38 2007/03/22 20:48:18 bms Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -504,7 +504,7 @@ public:
      *
      * @return a reference to the _admin_distance map.
      */
-    inline map<string, uint32_t>& get_protocol_admin_distances() {
+    map<string, uint32_t>& get_protocol_admin_distances() {
 	return _admin_distances;
     }
 
@@ -600,7 +600,7 @@ private:
      * @param tablename the name of the table to search for.
      * @return pointer to table if exists, NULL otherwise.
      */
-    inline RouteTable<A>* find_table(const string& tablename);
+    RouteTable<A>* find_table(const string& tablename);
 
     /**
      * Find a routing table, given its protocol name and XRL target
@@ -611,9 +611,9 @@ private:
      * @param target_instance the name of the target instance to search for.
      * @return pointer to table if exists, NULL otherwise.
      */
-    inline OriginTable<A>* find_table_by_instance(const string& tablename,
-						  const string&	target_class,
-						  const string& target_instance);
+    OriginTable<A>* find_table_by_instance(const string& tablename,
+					   const string& target_class,
+					   const string& target_instance);
 
     /**
      * Add table to RIB, but don't do any plumbing.
@@ -625,7 +625,7 @@ private:
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline int add_table(RouteTable<A>* table);
+    int add_table(RouteTable<A>* table);
 
     /**
      * Remove table from RIB, but don't do any unplumbing.
@@ -634,7 +634,7 @@ private:
      * @param tablename the name of the table to be removed.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline int remove_table(const string& tablename);
+    int remove_table(const string& tablename);
 
     /**
      * Find the virtual interface associated with one of this router's
@@ -643,7 +643,7 @@ private:
      * @param addr the IP address to lookup.
      * @return pointer to Vif on success, NULL otherwise.
      */
-    inline Vif* find_vif(const A& addr);
+    Vif* find_vif(const A& addr);
 
     /**
      * Find the IP External Nexthop class instance associated with an IP
@@ -652,7 +652,7 @@ private:
      * @param addr the IP address of the nexthop router.
      * @return pointer to external next hop if it exists, NULL otherwise.
      */
-    inline IPExternalNextHop<A>* find_external_nexthop(const A& addr);
+    IPExternalNextHop<A>* find_external_nexthop(const A& addr);
 
     /**
      * Find the IP Peer Nexthop class instance associated with an IP
@@ -661,7 +661,7 @@ private:
      * @param addr the IP address of the nexthop router.
      * @return pointer to peer next hop if it exists, NULL otherwise.
      */
-    inline IPPeerNextHop<A>* find_peer_nexthop(const A& addr);
+    IPPeerNextHop<A>* find_peer_nexthop(const A& addr);
 
     /**
      * Find or create the IP External Nexthop class instance
@@ -670,7 +670,7 @@ private:
      * @param addr the IP address of the nexthop router.
      * @return the IPExternalNextHop class instance for @ref addr
      */
-    inline IPExternalNextHop<A>* find_or_create_external_nexthop(const A& addr);
+    IPExternalNextHop<A>* find_or_create_external_nexthop(const A& addr);
 
     /**
      * Find or create the IP Peer Nexthop class instance
@@ -679,7 +679,7 @@ private:
      * @param addr the IP address of the nexthop router.
      * @return the IPPeerNextHop class instance for @ref addr.
      */
-    inline IPPeerNextHop<A>* find_or_create_peer_nexthop(const A& addr);
+    IPPeerNextHop<A>* find_or_create_peer_nexthop(const A& addr);
 
     /**
      * not implemented - force use of default copy constuctor to fail.

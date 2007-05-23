@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.15 2006/10/12 01:24:54 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.16 2007/02/16 22:46:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -32,8 +32,8 @@
 
 static bool s_verbose = false;
 
-inline bool verbose() 		{ return s_verbose; }
-inline void set_verbose(bool v)	{ s_verbose = v; }
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
 
 #define verbose_log(x...) 						      \
 do {									      \

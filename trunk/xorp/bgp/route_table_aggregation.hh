@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.12 2006/11/07 18:55:39 pavlin Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.13 2007/02/16 22:45:16 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -126,14 +126,14 @@ public:
 	delete _pa_list;
 	delete _aggregator_attribute;
     }
-    inline const PathAttributeList<A> *pa_list() const { return _pa_list; }
-    inline const IPNet<A> net() const	{ return _net; }
-    inline bool was_announced() const	{ return _was_announced; }
-    inline bool is_suppressed() const	{ return _is_suppressed; }
-    inline bool brief_mode() const	{ return _brief_mode; }
-    inline void was_announced(bool value) { _was_announced = value; }
-    inline void is_suppressed(bool value) { _is_suppressed = value; }
-    inline void brief_mode(bool value)	{ _brief_mode = value; }
+    const PathAttributeList<A> *pa_list() const { return _pa_list; }
+    const IPNet<A> net() const		{ return _net; }
+    bool was_announced() const		{ return _was_announced; }
+    bool is_suppressed() const		{ return _is_suppressed; }
+    bool brief_mode() const		{ return _brief_mode; }
+    void was_announced(bool value)	{ _was_announced = value; }
+    void is_suppressed(bool value)	{ _is_suppressed = value; }
+    void brief_mode(bool value)		{ _brief_mode = value; }
     void reevaluate(AggregationTable<A> *parent);
     RefTrie<A, const ComponentRoute<A> > *components_table() {
 	return &_components_table;

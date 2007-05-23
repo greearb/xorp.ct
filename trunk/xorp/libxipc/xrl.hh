@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.13 2006/03/16 00:04:20 pavlin Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.14 2007/02/16 22:46:09 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -32,10 +32,10 @@ public:
     /**
      * Construct an Xrl.
      */
-    inline Xrl(const string&	protocol,
-	       const string&	protocol_target,
-	       const string&	command,
-	       const XrlArgs&	args)
+    Xrl(const string&	protocol,
+	const string&	protocol_target,
+	const string&	command,
+	const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
 	  _args(args)
     {}
@@ -43,9 +43,9 @@ public:
     /**
      * Construct an Xrl (with implicit finder protocol).
      */
-    inline Xrl(const string&	target,
-	       const string&	command,
-	       const XrlArgs&	args)
+    Xrl(const string&	target,
+	const string&	command,
+	const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
 	  _args(args)
     {}
@@ -53,17 +53,17 @@ public:
     /**
      * Construct an Xrl that does not have an argument list.
      */
-    inline Xrl(const string& protocol,
-	       const string& protocol_target,
-	       const string& command)
+    Xrl(const string& protocol,
+	const string& protocol_target,
+	const string& command)
 	: _protocol(protocol), _target(protocol_target), _command(command)
     {}
 
     /**
      * Construct an Xrl that does not have an argument list.
      */
-    inline Xrl(const string& target,
-	       const string& command)
+    Xrl(const string& target,
+	const string& command)
 	: _protocol(_finder_protocol), _target(target), _command(command)
     {}
 
@@ -72,7 +72,7 @@ public:
      */
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
-    inline Xrl() {}
+    Xrl() {}
     ~Xrl();
 
     /**
@@ -83,32 +83,32 @@ public:
     /**
      * @return the protocol associated with XRL.
      */
-    inline const string& protocol() const		{ return _protocol; }
+    const string& protocol() const		{ return _protocol; }
 
     /**
      * @return the name of the XRL target entity.
      */
-    inline const string& target() const			{ return _target; }
+    const string& target() const		{ return _target; }
 
     /**
      * @return string representation of Xrl without arguments.
      */
-    inline string string_no_args() const;
+    string string_no_args() const;
 
     /**
      * @return the name of the command
      */
-    inline const string& command() const		{ return _command; }
+    const string& command() const		{ return _command; }
 
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    inline XrlArgs& args()				{ return _args; }
+    XrlArgs& args()				{ return _args; }
 
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    inline const XrlArgs& args() const			{ return _args; }
+    const XrlArgs& args() const			{ return _args; }
 
     /**
      * Test the equivalence of two XRL's.

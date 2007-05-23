@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.64 2007/03/22 20:48:18 bms Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.65 2007/03/22 22:17:03 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -32,8 +32,8 @@
 
 template <typename A>
 struct table_has_name {
-    inline table_has_name(const string& name) : _n(name) {}
-    inline bool operator() (const RouteTable<A>* rt) const {
+    table_has_name(const string& name) : _n(name) {}
+    bool operator() (const RouteTable<A>* rt) const {
 	return rt->tablename() == _n;
     }
 private:
@@ -42,8 +42,8 @@ private:
 
 template <typename A, typename T>
 struct table_has_name_and_type {
-    inline table_has_name_and_type(const string& name) : _n(name) {}
-    inline bool operator() (const RouteTable<A>* rt) const {
+    table_has_name_and_type(const string& name) : _n(name) {}
+    bool operator() (const RouteTable<A>* rt) const {
 	const T* t = dynamic_cast<const T*>(rt);
 	return (t != 0) && (rt->tablename() == _n);
     }

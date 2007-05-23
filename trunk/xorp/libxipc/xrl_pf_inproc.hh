@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.17 2006/03/16 00:04:22 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_inproc.hh,v 1.18 2007/02/16 22:46:12 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_INPROC_HH__
 #define __LIBXIPC_XRL_PF_INPROC_HH__
@@ -52,11 +52,11 @@ public:
 	      bool 				direct_call,
 	      const XrlPFSender::SendCallback& 	cb);
 
-    inline bool sends_pending() const			{ return false; }
+    bool sends_pending() const			{ return false; }
 
     const char* protocol() const;
 
-    inline static const char* protocol_name()		{ return _protocol; }
+    static const char* protocol_name()		{ return _protocol; }
 
     bool alive() const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.23 2006/10/12 01:25:13 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.24 2007/02/16 22:47:24 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
 #define __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
@@ -67,9 +67,7 @@ public:
     int get_deletions(const SlaveConfigTreeNode& master_node);
 
     // adaptors so we don't need to cast elsewhere
-    inline SlaveConfigTreeNode* parent() {
-	return (SlaveConfigTreeNode*)_parent;
-    }
+    SlaveConfigTreeNode* parent() { return (SlaveConfigTreeNode*)_parent; }
 
     void finalize_commit();
 

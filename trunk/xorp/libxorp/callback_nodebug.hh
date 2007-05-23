@@ -353,7 +353,7 @@ struct XorpSafeMemberCallback0B0<void,O>
 template <class R, class O, bool B=true>
 struct XorpMemberCallbackFactory0B0
 {
-    inline static XorpMemberCallback0B0<R, O>*
+    static XorpMemberCallback0B0<R, O>*
     make(O* o, R (O::*p)())
     {
 	return new XorpSafeMemberCallback0B0<R, O>(o, p);
@@ -363,7 +363,7 @@ struct XorpMemberCallbackFactory0B0
 template <class R, class O>
 struct XorpMemberCallbackFactory0B0<R, O, false>
 {
-    inline static XorpMemberCallback0B0<R, O>*
+    static XorpMemberCallback0B0<R, O>*
     make(O* o, R (O::*p)())
     {
 	return new XorpMemberCallback0B0<R, O>(o, p);
@@ -473,7 +473,7 @@ struct XorpConstSafeMemberCallback0B0<void,O>
 template <class R, class O, bool B=true>
 struct XorpConstMemberCallbackFactory0B0
 {
-    inline static XorpConstMemberCallback0B0<R, O>*
+    static XorpConstMemberCallback0B0<R, O>*
     make(O* o, R (O::*p)() const)
     {
 	return new XorpConstSafeMemberCallback0B0<R, O>(o, p);
@@ -483,7 +483,7 @@ struct XorpConstMemberCallbackFactory0B0
 template <class R, class O>
 struct XorpConstMemberCallbackFactory0B0<R, O, false>
 {
-    inline static XorpConstMemberCallback0B0<R, O>*
+    static XorpConstMemberCallback0B0<R, O>*
     make(O* o, R (O::*p)() const)
     {
 	return new XorpConstMemberCallback0B0<R, O>(o, p);
@@ -646,7 +646,7 @@ struct XorpSafeMemberCallback0B1<void,O, BA1>
 template <class R, class O, class BA1, bool B=true>
 struct XorpMemberCallbackFactory0B1
 {
-    inline static XorpMemberCallback0B1<R, O, BA1>*
+    static XorpMemberCallback0B1<R, O, BA1>*
     make(O* o, R (O::*p)(BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback0B1<R, O, BA1>(o, p, ba1);
@@ -656,7 +656,7 @@ struct XorpMemberCallbackFactory0B1
 template <class R, class O, class BA1>
 struct XorpMemberCallbackFactory0B1<R, O, BA1, false>
 {
-    inline static XorpMemberCallback0B1<R, O, BA1>*
+    static XorpMemberCallback0B1<R, O, BA1>*
     make(O* o, R (O::*p)(BA1), BA1 ba1)
     {
 	return new XorpMemberCallback0B1<R, O, BA1>(o, p, ba1);
@@ -768,7 +768,7 @@ struct XorpConstSafeMemberCallback0B1<void,O, BA1>
 template <class R, class O, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory0B1
 {
-    inline static XorpConstMemberCallback0B1<R, O, BA1>*
+    static XorpConstMemberCallback0B1<R, O, BA1>*
     make(O* o, R (O::*p)(BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback0B1<R, O, BA1>(o, p, ba1);
@@ -778,7 +778,7 @@ struct XorpConstMemberCallbackFactory0B1
 template <class R, class O, class BA1>
 struct XorpConstMemberCallbackFactory0B1<R, O, BA1, false>
 {
-    inline static XorpConstMemberCallback0B1<R, O, BA1>*
+    static XorpConstMemberCallback0B1<R, O, BA1>*
     make(O* o, R (O::*p)(BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback0B1<R, O, BA1>(o, p, ba1);
@@ -945,7 +945,7 @@ struct XorpSafeMemberCallback0B2<void,O, BA1, BA2>
 template <class R, class O, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory0B2
 {
-    inline static XorpMemberCallback0B2<R, O, BA1, BA2>*
+    static XorpMemberCallback0B2<R, O, BA1, BA2>*
     make(O* o, R (O::*p)(BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback0B2<R, O, BA1, BA2>(o, p, ba1, ba2);
@@ -955,7 +955,7 @@ struct XorpMemberCallbackFactory0B2
 template <class R, class O, class BA1, class BA2>
 struct XorpMemberCallbackFactory0B2<R, O, BA1, BA2, false>
 {
-    inline static XorpMemberCallback0B2<R, O, BA1, BA2>*
+    static XorpMemberCallback0B2<R, O, BA1, BA2>*
     make(O* o, R (O::*p)(BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback0B2<R, O, BA1, BA2>(o, p, ba1, ba2);
@@ -1069,7 +1069,7 @@ struct XorpConstSafeMemberCallback0B2<void,O, BA1, BA2>
 template <class R, class O, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory0B2
 {
-    inline static XorpConstMemberCallback0B2<R, O, BA1, BA2>*
+    static XorpConstMemberCallback0B2<R, O, BA1, BA2>*
     make(O* o, R (O::*p)(BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback0B2<R, O, BA1, BA2>(o, p, ba1, ba2);
@@ -1079,7 +1079,7 @@ struct XorpConstMemberCallbackFactory0B2
 template <class R, class O, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory0B2<R, O, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback0B2<R, O, BA1, BA2>*
+    static XorpConstMemberCallback0B2<R, O, BA1, BA2>*
     make(O* o, R (O::*p)(BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback0B2<R, O, BA1, BA2>(o, p, ba1, ba2);
@@ -1250,7 +1250,7 @@ struct XorpSafeMemberCallback0B3<void,O, BA1, BA2, BA3>
 template <class R, class O, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory0B3
 {
-    inline static XorpMemberCallback0B3<R, O, BA1, BA2, BA3>*
+    static XorpMemberCallback0B3<R, O, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback0B3<R, O, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -1260,7 +1260,7 @@ struct XorpMemberCallbackFactory0B3
 template <class R, class O, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback0B3<R, O, BA1, BA2, BA3>*
+    static XorpMemberCallback0B3<R, O, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback0B3<R, O, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -1376,7 +1376,7 @@ struct XorpConstSafeMemberCallback0B3<void,O, BA1, BA2, BA3>
 template <class R, class O, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory0B3
 {
-    inline static XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>*
+    static XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback0B3<R, O, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -1386,7 +1386,7 @@ struct XorpConstMemberCallbackFactory0B3
 template <class R, class O, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>*
+    static XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback0B3<R, O, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -1561,7 +1561,7 @@ struct XorpSafeMemberCallback0B4<void,O, BA1, BA2, BA3, BA4>
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory0B4
 {
-    inline static XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -1571,7 +1571,7 @@ struct XorpMemberCallbackFactory0B4
 template <class R, class O, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -1689,7 +1689,7 @@ struct XorpConstSafeMemberCallback0B4<void,O, BA1, BA2, BA3, BA4>
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory0B4
 {
-    inline static XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -1699,7 +1699,7 @@ struct XorpConstMemberCallbackFactory0B4
 template <class R, class O, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback0B4<R, O, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -1878,7 +1878,7 @@ struct XorpSafeMemberCallback0B5<void,O, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory0B5
 {
-    inline static XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -1888,7 +1888,7 @@ struct XorpMemberCallbackFactory0B5
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -2008,7 +2008,7 @@ struct XorpConstSafeMemberCallback0B5<void,O, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory0B5
 {
-    inline static XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -2018,7 +2018,7 @@ struct XorpConstMemberCallbackFactory0B5
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback0B5<R, O, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -2201,7 +2201,7 @@ struct XorpSafeMemberCallback0B6<void,O, BA1, BA2, BA3, BA4, BA5, BA6>
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory0B6
 {
-    inline static XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -2211,7 +2211,7 @@ struct XorpMemberCallbackFactory0B6
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -2333,7 +2333,7 @@ struct XorpConstSafeMemberCallback0B6<void,O, BA1, BA2, BA3, BA4, BA5, BA6>
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory0B6
 {
-    inline static XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -2343,7 +2343,7 @@ struct XorpConstMemberCallbackFactory0B6
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -2518,7 +2518,7 @@ struct XorpSafeMemberCallback1B0<void,O, A1>
 template <class R, class O, class A1, bool B=true>
 struct XorpMemberCallbackFactory1B0
 {
-    inline static XorpMemberCallback1B0<R, O, A1>*
+    static XorpMemberCallback1B0<R, O, A1>*
     make(O* o, R (O::*p)(A1))
     {
 	return new XorpSafeMemberCallback1B0<R, O, A1>(o, p);
@@ -2528,7 +2528,7 @@ struct XorpMemberCallbackFactory1B0
 template <class R, class O, class A1>
 struct XorpMemberCallbackFactory1B0<R, O, A1, false>
 {
-    inline static XorpMemberCallback1B0<R, O, A1>*
+    static XorpMemberCallback1B0<R, O, A1>*
     make(O* o, R (O::*p)(A1))
     {
 	return new XorpMemberCallback1B0<R, O, A1>(o, p);
@@ -2638,7 +2638,7 @@ struct XorpConstSafeMemberCallback1B0<void,O, A1>
 template <class R, class O, class A1, bool B=true>
 struct XorpConstMemberCallbackFactory1B0
 {
-    inline static XorpConstMemberCallback1B0<R, O, A1>*
+    static XorpConstMemberCallback1B0<R, O, A1>*
     make(O* o, R (O::*p)(A1) const)
     {
 	return new XorpConstSafeMemberCallback1B0<R, O, A1>(o, p);
@@ -2648,7 +2648,7 @@ struct XorpConstMemberCallbackFactory1B0
 template <class R, class O, class A1>
 struct XorpConstMemberCallbackFactory1B0<R, O, A1, false>
 {
-    inline static XorpConstMemberCallback1B0<R, O, A1>*
+    static XorpConstMemberCallback1B0<R, O, A1>*
     make(O* o, R (O::*p)(A1) const)
     {
 	return new XorpConstMemberCallback1B0<R, O, A1>(o, p);
@@ -2811,7 +2811,7 @@ struct XorpSafeMemberCallback1B1<void,O, A1, BA1>
 template <class R, class O, class A1, class BA1, bool B=true>
 struct XorpMemberCallbackFactory1B1
 {
-    inline static XorpMemberCallback1B1<R, O, A1, BA1>*
+    static XorpMemberCallback1B1<R, O, A1, BA1>*
     make(O* o, R (O::*p)(A1, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback1B1<R, O, A1, BA1>(o, p, ba1);
@@ -2821,7 +2821,7 @@ struct XorpMemberCallbackFactory1B1
 template <class R, class O, class A1, class BA1>
 struct XorpMemberCallbackFactory1B1<R, O, A1, BA1, false>
 {
-    inline static XorpMemberCallback1B1<R, O, A1, BA1>*
+    static XorpMemberCallback1B1<R, O, A1, BA1>*
     make(O* o, R (O::*p)(A1, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback1B1<R, O, A1, BA1>(o, p, ba1);
@@ -2933,7 +2933,7 @@ struct XorpConstSafeMemberCallback1B1<void,O, A1, BA1>
 template <class R, class O, class A1, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory1B1
 {
-    inline static XorpConstMemberCallback1B1<R, O, A1, BA1>*
+    static XorpConstMemberCallback1B1<R, O, A1, BA1>*
     make(O* o, R (O::*p)(A1, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback1B1<R, O, A1, BA1>(o, p, ba1);
@@ -2943,7 +2943,7 @@ struct XorpConstMemberCallbackFactory1B1
 template <class R, class O, class A1, class BA1>
 struct XorpConstMemberCallbackFactory1B1<R, O, A1, BA1, false>
 {
-    inline static XorpConstMemberCallback1B1<R, O, A1, BA1>*
+    static XorpConstMemberCallback1B1<R, O, A1, BA1>*
     make(O* o, R (O::*p)(A1, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback1B1<R, O, A1, BA1>(o, p, ba1);
@@ -3110,7 +3110,7 @@ struct XorpSafeMemberCallback1B2<void,O, A1, BA1, BA2>
 template <class R, class O, class A1, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory1B2
 {
-    inline static XorpMemberCallback1B2<R, O, A1, BA1, BA2>*
+    static XorpMemberCallback1B2<R, O, A1, BA1, BA2>*
     make(O* o, R (O::*p)(A1, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback1B2<R, O, A1, BA1, BA2>(o, p, ba1, ba2);
@@ -3120,7 +3120,7 @@ struct XorpMemberCallbackFactory1B2
 template <class R, class O, class A1, class BA1, class BA2>
 struct XorpMemberCallbackFactory1B2<R, O, A1, BA1, BA2, false>
 {
-    inline static XorpMemberCallback1B2<R, O, A1, BA1, BA2>*
+    static XorpMemberCallback1B2<R, O, A1, BA1, BA2>*
     make(O* o, R (O::*p)(A1, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback1B2<R, O, A1, BA1, BA2>(o, p, ba1, ba2);
@@ -3234,7 +3234,7 @@ struct XorpConstSafeMemberCallback1B2<void,O, A1, BA1, BA2>
 template <class R, class O, class A1, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory1B2
 {
-    inline static XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>*
+    static XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>*
     make(O* o, R (O::*p)(A1, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback1B2<R, O, A1, BA1, BA2>(o, p, ba1, ba2);
@@ -3244,7 +3244,7 @@ struct XorpConstMemberCallbackFactory1B2
 template <class R, class O, class A1, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory1B2<R, O, A1, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>*
+    static XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>*
     make(O* o, R (O::*p)(A1, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback1B2<R, O, A1, BA1, BA2>(o, p, ba1, ba2);
@@ -3415,7 +3415,7 @@ struct XorpSafeMemberCallback1B3<void,O, A1, BA1, BA2, BA3>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory1B3
 {
-    inline static XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
+    static XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback1B3<R, O, A1, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -3425,7 +3425,7 @@ struct XorpMemberCallbackFactory1B3
 template <class R, class O, class A1, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
+    static XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback1B3<R, O, A1, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -3541,7 +3541,7 @@ struct XorpConstSafeMemberCallback1B3<void,O, A1, BA1, BA2, BA3>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory1B3
 {
-    inline static XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
+    static XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback1B3<R, O, A1, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -3551,7 +3551,7 @@ struct XorpConstMemberCallbackFactory1B3
 template <class R, class O, class A1, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
+    static XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback1B3<R, O, A1, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -3726,7 +3726,7 @@ struct XorpSafeMemberCallback1B4<void,O, A1, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory1B4
 {
-    inline static XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -3736,7 +3736,7 @@ struct XorpMemberCallbackFactory1B4
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -3854,7 +3854,7 @@ struct XorpConstSafeMemberCallback1B4<void,O, A1, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory1B4
 {
-    inline static XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -3864,7 +3864,7 @@ struct XorpConstMemberCallbackFactory1B4
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback1B4<R, O, A1, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -4043,7 +4043,7 @@ struct XorpSafeMemberCallback1B5<void,O, A1, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory1B5
 {
-    inline static XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -4053,7 +4053,7 @@ struct XorpMemberCallbackFactory1B5
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -4173,7 +4173,7 @@ struct XorpConstSafeMemberCallback1B5<void,O, A1, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory1B5
 {
-    inline static XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -4183,7 +4183,7 @@ struct XorpConstMemberCallbackFactory1B5
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -4366,7 +4366,7 @@ struct XorpSafeMemberCallback1B6<void,O, A1, BA1, BA2, BA3, BA4, BA5, BA6>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory1B6
 {
-    inline static XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -4376,7 +4376,7 @@ struct XorpMemberCallbackFactory1B6
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -4498,7 +4498,7 @@ struct XorpConstSafeMemberCallback1B6<void,O, A1, BA1, BA2, BA3, BA4, BA5, BA6>
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory1B6
 {
-    inline static XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -4508,7 +4508,7 @@ struct XorpConstMemberCallbackFactory1B6
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -4683,7 +4683,7 @@ struct XorpSafeMemberCallback2B0<void,O, A1, A2>
 template <class R, class O, class A1, class A2, bool B=true>
 struct XorpMemberCallbackFactory2B0
 {
-    inline static XorpMemberCallback2B0<R, O, A1, A2>*
+    static XorpMemberCallback2B0<R, O, A1, A2>*
     make(O* o, R (O::*p)(A1, A2))
     {
 	return new XorpSafeMemberCallback2B0<R, O, A1, A2>(o, p);
@@ -4693,7 +4693,7 @@ struct XorpMemberCallbackFactory2B0
 template <class R, class O, class A1, class A2>
 struct XorpMemberCallbackFactory2B0<R, O, A1, A2, false>
 {
-    inline static XorpMemberCallback2B0<R, O, A1, A2>*
+    static XorpMemberCallback2B0<R, O, A1, A2>*
     make(O* o, R (O::*p)(A1, A2))
     {
 	return new XorpMemberCallback2B0<R, O, A1, A2>(o, p);
@@ -4803,7 +4803,7 @@ struct XorpConstSafeMemberCallback2B0<void,O, A1, A2>
 template <class R, class O, class A1, class A2, bool B=true>
 struct XorpConstMemberCallbackFactory2B0
 {
-    inline static XorpConstMemberCallback2B0<R, O, A1, A2>*
+    static XorpConstMemberCallback2B0<R, O, A1, A2>*
     make(O* o, R (O::*p)(A1, A2) const)
     {
 	return new XorpConstSafeMemberCallback2B0<R, O, A1, A2>(o, p);
@@ -4813,7 +4813,7 @@ struct XorpConstMemberCallbackFactory2B0
 template <class R, class O, class A1, class A2>
 struct XorpConstMemberCallbackFactory2B0<R, O, A1, A2, false>
 {
-    inline static XorpConstMemberCallback2B0<R, O, A1, A2>*
+    static XorpConstMemberCallback2B0<R, O, A1, A2>*
     make(O* o, R (O::*p)(A1, A2) const)
     {
 	return new XorpConstMemberCallback2B0<R, O, A1, A2>(o, p);
@@ -4976,7 +4976,7 @@ struct XorpSafeMemberCallback2B1<void,O, A1, A2, BA1>
 template <class R, class O, class A1, class A2, class BA1, bool B=true>
 struct XorpMemberCallbackFactory2B1
 {
-    inline static XorpMemberCallback2B1<R, O, A1, A2, BA1>*
+    static XorpMemberCallback2B1<R, O, A1, A2, BA1>*
     make(O* o, R (O::*p)(A1, A2, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback2B1<R, O, A1, A2, BA1>(o, p, ba1);
@@ -4986,7 +4986,7 @@ struct XorpMemberCallbackFactory2B1
 template <class R, class O, class A1, class A2, class BA1>
 struct XorpMemberCallbackFactory2B1<R, O, A1, A2, BA1, false>
 {
-    inline static XorpMemberCallback2B1<R, O, A1, A2, BA1>*
+    static XorpMemberCallback2B1<R, O, A1, A2, BA1>*
     make(O* o, R (O::*p)(A1, A2, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback2B1<R, O, A1, A2, BA1>(o, p, ba1);
@@ -5098,7 +5098,7 @@ struct XorpConstSafeMemberCallback2B1<void,O, A1, A2, BA1>
 template <class R, class O, class A1, class A2, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory2B1
 {
-    inline static XorpConstMemberCallback2B1<R, O, A1, A2, BA1>*
+    static XorpConstMemberCallback2B1<R, O, A1, A2, BA1>*
     make(O* o, R (O::*p)(A1, A2, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback2B1<R, O, A1, A2, BA1>(o, p, ba1);
@@ -5108,7 +5108,7 @@ struct XorpConstMemberCallbackFactory2B1
 template <class R, class O, class A1, class A2, class BA1>
 struct XorpConstMemberCallbackFactory2B1<R, O, A1, A2, BA1, false>
 {
-    inline static XorpConstMemberCallback2B1<R, O, A1, A2, BA1>*
+    static XorpConstMemberCallback2B1<R, O, A1, A2, BA1>*
     make(O* o, R (O::*p)(A1, A2, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback2B1<R, O, A1, A2, BA1>(o, p, ba1);
@@ -5275,7 +5275,7 @@ struct XorpSafeMemberCallback2B2<void,O, A1, A2, BA1, BA2>
 template <class R, class O, class A1, class A2, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory2B2
 {
-    inline static XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
+    static XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback2B2<R, O, A1, A2, BA1, BA2>(o, p, ba1, ba2);
@@ -5285,7 +5285,7 @@ struct XorpMemberCallbackFactory2B2
 template <class R, class O, class A1, class A2, class BA1, class BA2>
 struct XorpMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, false>
 {
-    inline static XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
+    static XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback2B2<R, O, A1, A2, BA1, BA2>(o, p, ba1, ba2);
@@ -5399,7 +5399,7 @@ struct XorpConstSafeMemberCallback2B2<void,O, A1, A2, BA1, BA2>
 template <class R, class O, class A1, class A2, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory2B2
 {
-    inline static XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
+    static XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback2B2<R, O, A1, A2, BA1, BA2>(o, p, ba1, ba2);
@@ -5409,7 +5409,7 @@ struct XorpConstMemberCallbackFactory2B2
 template <class R, class O, class A1, class A2, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
+    static XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback2B2<R, O, A1, A2, BA1, BA2>(o, p, ba1, ba2);
@@ -5580,7 +5580,7 @@ struct XorpSafeMemberCallback2B3<void,O, A1, A2, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory2B3
 {
-    inline static XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
+    static XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -5590,7 +5590,7 @@ struct XorpMemberCallbackFactory2B3
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
+    static XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -5706,7 +5706,7 @@ struct XorpConstSafeMemberCallback2B3<void,O, A1, A2, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory2B3
 {
-    inline static XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
+    static XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -5716,7 +5716,7 @@ struct XorpConstMemberCallbackFactory2B3
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
+    static XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback2B3<R, O, A1, A2, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -5891,7 +5891,7 @@ struct XorpSafeMemberCallback2B4<void,O, A1, A2, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory2B4
 {
-    inline static XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -5901,7 +5901,7 @@ struct XorpMemberCallbackFactory2B4
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -6019,7 +6019,7 @@ struct XorpConstSafeMemberCallback2B4<void,O, A1, A2, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory2B4
 {
-    inline static XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -6029,7 +6029,7 @@ struct XorpConstMemberCallbackFactory2B4
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback2B4<R, O, A1, A2, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -6208,7 +6208,7 @@ struct XorpSafeMemberCallback2B5<void,O, A1, A2, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory2B5
 {
-    inline static XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -6218,7 +6218,7 @@ struct XorpMemberCallbackFactory2B5
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -6338,7 +6338,7 @@ struct XorpConstSafeMemberCallback2B5<void,O, A1, A2, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory2B5
 {
-    inline static XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -6348,7 +6348,7 @@ struct XorpConstMemberCallbackFactory2B5
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -6531,7 +6531,7 @@ struct XorpSafeMemberCallback2B6<void,O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory2B6
 {
-    inline static XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -6541,7 +6541,7 @@ struct XorpMemberCallbackFactory2B6
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -6663,7 +6663,7 @@ struct XorpConstSafeMemberCallback2B6<void,O, A1, A2, BA1, BA2, BA3, BA4, BA5, B
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory2B6
 {
-    inline static XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -6673,7 +6673,7 @@ struct XorpConstMemberCallbackFactory2B6
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -6848,7 +6848,7 @@ struct XorpSafeMemberCallback3B0<void,O, A1, A2, A3>
 template <class R, class O, class A1, class A2, class A3, bool B=true>
 struct XorpMemberCallbackFactory3B0
 {
-    inline static XorpMemberCallback3B0<R, O, A1, A2, A3>*
+    static XorpMemberCallback3B0<R, O, A1, A2, A3>*
     make(O* o, R (O::*p)(A1, A2, A3))
     {
 	return new XorpSafeMemberCallback3B0<R, O, A1, A2, A3>(o, p);
@@ -6858,7 +6858,7 @@ struct XorpMemberCallbackFactory3B0
 template <class R, class O, class A1, class A2, class A3>
 struct XorpMemberCallbackFactory3B0<R, O, A1, A2, A3, false>
 {
-    inline static XorpMemberCallback3B0<R, O, A1, A2, A3>*
+    static XorpMemberCallback3B0<R, O, A1, A2, A3>*
     make(O* o, R (O::*p)(A1, A2, A3))
     {
 	return new XorpMemberCallback3B0<R, O, A1, A2, A3>(o, p);
@@ -6968,7 +6968,7 @@ struct XorpConstSafeMemberCallback3B0<void,O, A1, A2, A3>
 template <class R, class O, class A1, class A2, class A3, bool B=true>
 struct XorpConstMemberCallbackFactory3B0
 {
-    inline static XorpConstMemberCallback3B0<R, O, A1, A2, A3>*
+    static XorpConstMemberCallback3B0<R, O, A1, A2, A3>*
     make(O* o, R (O::*p)(A1, A2, A3) const)
     {
 	return new XorpConstSafeMemberCallback3B0<R, O, A1, A2, A3>(o, p);
@@ -6978,7 +6978,7 @@ struct XorpConstMemberCallbackFactory3B0
 template <class R, class O, class A1, class A2, class A3>
 struct XorpConstMemberCallbackFactory3B0<R, O, A1, A2, A3, false>
 {
-    inline static XorpConstMemberCallback3B0<R, O, A1, A2, A3>*
+    static XorpConstMemberCallback3B0<R, O, A1, A2, A3>*
     make(O* o, R (O::*p)(A1, A2, A3) const)
     {
 	return new XorpConstMemberCallback3B0<R, O, A1, A2, A3>(o, p);
@@ -7141,7 +7141,7 @@ struct XorpSafeMemberCallback3B1<void,O, A1, A2, A3, BA1>
 template <class R, class O, class A1, class A2, class A3, class BA1, bool B=true>
 struct XorpMemberCallbackFactory3B1
 {
-    inline static XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>*
+    static XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback3B1<R, O, A1, A2, A3, BA1>(o, p, ba1);
@@ -7151,7 +7151,7 @@ struct XorpMemberCallbackFactory3B1
 template <class R, class O, class A1, class A2, class A3, class BA1>
 struct XorpMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, false>
 {
-    inline static XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>*
+    static XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback3B1<R, O, A1, A2, A3, BA1>(o, p, ba1);
@@ -7263,7 +7263,7 @@ struct XorpConstSafeMemberCallback3B1<void,O, A1, A2, A3, BA1>
 template <class R, class O, class A1, class A2, class A3, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory3B1
 {
-    inline static XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>*
+    static XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback3B1<R, O, A1, A2, A3, BA1>(o, p, ba1);
@@ -7273,7 +7273,7 @@ struct XorpConstMemberCallbackFactory3B1
 template <class R, class O, class A1, class A2, class A3, class BA1>
 struct XorpConstMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, false>
 {
-    inline static XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>*
+    static XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback3B1<R, O, A1, A2, A3, BA1>(o, p, ba1);
@@ -7440,7 +7440,7 @@ struct XorpSafeMemberCallback3B2<void,O, A1, A2, A3, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory3B2
 {
-    inline static XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
+    static XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>(o, p, ba1, ba2);
@@ -7450,7 +7450,7 @@ struct XorpMemberCallbackFactory3B2
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2>
 struct XorpMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, false>
 {
-    inline static XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
+    static XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>(o, p, ba1, ba2);
@@ -7564,7 +7564,7 @@ struct XorpConstSafeMemberCallback3B2<void,O, A1, A2, A3, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory3B2
 {
-    inline static XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
+    static XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>(o, p, ba1, ba2);
@@ -7574,7 +7574,7 @@ struct XorpConstMemberCallbackFactory3B2
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
+    static XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback3B2<R, O, A1, A2, A3, BA1, BA2>(o, p, ba1, ba2);
@@ -7745,7 +7745,7 @@ struct XorpSafeMemberCallback3B3<void,O, A1, A2, A3, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory3B3
 {
-    inline static XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
+    static XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -7755,7 +7755,7 @@ struct XorpMemberCallbackFactory3B3
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
+    static XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -7871,7 +7871,7 @@ struct XorpConstSafeMemberCallback3B3<void,O, A1, A2, A3, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory3B3
 {
-    inline static XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
+    static XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -7881,7 +7881,7 @@ struct XorpConstMemberCallbackFactory3B3
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
+    static XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback3B3<R, O, A1, A2, A3, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -8056,7 +8056,7 @@ struct XorpSafeMemberCallback3B4<void,O, A1, A2, A3, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory3B4
 {
-    inline static XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -8066,7 +8066,7 @@ struct XorpMemberCallbackFactory3B4
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -8184,7 +8184,7 @@ struct XorpConstSafeMemberCallback3B4<void,O, A1, A2, A3, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory3B4
 {
-    inline static XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -8194,7 +8194,7 @@ struct XorpConstMemberCallbackFactory3B4
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -8373,7 +8373,7 @@ struct XorpSafeMemberCallback3B5<void,O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory3B5
 {
-    inline static XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -8383,7 +8383,7 @@ struct XorpMemberCallbackFactory3B5
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -8503,7 +8503,7 @@ struct XorpConstSafeMemberCallback3B5<void,O, A1, A2, A3, BA1, BA2, BA3, BA4, BA
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory3B5
 {
-    inline static XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -8513,7 +8513,7 @@ struct XorpConstMemberCallbackFactory3B5
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -8696,7 +8696,7 @@ struct XorpSafeMemberCallback3B6<void,O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory3B6
 {
-    inline static XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -8706,7 +8706,7 @@ struct XorpMemberCallbackFactory3B6
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -8828,7 +8828,7 @@ struct XorpConstSafeMemberCallback3B6<void,O, A1, A2, A3, BA1, BA2, BA3, BA4, BA
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory3B6
 {
-    inline static XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -8838,7 +8838,7 @@ struct XorpConstMemberCallbackFactory3B6
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -9013,7 +9013,7 @@ struct XorpSafeMemberCallback4B0<void,O, A1, A2, A3, A4>
 template <class R, class O, class A1, class A2, class A3, class A4, bool B=true>
 struct XorpMemberCallbackFactory4B0
 {
-    inline static XorpMemberCallback4B0<R, O, A1, A2, A3, A4>*
+    static XorpMemberCallback4B0<R, O, A1, A2, A3, A4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4))
     {
 	return new XorpSafeMemberCallback4B0<R, O, A1, A2, A3, A4>(o, p);
@@ -9023,7 +9023,7 @@ struct XorpMemberCallbackFactory4B0
 template <class R, class O, class A1, class A2, class A3, class A4>
 struct XorpMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, false>
 {
-    inline static XorpMemberCallback4B0<R, O, A1, A2, A3, A4>*
+    static XorpMemberCallback4B0<R, O, A1, A2, A3, A4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4))
     {
 	return new XorpMemberCallback4B0<R, O, A1, A2, A3, A4>(o, p);
@@ -9133,7 +9133,7 @@ struct XorpConstSafeMemberCallback4B0<void,O, A1, A2, A3, A4>
 template <class R, class O, class A1, class A2, class A3, class A4, bool B=true>
 struct XorpConstMemberCallbackFactory4B0
 {
-    inline static XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>*
+    static XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4) const)
     {
 	return new XorpConstSafeMemberCallback4B0<R, O, A1, A2, A3, A4>(o, p);
@@ -9143,7 +9143,7 @@ struct XorpConstMemberCallbackFactory4B0
 template <class R, class O, class A1, class A2, class A3, class A4>
 struct XorpConstMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, false>
 {
-    inline static XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>*
+    static XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4) const)
     {
 	return new XorpConstMemberCallback4B0<R, O, A1, A2, A3, A4>(o, p);
@@ -9306,7 +9306,7 @@ struct XorpSafeMemberCallback4B1<void,O, A1, A2, A3, A4, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, bool B=true>
 struct XorpMemberCallbackFactory4B1
 {
-    inline static XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
+    static XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>(o, p, ba1);
@@ -9316,7 +9316,7 @@ struct XorpMemberCallbackFactory4B1
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1>
 struct XorpMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, false>
 {
-    inline static XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
+    static XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>(o, p, ba1);
@@ -9428,7 +9428,7 @@ struct XorpConstSafeMemberCallback4B1<void,O, A1, A2, A3, A4, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory4B1
 {
-    inline static XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
+    static XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>(o, p, ba1);
@@ -9438,7 +9438,7 @@ struct XorpConstMemberCallbackFactory4B1
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1>
 struct XorpConstMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, false>
 {
-    inline static XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
+    static XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback4B1<R, O, A1, A2, A3, A4, BA1>(o, p, ba1);
@@ -9605,7 +9605,7 @@ struct XorpSafeMemberCallback4B2<void,O, A1, A2, A3, A4, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory4B2
 {
-    inline static XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
+    static XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>(o, p, ba1, ba2);
@@ -9615,7 +9615,7 @@ struct XorpMemberCallbackFactory4B2
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2>
 struct XorpMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, false>
 {
-    inline static XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
+    static XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>(o, p, ba1, ba2);
@@ -9729,7 +9729,7 @@ struct XorpConstSafeMemberCallback4B2<void,O, A1, A2, A3, A4, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory4B2
 {
-    inline static XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
+    static XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>(o, p, ba1, ba2);
@@ -9739,7 +9739,7 @@ struct XorpConstMemberCallbackFactory4B2
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
+    static XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback4B2<R, O, A1, A2, A3, A4, BA1, BA2>(o, p, ba1, ba2);
@@ -9910,7 +9910,7 @@ struct XorpSafeMemberCallback4B3<void,O, A1, A2, A3, A4, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory4B3
 {
-    inline static XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
+    static XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -9920,7 +9920,7 @@ struct XorpMemberCallbackFactory4B3
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
+    static XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -10036,7 +10036,7 @@ struct XorpConstSafeMemberCallback4B3<void,O, A1, A2, A3, A4, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory4B3
 {
-    inline static XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
+    static XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -10046,7 +10046,7 @@ struct XorpConstMemberCallbackFactory4B3
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
+    static XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -10221,7 +10221,7 @@ struct XorpSafeMemberCallback4B4<void,O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory4B4
 {
-    inline static XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -10231,7 +10231,7 @@ struct XorpMemberCallbackFactory4B4
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -10349,7 +10349,7 @@ struct XorpConstSafeMemberCallback4B4<void,O, A1, A2, A3, A4, BA1, BA2, BA3, BA4
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory4B4
 {
-    inline static XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -10359,7 +10359,7 @@ struct XorpConstMemberCallbackFactory4B4
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -10538,7 +10538,7 @@ struct XorpSafeMemberCallback4B5<void,O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory4B5
 {
-    inline static XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -10548,7 +10548,7 @@ struct XorpMemberCallbackFactory4B5
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -10668,7 +10668,7 @@ struct XorpConstSafeMemberCallback4B5<void,O, A1, A2, A3, A4, BA1, BA2, BA3, BA4
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory4B5
 {
-    inline static XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -10678,7 +10678,7 @@ struct XorpConstMemberCallbackFactory4B5
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -10861,7 +10861,7 @@ struct XorpSafeMemberCallback4B6<void,O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory4B6
 {
-    inline static XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -10871,7 +10871,7 @@ struct XorpMemberCallbackFactory4B6
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -10993,7 +10993,7 @@ struct XorpConstSafeMemberCallback4B6<void,O, A1, A2, A3, A4, BA1, BA2, BA3, BA4
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory4B6
 {
-    inline static XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -11003,7 +11003,7 @@ struct XorpConstMemberCallbackFactory4B6
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -11178,7 +11178,7 @@ struct XorpSafeMemberCallback5B0<void,O, A1, A2, A3, A4, A5>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, bool B=true>
 struct XorpMemberCallbackFactory5B0
 {
-    inline static XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
+    static XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5))
     {
 	return new XorpSafeMemberCallback5B0<R, O, A1, A2, A3, A4, A5>(o, p);
@@ -11188,7 +11188,7 @@ struct XorpMemberCallbackFactory5B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5>
 struct XorpMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, false>
 {
-    inline static XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
+    static XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5))
     {
 	return new XorpMemberCallback5B0<R, O, A1, A2, A3, A4, A5>(o, p);
@@ -11298,7 +11298,7 @@ struct XorpConstSafeMemberCallback5B0<void,O, A1, A2, A3, A4, A5>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, bool B=true>
 struct XorpConstMemberCallbackFactory5B0
 {
-    inline static XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
+    static XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5) const)
     {
 	return new XorpConstSafeMemberCallback5B0<R, O, A1, A2, A3, A4, A5>(o, p);
@@ -11308,7 +11308,7 @@ struct XorpConstMemberCallbackFactory5B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5>
 struct XorpConstMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, false>
 {
-    inline static XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
+    static XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5) const)
     {
 	return new XorpConstMemberCallback5B0<R, O, A1, A2, A3, A4, A5>(o, p);
@@ -11471,7 +11471,7 @@ struct XorpSafeMemberCallback5B1<void,O, A1, A2, A3, A4, A5, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, bool B=true>
 struct XorpMemberCallbackFactory5B1
 {
-    inline static XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
+    static XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>(o, p, ba1);
@@ -11481,7 +11481,7 @@ struct XorpMemberCallbackFactory5B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1>
 struct XorpMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, false>
 {
-    inline static XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
+    static XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>(o, p, ba1);
@@ -11593,7 +11593,7 @@ struct XorpConstSafeMemberCallback5B1<void,O, A1, A2, A3, A4, A5, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory5B1
 {
-    inline static XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
+    static XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>(o, p, ba1);
@@ -11603,7 +11603,7 @@ struct XorpConstMemberCallbackFactory5B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1>
 struct XorpConstMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, false>
 {
-    inline static XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
+    static XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback5B1<R, O, A1, A2, A3, A4, A5, BA1>(o, p, ba1);
@@ -11770,7 +11770,7 @@ struct XorpSafeMemberCallback5B2<void,O, A1, A2, A3, A4, A5, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory5B2
 {
-    inline static XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
+    static XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>(o, p, ba1, ba2);
@@ -11780,7 +11780,7 @@ struct XorpMemberCallbackFactory5B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2>
 struct XorpMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, false>
 {
-    inline static XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
+    static XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>(o, p, ba1, ba2);
@@ -11894,7 +11894,7 @@ struct XorpConstSafeMemberCallback5B2<void,O, A1, A2, A3, A4, A5, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory5B2
 {
-    inline static XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
+    static XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>(o, p, ba1, ba2);
@@ -11904,7 +11904,7 @@ struct XorpConstMemberCallbackFactory5B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
+    static XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2>(o, p, ba1, ba2);
@@ -12075,7 +12075,7 @@ struct XorpSafeMemberCallback5B3<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory5B3
 {
-    inline static XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
+    static XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -12085,7 +12085,7 @@ struct XorpMemberCallbackFactory5B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
+    static XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -12201,7 +12201,7 @@ struct XorpConstSafeMemberCallback5B3<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory5B3
 {
-    inline static XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
+    static XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -12211,7 +12211,7 @@ struct XorpConstMemberCallbackFactory5B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
+    static XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -12386,7 +12386,7 @@ struct XorpSafeMemberCallback5B4<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory5B4
 {
-    inline static XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -12396,7 +12396,7 @@ struct XorpMemberCallbackFactory5B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -12514,7 +12514,7 @@ struct XorpConstSafeMemberCallback5B4<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3,
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory5B4
 {
-    inline static XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -12524,7 +12524,7 @@ struct XorpConstMemberCallbackFactory5B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -12703,7 +12703,7 @@ struct XorpSafeMemberCallback5B5<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4,
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory5B5
 {
-    inline static XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -12713,7 +12713,7 @@ struct XorpMemberCallbackFactory5B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -12833,7 +12833,7 @@ struct XorpConstSafeMemberCallback5B5<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3,
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory5B5
 {
-    inline static XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -12843,7 +12843,7 @@ struct XorpConstMemberCallbackFactory5B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -13026,7 +13026,7 @@ struct XorpSafeMemberCallback5B6<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4,
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory5B6
 {
-    inline static XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -13036,7 +13036,7 @@ struct XorpMemberCallbackFactory5B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -13158,7 +13158,7 @@ struct XorpConstSafeMemberCallback5B6<void,O, A1, A2, A3, A4, A5, BA1, BA2, BA3,
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory5B6
 {
-    inline static XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -13168,7 +13168,7 @@ struct XorpConstMemberCallbackFactory5B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -13343,7 +13343,7 @@ struct XorpSafeMemberCallback6B0<void,O, A1, A2, A3, A4, A5, A6>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, bool B=true>
 struct XorpMemberCallbackFactory6B0
 {
-    inline static XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
+    static XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6))
     {
 	return new XorpSafeMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>(o, p);
@@ -13353,7 +13353,7 @@ struct XorpMemberCallbackFactory6B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6>
 struct XorpMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, false>
 {
-    inline static XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
+    static XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6))
     {
 	return new XorpMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>(o, p);
@@ -13463,7 +13463,7 @@ struct XorpConstSafeMemberCallback6B0<void,O, A1, A2, A3, A4, A5, A6>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, bool B=true>
 struct XorpConstMemberCallbackFactory6B0
 {
-    inline static XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
+    static XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6) const)
     {
 	return new XorpConstSafeMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>(o, p);
@@ -13473,7 +13473,7 @@ struct XorpConstMemberCallbackFactory6B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6>
 struct XorpConstMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, false>
 {
-    inline static XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
+    static XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6) const)
     {
 	return new XorpConstMemberCallback6B0<R, O, A1, A2, A3, A4, A5, A6>(o, p);
@@ -13636,7 +13636,7 @@ struct XorpSafeMemberCallback6B1<void,O, A1, A2, A3, A4, A5, A6, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, bool B=true>
 struct XorpMemberCallbackFactory6B1
 {
-    inline static XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
+    static XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>(o, p, ba1);
@@ -13646,7 +13646,7 @@ struct XorpMemberCallbackFactory6B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1>
 struct XorpMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, false>
 {
-    inline static XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
+    static XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>(o, p, ba1);
@@ -13758,7 +13758,7 @@ struct XorpConstSafeMemberCallback6B1<void,O, A1, A2, A3, A4, A5, A6, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory6B1
 {
-    inline static XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
+    static XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>(o, p, ba1);
@@ -13768,7 +13768,7 @@ struct XorpConstMemberCallbackFactory6B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1>
 struct XorpConstMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, false>
 {
-    inline static XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
+    static XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback6B1<R, O, A1, A2, A3, A4, A5, A6, BA1>(o, p, ba1);
@@ -13935,7 +13935,7 @@ struct XorpSafeMemberCallback6B2<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory6B2
 {
-    inline static XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
+    static XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>(o, p, ba1, ba2);
@@ -13945,7 +13945,7 @@ struct XorpMemberCallbackFactory6B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2>
 struct XorpMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, false>
 {
-    inline static XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
+    static XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>(o, p, ba1, ba2);
@@ -14059,7 +14059,7 @@ struct XorpConstSafeMemberCallback6B2<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory6B2
 {
-    inline static XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
+    static XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>(o, p, ba1, ba2);
@@ -14069,7 +14069,7 @@ struct XorpConstMemberCallbackFactory6B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
+    static XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2>(o, p, ba1, ba2);
@@ -14240,7 +14240,7 @@ struct XorpSafeMemberCallback6B3<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory6B3
 {
-    inline static XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
+    static XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -14250,7 +14250,7 @@ struct XorpMemberCallbackFactory6B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
+    static XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -14366,7 +14366,7 @@ struct XorpConstSafeMemberCallback6B3<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory6B3
 {
-    inline static XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
+    static XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -14376,7 +14376,7 @@ struct XorpConstMemberCallbackFactory6B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
+    static XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -14551,7 +14551,7 @@ struct XorpSafeMemberCallback6B4<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory6B4
 {
-    inline static XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -14561,7 +14561,7 @@ struct XorpMemberCallbackFactory6B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -14679,7 +14679,7 @@ struct XorpConstSafeMemberCallback6B4<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory6B4
 {
-    inline static XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -14689,7 +14689,7 @@ struct XorpConstMemberCallbackFactory6B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -14868,7 +14868,7 @@ struct XorpSafeMemberCallback6B5<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory6B5
 {
-    inline static XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -14878,7 +14878,7 @@ struct XorpMemberCallbackFactory6B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -14998,7 +14998,7 @@ struct XorpConstSafeMemberCallback6B5<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory6B5
 {
-    inline static XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -15008,7 +15008,7 @@ struct XorpConstMemberCallbackFactory6B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -15191,7 +15191,7 @@ struct XorpSafeMemberCallback6B6<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory6B6
 {
-    inline static XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -15201,7 +15201,7 @@ struct XorpMemberCallbackFactory6B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -15323,7 +15323,7 @@ struct XorpConstSafeMemberCallback6B6<void,O, A1, A2, A3, A4, A5, A6, BA1, BA2, 
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory6B6
 {
-    inline static XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -15333,7 +15333,7 @@ struct XorpConstMemberCallbackFactory6B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -15508,7 +15508,7 @@ struct XorpSafeMemberCallback7B0<void,O, A1, A2, A3, A4, A5, A6, A7>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, bool B=true>
 struct XorpMemberCallbackFactory7B0
 {
-    inline static XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
+    static XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7))
     {
 	return new XorpSafeMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>(o, p);
@@ -15518,7 +15518,7 @@ struct XorpMemberCallbackFactory7B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
 struct XorpMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, false>
 {
-    inline static XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
+    static XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7))
     {
 	return new XorpMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>(o, p);
@@ -15628,7 +15628,7 @@ struct XorpConstSafeMemberCallback7B0<void,O, A1, A2, A3, A4, A5, A6, A7>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, bool B=true>
 struct XorpConstMemberCallbackFactory7B0
 {
-    inline static XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
+    static XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7) const)
     {
 	return new XorpConstSafeMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>(o, p);
@@ -15638,7 +15638,7 @@ struct XorpConstMemberCallbackFactory7B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7>
 struct XorpConstMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, false>
 {
-    inline static XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
+    static XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7) const)
     {
 	return new XorpConstMemberCallback7B0<R, O, A1, A2, A3, A4, A5, A6, A7>(o, p);
@@ -15801,7 +15801,7 @@ struct XorpSafeMemberCallback7B1<void,O, A1, A2, A3, A4, A5, A6, A7, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, bool B=true>
 struct XorpMemberCallbackFactory7B1
 {
-    inline static XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
+    static XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>(o, p, ba1);
@@ -15811,7 +15811,7 @@ struct XorpMemberCallbackFactory7B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1>
 struct XorpMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, false>
 {
-    inline static XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
+    static XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>(o, p, ba1);
@@ -15923,7 +15923,7 @@ struct XorpConstSafeMemberCallback7B1<void,O, A1, A2, A3, A4, A5, A6, A7, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory7B1
 {
-    inline static XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
+    static XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>(o, p, ba1);
@@ -15933,7 +15933,7 @@ struct XorpConstMemberCallbackFactory7B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1>
 struct XorpConstMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, false>
 {
-    inline static XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
+    static XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1>(o, p, ba1);
@@ -16100,7 +16100,7 @@ struct XorpSafeMemberCallback7B2<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory7B2
 {
-    inline static XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
+    static XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(o, p, ba1, ba2);
@@ -16110,7 +16110,7 @@ struct XorpMemberCallbackFactory7B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2>
 struct XorpMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, false>
 {
-    inline static XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
+    static XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(o, p, ba1, ba2);
@@ -16224,7 +16224,7 @@ struct XorpConstSafeMemberCallback7B2<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory7B2
 {
-    inline static XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
+    static XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(o, p, ba1, ba2);
@@ -16234,7 +16234,7 @@ struct XorpConstMemberCallbackFactory7B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
+    static XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2>(o, p, ba1, ba2);
@@ -16405,7 +16405,7 @@ struct XorpSafeMemberCallback7B3<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory7B3
 {
-    inline static XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
+    static XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -16415,7 +16415,7 @@ struct XorpMemberCallbackFactory7B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
+    static XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -16531,7 +16531,7 @@ struct XorpConstSafeMemberCallback7B3<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory7B3
 {
-    inline static XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
+    static XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -16541,7 +16541,7 @@ struct XorpConstMemberCallbackFactory7B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
+    static XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -16716,7 +16716,7 @@ struct XorpSafeMemberCallback7B4<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory7B4
 {
-    inline static XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -16726,7 +16726,7 @@ struct XorpMemberCallbackFactory7B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -16844,7 +16844,7 @@ struct XorpConstSafeMemberCallback7B4<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory7B4
 {
-    inline static XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -16854,7 +16854,7 @@ struct XorpConstMemberCallbackFactory7B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -17033,7 +17033,7 @@ struct XorpSafeMemberCallback7B5<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory7B5
 {
-    inline static XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -17043,7 +17043,7 @@ struct XorpMemberCallbackFactory7B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -17163,7 +17163,7 @@ struct XorpConstSafeMemberCallback7B5<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory7B5
 {
-    inline static XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -17173,7 +17173,7 @@ struct XorpConstMemberCallbackFactory7B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -17356,7 +17356,7 @@ struct XorpSafeMemberCallback7B6<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory7B6
 {
-    inline static XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -17366,7 +17366,7 @@ struct XorpMemberCallbackFactory7B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -17488,7 +17488,7 @@ struct XorpConstSafeMemberCallback7B6<void,O, A1, A2, A3, A4, A5, A6, A7, BA1, B
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory7B6
 {
-    inline static XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -17498,7 +17498,7 @@ struct XorpConstMemberCallbackFactory7B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -17673,7 +17673,7 @@ struct XorpSafeMemberCallback8B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, bool B=true>
 struct XorpMemberCallbackFactory8B0
 {
-    inline static XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
+    static XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8))
     {
 	return new XorpSafeMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>(o, p);
@@ -17683,7 +17683,7 @@ struct XorpMemberCallbackFactory8B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
 struct XorpMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, false>
 {
-    inline static XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
+    static XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8))
     {
 	return new XorpMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>(o, p);
@@ -17793,7 +17793,7 @@ struct XorpConstSafeMemberCallback8B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, bool B=true>
 struct XorpConstMemberCallbackFactory8B0
 {
-    inline static XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
+    static XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8) const)
     {
 	return new XorpConstSafeMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>(o, p);
@@ -17803,7 +17803,7 @@ struct XorpConstMemberCallbackFactory8B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8>
 struct XorpConstMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, false>
 {
-    inline static XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
+    static XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8) const)
     {
 	return new XorpConstMemberCallback8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8>(o, p);
@@ -17966,7 +17966,7 @@ struct XorpSafeMemberCallback8B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, bool B=true>
 struct XorpMemberCallbackFactory8B1
 {
-    inline static XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
+    static XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(o, p, ba1);
@@ -17976,7 +17976,7 @@ struct XorpMemberCallbackFactory8B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1>
 struct XorpMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, false>
 {
-    inline static XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
+    static XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(o, p, ba1);
@@ -18088,7 +18088,7 @@ struct XorpConstSafeMemberCallback8B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory8B1
 {
-    inline static XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
+    static XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(o, p, ba1);
@@ -18098,7 +18098,7 @@ struct XorpConstMemberCallbackFactory8B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1>
 struct XorpConstMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, false>
 {
-    inline static XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
+    static XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1>(o, p, ba1);
@@ -18265,7 +18265,7 @@ struct XorpSafeMemberCallback8B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory8B2
 {
-    inline static XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
+    static XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(o, p, ba1, ba2);
@@ -18275,7 +18275,7 @@ struct XorpMemberCallbackFactory8B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2>
 struct XorpMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, false>
 {
-    inline static XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
+    static XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(o, p, ba1, ba2);
@@ -18389,7 +18389,7 @@ struct XorpConstSafeMemberCallback8B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory8B2
 {
-    inline static XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
+    static XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(o, p, ba1, ba2);
@@ -18399,7 +18399,7 @@ struct XorpConstMemberCallbackFactory8B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
+    static XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2>(o, p, ba1, ba2);
@@ -18570,7 +18570,7 @@ struct XorpSafeMemberCallback8B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory8B3
 {
-    inline static XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
+    static XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -18580,7 +18580,7 @@ struct XorpMemberCallbackFactory8B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
+    static XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -18696,7 +18696,7 @@ struct XorpConstSafeMemberCallback8B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory8B3
 {
-    inline static XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
+    static XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -18706,7 +18706,7 @@ struct XorpConstMemberCallbackFactory8B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
+    static XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -18881,7 +18881,7 @@ struct XorpSafeMemberCallback8B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory8B4
 {
-    inline static XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -18891,7 +18891,7 @@ struct XorpMemberCallbackFactory8B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -19009,7 +19009,7 @@ struct XorpConstSafeMemberCallback8B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory8B4
 {
-    inline static XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -19019,7 +19019,7 @@ struct XorpConstMemberCallbackFactory8B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -19198,7 +19198,7 @@ struct XorpSafeMemberCallback8B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory8B5
 {
-    inline static XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -19208,7 +19208,7 @@ struct XorpMemberCallbackFactory8B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -19328,7 +19328,7 @@ struct XorpConstSafeMemberCallback8B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory8B5
 {
-    inline static XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -19338,7 +19338,7 @@ struct XorpConstMemberCallbackFactory8B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -19521,7 +19521,7 @@ struct XorpSafeMemberCallback8B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory8B6
 {
-    inline static XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -19531,7 +19531,7 @@ struct XorpMemberCallbackFactory8B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -19653,7 +19653,7 @@ struct XorpConstSafeMemberCallback8B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, BA
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory8B6
 {
-    inline static XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -19663,7 +19663,7 @@ struct XorpConstMemberCallbackFactory8B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -19838,7 +19838,7 @@ struct XorpSafeMemberCallback9B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9>
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, bool B=true>
 struct XorpMemberCallbackFactory9B0
 {
-    inline static XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
+    static XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
     {
 	return new XorpSafeMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>(o, p);
@@ -19848,7 +19848,7 @@ struct XorpMemberCallbackFactory9B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
 struct XorpMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, false>
 {
-    inline static XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
+    static XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
     {
 	return new XorpMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>(o, p);
@@ -19958,7 +19958,7 @@ struct XorpConstSafeMemberCallback9B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, bool B=true>
 struct XorpConstMemberCallbackFactory9B0
 {
-    inline static XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
+    static XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const)
     {
 	return new XorpConstSafeMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>(o, p);
@@ -19968,7 +19968,7 @@ struct XorpConstMemberCallbackFactory9B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9>
 struct XorpConstMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, false>
 {
-    inline static XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
+    static XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const)
     {
 	return new XorpConstMemberCallback9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9>(o, p);
@@ -20131,7 +20131,7 @@ struct XorpSafeMemberCallback9B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, bool B=true>
 struct XorpMemberCallbackFactory9B1
 {
-    inline static XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
+    static XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(o, p, ba1);
@@ -20141,7 +20141,7 @@ struct XorpMemberCallbackFactory9B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1>
 struct XorpMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, false>
 {
-    inline static XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
+    static XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(o, p, ba1);
@@ -20253,7 +20253,7 @@ struct XorpConstSafeMemberCallback9B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory9B1
 {
-    inline static XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
+    static XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(o, p, ba1);
@@ -20263,7 +20263,7 @@ struct XorpConstMemberCallbackFactory9B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1>
 struct XorpConstMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, false>
 {
-    inline static XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
+    static XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1>(o, p, ba1);
@@ -20430,7 +20430,7 @@ struct XorpSafeMemberCallback9B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory9B2
 {
-    inline static XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
+    static XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(o, p, ba1, ba2);
@@ -20440,7 +20440,7 @@ struct XorpMemberCallbackFactory9B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2>
 struct XorpMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, false>
 {
-    inline static XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
+    static XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(o, p, ba1, ba2);
@@ -20554,7 +20554,7 @@ struct XorpConstSafeMemberCallback9B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory9B2
 {
-    inline static XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
+    static XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(o, p, ba1, ba2);
@@ -20564,7 +20564,7 @@ struct XorpConstMemberCallbackFactory9B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
+    static XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2>(o, p, ba1, ba2);
@@ -20735,7 +20735,7 @@ struct XorpSafeMemberCallback9B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory9B3
 {
-    inline static XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
+    static XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -20745,7 +20745,7 @@ struct XorpMemberCallbackFactory9B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
+    static XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -20861,7 +20861,7 @@ struct XorpConstSafeMemberCallback9B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory9B3
 {
-    inline static XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
+    static XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -20871,7 +20871,7 @@ struct XorpConstMemberCallbackFactory9B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
+    static XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -21046,7 +21046,7 @@ struct XorpSafeMemberCallback9B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory9B4
 {
-    inline static XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -21056,7 +21056,7 @@ struct XorpMemberCallbackFactory9B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -21174,7 +21174,7 @@ struct XorpConstSafeMemberCallback9B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory9B4
 {
-    inline static XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -21184,7 +21184,7 @@ struct XorpConstMemberCallbackFactory9B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -21363,7 +21363,7 @@ struct XorpSafeMemberCallback9B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory9B5
 {
-    inline static XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -21373,7 +21373,7 @@ struct XorpMemberCallbackFactory9B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -21493,7 +21493,7 @@ struct XorpConstSafeMemberCallback9B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory9B5
 {
-    inline static XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -21503,7 +21503,7 @@ struct XorpConstMemberCallbackFactory9B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -21686,7 +21686,7 @@ struct XorpSafeMemberCallback9B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory9B6
 {
-    inline static XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -21696,7 +21696,7 @@ struct XorpMemberCallbackFactory9B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -21818,7 +21818,7 @@ struct XorpConstSafeMemberCallback9B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory9B6
 {
-    inline static XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -21828,7 +21828,7 @@ struct XorpConstMemberCallbackFactory9B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -22003,7 +22003,7 @@ struct XorpSafeMemberCallback10B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, bool B=true>
 struct XorpMemberCallbackFactory10B0
 {
-    inline static XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+    static XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
     {
 	return new XorpSafeMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(o, p);
@@ -22013,7 +22013,7 @@ struct XorpMemberCallbackFactory10B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
 struct XorpMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, false>
 {
-    inline static XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+    static XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
     {
 	return new XorpMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(o, p);
@@ -22123,7 +22123,7 @@ struct XorpConstSafeMemberCallback10B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, bool B=true>
 struct XorpConstMemberCallbackFactory10B0
 {
-    inline static XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+    static XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const)
     {
 	return new XorpConstSafeMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(o, p);
@@ -22133,7 +22133,7 @@ struct XorpConstMemberCallbackFactory10B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10>
 struct XorpConstMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, false>
 {
-    inline static XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
+    static XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const)
     {
 	return new XorpConstMemberCallback10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(o, p);
@@ -22296,7 +22296,7 @@ struct XorpSafeMemberCallback10B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, bool B=true>
 struct XorpMemberCallbackFactory10B1
 {
-    inline static XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
+    static XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(o, p, ba1);
@@ -22306,7 +22306,7 @@ struct XorpMemberCallbackFactory10B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1>
 struct XorpMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, false>
 {
-    inline static XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
+    static XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(o, p, ba1);
@@ -22418,7 +22418,7 @@ struct XorpConstSafeMemberCallback10B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory10B1
 {
-    inline static XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
+    static XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(o, p, ba1);
@@ -22428,7 +22428,7 @@ struct XorpConstMemberCallbackFactory10B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1>
 struct XorpConstMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, false>
 {
-    inline static XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
+    static XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1>(o, p, ba1);
@@ -22595,7 +22595,7 @@ struct XorpSafeMemberCallback10B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory10B2
 {
-    inline static XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
+    static XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(o, p, ba1, ba2);
@@ -22605,7 +22605,7 @@ struct XorpMemberCallbackFactory10B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2>
 struct XorpMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, false>
 {
-    inline static XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
+    static XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(o, p, ba1, ba2);
@@ -22719,7 +22719,7 @@ struct XorpConstSafeMemberCallback10B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory10B2
 {
-    inline static XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
+    static XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(o, p, ba1, ba2);
@@ -22729,7 +22729,7 @@ struct XorpConstMemberCallbackFactory10B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
+    static XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2>(o, p, ba1, ba2);
@@ -22900,7 +22900,7 @@ struct XorpSafeMemberCallback10B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory10B3
 {
-    inline static XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
+    static XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -22910,7 +22910,7 @@ struct XorpMemberCallbackFactory10B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
+    static XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -23026,7 +23026,7 @@ struct XorpConstSafeMemberCallback10B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory10B3
 {
-    inline static XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
+    static XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -23036,7 +23036,7 @@ struct XorpConstMemberCallbackFactory10B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
+    static XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -23211,7 +23211,7 @@ struct XorpSafeMemberCallback10B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory10B4
 {
-    inline static XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -23221,7 +23221,7 @@ struct XorpMemberCallbackFactory10B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -23339,7 +23339,7 @@ struct XorpConstSafeMemberCallback10B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory10B4
 {
-    inline static XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -23349,7 +23349,7 @@ struct XorpConstMemberCallbackFactory10B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -23528,7 +23528,7 @@ struct XorpSafeMemberCallback10B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory10B5
 {
-    inline static XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -23538,7 +23538,7 @@ struct XorpMemberCallbackFactory10B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -23658,7 +23658,7 @@ struct XorpConstSafeMemberCallback10B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory10B5
 {
-    inline static XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -23668,7 +23668,7 @@ struct XorpConstMemberCallbackFactory10B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -23851,7 +23851,7 @@ struct XorpSafeMemberCallback10B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory10B6
 {
-    inline static XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -23861,7 +23861,7 @@ struct XorpMemberCallbackFactory10B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -23983,7 +23983,7 @@ struct XorpConstSafeMemberCallback10B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory10B6
 {
-    inline static XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -23993,7 +23993,7 @@ struct XorpConstMemberCallbackFactory10B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -24168,7 +24168,7 @@ struct XorpSafeMemberCallback11B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, bool B=true>
 struct XorpMemberCallbackFactory11B0
 {
-    inline static XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
+    static XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
     {
 	return new XorpSafeMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(o, p);
@@ -24178,7 +24178,7 @@ struct XorpMemberCallbackFactory11B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
 struct XorpMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, false>
 {
-    inline static XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
+    static XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
     {
 	return new XorpMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(o, p);
@@ -24288,7 +24288,7 @@ struct XorpConstSafeMemberCallback11B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, bool B=true>
 struct XorpConstMemberCallbackFactory11B0
 {
-    inline static XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
+    static XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) const)
     {
 	return new XorpConstSafeMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(o, p);
@@ -24298,7 +24298,7 @@ struct XorpConstMemberCallbackFactory11B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11>
 struct XorpConstMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, false>
 {
-    inline static XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
+    static XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) const)
     {
 	return new XorpConstMemberCallback11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(o, p);
@@ -24461,7 +24461,7 @@ struct XorpSafeMemberCallback11B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, bool B=true>
 struct XorpMemberCallbackFactory11B1
 {
-    inline static XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
+    static XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(o, p, ba1);
@@ -24471,7 +24471,7 @@ struct XorpMemberCallbackFactory11B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1>
 struct XorpMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, false>
 {
-    inline static XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
+    static XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(o, p, ba1);
@@ -24583,7 +24583,7 @@ struct XorpConstSafeMemberCallback11B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory11B1
 {
-    inline static XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
+    static XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(o, p, ba1);
@@ -24593,7 +24593,7 @@ struct XorpConstMemberCallbackFactory11B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1>
 struct XorpConstMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, false>
 {
-    inline static XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
+    static XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1>(o, p, ba1);
@@ -24760,7 +24760,7 @@ struct XorpSafeMemberCallback11B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory11B2
 {
-    inline static XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
+    static XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(o, p, ba1, ba2);
@@ -24770,7 +24770,7 @@ struct XorpMemberCallbackFactory11B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2>
 struct XorpMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, false>
 {
-    inline static XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
+    static XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(o, p, ba1, ba2);
@@ -24884,7 +24884,7 @@ struct XorpConstSafeMemberCallback11B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory11B2
 {
-    inline static XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
+    static XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(o, p, ba1, ba2);
@@ -24894,7 +24894,7 @@ struct XorpConstMemberCallbackFactory11B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
+    static XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2>(o, p, ba1, ba2);
@@ -25065,7 +25065,7 @@ struct XorpSafeMemberCallback11B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory11B3
 {
-    inline static XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
+    static XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -25075,7 +25075,7 @@ struct XorpMemberCallbackFactory11B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
+    static XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -25191,7 +25191,7 @@ struct XorpConstSafeMemberCallback11B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory11B3
 {
-    inline static XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
+    static XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -25201,7 +25201,7 @@ struct XorpConstMemberCallbackFactory11B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
+    static XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -25376,7 +25376,7 @@ struct XorpSafeMemberCallback11B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory11B4
 {
-    inline static XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -25386,7 +25386,7 @@ struct XorpMemberCallbackFactory11B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -25504,7 +25504,7 @@ struct XorpConstSafeMemberCallback11B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory11B4
 {
-    inline static XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -25514,7 +25514,7 @@ struct XorpConstMemberCallbackFactory11B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -25693,7 +25693,7 @@ struct XorpSafeMemberCallback11B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory11B5
 {
-    inline static XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -25703,7 +25703,7 @@ struct XorpMemberCallbackFactory11B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -25823,7 +25823,7 @@ struct XorpConstSafeMemberCallback11B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory11B5
 {
-    inline static XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -25833,7 +25833,7 @@ struct XorpConstMemberCallbackFactory11B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -26016,7 +26016,7 @@ struct XorpSafeMemberCallback11B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory11B6
 {
-    inline static XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -26026,7 +26026,7 @@ struct XorpMemberCallbackFactory11B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -26148,7 +26148,7 @@ struct XorpConstSafeMemberCallback11B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory11B6
 {
-    inline static XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -26158,7 +26158,7 @@ struct XorpConstMemberCallbackFactory11B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -26333,7 +26333,7 @@ struct XorpSafeMemberCallback12B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, bool B=true>
 struct XorpMemberCallbackFactory12B0
 {
-    inline static XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
+    static XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
     {
 	return new XorpSafeMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(o, p);
@@ -26343,7 +26343,7 @@ struct XorpMemberCallbackFactory12B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
 struct XorpMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, false>
 {
-    inline static XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
+    static XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
     {
 	return new XorpMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(o, p);
@@ -26453,7 +26453,7 @@ struct XorpConstSafeMemberCallback12B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, bool B=true>
 struct XorpConstMemberCallbackFactory12B0
 {
-    inline static XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
+    static XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) const)
     {
 	return new XorpConstSafeMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(o, p);
@@ -26463,7 +26463,7 @@ struct XorpConstMemberCallbackFactory12B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12>
 struct XorpConstMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, false>
 {
-    inline static XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
+    static XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) const)
     {
 	return new XorpConstMemberCallback12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(o, p);
@@ -26626,7 +26626,7 @@ struct XorpSafeMemberCallback12B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, bool B=true>
 struct XorpMemberCallbackFactory12B1
 {
-    inline static XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
+    static XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(o, p, ba1);
@@ -26636,7 +26636,7 @@ struct XorpMemberCallbackFactory12B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1>
 struct XorpMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, false>
 {
-    inline static XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
+    static XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(o, p, ba1);
@@ -26748,7 +26748,7 @@ struct XorpConstSafeMemberCallback12B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory12B1
 {
-    inline static XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
+    static XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(o, p, ba1);
@@ -26758,7 +26758,7 @@ struct XorpConstMemberCallbackFactory12B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1>
 struct XorpConstMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, false>
 {
-    inline static XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
+    static XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1>(o, p, ba1);
@@ -26925,7 +26925,7 @@ struct XorpSafeMemberCallback12B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory12B2
 {
-    inline static XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
+    static XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(o, p, ba1, ba2);
@@ -26935,7 +26935,7 @@ struct XorpMemberCallbackFactory12B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2>
 struct XorpMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, false>
 {
-    inline static XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
+    static XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(o, p, ba1, ba2);
@@ -27049,7 +27049,7 @@ struct XorpConstSafeMemberCallback12B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory12B2
 {
-    inline static XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
+    static XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(o, p, ba1, ba2);
@@ -27059,7 +27059,7 @@ struct XorpConstMemberCallbackFactory12B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
+    static XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2>(o, p, ba1, ba2);
@@ -27230,7 +27230,7 @@ struct XorpSafeMemberCallback12B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory12B3
 {
-    inline static XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
+    static XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -27240,7 +27240,7 @@ struct XorpMemberCallbackFactory12B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
+    static XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -27356,7 +27356,7 @@ struct XorpConstSafeMemberCallback12B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory12B3
 {
-    inline static XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
+    static XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -27366,7 +27366,7 @@ struct XorpConstMemberCallbackFactory12B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
+    static XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -27541,7 +27541,7 @@ struct XorpSafeMemberCallback12B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory12B4
 {
-    inline static XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -27551,7 +27551,7 @@ struct XorpMemberCallbackFactory12B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -27669,7 +27669,7 @@ struct XorpConstSafeMemberCallback12B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory12B4
 {
-    inline static XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -27679,7 +27679,7 @@ struct XorpConstMemberCallbackFactory12B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -27858,7 +27858,7 @@ struct XorpSafeMemberCallback12B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory12B5
 {
-    inline static XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -27868,7 +27868,7 @@ struct XorpMemberCallbackFactory12B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -27988,7 +27988,7 @@ struct XorpConstSafeMemberCallback12B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory12B5
 {
-    inline static XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -27998,7 +27998,7 @@ struct XorpConstMemberCallbackFactory12B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -28181,7 +28181,7 @@ struct XorpSafeMemberCallback12B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory12B6
 {
-    inline static XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -28191,7 +28191,7 @@ struct XorpMemberCallbackFactory12B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -28313,7 +28313,7 @@ struct XorpConstSafeMemberCallback12B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory12B6
 {
-    inline static XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -28323,7 +28323,7 @@ struct XorpConstMemberCallbackFactory12B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -28498,7 +28498,7 @@ struct XorpSafeMemberCallback13B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, bool B=true>
 struct XorpMemberCallbackFactory13B0
 {
-    inline static XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
+    static XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
     {
 	return new XorpSafeMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(o, p);
@@ -28508,7 +28508,7 @@ struct XorpMemberCallbackFactory13B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
 struct XorpMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, false>
 {
-    inline static XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
+    static XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
     {
 	return new XorpMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(o, p);
@@ -28618,7 +28618,7 @@ struct XorpConstSafeMemberCallback13B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, bool B=true>
 struct XorpConstMemberCallbackFactory13B0
 {
-    inline static XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
+    static XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
     {
 	return new XorpConstSafeMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(o, p);
@@ -28628,7 +28628,7 @@ struct XorpConstMemberCallbackFactory13B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13>
 struct XorpConstMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, false>
 {
-    inline static XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
+    static XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
     {
 	return new XorpConstMemberCallback13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(o, p);
@@ -28791,7 +28791,7 @@ struct XorpSafeMemberCallback13B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, bool B=true>
 struct XorpMemberCallbackFactory13B1
 {
-    inline static XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
+    static XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(o, p, ba1);
@@ -28801,7 +28801,7 @@ struct XorpMemberCallbackFactory13B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
 struct XorpMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, false>
 {
-    inline static XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
+    static XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(o, p, ba1);
@@ -28913,7 +28913,7 @@ struct XorpConstSafeMemberCallback13B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory13B1
 {
-    inline static XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
+    static XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(o, p, ba1);
@@ -28923,7 +28923,7 @@ struct XorpConstMemberCallbackFactory13B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1>
 struct XorpConstMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, false>
 {
-    inline static XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
+    static XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1>(o, p, ba1);
@@ -29090,7 +29090,7 @@ struct XorpSafeMemberCallback13B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory13B2
 {
-    inline static XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
+    static XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(o, p, ba1, ba2);
@@ -29100,7 +29100,7 @@ struct XorpMemberCallbackFactory13B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
 struct XorpMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, false>
 {
-    inline static XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
+    static XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(o, p, ba1, ba2);
@@ -29214,7 +29214,7 @@ struct XorpConstSafeMemberCallback13B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory13B2
 {
-    inline static XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
+    static XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(o, p, ba1, ba2);
@@ -29224,7 +29224,7 @@ struct XorpConstMemberCallbackFactory13B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
+    static XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2>(o, p, ba1, ba2);
@@ -29395,7 +29395,7 @@ struct XorpSafeMemberCallback13B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory13B3
 {
-    inline static XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
+    static XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -29405,7 +29405,7 @@ struct XorpMemberCallbackFactory13B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
+    static XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -29521,7 +29521,7 @@ struct XorpConstSafeMemberCallback13B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory13B3
 {
-    inline static XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
+    static XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -29531,7 +29531,7 @@ struct XorpConstMemberCallbackFactory13B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
+    static XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -29706,7 +29706,7 @@ struct XorpSafeMemberCallback13B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory13B4
 {
-    inline static XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -29716,7 +29716,7 @@ struct XorpMemberCallbackFactory13B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -29834,7 +29834,7 @@ struct XorpConstSafeMemberCallback13B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory13B4
 {
-    inline static XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -29844,7 +29844,7 @@ struct XorpConstMemberCallbackFactory13B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -30023,7 +30023,7 @@ struct XorpSafeMemberCallback13B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory13B5
 {
-    inline static XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -30033,7 +30033,7 @@ struct XorpMemberCallbackFactory13B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -30153,7 +30153,7 @@ struct XorpConstSafeMemberCallback13B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory13B5
 {
-    inline static XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -30163,7 +30163,7 @@ struct XorpConstMemberCallbackFactory13B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -30346,7 +30346,7 @@ struct XorpSafeMemberCallback13B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory13B6
 {
-    inline static XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -30356,7 +30356,7 @@ struct XorpMemberCallbackFactory13B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -30478,7 +30478,7 @@ struct XorpConstSafeMemberCallback13B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory13B6
 {
-    inline static XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -30488,7 +30488,7 @@ struct XorpConstMemberCallbackFactory13B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -30663,7 +30663,7 @@ struct XorpSafeMemberCallback14B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, bool B=true>
 struct XorpMemberCallbackFactory14B0
 {
-    inline static XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    static XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
     {
 	return new XorpSafeMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
@@ -30673,7 +30673,7 @@ struct XorpMemberCallbackFactory14B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
 struct XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, false>
 {
-    inline static XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    static XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
     {
 	return new XorpMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
@@ -30783,7 +30783,7 @@ struct XorpConstSafeMemberCallback14B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, bool B=true>
 struct XorpConstMemberCallbackFactory14B0
 {
-    inline static XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    static XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
     {
 	return new XorpConstSafeMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
@@ -30793,7 +30793,7 @@ struct XorpConstMemberCallbackFactory14B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14>
 struct XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, false>
 {
-    inline static XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
+    static XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
     {
 	return new XorpConstMemberCallback14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(o, p);
@@ -30956,7 +30956,7 @@ struct XorpSafeMemberCallback14B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, bool B=true>
 struct XorpMemberCallbackFactory14B1
 {
-    inline static XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    static XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
@@ -30966,7 +30966,7 @@ struct XorpMemberCallbackFactory14B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
 struct XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, false>
 {
-    inline static XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    static XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
@@ -31078,7 +31078,7 @@ struct XorpConstSafeMemberCallback14B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory14B1
 {
-    inline static XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    static XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
@@ -31088,7 +31088,7 @@ struct XorpConstMemberCallbackFactory14B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1>
 struct XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, false>
 {
-    inline static XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
+    static XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1>(o, p, ba1);
@@ -31255,7 +31255,7 @@ struct XorpSafeMemberCallback14B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory14B2
 {
-    inline static XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    static XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
@@ -31265,7 +31265,7 @@ struct XorpMemberCallbackFactory14B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
 struct XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, false>
 {
-    inline static XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    static XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
@@ -31379,7 +31379,7 @@ struct XorpConstSafeMemberCallback14B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory14B2
 {
-    inline static XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    static XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
@@ -31389,7 +31389,7 @@ struct XorpConstMemberCallbackFactory14B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
+    static XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2>(o, p, ba1, ba2);
@@ -31560,7 +31560,7 @@ struct XorpSafeMemberCallback14B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory14B3
 {
-    inline static XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    static XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -31570,7 +31570,7 @@ struct XorpMemberCallbackFactory14B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    static XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -31686,7 +31686,7 @@ struct XorpConstSafeMemberCallback14B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory14B3
 {
-    inline static XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    static XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -31696,7 +31696,7 @@ struct XorpConstMemberCallbackFactory14B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
+    static XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -31871,7 +31871,7 @@ struct XorpSafeMemberCallback14B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory14B4
 {
-    inline static XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -31881,7 +31881,7 @@ struct XorpMemberCallbackFactory14B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -31999,7 +31999,7 @@ struct XorpConstSafeMemberCallback14B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory14B4
 {
-    inline static XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -32009,7 +32009,7 @@ struct XorpConstMemberCallbackFactory14B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -32188,7 +32188,7 @@ struct XorpSafeMemberCallback14B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory14B5
 {
-    inline static XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -32198,7 +32198,7 @@ struct XorpMemberCallbackFactory14B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -32318,7 +32318,7 @@ struct XorpConstSafeMemberCallback14B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory14B5
 {
-    inline static XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -32328,7 +32328,7 @@ struct XorpConstMemberCallbackFactory14B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -32511,7 +32511,7 @@ struct XorpSafeMemberCallback14B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory14B6
 {
-    inline static XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -32521,7 +32521,7 @@ struct XorpMemberCallbackFactory14B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -32643,7 +32643,7 @@ struct XorpConstSafeMemberCallback14B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory14B6
 {
-    inline static XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -32653,7 +32653,7 @@ struct XorpConstMemberCallbackFactory14B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -32828,7 +32828,7 @@ struct XorpSafeMemberCallback15B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, bool B=true>
 struct XorpMemberCallbackFactory15B0
 {
-    inline static XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    static XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
     {
 	return new XorpSafeMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
@@ -32838,7 +32838,7 @@ struct XorpMemberCallbackFactory15B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
 struct XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, false>
 {
-    inline static XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    static XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
     {
 	return new XorpMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
@@ -32948,7 +32948,7 @@ struct XorpConstSafeMemberCallback15B0<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, bool B=true>
 struct XorpConstMemberCallbackFactory15B0
 {
-    inline static XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    static XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
     {
 	return new XorpConstSafeMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
@@ -32958,7 +32958,7 @@ struct XorpConstMemberCallbackFactory15B0
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15>
 struct XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, false>
 {
-    inline static XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
+    static XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
     {
 	return new XorpConstMemberCallback15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(o, p);
@@ -33121,7 +33121,7 @@ struct XorpSafeMemberCallback15B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, bool B=true>
 struct XorpMemberCallbackFactory15B1
 {
-    inline static XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    static XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
     {
 	return new XorpSafeMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
@@ -33131,7 +33131,7 @@ struct XorpMemberCallbackFactory15B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
 struct XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, false>
 {
-    inline static XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    static XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
     {
 	return new XorpMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
@@ -33243,7 +33243,7 @@ struct XorpConstSafeMemberCallback15B1<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, bool B=true>
 struct XorpConstMemberCallbackFactory15B1
 {
-    inline static XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    static XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
     {
 	return new XorpConstSafeMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
@@ -33253,7 +33253,7 @@ struct XorpConstMemberCallbackFactory15B1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1>
 struct XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, false>
 {
-    inline static XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
+    static XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
     {
 	return new XorpConstMemberCallback15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1>(o, p, ba1);
@@ -33420,7 +33420,7 @@ struct XorpSafeMemberCallback15B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, bool B=true>
 struct XorpMemberCallbackFactory15B2
 {
-    inline static XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    static XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpSafeMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
@@ -33430,7 +33430,7 @@ struct XorpMemberCallbackFactory15B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
 struct XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, false>
 {
-    inline static XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    static XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
     {
 	return new XorpMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
@@ -33544,7 +33544,7 @@ struct XorpConstSafeMemberCallback15B2<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, bool B=true>
 struct XorpConstMemberCallbackFactory15B2
 {
-    inline static XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    static XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstSafeMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
@@ -33554,7 +33554,7 @@ struct XorpConstMemberCallbackFactory15B2
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2>
 struct XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, false>
 {
-    inline static XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
+    static XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
     {
 	return new XorpConstMemberCallback15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2>(o, p, ba1, ba2);
@@ -33725,7 +33725,7 @@ struct XorpSafeMemberCallback15B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, bool B=true>
 struct XorpMemberCallbackFactory15B3
 {
-    inline static XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    static XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpSafeMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -33735,7 +33735,7 @@ struct XorpMemberCallbackFactory15B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
 struct XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, false>
 {
-    inline static XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    static XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -33851,7 +33851,7 @@ struct XorpConstSafeMemberCallback15B3<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, bool B=true>
 struct XorpConstMemberCallbackFactory15B3
 {
-    inline static XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    static XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstSafeMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -33861,7 +33861,7 @@ struct XorpConstMemberCallbackFactory15B3
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3>
 struct XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, false>
 {
-    inline static XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
+    static XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
     {
 	return new XorpConstMemberCallback15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3>(o, p, ba1, ba2, ba3);
@@ -34036,7 +34036,7 @@ struct XorpSafeMemberCallback15B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpMemberCallbackFactory15B4
 {
-    inline static XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpSafeMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -34046,7 +34046,7 @@ struct XorpMemberCallbackFactory15B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
 struct XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    static XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -34164,7 +34164,7 @@ struct XorpConstSafeMemberCallback15B4<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, bool B=true>
 struct XorpConstMemberCallbackFactory15B4
 {
-    inline static XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstSafeMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -34174,7 +34174,7 @@ struct XorpConstMemberCallbackFactory15B4
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4>
 struct XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, false>
 {
-    inline static XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
+    static XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
     {
 	return new XorpConstMemberCallback15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4>(o, p, ba1, ba2, ba3, ba4);
@@ -34353,7 +34353,7 @@ struct XorpSafeMemberCallback15B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpMemberCallbackFactory15B5
 {
-    inline static XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpSafeMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -34363,7 +34363,7 @@ struct XorpMemberCallbackFactory15B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    static XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -34483,7 +34483,7 @@ struct XorpConstSafeMemberCallback15B5<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, bool B=true>
 struct XorpConstMemberCallbackFactory15B5
 {
-    inline static XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstSafeMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -34493,7 +34493,7 @@ struct XorpConstMemberCallbackFactory15B5
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5>
 struct XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, false>
 {
-    inline static XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
+    static XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
     {
 	return new XorpConstMemberCallback15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5>(o, p, ba1, ba2, ba3, ba4, ba5);
@@ -34676,7 +34676,7 @@ struct XorpSafeMemberCallback15B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A1
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpMemberCallbackFactory15B6
 {
-    inline static XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpSafeMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -34686,7 +34686,7 @@ struct XorpMemberCallbackFactory15B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -34808,7 +34808,7 @@ struct XorpConstSafeMemberCallback15B6<void,O, A1, A2, A3, A4, A5, A6, A7, A8, A
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6, bool B=true>
 struct XorpConstMemberCallbackFactory15B6
 {
-    inline static XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstSafeMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);
@@ -34818,7 +34818,7 @@ struct XorpConstMemberCallbackFactory15B6
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6>
 struct XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, false>
 {
-    inline static XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
+    static XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>*
     make(O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
     {
 	return new XorpConstMemberCallback15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6>(o, p, ba1, ba2, ba3, ba4, ba5, ba6);

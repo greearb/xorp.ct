@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.40 2007/05/10 00:08:17 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.41 2007/05/19 01:52:43 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -76,7 +76,7 @@ public:
      * @param vif_name the vif name to map to a vif index.
      * @return the virtual interface index for vif name @ref vif_name.
      */
-    inline uint32_t vif_name2vif_index(const string& vif_name) const;
+    uint32_t vif_name2vif_index(const string& vif_name) const;
     
     /**
      * Find an unused vif index.
@@ -84,7 +84,7 @@ public:
      * @return the smallest unused vif index if there is one available,
      * otherwise return @ref Vif::VIF_INDEX_INVALID.
      */
-    inline uint32_t find_unused_vif_index() const;
+    uint32_t find_unused_vif_index() const;
     
     /**
      * Find a virtual interface for a given name.
@@ -93,7 +93,7 @@ public:
      * @return the virtual interface with name @ref name if found,
      * otherwise NULL.
      */
-    inline V *vif_find_by_name(const string& name) const;
+    V *vif_find_by_name(const string& name) const;
     
     /**
      * Find a virtual interface for a given address.
@@ -106,7 +106,7 @@ public:
      * @return the virtual interface with address @ref ipaddr_test if found,
      * otherwise NULL.
      */
-    inline V *vif_find_by_addr(const IPvX& ipaddr_test) const;
+    V *vif_find_by_addr(const IPvX& ipaddr_test) const;
     
     /**
      * Find a virtual interface for a given physical interface index.
@@ -115,7 +115,7 @@ public:
      * @return the virtual interface with physical interface index @ref
      * pif_index if found, otherwise NULL.
      */
-    inline V *vif_find_by_pif_index(uint32_t pif_index) const;
+    V *vif_find_by_pif_index(uint32_t pif_index) const;
     
     /**
      * Find a virtual interface for a given virtual interface index.
@@ -124,7 +124,7 @@ public:
      * @return the vvirtual interface with virtual interface index @ref
      * vif_index if found, otherwise NULL.
      */
-    inline V *vif_find_by_vif_index(uint32_t vif_index) const;
+    V *vif_find_by_vif_index(uint32_t vif_index) const;
 
     /**
      * Find a virtual interface that belongs to the same subnet
@@ -139,7 +139,7 @@ public:
      * or point-to-point link as address @ref ipaddr_test if found,
      * otherwise NULL.
      */
-    inline V *vif_find_same_subnet_or_p2p(const IPvX& ipaddr_test) const;
+    V *vif_find_same_subnet_or_p2p(const IPvX& ipaddr_test) const;
 
     /**
      * Test if an address belongs to one of my virtual interfaces.
@@ -162,7 +162,7 @@ public:
      * @param vif a pointer to the virtual interface to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline int add_vif(V *vif);
+    int add_vif(V *vif);
     
     /**
      * Delete a virtual interface.
@@ -173,7 +173,7 @@ public:
      * @param vif a pointer to the virtual interface to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    inline int delete_vif(const V *vif);
+    int delete_vif(const V *vif);
     
     /**
      * Get the array of pointers to the virtual interfaces.
@@ -397,7 +397,7 @@ public:
      * @return the smallest unused vif index from the set of configured vifs
      * if there is one available, otherwise return @ref Vif::VIF_INDEX_INVALID.
      */
-    inline uint32_t find_unused_config_vif_index() const;
+    uint32_t find_unused_config_vif_index() const;
 
     /**
      * Add a configured vif.
@@ -508,7 +508,7 @@ public:
      * @return the virtual interface with name @ref name if found,
      * otherwise NULL.
      */
-    inline const Vif *configured_vif_find_by_name(const string& name) const;
+    const Vif *configured_vif_find_by_name(const string& name) const;
 
     /**
      * Get the node status (see @ref ProcessStatus).

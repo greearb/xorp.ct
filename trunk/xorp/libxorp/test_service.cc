@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_service.cc,v 1.11 2006/10/12 01:24:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_service.cc,v 1.12 2007/02/16 22:46:25 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -59,8 +59,8 @@ static const uint32_t EXIT_MS = 5 * TRANS_MS;	// Time to exit (millisecs)
 
 static bool s_verbose = false;
 
-inline bool verbose() 		{ return s_verbose; }
-inline void set_verbose(bool v)	{ s_verbose = v; }
+bool verbose()			{ return s_verbose; }
+void set_verbose(bool v)	{ s_verbose = v; }
 
 #define verbose_log(x...) 						      \
 do {									      \

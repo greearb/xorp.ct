@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.21 2006/08/20 06:19:27 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.22 2007/02/16 22:47:13 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -116,12 +116,12 @@ protected:
     /**
      * Reset textual description of last error.
      */
-    inline void reset_error();
+    void reset_error();
 
     /**
      * Set textual description of latest error.
      */
-    inline void set_error(const string& err);
+    void set_error(const string& err);
 
 private:
     string _err;
@@ -330,17 +330,17 @@ public:
 	/**
 	 * Get the ID associated with the key.
 	 */
-	inline uint8_t	id() const			{ return _id; }
+	uint8_t		id() const		{ return _id; }
 
 	/**
 	 * Get pointer to key data.  The data is of size KEY_BYTES.
 	 */
-	const char*	key_data() const		{ return _key_data; }
+	const char*	key_data() const	{ return _key_data; }
 
 	/**
 	 * Get the size of the key data in bytes.
 	 */
-	inline uint32_t	key_data_bytes() const		{ return KEY_BYTES; }
+	uint32_t	key_data_bytes() const	{ return KEY_BYTES; }
 
 	/**
 	 * Get key data as a string.
@@ -367,13 +367,13 @@ public:
 	 *
 	 * @param v if true the key is persistent.
 	 */
-	void		set_persistent(bool v) { _is_persistent = v; }
+	void		set_persistent(bool v)	{ _is_persistent = v; }
 
 	/**
 	 * Get whether ID matches a particular value (convenient for STL
 	 * algorithms).
 	 */
-	inline bool	id_matches(uint8_t o) const	{ return _id == o; }
+	bool		id_matches(uint8_t o) const	{ return _id == o; }
 
 	/**
 	 * Get key validity status of key at a particular time.
@@ -428,7 +428,7 @@ public:
 	 * Get next sequence number for outbound packets.  The counter
 	 * is automatically updated with each call of this method.
 	 */
-	inline uint32_t next_seqno_out()		{ return _o_seqno++; }
+	uint32_t next_seqno_out()		{ return _o_seqno++; }
 
     protected:
 	static const uint32_t KEY_BYTES = 16;

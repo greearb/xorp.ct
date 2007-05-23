@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.29 2007/05/08 01:15:51 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.30 2007/05/08 21:47:23 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -53,17 +53,17 @@ public:
     /**
      * Interface collection accessor.
      */
-    inline const IfMap& interfaces() const		{ return _interfaces; }
+    const IfMap& interfaces() const		{ return _interfaces; }
 
     /**
      * Interface collection accessor.
      */
-    inline IfMap& interfaces()				{ return _interfaces; }
+    IfMap& interfaces()				{ return _interfaces; }
 
     /**
      * Clear all interface state.
      */
-    inline void clear();
+    void clear();
 
     /**
      * Find interface.
@@ -265,30 +265,30 @@ public:
     typedef map<const string, IfMgrVifAtom> VifMap;
 
 public:
-    inline IfMgrIfAtom(const string& name);
+    IfMgrIfAtom(const string& name);
 
-    inline const string& name() const			{ return _name; }
+    const string& name() const			{ return _name; }
 
-    inline bool		enabled() const			{ return _enabled; }
-    inline void		set_enabled(bool v)		{ _enabled = v; }
+    bool	enabled() const			{ return _enabled; }
+    void	set_enabled(bool v)		{ _enabled = v; }
 
-    inline bool		discard() const			{ return _discard; }
-    inline void		set_discard(bool v)		{ _discard = v; }
+    bool	discard() const			{ return _discard; }
+    void	set_discard(bool v)		{ _discard = v; }
 
-    inline uint32_t	mtu() const			{ return _mtu; }
-    inline void		set_mtu(uint32_t v)		{ _mtu = v; }
+    uint32_t	mtu() const			{ return _mtu; }
+    void	set_mtu(uint32_t v)		{ _mtu = v; }
 
-    inline const Mac&	mac() const			{ return _mac; }
-    inline void		set_mac(const Mac& v)		{ _mac = v; }
+    const Mac&	mac() const			{ return _mac; }
+    void	set_mac(const Mac& v)		{ _mac = v; }
 
-    inline uint32_t	pif_index() const		{ return _pif_index; }
-    inline void		set_pif_index(uint32_t v)	{ _pif_index = v; }
+    uint32_t	pif_index() const		{ return _pif_index; }
+    void	set_pif_index(uint32_t v)	{ _pif_index = v; }
 
-    inline bool		no_carrier() const		{ return _no_carrier; }
-    inline void		set_no_carrier(bool v)		{ _no_carrier = v; }
+    bool	no_carrier() const		{ return _no_carrier; }
+    void	set_no_carrier(bool v)		{ _no_carrier = v; }
 
-    inline const VifMap& vifs() const			{ return _vifs; }
-    inline VifMap& vifs()				{ return _vifs; }
+    const VifMap& vifs() const			{ return _vifs; }
+    VifMap& vifs()				{ return _vifs; }
     const IfMgrVifAtom*	find_vif(const string& vifname) const;
     IfMgrVifAtom*	find_vif(const string& vifname);
 
@@ -322,42 +322,41 @@ public:
     typedef map<const IPv6, IfMgrIPv6Atom> IPv6Map;
 
 public:
-    inline IfMgrVifAtom(const string& name);
+    IfMgrVifAtom(const string& name);
 
-    inline const string& name() const			{ return _name; }
+    const string& name() const			{ return _name; }
 
-    inline bool		enabled() const			{ return _enabled; }
-    inline void		set_enabled(bool v)		{ _enabled = v; }
+    bool	enabled() const			{ return _enabled; }
+    void	set_enabled(bool v)		{ _enabled = v; }
 
-    inline bool		multicast_capable() const 	{ return _multicast_capable; }
-    inline void		set_multicast_capable(bool v)	{ _multicast_capable = v; }
+    bool	multicast_capable() const 	{ return _multicast_capable; }
+    void	set_multicast_capable(bool v)	{ _multicast_capable = v; }
 
-    inline bool		broadcast_capable() const 	{ return _broadcast_capable; }
-    inline void		set_broadcast_capable(bool v)	{ _broadcast_capable = v; }
+    bool	broadcast_capable() const 	{ return _broadcast_capable; }
+    void	set_broadcast_capable(bool v)	{ _broadcast_capable = v; }
 
-    inline bool		p2p_capable() const		{ return _p2p_capable; }
-    inline void		set_p2p_capable(bool v)		{ _p2p_capable = v; }
+    bool	p2p_capable() const		{ return _p2p_capable; }
+    void	set_p2p_capable(bool v)		{ _p2p_capable = v; }
 
+    bool	loopback() const		{ return _loopback; }
+    void	set_loopback(bool v)		{ _loopback = v; }
 
-    inline bool		loopback() const		{ return _loopback; }
-    inline void		set_loopback(bool v)		{ _loopback = v; }
+    bool	pim_register() const		{ return _pim_register; }
+    void	set_pim_register(bool v)	{ _pim_register = v; }
 
-    inline bool		pim_register() const		{ return _pim_register; }
-    inline void		set_pim_register(bool v)	{ _pim_register = v; }
+    uint32_t	pif_index() const		{ return _pif_index; }
+    void	set_pif_index(uint32_t v) 	{ _pif_index = v; }
 
-    inline uint32_t	pif_index() const		{ return _pif_index; }
-    inline void		set_pif_index(uint32_t v) 	{ _pif_index = v; }
+    uint32_t	vif_index() const		{ return _vif_index; }
+    void	set_vif_index(uint32_t v) 	{ _vif_index = v; }
 
-    inline uint32_t	vif_index() const		{ return _vif_index; }
-    inline void		set_vif_index(uint32_t v) 	{ _vif_index = v; }
-
-    inline const IPv4Map& ipv4addrs() const		{ return _ipv4addrs; }
-    inline IPv4Map&	ipv4addrs() 			{ return _ipv4addrs; }
+    const IPv4Map&	ipv4addrs() const	{ return _ipv4addrs; }
+    IPv4Map&		ipv4addrs() 		{ return _ipv4addrs; }
     const IfMgrIPv4Atom* find_addr(const IPv4& addr) const;
     IfMgrIPv4Atom*	find_addr(const IPv4& addr);
 
-    inline const IPv6Map& ipv6addrs() const		{ return _ipv6addrs; }
-    inline IPv6Map&	ipv6addrs() 			{ return _ipv6addrs; }
+    const IPv6Map& ipv6addrs() const		{ return _ipv6addrs; }
+    IPv6Map&	ipv6addrs()			{ return _ipv6addrs; }
     const IfMgrIPv6Atom* find_addr(const IPv6& addr) const;
     IfMgrIPv6Atom*	find_addr(const IPv6& addr);
 
@@ -391,33 +390,33 @@ protected:
  */
 class IfMgrIPv4Atom {
 public:
-    inline IfMgrIPv4Atom(const IPv4& addr);
+    IfMgrIPv4Atom(const IPv4& addr);
 
-    inline const IPv4&	addr() const			{ return _addr; }
+    const IPv4&	addr() const			{ return _addr; }
 
-    inline uint32_t	prefix_len() const		{ return _prefix_len; }
-    inline void		set_prefix_len(uint32_t v)	{ _prefix_len = v; }
+    uint32_t	prefix_len() const		{ return _prefix_len; }
+    void	set_prefix_len(uint32_t v)	{ _prefix_len = v; }
 
-    inline bool		enabled() const			{ return _enabled; }
-    inline void		set_enabled(bool v)		{ _enabled = v; }
+    bool	enabled() const			{ return _enabled; }
+    void	set_enabled(bool v)		{ _enabled = v; }
 
-    inline bool		multicast_capable() const 	{ return _multicast_capable; }
-    inline void		set_multicast_capable(bool v)	{ _multicast_capable = v; }
+    bool	multicast_capable() const 	{ return _multicast_capable; }
+    void	set_multicast_capable(bool v)	{ _multicast_capable = v; }
 
-    inline bool		loopback() const		{ return _loopback; }
-    inline void		set_loopback(bool v) 		{ _loopback = v; }
+    bool	loopback() const		{ return _loopback; }
+    void	set_loopback(bool v) 		{ _loopback = v; }
 
-    inline bool		has_broadcast() const		{ return _broadcast; }
-    inline void		remove_broadcast()		{ _broadcast = false; }
-    inline void		set_broadcast_addr(const IPv4& baddr);
-    inline const IPv4&	broadcast_addr() const;
+    bool	has_broadcast() const		{ return _broadcast; }
+    void	remove_broadcast()		{ _broadcast = false; }
+    void	set_broadcast_addr(const IPv4& baddr);
+    const IPv4&	broadcast_addr() const;
 
-    inline bool		has_endpoint() const		{ return _p2p; }
-    inline void		remove_endpoint()		{ _p2p = false; }
-    inline void		set_endpoint_addr(const IPv4& endpoint);
-    inline const IPv4&	endpoint_addr() const;
+    bool	has_endpoint() const		{ return _p2p; }
+    void	remove_endpoint()		{ _p2p = false; }
+    void	set_endpoint_addr(const IPv4& endpoint);
+    const IPv4&	endpoint_addr() const;
 
-    bool 		operator==(const IfMgrIPv4Atom& o) const;
+    bool 	operator==(const IfMgrIPv4Atom& o) const;
 
 private:
     IfMgrIPv4Atom();			// Not implemented
@@ -445,28 +444,28 @@ protected:
 
 class IfMgrIPv6Atom {
 public:
-    inline IfMgrIPv6Atom(const IPv6& addr);
+    IfMgrIPv6Atom(const IPv6& addr);
 
-    inline const IPv6&  addr() const			{ return _addr; }
+    const IPv6&	addr() const			{ return _addr; }
 
-    inline bool		enabled() const			{ return _enabled; }
-    inline void		set_enabled(bool v)		{ _enabled = v; }
+    bool	enabled() const			{ return _enabled; }
+    void	set_enabled(bool v)		{ _enabled = v; }
 
-    inline uint32_t	prefix_len() const		{ return _prefix_len; }
-    inline void		set_prefix_len(uint32_t v)	{ _prefix_len = v; }
+    uint32_t	prefix_len() const		{ return _prefix_len; }
+    void	set_prefix_len(uint32_t v)	{ _prefix_len = v; }
 
-    inline bool		multicast_capable() const 	{ return _multicast_capable; }
-    inline void		set_multicast_capable(bool v)	{ _multicast_capable = v; }
+    bool	multicast_capable() const 	{ return _multicast_capable; }
+    void	set_multicast_capable(bool v)	{ _multicast_capable = v; }
 
-    inline bool		loopback() const		{ return _loopback; }
-    inline void		set_loopback(bool v) 		{ _loopback = v; }
+    bool	loopback() const		{ return _loopback; }
+    void	set_loopback(bool v) 		{ _loopback = v; }
 
-    inline bool		has_endpoint() const		{ return _p2p; }
-    inline void		remove_endpoint()		{ _p2p = false; }
-    inline void		set_endpoint_addr(const IPv6& endpoint);
-    inline const IPv6&	endpoint_addr() const;
+    bool	has_endpoint() const		{ return _p2p; }
+    void	remove_endpoint()		{ _p2p = false; }
+    void	set_endpoint_addr(const IPv6& endpoint);
+    const IPv6&	endpoint_addr() const;
 
-    bool 		operator==(const IfMgrIPv6Atom& o) const;
+    bool 	operator==(const IfMgrIPv6Atom& o) const;
 
 private:
     IfMgrIPv6Atom();			// Not implemented

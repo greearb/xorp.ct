@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.16 2007/04/19 23:53:05 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.17 2007/05/08 21:47:23 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -24,14 +24,14 @@
  */
 class IfMgrIfCommandBase : public IfMgrCommandBase {
 public:
-    inline IfMgrIfCommandBase(const string& ifname)
+    IfMgrIfCommandBase(const string& ifname)
 	: _ifname(ifname)
     {}
 
     /**
      * @return Interface name command relates to.
      */
-    inline const string& ifname() const			{ return _ifname; }
+    const string& ifname() const		{ return _ifname; }
 
 protected:
     string	_ifname;
@@ -42,7 +42,7 @@ protected:
  */
 class IfMgrIfAdd : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfAdd(const string& ifname)
+    IfMgrIfAdd(const string& ifname)
 	: IfMgrIfCommandBase(ifname)
     {}
 
@@ -60,7 +60,7 @@ public:
  */
 class IfMgrIfRemove : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfRemove(const string& ifname)
+    IfMgrIfRemove(const string& ifname)
 	: IfMgrIfCommandBase(ifname)
     {}
 
@@ -78,12 +78,12 @@ public:
  */
 class IfMgrIfSetEnabled : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetEnabled(const string& ifname, bool enabled)
+    IfMgrIfSetEnabled(const string& ifname, bool enabled)
 	: IfMgrIfCommandBase(ifname),
 	  _enabled(enabled)
     {}
 
-    inline bool enabled() const				{ return _enabled; }
+    bool enabled() const			{ return _enabled; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -102,12 +102,12 @@ protected:
  */
 class IfMgrIfSetDiscard : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetDiscard(const string& ifname, bool discard)
+    IfMgrIfSetDiscard(const string& ifname, bool discard)
 	: IfMgrIfCommandBase(ifname),
 	  _discard(discard)
     {}
 
-    inline bool discard() const				{ return _discard; }
+    bool discard() const			{ return _discard; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -126,12 +126,12 @@ protected:
  */
 class IfMgrIfSetMtu : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetMtu(const string& ifname, uint32_t mtu)
+    IfMgrIfSetMtu(const string& ifname, uint32_t mtu)
 	: IfMgrIfCommandBase(ifname),
 	  _mtu(mtu)
     {}
 
-    inline uint32_t mtu() const				{ return _mtu; }
+    uint32_t mtu() const			{ return _mtu; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -150,12 +150,12 @@ protected:
  */
 class IfMgrIfSetMac : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetMac(const string& ifname, const Mac& mac)
+    IfMgrIfSetMac(const string& ifname, const Mac& mac)
 	: IfMgrIfCommandBase(ifname),
 	  _mac(mac)
     {}
 
-    inline const Mac& mac() const			{ return _mac; }
+    const Mac& mac() const			{ return _mac; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -174,12 +174,12 @@ protected:
  */
 class IfMgrIfSetPifIndex : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetPifIndex(const string& ifname, uint32_t pif_index)
+    IfMgrIfSetPifIndex(const string& ifname, uint32_t pif_index)
 	: IfMgrIfCommandBase(ifname),
 	  _pif_index(pif_index)
     {}
 
-    inline uint32_t pif_index() const			{ return _pif_index; }
+    uint32_t pif_index() const			{ return _pif_index; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -198,12 +198,12 @@ protected:
  */
 class IfMgrIfSetNoCarrier : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetNoCarrier(const string& ifname, bool no_carrier)
+    IfMgrIfSetNoCarrier(const string& ifname, bool no_carrier)
 	: IfMgrIfCommandBase(ifname),
 	  _no_carrier(no_carrier)
     {}
 
-    inline bool no_carrier() const			{ return _no_carrier; }
+    bool no_carrier() const			{ return _no_carrier; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -223,7 +223,7 @@ protected:
  */
 class IfMgrVifCommandBase : public IfMgrIfCommandBase {
 public:
-    inline IfMgrVifCommandBase(const string& ifname, const string& vifname)
+    IfMgrVifCommandBase(const string& ifname, const string& vifname)
 	: IfMgrIfCommandBase(ifname),
 	  _vifname(vifname)
     {}
@@ -231,7 +231,7 @@ public:
     /**
      * @return Virtual interface name command relates to.
      */
-    inline const string& vifname() const		{ return _vifname; }
+    const string& vifname() const		{ return _vifname; }
 
 protected:
     string	_vifname;
@@ -242,7 +242,7 @@ protected:
  */
 class IfMgrVifAdd : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifAdd(const string& ifname, const string& vifname)
+    IfMgrVifAdd(const string& ifname, const string& vifname)
 	: IfMgrVifCommandBase(ifname, vifname)
     {}
 
@@ -260,7 +260,7 @@ public:
  */
 class IfMgrVifRemove : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifRemove(const string& ifname, const string& vifname)
+    IfMgrVifRemove(const string& ifname, const string& vifname)
 	: IfMgrVifCommandBase(ifname, vifname)
     {}
 
@@ -278,13 +278,13 @@ public:
  */
 class IfMgrVifSetEnabled : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetEnabled(const string&	ifname,
-			      const string&	vifname,
-			      bool		enabled)
+    IfMgrVifSetEnabled(const string&	ifname,
+		       const string&	vifname,
+		       bool		enabled)
 	: IfMgrVifCommandBase(ifname, vifname), _enabled(enabled)
     {}
 
-    inline bool enabled() const 			{ return _enabled; }
+    bool enabled() const 			{ return _enabled; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -303,14 +303,14 @@ protected:
  */
 class IfMgrVifSetMulticastCapable : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetMulticastCapable(const string&	ifname,
-				       const string&	vifname,
-				       bool		multicast_capable)
+    IfMgrVifSetMulticastCapable(const string&	ifname,
+				const string&	vifname,
+				bool		multicast_capable)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _multicast_capable(multicast_capable)
     {}
 
-    inline bool multicast_capable() const 	{ return _multicast_capable; }
+    bool multicast_capable() const 	{ return _multicast_capable; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -329,14 +329,14 @@ protected:
  */
 class IfMgrVifSetBroadcastCapable : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetBroadcastCapable(const string&	ifname,
-				       const string&	vifname,
-				       bool		broadcast_capable)
+    IfMgrVifSetBroadcastCapable(const string&	ifname,
+				const string&	vifname,
+				bool		broadcast_capable)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _broadcast_capable(broadcast_capable)
     {}
 
-    inline bool broadcast_capable() const 	{ return _broadcast_capable; }
+    bool broadcast_capable() const 	{ return _broadcast_capable; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -355,14 +355,14 @@ protected:
  */
 class IfMgrVifSetP2PCapable : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetP2PCapable(const string&	ifname,
-				 const string&	vifname,
-				 bool		p2p_capable)
+    IfMgrVifSetP2PCapable(const string&	ifname,
+			  const string&	vifname,
+			  bool		p2p_capable)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _p2p_capable(p2p_capable)
     {}
 
-    inline bool p2p_capable() const 		{ return _p2p_capable; }
+    bool p2p_capable() const 		{ return _p2p_capable; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -381,14 +381,14 @@ protected:
  */
 class IfMgrVifSetLoopbackCapable : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetLoopbackCapable(const string&	ifname,
-				      const string&	vifname,
-				      bool		loopback_capable)
+    IfMgrVifSetLoopbackCapable(const string&	ifname,
+			       const string&	vifname,
+			       bool		loopback_capable)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _loopback_capable(loopback_capable)
     {}
 
-    inline bool loopback_capable() const 	{ return _loopback_capable; }
+    bool loopback_capable() const 	{ return _loopback_capable; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -407,14 +407,14 @@ protected:
  */
 class IfMgrVifSetPimRegister : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetPimRegister(const string&	ifname,
-				  const string&	vifname,
-				  bool		pim_register)
+    IfMgrVifSetPimRegister(const string&	ifname,
+			   const string&	vifname,
+			   bool			pim_register)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _pim_register(pim_register)
     {}
 
-    inline bool pim_register() const 	{ return _pim_register; }
+    bool pim_register() const 	{ return _pim_register; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -434,14 +434,14 @@ protected:
  */
 class IfMgrVifSetPifIndex : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetPifIndex(const string&	ifname,
-			       const string&	vifname,
-			       uint32_t		pif_index)
+    IfMgrVifSetPifIndex(const string&	ifname,
+			const string&	vifname,
+			uint32_t		pif_index)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _pif_index(pif_index)
     {}
 
-    inline uint32_t pif_index() const 			{ return _pif_index; }
+    uint32_t pif_index() const 			{ return _pif_index; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -461,14 +461,14 @@ protected:
  */
 class IfMgrVifSetVifIndex : public IfMgrVifCommandBase {
 public:
-    inline IfMgrVifSetVifIndex(const string&	ifname,
-			       const string&	vifname,
-			       uint32_t		vif_index)
+    IfMgrVifSetVifIndex(const string&	ifname,
+			const string&	vifname,
+			uint32_t	vif_index)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _vif_index(vif_index)
     {}
 
-    inline uint32_t vif_index() const 			{ return _vif_index; }
+    uint32_t vif_index() const 			{ return _vif_index; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -488,9 +488,9 @@ protected:
  */
 class IfMgrIPv4CommandBase : public IfMgrVifCommandBase {
 public:
-    inline IfMgrIPv4CommandBase(const string&	ifname,
-				const string&	vifname,
-				const IPv4&	addr)
+    IfMgrIPv4CommandBase(const string&	ifname,
+			 const string&	vifname,
+			 const IPv4&	addr)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _addr(addr)
     {}
@@ -509,9 +509,9 @@ protected:
  */
 class IfMgrIPv4Add : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4Add(const string&	ifname,
-			const string&	vifname,
-			const IPv4&	addr)
+    IfMgrIPv4Add(const string&	ifname,
+		 const string&	vifname,
+		 const IPv4&	addr)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr)
     {}
 
@@ -529,9 +529,9 @@ public:
  */
 class IfMgrIPv4Remove : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4Remove(const string&	ifname,
-			   const string&	vifname,
-			   const IPv4&		addr)
+    IfMgrIPv4Remove(const string&	ifname,
+		    const string&	vifname,
+		    const IPv4&		addr)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr)
     {}
 
@@ -549,15 +549,15 @@ public:
  */
 class IfMgrIPv4SetPrefix : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4SetPrefix(const string&	ifname,
-			      const string&	vifname,
-			      const IPv4&	addr,
-			      uint32_t		prefix_len)
+    IfMgrIPv4SetPrefix(const string&	ifname,
+		       const string&	vifname,
+		       const IPv4&	addr,
+		       uint32_t		prefix_len)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr),
 	  _prefix_len(prefix_len)
     {}
 
-    inline uint32_t prefix_len() const			{ return _prefix_len; }
+    uint32_t prefix_len() const			{ return _prefix_len; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -576,15 +576,15 @@ protected:
  */
 class IfMgrIPv4SetEnabled : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4SetEnabled(const string&	ifname,
-			       const string&	vifname,
-			       const IPv4&	addr,
-			       bool		enabled)
+    IfMgrIPv4SetEnabled(const string&	ifname,
+			const string&	vifname,
+			const IPv4&	addr,
+			bool		enabled)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr),
 	  _enabled(enabled)
     {}
 
-    inline bool enabled() const				{ return _enabled; }
+    bool enabled() const				{ return _enabled; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -603,15 +603,15 @@ protected:
  */
 class IfMgrIPv4SetMulticastCapable : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4SetMulticastCapable(const string&	ifname,
-					const string&	vifname,
-					const IPv4&	addr,
-					bool		multicast_capable)
+    IfMgrIPv4SetMulticastCapable(const string&	ifname,
+				 const string&	vifname,
+				 const IPv4&	addr,
+				 bool		multicast_capable)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr),
 	  _multicast_capable(multicast_capable)
     {}
 
-    inline bool multicast_capable() const	{ return _multicast_capable; }
+    bool multicast_capable() const	{ return _multicast_capable; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -630,15 +630,15 @@ protected:
  */
 class IfMgrIPv4SetLoopback : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4SetLoopback(const string&	ifname,
-				const string&	vifname,
-				const IPv4&	addr,
-				bool		loopback)
+    IfMgrIPv4SetLoopback(const string&	ifname,
+			 const string&	vifname,
+			 const IPv4&	addr,
+			 bool		loopback)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr),
 	  _loopback(loopback)
     {}
 
-    inline bool loopback() const			{ return _loopback; }
+    bool loopback() const			{ return _loopback; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -658,15 +658,15 @@ protected:
  */
 class IfMgrIPv4SetBroadcast : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4SetBroadcast(const string&	ifname,
-				 const string&	vifname,
-				 const IPv4&	addr,
-				 const IPv4&	broadcast_addr)
+    IfMgrIPv4SetBroadcast(const string&	ifname,
+			  const string&	vifname,
+			  const IPv4&	addr,
+			  const IPv4&	broadcast_addr)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr),
 	  _broadcast_addr(broadcast_addr)
     {}
 
-    inline const IPv4& broadcast_addr() const	{ return _broadcast_addr; }
+    const IPv4& broadcast_addr() const	{ return _broadcast_addr; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -686,10 +686,10 @@ protected:
  */
 class IfMgrIPv4SetEndpoint : public IfMgrIPv4CommandBase {
 public:
-    inline IfMgrIPv4SetEndpoint(const string&	ifname,
-				const string&	vifname,
-				const IPv4&	addr,
-				const IPv4&	endpoint_addr)
+    IfMgrIPv4SetEndpoint(const string&	ifname,
+			 const string&	vifname,
+			 const IPv4&	addr,
+			 const IPv4&	endpoint_addr)
 	: IfMgrIPv4CommandBase(ifname, vifname, addr),
 	  _endpoint_addr(endpoint_addr)
     {}
@@ -714,9 +714,9 @@ protected:
  */
 class IfMgrIPv6CommandBase : public IfMgrVifCommandBase {
 public:
-    inline IfMgrIPv6CommandBase(const string&	ifname,
-				const string&	vifname,
-				const IPv6&	addr)
+    IfMgrIPv6CommandBase(const string&	ifname,
+			 const string&	vifname,
+			 const IPv6&	addr)
 	: IfMgrVifCommandBase(ifname, vifname),
 	  _addr(addr)
     {}
@@ -724,7 +724,7 @@ public:
     /**
      * @return IPv6 address command relates to.
      */
-    inline const IPv6& addr() const 			{ return _addr; }
+    const IPv6& addr() const 			{ return _addr; }
 
 protected:
     IPv6	_addr;
@@ -735,9 +735,9 @@ protected:
  */
 class IfMgrIPv6Add : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6Add(const string&	ifname,
-			const string&	vifname,
-			const IPv6&	addr)
+    IfMgrIPv6Add(const string&	ifname,
+		 const string&	vifname,
+		 const IPv6&	addr)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr)
     {}
 
@@ -755,9 +755,9 @@ public:
  */
 class IfMgrIPv6Remove : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6Remove(const string&	ifname,
-			   const string&	vifname,
-			   const IPv6&		addr)
+    IfMgrIPv6Remove(const string&	ifname,
+		    const string&	vifname,
+		    const IPv6&		addr)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr)
     {}
 
@@ -775,14 +775,14 @@ public:
  */
 class IfMgrIPv6SetPrefix : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6SetPrefix(const string&	ifname,
-			      const string&	vifname,
-			      const IPv6&	addr,
-			      uint32_t		prefix_len)
+    IfMgrIPv6SetPrefix(const string&	ifname,
+		       const string&	vifname,
+		       const IPv6&	addr,
+		       uint32_t		prefix_len)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr), _prefix_len(prefix_len)
     {}
 
-    inline uint32_t prefix_len() const			{ return _prefix_len; }
+    uint32_t prefix_len() const			{ return _prefix_len; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -801,14 +801,14 @@ protected:
  */
 class IfMgrIPv6SetEnabled : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6SetEnabled(const string&	ifname,
-			       const string&	vifname,
-			       const IPv6&	addr,
-			       bool		enabled)
+    IfMgrIPv6SetEnabled(const string&	ifname,
+			const string&	vifname,
+			const IPv6&	addr,
+			bool		enabled)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr), _enabled(enabled)
     {}
 
-    inline bool enabled() const				{ return _enabled; }
+    bool enabled() const				{ return _enabled; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -827,15 +827,15 @@ protected:
  */
 class IfMgrIPv6SetMulticastCapable : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6SetMulticastCapable(const string&	ifname,
-					const string&	vifname,
-					const IPv6&	addr,
-					bool		multicast_capable)
+    IfMgrIPv6SetMulticastCapable(const string&	ifname,
+				 const string&	vifname,
+				 const IPv6&	addr,
+				 bool		multicast_capable)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr),
 	  _multicast_capable(multicast_capable)
     {}
 
-    inline bool multicast_capable() const	{ return _multicast_capable; }
+    bool multicast_capable() const	{ return _multicast_capable; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -854,15 +854,15 @@ protected:
  */
 class IfMgrIPv6SetLoopback : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6SetLoopback(const string&	ifname,
-				const string&	vifname,
-				const IPv6&	addr,
-				bool		loopback)
+    IfMgrIPv6SetLoopback(const string&	ifname,
+			 const string&	vifname,
+			 const IPv6&	addr,
+			 bool		loopback)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr),
 	  _loopback(loopback)
     {}
 
-    inline bool loopback() const			{ return _loopback; }
+    bool loopback() const			{ return _loopback; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -882,15 +882,15 @@ protected:
  */
 class IfMgrIPv6SetEndpoint : public IfMgrIPv6CommandBase {
 public:
-    inline IfMgrIPv6SetEndpoint(const string&	ifname,
-				const string&	vifname,
-				const IPv6&	addr,
-				const IPv6&	endpoint_addr)
+    IfMgrIPv6SetEndpoint(const string&	ifname,
+			 const string&	vifname,
+			 const IPv6&	addr,
+			 const IPv6&	endpoint_addr)
 	: IfMgrIPv6CommandBase(ifname, vifname, addr),
 	  _endpoint_addr(endpoint_addr)
     {}
 
-    inline const IPv6& endpoint_addr() const	{ return _endpoint_addr; }
+    const IPv6& endpoint_addr() const	{ return _endpoint_addr; }
 
     bool execute(IfMgrIfTree& tree) const;
 

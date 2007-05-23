@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.8 2007/02/16 22:46:21 pavlin Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.9 2007/03/15 05:58:48 pavlin Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -96,15 +96,15 @@ class Profile {
 		     logentries *log) 
 	    : _comment(comment), _enabled(enabled), _locked(locked), _log(log)
 	{}
-	inline void set_enabled(bool v) {_enabled = v;}
-	inline bool enabled() const {return _enabled;}
-	inline void set_locked(bool v) {_locked = v;}
-	inline bool locked() const {return _locked;}
-	inline logentries *logptr() const {return _log;}
-	inline void zap() const {delete _log;}
-	inline void set_iterator(logentries::iterator i) {_i = i;}
-	inline void get_iterator(logentries::iterator& i) {i = _i;}
-	inline int size() const {return _log->size();}
+	void set_enabled(bool v) { _enabled = v; }
+	bool enabled() const { return _enabled; }
+	void set_locked(bool v) { _locked = v; }
+	bool locked() const { return _locked; }
+	logentries *logptr() const { return _log; }
+	void zap() const { delete _log; }
+	void set_iterator(logentries::iterator i) { _i = i; }
+	void get_iterator(logentries::iterator& i) { i = _i; }
+	int size() const { return _log->size(); }
 	const string& comment() const {return _comment;}
 
     private:
@@ -132,10 +132,7 @@ class Profile {
      *
      * @return true if this profile is enabled.
      */
-    inline
-    bool
-    enabled(const string& pname) throw(PVariableUnknown)
-    {
+    bool enabled(const string& pname) throw(PVariableUnknown) {
 	// This is the most frequently called method hence make it
 	// inline. As an optimisation if no profiling is enabled don't
 	// perform any string maniplulation or lookups.

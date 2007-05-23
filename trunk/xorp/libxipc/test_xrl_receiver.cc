@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.13 2006/10/12 01:24:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.14 2007/02/16 22:46:09 pavlin Exp $"
 
 
 //
@@ -77,9 +77,9 @@ public:
     {}
     ~TestReceiver() {}
 
-    inline bool done() const { return _done; }
+    bool done() const { return _done; }
 
-    inline void print_xrl_received() const {
+    void print_xrl_received() const {
 #if PRINT_DEBUG
     	printf(".");
 	if (! (_received_xrls % 10000))

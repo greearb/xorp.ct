@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.26 2006/10/10 20:02:20 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.27 2007/02/16 22:47:24 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -152,26 +152,22 @@ public:
     bool get_deltas(const SlaveConfigTree& main_tree);
     bool get_deletions(const SlaveConfigTree& main_tree);
 
-    virtual ConfigTreeNode& root_node() {
-	return _root_node;
-    }
+    virtual ConfigTreeNode& root_node() { return _root_node; }
     virtual const ConfigTreeNode& const_root_node() const {
 	return _root_node;
     }
 
-    inline SlaveConfigTreeNode& slave_root_node() {
+    SlaveConfigTreeNode& slave_root_node() { return _root_node; }
+    const SlaveConfigTreeNode& const_slave_root_node() const {
 	return _root_node;
     }
-    inline const SlaveConfigTreeNode& const_slave_root_node() const {
-	return _root_node;
-    }
-    inline SlaveConfigTreeNode* find_node(const list<string>& path) {
+    SlaveConfigTreeNode* find_node(const list<string>& path) {
 	return reinterpret_cast<SlaveConfigTreeNode*>(ConfigTree::find_node(path));
     }
 
-    inline const CommitStatus& commit_status() const { return _commit_status; }
+    const CommitStatus& commit_status() const { return _commit_status; }
 
-    inline void reset_commit_status() { _commit_status.reset(); }
+    void reset_commit_status() { _commit_status.reset(); }
 
 private:
     SlaveConfigTreeNode	_root_node;

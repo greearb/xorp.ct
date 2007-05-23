@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.15 2006/11/07 22:04:18 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.16 2007/02/16 22:46:10 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -99,8 +99,6 @@ escape_encode(char c, char*& buf)
 	    *buf++ = (v - 10) + 'A';
     }
 }
-
-
 
 inline static char
 hex_digit(char c)

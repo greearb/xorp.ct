@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_error.cc,v 1.12 2006/10/12 01:24:49 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_error.cc,v 1.13 2007/02/16 22:46:11 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -38,8 +38,8 @@ public:
 	return 0;
     }
 
-    inline XrlErrorCode error_code() const	{ return _error_code; }
-    inline const char*  error_msg() const	{ return _error_msg; }
+    XrlErrorCode error_code() const	{ return _error_code; }
+    const char*  error_msg() const	{ return _error_msg; }
 
 protected:
     XrlErrorCode _error_code;

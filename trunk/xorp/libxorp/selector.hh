@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.22 2006/08/12 00:38:36 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.23 2007/02/16 22:46:23 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -242,11 +242,11 @@ private:
 	int		_priority[SEL_MAX_IDX];
 
 	Node();
-	inline bool	add_okay(SelectorMask m, IoEventType type,
+	bool		add_okay(SelectorMask m, IoEventType type,
 				 const IoEventCb& cb, int priority);
-	inline int	run_hooks(SelectorMask m, XorpFd fd);
-	inline void	clear(SelectorMask m);
-	inline bool	is_empty();
+	int		run_hooks(SelectorMask m, XorpFd fd);
+	void		clear(SelectorMask m);
+	bool		is_empty();
     };
 
     ClockBase*		_clock;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.21 2007/02/16 22:47:08 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.22 2007/03/22 20:48:18 bms Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -69,7 +69,7 @@ public:
      * @return the Virtual Interface on which packets matching this
      * routing table entry should be forwarded.
      */
-    inline Vif* vif() const { return _vif; }
+    Vif* vif() const { return _vif; }
 
     /**
      * Get the NextHop router.
@@ -77,14 +77,14 @@ public:
      * @return the NextHop router to which packets matching this
      * entry should be forwarded.
      */
-    inline NextHop* nexthop() const { return _nexthop; }
+    NextHop* nexthop() const { return _nexthop; }
 
     /**
      * Set the NextHop router.
      *
      * @param v the NextHop router to be set on this route.
      */
-    inline void set_nexthop(NextHop* v) { _nexthop = v; }
+    void set_nexthop(NextHop* v) { _nexthop = v; }
 
     /**
      * Get the Administrative Distance.
@@ -95,14 +95,14 @@ public:
      * subnet come from different routing protocols, the one with the
      * lower admin distance is prefered.
      */
-    inline uint16_t admin_distance() const { return _admin_distance; }
+    uint16_t admin_distance() const { return _admin_distance; }
 
     /**
      * Set the Administrative Distance.
      *
      * @param ad the administrative distance to apply to this route.
      */
-    inline void set_admin_distance(uint16_t ad) { _admin_distance = ad; }
+    void set_admin_distance(uint16_t ad) { _admin_distance = ad; }
 
     /**
      * Get the routing protocol.
@@ -110,7 +110,7 @@ public:
      * @return the routing protocol that originated this route.
      * @see Protocol.
      */
-    inline const Protocol& protocol() const { return _protocol; }
+    const Protocol& protocol() const { return _protocol; }
 
     /**
      * Display the route for debugging purposes.
@@ -122,14 +122,14 @@ public:
      *
      * @param metric the routing protocol metric to be set on this route.
      */
-    inline void set_metric(uint16_t metric) { _metric = metric; }
+    void set_metric(uint16_t metric) { _metric = metric; }
 
     /**
      * Get the routing protocol metric.
      *
      * @return the routing protocol metric for this route.
      */
-    inline uint16_t metric() const { return _metric; }
+    uint16_t metric() const { return _metric; }
 
 protected:
     Vif*		_vif;
@@ -193,14 +193,14 @@ public:
      *
      * @return the route entry's subnet address.
      */
-    inline const IPNet<A>& net() const { return _net; }
+    const IPNet<A>& net() const { return _net; }
 
     /**
      * Get the prefix length of the route entry's subnet address.
      *
      * @return the prefix length (in bits) of the route entry's subnet address.
      */
-    inline size_t prefix_len() const { return _net.prefix_len(); }
+    size_t prefix_len() const { return _net.prefix_len(); }
 
     /**
      * Get the route entry's next-hop router address.
@@ -208,7 +208,7 @@ public:
      * @return the route entry's next-hop router address. If there is no
      * next-hop router, then the return value is IPv4#ZERO() or IPv6#ZERO().
      */
-    inline const A& nexthop_addr() const {
+    const A& nexthop_addr() const {
 	IPNextHop<A>* nh = reinterpret_cast<IPNextHop<A>* >(nexthop());
 	if (nh != NULL)
 	    return nh->addr();
@@ -222,16 +222,14 @@ public:
      *
      * @return the policy-tags for this route.
      */
-    inline const PolicyTags& policytags() const {
-	return _policytags;
-    }
+    const PolicyTags& policytags() const { return _policytags; }
 
     /**
      * Replace policy-tags in the route.
      *
      * @param ptags The new policy-tags for this route.
      */
-    inline void set_policytags(const PolicyTags& ptags) { _policytags = ptags; }
+    void set_policytags(const PolicyTags& ptags) { _policytags = ptags; }
 
     /**
      * Get the route entry as a string for debugging purposes.
@@ -304,7 +302,7 @@ public:
      * @return the IGP parent route entry that was used to resolve the
      * EGP parent route entry's non-local nexthop into a local nexthop.
      */
-    inline const IPRouteEntry<A>* igp_parent() const { return _igp_parent; }
+    const IPRouteEntry<A>* igp_parent() const { return _igp_parent; }
 
     /**
      * Get the EGP parent.
@@ -312,7 +310,7 @@ public:
      * @return the EGP parent, which is the original route entry that
      * had a non-local nexthop.
      */
-    inline const IPRouteEntry<A>* egp_parent() const { return _egp_parent; }
+    const IPRouteEntry<A>* egp_parent() const { return _egp_parent; }
 
     /**
      * Set the backlink.  When a resolved route is created, the
@@ -325,7 +323,7 @@ public:
      *
      * @param backlink the ExtIntTable multimap iterator for this route.
      */
-    inline void set_backlink(typename RouteBackLink::iterator v);
+    void set_backlink(typename RouteBackLink::iterator v);
 
     /**
      * Get the backlink.
@@ -333,7 +331,7 @@ public:
      *
      * @return the backlink iterator.
      */
-    inline typename RouteBackLink::iterator backlink() const;
+    typename RouteBackLink::iterator backlink() const;
 
 private:
     mutable const IPRouteEntry<A>* _igp_parent;
@@ -393,7 +391,7 @@ public:
      *
      * @return the route.
      */
-    inline const IPRouteEntry<A>* route() const { return _route; }
+    const IPRouteEntry<A>* route() const { return _route; }
 
     /**
      * Set the backlink.  When an unresolved route is created, the
@@ -406,7 +404,7 @@ public:
      *
      * @param backlink the ExtIntTable multimap iterator for this route.
      */
-    inline void set_backlink(typename RouteBackLink::iterator v);
+    void set_backlink(typename RouteBackLink::iterator v);
 
     /**
      * Get the backlink.
@@ -414,7 +412,7 @@ public:
      *
      * @return the backlink iterator.
      */
-    inline typename RouteBackLink::iterator backlink() const;
+    typename RouteBackLink::iterator backlink() const;
 
 private:
     //

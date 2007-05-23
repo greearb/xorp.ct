@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.21 2006/11/07 18:55:39 pavlin Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.22 2007/02/16 22:45:19 pavlin Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -263,9 +263,7 @@ public:
      * were applied to it to modify it.  If no filters have been
      * applied, NULL will be returned.
      */
-    inline const SubnetRoute<A>* parent_route() const {
-	return _parent_route;
-    }
+    const SubnetRoute<A>* parent_route() const { return _parent_route; }
 
     /**
      * @short record the original version of this route, before any
@@ -285,10 +283,7 @@ public:
      */
     void unref() const;
 
-    inline uint16_t refcount() const {
-	return (_flags & SRF_REFCOUNT)>>16;
-    }
-
+    uint16_t refcount() const { return (_flags & SRF_REFCOUNT) >> 16; }
 
     /**
      * @return policy tags associated with route.
@@ -361,7 +356,7 @@ protected:
     ~SubnetRoute();
 private:
 
-    inline void bump_refcount(int delta) const {
+    void bump_refcount(int delta) const {
 	XLOG_ASSERT(delta == 1 || delta == -1);
 	uint16_t refs = refcount();
 	if (delta == 1) {

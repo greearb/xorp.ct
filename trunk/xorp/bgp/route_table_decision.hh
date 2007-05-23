@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.23 2006/03/16 00:03:33 pavlin Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.24 2007/02/16 22:45:17 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
@@ -39,26 +39,18 @@ public:
 	: _route(route), _parent_table(parent_table), 
 	  _peer_handler(peer_handler), _genid(genid) {}
 
-    inline void set_is_not_winner() {
+    void set_is_not_winner() {
 	_parent_table->route_used(_route, false);
 	_route->set_is_not_winner();
     }
-    inline void set_is_winner(int igp_distance) {
+    void set_is_winner(int igp_distance) {
 	_parent_table->route_used(_route, true);
 	_route->set_is_winner(igp_distance);
     }
-    inline const SubnetRoute<A>* route() const {
-	return _route;
-    }
-    inline  const PeerHandler* peer_handler() const {
-	return _peer_handler;
-    }
-    inline BGPRouteTable<A>* parent_table() const {
-	return _parent_table;
-    }
-    inline uint32_t genid() const {
-	return _genid;
-    }
+    const SubnetRoute<A>* route() const { return _route; }
+    const PeerHandler* peer_handler() const { return _peer_handler; }
+    BGPRouteTable<A>* parent_table() const { return _parent_table; }
+    uint32_t genid() const { return _genid; }
 private:
     const SubnetRoute<A>* _route;
     BGPRouteTable<A>* _parent_table;

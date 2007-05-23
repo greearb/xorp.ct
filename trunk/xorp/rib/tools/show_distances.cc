@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/rib/tools/show_distances.cc,v 1.1 2007/03/22 20:48:19 bms Exp $"
 
 #include "rib/rib_module.h"
 
@@ -50,7 +50,7 @@ struct ShowDistancesOptions {
     string	finder_host;
     uint16_t	finder_port;
 
-    inline ShowDistancesOptions()
+    ShowDistancesOptions()
 	: ribin(false),
 	  ipv4(true),
 	  unicast(true)

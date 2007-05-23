@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.17 2006/10/11 06:53:57 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.18 2007/02/16 22:46:20 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -134,22 +134,21 @@ public:
      *
      * @return true if the subnet is IPv4.
      */
-    inline bool is_ipv4() const { return masked_addr().is_ipv4(); }
+    bool is_ipv4() const { return masked_addr().is_ipv4(); }
 
     /**
      * Test if this subnet is IPv6 subnet.
      *
      * @return true if the subnet is IPv6.
      */
-    inline bool is_ipv6() const { return masked_addr().is_ipv6(); }
+    bool is_ipv6() const { return masked_addr().is_ipv6(); }
 
     /**
      * Get IPv4Net subnet.
      *
      * @return IPv4Net subnet contained with IPvXNet structure.
      */
-    inline IPv4Net get_ipv4net() const 	throw (InvalidCast)
-    {
+    IPv4Net get_ipv4net() const 	throw (InvalidCast) {
     	return IPv4Net(masked_addr().get_ipv4(), prefix_len());
     }
 
@@ -158,8 +157,7 @@ public:
      *
      * @return IPv6Net subnet contained with IPvXNet structure.
      */
-    inline IPv6Net get_ipv6net() const 	throw (InvalidCast)
-    {
+    IPv6Net get_ipv6net() const 	throw (InvalidCast) {
     	return IPv6Net(masked_addr().get_ipv6(), prefix_len());
     }
 
@@ -169,8 +167,7 @@ public:
      * @param to_ipv4net IPv4Net subnet to be assigned IPv4Net value contained
      * within this subnet.
      */
-    inline void get(IPv4Net& to_ipv4net) const throw (InvalidCast)
-    {
+    void get(IPv4Net& to_ipv4net) const throw (InvalidCast) {
 	to_ipv4net = get_ipv4net();
     }
 
@@ -180,8 +177,7 @@ public:
      * @param to_ipv6net IPv6Net subnet to be assigned IPv6Net value contained
      * within this subnet.
      */
-    inline void get(IPv6Net& to_ipv6net) const throw (InvalidCast)
-    {
+    void get(IPv6Net& to_ipv6net) const throw (InvalidCast) {
 	to_ipv6net = get_ipv6net();
     }
 
@@ -190,7 +186,7 @@ public:
      *
      * @return the address family of this subnet (AF_INET or AF_INET6).
      */
-    inline int af() const { return masked_addr().af(); }
+    int af() const { return masked_addr().af(); }
 
     /**
      * Test if this subnet is a unicast prefix.
@@ -223,9 +219,7 @@ public:
      * @return the multicast base prefix address for address
      * family of @ref family.
      */
-    inline static IPvXNet ip_multicast_base_prefix(int family)
-	throw (InvalidFamily)
-    {
+    static IPvXNet ip_multicast_base_prefix(int family) throw (InvalidFamily) {
 	return IPvXNet(IPvX::MULTICAST_BASE(family),
 		       IPvX::ip_multicast_base_address_mask_len(family));
     }
@@ -243,9 +237,7 @@ public:
      * @return the Class A base prefix address for address
      * family of @ref family.
      */
-    inline static IPvXNet ip_class_a_base_prefix(int family)
-	throw (InvalidFamily)
-    {
+    static IPvXNet ip_class_a_base_prefix(int family) throw (InvalidFamily) {
 	return IPvXNet(IPvX::CLASS_A_BASE(family),
 		       IPvX::ip_class_a_base_address_mask_len(family));
     }
@@ -263,9 +255,7 @@ public:
      * @return the Class B base prefix address for address
      * family of @ref family.
      */
-    inline static IPvXNet ip_class_b_base_prefix(int family)
-	throw (InvalidFamily)
-    {
+    static IPvXNet ip_class_b_base_prefix(int family) throw (InvalidFamily) {
 	return IPvXNet(IPvX::CLASS_B_BASE(family),
 		       IPvX::ip_class_b_base_address_mask_len(family));
     }
@@ -283,9 +273,7 @@ public:
      * @return the Class C base prefix address for address
      * family of @ref family.
      */
-    inline static IPvXNet ip_class_c_base_prefix(int family)
-	throw (InvalidFamily)
-    {
+    static IPvXNet ip_class_c_base_prefix(int family) throw (InvalidFamily) {
 	return IPvXNet(IPvX::CLASS_C_BASE(family),
 		       IPvX::ip_class_c_base_address_mask_len(family));
     }
@@ -303,9 +291,8 @@ public:
      * @return the experimental base prefix address for address
      * family of @ref family.
      */
-    inline static IPvXNet ip_experimental_base_prefix(int family)
-	throw (InvalidFamily)
-    {
+    static IPvXNet ip_experimental_base_prefix(int family)
+	throw (InvalidFamily) {
 	return IPvXNet(IPvX::EXPERIMENTAL_BASE(family),
 		       IPvX::ip_experimental_base_address_mask_len(family));
     }

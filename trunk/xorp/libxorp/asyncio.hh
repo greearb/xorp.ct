@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.20 2006/09/11 17:50:50 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.21 2007/02/16 22:46:15 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -103,22 +103,22 @@ public:
      *
      * @return true on success, false if no buffers are available.
      */
-    inline bool		resume()		{ return start(); }
+    bool		resume()		{ return start(); }
 
     /**
      * @return true if asynchronous I/O is started.
      */
-    inline bool		running() const 	{ return _running; }
+    bool		running() const 	{ return _running; }
 
     /**
      * @return file descriptor undergoing asynchronous operation.
      */
-    inline XorpFd	fd() const		{ return _fd; }
+    XorpFd		fd() const		{ return _fd; }
 
     /**
      * @return the last error code returned by the underlying OS.
      */
-    inline int		error() const		{ return _last_error; }
+    int			error() const		{ return _last_error; }
 
 protected:
     AsyncFileOperator(EventLoop& e, XorpFd fd, 
@@ -202,7 +202,7 @@ protected:
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
 	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {}
-	inline void dispatch_callback(AsyncFileOperator::Event e) {
+	void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
 	uint8_t*	_buffer;
@@ -301,7 +301,7 @@ protected:
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb)
 	{}
 
-	inline void dispatch_callback(AsyncFileOperator::Event e) {
+	void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
 

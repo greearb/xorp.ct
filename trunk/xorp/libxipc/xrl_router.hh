@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.36 2006/10/12 01:24:49 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.37 2007/02/16 22:46:13 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -76,7 +76,7 @@ public:
     /**
      * @return true when XRLs
      */
-    inline bool finalized() const		{ return _finalized; }
+    bool finalized() const		{ return _finalized; }
 
     /**
      * @return true if instance has established a connection to the Finder.
@@ -123,11 +123,11 @@ public:
     /**
      * @return EventLoop used by XrlRouter instance.
      */
-    inline EventLoop& eventloop()		{ return _e; }
+    EventLoop& eventloop()		{ return _e; }
 
-    inline const string& instance_name() const	{ return _instance_name; }
+    const string& instance_name() const	{ return _instance_name; }
 
-    inline const string& class_name() const	{ return XrlCmdMap::name(); }
+    const string& class_name() const	{ return XrlCmdMap::name(); }
 
     IPv4     finder_address() const;
 

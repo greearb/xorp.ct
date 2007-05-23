@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.10 2006/03/16 00:05:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.11 2007/02/16 22:47:22 pavlin Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
@@ -55,8 +55,8 @@ public:
     };
  
     virtual string str() const;
-    inline ModuleStatus status() const { return _status; }
-    inline const string& name() const { return _name; }
+    ModuleStatus status() const { return _status; }
+    const string& name() const { return _name; }
     virtual void new_status(ModuleStatus new_status);
 
 protected:

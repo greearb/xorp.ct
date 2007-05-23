@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.5 2006/03/16 00:04:26 pavlin Exp $
+// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.6 2007/02/16 22:46:15 pavlin Exp $
 
 #ifndef __LIBXORP_BUFFERED_ASYNCIO_HH__
 #define __LIBXORP_BUFFERED_ASYNCIO_HH__
@@ -118,7 +118,7 @@ public:
      */
     size_t available_bytes() const;
 
-    inline int error() const { return _last_error; }
+    int error() const { return _last_error; }
 
     /**
      * Start.
@@ -142,7 +142,7 @@ private:
 private:
     void io_event(XorpFd fd, IoEventType type);
     void announce_event(Event e);
-    inline void provision_trigger_bytes();
+    void provision_trigger_bytes();
 
     struct Config {
 	uint8_t* head;		// The beginning of data

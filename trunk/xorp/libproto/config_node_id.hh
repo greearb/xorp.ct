@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/config_node_id.hh,v 1.7 2006/05/12 19:00:02 pavlin Exp $
+// $XORP: xorp/libproto/config_node_id.hh,v 1.8 2007/02/16 22:46:02 pavlin Exp $
 
 
 #ifndef __LIBPROTO_CONFIG_NODE_ID_HH__
@@ -82,7 +82,7 @@ public:
      * @param from_string the string to copy the node ID from.
      * @return the number of copied octets.
      */
-    inline size_t copy_in(const string& from_string) throw (InvalidString);
+    size_t copy_in(const string& from_string) throw (InvalidString);
 
     /**
      * Equality Operator
@@ -91,7 +91,7 @@ public:
      * @return true if the left-hand operand is numerically same as the
      * right-hand operand.
      */
-    inline bool operator==(const ConfigNodeId& other) const;
+    bool operator==(const ConfigNodeId& other) const;
 
     /**
      * Return the unique node ID.
@@ -112,7 +112,7 @@ public:
      * 
      * @param v the instance ID.
      */
-    inline void set_instance_id(const InstanceId& v);
+    void set_instance_id(const InstanceId& v);
 
     /**
      * Set the node position.
@@ -131,7 +131,7 @@ public:
      *
      * @return a new unique node ID.
      */
-    inline const ConfigNodeId& generate_unique_node_id();
+    const ConfigNodeId& generate_unique_node_id();
 
     /**
      * Convert this node ID from binary form to presentation format.
@@ -241,7 +241,7 @@ public:
      * @param node_id the node ID to search for.
      * @return the iterator to the element.
      */
-    inline typename ConfigNodeIdMap::iterator find(const ConfigNodeId& node_id);
+    typename ConfigNodeIdMap::iterator find(const ConfigNodeId& node_id);
 
     /**
      * Find an element for a given node ID.
@@ -249,7 +249,7 @@ public:
      * @param node_id the node ID to search for.
      * @return the const iterator to the element.
      */
-    inline typename ConfigNodeIdMap::const_iterator find(const ConfigNodeId& node_id) const;
+    typename ConfigNodeIdMap::const_iterator find(const ConfigNodeId& node_id) const;
 
     /**
      * Insert a new element.
@@ -264,8 +264,8 @@ public:
      * because of invalid node ID and the iterator points to @ref end()
      * of the container.
      */
-    inline pair<iterator, bool> insert(const ConfigNodeId& node_id,
-				       const V& v) {
+    pair<iterator, bool> insert(const ConfigNodeId& node_id,
+				const V& v) {
 	return (insert_impl(node_id, v, false));
     }
 
@@ -280,7 +280,7 @@ public:
      * false, then there is an element with the same node ID, and the
      * iterator points to that element.
      */
-    inline pair<iterator, bool> insert_out_of_order(
+    pair<iterator, bool> insert_out_of_order(
 	const ConfigNodeId& node_id, const V& v) {
 	return (insert_impl(node_id, v, true));
     }
@@ -291,14 +291,14 @@ public:
      * @param node_id the node ID of the element to remove.
      * @return the number of removed elements.
      */
-    inline size_t erase(const ConfigNodeId& node_id);
+    size_t erase(const ConfigNodeId& node_id);
 
     /**
      * Remove an existing element.
      * 
      * @param iter the iterator to the element to remove.
      */
-    inline void erase(ConfigNodeIdMap::iterator iter);
+    void erase(ConfigNodeIdMap::iterator iter);
 
     /**
      * Remove all elements.
@@ -311,7 +311,7 @@ public:
      * @return C++ string with the human-readable ASCII representation
      * of the object.
      */
-    inline string str() const;
+    string str() const;
 
     /**
      * Get the number of elements in the storage.
@@ -345,9 +345,9 @@ private:
      * because of invalid node ID and the iterator points to @ref end()
      * of the container.
      */
-    inline pair<iterator, bool> insert_impl(const ConfigNodeId& node_id,
-					    const V& v,
-					    bool ignore_missing_previous_element);
+    pair<iterator, bool> insert_impl(const ConfigNodeId& node_id,
+				     const V& v,
+				     bool ignore_missing_previous_element);
 
     typedef map<ConfigNodeId::UniqueNodeId, iterator> NodeId2IterMap;
 

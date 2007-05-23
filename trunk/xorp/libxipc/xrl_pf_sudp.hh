@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.21 2006/04/28 17:00:55 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.22 2007/02/16 22:46:13 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_SUDP_HH__
 #define __LIBXIPC_XRL_PF_SUDP_HH__
@@ -67,7 +67,7 @@ public:
 
     const char* protocol() const;
 
-    inline static const char* protocol_name()		{ return _protocol; }
+    static const char* protocol_name()		{ return _protocol; }
 
 protected:
     static void recv(XorpFd fd, IoEventType type);

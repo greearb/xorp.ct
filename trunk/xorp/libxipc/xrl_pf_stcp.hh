@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.25 2006/08/16 06:36:03 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.26 2007/02/16 22:46:12 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -73,15 +73,15 @@ public:
 
     bool sends_pending() const;
 
-    inline bool alive() const { return _sock.is_valid(); }
+    bool alive() const { return _sock.is_valid(); }
 
     const char* protocol() const;
 
-    inline static const char* protocol_name()		{ return _protocol; }
+    static const char* protocol_name()		{ return _protocol; }
 
     void set_keepalive_ms(uint32_t t);
 
-    inline uint32_t keepalive_ms() const	{ return _keepalive_ms; }
+    uint32_t keepalive_ms() const		{ return _keepalive_ms; }
 
 private:
     void die(const char* reason, bool verbose = true);

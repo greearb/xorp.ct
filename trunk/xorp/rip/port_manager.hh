@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_manager.hh,v 1.10 2006/03/16 00:05:50 pavlin Exp $
+// $XORP: xorp/rip/port_manager.hh,v 1.11 2007/02/16 22:47:15 pavlin Exp $
 
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
@@ -56,43 +56,43 @@ public:
     /**
      * Get parent @ref System<A> instance.
      */
-    inline SystemType& system()			{ return _system; }
+    SystemType& system()		{ return _system; }
 
     /**
      * Get parent @ref System<A> instance.
      */
-    inline const SystemType& system() const	{ return _system; }
+    const SystemType& system() const	{ return _system; }
 
     /**
      * Get list of managed RIP Ports.
      */
-    inline const PortList& const_ports() const	{ return _ports; }
+    const PortList& const_ports() const	{ return _ports; }
 
     /**
      * Get EventLoop.
      */
-    inline EventLoop& eventloop() 		{ return _system.eventloop(); }
+    EventLoop& eventloop() 		{ return _system.eventloop(); }
 
     /**
      * Get EventLoop.
      */
-    inline const EventLoop& eventloop() const	{ return _system.eventloop(); }
+    const EventLoop& eventloop() const	{ return _system.eventloop(); }
 
     /**
      * Get IfMgrIfTree.
      */
-    inline const IfMgrIfTree& iftree() const	{ return _iftree; }
+    const IfMgrIfTree& iftree() const	{ return _iftree; }
 
 protected:
     /**
      * Get list of managed RIP Ports.
      */
-    inline PortList& ports()			{ return _ports; }
+    PortList& ports()			{ return _ports; }
 
     /**
      * Get list of managed RIP Ports.
      */
-    inline const PortList& ports() const	{ return _ports; }
+    const PortList& ports() const	{ return _ports; }
 
 protected:
     SystemType&	_system;

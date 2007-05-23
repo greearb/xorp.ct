@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.32 2006/11/07 18:55:40 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.33 2007/02/16 22:46:04 pavlin Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -43,10 +43,10 @@ public:
     TraceFinderClient() : _do_trace(getenv("FINDERCLIENTTRACE") != 0)
     {
     }
-    inline bool on() const			{ return _do_trace; }
-    inline operator bool()			{ return _do_trace; }
-    inline void set_context(const string& s)	{ _context = s; }
-    inline const string& context() const	{ return _context; }
+    bool on() const			{ return _do_trace; }
+    operator bool()			{ return _do_trace; }
+    void set_context(const string& s)	{ _context = s; }
+    const string& context() const	{ return _context; }
 protected:
     bool _do_trace;
     string _context;
@@ -118,7 +118,7 @@ public:
      */
     virtual void execute(FinderMessengerBase* m) = 0;
 
-    inline FinderClient& client() { return _fc; }
+    FinderClient& client() { return _fc; }
 
 protected:
     FinderClient& _fc;
@@ -147,7 +147,7 @@ public:
     FinderClientRepeatOp(FinderClient& fc, uint32_t target_id)
 	: FinderClientOp(fc), _tid(target_id) {}
 
-    inline uint32_t target_id() const { return _tid; }
+    uint32_t target_id() const { return _tid; }
 
 private:
     uint32_t _tid;
@@ -299,10 +299,7 @@ public:
 	_qcb->dispatch(e, 0);
     }
 
-    inline static uint32_t instance_count()
-    {
-	return _instance_count;
-    }
+    static uint32_t instance_count() { return _instance_count; }
 
 protected:
     EventLoop&	   _eventloop;
@@ -559,10 +556,10 @@ public:
 	  _dispatcher(dispatcher),
 	  _id(_s_id++)
     {}
-    inline const string& instance_name() const		{ return _ins_name; }
-    inline const string& class_name() const		{ return _cls_name; }
-    inline const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
-    inline uint32_t id() const				{ return _id; }
+    const string& instance_name() const		{ return _ins_name; }
+    const string& class_name() const		{ return _cls_name; }
+    const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
+    uint32_t id() const				{ return _id; }
 
 private:
     string		 _ins_name;

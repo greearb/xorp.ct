@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.24 2007/02/16 22:46:08 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.25 2007/04/14 08:59:49 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -276,7 +276,7 @@ public:
 	_feo.router()->finalize();
     }
 
-    inline FinderEventObserver& observer()		{ return _feo; }
+    FinderEventObserver& observer()	{ return _feo; }
 
     bool xrl_router_connected() const	{ return _feo.router()->connected(); }
     bool xrl_router_ready() const	{ return _feo.router()->ready(); }
@@ -302,14 +302,8 @@ public:
     {
 	_router.finalize();
     }
-    inline const string& instance_name() const
-    {
-	return _router.instance_name();
-    }
-    inline const string& class_name() const
-    {
-	return _router.class_name();
-    }
+    const string& instance_name() const { return _router.instance_name(); }
+    const string& class_name() const { return _router.class_name(); }
 private:
     XrlStdRouter _router;
 };

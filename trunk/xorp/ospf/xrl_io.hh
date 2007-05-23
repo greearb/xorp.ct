@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.27 2007/05/08 19:23:17 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.28 2007/05/19 00:57:19 pavlin Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -74,9 +74,7 @@ private:
     /**
      * Maximum number in flight
      */
-    inline bool maximum_number_inflight() const {
-	return _flying >= WINDOW;
-    }
+    bool maximum_number_inflight() const { return _flying >= WINDOW; }
 
     /**
      * Start the transmission of XRLs to tbe RIB.
@@ -92,7 +90,7 @@ private:
      */
     bool sendit_spec(Queued& q, const char *protocol);
 
-    inline EventLoop& eventloop() const;
+    EventLoop& eventloop() const;
 
     void route_command_done(const XrlError& error, const string comment);
 };

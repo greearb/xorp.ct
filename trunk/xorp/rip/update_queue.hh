@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/update_queue.hh,v 1.12 2006/03/16 00:05:53 pavlin Exp $
+// $XORP: xorp/rip/update_queue.hh,v 1.13 2007/02/16 22:47:17 pavlin Exp $
 
 #ifndef __RIP_UPDATE_QUEUE__
 #define __RIP_UPDATE_QUEUE__
@@ -38,7 +38,7 @@ public:
     ~UpdateQueueReader();
 
     uint32_t id() const;
-    inline bool parent_is(const UpdateQueueImpl<A>* o) const;
+    bool parent_is(const UpdateQueueImpl<A>* o) const;
 
 private:
     UpdateQueueImpl<A>* _impl;

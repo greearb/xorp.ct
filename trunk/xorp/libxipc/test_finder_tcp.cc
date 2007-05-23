@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.21 2006/10/12 01:24:47 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.22 2007/02/16 22:46:08 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -96,10 +96,10 @@ public:
 	write_data(reinterpret_cast<const uint8_t*>(_buf), strlen(_buf));
     }
     
-    inline uint32_t read_events() const { return _reads; }
-    inline uint32_t write_events() const { return _writes; }
+    uint32_t read_events() const { return _reads; }
+    uint32_t write_events() const { return _writes; }
 
-    inline bool can_write() const { return !_writer.running(); }
+    bool can_write() const { return !_writer.running(); }
 
 protected:
     const char*	_name;

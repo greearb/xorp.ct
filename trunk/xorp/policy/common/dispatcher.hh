@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.8 2006/09/08 18:44:38 mjh Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.9 2007/02/16 22:47:01 pavlin Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
@@ -80,7 +80,7 @@ public:
         Key key = makeKey(op, 2, args);
 
         struct Local {
-            static inline Element* Trampoline(const Element& left, const Element& right) {
+            static Element* Trampoline(const Element& left, const Element& right) {
                 return funct(static_cast<const L&>(left),
                              static_cast<const R&>(right));
             }
@@ -110,7 +110,7 @@ public:
         Key key = makeKey(op,1, args);
 
         struct Local {
-	    static inline Element* Trampoline(const Element& arg) {
+	    static Element* Trampoline(const Element& arg) {
                 return funct(static_cast<const T&>(arg));
             }
         };
@@ -176,7 +176,7 @@ private:
      * @param op requested operation.
      * @param args the arguments for the operation.
      */
-    inline Key makeKey(const Oper& op, unsigned argc, const Element** argv) const {
+    Key makeKey(const Oper& op, unsigned argc, const Element** argv) const {
 	XLOG_ASSERT(op.arity() == argc);
 	XLOG_ASSERT(argc <= 2);
 
@@ -207,8 +207,7 @@ private:
      * @param op operation to perform.
      * @param args the arguments of the operation.
      */
-    inline Value lookup(const Oper& op, unsigned argc, const Element** argv) const
-    {
+    Value lookup(const Oper& op, unsigned argc, const Element** argv) const {
 	XLOG_ASSERT(op.arity() == argc);
 
         // find callback

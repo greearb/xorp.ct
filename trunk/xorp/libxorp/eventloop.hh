@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.26 2006/09/11 21:36:48 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.27 2007/02/16 22:46:18 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -321,7 +321,7 @@ public:
     /**
      * Get current time according to EventLoop's TimerList
      */
-    inline void current_time(TimeVal& now) const;
+    void current_time(TimeVal& now) const;
 
     /**
      * Get the count of the descriptors that have been added.

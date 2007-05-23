@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_kill.hh,v 1.5 2006/03/16 00:04:22 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_kill.hh,v 1.6 2007/02/16 22:46:12 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_KILL_HH__
 #define __LIBXIPC_XRL_PF_KILL_HH__
@@ -36,7 +36,7 @@ public:
 
     const char* protocol() const;
 
-    inline static const char* protocol_name()		{ return _protocol; }
+    static const char* protocol_name()		{ return _protocol; }
 
 protected:
     int _pid;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.18 2006/10/12 01:24:36 pavlin Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.19 2007/02/16 22:45:12 pavlin Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -49,23 +49,17 @@ public:
     /**
      * @return This routers AS number.
      */
-    inline const AsNum& get_as() const {
-	return _as;
-    }
+    const AsNum& get_as() const { return _as; }
 
     /**
      * Set this routers AS number.
      */
-    inline void set_as(const AsNum& a) {
-	_as = a;
-    }
+    void set_as(const AsNum& a) { _as = a; }
 
     /**
      * @return This routers ID.
      */
-    inline const IPv4& get_id() const {
-	return _id;
-    }
+    const IPv4& get_id() const { return _id; }
 
     /**
      * Set this routers ID.
@@ -77,21 +71,17 @@ public:
     /**
      * @return the confederation ID of this router if set.
      */
-    inline const AsNum& get_confed_id() const {
-	return _confed_id;
-    }
+    const AsNum& get_confed_id() const { return _confed_id; }
 
     /**
      * Set this routers confederation ID.
      */
-    inline void set_confed_id(const AsNum& confed_id) {
-	_confed_id = confed_id;
-    }
+    void set_confed_id(const AsNum& confed_id) { _confed_id = confed_id; }
 
     /**
      * @return the cluster ID of this router.
      */
-    inline const IPv4& get_cluster_id() const {
+    const IPv4& get_cluster_id() const {
 	XLOG_ASSERT(_route_reflector);
 	return _cluster_id;
     }
@@ -99,16 +89,12 @@ public:
     /**
      * Set this routers cluster ID.
      */
-    inline void set_cluster_id(const IPv4& cluster_id) {
-	_cluster_id = cluster_id;
-    }
+    void set_cluster_id(const IPv4& cluster_id) { _cluster_id = cluster_id; }
 
     /**
      * Get the route reflection status.
      */
-    inline const bool& get_route_reflector() const {
-	return _route_reflector;
-    }
+    const bool& get_route_reflector() const { return _route_reflector; }
 
     /**
      * Set the route reflection status.

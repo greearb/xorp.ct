@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.9 2006/03/16 00:04:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.10 2007/02/16 22:46:10 pavlin Exp $"
 
 #include "ipc_module.h"
 
@@ -29,7 +29,7 @@ public:
     TraceXrl() {
 	_do_trace = !(getenv("XRLDISPATCHTRACE") == 0);
     }
-    inline bool on() const { return _do_trace; }
+    bool on() const { return _do_trace; }
     operator bool() { return _do_trace; }
 
 protected:

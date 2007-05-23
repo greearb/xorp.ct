@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.16 2007/02/16 22:45:50 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/control_socket/routing_socket.hh,v 1.1 2007/05/01 01:42:40 pavlin Exp $
 
 #ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__
 #define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_ROUTING_SOCKET_HH__
@@ -68,7 +68,7 @@ public:
      * 
      * @return true if the routing socket is open, otherwise false.
      */
-    inline bool is_open() const { return _fd >= 0; }
+    bool is_open() const { return _fd >= 0; }
 
     /**
      * Write data to routing socket.
@@ -89,14 +89,14 @@ public:
      * @return the sequence number for the next message written into the
      * kernel.
      */
-    inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
+    uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
      * Get the cached process identifier value.
      * 
      * @return the cached process identifier value.
      */
-    inline pid_t pid() const { return _pid; }
+    pid_t pid() const { return _pid; }
 
     /**
      * Force socket to read data.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.13 2006/03/16 00:05:54 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.14 2007/02/16 22:47:18 pavlin Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -44,9 +44,9 @@ class XrlPortManager
       public ServiceChangeObserverBase
 {
 public:
-    inline XrlPortManager(System<A>& 		system,
-			  XrlRouter& 		xr,
-			  IfMgrXrlMirror& 	ifm)
+    XrlPortManager(System<A>& 		system,
+		   XrlRouter& 		xr,
+		   IfMgrXrlMirror& 	ifm)
 	: PortManagerBase<A>(system, ifm.iftree()),
 	  ServiceBase("RIP Port Manager"),
 	  _xr(xr), _ifm(ifm)

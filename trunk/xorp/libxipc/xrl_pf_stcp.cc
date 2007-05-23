@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.56 2007/03/28 13:49:34 schooley Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.57 2007/03/28 19:31:15 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -483,14 +483,13 @@ public:
 	sph.initialize(_sn, STCP_PT_HELO, XrlError::OKAY(), 0);
     }
 
-    inline bool		    has_seqno(uint32_t n) const { return _sn == n; }
-    inline XrlPFSTCPSender* parent() const		{ return _p; }
-    inline uint32_t	    seqno() const		{ return _sn; }
-    inline vector<uint8_t>& buffer() 			{ return _b; }
-    inline Callback&	    cb() 			{ return _cb; }
+    bool		has_seqno(uint32_t n) const { return _sn == n; }
+    XrlPFSTCPSender*	parent() const		{ return _p; }
+    uint32_t		seqno() const		{ return _sn; }
+    vector<uint8_t>&	buffer() 		{ return _b; }
+    Callback&		cb() 			{ return _cb; }
 
-    inline bool is_keepalive()
-    {
+    bool is_keepalive() {
 	if (_b.size() < STCPPacketHeader::header_size())
 	    return false;
 	const STCPPacketHeader sph(&_b[0]);

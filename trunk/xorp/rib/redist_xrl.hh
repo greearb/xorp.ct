@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.13 2006/07/11 21:22:50 zec Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.14 2007/02/16 22:47:08 pavlin Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -66,8 +66,8 @@ public:
     virtual void task_completed(Task* task);
     void task_failed_fatally(Task* task);
 
-    inline const string& xrl_target_name() const;
-    inline const string& cookie() const;
+    const string& xrl_target_name() const;
+    const string& cookie() const;
 
 public:
     static const uint32_t HI_WATER	 = 100;
@@ -77,11 +77,11 @@ public:
 protected:
     void start_next_task();
 
-    inline void 	incr_inflight();
-    inline void 	decr_inflight();
+    void 	incr_inflight();
+    void 	decr_inflight();
 
-    inline void		enqueue_task(Task* task);
-    inline void		dequeue_task(Task* task);
+    void	enqueue_task(Task* task);
+    void	dequeue_task(Task* task);
 
 protected:
     XrlRouter&	_xrl_router;
@@ -129,21 +129,21 @@ public:
 
     void task_completed(Task* task);
 
-    inline void set_callback_pending(bool v);
+    void set_callback_pending(bool v);
 
-    inline uint32_t tid() const;
-    inline void set_tid(uint32_t v);
+    uint32_t tid() const;
+    void set_tid(uint32_t v);
 
-    inline bool transaction_in_progress() const;
-    inline void set_transaction_in_progress(bool v);
+    bool transaction_in_progress() const;
+    void set_transaction_in_progress(bool v);
 
-    inline bool transaction_in_error() const;
-    inline void set_transaction_in_error(bool v);
+    bool transaction_in_error() const;
+    void set_transaction_in_error(bool v);
 
     // The size of the transaction that is build-in-progress
-    inline size_t transaction_size() const { return _transaction_size; }
-    inline void reset_transaction_size() { _transaction_size = 0; }
-    inline void incr_transaction_size() { _transaction_size++; }
+    size_t transaction_size() const { return _transaction_size; }
+    void reset_transaction_size() { _transaction_size = 0; }
+    void incr_transaction_size() { _transaction_size++; }
 
     static const size_t MAX_TRANSACTION_SIZE	 = 100;
 

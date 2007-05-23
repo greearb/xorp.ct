@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.32 2006/11/07 18:55:41 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.33 2007/02/16 22:46:19 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -108,7 +108,7 @@ public:
      * @return true if the left-hand side is "smaller" than the right-hand
      * side according to the chosen order.
      */
-    inline bool operator<(const IPNet& other) const;
+    bool operator<(const IPNet& other) const;
 
     /**
      * Decrement Operator
@@ -137,7 +137,7 @@ public:
      * @return true if the prefix length falls inside the range defined
      * by the right-hand operand.
      */
-    inline bool operator==(const U32Range& range) const {
+    bool operator==(const U32Range& range) const {
 	return (prefix_len() == range);
     }
 
@@ -148,7 +148,7 @@ public:
      * @return true if the prefix length falls outside the range defined
      * by the right-hand operand.
      */
-    inline bool operator!=(const U32Range& range) const {
+    bool operator!=(const U32Range& range) const {
 	return (prefix_len() != range);
     }
 
@@ -159,7 +159,7 @@ public:
      * @return true if the prefix length is bellow the range defined
      * by the right-hand operand.
      */
-    inline bool operator<(const U32Range& range) const {
+    bool operator<(const U32Range& range) const {
 	return (prefix_len() < range);
     };
 
@@ -171,7 +171,7 @@ public:
      * @return true if the prefix length is bellow or within the range
      * defined by the right-hand operand.
      */
-    inline bool operator<=(const U32Range& range) const {
+    bool operator<=(const U32Range& range) const {
 	return (prefix_len() <= range);
     };
 
@@ -182,7 +182,7 @@ public:
      * @return true if the prefix length is above the range defined
      * by the right-hand operand.
      */
-    inline bool operator>(const U32Range& range) const {
+    bool operator>(const U32Range& range) const {
 	return (prefix_len() > range);
     };
 
@@ -194,7 +194,7 @@ public:
      * @return true if the prefix length is above or within the range
      * defined by the right-hand operand.
      */
-    inline bool operator>=(const U32Range& range) const {
+    bool operator>=(const U32Range& range) const {
 	return (prefix_len() >= range);
     };
 
@@ -204,7 +204,7 @@ public:
      * @return C++ string with the human-readable ASCII representation
      * of the address.
      */
-    inline string str() const {
+    string str() const {
 	return _masked_addr.str() + c_format("/%u",
 					     XORP_UINT_CAST(_prefix_len));
     }
@@ -222,7 +222,7 @@ public:
      * @param other the subnet to compare against.
      * @return true if there is some overlap between the two subnets.
      */
-    inline bool is_overlap(const IPNet& other) const;
+    bool is_overlap(const IPNet& other) const;
 
     /**
      * Test if a subnet contains (or is equal to) another subnet.
@@ -232,7 +232,7 @@ public:
      * @param other the subnet to test against.
      * @return true if this subnet contains or is equal to @ref other.
      */
-    inline bool contains(const IPNet& other) const;
+    bool contains(const IPNet& other) const;
 
     /**
      * Test if an address is within a subnet.
@@ -240,7 +240,7 @@ public:
      * @param addr the address to test against.
      * @return true if @ref addr is within this subnet.
      */
-    inline bool contains(const A& addr) const {
+    bool contains(const A& addr) const {
 	return addr.mask_by_prefix_len(_prefix_len) == _masked_addr;
     }
 
@@ -252,7 +252,7 @@ public:
      * @return the number of bits overlapping between @ref other and
      * this subnet.
      */
-    inline uint32_t overlap(const IPNet& other) const;
+    uint32_t overlap(const IPNet& other) const;
 
     /**
      * Get the address family.
@@ -266,21 +266,21 @@ public:
      *
      * @return the base address for this subnet.
      */
-    inline const A& masked_addr() const { return _masked_addr; }
+    const A& masked_addr() const { return _masked_addr; }
 
     /**
      * Get the prefix length.
      *
      * @return the prefix length for this subnet.
      */
-    inline uint32_t prefix_len() const { return _prefix_len; }
+    uint32_t prefix_len() const { return _prefix_len; }
 
     /**
      * Get the network mask.
      *
      * @return the netmask associated with this subnet.
      */
-    inline A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
+    A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
 
     /**
      * Test if this subnet is a unicast prefix.
@@ -425,7 +425,7 @@ public:
      *
      * @return the highest address within this subnet.
      */
-    inline A top_addr() const { return _masked_addr | ~netmask(); }
+    A top_addr() const { return _masked_addr | ~netmask(); }
 
     /**
      * Get the smallest subnet containing both subnets.
@@ -438,7 +438,7 @@ public:
     }
 
 private:
-    inline void initialize_from_string(const char *s)
+    void initialize_from_string(const char *s)
 	throw (InvalidString, InvalidNetmaskLength);
 
     A		_masked_addr;

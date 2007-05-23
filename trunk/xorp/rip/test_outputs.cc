@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.28 2006/08/20 06:19:27 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.29 2007/02/16 22:47:16 pavlin Exp $"
 
 #include <set>
 
@@ -241,7 +241,7 @@ struct ResponseReader {
 
     bool get(IPNet<A>& n, A& nh, uint32_t& cost, uint32_t& tag);
 
-    inline uint32_t packet_entry() const		{ return _pe; }
+    uint32_t packet_entry() const		{ return _pe; }
 protected:
     const RipPacket<A>* _rp;
     uint32_t		_pe; 	// Current packet entry
@@ -315,15 +315,9 @@ public:
     /* Final check responses valid */
     virtual bool valid_in_sum() const = 0;
 
-    inline uint32_t total_routes_seen() const
-    {
-	return _total_routes_seen;
-    }
+    uint32_t total_routes_seen() const { return _total_routes_seen; }
 
-    inline uint32_t test_peer_routes_seen() const
-    {
-	return _test_peer_routes_seen;
-    }
+    uint32_t test_peer_routes_seen() const { return _test_peer_routes_seen; }
 
 protected:
     uint32_t _total_routes_seen;

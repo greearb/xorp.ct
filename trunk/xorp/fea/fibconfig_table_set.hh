@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.3 2007/04/30 23:40:28 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.4 2007/05/01 01:42:37 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
 #define __FEA_FIBCONFIG_TABLE_SET_HH__
@@ -137,7 +137,7 @@ protected:
      * @param error_msg the error message (if error).
      * @return true if configuration can be marked as started, false otherwise.
      */
-    inline bool mark_configuration_start(string& error_msg) {
+    bool mark_configuration_start(string& error_msg) {
 	if (false == _in_configuration) {
 	    _in_configuration = true;
 	    return true;
@@ -153,7 +153,7 @@ protected:
      * @param error_msg the error message (if error).
      * @return true if configuration can be marked as ended, false otherwise.
      */
-    inline bool mark_configuration_end(string& error_msg) {
+    bool mark_configuration_end(string& error_msg) {
 	if (true == _in_configuration) {
 	    _in_configuration = false;
 	    return true;
@@ -163,7 +163,7 @@ protected:
 	return false;
     }
     
-    inline bool in_configuration() const { return _in_configuration; }
+    bool in_configuration() const { return _in_configuration; }
 
     // Misc other state
     bool	_is_running;

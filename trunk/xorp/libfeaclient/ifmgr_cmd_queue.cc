@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.16 2007/05/08 01:15:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.17 2007/05/08 21:47:23 pavlin Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -174,12 +174,11 @@ IfMgrCommandIfClusteringQueue::pop_front()
 //
 class InterfaceNameOfQueuedCmdMatches {
 public:
-    inline InterfaceNameOfQueuedCmdMatches(const string& ifname)
+    InterfaceNameOfQueuedCmdMatches(const string& ifname)
 	: _ifname(ifname)
     {}
 
-    inline bool operator() (IfMgrCommandIfClusteringQueue::Cmd c)
-    {
+    bool operator() (IfMgrCommandIfClusteringQueue::Cmd c) {
 	IfMgrIfCommandBase* ifcmd = dynamic_cast<IfMgrIfCommandBase*>(c.get());
 	XLOG_ASSERT(ifcmd != NULL);
 	return ifcmd->ifname() == _ifname;

@@ -255,12 +255,12 @@ public:
     /**
      * Get Xrl instance name associated with command map.
      */
-    inline const string& name() const { return _cmds->name(); }
+    const string& name() const { return _cmds->name(); }
 
     /**
      * Get version string of instance.
      */
-    inline const char* version() const { return "%s/%s"; }
+    const char* version() const { return "%s/%s"; }
 
 protected:
 

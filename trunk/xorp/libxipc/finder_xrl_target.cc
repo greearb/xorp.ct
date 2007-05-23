@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.26 2007/04/14 08:59:49 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.27 2007/05/23 04:08:26 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
@@ -30,10 +30,10 @@ public:
     TraceFinder() {
 	_do_trace = !(getenv("FINDERTRACE") == 0);
     }
-    inline bool on() const { return _do_trace; }
+    bool on() const { return _do_trace; }
     operator bool() { return _do_trace; }
-    inline void set_context(const string& s) { _context = s; }
-    inline const string& context() const { return _context; }
+    void set_context(const string& s) { _context = s; }
+    const string& context() const { return _context; }
 protected:
     bool _do_trace;
     string _context;

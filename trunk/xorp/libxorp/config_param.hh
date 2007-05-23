@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/config_param.hh,v 1.9 2006/03/16 00:04:28 pavlin Exp $
+// $XORP: xorp/libxorp/config_param.hh,v 1.10 2007/02/16 22:46:18 pavlin Exp $
 
 #ifndef __LIBXORP_CONFIG_PARAM_HH__
 #define __LIBXORP_CONFIG_PARAM_HH__
@@ -68,14 +68,14 @@ public:
      * 
      * @return the current value of the parameter.
      */
-    inline const T& get() const { return (_value); }
+    const T& get() const { return (_value); }
     
     /**
      * Set the current value of the parameter.
      * 
      * @param value the current value to set the parameter to.
      */
-    inline void set(const T& value) {
+    void set(const T& value) {
 	_value = value;
 	if (! _update_cb.is_empty())
 	    _update_cb->dispatch(_value);
@@ -87,7 +87,7 @@ public:
      * @param value the value to assign to the parameter.
      * @return the parameter with the new value assigned.
      */
-    inline ConfigParam& operator=(const T& value) {
+    ConfigParam& operator=(const T& value) {
 	set(value);
 	return (*this);
     }
@@ -117,12 +117,12 @@ public:
     /**
      * Get the initial value of the parameter.
      */
-    inline const T& get_initial_value() const { return (_initial_value); }
+    const T& get_initial_value() const { return (_initial_value); }
     
     /**
      * Reset the current value of the parameter to its initial value.
      */
-    inline void reset() { set(_initial_value); }
+    void reset() { set(_initial_value); }
     
 private:
     T _value;			// The current value

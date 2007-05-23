@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.11 2006/03/25 09:37:14 pavlin Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.12 2007/02/16 22:47:15 pavlin Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -78,33 +78,33 @@ public:
     /**
      * Get Interface name associated with I/O.
      */
-    inline const string& ifname() const { return _ifname; }
+    const string& ifname() const { return _ifname; }
 
     /**
      * Get Virtual Interface name associated with I/O.
      */
-    inline const string& vifname() const { return _vifname; }
+    const string& vifname() const { return _vifname; }
 
     /**
      * Get associated address.
      */
-    inline const Addr& address() const { return _addr; }
+    const Addr& address() const { return _addr; }
 
     /**
      * Get the maximum number of route entries in a packet.
      */
-    inline size_t max_route_entries_per_packet() const { return _max_rte_pp; }
+    size_t max_route_entries_per_packet() const { return _max_rte_pp; }
 
     /**
      * Set the maximum number of route entries in a packet.
      * @return true on success, false if route entries per packet is fixed.
      */
-    inline bool set_max_route_entries_per_packet(size_t max_entries);
+    bool set_max_route_entries_per_packet(size_t max_entries);
 
     /**
      * Get enabled status of I/O system.
      */
-    inline bool	enabled() const { return _en; }
+    bool enabled() const { return _en; }
 
     /**
      * Set enabled status of I/O system.  The user object associated with
@@ -114,7 +114,7 @@ public:
      *
      * @param en new enable state.
      */
-    inline void set_enabled(bool en);
+    void set_enabled(bool en);
 
 protected:
     PortIOUser&	_user;
@@ -147,13 +147,13 @@ public:
 
     virtual void port_io_enabled_change(bool en) = 0;
 
-    inline bool set_io_handler(PortIO* pio, bool set_owner);
+    bool set_io_handler(PortIO* pio, bool set_owner);
 
-    inline PortIO* io_handler();
+    PortIO* io_handler();
 
-    inline const PortIO* io_handler() const;
+    const PortIO* io_handler() const;
 
-    inline bool port_io_enabled() const;
+    bool port_io_enabled() const;
 
 protected:
     PortIO*	_pio;
