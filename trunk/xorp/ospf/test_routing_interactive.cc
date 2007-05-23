@@ -13,11 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.7 2007/02/16 22:46:43 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_routing_interactive.cc,v 1.8 2007/05/23 04:08:28 pavlin Exp $"
 
-#include "config.h"
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
