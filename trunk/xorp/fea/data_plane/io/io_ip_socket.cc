@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.49 2007/05/19 01:52:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/io/io_ip_socket.cc,v 1.1 2007/05/24 20:01:28 pavlin Exp $"
 
 //
-// Raw socket support.
+// I/O IP raw socket support.
 //
 
 #include "fea/fea_module.h"
@@ -227,8 +227,8 @@ static uint8_t		ra_opt6[IP6OPT_RTALERT_LEN];
 #endif
 
 
-RawSocket::RawSocket(EventLoop& eventloop, int init_family,
-		     uint8_t ip_protocol, const IfTree& iftree)
+IoIpSocket::IoIpSocket(EventLoop& eventloop, int init_family,
+		       uint8_t ip_protocol, const IfTree& iftree)
     : _eventloop(eventloop),
       _family(init_family),
       _ip_protocol(ip_protocol),
@@ -291,7 +291,7 @@ RawSocket::RawSocket(EventLoop& eventloop, int init_family,
 #endif // ! HOST_OS_WINDOWS
 }
 
-RawSocket::~RawSocket()
+IoIpSocket::~IoIpSocket()
 {
     string dummy_error_msg;
 
@@ -305,7 +305,7 @@ RawSocket::~RawSocket()
 }
 
 int
-RawSocket::start(string& error_msg)
+IoIpSocket::start(string& error_msg)
 {
     if (_proto_socket_in.is_valid() && _proto_socket_out.is_valid())
 	return (XORP_OK);
@@ -314,7 +314,7 @@ RawSocket::start(string& error_msg)
 }
 
 int
-RawSocket::stop(string& error_msg)
+IoIpSocket::stop(string& error_msg)
 {
     if (! (_proto_socket_in.is_valid() && _proto_socket_out.is_valid()))
 	return (XORP_OK);
@@ -323,7 +323,7 @@ RawSocket::stop(string& error_msg)
 }
 
 int
-RawSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
+IoIpSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 {
     UNUSED(is_enabled);
 
@@ -361,7 +361,7 @@ RawSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 }
 
 int
-RawSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
+IoIpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 {
     switch (family()) {
     case AF_INET:
@@ -524,7 +524,7 @@ RawSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 }
 
 int
-RawSocket::set_multicast_ttl(int ttl, string& error_msg)
+IoIpSocket::set_multicast_ttl(int ttl, string& error_msg)
 {
     switch (family()) {
     case AF_INET:
@@ -571,7 +571,7 @@ RawSocket::set_multicast_ttl(int ttl, string& error_msg)
 }
 
 int
-RawSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
+IoIpSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 {
     switch (family()) {
     case AF_INET:
@@ -618,9 +618,9 @@ RawSocket::enable_multicast_loopback(bool is_enabled, string& error_msg)
 }
 
 int
-RawSocket::set_default_multicast_interface(const string& if_name,
-					   const string& vif_name,
-					   string& error_msg)
+IoIpSocket::set_default_multicast_interface(const string& if_name,
+					    const string& vif_name,
+					    string& error_msg)
 {
     const IfTreeVif* vifp;
 
@@ -690,10 +690,10 @@ RawSocket::set_default_multicast_interface(const string& if_name,
 }
 
 int
-RawSocket::join_multicast_group(const string& if_name,
-				const string& vif_name,
-				const IPvX& group,
-				string& error_msg)
+IoIpSocket::join_multicast_group(const string& if_name,
+				 const string& vif_name,
+				 const IPvX& group,
+				 string& error_msg)
 {
     const IfTreeVif* vifp;
 
@@ -789,10 +789,10 @@ RawSocket::join_multicast_group(const string& if_name,
 }
 
 int
-RawSocket::leave_multicast_group(const string& if_name,
-				 const string& vif_name,
-				 const IPvX& group,
-				 string& error_msg)
+IoIpSocket::leave_multicast_group(const string& if_name,
+				  const string& vif_name,
+				  const IPvX& group,
+				  string& error_msg)
 {
     const IfTreeVif* vifp;
 
@@ -887,7 +887,7 @@ RawSocket::leave_multicast_group(const string& if_name,
 }
 
 int
-RawSocket::open_proto_sockets(string& error_msg)
+IoIpSocket::open_proto_sockets(string& error_msg)
 {
     string dummy_error_msg;
 
@@ -1085,7 +1085,7 @@ RawSocket::open_proto_sockets(string& error_msg)
     // Assign a method to read from this socket
     if (eventloop().add_ioevent_cb(_proto_socket_in, IOT_READ,
 				   callback(this,
-					    &RawSocket::proto_socket_read))
+					    &IoIpSocket::proto_socket_read))
 	== false) {
 	close_proto_sockets(dummy_error_msg);
 	error_msg = c_format("Cannot add a protocol socket to the set of "
@@ -1097,7 +1097,7 @@ RawSocket::open_proto_sockets(string& error_msg)
 }
 
 int
-RawSocket::close_proto_sockets(string& error_msg)
+IoIpSocket::close_proto_sockets(string& error_msg)
 {
     if (! (_proto_socket_in.is_valid() && _proto_socket_out.is_valid())) {
 	error_msg = c_format("Invalid protocol socket");
@@ -1145,7 +1145,7 @@ RawSocket::close_proto_sockets(string& error_msg)
 }
 
 void
-RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
+IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 {
     ssize_t	nbytes;
     size_t	ip_hdr_len = 0;
@@ -1755,18 +1755,18 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 }
 
 int
-RawSocket::proto_socket_write(const string& if_name,
-			      const string& vif_name,
-			      const IPvX& src_address,
-			      const IPvX& dst_address,
-			      int32_t ip_ttl,
-			      int32_t ip_tos,
-			      bool ip_router_alert,
-			      bool ip_internet_control,
-			      const vector<uint8_t>& ext_headers_type,
-			      const vector<vector<uint8_t> >& ext_headers_payload,
-			      const vector<uint8_t>& payload,
-			      string& error_msg)
+IoIpSocket::proto_socket_write(const string& if_name,
+			       const string& vif_name,
+			       const IPvX& src_address,
+			       const IPvX& dst_address,
+			       int32_t ip_ttl,
+			       int32_t ip_tos,
+			       bool ip_router_alert,
+			       bool ip_internet_control,
+			       const vector<uint8_t>& ext_headers_type,
+			       const vector<vector<uint8_t> >& ext_headers_payload,
+			       const vector<uint8_t>& payload,
+			       string& error_msg)
 {
     size_t	ip_hdr_len = 0;
     int		int_val;
@@ -2324,11 +2324,11 @@ RawSocket::proto_socket_write(const string& if_name,
 }
 
 int
-RawSocket::proto_socket_transmit(const IfTreeInterface* ifp,
-				 const IfTreeVif*	vifp,
-				 const IPvX&		src_address,
-				 const IPvX&		dst_address,
-				 string&		error_msg)
+IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
+				  const IfTreeVif*	vifp,
+				  const IPvX&		src_address,
+				  const IPvX&		dst_address,
+				  string&		error_msg)
 {
     bool setloop = false;
     int ret_value = XORP_OK;
@@ -2470,10 +2470,10 @@ RawSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 }
 
 bool
-RawSocket::find_interface_vif_by_name(const string& if_name,
-				      const string& vif_name,
-				      const IfTreeInterface*& ifp,
-				      const IfTreeVif*& vifp) const
+IoIpSocket::find_interface_vif_by_name(const string& if_name,
+				       const string& vif_name,
+				       const IfTreeInterface*& ifp,
+				       const IfTreeVif*& vifp) const
 {
     ifp = NULL;
     vifp = NULL;
@@ -2495,9 +2495,9 @@ RawSocket::find_interface_vif_by_name(const string& if_name,
 }
 
 bool
-RawSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
-					   const IfTreeInterface*& ifp,
-					   const IfTreeVif*& vifp) const
+IoIpSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
+					    const IfTreeInterface*& ifp,
+					    const IfTreeVif*& vifp) const
 {
     ifp = NULL;
     vifp = NULL;
@@ -2519,9 +2519,9 @@ RawSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
 }
 
 bool
-RawSocket::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
-						 const IfTreeInterface*& ifp,
-						 const IfTreeVif*& vifp) const
+IoIpSocket::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
+						  const IfTreeInterface*& ifp,
+						  const IfTreeVif*& vifp) const
 {
     IfTree::IfMap::const_iterator ii;
     IfTreeInterface::VifMap::const_iterator vi;
@@ -2596,7 +2596,7 @@ RawSocket::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
 }
 
 bool
-RawSocket::find_interface_vif_by_addr(
+IoIpSocket::find_interface_vif_by_addr(
     const IPvX& addr,
     const IfTreeInterface*& ifp,
     const IfTreeVif*& vifp) const

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.20 2007/05/22 22:57:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.21 2007/05/23 00:55:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,7 +29,7 @@
 
 RawSocket6::RawSocket6(EventLoop& eventloop, uint8_t ip_protocol,
 		       const IfTree& iftree)
-    : RawSocket(eventloop, IPv6::af(), ip_protocol, iftree)
+    : IoIpSocket(eventloop, IPv6::af(), ip_protocol, iftree)
 {
 }
 
@@ -37,7 +37,7 @@ RawSocket6::~RawSocket6()
 {
     string error_msg;
 
-    RawSocket::stop(error_msg);
+    IoIpSocket::stop(error_msg);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -218,10 +218,10 @@ FilterRawSocket6::join_multicast_group(const string&	if_name,
 	// First receiver, hence join the multicast group first to check
 	// for errors.
 	//
-	if (RawSocket::join_multicast_group(if_name,
-					    vif_name,
-					    IPvX(group_address),
-					    error_msg)
+	if (IoIpSocket::join_multicast_group(if_name,
+					     vif_name,
+					     IPvX(group_address),
+					     error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -263,10 +263,10 @@ FilterRawSocket6::leave_multicast_group(const string&	if_name,
 	// The last receiver, hence leave the group
 	//
 	_joined_groups_table.erase(iter);
-	if (RawSocket::leave_multicast_group(if_name,
-					     vif_name,
-					     IPvX(group_address),
-					     error_msg)
+	if (IoIpSocket::leave_multicast_group(if_name,
+					      vif_name,
+					      IPvX(group_address),
+					      error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}

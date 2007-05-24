@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.20 2007/05/23 00:55:57 pavlin Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.21 2007/05/24 20:01:28 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -34,7 +34,7 @@ class RawSocket6Manager;
 /**
  * Base class for raw IPv6 sockets.
  */
-class RawSocket6 : public RawSocket {
+class RawSocket6 : public IoIpSocket {
 public:
     RawSocket6(EventLoop& eventloop, uint8_t ip_protocol,
 	       const IfTree& iftree);
@@ -329,7 +329,7 @@ protected:
  * a receiver registers for interest in a particular type of raw
  * packet a raw socket (FilterRawSocket6) is created if necessary,
  * then the relevent filter is created and associated with the
- * RawSocket.
+ * IoIpSocket.
  */
 class RawSocket6Manager {
 public:

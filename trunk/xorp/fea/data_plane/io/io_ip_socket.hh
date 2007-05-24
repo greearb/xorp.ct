@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/forwarding_plane/io/io_ip_socket.hh,v 1.1 2007/05/24 20:01:29 pavlin Exp $
 
 
 #ifndef __FEA_FORWARDING_PLANE_IO_IO_IP_SOCKET_HH__
@@ -20,7 +20,7 @@
 
 
 //
-// Raw socket support.
+// I/O IP raw socket support.
 //
 
 #include "libxorp/xorp.h"
@@ -38,12 +38,12 @@ class IfTreeVif;
 class IPvX;
 
 /**
- * @short A base class for raw socket I/O communication.
+ * @short A base class for I/O IP raw socket communication.
  * 
  * Each protocol 'registers' for socket I/O and gets assigned one object
  * of this class.
  */
-class RawSocket {
+class IoIpSocket {
 public:
     /**
      * Constructor for a given address family and protocol.
@@ -53,13 +53,13 @@ public:
      * @param ip_protocol the IP protocol number (IPPROTO_*).
      * @param iftree the interface tree.
      */
-    RawSocket(EventLoop& eventloop, int init_family, uint8_t ip_protocol,
-	      const IfTree& iftree);
+    IoIpSocket(EventLoop& eventloop, int init_family, uint8_t ip_protocol,
+	       const IfTree& iftree);
 
     /**
      * Destructor
      */
-    virtual ~RawSocket();
+    virtual ~IoIpSocket();
 
     /**
      * Get the event loop.
@@ -76,7 +76,7 @@ public:
     int		family() const { return (_family); }
 
     /**
-     * Start the @ref RawSocket.
+     * Start the @ref IoIpSocket.
      * 
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -84,7 +84,7 @@ public:
     int		start(string& error_msg);
 
     /**
-     * Stop the @ref RawSocket.
+     * Stop the @ref IoIpSocket.
      * 
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
