@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.90 2007/05/03 09:32:35 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.91 2007/05/19 01:52:40 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -31,6 +31,7 @@ LDADD		 = $(noinst_LTLIBRARIES)
 ### Forwarding plane libraries
 LDADD		+= $(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la
 LDADD		+= $(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la
+LDADD		+= $(top_builddir)/fea/forwarding_plane/io/libxorp_io.la
 LDADD		+= $(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
@@ -114,7 +115,6 @@ libfea_la_SOURCES	+= pa_entry.hh
 libfea_la_SOURCES	+= pa_table.hh
 libfea_la_SOURCES	+= pa_transaction.hh
 libfea_la_SOURCES	+= profile_vars.hh
-libfea_la_SOURCES	+= rawsock.hh
 libfea_la_SOURCES	+= rawsock4.hh
 libfea_la_SOURCES	+= rawsock6.hh
 libfea_la_SOURCES	+= xrl_fea_io.hh
@@ -152,7 +152,6 @@ libfea_la_SOURCES	+= pa_entry.cc
 libfea_la_SOURCES	+= pa_table.cc
 libfea_la_SOURCES	+= pa_transaction.cc
 libfea_la_SOURCES	+= profile_vars.cc
-libfea_la_SOURCES	+= rawsock.cc
 libfea_la_SOURCES	+= rawsock4.cc
 libfea_la_SOURCES	+= rawsock6.cc
 libfea_la_SOURCES	+= xrl_packet_acl.cc

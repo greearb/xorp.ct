@@ -57,11 +57,11 @@ am_libfea_la_OBJECTS = addr_table.lo fea_io.lo fea_node.lo \
 	mfea_config.lo mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo \
 	mfea_node_cli.lo mfea_vif.lo nexthop_port_mapper.lo \
 	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
-	pa_table.lo pa_transaction.lo profile_vars.lo rawsock.lo \
-	rawsock4.lo rawsock6.lo xrl_packet_acl.lo xrl_fea_io.lo \
-	xrl_fea_node.lo xrl_fea_target.lo xrl_fib_client_manager.lo \
-	xrl_mfea_node.lo xrl_rawsock4.lo xrl_rawsock6.lo \
-	xrl_socket_cmds.lo xrl_socket_server.lo
+	pa_table.lo pa_transaction.lo profile_vars.lo rawsock4.lo \
+	rawsock6.lo xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
+	xrl_fea_target.lo xrl_fib_client_manager.lo xrl_mfea_node.lo \
+	xrl_rawsock4.lo xrl_rawsock6.lo xrl_socket_cmds.lo \
+	xrl_socket_server.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -98,6 +98,7 @@ xorp_fea_LDADD = $(LDADD)
 xorp_fea_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la \
 	$(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/forwarding_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -130,6 +131,7 @@ xorp_fea_dummy_LDADD = $(LDADD)
 xorp_fea_dummy_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la \
 	$(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/forwarding_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -357,6 +359,7 @@ noinst_LTLIBRARIES = libfea.la
 LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la \
 	$(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/forwarding_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -402,18 +405,17 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh fea_io.hh \
 	mfea_node_cli.hh mfea_osdep.hh mfea_vif.hh \
 	nexthop_port_mapper.hh pa_backend.hh pa_backend_dummy.hh \
 	pa_backend_ipfw2.hh pa_entry.hh pa_table.hh pa_transaction.hh \
-	profile_vars.hh rawsock.hh rawsock4.hh rawsock6.hh \
-	xrl_fea_io.hh xrl_fea_node.hh xrl_fea_target.hh \
-	xrl_fib_client_manager.hh xrl_mfea_node.hh xrl_packet_acl.hh \
-	xrl_rawsock4.hh xrl_rawsock6.hh xrl_socket_cmds.hh \
-	xrl_socket_server.hh addr_table.cc fea_io.cc fea_node.cc \
-	fibconfig.cc fibconfig_transaction.cc ifconfig.cc \
-	ifconfig_addr_table.cc ifconfig_reporter.cc \
-	ifconfig_transaction.cc iftree.cc libfeaclient_bridge.cc \
-	mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc \
-	mfea_node_cli.cc mfea_vif.cc nexthop_port_mapper.cc \
-	pa_backend_dummy.cc pa_backend_ipfw2.cc pa_entry.cc \
-	pa_table.cc pa_transaction.cc profile_vars.cc rawsock.cc \
+	profile_vars.hh rawsock4.hh rawsock6.hh xrl_fea_io.hh \
+	xrl_fea_node.hh xrl_fea_target.hh xrl_fib_client_manager.hh \
+	xrl_mfea_node.hh xrl_packet_acl.hh xrl_rawsock4.hh \
+	xrl_rawsock6.hh xrl_socket_cmds.hh xrl_socket_server.hh \
+	addr_table.cc fea_io.cc fea_node.cc fibconfig.cc \
+	fibconfig_transaction.cc ifconfig.cc ifconfig_addr_table.cc \
+	ifconfig_reporter.cc ifconfig_transaction.cc iftree.cc \
+	libfeaclient_bridge.cc mfea_config.cc mfea_dataflow.cc \
+	mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc mfea_vif.cc \
+	nexthop_port_mapper.cc pa_backend_dummy.cc pa_backend_ipfw2.cc \
+	pa_entry.cc pa_table.cc pa_transaction.cc profile_vars.cc \
 	rawsock4.cc rawsock6.cc xrl_packet_acl.cc xrl_fea_io.cc \
 	xrl_fea_node.cc xrl_fea_target.cc xrl_fib_client_manager.cc \
 	xrl_mfea_node.cc xrl_rawsock4.cc xrl_rawsock6.cc \
@@ -595,7 +597,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/profile_vars.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rawsock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rawsock4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rawsock6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@

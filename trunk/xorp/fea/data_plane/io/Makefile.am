@@ -1,13 +1,18 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/forwarding_plane/Makefile.am,v 1.1 2007/05/01 02:33:31 pavlin Exp $
+## $XORP$
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-# -- Subdirectories
-SUBDIRS = . control_socket fibconfig ifconfig io
+# -- No-install Libraries
+noinst_LTLIBRARIES = libxorp_io.la
+
+# -- Library Sources
+libxorp_io_la_SOURCES		 = io_ip_socket.hh
+
+libxorp_io_la_SOURCES		+= io_ip_socket.cc
 
 
 ################################################################

@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.48 2007/05/08 19:23:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.49 2007/05/19 01:52:41 pavlin Exp $"
 
 //
 // Raw socket support.
 //
 
-#include "fea_module.h"
+#include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -58,7 +58,7 @@
 #ifdef HOST_OS_WINDOWS
 #include <mswsock.h>
 #include "libxorp/win_io.h"
-#include "ip.h"
+#include "fea/ip.h"
 #endif
 
 #include "libcomm/comm_api.h"
@@ -75,10 +75,10 @@
 #include "mrt/include/netinet/pim.h"
 #endif
 
-#include "forwarding_plane/control_socket/system_utilities.hh"
+#include "fea/forwarding_plane/control_socket/system_utilities.hh"
 
-#include "iftree.hh"
-#include "rawsock.hh"
+#include "fea/iftree.hh"
+#include "io_ip_socket.hh"
 
 
 //

@@ -1,0 +1,17 @@
+#
+# $XORP$
+#
+
+SubDir TOP fea forwarding_plane io ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libproto ;
+SubIncludeOnce TOP fea ;
+SubDir TOP fea forwarding_plane io ;
+
+Library libxorp_io : 
+	io_ip_socket.cc
+	;
