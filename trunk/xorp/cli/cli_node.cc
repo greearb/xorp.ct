@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.35 2006/10/13 20:48:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.36 2007/02/16 22:45:28 pavlin Exp $"
 
 
 //
@@ -165,7 +165,8 @@ CliNode::stop()
 
     delete_pointers_list(_client_list);
 
-    eventloop().remove_ioevent_cb(_cli_socket, IOT_ACCEPT);
+    if (_cli_socket.is_valid())
+	eventloop().remove_ioevent_cb(_cli_socket, IOT_ACCEPT);
     sock_serv_close();
 
     if (ProtoNode<Vif>::stop() < 0)
