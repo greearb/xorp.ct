@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_io_ip_manager.cc,v 1.1 2007/05/26 02:04:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -80,7 +80,7 @@ XrlIoIpManager::send_to_receiver(const string& receiver_name,
 		     payload,
 		     callback(this,
 			      &XrlIoIpManager::xrl_send_recv_cb,
-			      receiver_name));
+			      receiver_name, header.src_address.af()));
     }
 
     if (header.src_address.is_ipv6()) {
@@ -107,13 +107,13 @@ XrlIoIpManager::send_to_receiver(const string& receiver_name,
 		     payload,
 		     callback(this,
 			      &XrlIoIpManager::xrl_send_recv_cb,
-			      receiver_name));
+			      receiver_name, header.src_address.af()));
     }
 }
 
 void
 XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error,
-				 string receiver_name)
+				 string receiver_name, int family)
 {
     if (xrl_error == XrlError::OKAY())
 	return;
@@ -125,5 +125,5 @@ XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error,
     //
     // Remove all filters associated with this receiver.
     //
-    _io_ip_manager.erase_filters_by_name(receiver_name);
+    _io_ip_manager.erase_filters_by_name(receiver_name, family);
 }

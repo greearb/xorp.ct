@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/xrl_io_ip_manager.hh,v 1.1 2007/05/26 02:04:47 pavlin Exp $
 
 #ifndef __FEA_XRL_IO_IP_MANAGER_HH__
 #define __FEA_XRL_IO_IP_MANAGER_HH__
@@ -56,7 +56,8 @@ private:
     /**
      * Method to be called by XRL sending filter invoker
      */
-    void xrl_send_recv_cb(const XrlError& xrl_error, string receiver_name);
+    void xrl_send_recv_cb(const XrlError& xrl_error, string receiver_name,
+			  int family);
 
     IoIpManager&	_io_ip_manager;
     XrlRouter&		_xrl_router;

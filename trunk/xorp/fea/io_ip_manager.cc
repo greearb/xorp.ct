@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.1 2007/05/26 02:04:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -444,14 +444,14 @@ IoIpManager::send_to_receiver(const string&			receiver_name,
 }
 
 void
-IoIpManager::erase_filters_by_name(const string& receiver_name)
+IoIpManager::erase_filters_by_name(const string& receiver_name, int family)
 {
-    erase_filters(_comm_table4, _filters4,
-		  _filters4.lower_bound(receiver_name),
-		  _filters4.upper_bound(receiver_name));
-    erase_filters(_comm_table6, _filters6,
-		  _filters6.lower_bound(receiver_name),
-		  _filters6.upper_bound(receiver_name));
+    CommTable& comm_table = comm_table_by_family(family);
+    FilterBag& filters = filters_by_family(family);
+
+    erase_filters(comm_table, filters,
+		  filters.lower_bound(receiver_name),
+		  filters.upper_bound(receiver_name));
 }
 
 void

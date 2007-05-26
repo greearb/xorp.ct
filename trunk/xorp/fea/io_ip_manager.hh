@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.1 2007/05/26 02:04:45 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -520,8 +520,9 @@ public:
      * Erase filters for a given receiver name.
      *
      * @param receiver_name the name of the receiver.
+     * @param family the address family.
      */
-    void erase_filters_by_name(const string& receiver_name);
+    void erase_filters_by_name(const string& receiver_name, int family);
 
     /**
      * Get a reference to the interface tree.
