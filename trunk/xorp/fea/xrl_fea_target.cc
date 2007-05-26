@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.18 2007/05/09 00:25:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.19 2007/05/22 21:04:59 pavlin Exp $"
 
 
 //
@@ -44,8 +44,6 @@
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
-#include "xrl_rawsock4.hh"
-#include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
 
 
@@ -54,8 +52,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   XrlRouter&			xrl_router,
 			   Profile&			profile,
 			   XrlFibClientManager&		xrl_fib_client_manager,
-			   XrlRawSocket4Manager&	xrsm4,
-			   XrlRawSocket6Manager&	xrsm6,
+			   IoIpManager&			io_ip_manager,
 			   LibFeaClientBridge&		lib_fea_client_bridge,
 			   XrlSocketServer&		xrl_socket_server)
     : XrlFeaTargetBase(&xrl_router),
@@ -64,8 +61,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _xrl_router(xrl_router),
       _profile(profile),
       _xrl_fib_client_manager(xrl_fib_client_manager),
-      _xrsm4(xrsm4),
-      _xrsm6(xrsm6),
+      _io_ip_manager(io_ip_manager),
       _lib_fea_client_bridge(lib_fea_client_bridge),
       _xrl_socket_server(xrl_socket_server),
       _is_running(false),
@@ -2406,9 +2402,15 @@ XrlFeaTarget::raw_packet4_0_1_send(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4.send(if_name, vif_name, src_address, dst_address,
-		    ip_protocol, ip_ttl, ip_tos, ip_router_alert,
-		    ip_internet_control, payload, error_msg)
+    vector<uint8_t> ext_headers_type_vector;
+    vector<vector<uint8_t> > ext_headers_payload_vector;
+
+    if (_io_ip_manager.send(if_name, vif_name, IPvX(src_address),
+			    IPvX(dst_address), ip_protocol, ip_ttl, ip_tos,
+			    ip_router_alert, ip_internet_control,
+			    ext_headers_type_vector,
+			    ext_headers_payload_vector,
+			    payload, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2430,9 +2432,10 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4.register_receiver(xrl_target_name, if_name, vif_name,
-				 ip_protocol, enable_multicast_loopback,
-				 error_msg)
+    if (_io_ip_manager.register_receiver(IPv4::af(), xrl_target_name,
+					 if_name, vif_name, ip_protocol,
+					 enable_multicast_loopback,
+					 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2453,8 +2456,9 @@ XrlFeaTarget::raw_packet4_0_1_unregister_receiver(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4.unregister_receiver(xrl_target_name, if_name, vif_name,
-				   ip_protocol, error_msg)
+    if (_io_ip_manager.unregister_receiver(IPv4::af(), xrl_target_name,
+					   if_name, vif_name, ip_protocol,
+					   error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2476,8 +2480,9 @@ XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4.join_multicast_group(xrl_target_name, if_name, vif_name,
-				    ip_protocol, group_address, error_msg)
+    if (_io_ip_manager.join_multicast_group(xrl_target_name, if_name, vif_name,
+					    ip_protocol, IPvX(group_address),
+					    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2499,8 +2504,9 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    if (_xrsm4.leave_multicast_group(xrl_target_name, if_name, vif_name,
-				     ip_protocol, group_address, error_msg)
+    if (_io_ip_manager.leave_multicast_group(xrl_target_name, if_name,
+					     vif_name, ip_protocol,
+					     IPvX(group_address), error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2510,8 +2516,6 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
 
 // ----------------------------------------------------------------------------
 // IPv6 Raw Socket related
-
-static const string XRL_RAW_SOCKET6_NULL = "XrlRawSocket6Manager not present";
 
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_send(
@@ -2561,10 +2565,11 @@ XrlFeaTarget::raw_packet6_0_1_send(
 	ext_headers_payload_vector[i] = atom_payload.binary();
     }
 
-    if (_xrsm6.send(if_name, vif_name, src_address, dst_address,
-		    ip_protocol, ip_ttl, ip_tos, ip_router_alert,
-		    ip_internet_control, ext_headers_type_vector,
-		    ext_headers_payload_vector, payload, error_msg)
+    if (_io_ip_manager.send(if_name, vif_name,
+			    IPvX(src_address), IPvX(dst_address),
+			    ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+			    ip_internet_control, ext_headers_type_vector,
+			    ext_headers_payload_vector, payload, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2586,9 +2591,9 @@ XrlFeaTarget::raw_packet6_0_1_register_receiver(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    if ( _xrsm6.register_receiver(xrl_target_name, if_name, vif_name,
-				  ip_protocol, enable_multicast_loopback,
-				  error_msg)
+    if ( _io_ip_manager.register_receiver(IPv6::af(), xrl_target_name,
+					  if_name, vif_name, ip_protocol,
+					  enable_multicast_loopback, error_msg)
 	 != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2609,8 +2614,9 @@ XrlFeaTarget::raw_packet6_0_1_unregister_receiver(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    if (_xrsm6.unregister_receiver(xrl_target_name, if_name, vif_name,
-				   ip_protocol, error_msg)
+    if (_io_ip_manager.unregister_receiver(IPv6::af(), xrl_target_name,
+					   if_name, vif_name, ip_protocol,
+					   error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2632,8 +2638,9 @@ XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    if (_xrsm6.join_multicast_group(xrl_target_name, if_name, vif_name,
-				    ip_protocol, group_address, error_msg)
+    if (_io_ip_manager.join_multicast_group(xrl_target_name, if_name, vif_name,
+					    ip_protocol, IPvX(group_address),
+					    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2655,8 +2662,9 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    if (_xrsm6.leave_multicast_group(xrl_target_name, if_name, vif_name,
-				     ip_protocol, group_address, error_msg)
+    if (_io_ip_manager.leave_multicast_group(xrl_target_name, if_name,
+					     vif_name, ip_protocol,
+					     IPvX(group_address), error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

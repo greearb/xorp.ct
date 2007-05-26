@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.6 2007/05/03 09:32:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.7 2007/05/04 01:43:23 pavlin Exp $"
 
 
 //
@@ -40,8 +40,6 @@
 #include "libfeaclient_bridge.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_packet_acl.hh"
-#include "xrl_rawsock4.hh"
-#include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
 
 
@@ -55,8 +53,7 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().ifconfig_update_replicator()),
       _xrl_fea_io(eventloop),
       _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
-      _xrsm4(_eventloop, _fea_node.ifconfig().local_config(), _xrl_router),
-      _xrsm6(_eventloop, _fea_node.ifconfig().local_config(), _xrl_router),
+      _xrl_io_ip_manager(_fea_node.io_ip_manager(), _xrl_router),
       _xrl_socket_server(_eventloop,
 			 _fea_node.ifconfig().ifconfig_address_table(),
 			 _xrl_router.finder_address(),
@@ -81,7 +78,7 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		      xrl_finder_targetname),
 #endif
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
-		      _xrl_fib_client_manager, _xrsm4, _xrsm6,
+		      _xrl_fib_client_manager, _fea_node.io_ip_manager(),
 		      _lib_fea_client_bridge, _xrl_socket_server),
       _is_dummy(false)
 {

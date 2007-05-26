@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.12 2007/05/19 01:52:40 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.13 2007/05/24 20:01:27 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -27,6 +27,7 @@ Library libfea :
 	ifconfig_reporter.cc
 	ifconfig_transaction.cc
 	iftree.cc
+	io_ip_manager.cc
 	libfeaclient_bridge.cc
 	mfea_config.cc
 	mfea_dataflow.cc
@@ -41,16 +42,13 @@ Library libfea :
 	pa_table.cc
 	pa_transaction.cc
 	profile_vars.cc
-	rawsock4.cc
-	rawsock6.cc
 	xrl_packet_acl.cc
 	xrl_fea_io.cc
 	xrl_fea_node.cc
 	xrl_fea_target.cc
 	xrl_fib_client_manager.cc
+	xrl_io_ip_manager.cc
 	xrl_mfea_node.cc
-	xrl_rawsock4.cc
-	xrl_rawsock6.cc
 	xrl_socket_cmds.cc
 	xrl_socket_server.cc
 	;

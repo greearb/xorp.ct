@@ -12,84 +12,69 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.22 2007/05/24 20:01:28 pavlin Exp $
+// $XORP$
 
-#ifndef __FEA_RAWSOCK4_HH__
-#define __FEA_RAWSOCK4_HH__
+#ifndef __FEA_IO_IP_MANAGER_HH__
+#define __FEA_IO_IP_MANAGER_HH__
 
 #include <list>
 #include <vector>
 #include <set>
 #include <map>
 
-#include "libxorp/exceptions.hh"
-#include "libxorp/ipv4.hh"
-#include "libxorp/eventloop.hh"
+#include "libxorp/ipvx.hh"
 
 #include "forwarding_plane/io/io_ip_socket.hh"
 
-class RawSocket4Manager;
+class IoIpManager;
 
 
 /**
- * Base class for raw IPv4 sockets.
+ * Simple structure used to cache commonly passed IPv4 and IPv6 header
+ * information which comes from socket control message headers.
  */
-class RawSocket4 : public IoIpSocket {
-public:
-    RawSocket4(EventLoop& eventloop, uint8_t ip_protocol,
-	       const IfTree& iftree);
-
-    virtual ~RawSocket4();
-
-private:
-    RawSocket4(const RawSocket4&);		// Not implemented.
-    RawSocket4& operator=(const RawSocket4&);	// Not implemented.
-};
-
-/**
- * Simple structure used to cache commonly passed IPv4 header information
- * which comes from socket control message headers. This is used when
- * reading from the kernel, so we use C types, rather than XORP C++ Class
- * Library types.
- */
-struct IPv4HeaderInfo {
+struct IPvXHeaderInfo {
     string	if_name;
     string	vif_name;
-    IPv4	src_address;
-    IPv4	dst_address;
+    IPvX	src_address;
+    IPvX	dst_address;
     uint8_t	ip_protocol;
     int32_t	ip_ttl;
     int32_t	ip_tos;
     bool	ip_router_alert;
     bool	ip_internet_control;
+    vector<uint8_t> ext_headers_type;
+    vector<vector<uint8_t> > ext_headers_payload;
 };
 
 /**
- * A RawSocketClass that allows arbitrary filters to receive the data
- * associated with a raw socket.
+ * A class that handles raw IP I/O communication for a specific protocol.
+ *
+ * It also allows arbitrary filters to receive the raw IP data for that
+ * protocol.
  */
-class FilterRawSocket4 : public RawSocket4 {
+class IoIpComm : public IoIpSocket {
 public:
     /**
      * Filter class.
      */
     class InputFilter {
     public:
-	InputFilter(RawSocket4Manager&	raw_socket_manager,
+	InputFilter(IoIpManager&	io_ip_manager,
 		    const string&	receiver_name,
 		    uint8_t		ip_protocol)
-	    : _raw_socket_manager(raw_socket_manager),
+	    : _io_ip_manager(io_ip_manager),
 	      _receiver_name(receiver_name),
 	      _ip_protocol(ip_protocol)
 	{}
 	virtual ~InputFilter() {}
 
 	/**
-	 * Get a reference to the raw socket manager.
+	 * Get a reference to the I/O IP manager.
 	 *
-	 * @return a reference to the raw socket manager.
+	 * @return a reference to the I/O IP manager.
 	 */
-	RawSocket4Manager& raw_socket_manager() { return (_raw_socket_manager); }
+	IoIpManager& io_ip_manager() { return (_io_ip_manager); }
 
 	/**
 	 * Get the receiver name.
@@ -106,26 +91,24 @@ public:
 	uint8_t ip_protocol() const { return (_ip_protocol); }
 
 	/**
-	 * Method invoked when data arrives on associated FilterRawSocket4
-	 * instance.
+	 * Method invoked when data arrives on associated IoIpComm instance.
 	 */
-	virtual void recv(const struct IPv4HeaderInfo& header,
+	virtual void recv(const struct IPvXHeaderInfo& header,
 			  const vector<uint8_t>& payload) = 0;
 
 	/**
-	 * Method invoked by the destructor of the associated
-	 * FilterRawSocket4 instance.  This method provides the
-	 * InputFilter with the opportunity to delete itself or update
-	 * it's state.  The input filter does not need to call
-	 * FilterRawSocket4::remove_filter() since filter removal is
-	 * automatically conducted.
+	 * Method invoked by the destructor of the associated IoIpComm
+	 * instance. This method provides the InputFilter with the
+	 * opportunity to delete itself or update its state.
+	 * The input filter does not need to call IoIpComm::remove_filter()
+	 * since filter removal is automatically conducted.
 	 */
 	virtual void bye() = 0;
 
     private:
-	RawSocket4Manager&	_raw_socket_manager;
-	string			_receiver_name;
-	uint8_t			_ip_protocol;
+	IoIpManager&	_io_ip_manager;
+	string		_receiver_name;
+	uint8_t		_ip_protocol;
     };
 
     /**
@@ -134,7 +117,7 @@ public:
     class JoinedMulticastGroup {
     public:
 	JoinedMulticastGroup(const string& if_name, const string& vif_name,
-			     const IPv4& group_address)
+			     const IPvX& group_address)
 	    : _if_name(if_name),
 	      _vif_name(vif_name),
 	      _group_address(group_address)
@@ -195,17 +178,26 @@ public:
     private:
 	string		_if_name;
 	string		_vif_name;
-	IPv4		_group_address;
+	IPvX		_group_address;
 	set<string>	_receivers;
     };
 
 public:
-    FilterRawSocket4(EventLoop& eventloop, uint8_t ip_protocol,
-		     const IfTree& iftree);
-    virtual ~FilterRawSocket4();
+    /**
+     * Constructor for IoIpComm.
+     *
+     * @param eventloop the event loop to use.
+     * @param family the address family (AF_INET or AF_INET6 for
+     * IPv4 and IPv6 respectively).
+     * @param ip_protocol the IP protocol number.
+     * @param iftree the interface tree to use (@see IfTree).
+     */
+    IoIpComm(EventLoop& eventloop, int family, uint8_t ip_protocol,
+	     const IfTree& iftree);
+    virtual ~IoIpComm();
 
     /**
-     * Add a filter to list of input filters.  The FilterRawSocket4 class
+     * Add a filter to list of input filters.  The IoIpComm class
      * assumes that the callee will be responsible for managing the memory
      * associated with the filter and will call remove_filter() if the
      * filter is deleted or goes out of scope.
@@ -223,7 +215,7 @@ public:
     bool no_input_filters() const { return _input_filters.empty(); }
 
     /**
-     * Send an IPv4 packet on a raw socket.
+     * Send a raw IP packet.
      *
      * @param if_name the interface to send the packet on. It is essential for
      * multicast. In the unicast case this field may be empty.
@@ -233,29 +225,71 @@ public:
      * @param dst_address the IP destination address.
      * @param ip_ttl the IP TTL (hop-limit). If it has a negative value,
      * the TTL will be set internally before transmission.
-     * @param ip_tos the Type Of Service (Diffserv/ECN bits for IPv4).
+     * @param ip_tos the Type Of Service (IP traffic class for IPv6).
      * If it has a negative value, the TOS will be
      * set internally before transmission.
      * @param ip_router_alert if true, then add the IP Router Alert option to
      * the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
+     * @param ext_headers_type a vector of integers with the types of the
+     * optional IPv6 extention headers.
+     * @param ext_headers_payload a vector of payload data, one for each
+     * optional IPv6 extention header. The number of entries must match
+     * ext_headers_type.
      * @param payload the payload, everything after the IP header and options.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_socket_write(const string&	if_name,
 				   const string&	vif_name,
-				   const IPv4&		src_address,
-				   const IPv4&		dst_address,
+				   const IPvX&		src_address,
+				   const IPvX&		dst_address,
 				   int32_t		ip_ttl,
 				   int32_t		ip_tos,
 				   bool			ip_router_alert,
 				   bool			ip_internet_control,
+				   const vector<uint8_t>& ext_headers_type,
+				   const vector<vector<uint8_t> >& ext_headers_payload,
 				   const vector<uint8_t>& payload,
 				   string&		error_msg);
 
     /**
-     * Join an IPv4 multicast group.
+     * Received a raw IP packet.
+     *
+     * @param if_name the interface name the packet arrived on.
+     * @param vif_name the vif name the packet arrived on.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_protocol the IP protocol number.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value,
+     * then the received value is unknown.
+     * @param ip_tos The type of service (Diffserv/ECN bits for IPv4). If it
+     * has a negative value, then the received value is unknown.
+     * @param ip_router_alert if true, the IP Router Alert option was
+     * included in the IP packet.
+     * @param ip_internet_control if true, then this is IP control traffic.
+     * @param ext_headers_type a vector of integers with the types of the
+     * optional IPv6 extention headers.
+     * @param ext_headers_payload a vector of payload data, one for each
+     * optional IPv6 extention header. The number of entries must match
+     * ext_headers_type.
+     * @param packet the payload, everything after the IP header and
+     * options.
+     */
+    void process_recv_data(const string&	if_name,
+			   const string&	vif_name,
+			   const IPvX&		src_address,
+			   const IPvX&		dst_address,
+			   int32_t		ip_ttl,
+			   int32_t		ip_tos,
+			   bool			ip_router_alert,
+			   bool			ip_internet_control,
+			   const vector<uint8_t>& ext_headers_type,
+			   const vector<vector<uint8_t> >& ext_headers_payload,
+			   const vector<uint8_t>& payload);
+
+    /**
+     * Join an IP multicast group.
      * 
      * @param if_name the interface through which packets should be accepted.
      * @param vif_name the vif through which packets should be accepted.
@@ -266,12 +300,12 @@ public:
      */
     int		join_multicast_group(const string&	if_name,
 				     const string&	vif_name,
-				     const IPv4&	group_address,
+				     const IPvX&	group_address,
 				     const string&	receiver_name,
 				     string&		error_msg);
 
     /**
-     * Leave an IPv4 multicast group.
+     * Leave an IP multicast group.
      * 
      * @param if_name the interface through which packets should not be
      * accepted.
@@ -283,55 +317,60 @@ public:
      */
     int		leave_multicast_group(const string&	if_name,
 				      const string&	vif_name,
-				      const IPv4&	group_address,
+				      const IPvX&	group_address,
 				      const string&	receiver_name,
 				      string&		error_msg);
-    
-protected:
-    void	process_recv_data(const string&		if_name,
-				  const string&		vif_name,
-				  const IPvX&		src_address,
-				  const IPvX&		dst_address,
-				  int32_t		ip_ttl,
-				  int32_t		ip_tos,
-				  bool			ip_router_alert,
-				  bool			ip_internet_control,
-				  const vector<uint8_t>& ext_headers_type,
-				  const vector<vector<uint8_t> >& ext_headers_payload,
-				  const vector<uint8_t>& payload);
 
 private:
-    FilterRawSocket4(const FilterRawSocket4&);		 // Not implemented.
-    FilterRawSocket4& operator=(const FilterRawSocket4&); // Not implemented.
+    IoIpComm(const IoIpComm&);			// Not implemented.
+    IoIpComm& operator=(const IoIpComm&);	// Not implemented.
 
-protected:
     list<InputFilter*>		_input_filters;
     typedef map<JoinedMulticastGroup, JoinedMulticastGroup> JoinedGroupsTable;
     JoinedGroupsTable		_joined_groups_table;
 };
 
 /**
- * @short A class that manages IPv4 raw sockets.
+ * @short A class that manages raw IP I/O.
  *
- * The RawSocket4Manager has two containers: a container for raw
- * sockets indexed by the protocol associated with the raw socket, and
+ * The IoIpManager has two containers: a container for IP protocol handlers
+ * (@see IoIpComm) indexed by the protocol associated with the handler, and
  * a container for the filters associated with each receiver_name.  When
  * a receiver registers for interest in a particular type of raw
- * packet a raw socket (FilterRawSocket4) is created if necessary,
- * then the relevent filter is created and associated with the
- * IoIpSocket.
+ * packet a handler (@see IoIpComm) is created if necessary, then the
+ * relevent filter is created and associated with the IoIpComm.
  */
-class RawSocket4Manager {
+class IoIpManager {
 public:
     /**
-     * Constructor for RawSocket4Manager instances.
+     * Constructor for IoIpManager.
      */
-    RawSocket4Manager(EventLoop& eventloop, const IfTree& iftree);
+    IoIpManager(EventLoop& eventloop, const IfTree& iftree);
 
-    virtual ~RawSocket4Manager();
+    virtual ~IoIpManager();
 
     /**
-     * Send an IPv4 packet on a raw socket.
+     * @short Class that implements the API for sending IP packet to a
+     * receiver.
+     */
+    class SendToReceiverBase {
+    public:
+	/**
+	 * Send a raw IP packet to a receiver.
+	 *
+	 * @param receiver_name the name of the receiver to send the
+	 * IP packet to.
+	 * @param header the IP header information.
+	 * @param payload the payload, everything after the IP header
+	 * and options.
+	 */
+	virtual void send_to_receiver(const string&		receiver_name,
+				      const struct IPvXHeaderInfo& header,
+				      const vector<uint8_t>&	payload) = 0;
+    };
+
+    /**
+     * Send an IP packet on a raw socket.
      *
      * @param if_name the interface to send the packet on. It is essential for
      * multicast. In the unicast case this field may be empty.
@@ -343,31 +382,40 @@ public:
      * 255.
      * @param ip_ttl the IP TTL (hop-limit). If it has a negative value, the
      * TTL will be set internally before transmission.
-     * @param ip_tos the Type Of Service (Diffserv/ECN bits for IPv4). If it
+     * @param ip_tos the Type Of Service (IP traffic class for IPv6). If it
      * has a negative value, the TOS will be set internally before
      * transmission.
      * @param ip_router_alert if true, then add the IP Router Alert option to
      * the IP packet.
      * @param ip_internet_control if true, then this is IP control traffic.
+     * @param ext_headers_type a vector of integers with the types of the
+     * optional IPv6 extention headers.
+     * @param ext_headers_payload a vector of payload data, one for each
+     * optional IPv6 extention header. The number of entries must match
+     * ext_headers_type.
      * @param payload the payload, everything after the IP header and options.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int send(const string&	if_name,
 	     const string&	vif_name,
-	     const IPv4&	src_address,
-	     const IPv4&	dst_address,
+	     const IPvX&	src_address,
+	     const IPvX&	dst_address,
 	     uint8_t		ip_protocol,
 	     int32_t		ip_ttl,
 	     int32_t		ip_tos,
 	     bool		ip_router_alert,
 	     bool		ip_internet_control,
+	     const vector<uint8_t>& ext_headers_type,
+	     const vector<vector<uint8_t> >& ext_headers_payload,
 	     const vector<uint8_t>&	payload,
 	     string&		error_msg);
 
     /**
-     * Register to receive IPv4 packets.
+     * Register to receive IP packets.
      *
+     * @param family the address family (AF_INET or AF_INET6 for
+     * IPv4 and IPv6 respectively).
      * @param receiver_name the name of the receiver.
      * @param if_name the interface through which packets should be accepted.
      * @param vif_name the vif through which packets should be accepted.
@@ -380,16 +428,19 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_receiver(const string&	receiver_name,
+    int register_receiver(int		family,
+			  const string&	receiver_name,
 			  const string&	if_name,
 			  const string&	vif_name,
 			  uint8_t	ip_protocol,
 			  bool		enable_multicast_loopback,
 			  string&	error_msg);
-
+    
     /**
-     * Unregister to receive IPv4 packets.
+     * Unregister to receive IP packets.
      *
+     * @param family the address family (AF_INET or AF_INET6 for
+     * IPv4 and IPv6 respectively).
      * @param receiver_name the name of the receiver.
      * @param if_name the interface through which packets should not be
      * accepted.
@@ -400,14 +451,15 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int unregister_receiver(const string&	receiver_name,
+    int unregister_receiver(int			family,
+			    const string&	receiver_name,
 			    const string&	if_name,
 			    const string&	vif_name,
 			    uint8_t		ip_protocol,
 			    string&		error_msg);
 
     /**
-     * Join an IPv4 multicast group.
+     * Join an IP multicast group.
      *
      * @param receiver_name the name of the receiver.
      * @param if_name the interface through which packets should be accepted.
@@ -423,11 +475,11 @@ public:
 			     const string&	if_name,
 			     const string&	vif_name,
 			     uint8_t		ip_protocol,
-			     const IPv4&	group_address,
+			     const IPvX&	group_address,
 			     string&		error_msg);
 
     /**
-     * Leave an IPv4 multicast group.
+     * Leave an IP multicast group.
      *
      * @param receiver_name the name of the receiver.
      * @param if_name the interface through which packets should not be
@@ -437,27 +489,32 @@ public:
      * interested in anymore. It must be between 0 and 255. A protocol number
      * of 0 is used to specify all protocols.
      * @param group_address the multicast group address to leave.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int leave_multicast_group(const string&	receiver_name,
 			      const string&	if_name,
 			      const string&	vif_name,
 			      uint8_t		ip_protocol,
-			      const IPv4&	group_address,
+			      const IPvX&	group_address,
 			      string&		error_msg);
 
     /**
-     * Received an IPv4 packet on a raw socket and forward it to the
-     * recipient.
+     * Send a raw IP packet to a receiver.
      *
      * @param receiver_name the name of the receiver to send the IP packet to.
-     * @param header the IPv4 header information.
+     * @param header the IP header information.
      * @param payload the payload, everything after the IP header and options.
      */
-    virtual void recv_and_forward(const string&			receiver_name,
-				  const struct IPv4HeaderInfo&	header,
-				  const vector<uint8_t>&	payload) = 0;
+    void send_to_receiver(const string&			receiver_name,
+			  const struct IPvXHeaderInfo&	header,
+			  const vector<uint8_t>&	payload);
+
+    /**
+     * Set the instance that is responsible for sending IP packets
+     * to a receiver.
+     */
+    void set_send_to_receiver_base(SendToReceiverBase* v) {
+	_send_to_receiver_base = v;
+    }
 
     /**
      * Erase filters for a given receiver name.
@@ -473,21 +530,29 @@ public:
      */
     const IfTree&	iftree() const { return _iftree; }
 
-protected:
+private:
+    typedef map<uint8_t, IoIpComm*> CommTable;
+    typedef multimap<string, IoIpComm::InputFilter*> FilterBag;
+
+    CommTable& comm_table_by_family(int family);
+    FilterBag& filters_by_family(int family);
+
+    void erase_filters(CommTable& comm_table, FilterBag& filters,
+		       const FilterBag::iterator& begin,
+		       const FilterBag::iterator& end);
+
     EventLoop&		_eventloop;
     const IfTree&	_iftree;
 
-    // Collection of IPv4 raw sockets keyed by protocol
-    typedef map<uint8_t, FilterRawSocket4*> SocketTable4;
-    SocketTable4	_sockets;
+    // Collection of IP communication handlers keyed by protocol.
+    CommTable		_comm_table4;
+    CommTable		_comm_table6;
 
-    // Collection of input filters created by RawSocketManager
-    typedef multimap<string, FilterRawSocket4::InputFilter*> FilterBag4;
-    FilterBag4		_filters;
+    // Collection of input filters created by IoIpManager
+    FilterBag		_filters4;
+    FilterBag		_filters6;
 
-protected:
-    void erase_filters(const FilterBag4::iterator& begin,
-		       const FilterBag4::iterator& end);
+    SendToReceiverBase*	_send_to_receiver_base;
 };
 
-#endif // __FEA_RAWSOCK4_HH__
+#endif // __FEA_IO_IP_MANAGER_HH__

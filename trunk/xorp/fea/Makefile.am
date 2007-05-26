@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.91 2007/05/19 01:52:40 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.92 2007/05/24 20:01:27 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -99,6 +99,7 @@ libfea_la_SOURCES	+= ifconfig_reporter.hh
 libfea_la_SOURCES	+= ifconfig_set.hh
 libfea_la_SOURCES	+= ifconfig_transaction.hh
 libfea_la_SOURCES	+= iftree.hh
+libfea_la_SOURCES	+= io_ip_manager.hh
 libfea_la_SOURCES	+= libfeaclient_bridge.hh
 libfea_la_SOURCES	+= mfea_dataflow.hh
 libfea_la_SOURCES	+= mfea_kernel_messages.hh
@@ -115,16 +116,13 @@ libfea_la_SOURCES	+= pa_entry.hh
 libfea_la_SOURCES	+= pa_table.hh
 libfea_la_SOURCES	+= pa_transaction.hh
 libfea_la_SOURCES	+= profile_vars.hh
-libfea_la_SOURCES	+= rawsock4.hh
-libfea_la_SOURCES	+= rawsock6.hh
 libfea_la_SOURCES	+= xrl_fea_io.hh
 libfea_la_SOURCES	+= xrl_fea_node.hh
 libfea_la_SOURCES	+= xrl_fea_target.hh
 libfea_la_SOURCES	+= xrl_fib_client_manager.hh
+libfea_la_SOURCES	+= xrl_io_ip_manager.hh
 libfea_la_SOURCES	+= xrl_mfea_node.hh
 libfea_la_SOURCES	+= xrl_packet_acl.hh
-libfea_la_SOURCES	+= xrl_rawsock4.hh
-libfea_la_SOURCES	+= xrl_rawsock6.hh
 libfea_la_SOURCES	+= xrl_socket_cmds.hh
 libfea_la_SOURCES	+= xrl_socket_server.hh
 
@@ -138,6 +136,7 @@ libfea_la_SOURCES	+= ifconfig_addr_table.cc
 libfea_la_SOURCES	+= ifconfig_reporter.cc
 libfea_la_SOURCES	+= ifconfig_transaction.cc
 libfea_la_SOURCES	+= iftree.cc
+libfea_la_SOURCES	+= io_ip_manager.cc
 libfea_la_SOURCES	+= libfeaclient_bridge.cc
 libfea_la_SOURCES	+= mfea_config.cc
 libfea_la_SOURCES	+= mfea_dataflow.cc
@@ -152,16 +151,13 @@ libfea_la_SOURCES	+= pa_entry.cc
 libfea_la_SOURCES	+= pa_table.cc
 libfea_la_SOURCES	+= pa_transaction.cc
 libfea_la_SOURCES	+= profile_vars.cc
-libfea_la_SOURCES	+= rawsock4.cc
-libfea_la_SOURCES	+= rawsock6.cc
 libfea_la_SOURCES	+= xrl_packet_acl.cc
 libfea_la_SOURCES	+= xrl_fea_io.cc
 libfea_la_SOURCES	+= xrl_fea_node.cc
 libfea_la_SOURCES	+= xrl_fea_target.cc
 libfea_la_SOURCES	+= xrl_fib_client_manager.cc
+libfea_la_SOURCES	+= xrl_io_ip_manager.cc
 libfea_la_SOURCES	+= xrl_mfea_node.cc
-libfea_la_SOURCES	+= xrl_rawsock4.cc
-libfea_la_SOURCES	+= xrl_rawsock6.cc
 libfea_la_SOURCES	+= xrl_socket_cmds.cc
 libfea_la_SOURCES	+= xrl_socket_server.cc
 

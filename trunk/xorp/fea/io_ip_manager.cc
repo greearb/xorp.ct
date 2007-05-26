@@ -12,44 +12,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.22 2007/05/23 00:55:57 pavlin Exp $"
+#ident "$XORP$"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-#include "libxorp/ipvx.hh"
 
 #include "iftree.hh"
-#include "rawsock4.hh"
+#include "io_ip_manager.hh"
 
 /* ------------------------------------------------------------------------- */
-/* RawSocket4 methods */
+/* IoIpComm methods */
 
-RawSocket4::RawSocket4(EventLoop& eventloop, uint8_t ip_protocol,
-		       const IfTree& iftree)
-    : IoIpSocket(eventloop, IPv4::af(), ip_protocol, iftree)
+IoIpComm::IoIpComm(EventLoop& eventloop, int family, uint8_t ip_protocol,
+		   const IfTree& iftree)
+    : IoIpSocket(eventloop, family, ip_protocol, iftree)
 {
 }
 
-RawSocket4::~RawSocket4()
-{
-    string error_msg;
-
-    IoIpSocket::stop(error_msg);
-}
-
-/* ------------------------------------------------------------------------- */
-/* FilterRawSocket4 methods */
-
-FilterRawSocket4::FilterRawSocket4(EventLoop& eventloop, uint8_t ip_protocol,
-				   const IfTree& iftree)
-    : RawSocket4(eventloop, ip_protocol, iftree)
-{
-}
-
-FilterRawSocket4::~FilterRawSocket4()
+IoIpComm::~IoIpComm()
 {
     if (_input_filters.empty() == false) {
 	string dummy_error_msg;
@@ -64,9 +47,9 @@ FilterRawSocket4::~FilterRawSocket4()
 }
 
 bool
-FilterRawSocket4::add_filter(InputFilter* filter)
+IoIpComm::add_filter(InputFilter* filter)
 {
-    if (filter == 0) {
+    if (filter == NULL) {
 	XLOG_FATAL("Adding a null filter");
 	return false;
     }
@@ -80,7 +63,7 @@ FilterRawSocket4::add_filter(InputFilter* filter)
     _input_filters.push_back(filter);
     if (_input_filters.front() == filter) {
 	string error_msg;
-	if (RawSocket4::start(error_msg) != XORP_OK) {
+	if (IoIpComm::start(error_msg) != XORP_OK) {
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return false;
 	}
@@ -89,9 +72,10 @@ FilterRawSocket4::add_filter(InputFilter* filter)
 }
 
 bool
-FilterRawSocket4::remove_filter(InputFilter* filter)
+IoIpComm::remove_filter(InputFilter* filter)
 {
     list<InputFilter*>::iterator i;
+
     i = find(_input_filters.begin(), _input_filters.end(), filter);
     if (i == _input_filters.end()) {
 	debug_msg("filter does not exist\n");
@@ -101,7 +85,7 @@ FilterRawSocket4::remove_filter(InputFilter* filter)
     _input_filters.erase(i);
     if (_input_filters.empty()) {
 	string error_msg;
-	if (RawSocket4::stop(error_msg) != XORP_OK) {
+	if (IoIpSocket::stop(error_msg) != XORP_OK) {
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return false;
 	}
@@ -110,25 +94,23 @@ FilterRawSocket4::remove_filter(InputFilter* filter)
 }
 
 int
-FilterRawSocket4::proto_socket_write(const string&	if_name,
-				     const string&	vif_name,
-				     const IPv4&	src_address,
-				     const IPv4&	dst_address,
-				     int32_t		ip_ttl,
-				     int32_t		ip_tos,
-				     bool		ip_router_alert,
-				     bool		ip_internet_control,
-				     const vector<uint8_t>& payload,
-				     string&		error_msg)
+IoIpComm::proto_socket_write(const string&	if_name,
+			     const string&	vif_name,
+			     const IPvX&	src_address,
+			     const IPvX&	dst_address,
+			     int32_t		ip_ttl,
+			     int32_t		ip_tos,
+			     bool		ip_router_alert,
+			     bool		ip_internet_control,
+			     const vector<uint8_t>& ext_headers_type,
+			     const vector<vector<uint8_t> >& ext_headers_payload,
+			     const vector<uint8_t>& payload,
+			     string&		error_msg)
 {
-    // XXX: The extention headers are not used in IPv4
-    vector<uint8_t> ext_headers_type;
-    vector<vector<uint8_t> > ext_headers_payload;
-
-    return (RawSocket4::proto_socket_write(if_name,
+    return (IoIpSocket::proto_socket_write(if_name,
 					   vif_name,
-					   IPvX(src_address),
-					   IPvX(dst_address),
+					   src_address,
+					   dst_address,
 					   ip_ttl,
 					   ip_tos,
 					   ip_router_alert,
@@ -140,36 +122,31 @@ FilterRawSocket4::proto_socket_write(const string&	if_name,
 }
 
 void
-FilterRawSocket4::process_recv_data(const string&	if_name,
-				    const string&	vif_name,
-				    const IPvX&		src_address,
-				    const IPvX&		dst_address,
-				    int32_t		ip_ttl,
-				    int32_t		ip_tos,
-				    bool		ip_router_alert,
-				    bool		ip_internet_control,
-				    const vector<uint8_t>& ext_headers_type,
-				    const vector<vector<uint8_t> >& ext_headers_payload,
-				    const vector<uint8_t>& payload)
+IoIpComm::process_recv_data(const string&	if_name,
+			    const string&	vif_name,
+			    const IPvX&		src_address,
+			    const IPvX&		dst_address,
+			    int32_t		ip_ttl,
+			    int32_t		ip_tos,
+			    bool		ip_router_alert,
+			    bool		ip_internet_control,
+			    const vector<uint8_t>& ext_headers_type,
+			    const vector<vector<uint8_t> >& ext_headers_payload,
+			    const vector<uint8_t>& payload)
 {
-    struct IPv4HeaderInfo header;
-
-    // XXX: The extention headers are not used in IPv4
-    UNUSED(ext_headers_type);
-    UNUSED(ext_headers_payload);
-
-    XLOG_ASSERT(src_address.is_ipv4());
-    XLOG_ASSERT(dst_address.is_ipv4());
+    struct IPvXHeaderInfo header;
 
     header.if_name = if_name;
     header.vif_name = vif_name;
-    header.src_address = src_address.get_ipv4();
-    header.dst_address = dst_address.get_ipv4();
-    header.ip_protocol = RawSocket4::ip_protocol();
+    header.src_address = src_address;
+    header.dst_address = dst_address;
+    header.ip_protocol = IoIpSocket::ip_protocol();
     header.ip_ttl = ip_ttl;
     header.ip_tos = ip_tos;
     header.ip_router_alert = ip_router_alert;
     header.ip_internet_control = ip_internet_control;
+    header.ext_headers_type = ext_headers_type;
+    header.ext_headers_payload = ext_headers_payload;
 
     for (list<InputFilter*>::iterator i = _input_filters.begin();
 	 i != _input_filters.end(); ++i) {
@@ -178,11 +155,11 @@ FilterRawSocket4::process_recv_data(const string&	if_name,
 }
 
 int
-FilterRawSocket4::join_multicast_group(const string&	if_name,
-				       const string&	vif_name,
-				       const IPv4&	group_address,
-				       const string&	receiver_name,
-				       string&		error_msg)
+IoIpComm::join_multicast_group(const string&	if_name,
+			       const string&	vif_name,
+			       const IPvX&	group_address,
+			       const string&	receiver_name,
+			       string&		error_msg)
 {
     JoinedGroupsTable::iterator iter;
 
@@ -224,7 +201,7 @@ FilterRawSocket4::join_multicast_group(const string&	if_name,
 	//
 	if (IoIpSocket::join_multicast_group(if_name,
 					     vif_name,
-					     IPvX(group_address),
+					     group_address,
 					     error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
@@ -241,11 +218,11 @@ FilterRawSocket4::join_multicast_group(const string&	if_name,
 }
 
 int
-FilterRawSocket4::leave_multicast_group(const string&	if_name,
-					const string&	vif_name,
-					const IPv4&	group_address,
-					const string&	receiver_name,
-					string&		error_msg)
+IoIpComm::leave_multicast_group(const string&	if_name,
+				const string&	vif_name,
+				const IPvX&	group_address,
+				const string&	receiver_name,
+				string&		error_msg)
 {
     JoinedGroupsTable::iterator iter;
 
@@ -269,7 +246,7 @@ FilterRawSocket4::leave_multicast_group(const string&	if_name,
 	_joined_groups_table.erase(iter);
 	if (IoIpSocket::leave_multicast_group(if_name,
 					      vif_name,
-					      IPvX(group_address),
+					      group_address,
 					      error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
@@ -283,29 +260,30 @@ FilterRawSocket4::leave_multicast_group(const string&	if_name,
 // Filter class for checking incoming raw packets and checking whether
 // to forward them.
 //
-class VifInputFilter4 : public FilterRawSocket4::InputFilter {
+class VifInputFilter : public IoIpComm::InputFilter {
 public:
-    VifInputFilter4(RawSocket4Manager&	raw_socket_manager,
-		    FilterRawSocket4&	rs,
-		    const string&	receiver_name,
-		    const string&	if_name,
-		    const string&	vif_name,
-		    uint8_t		ip_protocol)
-	: FilterRawSocket4::InputFilter(raw_socket_manager, receiver_name,
-					ip_protocol),
-	  _rs(rs),
+    VifInputFilter(IoIpManager&		io_ip_manager,
+		   IoIpComm&		io_ip_comm,
+		   const string&	receiver_name,
+		   const string&	if_name,
+		   const string&	vif_name,
+		   uint8_t		ip_protocol)
+	: IoIpComm::InputFilter(io_ip_manager, receiver_name, ip_protocol),
+	  _io_ip_comm(io_ip_comm),
 	  _if_name(if_name),
 	  _vif_name(vif_name),
 	  _enable_multicast_loopback(false)
     {}
 
-    virtual ~VifInputFilter4() {
+    virtual ~VifInputFilter() {
 	leave_all_multicast_groups();
     }
 
-    void set_enable_multicast_loopback(bool v) { _enable_multicast_loopback = v; }
+    void set_enable_multicast_loopback(bool v) {
+	_enable_multicast_loopback = v;
+    }
 
-    void recv(const struct IPv4HeaderInfo& header,
+    void recv(const struct IPvXHeaderInfo& header,
 	      const vector<uint8_t>& payload)
     {
 	// Check the protocol
@@ -344,17 +322,17 @@ public:
 	}
 
 	// Forward the packet
-	raw_socket_manager().recv_and_forward(receiver_name(), header,
-					      payload);
+	io_ip_manager().send_to_receiver(receiver_name(), header, payload);
     }
 
     void bye() {}
     const string& if_name() const { return _if_name; }
     const string& vif_name() const { return _vif_name; }
 
-    int join_multicast_group(const IPv4& group_address, string& error_msg) {
-	if (_rs.join_multicast_group(if_name(), vif_name(), group_address,
-				     receiver_name(), error_msg)
+    int join_multicast_group(const IPvX& group_address, string& error_msg) {
+	if (_io_ip_comm.join_multicast_group(if_name(), vif_name(),
+					     group_address, receiver_name(),
+					     error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -362,10 +340,11 @@ public:
 	return (XORP_OK);
     }
 
-    int leave_multicast_group(const IPv4& group_address, string& error_msg) {
+    int leave_multicast_group(const IPvX& group_address, string& error_msg) {
 	_joined_multicast_groups.erase(group_address);
-	if (_rs.leave_multicast_group(if_name(), vif_name(), group_address,
-				      receiver_name(), error_msg)
+	if (_io_ip_comm.leave_multicast_group(if_name(), vif_name(),
+					      group_address, receiver_name(),
+					      error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -375,155 +354,217 @@ public:
     void leave_all_multicast_groups() {
 	string error_msg;
 	while (! _joined_multicast_groups.empty()) {
-	    const IPv4& group_address = *(_joined_multicast_groups.begin());
+	    const IPvX& group_address = *(_joined_multicast_groups.begin());
 	    leave_multicast_group(group_address, error_msg);
 	}
     }
 
 protected:
-    bool is_my_address(const IPv4& addr) const {
+    bool is_my_address(const IPvX& addr) const {
 	const IfTreeInterface* ifp = NULL;
 	const IfTreeVif* vifp = NULL;
 
-	if (_rs.find_interface_vif_by_addr(IPvX(addr), ifp, vifp) != true) {
+	if (_io_ip_comm.find_interface_vif_by_addr(IPvX(addr), ifp, vifp)
+	    != true) {
 	    return (false);
 	}
-	if (ifp->enabled() && vifp->enabled()) {
-	    const IfTreeAddr4* ap = vifp->find_addr(addr);
-	    if (ap != NULL) {
-		if (ap->enabled())
-		    return (true);
-	    }
+	if (! (ifp->enabled() && vifp->enabled()))
+	    return (false);
+	if (addr.is_ipv4()) {
+	    const IfTreeAddr4* ap = vifp->find_addr(addr.get_ipv4());
+	    if ((ap != NULL) && (ap->enabled()))
+		return (true);
+	    return (false);
+	}
+	if (addr.is_ipv6()) {
+	    const IfTreeAddr6* ap = vifp->find_addr(addr.get_ipv6());
+	    if ((ap != NULL) && (ap->enabled()))
+		return (true);
+	    return (false);
 	}
 	return (false);
     }
 
-    FilterRawSocket4&	_rs;
+    IoIpComm&		_io_ip_comm;
     const string	_if_name;
     const string	_vif_name;
-    set<IPv4>		_joined_multicast_groups;
+    set<IPvX>           _joined_multicast_groups;
     bool		_enable_multicast_loopback;
 };
 
-
 // ----------------------------------------------------------------------------
-// RawSocket4Manager code
+// IoIpManager code
 
-RawSocket4Manager::RawSocket4Manager(EventLoop&		eventloop,
-				     const IfTree&	iftree)
+IoIpManager::IoIpManager(EventLoop&	eventloop,
+			 const IfTree&	iftree)
     : _eventloop(eventloop),
-      _iftree(iftree)
+      _iftree(iftree),
+      _send_to_receiver_base(NULL)
 {
 }
 
-RawSocket4Manager::~RawSocket4Manager()
+IoIpManager::~IoIpManager()
 {
-    erase_filters(_filters.begin(), _filters.end());
+    erase_filters(_comm_table4, _filters4, _filters4.begin(), _filters4.end());
+    erase_filters(_comm_table6, _filters6, _filters6.begin(), _filters6.end());
+}
+
+IoIpManager::CommTable&
+IoIpManager::comm_table_by_family(int family)
+{
+    if (family == IPv4::af())
+	return (_comm_table4);
+    if (family == IPv6::af())
+	return (_comm_table6);
+
+    XLOG_FATAL("Invalid address family: %d", family);
+    return (_comm_table4);
+}
+
+IoIpManager::FilterBag&
+IoIpManager::filters_by_family(int family)
+{
+    if (family == IPv4::af())
+	return (_filters4);
+    if (family == IPv6::af())
+	return (_filters6);
+
+    XLOG_FATAL("Invalid address family: %d", family);
+    return (_filters4);
 }
 
 void
-RawSocket4Manager::erase_filters_by_name(const string& receiver_name)
+IoIpManager::send_to_receiver(const string&			receiver_name,
+			      const struct IPvXHeaderInfo&	header,
+			      const vector<uint8_t>&		payload)
 {
-    erase_filters(_filters.lower_bound(receiver_name),
-		  _filters.upper_bound(receiver_name));
+    if (_send_to_receiver_base != NULL)
+	_send_to_receiver_base->send_to_receiver(receiver_name, header,
+						 payload);
 }
 
 void
-RawSocket4Manager::erase_filters(const FilterBag4::iterator& begin,
-				 const FilterBag4::iterator& end)
+IoIpManager::erase_filters_by_name(const string& receiver_name)
 {
-    FilterBag4::iterator fi(begin);
+    erase_filters(_comm_table4, _filters4,
+		  _filters4.lower_bound(receiver_name),
+		  _filters4.upper_bound(receiver_name));
+    erase_filters(_comm_table6, _filters6,
+		  _filters6.lower_bound(receiver_name),
+		  _filters6.upper_bound(receiver_name));
+}
+
+void
+IoIpManager::erase_filters(CommTable& comm_table, FilterBag& filters,
+			   const FilterBag::iterator& begin,
+			   const FilterBag::iterator& end)
+{
+    FilterBag::iterator fi(begin);
     while (fi != end) {
-	FilterRawSocket4::InputFilter* filter = fi->second;
+	IoIpComm::InputFilter* filter = fi->second;
 
-	SocketTable4::iterator sti = _sockets.find(filter->ip_protocol());
-	XLOG_ASSERT(sti != _sockets.end());
-	FilterRawSocket4* rs = sti->second;
-	XLOG_ASSERT(rs != NULL);
+	CommTable::iterator cti = comm_table.find(filter->ip_protocol());
+	XLOG_ASSERT(cti != comm_table.end());
+	IoIpComm* io_ip_comm = cti->second;
+	XLOG_ASSERT(io_ip_comm != NULL);
 
-	rs->remove_filter(filter);
+	io_ip_comm->remove_filter(filter);
 	delete filter;
 
-	_filters.erase(fi++);
+	filters.erase(fi++);
+
+	//
+	// Reference counting: if there are now no listeners on
+	// this protocol socket (and hence no filters), remove it
+	// from the table and delete it.
+	//
+	if (io_ip_comm->no_input_filters()) {
+	    comm_table.erase(io_ip_comm->ip_protocol());
+	    delete io_ip_comm;
+	}
     }
 }
 
 int
-RawSocket4Manager::send(const string&	if_name,
-			const string&	vif_name,
-			const IPv4&	src_address,
-			const IPv4&	dst_address,
-			uint8_t		ip_protocol,
-			int32_t		ip_ttl,
-			int32_t		ip_tos,
-			bool		ip_router_alert,
-			bool		ip_internet_control,
-			const vector<uint8_t>& payload,
-			string&		error_msg)
+IoIpManager::send(const string&		if_name,
+		  const string&		vif_name,
+		  const IPvX&		src_address,
+		  const IPvX&		dst_address,
+		  uint8_t		ip_protocol,
+		  int32_t		ip_ttl,
+		  int32_t		ip_tos,
+		  bool			ip_router_alert,
+		  bool			ip_internet_control,
+		  const vector<uint8_t>& ext_headers_type,
+		  const vector<vector<uint8_t> >& ext_headers_payload,
+		  const vector<uint8_t>& payload,
+		  string&		error_msg)
 {
-    // Find the socket associated with this protocol
-    SocketTable4::iterator sti = _sockets.find(ip_protocol);
-    if (sti == _sockets.end()) {
+    CommTable& comm_table = comm_table_by_family(src_address.af());
+
+    // Find the IoIpComm associated with this protocol
+    CommTable::iterator cti = comm_table.find(ip_protocol);
+    if (cti == comm_table.end()) {
 	error_msg = c_format("Protocol %u is not registered",
 			     XORP_UINT_CAST(ip_protocol));
 	return (XORP_ERROR);
     }
-    FilterRawSocket4* rs = sti->second;
-    XLOG_ASSERT(rs != NULL);
+    IoIpComm* io_ip_comm = cti->second;
+    XLOG_ASSERT(io_ip_comm != NULL);
 
-    if (rs->proto_socket_write(if_name,
-			       vif_name,
-			       src_address,
-			       dst_address,
-			       ip_ttl,
-			       ip_tos,
-			       ip_router_alert,
-			       ip_internet_control,
-			       payload,
-			       error_msg)
-	!= XORP_OK) {
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
+    return (io_ip_comm->proto_socket_write(if_name,
+					   vif_name,
+					   src_address,
+					   dst_address,
+					   ip_ttl,
+					   ip_tos,
+					   ip_router_alert,
+					   ip_internet_control,
+					   ext_headers_type,
+					   ext_headers_payload,
+					   payload,
+					   error_msg));
 }
 
 int
-RawSocket4Manager::register_receiver(const string&	receiver_name,
-				     const string&	if_name,
-				     const string&	vif_name,
-				     uint8_t		ip_protocol,
-				     bool		enable_multicast_loopback,
-				     string&		error_msg)
+IoIpManager::register_receiver(int		family,
+			       const string&	receiver_name,
+			       const string&	if_name,
+			       const string&	vif_name,
+			       uint8_t		ip_protocol,
+			       bool		enable_multicast_loopback,
+			       string&		error_msg)
 {
-    VifInputFilter4* filter;
+    VifInputFilter* filter;
+    CommTable& comm_table = comm_table_by_family(family);
+    FilterBag& filters = filters_by_family(family);
 
     error_msg = "";
 
     //
-    // Look in the SocketTable for a socket matching this protocol.
-    // If a socket does not yet exist, create one.
+    // Look in the CommTable for an entry matching this protocol.
+    // If an entry does not yet exist, create one.
     //
-    SocketTable4::iterator sti = _sockets.find(ip_protocol);
-    FilterRawSocket4* rs = NULL;
-    if (sti == _sockets.end()) {
-	rs = new FilterRawSocket4(_eventloop, ip_protocol, iftree());
-	_sockets[ip_protocol] = rs;
+    CommTable::iterator cti = comm_table.find(ip_protocol);
+    IoIpComm* io_ip_comm = NULL;
+    if (cti == comm_table.end()) {
+	io_ip_comm = new IoIpComm(_eventloop, family, ip_protocol, iftree());
+	comm_table[ip_protocol] = io_ip_comm;
     } else {
-	rs = sti->second;
+	io_ip_comm = cti->second;
     }
-    XLOG_ASSERT(rs != NULL);
+    XLOG_ASSERT(io_ip_comm != NULL);
 
-    //
-    // Search if we have already the filter
-    //
-    FilterBag4::iterator fi;
-    FilterBag4::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	filter = dynamic_cast<VifInputFilter4*>(fi->second);
+    FilterBag::iterator fi;
+    FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
+    for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+	filter = dynamic_cast<VifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
+	//
+	// Search if we have already the filter
+	//
 	if ((filter->ip_protocol() == ip_protocol) &&
 	    (filter->if_name() == if_name) &&
 	    (filter->vif_name() == vif_name)) {
@@ -536,58 +577,62 @@ RawSocket4Manager::register_receiver(const string&	receiver_name,
     //
     // Create the filter
     //
-    filter = new VifInputFilter4(*this, *rs, receiver_name, if_name,
-				 vif_name, ip_protocol);
+    filter = new VifInputFilter(*this, *io_ip_comm, receiver_name, if_name,
+				vif_name, ip_protocol);
     filter->set_enable_multicast_loopback(enable_multicast_loopback);
 
-    // Add the filter to the appropriate raw socket
-    rs->add_filter(filter);
+    // Add the filter to the appropriate IoIpComm entry
+    io_ip_comm->add_filter(filter);
 
     // Add the filter to those associated with receiver_name
-    _filters.insert(FilterBag4::value_type(receiver_name, filter));
+    filters.insert(FilterBag::value_type(receiver_name, filter));
 
     return (XORP_OK);
 }
 
 int
-RawSocket4Manager::unregister_receiver(const string&	receiver_name,
-				       const string&	if_name,
-				       const string&	vif_name,
-				       uint8_t		ip_protocol,
-				       string&		error_msg)
+IoIpManager::unregister_receiver(int		family,
+				 const string&	receiver_name,
+				 const string&	if_name,
+				 const string&	vif_name,
+				 uint8_t	ip_protocol,
+				 string&	error_msg)
 {
+    CommTable& comm_table = comm_table_by_family(family);
+    FilterBag& filters = filters_by_family(family);
+
     //
-    // Find the socket associated with this protocol
+    // Find the IoIpComm entry associated with this protocol
     //
-    SocketTable4::iterator sti = _sockets.find(ip_protocol);
-    if (sti == _sockets.end()) {
+    CommTable::iterator cti = comm_table.find(ip_protocol);
+    if (cti == comm_table.end()) {
 	error_msg = c_format("Protocol %u is not registered",
 			     XORP_UINT_CAST(ip_protocol));
 	return (XORP_ERROR);
     }
-    FilterRawSocket4* rs = sti->second;
-    XLOG_ASSERT(rs != NULL);
+    IoIpComm* io_ip_comm = cti->second;
+    XLOG_ASSERT(io_ip_comm != NULL);
 
     //
     // Walk through list of filters looking for matching interface and vif
     //
-    FilterBag4::iterator fi;
-    FilterBag4::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter4* filter;
-	filter = dynamic_cast<VifInputFilter4*>(fi->second);
+    FilterBag::iterator fi;
+    FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
+    for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+	VifInputFilter* filter;
+	filter = dynamic_cast<VifInputFilter*>(fi->second);
 
 	// If filter found, remove it and delete it
 	if ((filter != NULL) &&
 	    (filter->ip_protocol() == ip_protocol) &&
 	    (filter->if_name() == if_name) &&
 	    (filter->vif_name() == vif_name)) {
-	    
+
 	    // Remove the filter
-	    rs->remove_filter(filter);
+	    io_ip_comm->remove_filter(filter);
 
 	    // Remove the filter from the group associated with this receiver
-	    _filters.erase(fi);
+	    filters.erase(fi);
 
 	    // Destruct the filter
 	    delete filter;
@@ -597,9 +642,9 @@ RawSocket4Manager::unregister_receiver(const string&	receiver_name,
 	    // this protocol socket (and hence no filters), remove it
 	    // from the table and delete it.
 	    //
-	    if (rs->no_input_filters()) {
-		_sockets.erase(ip_protocol);
-		delete rs;
+	    if (io_ip_comm->no_input_filters()) {
+		comm_table.erase(ip_protocol);
+		delete io_ip_comm;
 	    }
 
 	    return (XORP_OK);
@@ -615,21 +660,23 @@ RawSocket4Manager::unregister_receiver(const string&	receiver_name,
 }
 
 int
-RawSocket4Manager::join_multicast_group(const string&	receiver_name,
-					const string&	if_name,
-					const string&	vif_name,
-					uint8_t		ip_protocol,
-					const IPv4&	group_address,
-					string&		error_msg)
+IoIpManager::join_multicast_group(const string&	receiver_name,
+				  const string&	if_name,
+				  const string&	vif_name,
+				  uint8_t	ip_protocol,
+				  const IPvX&	group_address,
+				  string&	error_msg)
 {
+    FilterBag& filters = filters_by_family(group_address.af());
+
     //
     // Search if we have already the filter
     //
-    FilterBag4::iterator fi;
-    FilterBag4::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter4* filter;
-	filter = dynamic_cast<VifInputFilter4*>(fi->second);
+    FilterBag::iterator fi;
+    FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
+    for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+	VifInputFilter* filter;
+	filter = dynamic_cast<VifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -656,21 +703,23 @@ RawSocket4Manager::join_multicast_group(const string&	receiver_name,
 }
 
 int
-RawSocket4Manager::leave_multicast_group(const string&	receiver_name,
-					 const string&	if_name,
-					 const string&	vif_name,
-					 uint8_t	ip_protocol,
-					 const IPv4&	group_address,
-					 string&	error_msg)
+IoIpManager::leave_multicast_group(const string&	receiver_name,
+				   const string&	if_name,
+				   const string&	vif_name,
+				   uint8_t		ip_protocol,
+				   const IPvX&		group_address,
+				   string&		error_msg)
 {
+    FilterBag& filters = filters_by_family(group_address.af());
+
     //
     // Search if we have already the filter
     //
-    FilterBag4::iterator fi;
-    FilterBag4::iterator fi_end = _filters.upper_bound(receiver_name);
-    for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter4* filter;
-	filter = dynamic_cast<VifInputFilter4*>(fi->second);
+    FilterBag::iterator fi;
+    FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
+    for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
+	VifInputFilter* filter;
+	filter = dynamic_cast<VifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 

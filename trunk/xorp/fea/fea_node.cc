@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.3 2007/04/27 01:10:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.4 2007/05/04 01:43:21 pavlin Exp $"
 
 
 //
@@ -46,6 +46,7 @@ FeaNode::FeaNode(EventLoop& eventloop)
 		 _ifconfig.local_config(),
 #endif
 		 _nexthop_port_mapper),
+      _io_ip_manager(_eventloop, ifconfig().local_config()),
       _pa_transaction_manager(_eventloop, _pa_table_manager)
 {
 }

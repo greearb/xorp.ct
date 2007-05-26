@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.3 2007/04/20 05:43:43 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.4 2007/04/28 00:49:12 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -33,10 +33,9 @@
 #include "libfeaclient_bridge.hh"
 #include "xrl_fea_io.hh"
 #include "xrl_fea_target.hh"
+#include "xrl_io_ip_manager.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_packet_acl.hh"
-#include "xrl_rawsock4.hh"
-#include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
 
 class EventLoop;
@@ -153,8 +152,7 @@ private:
     XrlFeaIO		_xrl_fea_io;	// The FEA I/O XRL interface
 
     XrlFibClientManager	_xrl_fib_client_manager; // The FIB client manager
-    XrlRawSocket4Manager _xrsm4;	// IPv4 raw sockets manager
-    XrlRawSocket6Manager _xrsm6;	// IPv6 raw sockets manager
+    XrlIoIpManager	_xrl_io_ip_manager;	// IP raw I/O manager
 
     XrlSocketServer	_xrl_socket_server; // XRL socket server
     XrlPacketAclTarget	_xrl_packet_acl_target;

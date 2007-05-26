@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.9 2007/04/28 00:49:12 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.10 2007/05/08 19:23:15 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -34,8 +34,7 @@ class IfConfig;
 class InterfaceManager;
 class LibFeaClientBridge;
 class XrlFibClientManager;
-class XrlRawSocket4Manager;
-class XrlRawSocket6Manager;
+class XrlIoIpManager;
 class XrlSocketServer;
 class Profile;
 
@@ -54,8 +53,7 @@ public:
 		 XrlRouter&		xrl_router,
 		 Profile&		profile,
 		 XrlFibClientManager&	xrl_fib_client_manager,
-		 XrlRawSocket4Manager&	xrsm4,
-		 XrlRawSocket6Manager&	xrsm6,
+		 IoIpManager&		io_ip_manager,
 		 LibFeaClientBridge&	lib_fea_client_bridge,
 		 XrlSocketServer&	xrl_socket_server);
 
@@ -1318,8 +1316,7 @@ private:
     XrlRouter&		       	_xrl_router;
     Profile&			_profile;
     XrlFibClientManager&	_xrl_fib_client_manager;
-    XrlRawSocket4Manager&	_xrsm4;
-    XrlRawSocket6Manager&	_xrsm6;
+    IoIpManager&		_io_ip_manager;
     LibFeaClientBridge&		_lib_fea_client_bridge;
     XrlSocketServer&		_xrl_socket_server;
 
