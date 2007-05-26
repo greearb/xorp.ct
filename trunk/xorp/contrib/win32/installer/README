@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/contrib/win32/installer/README,v 1.1 2006/03/09 08:00:32 pavlin Exp $
+# $XORP: xorp/contrib/win32/installer/README,v 1.2 2007/02/17 03:01:40 pavlin Exp $
 #
 
 Those are the instructions for building the XORP Installer for Windows:
@@ -15,3 +15,4 @@ Those are the instructions for building the XORP Installer for Windows:
     that need to be installed.
   - Run makensis xorp.nsi.
   - Test the installer.
+
