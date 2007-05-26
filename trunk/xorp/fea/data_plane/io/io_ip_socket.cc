@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/io/io_ip_socket.cc,v 1.1 2007/05/24 20:01:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/io/io_ip_socket.cc,v 1.2 2007/05/24 20:17:23 pavlin Exp $"
 
 //
 // I/O IP raw socket support.
@@ -296,7 +296,7 @@ IoIpSocket::~IoIpSocket()
     string dummy_error_msg;
 
     stop(dummy_error_msg);
-    
+
     // Free the buffers
     delete[] _rcvbuf;
     delete[] _sndbuf;
@@ -307,18 +307,12 @@ IoIpSocket::~IoIpSocket()
 int
 IoIpSocket::start(string& error_msg)
 {
-    if (_proto_socket_in.is_valid() && _proto_socket_out.is_valid())
-	return (XORP_OK);
-    
     return (open_proto_sockets(error_msg));
 }
 
 int
 IoIpSocket::stop(string& error_msg)
 {
-    if (! (_proto_socket_in.is_valid() && _proto_socket_out.is_valid()))
-	return (XORP_OK);
-
     return (close_proto_sockets(error_msg));
 }
 
@@ -891,6 +885,9 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 {
     string dummy_error_msg;
 
+    if (_proto_socket_in.is_valid() && _proto_socket_out.is_valid())
+	return (XORP_OK);
+    
     // If necessary, open the protocol sockets
     if (! _proto_socket_in.is_valid()) {
 	_proto_socket_in = socket(family(), SOCK_RAW, _ip_protocol);
@@ -1099,10 +1096,7 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 int
 IoIpSocket::close_proto_sockets(string& error_msg)
 {
-    if (! (_proto_socket_in.is_valid() && _proto_socket_out.is_valid())) {
-	error_msg = c_format("Invalid protocol socket");
-	return (XORP_ERROR);
-    }
+    error_msg = "";
 
     //
     // Close the outgoing protocol socket
