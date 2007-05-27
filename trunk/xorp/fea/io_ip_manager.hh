@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.1 2007/05/26 02:04:45 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.2 2007/05/26 02:10:26 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -355,6 +355,7 @@ public:
      */
     class SendToReceiverBase {
     public:
+	virtual ~SendToReceiverBase() {}
 	/**
 	 * Send a raw IP packet to a receiver.
 	 *
