@@ -58,6 +58,9 @@
 /* Define to 1 if you have broken Linux RTM_RTA macro */
 #undef HAVE_BROKEN_MACRO_RTM_RTA
 
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
