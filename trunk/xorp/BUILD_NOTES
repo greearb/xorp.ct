@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.88 2007/05/04 22:21:48 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.89 2007/05/09 23:57:58 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -447,6 +447,19 @@ gmake check
 
       The path to the python.exe binary must either be present in PATH after
       installation, or a symlink created in the MinGW environment.
+
+    - In certain cases the compilation might try to use Python to
+      auto-generate some files. In that case, one possible work-around
+      solution would be install Python. However, if the compilation
+      fails with an error like:
+
+/c/python24/python ../../xrl/scripts/tgt-gen -I../../xrl/interfaces bgp.tgt
+process_begin: CreateProcess((null), /c/python24/python ../../xrl/scripts/tgt-gen -I../../xrl/interfaces bgp.tgt, ...) failed.
+make (e=3): The system cannot find the path specified.
+
+      then try using the following command in the top-level XORP directory:
+
+      env PYTHON=C:/dos/style/path/to/python.exe ./configure
 
     - The RunShellCommand class has a hard-coded path to the MSYS shell.
       This is currently a no-op because the router manager no longer uses
