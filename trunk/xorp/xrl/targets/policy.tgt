@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/targets/policy.tgt,v 1.1 2004/09/17 14:05:12 abittau Exp $ */
+/* $XORP: xorp/xrl/targets/policy.tgt,v 1.2 2004/09/18 00:21:07 pavlin Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"

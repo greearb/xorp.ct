@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/targets/socket_server.tgt,v 1.3 2004/06/11 00:09:45 pavlin Exp $ */
 #include "common.xif"
 #include "finder_event_observer.xif"
 #include "socket4.xif"

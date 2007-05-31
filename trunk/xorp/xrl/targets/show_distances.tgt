@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/targets/show_distances.tgt,v 1.1 2007/03/22 20:48:21 bms Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"

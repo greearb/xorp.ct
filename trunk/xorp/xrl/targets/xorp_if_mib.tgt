@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/xrl/targets/xorp_if_mib.tgt,v 1.1 2003/05/20 01:20:46 jcardona Exp $ */
+/* $XORP: xorp/xrl/targets/xorp_if_mib.tgt,v 1.2 2004/04/10 07:41:43 pavlin Exp $ */
 
 #include "common.xif"
 #include "xorp_if_mib.xif"
