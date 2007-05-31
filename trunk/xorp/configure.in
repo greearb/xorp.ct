@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.203 2007/05/24 20:01:26 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.204 2007/05/31 17:07:04 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.203 2007/05/24 20:01:26 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.204 2007/05/31 17:07:04 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -780,6 +780,8 @@ AC_CHECK_FUNCS([if_nametoindex])
 AC_CHECK_FUNCS([if_indextoname])
 AC_CHECK_FUNCS([uname])
 AC_CHECK_FUNCS([strptime])
+dnl XXX: On Linux, clock_gettime() requires linking with the librt library
+AC_CHECK_LIB(rt, clock_gettime, [LIBS="${LIBS} -lrt"])
 AC_CHECK_FUNCS([clock_gettime])
 
 dnl ---------------------------------------------------------------------------
