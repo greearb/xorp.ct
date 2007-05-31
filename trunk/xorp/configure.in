@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.204 2007/05/31 17:07:04 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.205 2007/05/31 17:51:50 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.204 2007/05/31 17:07:04 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.205 2007/05/31 17:51:50 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -768,6 +768,15 @@ AC_TRY_COMPILE([
     [AC_MSG_RESULT(no)
      AC_CHECK_HEADERS([getopt.h])
     ])
+
+dnl Check for "struct timespec"
+AC_CHECK_HEADERS([time.h])
+AC_CHECK_TYPES([struct timespec], [], [],
+[
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for library functions

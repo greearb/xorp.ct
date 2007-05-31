@@ -474,6 +474,9 @@
 /* Define to 1 if `sun_len' is member of `struct sockaddr_un'. */
 #undef HAVE_STRUCT_SOCKADDR_UN_SUN_LEN
 
+/* Define to 1 if the system has the type `struct timespec'. */
+#undef HAVE_STRUCT_TIMESPEC
+
 /* Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method */
 #undef HAVE_SYSCTL_NET_RT_DUMP
 
@@ -548,6 +551,9 @@
 
 /* Define to 1 if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
+
+/* Define to 1 if you have the <time.h> header file. */
+#undef HAVE_TIME_H
 
 /* Define to 1 if the system has the type `uint16_t'. */
 #undef HAVE_UINT16_T
