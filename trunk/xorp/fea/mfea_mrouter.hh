@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.16 2007/02/16 22:45:46 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.17 2007/05/19 01:52:40 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -112,24 +112,6 @@ public:
      * @return the socket value.
      */
     XorpFd	mrouter_socket() const { return (_mrouter_socket); }
-    
-    /**
-     * Open an mrouter socket.
-     * 
-     * The mrouter socket is used for various multicast-related access.
-     * Note that no more than one mrouter socket (per address family)
-     * should be open at a time.
-     * 
-     * @return the socket value.
-     */
-    XorpFd	open_mrouter_socket();
-    
-    /**
-     * Close the mrouter socket.
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		close_mrouter_socket();
     
     /**
      * Start/enable the multicast routing in the kernel.
@@ -371,21 +353,11 @@ public:
      * @param datalen the length of the data in @ref databuf.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		kernel_call_process(uint8_t *databuf, size_t datalen);
+    int		kernel_call_process(const uint8_t *databuf, size_t datalen);
     
 private:
     // Private functions
     MfeaNode&	mfea_node() const	{ return (_mfea_node);	}
-    
-    /**
-     * Read data from the multicast router socket.
-     *
-     * This is called as an IoEventCb callback.
-     * @param fd file descriptor that with event caused this method to be
-     * called.
-     * @param m mask representing event type.
-     */
-    void	mrouter_socket_read(XorpFd fd, IoEventType m);
     
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to

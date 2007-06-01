@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.43 2007/05/10 00:08:16 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.44 2007/05/19 01:52:40 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -82,6 +82,13 @@ public:
      * Destructor
      */
     virtual	~MfeaNode();
+
+    /**
+     * Get the FEA node instance.
+     *
+     * @return reference to the FEA node instance.
+     */
+    FeaNode&	fea_node() { return (_fea_node); }
 
     /**
      * Start the node operation.

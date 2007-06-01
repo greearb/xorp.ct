@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/io/io_ip_socket.cc,v 1.2 2007/05/24 20:17:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/forwarding_plane/io/io_ip_socket.cc,v 1.3 2007/05/26 00:52:31 pavlin Exp $"
 
 //
 // I/O IP raw socket support.
@@ -1188,7 +1188,8 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     if (nbytes < 0) {
 	if (errno == EINTR)
 	    return;		// OK: restart receiving
-	XLOG_ERROR("recvmsg() failed: %s", strerror(errno));
+	XLOG_ERROR("recvmsg() on socket %s failed: %s",
+		   _proto_socket_in.str().c_str(), strerror(errno));
 	return;			// Error
     }
 
@@ -1248,32 +1249,31 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     }
 #endif // HOST_OS_WINDOWS
     
-    // Check whether this is a signal from the kernel to the user-level
-    switch (_ip_protocol) {
-    case IPPROTO_IGMP:
+    //
+    // Check whether this is a multicast forwarding related upcall from the
+    // system to the user-level.
+    //
+    switch (family()) {
+    case AF_INET:
     {
-#ifndef HAVE_IPV4_MULTICAST_ROUTING
-	XLOG_WARNING("proto_socket_read(): "
-		     "IGMP is unsupported on this platform");
-	return;		// Error
-#else
+	if (_ip_protocol != IPPROTO_IGMP)
+	    break;
+
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
 	if (nbytes < (ssize_t)sizeof(struct igmpmsg)) {
-	    XLOG_WARNING("proto_socket_read() failed: "
-			 "kernel signal packet size %d is smaller than minimum size %u",
-			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(sizeof(struct igmpmsg)));
-	    return;		// Error
+	    // Probably not a system upcall
+	    break;
 	}
-	struct igmpmsg igmpmsg;
-	memcpy(&igmpmsg, _rcvbuf, sizeof(igmpmsg));
-	if (igmpmsg.im_mbz == 0) {
+	struct igmpmsg* igmpmsg;
+	igmpmsg = reinterpret_cast<struct igmpmsg *>(_rcvbuf);
+	if (igmpmsg->im_mbz == 0) {
 	    //
-	    // XXX: Packets sent up from kernel to daemon have
-	    //      igmpmsg.im_mbz = ip->ip_p = 0
+	    // XXX: Packets sent up from system to daemon have
+	    //      igmpmsg->im_mbz = ip->ip_p = 0
 	    //
-	    // XXX: Those kernel upcall messages should be received and
-	    // processed by the MFEA, hence we silently ignore them here.
-	    // kernel_call_process(_rcvbuf, nbytes);
+	    vector<uint8_t> payload(nbytes);
+	    memcpy(&payload[0], _rcvbuf, nbytes);
+	    process_system_multicast_upcall(payload);
 	    return;		// OK
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
@@ -1281,27 +1281,21 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     break;
     
 #ifdef HAVE_IPV6
-    case IPPROTO_ICMPV6:
+    case AF_INET6:
     {
-	if (nbytes < (ssize_t)sizeof(struct icmp6_hdr)) {
-	    XLOG_WARNING("proto_socket_read() failed: "
-			 "packet size %d is smaller than minimum size %u",
-			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(sizeof(struct icmp6_hdr)));
-	    return;		// Error
-	}
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-	struct mrt6msg *mrt6msg;
+	if (_ip_protocol != IPPROTO_ICMPV6)
+	    break;
 
-	if (nbytes < (ssize_t)sizeof(*mrt6msg)) {
-	    // Not a kernel signal
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+	if (nbytes < (ssize_t)sizeof(struct mrt6msg)) {
+	    // Probably not a system upcall 
 	    break;
 	}
-
+	struct mrt6msg* mrt6msg;
 	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf);
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
 	    //
-	    // XXX: Packets sent up from kernel to daemon have
+	    // XXX: Packets sent up from system to daemon have
 	    //      mrt6msg->im6_mbz = icmp6_hdr->icmp6_type = 0
 	    // Because we set ICMP6 filters on the socket,
 	    // we should never see a real ICMPv6 packet
@@ -1313,9 +1307,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    // April 2000, FreeBSD-4.0) which don't have the
 	    //     'icmp6_type = 0' mechanism.
 	    //
-	    // XXX: Those kernel upcall messages should be received and
-	    // processed by the MFEA, hence we silently ignore them here.
-	    // kernel_call_process(_rcvbuf, nbytes);
+	    vector<uint8_t> payload(nbytes);
+	    memcpy(&payload[0], _rcvbuf, nbytes);
+	    process_system_multicast_upcall(payload);
 	    return;		// OK
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
@@ -1324,11 +1318,12 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #endif // HAVE_IPV6
     
     default:
-	break;
+	XLOG_UNREACHABLE();
+	return;			// Error
     }
     
     //
-    // Not a kernel signal. Pass to the registered processing function
+    // Not a system upcall. Pass to the registered processing function.
     //
 
     //

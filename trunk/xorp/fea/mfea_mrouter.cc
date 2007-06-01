@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.52 2007/05/19 01:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.53 2007/05/23 04:08:23 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -62,6 +62,7 @@
 #include "mrt/max_vifs.h"
 #include "mrt/multicast_defs.h"
 
+#include "fea_node.hh"
 #include "mfea_node.hh"
 #include "mfea_vif.hh"
 #include "mfea_kernel_messages.hh"
@@ -188,6 +189,8 @@ MfeaMrouter::~MfeaMrouter()
 int
 MfeaMrouter::start()
 {
+    string error_msg;
+
 #ifdef HOST_OS_WINDOWS
     XLOG_ERROR("Multicast routing is not supported on Windows");
     return (XORP_ERROR);
@@ -210,11 +213,26 @@ MfeaMrouter::start()
 	// return (XORP_ERROR);
     }
 #endif // ! HOST_OS_WINDOWS
-    
-    // Open kernel multicast routing access socket
-    if (! open_mrouter_socket().is_valid())
+
+    // Register as multicast upcall receiver
+    IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();
+    uint8_t ip_protocol = kernel_mrouter_ip_protocol();
+    if (io_ip_manager.register_system_multicast_upcall_receiver(
+	    family(),
+	    ip_protocol,
+	    callback(this, &MfeaMrouter::kernel_call_process),
+	    _mrouter_socket,
+	    error_msg)
+	!= XORP_OK) {
+	XLOG_ERROR("Cannot register multicast upcall receiver: %s",
+		   error_msg.c_str());
 	return (XORP_ERROR);
-    
+    }
+    if (! _mrouter_socket.is_valid()) {
+	XLOG_ERROR("Failed to assign the multicast routing socket");
+	return (XORP_ERROR);
+    }
+
     // Start the multicast routing in the kernel
     if (start_mrt() < 0)
 	return (XORP_ERROR);
@@ -233,6 +251,8 @@ MfeaMrouter::start()
 int
 MfeaMrouter::stop()
 {
+    string error_msg;
+
     if (is_down())
 	return (XORP_OK);
 
@@ -242,8 +262,21 @@ MfeaMrouter::stop()
     // Stop the multicast routing in the kernel
     stop_mrt();
     
-    // Close kernel multicast routing access socket
-    close_mrouter_socket();
+    // Clear kernel multicast routing access socket
+    _mrouter_socket.clear();
+
+    // Unregister as multicast upcall receiver
+    IoIpManager& io_ip_manager = mfea_node().fea_node().io_ip_manager();
+    uint8_t ip_protocol = kernel_mrouter_ip_protocol();
+    if (io_ip_manager.unregister_system_multicast_upcall_receiver(
+	    family(),
+	    ip_protocol,
+	    error_msg)
+	!= XORP_OK) {
+	XLOG_ERROR("Cannot unregister multicast upcall receiver: %s",
+		   error_msg.c_str());
+	return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }
@@ -362,125 +395,6 @@ MfeaMrouter::kernel_mrouter_ip_protocol() const
     }
     
     return (XORP_ERROR);
-}
-
-/**
- * MfeaMrouter::open_mrouter_socket:
- * @: 
- * 
- * Open the mrouter socket (used for various multicast routing kernel calls).
- * 
- * Return value: The socket value.
- **/
-XorpFd
-MfeaMrouter::open_mrouter_socket()
-{
-    XorpFd badfd;
-    int ip_protocol = kernel_mrouter_ip_protocol();
-
-    if (_mrouter_socket.is_valid())
-	return (_mrouter_socket);
-
-    if (ip_protocol < 0)
-	return (badfd);
-    
-    _mrouter_socket = socket(family(), SOCK_RAW, ip_protocol);
-    if (! _mrouter_socket.is_valid()) {
-	XLOG_ERROR("Cannot open mrouter socket");
-	return (badfd);
-	}
-    
-    // Set receiving buffer size
-    if (comm_sock_set_rcvbuf(_mrouter_socket, SO_RCV_BUF_SIZE_MAX,
-			     SO_RCV_BUF_SIZE_MIN)
-	< SO_RCV_BUF_SIZE_MIN) {
-	comm_close(_mrouter_socket);
-	_mrouter_socket.clear();
-	return (badfd);
-    }
-    
-    // Protocol-specific setup
-    switch (family()) {
-    case AF_INET:
-#ifndef HAVE_IPV4_MULTICAST_ROUTING
-	XLOG_ERROR("open_mrouter_socket() failed: "
-		   "IPv4 multicast routing not supported");
-	return (badfd);
-#endif
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-#ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_ERROR("open_mrouter_socket() failed: "
-		   "IPv6 multicast routing not supported");
-	return (badfd);
-#else
-	struct icmp6_filter filter;
-	// Filter all ICMPv6 messages
-	ICMP6_FILTER_SETBLOCKALL(&filter);
-	if (setsockopt(_mrouter_socket, IPPROTO_ICMPV6, ICMP6_FILTER,
-		       (void *)&filter, sizeof(filter)) < 0) {
-	    XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s", strerror(errno));
-	    comm_close(_mrouter_socket);
-	    _mrouter_socket.clear();
-	    return (badfd);
-	}
-#endif // HAVE_IPV6_MULTICAST_ROUTING
-    }
-    break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	return (badfd);
-    }
-    
-    // Assign a method to read from this socket
-    if (mfea_node().eventloop().add_ioevent_cb(_mrouter_socket, IOT_READ,
-				callback(this,
-					 &MfeaMrouter::mrouter_socket_read))
-	== false) {
-	XLOG_ERROR("Cannot add mrouter socket to the set of sockets "
-		   "to read from in the event loop");
-	comm_close(_mrouter_socket);
-	_mrouter_socket.clear();
-	return (badfd);
-    }
-    
-    return (_mrouter_socket);
-}
-
-/**
- * MfeaMrouter::close_mrouter_socket:
- * @: 
- * 
- * Close the mrouter socket.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
-int
-MfeaMrouter::close_mrouter_socket()
-{
-    if (! _mrouter_socket.is_valid())
-	return (XORP_ERROR);
-    
-    if (kernel_mrouter_ip_protocol() < 0)
-	return (XORP_ERROR);
-    
-    // Remove the function for reading from this socket    
-    mfea_node().eventloop().remove_ioevent_cb(_mrouter_socket);
-    
-    // Close the socket and set its handle to an invalid value.
-    if (comm_close(_mrouter_socket) == XORP_ERROR) {
-	XLOG_ERROR("Cannot close mrouter socket: %s",
-		    comm_get_last_error_str());
-	_mrouter_socket.clear();
-	return (XORP_ERROR);
-    }
-    
-    _mrouter_socket.clear();
-    
-    return (XORP_OK);
 }
 
 /**
@@ -1965,152 +1879,6 @@ MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 }
 
 /**
- * MfeaMrouter::mrouter_socket_read:
- * @fd: file descriptor of arriving data.
- * @type: The event type that describes the status of @fd.
- * 
- * Read data from the mrouter socket, and then call the appropriate method
- * to process it.
- **/
-void
-MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
-{
-    ssize_t nbytes;
-    
-    UNUSED(fd);
-    UNUSED(type);
- 
-#ifndef HOST_OS_WINDOWS
-    // Zero and reset various fields
-    _rcvmh.msg_controllen = CMSG_BUF_SIZE;
-
-    // TODO: when resetting _from4 and _from6 do we need to set the address
-    // family and the sockaddr len?
-    switch (family()) {
-    case AF_INET:
-	memset(&_from4, 0, sizeof(_from4));
-	_rcvmh.msg_namelen = sizeof(_from4);
-	break;
-
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-#ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_FATAL("mrouter_socket_read() failed: "
-		   "IPv6 multicast routing not supported");
-	return;
-#else
-	memset(&_from6, 0, sizeof(_from6));
-	_rcvmh.msg_namelen = sizeof(_from6);
-#endif // HAVE_IPV6_MULTICAST_ROUTING
-    }
-    break;
-#endif // HAVE_IPV6
-
-    default:
-	XLOG_UNREACHABLE();
-	return;			// Error
-    }
-
-    // Read from the socket
-    nbytes = recvmsg(_mrouter_socket, &_rcvmh, 0);
-    if (nbytes < 0) {
-	if (errno == EINTR)
-	    return;		// OK: restart receiving
-	XLOG_ERROR("recvmsg() on socket %p failed: %s",
-		   _mrouter_socket.str().c_str(), strerror(errno));
-	return;			// Error
-    }
-
-#else // HOST_OS_WINDOWS
-    UNUSED(nbytes);
-    XLOG_FATAL("Multicast routing is not supported on Windows");
-#endif
-    
-    // Check if it is a signal from the kernel to the user-level
-    switch (family()) {
-    case AF_INET:
-    {
-#ifndef HAVE_IPV4_MULTICAST_ROUTING
-	XLOG_FATAL("mrouter_socket_read() failed: "
-		   "IPv4 multicast routing not supported");
-	return;
-#else
-	if (nbytes < (ssize_t)sizeof(struct igmpmsg)) {
-	    XLOG_WARNING("mrouter_socket_read() failed: "
-			 "kernel signal packet size %d is smaller than minimum size %u",
-			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(sizeof(struct igmpmsg)));
-	    return;		// Error
-	}
-	struct igmpmsg igmpmsg;
-	memcpy(&igmpmsg, _rcvbuf0, sizeof(igmpmsg));
-	if (igmpmsg.im_mbz == 0) {
-	    //
-	    // XXX: Packets sent up from kernel to daemon have
-	    //      igmpmsg.im_mbz = ip->ip_p = 0
-	    //
-	    kernel_call_process(_rcvbuf0, nbytes);
-	    return;		// OK
-	}
-#endif // HAVE_IPV4_MULTICAST_ROUTING
-    }
-    break;
-    
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-#ifndef HAVE_IPV6_MULTICAST_ROUTING
-	XLOG_FATAL("mrouter_socket_read() failed: "
-		   "IPv6 multicast routing not supported");
-	return;
-#else
-	if ((nbytes < (ssize_t)sizeof(struct mrt6msg))
-	    && (nbytes < (ssize_t)MLD_MINLEN)) {
-	    XLOG_WARNING("mrouter_socket_read() failed: "
-			 "kernel signal packet size %d is smaller than minimum size %u",
-			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(min(sizeof(struct mrt6msg),
-					    (size_t)MLD_MINLEN)));
-	    return;		// Error
-	}
-	struct mrt6msg mrt6msg;
-	memcpy(&mrt6msg, _rcvbuf0, sizeof(mrt6msg));
-	if ((mrt6msg.im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
-	    //
-	    // XXX: Packets sent up from kernel to daemon have
-	    //      mrt6msg.im6_mbz = icmp6_hdr->icmp6_type = 0
-	    // Because we set ICMP6 filters on the socket,
-	    // we should never see a real ICMPv6 packet
-	    // with icmp6_type = 0 .
-	    //
-	    //
-	    // TODO: XXX: (msg_controllen == 0) is presumably
-	    // true for older IPv6 systems (e.g. KAME circa
-	    // April 2000, FreeBSD-4.0) which don't have the
-	    //     'icmp6_type = 0' mechanism.
-	    //
-	    kernel_call_process(_rcvbuf0, nbytes);
-	    return;		// OK
-	}
-#endif // HAVE_IPV6_MULTICAST_ROUTING
-    }
-    break;
-#endif // HAVE_IPV6
-    
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-    
-    //
-    // Not a kernel signal. Ignore it.
-    //
-    
-    return;			// OK
-}
-
-/**
  * kernel_call_process:
  * @databuf: The data buffer.
  * @datalen: The length of the data in 'databuf'.
@@ -2122,7 +1890,7 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
+MfeaMrouter::kernel_call_process(const uint8_t *databuf, size_t datalen)
 {
     uint32_t	iif_vif_index;
     int		message_type;

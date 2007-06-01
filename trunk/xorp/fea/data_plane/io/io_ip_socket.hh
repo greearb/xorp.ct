@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/forwarding_plane/io/io_ip_socket.hh,v 1.1 2007/05/24 20:01:29 pavlin Exp $
+// $XORP: xorp/fea/forwarding_plane/io/io_ip_socket.hh,v 1.2 2007/05/24 20:17:23 pavlin Exp $
 
 
 #ifndef __FEA_FORWARDING_PLANE_IO_IO_IP_SOCKET_HH__
@@ -275,6 +275,23 @@ public:
 				   const vector<uint8_t>& ext_headers_type,
 				   const vector<vector<uint8_t> >& ext_headers_payload,
 				   const vector<uint8_t>& payload) = 0;
+
+    /**
+     * Received a multicast forwarding related upcall from the system.
+     *
+     * Examples of such upcalls are: "nocache", "wrongiif", "wholepkt",
+     * "bw_upcall".
+     *
+     * @param payload the payload data for the upcall.
+     */
+    virtual void process_system_multicast_upcall(const vector<uint8_t>& payload) = 0;
+
+    /**
+     * Get the socket for receiving protocol messages.
+     *
+     * @return a reference to the socket for receiving protocol messages.
+     */
+    XorpFd& proto_socket_in() { return (_proto_socket_in); }
 
     /**
      * Find an interface and a vif by interface and vif name.

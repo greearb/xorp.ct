@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.2 2007/05/26 02:10:26 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.3 2007/05/27 21:13:49 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -95,6 +95,12 @@ public:
 	 */
 	virtual void recv(const struct IPvXHeaderInfo& header,
 			  const vector<uint8_t>& payload) = 0;
+
+	/**
+	 * Method invoked when a multicast forwarding related upcall is
+	 * received from the system.
+	 */
+	virtual void recv_system_multicast_upcall(const vector<uint8_t>& payload) = 0;
 
 	/**
 	 * Method invoked by the destructor of the associated IoIpComm
@@ -289,6 +295,16 @@ public:
 			   const vector<uint8_t>& payload);
 
     /**
+     * Received a multicast forwarding related upcall from the system.
+     *
+     * Examples of such upcalls are: "nocache", "wrongiif", "wholepkt",
+     * "bw_upcall".
+     *
+     * @param payload the payload data for the upcall.
+     */
+    void process_system_multicast_upcall(const vector<uint8_t>& payload);
+
+    /**
      * Join an IP multicast group.
      * 
      * @param if_name the interface through which packets should be accepted.
@@ -342,6 +358,8 @@ private:
  */
 class IoIpManager {
 public:
+    typedef XorpCallback2<int, const uint8_t*, size_t>::RefPtr UpcallReceiverCb;
+
     /**
      * Constructor for IoIpManager.
      */
@@ -497,6 +515,44 @@ public:
 			      uint8_t		ip_protocol,
 			      const IPvX&	group_address,
 			      string&		error_msg);
+
+    /**
+     * Register to receive multicast forwarding related upcalls from the
+     * system.
+     *
+     * @param family the address family (AF_INET or AF_INET6 for
+     * IPv4 and IPv6 respectively).
+     * @param ip_protocol the IP protocol number that the receiver is
+     * interested in. It must be between 0 and 255. A protocol number of 0 is
+     * used to specify all protocols.
+     * @param receiver_cb the receiver callback to be invoked when an
+     * upcall is received.
+     * @param receiver_fd the return-by-reference file descriptor for
+     * the socket that receives the upcalls.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_system_multicast_upcall_receiver(int		family,
+						  uint8_t	ip_protocol,
+						  IoIpManager::UpcallReceiverCb receiver_cb,
+						  XorpFd&	receiver_fd,
+						  string&	error_msg);
+
+    /**
+     * Unregister to receive multicast forwarding related upcalls from the
+     * system.
+     *
+     * @param family the address family (AF_INET or AF_INET6 for
+     * IPv4 and IPv6 respectively).
+     * @param ip_protocol the IP Protocol number that the receiver is not
+     * interested in anymore. It must be between 0 and 255. A protocol number
+     * of 0 is used to specify all protocols.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_system_multicast_upcall_receiver(int		family,
+						    uint8_t	ip_protocol,
+						    string&	error_msg);
 
     /**
      * Send a raw IP packet to a receiver.
