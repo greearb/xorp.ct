@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/io/io_ip_socket.cc,v 1.3 2007/05/26 00:52:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.4 2007/06/01 18:17:12 pavlin Exp $"
 
 //
 // I/O IP raw socket support.
@@ -75,7 +75,7 @@
 #include "mrt/include/netinet/pim.h"
 #endif
 
-#include "fea/forwarding_plane/control_socket/system_utilities.hh"
+#include "fea/data_plane/control_socket/system_utilities.hh"
 
 #include "fea/iftree.hh"
 #include "io_ip_socket.hh"

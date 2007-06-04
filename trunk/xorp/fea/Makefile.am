@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.92 2007/05/24 20:01:27 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.93 2007/05/26 02:04:44 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
 # -- Subdirectories
-SUBDIRS = forwarding_plane . tools
+SUBDIRS = data_plane . tools
 
 # -- Real Programs
 bin_PROGRAMS	 = xorp_fea xorp_fea_dummy
@@ -28,11 +28,11 @@ noinst_LTLIBRARIES = libfea.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LTLIBRARIES)
-### Forwarding plane libraries
-LDADD		+= $(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la
-LDADD		+= $(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la
-LDADD		+= $(top_builddir)/fea/forwarding_plane/io/libxorp_io.la
-LDADD		+= $(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la
+### Data plane libraries
+LDADD		+= $(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la
+LDADD		+= $(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la
+LDADD		+= $(top_builddir)/fea/data_plane/io/libxorp_io.la
+LDADD		+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la

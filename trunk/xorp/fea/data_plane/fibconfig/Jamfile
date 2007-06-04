@@ -1,8 +1,8 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.9 2007/04/24 01:28:41 pavlin Exp $
+# $XORP: xorp/fea/data_plane/fibconfig/Jamfile,v 1.1 2007/05/01 16:55:22 bms Exp $
 #
 
-SubDir TOP fea forwarding_plane fibconfig ;
+SubDir TOP fea data_plane fibconfig ;
 SubIncludeOnce TOP libxorp ;
 SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
@@ -10,7 +10,7 @@ SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
 SubIncludeOnce TOP fea ;
-SubDir TOP fea forwarding_plane fibconfig ;
+SubDir TOP fea data_plane fibconfig ;
 
 Library libxorp_fibconfig : 
 	fibconfig_entry_get_click.cc

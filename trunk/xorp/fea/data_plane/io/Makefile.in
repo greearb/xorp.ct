@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-subdir = fea/forwarding_plane/io
+subdir = fea/data_plane/io
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/config/compiler_flags.m4 \
@@ -226,9 +226,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  fea/forwarding_plane/io/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  fea/data_plane/io/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  fea/forwarding_plane/io/Makefile
+	  $(AUTOMAKE) --foreign  fea/data_plane/io/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

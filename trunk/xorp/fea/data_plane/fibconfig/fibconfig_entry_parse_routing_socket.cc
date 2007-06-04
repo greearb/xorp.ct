@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc,v 1.7 2007/05/01 01:42:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc,v 1.8 2007/05/01 08:21:57 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -24,12 +24,12 @@
 #include <net/route.h>
 #endif
 #ifdef HOST_OS_WINDOWS
-#include "fea/forwarding_plane/control_socket/windows_routing_socket.h"
+#include "fea/data_plane/control_socket/windows_routing_socket.h"
 #endif
 
 #include "fea/fibconfig.hh"
 #include "fea/fibconfig_entry_get.hh"
-#include "fea/forwarding_plane/control_socket/routing_socket_utilities.hh"
+#include "fea/data_plane/control_socket/routing_socket_utilities.hh"
 
 
 //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.3 2007/05/27 21:13:49 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.4 2007/06/01 18:17:11 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -24,7 +24,7 @@
 
 #include "libxorp/ipvx.hh"
 
-#include "forwarding_plane/io/io_ip_socket.hh"
+#include "fea/data_plane/io/io_ip_socket.hh"
 
 class IoIpManager;
 

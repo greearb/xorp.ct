@@ -1,8 +1,8 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.9 2007/04/24 01:28:41 pavlin Exp $
+# $XORP: xorp/fea/data_plane/control_socket/Jamfile,v 1.1 2007/05/01 16:55:21 bms Exp $
 #
 
-SubDir TOP fea forwarding_plane control_socket ;
+SubDir TOP fea data_plane control_socket ;
 SubIncludeOnce TOP libxorp ;
 SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
@@ -10,7 +10,7 @@ SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
 #SubIncludeOnce TOP fea ;
-SubDir TOP fea forwarding_plane control_socket ;
+SubDir TOP fea data_plane control_socket ;
 
 Library libxorp_control_socket : 
 	click_socket.cc

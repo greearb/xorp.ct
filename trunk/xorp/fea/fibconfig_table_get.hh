@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.6 2007/04/30 23:40:28 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.7 2007/05/01 01:42:37 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -22,8 +22,8 @@
 #include "libxorp/ipvx.hh"
 
 #include "fte.hh"
-#include "fea/forwarding_plane/control_socket/click_socket.hh"
-#include "fea/forwarding_plane/control_socket/netlink_socket.hh"
+#include "fea/data_plane/control_socket/click_socket.hh"
+#include "fea/data_plane/control_socket/netlink_socket.hh"
 
 
 class IPv4;

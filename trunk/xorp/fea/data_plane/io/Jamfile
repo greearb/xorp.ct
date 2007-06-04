@@ -1,8 +1,8 @@
 #
-# $XORP$
+# $XORP: xorp/fea/data_plane/io/Jamfile,v 1.1 2007/05/24 20:01:28 pavlin Exp $
 #
 
-SubDir TOP fea forwarding_plane io ;
+SubDir TOP fea data_plane io ;
 SubIncludeOnce TOP libxorp ;
 SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
@@ -10,7 +10,7 @@ SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
 SubIncludeOnce TOP fea ;
-SubDir TOP fea forwarding_plane io ;
+SubDir TOP fea data_plane io ;
 
 Library libxorp_io : 
 	io_ip_socket.cc

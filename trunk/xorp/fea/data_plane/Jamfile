@@ -1,11 +1,10 @@
 #
-# $XORP: xorp/fea/forwarding_plane/Jamfile,v 1.1 2007/05/01 16:55:23 bms Exp $
+# $XORP: xorp/fea/data_plane/Jamfile,v 1.2 2007/05/24 20:01:28 pavlin Exp $
 #
 
-SubDir TOP fea forwarding_plane ;
-SubIncludeOnce TOP fea forwarding_plane control_socket ;
-SubIncludeOnce TOP fea forwarding_plane fibconfig ;
-SubIncludeOnce TOP fea forwarding_plane firewall ;
-SubIncludeOnce TOP fea forwarding_plane ifconfig ;
-SubIncludeOnce TOP fea forwarding_plane io ;
-SubDir TOP fea forwarding_plane ;
+SubDir TOP fea data_plane ;
+SubIncludeOnce TOP fea data_plane control_socket ;
+SubIncludeOnce TOP fea data_plane fibconfig ;
+SubIncludeOnce TOP fea data_plane ifconfig ;
+SubIncludeOnce TOP fea data_plane io ;
+SubDir TOP fea data_plane ;

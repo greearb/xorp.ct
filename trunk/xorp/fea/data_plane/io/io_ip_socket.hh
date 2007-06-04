@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/forwarding_plane/io/io_ip_socket.hh,v 1.2 2007/05/24 20:17:23 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.3 2007/06/01 18:17:12 pavlin Exp $
 
 
-#ifndef __FEA_FORWARDING_PLANE_IO_IO_IP_SOCKET_HH__
-#define __FEA_FORWARDING_PLANE_IO_IO_IP_SOCKET_HH__
+#ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
+#define __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
 
 
 //
@@ -427,4 +427,4 @@ private:
 #endif // ! HOST_OS_WINDOWS
 };
 
-#endif // __FEA_FORWARDING_PLANE_IO_IO_IP_SOCKET_HH__
+#endif // __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__

@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/control_socket/windows_rras_support.hh,v 1.1 2007/05/01 08:21:56 pavlin Exp $
 
-#ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RRAS_SUPPORT_HH__
-#define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RRAS_SUPPORT_HH__
+#ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RRAS_SUPPORT_HH__
+#define __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RRAS_SUPPORT_HH__
 
 class WinSupport {
 public:
@@ -27,4 +27,4 @@ public:
 private:
 };
 
-#endif // __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RRAS_SUPPORT_HH__
+#endif // __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RRAS_SUPPORT_HH__

@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/forwarding_plane/control_socket/windows_rtm_pipe.hh,v 1.1 2007/05/01 08:21:56 pavlin Exp $
+// $XORP: xorp/fea/data_plane/control_socket/windows_rtm_pipe.hh,v 1.2 2007/05/23 12:12:36 pavlin Exp $
 
-#ifndef __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
-#define __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
+#ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
+#define __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
 
 #include <list>
 
@@ -159,4 +159,4 @@ private:
     WinRtmPipe& _rs;
 };
 
-#endif // __FEA_FORWARDING_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
+#endif // __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__

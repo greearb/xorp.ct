@@ -96,10 +96,10 @@ am_xorp_fea_OBJECTS = xorp_fea.$(OBJEXT)
 xorp_fea_OBJECTS = $(am_xorp_fea_OBJECTS)
 xorp_fea_LDADD = $(LDADD)
 xorp_fea_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la \
-	$(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la \
-	$(top_builddir)/fea/forwarding_plane/io/libxorp_io.la \
-	$(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la \
+	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
+	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
@@ -129,10 +129,10 @@ am_xorp_fea_dummy_OBJECTS = xorp_fea_dummy-xorp_fea.$(OBJEXT)
 xorp_fea_dummy_OBJECTS = $(am_xorp_fea_dummy_OBJECTS)
 xorp_fea_dummy_LDADD = $(LDADD)
 xorp_fea_dummy_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la \
-	$(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la \
-	$(top_builddir)/fea/forwarding_plane/io/libxorp_io.la \
-	$(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la \
+	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
+	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
@@ -337,7 +337,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- Subdirectories
-SUBDIRS = forwarding_plane . tools
+SUBDIRS = data_plane . tools
 bin_SCRIPTS = xorp_fea_click_config_generator
 check_SCRIPTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
 TESTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
@@ -346,7 +346,7 @@ TESTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
 noinst_LTLIBRARIES = libfea.la
 
 # -- Libraries and library flags to link the binary programs
-### Forwarding plane libraries
+### Data plane libraries
 ### XRL libraries
 ### MFEA XRL libraries
 ### MRT libraries
@@ -357,10 +357,10 @@ noinst_LTLIBRARIES = libfea.la
 ### XRL client for Profile
 ### XORP misc libraries
 LDADD = $(noinst_LTLIBRARIES) \
-	$(top_builddir)/fea/forwarding_plane/fibconfig/libxorp_fibconfig.la \
-	$(top_builddir)/fea/forwarding_plane/ifconfig/libxorp_ifconfig.la \
-	$(top_builddir)/fea/forwarding_plane/io/libxorp_io.la \
-	$(top_builddir)/fea/forwarding_plane/control_socket/libxorp_control_socket.la \
+	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
+	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
+	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \

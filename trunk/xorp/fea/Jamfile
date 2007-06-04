@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.13 2007/05/24 20:01:27 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.14 2007/05/26 02:04:44 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -13,7 +13,7 @@ SubIncludeOnce TOP libfeaclient ;
 SubIncludeOnce TOP mrt ;
 SubIncludeOnce TOP cli ;
 SubIncludeOnce TOP cli libtecla ;
-SubIncludeOnce TOP fea forwarding_plane ;
+SubIncludeOnce TOP fea data_plane ;
 SubDir TOP fea ;
 
 Library libfea : 

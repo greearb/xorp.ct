@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.35 2007/05/01 01:42:37 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.36 2007/05/04 01:42:59 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -21,8 +21,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
 
-#include "fea/forwarding_plane/control_socket/click_socket.hh"
-#include "fea/forwarding_plane/control_socket/netlink_socket.hh"
+#include "fea/data_plane/control_socket/click_socket.hh"
+#include "fea/data_plane/control_socket/netlink_socket.hh"
 
 class IfConfig;
 class IfTree;

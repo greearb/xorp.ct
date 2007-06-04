@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.5 2007/05/01 08:21:55 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.6 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
 #define __FEA_FIBCONFIG_ENTRY_SET_HH__
@@ -25,10 +25,10 @@
 
 #include "fte.hh"
 #include "nexthop_port_mapper.hh"
-#include "fea/forwarding_plane/control_socket/click_socket.hh"
-#include "fea/forwarding_plane/control_socket/netlink_socket.hh"
-#include "fea/forwarding_plane/control_socket/routing_socket.hh"
-#include "fea/forwarding_plane/control_socket/windows_rtm_pipe.hh"
+#include "fea/data_plane/control_socket/click_socket.hh"
+#include "fea/data_plane/control_socket/netlink_socket.hh"
+#include "fea/data_plane/control_socket/routing_socket.hh"
+#include "fea/data_plane/control_socket/windows_rtm_pipe.hh"
 
 class FibConfig;
 

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README,v 1.7 2004/06/30 16:42:12 mjh Exp $
+# $XORP: xorp/fea/README,v 1.8 2006/03/08 02:24:24 pavlin Exp $
 #
 
 Forwarding Engine Abstraction
@@ -11,7 +11,7 @@ The FEA is intended to fulfill several roles:
 
     2) it reports changes to network interface configurations.
 
-    3) it manages the forwarding tables of the underlying forwarding plane.
+    3) it manages the forwarding tables of the underlying data plane.
 
     4) it allows UDP and RAW packets to be sent from network interfaces.
 
