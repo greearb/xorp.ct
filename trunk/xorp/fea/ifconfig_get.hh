@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.37 2007/06/04 23:17:32 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.38 2007/06/05 09:39:36 greenhal Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -75,56 +75,6 @@ protected:
 private:
     IfConfig&	_ifconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
-};
-
-class IfConfigGetGetifaddrs : public IfConfigGet {
-public:
-    IfConfigGetGetifaddrs(IfConfig& ifconfig);
-    virtual ~IfConfigGetGetifaddrs();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-
-    /**
-     * Pull the network interface information from the underlying system.
-     * 
-     * @param config the IfTree storage to store the pulled information.
-     * @return true on success, otherwise false.
-     */
-    virtual bool pull_config(IfTree& config);
-
-    /**
-     * Parse information about network interface configuration change from
-     * the underlying system.
-     * 
-     * The information to parse is in "struct ifaddrs" format
-     * (e.g., obtained by getifaddrs(3) mechanism).
-     * 
-     * @param ifconfig the IfConfig instance.
-     * @param it the IfTree storage to store the parsed information.
-     * @param ifap a linked list of the network interfaces on the
-     * local machine.
-     * @return true on success, otherwise false.
-     * @see IfTree.
-     */
-    static bool parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
-					const struct ifaddrs* ifap);
-
-private:
-    bool read_config(IfTree& it);
 };
 
 class IfConfigGetSysctl : public IfConfigGet {
