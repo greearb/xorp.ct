@@ -14,32 +14,18 @@
 
 // $XORP: xorp/fea/ifconfig_observer.hh,v 1.23 2007/06/04 23:17:32 pavlin Exp $
 
-#ifndef __FEA_IFCONFIG_OBSERVER_HH__
-#define __FEA_IFCONFIG_OBSERVER_HH__
+#ifndef __FEA_IFCONFIG_OBSERVER_DUMMY_HH__
+#define __FEA_IFCONFIG_OBSERVER_DUMMY_HH__
 
-#include "fea/data_plane/control_socket/netlink_socket.hh"
-#include "fea/data_plane/control_socket/routing_socket.hh"
-
+#include "fea/ifconfig_observer.hh"
 
 class IfConfig;
 class IfTree;
 
-class IfConfigObserver {
+class IfConfigObserverDummy : public IfConfigObserver {
 public:
-    IfConfigObserver(IfConfig& ifconfig)
-	: _is_running(false),
-	  _ifconfig(ifconfig),
-	  _is_primary(true)
-    {}
-    virtual ~IfConfigObserver() {}
-    
-    IfConfig&	ifconfig() { return _ifconfig; }
-    
-    virtual void set_primary() { _is_primary = true; }
-    virtual void set_secondary() { _is_primary = false; }
-    virtual bool is_primary() const { return _is_primary; }
-    virtual bool is_secondary() const { return !_is_primary; }
-    virtual bool is_running() const { return _is_running; }
+    IfConfigObserverDummy(IfConfig& ifconfig);
+    virtual ~IfConfigObserverDummy();
 
     /**
      * Start operation.
@@ -47,7 +33,7 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start(string& error_msg) = 0;
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
@@ -55,22 +41,17 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop(string& error_msg) = 0;
-    
+    virtual int stop(string& error_msg);
+
     /**
      * Receive data from the underlying system.
      * 
      * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const vector<uint8_t>& buffer) = 0;
-
-protected:
-    // Misc other state
-    bool	_is_running;
-
+    virtual void receive_data(const vector<uint8_t>& buffer);
+    
 private:
-    IfConfig&	_ifconfig;
-    bool	_is_primary;	// True -> primary, false -> secondary method
+    
 };
 
 #endif // __FEA_IFCONFIG_OBSERVER_HH__
