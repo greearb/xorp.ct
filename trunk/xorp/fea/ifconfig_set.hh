@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.47 2007/04/30 23:40:29 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.48 2007/05/01 21:27:40 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
 
 #include "iftree.hh"
+#include "fea/data_plane/control_socket/netlink_socket.hh"
 
 #include <map>
 

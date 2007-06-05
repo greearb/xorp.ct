@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.60 2007/06/05 09:39:35 greenhal Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.61 2007/06/05 09:48:52 greenhal Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -24,6 +24,12 @@
 #include "ifconfig_get.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_ioctl.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_proc_linux.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_click.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_iphelper.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh"
 #include "ifconfig_set.hh"
 #include "ifconfig_observer.hh"
 #include "ifconfig_reporter.hh"

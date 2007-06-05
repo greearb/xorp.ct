@@ -14,40 +14,28 @@
 
 // $XORP: xorp/fea/ifconfig_get.hh,v 1.39 2007/06/05 09:48:52 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_GET_HH__
-#define __FEA_IFCONFIG_GET_HH__
-
+#ifndef __FEA_IFCONFIG_GET_SYSCTL_HH__
+#define __FEA_IFCONFIG_GET_SYSCTL_HH__
 
 #include "libxorp/xorp.h"
 #include "libxorp/ipvx.hh"
+#include "fea/ifconfig_get.hh"
 
 class IfConfig;
 class IfTree;
 
-class IfConfigGet {
+class IfConfigGetSysctl : public IfConfigGet {
 public:
-    IfConfigGet(IfConfig& ifconfig)
-	: _is_running(false),
-	  _ifconfig(ifconfig),
-	  _is_primary(true)
-    {}
-    virtual ~IfConfigGet() {}
-    
-    IfConfig&	ifconfig() { return _ifconfig; }
-    
-    virtual void set_primary() { _is_primary = true; }
-    virtual void set_secondary() { _is_primary = false; }
-    virtual bool is_primary() const { return _is_primary; }
-    virtual bool is_secondary() const { return !_is_primary; }
-    virtual bool is_running() const { return _is_running; }
-    
+    IfConfigGetSysctl(IfConfig& ifconfig);
+    virtual ~IfConfigGetSysctl();
+
     /**
      * Start operation.
      * 
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start(string& error_msg) = 0;
+    virtual int start(string& error_msg);
     
     /**
      * Stop operation.
@@ -55,7 +43,7 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop(string& error_msg) = 0;
+    virtual int stop(string& error_msg);
 
     /**
      * Pull the network interface information from the underlying system.
@@ -63,15 +51,27 @@ public:
      * @param config the IfTree storage to store the pulled information.
      * @return true on success, otherwise false.
      */
-    virtual bool pull_config(IfTree& config) = 0;
-    
-protected:
-    // Misc other state
-    bool	_is_running;
+    virtual bool pull_config(IfTree& config);
+
+    /**
+     * Parse information about network interface configuration change from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param ifconfig the IfConfig instance.
+     * @param it the IfTree storage to store the parsed information.
+     * @param buffer the buffer with the data to parse.
+     * @return true on success, otherwise false.
+     * @see IfTree.
+     */
+    static bool parse_buffer_routing_socket(IfConfig& ifconfig, IfTree& it,
+					    const vector<uint8_t>& buffer);
 
 private:
-    IfConfig&	_ifconfig;
-    bool	_is_primary;	// True -> primary, false -> secondary method
+    bool read_config(IfTree& it);
+    static string iff_flags(uint32_t flags);
 };
 
-#endif // __FEA_IFCONFIG_GET_HH__
+#endif // __FEA_IFCONFIG_GET_SYSCTL_HH__
