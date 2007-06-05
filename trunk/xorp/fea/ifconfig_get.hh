@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.36 2007/05/04 01:42:59 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.37 2007/06/04 23:17:32 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -75,39 +75,6 @@ protected:
 private:
     IfConfig&	_ifconfig;
     bool	_is_primary;	// True -> primary, false -> secondary method
-};
-
-class IfConfigGetDummy : public IfConfigGet {
-public:
-    IfConfigGetDummy(IfConfig& ifconfig);
-    virtual ~IfConfigGetDummy();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-
-    /**
-     * Pull the network interface information from the underlying system.
-     * 
-     * @param config the IfTree storage to store the pulled information.
-     * @return true on success, otherwise false.
-     */
-    virtual bool pull_config(IfTree& config);
-    
-private:
-    
 };
 
 class IfConfigGetGetifaddrs : public IfConfigGet {
