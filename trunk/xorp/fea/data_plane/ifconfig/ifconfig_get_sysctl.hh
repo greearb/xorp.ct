@@ -12,17 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.39 2007/06/05 09:48:52 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.hh,v 1.1 2007/06/05 10:30:30 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_GET_SYSCTL_HH__
-#define __FEA_IFCONFIG_GET_SYSCTL_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_SYSCTL_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_SYSCTL_HH__
 
-#include "libxorp/xorp.h"
-#include "libxorp/ipvx.hh"
+
 #include "fea/ifconfig_get.hh"
-
-class IfConfig;
-class IfTree;
 
 class IfConfigGetSysctl : public IfConfigGet {
 public:
@@ -74,4 +70,4 @@ private:
     static string iff_flags(uint32_t flags);
 };
 
-#endif // __FEA_IFCONFIG_GET_SYSCTL_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_SYSCTL_HH__

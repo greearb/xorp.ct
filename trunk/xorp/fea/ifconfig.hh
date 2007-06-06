@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.63 2007/06/05 13:14:31 greenhal Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.64 2007/06/05 13:51:17 greenhal Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -22,18 +22,18 @@
 
 #include "ifconfig_addr_table.hh"
 #include "ifconfig_get.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_click.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_ioctl.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_proc_linux.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_click.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_iphelper.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_proc_linux.hh"
+#include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
 #include "ifconfig_set.hh"
+#include "fea/data_plane/ifconfig/ifconfig_set_click.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_ioctl.hh"
-#include "fea/data_plane/ifconfig/ifconfig_set_click.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_iphelper.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh"
 #include "ifconfig_observer.hh"

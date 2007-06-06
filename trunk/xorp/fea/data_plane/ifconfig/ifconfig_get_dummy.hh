@@ -12,18 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get_dummy.hh,v 1.37 2007/06/04 23:17:32 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_dummy.hh,v 1.1 2007/06/05 09:39:36 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_GET_DUMMY_HH__
-#define __FEA_IFCONFIG_GET_DUMMY_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_DUMMY_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_DUMMY_HH__
 
 
-#include "libxorp/xorp.h"
-#include "libxorp/ipvx.hh"
 #include "fea/ifconfig_get.hh"
-
-class IfConfig;
-class IfTree;
 
 class IfConfigGetDummy : public IfConfigGet {
 public:
@@ -55,7 +50,6 @@ public:
     virtual bool pull_config(IfTree& config);
     
 private:
-    
 };
 
-#endif // __FEA_IFCONFIG_GET_DUMMY_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_DUMMY_HH__

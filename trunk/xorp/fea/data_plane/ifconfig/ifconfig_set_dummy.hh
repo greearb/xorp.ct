@@ -12,18 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.49 2007/06/05 10:30:28 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.hh,v 1.1 2007/06/05 13:14:32 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_SET_DUMMY_HH__
-#define __FEA_IFCONFIG_SET_DUMMY_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__
 
-#include "fea/iftree.hh"
+
 #include "fea/ifconfig_set.hh"
-
-#include <map>
-
-class IfConfig;
-class RunCommand;
 
 class IfConfigSetDummy : public IfConfigSet {
 public:
@@ -110,4 +105,4 @@ private:
 				   string& error_msg);
 };
 
-#endif // __FEA_IFCONFIG_SET_DUMMY_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__

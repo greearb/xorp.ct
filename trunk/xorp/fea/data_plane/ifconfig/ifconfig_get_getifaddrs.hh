@@ -12,18 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.38 2007/06/05 09:39:36 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh,v 1.1 2007/06/05 09:48:52 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_GET_GETIFADDRS_HH__
-#define __FEA_IFCONFIG_GET_GETIFADDRS_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__
 
 
-#include "libxorp/xorp.h"
-#include "libxorp/ipvx.hh"
 #include "fea/ifconfig_get.hh"
-
-class IfConfig;
-class IfTree;
 
 class IfConfigGetGetifaddrs : public IfConfigGet {
 public:
@@ -75,4 +70,4 @@ private:
     bool read_config(IfTree& it);
 };
 
-#endif // __FEA_IFCONFIG_GET_GETIFADDRS_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__

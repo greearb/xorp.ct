@@ -12,21 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.49 2007/06/05 10:30:28 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.1 2007/06/05 13:14:32 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_SET_CLICK_HH__
-#define __FEA_IFCONFIG_SET_CLICK_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
 
-#include "fea/iftree.hh"
+
 #include "fea/ifconfig_set.hh"
+#include "fea/iftree.hh"
+#include "fea/data_plane/control_socket/click_socket.hh"
 
-#include <map>
-
-class IfConfig;
 class RunCommand;
 
-class IfConfigSetClick : public IfConfigSet,
-			 public ClickSocket {
+class IfConfigSetClick : public IfConfigSet, public ClickSocket {
 private:
     class ClickConfigGenerator;
 
@@ -177,5 +175,4 @@ private:
     string			_generated_user_click_config;
 };
 
-
-#endif // __FEA_IFCONFIG_SET_CLICK_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__

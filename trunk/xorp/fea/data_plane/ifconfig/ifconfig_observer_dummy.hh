@@ -12,15 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.23 2007/06/04 23:17:32 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.hh,v 1.1 2007/06/05 13:51:18 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_OBSERVER_DUMMY_HH__
-#define __FEA_IFCONFIG_OBSERVER_DUMMY_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__
+
 
 #include "fea/ifconfig_observer.hh"
-
-class IfConfig;
-class IfTree;
 
 class IfConfigObserverDummy : public IfConfigObserver {
 public:
@@ -51,7 +49,6 @@ public:
     virtual void receive_data(const vector<uint8_t>& buffer);
     
 private:
-    
 };
 
-#endif // __FEA_IFCONFIG_OBSERVER_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__

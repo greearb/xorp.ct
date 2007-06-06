@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_media.cc,v 1.12 2007/02/16 22:45:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.1 2007/05/01 06:36:45 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -58,6 +58,9 @@ typedef uint64_t u64;
 // #ifdef HAVE_LINUX_MII_H
 // #include <linux/mii.h>
 // #endif
+
+#include "ifconfig_media.hh"
+
 
 //
 // Network interfaces media related utilities.

@@ -12,15 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.23 2007/06/04 23:17:32 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.hh,v 1.1 2007/06/05 13:51:18 greenhal Exp $
 
-#ifndef __FEA_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
-#define __FEA_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
 
+
+#include "fea/ifconfig_observer.hh"
 #include "fea/data_plane/control_socket/netlink_socket.hh"
-
-class IfConfig;
-class IfTree;
 
 class IfConfigObserverNetlinkSocket : public IfConfigObserver,
 				      public NetlinkSocket,
@@ -55,7 +54,6 @@ public:
     void nlsock_data(const vector<uint8_t>& buffer);
     
 private:
-    
 };
 
-#endif // __FEA_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_NETLINK_SOCKET_HH__
