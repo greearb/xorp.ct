@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/forwarding_plane/ifconfig/Makefile.am,v 1.1 2007/05/01 02:33:32 pavlin Exp $
+## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.2 2007/05/01 06:36:45 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -10,7 +10,24 @@ bindir = $(prefix)/$(subdir)
 noinst_LTLIBRARIES = libxorp_ifconfig.la
 
 # -- Library Sources
-libxorp_ifconfig_la_SOURCES	 = ifconfig_media.hh
+libxorp_ifconfig_la_SOURCES	 = ifconfig_get_click.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_dummy.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_getifaddrs.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_ioctl.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_iphelper.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_netlink_socket.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_proc_linux.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_get_sysctl.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_media.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_dummy.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_iphelper.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_netlink_socket.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_routing_socket.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_set_click.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_set_dummy.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_set_ioctl.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_set_iphelper.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_set_netlink_socket.hh
 
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_click.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_dummy.cc

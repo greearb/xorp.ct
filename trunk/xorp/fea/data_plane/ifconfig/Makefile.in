@@ -222,12 +222,22 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libxorp_ifconfig.la
 
 # -- Library Sources
-libxorp_ifconfig_la_SOURCES = ifconfig_media.hh ifconfig_get_click.cc \
-	ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc \
-	ifconfig_get_ioctl.cc ifconfig_get_iphelper.cc \
-	ifconfig_get_netlink_socket.cc ifconfig_get_proc_linux.cc \
-	ifconfig_get_sysctl.cc ifconfig_media.cc \
-	ifconfig_observer_dummy.cc ifconfig_observer_iphelper.cc \
+libxorp_ifconfig_la_SOURCES = ifconfig_get_click.hh \
+	ifconfig_get_dummy.hh ifconfig_get_getifaddrs.hh \
+	ifconfig_get_ioctl.hh ifconfig_get_iphelper.hh \
+	ifconfig_get_netlink_socket.hh ifconfig_get_proc_linux.hh \
+	ifconfig_get_sysctl.hh ifconfig_media.hh \
+	ifconfig_observer_dummy.hh ifconfig_observer_iphelper.hh \
+	ifconfig_observer_netlink_socket.hh \
+	ifconfig_observer_routing_socket.hh ifconfig_set_click.hh \
+	ifconfig_set_dummy.hh ifconfig_set_ioctl.hh \
+	ifconfig_set_iphelper.hh ifconfig_set_netlink_socket.hh \
+	ifconfig_get_click.cc ifconfig_get_dummy.cc \
+	ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc \
+	ifconfig_get_iphelper.cc ifconfig_get_netlink_socket.cc \
+	ifconfig_get_proc_linux.cc ifconfig_get_sysctl.cc \
+	ifconfig_media.cc ifconfig_observer_dummy.cc \
+	ifconfig_observer_iphelper.cc \
 	ifconfig_observer_netlink_socket.cc \
 	ifconfig_observer_routing_socket.cc \
 	ifconfig_parse_getifaddrs.cc ifconfig_parse_ioctl.cc \
