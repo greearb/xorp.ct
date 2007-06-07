@@ -1,0 +1,128 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+
+// Copyright (c) 2001-2007 International Computer Science Institute
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the "Software")
+// to deal in the Software without restriction, subject to the conditions
+// listed in the XORP LICENSE file. These conditions include: you must
+// preserve this copyright notice, and you cannot mention the copyright
+// holders in advertising related to the Software without their permission.
+// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+// notice is a summary of the XORP LICENSE file; the license in that file is
+// legally binding.
+
+// $XORP$
+
+#ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_ROUTING_SOCKET_HH__
+#define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_ROUTING_SOCKET_HH__
+
+#include "fea/fibconfig_entry_get.hh"
+#include "fea/data_plane/control_socket/routing_socket.hh"
+
+
+class FibConfigEntryGetRtsock : public FibConfigEntryGet,
+				public RoutingSocket {
+public:
+    FibConfigEntryGetRtsock(FibConfig& fibconfig);
+    virtual ~FibConfigEntryGetRtsock();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+
+    /**
+     * Lookup a route by destination address.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
+
+    /**
+     * Lookup route by network address.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
+
+    /**
+     * Lookup a route by destination address.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
+
+    /**
+     * Lookup route by network address.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
+
+    /**
+     * Parse information about routing entry information received from
+     * the underlying system.
+     * 
+     * The information to parse is in RTM format
+     * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
+     * 
+     * @param iftree the interface tree to use.
+     * @param fte the Fte storage to store the parsed information.
+     * @param buffer the buffer with the data to parse.
+     * @param filter the set of messages that caller is interested in.
+     * @return true on success, otherwise false.
+     * @see FteX.
+     */
+    static bool parse_buffer_routing_socket(const IfTree& iftree, FteX& fte,
+					    const vector<uint8_t>& buffer,
+					    FibMsgSet filter);
+
+private:
+    /**
+     * Lookup a route by destination address.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_dest(const IPvX& dst, FteX& fte);
+
+    /**
+     * Lookup route by network address.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_network(const IPvXNet& dst, FteX& fte);
+
+    RoutingSocketReader _rs_reader;
+};
+
+#endif // __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_ROUTING_SOCKET_HH__

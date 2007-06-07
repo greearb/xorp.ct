@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.7 2007/05/23 04:08:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.8 2007/06/04 23:17:31 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -51,6 +51,7 @@
 #ifdef HOST_OS_WINDOWS
 #include "libxorp/win_io.h"
 #include "fea/data_plane/control_socket/windows_routing_socket.h"
+#include "fea/data_plane/control_socket/windows_rras_support.hh"
 #endif
 
 #define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"

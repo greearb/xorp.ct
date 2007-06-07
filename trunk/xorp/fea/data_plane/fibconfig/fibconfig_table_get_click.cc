@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/fibconfig/fibconfig_table_get_click.cc,v 1.4 2007/04/28 01:54:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -23,6 +23,8 @@
 
 #include "fea/fibconfig.hh"
 #include "fea/fibconfig_table_get.hh"
+
+#include "fibconfig_table_get_click.hh"
 
 
 //

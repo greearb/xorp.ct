@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.6 2007/05/01 08:21:55 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.7 2007/06/04 23:17:31 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -45,13 +45,44 @@ typedef uint32_t FibMsgSet;
 #include "fte.hh"
 
 #include "fibconfig_entry_get.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_get_click.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_get_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.hh"
 #include "fibconfig_entry_set.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_set_click.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_set_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.hh"
 #include "fibconfig_entry_observer.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_observer_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_observer_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_entry_observer_rtmv2.hh"
 #include "fibconfig_table_get.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_get_click.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_get_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_get_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_get_sysctl.hh"
 #include "fibconfig_table_set.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_set_click.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_set_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_set_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_set_netlink_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_set_routing_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.hh"
 #include "fibconfig_table_observer.hh"
-#include "iftree.hh"
-#include "fea/data_plane/control_socket/windows_rras_support.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_observer_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_observer_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_observer_routing_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.hh"
 
 class EventLoop;
 class FibConfigEntryGet;
@@ -62,6 +93,7 @@ class FibConfigTableSet;
 class FibConfigTableObserver;
 class FibConfigTransactionManager;
 class FibTableObserverBase;
+class IfTree;
 class NexthopPortMapper;
 class Profile;
 

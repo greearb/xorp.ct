@@ -12,16 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_observer.hh,v 1.4 2007/05/01 01:42:37 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_observer.hh,v 1.5 2007/06/04 23:17:32 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
 
-#include "fea/data_plane/control_socket/netlink_socket.hh"
-#include "fea/data_plane/control_socket/routing_socket.hh"
+#include <vector>
 
+#include "fte.hh"
+#include "iftree.hh"
 
 class FibConfig;
+
 
 class FibConfigEntryObserver {
 public:
@@ -72,162 +74,4 @@ private:
     bool	_is_primary;	// True -> primary, false -> secondary method
 };
 
-class FibConfigEntryObserverDummy : public FibConfigEntryObserver {
-public:
-    FibConfigEntryObserverDummy(FibConfig& fibconfig);
-    virtual ~FibConfigEntryObserverDummy();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(const vector<uint8_t>& buffer);
-    
-private:
-    
-};
-
-class FibConfigEntryObserverRtsock : public FibConfigEntryObserver,
-				     public RoutingSocket,
-				     public RoutingSocketObserver {
-public:
-    FibConfigEntryObserverRtsock(FibConfig& fibconfig);
-    virtual ~FibConfigEntryObserverRtsock();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(const vector<uint8_t>& buffer);
-    
-    void rtsock_data(const vector<uint8_t>& buffer);
-    
-private:
-    
-};
-
-class FibConfigEntryObserverNetlink : public FibConfigEntryObserver,
-				      public NetlinkSocket,
-				      public NetlinkSocketObserver {
-public:
-    FibConfigEntryObserverNetlink(FibConfig& fibconfig);
-    virtual ~FibConfigEntryObserverNetlink();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(const vector<uint8_t>& buffer);
-    
-    void nlsock_data(const vector<uint8_t>& buffer);
-    
-private:
-    
-};
-
-class FibConfigEntryObserverIPHelper : public FibConfigEntryObserver {
-public:
-    FibConfigEntryObserverIPHelper(FibConfig& fibconfig);
-    virtual ~FibConfigEntryObserverIPHelper();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-    /**
-     * Receive data from the underlying system.
-     * 
-     * @param buffer the buffer with the received data.
-     */
-    virtual void receive_data(const vector<uint8_t>& buffer);
-};
-
-class FibConfigEntryObserverRtmV2 : public FibConfigEntryObserver {
-public:
-    FibConfigEntryObserverRtmV2(FibConfig& fibconfig);
-    virtual ~FibConfigEntryObserverRtmV2();
-
-    /**
-     * Start operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start(string& error_msg);
-    
-    /**
-     * Stop operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int stop(string& error_msg);
-    
-private:
-
-};
-    
 #endif // __FEA_FIBCONFIG_ENTRY_OBSERVER_HH__
