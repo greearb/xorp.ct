@@ -12,12 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.44 2007/05/08 22:16:03 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.45 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
-
-#include "libxorp/xorp.h"
 
 #include <map>
 #include <string>
@@ -25,6 +23,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/mac.hh"
+
 
 /**
  * Base class for Fea configurable items where the modifications need

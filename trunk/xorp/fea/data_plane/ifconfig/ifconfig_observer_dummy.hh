@@ -12,13 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.hh,v 1.1 2007/06/05 13:51:18 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.hh,v 1.2 2007/06/06 19:55:53 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__
 
-
 #include "fea/ifconfig_observer.hh"
+
 
 class IfConfigObserverDummy : public IfConfigObserver {
 public:

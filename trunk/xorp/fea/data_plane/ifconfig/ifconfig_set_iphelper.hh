@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.hh,v 1.1 2007/06/05 13:14:32 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.hh,v 1.2 2007/06/06 19:55:55 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_IPHELPER_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_IPHELPER_HH__
 
-
 #include <map>
 
 #include "fea/ifconfig_set.hh"
+
 
 class IfConfigSetIPHelper : public IfConfigSet {
 public:

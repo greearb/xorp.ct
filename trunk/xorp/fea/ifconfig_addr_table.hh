@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.12 2007/05/04 01:43:22 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_addr_table.hh,v 1.13 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_ADDR_TABLE_HH__
 #define __FEA_IFCONFIG_ADDR_TABLE_HH__
@@ -20,15 +20,15 @@
 #include "addr_table.hh"
 #include "ifconfig_reporter.hh"
 
+
 /**
  * Standard Xorp FEA AddressTable implementation.
  *
  * This class acts as a proxy between the interface configuration tree
  * the XrlSocketServer.
  */
-class IfConfigAddressTable
-    : public AddressTableBase, public IfConfigUpdateReporterBase
-{
+class IfConfigAddressTable : public AddressTableBase,
+			     public IfConfigUpdateReporterBase {
 public:
     /**
      * Constructor.

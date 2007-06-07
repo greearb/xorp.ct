@@ -12,14 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.40 2007/06/05 10:30:28 greenhal Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.41 2007/06/06 19:55:51 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
 
+#include "iftree.hh"
 
 class IfConfig;
-class IfTree;
+
 
 class IfConfigGet {
 public:

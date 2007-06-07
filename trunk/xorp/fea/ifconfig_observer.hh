@@ -12,16 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.24 2007/06/05 13:51:17 greenhal Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.25 2007/06/06 19:55:52 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
 
-
-#include "fea/data_plane/control_socket/netlink_socket.hh"
-#include "fea/data_plane/control_socket/routing_socket.hh"
+#include "iftree.hh"
 
 class IfConfig;
+
 
 class IfConfigObserver {
 public:

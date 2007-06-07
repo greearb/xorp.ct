@@ -12,16 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.1 2007/06/05 10:30:29 greenhal Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.2 2007/06/06 19:55:53 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 
-
 #include "fea/ifconfig_get.hh"
 #include "fea/data_plane/control_socket/netlink_socket.hh"
 
-class IfConfigGetNetlinkSocket : public IfConfigGet, public NetlinkSocket {
+
+class IfConfigGetNetlinkSocket : public IfConfigGet,
+				 public NetlinkSocket {
 public:
     IfConfigGetNetlinkSocket(IfConfig& ifconfig);
     virtual ~IfConfigGetNetlinkSocket();
