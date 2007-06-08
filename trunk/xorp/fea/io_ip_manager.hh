@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.4 2007/06/01 18:17:11 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.5 2007/06/04 23:17:32 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -75,6 +75,13 @@ public:
 	 * @return a reference to the I/O IP manager.
 	 */
 	IoIpManager& io_ip_manager() { return (_io_ip_manager); }
+
+	/**
+	 * Get a const reference to the I/O IP manager.
+	 *
+	 * @return a const reference to the I/O IP manager.
+	 */
+	const IoIpManager& io_ip_manager() const { return (_io_ip_manager); }
 
 	/**
 	 * Get the receiver name.

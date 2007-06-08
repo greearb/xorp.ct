@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.3 2007/06/01 18:17:12 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.4 2007/06/04 23:17:36 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
@@ -31,11 +31,11 @@
 
 #include "libxorp/eventloop.hh"
 
-class EventLoop;
 class IfTree;
 class IfTreeInterface;
 class IfTreeVif;
 class IPvX;
+
 
 /**
  * @short A base class for I/O IP raw socket communication.
@@ -292,62 +292,6 @@ public:
      * @return a reference to the socket for receiving protocol messages.
      */
     XorpFd& proto_socket_in() { return (_proto_socket_in); }
-
-    /**
-     * Find an interface and a vif by interface and vif name.
-     * 
-     * @param if_name the interface name.
-     * @param vif_name the vif name.
-     * @param ifp return-by-reference a pointer to the interface.
-     * @param vifp return-by-reference a pointer to the vif.
-     * @return true if a match is found, otherwise false.
-     */
-    bool	find_interface_vif_by_name(
-	const string&		if_name,
-	const string&		vif_name,
-	const IfTreeInterface*&	ifp,
-	const IfTreeVif*&	vifp) const;
-
-    /**
-     * Find an interface and a vif by physical interface index.
-     * 
-     * @param pif_index the physical interface index.
-     * @param ifp return-by-reference a pointer to the interface.
-     * @param vifp return-by-reference a pointer to the vif.
-     * @return true if a match is found, otherwise false.
-     */
-    bool	find_interface_vif_by_pif_index(
-	uint32_t		pif_index,
-	const IfTreeInterface*&	ifp,
-	const IfTreeVif*&	vifp) const;
-
-    /**
-     * Find an interface and a vif by an address that shares the same subnet
-     * or p2p address.
-     * 
-     * @param addr the address.
-     * @param ifp return-by-reference a pointer to the interface.
-     * @param vifp return-by-reference a pointer to the vif.
-     * @return true if a match is found, otherwise false.
-     */
-    bool	find_interface_vif_same_subnet_or_p2p(
-	const IPvX&		addr,
-	const IfTreeInterface*&	ifp,
-	const IfTreeVif*&	vifp) const;
-
-    /**
-     * Find an interface and a vif by an address that belongs to that interface
-     * and vif.
-     * 
-     * @param addr the address.
-     * @param ifp return-by-reference a pointer to the interface.
-     * @param vifp return-by-reference a pointer to the vif.
-     * @return true if a match is found, otherwise false.
-     */
-    bool	find_interface_vif_by_addr(
-	const IPvX&		addr,
-	const IfTreeInterface*&	ifp,
-	const IfTreeVif*&	vifp) const;
 
 private:
     /**

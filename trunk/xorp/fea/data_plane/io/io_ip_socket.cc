@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.4 2007/06/01 18:17:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.5 2007/06/04 23:17:36 pavlin Exp $"
 
 //
 // I/O IP raw socket support.
@@ -1703,14 +1703,16 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// However, check first whether we can use 'pif_index' instead.
 	//
 	if (pif_index != 0) {
-	    find_interface_vif_by_pif_index(pif_index, ifp, vifp);
+	    ifp = _iftree.find_interface(pif_index);
+	    if (ifp != NULL)
+		vifp = ifp->find_vif(pif_index);
 	    break;
 	}
 	
 	if (dst_address.is_multicast()) {
-	    find_interface_vif_same_subnet_or_p2p(src_address, ifp, vifp);
+	    _iftree.find_interface_vif_same_subnet_or_p2p(src_address, ifp, vifp);
 	} else {
-	    find_interface_vif_by_addr(dst_address, ifp, vifp);
+	    _iftree.find_interface_vif_by_addr(dst_address, ifp, vifp);
 	}
 	break;
     } while (false);
@@ -1769,12 +1771,12 @@ IoIpSocket::proto_socket_write(const string& if_name,
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
-    find_interface_vif_by_name(if_name, vif_name, ifp, vifp);
-    
+    ifp = _iftree.find_interface(if_name);
     if (ifp == NULL) {
 	error_msg = c_format("No interface %s", if_name.c_str());
 	return (XORP_ERROR);
-    }	
+    }
+    vifp = ifp->find_vif(vif_name);
     if (vifp == NULL) {
 	error_msg = c_format("No interface %s vif %s",
 			     if_name.c_str(), vif_name.c_str());
@@ -2456,184 +2458,4 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     }
 
     return (ret_value);
-}
-
-bool
-IoIpSocket::find_interface_vif_by_name(const string& if_name,
-				       const string& vif_name,
-				       const IfTreeInterface*& ifp,
-				       const IfTreeVif*& vifp) const
-{
-    ifp = NULL;
-    vifp = NULL;
-
-    // Find the interface
-    ifp = _iftree.find_interface(if_name);
-    if (ifp == NULL)
-	return (false);
-
-    // Find the vif
-    vifp = ifp->find_vif(vif_name);
-    if (vifp == NULL) {
-	ifp = NULL;
-	return (false);
-    }
-
-    // Found a match
-    return (true);
-}
-
-bool
-IoIpSocket::find_interface_vif_by_pif_index(uint32_t pif_index,
-					    const IfTreeInterface*& ifp,
-					    const IfTreeVif*& vifp) const
-{
-    ifp = NULL;
-    vifp = NULL;
-
-    // Find the interface
-    ifp = _iftree.find_interface(pif_index);
-    if (ifp == NULL)
-	return (false);
-
-    // Find the vif
-    vifp = ifp->find_vif(pif_index);
-    if (vifp == NULL) {
-	ifp = NULL;
-	return (false);
-    }
-
-    // Found a match
-    return (true);
-}
-
-bool
-IoIpSocket::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
-						  const IfTreeInterface*& ifp,
-						  const IfTreeVif*& vifp) const
-{
-    IfTree::IfMap::const_iterator ii;
-    IfTreeInterface::VifMap::const_iterator vi;
-    IfTreeVif::IPv4Map::const_iterator ai4;
-    IfTreeVif::IPv6Map::const_iterator ai6;
-
-    ifp = NULL;
-    vifp = NULL;
-
-    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
-	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
-
-	    if (addr.is_ipv4()) {
-		IPv4 addr4 = addr.get_ipv4();
-		for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
-		    const IfTreeAddr4& a4 = ai4->second;
-
-		    // Test if same subnet
-		    IPv4Net subnet(a4.addr(), a4.prefix_len());
-		    if (subnet.contains(addr4)) {
-			// Found a match
-			ifp = &fi;
-			vifp = &fv;
-			return (true);
-		    }
-
-		    // Test if same p2p
-		    if (! a4.point_to_point())
-			continue;
-		    if ((a4.addr() == addr4) || (a4.endpoint() == addr4)) {
-			// Found a match
-			ifp = &fi;
-			vifp = &fv;
-			return (true);
-		    }
-		}
-		continue;
-	    }
-
-	    if (addr.is_ipv6()) {
-		IPv6 addr6 = addr.get_ipv6();
-		for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
-		    const IfTreeAddr6& a6 = ai6->second;
-
-		    // Test if same subnet
-		    IPv6Net subnet(a6.addr(), a6.prefix_len());
-		    if (subnet.contains(addr6)) {
-			// Found a match
-			ifp = &fi;
-			vifp = &fv;
-			return (true);
-		    }
-
-		    // Test if same p2p
-		    if (! a6.point_to_point())
-			continue;
-		    if ((a6.addr() == addr6) || (a6.endpoint() == addr6)) {
-			// Found a match
-			ifp = &fi;
-			vifp = &fv;
-			return (true);
-		    }
-		}
-		continue;
-	    }
-	}
-    }
-
-    return (false);
-}
-
-bool
-IoIpSocket::find_interface_vif_by_addr(
-    const IPvX& addr,
-    const IfTreeInterface*& ifp,
-    const IfTreeVif*& vifp) const
-{
-    IfTree::IfMap::const_iterator ii;
-    IfTreeInterface::VifMap::const_iterator vi;
-    IfTreeVif::IPv4Map::const_iterator ai4;
-    IfTreeVif::IPv6Map::const_iterator ai6;
-
-    ifp = NULL;
-    vifp = NULL;
-
-    for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
-	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
-
-	    if (addr.is_ipv4()) {
-		IPv4 addr4 = addr.get_ipv4();
-		for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
-		    const IfTreeAddr4& a4 = ai4->second;
-
-		    if (a4.addr() == addr4) {
-			// Found a match
-			ifp = &fi;
-			vifp = &fv;
-			return (true);
-		    }
-		}
-		continue;
-	    }
-
-	    if (addr.is_ipv6()) {
-		IPv6 addr6 = addr.get_ipv6();
-		for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
-		    const IfTreeAddr6& a6 = ai6->second;
-
-		    if (a6.addr() == addr6) {
-			// Found a match
-			ifp = &fi;
-			vifp = &fv;
-			return (true);
-		    }
-		}
-		continue;
-	    }
-	}
-    }
-
-    return (false);
 }

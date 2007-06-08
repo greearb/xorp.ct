@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.43 2007/05/08 22:16:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.44 2007/05/23 04:08:23 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -92,11 +92,11 @@ IfTree::find_interface(const string& ifname) const
 }
 
 IfTreeInterface *
-IfTree::find_interface(uint32_t ifindex)
+IfTree::find_interface(uint32_t pif_index)
 {
     IfTree::IfMap::iterator iter;
     for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
-	if (iter->second.pif_index() == ifindex)
+	if (iter->second.pif_index() == pif_index)
 	    return (&iter->second);
     }
 
@@ -104,11 +104,11 @@ IfTree::find_interface(uint32_t ifindex)
 }
 
 const IfTreeInterface *
-IfTree::find_interface(uint32_t ifindex) const
+IfTree::find_interface(uint32_t pif_index) const
 {
     IfTree::IfMap::const_iterator iter;
     for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
-	if (iter->second.pif_index() == ifindex)
+	if (iter->second.pif_index() == pif_index)
 	    return (&iter->second);
     }
 
@@ -183,6 +183,136 @@ IfTree::find_addr(const string& ifname, const string& vifname,
 	return (NULL);
 
     return (vifp->find_addr(addr));
+}
+
+bool
+IfTree::find_interface_vif_by_addr(const IPvX& addr,
+				   const IfTreeInterface*& ifp,
+				   const IfTreeVif*& vifp) const
+{
+    IfTree::IfMap::const_iterator ii;
+    IfTreeInterface::VifMap::const_iterator vi;
+    IfTreeVif::IPv4Map::const_iterator ai4;
+    IfTreeVif::IPv6Map::const_iterator ai6;
+
+    ifp = NULL;
+    vifp = NULL;
+
+    for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
+	const IfTreeInterface& fi = ii->second;
+	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
+	    const IfTreeVif& fv = vi->second;
+
+	    if (addr.is_ipv4()) {
+		IPv4 addr4 = addr.get_ipv4();
+		for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
+		    const IfTreeAddr4& a4 = ai4->second;
+
+		    if (a4.addr() == addr4) {
+			// Found a match
+			ifp = &fi;
+			vifp = &fv;
+			return (true);
+		    }
+		}
+		continue;
+	    }
+
+	    if (addr.is_ipv6()) {
+		IPv6 addr6 = addr.get_ipv6();
+		for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
+		    const IfTreeAddr6& a6 = ai6->second;
+
+		    if (a6.addr() == addr6) {
+			// Found a match
+			ifp = &fi;
+			vifp = &fv;
+			return (true);
+		    }
+		}
+		continue;
+	    }
+	}
+    }
+
+    return (false);
+}
+
+bool
+IfTree::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
+					      const IfTreeInterface*& ifp,
+					      const IfTreeVif*& vifp) const
+{
+    IfTree::IfMap::const_iterator ii;
+    IfTreeInterface::VifMap::const_iterator vi;
+    IfTreeVif::IPv4Map::const_iterator ai4;
+    IfTreeVif::IPv6Map::const_iterator ai6;
+
+    ifp = NULL;
+    vifp = NULL;
+
+    for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
+	const IfTreeInterface& fi = ii->second;
+	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
+	    const IfTreeVif& fv = vi->second;
+
+	    if (addr.is_ipv4()) {
+		IPv4 addr4 = addr.get_ipv4();
+		for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
+		    const IfTreeAddr4& a4 = ai4->second;
+
+		    // Test if same subnet
+		    IPv4Net subnet(a4.addr(), a4.prefix_len());
+		    if (subnet.contains(addr4)) {
+			// Found a match
+			ifp = &fi;
+			vifp = &fv;
+			return (true);
+		    }
+
+		    // Test if same p2p
+		    if (! a4.point_to_point())
+			continue;
+		    if ((a4.addr() == addr4) || (a4.endpoint() == addr4)) {
+			// Found a match
+			ifp = &fi;
+			vifp = &fv;
+			return (true);
+		    }
+		}
+		continue;
+	    }
+
+	    if (addr.is_ipv6()) {
+		IPv6 addr6 = addr.get_ipv6();
+		for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
+		    const IfTreeAddr6& a6 = ai6->second;
+
+		    // Test if same subnet
+		    IPv6Net subnet(a6.addr(), a6.prefix_len());
+		    if (subnet.contains(addr6)) {
+			// Found a match
+			ifp = &fi;
+			vifp = &fv;
+			return (true);
+		    }
+
+		    // Test if same p2p
+		    if (! a6.point_to_point())
+			continue;
+		    if ((a6.addr() == addr6) || (a6.endpoint() == addr6)) {
+			// Found a match
+			ifp = &fi;
+			vifp = &fv;
+			return (true);
+		    }
+		}
+		continue;
+	    }
+	}
+    }
+
+    return (false);
 }
 
 bool
@@ -830,11 +960,11 @@ IfTreeInterface::find_vif(const string& vifname) const
 }
 
 IfTreeVif *
-IfTreeInterface::find_vif(uint32_t ifindex)
+IfTreeInterface::find_vif(uint32_t pif_index)
 {
     IfTreeInterface::VifMap::iterator iter;
     for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	if (iter->second.pif_index() == ifindex)
+	if (iter->second.pif_index() == pif_index)
 	    return (&iter->second);
     }
 
@@ -842,11 +972,11 @@ IfTreeInterface::find_vif(uint32_t ifindex)
 }
 
 const IfTreeVif *
-IfTreeInterface::find_vif(uint32_t ifindex) const
+IfTreeInterface::find_vif(uint32_t pif_index) const
 {
     IfTreeInterface::VifMap::const_iterator iter;
     for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	if (iter->second.pif_index() == ifindex)
+	if (iter->second.pif_index() == pif_index)
 	    return (&iter->second);
     }
 

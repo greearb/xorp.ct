@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.2 2007/05/26 02:10:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.3 2007/06/01 18:17:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -136,7 +136,8 @@ protected:
 	const IfTreeInterface* ifp = NULL;
 	const IfTreeVif* vifp = NULL;
 
-	if (_io_ip_comm.find_interface_vif_by_addr(IPvX(addr), ifp, vifp)
+	if (io_ip_manager().iftree().find_interface_vif_by_addr(IPvX(addr),
+								ifp, vifp)
 	    != true) {
 	    return (false);
 	}

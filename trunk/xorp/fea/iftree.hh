@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.45 2007/05/23 12:12:34 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.46 2007/06/07 01:23:03 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -23,6 +23,8 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/mac.hh"
+
+class IPvX;
 
 
 /**
@@ -164,20 +166,20 @@ public:
     /**
      * Find an interface for a given physical index.
      *
-     * @param ifindex the interface index to search for.
+     * @param pif_index the physical interface index to search for.
      * @return a pointer to the interface (@see IfTreeInterface) or NULL
      * if not found.
      */
-    IfTreeInterface* find_interface(uint32_t ifindex);
+    IfTreeInterface* find_interface(uint32_t pif_index);
 
     /**
      * Find a const interface for a given physical index.
      *
-     * @param ifindex the interface index to search for.
+     * @param pif_index the physical interface index to search for.
      * @return a const pointer to the interface (@see IfTreeInterface) or NULL
      * if not found.
      */
-    const IfTreeInterface* find_interface(uint32_t ifindex) const;
+    const IfTreeInterface* find_interface(uint32_t pif_index) const;
 
     /**
      * Find a vif.
@@ -243,6 +245,32 @@ public:
      */
     const IfTreeAddr6* find_addr(const string& ifname, const string& vifname,
 				 const IPv6& addr) const;
+
+    /**
+     * Find an interface and a vif by an address that belongs to that
+     * interface and vif.
+     *
+     * @param addr the address.
+     * @param ifp return-by-reference a pointer to the interface.
+     * @param vifp return-by-reference a pointer to the vif.
+     * @return true if a match is found, otherwise false.
+     */
+    bool find_interface_vif_by_addr(const IPvX& addr,
+				    const IfTreeInterface*& ifp,
+				    const IfTreeVif*& vifp) const;
+
+    /**
+     * Find an interface and a vif by an address that shares the same subnet
+     * or p2p address.
+     *
+     * @param addr the address.
+     * @param ifp return-by-reference a pointer to the interface.
+     * @param vifp return-by-reference a pointer to the vif.
+     * @return true if a match is found, otherwise false.
+     */
+    bool find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
+					       const IfTreeInterface*& ifp,
+					       const IfTreeVif*& vifp) const;
 
     /**
      * Get the map with the stored interfaces.
@@ -461,20 +489,20 @@ public:
     /**
      * Find a vif for a given physical index.
      *
-     * @param ifindex the interface index to search for.
+     * @param pif_index the physical interface index to search for.
      * @return a pointer to the interface (@see IfTreeInterface) or NULL
      * if not found.
      */
-    IfTreeVif* find_vif(uint32_t ifindex);
+    IfTreeVif* find_vif(uint32_t pif_index);
 
     /**
      * Find a const vif for a given physical index.
      *
-     * @param ifindex the interface index to search for.
+     * @param pif_index the physical interface index to search for.
      * @return a const pointer to the interface (@see IfTreeInterface) or NULL
      * if not found.
      */
-    const IfTreeVif* find_vif(uint32_t ifindex) const;
+    const IfTreeVif* find_vif(uint32_t pif_index) const;
 
     /**
      * Find an IPv4 address.
