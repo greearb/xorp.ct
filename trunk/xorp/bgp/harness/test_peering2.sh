@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.56 2007/05/12 23:01:33 zec Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.57 2007/05/12 23:26:23 zec Exp $
 #
 
 #
@@ -249,10 +249,7 @@ test2()
     # Bring up another peering to test the dump code.
     for i in 1 2
     do
-	coord reset
-
-	coord target $HOST $PORT1
-	coord initialise attach peer1
+        coord peer1 disconnect
 
 	# Wait for the peering to be dropped
 	while status peer1 | grep established
@@ -270,12 +267,14 @@ test2()
 	bgp_peer_unchanged peer1
     done
 
-    # The reset above will have removed state about peer2 from the coordinator
-    # but the tcp connection between test_peer2 and the bgp process will not
-    # have been dropped. So by re-initialising like this we will toggle the
-    # original connection.
-    coord target $HOST $PORT2
-    coord initialise attach peer2
+    coord peer2 disconnect
+
+    while status peer2 | grep established
+    do
+	sleep 2
+    done
+
+    sleep 2
 
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
     coord peer2 assert established
