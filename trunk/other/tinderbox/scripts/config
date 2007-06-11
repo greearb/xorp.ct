@@ -98,11 +98,11 @@ env_vm_freebsd62_gcc346=""
 buildflags_vm_freebsd62_gcc346="-j 2"
 sshflags_vm_freebsd62_gcc346="-i ${HOME}/.ssh/tinderbox -p 49131"
 
-host_vm_fedora6_gcc411="xorpv-vm.icir.org"
-home_vm_fedora6_gcc411="tinderbox"
-env_vm_fedora6_gcc411=""
-buildflags_vm_fedora6_gcc411="-j 2"
-sshflags_vm_fedora6_gcc411="-i ${HOME}/.ssh/tinderbox -p 49132"
+host_vm_fedora7_gcc412="xorpv-vm.icir.org"
+home_vm_fedora7_gcc412="tinderbox"
+env_vm_fedora7_gcc412=""
+buildflags_vm_fedora7_gcc412="-j 2"
+sshflags_vm_fedora7_gcc412="-i ${HOME}/.ssh/tinderbox -p 49132"
 
 host_vm_solaris10_gcc343="xorpv-vm.icir.org"
 home_vm_solaris10_gcc343="tinderbox"
@@ -116,7 +116,13 @@ env_vm_debian31_gcc335="CC=gcc-3.3 CXX=g++-3.3"
 buildflags_vm_debian31_gcc335="-j 2"
 sshflags_vm_debian31_gcc335="-i ${HOME}/.ssh/tinderbox -p 49134"
 
-TINDERBOX_CONFIGS="fbsd410_gcc295 fbsd410_gcc334 fbsd410_gcc346 fbsd410_gcc346_stldebug linux24_gcc296 linux26g_gcc344 linux26g_gcc344_opt vm_windows2003_gcc342 vm_openbsd41_gcc335 vm_netbsd31_gcc333 vm_dragonflybsd18_gcc346 vm_freebsd62_gcc346 vm_fedora6_gcc411 vm_debian31_gcc335"
+host_vm_ubuntu704_gcc412="xorpv-vm.icir.org"
+home_vm_ubuntu704_gcc412="tinderbox"
+env_vm_ubuntu704_gcc412="CC=gcc-3.3 CXX=g++-3.3"
+buildflags_vm_ubuntu704_gcc412="-j 2"
+sshflags_vm_ubuntu704_gcc412="-i ${HOME}/.ssh/tinderbox -p 49134"
+
+TINDERBOX_CONFIGS="fbsd410_gcc295 fbsd410_gcc334 fbsd410_gcc346 fbsd410_gcc346_stldebug linux24_gcc296 linux26g_gcc344 linux26g_gcc344_opt vm_windows2003_gcc342 vm_openbsd41_gcc335 vm_netbsd31_gcc333 vm_dragonflybsd18_gcc346 vm_freebsd62_gcc346 vm_fedora7_gcc412 vm_debian31_gcc335 vm_ubuntu704_gcc412"
 
 TINDERBOX_CONFIG_UNUSED="vm_solaris10_gcc343"
 
