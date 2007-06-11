@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.4 2007/05/04 01:43:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.5 2007/05/26 02:04:45 pavlin Exp $"
 
 
 //
@@ -28,6 +28,10 @@
 #include "libxorp/eventloop.hh"
 
 #include "libcomm/comm_api.h"
+
+#ifdef HOST_OS_WINDOWS
+#include "fea/data_plane/control_socket/windows_rras_support.hh"
+#endif
 
 #include "fea_node.hh"
 #include "profile_vars.hh"
