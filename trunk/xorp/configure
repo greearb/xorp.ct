@@ -37564,6 +37564,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
+#endif
 
 
 #include <$ac_header>
@@ -37629,6 +37632,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 
 

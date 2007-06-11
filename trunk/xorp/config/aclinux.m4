@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aclinux.m4,v 1.6 2007/04/20 20:28:59 pavlin Exp $
+dnl $XORP: xorp/config/aclinux.m4,v 1.7 2007/06/08 23:45:14 pavlin Exp $
 dnl
 
 dnl
@@ -48,7 +48,7 @@ typedef uint64_t u64;
 ])
 
 dnl XXX: Header file <linux/netlink.h> might need <sys/types.h>
-dnl and <sys/socket.h>
+dnl <sys/socket.h> and <linux/types.h>
 AC_CHECK_HEADERS([linux/netlink.h], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
@@ -57,10 +57,13 @@ AC_CHECK_HEADERS([linux/netlink.h], [], [],
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
+#endif
 ])
 
 dnl XXX: Header file <linux/rtnetlink.h> might need <sys/types.h>
-dnl and <sys/socket.h>
+dnl <sys/socket.h> and <linux/types.h>
 AC_CHECK_HEADERS([linux/rtnetlink.h], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
@@ -68,6 +71,9 @@ AC_CHECK_HEADERS([linux/rtnetlink.h], [], [],
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 ])
 
