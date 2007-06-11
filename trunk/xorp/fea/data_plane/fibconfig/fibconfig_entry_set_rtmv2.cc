@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.9 2007/06/07 01:28:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.10 2007/06/08 05:53:34 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -23,7 +23,6 @@
 
 #ifdef HOST_OS_WINDOWS
 #include "fea/data_plane/control_socket/windows_routing_socket.h"
-#include "fea/data_plane/control_socket/windows_rras_support.hh"
 #endif
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
@@ -34,7 +33,10 @@
 
 #include "fea/fibconfig.hh"
 #include "fea/fibconfig_entry_set.hh"
+#ifdef HOST_OS_WINDOWS
 #include "fea/data_plane/control_socket/windows_rtm_pipe.hh"
+#include "fea/data_plane/control_socket/windows_rras_support.hh"
+#endif
 
 #include "fibconfig_entry_set_rtmv2.hh"
 
