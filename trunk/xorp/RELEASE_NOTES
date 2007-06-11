@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.173 2007/03/22 20:20:09 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.174 2007/04/14 08:59:46 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,7 @@ This file contains XORP release notes (most recent releases first).
 Release 1.5-WIP (2007/??/??)
 =========================
   ALL:
-    - 
+    - XORP now builds on Linux Ubuntu-7.04 and OpenBSD-4.1.
 
   CONFIGURATION:
     - 
