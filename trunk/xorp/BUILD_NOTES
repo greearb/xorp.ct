@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.90 2007/05/31 18:58:37 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.91 2007/06/11 17:35:12 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -276,6 +276,10 @@ gmake check
   * Linux Fedora Core6 (2.6.18-1.2798.fc6PAE):
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.1 20061011 (Red Hat 4.1.1-30)
+
+  * Linux Fedora 7 (2.6.21-1.3194.fc7):
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.1.2 20070502 (Red Hat 4.1.2-12)
 
   * Linux Debian-3.1 (sarge) (2.4.27-3-386)
     - You must install the following packages:
