@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.175 2007/06/11 17:38:54 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.176 2007/06/12 16:44:19 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -37,7 +37,12 @@ Release 1.5-WIP (2007/??/??)
     - 
 
   FEA/MFEA:
-    - 
+    - Critical bug fix that affects recent NetBSD and OpenBSD releases.
+
+    - If MFEA is started, then explicitly enable the multicast forwarding
+      flags that have been added to recent OpenBSD releases:
+      net.inet.ip.mforwarding (for OpenBSD-3.9 and later) and
+      net.inet6.ip6.mforwarding (for OpenBSD-4.0 and later).
 
   RIB:
     - 
