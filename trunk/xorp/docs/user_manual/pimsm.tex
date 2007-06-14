@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.28 2007/03/14 01:07:01 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.29 2007/04/02 21:53:23 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -366,6 +366,9 @@ sysctl net.inet.ip.forwarding=1
 sysctl net.inet6.ip6.forwarding=1
 \end{verbatim}
 
+See sysctl.conf(5) for information how to add the sysctl configuration
+permanently.
+
     \item {\tt FreeBSD}:
 
     IPv4: Enable IPv4 unicast forwarding:
@@ -379,6 +382,9 @@ sysctl net.inet.ip.forwarding=1
 \begin{verbatim}
 sysctl net.inet6.ip6.forwarding=1
 \end{verbatim}
+
+See sysctl.conf(5) for information how to add the sysctl configuration
+permanently.
 
     \item {\tt Linux}:
 
@@ -406,14 +412,37 @@ echo 0 > /proc/sys/net/ipv4/conf/eth1/rp_filter
 
     \item {\tt NetBSD}: none.
 
-    \item {\tt OpenBSD}: Add the following lines to {\stt /etc/rc.conf.local}
-    and reboot:
+    \item {\tt OpenBSD}:
+
+     Enable multicast routing by adding the following lines to
+     {\stt /etc/rc.conf.local} and reboot:
 
 \begin{verbatim}
 # Enable multicast routing (see netstart(8) for details).
 multicast_host=NO
 multicast_router=YES
 \end{verbatim}
+
+    IPv4: Enable IPv4 multicast forwarding (for OpenBSD-3.9 and later):
+
+\begin{verbatim}
+sysctl net.inet.ip.mforwarding=1
+\end{verbatim}
+
+    IPv6: Enable IPv6 multicast forwarding (for OpenBSD-4.0 and later):
+
+\begin{verbatim}
+sysctl net.inet6.ip6.mforwarding=1
+\end{verbatim}
+
+See sysctl.conf(5) for information how to add the sysctl configuration
+permanently.
+
+Note that XORP itself automatically enables the above {\it sysctl}
+multicast forwarding flags, hence it is not really necessary to set
+them manually.
+The flags are described for completness and in case someone needs
+better control over multicast forwarding.
 
   \end{itemize}
 
