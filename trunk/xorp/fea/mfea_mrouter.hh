@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.17 2007/05/19 01:52:40 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.18 2007/06/01 18:17:11 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -66,6 +66,20 @@ public:
      * Destructor
      */
     virtual ~MfeaMrouter();
+
+    /**
+     * Setup the unit to behave as dummy (for testing purpose).
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_dummy();
+
+    /**
+     * Test if running in dummy mode.
+     * 
+     * @return true if running in dummy mode, otherwise false.
+     */
+    bool is_dummy() const { return _is_dummy; }
     
     /**
      * Start the @ref MfeaMrouter.
@@ -96,6 +110,52 @@ public:
      * otherwise false.
      */
     bool have_multicast_routing6() const;
+
+    /**
+     * Test whether the IPv4 multicast forwarding engine is enabled or disabled
+     * to forward packets.
+     * 
+     * @param ret_value if true on return, then the IPv4 multicast forwarding
+     * is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int multicast_forwarding_enabled4(bool& ret_value,
+				      string& error_msg) const;
+
+    /**
+     * Test whether the IPv6 multicast forwarding engine is enabled or disabled
+     * to forward packets.
+     * 
+     * @param ret_value if true on return, then the IPv6 multicast forwarding
+     * is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int multicast_forwarding_enabled6(bool& ret_value,
+				      string& error_msg) const;
+
+    /**
+     * Set the IPv4 multicast forwarding engine to enable or disable forwarding
+     * of packets.
+     * 
+     * @param v if true, then enable IPv4 multicast forwarding, otherwise
+     * disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_multicast_forwarding_enabled4(bool v, string& error_msg);
+
+    /**
+     * Set the IPv6 multicast forwarding engine to enable or disable forwarding
+     * of packets.
+     * 
+     * @param v if true, then enable IPv6 multicast forwarding, otherwise
+     * disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_multicast_forwarding_enabled6(bool v, string& error_msg);
     
     /**
      * Get the protocol that would be used in case of mrouter socket.
@@ -394,6 +454,16 @@ private:
     bool	_mrt_api_mrt_mfc_flags_border_vif;
     bool	_mrt_api_mrt_mfc_rp;
     bool	_mrt_api_mrt_mfc_bw_upcall;
+
+    //
+    // Original state from the underlying system before the MFEA was started
+    //
+    bool	_multicast_forwarding_enabled;
+
+    //
+    // Misc other state
+    //
+    bool	_is_dummy;
 };
 
 /**

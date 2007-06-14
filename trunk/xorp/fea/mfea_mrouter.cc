@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.53 2007/05/23 04:08:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.54 2007/06/01 18:17:11 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -31,6 +31,9 @@
 #endif
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
+#endif
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
 #endif
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
@@ -108,8 +111,16 @@ typedef char *caddr_t;
  **/
 MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
-      _mfea_node(mfea_node)
+      _mfea_node(mfea_node),
+      _mrt_api_mrt_mfc_flags_disable_wrongvif(false),
+      _mrt_api_mrt_mfc_flags_border_vif(false),
+      _mrt_api_mrt_mfc_rp(false),
+      _mrt_api_mrt_mfc_bw_upcall(false),
+      _multicast_forwarding_enabled(false),
+      _is_dummy(false)
 {
+    string error_msg;
+
     // Allocate the buffers
     _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
     _sndbuf0 = new uint8_t[IO_BUF_SIZE];
@@ -159,10 +170,27 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     _sndmh.msg_controllen	= 0;
 #endif // ! HOST_OS_WINDOWS
 
-    _mrt_api_mrt_mfc_flags_disable_wrongvif = false;
-    _mrt_api_mrt_mfc_flags_border_vif = false;
-    _mrt_api_mrt_mfc_rp = false;
-    _mrt_api_mrt_mfc_bw_upcall = false;
+    //
+    // Get the old state from the underlying system
+    //
+    int ret_value = XORP_OK;
+    switch (family()) {
+    case AF_INET:
+	ret_value = multicast_forwarding_enabled4(_multicast_forwarding_enabled,
+						  error_msg);
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	ret_value = multicast_forwarding_enabled6(_multicast_forwarding_enabled,
+						  error_msg);
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+    }
+    if (ret_value != XORP_OK) {
+	XLOG_FATAL("%s", error_msg.c_str());
+    }
 }
 
 MfeaMrouter::~MfeaMrouter()
@@ -176,6 +204,14 @@ MfeaMrouter::~MfeaMrouter()
     delete[] _sndbuf1;
     delete[] _rcvcmsgbuf;
     delete[] _sndcmsgbuf;
+}
+
+int
+MfeaMrouter::set_dummy()
+{
+    _is_dummy = true;
+
+    return (XORP_OK);
 }
 
 /**
@@ -258,7 +294,7 @@ MfeaMrouter::stop()
 
     if (ProtoUnit::stop() < 0)
 	return (XORP_ERROR);
-    
+
     // Stop the multicast routing in the kernel
     stop_mrt();
     
@@ -274,6 +310,30 @@ MfeaMrouter::stop()
 	    error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("Cannot unregister multicast upcall receiver: %s",
+		   error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Restore the old forwarding state in the underlying system.
+    //
+    int ret_value = XORP_OK;
+    switch (family()) {
+    case AF_INET:
+	ret_value = set_multicast_forwarding_enabled4(_multicast_forwarding_enabled,
+						      error_msg);
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	ret_value = set_multicast_forwarding_enabled6(_multicast_forwarding_enabled,
+						      error_msg);
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+    }
+    if (ret_value != XORP_OK) {
+	XLOG_ERROR("Cannot restore the multicast forwarding state: %s",
 		   error_msg.c_str());
 	return (XORP_ERROR);
     }
@@ -372,6 +432,277 @@ MfeaMrouter::have_multicast_routing6() const
 }
 
 /**
+ * Test whether the IPv4 multicast forwarding engine is enabled or disabled
+ * to forward packets.
+ * 
+ * @param ret_value if true on return, then the IPv4 multicast forwarding
+ * is enabled, otherwise is disabled.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+MfeaMrouter::multicast_forwarding_enabled4(bool& ret_value,
+					   string& error_msg) const
+{
+    // XXX: always return true if running in dummy mode
+    if (is_dummy()) {
+	ret_value = true;
+	return (XORP_OK);
+    }
+
+    if (! have_multicast_routing4()) {
+	ret_value = false;
+	error_msg = c_format("Cannot test whether IPv4 multicast forwarding "
+			     "is enabled: IPv4 multicast routing is not "
+			     "supported");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    int enabled = 0;
+
+#if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_MFORWARDING)
+    {
+	size_t sz = sizeof(enabled);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET;
+	mib[2] = IPPROTO_IP;
+	mib[3] = IPCTL_MFORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
+	    != 0) {
+	    error_msg = c_format("Get sysctl(IPCTL_MFORWARDING) failed: %s",
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+#else // ! IPCTL_MFORWARDING
+
+    // XXX: Not all systems have such additional control mechanism to
+    // explicitly enable multicast forwarding, hence assume it is enabled.
+    enabled = 1;
+#endif // ! IPCTL_MFORWARDING
+
+    if (enabled > 0)
+	ret_value = true;
+    else
+	ret_value = false;
+    
+    return (XORP_OK);
+}
+
+/**
+ * Test whether the IPv6 multicast forwarding engine is enabled or disabled
+ * to forward packets.
+ * 
+ * @param ret_value if true on return, then the IPv6 multicast forwarding
+ * is enabled, otherwise is disabled.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+MfeaMrouter::multicast_forwarding_enabled6(bool& ret_value,
+					   string& error_msg) const
+{
+    // XXX: always return true if running in dummy mode
+    if (is_dummy()) {
+	ret_value = true;
+	return (XORP_OK);
+    }
+
+    if (! have_multicast_routing6()) {
+	ret_value = false;
+	error_msg = c_format("Cannot test whether IPv6 multicast forwarding "
+			     "is enabled: IPv6 multicast routing is not "
+			     "supported");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    int enabled = 0;
+
+#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_MFORWARDING)
+    {
+	size_t sz = sizeof(enabled);
+	int mib[4];
+	
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET6;
+	mib[2] = IPPROTO_IPV6;
+	mib[3] = IPV6CTL_MFORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
+	    != 0) {
+	    error_msg = c_format("Get sysctl(IPV6CTL_MFORWARDING) failed: %s",
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+#else // ! IPV6CTL_MFORWARDING
+    //
+    // XXX: Not all systems have such additional control mechanism to
+    // explicitly enable multicast forwarding, hence assume it is enabled.
+    //
+    enabled = 1;
+#endif // ! IPV6CTL_MFORWARDING
+
+    if (enabled > 0)
+	ret_value = true;
+    else
+	ret_value = false;
+    
+    return (XORP_OK);
+}
+
+/**
+ * Set the IPv4 multicast forwarding engine to enable or disable forwarding
+ * of packets.
+ * 
+ * @param v if true, then enable IPv4 multicast forwarding, otherwise
+ * disable it.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+MfeaMrouter::set_multicast_forwarding_enabled4(bool v, string& error_msg)
+{
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return (XORP_OK);
+
+    if (! have_multicast_routing4()) {
+	if (! v) {
+	    //
+	    // XXX: we assume that "not supported" == "disable", hence
+	    // return OK.
+	    //
+	    return (XORP_OK);
+	}
+	error_msg = c_format("Cannot set IPv4 multicast forwarding to %s: "
+			     "IPv4 multicast routing is not supported",
+			     bool_c_str(v));
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    int enable = (v) ? 1 : 0;
+    bool old_value;
+
+    UNUSED(enable);
+
+    if (multicast_forwarding_enabled4(old_value, error_msg) < 0)
+	return (XORP_ERROR);
+
+    if (old_value == v)
+	return (XORP_OK);	// Nothing changed
+
+#if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_MFORWARDING)
+    {
+	size_t sz = sizeof(enable);
+	int mib[4];
+
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET;
+	mib[2] = IPPROTO_IP;
+	mib[3] = IPCTL_MFORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
+	    != 0) {
+	    error_msg = c_format("Set sysctl(IPCTL_MFORWARDING) to %s failed: %s",
+				 bool_c_str(v), strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+#else // ! IPCTL_MFORWARDING
+    //
+    // XXX: Not all systems have such additional control mechanism to
+    // explicitly enable multicast forwarding, hence don't do anything
+    //
+#endif // ! IPCTL_MFORWARDING
+
+    return (XORP_OK);
+}
+
+/**
+ * Set the IPv6 multicast forwarding engine to enable or disable forwarding
+ * of packets.
+ * 
+ * @param v if true, then enable IPv6 multicast forwarding, otherwise
+ * disable it.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+MfeaMrouter::set_multicast_forwarding_enabled6(bool v, string& error_msg)
+{
+    // XXX: don't do anything if running in dummy mode
+    if (is_dummy())
+	return (XORP_OK);
+
+    if (! have_multicast_routing6()) {
+	if (! v) {
+	    //
+	    // XXX: we assume that "not supported" == "disable", hence
+	    // return OK.
+	    //
+	    return (XORP_OK);
+	}
+	error_msg = c_format("Cannot set IPv6 multicast forwarding to %s: "
+			     "IPv6 multicast routing is not supported",
+			     bool_c_str(v));
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    int enable = (v) ? 1 : 0;
+    bool old_value;
+
+    UNUSED(enable);
+
+    if (multicast_forwarding_enabled6(old_value, error_msg) < 0)
+	return (XORP_ERROR);
+
+    if (old_value == v)
+	return (XORP_OK);	// Nothing changed
+
+#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_MFORWARDING)
+    {
+	size_t sz = sizeof(enable);
+	int mib[4];
+
+	mib[0] = CTL_NET;
+	mib[1] = AF_INET6;
+	mib[2] = IPPROTO_IPV6;
+	mib[3] = IPV6CTL_MFORWARDING;
+	
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
+	    != 0) {
+	    error_msg = c_format("Set sysctl(IPV6CTL_MFORWARDING) to %s failed: %s",
+				 bool_c_str(v), strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+#else // ! IPV6CTL_MFORWARDING
+    //
+    // XXX: Not all systems have such additional control mechanism to
+    // explicitly enable multicast forwarding, hence don't do anything
+    //
+#endif // ! IPV6CTL_MFORWARDING
+
+    return (XORP_OK);
+}
+
+/**
  * MfeaMrouter::kernel_mrouter_ip_protocol:
  * @: 
  * 
@@ -409,9 +740,10 @@ int
 MfeaMrouter::start_mrt()
 {
     int mrouter_version = 1;	// XXX: hardcoded version
-#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
-    UNUSED(mrouter_version)
-#endif
+    string error_msg;
+
+    UNUSED(mrouter_version);
+    UNUSED(error_msg);
     
     switch (family()) {
     case AF_INET:
@@ -420,6 +752,11 @@ MfeaMrouter::start_mrt()
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	if (set_multicast_forwarding_enabled4(true, error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot enable IPv4 multicast forwarding: %s",
+		       error_msg.c_str());
+	    return (XORP_ERROR);
+	}
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
 		       (void *)&mrouter_version, sizeof(mrouter_version))
 	    < 0) {
@@ -438,6 +775,11 @@ MfeaMrouter::start_mrt()
 		   "IPv6 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	if (set_multicast_forwarding_enabled6(true, error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot enable IPv6 multicast forwarding: %s",
+		       error_msg.c_str());
+	    return (XORP_ERROR);
+	}
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_INIT,
 		       (void *)&mrouter_version, sizeof(mrouter_version))
 	    < 0) {
@@ -611,6 +953,10 @@ MfeaMrouter::start_mrt()
 int
 MfeaMrouter::stop_mrt()
 {
+    string error_msg;
+
+    UNUSED(error_msg);
+
     _mrt_api_mrt_mfc_flags_disable_wrongvif = false;
     _mrt_api_mrt_mfc_flags_border_vif = false;
     _mrt_api_mrt_mfc_rp = false;
@@ -626,6 +972,11 @@ MfeaMrouter::stop_mrt()
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	if (set_multicast_forwarding_enabled4(false, error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot disable IPv4 multicast forwarding: %s",
+		       error_msg.c_str());
+	    return (XORP_ERROR);
+	}
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DONE, NULL, 0)
 	    < 0) {
 	    XLOG_ERROR("setsockopt(MRT_DONE) failed: %s", strerror(errno));
@@ -641,6 +992,11 @@ MfeaMrouter::stop_mrt()
 		   "IPv6 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	if (set_multicast_forwarding_enabled6(false, error_msg) != XORP_OK) {
+	    XLOG_ERROR("Cannot disable IPv6 multicast forwarding: %s",
+		       error_msg.c_str());
+	    return (XORP_ERROR);
+	}
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_DONE, NULL, 0)
 	    < 0) {
 	    XLOG_ERROR("setsockopt(MRT6_DONE) failed: %s", strerror(errno));
