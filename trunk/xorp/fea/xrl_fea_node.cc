@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.7 2007/05/04 01:43:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.8 2007/05/26 02:04:46 pavlin Exp $"
 
 
 //
@@ -210,6 +210,11 @@ int
 XrlFeaNode::set_dummy()
 {
     _fea_node.set_dummy();
+
+    _xrl_mfea_node4.set_dummy();
+#ifdef HAVE_IPV6_MULTICAST
+    _xrl_mfea_node6.set_dummy();
+#endif
 
     _is_dummy = true;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.80 2007/05/19 01:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.81 2007/05/23 04:08:23 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -74,6 +74,7 @@ MfeaNode::MfeaNode(FeaNode& fea_node, int family, xorp_module_id module_id,
     : ProtoNode<MfeaVif>(family, module_id, eventloop),
       IfConfigUpdateReporterBase(fea_node.ifconfig().ifconfig_update_replicator()),
       _fea_node(fea_node),
+      _is_dummy(false),
       _mfea_mrouter(*this),
       _mfea_dft(*this),
       _mfea_iftree_update_replicator(_mfea_iftree),
@@ -119,6 +120,16 @@ MfeaNode::~MfeaNode()
     ProtoNode<MfeaVif>::set_node_status(PROC_NULL);
     
     delete_all_vifs();
+}
+
+int
+MfeaNode::set_dummy()
+{
+    _mfea_mrouter.set_dummy();
+
+    _is_dummy = true;
+
+    return (XORP_OK);
 }
 
 /**
