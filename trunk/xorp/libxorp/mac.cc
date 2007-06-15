@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.12 2006/03/16 00:04:30 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.13 2007/02/16 22:46:20 pavlin Exp $"
 
 #include <vector>
 
@@ -96,31 +96,23 @@ EtherMac::EtherMac(const Mac& m) throw (BadMac)
 	       c_format("Bad EtherMac representation: %s", s.c_str()));
 }
 
-EtherMac::EtherMac(const struct ether_addr& ea) throw (BadMac)
+EtherMac::EtherMac(const struct ether_addr& ether_addr) throw (BadMac)
 {
-    //
-    // XXX: we need to const_cast the ether_ntoa() argument,
-    // because on some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
-    // declaration is broken.
-    //
-    const char* ap = ether_ntoa(const_cast<struct ether_addr *>(&ea));
-    if (ap != NULL) {
-	set_rep(ap);
-	return;
-    }
+    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
 
-    //
-    // Nobody agrees on name of fields within ether_addr structure...
-    // We probably don't care as this should never be reached.
-    //
-    static_assert(sizeof(ea) == 6);
-    const uint8_t* s = reinterpret_cast<const uint8_t*>(&ea);
-    xorp_throw(BadMac, c_format("%2x:%2x:%2x:%2x:%2x:%2x",
-				s[0], s[1], s[2], s[3], s[4], s[5]));
+    if (copy_in(ether_addr) != ADDR_BYTELEN) {
+	//
+	// Nobody agrees on name of fields within ether_addr structure...
+	// We probably don't care as this should never be reached.
+	//
+	const uint8_t* s = reinterpret_cast<const uint8_t*>(&ether_addr);
+	xorp_throw(BadMac, c_format("%2x:%2x:%2x:%2x:%2x:%2x",
+				    s[0], s[1], s[2], s[3], s[4], s[5]));
+    }
 }
 
-bool
-EtherMac::get_ether_addr(struct ether_addr& ea) const
+size_t
+EtherMac::copy_out(struct ether_addr& to_ether_addr) const
 {
     //
     // XXX: work-around because of broken ether_aton() declarations that
@@ -132,10 +124,27 @@ EtherMac::get_ether_addr(struct ether_addr& ea) const
 
     const struct ether_addr* ep = ether_aton(&buf[0]);
     if (ep != NULL) {
-	memcpy(&ea, ep, sizeof(ea));
-	return true;
+	memcpy(&to_ether_addr, ep, sizeof(to_ether_addr));
+	return (sizeof(to_ether_addr));
     }
-    return false;
+
+    return (0);
+}
+
+size_t
+EtherMac::copy_in(const struct ether_addr& from_ether_addr)
+{
+    //
+    // XXX: we need to const_cast the ether_ntoa() argument,
+    // because on some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
+    // declaration is broken.
+    //
+    const char* ap = ether_ntoa(const_cast<struct ether_addr *>(&from_ether_addr));
+    if (ap == NULL)
+	return (0);
+
+    set_rep(ap);
+    return (ADDR_BYTELEN);
 }
 
 bool

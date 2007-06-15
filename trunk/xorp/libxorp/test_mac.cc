@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.9 2006/10/12 01:24:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.10 2007/02/16 22:46:25 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/ether_compat.h"
@@ -122,7 +122,7 @@ test5()
  	EtherMac m1("bb:aa:aa:aa:aa:aa");
 	struct ether_addr ether_addr;
 
-	if (m1.get_ether_addr(ether_addr) != true) {
+	if (m1.copy_out(ether_addr) != EtherMac::ADDR_BYTELEN) {
 	    cout << "Cannot get ether_addr from EtherMac " << m1.str() << "\n";
 	    return false;
 	}

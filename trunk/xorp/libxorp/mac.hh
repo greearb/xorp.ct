@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.11 2007/02/16 22:46:20 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.12 2007/05/23 12:12:43 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -119,16 +119,24 @@ public:
     /**
      * Construct EtherMac from ether_addr.
      */
-    EtherMac(const ether_addr& ea) throw (BadMac);
+    EtherMac(const ether_addr& ether_addr) throw (BadMac);
     
     /**
-     * Convert to ether_addr representation.
+     * Copy the EtherMac address to ether_addr structure.
      *
-     * @param ea ether_addr to store representation.
-     * @return true on success, false if underlying string is empty.
+     * @param to_ether_addr the storage to copy the address to.
+     * @return the number of copied octets.
      */
-    bool 
-    get_ether_addr(struct ether_addr& ea) const;
+    size_t copy_out(struct ether_addr& to_ether_addr) const;
+
+    /**
+     * Copy a raw Ethernet address from ether_addr structure into EtherMac
+     * structure.
+     *
+     * @param from_ether_addr the storage to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const struct ether_addr& from_ether_addr);
 
     /**
      * Check whether string contains valid EtherMac representation.
@@ -151,6 +159,16 @@ public:
      * @return a string with the normalized EtherMac address.
      */
     static string normalize(const string& s) throw (InvalidString);
+
+    /**
+     * Number of bits in address as a constant.
+     */
+    static const uint32_t ADDR_BITLEN = 48;
+
+    /**
+     * Number of bytes in address as a constant.
+     */
+    static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
 };
 
 inline bool
@@ -164,9 +182,9 @@ operator==(const EtherMac& m1, const EtherMac& m2)
 {
     struct ether_addr ea1, ea2;
 
-    if (m1.get_ether_addr(ea1) != true)
+    if (m1.copy_out(ea1) != EtherMac::ADDR_BYTELEN)
 	return false;
-    if (m2.get_ether_addr(ea2) != true)
+    if (m2.copy_out(ea2) != EtherMac::ADDR_BYTELEN)
 	return false;
     return (memcmp(&ea1, &ea2, sizeof(ea1)) == 0);
 }

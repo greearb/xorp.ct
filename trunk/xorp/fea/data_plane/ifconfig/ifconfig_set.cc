@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/ifconfig/ifconfig_set.cc,v 1.3 2007/05/04 01:43:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.4 2007/05/08 00:49:03 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -362,7 +362,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	try {
 	    EtherMac em;
 	    em = EtherMac(new_mac);
-	    if (em.get_ether_addr(ea) == false) {
+	    if (em.copy_out(ea) != EtherMac::ADDR_BYTELEN) {
 		error_msg = c_format("Expected Ethernet MAC address, "
 				     "got \"%s\"",
 				     new_mac.str().c_str());
