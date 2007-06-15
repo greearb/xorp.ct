@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.54 2007/06/01 18:17:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.55 2007/06/14 17:35:42 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -444,22 +444,20 @@ int
 MfeaMrouter::multicast_forwarding_enabled4(bool& ret_value,
 					   string& error_msg) const
 {
+    int enabled = 0;
+
+    UNUSED(error_msg);
+
     // XXX: always return true if running in dummy mode
     if (is_dummy()) {
 	ret_value = true;
 	return (XORP_OK);
     }
 
-    if (! have_multicast_routing4()) {
-	ret_value = false;
-	error_msg = c_format("Cannot test whether IPv4 multicast forwarding "
-			     "is enabled: IPv4 multicast routing is not "
-			     "supported");
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    int enabled = 0;
+    //
+    // XXX: Don't check whether the system supports IPv4 multicast routing,
+    // because this might require to run as a root.
+    //
 
 #if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_MFORWARDING)
     {
@@ -508,22 +506,20 @@ int
 MfeaMrouter::multicast_forwarding_enabled6(bool& ret_value,
 					   string& error_msg) const
 {
+    int enabled = 0;
+
+    UNUSED(error_msg);
+
     // XXX: always return true if running in dummy mode
     if (is_dummy()) {
 	ret_value = true;
 	return (XORP_OK);
     }
 
-    if (! have_multicast_routing6()) {
-	ret_value = false;
-	error_msg = c_format("Cannot test whether IPv6 multicast forwarding "
-			     "is enabled: IPv6 multicast routing is not "
-			     "supported");
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    int enabled = 0;
+    //
+    // XXX: Don't check whether the system supports IPv6 multicast routing,
+    // because this might require to run as a root.
+    //
 
 #if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_MFORWARDING)
     {
