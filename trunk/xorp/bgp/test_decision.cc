@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.39 2006/10/12 01:24:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.40 2007/02/16 22:45:20 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -613,6 +613,90 @@ test_decision(TestInfo& /*info*/)
     sr1->unref();
     delete msg;
     delete palist4;
+
+    debug_table->write_separator();
+    // ================================================================
+    // Test4c: Test for incorrectly allowing routes with second-highest
+    // local pref to pass through to ASPATH length selection
+    // ================================================================
+
+    palist4 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt2, igp_origin_att);
+    palist4->add_path_attribute(lpa1);
+    palist4->rehash();
+
+    palist5 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    palist5->add_path_attribute(lpa1);
+    palist5->rehash();
+
+    palist6 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt2, igp_origin_att);
+    palist6->add_path_attribute(lpa2);
+    palist6->rehash();
+
+    debug_table->write_comment("******************************************");
+    debug_table->write_comment("TEST 4C");
+    debug_table->write_comment("TEST OF LOCALPREF");
+    debug_table->write_comment("HIGHEST LOCALPREF WINS");
+
+    debug_table->write_comment("SENDING FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("SENDING FROM PEER 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 1");
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    msg->set_push();
+    ribin_table1->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 2");
+    sr1 = new SubnetRoute<IPv4>(net1, palist5, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler2, 0);
+    msg->set_push();
+    ribin_table2->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    debug_table->write_separator();
+    debug_table->write_comment("DELETION FROM PEER 3");
+    sr1 = new SubnetRoute<IPv4>(net1, palist6, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler3, 0);
+    msg->set_push();
+    ribin_table3->delete_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+
+    delete palist4; 
+    delete palist5; 
+    delete palist6; 
 
     debug_table->write_separator();
     // ================================================================

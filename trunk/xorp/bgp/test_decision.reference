@@ -411,6 +411,74 @@ SubnetRoute:
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] ******************************************
+[comment] TEST 4C
+[comment] TEST OF LOCALPREF
+[comment] HIGHEST LOCALPREF WINS
+[comment] SENDING FROM PEER 1
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 2
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 100
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] SENDING FROM PEER 3
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[ADD]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 200
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 1
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 2
+[separator]-------------------------------------
+[comment] DELETION FROM PEER 3
+[DELETE]
+PUSH flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	Local Preference Attribute - 200
+[separator]-------------------------------------
+[comment] ******************************************
 [comment] TEST 5
 [comment] TEST OF MED
 [comment] LOWEST MED WINS

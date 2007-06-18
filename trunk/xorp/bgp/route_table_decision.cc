@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.43 2006/08/22 23:46:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.44 2007/02/16 22:45:16 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -605,7 +605,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	    i = alternatives.erase(i);
 	} else if (lp > test_pref) {
 	    test_pref = lp;
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	    i++;
 	} else {
 	    i++;
@@ -642,7 +642,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	    i = alternatives.erase(i);
 	} else if (len < test_aspath_length) {
 	    test_aspath_length = len;
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	} else {
 	    i++;
 	}
@@ -666,7 +666,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	    i = alternatives.erase(i);
 	} else if (origin < test_origin) {
 	    test_origin = origin;
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	    i++;
 	} else {
 	    i++;
@@ -735,7 +735,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	    i = alternatives.erase(i);
 	} else if (test_ibgp && !ibgp) {
 	    //test route is internal, alternative is external
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	    test_ibgp = ibgp;
 	    i++;
 	} else {
@@ -760,7 +760,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	if (test_igp_distance < igp_dist) {
 	    i = alternatives.erase(i);
 	} else if (test_igp_distance > igp_dist) {
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	    test_igp_distance = igp_dist;
 	    i++;
 	} else {
@@ -785,7 +785,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	if (test_id < id) {
 	    i = alternatives.erase(i);
 	} else if (test_id > id) {
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	    test_id = id;
 	    i++;
 	} else {
@@ -812,7 +812,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	if (test_address < address) {
 	    i = alternatives.erase(i);
 	} else if (test_address > address) {
-	    alternatives.pop_front();
+	    alternatives.erase(alternatives.begin(), i);
 	    test_address = address;
 	    i++;
 	} else {
