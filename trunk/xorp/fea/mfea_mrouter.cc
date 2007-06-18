@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.55 2007/06/14 17:35:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.56 2007/06/15 16:55:08 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -31,6 +31,16 @@
 #endif
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
+#endif
+//
+// XXX: We need to include <linux/types.h> before <sys/sysctl.h> because
+// the latter is broken on many systems (e.g., Linux Debian-3.1, Linux
+// Ubuntu-7.04, Gentoo-2006.1): file <linux/types.h> is needed if
+// <linux/mroute.h> is included, but <sys/sysctl.h> contains some hacks
+// to prevent the inclusion of <linux/types.h>.
+//
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
