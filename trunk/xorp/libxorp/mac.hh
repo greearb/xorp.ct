@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.12 2007/05/23 12:12:43 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.13 2007/06/15 22:27:55 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -50,13 +50,23 @@ public:
     Mac() {}
 
     /**
-     * Construct MAC address from string.  Mac address format must conform
+     * Construct MAC address from string. Mac address format must conform
      * to one of known types.
      *
      * @param s string representation of mac.
      * @throws InvalidString if s is not recognized Mac type.
      */
     Mac(const string& s) throw (InvalidString);
+
+    /**
+     * Copy a MAC address from string. Mac address format must conform
+     * to one of known types.
+     *
+     * @param from_string the storage to copy the address from.
+     * @return the number of copied octets.
+     * @throws InvalidString if from_string is not recognized Mac type.
+     */
+    size_t copy_in(const string& from_string) throw (InvalidString);
 
     /**
      * @return string representation of MAC address.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.13 2007/02/16 22:46:20 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.14 2007/06/15 22:27:55 pavlin Exp $"
 
 #include <vector>
 
@@ -26,12 +26,13 @@
 /* Base Mac methods */
 
 Mac::Mac(const string& s) throw (InvalidString)
-    : _srep(s)
 {
-    // Empty string valid, nothing to do.
-    if (_srep.empty())
-	return;
+    copy_in(s);
+}
 
+size_t
+Mac::copy_in(const string& from_string) throw (InvalidString)
+{
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //
@@ -39,12 +40,22 @@ Mac::Mac(const string& s) throw (InvalidString)
     //
     // Add new MyMac::valid methods here
     // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep)) {
-	return;
-    }
+    do {
+	if (from_string.empty()) {
+	    // XXX: Always accept the empty string
+	    break;
+	}
+	if (EtherMac::valid(from_string)) {
+	    break;
+	}
+	xorp_throw(InvalidString,
+		   c_format("Unknown Mac representation: %s",
+			    from_string.c_str()));
+	return ((size_t)-1);
+    } while (false);
 
-    xorp_throw(InvalidString,
-	       c_format("Unknown Mac representation: %s", s.c_str()));
+    _srep = from_string;
+    return (from_string.size());
 }
 
 string
