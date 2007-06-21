@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.91 2007/06/11 17:35:12 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.92 2007/06/12 16:44:00 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -281,7 +281,7 @@ gmake check
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.2 20070502 (Red Hat 4.1.2-12)
 
-  * Linux Debian-3.1 (sarge) (2.4.27-3-386)
+  * Linux Debian-3.1 (sarge) (2.4.27-3-386):
     - You must install the following packages:
       - libssl (e.g., libssl0.9.7)
       - libssl-dev
@@ -313,6 +313,7 @@ gmake check
       - g++ (e.g., g++-4.1)
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
+    - Tested on the following architectures: i386, sparc64
 
   * There is a known problem with building XORP on Linux with gcc-4.0.x
     and optimization enabled. It is a bug in gcc, see XORP Bugzilla #435
