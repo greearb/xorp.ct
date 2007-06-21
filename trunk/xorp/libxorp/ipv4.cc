@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.29 2007/02/16 22:46:19 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.30 2007/04/14 07:00:52 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -45,8 +45,8 @@ IPv4::IPv4(const sockaddr& sa) throw (InvalidFamily)
 {
     if (sa.sa_family != AF_INET)
 	xorp_throw(InvalidFamily, sa.sa_family);
-    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
-    _addr = sin.sin_addr.s_addr;
+    const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
+    _addr = sin->sin_addr.s_addr;
 }
 
 IPv4::IPv4(const sockaddr_in& sin) throw(InvalidFamily)
@@ -93,7 +93,7 @@ IPv4::copy_out(in_addr& to_in_addr) const
 size_t
 IPv4::copy_out(struct sockaddr& to_sockaddr) const
 {
-    return (copy_out(reinterpret_cast<sockaddr_in&>(to_sockaddr)));
+    return (copy_out(*sockaddr2sockaddr_in(&to_sockaddr)));
 }
 
 /**
@@ -141,7 +141,7 @@ IPv4::copy_in(const in_addr& from_in_addr)
 size_t
 IPv4::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
 {
-    return (copy_in(reinterpret_cast<const sockaddr_in&>(from_sockaddr)));
+    return (copy_in(*sockaddr2sockaddr_in(&from_sockaddr)));
 }
 
 /**

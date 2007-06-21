@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.37 2007/04/19 21:36:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.38 2007/04/19 22:04:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -98,8 +98,8 @@ inline uint16_t
 sockaddr_ip_port<IPv4>(const sockaddr& sa)
 {
     XLOG_ASSERT(sa.sa_family == IPv4::af());
-    const sockaddr_in& sin = reinterpret_cast<const sockaddr_in&>(sa);
-    return ntohs(sin.sin_port);
+    const sockaddr_in* sin = sockaddr2sockaddr_in(&sa);
+    return ntohs(sin->sin_port);
 }
 
 template <>
@@ -107,8 +107,8 @@ inline uint16_t
 sockaddr_ip_port<IPv6>(const sockaddr& sa)
 {
     XLOG_ASSERT(sa.sa_family == IPv6::af());
-    const sockaddr_in6& sin6 = reinterpret_cast<const sockaddr_in6&>(sa);
-    return ntohs(sin6.sin6_port);
+    const sockaddr_in6* sin6 = sockaddr2sockaddr_in6(&sa);
+    return ntohs(sin6->sin6_port);
 }
 
 template <typename A>

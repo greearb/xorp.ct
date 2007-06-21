@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/routing_socket_utilities.cc,v 1.5 2007/05/01 08:21:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.6 2007/05/08 00:49:02 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -222,7 +222,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
     case AF_INET:
     {
 	// XXX: sock->sa_family is undefined
-	const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
+	const struct sockaddr_in* sin = sockaddr2sockaddr_in(sock);
 	IPv4 netmask(sin->sin_addr);
 	return (netmask.mask_len());
     }
@@ -231,7 +231,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
     case AF_INET6:
     {
 	// XXX: sock->sa_family is undefined
-	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
+	const struct sockaddr_in6* sin6 = sockaddr2sockaddr_in6(sock);
 	IPv6 netmask(sin6->sin6_addr);
 	return (netmask.mask_len());
     }
@@ -272,7 +272,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	    // XXX: assume that the whole mask is stored
 	    {
 		// XXX: sock->sa_family is undefined
-		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(sock);
+		const struct sockaddr_in* sin = sockaddr2sockaddr_in(sock);
 		IPv4 netmask(sin->sin_addr);
 		return (netmask.mask_len());
 	    }

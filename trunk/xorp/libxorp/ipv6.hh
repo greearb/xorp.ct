@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.35 2007/02/16 22:46:20 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.36 2007/05/23 12:12:43 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -78,9 +78,9 @@ public:
     /**
      * Constructor from sockaddr_in6 structure.
      *
-     * @param sin sockaddr_in6 to construct IPv6 addr from.
+     * @param sin6 sockaddr_in6 to construct IPv6 addr from.
      */
-    IPv6(const sockaddr_in6& sin) throw (InvalidFamily);
+    IPv6(const sockaddr_in6& sin6) throw (InvalidFamily);
 
     /**
      * Constructor from a string.

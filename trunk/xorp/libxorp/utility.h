@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.14 2007/02/16 22:46:28 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.15 2007/05/23 04:08:26 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -62,6 +62,54 @@
 #define	XORP_UINT_CAST(x)	static_cast<unsigned int>(x)
 #define	XORP_INT_CAST(x)	static_cast<int>(x)
 #endif
+
+/*
+ * On some architectures casting a "(struct sockaddr *)" pointer to
+ * "(struct sockaddr_in *)" or "(struct sockaddr_in6 *)" pointer generates
+ * a warning like:
+ *     warning: cast from 'sockaddr*' to 'sockaddr_in*' increases required
+ *     alignment of target type
+ *
+ * In general such casting shouldn't create any alignment issues and
+ * shouldn't generate such warning.
+ * To get around the problem we use the help of a "void" pointer.
+ *
+ * If the casting actually creates an alignment problem, then we need
+ * to copy the "struct sockaddr" content to "struct sockaddr_in" or
+ * "struct sockaddr_in6" placeholder.
+ * Doing this (without using local static storage) might requite changing
+ * the semantics hence we don't provide the implementation.
+ */
+#ifdef __cplusplus
+inline const struct sockaddr_in *
+sockaddr2sockaddr_in(const struct sockaddr* sa)
+{
+    const void* v = sa;
+    return (reinterpret_cast<const struct sockaddr_in*>(v));
+}
+
+inline struct sockaddr_in *
+sockaddr2sockaddr_in(struct sockaddr* sa)
+{
+    void* v = sa;
+    return (reinterpret_cast<struct sockaddr_in*>(v));
+}
+
+inline const struct sockaddr_in6 *
+sockaddr2sockaddr_in6(const struct sockaddr* sa)
+{
+    const void* v = sa;
+    return (reinterpret_cast<const struct sockaddr_in6*>(v));
+}
+
+inline struct sockaddr_in6 *
+sockaddr2sockaddr_in6(struct sockaddr* sa)
+{
+    void* v = sa;
+    return (reinterpret_cast<struct sockaddr_in6*>(v));
+}
+
+#endif /* __cplusplus */
 
 #define ADD_POINTER(pointer, size, type)				\
 	((type)(void *)(((uint8_t *)(pointer)) + (size)))

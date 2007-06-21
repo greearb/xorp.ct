@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.8 2007/05/23 04:08:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.9 2007/06/04 23:17:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -403,14 +403,14 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
 	    
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
-		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_netmask);
+		const struct sockaddr_in* sin = sockaddr2sockaddr_in(ifa->ifa_netmask);
 		subnet_mask.copy_in(sin->sin_addr);
 	    }
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
 	    
 	    // Get the broadcast address
 	    if (vifp->broadcast() && (ifa->ifa_broadaddr != NULL)) {
-		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_broadaddr);
+		const struct sockaddr_in* sin = sockaddr2sockaddr_in(ifa->ifa_broadaddr);
 		broadcast_addr.copy_in(sin->sin_addr);
 		has_broadcast_addr = true;
 		debug_msg("Broadcast address: %s\n",
@@ -419,7 +419,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
 	    
 	    // Get the p2p address
 	    if (vifp->point_to_point() && (ifa->ifa_dstaddr != NULL)) {
-		const struct sockaddr_in* sin = reinterpret_cast<const struct sockaddr_in*>(ifa->ifa_dstaddr);
+		const struct sockaddr_in* sin = sockaddr2sockaddr_in(ifa->ifa_dstaddr);
 		peer_addr.copy_in(sin->sin_addr);
 		has_peer_addr = true;
 		debug_msg("Peer address: %s\n", peer_addr.str().c_str());
@@ -467,7 +467,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
 	    
 	    // Get the netmask
 	    if (ifa->ifa_netmask != NULL) {
-		const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(ifa->ifa_netmask);
+		const struct sockaddr_in6* sin6 = sockaddr2sockaddr_in6(ifa->ifa_netmask);
 		subnet_mask.copy_in(sin6->sin6_addr);
 	    }
 	    debug_msg("IP netmask: %s\n", subnet_mask.str().c_str());
@@ -478,7 +478,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
 	    if (vifp->point_to_point()
 		&& (ifa->ifa_dstaddr != NULL)
 		&& (ifa->ifa_dstaddr->sa_family == AF_INET6)) {
-		const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(ifa->ifa_dstaddr);
+		const struct sockaddr_in6* sin6 = sockaddr2sockaddr_in6(ifa->ifa_dstaddr);
 		peer_addr.copy_in(sin6->sin6_addr);
 		has_peer_addr = true;
 		debug_msg("Peer address: %s\n", peer_addr.str().c_str());

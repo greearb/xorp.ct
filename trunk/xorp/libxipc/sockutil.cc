@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.24 2006/10/12 01:24:47 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.25 2007/02/16 22:46:07 pavlin Exp $"
 
 #include "ipc_module.h"
 
@@ -436,8 +436,8 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
 	comm_close(s);
 	return false;
     }
-    sockaddr_in& sin = reinterpret_cast<sockaddr_in&>(ifr.ifr_addr);
-    addr.s_addr = sin.sin_addr.s_addr;
+    sockaddr_in* sin = sockaddr2sockaddr_in(&ifr.ifr_addr);
+    addr.s_addr = sin->sin_addr.s_addr;
 
     if (ioctl(s, SIOCGIFFLAGS, &ifr) < 0) {
 	debug_msg("Failed to get interface flags\n");
