@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.5 2007/06/04 23:17:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.6 2007/06/08 01:45:21 pavlin Exp $"
 
 //
 // I/O IP raw socket support.
@@ -1265,7 +1265,13 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    break;
 	}
 	struct igmpmsg* igmpmsg;
-	igmpmsg = reinterpret_cast<struct igmpmsg *>(_rcvbuf);
+	//
+	// XXX: Use the help of a "void" casting to get around alignment
+	// related warning that can be safely ignored. This is because
+	// _rcvbuf is malloc()-ed and therefore guarantees that the igmpmsg
+	// fields are aligned.
+	//
+	igmpmsg = reinterpret_cast<struct igmpmsg *>((void *)_rcvbuf);
 	if (igmpmsg->im_mbz == 0) {
 	    //
 	    // XXX: Packets sent up from system to daemon have
