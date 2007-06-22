@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.14 2007/06/19 01:50:06 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.15 2007/06/22 22:04:17 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -108,6 +108,14 @@ public:
     EtherMac() : Mac() {}
 
     /**
+     * Constructor from a (uint8_t *) memory pointer.
+     *
+     * @param from_uint8 the pointer to the memory to copy the address value
+     * from.
+     */
+    explicit EtherMac(const uint8_t* from_uint8);
+
+    /**
      * Construct EtherMac from a string representation.
      *
      * @param from_string string representation of the form XX:XX:XX:XX:XX:XX
@@ -132,7 +140,24 @@ public:
      * @throws BadMac if the ether_addr cannot be used to construct EtherMac.
      */
     EtherMac(const ether_addr& from_ether_addr) throw (BadMac);
-    
+
+    /**
+     * Copy the EtherMac raw address to specified memory location.
+     *
+     * @param: to_uint8 the pointer to the memory to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(uint8_t* to_uint8) const;
+
+    /**
+     * Copy a raw EtherMac address from specified memory location into
+     * EtherMac container.
+     *
+     * @param from_uint8 the memory address to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const uint8_t* from_uint8);
+
     /**
      * Copy the EtherMac address to ether_addr structure.
      *

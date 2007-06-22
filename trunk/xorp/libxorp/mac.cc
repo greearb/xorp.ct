@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.15 2007/06/19 01:50:06 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.16 2007/06/22 22:04:17 pavlin Exp $"
 
 #include <vector>
 
@@ -87,6 +87,11 @@ Mac::normalized_str() const
 /* ------------------------------------------------------------------------- */
 /* EtherMac related methods */
 
+EtherMac::EtherMac(const uint8_t* from_uint8)
+{
+    copy_in(from_uint8);
+}
+
 EtherMac::EtherMac(const string& from_string) throw (InvalidString)
 {
     if (valid(from_string)) {
@@ -120,8 +125,36 @@ EtherMac::EtherMac(const struct ether_addr& from_ether_addr) throw (BadMac)
 }
 
 size_t
+EtherMac::copy_out(uint8_t* to_uint8) const
+{
+    struct ether_addr ether_addr;
+
+    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
+
+    if (copy_out(ether_addr) != sizeof(ether_addr))
+	return (static_cast<size_t>(-1));
+
+    memcpy(to_uint8, &ether_addr, sizeof(ether_addr));
+
+    return (ADDR_BYTELEN);
+}
+
+size_t
+EtherMac::copy_in(const uint8_t* from_uint8)
+{
+    struct ether_addr ether_addr;
+
+    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
+    memcpy(&ether_addr, from_uint8, sizeof(ether_addr));
+
+    return (copy_in(ether_addr));
+}
+
+size_t
 EtherMac::copy_out(struct ether_addr& to_ether_addr) const
 {
+    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
+
     //
     // XXX: work-around because of broken ether_aton() declarations that
     // are missing the 'const' in the argument.
