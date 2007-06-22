@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.13 2007/06/15 22:27:55 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.14 2007/06/19 01:50:06 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -53,10 +53,10 @@ public:
      * Construct MAC address from string. Mac address format must conform
      * to one of known types.
      *
-     * @param s string representation of mac.
+     * @param from_string string representation of MAC.
      * @throws InvalidString if s is not recognized Mac type.
      */
-    Mac(const string& s) throw (InvalidString);
+    Mac(const string& from_string) throw (InvalidString);
 
     /**
      * Copy a MAC address from string. Mac address format must conform
@@ -110,26 +110,28 @@ public:
     /**
      * Construct EtherMac from a string representation.
      *
-     * @param s string representation of the form XX:XX:XX:XX:XX:XX where
-     *          X represents a hex-digit.
+     * @param from_string string representation of the form XX:XX:XX:XX:XX:XX
+     * where X represents a hex-digit.
      * @throws InvalidString if string passed does not match expected format.
      */
-    EtherMac(const string& s) throw (InvalidString);
+    EtherMac(const string& from_string) throw (InvalidString);
 
     /**
-     * Construct EtherMac from Mac. 
+     * Construct EtherMac from Mac.
      *
-     * @param m Mac to construct EtherMac from.
-     *
+     * @param from_mac Mac to construct EtherMac from.
      * @throws BadMac if the Mac's string representation is not equivalent to 
      * the EtherMac's string representation.
      */
-    EtherMac(const Mac& m) throw (BadMac);
+    EtherMac(const Mac& from_mac) throw (BadMac);
 
     /**
      * Construct EtherMac from ether_addr.
+     *
+     * @param from_ether_addr the ether_addr to construct EtherMac from.
+     * @throws BadMac if the ether_addr cannot be used to construct EtherMac.
      */
-    EtherMac(const ether_addr& ether_addr) throw (BadMac);
+    EtherMac(const ether_addr& from_ether_addr) throw (BadMac);
     
     /**
      * Copy the EtherMac address to ether_addr structure.
@@ -141,12 +143,29 @@ public:
 
     /**
      * Copy a raw Ethernet address from ether_addr structure into EtherMac
-     * structure.
+     * container.
      *
      * @param from_ether_addr the storage to copy the address from.
      * @return the number of copied octets.
      */
     size_t copy_in(const struct ether_addr& from_ether_addr);
+
+    /**
+     * Copy the EtherMac address to generic Mac container.
+     *
+     * @param to_mac the storage to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(Mac& to_mac) const;
+
+    /**
+     * Copy an Ethernet address from Mac container into EtherMac container.
+     *
+     * @param from_mac the storage to copy the address from.
+     * @return the number of copied octets.
+     * @throws BadMac if the Mac cannot be used to construct EtherMac.
+     */
+    size_t copy_in(const Mac& from_mac) throw (BadMac);
 
     /**
      * Check whether string contains valid EtherMac representation.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.14 2007/06/15 22:27:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.15 2007/06/19 01:50:06 pavlin Exp $"
 
 #include <vector>
 
@@ -25,14 +25,16 @@
 /* ------------------------------------------------------------------------- */
 /* Base Mac methods */
 
-Mac::Mac(const string& s) throw (InvalidString)
+Mac::Mac(const string& from_string) throw (InvalidString)
 {
-    copy_in(s);
+    copy_in(from_string);
 }
 
 size_t
 Mac::copy_in(const string& from_string) throw (InvalidString)
 {
+    size_t ret_value = static_cast<size_t>(-1);
+
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //
@@ -43,19 +45,21 @@ Mac::copy_in(const string& from_string) throw (InvalidString)
     do {
 	if (from_string.empty()) {
 	    // XXX: Always accept the empty string
+	    ret_value = 0;
 	    break;
 	}
 	if (EtherMac::valid(from_string)) {
+	    ret_value = EtherMac::ADDR_BYTELEN;
 	    break;
 	}
 	xorp_throw(InvalidString,
 		   c_format("Unknown Mac representation: %s",
 			    from_string.c_str()));
-	return ((size_t)-1);
+	return (static_cast<size_t>(-1));
     } while (false);
 
     _srep = from_string;
-    return (from_string.size());
+    return (ret_value);
 }
 
 string
@@ -83,40 +87,33 @@ Mac::normalized_str() const
 /* ------------------------------------------------------------------------- */
 /* EtherMac related methods */
 
-EtherMac::EtherMac(const string& s) throw (InvalidString)
+EtherMac::EtherMac(const string& from_string) throw (InvalidString)
 {
-    if (valid(s)) {
-	set_rep(s);
+    if (valid(from_string)) {
+	set_rep(from_string);
 	return;
     }
 
     xorp_throw(InvalidString,
-	       c_format("Bad EtherMac representation: %s", s.c_str()));
+	       c_format("Bad EtherMac representation: %s",
+			from_string.c_str()));
 }
 
-EtherMac::EtherMac(const Mac& m) throw (BadMac)
+EtherMac::EtherMac(const Mac& from_mac) throw (BadMac)
 {
-    string s = m.str();
-
-    if (valid(s)) {
-	set_rep(s);
-	return;
-    }
-
-    xorp_throw(BadMac,
-	       c_format("Bad EtherMac representation: %s", s.c_str()));
+    copy_in(from_mac);
 }
 
-EtherMac::EtherMac(const struct ether_addr& ether_addr) throw (BadMac)
+EtherMac::EtherMac(const struct ether_addr& from_ether_addr) throw (BadMac)
 {
-    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
+    static_assert(sizeof(from_ether_addr) == ADDR_BYTELEN);
 
-    if (copy_in(ether_addr) != ADDR_BYTELEN) {
+    if (copy_in(from_ether_addr) != ADDR_BYTELEN) {
 	//
 	// Nobody agrees on name of fields within ether_addr structure...
 	// We probably don't care as this should never be reached.
 	//
-	const uint8_t* s = reinterpret_cast<const uint8_t*>(&ether_addr);
+	const uint8_t* s = reinterpret_cast<const uint8_t*>(&from_ether_addr);
 	xorp_throw(BadMac, c_format("%2x:%2x:%2x:%2x:%2x:%2x",
 				    s[0], s[1], s[2], s[3], s[4], s[5]));
     }
@@ -139,7 +136,7 @@ EtherMac::copy_out(struct ether_addr& to_ether_addr) const
 	return (sizeof(to_ether_addr));
     }
 
-    return (0);
+    return (static_cast<size_t>(-1));
 }
 
 size_t
@@ -152,10 +149,39 @@ EtherMac::copy_in(const struct ether_addr& from_ether_addr)
     //
     const char* ap = ether_ntoa(const_cast<struct ether_addr *>(&from_ether_addr));
     if (ap == NULL)
-	return (0);
+	return (static_cast<size_t>(-1));
 
     set_rep(ap);
     return (ADDR_BYTELEN);
+}
+
+size_t
+EtherMac::copy_out(Mac& to_mac) const
+{
+    try {
+	to_mac.copy_in(str());
+	return (ADDR_BYTELEN);
+    } catch (const BadMac& e) {
+	// XXX: shouldn't happen
+	XLOG_FATAL("Invalid EtherMac address: %s", str().c_str());
+    }
+
+    return (static_cast<size_t>(-1));
+}
+
+size_t
+EtherMac::copy_in(const Mac& from_mac) throw (BadMac)
+{
+    string s = from_mac.str();
+
+    if (valid(s)) {
+	set_rep(s);
+	return (ADDR_BYTELEN);
+    }
+
+    xorp_throw(BadMac,
+	       c_format("Bad EtherMac representation: %s", s.c_str()));
+    return (static_cast<size_t>(-1));
 }
 
 bool
