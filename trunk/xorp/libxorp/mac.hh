@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.15 2007/06/22 22:04:17 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.16 2007/06/22 22:53:52 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -134,12 +134,21 @@ public:
     EtherMac(const Mac& from_mac) throw (BadMac);
 
     /**
-     * Construct EtherMac from ether_addr.
+     * Construct EtherMac from ether_addr structure.
      *
-     * @param from_ether_addr the ether_addr to construct EtherMac from.
+     * @param from_ether_addr the ether_addr structure to construct EtherMac
+     * from.
      * @throws BadMac if the ether_addr cannot be used to construct EtherMac.
      */
-    EtherMac(const ether_addr& from_ether_addr) throw (BadMac);
+    EtherMac(const struct ether_addr& from_ether_addr) throw (BadMac);
+
+    /**
+     * Construct EtherMac from sockaddr structure.
+     *
+     * @param from_sockaddr the sockaddr structure to construct EtherMac from.
+     * @throws BadMac if the sockaddr cannot be used to construct EtherMac.
+     */
+    EtherMac(const struct sockaddr& from_sockaddr) throw (BadMac);
 
     /**
      * Copy the EtherMac raw address to specified memory location.
@@ -174,6 +183,23 @@ public:
      * @return the number of copied octets.
      */
     size_t copy_in(const struct ether_addr& from_ether_addr);
+
+    /**
+     * Copy the EtherMac address to sockaddr structure.
+     *
+     * @param to_sockaddr the storage to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(struct sockaddr& to_sockaddr) const;
+
+    /**
+     * Copy a raw Ethernet address from sockaddr structure into EtherMac
+     * container.
+     *
+     * @param from_sockaddr the storage to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const struct sockaddr& from_sockaddr);
 
     /**
      * Copy the EtherMac address to generic Mac container.

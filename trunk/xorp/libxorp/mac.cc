@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.16 2007/06/22 22:04:17 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.17 2007/06/22 22:53:52 pavlin Exp $"
 
 #include <vector>
 
@@ -124,6 +124,15 @@ EtherMac::EtherMac(const struct ether_addr& from_ether_addr) throw (BadMac)
     }
 }
 
+EtherMac::EtherMac(const struct sockaddr& from_sockaddr) throw (BadMac)
+{
+    if (copy_in(from_sockaddr) != ADDR_BYTELEN) {
+	const uint8_t* s = reinterpret_cast<const uint8_t*>(from_sockaddr.sa_data);
+	xorp_throw(BadMac, c_format("%2x:%2x:%2x:%2x:%2x:%2x",
+				    s[0], s[1], s[2], s[3], s[4], s[5]));
+    }
+}
+
 size_t
 EtherMac::copy_out(uint8_t* to_uint8) const
 {
@@ -186,6 +195,31 @@ EtherMac::copy_in(const struct ether_addr& from_ether_addr)
 
     set_rep(ap);
     return (ADDR_BYTELEN);
+}
+
+size_t
+EtherMac::copy_out(struct sockaddr& to_sockaddr) const
+{
+    memset(&to_sockaddr, 0, sizeof(to_sockaddr));
+
+#ifdef  HAVE_STRUCT_SOCKADDR_SA_LEN
+    to_sockaddr.sa_len = sizeof(to_sockaddr);
+#endif
+#ifdef AF_LINK
+    to_sockaddr.sa_family = AF_LINK;
+#else
+    to_sockaddr.sa_family = AF_UNSPEC;
+#endif
+
+    uint8_t* sa_data = reinterpret_cast<uint8_t*>(to_sockaddr.sa_data);
+    return (copy_out(sa_data));
+}
+
+size_t
+EtherMac::copy_in(const struct sockaddr& from_sockaddr)
+{
+    const uint8_t* sa_data = reinterpret_cast<const uint8_t*>(from_sockaddr.sa_data);
+    return (copy_in(sa_data));
 }
 
 size_t
