@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.176 2007/06/12 16:44:19 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.177 2007/06/14 18:30:57 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -63,7 +63,8 @@ Release 1.5-WIP (2007/??/??)
     - 
 
   STATIC_ROUTES:
-    - 
+    - Bug fix that prevented the deletion of interface-specific routes
+      using xorpsh.
 
   MLD/IGMP:
     - 
