@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.16 2007/06/22 22:53:52 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.17 2007/06/26 18:39:30 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -67,6 +67,33 @@ public:
      * @throws InvalidString if from_string is not recognized Mac type.
      */
     size_t copy_in(const string& from_string) throw (InvalidString);
+
+    /**
+     * Less-Than Operator
+     *
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is numerically smaller than the
+     * right-hand operand.
+     */
+    bool operator<(const Mac& other) const { return (_srep < other._srep); }
+
+    /**
+     * Equality Operator
+     *
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is numerically same as the
+     * right-hand operand.
+     */
+    bool operator==(const Mac& other) const { return (_srep == other._srep); }
+
+    /**
+     * Not-Equal Operator
+     *
+     * @param other the right-hand operand to compare against.
+     * @return true if the left-hand operand is numerically not same as the
+     * right-hand operand.
+     */
+    bool operator!=(const Mac& other) const { return (_srep != other._srep); }
 
     /**
      * @return string representation of MAC address.
