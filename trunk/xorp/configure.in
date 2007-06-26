@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.206 2007/05/31 20:51:06 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.207 2007/06/04 23:17:30 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.206 2007/05/31 20:51:06 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.207 2007/06/04 23:17:30 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -842,6 +842,11 @@ AC_LANG_POP(C)
 dnl ---------------------------------------------------------------------------
 dnl Check for system services
 dnl ---------------------------------------------------------------------------
+
+dnl
+dnl Raw link-level I/O access checks
+dnl
+builtin(include, config/aciolink.m4)
 
 dnl
 dnl Socket implementation checks
