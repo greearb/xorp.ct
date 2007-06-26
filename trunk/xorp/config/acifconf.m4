@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acifconf.m4,v 1.4 2007/04/14 01:35:06 pavlin Exp $
+dnl $XORP: xorp/config/acifconf.m4,v 1.5 2007/04/14 07:00:48 pavlin Exp $
 dnl
 
 dnl
@@ -32,6 +32,23 @@ dnl Check for ifr_ifindex in ifreq
 dnl ------------------------------
 
 AC_CHECK_MEMBERS([struct ifreq.ifr_ifindex], [], [],
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+])
+
+dnl ------------------------------
+dnl Check for ifr_hwaddr in ifreq
+dnl ------------------------------
+
+AC_CHECK_MEMBERS([struct ifreq.ifr_hwaddr], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

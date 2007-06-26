@@ -405,6 +405,9 @@
 /* Define to 1 if the system has the type `struct ether_addr'. */
 #undef HAVE_STRUCT_ETHER_ADDR
 
+/* Define to 1 if `ifr_hwaddr' is member of `struct ifreq'. */
+#undef HAVE_STRUCT_IFREQ_IFR_HWADDR
+
 /* Define to 1 if `ifr_ifindex' is member of `struct ifreq'. */
 #undef HAVE_STRUCT_IFREQ_IFR_IFINDEX
 
