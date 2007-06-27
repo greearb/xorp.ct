@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.1 2007/06/27 01:27:06 pavlin Exp $"
 
 //
 // I/O link raw pcap(3)-based support.
@@ -244,6 +244,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // The default is PCAP_D_INOUT (if supported by the system).
     //
     //
+#ifdef PCAP_D_INOUT
     if (pcap_setdirection(_pcap, PCAP_D_INOUT) != 0) {
 	error_msg = c_format("Cannot set the pcap packet capture "
 			     "direction for interface %s vif %s: %s",
@@ -252,6 +253,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
+#endif // PCAP_D_INOUT
 
     //
     // Assign a method to read from this descriptor
