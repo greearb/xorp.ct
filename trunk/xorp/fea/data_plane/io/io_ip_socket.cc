@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.7 2007/06/21 06:03:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.8 2007/06/21 08:11:11 pavlin Exp $"
 
 //
 // I/O IP raw socket support.
@@ -227,12 +227,12 @@ static uint8_t		ra_opt6[IP6OPT_RTALERT_LEN];
 #endif
 
 
-IoIpSocket::IoIpSocket(EventLoop& eventloop, int init_family,
-		       uint8_t ip_protocol, const IfTree& iftree)
+IoIpSocket::IoIpSocket(EventLoop& eventloop, const IfTree& iftree,
+		       int init_family, uint8_t ip_protocol)
     : _eventloop(eventloop),
+      _iftree(iftree),
       _family(init_family),
       _ip_protocol(ip_protocol),
-      _iftree(iftree),
       _is_ip_hdr_included(false),
       _ip_id(xorp_random())
 {

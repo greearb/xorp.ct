@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.19 2007/05/22 21:04:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.20 2007/05/26 02:04:47 pavlin Exp $"
 
 
 //
@@ -52,6 +52,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   XrlRouter&			xrl_router,
 			   Profile&			profile,
 			   XrlFibClientManager&		xrl_fib_client_manager,
+			   IoLinkManager&		io_link_manager,
 			   IoIpManager&			io_ip_manager,
 			   LibFeaClientBridge&		lib_fea_client_bridge,
 			   XrlSocketServer&		xrl_socket_server)
@@ -61,6 +62,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _xrl_router(xrl_router),
       _profile(profile),
       _xrl_fib_client_manager(xrl_fib_client_manager),
+      _io_link_manager(io_link_manager),
       _io_ip_manager(io_ip_manager),
       _lib_fea_client_bridge(lib_fea_client_bridge),
       _xrl_socket_server(xrl_socket_server),
@@ -2373,6 +2375,122 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
 	    tid,
 	    new FibDeleteAllEntries6(fibconfig()),
 	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+// ----------------------------------------------------------------------------
+// Raw Link-Level Server Interface related
+
+XrlCmdError
+XrlFeaTarget::raw_link_0_1_send(
+    // Input values,
+    const string&		if_name,
+    const string&		vif_name,
+    const Mac&			src_address,
+    const Mac&			dst_address,
+    const uint32_t&		ether_type,
+    const vector<uint8_t>&	payload)
+{
+    string error_msg;
+
+    if (_io_link_manager.send(if_name, vif_name, src_address, dst_address,
+			      ether_type, payload, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::raw_link_0_1_register_receiver(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ether_type,
+    const string&	filter_program,
+    const bool&		enable_multicast_loopback)
+{
+    string error_msg;
+
+    if (_io_link_manager.register_receiver(xrl_target_name,
+					   if_name, vif_name,
+					   ether_type, filter_program,
+					   enable_multicast_loopback,
+					   error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::raw_link_0_1_unregister_receiver(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ether_type,
+    const string&	filter_program)
+{
+    string error_msg;
+
+    if (_io_link_manager.unregister_receiver(xrl_target_name,
+					     if_name, vif_name,
+					     ether_type, filter_program,
+					     error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::raw_link_0_1_join_multicast_group(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ether_type,
+    const string&	filter_program,
+    const Mac&		group_address)
+{
+    string error_msg;
+
+    if (_io_link_manager.join_multicast_group(xrl_target_name,
+					      if_name, vif_name,
+					      ether_type, filter_program,
+					      group_address, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::raw_link_0_1_leave_multicast_group(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ether_type,
+    const string&	filter_program,
+    const Mac&		group_address)
+{
+    string error_msg;
+
+    if (_io_link_manager.leave_multicast_group(xrl_target_name,
+					       if_name, vif_name,
+					       ether_type, filter_program,
+					       group_address, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

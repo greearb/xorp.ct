@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.33 2006/10/19 02:14:30 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.34 2007/04/20 06:36:09 pavlin Exp $
 ##
 
 ###############################################################################
@@ -68,6 +68,16 @@ libfib2mribxif_la_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 # Forwarding Table Interface Client Interface
 noinst_LTLIBRARIES += libftixif.la
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
+
+# FEA Raw Link-Level I/O Server Interface
+noinst_LTLIBRARIES += libfearawlink.la
+libfearawlink_la_SOURCES  = fea_rawlink_xif.hh
+libfearawlink_la_SOURCES += fea_rawlink_xif.cc
+
+# FEA Raw Link-Level I/O Client Interface
+noinst_LTLIBRARIES += libfearawlinkclient.la
+libfearawlinkclient_la_SOURCES  = fea_rawlink_client_xif.hh
+libfearawlinkclient_la_SOURCES += fea_rawlink_client_xif.cc
 
 # FEA IPv4 Raw Packet Server Interface
 noinst_LTLIBRARIES += libfearawpkt4.la

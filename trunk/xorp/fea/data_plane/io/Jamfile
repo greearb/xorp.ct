@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/data_plane/io/Jamfile,v 1.1 2007/05/24 20:01:28 pavlin Exp $
+# $XORP: xorp/fea/data_plane/io/Jamfile,v 1.2 2007/06/04 23:17:36 pavlin Exp $
 #
 
 SubDir TOP fea data_plane io ;
@@ -13,5 +13,6 @@ SubIncludeOnce TOP fea ;
 SubDir TOP fea data_plane io ;
 
 Library libxorp_io : 
+	io_link_pcap.cc
 	io_ip_socket.cc
 	;

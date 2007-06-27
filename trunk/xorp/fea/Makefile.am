@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.93 2007/05/26 02:04:44 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.94 2007/06/04 23:17:31 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -35,6 +35,7 @@ LDADD		+= $(top_builddir)/fea/data_plane/io/libxorp_io.la
 LDADD		+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6client.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
@@ -100,6 +101,7 @@ libfea_la_SOURCES	+= ifconfig_set.hh
 libfea_la_SOURCES	+= ifconfig_transaction.hh
 libfea_la_SOURCES	+= iftree.hh
 libfea_la_SOURCES	+= io_ip_manager.hh
+libfea_la_SOURCES	+= io_link_manager.hh
 libfea_la_SOURCES	+= libfeaclient_bridge.hh
 libfea_la_SOURCES	+= mfea_dataflow.hh
 libfea_la_SOURCES	+= mfea_kernel_messages.hh
@@ -121,6 +123,7 @@ libfea_la_SOURCES	+= xrl_fea_node.hh
 libfea_la_SOURCES	+= xrl_fea_target.hh
 libfea_la_SOURCES	+= xrl_fib_client_manager.hh
 libfea_la_SOURCES	+= xrl_io_ip_manager.hh
+libfea_la_SOURCES	+= xrl_io_link_manager.hh
 libfea_la_SOURCES	+= xrl_mfea_node.hh
 libfea_la_SOURCES	+= xrl_packet_acl.hh
 libfea_la_SOURCES	+= xrl_socket_cmds.hh
@@ -137,6 +140,7 @@ libfea_la_SOURCES	+= ifconfig_reporter.cc
 libfea_la_SOURCES	+= ifconfig_transaction.cc
 libfea_la_SOURCES	+= iftree.cc
 libfea_la_SOURCES	+= io_ip_manager.cc
+libfea_la_SOURCES	+= io_link_manager.cc
 libfea_la_SOURCES	+= libfeaclient_bridge.cc
 libfea_la_SOURCES	+= mfea_config.cc
 libfea_la_SOURCES	+= mfea_dataflow.cc
@@ -157,6 +161,7 @@ libfea_la_SOURCES	+= xrl_fea_node.cc
 libfea_la_SOURCES	+= xrl_fea_target.cc
 libfea_la_SOURCES	+= xrl_fib_client_manager.cc
 libfea_la_SOURCES	+= xrl_io_ip_manager.cc
+libfea_la_SOURCES	+= xrl_io_link_manager.cc
 libfea_la_SOURCES	+= xrl_mfea_node.cc
 libfea_la_SOURCES	+= xrl_socket_cmds.cc
 libfea_la_SOURCES	+= xrl_socket_server.cc

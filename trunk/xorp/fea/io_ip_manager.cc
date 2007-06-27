@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.3 2007/06/01 18:17:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.4 2007/06/08 01:45:21 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -161,7 +161,7 @@ protected:
     IoIpComm&		_io_ip_comm;
     const string	_if_name;
     const string	_vif_name;
-    set<IPvX>           _joined_multicast_groups;
+    set<IPvX>		_joined_multicast_groups;
     bool		_enable_multicast_loopback;
 };
 
@@ -209,9 +209,9 @@ protected:
 /* ------------------------------------------------------------------------- */
 /* IoIpComm methods */
 
-IoIpComm::IoIpComm(EventLoop& eventloop, int family, uint8_t ip_protocol,
-		   const IfTree& iftree)
-    : IoIpSocket(eventloop, family, ip_protocol, iftree)
+IoIpComm::IoIpComm(EventLoop& eventloop, const IfTree& iftree, int family,
+		   uint8_t ip_protocol)
+    : IoIpSocket(eventloop, iftree, family, ip_protocol)
 {
 }
 
@@ -246,7 +246,7 @@ IoIpComm::add_filter(InputFilter* filter)
     _input_filters.push_back(filter);
     if (_input_filters.front() == filter) {
 	string error_msg;
-	if (IoIpComm::start(error_msg) != XORP_OK) {
+	if (IoIpSocket::start(error_msg) != XORP_OK) {
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return false;
 	}
@@ -604,7 +604,7 @@ IoIpManager::register_receiver(int		family,
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
-	io_ip_comm = new IoIpComm(_eventloop, family, ip_protocol, iftree());
+	io_ip_comm = new IoIpComm(_eventloop, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
 	io_ip_comm = cti->second;
@@ -712,8 +712,9 @@ IoIpManager::unregister_receiver(int		family,
     }
 
     error_msg = c_format("Cannot find registration for receiver %s "
-			 "interface %s and vif %s",
+			 "protocol %u interface %s and vif %s",
 			 receiver_name.c_str(),
+			 XORP_UINT_CAST(ip_protocol),
 			 if_name.c_str(),
 			 vif_name.c_str());
     return (XORP_ERROR);
@@ -826,7 +827,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
-	io_ip_comm = new IoIpComm(_eventloop, family, ip_protocol, iftree());
+	io_ip_comm = new IoIpComm(_eventloop, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
 	io_ip_comm = cti->second;

@@ -89,6 +89,12 @@ libfeaifmgrreplicatorxif_la_OBJECTS =  \
 libfeaifmgrxif_la_LIBADD =
 am_libfeaifmgrxif_la_OBJECTS = fea_ifmgr_xif.lo
 libfeaifmgrxif_la_OBJECTS = $(am_libfeaifmgrxif_la_OBJECTS)
+libfearawlink_la_LIBADD =
+am_libfearawlink_la_OBJECTS = fea_rawlink_xif.lo
+libfearawlink_la_OBJECTS = $(am_libfearawlink_la_OBJECTS)
+libfearawlinkclient_la_LIBADD =
+am_libfearawlinkclient_la_OBJECTS = fea_rawlink_client_xif.lo
+libfearawlinkclient_la_OBJECTS = $(am_libfearawlinkclient_la_OBJECTS)
 libfearawpkt4_la_LIBADD =
 am_libfearawpkt4_la_OBJECTS = fea_rawpkt4_xif.lo
 libfearawpkt4_la_OBJECTS = $(am_libfearawpkt4_la_OBJECTS)
@@ -261,7 +267,8 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) \
 	$(libfeafibxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
-	$(libfeaifmgrxif_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
+	$(libfeaifmgrxif_la_SOURCES) $(libfearawlink_la_SOURCES) \
+	$(libfearawlinkclient_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
 	$(libfearawpkt4client_la_SOURCES) $(libfearawpkt6_la_SOURCES) \
 	$(libfearawpkt6client_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
 	$(libfinderclientxif_la_SOURCES) \
@@ -296,7 +303,8 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) \
 	$(libfeafibxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
-	$(libfeaifmgrxif_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
+	$(libfeaifmgrxif_la_SOURCES) $(libfearawlink_la_SOURCES) \
+	$(libfearawlinkclient_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
 	$(libfearawpkt4client_la_SOURCES) $(libfearawpkt6_la_SOURCES) \
 	$(libfearawpkt6client_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
 	$(libfinderclientxif_la_SOURCES) \
@@ -487,6 +495,10 @@ top_srcdir = @top_srcdir@
 
 # Forwarding Table Interface Client Interface
 
+# FEA Raw Link-Level I/O Server Interface
+
+# FEA Raw Link-Level I/O Client Interface
+
 # FEA IPv4 Raw Packet Server Interface
 
 # FEA IPv4 Raw Packet Client Interface
@@ -575,14 +587,14 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libcoordxif.la libdatainxif.la libfeaclickxif.la \
 	libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la \
 	libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la \
-	libfib2mribxif.la libftixif.la libfearawpkt4.la \
-	libfearawpkt4client.la libfearawpkt6.la libfearawpkt6client.la \
-	libfinderxif.la libfindereventnotifierxif.la \
-	libfindereventobserverxif.la libfinderclientxif.la \
-	libmfeaxif.la libmfeaclientxif.la libmld6igmpxif.la \
-	libmld6igmpclientxif.la libospfv2xif.la libospfv3xif.la \
-	libpacketaclxif.la libpimxif.la libpolicyxif.la \
-	libpolicybackendxif.la libpolicyredist4xif.la \
+	libfib2mribxif.la libftixif.la libfearawlink.la \
+	libfearawlinkclient.la libfearawpkt4.la libfearawpkt4client.la \
+	libfearawpkt6.la libfearawpkt6client.la libfinderxif.la \
+	libfindereventnotifierxif.la libfindereventobserverxif.la \
+	libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la \
+	libmld6igmpxif.la libmld6igmpclientxif.la libospfv2xif.la \
+	libospfv3xif.la libpacketaclxif.la libpimxif.la \
+	libpolicyxif.la libpolicybackendxif.la libpolicyredist4xif.la \
 	libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la \
 	libredist4xif.la libredist6xif.la libredisttransaction4xif.la \
 	libredisttransaction6xif.la libribxif.la libribclientxif.la \
@@ -609,6 +621,9 @@ libfeaifmgrreplicatorxif_la_SOURCES = fea_ifmgr_replicator_xif.hh \
 	fea_ifmgr_replicator_xif.cc
 libfib2mribxif_la_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
+libfearawlink_la_SOURCES = fea_rawlink_xif.hh fea_rawlink_xif.cc
+libfearawlinkclient_la_SOURCES = fea_rawlink_client_xif.hh \
+	fea_rawlink_client_xif.cc
 libfearawpkt4_la_SOURCES = fea_rawpkt4_xif.hh fea_rawpkt4_xif.cc
 libfearawpkt4client_la_SOURCES = fea_rawpkt4_client_xif.hh \
 	fea_rawpkt4_client_xif.cc
@@ -735,6 +750,10 @@ libfeaifmgrreplicatorxif.la: $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmg
 	$(CXXLINK)  $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmgrreplicatorxif_la_LIBADD) $(LIBS)
 libfeaifmgrxif.la: $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_LIBADD) $(LIBS)
+libfearawlink.la: $(libfearawlink_la_OBJECTS) $(libfearawlink_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawlink_la_OBJECTS) $(libfearawlink_la_LIBADD) $(LIBS)
+libfearawlinkclient.la: $(libfearawlinkclient_la_OBJECTS) $(libfearawlinkclient_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawlinkclient_la_OBJECTS) $(libfearawlinkclient_la_LIBADD) $(LIBS)
 libfearawpkt4.la: $(libfearawpkt4_la_OBJECTS) $(libfearawpkt4_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfearawpkt4_la_OBJECTS) $(libfearawpkt4_la_LIBADD) $(LIBS)
 libfearawpkt4client.la: $(libfearawpkt4client_la_OBJECTS) $(libfearawpkt4client_la_DEPENDENCIES) 
@@ -845,6 +864,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_mirror_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_replicator_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_rawlink_client_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_rawlink_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_rawpkt4_client_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_rawpkt4_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_rawpkt6_client_xif.Plo@am__quote@

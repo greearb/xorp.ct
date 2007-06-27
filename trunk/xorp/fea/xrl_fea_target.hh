@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.10 2007/05/08 19:23:15 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.11 2007/05/26 02:04:47 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -53,6 +53,7 @@ public:
 		 XrlRouter&		xrl_router,
 		 Profile&		profile,
 		 XrlFibClientManager&	xrl_fib_client_manager,
+		 IoLinkManager&		io_link_manager,
 		 IoIpManager&		io_ip_manager,
 		 LibFeaClientBridge&	lib_fea_client_bridge,
 		 XrlSocketServer&	xrl_socket_server);
@@ -980,6 +981,146 @@ public:
 	const string&	cookie);
 
     //
+    // Raw Link-Level Server Interface
+    //
+
+    /**
+     *  Send a raw link-level packet on an interface.
+     *
+     *  @param if_name the interface to send the packet on.
+     *
+     *  @param vif_name the vif to send the packet on.
+     *
+     *  @param src_address the MAC source address.
+     *
+     *  @param dst_address the MAC destination address.
+     *
+     *  @param ether_type the EtherType protocol type. It must be between 1536
+     *  and 65535.
+     *
+     *  @param payload the payload, everything after the MAC header.
+     */
+    XrlCmdError raw_link_0_1_send(
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const Mac&	src_address,
+	const Mac&	dst_address,
+	const uint32_t&	ether_type,
+	const vector<uint8_t>&	payload);
+
+    /**
+     *  Register to receive raw link-level packets. The receiver is expected to
+     *  support raw_link_client/0.1 interface.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should be accepted.
+     *
+     *  @param vif_name the vif through which packets should be accepted.
+     *
+     *  @param ether_type the EtherType protocol number that the receiver is
+     *  interested in. It must be between 1536 and 65535. A protocol number of
+     *  0 is used to specify all protocols.
+     *
+     *  @param filter_program the filter program to be applied on the received
+     *  packets. The program uses tcpdump(1) style expression.
+     *
+     *  @param enable_multicast_loopback if true then enable delivering of
+     *  multicast datagrams back to this host (assuming the host is a member of
+     *  the same multicast group).
+     */
+    XrlCmdError raw_link_0_1_register_receiver(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ether_type,
+	const string&	filter_program,
+	const bool&	enable_multicast_loopback);
+
+    /**
+     *  Unregister to receive raw link-level packets.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should not be
+     *  accepted.
+     *
+     *  @param vif_name the vif through which packets should not be accepted.
+     *
+     *  @param ether_type the EtherType protocol number that the receiver is
+     *  not interested in anymore. It must be between 1536 and 65535. A
+     *  protocol number of 0 is used to specify all protocols.
+     *
+     *  @param filter_program the filter program that was applied on the
+     *  received packets. The program uses tcpdump(1) style expression.
+     */
+    XrlCmdError raw_link_0_1_unregister_receiver(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ether_type,
+	const string&	filter_program);
+
+    /**
+     *  Join a MAC multicast group.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should be accepted.
+     *
+     *  @param vif_name the vif through which packets should be accepted.
+     *
+     *  @param ether_type the EtherType protocol number that the receiver is
+     *  interested in. It must be between 1536 and 65535. A protocol number of
+     *  0 is used to specify all protocols.
+     *
+     *  @param filter_program the filter program to be applied on the received
+     *  packets. The program uses tcpdump(1) style expression.
+     *
+     *  @param group_address the multicast group address to join.
+     */
+    XrlCmdError raw_link_0_1_join_multicast_group(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ether_type,
+	const string&	filter_program,
+	const Mac&	group_address);
+
+    /**
+     *  Leave a MAC multicast group.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should not be
+     *  accepted.
+     *
+     *  @param vif_name the vif through which packets should not be accepted.
+     *
+     *  @param ether_type the EtherType protocol number that the receiver is
+     *  not interested in anymore. It must be between 1536 and 65535. A
+     *  protocol number of 0 is used to specify all protocols.
+     *
+     *  @param filter_program the filter program that was applied on the
+     *  received packets. The program uses tcpdump(1) style expression.
+     *
+     *  @param group_address the multicast group address to leave.
+     */
+    XrlCmdError raw_link_0_1_leave_multicast_group(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ether_type,
+	const string&	filter_program,
+	const Mac&	group_address);
+
+
+    //
     // IPv4 Raw Socket Server Interface
     //
 
@@ -1316,6 +1457,7 @@ private:
     XrlRouter&		       	_xrl_router;
     Profile&			_profile;
     XrlFibClientManager&	_xrl_fib_client_manager;
+    IoLinkManager&		_io_link_manager;
     IoIpManager&		_io_ip_manager;
     LibFeaClientBridge&		_lib_fea_client_bridge;
     XrlSocketServer&		_xrl_socket_server;

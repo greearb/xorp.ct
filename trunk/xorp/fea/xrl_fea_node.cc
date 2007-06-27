@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.8 2007/05/26 02:04:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.9 2007/06/15 16:53:18 pavlin Exp $"
 
 
 //
@@ -53,6 +53,7 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().ifconfig_update_replicator()),
       _xrl_fea_io(eventloop),
       _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
+      _xrl_io_link_manager(_fea_node.io_link_manager(), _xrl_router),
       _xrl_io_ip_manager(_fea_node.io_ip_manager(), _xrl_router),
       _xrl_socket_server(_eventloop,
 			 _fea_node.ifconfig().ifconfig_address_table(),
@@ -78,8 +79,9 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		      xrl_finder_targetname),
 #endif
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
-		      _xrl_fib_client_manager, _fea_node.io_ip_manager(),
-		      _lib_fea_client_bridge, _xrl_socket_server),
+		      _xrl_fib_client_manager, _fea_node.io_link_manager(),
+		      _fea_node.io_ip_manager(), _lib_fea_client_bridge,
+		      _xrl_socket_server),
       _is_dummy(false)
 {
     _cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access

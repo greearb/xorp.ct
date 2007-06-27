@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.5 2007/06/04 23:17:32 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.6 2007/06/08 01:45:21 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -200,13 +200,13 @@ public:
      * Constructor for IoIpComm.
      *
      * @param eventloop the event loop to use.
+     * @param iftree the interface tree to use (@see IfTree).
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
      * @param ip_protocol the IP protocol number.
-     * @param iftree the interface tree to use (@see IfTree).
      */
-    IoIpComm(EventLoop& eventloop, int family, uint8_t ip_protocol,
-	     const IfTree& iftree);
+    IoIpComm(EventLoop& eventloop, const IfTree& iftree, int family,
+	     uint8_t ip_protocol);
     virtual ~IoIpComm();
 
     /**
@@ -515,6 +515,8 @@ public:
      * interested in anymore. It must be between 0 and 255. A protocol number
      * of 0 is used to specify all protocols.
      * @param group_address the multicast group address to leave.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int leave_multicast_group(const string&	receiver_name,
 			      const string&	if_name,

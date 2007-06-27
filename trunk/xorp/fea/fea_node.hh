@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.5 2007/05/04 01:43:22 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.6 2007/05/26 02:04:45 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -27,6 +27,7 @@
 
 #include "fibconfig.hh"
 #include "ifconfig.hh"
+#include "io_link_manager.hh"
 #include "io_ip_manager.hh"
 #include "nexthop_port_mapper.hh"
 #include "pa_table.hh"
@@ -122,6 +123,14 @@ public:
     FibConfig& fibconfig() { return (_fibconfig); }
 
     /**
+     * Get the IoLinkManager instance.
+     *
+     * @return a reference to the IoLinkManager instance.
+     * @see IoLinkManager.
+     */
+    IoLinkManager& io_link_manager() { return (_io_link_manager); }
+
+    /**
      * Get the IoIpManager instance.
      *
      * @return a reference to the IoIpManager instance.
@@ -148,6 +157,7 @@ private:
 
     FibConfig			_fibconfig;
 
+    IoLinkManager		_io_link_manager;
     IoIpManager			_io_ip_manager;
 
     PaTableManager		_pa_table_manager;

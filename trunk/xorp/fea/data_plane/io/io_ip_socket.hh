@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.4 2007/06/04 23:17:36 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.5 2007/06/08 01:45:21 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
@@ -49,12 +49,12 @@ public:
      * Constructor for a given address family and protocol.
      * 
      * @param eventloop the event loop to use.
+     * @param iftree the interface tree to use.
      * @param init_family the address family.
      * @param ip_protocol the IP protocol number (IPPROTO_*).
-     * @param iftree the interface tree.
      */
-    IoIpSocket(EventLoop& eventloop, int init_family, uint8_t ip_protocol,
-	       const IfTree& iftree);
+    IoIpSocket(EventLoop& eventloop, const IfTree& iftree, int init_family,
+	       uint8_t ip_protocol);
 
     /**
      * Destructor
@@ -342,9 +342,9 @@ private:
 
     // Private state
     EventLoop&	_eventloop;	// The event loop to use
+    const IfTree& _iftree;	// The interface tree to use
     int		_family;	// The address family
     uint8_t	_ip_protocol;	// The protocol number (IPPROTO_*)
-    const IfTree& _iftree;	// The interface tree
 
     XorpFd	_proto_socket_in;    // The socket to receive protocol message
     XorpFd	_proto_socket_out;   // The socket to end protocol message

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.14 2007/05/26 02:04:44 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.15 2007/06/04 23:17:31 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -28,6 +28,7 @@ Library libfea :
 	ifconfig_transaction.cc
 	iftree.cc
 	io_ip_manager.cc
+	io_link_manager.cc
 	libfeaclient_bridge.cc
 	mfea_config.cc
 	mfea_dataflow.cc
@@ -48,6 +49,7 @@ Library libfea :
 	xrl_fea_target.cc
 	xrl_fib_client_manager.cc
 	xrl_io_ip_manager.cc
+	xrl_io_link_manager.cc
 	xrl_mfea_node.cc
 	xrl_socket_cmds.cc
 	xrl_socket_server.cc
@@ -59,6 +61,7 @@ FEA_LDADD =
 	libxorp_fibconfig
 	libxorp_control_socket
 	libfeafibclientxif
+	libfearawlinkclient
 	libfearawpkt4client
 	libfearawpkt6client
 	libfeabase
