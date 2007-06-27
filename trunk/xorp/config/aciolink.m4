@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/aciolink.m4,v 1.1 2007/06/26 01:15:59 pavlin Exp $
 dnl
 
 dnl
@@ -21,6 +21,11 @@ dnl -----------------------------------------------
 dnl Check for libraries
 dnl -----------------------------------------------
 AC_SEARCH_LIBS(pcap_open_live, pcap)
+
+dnl -----------------------------------------------
+dnl Check for functions
+dnl -----------------------------------------------
+AC_CHECK_FUNCS([pcap_sendpacket])
 
 AC_LANG_POP(C)
 AC_CACHE_SAVE
