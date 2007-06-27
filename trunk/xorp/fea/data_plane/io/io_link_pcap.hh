@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.1 2007/06/27 01:27:06 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -35,6 +35,10 @@ class IfTree;
 class IfTreeInterface;
 class IfTreeVif;
 class Mac;
+
+#ifndef HAVE_PCAP_H
+typedef void pcap_t;
+#endif
 
 
 /**

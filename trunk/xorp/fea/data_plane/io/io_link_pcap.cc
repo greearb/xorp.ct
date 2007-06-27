@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.2 2007/06/27 01:45:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.3 2007/06/27 02:01:28 pavlin Exp $"
 
 //
 // I/O link raw pcap(3)-based support.
@@ -29,10 +29,6 @@
 #include <sys/ioctl.h>
 #endif
 
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
-#endif
-
 #include "fea/iftree.hh"
 #include "io_link_pcap.hh"
 
@@ -45,10 +41,6 @@
 //
 // Local structures/classes, typedefs and macros
 //
-
-#ifdef HOST_OS_WINDOWS
-typedef char *caddr_t;
-#endif // HOST_OS_WINDOWS
 
 //
 // Local variables
@@ -66,11 +58,10 @@ IoLinkPcap::IoLinkPcap(EventLoop& eventloop, const IfTree& iftree,
       _filter_program(filter_program),
       _pcap(NULL),
       _datalink_type(-1),
+      _databuf(NULL),
+      _errbuf(NULL),
       _is_log_trace(false)
 {
-    // Allocate the buffers
-    _databuf = new uint8_t[IO_BUF_SIZE];
-    _errbuf = new char[PCAP_ERRBUF_SIZE];
 }
 
 IoLinkPcap::~IoLinkPcap()
@@ -80,8 +71,10 @@ IoLinkPcap::~IoLinkPcap()
     stop(dummy_error_msg);
 
     // Free the buffers
-    delete[] _databuf;
-    delete[] _errbuf;
+    if (_databuf != NULL)
+	delete[] _databuf;
+    if (_errbuf != NULL)
+	delete[] _errbuf;
 }
 
 int
@@ -97,12 +90,83 @@ IoLinkPcap::stop(string& error_msg)
 }
 
 int
+IoLinkPcap::join_multicast_group(const Mac& group, string& error_msg)
+{
+    return (join_leave_multicast_group(true, group, error_msg));
+}
+
+int
+IoLinkPcap::leave_multicast_group(const Mac& group, string& error_msg)
+{
+    return (join_leave_multicast_group(false, group, error_msg));
+}
+
+#ifndef HAVE_PCAP
+
+int
+IoLinkPcap::open_pcap_access(string& error_msg)
+{
+    error_msg = c_format("IoLinkPcap::open_pcap_access() failed: "
+			 "The I/O link raw pcap(3)-based mechanism is not "
+			 "supported");
+    return (XORP_ERROR);
+}
+
+int
+IoLinkPcap::close_pcap_access(string& error_msg)
+{
+    error_msg = c_format("IoLinkPcap::close_pcap_access() failed: "
+			 "The I/O link raw pcap(3)-based mechanism is not "
+			 "supported");
+    return (XORP_ERROR);
+}
+
+int
+IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
+				       string& error_msg)
+{
+    UNUSED(is_join);
+    UNUSED(group);
+
+    error_msg = c_format("IoLinkPcap::join_leave_multicast_group() failed: "
+			 "The I/O link raw pcap(3)-based mechanism is not "
+			 "supported");
+    return (XORP_ERROR);
+}
+
+int
+IoLinkPcap::send_packet(const Mac& src_address,
+			const Mac& dst_address,
+			uint16_t ether_type,
+			const vector<uint8_t>& payload,
+			string& error_msg)
+{
+    UNUSED(src_address);
+    UNUSED(dst_address);
+    UNUSED(ether_type);
+    UNUSED(payload);
+
+    error_msg = c_format("IoLinkPcap::send_packet() failed: "
+			 "The I/O link raw pcap(3)-based mechanism is not "
+			 "supported");
+    return (XORP_ERROR);
+}
+
+#else // HAVE_PCAP
+
+int
 IoLinkPcap::open_pcap_access(string& error_msg)
 {
     string dummy_error_msg;
 
     if (_packet_fd.is_valid())
 	return (XORP_OK);
+
+    // Allocate the buffers
+    if (_databuf == NULL)
+	_databuf = new uint8_t[IO_BUF_SIZE];
+    if (_errubf == NULL)
+	_errbuf = new char[PCAP_ERRBUF_SIZE];
 
     //
     // Open the pcap descriptor
@@ -138,7 +202,10 @@ IoLinkPcap::open_pcap_access(string& error_msg)
 	break;			// XXX: data link type recognized
 
 #if 0
+	//
 	// XXX: List of some of the data link types that might be supported
+	// in the future.
+	//
     case DLT_NULL:		// BSD loopback encapsulation
     case DLT_IEEE802:		// IEEE 802.5 Token Ring
     case DLT_ARCNET:		// ARCNET
@@ -289,18 +356,6 @@ IoLinkPcap::close_pcap_access(string& error_msg)
     }
 
     return (XORP_OK);
-}
-
-int
-IoLinkPcap::join_multicast_group(const Mac& group, string& error_msg)
-{
-    return (join_leave_multicast_group(true, group, error_msg));
-}
-
-int
-IoLinkPcap::leave_multicast_group(const Mac& group, string& error_msg)
-{
-    return (join_leave_multicast_group(false, group, error_msg));
 }
 
 int
@@ -630,7 +685,6 @@ IoLinkPcap::send_packet(const Mac& src_address,
     //
     // Transmit the packet
     //
-#ifdef HAVE_PCAP_SENDPACKET
     if (pcap_sendpacket(_pcap, _databuf, packet_size) != 0) {
 	error_msg = c_format("Sending packet from %s to %s EtherType %u"
 			     "on interface %s vif %s failed: %s",
@@ -644,21 +698,6 @@ IoLinkPcap::send_packet(const Mac& src_address,
     }
 
     return (XORP_OK);
-
-#else // ! HAVE_PCAP_SENDPACKET
-    //
-    // TODO: We should check upfront whether the system has a mechanism
-    // for transmitting a packet. If there is no mechanism, then IoLinkPcap
-    // shouldn't be used at all.
-    //
-    error_msg = c_format("Sending packet from %s to %s EtherType %u"
-			 "on interface %s vif %s failed: "
-			 "the syatem has no mechanism to transmit the packet",
-			 src_address.str().c_str(),
-			 dst_address.str().c_str(),
-			 ether_type,
-			 _if_name.c_str(),
-			 _vif_name.c_str());
-    return (XORP_ERROR);
-#endif // ! HAVE_PCAP_SENDPACKET
 }
+
+#endif // HAVE_PCAP
