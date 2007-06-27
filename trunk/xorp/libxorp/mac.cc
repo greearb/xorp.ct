@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.17 2007/06/22 22:53:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.18 2007/06/26 18:39:30 pavlin Exp $"
 
 #include <vector>
 
@@ -83,6 +83,25 @@ Mac::normalized_str() const
     XLOG_UNREACHABLE();
     return (_srep);
 }
+
+bool
+Mac::is_multicast() const
+{
+    // ------------------------------------------------------------------------
+    // I M P O R T A N T !
+    //
+    // Check all known MAC instance classes for whether string is valid
+    //
+    // Add new MyMac::valid methods here
+    // ------------------------------------------------------------------------
+    if (EtherMac::valid(_srep)) {
+	EtherMac ether_mac(_srep);
+	return (ether_mac.is_multicast());
+    }
+
+    return (false);
+}
+
 
 /* ------------------------------------------------------------------------- */
 /* EtherMac related methods */
@@ -296,4 +315,14 @@ EtherMac::normalize(const string& s) throw (InvalidString)
 			    s.c_str()));
     }
     return (string(ap));
+}
+
+bool
+EtherMac::is_multicast() const
+{
+    uint8_t addr[ADDR_BYTELEN];
+
+    copy_out(addr);
+
+    return (addr[0] & MULTICAST_BIT);
 }

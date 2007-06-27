@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.18 2007/06/26 21:37:51 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.19 2007/06/26 21:43:26 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -102,6 +102,13 @@ public:
      * @return true if MAC address value is unset.
      */
     bool empty() const { return _srep.empty(); }
+
+    /**
+     * Test if this address is a valid multicast address.
+     *
+     * @return true if the address is a valid multicast address.
+     */
+    bool is_multicast() const;
 
 protected:
     void set_rep(const string& s) { _srep = s; }
@@ -252,6 +259,13 @@ public:
     static string normalize(const string& s) throw (InvalidString);
 
     /**
+     * Test if this address is a valid multicast address.
+     *
+     * @return true if the address is a valid multicast address.
+     */
+    bool is_multicast() const;
+
+    /**
      * Number of bits in address as a constant.
      */
     static const uint32_t ADDR_BITLEN = 48;
@@ -260,6 +274,11 @@ public:
      * Number of bytes in address as a constant.
      */
     static const uint32_t ADDR_BYTELEN = ADDR_BITLEN / 8;
+
+    /**
+     * The multicast bit in the first octet of the address.
+     */
+    static const uint8_t MULTICAST_BIT = 0x1;
 };
 
 inline bool
