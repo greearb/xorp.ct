@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aciolink.m4,v 1.2 2007/06/27 01:54:58 pavlin Exp $
+dnl $XORP: xorp/config/aciolink.m4,v 1.3 2007/06/27 06:22:58 pavlin Exp $
 dnl
 
 dnl
@@ -31,7 +31,7 @@ dnl -----------------------------------------------------------
 dnl Check whether the system has pcap(3) that is reasonably new
 dnl -----------------------------------------------------------
 AC_MSG_CHECKING(whether the system has pcap(3) that is reasonable)
-AC_TRY_COMPILE([
+AC_TRY_LINK([
 #ifdef HAVE_PCAP_H
 #include <pcap.h>
 #endif
