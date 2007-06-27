@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.3 2007/06/27 02:01:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.4 2007/06/27 18:54:24 pavlin Exp $"
 
 //
 // I/O link raw pcap(3)-based support.
@@ -165,7 +165,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // Allocate the buffers
     if (_databuf == NULL)
 	_databuf = new uint8_t[IO_BUF_SIZE];
-    if (_errubf == NULL)
+    if (_errbuf == NULL)
 	_errbuf = new char[PCAP_ERRBUF_SIZE];
 
     //
