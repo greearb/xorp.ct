@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.1 2007/06/27 01:27:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.2 2007/06/27 01:45:11 pavlin Exp $"
 
 //
 // I/O link raw pcap(3)-based support.
@@ -630,6 +630,7 @@ IoLinkPcap::send_packet(const Mac& src_address,
     //
     // Transmit the packet
     //
+#ifdef HAVE_PCAP_SENDPACKET
     if (pcap_sendpacket(_pcap, _databuf, packet_size) != 0) {
 	error_msg = c_format("Sending packet from %s to %s EtherType %u"
 			     "on interface %s vif %s failed: %s",
@@ -643,4 +644,21 @@ IoLinkPcap::send_packet(const Mac& src_address,
     }
 
     return (XORP_OK);
+
+#else // ! HAVE_PCAP_SENDPACKET
+    //
+    // TODO: We should check upfront whether the system has a mechanism
+    // for transmitting a packet. If there is no mechanism, then IoLinkPcap
+    // shouldn't be used at all.
+    //
+    error_msg = c_format("Sending packet from %s to %s EtherType %u"
+			 "on interface %s vif %s failed: "
+			 "the syatem has no mechanism to transmit the packet",
+			 src_address.str().c_str(),
+			 dst_address.str().c_str(),
+			 ether_type,
+			 _if_name.c_str(),
+			 _vif_name.c_str());
+    return (XORP_ERROR);
+#endif // ! HAVE_PCAP_SENDPACKET
 }
