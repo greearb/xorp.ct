@@ -30480,6 +30480,89 @@ fi
 done
 
 
+{ echo "$as_me:$LINENO: checking whether the system has pcap(3) that is reasonable" >&5
+echo $ECHO_N "checking whether the system has pcap(3) that is reasonable... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#ifdef HAVE_PCAP_H
+#include <pcap.h>
+#endif
+
+int
+main ()
+{
+
+    int dummy = 0;
+    pcap_t *pcap;
+    char errbuf[PCAP_ERRBUF_SIZE];
+    u_char databuf[65535];
+    int datalink_type;
+    struct bpf_program bpf_program;
+    int fd;
+    const u_char* packet;
+    struct pcap_pkthdr pcap_pkthdr;
+
+    /* Test whether various functions are available */
+    pcap = pcap_open_live("foo", 0xffff, 0, 1, errbuf);
+    datalink_type = pcap_datalink(pcap);
+    pcap_setnonblock(pcap, 1, errbuf);
+    pcap_breakloop(pcap);
+    fd = pcap_get_selectable_fd(pcap);
+    pcap_compile(pcap, &bpf_program, "tcpdump program", 1, 0);
+    pcap_setfilter(pcap, &bpf_program);
+    pcap_freecode(&bpf_program);
+#ifdef PCAP_D_INOUT
+    pcap_setdirection(pcap, PCAP_D_INOUT);
+#endif
+    packet = pcap_next(pcap, &pcap_pkthdr);
+    pcap_sendpacket(pcap, databuf, 1);
+
+    /* Dummy integer values that must be defined in some of the header files */
+    dummy += DLT_EN10MB;
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PCAP 1
+_ACEOF
+
+     { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
