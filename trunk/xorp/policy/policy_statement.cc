@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.11 2006/10/12 01:25:05 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.12 2007/02/16 22:46:54 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -191,8 +191,9 @@ PolicyStatement::set_policy_end()
 		term_names += ", ";
 	    term_names += term->name();
 	}
-	XLOG_WARNING("Found out-of-order term(s) inside policy %s: %s",
-		     name().c_str(), term_names.c_str());
+	XLOG_ERROR("Found out-of-order term(s) inside policy %s: %s. "
+		   "The term(s) will be excluded!",
+		   name().c_str(), term_names.c_str());
     }
 }
 
