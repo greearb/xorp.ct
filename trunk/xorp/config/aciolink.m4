@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aciolink.m4,v 1.3 2007/06/27 06:22:58 pavlin Exp $
+dnl $XORP: xorp/config/aciolink.m4,v 1.4 2007/06/27 18:08:07 pavlin Exp $
 dnl
 
 dnl
@@ -15,7 +15,33 @@ dnl -----------------------------------------------
 dnl Check for header files that might be used later
 dnl -----------------------------------------------
 
-AC_CHECK_HEADERS([pcap.h])
+dnl
+dnl XXX: On some systems (e.g., RedHat-7.3) <pcap.h> s not C++ friendly,
+dnl hence we need to explicitly check it with the C++ compiler.
+dnl
+dnl Note that we could just use the following:
+dnl     AC_LANG_PUSH(C++)
+dnl     AC_CHECK_HEADERS([pcap.h])
+dnl     AC_LANG_POP(C++)
+dnl However, on failure the error message will be misleading that the
+dnl reason for the failure is missing prerequisite headers.
+dnl
+AC_CHECK_HEADER([pcap.h],
+[
+    AC_MSG_CHECKING(whether pcap.h is C++ friendly)
+    AC_LANG_PUSH(C++)
+    AC_TRY_COMPILE([
+#include <pcap.h>
+	],
+	[],
+	[AC_MSG_RESULT(yes)
+	 AC_DEFINE(HAVE_PCAP_H, 1, 
+		      [Define to 1 if you have the <pcap.h> header file.])
+	],
+	[AC_MSG_RESULT(no)]
+    )
+    AC_LANG_POP(C++)
+])
 
 dnl -----------------------------------------------
 dnl Check for libraries
