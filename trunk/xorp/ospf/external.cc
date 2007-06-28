@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.29 2007/02/24 11:00:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.30 2007/03/19 01:00:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -399,8 +399,11 @@ External<A>::withdraw(const IPNet<A>& net)
 
     ASExternalDatabase::iterator i = unique_find_lsa(searchlsar, net);
     if (i == _lsas.end()) {
-	XLOG_ERROR("Lsa not found for net %s", cstring(net));
-	return false;
+	// The LSA may not have been found because it has been filtered.
+ 	debug_msg("Lsa not found for net %s", cstring(net));
+	return true;
+// 	XLOG_ERROR("Lsa not found for net %s", cstring(net));
+// 	return false;
     }
 
     Lsa::LsaRef lsar = *i;
