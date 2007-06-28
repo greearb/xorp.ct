@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.177 2007/06/14 18:30:57 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.178 2007/06/26 17:46:25 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -31,7 +31,11 @@ Release 1.5-WIP (2007/??/??)
     - 
 
   XORPSH:
-    - 
+    - Bug fix related to assigning the node ID position in case the
+      previous (sibling) node was deleted at the same time a new node
+      was added.
+      This fixes "Found out-of-order term(s) inside policy ..." error
+      inside the policy manager.
 
   POLICY:
     - 
