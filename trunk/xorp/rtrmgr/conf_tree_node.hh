@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.65 2006/07/11 07:12:06 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.66 2007/02/16 22:47:21 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -116,6 +116,9 @@ public:
     const string& segname() const { return _segname; }
     const string& value() const;
     const ConfigNodeId& node_id() const { return _node_id; }
+    void set_node_id_position(const ConfigNodeId::Position& p) {
+	_node_id.set_position(p);
+    }
     ConfigNodeId& node_id_generator() { return _node_id_generator; }
     uint32_t clientid() const { return _clientid; }
     bool has_value() const { return _has_value; }
@@ -165,6 +168,7 @@ public:
     bool is_default_value() const;
     bool is_default_value(const string& test_value) const;
     bool has_undeleted_children() const;
+    virtual void update_node_id_position();
 
 protected:
     bool split_up_varname(const string& varname,

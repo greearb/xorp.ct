@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.36 2006/12/24 00:35:03 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.37 2007/02/16 22:47:24 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -177,6 +177,8 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
         _commit_status.set_error(error_msg);
 	return;
     }
+
+    slave_root_node().update_node_id_position();
 
     // We managed to get the master lock
     SlaveConfigTree delta_tree(_xclient, _verbose);

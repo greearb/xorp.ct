@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.113 2006/07/11 07:12:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.114 2007/02/16 22:47:21 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -2136,13 +2136,97 @@ ConfigTreeNode::allocate_unique_node_id()
     //
     _node_id = effective_parent->node_id_generator().generate_unique_node_id();
     if (prev == NULL) {
-	_node_id.set_position(0);	// XXX: the first node
+	set_node_id_position(0);	// XXX: the first node
     } else {
-	_node_id.set_position(prev->node_id().unique_node_id());
+	set_node_id_position(prev->node_id().unique_node_id());
     }
     debug_msg("node %s node_id %s", _segname.c_str(), _node_id.str().c_str());
 
     XLOG_ASSERT(! _node_id.is_empty());
+}
+
+//
+// Update the position part of each node ID in case some of the
+// nodes were deleted.
+// Note that we update the position part only for those nodes
+// that were just created.
+//
+void
+ConfigTreeNode::update_node_id_position()
+{
+    ConfigTreeNode *prev = NULL;
+    ConfigTreeNode *effective_parent = _parent;
+    list<ConfigTreeNode*>::iterator iter;
+    list<ConfigTreeNode *> sorted_children;
+
+    if (_parent == NULL)
+	goto process_subtree;
+
+    XLOG_ASSERT(! _node_id.is_empty());
+
+    // Update the position part only if the node was just created
+    if (this->existence_committed())
+	goto process_subtree;
+
+    //
+    // Found the previous node by excluding the nodes that were deleted.
+    // If the parent node is a tag, then we need to consider the children
+    // of the tag's parent node.
+    //
+    sorted_children = _parent->children();
+    sort_by_template(sorted_children);
+    for (iter = sorted_children.begin();
+	 iter != sorted_children.end();
+	 ++iter) {
+	ConfigTreeNode* ctn = *iter;
+	if (ctn == this)
+	    break;		// We reached this node
+
+	// Ignore nodes that were deleted
+	if (ctn->deleted())
+	    continue;
+
+	// The previous node
+	prev = ctn;
+    }
+
+    //
+    // Found the previous (ordered) sibling
+    //
+    if ((prev == NULL) && _parent->is_tag() && (!is_tag())
+	&& (_parent->parent() != NULL)) {
+	effective_parent = _parent->parent();
+	XLOG_ASSERT(effective_parent != NULL);
+	sorted_children = effective_parent->children();
+	sort_by_template(sorted_children);
+	for (iter = sorted_children.begin(); 
+	     iter != sorted_children.end();
+	     ++iter) {
+	    ConfigTreeNode* ctn = *iter;
+	    if (ctn == _parent)
+		break;		// We reached the tag parent for this node
+
+	    // Ignore nodes that were deleted
+	    if (ctn->deleted())
+		continue;
+
+	    // The previous node
+	    prev = ctn;
+	}
+    }
+
+    if (prev == NULL)
+	set_node_id_position(0);	// XXX: the first node
+    else
+	set_node_id_position(prev->node_id().unique_node_id());
+
+    //
+    // Apply recursively the operation
+    //
+ process_subtree:
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	(*iter)->update_node_id_position();
+    }
 }
 
 string
