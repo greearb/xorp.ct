@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code_list.hh,v 1.5 2006/12/07 20:00:08 pavlin Exp $
+// $XORP: xorp/policy/code_list.hh,v 1.6 2007/02/16 22:46:52 pavlin Exp $
 
 #ifndef __POLICY_CODE_LIST_HH__
 #define __POLICY_CODE_LIST_HH__
@@ -66,6 +66,15 @@ public:
      * @param targets argument is filled with targets the code list has.
      */
     void get_targets(Code::TargetSet& targets) const;
+
+    /**
+     * Obtain the set of targets of particular filter type the code list has.
+     *
+     * @param targets argument is filled with targets the code list has.
+     * @param filter the filter type.
+     */
+    void get_targets(Code::TargetSet& targets,
+		     const filter::Filter& filter) const;
 
     /**
      * Return the tags used by a certain protocol for route redistribution,

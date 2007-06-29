@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_list.cc,v 1.9 2006/12/07 20:00:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_list.cc,v 1.10 2007/02/16 22:46:52 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -69,6 +69,21 @@ CodeList::get_targets(Code::TargetSet& targets) const
     for (ListCode::const_iterator i = _codes.begin(); i != _codes.end(); ++i) {
 	const Code* c = *i;
 	targets.insert(c->target());
+    }
+}
+
+void
+CodeList::get_targets(Code::TargetSet& targets,
+		      const filter::Filter& filter) const
+{
+    //
+    // Go through all our code and see what targets the code.
+    // Insert only targets that match the given filter.
+    //
+    for (ListCode::const_iterator i = _codes.begin(); i != _codes.end(); ++i) {
+	const Code* c = *i;
+	if (c->target().filter() == filter)
+	    targets.insert(c->target());
     }
 }
 

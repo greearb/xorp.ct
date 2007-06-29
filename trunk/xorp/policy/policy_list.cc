@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.9 2006/12/07 20:00:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.10 2007/02/16 22:46:54 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -251,6 +251,24 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
     Code* code = new Code(ecg.code());
     CodeList* cl = new CodeList(ps.name());
     cl->push_back(code);
+
+    //
+    // If we had a codelist, then add the set of EXPORT_SOURCEMATCH
+    // targets to the set of modified targets.
+    //
+    // This is needed to cover the case when we delete all policy terms
+    // that export from a particular protocol.
+    //
+    if ((*iter).second) {
+	CodeList* old_cl = (*iter).second;
+	Code::TargetSet old_targets;
+	old_cl->get_targets(old_targets, filter::EXPORT_SOURCEMATCH);
+
+	Code::TargetSet::iterator i;
+	for (i = old_targets.begin(); i != old_targets.end(); ++i) {
+	    modified_targets.insert(*i);
+	}
+    }
 
     // if we had a codelist get rid of it
     if ((*iter).second) {
