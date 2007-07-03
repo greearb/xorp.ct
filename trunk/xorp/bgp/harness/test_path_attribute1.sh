@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.7 2006/04/04 12:07:44 bms Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.8 2006/08/16 22:10:13 atanu Exp $
 #
 
 #
@@ -298,8 +298,80 @@ test3()
     coord peer3 assert established
 }
 
+# http://www.xorp.org/bugzilla/show_bug.cgi?id=717
+test4()
+{
+    echo "TEST4:"
+    echo "	1) Send an update packet with a community"
+    echo "	   attribute of more than 256 bytes"
+
+    # Reset the peers
+    reset
+
+    # Establish a connection
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
+    coord peer2 assert established
+
+    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
+    coord peer3 assert established
+
+    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
+    NEXTHOP="20.20.20.20"
+
+    set +e
+    let i=0
+    while ((i++ < 256))
+    do
+      COMMUNITY=$COMMUNITY" community $i"
+    done
+    set -e
+
+    PACKET1="packet update
+	origin 2
+	aspath $ASPATH
+	nexthop $NEXTHOP
+	$COMMUNITY
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    PACKET2="packet update
+	origin 2
+	aspath $ASPATH
+	nexthop $NEXTHOP
+	localpref 100
+        $COMMUNITY
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    PACKET3="packet update
+	origin 2
+	aspath $AS,$ASPATH
+	nexthop $NEXT_HOP
+	med 1
+	$COMMUNITY
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    coord peer2 expect $PACKET2
+    coord peer3 expect $PACKET3
+
+    coord peer1 send $PACKET1
+
+    sleep 2
+    coord peer2 assert queue 0
+    coord peer3 assert queue 0
+
+    # Verify that the peers are still connected.
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3'
+TESTS='test1 test2 test3 test4'
 
 # Include command line
 . ${srcdir}/args.sh

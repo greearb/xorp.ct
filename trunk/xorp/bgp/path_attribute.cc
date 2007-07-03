@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.85 2007/02/16 22:45:13 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.86 2007/04/05 07:43:19 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -451,8 +451,8 @@ CommunityAttribute::CommunityAttribute(const uint8_t* d)
 void
 CommunityAttribute::encode()
 {
-    assert(_size == (4 * _communities.size()) );
-    assert(_size < 256);
+    XLOG_ASSERT(_size == (4 * _communities.size()) );
+//     XLOG_ASSERT(_size < 256);
 
     delete[] _data;
     uint8_t *d = set_header(_size);
