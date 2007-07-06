@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.44 2007/02/16 22:45:16 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.45 2007/06/18 23:30:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -435,6 +435,8 @@ DecisionTable<A>::lookup_route(const IPNet<A> &net,
 	genid = winner->genid();
 	return winner->route();
     }
+    XLOG_UNREACHABLE();
+    return NULL;
 }
 
 
