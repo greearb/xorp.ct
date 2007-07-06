@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.85 2007/05/08 01:15:49 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.86 2007/05/23 04:08:21 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -237,6 +237,9 @@ BGPMain::status(string& reason)
     } else if (! _is_ifmgr_ready) {
 	s = PROC_NOT_READY;
 	reason = "Waiting for interface manager";
+    } else if (!_first_policy_push) {
+	s = PROC_NOT_READY;
+	reason = "Waiting for policy manager";
     }
 
     return s;
