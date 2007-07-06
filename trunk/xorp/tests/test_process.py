@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_process.py,v 1.1 2006/04/07 05:13:08 atanu Exp $
+# $XORP: xorp/tests/test_process.py,v 1.2 2007/02/16 22:47:30 pavlin Exp $
 
 import thread,threading,time,sys,os,popen2
 
@@ -24,13 +24,13 @@ class Process(threading.Thread):
     def __init__(self, command=""):
         threading.Thread.__init__(self)
         self._status = "INIT"
-        self.command = command
+        self._command = command
         self.lock = thread.allocate_lock()
         
     def run(self):
         self.lock.acquire()
-        print "command:", self.command
-        self.process = popen2.Popen4("exec " + self.command)
+        print "command:", self._command
+        self.process = popen2.Popen4("exec " + self._command)
         print "PID:", self.process.pid
         self._status = "RUNNING"
         while 1:
@@ -39,24 +39,27 @@ class Process(threading.Thread):
                 break
             os.write(1, o)
         self._status = "TERMINATED"
-        print "exiting:", self.command
+        print "exiting:", self._command
         self.lock.release()
 
     def status(self):
         return self._status
+
+    def command(self):
+        return self._command
 
     def terminate(self):
         """
         Terminate this process
         """
 
-        print "sending kill to", self.command, self.process.pid
+        print "sending kill to", self._command, self.process.pid
         if self._status == "RUNNING":
             os.kill(self.process.pid, 9)
             self.lock.acquire()
             self.lock.release()
         else:
-            print self.command, "not running"
+            print self._command, "not running"
 
 
 # Local Variables:
