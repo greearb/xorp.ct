@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.12 2006/10/12 01:25:06 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.13 2007/02/16 22:46:58 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -44,8 +44,8 @@ IvExec::~IvExec()
 	delete _policies;
     
     clear_trash();
-    delete _trash;
-    delete _stack;
+    delete [] _trash;
+    delete [] _stack;
 }
 
 IvExec::FlowAction 
