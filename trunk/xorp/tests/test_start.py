@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_start.py,v 1.2 2006/04/07 20:15:12 atanu Exp $
+# $XORP: xorp/tests/test_start.py,v 1.3 2007/02/16 22:47:31 pavlin Exp $
 
 import threading,time,sys
 from test_process import Process
@@ -59,8 +59,18 @@ class Start:
         """
 
         for i in self.plist:
-            if "RUNNING" != i.status():
+            print "Testing: ", i.command()
+            status = i.status()
+            if "TERMINATED" == status:
                 return False
+            if "RUNNING" == status:
+                continue
+            if "INIT" == status:
+                for a in range(5):
+                    time.sleep(1)
+                    if "RUNNING" == i.status():
+                        break
+                print "Not running", i.command(), i.status()
 
         return True
 
