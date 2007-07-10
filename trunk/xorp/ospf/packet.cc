@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.43 2007/02/16 22:46:41 pavlin Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.44 2007/05/23 04:08:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -459,26 +459,24 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
 
     map<OspfTypes::Type , Packet *>::iterator i;
     uint8_t type = ptr[1];
-    bool bad = false;
+    Packet *packet = NULL;
     switch(version) {
     case OspfTypes::V2:
 	i = _ospfv2.find(type);
-	if (i == _ospfv2.end())
-	    bad = true;
+	if (i != _ospfv2.end())
+	    packet = i->second;
 	break;
     case OspfTypes::V3:
 	i = _ospfv3.find(type);
-	if (i == _ospfv3.end())
-	    bad = true;
+	if (i != _ospfv3.end())
+	    packet = i->second;
 	break;
     }
     
-    if (bad)
+    if (packet == NULL)
 	xorp_throw(InvalidPacket,
 		   c_format("OSPF Version %u Unknown Type %u", version, type));
     
-    Packet *packet = i->second;
-
     return packet->decode(ptr, len);
 }
 
