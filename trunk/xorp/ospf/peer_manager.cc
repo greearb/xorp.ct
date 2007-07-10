@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.141 2007/03/29 23:49:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.142 2007/05/23 04:08:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1921,7 +1921,7 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     // Save this route for possible later replay.
     XLOG_ASSERT(0 == _summaries.count(net));
     Summary s(area, rt);
-    _summaries[net] = s;
+    _summaries.insert(make_pair(net, s));
 
     if (!area_border_router_p())
 	return;

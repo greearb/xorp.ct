@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.23 2006/10/12 01:24:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.24 2007/02/16 22:45:14 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -108,17 +108,18 @@ BGPPeerList::detach_peer(BGPPeer *p)
 	list<BGPPeer *>::iterator pli = mi->second;
 	if (*pli == p) {
 	    pli++;
-	    _readers[mi->first] = pli;
+	    _readers.insert(make_pair(mi->first, pli));
 	}
     }
 
     //Now it's safe to do the deletion.
     list<BGPPeer *>::iterator i;
-    for(i = _peers.begin(); i != _peers.end(); i++)
-	if(p == *i) {
+    for (i = _peers.begin(); i != _peers.end(); i++) {
+	if (p == *i) {
 	    _peers.erase(i);
 	    return;
 	}
+    }
     XLOG_FATAL("Peer %s not found in peerlist", p->str().c_str());
 }
 
@@ -173,6 +174,6 @@ BGPPeerList::get_peer_list_next(const uint32_t& token,
 	_readers.erase(mi);
 	return false;
     }
-    _readers[token] = i;
+    _readers.insert(make_pair(token, i));
     return true;
 }

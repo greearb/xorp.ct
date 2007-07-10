@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.64 2007/03/28 02:14:23 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.65 2007/05/23 04:08:21 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -971,8 +971,8 @@ private:
 	    while(_tokens.find(_last) != _tokens.end())
 		_last++;
 		
-	    _tokens[_last] = WhichTable(internal_token, prefix,
-					unicast, multicast);
+	    _tokens.insert(make_pair(_last, WhichTable(internal_token, prefix,
+						       unicast, multicast)));
 
 	    return _last;
 	}

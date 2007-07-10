@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.14 2007/02/16 22:46:03 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.15 2007/05/23 04:08:26 pavlin Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -811,7 +811,7 @@ Node<A>::add_edge(NodeRef dst, int weight)
 	return false;
     }
 
-    _adjacencies[dst->nodename()] = Edge<A>(dst, weight);
+    _adjacencies.insert(make_pair(dst->nodename(), Edge<A>(dst, weight)));
 
     return true;
 }
