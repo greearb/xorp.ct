@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.7 2007/05/23 12:12:34 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.8 2007/06/07 01:23:03 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -53,8 +53,8 @@ private:
  */
 class IfConfigTransactionOperation : public TransactionOperation {
 public:
-    IfConfigTransactionOperation(IfTree& it, const string& ifname)
-	: _it(it), _ifname(ifname) {}
+    IfConfigTransactionOperation(IfTree& iftree, const string& ifname)
+	: _iftree(iftree), _ifname(ifname) {}
 
     /**
      * The interface / vif / address stored in operation exist.
@@ -68,14 +68,14 @@ public:
 
     const string& ifname() const		{ return _ifname; }
 
-    const IfTree& iftree() const		{ return _it; }
+    const IfTree& iftree() const		{ return _iftree; }
 
 protected:
-    inline IfTree& iftree() 			{ return _it; }
+    inline IfTree& iftree() 			{ return _iftree; }
 
 private:
-    IfTree& _it;
-    const string    	   _ifname;
+    IfTree&		_iftree;
+    const string	_ifname;
 };
 
 /**
@@ -83,8 +83,8 @@ private:
  */
 class AddInterface : public IfConfigTransactionOperation {
 public:
-    AddInterface(IfTree& it, const string& ifname)
-	: IfConfigTransactionOperation(it, ifname) {}
+    AddInterface(IfTree& iftree, const string& ifname)
+	: IfConfigTransactionOperation(iftree, ifname) {}
 
     bool dispatch() 	{ iftree().add_interface(ifname()); return true; }
 
@@ -98,8 +98,8 @@ public:
  */
 class RemoveInterface : public IfConfigTransactionOperation {
 public:
-    RemoveInterface(IfTree& it, const string& ifname)
-	: IfConfigTransactionOperation(it, ifname) {}
+    RemoveInterface(IfTree& iftree, const string& ifname)
+	: IfConfigTransactionOperation(iftree, ifname) {}
 
     bool dispatch() 		{ return iftree().remove_interface(ifname()); }
 
@@ -116,9 +116,9 @@ public:
  */
 class ConfigureInterfaceFromSystem : public IfConfigTransactionOperation {
 public:
-    ConfigureInterfaceFromSystem(IfConfig& ifconfig, IfTree& it,
+    ConfigureInterfaceFromSystem(IfConfig& ifconfig, IfTree& iftree,
 				 const string& ifname)
-	: IfConfigTransactionOperation(it, ifname), _ifconfig(ifconfig) {}
+	: IfConfigTransactionOperation(iftree, ifname), _ifconfig(ifconfig) {}
 
     bool dispatch() {
 	const IfTree& dev_config = _ifconfig.pulled_config();
@@ -144,10 +144,10 @@ private:
  */
 class InterfaceModifier : public IfConfigTransactionOperation {
 public:
-    InterfaceModifier(IfTree& it, const string& ifname)
-	: IfConfigTransactionOperation(it, ifname) {}
+    InterfaceModifier(IfTree& iftree, const string& ifname)
+	: IfConfigTransactionOperation(iftree, ifname) {}
 
-    bool path_valid() const	{ return interface() != 0; }
+    bool path_valid() const	{ return interface() != NULL; }
 
 protected:
     IfTreeInterface* interface() {
@@ -165,25 +165,26 @@ protected:
  */
 class SetInterfaceEnabled : public InterfaceModifier {
 public:
-    SetInterfaceEnabled(IfTree&		it,
+    SetInterfaceEnabled(IfTree&		iftree,
 			const string&	ifname,
-			bool		en)
-	: InterfaceModifier(it, ifname), _en(en) {}
+			bool		enabled)
+	: InterfaceModifier(iftree, ifname), _enabled(enabled) {}
 
     bool dispatch() {
 	IfTreeInterface* fi = interface();
-	if (fi == 0) return false;
-	fi->set_enabled(_en);
+	if (fi == NULL)
+	    return false;
+	fi->set_enabled(_enabled);
 	return true;
     }
 
     string str() const {
 	return c_format("SetInterfaceEnabled: %s %s",
-			ifname().c_str(), bool_c_str(_en));
+			ifname().c_str(), bool_c_str(_enabled));
     }
 
 private:
-    bool _en;
+    bool _enabled;
 };
 
 /**
@@ -191,14 +192,15 @@ private:
  */
 class SetInterfaceDiscard : public InterfaceModifier {
 public:
-    SetInterfaceDiscard(IfTree&		it,
+    SetInterfaceDiscard(IfTree&		iftree,
 			const string&	ifname,
 			bool		discard)
-	: InterfaceModifier(it, ifname), _discard(discard) {}
+	: InterfaceModifier(iftree, ifname), _discard(discard) {}
 
     bool dispatch() {
 	IfTreeInterface* fi = interface();
-	if (fi == 0) return false;
+	if (fi == NULL)
+	    return false;
 	fi->set_discard(_discard);
 	return true;
     }
@@ -217,10 +219,10 @@ private:
  */
 class SetInterfaceMTU : public InterfaceModifier {
 public:
-    SetInterfaceMTU(IfTree&		it,
+    SetInterfaceMTU(IfTree&		iftree,
 		    const string&	ifname,
 		    uint32_t		mtu)
-	: InterfaceModifier(it, ifname), _mtu(mtu) {}
+	: InterfaceModifier(iftree, ifname), _mtu(mtu) {}
 
     // Minimum and maximum MTU (as defined in RFC 791 and RFC 1191)
     static const uint32_t MIN_MTU = 68;
@@ -228,7 +230,8 @@ public:
     
     bool dispatch() {
 	IfTreeInterface* fi = interface();
-	if (fi == 0) return false;
+	if (fi == NULL)
+	    return false;
 
 	if (_mtu < MIN_MTU || _mtu > MAX_MTU)
 	    return false;
@@ -256,14 +259,15 @@ private:
  */
 class SetInterfaceMAC : public InterfaceModifier {
 public:
-    SetInterfaceMAC(IfTree&		it,
+    SetInterfaceMAC(IfTree&		iftree,
 		    const string&	ifname,
 		    const Mac&		mac)
-	: InterfaceModifier(it, ifname), _mac(mac) {}
+	: InterfaceModifier(iftree, ifname), _mac(mac) {}
 
     bool dispatch() {
 	IfTreeInterface* fi = interface();
-	if (fi == 0) return false;
+	if (fi == NULL)
+	    return false;
 	fi->set_mac(_mac);
 	return true;
     }
@@ -281,14 +285,15 @@ private:
  */
 class AddInterfaceVif : public InterfaceModifier {
 public:
-    AddInterfaceVif(IfTree&		it,
+    AddInterfaceVif(IfTree&		iftree,
 		    const string&	ifname,
 		    const string&	vifname)
-	: InterfaceModifier(it, ifname), _vifname(vifname) {}
+	: InterfaceModifier(iftree, ifname), _vifname(vifname) {}
 
     bool dispatch() {
 	IfTreeInterface* fi = interface();
-	if (fi == 0) return false;
+	if (fi == NULL)
+	    return false;
 	fi->add_vif(_vifname);
 	return true;
     }
@@ -307,14 +312,15 @@ private:
  */
 class RemoveInterfaceVif : public InterfaceModifier {
 public:
-    RemoveInterfaceVif(IfTree&		it,
+    RemoveInterfaceVif(IfTree&		iftree,
 		    const string&	ifname,
 		    const string&	vifname)
-	: InterfaceModifier(it, ifname), _vifname(vifname) {}
+	: InterfaceModifier(iftree, ifname), _vifname(vifname) {}
 
     bool dispatch() {
 	IfTreeInterface* fi = interface();
-	if (fi == 0) return false;
+	if (fi == NULL)
+	    return false;
 	return fi->remove_vif(_vifname);
     }
 
@@ -332,12 +338,12 @@ private:
  */
 class VifModifier : public InterfaceModifier {
 public:
-    VifModifier(IfTree&		it,
+    VifModifier(IfTree&		iftree,
 		const string&	ifname,
 		const string&	vifname)
-	: InterfaceModifier(it, ifname), _vifname(vifname) {}
+	: InterfaceModifier(iftree, ifname), _vifname(vifname) {}
 
-    bool path_valid() const			{ return vif() != 0; }
+    bool path_valid() const			{ return vif() != NULL; }
 
     string path() const {
 	return InterfaceModifier::path() + string(" ") + vifname();
@@ -364,26 +370,27 @@ protected:
  */
 class SetVifEnabled : public VifModifier {
 public:
-    SetVifEnabled(IfTree& 	it,
+    SetVifEnabled(IfTree& 	iftree,
 		  const string&	ifname,
 		  const string&	vifname,
-		  bool		en)
-	: VifModifier(it, ifname, vifname), _en(en) {}
+		  bool		enabled)
+	: VifModifier(iftree, ifname, vifname), _enabled(enabled) {}
 
     bool dispatch() {
 	IfTreeVif* fv = vif();
-	if (fv == 0) return false;
-	fv->set_enabled(_en);
+	if (fv == NULL)
+	    return false;
+	fv->set_enabled(_enabled);
 	return true;
     }
 
     string str() const {
 	return c_format("SetVifEnabled: %s %s",
-			path().c_str(), bool_c_str(_en));
+			path().c_str(), bool_c_str(_enabled));
     }
 
 private:
-    bool _en;
+    bool _enabled;
 };
 
 /**
@@ -391,15 +398,16 @@ private:
  */
 class AddAddr4 : public VifModifier {
 public:
-    AddAddr4(IfTree&		it,
+    AddAddr4(IfTree&		iftree,
 	     const string&	ifname,
 	     const string&	vifname,
 	     const IPv4&	addr)
-	: VifModifier(it, ifname, vifname), _addr(addr) {}
+	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
     bool dispatch() {
 	IfTreeVif* fv = vif();
-	if (fv == 0) return false;
+	if (fv == NULL)
+	    return false;
 	fv->add_addr(_addr);
 	return true;
     }
@@ -418,15 +426,16 @@ private:
  */
 class RemoveAddr4 : public VifModifier {
 public:
-    RemoveAddr4(IfTree&		it,
+    RemoveAddr4(IfTree&		iftree,
 		const string&	ifname,
 		const string&	vifname,
 		const IPv4&	addr)
-	: VifModifier(it, ifname, vifname), _addr(addr) {}
+	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
     bool dispatch() {
 	IfTreeVif* fv = vif();
-	if (fv == 0) return false;
+	if (fv == NULL)
+	    return false;
 	return fv->remove_addr(_addr);
     }
 
@@ -444,15 +453,16 @@ private:
  */
 class AddAddr6 : public VifModifier {
 public:
-    AddAddr6(IfTree&		it,
+    AddAddr6(IfTree&		iftree,
 	     const string&	ifname,
 	     const string&	vifname,
 	     const IPv6&	addr)
-	: VifModifier(it, ifname, vifname), _addr(addr) {}
+	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
     bool dispatch() {
 	IfTreeVif* fv = vif();
-	if (fv == 0) return false;
+	if (fv == NULL)
+	    return false;
 	fv->add_addr(_addr);
 	return true;
     }
@@ -471,15 +481,16 @@ private:
  */
 class RemoveAddr6 : public VifModifier {
 public:
-    RemoveAddr6(IfTree&		it,
+    RemoveAddr6(IfTree&		iftree,
 		const string&	ifname,
 		const string&	vifname,
 		const IPv6& 	addr)
-	: VifModifier(it, ifname, vifname), _addr(addr) {}
+	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
     bool dispatch() {
 	IfTreeVif* fv = vif();
-	if (fv == 0) return false;
+	if (fv == NULL)
+	    return false;
 	return fv->remove_addr(_addr);
     }
 
@@ -497,13 +508,13 @@ private:
  */
 class Addr4Modifier : public VifModifier {
 public:
-    Addr4Modifier(IfTree& 	it,
+    Addr4Modifier(IfTree& 	iftree,
 		  const string&	ifname,
 		  const string&	vifname,
 		  const IPv4&	addr)
-	: VifModifier(it, ifname, vifname), _addr(addr) {}
+	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
-    bool path_valid() const	{ return addr() != 0; }
+    bool path_valid() const	{ return addr() != NULL; }
 
     string path() const {
 	return VifModifier::path() + string(" ") + _addr.str();
@@ -528,27 +539,28 @@ protected:
  */
 class SetAddr4Enabled : public Addr4Modifier {
 public:
-    SetAddr4Enabled(IfTree&		it,
+    SetAddr4Enabled(IfTree&		iftree,
 		    const string&	ifname,
 		    const string&	vifname,
 		    const IPv4&		addr,
-		    bool		en)
-	: Addr4Modifier(it, ifname, vifname, addr), _en(en) {}
+		    bool		enabled)
+	: Addr4Modifier(iftree, ifname, vifname, addr), _enabled(enabled) {}
 
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
-	if (fa == 0) return false;
-	fa->set_enabled(_en);
+	if (fa == NULL)
+	    return false;
+	fa->set_enabled(_enabled);
 	return true;
     }
 
     string str() const {
 	return c_format("SetAddr4Enabled: %s %s",
-			path().c_str(), bool_c_str(_en));
+			path().c_str(), bool_c_str(_enabled));
     }
 
 protected:
-    bool _en;
+    bool _enabled;
 };
 
 /**
@@ -556,18 +568,19 @@ protected:
  */
 class SetAddr4Prefix : public Addr4Modifier {
 public:
-    SetAddr4Prefix(IfTree&		it,
+    SetAddr4Prefix(IfTree&		iftree,
 		   const string&	ifname,
 		   const string&	vifname,
 		   const IPv4&		addr,
 		   uint32_t		prefix_len)
-	: Addr4Modifier(it, ifname, vifname, addr), _prefix_len(prefix_len) {}
+	: Addr4Modifier(iftree, ifname, vifname, addr),
+	  _prefix_len(prefix_len) {}
 
     static const uint32_t MAX_PREFIX_LEN = 32;
     
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
-	if (fa == 0 || _prefix_len > MAX_PREFIX_LEN)
+	if (fa == NULL || _prefix_len > MAX_PREFIX_LEN)
 	    return false;
 	return fa->set_prefix_len(_prefix_len);
     }
@@ -590,16 +603,17 @@ protected:
  */
 class SetAddr4Endpoint : public Addr4Modifier {
 public:
-    SetAddr4Endpoint(IfTree&	 	it,
+    SetAddr4Endpoint(IfTree&	 	iftree,
 		     const string&	ifname,
 		     const string&	vifname,
 		     const IPv4&	addr,
 		     const IPv4&	endpoint)
-	: Addr4Modifier(it, ifname, vifname, addr), _endpoint(endpoint) {}
+	: Addr4Modifier(iftree, ifname, vifname, addr), _endpoint(endpoint) {}
 
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
-	if (fa == 0) return false;
+	if (fa == NULL)
+	    return false;
 	fa->set_endpoint(_endpoint);
 	fa->set_point_to_point(true);
 	return true;
@@ -619,16 +633,17 @@ protected:
  */
 class SetAddr4Broadcast : public Addr4Modifier {
 public:
-    SetAddr4Broadcast(IfTree&		it,
+    SetAddr4Broadcast(IfTree&		iftree,
 		      const string&	ifname,
 		      const string&	vifname,
 		      const IPv4&	addr,
 		      const IPv4&	bcast)
-	: Addr4Modifier(it, ifname, vifname, addr), _bcast(bcast) {}
+	: Addr4Modifier(iftree, ifname, vifname, addr), _bcast(bcast) {}
 
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
-	if (fa == 0) return false;
+	if (fa == NULL)
+	    return false;
 	fa->set_bcast(_bcast);
 	fa->set_broadcast(true);
 	return true;
@@ -648,13 +663,13 @@ protected:
  */
 class Addr6Modifier : public VifModifier {
 public:
-    Addr6Modifier(IfTree&	it,
+    Addr6Modifier(IfTree&	iftree,
 		  const string&	ifname,
 		  const string&	vifname,
 		  const IPv6&	addr)
-	: VifModifier(it, ifname, vifname), _addr(addr) {}
+	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
-    bool path_valid() const	{ return addr() != 0; }
+    bool path_valid() const	{ return addr() != NULL; }
 
     string path() const {
 	return VifModifier::path() + string(" ") + _addr.str();
@@ -680,27 +695,28 @@ protected:
  */
 class SetAddr6Enabled : public Addr6Modifier {
 public:
-    SetAddr6Enabled(IfTree& 		it,
+    SetAddr6Enabled(IfTree& 		iftree,
 		    const string&	ifname,
 		    const string&	vifname,
 		    const IPv6&		addr,
-		    bool		en)
-	: Addr6Modifier(it, ifname, vifname, addr), _en(en) {}
+		    bool		enabled)
+	: Addr6Modifier(iftree, ifname, vifname, addr), _enabled(enabled) {}
 
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
-	if (fa == 0) return false;
-	fa->set_enabled(_en);
+	if (fa == NULL)
+	    return false;
+	fa->set_enabled(_enabled);
 	return true;
     }
 
     string str() const {
 	return c_format("SetAddr6Enabled: %s %s",
-			path().c_str(), bool_c_str(_en));
+			path().c_str(), bool_c_str(_enabled));
     }
 
 protected:
-    bool _en;
+    bool _enabled;
 };
 
 /**
@@ -708,18 +724,19 @@ protected:
  */
 class SetAddr6Prefix : public Addr6Modifier {
 public:
-    SetAddr6Prefix(IfTree&		it,
+    SetAddr6Prefix(IfTree&		iftree,
 		   const string&	ifname,
 		   const string&	vifname,
 		   const IPv6&		addr,
 		   uint32_t		prefix_len)
-	: Addr6Modifier(it, ifname, vifname, addr), _prefix_len(prefix_len) {}
+	: Addr6Modifier(iftree, ifname, vifname, addr),
+	  _prefix_len(prefix_len) {}
 
     static const uint32_t MAX_PREFIX_LEN = 128;
     
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
-	if (fa == 0 || _prefix_len > MAX_PREFIX_LEN)
+	if (fa == NULL || _prefix_len > MAX_PREFIX_LEN)
 	    return false;
 	return fa->set_prefix_len(_prefix_len);
     }
@@ -742,16 +759,17 @@ protected:
  */
 class SetAddr6Endpoint : public Addr6Modifier {
 public:
-    SetAddr6Endpoint(IfTree& 		it,
+    SetAddr6Endpoint(IfTree& 		iftree,
 		     const string&	ifname,
 		     const string&	vifname,
 		     const IPv6&	addr,
 		     const IPv6&	endpoint)
-	: Addr6Modifier(it, ifname, vifname, addr), _endpoint(endpoint) {}
+	: Addr6Modifier(iftree, ifname, vifname, addr), _endpoint(endpoint) {}
 
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
-	if (fa == 0) return false;
+	if (fa == NULL)
+	    return false;
 	fa->set_endpoint(_endpoint);
 	fa->set_point_to_point(true);
 	return true;
