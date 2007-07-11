@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.cc,v 1.5 2007/06/05 10:30:29 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.cc,v 1.6 2007/06/06 19:55:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -21,20 +21,22 @@
 #include "libxorp/debug.h"
 
 #include "fea/ifconfig.hh"
+#include "fea/fea_data_plane_manager.hh"
 
+#include "ifconfig_set_click.hh"
 #include "ifconfig_get_click.hh"
 
 
 //
 // Get information about network interfaces from the underlying system.
 //
-// The mechanism to obtain the information is click(1)
-// (e.g., see http://www.pdos.lcs.mit.edu/click/).
+// The mechanism to obtain the information is Click:
+//   http://www.read.cs.ucla.edu/click/
 //
 
-IfConfigGetClick::IfConfigGetClick(IfConfig& ifconfig)
-    : IfConfigGet(ifconfig),
-      ClickSocket(ifconfig.eventloop()),
+IfConfigGetClick::IfConfigGetClick(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigGet(fea_data_plane_manager),
+      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
@@ -65,13 +67,6 @@ IfConfigGetClick::start(string& error_msg)
 
     _is_running = true;
 
-    //
-    // XXX: we should register ourselves after we are running so the
-    // registration process itself can trigger some startup operations
-    // (if any).
-    //
-    ifconfig().register_ifconfig_get_secondary(this);
-
     return (XORP_OK);
 }
 
@@ -97,17 +92,29 @@ IfConfigGetClick::pull_config(IfTree& iftree)
 }
 
 bool
-IfConfigGetClick::read_config(IfTree& it)
+IfConfigGetClick::read_config(IfTree& iftree)
 {
     //
-    // XXX: get the tree from the IfconfigSetClick instance.
+    // XXX: Get the tree from the IfConfigSetClick instance.
     // The reason for that is because it is practically
     // impossible to read the Click configuration and parse it to restore
     // the original IfTree state.
     //
-    if (! ifconfig().ifconfig_set_click().is_running())
+    IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
+    if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
 	return (false);
 
-    it = ifconfig().ifconfig_set_click().iftree();
+    IfConfigSetClick* ifconfig_set_click;
+    ifconfig_set_click = dynamic_cast<IfConfigSetClick*>(ifconfig_set);
+    if (ifconfig_set_click == NULL) {
+	//
+	// XXX: The IfConfigSet plugin was probably changed to something else
+	// which we don't know how to deal with.
+	//
+	return (false);
+    }
+
+    iftree = ifconfig_set_click->iftree();
+
     return (true);
 }

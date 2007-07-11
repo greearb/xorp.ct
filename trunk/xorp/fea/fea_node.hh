@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.6 2007/05/26 02:04:45 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.7 2007/06/27 01:27:04 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -46,8 +46,9 @@ public:
      * Constructor for a given event loop.
      *
      * @param eventloop the event loop to use.
+     * @param is_dummy if true, then run the FEA in dummy mode.
      */
-    FeaNode(EventLoop& eventloop);
+    FeaNode(EventLoop& eventloop, bool is_dummy);
 
     /**
      * Destructor
@@ -107,6 +108,14 @@ public:
     Profile& profile() { return (_profile); }
 
     /**
+     * Get the NexthopPortMapper instance.
+     *
+     * @return a reference to the NexthopPortMapper instance.
+     * @see NexthopPortMapper.
+     */
+    NexthopPortMapper& nexthop_port_mapper() { return (_nexthop_port_mapper); }
+
+    /**
      * Get the IfConfig instance.
      *
      * @return a reference to the IfConfig instance.
@@ -146,7 +155,42 @@ public:
      */
     PaTransactionManager& pa_transaction_manager() { return (_pa_transaction_manager); }
 
+    /**
+     * Register @ref FeaDataPlaneManager data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager to register.
+     * @param is_exclusive if true, the manager is registered as the
+     * exclusive manager, otherwise is added to the list of managers.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager,
+				    bool is_exclusive);
+
+    /**
+     * Unregister @ref FeaDataPlaneManager data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager);
+
 private:
+    /**
+     * Load the data plane managers.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int load_data_plane_managers(string& error_msg);
+
+    /**
+     * Unload the data plane managers.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unload_data_plane_managers(string& error_msg);
+
     EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running
     bool	_is_dummy;	// True if running in dummy node
@@ -154,7 +198,6 @@ private:
     NexthopPortMapper		_nexthop_port_mapper;	// Next-hop port mapper
 
     IfConfig			_ifconfig;
-
     FibConfig			_fibconfig;
 
     IoLinkManager		_io_link_manager;
@@ -162,6 +205,8 @@ private:
 
     PaTableManager		_pa_table_manager;
     PaTransactionManager	_pa_transaction_manager;
+
+    list<FeaDataPlaneManager*>	_fea_data_plane_managers;
 };
 
 #endif // __FEA_FEA_NODE_HH__

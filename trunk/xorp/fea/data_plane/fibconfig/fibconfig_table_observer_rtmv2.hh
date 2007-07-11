@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.hh,v 1.1 2007/06/07 01:28:41 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_OBSERVER_RTMV2_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_OBSERVER_RTMV2_HH__
@@ -20,10 +20,13 @@
 #include "fea/fibconfig_table_observer.hh"
 #include "fea/data_plane/control_socket/windows_rtm_pipe.hh"
 
+class WinRtmPipe;
+class RtmV2Observer;
+
 
 class FibConfigTableObserverRtmV2 : public FibConfigTableObserver {
 public:
-    FibConfigTableObserverRtmV2(FibConfig& fibconfig);
+    FibConfigTableObserverRtmV2(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~FibConfigTableObserverRtmV2();
 
     /**
@@ -56,7 +59,7 @@ private:
 		      FibConfigTableObserverRtmV2& rtmo)
 	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
     	virtual ~RtmV2Observer() {}
-	void rtsock_data(const vector<uint8_t>& buffer) {
+	void routing_socket_data(const vector<uint8_t>& buffer) {
 	    _rtmo.receive_data(buffer);
 	}
     private:

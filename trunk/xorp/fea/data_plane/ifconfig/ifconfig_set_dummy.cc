@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.cc,v 1.6 2007/06/05 13:14:32 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.cc,v 1.7 2007/06/06 19:55:54 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
+#include "libxorp/ipvx.hh"
 
 #include "fea/ifconfig.hh"
 
@@ -33,12 +34,9 @@
 // The mechanism to set the information is dummy (for testing purpose).
 //
 
-IfConfigSetDummy::IfConfigSetDummy(IfConfig& ifconfig)
-    : IfConfigSet(ifconfig)
+IfConfigSetDummy::IfConfigSetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigSet(fea_data_plane_manager)
 {
-#if 0	// XXX: by default Dummy is never registering by itself
-    ifconfig.register_ifconfig_set_primary(this);
-#endif
 }
 
 IfConfigSetDummy::~IfConfigSetDummy()
@@ -80,10 +78,10 @@ IfConfigSetDummy::stop(string& error_msg)
 }
 
 bool
-IfConfigSetDummy::push_config(IfTree& it)
+IfConfigSetDummy::push_config(IfTree& iftree)
 {
-    ifconfig().report_updates(it, true);
-    ifconfig().set_live_config(it);
+    ifconfig().report_updates(iftree, true);
+    ifconfig().set_live_config(iftree);
 
     return true;
 }

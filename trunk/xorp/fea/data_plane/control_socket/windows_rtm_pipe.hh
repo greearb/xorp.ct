@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/control_socket/windows_rtm_pipe.hh,v 1.2 2007/05/23 12:12:36 pavlin Exp $
+// $XORP: xorp/fea/data_plane/control_socket/windows_rtm_pipe.hh,v 1.3 2007/06/04 23:17:33 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_RTM_PIPE_HH__
@@ -108,7 +108,7 @@ private:
 
     /**
      * Read data available for WinRtmPipe and invoke
-     * WinRtmPipeObserver::rtsock_data() on all observers of routing
+     * WinRtmPipeObserver::routing_socket_data() on all observers of routing
      * socket.
      */
     void io_event(XorpFd fd, IoEventType type);
@@ -117,7 +117,7 @@ private:
     WinRtmPipe(const WinRtmPipe&);		// Not implemented
 
 private:
-    static const size_t RTSOCK_BYTES = 8*1024; // Initial guess at msg size
+    static const size_t ROUTING_SOCKET_BYTES = 8*1024; // Initial guess at msg size
 
 private:
     EventLoop&	 _eventloop;
@@ -148,7 +148,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void rtsock_data(const vector<uint8_t>& buffer) = 0;
+    virtual void routing_socket_data(const vector<uint8_t>& buffer) = 0;
 
     /**
      * Get WinRtmPipe associated with Observer.

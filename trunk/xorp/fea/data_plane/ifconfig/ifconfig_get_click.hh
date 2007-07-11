@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.hh,v 1.2 2007/06/06 19:55:52 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.hh,v 1.3 2007/06/07 01:23:34 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_CLICK_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_CLICK_HH__
@@ -24,7 +24,7 @@
 class IfConfigGetClick : public IfConfigGet,
 			 public ClickSocket {
 public:
-    IfConfigGetClick(IfConfig& ifconfig);
+    IfConfigGetClick(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~IfConfigGetClick();
     
     /**
@@ -52,7 +52,7 @@ public:
     virtual bool pull_config(IfTree& config);
     
 private:
-    bool read_config(IfTree& it);
+    bool read_config(IfTree& iftree);
 
     ClickSocketReader	_cs_reader;
 };

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh,v 1.2 2007/06/06 19:55:55 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh,v 1.3 2007/06/07 01:23:35 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_NETLINK_SOCKET_HH__
@@ -24,7 +24,7 @@
 class IfConfigSetNetlinkSocket : public IfConfigSet,
 				 public NetlinkSocket {
 public:
-    IfConfigSetNetlinkSocket(IfConfig& ifconfig);
+    IfConfigSetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~IfConfigSetNetlinkSocket();
 
     /**

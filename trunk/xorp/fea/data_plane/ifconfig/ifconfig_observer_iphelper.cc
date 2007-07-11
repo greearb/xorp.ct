@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_iphelper.cc,v 1.5 2007/06/05 13:51:18 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_iphelper.cc,v 1.6 2007/06/06 19:55:53 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -33,13 +33,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-
-IfConfigObserverIPHelper::IfConfigObserverIPHelper(IfConfig& ifconfig)
-    : IfConfigObserver(ifconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    ifconfig.register_ifconfig_observer_primary(this);
-#endif
+
+IfConfigObserverIPHelper::IfConfigObserverIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigObserver(fea_data_plane_manager)
+{
 }
 
 IfConfigObserverIPHelper::~IfConfigObserverIPHelper()
@@ -96,3 +94,5 @@ IfConfigObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
     debug_msg("called\n");
     UNUSED(buffer);
 }
+
+#endif // HOST_OS_WINDOWS

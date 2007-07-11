@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.cc,v 1.5 2007/04/30 23:40:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.cc,v 1.6 2007/06/07 01:28:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,14 +29,14 @@
 //
 // Set whole-table information into the unicast forwarding table.
 //
-// The mechanism to obtain the information is click(1)
-// (e.g., see http://www.pdos.lcs.mit.edu/click/).
+// The mechanism to set the information is Click:
+//   http://www.read.cs.ucla.edu/click/
 //
 
 
-FibConfigTableSetClick::FibConfigTableSetClick(FibConfig& fibconfig)
-    : FibConfigTableSet(fibconfig),
-      ClickSocket(fibconfig.eventloop()),
+FibConfigTableSetClick::FibConfigTableSetClick(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableSet(fea_data_plane_manager),
+      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
@@ -74,14 +74,27 @@ FibConfigTableSetClick::start(string& error_msg)
     _is_running = true;
 
     //
-    // XXX: we should register ourselves after we are running so the
-    // registration process itself can trigger some startup operations
-    // (if any).
+    // XXX: Push the current config into the new method
     //
-    if (ClickSocket::is_duplicate_routes_to_kernel_enabled())
-	fibconfig().register_fibconfig_table_set_secondary(this);
-    else
-	fibconfig().register_fibconfig_table_set_primary(this);
+    list<Fte4> fte_list4;
+    if (fibconfig().get_table4(fte_list4) == true) {
+	if (set_table4(fte_list4) != true) {
+	    XLOG_ERROR("Cannot push the current IPv4 forwarding table "
+		       "into the FibConfigTableSetClick plugin for setting "
+		       "the forwarding table");
+	}
+    }
+
+#ifdef HAVE_IPV6
+    list<Fte6> fte_list6;
+    if (fibconfig().get_table6(fte_list6) == true) {
+	if (set_table6(fte_list6) != true) {
+	    XLOG_ERROR("Cannot push the current IPv6 forwarding table "
+		       "into the FibConfigTableSetClick plugin for setting "
+		       "the forwarding table");
+	}
+    }
+#endif // HAVE_IPV6
 
     return (XORP_OK);
 }

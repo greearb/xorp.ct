@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.5 2007/05/26 02:04:46 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.6 2007/06/27 01:27:05 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -56,10 +56,12 @@ public:
      * @param xrl_finder_targetname the XRL targetname of the Finder.
      * @param finder_hostname the XRL Finder hostname.
      * @param finder_port the XRL Finder port.
+     * @param is_dummy if true, then run the FEA in dummy mode.
      */
     XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 	       const string& xrl_finder_targetname,
-	       const string& finder_hostname, uint16_t finder_port);
+	       const string& finder_hostname, uint16_t finder_port,
+	       bool is_dummy);
 
     /**
      * Destructor

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.8 2007/05/23 04:08:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.9 2007/06/04 23:17:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,7 +20,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
-#include "libxorp/ipvx.hh"
 
 #include "libcomm/comm_api.h"
 
@@ -50,6 +49,7 @@
 #include "fea/ifconfig_get.hh"
 #include "fea/data_plane/control_socket/system_utilities.hh"
 
+#include "ifconfig_get_ioctl.hh"
 #include "ifconfig_media.hh"
 
 
@@ -61,18 +61,10 @@
 // (e.g., obtained by ioctl(SIOCGIFCONF) mechanism).
 //
 
-#ifndef HAVE_IOCTL_SIOCGIFCONF
-bool
-IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& , IfTree& , int ,
-				     const vector<uint8_t>& )
-{
-    return false;
-}
-
-#else // HAVE_IOCTL_SIOCGIFCONF
+#ifdef HAVE_IOCTL_SIOCGIFCONF
 
 bool
-IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
+IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 				     int family, const vector<uint8_t>& buffer)
 {
 #ifndef HOST_OS_WINDOWS
@@ -178,11 +170,11 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
 	// Add the interface (if a new one)
 	//
 	ifconfig.map_ifindex(if_index, alias_if_name);
-	IfTreeInterface* ifp = it.find_interface(alias_if_name);
+	IfTreeInterface* ifp = iftree.find_interface(alias_if_name);
 	if (ifp == NULL) {
-	    it.add_interface(alias_if_name);
+	    iftree.add_interface(alias_if_name);
 	    is_newlink = true;
-	    ifp = it.find_interface(alias_if_name);
+	    ifp = iftree.find_interface(alias_if_name);
 	    XLOG_ASSERT(ifp != NULL);
 	}
 
@@ -592,14 +584,14 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& it,
     comm_close(s);
 
     return true;
-#else /* HOST_OS_WINDOWS */
+#else // HOST_OS_WINDOWS
     XLOG_FATAL("WinSock2 does not support struct ifreq.");
 
     UNUSED(it);
     UNUSED(family);
     UNUSED(buffer);
     return false;
-#endif /* HOST_OS_WINDOWS */
+#endif // HOST_OS_WINDOWS
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.7 2007/05/01 00:14:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.8 2007/06/07 01:28:40 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -30,6 +30,7 @@
 #include "fea/fibconfig.hh"
 #include "fea/fibconfig_table_observer.hh"
 
+#include "fibconfig_table_get_netlink_socket.hh"
 #include "fibconfig_table_observer_netlink_socket.hh"
 
 
@@ -43,18 +44,16 @@
 // The mechanism to observe the information is netlink(7) sockets.
 //
 
+#ifdef HAVE_NETLINK_SOCKETS
 
-FibConfigTableObserverNetlink::FibConfigTableObserverNetlink(FibConfig& fibconfig)
-    : FibConfigTableObserver(fibconfig),
-      NetlinkSocket(fibconfig.eventloop()),
+FibConfigTableObserverNetlinkSocket::FibConfigTableObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableObserver(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    fibconfig.register_fibconfig_table_observer_primary(this);
-#endif
 }
 
-FibConfigTableObserverNetlink::~FibConfigTableObserverNetlink()
+FibConfigTableObserverNetlinkSocket::~FibConfigTableObserverNetlinkSocket()
 {
     string error_msg;
 
@@ -67,17 +66,8 @@ FibConfigTableObserverNetlink::~FibConfigTableObserverNetlink()
 }
 
 int
-FibConfigTableObserverNetlink::start(string& error_msg)
+FibConfigTableObserverNetlinkSocket::start(string& error_msg)
 {
-#ifndef HAVE_NETLINK_SOCKETS
-    error_msg = c_format("The netlink(7) mechanism to observe "
-			 "whole forwarding table from the "
-			 "underlying system is not supported");
-    XLOG_UNREACHABLE();
-    return (XORP_ERROR);
-
-#else // HAVE_NETLINK_SOCKETS
-
     uint32_t nl_groups = 0;
 
     if (_is_running)
@@ -108,11 +98,10 @@ FibConfigTableObserverNetlink::start(string& error_msg)
     _is_running = true;
 
     return (XORP_OK);
-#endif // HAVE_NETLINK_SOCKETS
 }
     
 int
-FibConfigTableObserverNetlink::stop(string& error_msg)
+FibConfigTableObserverNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -126,7 +115,7 @@ FibConfigTableObserverNetlink::stop(string& error_msg)
 }
 
 void
-FibConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
 
@@ -134,7 +123,7 @@ FibConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
     // Get the IPv4 routes
     //
     if (fibconfig().have_ipv4()) {
-	FibConfigTableGetNetlink::parse_buffer_netlink_socket(
+	FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	    AF_INET,
 	    fibconfig().iftree(),
 	    fte_list,
@@ -151,11 +140,12 @@ FibConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
     // Get the IPv6 routes
     //
     if (fibconfig().have_ipv6()) {
-	FibConfigTableGetNetlink::parse_buffer_netlink_socket(AF_INET6,
-							      fibconfig().iftree(),
-							      fte_list,
-							      buffer,
-							      false);
+	FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
+	    AF_INET6,
+	    fibconfig().iftree(),
+	    fte_list,
+	    buffer,
+	    false);
 	if (! fte_list.empty()) {
 	    fibconfig().propagate_fib_changes(fte_list, this);
 	    fte_list.clear();
@@ -165,7 +155,9 @@ FibConfigTableObserverNetlink::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-FibConfigTableObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverNetlinkSocket::netlink_socket_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
+
+#endif // HAVE_NETLINK_SOCKETS

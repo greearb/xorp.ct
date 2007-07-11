@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.8 2007/06/04 23:17:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.9 2007/06/07 01:28:38 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -40,17 +40,15 @@
 // The mechanism to set the information is routing sockets.
 //
 
-
-FibConfigEntrySetRtsock::FibConfigEntrySetRtsock(FibConfig& fibconfig)
-    : FibConfigEntrySet(fibconfig),
-      RoutingSocket(fibconfig.eventloop())
-{
 #ifdef HAVE_ROUTING_SOCKETS
-    fibconfig.register_fibconfig_entry_set_primary(this);
-#endif
+
+FibConfigEntrySetRoutingSocket::FibConfigEntrySetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntrySet(fea_data_plane_manager),
+      RoutingSocket(fea_data_plane_manager.eventloop())
+{
 }
 
-FibConfigEntrySetRtsock::~FibConfigEntrySetRtsock()
+FibConfigEntrySetRoutingSocket::~FibConfigEntrySetRoutingSocket()
 {
     string error_msg;
 
@@ -63,7 +61,7 @@ FibConfigEntrySetRtsock::~FibConfigEntrySetRtsock()
 }
 
 int
-FibConfigEntrySetRtsock::start(string& error_msg)
+FibConfigEntrySetRoutingSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -77,7 +75,7 @@ FibConfigEntrySetRtsock::start(string& error_msg)
 }
 
 int
-FibConfigEntrySetRtsock::stop(string& error_msg)
+FibConfigEntrySetRoutingSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -91,7 +89,7 @@ FibConfigEntrySetRtsock::stop(string& error_msg)
 }
 
 bool
-FibConfigEntrySetRtsock::add_entry4(const Fte4& fte)
+FibConfigEntrySetRoutingSocket::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -99,7 +97,7 @@ FibConfigEntrySetRtsock::add_entry4(const Fte4& fte)
 }
 
 bool
-FibConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
+FibConfigEntrySetRoutingSocket::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -107,7 +105,7 @@ FibConfigEntrySetRtsock::delete_entry4(const Fte4& fte)
 }
 
 bool
-FibConfigEntrySetRtsock::add_entry6(const Fte6& fte)
+FibConfigEntrySetRoutingSocket::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -115,27 +113,12 @@ FibConfigEntrySetRtsock::add_entry6(const Fte6& fte)
 }
 
 bool
-FibConfigEntrySetRtsock::delete_entry6(const Fte6& fte)
+FibConfigEntrySetRoutingSocket::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
     return (delete_entry(ftex));
 }
-
-#ifndef HAVE_ROUTING_SOCKETS
-bool
-FibConfigEntrySetRtsock::add_entry(const FteX& )
-{
-    return false;
-}
-
-bool
-FibConfigEntrySetRtsock::delete_entry(const FteX& )
-{
-    return false;
-}
-
-#else // HAVE_ROUTING_SOCKETS
 
 //
 // XXX: Define a number of constants with the size of the corresponding
@@ -157,7 +140,7 @@ static const size_t SOCKADDR_DL_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockadd
 #undef LONG_ROUNDUP_SIZEOF
 
 bool
-FibConfigEntrySetRtsock::add_entry(const FteX& fte)
+FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -409,7 +392,7 @@ FibConfigEntrySetRtsock::add_entry(const FteX& fte)
 }
 
 bool
-FibConfigEntrySetRtsock::delete_entry(const FteX& fte)
+FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -518,7 +501,7 @@ FibConfigEntrySetRtsock::delete_entry(const FteX& fte)
 	// Note that we could add to the following list the check whether
 	// the forwarding entry is not in the kernel, but this is probably
 	// an overkill. If such check should be performed, we should
-	// use the corresponding FibConfigTableGetNetlink provider.
+	// use the corresponding FibConfigTableGetNetlink plugin.
 	//
 	do {
 	    // Check whether the error code matches
@@ -553,4 +536,5 @@ FibConfigEntrySetRtsock::delete_entry(const FteX& fte)
     
     return true;
 }
+
 #endif // HAVE_ROUTING_SOCKETS

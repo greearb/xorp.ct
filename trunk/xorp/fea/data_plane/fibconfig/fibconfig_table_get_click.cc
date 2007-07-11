@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.cc,v 1.6 2007/06/07 01:28:39 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -23,21 +23,23 @@
 
 #include "fea/fibconfig.hh"
 #include "fea/fibconfig_table_get.hh"
+#include "fea/fea_data_plane_manager.hh"
 
+#include "fibconfig_entry_set_click.hh"
 #include "fibconfig_table_get_click.hh"
 
 
 //
 // Get the whole table information from the unicast forwarding table.
 //
-// The mechanism to obtain the information is click(1)
-// (e.g., see http://www.pdos.lcs.mit.edu/click/).
+// The mechanism to obtain the information is Click:
+//   http://www.read.cs.ucla.edu/click/
 //
 
 
-FibConfigTableGetClick::FibConfigTableGetClick(FibConfig& fibconfig)
-    : FibConfigTableGet(fibconfig),
-      ClickSocket(fibconfig.eventloop()),
+FibConfigTableGetClick::FibConfigTableGetClick(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableGet(fea_data_plane_manager),
+      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
@@ -68,17 +70,6 @@ FibConfigTableGetClick::start(string& error_msg)
 
     _is_running = true;
 
-    //
-    // XXX: we should register ourselves after we are running so the
-    // registration process itself can trigger some startup operations
-    // (if any).
-    //
-    // XXX: we register ourselves as the primary "get" method, because
-    // Click should be the ultimate place to read the route info from.
-    // The kernel itself may contain some left-over stuff.
-    //
-    fibconfig().register_fibconfig_table_get_primary(this);
-
     return (XORP_OK);
 }
 
@@ -100,7 +91,27 @@ FibConfigTableGetClick::stop(string& error_msg)
 bool
 FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 {
-    const map<IPv4Net, Fte4>& fte_table4 = fibconfig().fibconfig_entry_set_click().fte_table4();
+    //
+    // XXX: Get the table from the FibConfigEntrySetClick instance.
+    // The reason for that is because it is practically
+    // impossible to read the Click configuration and parse it to restore
+    // the original table.
+    //
+    FibConfigEntrySet* fibconfig_entry_set = fea_data_plane_manager().fibconfig_entry_set();
+    if ((fibconfig_entry_set == NULL) || (! fibconfig_entry_set->is_running()))
+	return (false);
+
+    FibConfigEntrySetClick* fibconfig_entry_set_click;
+    fibconfig_entry_set_click = dynamic_cast<FibConfigEntrySetClick*>(fibconfig_entry_set);
+    if (fibconfig_entry_set_click == NULL) {
+	//
+	// XXX: The FibConfigEntrySet plugin was probably changed to
+	// something else which we don't know how to deal with.
+	//
+	return (false);
+    }
+
+    const map<IPv4Net, Fte4>& fte_table4 = fibconfig_entry_set_click->fte_table4();
     map<IPv4Net, Fte4>::const_iterator iter;
 
     for (iter = fte_table4.begin(); iter != fte_table4.end(); ++iter) {
@@ -118,7 +129,28 @@ FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
     
     return false;
 #else
-    const map<IPv6Net, Fte6>& fte_table6 = fibconfig().fibconfig_entry_set_click().fte_table6();
+
+    //
+    // XXX: Get the table from the FibConfigEntrySetClick instance.
+    // The reason for that is because it is practically
+    // impossible to read the Click configuration and parse it to restore
+    // the original table.
+    //
+    FibConfigEntrySet* fibconfig_entry_set = fea_data_plane_manager().fibconfig_entry_set();
+    if ((fibconfig_entry_set == NULL) || (! fibconfig_entry_set->is_running()))
+	return (false);
+
+    FibConfigEntrySetClick* fibconfig_entry_set_click;
+    fibconfig_entry_set_click = dynamic_cast<FibConfigEntrySetClick*>(fibconfig_entry_set);
+    if (fibconfig_entry_set_click == NULL) {
+	//
+	// XXX: The FibConfigEntrySet plugin was probably changed to
+	// something else which we don't know how to deal with.
+	//
+	return (false);
+    }
+
+    const map<IPv6Net, Fte6>& fte_table6 = fibconfig_entry_set_click->fte_table6();
     map<IPv6Net, Fte6>::const_iterator iter;
 
     for (iter = fte_table6.begin(); iter != fte_table6.end(); ++iter) {

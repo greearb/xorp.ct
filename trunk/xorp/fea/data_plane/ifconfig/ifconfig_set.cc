@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.4 2007/05/08 00:49:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.5 2007/06/15 22:27:54 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
+#include "libxorp/ipvx.hh"
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
@@ -40,7 +41,7 @@
 //
 
 bool
-IfConfigSet::push_config(IfTree& it)
+IfConfigSet::push_config(IfTree& iftree)
 {
     IfTree::IfMap::iterator ii;
     IfTreeInterface::VifMap::iterator vi;
@@ -51,7 +52,9 @@ IfConfigSet::push_config(IfTree& it)
     //
     // Sanity check config - bail on bad interface and bad vif names
     //
-    for (ii = it.interfaces().begin(); ii != it.interfaces().end(); ++ii) {
+    for (ii = iftree.interfaces().begin();
+	 ii != iftree.interfaces().end();
+	 ++ii) {
 	IfTreeInterface& i = ii->second;
 	//
 	// Skip the ifindex check if the interface has no mapping to
@@ -94,7 +97,9 @@ IfConfigSet::push_config(IfTree& it)
     // Walk config
     //
     push_iftree_begin();
-    for (ii = it.interfaces().begin(); ii != it.interfaces().end(); ++ii) {
+    for (ii = iftree.interfaces().begin();
+	 ii != iftree.interfaces().end();
+	 ++ii) {
 	IfTreeInterface& i = ii->second;
 
 	// Set the "discard_emulated" flag if the discard interface is emulated
@@ -259,7 +264,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 
 	new_up = (new_flags & IFF_UP)? true : false;
 
-	if (is_primary() && (new_flags == pulled_flags))
+	if ((! is_pulled_config_mirror()) && (new_flags == pulled_flags))
 	    break;		// XXX: nothing changed
 
 	if (config_interface(i.ifname(), if_index, new_flags, new_up,
@@ -289,7 +294,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	if (ifp != NULL)
 	    pulled_mtu = ifp->mtu();
 
-	if (is_secondary() && (new_mtu == 0)) {
+	if (is_pulled_config_mirror() && (new_mtu == 0)) {
 	    // Get the MTU from the pulled config
 	    new_mtu = pulled_mtu;
 	}
@@ -297,10 +302,10 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	if (new_mtu == 0)
 	    break;		// XXX: ignore the MTU setup
 
-	if (is_primary() && (new_mtu == pulled_mtu))
+	if ((! is_pulled_config_mirror()) && (new_mtu == pulled_mtu))
 	    break;		// Ignore: the MTU hasn't changed
 
-	if (is_primary() && (ifp != NULL) && new_up) {
+	if ((ifp != NULL) && new_up) {
 	    //
 	    // XXX: Set the interface DOWN otherwise we may not be able to
 	    // set the MTU (limitation imposed by the Linux kernel).
@@ -347,7 +352,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	if (ifp != NULL)
 	    pulled_mac = ifp->mac();
 
-	if (is_secondary() && new_mac.empty()) {
+	if (is_pulled_config_mirror() && new_mac.empty()) {
 	    // Get the MAC from the pulled config
 	    new_mac = pulled_mac;
 	}
@@ -355,7 +360,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	if (new_mac.empty())
 	    break;		// XXX: ignore the MAC setup
 
-	if (is_primary() && (new_mac == pulled_mac))
+	if ((! is_pulled_config_mirror()) && (new_mac == pulled_mac))
 	    break;		// Ignore: the MAC hasn't changed
 
 	struct ether_addr ea;
@@ -380,7 +385,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    return;
 	}
 
-	if (is_primary() && (ifp != NULL) && new_up) {
+	if ((ifp != NULL) && new_up) {
 	    //
 	    // XXX: Set the interface DOWN otherwise we may not be able to
 	    // set the MAC address (limitation imposed by the Linux kernel).
@@ -480,7 +485,7 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 	if ( (!pulled_up) && enabled)
 	    new_flags |= IFF_UP;
 
-	if (is_primary() && (new_flags == pulled_flags))
+	if ((! is_pulled_config_mirror()) && (new_flags == pulled_flags))
 	    break;		// XXX: nothing changed
 
 	// Set the vif flags
@@ -493,17 +498,16 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 		pulled_multicast = vifp->multicast();
 	    }
 	}
-	if (is_primary()) {
-	    new_broadcast = v.broadcast();
-	    new_loopback = v.loopback();
-	    new_point_to_point = v.point_to_point();
-	    new_multicast = v.multicast();
-	}
-	if (is_secondary()) {
+	if (is_pulled_config_mirror()) {
 	    new_broadcast = pulled_broadcast;
 	    new_loopback = pulled_loopback;
 	    new_point_to_point = pulled_point_to_point;
 	    new_multicast = pulled_multicast;
+	} else {
+	    new_broadcast = v.broadcast();
+	    new_loopback = v.loopback();
+	    new_point_to_point = v.point_to_point();
+	    new_multicast = v.multicast();
 	}
 
 	new_up = (new_flags & IFF_UP)? true : false;
@@ -591,7 +595,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	// Test if a new address
 	bool new_address = true;
 	do {
-	    if (is_secondary())
+	    if (is_pulled_config_mirror())
 		break;
 	    if (ap == NULL)
 		break;
@@ -718,7 +722,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	// Test if a new address
 	bool new_address = true;
 	do {
-	    if (is_secondary())
+	    if (is_pulled_config_mirror())
 		break;
 	    if (ap == NULL)
 		break;

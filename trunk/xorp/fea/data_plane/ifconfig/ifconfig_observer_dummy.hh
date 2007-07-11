@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.hh,v 1.2 2007/06/06 19:55:53 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.hh,v 1.3 2007/06/07 01:23:35 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_OBSERVER_DUMMY_HH__
@@ -22,7 +22,7 @@
 
 class IfConfigObserverDummy : public IfConfigObserver {
 public:
-    IfConfigObserverDummy(IfConfig& ifconfig);
+    IfConfigObserverDummy(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~IfConfigObserverDummy();
 
     /**

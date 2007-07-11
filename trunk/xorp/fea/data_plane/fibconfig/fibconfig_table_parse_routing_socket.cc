@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.9 2007/06/04 23:17:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.10 2007/06/07 01:28:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -44,17 +44,7 @@
 // Reading route(4) manual page is a good start for understanding this
 //
 
-#if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
-bool
-FibConfigTableGetSysctl::parse_buffer_routing_socket(int, const IfTree& ,
-						     list<FteX>& ,
-						     const vector<uint8_t>& ,
-						     FibMsgSet)
-{
-    return false;
-}
-
-#else // HAVE_ROUTING_SOCKETS
+#ifdef HAVE_ROUTING_SOCKETS
 
 bool
 FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,

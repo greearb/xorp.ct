@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,14 +29,14 @@
 //
 // Set single-entry information into the unicast forwarding table.
 //
-// The mechanism to obtain the information is click(1)
-// (e.g., see http://www.pdos.lcs.mit.edu/click/).
+// The mechanism to set the information is Click:
+//   http://www.read.cs.ucla.edu/click/
 //
 
 
-FibConfigEntrySetClick::FibConfigEntrySetClick(FibConfig& fibconfig)
-    : FibConfigEntrySet(fibconfig),
-      ClickSocket(fibconfig.eventloop()),
+FibConfigEntrySetClick::FibConfigEntrySetClick(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntrySet(fea_data_plane_manager),
+      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _reinstall_all_entries_time_slice(100000, 20),	// 100ms, test every 20th iter
       _start_reinstalling_fte_table4(false),
@@ -76,16 +76,6 @@ FibConfigEntrySetClick::start(string& error_msg)
     fibconfig().nexthop_port_mapper().add_observer(this);
 
     _is_running = true;
-
-    //
-    // XXX: we should register ourselves after we are running so the
-    // registration process itself can trigger some startup operations
-    // (if any).
-    //
-    if (ClickSocket::is_duplicate_routes_to_kernel_enabled())
-	fibconfig().register_fibconfig_entry_set_secondary(this);
-    else
-	fibconfig().register_fibconfig_entry_set_primary(this);
 
     return (XORP_OK);
 }

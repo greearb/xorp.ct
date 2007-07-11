@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.15 2007/06/04 23:17:31 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.16 2007/06/27 01:27:04 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -15,6 +15,9 @@ SubIncludeOnce TOP cli ;
 SubIncludeOnce TOP cli libtecla ;
 SubIncludeOnce TOP fea data_plane ;
 SubDir TOP fea ;
+
+Library libfea_data_plane_manager :
+	fea_data_plane_manager.cc
 
 Library libfea : 
 	addr_table.cc
@@ -57,9 +60,11 @@ Library libfea :
 
 FEA_LDADD =
 	libfea
-	libxorp_ifconfig
+	libxorp_data_plane_managers
 	libxorp_fibconfig
+	libxorp_ifconfig
 	libxorp_control_socket
+	libfea_data_plane_manager
 	libfeafibclientxif
 	libfearawlinkclient
 	libfearawpkt4client
@@ -108,9 +113,11 @@ if $(MAKE_CHECK) {
  Main test_xrl_sockets4_udp : test_xrl_sockets4_udp.cc ;
  LinkLibraries test_xrl_sockets4_udp :
 	libfea
-	libxorp_ifconfig
+	libxorp_data_plane_managers
 	libxorp_fibconfig
+	libxorp_ifconfig
 	libxorp_control_socket
+	libfea_data_plane_manager
 	libsocket4userxif
 	libsocket4xif
 	libsocket6userxif
@@ -126,9 +133,11 @@ if $(MAKE_CHECK) {
  Main test_xrl_sockets4_tcp : test_xrl_sockets4_tcp.cc ;
  LinkLibraries test_xrl_sockets4_tcp :
 	libfea
-	libxorp_ifconfig
+	libxorp_data_plane_managers
 	libxorp_fibconfig
+	libxorp_ifconfig
 	libxorp_control_socket
+	libfea_data_plane_manager
 	libsocket4userxif
 	libsocket4xif
 	libsocket6userxif

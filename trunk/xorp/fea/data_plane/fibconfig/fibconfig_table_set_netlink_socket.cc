@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_netlink_socket.cc,v 1.5 2007/04/30 23:40:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_netlink_socket.cc,v 1.6 2007/06/07 01:28:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -32,16 +32,14 @@
 // The mechanism to set the information is netlink(7) sockets.
 //
 
-
-FibConfigTableSetNetlink::FibConfigTableSetNetlink(FibConfig& fibconfig)
-    : FibConfigTableSet(fibconfig)
-{
 #ifdef HAVE_NETLINK_SOCKETS
-    fibconfig.register_fibconfig_table_set_primary(this);
-#endif
+
+FibConfigTableSetNetlinkSocket::FibConfigTableSetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableSet(fea_data_plane_manager)
+{
 }
 
-FibConfigTableSetNetlink::~FibConfigTableSetNetlink()
+FibConfigTableSetNetlinkSocket::~FibConfigTableSetNetlinkSocket()
 {
     string error_msg;
 
@@ -54,7 +52,7 @@ FibConfigTableSetNetlink::~FibConfigTableSetNetlink()
 }
 
 int
-FibConfigTableSetNetlink::start(string& error_msg)
+FibConfigTableSetNetlinkSocket::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -78,7 +76,7 @@ FibConfigTableSetNetlink::start(string& error_msg)
 }
 
 int
-FibConfigTableSetNetlink::stop(string& error_msg)
+FibConfigTableSetNetlinkSocket::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -102,7 +100,7 @@ FibConfigTableSetNetlink::stop(string& error_msg)
 }
 
 bool
-FibConfigTableSetNetlink::set_table4(const list<Fte4>& fte_list)
+FibConfigTableSetNetlinkSocket::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
 
@@ -116,7 +114,7 @@ FibConfigTableSetNetlink::set_table4(const list<Fte4>& fte_list)
 }
 
 bool
-FibConfigTableSetNetlink::delete_all_entries4()
+FibConfigTableSetNetlinkSocket::delete_all_entries4()
 {
     list<Fte4> fte_list;
     list<Fte4>::const_iterator iter;
@@ -135,7 +133,7 @@ FibConfigTableSetNetlink::delete_all_entries4()
 }
 
 bool
-FibConfigTableSetNetlink::set_table6(const list<Fte6>& fte_list)
+FibConfigTableSetNetlinkSocket::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
     
@@ -149,7 +147,7 @@ FibConfigTableSetNetlink::set_table6(const list<Fte6>& fte_list)
 }
     
 bool
-FibConfigTableSetNetlink::delete_all_entries6()
+FibConfigTableSetNetlinkSocket::delete_all_entries6()
 {
     list<Fte6> fte_list;
     list<Fte6>::const_iterator iter;
@@ -166,3 +164,5 @@ FibConfigTableSetNetlink::delete_all_entries6()
     
     return true;
 }
+
+#endif // HAVE_NETLINK_SOCKETS

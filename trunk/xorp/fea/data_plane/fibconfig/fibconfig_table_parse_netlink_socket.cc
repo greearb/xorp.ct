@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc,v 1.7 2007/06/04 23:17:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc,v 1.8 2007/06/07 01:28:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -44,24 +44,15 @@
 // Reading netlink(3) manual page is a good start for understanding this
 //
 
-#ifndef HAVE_NETLINK_SOCKETS
-bool
-FibConfigTableGetNetlink::parse_buffer_netlink_socket(int, const IfTree& ,
-						      list<FteX>& ,
-						      const vector<uint8_t>& ,
-						      bool )
-{
-    return false;
-}
-
-#else // HAVE_NETLINK_SOCKETS
+#ifdef HAVE_NETLINK_SOCKETS
 
 bool
-FibConfigTableGetNetlink::parse_buffer_netlink_socket(int family,
-						      const IfTree& iftree,
-						      list<FteX>& fte_list,
-						      const vector<uint8_t>& buffer,
-						      bool is_nlm_get_only)
+FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
+    int family,
+    const IfTree& iftree,
+    list<FteX>& fte_list,
+    const vector<uint8_t>& buffer,
+    bool is_nlm_get_only)
 {
     size_t buffer_bytes = buffer.size();
     AlignData<struct nlmsghdr> align_data(buffer);

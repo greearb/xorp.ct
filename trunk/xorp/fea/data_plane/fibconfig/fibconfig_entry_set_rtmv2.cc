@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.10 2007/06/08 05:53:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.11 2007/06/11 21:57:44 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -47,25 +47,22 @@
 // The mechanism to set the information is Router Manager V2.
 //
 
+#ifdef HOST_OS_WINDOWS
 
-FibConfigEntrySetRtmV2::FibConfigEntrySetRtmV2(FibConfig& fibconfig)
-    : FibConfigEntrySet(fibconfig),
+FibConfigEntrySetRtmV2::FibConfigEntrySetRtmV2(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntrySet(fea_data_plane_manager),
       _rs4(NULL),
       _rs6(NULL)
 {
-#ifdef HOST_OS_WINDOWS
     if (!WinSupport::is_rras_running()) {
 	XLOG_WARNING("RRAS is not running; disabling FibConfigEntrySetRtmV2.");
         return;
     }
 
-    _rs4 = new WinRtmPipe(fibconfig.eventloop());
+    _rs4 = new WinRtmPipe(fea_data_plane_manager.eventloop());
 
 #ifdef HAVE_IPV6
-    _rs6 = new WinRtmPipe(fibconfig.eventloop());
-#endif
-
-    fibconfig.register_fibconfig_entry_set_primary(this);
+    _rs6 = new WinRtmPipe(fea_data_plane_manager.eventloop());
 #endif
 }
 
@@ -80,10 +77,10 @@ FibConfigEntrySetRtmV2::~FibConfigEntrySetRtmV2()
 		   error_msg.c_str());
     }
 #ifdef HAVE_IPV6
-    if (_rs6)
+    if (_rs6 != NULL)
         delete _rs6;
 #endif
-    if (_rs4)
+    if (_rs4 != NULL)
         delete _rs4;
 }
 
@@ -159,21 +156,6 @@ FibConfigEntrySetRtmV2::delete_entry6(const Fte6& fte)
     
     return (delete_entry(ftex));
 }
-
-#ifndef HOST_OS_WINDOWS
-bool
-FibConfigEntrySetRtmV2::add_entry(const FteX& )
-{
-    return false;
-}
-
-bool
-FibConfigEntrySetRtmV2::delete_entry(const FteX& )
-{
-    return false;
-}
-
-#else // HOST_OS_WINDOWS
 
 bool
 FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
@@ -373,4 +355,5 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     
     return true;
 }
+
 #endif // HOST_OS_WINDOWS

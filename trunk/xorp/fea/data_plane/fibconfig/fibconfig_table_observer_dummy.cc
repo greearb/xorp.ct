@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_dummy.cc,v 1.5 2007/04/30 23:40:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_dummy.cc,v 1.6 2007/06/07 01:28:40 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -37,12 +37,9 @@
 //
 
 
-FibConfigTableObserverDummy::FibConfigTableObserverDummy(FibConfig& fibconfig)
-    : FibConfigTableObserver(fibconfig)
+FibConfigTableObserverDummy::FibConfigTableObserverDummy(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableObserver(fea_data_plane_manager)
 {
-#if 0	// XXX: by default Dummy is never registering by itself
-    fibconfig.register_fibconfig_table_observer_primary(this);
-#endif
 }
 
 FibConfigTableObserverDummy::~FibConfigTableObserverDummy()

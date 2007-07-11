@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.37 2006/10/17 22:26:08 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.38 2006/10/18 17:02:11 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -126,7 +126,9 @@ fea {
 
     click {
 	%help:		short "Configure Click FEA support";
+	%create:	xrl "$(fea.targetname)/fea_click/0.1/load_click";
 	%activate:	xrl "$(fea.targetname)/fea_click/0.1/start_click";
+	%delete:	xrl "$(fea.targetname)/fea_click/0.1/unload_click";
 
 	disable {
 	    %help:	short "Disable Click FEA support";

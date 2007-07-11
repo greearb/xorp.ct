@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.9 2007/06/04 23:17:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.10 2007/06/07 01:28:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -37,13 +37,11 @@
 // The mechanism to obtain the information is Router Manager V2.
 //
 
-
-FibConfigEntryGetRtmV2::FibConfigEntryGetRtmV2(FibConfig& fibconfig)
-    : FibConfigEntryGet(fibconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_entry_get_primary(this);
-#endif
+
+FibConfigEntryGetRtmV2::FibConfigEntryGetRtmV2(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryGet(fea_data_plane_manager)
+{
 }
 
 FibConfigEntryGetRtmV2::~FibConfigEntryGetRtmV2()
@@ -180,21 +178,6 @@ FibConfigEntryGetRtmV2::lookup_route_by_network6(const IPv6Net& dst,
     return (ret_value);
 }
 
-#ifndef HOST_OS_WINDOWS
-bool
-FibConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& , FteX& )
-{
-    return false;
-}
-
-bool
-FibConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& , FteX& )
-{
-    return false;
-}
-
-#else // HOST_OS_WINDOWS
-
 /**
  * Lookup a route by destination address.
  *
@@ -327,7 +310,7 @@ FibConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     }
 
     return (true);
-#endif
+#endif // 0
 }
 
 /**

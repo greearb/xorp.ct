@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_dummy.cc,v 1.5 2007/04/30 23:40:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_dummy.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -37,12 +37,9 @@
 //
 
 
-FibConfigEntryObserverDummy::FibConfigEntryObserverDummy(FibConfig& fibconfig)
-    : FibConfigEntryObserver(fibconfig)
+FibConfigEntryObserverDummy::FibConfigEntryObserverDummy(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryObserver(fea_data_plane_manager)
 {
-#if 0	// XXX: by default Dummy is never registering by itself
-    fibconfig.register_fibconfig_entry_observer_primary(this);
-#endif
 }
 
 FibConfigEntryObserverDummy::~FibConfigEntryObserverDummy()
@@ -93,4 +90,3 @@ FibConfigEntryObserverDummy::receive_data(const vector<uint8_t>& buffer)
     // TODO: use it?
     UNUSED(buffer);
 }
-

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.cc,v 1.5 2007/04/30 23:40:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.cc,v 1.6 2007/06/07 01:28:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -32,13 +32,11 @@
 // The mechanism to set the information is Router Manager V2.
 //
 
-
-FibConfigTableSetRtmV2::FibConfigTableSetRtmV2(FibConfig& fibconfig)
-    : FibConfigTableSet(fibconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_table_set_primary(this);
-#endif
+
+FibConfigTableSetRtmV2::FibConfigTableSetRtmV2(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableSet(fea_data_plane_manager)
+{
 }
 
 FibConfigTableSetRtmV2::~FibConfigTableSetRtmV2()
@@ -166,3 +164,5 @@ FibConfigTableSetRtmV2::delete_all_entries6()
     
     return true;
 }
+
+#endif // HOST_OS_WINDOWS

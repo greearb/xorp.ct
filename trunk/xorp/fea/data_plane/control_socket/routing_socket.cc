@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/routing_socket.cc,v 1.1 2007/05/01 01:42:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket.cc,v 1.2 2007/05/01 02:40:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -173,7 +173,7 @@ int
 RoutingSocket::force_read(string& error_msg)
 {
     vector<uint8_t> message;
-    vector<uint8_t> buffer(RTSOCK_BYTES);
+    vector<uint8_t> buffer(ROUTING_SOCKET_BYTES);
     size_t off = 0;
     size_t last_mh_off = 0;
     
@@ -187,7 +187,7 @@ RoutingSocket::force_read(string& error_msg)
 		continue;	// XXX: the receive was interrupted by a signal
 	    if ((got < 0) || (got < (ssize_t)buffer.size()))
 		break;		// The buffer is big enough
-	    buffer.resize(buffer.size() + RTSOCK_BYTES);
+	    buffer.resize(buffer.size() + ROUTING_SOCKET_BYTES);
 	} while (true);
 	
 	got = read(_fd, &buffer[0], buffer.size());
@@ -246,7 +246,7 @@ RoutingSocket::force_read(string& error_msg)
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->rtsock_data(message);
+	(*i)->routing_socket_data(message);
     }
 
     return (XORP_OK);
@@ -359,7 +359,7 @@ RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno,
  * @param buffer the buffer with the received data.
  */
 void
-RoutingSocketReader::rtsock_data(const vector<uint8_t>& buffer)
+RoutingSocketReader::routing_socket_data(const vector<uint8_t>& buffer)
 {
 #ifndef HAVE_ROUTING_SOCKETS
     UNUSED(buffer);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.8 2007/06/05 10:30:29 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.9 2007/06/06 19:55:53 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -41,14 +41,13 @@
 // The mechanism to obtain the information is netlink(7) sockets.
 //
 
-IfConfigGetNetlinkSocket::IfConfigGetNetlinkSocket(IfConfig& ifconfig)
-    : IfConfigGet(ifconfig),
-      NetlinkSocket(ifconfig.eventloop()),
+#ifdef HAVE_NETLINK_SOCKETS
+
+IfConfigGetNetlinkSocket::IfConfigGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigGet(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    ifconfig.register_ifconfig_get_primary(this);
-#endif
 }
 
 IfConfigGetNetlinkSocket::~IfConfigGetNetlinkSocket()
@@ -97,18 +96,8 @@ IfConfigGetNetlinkSocket::pull_config(IfTree& iftree)
     return read_config(iftree);
 }
 
-#ifndef HAVE_NETLINK_SOCKETS
-
 bool
-IfConfigGetNetlinkSocket::read_config(IfTree& )
-{
-    return false;
-}
-
-#else // HAVE_NETLINK_SOCKETS
-
-bool
-IfConfigGetNetlinkSocket::read_config(IfTree& it)
+IfConfigGetNetlinkSocket::read_config(IfTree& iftree)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512;
@@ -177,7 +166,7 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
     }
     // XXX: reset the multipart message read hackish flag
     ns.set_multipart_message_read(false);
-    if (parse_buffer_netlink_socket(ifconfig(), it, _ns_reader.buffer())
+    if (parse_buffer_netlink_socket(ifconfig(), iftree, _ns_reader.buffer())
 	!= true) {
 	return (false);
     }
@@ -189,8 +178,8 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
     uint32_t if_index;
     
     IfTree::IfMap::const_iterator if_iter;
-    for (if_iter = it.interfaces().begin();
-	 if_iter != it.interfaces().end();
+    for (if_iter = iftree.interfaces().begin();
+	 if_iter != iftree.interfaces().end();
 	 ++if_iter) {
 	const IfTreeInterface& iface = if_iter->second;
 	IfTreeInterface::VifMap::const_iterator vif_iter;
@@ -258,7 +247,7 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
 	    }
 	    // XXX: reset the multipart message read hackish flag
 	    ns.set_multipart_message_read(false);
-	    if (parse_buffer_netlink_socket(ifconfig(), it,
+	    if (parse_buffer_netlink_socket(ifconfig(), iftree,
 					    _ns_reader.buffer())
 		!= true) {
 		return (false);
@@ -312,7 +301,7 @@ IfConfigGetNetlinkSocket::read_config(IfTree& it)
 	    }
 	    // XXX: reset the multipart message read hackish flag
 	    ns.set_multipart_message_read(false);
-	    if (parse_buffer_netlink_socket(ifconfig(), it,
+	    if (parse_buffer_netlink_socket(ifconfig(), iftree,
 					    _ns_reader.buffer())
 		!= true) {
 		return (false);

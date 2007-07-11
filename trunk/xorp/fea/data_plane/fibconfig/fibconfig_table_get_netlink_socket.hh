@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.hh,v 1.1 2007/06/07 01:28:40 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_NETLINK_SOCKET_HH__
@@ -21,11 +21,11 @@
 #include "fea/data_plane/control_socket/netlink_socket.hh"
 
 
-class FibConfigTableGetNetlink : public FibConfigTableGet,
-				 public NetlinkSocket {
+class FibConfigTableGetNetlinkSocket : public FibConfigTableGet,
+				       public NetlinkSocket {
 public:
-    FibConfigTableGetNetlink(FibConfig& fibconfig);
-    virtual ~FibConfigTableGetNetlink();
+    FibConfigTableGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+    virtual ~FibConfigTableGetNetlinkSocket();
 
     /**
      * Start operation.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh,v 1.2 2007/06/06 19:55:52 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh,v 1.3 2007/06/07 01:23:34 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__
@@ -22,7 +22,7 @@
 
 class IfConfigGetGetifaddrs : public IfConfigGet {
 public:
-    IfConfigGetGetifaddrs(IfConfig& ifconfig);
+    IfConfigGetGetifaddrs(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~IfConfigGetGetifaddrs();
 
     /**
@@ -57,17 +57,17 @@ public:
      * (e.g., obtained by getifaddrs(3) mechanism).
      * 
      * @param ifconfig the IfConfig instance.
-     * @param it the IfTree storage to store the parsed information.
+     * @param iftree the IfTree storage to store the parsed information.
      * @param ifap a linked list of the network interfaces on the
      * local machine.
      * @return true on success, otherwise false.
      * @see IfTree.
      */
-    static bool parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
+    static bool parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& iftree,
 					const struct ifaddrs* ifap);
 
 private:
-    bool read_config(IfTree& it);
+    bool read_config(IfTree& iftree);
 };
 
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__

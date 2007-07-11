@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.7 2007/06/05 13:14:32 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.8 2007/06/06 19:55:54 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/ipvx.hh"
 #include "libxorp/run_command.hh"
 #include "libxorp/utils.hh"
 
@@ -37,13 +38,13 @@
 // Set information about network interfaces configuration with the
 // underlying system.
 //
-// The mechanism to set the information is click(1)
-// (e.g., see http://www.pdos.lcs.mit.edu/click/).
+// The mechanism to set the information is Click:
+//   http://www.read.cs.ucla.edu/click/
 //
 
-IfConfigSetClick::IfConfigSetClick(IfConfig& ifconfig)
-    : IfConfigSet(ifconfig),
-      ClickSocket(ifconfig.eventloop()),
+IfConfigSetClick::IfConfigSetClick(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigSet(fea_data_plane_manager),
+      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this),
       _kernel_click_config_generator(NULL),
       _user_click_config_generator(NULL),
@@ -79,11 +80,9 @@ IfConfigSetClick::start(string& error_msg)
     _is_running = true;
 
     //
-    // XXX: we should register ourselves after we are running so the
-    // registration process itself can trigger some startup operations
-    // (if any).
+    // XXX: Push the existing configuration
     //
-    ifconfig().register_ifconfig_set_secondary(this);
+    push_config(ifconfig().pushed_config());
 
     return (XORP_OK);
 }

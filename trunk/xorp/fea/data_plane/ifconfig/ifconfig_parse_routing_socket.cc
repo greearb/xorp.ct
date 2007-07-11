@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.10 2007/05/23 04:08:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.11 2007/06/04 23:17:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -51,6 +51,7 @@
 #include "fea/data_plane/control_socket/system_utilities.hh"
 #include "fea/data_plane/control_socket/routing_socket_utilities.hh"
 
+#include "ifconfig_get_sysctl.hh"
 #include "ifconfig_media.hh"
 
 
@@ -64,34 +65,18 @@
 // Reading route(4) manual page is a good start for understanding this
 //
 
-#ifndef HAVE_ROUTING_SOCKETS
-bool
-IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ,
-					       IfTree& ,
-					       const vector<uint8_t>& )
-{
-    return false;
-}
-
-string
-IfConfigGetSysctl::iff_flags(uint32_t flags)
-{
-    UNUSED(flags);
-
-    return string("");
-}
-
-#else // HAVE_ROUTING_SOCKETS
+#ifdef HAVE_ROUTING_SOCKETS
 
 static void rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig,
-				  const struct if_msghdr* ifm, IfTree& it,
+				  const struct if_msghdr* ifm, IfTree& iftree,
 				  u_short& if_index_hint);
 static void rtm_addr_to_fea_cfg(IfConfig& ifconfig,
-				const struct if_msghdr* ifm, IfTree& it,
+				const struct if_msghdr* ifm, IfTree& iftree,
 				u_short if_index_hint);
 #ifdef RTM_IFANNOUNCE
 static void rtm_announce_to_fea_cfg(IfConfig& ifconfig,
-				    const struct if_msghdr* ifm, IfTree& it);
+				    const struct if_msghdr* ifm,
+				    IfTree& iftree);
 #endif
 
 //
@@ -215,7 +200,7 @@ IfConfigGetSysctl::iff_flags(uint32_t flags)
 
 bool
 IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
-					       IfTree& it,
+					       IfTree& iftree,
 					       const vector<uint8_t>& buffer)
 {
     AlignData<struct if_msghdr> align_data(buffer);
@@ -237,18 +222,18 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 	switch (ifm->ifm_type) {
 	case RTM_IFINFO:
 	    if_index_hint = 0;
-	    rtm_ifinfo_to_fea_cfg(ifconfig, ifm, it, if_index_hint);
+	    rtm_ifinfo_to_fea_cfg(ifconfig, ifm, iftree, if_index_hint);
 	    recognized = true;
 	    break;
 	case RTM_NEWADDR:
 	case RTM_DELADDR:
-	    rtm_addr_to_fea_cfg(ifconfig, ifm, it, if_index_hint);
+	    rtm_addr_to_fea_cfg(ifconfig, ifm, iftree, if_index_hint);
 	    recognized = true;
 	    break;
 #ifdef RTM_IFANNOUNCE
 	case RTM_IFANNOUNCE:
 	    if_index_hint = 0;
-	    rtm_announce_to_fea_cfg(ifconfig, ifm, it);
+	    rtm_announce_to_fea_cfg(ifconfig, ifm, iftree);
 	    recognized = true;
 	    break;
 #endif // RTM_IFANNOUNCE
@@ -277,7 +262,7 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 
 static void
 rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
-		      IfTree& it, u_short& if_index_hint)
+		      IfTree& iftree, u_short& if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFINFO);
     
@@ -321,7 +306,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	debug_msg("interface: %s\n", if_name.c_str());
 	debug_msg("interface index: %d\n", if_index);
 	
-	IfTreeInterface* ifp = it.find_interface(if_name);
+	IfTreeInterface* ifp = iftree.find_interface(if_name);
 	if (ifp == NULL) {
 	    XLOG_FATAL("Could not find interface named %s", if_name.c_str());
 	}
@@ -345,7 +330,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 	
 	// XXX: vifname == ifname on this platform
-	IfTreeVif* vifp = it.find_vif(if_name, if_name);
+	IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
 	if (vifp == NULL) {
 	    XLOG_FATAL("Could not find IfTreeVif on %s named %s",
 		       if_name.c_str(), if_name.c_str());
@@ -465,11 +450,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     // Add the interface (if a new one)
     //
     ifconfig.map_ifindex(if_index, if_name);
-    IfTreeInterface* ifp = it.find_interface(if_name);
+    IfTreeInterface* ifp = iftree.find_interface(if_name);
     if (ifp == NULL) {
-	it.add_interface(if_name);
+	iftree.add_interface(if_name);
 	is_newlink = true;
-	ifp = it.find_interface(if_name);
+	ifp = iftree.find_interface(if_name);
 	XLOG_ASSERT(ifp != NULL);
     }
 
@@ -592,7 +577,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 
 static void
 rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
-		    IfTree& it, u_short if_index_hint)
+		    IfTree& iftree, u_short if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_NEWADDR || ifm->ifm_type == RTM_DELADDR);
     
@@ -641,7 +626,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     // Locate the vif to pin data on
     //
     // XXX: vifname == ifname on this platform
-    IfTreeVif* vifp = it.find_vif(if_name, if_name);
+    IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
     if (vifp == NULL) {
 	XLOG_FATAL("Could not find vif named %s in IfTree", if_name.c_str());
     }
@@ -783,7 +768,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 #ifdef RTM_IFANNOUNCE
 static void
 rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
-			IfTree& it)
+			IfTree& iftree)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFANNOUNCE);
     
@@ -804,8 +789,8 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	debug_msg("Mapping %d -> %s\n", if_index, if_name.c_str());
 	ifconfig.map_ifindex(if_index, if_name);
 	
-	it.add_interface(if_name);
-	IfTreeInterface* ifp = it.find_interface(if_name);
+	iftree.add_interface(if_name);
+	IfTreeInterface* ifp = iftree.find_interface(if_name);
 	// XXX: vifname == ifname on this platform
 	if (ifp != NULL) {
 	    ifp->add_vif(if_name);
@@ -821,7 +806,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	// Delete interface
 	//
 	debug_msg("Deleting interface and vif named: %s\n", if_name.c_str());
-	IfTreeInterface* ifp = it.find_interface(if_name);
+	IfTreeInterface* ifp = iftree.find_interface(if_name);
 	if (ifp != NULL) {
 	    ifp->mark(IfTree::DELETED);
 	} else {
@@ -829,7 +814,7 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 		      if_name.c_str());
 	}
 	// XXX: vifname == ifname on this platform
-	IfTreeVif* vifp = it.find_vif(if_name, if_name);
+	IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
 	if (vifp != NULL) {
 	    vifp->mark(IfTree::DELETED);
 	} else {

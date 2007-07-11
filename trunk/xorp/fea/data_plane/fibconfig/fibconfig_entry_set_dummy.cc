@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.6 2007/06/07 01:28:38 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -33,12 +33,9 @@
 //
 
 
-FibConfigEntrySetDummy::FibConfigEntrySetDummy(FibConfig& fibconfig)
-    : FibConfigEntrySet(fibconfig)
+FibConfigEntrySetDummy::FibConfigEntrySetDummy(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntrySet(fea_data_plane_manager)
 {
-#if 0	// XXX: by default Dummy is never registering by itself
-    fibconfig.register_fibconfig_entry_set_primary(this);
-#endif
 }
 
 FibConfigEntrySetDummy::~FibConfigEntrySetDummy()

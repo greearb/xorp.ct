@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.7 2007/06/04 23:17:31 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.8 2007/06/07 01:28:34 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -26,65 +26,17 @@
 #include "libxorp/transaction.hh"
 #include "libxorp/trie.hh"
 
-//
-// Flag values used to tell underlying FIB message parsing routines
-// which messages the caller is interested in.
-//
-// TODO: Those values and FibMsgSet are temporarily defined here.
-// In the future they should be moved inside FibConfig.
-//
-namespace FibMsg {
-    enum {
-	UPDATES		= 1 << 0,
-	GETS		= 1 << 1,
-	RESOLVES	= 1 << 2
-    };
-};
-typedef uint32_t FibMsgSet;
-
 #include "fte.hh"
 
 #include "fibconfig_entry_get.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_get_click.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_get_dummy.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.hh"
 #include "fibconfig_entry_set.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_set_click.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_set_dummy.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.hh"
 #include "fibconfig_entry_observer.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_observer_dummy.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_observer_iphelper.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_entry_observer_rtmv2.hh"
 #include "fibconfig_table_get.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_get_click.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_get_dummy.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_get_iphelper.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_get_sysctl.hh"
 #include "fibconfig_table_set.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_set_click.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_set_dummy.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_set_iphelper.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_set_netlink_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_set_routing_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.hh"
 #include "fibconfig_table_observer.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_observer_dummy.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_observer_iphelper.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_observer_routing_socket.hh"
-#include "fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.hh"
 
 class EventLoop;
+class FeaNode;
 class FibConfigEntryGet;
 class FibConfigEntrySet;
 class FibConfigEntryObserver;
@@ -111,15 +63,13 @@ public:
     /**
      * Constructor.
      * 
-     * @param eventloop the event loop.
-     * @param profile the profile entity.
-     * @param nexthop_port_mapper the next-hop port mapper.
+     * @param fea_node the FEA node.
+     * @param iftree the interface tree to use.
      */
-    FibConfig(EventLoop& eventloop, Profile& profile, const IfTree& iftree,
-	      NexthopPortMapper& nexthop_port_mapper);
+    FibConfig(FeaNode& fea_node, const IfTree& iftree);
 
     /**
-     * Virtual destructor (in case this class is used as base class).
+     * Virtual destructor (in case this class is used as a base class).
      */
     virtual ~FibConfig();
 
@@ -191,41 +141,119 @@ public:
 				  const TransactionManager::Operation& op,
 				  string& error_msg);
 
-    int register_fibconfig_entry_get_primary(FibConfigEntryGet *fibconfig_entry_get);
-    int register_fibconfig_entry_set_primary(FibConfigEntrySet *fibconfig_entry_set);
-    int register_fibconfig_entry_observer_primary(FibConfigEntryObserver *fibconfig_entry_observer);
-    int register_fibconfig_table_get_primary(FibConfigTableGet *fibconfig_table_get);
-    int register_fibconfig_table_set_primary(FibConfigTableSet *fibconfig_table_set);
-    int register_fibconfig_table_observer_primary(FibConfigTableObserver *fibconfig_table_observer);
-    int register_fibconfig_entry_get_secondary(FibConfigEntryGet *fibconfig_entry_get);
-    int register_fibconfig_entry_set_secondary(FibConfigEntrySet *fibconfig_entry_set);
-    int register_fibconfig_entry_observer_secondary(FibConfigEntryObserver *fibconfig_entry_observer);
-    int register_fibconfig_table_get_secondary(FibConfigTableGet *fibconfig_table_get);
-    int register_fibconfig_table_set_secondary(FibConfigTableSet *fibconfig_table_set);
-    int register_fibconfig_table_observer_secondary(FibConfigTableObserver *fibconfig_table_observer);
-    
-    FibConfigEntryGet&		fibconfig_entry_get_primary() { return *_fibconfig_entry_get_primary; }
-    FibConfigEntrySet&		fibconfig_entry_set_primary() { return *_fibconfig_entry_set_primary; }
-    FibConfigEntryObserver&	fibconfig_entry_observer_primary() { return *_fibconfig_entry_observer_primary; }
-    FibConfigTableGet&		fibconfig_table_get_primary() { return *_fibconfig_table_get_primary; }
-    FibConfigTableSet&		fibconfig_table_set_primary() { return *_fibconfig_table_set_primary; }
-    FibConfigTableObserver&	fibconfig_table_observer_primary() { return *_fibconfig_table_observer_primary; }
-
-    FibConfigEntrySetClick&	fibconfig_entry_set_click() { return _fibconfig_entry_set_click; }
-
     /**
-     * Setup the unit to behave as dummy (for testing purpose).
-     * 
+     * Register @ref FibConfigEntryGet plugin.
+     *
+     * @param fibconfig_entry_get the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int set_dummy();
+    int register_fibconfig_entry_get(FibConfigEntryGet *fibconfig_entry_get,
+				     bool is_exclusive);
 
     /**
-     * Test if running in dummy mode.
-     * 
-     * @return true if running in dummy mode, otherwise false.
+     * Unregister @ref FibConfigEntryGet plugin.
+     *
+     * @param fibconfig_entry_get the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool is_dummy() const { return _is_dummy; }
+    int unregister_fibconfig_entry_get(FibConfigEntryGet* fibconfig_entry_get);
+
+    /**
+     * Register @ref FibConfigEntrySet plugin.
+     *
+     * @param fibconfig_entry_set the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_fibconfig_entry_set(FibConfigEntrySet *fibconfig_entry_set,
+				     bool is_exclusive);
+
+    /**
+     * Unregister @ref FibConfigEntrySet plugin.
+     *
+     * @param fibconfig_entry_set the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_fibconfig_entry_set(FibConfigEntrySet* fibconfig_entry_set);
+
+    /**
+     * Register @ref FibConfigEntryObserver plugin.
+     *
+     * @param fibconfig_entry_observer the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_fibconfig_entry_observer(FibConfigEntryObserver *fibconfig_entry_observer,
+					  bool is_exclusive);
+
+    /**
+     * Unregister @ref FibConfigEntryObserver plugin.
+     *
+     * @param fibconfig_entry_observer the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_fibconfig_entry_observer(FibConfigEntryObserver* fibconfig_entry_observer);
+
+    /**
+     * Register @ref FibConfigTableGet plugin.
+     *
+     * @param fibconfig_table_get the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_fibconfig_table_get(FibConfigTableGet *fibconfig_table_get,
+				     bool is_exclusive);
+
+    /**
+     * Unregister @ref FibConfigTableGet plugin.
+     *
+     * @param fibconfig_table_get the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_fibconfig_table_get(FibConfigTableGet* fibconfig_table_get);
+
+    /**
+     * Register @ref FibConfigTableSet plugin.
+     *
+     * @param fibconfig_table_set the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_fibconfig_table_set(FibConfigTableSet *fibconfig_table_set,
+				     bool is_exclusive);
+
+    /**
+     * Unregister @ref FibConfigTableSet plugin.
+     *
+     * @param fibconfig_table_set the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_fibconfig_table_set(FibConfigTableSet* fibconfig_table_set);
+
+    /**
+     * Register @ref FibConfigTableObserver plugin.
+     *
+     * @param fibconfig_table_observer the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_fibconfig_table_observer(FibConfigTableObserver *fibconfig_table_observer,
+					  bool is_exclusive);
+
+    /**
+     * Unregister @ref FibConfigTableObserver plugin.
+     *
+     * @param fibconfig_table_observer the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_fibconfig_table_observer(FibConfigTableObserver* fibconfig_table_observer);
     
     /**
      * Start operation.
@@ -242,140 +270,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int stop(string& error_msg);
-
-    /**
-     * Enable/disable Click support.
-     *
-     * @param enable if true, then enable Click support, otherwise disable it.
-     */
-    void enable_click(bool enable);
-
-    /**
-     * Start Click support.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start_click(string& error_msg);
-
-    /**
-     * Stop Click support.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int stop_click(string& error_msg);
-
-    /**
-     * Enable/disable duplicating the Click routes to the system kernel.
-     *
-     * @param enable if true, then enable duplicating the Click routes to the
-     * system kernel, otherwise disable it.
-     */
-    void enable_duplicate_routes_to_kernel(bool enable);
-
-    /**
-     * Enable/disable kernel-level Click support.
-     *
-     * @param enable if true, then enable the kernel-level Click support,
-     * otherwise disable it.
-     */
-    void enable_kernel_click(bool enable);
-
-    /**
-     * Enable/disable installing kernel-level Click on startup.
-     *
-     * @param enable if true, then install kernel-level Click on startup.
-     */
-    void enable_kernel_click_install_on_startup(bool enable);
-
-    /**
-     * Specify the list of kernel Click modules to load on startup if
-     * installing kernel-level Click on startup is enabled.
-     *
-     * @param modules the list of kernel Click modules to load.
-     */
-    void set_kernel_click_modules(const list<string>& modules);
-
-    /**
-     * Specify the kernel-level Click mount directory.
-     *
-     * @param directory the kernel-level Click mount directory.
-     */
-    void set_kernel_click_mount_directory(const string& directory);
-
-    /**
-     * Specify the external program to generate the kernel-level Click
-     * configuration.
-     *
-     * @param v the name of the external program to generate the kernel-level
-     * Click configuration.
-     */
-    void set_kernel_click_config_generator_file(const string& v);
-
-    /**
-     * Enable/disable user-level Click support.
-     *
-     * @param enable if true, then enable the user-level Click support,
-     * otherwise disable it.
-     */
-    void enable_user_click(bool enable);
-
-    /**
-     * Specify the user-level Click command file.
-     *
-     * @param v the name of the user-level Click command file.
-     */
-    void set_user_click_command_file(const string& v);
-
-    /**
-     * Specify the extra arguments to the user-level Click command.
-     *
-     * @param v the extra arguments to the user-level Click command.
-     */
-    void set_user_click_command_extra_arguments(const string& v);
-
-    /**
-     * Specify whether to execute on startup the user-level Click command.
-     *
-     * @param v if true, then execute the user-level Click command on startup.
-     */
-    void set_user_click_command_execute_on_startup(bool v);
-
-    /**
-     * Specify the address to use for control access to the user-level
-     * Click.
-     *
-     * @param v the address to use for control access to the user-level Click.
-     */
-    void set_user_click_control_address(const IPv4& v);
-
-    /**
-     * Specify the socket port to use for control access to the user-level
-     * Click.
-     *
-     * @param v the socket port to use for control access to the user-level
-     * Click.
-     */
-    void set_user_click_control_socket_port(uint32_t v);
-
-    /**
-     * Specify the configuration file to be used by user-level Click on
-     * startup.
-     *
-     * @param v the name of the configuration file to be used by user-level
-     * Click on startup.
-     */
-    void set_user_click_startup_config_file(const string& v);
-
-    /**
-     * Specify the external program to generate the user-level Click
-     * configuration.
-     *
-     * @param v the name of the external program to generate the user-level
-     * Click configuration.
-     */
-    void set_user_click_config_generator_file(const string& v);
 
     /**
      * Start a configuration interval. All modifications must be
@@ -757,6 +651,7 @@ protected:
     Trie6	_trie6;		// IPv6 trie (used for testing purpose)
     
 private:
+    FeaNode&				_fea_node;
     EventLoop&				_eventloop;
     Profile&				_profile;
     NexthopPortMapper&			_nexthop_port_mapper;
@@ -767,134 +662,12 @@ private:
     //
     FibConfigTransactionManager*	_ftm;
 
-    FibConfigEntryGet*			_fibconfig_entry_get_primary;
-    FibConfigEntrySet*			_fibconfig_entry_set_primary;
-    FibConfigEntryObserver*		_fibconfig_entry_observer_primary;
-    FibConfigTableGet*			_fibconfig_table_get_primary;
-    FibConfigTableSet*			_fibconfig_table_set_primary;
-    FibConfigTableObserver*		_fibconfig_table_observer_primary;
-
-    list<FibConfigEntryGet*>		_fibconfig_entry_gets_secondary;
-    list<FibConfigEntrySet*>		_fibconfig_entry_sets_secondary;
-    list<FibConfigEntryObserver*>	_fibconfig_entry_observers_secondary;
-    list<FibConfigTableGet*>		_fibconfig_table_gets_secondary;
-    list<FibConfigTableSet*>		_fibconfig_table_sets_secondary;
-    list<FibConfigTableObserver*>	_fibconfig_table_observers_secondary;
-    
-    //
-    // The primary mechanisms to get single-entry information
-    // from the unicast forwarding table.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    FibConfigEntryGetDummy	_fibconfig_entry_get_dummy;
-    FibConfigEntryGetRtsock	_fibconfig_entry_get_rtsock;
-    FibConfigEntryGetNetlink	_fibconfig_entry_get_netlink;
-    FibConfigEntryGetIPHelper	_fibconfig_entry_get_iphelper;
-    //FibConfigEntryGetRtmV2	_fibconfig_entry_get_rtmv2;
-
-    //
-    // The secondary mechanisms to get single-entry information
-    // from the unicast forwarding table.
-    //
-    // XXX: Ordering is not important.
-    //
-    FibConfigEntryGetClick	_fibconfig_entry_get_click;
-    
-    //
-    // The primary mechanisms to set single-entry information
-    // into the unicast forwarding table.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    FibConfigEntrySetDummy	_fibconfig_entry_set_dummy;
-    FibConfigEntrySetRtsock	_fibconfig_entry_set_rtsock;
-    FibConfigEntrySetNetlink	_fibconfig_entry_set_netlink;
-    FibConfigEntrySetIPHelper	_fibconfig_entry_set_iphelper;
-    FibConfigEntrySetRtmV2	_fibconfig_entry_set_rtmv2;
-
-    //
-    // The secondary mechanisms to set single-entry information
-    // into the unicast forwarding table.
-    //
-    // XXX: Ordering is not important.
-    //
-    FibConfigEntrySetClick	_fibconfig_entry_set_click;
-    
-    //
-    // The primary mechanisms to observe single-entry information change
-    // about the unicast forwarding table.
-    // E.g., if the forwarding table has changed, then the information
-    // received by the observer would specify the particular entry that
-    // has changed.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    FibConfigEntryObserverDummy		_fibconfig_entry_observer_dummy;
-    FibConfigEntryObserverRtsock	_fibconfig_entry_observer_rtsock;
-    FibConfigEntryObserverNetlink	_fibconfig_entry_observer_netlink;
-    FibConfigEntryObserverIPHelper	_fibconfig_entry_observer_iphelper;
-    //FibConfigEntryObserverRtmV2	_fibconfig_entry_observer_rtmv2;
-
-    //
-    // The primary mechanisms to get the whole table information
-    // from the unicast forwarding table.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    FibConfigTableGetDummy	_fibconfig_table_get_dummy;
-    FibConfigTableGetSysctl	_fibconfig_table_get_sysctl;
-    FibConfigTableGetNetlink	_fibconfig_table_get_netlink;
-    FibConfigTableGetIPHelper	_fibconfig_table_get_iphelper;
-    
-    //
-    // The secondary mechanisms to get the whole table information
-    // from the unicast forwarding table.
-    //
-    // XXX: Ordering is not important.
-    //
-    FibConfigTableGetClick	_fibconfig_table_get_click;
-
-    //
-    // The primary mechanisms to set the whole table information
-    // into the unicast forwarding table.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    FibConfigTableSetDummy	_fibconfig_table_set_dummy;
-    FibConfigTableSetRtsock	_fibconfig_table_set_rtsock;
-    FibConfigTableSetNetlink	_fibconfig_table_set_netlink;
-    FibConfigTableSetIPHelper	_fibconfig_table_set_iphelper;
-    //FibConfigTableSetRtmV2	_fibconfig_table_set_rtmv2;
-
-    //
-    // The secondary mechanisms to set the whole table information
-    // into the unicast forwarding table.
-    //
-    // XXX: Ordering is not important.
-    //
-    FibConfigTableSetClick	_fibconfig_table_set_click;
-    
-    //
-    // The primary mechanisms to observe the whole-table information change
-    // about the unicast forwarding table.
-    // E.g., if the forwarding table has changed, then the information
-    // received by the observer would NOT specify the particular entry that
-    // has changed.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    FibConfigTableObserverDummy		_fibconfig_table_observer_dummy;
-    FibConfigTableObserverRtsock	_fibconfig_table_observer_rtsock;
-    FibConfigTableObserverNetlink	_fibconfig_table_observer_netlink;
-    FibConfigTableObserverIPHelper	_fibconfig_table_observer_iphelper;
-    FibConfigTableObserverRtmV2		_fibconfig_table_observer_rtmv2;
+    list<FibConfigEntryGet*>		_fibconfig_entry_gets;
+    list<FibConfigEntrySet*>		_fibconfig_entry_sets;
+    list<FibConfigEntryObserver*>	_fibconfig_entry_observers;
+    list<FibConfigTableGet*>		_fibconfig_table_gets;
+    list<FibConfigTableSet*>		_fibconfig_table_sets;
+    list<FibConfigTableObserver*>	_fibconfig_table_observers;
     
     //
     // Original state from the underlying system before the FEA was started
@@ -916,7 +689,6 @@ private:
     //
     bool	_have_ipv4;
     bool	_have_ipv6;
-    bool	_is_dummy;
     bool	_is_running;
     list<FibTableObserverBase* > _fib_table_observers;
 

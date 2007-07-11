@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.6 2007/06/05 10:30:29 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.7 2007/06/06 19:55:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -42,12 +42,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-IfConfigGetIPHelper::IfConfigGetIPHelper(IfConfig& ifconfig)
-    : IfConfigGet(ifconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    ifconfig.register_ifconfig_get_primary(this);
-#endif
+
+IfConfigGetIPHelper::IfConfigGetIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigGet(fea_data_plane_manager)
+{
 }
 
 IfConfigGetIPHelper::~IfConfigGetIPHelper()
@@ -94,17 +93,8 @@ IfConfigGetIPHelper::pull_config(IfTree& iftree)
     return read_config(iftree);
 }
 
-#ifndef HOST_OS_WINDOWS
-
 bool
-IfConfigGetIPHelper::read_config(IfTree& )
-{
-    return false;
-}
-
-#else // HOST_OS_WINDOWS
-bool
-IfConfigGetIPHelper::read_config(IfTree& it)
+IfConfigGetIPHelper::read_config(IfTree& iftree)
 {
     PIP_ADAPTER_ADDRESSES	pAdapters, curAdapter;
     DWORD	result, tries;
@@ -156,11 +146,11 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 	ifconfig().map_ifindex(if_index, if_name);
 
 	// Name
-	IfTreeInterface* ifp = it.find_interface(if_name);
+	IfTreeInterface* ifp = iftree.find_interface(if_name);
 	if (ifp == NULL) {
-	    it.add_interface(if_name);
+	    iftree.add_interface(if_name);
 	    is_newlink = true;
-	    ifp = it.find_interface(if_name);
+	    ifp = iftree.find_interface(if_name);
 	    XLOG_ASSERT(ifp != NULL);
 	}
 

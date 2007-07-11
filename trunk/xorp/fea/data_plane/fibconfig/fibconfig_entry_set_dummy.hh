@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.hh,v 1.1 2007/06/07 01:28:38 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_DUMMY_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_DUMMY_HH__
@@ -22,7 +22,7 @@
 
 class FibConfigEntrySetDummy : public FibConfigEntrySet {
 public:
-    FibConfigEntrySetDummy(FibConfig& fibconfig);
+    FibConfigEntrySetDummy(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~FibConfigEntrySetDummy();
 
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.9 2007/06/15 16:53:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.10 2007/06/27 01:27:05 pavlin Exp $"
 
 
 //
@@ -45,9 +45,10 @@
 
 XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		       const string& xrl_finder_targetname,
-		       const string& finder_hostname, uint16_t finder_port)
+		       const string& finder_hostname, uint16_t finder_port,
+		       bool is_dummy)
     : _eventloop(eventloop),
-      _fea_node(eventloop),
+      _fea_node(eventloop, is_dummy),
       _xrl_router(eventloop, xrl_fea_targetname.c_str(),
 		  finder_hostname.c_str(), finder_port),
       _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().ifconfig_update_replicator()),

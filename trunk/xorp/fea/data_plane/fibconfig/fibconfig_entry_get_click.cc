@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_click.cc,v 1.5 2007/04/30 23:40:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_click.cc,v 1.6 2007/06/07 01:28:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,14 +29,14 @@
 //
 // Get single-entry information from the unicast forwarding table.
 //
-// The mechanism to obtain the information is click(1)
-// (e.g., see http://www.pdos.lcs.mit.edu/click/).
+// The mechanism to obtain the information is Click:
+//   http://www.read.cs.ucla.edu/click/
 //
 
 
-FibConfigEntryGetClick::FibConfigEntryGetClick(FibConfig& fibconfig)
-    : FibConfigEntryGet(fibconfig),
-      ClickSocket(fibconfig.eventloop()),
+FibConfigEntryGetClick::FibConfigEntryGetClick(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryGet(fea_data_plane_manager),
+      ClickSocket(fea_data_plane_manager.eventloop()),
       _cs_reader(*(ClickSocket *)this)
 {
 }
@@ -66,17 +66,6 @@ FibConfigEntryGetClick::start(string& error_msg)
 	return (XORP_ERROR);
 
     _is_running = true;
-
-    //
-    // XXX: we should register ourselves after we are running so the
-    // registration process itself can trigger some startup operations
-    // (if any).
-    //
-    // XXX: we register ourselves as the primary "get" method, because
-    // Click should be the ultimate place to read the route info from.
-    // The kernel itself may contain some left-over stuff.
-    //
-    fibconfig().register_fibconfig_entry_get_primary(this);
 
     return (XORP_OK);
 }

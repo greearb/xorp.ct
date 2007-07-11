@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.7 2007/06/05 10:30:29 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.8 2007/06/06 19:55:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -43,12 +43,15 @@
 // The mechanism to obtain the information is ioctl(2).
 //
 
-IfConfigGetIoctl::IfConfigGetIoctl(IfConfig& ifconfig)
-    : IfConfigGet(ifconfig), _s4(-1), _s6(-1)
-{
 #ifdef HAVE_IOCTL_SIOCGIFCONF
-    ifconfig.register_ifconfig_get_primary(this);
-#endif
+
+static bool ioctl_read_ifconf(int family, ifconf *ifconf);
+
+IfConfigGetIoctl::IfConfigGetIoctl(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigGet(fea_data_plane_manager),
+      _s4(-1),
+      _s6(-1)
+{
 }
 
 IfConfigGetIoctl::~IfConfigGetIoctl()
@@ -138,19 +141,8 @@ IfConfigGetIoctl::pull_config(IfTree& iftree)
     return read_config(iftree);
 }
 
-#ifndef HAVE_IOCTL_SIOCGIFCONF
 bool
-IfConfigGetIoctl::read_config(IfTree& )
-{
-    return false;
-}
-
-#else // HAVE_IOCTL_SIOCGIFCONF
-
-static bool ioctl_read_ifconf(int family, ifconf *ifconf);
-
-bool
-IfConfigGetIoctl::read_config(IfTree& it)
+IfConfigGetIoctl::read_config(IfTree& iftree)
 {
     struct ifconf ifconf;
     
@@ -164,7 +156,7 @@ IfConfigGetIoctl::read_config(IfTree& it)
 	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
 	delete[] ifconf.ifc_buf;
 
-	parse_buffer_ioctl(ifconfig(), it, AF_INET, buffer);
+	parse_buffer_ioctl(ifconfig(), iftree, AF_INET, buffer);
     }
     
 #ifdef HAVE_IPV6
@@ -178,7 +170,7 @@ IfConfigGetIoctl::read_config(IfTree& it)
 	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
 	delete[] ifconf.ifc_buf;
 
-	parse_buffer_ioctl(ifconfig(), it, AF_INET6, buffer);
+	parse_buffer_ioctl(ifconfig(), iftree, AF_INET6, buffer);
     }
 #endif // HAVE_IPV6
     

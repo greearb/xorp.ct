@@ -190,7 +190,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- Subdirectories
-SUBDIRS = . control_socket fibconfig ifconfig io
+SUBDIRS = . control_socket fibconfig ifconfig io managers
 
 ################################################################
 INCLUDES = -I$(top_srcdir)

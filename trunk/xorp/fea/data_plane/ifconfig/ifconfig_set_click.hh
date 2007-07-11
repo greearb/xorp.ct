@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.2 2007/06/06 19:55:54 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.3 2007/06/07 01:23:35 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
@@ -29,7 +29,7 @@ private:
     class ClickConfigGenerator;
 
 public:
-    IfConfigSetClick(IfConfig& ifconfig);
+    IfConfigSetClick(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~IfConfigSetClick();
 
     /**
@@ -69,6 +69,18 @@ public:
 	IfConfigSetClick::ClickConfigGenerator* click_config_generator,
 	bool success,
 	const string& error_msg);
+
+    /**
+     * Test whether the provider mirrors the pulled interface configuration
+     * from the system.
+     *
+     * Note that this method is a short-term solution and might disappear
+     * in the future.
+     *
+     * @return true if the provider mirrors the pulled interface configuration
+     * from the system.
+     */
+    virtual bool is_pulled_config_mirror() const { return (true); }
 
 private:
     virtual bool is_discard_emulated(const IfTreeInterface& i) const;

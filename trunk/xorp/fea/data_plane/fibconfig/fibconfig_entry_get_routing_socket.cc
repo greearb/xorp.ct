@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.7 2007/04/30 23:40:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.8 2007/06/07 01:28:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -41,18 +41,16 @@
 // The mechanism to obtain the information is routing sockets.
 //
 
+#ifdef HAVE_ROUTING_SOCKETS
 
-FibConfigEntryGetRtsock::FibConfigEntryGetRtsock(FibConfig& fibconfig)
-    : FibConfigEntryGet(fibconfig),
-      RoutingSocket(fibconfig.eventloop()),
+FibConfigEntryGetRoutingSocket::FibConfigEntryGetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryGet(fea_data_plane_manager),
+      RoutingSocket(fea_data_plane_manager.eventloop()),
       _rs_reader(*(RoutingSocket *)this)
 {
-#ifdef HAVE_ROUTING_SOCKETS
-    fibconfig.register_fibconfig_entry_get_primary(this);
-#endif
 }
 
-FibConfigEntryGetRtsock::~FibConfigEntryGetRtsock()
+FibConfigEntryGetRoutingSocket::~FibConfigEntryGetRoutingSocket()
 {
     string error_msg;
 
@@ -65,7 +63,7 @@ FibConfigEntryGetRtsock::~FibConfigEntryGetRtsock()
 }
 
 int
-FibConfigEntryGetRtsock::start(string& error_msg)
+FibConfigEntryGetRoutingSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -79,7 +77,7 @@ FibConfigEntryGetRtsock::start(string& error_msg)
 }
 
 int
-FibConfigEntryGetRtsock::stop(string& error_msg)
+FibConfigEntryGetRoutingSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -101,7 +99,8 @@ FibConfigEntryGetRtsock::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetRoutingSocket::lookup_route_by_dest4(const IPv4& dst,
+						      Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -122,8 +121,8 @@ FibConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
-						  Fte4& fte)
+FibConfigEntryGetRoutingSocket::lookup_route_by_network4(const IPv4Net& dst,
+							 Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -144,7 +143,8 @@ FibConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetRoutingSocket::lookup_route_by_dest6(const IPv6& dst,
+						      Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -165,8 +165,8 @@ FibConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
-						  Fte6& fte)
+FibConfigEntryGetRoutingSocket::lookup_route_by_network6(const IPv6Net& dst,
+							 Fte6& fte)
 { 
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -178,21 +178,6 @@ FibConfigEntryGetRtsock::lookup_route_by_network6(const IPv6Net& dst,
     return (ret_value);
 }
 
-#ifndef HAVE_ROUTING_SOCKETS
-bool
-FibConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& , FteX& )
-{
-    return false;
-}
-
-bool
-FibConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& , FteX& )
-{
-    return false;
-}
-
-#else // HAVE_ROUTING_SOCKETS
-
 /**
  * Lookup a route by destination address.
  *
@@ -202,7 +187,8 @@ FibConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
+FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
+						     FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {
@@ -328,7 +314,8 @@ FibConfigEntryGetRtsock::lookup_route_by_dest(const IPvX& dst, FteX& fte)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
+FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
+							FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
     union {

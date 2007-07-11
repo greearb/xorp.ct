@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.5 2007/05/23 04:08:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.6 2007/06/06 19:55:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/win_io.h"
+#include "libxorp/ipvx.hh"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -42,13 +43,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-
-IfConfigSetIPHelper::IfConfigSetIPHelper(IfConfig& ifconfig)
-    : IfConfigSet(ifconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    ifconfig.register_ifconfig_set_primary(this);
-#endif
+
+IfConfigSetIPHelper::IfConfigSetIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigSet(fea_data_plane_manager)
+{
 }
 
 IfConfigSetIPHelper::~IfConfigSetIPHelper()
@@ -96,292 +95,6 @@ IfConfigSetIPHelper::is_discard_emulated(const IfTreeInterface& i) const
 
     return (false);
 }
-
-
-#ifndef HOST_OS_WINDOWS
-int
-IfConfigSetIPHelper::config_begin(string& error_msg)
-{
-    debug_msg("config_begin\n");
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::config_end(string& error_msg)
-{
-    debug_msg("config_end\n");
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::add_interface(const string& ifname,
-				   uint32_t if_index,
-				   string& error_msg)
-{
-    debug_msg("add_interface "
-	      "(ifname = %s if_index = %u)\n",
-	      ifname.c_str(), if_index);
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::add_vif(const string& ifname,
-			     const string& vifname,
-			     uint32_t if_index,
-			     string& error_msg)
-{
-    debug_msg("add_vif "
-	      "(ifname = %s vifname = %s if_index = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index);
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::config_interface(const string& ifname,
-				      uint32_t if_index,
-				      uint32_t flags,
-				      bool is_up,
-				      bool is_deleted,
-				      string& error_msg)
-{
-    debug_msg("config_interface "
-	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index,
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted));
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::config_vif(const string& ifname,
-				const string& vifname,
-				uint32_t if_index,
-				uint32_t flags,
-				bool is_up,
-				bool is_deleted,
-				bool broadcast,
-				bool loopback,
-				bool point_to_point,
-				bool multicast,
-				string& error_msg)
-{
-    debug_msg("config_vif "
-	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted),
-	      bool_c_str(broadcast),
-	      bool_c_str(loopback),
-	      bool_c_str(point_to_point),
-	      bool_c_str(multicast));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-    UNUSED(broadcast);
-    UNUSED(loopback);
-    UNUSED(point_to_point);
-    UNUSED(multicast);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::set_interface_mac_address(const string& ifname,
-					       uint32_t if_index,
-					       const struct ether_addr& ether_addr,
-					       string& error_msg)
-{
-    debug_msg("set_interface_mac "
-	      "(ifname = %s if_index = %u mac = %s)\n",
-	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(ether_addr);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::set_interface_mtu(const string& ifname,
-				       uint32_t if_index,
-				       uint32_t mtu,
-				       string& error_msg)
-{
-    debug_msg("set_interface_mtu "
-	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(mtu);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::add_vif_address(const string& ifname,
-				     const string& vifname,
-				     uint32_t if_index,
-				     bool is_broadcast,
-				     bool is_p2p,
-				     const IPvX& addr,
-				     const IPvX& dst_or_bcast,
-				     uint32_t prefix_len,
-				     string& error_msg)
-{
-    debug_msg("add_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
-	      addr.str().c_str(), dst_or_bcast.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(is_broadcast);
-    UNUSED(is_p2p);
-    UNUSED(addr);
-    UNUSED(dst_or_bcast);
-    UNUSED(prefix_len);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::add_vif_address4(const string& ifname,
-				      const string& vifname,
-				      uint32_t if_index,
-				      bool is_broadcast,
-				      bool is_p2p,
-				      const IPvX& addr,
-				      const IPvX& dst_or_bcast,
-				      uint32_t prefix_len,
-				      string& error_msg)
-{
-    debug_msg("add_vif_address4 "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
-	      addr.str().c_str(), dst_or_bcast.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(is_broadcast);
-    UNUSED(is_p2p);
-    UNUSED(addr);
-    UNUSED(dst_or_bcast);
-    UNUSED(prefix_len);
-    UNUSED(error_msg);
-
-    return (XORP_ERROR);
-};
-
-int
-IfConfigSetIPHelper::add_vif_address6(const string& ifname,
-				      const string& vifname,
-				      uint32_t if_index,
-				      bool is_p2p,
-				      const IPvX& addr,
-				      const IPvX& dst,
-				      uint32_t prefix_len,
-				      string& error_msg)
-{
-    debug_msg("add_vif_address6 "
-	      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
-	      "addr = %s dst = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_p2p), addr.str().c_str(),
-	      dst.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(is_p2p);
-    UNUSED(addr);
-    UNUSED(dst);
-    UNUSED(prefix_len);
-    UNUSED(error_msg);
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetIPHelper::delete_vif_address(const string& ifname,
-					const string& vifname,
-					uint32_t if_index,
-					const IPvX& addr,
-					uint32_t prefix_len,
-					string& error_msg)
-{
-    debug_msg("delete_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u addr = %s "
-	      "prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(addr);
-    UNUSED(prefix_len);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-#else // HOST_OS_WINDOWS
 
 int
 IfConfigSetIPHelper::config_begin(string& error_msg)
@@ -809,4 +522,5 @@ IfConfigSetIPHelper::delete_vif_address(const string& ifname,
 
     return (XORP_OK);
 }
-#endif // !HOST_OS_WINDOWS
+
+#endif // HOST_OS_WINDOWS

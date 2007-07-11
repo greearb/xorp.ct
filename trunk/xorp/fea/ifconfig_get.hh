@@ -12,31 +12,45 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.41 2007/06/06 19:55:51 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.42 2007/06/07 01:23:02 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
 
 #include "iftree.hh"
+#include "fea_data_plane_manager.hh"
 
 class IfConfig;
 
 
 class IfConfigGet {
 public:
-    IfConfigGet(IfConfig& ifconfig)
+    IfConfigGet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
-	  _ifconfig(ifconfig),
-	  _is_primary(true)
+	  _ifconfig(fea_data_plane_manager.ifconfig()),
+	  _fea_data_plane_manager(fea_data_plane_manager)
     {}
     virtual ~IfConfigGet() {}
     
+    /**
+     * Get the @ref IfConfig instance.
+     *
+     * @return the @ref IfConfig instance.
+     */
     IfConfig&	ifconfig() { return _ifconfig; }
-    
-    virtual void set_primary() { _is_primary = true; }
-    virtual void set_secondary() { _is_primary = false; }
-    virtual bool is_primary() const { return _is_primary; }
-    virtual bool is_secondary() const { return !_is_primary; }
+
+    /**
+     * Get the @ref FeaDataPlaneManager instance.
+     *
+     * @return the @ref FeaDataPlaneManager instance.
+     */
+    FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
+
+    /**
+     * Test whether this instance is running.
+     *
+     * @return true if the instance is running, otherwise false.
+     */
     virtual bool is_running() const { return _is_running; }
     
     /**
@@ -68,8 +82,8 @@ protected:
     bool	_is_running;
 
 private:
-    IfConfig&	_ifconfig;
-    bool	_is_primary;	// True -> primary, false -> secondary method
+    IfConfig&		_ifconfig;
+    FeaDataPlaneManager& _fea_data_plane_manager;
 };
 
 #endif // __FEA_IFCONFIG_GET_HH__

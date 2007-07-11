@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.20 2007/05/26 02:04:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.21 2007/06/27 01:27:05 pavlin Exp $"
 
 
 //
@@ -46,6 +46,8 @@
 #include "xrl_fea_target.hh"
 #include "xrl_socket_server.hh"
 
+#include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
+
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
@@ -69,7 +71,8 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _is_running(false),
       _is_shutdown_received(false),
       _have_ipv4(false),
-      _have_ipv6(false)
+      _have_ipv6(false),
+      _fea_data_plane_manager_click(NULL)
 {
 }
 
@@ -181,6 +184,66 @@ XrlFeaTarget::common_0_1_shutdown()
 }
 
 /**
+ *  Load Click FEA support.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_load_click()
+{
+    string error_msg;
+
+    if (_fea_data_plane_manager_click != NULL) {
+	error_msg = c_format("Data plane manager %s is already loaded",
+			     _fea_data_plane_manager_click->manager_name().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    _fea_data_plane_manager_click = new FeaDataPlaneManagerClick(_fea_node);
+
+    if (_fea_node.register_data_plane_manager(_fea_data_plane_manager_click, false)
+	!= XORP_OK) {
+	error_msg = c_format("Cannot register data plane manager %s",
+			     _fea_data_plane_manager_click->manager_name().c_str());
+	delete _fea_data_plane_manager_click;
+	_fea_data_plane_manager_click = NULL;
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (_fea_data_plane_manager_click->start_manager(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot start data plane manager %s: %s",
+			     _fea_data_plane_manager_click->manager_name().c_str(),
+			     error_msg.c_str());
+	delete _fea_data_plane_manager_click;
+	_fea_data_plane_manager_click = NULL;
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+/**
+ *  Unload Click FEA support.
+ */
+XrlCmdError
+XrlFeaTarget::fea_click_0_1_unload_click()
+{
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (_fea_node.unregister_data_plane_manager(_fea_data_plane_manager_click)
+	!= XORP_OK) {
+	error_msg = c_format("Cannot unregister data plane manager %s",
+			     _fea_data_plane_manager_click->manager_name().c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    // XXX: The entry is deleted when unregistered
+    _fea_data_plane_manager_click = NULL;
+
+    return XrlCmdError::OKAY();
+}
+
+/**
  *  Enable/disable Click FEA support.
  *
  *  @param enable if true, then enable the Click FEA support, otherwise
@@ -191,8 +254,17 @@ XrlFeaTarget::fea_click_0_1_enable_click(
     // Input values,
     const bool&	enable)
 {
-    ifconfig().enable_click(enable);
-    fibconfig().enable_click(enable);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->enable_click(enable, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -205,12 +277,15 @@ XrlFeaTarget::fea_click_0_1_start_click()
 {
     string error_msg;
 
-    if (ifconfig().start_click(error_msg) < 0) {
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    if (fibconfig().start_click(error_msg) < 0) {
-	string dummy_msg;
-	ifconfig().stop_click(error_msg);
+
+    if (_fea_data_plane_manager_click->register_plugins(error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (_fea_data_plane_manager_click->start_plugins(error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -223,14 +298,15 @@ XrlFeaTarget::fea_click_0_1_start_click()
 XrlCmdError
 XrlFeaTarget::fea_click_0_1_stop_click()
 {
-    string error_msg1, error_msg2;
+    string error_msg;
 
-    if (fibconfig().stop_click(error_msg1) < 0) {
-	ifconfig().stop_click(error_msg2);
-	return XrlCmdError::COMMAND_FAILED(error_msg1);
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    if (ifconfig().stop_click(error_msg1) < 0) {
-	return XrlCmdError::COMMAND_FAILED(error_msg1);
+
+    if (_fea_data_plane_manager_click->stop_plugins(error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
@@ -247,7 +323,18 @@ XrlFeaTarget::fea_click_0_1_enable_duplicate_routes_to_kernel(
     // Input values,
     const bool&	enable)
 {
-    fibconfig().enable_duplicate_routes_to_kernel(enable);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->enable_duplicate_routes_to_kernel(
+	    enable, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -263,8 +350,17 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click(
     // Input values,
     const bool&	enable)
 {
-    ifconfig().enable_kernel_click(enable);
-    fibconfig().enable_kernel_click(enable);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->enable_kernel_click(enable, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -279,8 +375,18 @@ XrlFeaTarget::fea_click_0_1_enable_kernel_click_install_on_startup(
     // Input values,
     const bool&	enable)
 {
-    ifconfig().enable_kernel_click_install_on_startup(enable);
-    fibconfig().enable_kernel_click_install_on_startup(enable);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->enable_kernel_click_install_on_startup(
+	    enable, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -299,6 +405,12 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
     const string&	modules)
 {
     list<string> modules_list;
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     //
     // Split the string with the names of the modules (separated by colon)
@@ -319,8 +431,11 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_modules(
 	    modules_list.push_back(name);
     } while (true);
 
-    ifconfig().set_kernel_click_modules(modules_list);
-    fibconfig().set_kernel_click_modules(modules_list);
+    if (_fea_data_plane_manager_click->set_kernel_click_modules(modules_list,
+								error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -335,8 +450,18 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_mount_directory(
     // Input values,
     const string&	directory)
 {
-    ifconfig().set_kernel_click_mount_directory(directory);
-    fibconfig().set_kernel_click_mount_directory(directory);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_kernel_click_mount_directory(
+	    directory, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -353,10 +478,18 @@ XrlFeaTarget::fea_click_0_1_set_kernel_click_config_generator_file(
     // Input values,
     const string&	kernel_click_config_generator_file)
 {
-    ifconfig().set_kernel_click_config_generator_file(
-	kernel_click_config_generator_file);
-    fibconfig().set_kernel_click_config_generator_file(
-	kernel_click_config_generator_file);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_kernel_click_config_generator_file(
+	    kernel_click_config_generator_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -372,8 +505,17 @@ XrlFeaTarget::fea_click_0_1_enable_user_click(
     // Input values,
     const bool&	enable)
 {
-    ifconfig().enable_user_click(enable);
-    fibconfig().enable_user_click(enable);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->enable_user_click(enable, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -389,8 +531,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_file(
     // Input values,
     const string&	user_click_command_file)
 {
-    ifconfig().set_user_click_command_file(user_click_command_file);
-    fibconfig().set_user_click_command_file(user_click_command_file);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_command_file(
+	    user_click_command_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -406,10 +558,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_extra_arguments(
     // Input values,
     const string&	user_click_command_extra_arguments)
 {
-    ifconfig().set_user_click_command_extra_arguments(
-	user_click_command_extra_arguments);
-    fibconfig().set_user_click_command_extra_arguments(
-	user_click_command_extra_arguments);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_command_extra_arguments(
+	    user_click_command_extra_arguments, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -425,10 +585,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_command_execute_on_startup(
     // Input values,
     const bool&	user_click_command_execute_on_startup)
 {
-    ifconfig().set_user_click_command_execute_on_startup(
-	user_click_command_execute_on_startup);
-    fibconfig().set_user_click_command_execute_on_startup(
-	user_click_command_execute_on_startup);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_command_execute_on_startup(
+	    user_click_command_execute_on_startup, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -445,8 +613,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_address(
     // Input values,
     const IPv4&	user_click_control_address)
 {
-    ifconfig().set_user_click_control_address(user_click_control_address);
-    fibconfig().set_user_click_control_address(user_click_control_address);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_control_address(
+	    user_click_control_address, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -463,10 +641,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_socket_port(
     // Input values,
     const uint32_t&	user_click_control_socket_port)
 {
-    ifconfig().set_user_click_control_socket_port(
-	user_click_control_socket_port);
-    fibconfig().set_user_click_control_socket_port(
-	user_click_control_socket_port);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_control_socket_port(
+	    user_click_control_socket_port, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -483,10 +669,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_startup_config_file(
     // Input values,
     const string&	user_click_startup_config_file)
 {
-    ifconfig().set_user_click_startup_config_file(
-	user_click_startup_config_file);
-    fibconfig().set_user_click_startup_config_file(
-	user_click_startup_config_file);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_startup_config_file(
+	    user_click_startup_config_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -503,10 +697,18 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
     // Input values,
     const string&	user_click_config_generator_file)
 {
-    ifconfig().set_user_click_config_generator_file(
-	user_click_config_generator_file);
-    fibconfig().set_user_click_config_generator_file(
-	user_click_config_generator_file);
+    string error_msg;
+
+    if (_fea_data_plane_manager_click == NULL) {
+	error_msg = c_format("Data plane manager Click is not loaded");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_fea_data_plane_manager_click->set_user_click_config_generator_file(
+	    user_click_config_generator_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }

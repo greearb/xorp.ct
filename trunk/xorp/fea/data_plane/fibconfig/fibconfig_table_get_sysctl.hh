@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.hh,v 1.1 2007/06/07 01:28:40 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_SYSCTL_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_SYSCTL_HH__
@@ -22,7 +22,7 @@
 
 class FibConfigTableGetSysctl : public FibConfigTableGet {
 public:
-    FibConfigTableGetSysctl(FibConfig& fibconfig);
+    FibConfigTableGetSysctl(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~FibConfigTableGetSysctl();
 
     /**
@@ -60,6 +60,19 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool get_table6(list<Fte6>& fte_list);
+
+    /**
+     * Flag values used to tell underlying FIB message parsing routines
+     * which messages the caller is interested in.
+     */
+    struct FibMsg {
+	enum {
+	    UPDATES	= 1 << 0,
+	    GETS	= 1 << 1,
+	    RESOLVES	= 1 << 2
+	};
+    };
+    typedef uint32_t FibMsgSet;
 
     /**
      * Parse information about routing table information received from

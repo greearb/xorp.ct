@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -36,19 +36,15 @@
 // The mechanism to observe the information is Router Manager V2.
 //
 
+#ifdef HOST_OS_WINDOWS
 
-FibConfigEntryObserverRtmV2::FibConfigEntryObserverRtmV2(FibConfig& fibconfig)
-    : FibConfigEntryObserver(fibconfig)
+FibConfigEntryObserverRtmV2::FibConfigEntryObserverRtmV2(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryObserver(fea_data_plane_manager)
 #if 0
-      WinRtmPipe(fibconfig.eventloop()),
+      WinRtmPipe(fea_data_plane_manager.eventloop()),
       WinRtmPipeObserver(*(WinRtmPipe *)this)
 #endif
 {
-#if 0
-#ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_entry_observer_primary(this);
-#endif
-#endif
 }
 
 FibConfigEntryObserverRtmV2::~FibConfigEntryObserverRtmV2()
@@ -110,3 +106,5 @@ FibConfigEntryObserverRtmV2::rtsock_data(const vector<uint8_t>& buffer)
     receive_data(buffer);
 }
 #endif // 0
+
+#endif // HOST_OS_WINDOWS

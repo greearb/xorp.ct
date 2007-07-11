@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.8 2007/06/04 23:17:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.9 2007/06/06 19:55:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
+#include "libxorp/ipvx.hh"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -51,14 +52,13 @@
 // The mechanism to set the information is netlink(7) sockets.
 //
 
-IfConfigSetNetlinkSocket::IfConfigSetNetlinkSocket(IfConfig& ifconfig)
-    : IfConfigSet(ifconfig),
-      NetlinkSocket(ifconfig.eventloop()),
+#ifdef HAVE_NETLINK_SOCKETS
+
+IfConfigSetNetlinkSocket::IfConfigSetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigSet(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    ifconfig.register_ifconfig_set_primary(this);
-#endif
 }
 
 IfConfigSetNetlinkSocket::~IfConfigSetNetlinkSocket()
@@ -112,230 +112,6 @@ IfConfigSetNetlinkSocket::is_discard_emulated(const IfTreeInterface& i) const
     return (false);
 #endif
 }
-
-#ifndef HAVE_NETLINK_SOCKETS
-int
-IfConfigSetNetlinkSocket::config_begin(string& error_msg)
-{
-    debug_msg("config_begin\n");
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::config_end(string& error_msg)
-{
-    debug_msg("config_end\n");
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::add_interface(const string& ifname,
-					uint32_t if_index,
-					string& error_msg)
-{
-    debug_msg("add_interface "
-	      "(ifname = %s if_index = %u)\n",
-	      ifname.c_str(), if_index);
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::add_vif(const string& ifname,
-				  const string& vifname,
-				  uint32_t if_index,
-				  string& error_msg)
-{
-    debug_msg("add_vif "
-	      "(ifname = %s vifname = %s if_index = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index);
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::config_interface(const string& ifname,
-					   uint32_t if_index,
-					   uint32_t flags,
-					   bool is_up,
-					   bool is_deleted,
-					   string& error_msg)
-{
-    debug_msg("config_interface "
-	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index,
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted));
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::config_vif(const string& ifname,
-				     const string& vifname,
-				     uint32_t if_index,
-				     uint32_t flags,
-				     bool is_up,
-				     bool is_deleted,
-				     bool broadcast,
-				     bool loopback,
-				     bool point_to_point,
-				     bool multicast,
-				     string& error_msg)
-{
-    debug_msg("config_vif "
-	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted),
-	      bool_c_str(broadcast),
-	      bool_c_str(loopback),
-	      bool_c_str(point_to_point),
-	      bool_c_str(multicast));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-    UNUSED(broadcast);
-    UNUSED(loopback);
-    UNUSED(point_to_point);
-    UNUSED(multicast);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
-						    uint32_t if_index,
-						    const struct ether_addr& ether_addr,
-						    string& error_msg)
-{
-    debug_msg("set_interface_mac "
-	      "(ifname = %s if_index = %u mac = %s)\n",
-	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(ether_addr);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
-					    uint32_t if_index,
-					    uint32_t mtu,
-					    string& error_msg)
-{
-    debug_msg("set_interface_mtu "
-	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(mtu);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
-					  const string& vifname,
-					  uint32_t if_index,
-					  bool is_broadcast,
-					  bool is_p2p,
-					  const IPvX& addr,
-					  const IPvX& dst_or_bcast,
-					  uint32_t prefix_len,
-					  string& error_msg)
-{
-    debug_msg("add_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
-	      addr.str().c_str(), dst_or_bcast.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(is_broadcast);
-    UNUSED(is_p2p);
-    UNUSED(addr);
-    UNUSED(dst_or_bcast);
-    UNUSED(prefix_len);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-int
-IfConfigSetNetlinkSocket::delete_vif_address(const string& ifname,
-					     const string& vifname,
-					     uint32_t if_index,
-					     const IPvX& addr,
-					     uint32_t prefix_len,
-					     string& error_msg)
-{
-    debug_msg("delete_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u addr = %s "
-	      "prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(addr);
-    UNUSED(prefix_len);
-
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-}
-
-#else // HAVE_NETLINK_SOCKETS
 
 int
 IfConfigSetNetlinkSocket::config_begin(string& error_msg)

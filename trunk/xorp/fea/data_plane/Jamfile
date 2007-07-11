@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/data_plane/Jamfile,v 1.2 2007/05/24 20:01:28 pavlin Exp $
+# $XORP: xorp/fea/data_plane/Jamfile,v 1.3 2007/06/04 23:17:32 pavlin Exp $
 #
 
 SubDir TOP fea data_plane ;
@@ -7,4 +7,5 @@ SubIncludeOnce TOP fea data_plane control_socket ;
 SubIncludeOnce TOP fea data_plane fibconfig ;
 SubIncludeOnce TOP fea data_plane ifconfig ;
 SubIncludeOnce TOP fea data_plane io ;
+SubIncludeOnce TOP fea data_plane managers ;
 SubDir TOP fea data_plane ;

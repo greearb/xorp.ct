@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.7 2007/06/05 13:51:18 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.8 2007/06/06 19:55:54 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,6 +29,7 @@
 
 #include "fea/ifconfig.hh"
 
+#include "ifconfig_get_netlink_socket.hh"
 #include "ifconfig_observer_netlink_socket.hh"
 
 
@@ -39,15 +40,13 @@
 // The mechanism to observe the information is netlink(7) sockets.
 //
 
+#ifdef HAVE_NETLINK_SOCKETS
 
-IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(IfConfig& ifconfig)
-    : IfConfigObserver(ifconfig),
-      NetlinkSocket(ifconfig.eventloop()),
+IfConfigObserverNetlinkSocket::IfConfigObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigObserver(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    ifconfig.register_ifconfig_observer_primary(this);
-#endif
 }
 
 IfConfigObserverNetlinkSocket::~IfConfigObserverNetlinkSocket()
@@ -65,15 +64,6 @@ IfConfigObserverNetlinkSocket::~IfConfigObserverNetlinkSocket()
 int
 IfConfigObserverNetlinkSocket::start(string& error_msg)
 {
-#ifndef HAVE_NETLINK_SOCKETS
-    error_msg = c_format("The netlink(7) sockets mechanism to observe "
-			 "information about network interfaces from the "
-			 "underlying system is not supported");
-    XLOG_UNREACHABLE();
-    return (XORP_ERROR);
-
-#else // HAVE_NETLINK_SOCKETS
-
     uint32_t nl_groups = 0;
 
     if (_is_running)
@@ -106,7 +96,6 @@ IfConfigObserverNetlinkSocket::start(string& error_msg)
     _is_running = true;
 
     return (XORP_OK);
-#endif // HAVE_NETLINK_SOCKETS
 }
 
 int
@@ -143,7 +132,9 @@ IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-IfConfigObserverNetlinkSocket::nlsock_data(const vector<uint8_t>& buffer)
+IfConfigObserverNetlinkSocket::netlink_socket_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
+
+#endif // HAVE_NETLINK_SOCKETS

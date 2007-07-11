@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_iphelper.cc,v 1.6 2007/06/07 01:28:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_iphelper.cc,v 1.7 2007/06/11 22:00:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -39,18 +39,15 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-
-FibConfigTableSetIPHelper::FibConfigTableSetIPHelper(FibConfig& fibconfig)
-    : FibConfigTableSet(fibconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_table_set_primary(this);
 
+FibConfigTableSetIPHelper::FibConfigTableSetIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableSet(fea_data_plane_manager)
+{
     if (WinSupport::is_rras_running()) {
 	XLOG_WARNING("Windows Routing and Remote Access Service is running.\n"
 		     "Some change operations through IP Helper may not work.");
     }
-#endif
 }
 
 FibConfigTableSetIPHelper::~FibConfigTableSetIPHelper()
@@ -178,3 +175,5 @@ FibConfigTableSetIPHelper::delete_all_entries6()
     
     return true;
 }
+
+#endif // HOST_OS_WINDOWS

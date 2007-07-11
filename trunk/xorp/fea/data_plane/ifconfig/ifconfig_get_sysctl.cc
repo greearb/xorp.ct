@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.cc,v 1.7 2007/06/06 19:55:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.cc,v 1.8 2007/06/13 00:15:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -41,13 +41,11 @@
 // The mechanism to obtain the information is sysctl(3).
 //
 
-
-IfConfigGetSysctl::IfConfigGetSysctl(IfConfig& ifconfig)
-    : IfConfigGet(ifconfig)
-{
 #ifdef HAVE_SYSCTL_NET_RT_IFLIST
-    ifconfig.register_ifconfig_get_primary(this);
-#endif
+
+IfConfigGetSysctl::IfConfigGetSysctl(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigGet(fea_data_plane_manager)
+{
 }
 
 IfConfigGetSysctl::~IfConfigGetSysctl()
@@ -94,17 +92,8 @@ IfConfigGetSysctl::pull_config(IfTree& iftree)
     return read_config(iftree);
 }
 
-#ifndef HAVE_SYSCTL_NET_RT_IFLIST
-
 bool
-IfConfigGetSysctl::read_config(IfTree& )
-{
-    return false;
-}
-
-#else // HAVE_SYSCTL_NET_RT_IFLIST
-bool
-IfConfigGetSysctl::read_config(IfTree& it)
+IfConfigGetSysctl::read_config(IfTree& iftree)
 {
     int mib[6];
 
@@ -138,7 +127,7 @@ IfConfigGetSysctl::read_config(IfTree& it)
 	    if (buffer.size() > sz)
 		buffer.resize(sz);
 	    // Parse the result
-	    return (parse_buffer_routing_socket(ifconfig(), it, buffer));
+	    return (parse_buffer_routing_socket(ifconfig(), iftree, buffer));
 	}
 	
 	// Error

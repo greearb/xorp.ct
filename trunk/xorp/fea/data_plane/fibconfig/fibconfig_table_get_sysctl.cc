@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.8 2007/06/07 01:28:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.9 2007/06/13 00:15:51 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -36,13 +36,11 @@
 // The mechanism to obtain the information is sysctl(3).
 //
 
-
-FibConfigTableGetSysctl::FibConfigTableGetSysctl(FibConfig& fibconfig)
-    : FibConfigTableGet(fibconfig)
-{
 #ifdef HAVE_SYSCTL_NET_RT_DUMP
-    fibconfig.register_fibconfig_table_get_primary(this);
-#endif
+
+FibConfigTableGetSysctl::FibConfigTableGetSysctl(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableGet(fea_data_plane_manager)
+{
 }
 
 FibConfigTableGetSysctl::~FibConfigTableGetSysctl()
@@ -126,16 +124,6 @@ FibConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
     return true;
 #endif // HAVE_IPV6
 }
-
-#ifndef HAVE_SYSCTL_NET_RT_DUMP
-
-bool
-FibConfigTableGetSysctl::get_table(int , list<FteX>& )
-{
-    return false;
-}
-
-#else // HAVE_SYSCTL_NET_RT_DUMP
 
 bool
 FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)

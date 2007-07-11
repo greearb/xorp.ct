@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.6 2007/06/07 01:28:39 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -47,13 +47,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-
-FibConfigTableGetIPHelper::FibConfigTableGetIPHelper(FibConfig& fibconfig)
-    : FibConfigTableGet(fibconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_table_get_primary(this);
-#endif
+
+FibConfigTableGetIPHelper::FibConfigTableGetIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableGet(fea_data_plane_manager)
+{
 }
 
 FibConfigTableGetIPHelper::~FibConfigTableGetIPHelper()
@@ -119,16 +117,6 @@ FibConfigTableGetIPHelper::get_table6(list<Fte6>& fte_list)
     UNUSED(fte_list);
     return false;
 }
-
-#ifndef HOST_OS_WINDOWS
-
-bool
-FibConfigTableGetIPHelper::get_table(int , list<FteX>& )
-{
-    return false;
-}
-
-#else // HOST_OS_WINDOWS
 
 bool
 FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)

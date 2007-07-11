@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.8 2007/05/01 00:14:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_routing_socket.cc,v 1.9 2007/06/07 01:28:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -25,6 +25,7 @@
 #include "fea/fibconfig_table_get.hh"
 #include "fea/fibconfig_table_observer.hh"
 
+#include "fibconfig_table_get_sysctl.hh"
 #include "fibconfig_table_observer_routing_socket.hh"
 
 
@@ -38,18 +39,16 @@
 // The mechanism to observe the information is routing sockets.
 //
 
+#ifdef HAVE_ROUTING_SOCKETS
 
-FibConfigTableObserverRtsock::FibConfigTableObserverRtsock(FibConfig& fibconfig)
-    : FibConfigTableObserver(fibconfig),
-      RoutingSocket(fibconfig.eventloop()),
+FibConfigTableObserverRoutingSocket::FibConfigTableObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableObserver(fea_data_plane_manager),
+      RoutingSocket(fea_data_plane_manager.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
-#ifdef HAVE_ROUTING_SOCKETS
-    fibconfig.register_fibconfig_table_observer_primary(this);
-#endif
 }
 
-FibConfigTableObserverRtsock::~FibConfigTableObserverRtsock()
+FibConfigTableObserverRoutingSocket::~FibConfigTableObserverRoutingSocket()
 {
     string error_msg;
 
@@ -62,7 +61,7 @@ FibConfigTableObserverRtsock::~FibConfigTableObserverRtsock()
 }
 
 int
-FibConfigTableObserverRtsock::start(string& error_msg)
+FibConfigTableObserverRoutingSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -76,7 +75,7 @@ FibConfigTableObserverRtsock::start(string& error_msg)
 }
     
 int
-FibConfigTableObserverRtsock::stop(string& error_msg)
+FibConfigTableObserverRoutingSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -90,10 +89,11 @@ FibConfigTableObserverRtsock::stop(string& error_msg)
 }
 
 void
-FibConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
-    FibMsgSet filter = FibMsg::UPDATES | FibMsg::GETS | FibMsg::RESOLVES;
+    FibConfigTableGetSysctl::FibMsgSet filter;
+    filter = FibConfigTableGetSysctl::FibMsg::UPDATES | FibConfigTableGetSysctl::FibMsg::GETS | FibConfigTableGetSysctl::FibMsg::RESOLVES;
 
     //
     // Get the IPv4 routes
@@ -129,7 +129,9 @@ FibConfigTableObserverRtsock::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-FibConfigTableObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
+FibConfigTableObserverRoutingSocket::routing_socket_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
+
+#endif // HAVE_ROUTING_SOCKETS

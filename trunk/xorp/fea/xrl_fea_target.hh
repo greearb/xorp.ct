@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.11 2007/05/26 02:04:47 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.12 2007/06/27 01:27:05 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -28,6 +28,7 @@
 #include "xrl_fib_client_manager.hh"
 
 class EventLoop;
+class FeaDataPlaneManagerClick;
 class FeaNode;
 class FibConfig;
 class IfConfig;
@@ -134,6 +135,16 @@ public:
      * Shutdown FEA cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Load Click FEA support.
+     */
+    XrlCmdError fea_click_0_1_load_click();
+
+    /**
+     *  Unload Click FEA support.
+     */
+    XrlCmdError fea_click_0_1_unload_click();
 
     /**
      *  Enable/disable Click FEA support.
@@ -1466,6 +1477,11 @@ private:
     bool	_is_shutdown_received; // True if shutdown XRL request received
     bool	_have_ipv4;	// True if we have IPv4
     bool	_have_ipv6;	// True if we have IPv6
+
+    //
+    // The externally loadable managers
+    //
+    FeaDataPlaneManagerClick*	_fea_data_plane_manager_click;
 };
 
 #endif // __FEA_XRL_FEA_TARGET_HH__

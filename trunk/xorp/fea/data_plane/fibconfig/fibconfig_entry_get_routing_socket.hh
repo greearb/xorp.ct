@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.hh,v 1.1 2007/06/07 01:28:36 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_ROUTING_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_ROUTING_SOCKET_HH__
@@ -21,11 +21,11 @@
 #include "fea/data_plane/control_socket/routing_socket.hh"
 
 
-class FibConfigEntryGetRtsock : public FibConfigEntryGet,
-				public RoutingSocket {
+class FibConfigEntryGetRoutingSocket : public FibConfigEntryGet,
+				       public RoutingSocket {
 public:
-    FibConfigEntryGetRtsock(FibConfig& fibconfig);
-    virtual ~FibConfigEntryGetRtsock();
+    FibConfigEntryGetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager);
+    virtual ~FibConfigEntryGetRoutingSocket();
 
     /**
      * Start operation.
@@ -82,6 +82,19 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
+
+    /**
+     * Flag values used to tell underlying FIB message parsing routines
+     * which messages the caller is interested in.
+     */
+    struct FibMsg {
+	enum {
+	    UPDATES	= 1 << 0,
+	    GETS	= 1 << 1,
+	    RESOLVES	= 1 << 2
+	};
+    };
+    typedef uint32_t FibMsgSet;
 
     /**
      * Parse information about routing entry information received from

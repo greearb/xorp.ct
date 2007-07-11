@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.9 2007/06/04 23:17:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.10 2007/06/21 06:10:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -49,6 +49,7 @@
 #include "fea/ifconfig_get.hh"
 #include "fea/data_plane/control_socket/system_utilities.hh"
 
+#include "ifconfig_get_getifaddrs.hh"
 #include "ifconfig_media.hh"
 
 
@@ -60,28 +61,16 @@
 // (e.g., obtained by getifaddrs(3) mechanism).
 //
 
-#ifndef HAVE_GETIFADDRS
+#ifdef HAVE_GETIFADDRS
 
 bool
-IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ,
-					       IfTree& ,
-					       const struct ifaddrs* )
-{
-    return (false);
-}
-
-#else // HAVE_GETIFADDRS
-
-bool
-IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
+IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
+					       IfTree& iftree,
 					       const struct ifaddrs* ifap)
 {
     u_short if_index = 0;
     string if_name, alias_if_name;
     const struct ifaddrs* ifa;
-    
-    UNUSED(if_index);
-    UNUSED(it);
     
     for (ifa = ifap; ifa != NULL; ifa = ifa->ifa_next) {
 	bool is_newlink = false;	// True if really a new link
@@ -171,11 +160,11 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& it,
 	// Add the interface (if a new one)
 	//
 	ifconfig.map_ifindex(if_index, alias_if_name);
-	IfTreeInterface* ifp = it.find_interface(alias_if_name);
+	IfTreeInterface* ifp = iftree.find_interface(alias_if_name);
 	if (ifp == NULL) {
-	    it.add_interface(alias_if_name);
+	    iftree.add_interface(alias_if_name);
 	    is_newlink = true;
-	    ifp = it.find_interface(alias_if_name);
+	    ifp = iftree.find_interface(alias_if_name);
 	    XLOG_ASSERT(ifp != NULL);
 	}
 

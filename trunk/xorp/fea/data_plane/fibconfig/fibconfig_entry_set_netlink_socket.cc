@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.7 2007/06/04 23:17:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.8 2007/06/07 01:28:38 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -43,18 +43,16 @@
 // The mechanism to set the information is netlink(7) sockets.
 //
 
+#ifdef HAVE_NETLINK_SOCKETS
 
-FibConfigEntrySetNetlink::FibConfigEntrySetNetlink(FibConfig& fibconfig)
-    : FibConfigEntrySet(fibconfig),
-      NetlinkSocket(fibconfig.eventloop()),
+FibConfigEntrySetNetlinkSocket::FibConfigEntrySetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntrySet(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    fibconfig.register_fibconfig_entry_set_primary(this);
-#endif
 }
 
-FibConfigEntrySetNetlink::~FibConfigEntrySetNetlink()
+FibConfigEntrySetNetlinkSocket::~FibConfigEntrySetNetlinkSocket()
 {
     string error_msg;
 
@@ -67,7 +65,7 @@ FibConfigEntrySetNetlink::~FibConfigEntrySetNetlink()
 }
 
 int
-FibConfigEntrySetNetlink::start(string& error_msg)
+FibConfigEntrySetNetlinkSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -81,7 +79,7 @@ FibConfigEntrySetNetlink::start(string& error_msg)
 }
 
 int
-FibConfigEntrySetNetlink::stop(string& error_msg)
+FibConfigEntrySetNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -95,7 +93,7 @@ FibConfigEntrySetNetlink::stop(string& error_msg)
 }
 
 bool
-FibConfigEntrySetNetlink::add_entry4(const Fte4& fte)
+FibConfigEntrySetNetlinkSocket::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -103,7 +101,7 @@ FibConfigEntrySetNetlink::add_entry4(const Fte4& fte)
 }
 
 bool
-FibConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
+FibConfigEntrySetNetlinkSocket::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
     
@@ -111,7 +109,7 @@ FibConfigEntrySetNetlink::delete_entry4(const Fte4& fte)
 }
 
 bool
-FibConfigEntrySetNetlink::add_entry6(const Fte6& fte)
+FibConfigEntrySetNetlinkSocket::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
@@ -119,29 +117,15 @@ FibConfigEntrySetNetlink::add_entry6(const Fte6& fte)
 }
 
 bool
-FibConfigEntrySetNetlink::delete_entry6(const Fte6& fte)
+FibConfigEntrySetNetlinkSocket::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
     
     return (delete_entry(ftex));
 }
 
-#ifndef HAVE_NETLINK_SOCKETS
 bool
-FibConfigEntrySetNetlink::add_entry(const FteX& )
-{
-    return false;
-}
-
-bool
-FibConfigEntrySetNetlink::delete_entry(const FteX& )
-{
-    return false;
-}
-
-#else // HAVE_NETLINK_SOCKETS
-bool
-FibConfigEntrySetNetlink::add_entry(const FteX& fte)
+FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
 	+ 3*sizeof(struct rtattr) + sizeof(int) + 512;
@@ -331,7 +315,7 @@ FibConfigEntrySetNetlink::add_entry(const FteX& fte)
 }
 
 bool
-FibConfigEntrySetNetlink::delete_entry(const FteX& fte)
+FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
 	+ 3*sizeof(struct rtattr) + sizeof(int) + 512;
@@ -456,7 +440,7 @@ FibConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	// Note that we could add to the following list the check whether
 	// the forwarding entry is not in the kernel, but this is probably
 	// an overkill. If such check should be performed, we should
-	// use the corresponding FibConfigTableGetNetlink provider.
+	// use the corresponding FibConfigTableGetNetlink plugin.
 	//
 	do {
 	    // Check whether the error code matches

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.94 2007/06/04 23:17:31 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.95 2007/06/27 01:27:04 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -24,15 +24,17 @@ TESTS		 = test_xrl_sockets4_tcp.sh
 TESTS		+= test_xrl_sockets4_udp.sh
 
 # -- No-install Libraries
-noinst_LTLIBRARIES = libfea.la
+noinst_LTLIBRARIES = libfea.la libfea_data_plane_manager.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD		 = $(noinst_LTLIBRARIES)
 ### Data plane libraries
+LDADD		+= $(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la
 LDADD		+= $(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la
 LDADD		+= $(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la
 LDADD		+= $(top_builddir)/fea/data_plane/io/libxorp_io.la
 LDADD		+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la
+LDADD		+= $(top_builddir)/fea/libfea_data_plane_manager.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclient.la
@@ -78,6 +80,9 @@ xorp_fea_dummy_CXXFLAGS			= -DFEA_DUMMY
 xorp_fea_dummy_SOURCES			= xorp_fea.cc
 
 # -- Library Sources
+libfea_data_plane_manager_la_SOURCES	 = fea_data_plane_manager.hh
+libfea_data_plane_manager_la_SOURCES	+= fea_data_plane_manager.cc
+
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
 libfea_la_SOURCES	+= addr_table.hh

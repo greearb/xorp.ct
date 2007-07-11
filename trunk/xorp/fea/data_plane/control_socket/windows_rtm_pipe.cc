@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.6 2007/02/16 22:45:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/windows_rtm_pipe.cc,v 1.1 2007/05/01 08:21:56 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -186,7 +186,7 @@ int
 WinRtmPipe::force_read(string& error_msg)
 {
     vector<uint8_t> message;
-    vector<uint8_t> buffer(RTSOCK_BYTES);
+    vector<uint8_t> buffer(ROUTING_SOCKET_BYTES);
     size_t off = 0;
     size_t last_mh_off = 0;
     DWORD nbytes;
@@ -200,7 +200,7 @@ WinRtmPipe::force_read(string& error_msg)
 	    result = PeekNamedPipe(_fd, &buffer[0], buffer.size(), NULL,
 				    NULL, &nbytes);
 	    if (result == 0 && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
-		buffer.resize(buffer.size() + RTSOCK_BYTES);
+		buffer.resize(buffer.size() + ROUTING_SOCKET_BYTES);
 		continue;
 	    } else {
 		break;
@@ -245,7 +245,7 @@ WinRtmPipe::force_read(string& error_msg)
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->rtsock_data(message);
+	(*i)->routing_socket_data(message);
     }
 
     return (XORP_OK);

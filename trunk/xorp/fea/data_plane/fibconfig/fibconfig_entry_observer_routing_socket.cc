@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc,v 1.5 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -36,18 +36,16 @@
 // The mechanism to observe the information is routing sockets.
 //
 
+#ifdef HAVE_ROUTING_SOCKETS
 
-FibConfigEntryObserverRtsock::FibConfigEntryObserverRtsock(FibConfig& fibconfig)
-    : FibConfigEntryObserver(fibconfig),
-      RoutingSocket(fibconfig.eventloop()),
+FibConfigEntryObserverRoutingSocket::FibConfigEntryObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryObserver(fea_data_plane_manager),
+      RoutingSocket(fea_data_plane_manager.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
-#ifdef HAVE_ROUTING_SOCKETS
-    fibconfig.register_fibconfig_entry_observer_primary(this);
-#endif
 }
 
-FibConfigEntryObserverRtsock::~FibConfigEntryObserverRtsock()
+FibConfigEntryObserverRoutingSocket::~FibConfigEntryObserverRoutingSocket()
 {
     string error_msg;
 
@@ -60,7 +58,7 @@ FibConfigEntryObserverRtsock::~FibConfigEntryObserverRtsock()
 }
 
 int
-FibConfigEntryObserverRtsock::start(string& error_msg)
+FibConfigEntryObserverRoutingSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -74,7 +72,7 @@ FibConfigEntryObserverRtsock::start(string& error_msg)
 }
 
 int
-FibConfigEntryObserverRtsock::stop(string& error_msg)
+FibConfigEntryObserverRoutingSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -88,14 +86,16 @@ FibConfigEntryObserverRtsock::stop(string& error_msg)
 }
 
 void
-FibConfigEntryObserverRtsock::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FibConfigEntryObserverRtsock::rtsock_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverRoutingSocket::routing_socket_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
+
+#endif // HAVE_ROUTING_SOCKETS

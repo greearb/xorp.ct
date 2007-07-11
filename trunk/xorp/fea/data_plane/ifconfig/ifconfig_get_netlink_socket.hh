@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.2 2007/06/06 19:55:53 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.3 2007/06/07 01:23:34 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
@@ -24,7 +24,7 @@
 class IfConfigGetNetlinkSocket : public IfConfigGet,
 				 public NetlinkSocket {
 public:
-    IfConfigGetNetlinkSocket(IfConfig& ifconfig);
+    IfConfigGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~IfConfigGetNetlinkSocket();
 
     /**
@@ -59,16 +59,16 @@ public:
      * (e.g., obtained by netlink(7) sockets mechanism).
      * 
      * @param ifconfig the IfConfig instance.
-     * @param it the IfTree storage to store the parsed information.
+     * @param iftree the IfTree storage to store the parsed information.
      * @param buffer the buffer with the data to parse.
      * @return true on success, otherwise false.
      * @see IfTree.
      */
-    static bool parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& it,
+    static bool parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
 					    const vector<uint8_t>& buffer);
     
 private:
-    bool read_config(IfTree& it);
+    bool read_config(IfTree& iftree);
 
     NetlinkSocketReader	_ns_reader;
 };

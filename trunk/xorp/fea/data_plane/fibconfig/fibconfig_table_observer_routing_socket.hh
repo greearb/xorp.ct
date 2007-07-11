@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_routing_socket.hh,v 1.1 2007/06/07 01:28:41 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_OBSERVER_ROUTING_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_OBSERVER_ROUTING_SOCKET_HH__
@@ -21,12 +21,12 @@
 #include "fea/data_plane/control_socket/routing_socket.hh"
 
 
-class FibConfigTableObserverRtsock : public FibConfigTableObserver,
-				     public RoutingSocket,
-				     public RoutingSocketObserver {
+class FibConfigTableObserverRoutingSocket : public FibConfigTableObserver,
+					    public RoutingSocket,
+					    public RoutingSocketObserver {
 public:
-    FibConfigTableObserverRtsock(FibConfig& fibconfig);
-    virtual ~FibConfigTableObserverRtsock();
+    FibConfigTableObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager);
+    virtual ~FibConfigTableObserverRoutingSocket();
 
     /**
      * Start operation.
@@ -51,7 +51,7 @@ public:
      */
     virtual void receive_data(const vector<uint8_t>& buffer);
     
-    void rtsock_data(const vector<uint8_t>& buffer);
+    void routing_socket_data(const vector<uint8_t>& buffer);
     
 private:
 };

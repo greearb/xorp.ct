@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_iphelper.cc,v 1.5 2007/04/30 23:40:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_iphelper.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -37,13 +37,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-
-FibConfigEntryObserverIPHelper::FibConfigEntryObserverIPHelper(FibConfig& fibconfig)
-    : FibConfigEntryObserver(fibconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_entry_observer_primary(this);
-#endif
+
+FibConfigEntryObserverIPHelper::FibConfigEntryObserverIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryObserver(fea_data_plane_manager)
+{
 }
 
 FibConfigEntryObserverIPHelper::~FibConfigEntryObserverIPHelper()
@@ -92,3 +90,5 @@ FibConfigEntryObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
     // Do nothing.
     UNUSED(buffer);
 }
+
+#endif // HOST_OS_WINDOWS

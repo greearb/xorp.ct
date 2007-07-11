@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.11 2007/06/05 10:30:29 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.12 2007/06/06 19:55:53 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,7 +20,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
-#include "libxorp/ipvx.hh"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -31,7 +30,9 @@
 
 #include "fea/ifconfig.hh"
 #include "fea/data_plane/control_socket/system_utilities.hh"
+#include "fea/data_plane/managers/fea_data_plane_manager_linux.hh"
 
+#include "ifconfig_get_ioctl.hh"
 #include "ifconfig_get_proc_linux.hh"
 
 
@@ -45,12 +46,24 @@ const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V6 = "/proc/net/i
 // or /proc/net/if_inet6 (for IPv6).
 //
 
-IfConfigGetProcLinux::IfConfigGetProcLinux(IfConfig& ifconfig)
-    : IfConfigGet(ifconfig)
-{
 #ifdef HAVE_PROC_LINUX
-    ifconfig.register_ifconfig_get_primary(this);
+
+static char* get_proc_linux_iface_name(char* name, char* p);
+static bool proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree,
+				   int family,
+				   const string& proc_linux_net_device_file);
+static bool if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
+			      const string& proc_linux_net_device_file);
+
+#ifdef HAVE_IPV6
+static bool if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
+			      const string& proc_linux_net_device_file);
 #endif
+
+IfConfigGetProcLinux::IfConfigGetProcLinux(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigGet(fea_data_plane_manager),
+      _ifconfig_get_ioctl(NULL)
+{
 }
 
 IfConfigGetProcLinux::~IfConfigGetProcLinux()
@@ -71,8 +84,24 @@ IfConfigGetProcLinux::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
+    FeaDataPlaneManagerLinux* manager_linux;
+    manager_linux = dynamic_cast<FeaDataPlaneManagerLinux*>(&fea_data_plane_manager());
+    if (manager_linux == NULL) {
+	error_msg = c_format("Cannot start the IfConfigGetProcLinux plugin, "
+			     "because the data plane manager is not "
+			     "FeaDataPlaneManagerLinux");
+	return (XORP_ERROR);
+    }
+    _ifconfig_get_ioctl = manager_linux->ifconfig_get_ioctl();
+    if (_ifconfig_get_ioctl == NULL) {
+	error_msg = c_format("Cannot start the IfConfigGetProcLinux plugin, "
+			     "because the IfConfigGetIoctl plugin it depends "
+			     "on cannot be found");
+	return (XORP_ERROR);
+    }
+
     // XXX: this method relies on the ioctl() method
-    if (ifconfig().ifconfig_get_ioctl().start(error_msg) < 0)
+    if (_ifconfig_get_ioctl->start(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -87,7 +116,7 @@ IfConfigGetProcLinux::stop(string& error_msg)
 	return (XORP_OK);
 
     // XXX: this method relies on the ioctl() method
-    if (ifconfig().ifconfig_get_ioctl().stop(error_msg) < 0)
+    if (_ifconfig_get_ioctl->stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;
@@ -101,32 +130,11 @@ IfConfigGetProcLinux::pull_config(IfTree& iftree)
     return read_config(iftree);
 }
 
-#ifndef HAVE_PROC_LINUX
-bool
-IfConfigGetProcLinux::read_config(IfTree& )
-{
-    return false;
-}
-
-#else // HAVE_PROC_LINUX
-
-static char* get_proc_linux_iface_name(char* name, char* p);
-static bool proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree,
-				   int family,
-				   const string& proc_linux_net_device_file);
-static bool if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
-			      const string& proc_linux_net_device_file);
-
-#ifdef HAVE_IPV6
-static bool if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
-			      const string& proc_linux_net_device_file);
-#endif
-
 bool
 IfConfigGetProcLinux::read_config(IfTree& iftree)
 {
     // XXX: this method relies on the ioctl() method
-    ifconfig().ifconfig_get_ioctl().pull_config(iftree);
+    _ifconfig_get_ioctl->pull_config(iftree);
     
     //
     // The IPv4 information
@@ -238,7 +246,7 @@ get_proc_linux_iface_name(char* name, char* p)
 // both mechanisms. Enjoy!
 //
 static bool
-if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
+if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 		  const string& proc_linux_net_device_file)
 {
     FILE *fh;
@@ -279,7 +287,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
 	    continue;
 	}
 	
-	if (it.find_interface(ifname) != NULL) {
+	if (iftree.find_interface(ifname) != NULL) {
 	    // Already have this interface. Ignore it.
 	    continue;
 	}
@@ -290,7 +298,8 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
 	vector<uint8_t> buffer(sizeof(struct ifreq));
 	memcpy(&buffer[0], &ifreq, sizeof(ifreq));
 
-	IfConfigGetIoctl::parse_buffer_ioctl(ifconfig, it, AF_INET, buffer);
+	IfConfigGetIoctl::parse_buffer_ioctl(ifconfig, iftree, AF_INET,
+					     buffer);
     }
     if (ferror(fh)) {
 	XLOG_ERROR("%s read failed: %s",
@@ -321,7 +330,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& it,
 //
 #ifdef HAVE_IPV6
 static bool
-if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
+if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 		  const string& proc_linux_net_device_file)
 {
     FILE *fh;
@@ -384,8 +393,8 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& it,
 	// Add the interface (if a new one)
 	//
 	ifconfig.map_ifindex(if_index, alias_if_name);
-	it.add_interface(alias_if_name);
-	IfTreeInterface* ifp = it.find_interface(alias_if_name);
+	iftree.add_interface(alias_if_name);
+	IfTreeInterface* ifp = iftree.find_interface(alias_if_name);
 	XLOG_ASSERT(ifp != NULL);
 
 	//

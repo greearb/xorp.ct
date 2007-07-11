@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.hh,v 1.1 2007/06/07 01:28:38 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_ROUTING_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_ROUTING_SOCKET_HH__
@@ -21,11 +21,11 @@
 #include "fea/data_plane/control_socket/routing_socket.hh"
 
 
-class FibConfigEntrySetRtsock : public FibConfigEntrySet,
-				public RoutingSocket {
+class FibConfigEntrySetRoutingSocket : public FibConfigEntrySet,
+				       public RoutingSocket {
 public:
-    FibConfigEntrySetRtsock(FibConfig& fibconfig);
-    virtual ~FibConfigEntrySetRtsock();
+    FibConfigEntrySetRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager);
+    virtual ~FibConfigEntrySetRoutingSocket();
 
     /**
      * Start operation.

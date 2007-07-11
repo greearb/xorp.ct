@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.cc,v 1.5 2007/04/30 23:40:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.cc,v 1.6 2007/06/07 01:28:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -42,13 +42,11 @@
 // Windows (IPHLPAPI.DLL).
 //
 
-
-FibConfigEntryGetIPHelper::FibConfigEntryGetIPHelper(FibConfig& fibconfig)
-    : FibConfigEntryGet(fibconfig)
-{
 #ifdef HOST_OS_WINDOWS
-    fibconfig.register_fibconfig_entry_get_primary(this);
-#endif
+
+FibConfigEntryGetIPHelper::FibConfigEntryGetIPHelper(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryGet(fea_data_plane_manager)
+{
 }
 
 FibConfigEntryGetIPHelper::~FibConfigEntryGetIPHelper()
@@ -174,21 +172,6 @@ FibConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
     
     return (ret_value);
 }
-
-#ifndef HOST_OS_WINDOWS
-bool
-FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& , FteX& )
-{
-    return false;
-}
-
-bool
-FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& , FteX& )
-{
-    return false;
-}
-
-#else // HOST_OS_WINDOWS
 
 /**
  * Lookup a route by destination address.
@@ -396,4 +379,5 @@ FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 
     return (found);
 }
+
 #endif // HOST_OS_WINDOWS

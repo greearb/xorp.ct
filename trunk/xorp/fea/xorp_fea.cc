@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xorp_fea.cc,v 1.1 2007/04/18 06:20:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/xorp_fea.cc,v 1.2 2007/04/19 16:45:05 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -89,11 +89,7 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     EventLoop eventloop;
     XrlFeaNode xrl_fea_node(eventloop, xrl_fea_targetname,
 			    xrl_finder_targetname, finder_hostname,
-			    finder_port);
-
-    // Set the unit in dummy mode
-    if (is_dummy)
-	xrl_fea_node.set_dummy();
+			    finder_port, is_dummy);
 
     // Start operations
     xrl_fea_node.startup();

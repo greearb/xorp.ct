@@ -12,31 +12,46 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.51 2007/06/06 19:55:52 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.52 2007/06/07 01:23:02 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
 
 #include "iftree.hh"
+#include "fea_data_plane_manager.hh"
 
 class IfConfig;
+class IPvX;
 
 
 class IfConfigSet {
 public:
-    IfConfigSet(IfConfig& ifconfig)
+    IfConfigSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
-	  _ifconfig(ifconfig),
-	  _is_primary(true)
+	  _ifconfig(fea_data_plane_manager.ifconfig()),
+	  _fea_data_plane_manager(fea_data_plane_manager)
     {}
     virtual ~IfConfigSet() {}
-    
+
+    /**
+     * Get the @ref IfConfig instance.
+     *
+     * @return the @ref IfConfig instance.
+     */
     IfConfig&	ifconfig() { return _ifconfig; }
-    
-    virtual void set_primary() { _is_primary = true; }
-    virtual void set_secondary() { _is_primary = false; }
-    virtual bool is_primary() const { return _is_primary; }
-    virtual bool is_secondary() const { return !_is_primary; }
+
+    /**
+     * Get the @ref FeaDataPlaneManager instance.
+     *
+     * @return the @ref FeaDataPlaneManager instance.
+     */
+    FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
+
+    /**
+     * Test whether this instance is running.
+     *
+     * @return true if the instance is running, otherwise false.
+     */
     virtual bool is_running() const { return _is_running; }
 
     /**
@@ -65,6 +80,18 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool push_config(IfTree& config);
+
+    /**
+     * Test whether the provider mirrors the pulled interface configuration
+     * from the system.
+     *
+     * Note that this method is a short-term solution and might disappear
+     * in the future.
+     *
+     * @return true if the provider mirrors the pulled interface configuration
+     * from the system.
+     */
+    virtual bool is_pulled_config_mirror() const { return (false); }
 
 protected:
     /**
@@ -250,8 +277,8 @@ private:
     void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
 			  const IfTreeAddr6& a);
 
-    IfConfig&	_ifconfig;
-    bool	_is_primary;	// True -> primary, false -> secondary method
+    IfConfig&		_ifconfig;
+    FeaDataPlaneManager& _fea_data_plane_manager;
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

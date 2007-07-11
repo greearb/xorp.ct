@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.9 2007/06/07 01:28:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.10 2007/06/11 22:00:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,6 +29,7 @@
 #include "fea/data_plane/control_socket/windows_rras_support.hh"
 #endif
 
+#include "fibconfig_table_get_sysctl.hh"
 #include "fibconfig_table_observer_rtmv2.hh"
 
 
@@ -42,28 +43,26 @@
 // The mechanism to observe the information is Router Manager V2.
 //
 
-FibConfigTableObserverRtmV2::FibConfigTableObserverRtmV2(FibConfig& fibconfig)
-    : FibConfigTableObserver(fibconfig),
+#ifdef HOST_OS_WINDOWS
+
+FibConfigTableObserverRtmV2::FibConfigTableObserverRtmV2(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableObserver(fea_data_plane_manager),
       _rs4(NULL),
       _rso4(NULL),
       _rs6(NULL),
       _rso6(NULL)
 {
-#ifdef HOST_OS_WINDOWS
     if (!WinSupport::is_rras_running()) {
         XLOG_WARNING("RRAS is not running; disabling FibConfigTableObserverRtmV2.");
         return;
     }
 
-    _rs4 = new WinRtmPipe(fibconfig.eventloop());
+    _rs4 = new WinRtmPipe(fea_data_plane_manager.eventloop());
     _rso4 = new RtmV2Observer(*_rs4, AF_INET, *this);
 
 #ifdef HAVE_IPV6
-    _rs6 = new WinRtmPipe(fibconfig.eventloop());
+    _rs6 = new WinRtmPipe(fea_data_plane_manager.eventloop());
     _rso6 = new RtmV2Observer(*_rs6, AF_INET6, *this);
-#endif
-
-    fibconfig.register_fibconfig_table_observer_primary(this);
 #endif
 }
 
@@ -134,7 +133,8 @@ void
 FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 {
     list<FteX> fte_list;
-    FibMsgSet filter = FibMsg::UPDATES | FibMsg::GETS;
+    FibConfigTableGetSysctl::FibMsgSet filter;
+    filter = FibConfigTableGetSysctl::FibMsg::UPDATES | FibConfigTableGetSysctl::FibMsg::GETS;
 
     //
     // Get the IPv4 routes
@@ -168,3 +168,5 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
     }
 #endif // HAVE_IPV6
 }
+
+#endif // HOST_OS_WINDOWS

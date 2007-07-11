@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.hh,v 1.1 2007/06/07 01:28:42 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_RTMV2_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_RTMV2_HH__
@@ -22,7 +22,7 @@
 
 class FibConfigTableSetRtmV2 : public FibConfigTableSet {
 public:
-    FibConfigTableSetRtmV2(FibConfig& fibconfig);
+    FibConfigTableSetRtmV2(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~FibConfigTableSetRtmV2();
 
     /**

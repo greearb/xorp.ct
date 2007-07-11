@@ -12,33 +12,47 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.7 2007/06/04 23:17:32 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.8 2007/06/07 01:28:34 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
 #define __FEA_FIBCONFIG_ENTRY_SET_HH__
 
 #include "fte.hh"
 #include "iftree.hh"
+#include "fea_data_plane_manager.hh"
 
 class FibConfig;
 
 
 class FibConfigEntrySet {
 public:
-    FibConfigEntrySet(FibConfig& fibconfig)
+    FibConfigEntrySet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
-	  _fibconfig(fibconfig),
-	  _in_configuration(false),
-	  _is_primary(true)
+	  _fibconfig(fea_data_plane_manager.fibconfig()),
+	  _fea_data_plane_manager(fea_data_plane_manager),
+	  _in_configuration(false)
     {}
     virtual ~FibConfigEntrySet() {}
-    
+
+    /**
+     * Get the @ref FibConfig instance.
+     *
+     * @return the @ref FibConfig instance.
+     */
     FibConfig&	fibconfig() { return _fibconfig; }
-    
-    virtual void set_primary() { _is_primary = true; }
-    virtual void set_secondary() { _is_primary = false; }
-    virtual bool is_primary() const { return _is_primary; }
-    virtual bool is_secondary() const { return !_is_primary; }
+
+    /**
+     * Get the @ref FeaDataPlaneManager instance.
+     *
+     * @return the @ref FeaDataPlaneManager instance.
+     */
+    FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
+
+    /**
+     * Test whether this instance is running.
+     *
+     * @return true if the instance is running, otherwise false.
+     */
     virtual bool is_running() const { return _is_running; }
 
     /**
@@ -166,9 +180,9 @@ protected:
     bool	_is_running;
 
 private:
-    FibConfig&	_fibconfig;
-    bool	_in_configuration;
-    bool	_is_primary;	// True -> primary, false -> secondary method
+    FibConfig&		_fibconfig;
+    FeaDataPlaneManager& _fea_data_plane_manager;
+    bool		_in_configuration;
 };
 
 #endif // __FEA_FIBCONFIG_ENTRY_SET_HH__

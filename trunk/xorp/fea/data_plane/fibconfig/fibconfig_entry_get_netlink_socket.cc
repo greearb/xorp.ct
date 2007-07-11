@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.8 2007/06/04 23:17:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.9 2007/06/07 01:28:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -41,18 +41,16 @@
 // The mechanism to obtain the information is netlink(7) sockets.
 //
 
+#ifdef HAVE_NETLINK_SOCKETS
 
-FibConfigEntryGetNetlink::FibConfigEntryGetNetlink(FibConfig& fibconfig)
-    : FibConfigEntryGet(fibconfig),
-      NetlinkSocket(fibconfig.eventloop()),
+FibConfigEntryGetNetlinkSocket::FibConfigEntryGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryGet(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    fibconfig.register_fibconfig_entry_get_primary(this);
-#endif
 }
 
-FibConfigEntryGetNetlink::~FibConfigEntryGetNetlink()
+FibConfigEntryGetNetlinkSocket::~FibConfigEntryGetNetlinkSocket()
 {
     string error_msg;
 
@@ -65,7 +63,7 @@ FibConfigEntryGetNetlink::~FibConfigEntryGetNetlink()
 }
 
 int
-FibConfigEntryGetNetlink::start(string& error_msg)
+FibConfigEntryGetNetlinkSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -79,7 +77,7 @@ FibConfigEntryGetNetlink::start(string& error_msg)
 }
 
 int
-FibConfigEntryGetNetlink::stop(string& error_msg)
+FibConfigEntryGetNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -101,7 +99,8 @@ FibConfigEntryGetNetlink::stop(string& error_msg)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
+FibConfigEntryGetNetlinkSocket::lookup_route_by_dest4(const IPv4& dst,
+						      Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -122,8 +121,8 @@ FibConfigEntryGetNetlink::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetNetlink::lookup_route_by_network4(const IPv4Net& dst,
-						   Fte4& fte)
+FibConfigEntryGetNetlinkSocket::lookup_route_by_network4(const IPv4Net& dst,
+							 Fte4& fte)
 {
     list<Fte4> fte_list4;
 
@@ -151,7 +150,8 @@ FibConfigEntryGetNetlink::lookup_route_by_network4(const IPv4Net& dst,
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
+FibConfigEntryGetNetlinkSocket::lookup_route_by_dest6(const IPv6& dst,
+						      Fte6& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -172,8 +172,8 @@ FibConfigEntryGetNetlink::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetNetlink::lookup_route_by_network6(const IPv6Net& dst,
-						   Fte6& fte)
+FibConfigEntryGetNetlinkSocket::lookup_route_by_network6(const IPv6Net& dst,
+							 Fte6& fte)
 { 
     list<Fte6> fte_list6;
 
@@ -192,16 +192,6 @@ FibConfigEntryGetNetlink::lookup_route_by_network6(const IPv6Net& dst,
     return (false);
 }
 
-#ifndef HAVE_NETLINK_SOCKETS
-
-bool
-FibConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
-{
-    return false;
-}
-
-#else // HAVE_NETLINK_SOCKETS
-
 /**
  * Lookup a route by destination address.
  *
@@ -211,7 +201,8 @@ FibConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
  * @return true on success, otherwise false.
  */
 bool
-FibConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
+FibConfigEntryGetNetlinkSocket::lookup_route_by_dest(const IPvX& dst,
+						     FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct rtmsg) + sizeof(struct rtattr) + 512;

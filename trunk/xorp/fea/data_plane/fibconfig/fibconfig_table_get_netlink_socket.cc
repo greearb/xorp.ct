@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.6 2007/04/30 23:40:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.7 2007/06/07 01:28:40 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -39,18 +39,16 @@
 // The mechanism to obtain the information is netlink(7) sockets.
 //
 
+#ifdef HAVE_NETLINK_SOCKETS
 
-FibConfigTableGetNetlink::FibConfigTableGetNetlink(FibConfig& fibconfig)
-    : FibConfigTableGet(fibconfig),
-      NetlinkSocket(fibconfig.eventloop()),
+FibConfigTableGetNetlinkSocket::FibConfigTableGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigTableGet(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       _ns_reader(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    fibconfig.register_fibconfig_table_get_primary(this);
-#endif
 }
 
-FibConfigTableGetNetlink::~FibConfigTableGetNetlink()
+FibConfigTableGetNetlinkSocket::~FibConfigTableGetNetlinkSocket()
 {
     string error_msg;
 
@@ -63,7 +61,7 @@ FibConfigTableGetNetlink::~FibConfigTableGetNetlink()
 }
 
 int
-FibConfigTableGetNetlink::start(string& error_msg)
+FibConfigTableGetNetlinkSocket::start(string& error_msg)
 {
     if (_is_running)
 	return (XORP_OK);
@@ -77,7 +75,7 @@ FibConfigTableGetNetlink::start(string& error_msg)
 }
 
 int
-FibConfigTableGetNetlink::stop(string& error_msg)
+FibConfigTableGetNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -91,7 +89,7 @@ FibConfigTableGetNetlink::stop(string& error_msg)
 }
 
 bool
-FibConfigTableGetNetlink::get_table4(list<Fte4>& fte_list)
+FibConfigTableGetNetlinkSocket::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
 
@@ -110,7 +108,7 @@ FibConfigTableGetNetlink::get_table4(list<Fte4>& fte_list)
 }
 
 bool
-FibConfigTableGetNetlink::get_table6(list<Fte6>& fte_list)
+FibConfigTableGetNetlinkSocket::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
     UNUSED(fte_list);
@@ -134,18 +132,8 @@ FibConfigTableGetNetlink::get_table6(list<Fte6>& fte_list)
 #endif // HAVE_IPV6
 }
 
-#ifndef HAVE_NETLINK_SOCKETS
-
 bool
-FibConfigTableGetNetlink::get_table(int , list<FteX>& )
-{
-    return false;
-}
-
-#else // HAVE_NETLINK_SOCKETS
-
-bool
-FibConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
+FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct rtmsg) + 512;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.7 2007/06/05 13:51:18 greenhal Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.8 2007/06/06 19:55:54 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -22,6 +22,7 @@
 
 #include "fea/ifconfig.hh"
 
+#include "ifconfig_get_sysctl.hh"
 #include "ifconfig_observer_routing_socket.hh"
 
 
@@ -32,15 +33,13 @@
 // The mechanism to observe the information is routing sockets.
 //
 
+#ifdef HAVE_ROUTING_SOCKETS
 
-IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(IfConfig& ifconfig)
-    : IfConfigObserver(ifconfig),
-      RoutingSocket(ifconfig.eventloop()),
+IfConfigObserverRoutingSocket::IfConfigObserverRoutingSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : IfConfigObserver(fea_data_plane_manager),
+      RoutingSocket(fea_data_plane_manager.eventloop()),
       RoutingSocketObserver(*(RoutingSocket *)this)
 {
-#ifdef HAVE_ROUTING_SOCKETS
-    ifconfig.register_ifconfig_observer_primary(this);
-#endif
 }
 
 IfConfigObserverRoutingSocket::~IfConfigObserverRoutingSocket()
@@ -103,7 +102,9 @@ IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 }
 
 void
-IfConfigObserverRoutingSocket::rtsock_data(const vector<uint8_t>& buffer)
+IfConfigObserverRoutingSocket::routing_socket_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
+
+#endif // HAVE_ROUTING_SOCKETS

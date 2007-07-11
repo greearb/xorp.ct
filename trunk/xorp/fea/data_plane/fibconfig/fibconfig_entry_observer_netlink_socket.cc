@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc,v 1.5 2007/04/30 23:40:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -43,18 +43,16 @@
 // The mechanism to observe the information is netlink(7) sockets.
 //
 
+#ifdef HAVE_NETLINK_SOCKETS
 
-FibConfigEntryObserverNetlink::FibConfigEntryObserverNetlink(FibConfig& fibconfig)
-    : FibConfigEntryObserver(fibconfig),
-      NetlinkSocket(fibconfig.eventloop()),
+FibConfigEntryObserverNetlinkSocket::FibConfigEntryObserverNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager)
+    : FibConfigEntryObserver(fea_data_plane_manager),
+      NetlinkSocket(fea_data_plane_manager.eventloop()),
       NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
-#ifdef HAVE_NETLINK_SOCKETS
-    fibconfig.register_fibconfig_entry_observer_primary(this);
-#endif
 }
 
-FibConfigEntryObserverNetlink::~FibConfigEntryObserverNetlink()
+FibConfigEntryObserverNetlinkSocket::~FibConfigEntryObserverNetlinkSocket()
 {
     string error_msg;
 
@@ -67,17 +65,8 @@ FibConfigEntryObserverNetlink::~FibConfigEntryObserverNetlink()
 }
 
 int
-FibConfigEntryObserverNetlink::start(string& error_msg)
+FibConfigEntryObserverNetlinkSocket::start(string& error_msg)
 {
-#ifndef HAVE_NETLINK_SOCKETS
-    error_msg = c_format("The netlink(7) mechanism to observe "
-			 "information about forwarding table from the "
-			 "underlying system is not supported");
-    XLOG_UNREACHABLE();
-    return (XORP_ERROR);
-
-#else // HAVE_NETLINK_SOCKETS
-
     uint32_t nl_groups = 0;
 
     if (_is_running)
@@ -108,11 +97,10 @@ FibConfigEntryObserverNetlink::start(string& error_msg)
     _is_running = true;
 
     return (XORP_OK);
-#endif // HAVE_NETLINK_SOCKETS
 }
 
 int
-FibConfigEntryObserverNetlink::stop(string& error_msg)
+FibConfigEntryObserverNetlinkSocket::stop(string& error_msg)
 {
     if (! _is_running)
 	return (XORP_OK);
@@ -126,14 +114,16 @@ FibConfigEntryObserverNetlink::stop(string& error_msg)
 }
 
 void
-FibConfigEntryObserverNetlink::receive_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
     UNUSED(buffer);
 }
 
 void
-FibConfigEntryObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
+FibConfigEntryObserverNetlinkSocket::netlink_socket_data(const vector<uint8_t>& buffer)
 {
     receive_data(buffer);
 }
+
+#endif // HAVE_NETLINK_SOCKETS

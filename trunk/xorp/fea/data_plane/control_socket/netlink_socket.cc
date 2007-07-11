@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket.cc,v 1.1 2007/05/01 01:42:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket.cc,v 1.2 2007/05/01 02:40:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -272,7 +272,7 @@ int
 NetlinkSocket::force_read(string& error_msg)
 {
     vector<uint8_t> message;
-    vector<uint8_t> buffer(NLSOCK_BYTES);
+    vector<uint8_t> buffer(NETLINK_SOCKET_BYTES);
     size_t off = 0;
     size_t last_mh_off = 0;
     
@@ -286,7 +286,7 @@ NetlinkSocket::force_read(string& error_msg)
 		continue;	// XXX: the receive was interrupted by a signal
 	    if ((got < 0) || (got < (ssize_t)buffer.size()))
 		break;		// The buffer is big enough
-	    buffer.resize(buffer.size() + NLSOCK_BYTES);
+	    buffer.resize(buffer.size() + NETLINK_SOCKET_BYTES);
 	} while (true);
 	
 	got = read(_fd, &buffer[0], buffer.size());
@@ -339,7 +339,7 @@ NetlinkSocket::force_read(string& error_msg)
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(message);
+	(*i)->netlink_socket_data(message);
     }
 
     return (XORP_OK);
@@ -350,7 +350,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 			      socklen_t* fromlen, string& error_msg)
 {
     vector<uint8_t> message;
-    vector<uint8_t> buffer(NLSOCK_BYTES);
+    vector<uint8_t> buffer(NETLINK_SOCKET_BYTES);
     size_t off = 0;
     size_t last_mh_off = 0;
     
@@ -364,7 +364,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 		continue;	// XXX: the receive was interrupted by a signal
 	    if ((got < 0) || (got < (ssize_t)buffer.size()))
 		break;		// The buffer is big enough
-	    buffer.resize(buffer.size() + NLSOCK_BYTES);
+	    buffer.resize(buffer.size() + NETLINK_SOCKET_BYTES);
 	} while (true);
 	
 	got = recvfrom(_fd, &buffer[0], buffer.size(), flags, from, fromlen);
@@ -417,7 +417,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(message);
+	(*i)->netlink_socket_data(message);
     }
 
     return (XORP_OK);
@@ -428,7 +428,7 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 			     string& error_msg)
 {
     vector<uint8_t> message;
-    vector<uint8_t> buffer(NLSOCK_BYTES);
+    vector<uint8_t> buffer(NETLINK_SOCKET_BYTES);
     size_t off = 0;
     size_t last_mh_off = 0;
     struct iovec	iov;
@@ -460,7 +460,7 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 		continue;	// XXX: the receive was interrupted by a signal
 	    if ((got < 0) || (got < (ssize_t)buffer.size()))
 		break;		// The buffer is big enough
-	    buffer.resize(buffer.size() + NLSOCK_BYTES);
+	    buffer.resize(buffer.size() + NETLINK_SOCKET_BYTES);
 	} while (true);
 	
 	// Re-init the iov argument
@@ -531,7 +531,7 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(message);
+	(*i)->netlink_socket_data(message);
     }
 
     return (XORP_OK);
@@ -644,7 +644,7 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
  * @param buffer the buffer with the received data.
  */
 void
-NetlinkSocketReader::nlsock_data(const vector<uint8_t>& buffer)
+NetlinkSocketReader::netlink_socket_data(const vector<uint8_t>& buffer)
 {
 #ifndef HAVE_NETLINK_SOCKETS
     UNUSED(buffer);

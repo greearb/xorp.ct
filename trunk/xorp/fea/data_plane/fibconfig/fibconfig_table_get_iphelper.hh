@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.hh,v 1.1 2007/06/07 01:28:39 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_IPHELPER_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_IPHELPER_HH__
@@ -22,7 +22,7 @@
 
 class FibConfigTableGetIPHelper : public FibConfigTableGet {
 public:
-    FibConfigTableGetIPHelper(FibConfig& fibconfig);
+    FibConfigTableGetIPHelper(FeaDataPlaneManager& fea_data_plane_manager);
     virtual ~FibConfigTableGetIPHelper();
 
     /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/control_socket/netlink_socket.hh,v 1.2 2007/05/23 12:12:36 pavlin Exp $
+// $XORP: xorp/fea/data_plane/control_socket/netlink_socket.hh,v 1.3 2007/06/04 23:17:33 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_HH__
@@ -180,7 +180,7 @@ private:
 
     /**
      * Read data available for NetlinkSocket and invoke
-     * NetlinkSocketObserver::nlsock_data() on all observers of netlink
+     * NetlinkSocketObserver::netlink_socket_data() on all observers of netlink
      * socket.
      */
     void io_event(XorpFd fd, IoEventType sm);
@@ -188,7 +188,7 @@ private:
     NetlinkSocket& operator=(const NetlinkSocket&);	// Not implemented
     NetlinkSocket(const NetlinkSocket&);		// Not implemented
 
-    static const size_t NLSOCK_BYTES = 8*1024; // Initial guess at msg size
+    static const size_t NETLINK_SOCKET_BYTES = 8*1024;	// Initial guess at msg size
 
     EventLoop&	 _eventloop;
     int		 _fd;
@@ -220,7 +220,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void nlsock_data(const vector<uint8_t>& buffer) = 0;
+    virtual void netlink_socket_data(const vector<uint8_t>& buffer) = 0;
 
     /**
      * Get NetlinkSocket associated with Observer.
@@ -262,7 +262,7 @@ public:
      *
      * @param buffer the buffer with the received data.
      */
-    virtual void nlsock_data(const vector<uint8_t>& buffer);
+    virtual void netlink_socket_data(const vector<uint8_t>& buffer);
 
 private:
     NetlinkSocket&  _ns;

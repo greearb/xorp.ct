@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.64 2007/06/05 13:51:17 greenhal Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.65 2007/06/06 19:55:51 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -22,29 +22,13 @@
 
 #include "ifconfig_addr_table.hh"
 #include "ifconfig_get.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_click.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_dummy.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_ioctl.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_iphelper.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_proc_linux.hh"
-#include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
 #include "ifconfig_set.hh"
-#include "fea/data_plane/ifconfig/ifconfig_set_click.hh"
-#include "fea/data_plane/ifconfig/ifconfig_set_dummy.hh"
-#include "fea/data_plane/ifconfig/ifconfig_set_ioctl.hh"
-#include "fea/data_plane/ifconfig/ifconfig_set_iphelper.hh"
-#include "fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh"
 #include "ifconfig_observer.hh"
-#include "fea/data_plane/ifconfig/ifconfig_observer_dummy.hh"
-#include "fea/data_plane/ifconfig/ifconfig_observer_iphelper.hh"
-#include "fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.hh"
-#include "fea/data_plane/ifconfig/ifconfig_observer_routing_socket.hh"
 #include "ifconfig_reporter.hh"
 #include "iftree.hh"
 
 class EventLoop;
+class FeaNode;
 class IfConfigGet;
 class IfConfigErrorReporterBase;
 class IfConfigObserver;
@@ -63,13 +47,12 @@ public:
     /**
      * Constructor.
      *
-     * @param eventloop the event loop.
-     * @param nexthop_port_mapper the next-hop port mapper.
+     * @param fea_node the FEA node.
      */
-    IfConfig(EventLoop& eventloop, NexthopPortMapper& nexthop_port_mapper);
+    IfConfig(FeaNode& fea_node);
 
     /**
-     * Virtual destructor (in case this class is used as base class).
+     * Virtual destructor (in case this class is used as a base class).
      */
     virtual ~IfConfig();
 
@@ -162,15 +145,15 @@ public:
     }
 
     IfTree& live_config() { return (_live_config); }
-    void    set_live_config(const IfTree& it) { _live_config = it; }
+    void    set_live_config(const IfTree& iftree) { _live_config = iftree; }
 
     const IfTree& pulled_config()	{ return (_pulled_config); }
     IfTree& pushed_config()		{ return (_pushed_config); }
     const IfTree& original_config()	{ return (_original_config); }
     IfTree& local_config()		{ return (_local_config); }
-    void set_local_config(const IfTree& it) { _local_config = it; }
+    void set_local_config(const IfTree& iftree) { _local_config = iftree; }
     IfTree& old_local_config()		{ return (_old_local_config); }
-    void set_old_local_config(const IfTree& it) { _old_local_config = it; }
+    void set_old_local_config(const IfTree& iftree) { _old_local_config = iftree; }
 
     /**
      * Test whether the original configuration should be restored on shutdown.
@@ -193,33 +176,60 @@ public:
 	_restore_original_config_on_shutdown = v;
     }
 
-    int register_ifconfig_get_primary(IfConfigGet *ifconfig_get);
-    int register_ifconfig_set_primary(IfConfigSet *ifconfig_set);
-    int register_ifconfig_observer_primary(IfConfigObserver *ifconfig_observer);
-    int register_ifconfig_get_secondary(IfConfigGet *ifconfig_get);
-    int register_ifconfig_set_secondary(IfConfigSet *ifconfig_set);
-    int register_ifconfig_observer_secondary(IfConfigObserver *ifconfig_observer);
-
-    IfConfigGet&	ifconfig_get_primary() { return *_ifconfig_get_primary; }
-    IfConfigSet&	ifconfig_set_primary() { return *_ifconfig_set_primary; }
-    IfConfigObserver&	ifconfig_observer_primary() { return *_ifconfig_observer_primary; }
-
-    IfConfigGet&	ifconfig_get_ioctl() { return _ifconfig_get_ioctl; }
-    IfConfigSetClick&	ifconfig_set_click() { return _ifconfig_set_click; }
-
     /**
-     * Setup the unit to behave as dummy (for testing purpose).
+     * Register @ref IfConfigGet plugin.
      *
+     * @param ifconfig_get the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int set_dummy();
+    int register_ifconfig_get(IfConfigGet* ifconfig_get, bool is_exclusive);
 
     /**
-     * Test if running in dummy mode.
-     * 
-     * @return true if running in dummy mode, otherwise false.
+     * Unregister @ref IfConfigGet plugin.
+     *
+     * @param ifconfig_get the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool is_dummy() const { return _is_dummy; }
+    int unregister_ifconfig_get(IfConfigGet* ifconfig_get);
+
+    /**
+     * Register @ref IfConfigSet plugin.
+     *
+     * @param ifconfig_set the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_ifconfig_set(IfConfigSet* ifconfig_set, bool is_exclusive);
+
+    /**
+     * Unregister @ref IfConfigSet plugin.
+     *
+     * @param ifconfig_set the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_ifconfig_set(IfConfigSet* ifconfig_set);
+
+    /**
+     * Register @ref IfConfigObserver plugin.
+     *
+     * @param ifconfig_observer the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_ifconfig_observer(IfConfigObserver* ifconfig_observer,
+				   bool is_exclusive);
+
+    /**
+     * Unregister @ref IfConfigObserver plugin.
+     *
+     * @param ifconfig_observer the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_ifconfig_observer(IfConfigObserver* ifconfig_observer);
 
     /**
      * Start operation.
@@ -264,132 +274,6 @@ public:
      * @return true if the underlying system supports IPv6, otherwise false.
      */
     bool test_have_ipv6() const;
-
-    /**
-     * Enable/disable Click support.
-     *
-     * @param enable if true, then enable Click support, otherwise disable it.
-     */
-    void enable_click(bool enable);
-
-    /**
-     * Start Click support.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start_click(string& error_msg);
-
-    /**
-     * Stop Click support.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int stop_click(string& error_msg);
-
-    /**
-     * Specify the external program to generate the kernel-level Click
-     * configuration.
-     *
-     * @param v the name of the external program to generate the kernel-level
-     * Click configuration.
-     */
-    void set_kernel_click_config_generator_file(const string& v);
-
-    /**
-     * Enable/disable kernel-level Click support.
-     *
-     * @param enable if true, then enable the kernel-level Click support,
-     * otherwise disable it.
-     */
-    void enable_kernel_click(bool enable);
-
-    /**
-     * Enable/disable installing kernel-level Click on startup.
-     *
-     * @param enable if true, then install kernel-level Click on startup.
-     */
-    void enable_kernel_click_install_on_startup(bool enable);
-
-    /**
-     * Specify the list of kernel Click modules to load on startup if
-     * installing kernel-level Click on startup is enabled.
-     *
-     * @param modules the list of kernel Click modules to load.
-     */
-    void set_kernel_click_modules(const list<string>& modules);
-
-    /**
-     * Specify the kernel-level Click mount directory.
-     *
-     * @param directory the kernel-level Click mount directory.
-     */
-    void set_kernel_click_mount_directory(const string& directory);
-
-    /**
-     * Enable/disable user-level Click support.
-     *
-     * @param enable if true, then enable the user-level Click support,
-     * otherwise disable it.
-     */
-    void enable_user_click(bool enable);
-
-    /**
-     * Specify the user-level Click command file.
-     *
-     * @param v the name of the user-level Click command file.
-     */
-    void set_user_click_command_file(const string& v);
-
-    /**
-     * Specify the extra arguments to the user-level Click command.
-     *
-     * @param v the extra arguments to the user-level Click command.
-     */
-    void set_user_click_command_extra_arguments(const string& v);
-
-    /**
-     * Specify whether to execute on startup the user-level Click command.
-     *
-     * @param v if true, then execute the user-level Click command on startup.
-     */
-    void set_user_click_command_execute_on_startup(bool v);
-
-    /**
-     * Specify the address to use for control access to the user-level
-     * Click.
-     *
-     * @param v the address to use for control access to the user-level Click.
-     */
-    void set_user_click_control_address(const IPv4& v);
-
-    /**
-     * Specify the socket port to use for control access to the user-level
-     * Click.
-     *
-     * @param v the socket port to use for control access to the user-level
-     * Click.
-     */
-    void set_user_click_control_socket_port(uint32_t v);
-
-    /**
-     * Specify the configuration file to be used by user-level Click on
-     * startup.
-     *
-     * @param v the name of the configuration file to be used by user-level
-     * Click on startup.
-     */
-    void set_user_click_startup_config_file(const string& v);
-
-    /**
-     * Specify the external program to generate the user-level Click
-     * configuration.
-     *
-     * @param v the name of the external program to generate the user-level
-     * Click configuration.
-     */
-    void set_user_click_config_generator_file(const string& v);
 
     /**
      * Push IfTree structure down to platform.  Errors are reported
@@ -458,7 +342,7 @@ public:
      * Check every item within IfTree and report updates to
      * IfConfigUpdateReporter.
      */
-    void   report_updates(IfTree& it, bool is_system_interfaces_reportee);
+    void   report_updates(IfTree& iftree, bool is_system_interfaces_reportee);
 
     void	map_ifindex(uint32_t if_index, const string& ifname);
     void	unmap_ifindex(uint32_t if_index);
@@ -469,7 +353,7 @@ public:
     uint32_t	get_insert_ifindex(const string& ifname);
 
 private:
-
+    FeaNode&			_fea_node;
     EventLoop&			_eventloop;
     NexthopPortMapper&		_nexthop_port_mapper;
 
@@ -499,74 +383,15 @@ private:
     IfConfigErrorReporter	_ifconfig_error_reporter;
     IfConfigAddressTable	_ifconfig_address_table;
 
-    IfConfigGet*		_ifconfig_get_primary;
-    IfConfigSet*		_ifconfig_set_primary;
-    IfConfigObserver*		_ifconfig_observer_primary;
-    list<IfConfigGet*>		_ifconfig_gets_secondary;
-    list<IfConfigSet*>		_ifconfig_sets_secondary;
-    list<IfConfigObserver*>	_ifconfig_observers_secondary;
-
-    //
-    // The primary mechanisms to get interface-related information
-    // from the underlying system.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    IfConfigGetDummy		_ifconfig_get_dummy;
-    IfConfigGetIoctl		_ifconfig_get_ioctl;
-    IfConfigGetSysctl		_ifconfig_get_sysctl;
-    IfConfigGetGetifaddrs	_ifconfig_get_getifaddrs;
-    IfConfigGetProcLinux	_ifconfig_get_proc_linux;
-    IfConfigGetNetlinkSocket	_ifconfig_get_netlink_socket;
-    IfConfigGetIPHelper		_ifconfig_get_iphelper;
-
-    //
-    // The secondary mechanisms to get interface-related information
-    // from the underlying system.
-    //
-    // XXX: Ordering is not important.
-    //
-    IfConfigGetClick		_ifconfig_get_click;
-
-    //
-    // The primary mechanisms to set interface-related information
-    // within the underlying system.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    IfConfigSetDummy		_ifconfig_set_dummy;
-    IfConfigSetIoctl		_ifconfig_set_ioctl;
-    IfConfigSetNetlinkSocket	_ifconfig_set_netlink_socket;
-    IfConfigSetIPHelper		_ifconfig_set_iphelper;
-
-    //
-    // The secondary mechanisms to get interface-related information
-    // from the underlying system.
-    //
-    // XXX: Ordering is not important.
-    //
-    IfConfigSetClick		_ifconfig_set_click;
-
-    //
-    // The primary mechanisms to observe whether the interface-related
-    // information within the underlying system has changed.
-    //
-    // XXX: Ordering is important: the last that is supported
-    // is the one to use.
-    //
-    IfConfigObserverDummy		_ifconfig_observer_dummy;
-    IfConfigObserverRoutingSocket	_ifconfig_observer_routing_socket;
-    IfConfigObserverNetlinkSocket	_ifconfig_observer_netlink_socket;
-    IfConfigObserverIPHelper		_ifconfig_observer_iphelper;
+    list<IfConfigGet*>		_ifconfig_gets;
+    list<IfConfigSet*>		_ifconfig_sets;
+    list<IfConfigObserver*>	_ifconfig_observers;
 
     //
     // Misc other state
     //
     bool	_have_ipv4;
     bool	_have_ipv6;
-    bool	_is_dummy;
     bool	_is_running;
 };
 
