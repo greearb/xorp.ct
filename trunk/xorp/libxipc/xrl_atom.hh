@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.12 2007/02/16 22:46:10 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.13 2007/05/23 12:12:39 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -70,8 +70,16 @@ class XrlAtom {
 public:
     // Exceptions
     struct NoData : public XorpException {
-	NoData(const char* file, int line) :
-	    XorpException("XrlAtom::NoData", file, line) {}
+	NoData(const char* file, int line, const string& name) :
+	    XorpException("XrlAtom::NoData", file, line),
+	_name(name) {}
+
+	const string why() const {
+	    return c_format("Atom name %s has no data", _name.c_str());
+	}
+
+    private:
+	string _name;
     };
 
     struct WrongType : public XorpException {

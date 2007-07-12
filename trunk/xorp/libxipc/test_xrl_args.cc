@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.13 2006/10/12 01:24:48 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.14 2007/02/16 22:46:09 pavlin Exp $"
 
 // test_xrl_args: String Serialization Tests
 
@@ -226,8 +226,8 @@ run_test()
 
     try {
 	al.get_uint32("only_uint");
-    } catch (const XrlArgs::XrlAtomNotFound &e) {
-	verbose_log("Atom not Found\n");
+    } catch (const XrlArgs::BadArgs &e) {
+	verbose_log("Error decoding the argument: %s\n", e.str().c_str());
 	return 1;
     } catch (...) {
 	verbose_log("Unanticipated exception.");
@@ -247,8 +247,8 @@ run_test()
 	al.get_string(0);
 	al.get_string("");
 	al.get_string("bad_karma");
-    } catch (XrlArgs::XrlAtomNotFound& e) {
-	verbose_log("Failed to find atom.\n");
+    } catch (XrlArgs::BadArgs& e) {
+	verbose_log("Error decoding the argument: %s\n", e.str().c_str());
 	return 1;
     }
     return 0;

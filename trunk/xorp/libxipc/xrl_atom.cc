@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.26 2007/02/16 22:46:10 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.27 2007/05/23 04:08:26 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -187,7 +187,7 @@ XrlAtom::type_and_data_okay(const XrlAtomType& t) const
     if (_type != t)
         xorp_throw(WrongType, t, _type);
     if (_have_data == false)
-        xorp_throw0(NoData);
+        xorp_throw(NoData, name());
 }
 
 const bool&

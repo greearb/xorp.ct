@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.12 2006/06/02 15:19:42 zec Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.13 2007/02/16 22:46:09 pavlin Exp $"
 
 #include <string.h>
 #include <stdio.h>
@@ -81,9 +81,15 @@ XrlArgs::add_bool(const char* name, bool val) throw (XrlAtomFound)
 }
 
 const bool&
-XrlArgs::get_bool(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_bool(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_boolean)).boolean();
+    try {
+	return get(XrlAtom(name, xrlatom_boolean)).boolean();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -102,9 +108,15 @@ XrlArgs::add_int32(const char* name, int32_t val) throw (XrlAtomFound)
 }
 
 const int32_t&
-XrlArgs::get_int32(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_int32(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_int32)).int32();
+    try {
+	return get(XrlAtom(name, xrlatom_int32)).int32();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -123,9 +135,15 @@ XrlArgs::add_uint32(const char* name, uint32_t val) throw (XrlAtomFound)
 }
 
 const uint32_t&
-XrlArgs::get_uint32(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_uint32(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_uint32)).uint32();
+    try {
+	return get(XrlAtom(name, xrlatom_uint32)).uint32();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -144,9 +162,15 @@ XrlArgs::add_ipv4(const char* name, const IPv4& val) throw (XrlAtomFound)
 }
 
 const IPv4&
-XrlArgs::get_ipv4(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_ipv4(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
+    try {
+	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -159,16 +183,21 @@ XrlArgs::remove_ipv4(const char* name) throw (XrlAtomNotFound)
 // XrlArgs add/get/remove ipv4net
 
 XrlArgs&
-XrlArgs::add_ipv4net(const char* name, const IPv4Net& val)
-    throw (XrlAtomFound)
+XrlArgs::add_ipv4net(const char* name, const IPv4Net& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
 const IPv4Net&
-XrlArgs::get_ipv4net(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_ipv4net(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
+    try {
+	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -187,9 +216,15 @@ XrlArgs::add_ipv6(const char* name, const IPv6& val) throw (XrlAtomFound)
 }
 
 const IPv6&
-XrlArgs::get_ipv6(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_ipv6(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+    try {
+	return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -202,16 +237,21 @@ XrlArgs::remove_ipv6(const char* name) throw (XrlAtomNotFound)
 // XrlArgs add/get/remove ipv6net
 
 XrlArgs&
-XrlArgs::add_ipv6net(const char* name, const IPv6Net& val)
-    throw (XrlAtomFound)
+XrlArgs::add_ipv6net(const char* name, const IPv6Net& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
 const IPv6Net&
-XrlArgs::get_ipv6net(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_ipv6net(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+    try {
+	return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -232,12 +272,18 @@ XrlArgs::add_ipvx(const char* name, const IPvX& val) throw (XrlAtomFound)
 }
 
 const IPvX
-XrlArgs::get_ipvx(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_ipvx(const char* name) const throw (BadArgs)
 {
     try {
 	return get(XrlAtom(name, xrlatom_ipv4)).ipv4();
-    } catch (const XrlAtomNotFound&) {
-	return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType&) {
+	try {
+	    return get(XrlAtom(name, xrlatom_ipv6)).ipv6();
+	} catch (const XrlAtom::WrongType& e) {
+	    xorp_throw(BadArgs, e.why());
+	}
     }
 }
 
@@ -257,19 +303,24 @@ XrlArgs::remove_ipvx(const char* name) throw (XrlAtomNotFound)
 // provided as a convenience.
 
 XrlArgs&
-XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val)
-    throw (XrlAtomFound)
+XrlArgs::add_ipvxnet(const char* name, const IPvXNet& val) throw (XrlAtomFound)
 {
     return add(XrlAtom(name, val));
 }
 
 const IPvXNet
-XrlArgs::get_ipvxnet(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_ipvxnet(const char* name) const throw (BadArgs)
 {
     try {
 	return get(XrlAtom(name, xrlatom_ipv4net)).ipv4net();
-    } catch (const XrlAtomNotFound&) {
-	return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType&) {
+	try {
+	    return get(XrlAtom(name, xrlatom_ipv6net)).ipv6net();
+	} catch (const XrlAtom::WrongType& e) {
+	    xorp_throw(BadArgs, e.why());
+	}
     }
 }
 
@@ -287,15 +338,21 @@ XrlArgs::remove_ipvxnet(const char* name) throw (XrlAtomNotFound)
 // XrlArgs add/get/remove mac
 
 XrlArgs&
-XrlArgs::add_mac(const char* name, const Mac& val)
-    throw (XrlAtomFound) {
+XrlArgs::add_mac(const char* name, const Mac& val) throw (XrlAtomFound)
+{
     return add(XrlAtom(name, val));
 }
 
 const Mac&
-XrlArgs::get_mac(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_mac(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_mac)).mac();
+    try {
+	return get(XrlAtom(name, xrlatom_mac)).mac();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -308,15 +365,21 @@ XrlArgs::remove_mac(const char* name) throw (XrlAtomNotFound)
 // XrlArgs add/get/remove string
 
 XrlArgs&
-XrlArgs::add_string(const char* name, const string& val)
-    throw (XrlAtomFound) {
+XrlArgs::add_string(const char* name, const string& val) throw (XrlAtomFound)
+{
     return add(XrlAtom(name, val));
 }
 
 const string&
-XrlArgs::get_string(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_string(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_text)).text();
+    try {
+	return get(XrlAtom(name, xrlatom_text)).text();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -330,14 +393,21 @@ XrlArgs::remove_string(const char* name) throw (XrlAtomNotFound)
 
 XrlArgs&
 XrlArgs::add_list(const char* name, const XrlAtomList& val)
-    throw (XrlAtomFound) {
+    throw (XrlAtomFound)
+{
     return add(XrlAtom(name, val));
 }
 
 const XrlAtomList&
-XrlArgs::get_list(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_list(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_list)).list();
+    try {
+	return get(XrlAtom(name, xrlatom_list)).list();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -351,14 +421,21 @@ XrlArgs::remove_list(const char* name) throw (XrlAtomNotFound)
 
 XrlArgs&
 XrlArgs::add_binary(const char* name, const vector<uint8_t>& val)
-    throw (XrlAtomFound) {
+    throw (XrlAtomFound)
+{
     return add(XrlAtom(name, val));
 }
 
 const vector<uint8_t>&
-XrlArgs::get_binary(const char* name) const throw (XrlAtomNotFound)
+XrlArgs::get_binary(const char* name) const throw (BadArgs)
 {
-    return get(XrlAtom(name, xrlatom_binary)).binary();
+    try {
+	return get(XrlAtom(name, xrlatom_binary)).binary();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
 }
 
 void
@@ -430,8 +507,7 @@ XrlArgs::operator[](uint32_t index) const
 }
 
 const XrlAtom&
-XrlArgs::operator[](const string& name) const
-    throw (XrlAtomNotFound)
+XrlArgs::operator[](const string& name) const throw (XrlAtomNotFound)
 {
     for ( const_iterator ai = _args.begin() ; ai != _args.end() ; ai++ ) {
 	if (ai->name() == name)

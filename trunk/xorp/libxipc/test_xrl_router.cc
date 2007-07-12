@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.16 2006/03/16 00:04:19 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_router.cc,v 1.17 2007/02/16 22:46:09 pavlin Exp $"
 
 #include <stdlib.h>
 
@@ -81,8 +81,8 @@ got_integer(const XrlError&	e,
 	    fprintf(stderr, "Corrupt integer argument.");
 	    exit(-1);
 	}
-    } catch (const XrlArgs::XrlAtomNotFound& e) {
-	printf("Failed to get expected integer\n");
+    } catch (const XrlArgs::BadArgs& e) {
+	printf("Error decoding the argument: %s\n", e.str().c_str());
     }
 
     // Eg we can iterate through the argument list
