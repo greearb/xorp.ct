@@ -111,8 +111,8 @@ def implement_unmarshall(cls, method_no, method):
         for r in method.rargs():
             s += "\ta->get(\"%s\", %s);\n" % (r.name(), cpp_name(r.name()))
 
-        s += "    } catch (const XrlArgs::XrlAtomNotFound&) {\n"
-        s += "\tXLOG_ERROR(\"Atom not found\");\n"
+        s += "    } catch (const XrlArgs::BadArgs& e) {\n"
+        s += "\tXLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());\n"
         s += "\tcb->dispatch(XrlError::BAD_ARGS()%s);\n" % fail_args
         s += "\treturn;\n"
         s += "    }\n"

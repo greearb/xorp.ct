@@ -177,9 +177,9 @@ def target_handler_methods(cls, name, methods):
 """ % m.name()
 
     	s += \
-"""    } catch (const XrlArgs::XrlAtomNotFound& e) {
-	XLOG_ERROR(\"Argument not found\");
-	return XrlCmdError::BAD_ARGS();
+"""    } catch (const XrlArgs::BadArgs& e) {
+	XLOG_ERROR(\"Error decoding the arguments: %s\", e.str().c_str());
+	return XrlCmdError::BAD_ARGS(e.str());
     }
 """
 
