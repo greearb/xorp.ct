@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.5 2004/09/21 18:09:13 atanu Exp $ */
+/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.6 2007/05/31 19:02:25 pavlin Exp $ */
 
 #include "common.xif"
 #include "bgp.xif"
