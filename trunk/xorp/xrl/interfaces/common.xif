@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/common.xif,v 1.2 2003/05/07 23:15:18 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/common.xif,v 1.3 2003/05/29 21:17:17 mjh Exp $ */
 
 /*
  * XRL interface common to all XRL target entities.

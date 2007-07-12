@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.3 2003/03/25 01:21:48 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.4 2003/12/20 01:43:35 pavlin Exp $ */
 
 /*
  * CLI manager XRL interface.

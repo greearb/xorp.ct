@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.7 2004/08/03 05:21:27 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.8 2006/10/17 22:26:10 pavlin Exp $ */
 
 /*
  * Forwarding Table XRL interface.

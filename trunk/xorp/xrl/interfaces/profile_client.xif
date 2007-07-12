@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/profile_client.xif,v 1.1 2004/09/21 18:09:12 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/profile_client.xif,v 1.2 2004/10/26 01:34:28 bms Exp $ */
 
 /*
 ** Profiling client

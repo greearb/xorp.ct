@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist_transaction6.xif,v 1.8 2004/08/03 18:09:15 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist_transaction6.xif,v 1.9 2006/03/30 02:21:16 pavlin Exp $ */
 
 /*
  * RIB routes redistribution transaction-based XRL interface.

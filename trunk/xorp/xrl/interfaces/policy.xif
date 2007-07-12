@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.8 2005/10/23 20:41:39 abittau Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.9 2006/10/31 05:26:27 pavlin Exp $ */
 
 /**
  * Policy manager XRL interface.

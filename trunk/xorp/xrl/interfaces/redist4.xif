@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist4.xif,v 1.8 2005/10/27 05:05:40 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist4.xif,v 1.9 2006/03/30 02:21:15 pavlin Exp $ */
 
 /*
  * RIB routes redistribution XRL interface.

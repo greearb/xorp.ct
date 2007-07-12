@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/fea_rawlink.xif,v 1.1 2007/06/27 01:27:07 pavlin Exp $ */
 
 /*
  * Interface for sending raw link-level packets on an interface.

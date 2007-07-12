@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/isis.xif,v 1.1 2003/07/18 01:59:15 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/isis.xif,v 1.2 2003/07/23 19:45:19 atanu Exp $ */
 
 /*
 ** IS-IS protocol XRL interface.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_click.xif,v 1.4 2005/01/20 00:43:17 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_click.xif,v 1.5 2007/07/11 22:18:18 pavlin Exp $ */
 
 /*
  * Click FEA XRL interface.

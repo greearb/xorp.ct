@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.10 2007/03/12 10:16:05 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.11 2007/05/08 18:13:58 pavlin Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.

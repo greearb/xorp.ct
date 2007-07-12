@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_fib.xif,v 1.2 2004/11/18 14:25:29 bms Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_fib.xif,v 1.3 2006/03/26 08:05:04 pavlin Exp $ */
 
 /*
  * FEA Forwarding Information Base XRL interface.

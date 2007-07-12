@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.10 2003/07/25 02:12:24 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp_mib_traps.xif,v 1.1 2003/07/31 01:17:39 jcardona Exp $ */
 
 /*
 ** XRL interface to send SNMP traps for BGP MIB (RFC 1657)

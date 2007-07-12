@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.21 2006/01/04 05:55:29 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.22 2007/03/22 20:48:20 bms Exp $ */
 
 /*
  * Routing Information Base XRL interface.

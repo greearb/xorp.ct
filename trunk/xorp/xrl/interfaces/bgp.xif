@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.32 2006/04/15 07:10:37 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.33 2006/07/05 22:46:57 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.

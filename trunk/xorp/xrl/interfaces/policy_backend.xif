@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/policy_backend.xif,v 1.1 2004/09/17 14:05:09 abittau Exp $ */
 
 /**
  * Policy backend XRL interface.

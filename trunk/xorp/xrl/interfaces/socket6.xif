@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.6 2007/03/28 13:41:42 schooley Exp $ */
+/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.7 2007/03/28 13:49:32 schooley Exp $ */
 
 /**
  * Interface implementing basic IPv6 socket functionality.  This interface
