@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.1 2007/07/11 22:18:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -51,16 +51,7 @@ extern "C" void destroy(FeaDataPlaneManager* fea_data_plane_manager)
 
 
 FeaDataPlaneManagerDummy::FeaDataPlaneManagerDummy(FeaNode& fea_node)
-    : FeaDataPlaneManager(fea_node, "Dummy"),
-      _ifconfig_get_dummy(NULL),
-      _ifconfig_set_dummy(NULL),
-      _ifconfig_observer_dummy(NULL),
-      _fibconfig_entry_get_dummy(NULL),
-      _fibconfig_entry_set_dummy(NULL),
-      _fibconfig_entry_observer_dummy(NULL),
-      _fibconfig_table_get_dummy(NULL),
-      _fibconfig_table_set_dummy(NULL),
-      _fibconfig_table_observer_dummy(NULL)
+    : FeaDataPlaneManager(fea_node, "Dummy")
 {
 }
 
@@ -76,77 +67,30 @@ FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
     if (_is_loaded_plugins)
 	return (XORP_OK);
 
-    XLOG_ASSERT(_ifconfig_get_dummy == NULL);
-    XLOG_ASSERT(_ifconfig_set_dummy == NULL);
-    XLOG_ASSERT(_ifconfig_observer_dummy == NULL);
-    XLOG_ASSERT(_fibconfig_entry_get_dummy == NULL);
-    XLOG_ASSERT(_fibconfig_entry_set_dummy == NULL);
-    XLOG_ASSERT(_fibconfig_entry_observer_dummy == NULL);
-    XLOG_ASSERT(_fibconfig_table_get_dummy == NULL);
-    XLOG_ASSERT(_fibconfig_table_set_dummy == NULL);
-    XLOG_ASSERT(_fibconfig_table_observer_dummy == NULL);
+    XLOG_ASSERT(_ifconfig_get == NULL);
+    XLOG_ASSERT(_ifconfig_set == NULL);
+    XLOG_ASSERT(_ifconfig_observer == NULL);
+    XLOG_ASSERT(_fibconfig_entry_get == NULL);
+    XLOG_ASSERT(_fibconfig_entry_set == NULL);
+    XLOG_ASSERT(_fibconfig_entry_observer == NULL);
+    XLOG_ASSERT(_fibconfig_table_get == NULL);
+    XLOG_ASSERT(_fibconfig_table_set == NULL);
+    XLOG_ASSERT(_fibconfig_table_observer == NULL);
 
     //
     // Load the plugins
     //
-    _ifconfig_get_dummy = new IfConfigGetDummy(*this);
-    _ifconfig_set_dummy = new IfConfigSetDummy(*this);
-    _ifconfig_observer_dummy = new IfConfigObserverDummy(*this);
-    _fibconfig_entry_get_dummy = new FibConfigEntryGetDummy(*this);
-    _fibconfig_entry_set_dummy = new FibConfigEntrySetDummy(*this);
-    _fibconfig_entry_observer_dummy = new FibConfigEntryObserverDummy(*this);
-    _fibconfig_table_get_dummy = new FibConfigTableGetDummy(*this);
-    _fibconfig_table_set_dummy = new FibConfigTableSetDummy(*this);
-    _fibconfig_table_observer_dummy = new FibConfigTableObserverDummy(*this);
-    _ifconfig_get = _ifconfig_get_dummy;
-    _ifconfig_set = _ifconfig_set_dummy;
-    _ifconfig_observer = _ifconfig_observer_dummy;
-    _fibconfig_entry_get = _fibconfig_entry_get_dummy;
-    _fibconfig_entry_set = _fibconfig_entry_set_dummy;
-    _fibconfig_entry_observer = _fibconfig_entry_observer_dummy;
-    _fibconfig_table_get = _fibconfig_table_get_dummy;
-    _fibconfig_table_set = _fibconfig_table_set_dummy;
-    _fibconfig_table_observer = _fibconfig_table_observer_dummy;
+    _ifconfig_get = new IfConfigGetDummy(*this);
+    _ifconfig_set = new IfConfigSetDummy(*this);
+    _ifconfig_observer = new IfConfigObserverDummy(*this);
+    _fibconfig_entry_get = new FibConfigEntryGetDummy(*this);
+    _fibconfig_entry_set = new FibConfigEntrySetDummy(*this);
+    _fibconfig_entry_observer = new FibConfigEntryObserverDummy(*this);
+    _fibconfig_table_get = new FibConfigTableGetDummy(*this);
+    _fibconfig_table_set = new FibConfigTableSetDummy(*this);
+    _fibconfig_table_observer = new FibConfigTableObserverDummy(*this);
 
     _is_loaded_plugins = true;
-
-    return (XORP_OK);
-}
-
-int
-FeaDataPlaneManagerDummy::unload_plugins(string& error_msg)
-{
-    if (! _is_loaded_plugins)
-	return (XORP_OK);
-
-    XLOG_ASSERT(_ifconfig_get_dummy != NULL);
-    XLOG_ASSERT(_ifconfig_set_dummy != NULL);
-    XLOG_ASSERT(_ifconfig_observer_dummy != NULL);
-    XLOG_ASSERT(_fibconfig_entry_get_dummy != NULL);
-    XLOG_ASSERT(_fibconfig_entry_set_dummy != NULL);
-    XLOG_ASSERT(_fibconfig_entry_observer_dummy != NULL);
-    XLOG_ASSERT(_fibconfig_table_get_dummy != NULL);
-    XLOG_ASSERT(_fibconfig_table_set_dummy != NULL);
-    XLOG_ASSERT(_fibconfig_table_observer_dummy != NULL);
-
-    //
-    // Unload the plugins
-    //
-    if (FeaDataPlaneManager::unload_plugins(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    //
-    // Reset the state
-    //
-    _ifconfig_get_dummy = NULL;
-    _ifconfig_set_dummy = NULL;
-    _ifconfig_observer_dummy = NULL;
-    _fibconfig_entry_get_dummy = NULL;
-    _fibconfig_entry_set_dummy = NULL;
-    _fibconfig_entry_observer_dummy = NULL;
-    _fibconfig_table_get_dummy = NULL;
-    _fibconfig_table_set_dummy = NULL;
-    _fibconfig_table_observer_dummy = NULL;
 
     return (XORP_OK);
 }
