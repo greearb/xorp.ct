@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.178 2007/06/26 17:46:25 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.179 2007/06/28 19:19:19 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -25,7 +25,7 @@ Release 1.5-WIP (2007/??/??)
     - 
 
   XRL:
-    - 
+    - Critical bug fix that can be triggered by malformatted XRLs.
 
   RTRMGR:
     - 
