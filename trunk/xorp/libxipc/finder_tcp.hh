@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.20 2007/02/16 22:46:06 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.21 2007/05/23 12:12:38 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -48,8 +48,10 @@ public:
      * @param errval error code, values are equivalent to errno.
      * @param data pointer to data
      * @param data_bytes size of data.
+     * @return true if the data was processed without an error and the
+     * connection was kept, otherwise false. 
      */
-    virtual void read_event(int		   errval,
+    virtual bool read_event(int		   errval,
 			    const uint8_t* data,
 			    uint32_t	   data_bytes) = 0;
 

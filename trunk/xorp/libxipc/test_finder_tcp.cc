@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.22 2007/02/16 22:46:08 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.23 2007/05/23 12:12:38 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -68,13 +68,14 @@ public:
 	: FinderTcpBase(e, fd), _name(name), _reads(0), _writes(0)
     {}
     
-    void read_event(int		   errval,
+    bool read_event(int		   errval,
 		    const uint8_t* data,
 		    uint32_t	   data_bytes)
     {
 	verbose_log("- %s %d %p %u\n", _name, errval, data,
 		    XORP_UINT_CAST(data_bytes));
 	_reads++;
+	return true;
     }
 
     void write_event(int	    errval,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.28 2006/10/12 01:24:46 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.29 2007/02/16 22:46:06 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -42,7 +42,7 @@ FinderTcpMessenger::~FinderTcpMessenger()
     drain_queue();
 }
 
-void
+bool
 FinderTcpMessenger::read_event(int	      errval,
 			       const uint8_t* data,
 			       uint32_t	      data_bytes)
@@ -53,7 +53,7 @@ FinderTcpMessenger::read_event(int	      errval,
 	 */
 	debug_msg("Got errval %d, data %p, data_bytes %u\n",
 		  errval, data, XORP_UINT_CAST(data_bytes));
-	return;
+	return true;
     }
 
     string s(data, data + data_bytes);
@@ -63,11 +63,11 @@ FinderTcpMessenger::read_event(int	      errval,
 	try {
 	    ParsedFinderXrlMessage fm(s.c_str());
 	    dispatch_xrl(fm.seqno(), fm.xrl());
-	    return;
+	    return true;
 	} catch (const WrongFinderMessageType&) {
 	    ParsedFinderXrlResponse fm(s.c_str());
 	    dispatch_xrl_response(fm.seqno(), fm.xrl_error(), fm.xrl_args());
-	    return;
+	    return true;
 	}
     } catch (const InvalidString& e) {
 	ex = e.str();
@@ -82,6 +82,7 @@ FinderTcpMessenger::read_event(int	      errval,
     }
     XLOG_ERROR("Got exception %s, closing connection", ex.c_str());
     close();
+    return false;
 }
 
 bool

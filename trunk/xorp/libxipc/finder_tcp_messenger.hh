@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.16 2007/02/16 22:46:06 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.17 2007/05/23 12:12:38 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -44,7 +44,7 @@ public:
     
 protected:
     // FinderTcpBase methods
-    void read_event(int		   errval,
+    bool read_event(int		   errval,
 		    const uint8_t* data,
 		    uint32_t	   data_bytes);
 
