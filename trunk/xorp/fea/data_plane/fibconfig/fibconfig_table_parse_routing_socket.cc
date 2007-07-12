@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.10 2007/06/07 01:28:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.11 2007/07/11 22:18:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -44,7 +44,13 @@
 // Reading route(4) manual page is a good start for understanding this
 //
 
-#ifdef HAVE_ROUTING_SOCKETS
+//
+// XXX: The FibConfigTableGetSysctl::parse_buffer_routing_socket()
+// static method is used by the FibConfigTableObserverRtmV2
+// Windows implementation as well even though Windows doesn't have
+// routing sockets.
+//
+#if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
 
 bool
 FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
@@ -132,4 +138,4 @@ FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
     return true;
 }
 
-#endif // HAVE_ROUTING_SOCKETS
+#endif // HAVE_ROUTING_SOCKETS || HOST_OS_WINDOWS
