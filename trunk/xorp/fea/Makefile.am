@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.95 2007/06/27 01:27:04 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.96 2007/07/11 22:18:01 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -27,7 +27,7 @@ TESTS		+= test_xrl_sockets4_udp.sh
 noinst_LTLIBRARIES = libfea.la libfea_data_plane_manager.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD		 = $(noinst_LTLIBRARIES)
+LDADD		 = libfea.la
 ### Data plane libraries
 LDADD		+= $(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la
 LDADD		+= $(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la
