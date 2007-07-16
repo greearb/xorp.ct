@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.hh,v 1.1 2007/06/07 01:28:42 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.hh,v 1.2 2007/07/11 22:18:11 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_RTMV2_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_RTMV2_HH__
@@ -22,7 +22,17 @@
 
 class FibConfigTableSetRtmV2 : public FibConfigTableSet {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     FibConfigTableSetRtmV2(FeaDataPlaneManager& fea_data_plane_manager);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~FibConfigTableSetRtmV2();
 
     /**

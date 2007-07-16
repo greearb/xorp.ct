@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.hh,v 1.1 2007/06/07 01:28:39 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.hh,v 1.2 2007/07/11 22:18:08 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_CLICK_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_CLICK_HH__
@@ -24,7 +24,17 @@
 class FibConfigTableGetClick : public FibConfigTableGet,
 			       public ClickSocket {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     FibConfigTableGetClick(FeaDataPlaneManager& fea_data_plane_manager);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~FibConfigTableGetClick();
 
     /**

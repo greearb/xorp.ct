@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.hh,v 1.1 2007/06/07 01:28:38 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.hh,v 1.2 2007/07/11 22:18:07 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_CLICK_HH__
@@ -33,7 +33,17 @@ class FibConfigEntrySetClick : public FibConfigEntrySet,
 			       public ClickSocket,
 			       public NexthopPortMapperObserver {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     FibConfigEntrySetClick(FeaDataPlaneManager& fea_data_plane_manager);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~FibConfigEntrySetClick();
 
     /**

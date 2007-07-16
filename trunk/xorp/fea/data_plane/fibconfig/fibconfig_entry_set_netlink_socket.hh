@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.hh,v 1.1 2007/06/07 01:28:38 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.hh,v 1.2 2007/07/11 22:18:08 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_NETLINK_SOCKET_HH__
@@ -24,7 +24,17 @@
 class FibConfigEntrySetNetlinkSocket : public FibConfigEntrySet,
 				       public NetlinkSocket {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     FibConfigEntrySetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~FibConfigEntrySetNetlinkSocket();
 
     /**

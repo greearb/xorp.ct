@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.5 2007/06/08 01:45:21 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.6 2007/06/27 01:27:06 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
@@ -57,7 +57,7 @@ public:
 	       uint8_t ip_protocol);
 
     /**
-     * Destructor
+     * Virtual destructor.
      */
     virtual ~IoIpSocket();
 

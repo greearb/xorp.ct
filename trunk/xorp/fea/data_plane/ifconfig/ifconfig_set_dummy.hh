@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.hh,v 1.3 2007/06/07 01:23:35 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.hh,v 1.4 2007/07/11 22:18:15 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__
@@ -22,7 +22,17 @@
 
 class IfConfigSetDummy : public IfConfigSet {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     IfConfigSetDummy(FeaDataPlaneManager& fea_data_plane_manager);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~IfConfigSetDummy();
 
     /**

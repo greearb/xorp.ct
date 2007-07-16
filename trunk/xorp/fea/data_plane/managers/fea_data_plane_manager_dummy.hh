@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.hh,v 1.1 2007/07/11 22:18:17 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.hh,v 1.2 2007/07/12 23:45:19 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_DUMMY_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_DUMMY_HH__
@@ -43,7 +43,7 @@ public:
     FeaDataPlaneManagerDummy(FeaNode& fea_node);
 
     /**
-     * Virtual destructor (in case this class is used as a base class).
+     * Virtual destructor.
      */
     virtual ~FeaDataPlaneManagerDummy();
 

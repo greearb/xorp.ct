@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.hh,v 1.3 2007/06/07 01:23:34 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.hh,v 1.4 2007/07/11 22:18:13 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IPHELPER_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IPHELPER_HH__
@@ -22,7 +22,17 @@
 
 class IfConfigGetIPHelper : public IfConfigGet {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     IfConfigGetIPHelper(FeaDataPlaneManager& fea_data_plane_manager);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~IfConfigGetIPHelper();
 
     /**

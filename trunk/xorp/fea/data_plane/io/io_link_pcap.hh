@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.1 2007/06/27 01:27:06 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.2 2007/06/27 18:54:24 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -66,7 +66,7 @@ public:
 	       uint16_t ether_type, const string& filter_program);
 
     /**
-     * Destructor
+     * Virtual destructor.
      */
     virtual ~IoLinkPcap();
 
