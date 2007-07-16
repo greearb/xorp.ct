@@ -12,19 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.13 2007/02/16 22:46:09 pavlin Exp $"
-
-#include <string.h>
-#include <stdio.h>
-
-#include <algorithm>
-#include <functional>
-#include <stdexcept>
-#include <string>
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.14 2007/07/12 21:23:23 pavlin Exp $"
 
 #include "xrl_module.h"
-#include "xrl_args.hh"
 
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
+#include <functional>
+#include <stdexcept>
+
+#include "xrl_args.hh"
 #include "xrl_tokens.hh"
 
 // ----------------------------------------------------------------------------
@@ -285,6 +284,8 @@ XrlArgs::get_ipvx(const char* name) const throw (BadArgs)
 	    xorp_throw(BadArgs, e.why());
 	}
     }
+    xorp_throw(BadArgs, c_format("Unknown error for atom name %s", name));
+    XLOG_UNREACHABLE();
 }
 
 void
@@ -322,6 +323,8 @@ XrlArgs::get_ipvxnet(const char* name) const throw (BadArgs)
 	    xorp_throw(BadArgs, e.why());
 	}
     }
+    xorp_throw(BadArgs, c_format("Unknown error for atom name %s", name));
+    XLOG_UNREACHABLE();
 }
 
 void
