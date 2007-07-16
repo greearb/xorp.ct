@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.65 2007/06/06 19:55:51 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.66 2007/07/11 22:18:03 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -29,10 +29,7 @@
 
 class EventLoop;
 class FeaNode;
-class IfConfigGet;
 class IfConfigErrorReporterBase;
-class IfConfigObserver;
-class IfConfigSet;
 class IfConfigTransactionManager;
 class IfConfigUpdateReporterBase;
 class NexthopPortMapper;

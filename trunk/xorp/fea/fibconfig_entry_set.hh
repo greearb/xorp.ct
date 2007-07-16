@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.8 2007/06/07 01:28:34 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.9 2007/07/11 22:18:02 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
 #define __FEA_FIBCONFIG_ENTRY_SET_HH__
@@ -26,12 +26,22 @@ class FibConfig;
 
 class FibConfigEntrySet {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     FibConfigEntrySet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _fibconfig(fea_data_plane_manager.fibconfig()),
 	  _fea_data_plane_manager(fea_data_plane_manager),
 	  _in_configuration(false)
     {}
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~FibConfigEntrySet() {}
 
     /**

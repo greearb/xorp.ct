@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.52 2007/06/07 01:23:02 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.53 2007/07/11 22:18:03 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -26,11 +26,21 @@ class IPvX;
 
 class IfConfigSet {
 public:
+    /**
+     * Constructor.
+     *
+     * @param fea_data_plane_manager the corresponding data plane manager
+     * (@see FeaDataPlaneManager).
+     */
     IfConfigSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _ifconfig(fea_data_plane_manager.ifconfig()),
 	  _fea_data_plane_manager(fea_data_plane_manager)
     {}
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~IfConfigSet() {}
 
     /**
