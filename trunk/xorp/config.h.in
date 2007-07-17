@@ -486,6 +486,18 @@
 /* Define to 1 if the system has the type `struct timespec'. */
 #undef HAVE_STRUCT_TIMESPEC
 
+/* Define to 1 if you have sysctl(IPCTL_FORWARDING) to get/set IPv4 unicast
+   forwarding */
+#undef HAVE_SYSCTL_IPCTL_FORWARDING
+
+/* Define to 1 if you have sysctl(IPV6CTL_ACCEPT_RTADV) to get/set IPv6 Router
+   Advertisement */
+#undef HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV
+
+/* Define to 1 if you have sysctl(IPV6CTL_FORWARDING) to get/set IPv6 unicast
+   forwarding */
+#undef HAVE_SYSCTL_IPV6CTL_FORWARDING
+
 /* Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method */
 #undef HAVE_SYSCTL_NET_RT_DUMP
 

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acifconf.m4,v 1.5 2007/04/14 07:00:48 pavlin Exp $
+dnl $XORP: xorp/config/acifconf.m4,v 1.6 2007/06/26 01:24:28 pavlin Exp $
 dnl
 
 dnl
@@ -12,7 +12,7 @@ dnl -----------------------------------------------
 dnl Check for header files that might be used later
 dnl -----------------------------------------------
 
-AC_CHECK_HEADERS([sys/types.h sys/param.h sys/socket.h sys/sockio.h])
+AC_CHECK_HEADERS([sys/types.h sys/param.h sys/socket.h sys/sockio.h netinet/in.h])
 
 dnl XXX: Header files <net/if.h> might need <sys/types.h> and <sys/socket.h>
 AC_CHECK_HEADERS([sys/types.h sys/socket.h])
@@ -189,6 +189,129 @@ AC_TRY_COMPILE([
 ],
     [AC_DEFINE(HAVE_SYSCTL_NET_RT_DUMP, 1,
 	       [Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
+
+
+dnl ---------------------------------------------------------------------
+dnl Check for sysctl(IPCTL_FORWARDING) to get/set IPv4 unicast forwarding
+dnl ---------------------------------------------------------------------
+
+AC_MSG_CHECKING(whether the system has sysctl(IPCTL_FORWARDING) to get/set IPv4 unicast forwarding)
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#include <sys/sysctl.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],
+[
+{
+    int enabled = 0;
+    size_t sz = sizeof(enabled);
+
+    /* IPv4 unicast forwarding */
+    int mib1[] = {CTL_NET, AF_INET, IPPROTO_IP, IPCTL_FORWARDING};
+
+    if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), &enabled, &sz, NULL, 0) < 0)
+	return (1);
+
+    return (0);
+}
+],
+    [AC_DEFINE(HAVE_SYSCTL_IPCTL_FORWARDING, 1,
+	       [Define to 1 if you have sysctl(IPCTL_FORWARDING) to get/set IPv4 unicast forwarding])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
+
+
+dnl -----------------------------------------------------------------------
+dnl Check for sysctl(IPV6CTL_FORWARDING) to get/set IPv6 unicast forwarding
+dnl -----------------------------------------------------------------------
+
+AC_MSG_CHECKING(whether the system has sysctl(IPV6CTL_FORWARDING) to get/set IPv6 unicast forwarding)
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#include <sys/sysctl.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],
+[
+{
+    int enabled = 0;
+    size_t sz = sizeof(enabled);
+
+    /* IPv6 unicast forwarding */
+    int mib1[] = {CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_FORWARDING};
+
+    if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), &enabled, &sz, NULL, 0) < 0)
+	return (1);
+
+    return (0);
+}
+],
+    [AC_DEFINE(HAVE_SYSCTL_IPV6CTL_FORWARDING, 1,
+	       [Define to 1 if you have sysctl(IPV6CTL_FORWARDING) to get/set IPv6 unicast forwarding])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
+
+
+dnl ---------------------------------------------------------------------------
+dnl Check for sysctl(IPV6CTL_ACCEPT_RTADV) to get/set IPv6 Router Advertisement
+dnl ---------------------------------------------------------------------------
+
+AC_MSG_CHECKING(whether the system has sysctl(IPV6CTL_ACCEPT_RTADV) to get/set IPv6 Router Advertisement)
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#include <sys/sysctl.h>
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+],
+[
+{
+    int enabled = 0;
+    size_t sz = sizeof(enabled);
+
+    /* IPv6 Router Advertisement */
+    int mib1[] = {CTL_NET, AF_INET6, IPPROTO_IPV6, IPV6CTL_ACCEPT_RTADV};
+
+    if (sysctl(mib1, sizeof(mib1)/sizeof(mib1[0]), &enabled, &sz, NULL, 0) < 0)
+	return (1);
+
+    return (0);
+}
+],
+    [AC_DEFINE(HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV, 1,
+	       [Define to 1 if you have sysctl(IPV6CTL_ACCEPT_RTADV) to get/set IPv6 Router Advertisement])
      AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)])
 
