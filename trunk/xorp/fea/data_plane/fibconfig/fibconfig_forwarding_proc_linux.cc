@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_proc_linux.cc,v 1.1 2007/07/17 22:53:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -226,7 +226,7 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled4(bool v,
     fh = fopen(PROC_LINUX_FORWARDING_FILE_V4.c_str(), "w");
     if (fh == NULL) {
 	error_msg = c_format("Cannot open file %s for writing: %s",
-			     PROC_LINUX_FORWARDING_FILE_V4.c_srt(),
+			     PROC_LINUX_FORWARDING_FILE_V4.c_str(),
 			     strerror(errno));
 	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
