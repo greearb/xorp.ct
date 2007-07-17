@@ -13,7 +13,7 @@
  * notice is a summary of the XORP LICENSE file; the license in that file is
  * legally binding.
  *
- * $XORP: xorp/fea/data_plane/control_socket/windows_routing_socket.h,v 1.1 2007/05/01 08:21:56 pavlin Exp $
+ * $XORP: xorp/fea/data_plane/control_socket/windows_routing_socket.h,v 1.2 2007/06/04 23:17:33 pavlin Exp $
  *
  */
 
@@ -59,6 +59,10 @@
 
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_ROUTING_SOCKET_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_ROUTING_SOCKET_HH__
+
+#include "libxorp/xorp.h"
+
+#ifdef HOST_OS_WINDOWS
 
 #ifdef  __cplusplus
 extern "C" {
@@ -305,5 +309,7 @@ struct ifa_msghdr {
 #ifdef  __cplusplus
 }
 #endif
+
+#endif // HOST_OS_WINDOWS
 
 #endif /* __FEA_DATA_PLANE_CONTROL_SOCKET_WINDOWS_ROUTING_SOCKET_HH__ */
