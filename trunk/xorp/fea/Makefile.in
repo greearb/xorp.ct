@@ -63,10 +63,11 @@ am_libfea_la_OBJECTS = addr_table.lo fea_io.lo fea_node.lo \
 	xrl_io_ip_manager.lo xrl_io_link_manager.lo xrl_mfea_node.lo \
 	xrl_socket_cmds.lo xrl_socket_server.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
-libfea_data_plane_manager_la_LIBADD =
-am_libfea_data_plane_manager_la_OBJECTS = fea_data_plane_manager.lo
-libfea_data_plane_manager_la_OBJECTS =  \
-	$(am_libfea_data_plane_manager_la_OBJECTS)
+libfea_data_plane_base_la_LIBADD =
+am_libfea_data_plane_base_la_OBJECTS = fea_data_plane_manager.lo \
+	fibconfig_forwarding.lo
+libfea_data_plane_base_la_OBJECTS =  \
+	$(am_libfea_data_plane_base_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -105,7 +106,7 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
-	$(top_builddir)/fea/libfea_data_plane_manager.la \
+	$(top_builddir)/fea/libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -141,7 +142,7 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
-	$(top_builddir)/fea/libfea_data_plane_manager.la \
+	$(top_builddir)/fea/libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -195,12 +196,12 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libfea_la_SOURCES) $(libfea_data_plane_manager_la_SOURCES) \
+SOURCES = $(libfea_la_SOURCES) $(libfea_data_plane_base_la_SOURCES) \
 	$(test_xrl_sockets4_tcp_SOURCES) \
 	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
 	$(xorp_fea_dummy_SOURCES)
 DIST_SOURCES = $(libfea_la_SOURCES) \
-	$(libfea_data_plane_manager_la_SOURCES) \
+	$(libfea_data_plane_base_la_SOURCES) \
 	$(test_xrl_sockets4_tcp_SOURCES) \
 	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
 	$(xorp_fea_dummy_SOURCES)
@@ -356,7 +357,7 @@ check_SCRIPTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
 TESTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
 
 # -- No-install Libraries
-noinst_LTLIBRARIES = libfea.la libfea_data_plane_manager.la
+noinst_LTLIBRARIES = libfea.la libfea_data_plane_base.la
 
 # -- Libraries and library flags to link the binary programs
 ### Data plane libraries
@@ -375,7 +376,7 @@ LDADD = libfea.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
-	$(top_builddir)/fea/libfea_data_plane_manager.la \
+	$(top_builddir)/fea/libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -409,8 +410,9 @@ xorp_fea_dummy_CXXFLAGS = -DFEA_DUMMY
 xorp_fea_dummy_SOURCES = xorp_fea.cc
 
 # -- Library Sources
-libfea_data_plane_manager_la_SOURCES = fea_data_plane_manager.hh \
-	fea_data_plane_manager.cc
+libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
+	fibconfig_forwarding.hh fea_data_plane_manager.cc \
+	fibconfig_forwarding.cc
 libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh fea_io.hh \
 	fea_node.hh fte.hh fibconfig.hh fibconfig_entry_get.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
@@ -520,8 +522,8 @@ clean-noinstLTLIBRARIES:
 	done
 libfea.la: $(libfea_la_OBJECTS) $(libfea_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfea_la_OBJECTS) $(libfea_la_LIBADD) $(LIBS)
-libfea_data_plane_manager.la: $(libfea_data_plane_manager_la_OBJECTS) $(libfea_data_plane_manager_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfea_data_plane_manager_la_OBJECTS) $(libfea_data_plane_manager_la_LIBADD) $(LIBS)
+libfea_data_plane_base.la: $(libfea_data_plane_base_la_OBJECTS) $(libfea_data_plane_base_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfea_data_plane_base_la_OBJECTS) $(libfea_data_plane_base_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -600,6 +602,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_forwarding.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_addr_table.Plo@am__quote@

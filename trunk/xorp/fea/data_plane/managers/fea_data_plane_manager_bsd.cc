@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.cc,v 1.1 2007/07/11 22:18:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -25,6 +25,7 @@
 #include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_ioctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_routing_socket.hh"
+#include "fea/data_plane/fibconfig/fibconfig_forwarding_sysctl.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.hh"
@@ -72,6 +73,7 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
+    XLOG_ASSERT(_fibconfig_forwarding == NULL);
     XLOG_ASSERT(_fibconfig_entry_get == NULL);
     XLOG_ASSERT(_fibconfig_entry_set == NULL);
     XLOG_ASSERT(_fibconfig_entry_observer == NULL);
@@ -96,6 +98,10 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
 
 #if defined(HAVE_ROUTING_SOCKETS)
     _ifconfig_observer = new IfConfigObserverRoutingSocket(*this);
+#endif
+
+#if defined(HAVE_SYSCTL_IPCTL_FORWARDING) || defined(HAVE_SYSCTL_IPV6CTL_FORWARDING) || defined(HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV)
+    _fibconfig_forwarding = new FibConfigForwardingSysctl(*this);
 #endif
 
 #if defined(HAVE_ROUTING_SOCKETS)

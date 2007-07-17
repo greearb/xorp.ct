@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.1 2007/07/11 22:18:18 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -26,6 +26,7 @@
 #include "fea/data_plane/ifconfig/ifconfig_get_iphelper.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_iphelper.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_iphelper.hh"
+#include "fea/data_plane/fibconfig/fibconfig_forwarding_windows.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.hh"
@@ -78,6 +79,7 @@ FeaDataPlaneManagerWindows::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
+    XLOG_ASSERT(_fibconfig_forwarding == NULL);
     XLOG_ASSERT(_fibconfig_entry_get == NULL);
     XLOG_ASSERT(_fibconfig_entry_set == NULL);
     XLOG_ASSERT(_fibconfig_entry_observer == NULL);
@@ -93,6 +95,7 @@ FeaDataPlaneManagerWindows::load_plugins(string& error_msg)
     _ifconfig_get = new IfConfigGetIPHelper(*this);
     _ifconfig_set = new IfConfigSetIPHelper(*this);
     _ifconfig_observer = new IfConfigObserverIPHelper(*this);
+    _fibconfig_forwarding = new FibConfigForwardingWindows(*this);
     _fibconfig_entry_get = new FibConfigEntryGetIPHelper(*this);
     // _fibconfig_entry_get = new FibConfigEntryGetRtmV2(*this);
     if (is_rras_running) {

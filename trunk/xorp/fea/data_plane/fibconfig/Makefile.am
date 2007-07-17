@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/data_plane/fibconfig/Makefile.am,v 1.1 2007/05/01 02:33:32 pavlin Exp $
+## $XORP: xorp/fea/data_plane/fibconfig/Makefile.am,v 1.2 2007/06/07 01:28:35 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -27,6 +27,11 @@ libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_iphelper.hh
 libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_netlink_socket.hh
 libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_routing_socket.hh
 libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_rtmv2.hh
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_dummy.hh
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_proc_linux.hh
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_solaris.hh
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_sysctl.hh
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_windows.hh
 libxorp_fibconfig_la_SOURCES	+= fibconfig_table_get_click.hh
 libxorp_fibconfig_la_SOURCES	+= fibconfig_table_get_dummy.hh
 libxorp_fibconfig_la_SOURCES	+= fibconfig_table_get_iphelper.hh
@@ -63,6 +68,11 @@ libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_iphelper.cc
 libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_netlink_socket.cc
 libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_routing_socket.cc
 libxorp_fibconfig_la_SOURCES	+= fibconfig_entry_set_rtmv2.cc
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_dummy.cc
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_proc_linux.cc
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_solaris.cc
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_sysctl.cc
+libxorp_fibconfig_la_SOURCES	+= fibconfig_forwarding_windows.cc
 libxorp_fibconfig_la_SOURCES	+= fibconfig_table_get_click.cc
 libxorp_fibconfig_la_SOURCES	+= fibconfig_table_get_dummy.cc
 libxorp_fibconfig_la_SOURCES	+= fibconfig_table_get_iphelper.cc

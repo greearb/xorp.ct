@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.8 2007/06/07 01:28:34 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.9 2007/07/11 22:18:02 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -27,7 +27,7 @@
 #include "libxorp/trie.hh"
 
 #include "fte.hh"
-
+#include "fibconfig_forwarding.hh"
 #include "fibconfig_entry_get.hh"
 #include "fibconfig_entry_set.hh"
 #include "fibconfig_entry_observer.hh"
@@ -37,12 +37,6 @@
 
 class EventLoop;
 class FeaNode;
-class FibConfigEntryGet;
-class FibConfigEntrySet;
-class FibConfigEntryObserver;
-class FibConfigTableGet;
-class FibConfigTableSet;
-class FibConfigTableObserver;
 class FibConfigTransactionManager;
 class FibTableObserverBase;
 class IfTree;
@@ -140,6 +134,25 @@ public:
     int add_transaction_operation(uint32_t tid,
 				  const TransactionManager::Operation& op,
 				  string& error_msg);
+
+    /**
+     * Register @ref FibConfigForwarding plugin.
+     *
+     * @param fibconfig_forwarding the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_fibconfig_forwarding(FibConfigForwarding *fibconfig_forwarding,
+				      bool is_exclusive);
+
+    /**
+     * Unregister @ref FibConfigForwarding plugin.
+     *
+     * @param fibconfig_forwarding the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_fibconfig_forwarding(FibConfigForwarding* fibconfig_forwarding);
 
     /**
      * Register @ref FibConfigEntryGet plugin.
@@ -287,7 +300,180 @@ public:
      * @return true configuration success pushed down into forwarding table.
      */
     bool end_configuration(string& error_msg);
+
+    /**
+     * Return true if the underlying system supports IPv4.
+     * 
+     * @return true if the underlying system supports IPv4, otherwise false.
+     */
+    bool have_ipv4() const;
+
+    /**
+     * Return true if the underlying system supports IPv6.
+     * 
+     * @return true if the underlying system supports IPv6, otherwise false.
+     */
+    bool have_ipv6() const;
+
+    /**
+     * Test whether the IPv4 unicast forwarding engine retains existing
+     * XORP forwarding entries on startup.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_startup4() const {
+	return (_unicast_forwarding_entries_retain_on_startup4);
+    }
+
+    /**
+     * Test whether the IPv4 unicast forwarding engine retains existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_shutdown4() const {
+	return (_unicast_forwarding_entries_retain_on_shutdown4);
+    }
+
+    /**
+     * Test whether the IPv6 unicast forwarding engine retains existing
+     * XORP forwarding entries on startup.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_startup6() const {
+	return (_unicast_forwarding_entries_retain_on_startup6);
+    }
+
+    /**
+     * Test whether the IPv6 unicast forwarding engine retains existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_shutdown6() const {
+	return (_unicast_forwarding_entries_retain_on_shutdown6);
+    }
+
+    /**
+     * Set the IPv4 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on startup.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_startup4(bool retain,
+							  string& error_msg);
+
+    /**
+     * Set the IPv4 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
+							   string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on startup.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_startup6(bool retain,
+							  string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
+							   string& error_msg);
+
+    /**
+     * Test whether the IPv4 unicast forwarding engine is enabled or disabled
+     * to forward packets.
+     * 
+     * @param ret_value if true on return, then the IPv4 unicast forwarding
+     * is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const;
+
+    /**
+     * Test whether the IPv6 unicast forwarding engine is enabled or disabled
+     * to forward packets.
+     * 
+     * @param ret_value if true on return, then the IPv6 unicast forwarding
+     * is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const;
     
+    /**
+     * Test whether the acceptance of IPv6 Router Advertisement messages is
+     * enabled or disabled.
+     * 
+     * @param ret_value if true on return, then the acceptance of IPv6 Router
+     * Advertisement messages is enabled, otherwise is disabled.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int accept_rtadv_enabled6(bool& ret_value, string& error_msg) const;
+    
+    /**
+     * Set the IPv4 unicast forwarding engine to enable or disable forwarding
+     * of packets.
+     * 
+     * @param v if true, then enable IPv4 unicast forwarding, otherwise
+     * disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_enabled4(bool v, string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding engine to enable or disable forwarding
+     * of packets.
+     * 
+     * @param v if true, then enable IPv6 unicast forwarding, otherwise
+     * disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_enabled6(bool v, string& error_msg);
+    
+    /**
+     * Enable or disable the acceptance of IPv6 Router Advertisement messages
+     * from other routers. It should be enabled for hosts, and disabled for
+     * routers.
+     * 
+     * @param v if true, then enable the acceptance of IPv6 Router
+     * Advertisement messages, otherwise disable it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_accept_rtadv_enabled6(bool v, string& error_msg);
+
     /**
      * Add a single routing entry. Must be within a configuration interval.
      *
@@ -446,193 +632,6 @@ public:
 			       const FibConfigTableObserver* fibconfig_table_observer);
 
     /**
-     * Return true if the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    bool have_ipv4() const { return _have_ipv4; }
-
-    /**
-     * Return true if the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    bool have_ipv6() const { return _have_ipv6; }
-
-    /**
-     * Test if the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    bool test_have_ipv4() const;
-
-    /**
-     * Test if the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    bool test_have_ipv6() const;
-
-    /**
-     * Test whether the IPv4 unicast forwarding engine is enabled or disabled
-     * to forward packets.
-     * 
-     * @param ret_value if true on return, then the IPv4 unicast forwarding
-     * is enabled, otherwise is disabled.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const;
-
-    /**
-     * Test whether the IPv6 unicast forwarding engine is enabled or disabled
-     * to forward packets.
-     * 
-     * @param ret_value if true on return, then the IPv6 unicast forwarding
-     * is enabled, otherwise is disabled.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const;
-    
-    /**
-     * Test whether the acceptance of IPv6 Router Advertisement messages is
-     * enabled or disabled.
-     * 
-     * @param ret_value if true on return, then the acceptance of IPv6 Router
-     * Advertisement messages is enabled, otherwise is disabled.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int accept_rtadv_enabled6(bool& ret_value, string& error_msg) const;
-    
-    /**
-     * Set the IPv4 unicast forwarding engine to enable or disable forwarding
-     * of packets.
-     * 
-     * @param v if true, then enable IPv4 unicast forwarding, otherwise
-     * disable it.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_unicast_forwarding_enabled4(bool v, string& error_msg);
-
-    /**
-     * Set the IPv6 unicast forwarding engine to enable or disable forwarding
-     * of packets.
-     * 
-     * @param v if true, then enable IPv6 unicast forwarding, otherwise
-     * disable it.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_unicast_forwarding_enabled6(bool v, string& error_msg);
-    
-    /**
-     * Enable or disable the acceptance of IPv6 Router Advertisement messages
-     * from other routers. It should be enabled for hosts, and disabled for
-     * routers.
-     * 
-     * @param v if true, then enable the acceptance of IPv6 Router
-     * Advertisement messages, otherwise disable it.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_accept_rtadv_enabled6(bool v, string& error_msg);
-
-    /**
-     * Test whether the IPv4 unicast forwarding engine retains existing
-     * XORP forwarding entries on startup.
-     *
-     * @return true if the XORP unicast forwarding entries are retained,
-     * otherwise false.
-     */
-    bool unicast_forwarding_entries_retain_on_startup4() const {
-	return (_unicast_forwarding_entries_retain_on_startup4);
-    }
-
-    /**
-     * Test whether the IPv4 unicast forwarding engine retains existing
-     * XORP forwarding entries on shutdown.
-     *
-     * @return true if the XORP unicast forwarding entries are retained,
-     * otherwise false.
-     */
-    bool unicast_forwarding_entries_retain_on_shutdown4() const {
-	return (_unicast_forwarding_entries_retain_on_shutdown4);
-    }
-
-    /**
-     * Test whether the IPv6 unicast forwarding engine retains existing
-     * XORP forwarding entries on startup.
-     *
-     * @return true if the XORP unicast forwarding entries are retained,
-     * otherwise false.
-     */
-    bool unicast_forwarding_entries_retain_on_startup6() const {
-	return (_unicast_forwarding_entries_retain_on_startup6);
-    }
-
-    /**
-     * Test whether the IPv6 unicast forwarding engine retains existing
-     * XORP forwarding entries on shutdown.
-     *
-     * @return true if the XORP unicast forwarding entries are retained,
-     * otherwise false.
-     */
-    bool unicast_forwarding_entries_retain_on_shutdown6() const {
-	return (_unicast_forwarding_entries_retain_on_shutdown6);
-    }
-
-    /**
-     * Set the IPv4 unicast forwarding engine whether to retain existing
-     * XORP forwarding entries on startup.
-     *
-     * @param retain if true, then retain the XORP forwarding entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_unicast_forwarding_entries_retain_on_startup4(bool retain,
-							  string& error_msg);
-
-    /**
-     * Set the IPv4 unicast forwarding engine whether to retain existing
-     * XORP forwarding entries on shutdown.
-     *
-     * @param retain if true, then retain the XORP forwarding entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
-							   string& error_msg);
-
-    /**
-     * Set the IPv6 unicast forwarding engine whether to retain existing
-     * XORP forwarding entries on startup.
-     *
-     * @param retain if true, then retain the XORP forwarding entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_unicast_forwarding_entries_retain_on_startup6(bool retain,
-							  string& error_msg);
-
-    /**
-     * Set the IPv6 unicast forwarding engine whether to retain existing
-     * XORP forwarding entries on shutdown.
-     *
-     * @param retain if true, then retain the XORP forwarding entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
-							   string& error_msg);
-    
-    /**
      * Get the IPv4 Trie (used for testing purpose).
      * 
      * @return the IPv4 Trie.
@@ -662,6 +661,7 @@ private:
     //
     FibConfigTransactionManager*	_ftm;
 
+    list<FibConfigForwarding*>		_fibconfig_forwarding_plugins;
     list<FibConfigEntryGet*>		_fibconfig_entry_gets;
     list<FibConfigEntrySet*>		_fibconfig_entry_sets;
     list<FibConfigEntryObserver*>	_fibconfig_entry_observers;
@@ -670,14 +670,7 @@ private:
     list<FibConfigTableObserver*>	_fibconfig_table_observers;
     
     //
-    // Original state from the underlying system before the FEA was started
-    //
-    bool	_unicast_forwarding_enabled4;
-    bool	_unicast_forwarding_enabled6;
-    bool	_accept_rtadv_enabled6;
-
-    //
-    // Unicast forwarding entries properties
+    // Configured unicast forwarding entries properties
     //
     bool	_unicast_forwarding_entries_retain_on_startup4;
     bool	_unicast_forwarding_entries_retain_on_shutdown4;
@@ -687,19 +680,8 @@ private:
     //
     // Misc other state
     //
-    bool	_have_ipv4;
-    bool	_have_ipv6;
     bool	_is_running;
     list<FibTableObserverBase* > _fib_table_observers;
-
-#ifdef HOST_OS_WINDOWS
-    //
-    // State for Windows EnableRouter() API function.
-    //
-    HANDLE	_event;
-    OVERLAPPED  _overlapped;
-    int		_enablecnt;
-#endif
 };
 
 /**

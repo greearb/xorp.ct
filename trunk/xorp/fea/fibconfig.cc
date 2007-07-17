@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.9 2007/06/07 01:28:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.10 2007/07/11 22:18:02 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,51 +22,11 @@
 #include "libxorp/debug.h"
 #include "libxorp/profile.hh"
 
-#include "libcomm/comm_api.h"
-
-#ifdef HAVE_STROPTS_H
-#include <stropts.h>
-#endif
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-
-#ifdef HAVE_IPHLPAPI_H
-#include <iphlpapi.h>
-#endif
-
-#ifdef HAVE_INET_ND_H
-#include <inet/nd.h>
-#endif
-
-#ifdef HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
-#endif
-
 #include "profile_vars.hh"
 #include "fibconfig.hh"
 #include "fibconfig_transaction.hh"
 #include "fea_node.hh"
 
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
-#include "fea/data_plane/control_socket/windows_routing_socket.h"
-#include "fea/data_plane/control_socket/windows_rras_support.hh"
-#endif
-
-#define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
-#define PROC_LINUX_FILE_FORWARDING_V6 "/proc/sys/net/ipv6/conf/all/forwarding"
-#define DEV_SOLARIS_DRIVER_FORWARDING_V4 "/dev/ip"
-#define DEV_SOLARIS_DRIVER_FORWARDING_V6 "/dev/ip6"
-#define DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V4 "ip_forwarding"
-#define DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V6 "ip6_forwarding"
-#define DEV_SOLARIS_DRIVER_PARAMETER_IGNORE_REDIRECT_V6 "ip6_ignore_redirect"
-
-#ifdef __MINGW32__
-#define MIB_IP_FORWARDING	1
-#define MIB_IP_NOT_FORWARDING	2
-#endif
 
 //
 // Unicast forwarding table related configuration.
@@ -80,56 +40,13 @@ FibConfig::FibConfig(FeaNode& fea_node, const IfTree& iftree)
       _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
       _iftree(iftree),
       _ftm(NULL),
-      _unicast_forwarding_enabled4(false),
-      _unicast_forwarding_enabled6(false),
-      _accept_rtadv_enabled6(false),
       _unicast_forwarding_entries_retain_on_startup4(false),
       _unicast_forwarding_entries_retain_on_shutdown4(false),
       _unicast_forwarding_entries_retain_on_startup6(false),
       _unicast_forwarding_entries_retain_on_shutdown6(false),
-      _have_ipv4(false),
-      _have_ipv6(false),
       _is_running(false)
 {
-    string error_msg;
-
     _ftm = new FibConfigTransactionManager(_eventloop, *this);
-
-    //
-    // Test if the system supports IPv4 and IPv6 respectively
-    //
-    _have_ipv4 = test_have_ipv4();
-    _have_ipv6 = test_have_ipv6();
-
-    //
-    // Get the old state from the underlying system
-    //
-    if (_have_ipv4) {
-	if (unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
-					error_msg) < 0) {
-	    XLOG_FATAL("%s", error_msg.c_str());
-	}
-    }
-#ifdef HAVE_IPV6
-    if (_have_ipv6) {
-	if (unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
-					error_msg) < 0) {
-	    XLOG_FATAL("%s", error_msg.c_str());
-	}
-	if (accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
-	    XLOG_FATAL("%s", error_msg.c_str());
-	}
-    }
-#endif // HAVE_IPV6
-
-#ifdef HOST_OS_WINDOWS
-    _event = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (_event == NULL)
-	XLOG_FATAL("Could not create Win32 event object.");
-    memset(&_overlapped, 0, sizeof(_overlapped));
-    _overlapped.hEvent = _event;
-    _enablecnt = 0;
-#endif
 }
 
 FibConfig::~FibConfig()
@@ -141,14 +58,6 @@ FibConfig::~FibConfig()
 		   "the forwarding table information: %s",
 		   error_msg.c_str());
     }
-
-#ifdef HOST_OS_WINDOWS
-    if (_enablecnt > 0) {
-	XLOG_WARNING("EnableRouter() without %d matching "
-		     "UnenableRouter() calls.", _enablecnt);
-    }
-    CloseHandle(_event);
-#endif
 
     if (_ftm != NULL) {
 	delete _ftm;
@@ -229,6 +138,98 @@ FibConfig::commit_transaction(uint32_t tid, string& error_msg)
 	error_msg = ftm_error_msg;
 	return (XORP_ERROR);
     }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::register_fibconfig_forwarding(FibConfigForwarding* fibconfig_forwarding,
+					bool is_exclusive)
+{
+    if (is_exclusive)
+	_fibconfig_forwarding_plugins.clear();
+
+    if ((fibconfig_forwarding != NULL)
+	&& (find(_fibconfig_forwarding_plugins.begin(),
+		 _fibconfig_forwarding_plugins.end(),
+		 fibconfig_forwarding)
+	    == _fibconfig_forwarding_plugins.end())) {
+	_fibconfig_forwarding_plugins.push_back(fibconfig_forwarding);
+
+	//
+	// XXX: Push the current config into the new method
+	//
+	if (fibconfig_forwarding->is_running()) {
+	    bool v = false;
+	    string error_msg;
+	    string manager_name = fibconfig_forwarding->fea_data_plane_manager().manager_name();
+
+	    if (have_ipv4()) {
+		if (unicast_forwarding_enabled4(v, error_msg) != XORP_OK) {
+		    XLOG_ERROR("Cannot push the current IPv4 forwarding "
+			       "information state into the %s mechanism, "
+			       "because failed to obtain the current state: %s",
+			       manager_name.c_str(), error_msg.c_str());
+		} else {
+		    if (fibconfig_forwarding->set_unicast_forwarding_enabled4(v, error_msg)
+			!= XORP_OK) {
+			XLOG_ERROR("Cannot push the current IPv4 forwarding "
+				   "information state into the %s mechanism: %s",
+				   manager_name.c_str(), error_msg.c_str());
+		    }
+		}
+	    }
+
+#ifdef HAVE_IPV6
+	    if (have_ipv6()) {
+		if (unicast_forwarding_enabled6(v, error_msg) != XORP_OK) {
+		    XLOG_ERROR("Cannot push the current IPv6 forwarding "
+			       "information state into the %s mechanism, "
+			       "because failed to obtain the current state: %s",
+			       manager_name.c_str(), error_msg.c_str());
+		} else {
+		    if (fibconfig_forwarding->set_unicast_forwarding_enabled6(v, error_msg)
+			!= XORP_OK) {
+			XLOG_ERROR("Cannot push the current IPv6 forwarding "
+				   "information state into the %s mechanism: %s",
+				   manager_name.c_str(), error_msg.c_str());
+		    }
+		}
+
+		if (accept_rtadv_enabled6(v, error_msg) != XORP_OK) {
+		    XLOG_ERROR("Cannot push the current IPv6 forwarding "
+			       "information state into the %s mechanism, "
+			       "because failed to obtain the current state: %s",
+			       manager_name.c_str(), error_msg.c_str());
+		} else {
+		    if (fibconfig_forwarding->set_accept_rtadv_enabled6(v, error_msg)
+			!= XORP_OK) {
+			XLOG_ERROR("Cannot push the current IPv6 forwarding "
+				   "information state into the %s mechanism: %s",
+				   manager_name.c_str(), error_msg.c_str());
+		    }
+		}
+	    }
+#endif // HAVE_IPV6
+	}
+    }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::unregister_fibconfig_forwarding(FibConfigForwarding* fibconfig_forwarding)
+{
+    if (fibconfig_forwarding == NULL)
+	return (XORP_ERROR);
+
+    list<FibConfigForwarding*>::iterator iter;
+    iter = find(_fibconfig_forwarding_plugins.begin(),
+		_fibconfig_forwarding_plugins.end(),
+		fibconfig_forwarding);
+    if (iter == _fibconfig_forwarding_plugins.end())
+	return (XORP_ERROR);
+    _fibconfig_forwarding_plugins.erase(iter);
 
     return (XORP_OK);
 }
@@ -479,6 +480,7 @@ FibConfig::unregister_fibconfig_table_observer(FibConfigTableObserver* fibconfig
 int
 FibConfig::start(string& error_msg)
 {
+    list<FibConfigForwarding*>::iterator fibconfig_forwarding_iter;
     list<FibConfigEntryGet*>::iterator fibconfig_entry_get_iter;
     list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
     list<FibConfigEntryObserver*>::iterator fibconfig_entry_observer_iter;
@@ -492,6 +494,10 @@ FibConfig::start(string& error_msg)
     //
     // Check whether all mechanisms are available
     //
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No mechanism to configure unicast forwarding");
+	return (XORP_ERROR);
+    }
     if (_fibconfig_entry_gets.empty()) {
 	error_msg = c_format("No mechanism to get forwarding table entries");
 	return (XORP_ERROR);
@@ -515,6 +521,17 @@ FibConfig::start(string& error_msg)
     if (_fibconfig_table_observers.empty()) {
 	error_msg = c_format("No mechanism to observe the forwarding table");
 	return (XORP_ERROR);
+    }
+
+    //
+    // Start the FibConfigForwarding methods
+    //
+    for (fibconfig_forwarding_iter = _fibconfig_forwarding_plugins.begin();
+	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
+	 ++fibconfig_forwarding_iter) {
+	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
+	if (fibconfig_forwarding->start(error_msg) < 0)
+	    return (XORP_ERROR);
     }
 
     //
@@ -591,6 +608,7 @@ FibConfig::start(string& error_msg)
 int
 FibConfig::stop(string& error_msg)
 {
+    list<FibConfigForwarding*>::iterator fibconfig_forwarding_iter;
     list<FibConfigEntryGet*>::iterator fibconfig_entry_get_iter;
     list<FibConfigEntrySet*>::iterator fibconfig_entry_set_iter;
     list<FibConfigEntryObserver*>::iterator fibconfig_entry_observer_iter;
@@ -696,33 +714,19 @@ FibConfig::stop(string& error_msg)
     }
 
     //
-    // Restore the old forwarding state in the underlying system.
+    // Stop the FibConfigForwarding methods
     //
-    // XXX: Note that if the XORP forwarding entries are retained on shutdown,
-    // then we don't restore the state.
-    //
-    if (_have_ipv4) {
-	if (! unicast_forwarding_entries_retain_on_shutdown4()) {
-	    if (set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
-						error_msg) < 0) {
-		ret_value = XORP_ERROR;
-	    }
+    for (fibconfig_forwarding_iter = _fibconfig_forwarding_plugins.begin();
+	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
+	 ++fibconfig_forwarding_iter) {
+	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
+	if (fibconfig_forwarding->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
 	}
     }
-#ifdef HAVE_IPV6
-    if (_have_ipv6) {
-	if (! unicast_forwarding_entries_retain_on_shutdown6()) {
-	    if (set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
-						error_msg) < 0) {
-		ret_value = XORP_ERROR;
-	    }
-	    if (set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg)
-		< 0) {
-		ret_value = XORP_ERROR;
-	    }
-	}
-    }
-#endif // HAVE_IPV6
 
     _is_running = false;
 
@@ -811,6 +815,194 @@ FibConfig::end_configuration(string& error_msg)
     }
     
     return (ret_value);
+}
+
+bool
+FibConfig::have_ipv4() const
+{
+    if (_fibconfig_forwarding_plugins.empty())
+	return (false);
+
+    //
+    // XXX: We pull the information by using only the first method.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fibconfig_forwarding_plugins.front()->have_ipv4());
+}
+
+bool
+FibConfig::have_ipv6() const
+{
+    if (_fibconfig_forwarding_plugins.empty())
+	return (false);
+
+    //
+    // XXX: We pull the information by using only the first method.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fibconfig_forwarding_plugins.front()->have_ipv6());
+}
+
+int
+FibConfig::set_unicast_forwarding_entries_retain_on_startup4(bool retain,
+							     string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_startup4 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+int
+FibConfig::set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
+							      string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_shutdown4 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+int
+FibConfig::set_unicast_forwarding_entries_retain_on_startup6(bool retain,
+							     string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_startup6 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+int
+FibConfig::set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
+							      string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_shutdown6 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+int
+FibConfig::unicast_forwarding_enabled4(bool& ret_value,
+				       string& error_msg) const
+{
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No plugin to test whether IPv4 unicast "
+			     "forwarding is enabled");
+	return (XORP_ERROR);
+    }
+
+    //
+    // XXX: We pull the information by using only the first method.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fibconfig_forwarding_plugins.front()->unicast_forwarding_enabled4(
+		ret_value, error_msg));
+}
+
+int
+FibConfig::unicast_forwarding_enabled6(bool& ret_value,
+				       string& error_msg) const
+{
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No plugin to test whether IPv6 unicast "
+			     "forwarding is enabled");
+	return (XORP_ERROR);
+    }
+
+    //
+    // XXX: We pull the information by using only the first method.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fibconfig_forwarding_plugins.front()->unicast_forwarding_enabled6(
+		ret_value, error_msg));
+}
+
+int
+FibConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
+{
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No plugin to test whether IPv6 Router "
+			     "Advertisement messages are accepted");
+	return (XORP_ERROR);
+    }
+
+    //
+    // XXX: We pull the information by using only the first method.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fibconfig_forwarding_plugins.front()->accept_rtadv_enabled6(
+		ret_value, error_msg));
+}
+
+int
+FibConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
+{
+    list<FibConfigForwarding*>::iterator fibconfig_forwarding_iter;
+
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No plugin to configure the IPv4 unicast "
+			     "forwarding");
+	return (XORP_ERROR);
+    }
+
+    for (fibconfig_forwarding_iter = _fibconfig_forwarding_plugins.begin();
+	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
+	 ++fibconfig_forwarding_iter) {
+	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
+	if (fibconfig_forwarding->set_unicast_forwarding_enabled4(v, error_msg)
+	    != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
+{
+    list<FibConfigForwarding*>::iterator fibconfig_forwarding_iter;
+
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No plugin to configure the IPv6 unicast "
+			     "forwarding");
+	return (XORP_ERROR);
+    }
+
+    for (fibconfig_forwarding_iter = _fibconfig_forwarding_plugins.begin();
+	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
+	 ++fibconfig_forwarding_iter) {
+	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
+	if (fibconfig_forwarding->set_unicast_forwarding_enabled6(v, error_msg)
+	    != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
+{
+    list<FibConfigForwarding*>::iterator fibconfig_forwarding_iter;
+
+    if (_fibconfig_forwarding_plugins.empty()) {
+	error_msg = c_format("No plugin to configure IPv6 Router "
+			     "Advertisement messages acceptance");
+	return (XORP_ERROR);
+    }
+
+    for (fibconfig_forwarding_iter = _fibconfig_forwarding_plugins.begin();
+	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
+	 ++fibconfig_forwarding_iter) {
+	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
+	if (fibconfig_forwarding->set_accept_rtadv_enabled6(v, error_msg)
+	    != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
 }
 
 bool
@@ -1160,1094 +1352,4 @@ FibConfig::propagate_fib_changes(const list<FteX>& fte_list,
 	if (! fte_list6.empty())
 	    fib_table_observer->process_fib_changes(fte_list6);
     }
-}
-
-/**
- * Test if the underlying system supports IPv4.
- * 
- * @return true if the underlying system supports IPv4, otherwise false.
- */
-bool
-FibConfig::test_have_ipv4() const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy())
-	return (true);
-
-    XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
-    if (!s.is_valid())
-	return (false);
-   
-    comm_close(s);
-
-    return (true);
-}
-
-/**
- * Test if the underlying system supports IPv6.
- * 
- * @return true if the underlying system supports IPv6, otherwise false.
- */
-bool
-FibConfig::test_have_ipv6() const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy())
-	return (true);
-
-#ifndef HAVE_IPV6
-    return (false);
-#else
-    XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
-    if (!s.is_valid())
-	return (false);
-    
-    comm_close(s);
-    return (true);
-#endif // HAVE_IPV6
-}
-
-/**
- * Test whether the IPv4 unicast forwarding engine is enabled or disabled
- * to forward packets.
- * 
- * @param ret_value if true on return, then the IPv4 unicast forwarding
- * is enabled, otherwise is disabled.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy()) {
-	ret_value = true;
-	return (XORP_OK);
-    }
-
-    if (! have_ipv4()) {
-	ret_value = false;
-	error_msg = c_format("Cannot test whether IPv4 unicast forwarding "
-			     "is enabled: IPv4 is not supported");
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    int enabled = 0;
-    
-#if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_FORWARDING)
-    {
-	size_t sz = sizeof(enabled);
-	int mib[4];
-	
-	mib[0] = CTL_NET;
-	mib[1] = AF_INET;
-	mib[2] = IPPROTO_IP;
-	mib[3] = IPCTL_FORWARDING;
-	
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
-	    != 0) {
-	    error_msg = c_format("Get sysctl(IPCTL_FORWARDING) failed: %s",
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-    }
-#elif defined(HOST_OS_LINUX)
-    {
-	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V4, "r");
-	
-	if (fh == NULL) {
-	    error_msg = c_format("Cannot open file %s for reading: %s",
-				 PROC_LINUX_FILE_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	if (fscanf(fh, "%d", &enabled) != 1) {
-	    error_msg = c_format("Error reading file %s: %s",
-				 PROC_LINUX_FILE_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    fclose(fh);
-	    return (XORP_ERROR);
-	}
-	fclose(fh);
-    }
-#elif defined(HOST_OS_SOLARIS)
-    {
-	struct strioctl strioctl;
-	char buf[256];
-	int fd;
-
-	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V4, O_RDONLY);
-	if (fd < 0) {
-	    error_msg = c_format("Cannot open file %s for reading: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	int r = isastream(fd);
-	if (r < 0) {
-	    error_msg = c_format("Error testing whether file %s is a stream: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (r == 0) {
-	    error_msg = c_format("File %s is not a stream",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V4);
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-
-	memset(&strioctl, 0, sizeof(strioctl));
-	memset(buf, 0, sizeof(buf));
-	strncpy(buf, DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V4,
-		sizeof(buf) - 1);
-	strioctl.ic_cmd = ND_GET;
-	strioctl.ic_timout = 0;
-	strioctl.ic_len = sizeof(buf);
-	strioctl.ic_dp = buf;
-	if (ioctl(fd, I_STR, &strioctl) < 0) {
-	    error_msg = c_format("Error testing whether IPv4 unicast "
-				 "forwarding is enabled: %s",
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (sscanf(buf, "%d", &enabled) != 1) {
-	    error_msg = c_format("Error reading result %s: %s",
-				 buf, strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	close(fd);
-    }
-#elif defined(HOST_OS_WINDOWS)
-    {
-	MIB_IPSTATS ipstats;
-	DWORD error = GetIpStatistics(&ipstats);
-	if (error != NO_ERROR) {
-	    XLOG_ERROR("GetIpStatistics() failed: %s",
-		       win_strerror(GetLastError()));
-	    return (XORP_ERROR);
-	}
-	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
-    }
-#else
-#error "OS not supported: don't know how to test whether"
-#error "IPv4 unicast forwarding is enabled/disabled"
-#endif
-    
-    if (enabled > 0)
-	ret_value = true;
-    else
-	ret_value = false;
-    
-    return (XORP_OK);
-}
-
-/**
- * Test whether the IPv6 unicast forwarding engine is enabled or disabled
- * to forward packets.
- * 
- * @param ret_value if true on return, then the IPv6 unicast forwarding
- * is enabled, otherwise is disabled.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy()) {
-	ret_value = true;
-	return (XORP_OK);
-    }
-
-#ifndef HAVE_IPV6
-    ret_value = false;
-    error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
-			 "is enabled: IPv6 is not supported");
-    XLOG_ERROR("%s", error_msg.c_str());
-    return (XORP_ERROR);
-    
-#else // HAVE_IPV6
-
-    if (! have_ipv6()) {
-	ret_value = false;
-	error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
-			     "is enabled: IPv6 is not supported");
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    int enabled = 0;
-    
-#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_FORWARDING)
-    {
-	size_t sz = sizeof(enabled);
-	int mib[4];
-	
-	mib[0] = CTL_NET;
-	mib[1] = AF_INET6;
-	mib[2] = IPPROTO_IPV6;
-	mib[3] = IPV6CTL_FORWARDING;
-	
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
-	    != 0) {
-	    error_msg = c_format("Get sysctl(IPV6CTL_FORWARDING) failed: %s",
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-    }
-#elif defined(HOST_OS_LINUX)
-    {
-	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V6, "r");
-	
-	if (fh == NULL) {
-	    error_msg = c_format("Cannot open file %s for reading: %s",
-				 PROC_LINUX_FILE_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	if (fscanf(fh, "%d", &enabled) != 1) {
-	    error_msg = c_format("Error reading file %s: %s",
-				 PROC_LINUX_FILE_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    fclose(fh);
-	    return (XORP_ERROR);
-	}
-	fclose(fh);
-    }
-#elif defined(HOST_OS_SOLARIS)
-    {
-	struct strioctl strioctl;
-	char buf[256];
-	int fd;
-
-	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_RDONLY);
-	if (fd < 0) {
-	    error_msg = c_format("Cannot open file %s for reading: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	int r = isastream(fd);
-	if (r < 0) {
-	    error_msg = c_format("Error testing whether file %s is a stream: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (r == 0) {
-	    error_msg = c_format("File %s is not a stream",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-
-	memset(&strioctl, 0, sizeof(strioctl));
-	memset(buf, 0, sizeof(buf));
-	strncpy(buf, DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V6,
-		sizeof(buf) - 1);
-	strioctl.ic_cmd = ND_GET;
-	strioctl.ic_timout = 0;
-	strioctl.ic_len = sizeof(buf);
-	strioctl.ic_dp = buf;
-	if (ioctl(fd, I_STR, &strioctl) < 0) {
-	    error_msg = c_format("Error testing whether IPv6 unicast "
-				 "forwarding is enabled: %s",
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (sscanf(buf, "%d", &enabled) != 1) {
-	    error_msg = c_format("Error reading result %s: %s",
-				 buf, strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	close(fd);
-    }
-#elif defined(HOST_OS_WINDOWS) && 0
-    // XXX: Not in MinGW w32api yet.
-    {
-	MIB_IPSTATS ipstats;
-	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
-	if (error != NO_ERROR) {
-	    XLOG_ERROR("GetIpStatisticsEx() failed: %s",
-		       win_strerror(GetLastError()));
-	    return (XORP_ERROR);
-	}
-	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
-    }
-#else
-#error "OS not supported: don't know how to test whether"
-#error "IPv6 unicast forwarding is enabled/disabled"
-#endif
-    
-    if (enabled > 0)
-	ret_value = true;
-    else
-	ret_value = false;
-    
-    return (XORP_OK);
-#endif // HAVE_IPV6
-}
-
-/**
- * Test whether the acceptance of IPv6 Router Advertisement messages is
- * enabled or disabled.
- * 
- * @param ret_value if true on return, then the acceptance of IPv6 Router
- * Advertisement messages is enabled, otherwise is disabled.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy()) {
-	ret_value = true;
-	return (XORP_OK);
-    }
-
-#ifndef HAVE_IPV6
-    ret_value = false;
-    error_msg = c_format("Cannot test whether the acceptance of IPv6 "
-			 "Router Advertisement messages is enabled: "
-			 "IPv6 is not supported");
-    XLOG_ERROR("%s", error_msg.c_str());
-    return (XORP_ERROR);
-    
-#else // HAVE_IPV6
-
-    if (! have_ipv6()) {
-	ret_value = false;
-	error_msg = c_format("Cannot test whether the acceptance of IPv6 "
-			     "Router Advertisement messages is enabled: "
-			     "IPv6 is not supported");
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    int enabled = 0;
-    
-#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_ACCEPT_RTADV)
-    {
-	size_t sz = sizeof(enabled);
-	int mib[4];
-	
-	mib[0] = CTL_NET;
-	mib[1] = AF_INET6;
-	mib[2] = IPPROTO_IPV6;
-	mib[3] = IPV6CTL_ACCEPT_RTADV;
-	
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &enabled, &sz, NULL, 0)
-	    != 0) {
-	    error_msg = c_format("Get sysctl(IPV6CTL_ACCEPT_RTADV) failed: %s",
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-    }
-#elif defined(HOST_OS_LINUX)
-    // XXX: nothing to do in case of Linux
-    error_msg = "";
-#elif defined(HOST_OS_SOLARIS)
-    {
-	struct strioctl strioctl;
-	char buf[256];
-	int fd;
-	int ignore_redirect = 0;
-
-	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_RDONLY);
-	if (fd < 0) {
-	    error_msg = c_format("Cannot open file %s for reading: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	int r = isastream(fd);
-	if (r < 0) {
-	    error_msg = c_format("Error testing whether file %s is a stream: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (r == 0) {
-	    error_msg = c_format("File %s is not a stream",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-
-	memset(&strioctl, 0, sizeof(strioctl));
-	memset(buf, 0, sizeof(buf));
-	strncpy(buf, DEV_SOLARIS_DRIVER_PARAMETER_IGNORE_REDIRECT_V6,
-		sizeof(buf) - 1);
-	strioctl.ic_cmd = ND_GET;
-	strioctl.ic_timout = 0;
-	strioctl.ic_len = sizeof(buf);
-	strioctl.ic_dp = buf;
-	if (ioctl(fd, I_STR, &strioctl) < 0) {
-	    error_msg = c_format("Error testing whether the acceptance of "
-				 "IPv6 Router Advertisement messages is "
-				 "enabled: %s",
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (sscanf(buf, "%d", &ignore_redirect) != 1) {
-	    error_msg = c_format("Error reading result %s: %s",
-				 buf, strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	close(fd);
-
-	//
-	// XXX: The logic of "Accept IPv6 Router Advertisement" is just the
-	// opposite of "Ignore Redirect".
-	//
-	if (ignore_redirect == 0)
-	    enabled = 1;
-	else
-	    enabled = 0;
-    }
-#else
-#error "OS not supported: don't know how to test whether"
-#error "the acceptance of IPv6 Router Advertisement messages"
-#error "is enabled/disabled"
-#endif
-    
-    if (enabled > 0)
-	ret_value = true;
-    else
-	ret_value = false;
-    
-    return (XORP_OK);
-#endif // HAVE_IPV6
-}
-
-/**
- * Set the IPv4 unicast forwarding engine to enable or disable forwarding
- * of packets.
- * 
- * @param v if true, then enable IPv4 unicast forwarding, otherwise
- * disable it.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
-{
-    // XXX: don't do anything if running in dummy mode
-    if (_fea_node.is_dummy())
-	return (XORP_OK);
-
-    if (! have_ipv4()) {
-	if (! v) {
-	    //
-	    // XXX: we assume that "not supported" == "disable", hence
-	    // return OK.
-	    //
-	    return (XORP_OK);
-	}
-	error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: "
-			     "IPv4 is not supported", bool_c_str(v));
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    int enable = (v) ? 1 : 0;
-    bool old_value;
-    
-    if (unicast_forwarding_enabled4(old_value, error_msg) < 0)
-	return (XORP_ERROR);
-    
-    if (old_value == v)
-	return (XORP_OK);	// Nothing changed
-    
-#if defined(CTL_NET) && defined(IPPROTO_IP) && defined(IPCTL_FORWARDING)
-    {
-	size_t sz = sizeof(enable);
-	int mib[4];
-	
-	mib[0] = CTL_NET;
-	mib[1] = AF_INET;
-	mib[2] = IPPROTO_IP;
-	mib[3] = IPCTL_FORWARDING;
-	
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
-	    != 0) {
-	    error_msg = c_format("Set sysctl(IPCTL_FORWARDING) to %s failed: %s",
-				 bool_c_str(v), strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-    }
-#elif defined(HOST_OS_LINUX)
-    {
-	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V4, "w");
-	
-	if (fh == NULL) {
-	    error_msg = c_format("Cannot open file %s for writing: %s",
-				 PROC_LINUX_FILE_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	if (fprintf(fh, "%d", enable) != 1) {
-	    error_msg = c_format("Error writing %d to file %s: %s",
-				 enable,
-				 PROC_LINUX_FILE_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    fclose(fh);
-	    return (XORP_ERROR);
-	}
-	fclose(fh);
-    }
-#elif defined(HOST_OS_SOLARIS)
-    {
-	struct strioctl strioctl;
-	char buf[256];
-	int fd;
-
-	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V4, O_WRONLY);
-	if (fd < 0) {
-	    error_msg = c_format("Cannot open file %s for writing: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	int r = isastream(fd);
-	if (r < 0) {
-	    error_msg = c_format("Error testing whether file %s is a stream: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (r == 0) {
-	    error_msg = c_format("File %s is not a stream",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V4);
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-
-	memset(&strioctl, 0, sizeof(strioctl));
-	memset(buf, 0, sizeof(buf));
-	snprintf(buf, sizeof(buf) - 1, "%s %d",
-		 DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V4, enable);
-	strioctl.ic_cmd = ND_SET;
-	strioctl.ic_timout = 0;
-	strioctl.ic_len = sizeof(buf);
-	strioctl.ic_dp = buf;
-	if (ioctl(fd, I_STR, &strioctl) < 0) {
-	    error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: %s",
-				 bool_c_str(v), strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	close(fd);
-    }
-#elif defined(HOST_OS_WINDOWS)
-    if (enable) {
-	if (WinSupport::is_rras_running()) {
-	    XLOG_WARNING("RRAS is running; ignoring request to enable "
-			 "IPv4 forwarding.");
-	    return (XORP_OK);
-	}
-	HANDLE hFwd;
-	DWORD result = EnableRouter(&hFwd, &_overlapped);
-	if (result != ERROR_IO_PENDING) {
-	    error_msg = c_format("Error '%s' from EnableRouter",
-				 win_strerror(GetLastError()));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_OK);	// XXX: This error is non-fatal.
-	}
-	++_enablecnt;
-    } else {
-	if (WinSupport::is_rras_running()) {
-	    XLOG_WARNING("RRAS is running; ignoring request to disable "
-			 "IPv4 forwarding.");
-	    return (XORP_OK);
-	}
-	if (_enablecnt == 0) {
-	    error_msg = c_format("UnenableRouter() called without any previous "
-				 "call to EnableRouter()");
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_OK);	// XXX: This error is non-fatal.
-	}
-
-	DWORD result = UnenableRouter(&_overlapped, NULL);
-	if (result != NO_ERROR) {
-	    error_msg = c_format("Error '%s' from UnenableRouter",
-				 win_strerror(GetLastError()));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_OK);	// XXX: This error is non-fatal.
-	}
-	--_enablecnt;
-    }
-#else
-#error "OS not supported: don't know how to enable/disable"
-#error "IPv4 unicast forwarding"
-#endif
-    
-    return (XORP_OK);
-}
-
-/**
- * Set the IPv6 unicast forwarding engine to enable or disable forwarding
- * of packets.
- * 
- * @param v if true, then enable IPv6 unicast forwarding, otherwise
- * disable it.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
-{
-    // XXX: don't do anything if running in dummy mode
-    if (_fea_node.is_dummy())
-	return (XORP_OK);
-
-#ifndef HAVE_IPV6
-    if (! v) {
-	//
-	// XXX: we assume that "not supported" == "disable", hence
-	// return OK.
-	//
-	return (XORP_OK);
-    }
-
-    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
-			 "IPv6 is not supported", bool_c_str(v));
-    XLOG_ERROR("%s", error_msg.c_str());
-    return (XORP_ERROR);
-    
-#else // HAVE_IPV6
-
-    if (! have_ipv6()) {
-	if (! v) {
-	    //
-	    // XXX: we assume that "not supported" == "disable", hence
-	    // return OK.
-	    //
-	    return (XORP_OK);
-	}
-
-	error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
-			     "IPv6 is not supported", bool_c_str(v));
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    int enable = (v) ? 1 : 0;
-    bool old_value, old_value_accept_rtadv;
-    
-    if (unicast_forwarding_enabled6(old_value, error_msg) < 0)
-	return (XORP_ERROR);
-    if (accept_rtadv_enabled6(old_value_accept_rtadv, error_msg) < 0)
-	return (XORP_ERROR);
-    
-    if ((old_value == v) && (old_value_accept_rtadv == !v))
-	return (XORP_OK);	// Nothing changed
-    
-    if (set_accept_rtadv_enabled6(!v, error_msg) < 0)
-	return (XORP_ERROR);
-    
-#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_FORWARDING)
-    {
-	size_t sz = sizeof(enable);
-	int mib[4];
-	
-	mib[0] = CTL_NET;
-	mib[1] = AF_INET6;
-	mib[2] = IPPROTO_IPV6;
-	mib[3] = IPV6CTL_FORWARDING;
-	
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
-	    != 0) {
-	    error_msg = c_format("Set sysctl(IPV6CTL_FORWARDING) to %s failed: %s",
-				 bool_c_str(v), strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    // Restore the old accept_rtadv value
-	    if (old_value_accept_rtadv != !v) {
-		string dummy_error_msg;
-		set_accept_rtadv_enabled6(old_value_accept_rtadv,
-					  dummy_error_msg);
-	    }
-	    return (XORP_ERROR);
-	}
-    }
-#elif defined(HOST_OS_LINUX)
-    {
-	FILE *fh = fopen(PROC_LINUX_FILE_FORWARDING_V6, "w");
-	
-	if (fh == NULL) {
-	    error_msg = c_format("Cannot open file %s for writing: %s",
-				 PROC_LINUX_FILE_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	if (fprintf(fh, "%d", enable) != 1) {
-	    error_msg = c_format("Error writing %d to file %s: %s",
-				 enable,
-				 PROC_LINUX_FILE_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    // Restore the old accept_rtadv value
-	    if (old_value_accept_rtadv != !v) {
-		string dummy_error_msg;
-		set_accept_rtadv_enabled6(old_value_accept_rtadv,
-					  dummy_error_msg);
-	    }
-	    fclose(fh);
-	    return (XORP_ERROR);
-	}
-	fclose(fh);
-    }
-#elif defined(HOST_OS_SOLARIS)
-    {
-	struct strioctl strioctl;
-	char buf[256];
-	int fd;
-
-	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_WRONLY);
-	if (fd < 0) {
-	    error_msg = c_format("Cannot open file %s for writing: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	int r = isastream(fd);
-	if (r < 0) {
-	    error_msg = c_format("Error testing whether file %s is a stream: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (r == 0) {
-	    error_msg = c_format("File %s is not a stream",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-
-	memset(&strioctl, 0, sizeof(strioctl));
-	memset(buf, 0, sizeof(buf));
-	snprintf(buf, sizeof(buf) - 1, "%s %d",
-		 DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V6, enable);
-	strioctl.ic_cmd = ND_SET;
-	strioctl.ic_timout = 0;
-	strioctl.ic_len = sizeof(buf);
-	strioctl.ic_dp = buf;
-	if (ioctl(fd, I_STR, &strioctl) < 0) {
-	    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: %s",
-				 bool_c_str(v), strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	close(fd);
-    }
-#elif defined(HOST_OS_WINDOWS) && 0
-    // XXX: Not yet in MinGW w32api
-    {
-	MIB_IPSTATS ipstats;
-	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
-	if (error != NO_ERROR) {
-	    XLOG_ERROR("GetIpStatisticsEx() failed: %s",
-		       win_strerror(GetLastError()));
-	    return (XORP_ERROR);
-	}
-	ipstats.dwForwarding = (enable != 0) ? 1 : 0;
-	ipstats.dwDefaultTTL = MIB_USE_CURRENT_TTL;
-	error = SetIpStatisticsEx(&ipstats, AF_INET6);
-	if (error != NO_ERROR) {
-	    XLOG_ERROR("SetIpStatisticsEx() failed: %s",
-		       win_strerror(GetLastError()));
-	    return (XORP_ERROR);
-	}
-    }
-#else
-#error "OS not supported: don't know how to enable/disable"
-#error "IPv6 unicast forwarding"
-#endif
-    
-    return (XORP_OK);
-#endif // HAVE_IPV6
-}
-
-/**
- * Enable or disable the acceptance of IPv6 Router Advertisement messages
- * from other routers. It should be enabled for hosts, and disabled for
- * routers.
- * 
- * @param v if true, then enable the acceptance of IPv6 Router Advertisement
- * messages, otherwise disable it.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
-{
-    // XXX: don't do anything if running in dummy mode
-    if (_fea_node.is_dummy())
-	return (XORP_OK);
-
-#ifndef HAVE_IPV6
-    if (! v) {
-	//
-	// XXX: we assume that "not supported" == "disable", hence
-	// return OK.
-	//
-	return (XORP_OK);
-    }
-
-    error_msg = c_format("Cannot set the acceptance of IPv6 "
-			 "Router Advertisement messages to %s: "
-			 "IPv6 is not supported",
-			 bool_c_str(v));
-    XLOG_ERROR("%s", error_msg.c_str());
-    return (XORP_ERROR);
-    
-#else // HAVE_IPV6
-
-    if (! have_ipv6()) {
-	if (! v) {
-	    //
-	    // XXX: we assume that "not supported" == "disable", hence
-	    // return OK.
-	    //
-	    return (XORP_OK);
-	}
-
-	error_msg = c_format("Cannot set the acceptance of IPv6 "
-			     "Router Advertisement messages to %s: "
-			     "IPv6 is not supported",
-			     bool_c_str(v));
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-
-    int enable = (v) ? 1 : 0;
-    bool old_value;
-    
-    if (accept_rtadv_enabled6(old_value, error_msg) < 0)
-	return (XORP_ERROR);
-    
-    if (old_value == v)
-	return (XORP_OK);	// Nothing changed
-    
-#if defined(CTL_NET) && defined(IPPROTO_IPV6) && defined(IPV6CTL_ACCEPT_RTADV)
-    {
-	size_t sz = sizeof(enable);
-	int mib[4];
-	
-	mib[0] = CTL_NET;
-	mib[1] = AF_INET6;
-	mib[2] = IPPROTO_IPV6;
-	mib[3] = IPV6CTL_ACCEPT_RTADV;
-	
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, NULL, &enable, sz)
-	    != 0) {
-	    error_msg = c_format("Set sysctl(IPV6CTL_ACCEPT_RTADV) to %s failed: %s",
-				 bool_c_str(v), strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-    }
-#elif defined(HOST_OS_LINUX)
-    {
-	// XXX: nothing to do in case of Linux
-	error_msg = "";
-	UNUSED(enable);
-    }
-#elif defined(HOST_OS_SOLARIS)
-    {
-	struct strioctl strioctl;
-	char buf[256];
-	int fd;
-	int ignore_redirect = 0;
-
-	//
-	// XXX: The logic of "Accept IPv6 Router Advertisement" is just the
-	// opposite of "Ignore Redirect".
-	//
-	if (enable == 0)
-	    ignore_redirect = 1;
-	else
-	    ignore_redirect = 0;
-
-	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_WRONLY);
-	if (fd < 0) {
-	    error_msg = c_format("Cannot open file %s for writing: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	int r = isastream(fd);
-	if (r < 0) {
-	    error_msg = c_format("Error testing whether file %s is a stream: %s",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
-				 strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	if (r == 0) {
-	    error_msg = c_format("File %s is not a stream",
-				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-
-	memset(&strioctl, 0, sizeof(strioctl));
-	memset(buf, 0, sizeof(buf));
-	snprintf(buf, sizeof(buf) - 1, "%s %d",
-		 DEV_SOLARIS_DRIVER_PARAMETER_IGNORE_REDIRECT_V6,
-		 ignore_redirect);
-	strioctl.ic_cmd = ND_SET;
-	strioctl.ic_timout = 0;
-	strioctl.ic_len = sizeof(buf);
-	strioctl.ic_dp = buf;
-	if (ioctl(fd, I_STR, &strioctl) < 0) {
-	    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: %s",
-				 bool_c_str(v), strerror(errno));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    close(fd);
-	    return (XORP_ERROR);
-	}
-	close(fd);
-    }
-#elif defined(HOST_OS_WINDOWS)
-    {
-	// XXX: nothing to do in case of Windows
-	error_msg = "";
-	UNUSED(enable);
-    }
-
-#else
-#error "OS not supported: don't know how to enable/disable"
-#error "the acceptance of IPv6 Router Advertisement messages"
-#endif
-    
-    return (XORP_OK);
-#endif // HAVE_IPV6
-}
-
-/**
- * Set the IPv4 unicast forwarding engine whether to retain existing
- * XORP forwarding entries on startup.
- *
- * @param retain if true, then retain the XORP forwarding entries,
- * otherwise delete them.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_unicast_forwarding_entries_retain_on_startup4(bool retain,
-							     string& error_msg)
-{
-    _unicast_forwarding_entries_retain_on_startup4 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
-}
-
-/**
- * Set the IPv4 unicast forwarding engine whether to retain existing
- * XORP forwarding entries on shutdown.
- *
- * @param retain if true, then retain the XORP forwarding entries,
- * otherwise delete them.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
-							      string& error_msg)
-{
-    _unicast_forwarding_entries_retain_on_shutdown4 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
-}
-
-/**
- * Set the IPv6 unicast forwarding engine whether to retain existing
- * XORP forwarding entries on startup.
- *
- * @param retain if true, then retain the XORP forwarding entries,
- * otherwise delete them.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_unicast_forwarding_entries_retain_on_startup6(bool retain,
-							     string& error_msg)
-{
-    _unicast_forwarding_entries_retain_on_startup6 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
-}
-
-/**
- * Set the IPv6 unicast forwarding engine whether to retain existing
- * XORP forwarding entries on shutdown.
- *
- * @param retain if true, then retain the XORP forwarding entries,
- * otherwise delete them.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-FibConfig::set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
-							      string& error_msg)
-{
-    _unicast_forwarding_entries_retain_on_shutdown6 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
 }

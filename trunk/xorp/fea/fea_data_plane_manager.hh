@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.1 2007/07/11 22:24:51 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
@@ -23,6 +23,7 @@ class FibConfig;
 class FibConfigEntryGet;
 class FibConfigEntryObserver;
 class FibConfigEntrySet;
+class FibConfigForwarding;
 class FibConfigTableGet;
 class FibConfigTableObserver;
 class FibConfigTableSet;
@@ -151,7 +152,7 @@ public:
     /**
      * Get the IfConfigSet plugin.
      *
-     * @return the @ref IfConfigGet plugin.
+     * @return the @ref IfConfigSet plugin.
      */
     IfConfigSet* ifconfig_set() { return _ifconfig_set; }
 
@@ -161,6 +162,13 @@ public:
      * @return the @ref IfConfigObserver plugin.
      */
     IfConfigObserver* ifconfig_observer() { return _ifconfig_observer; }
+
+    /**
+     * Get the FibConfigForwarding plugin.
+     *
+     * @return the @ref FibConfigForwarding plugin.
+     */
+    FibConfigForwarding* fibconfig_forwarding() { return _fibconfig_forwarding; }
 
     /**
      * Get the FibConfigEntryGet plugin.
@@ -231,6 +239,7 @@ protected:
     IfConfigGet*		_ifconfig_get;
     IfConfigSet*		_ifconfig_set;
     IfConfigObserver*		_ifconfig_observer;
+    FibConfigForwarding*	_fibconfig_forwarding;
     FibConfigEntryGet*		_fibconfig_entry_get;
     FibConfigEntrySet*		_fibconfig_entry_set;
     FibConfigEntryObserver*	_fibconfig_entry_observer;

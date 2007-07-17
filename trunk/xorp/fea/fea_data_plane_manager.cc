@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.1 2007/07/11 22:24:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -34,6 +34,7 @@ FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
       _ifconfig_get(NULL),
       _ifconfig_set(NULL),
       _ifconfig_observer(NULL),
+      _fibconfig_forwarding(NULL),
       _fibconfig_entry_get(NULL),
       _fibconfig_entry_set(NULL),
       _fibconfig_entry_observer(NULL),
@@ -127,6 +128,10 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	delete _ifconfig_observer;
 	_ifconfig_observer = NULL;
     }
+    if (_fibconfig_forwarding != NULL) {
+	delete _fibconfig_forwarding;
+	_fibconfig_forwarding = NULL;
+    }
     if (_fibconfig_entry_get != NULL) {
 	delete _fibconfig_entry_get;
 	_fibconfig_entry_get = NULL;
@@ -177,6 +182,8 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
 	fibconfig().unregister_fibconfig_entry_set(_fibconfig_entry_set);
     if (_fibconfig_entry_get != NULL)
 	fibconfig().unregister_fibconfig_entry_get(_fibconfig_entry_get);
+    if (_fibconfig_forwarding != NULL)
+	fibconfig().unregister_fibconfig_forwarding(_fibconfig_forwarding);
     if (_ifconfig_observer != NULL)
 	ifconfig().unregister_ifconfig_observer(_ifconfig_observer);
     if (_ifconfig_set != NULL)
@@ -219,6 +226,10 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     }
     if (_ifconfig_observer != NULL) {
 	if (_ifconfig_observer->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+    if (_fibconfig_forwarding != NULL) {
+	if (_fibconfig_forwarding->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
     if (_fibconfig_entry_get != NULL) {
@@ -314,6 +325,17 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 						  is_exclusive)
 	    != XORP_OK) {
 	    error_msg = c_format("Cannot register IfConfigObserver plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+    if (_fibconfig_forwarding != NULL) {
+	if (fibconfig().register_fibconfig_forwarding(_fibconfig_forwarding,
+						      is_exclusive)
+	    != XORP_OK) {
+	    error_msg = c_format("Cannot register FibConfigForwarding plugin "
 				 "for data plane manager %s",
 				 manager_name().c_str());
 	    unregister_plugins(dummy_error_msg);
@@ -443,6 +465,14 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
     }
     if (_fibconfig_entry_get != NULL) {
 	if (_fibconfig_entry_get->stop(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+    if (_fibconfig_forwarding != NULL) {
+	if (_fibconfig_forwarding->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";

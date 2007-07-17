@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.1 2007/07/11 22:18:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.2 2007/07/12 23:45:19 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -23,6 +23,7 @@
 #include "fea/data_plane/ifconfig/ifconfig_get_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_dummy.hh"
+#include "fea/data_plane/fibconfig/fibconfig_forwarding_dummy.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_dummy.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_dummy.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_observer_dummy.hh"
@@ -70,6 +71,7 @@ FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
+    XLOG_ASSERT(_fibconfig_forwarding == NULL);
     XLOG_ASSERT(_fibconfig_entry_get == NULL);
     XLOG_ASSERT(_fibconfig_entry_set == NULL);
     XLOG_ASSERT(_fibconfig_entry_observer == NULL);
@@ -83,6 +85,7 @@ FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
     _ifconfig_get = new IfConfigGetDummy(*this);
     _ifconfig_set = new IfConfigSetDummy(*this);
     _ifconfig_observer = new IfConfigObserverDummy(*this);
+    _fibconfig_forwarding = new FibConfigForwardingDummy(*this);
     _fibconfig_entry_get = new FibConfigEntryGetDummy(*this);
     _fibconfig_entry_set = new FibConfigEntrySetDummy(*this);
     _fibconfig_entry_observer = new FibConfigEntryObserverDummy(*this);
