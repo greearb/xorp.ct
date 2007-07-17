@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.6 2007/06/07 01:28:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.7 2007/07/11 22:18:07 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,7 +29,7 @@
 //
 // Set single-entry information into the unicast forwarding table.
 //
-// The mechanism to set the information is dummy (for testing purpose).
+// The mechanism to set the information is Dummy (for testing purpose).
 //
 
 
@@ -43,7 +43,7 @@ FibConfigEntrySetDummy::~FibConfigEntrySetDummy()
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the dummy mechanism to set "
+	XLOG_ERROR("Cannot stop the Dummy mechanism to set "
 		   "information about forwarding table from the underlying "
 		   "system: %s",
 		   error_msg.c_str());

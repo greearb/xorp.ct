@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_dummy.cc,v 1.6 2007/06/06 19:55:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_dummy.cc,v 1.7 2007/07/11 22:18:12 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -28,7 +28,7 @@
 //
 // Get information about network interfaces from the underlying system.
 //
-// The mechanism to obtain the information is dummy (for testing purpose).
+// The mechanism to obtain the information is Dummy (for testing purpose).
 //
 
 
@@ -42,7 +42,7 @@ IfConfigGetDummy::~IfConfigGetDummy()
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the dummy mechanism to get "
+	XLOG_ERROR("Cannot stop the Dummy mechanism to get "
 		   "information about network interfaces from the underlying "
 		   "system: %s",
 		   error_msg.c_str());

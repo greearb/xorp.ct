@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.cc,v 1.6 2007/06/06 19:55:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.cc,v 1.7 2007/07/11 22:18:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -29,7 +29,7 @@
 // Observe information change about network interface configuration from
 // the underlying system.
 //
-// The mechanism to observe the information is dummy (for testing
+// The mechanism to observe the information is Dummy (for testing
 // purpose).
 //
 
@@ -44,7 +44,7 @@ IfConfigObserverDummy::~IfConfigObserverDummy()
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the dummy mechanism to observe "
+	XLOG_ERROR("Cannot stop the Dummy mechanism to observe "
 		   "information about network interfaces from the underlying "
 		   "system: %s",
 		   error_msg.c_str());

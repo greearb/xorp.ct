@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_dummy.cc,v 1.1 2007/07/17 22:53:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -31,7 +31,7 @@
 //
 // Configure unicast forwarding.
 //
-// The mechanism to get/set the information is dummy (for testing purpose).
+// The mechanism to get/set the information is Dummy (for testing purpose).
 //
 
 
