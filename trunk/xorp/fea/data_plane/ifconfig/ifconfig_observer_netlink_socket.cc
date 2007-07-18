@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.8 2007/06/06 19:55:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.9 2007/07/11 22:18:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -73,7 +73,7 @@ IfConfigObserverNetlinkSocket::start(string& error_msg)
     // Listen to the netlink multicast group for network interfaces status
     // and IPv4 addresses.
     //
-    if (ifconfig().have_ipv4()) 
+    if (fea_data_plane_manager().have_ipv4()) 
 	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
 
 #ifdef HAVE_IPV6
@@ -81,7 +81,7 @@ IfConfigObserverNetlinkSocket::start(string& error_msg)
     // Listen to the netlink multicast group for network interfaces status
     // and IPv6 addresses.
     //
-    if (ifconfig().have_ipv6())
+    if (fea_data_plane_manager().have_ipv6())
 	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
 #endif // HAVE_IPV6
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.12 2007/06/27 01:27:05 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.13 2007/07/11 22:18:04 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1459,9 +1459,6 @@ public:
 	string&	info);
 
 private:
-    bool have_ipv4() const { return (_have_ipv4); };
-    bool have_ipv6() const { return (_have_ipv6); };
-
     EventLoop&		_eventloop;	// The event loop to use
     FeaNode&		_fea_node;	// The corresponding FeaNode
 
@@ -1475,8 +1472,6 @@ private:
 
     bool	_is_running;	// True if the service is running
     bool	_is_shutdown_received; // True if shutdown XRL request received
-    bool	_have_ipv4;	// True if we have IPv4
-    bool	_have_ipv6;	// True if we have IPv6
 
     //
     // The externally loadable managers

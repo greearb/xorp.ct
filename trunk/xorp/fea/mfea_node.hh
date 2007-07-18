@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.45 2007/06/01 18:17:11 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.46 2007/06/15 16:53:18 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -91,18 +91,11 @@ public:
     FeaNode&	fea_node() { return (_fea_node); }
 
     /**
-     * Setup the unit to behave as dummy (for testing purpose).
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		set_dummy();
-
-    /**
      * Test if running in dummy mode.
      * 
      * @return true if running in dummy mode, otherwise false.
      */
-    bool	is_dummy() const { return _is_dummy; }
+    bool	is_dummy() const;
 
     /**
      * Start the node operation.
@@ -834,7 +827,6 @@ private:
     
     // Private state
     FeaNode&		_fea_node;
-    bool		_is_dummy;	// True if running in dummy node
 
     MfeaMrouter		_mfea_mrouter;	// The mrouter state
     MfeaDft		_mfea_dft;	// The dataflow monitoring table

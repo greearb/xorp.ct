@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.18 2007/06/01 18:17:11 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.19 2007/06/14 17:35:42 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -67,20 +67,6 @@ public:
      */
     virtual ~MfeaMrouter();
 
-    /**
-     * Setup the unit to behave as dummy (for testing purpose).
-     * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_dummy();
-
-    /**
-     * Test if running in dummy mode.
-     * 
-     * @return true if running in dummy mode, otherwise false.
-     */
-    bool is_dummy() const { return _is_dummy; }
-    
     /**
      * Start the @ref MfeaMrouter.
      * 
@@ -459,11 +445,6 @@ private:
     // Original state from the underlying system before the MFEA was started
     //
     bool	_multicast_forwarding_enabled;
-
-    //
-    // Misc other state
-    //
-    bool	_is_dummy;
 };
 
 /**

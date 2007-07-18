@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.66 2007/07/11 22:18:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.67 2007/07/16 23:54:05 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -245,34 +245,6 @@ public:
     int stop(string& error_msg);
 
     /**
-     * Return true if the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    bool have_ipv4() const { return _have_ipv4; }
-
-    /**
-     * Return true if the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    bool have_ipv6() const { return _have_ipv6; }
-
-    /**
-     * Test if the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    bool test_have_ipv4() const;
-
-    /**
-     * Test if the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    bool test_have_ipv6() const;
-
-    /**
      * Push IfTree structure down to platform.  Errors are reported
      * via the constructor supplied ErrorReporter instance.
      *
@@ -387,8 +359,6 @@ private:
     //
     // Misc other state
     //
-    bool	_have_ipv4;
-    bool	_have_ipv6;
     bool	_is_running;
 };
 

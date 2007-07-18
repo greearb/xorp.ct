@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.1 2007/07/11 22:24:51 pavlin Exp $
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.2 2007/07/17 22:53:54 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
@@ -127,6 +127,20 @@ public:
      * @return the event loop this instance is added to.
      */
     EventLoop&	eventloop();
+
+    /**
+     * Return true if the underlying system supports IPv4.
+     * 
+     * @return true if the underlying system supports IPv4, otherwise false.
+     */
+    virtual bool have_ipv4() const { return (_have_ipv4); }
+
+    /**
+     * Return true if the underlying system supports IPv6.
+     * 
+     * @return true if the underlying system supports IPv6, otherwise false.
+     */
+    virtual bool have_ipv6() const { return (_have_ipv6); }
 
     /**
      * Get the @ref IfConfig instance.
@@ -246,6 +260,12 @@ protected:
     FibConfigTableGet*		_fibconfig_table_get;
     FibConfigTableSet*		_fibconfig_table_set;
     FibConfigTableObserver*	_fibconfig_table_observer;
+
+    //
+    // Data plane properties
+    //
+    bool		_have_ipv4;
+    bool		_have_ipv6;
 
     //
     // Misc other state

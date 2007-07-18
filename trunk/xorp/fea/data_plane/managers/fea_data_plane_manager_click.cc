@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.1 2007/07/11 22:18:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -25,6 +25,7 @@
 
 #include "fea/data_plane/ifconfig/ifconfig_get_click.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_click.hh"
+#include "fea/data_plane/fibconfig/fibconfig_forwarding_dummy.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_click.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_click.hh"
 #include "fea/data_plane/fibconfig/fibconfig_table_get_click.hh"
@@ -55,6 +56,7 @@ FeaDataPlaneManagerClick::FeaDataPlaneManagerClick(FeaNode& fea_node)
     : FeaDataPlaneManager(fea_node, "Click"),
       _ifconfig_get_click(NULL),
       _ifconfig_set_click(NULL),
+      _fibconfig_forwarding_dummy(NULL),
       _fibconfig_entry_get_click(NULL),
       _fibconfig_entry_set_click(NULL),
       _fibconfig_table_get_click(NULL),
@@ -76,6 +78,7 @@ FeaDataPlaneManagerClick::load_plugins(string& error_msg)
 
     XLOG_ASSERT(_ifconfig_get_click == NULL);
     XLOG_ASSERT(_ifconfig_set_click == NULL);
+    XLOG_ASSERT(_fibconfig_forwarding_dummy == NULL);
     XLOG_ASSERT(_fibconfig_entry_get_click == NULL);
     XLOG_ASSERT(_fibconfig_entry_set_click == NULL);
     XLOG_ASSERT(_fibconfig_table_get_click == NULL);
@@ -86,12 +89,18 @@ FeaDataPlaneManagerClick::load_plugins(string& error_msg)
     //
     _ifconfig_get_click = new IfConfigGetClick(*this);
     _ifconfig_set_click = new IfConfigSetClick(*this);
+    //
+    // TODO: XXX: For the time being Click uses the
+    // FibConfigForwardingDummy plugin.
+    //
+    _fibconfig_forwarding_dummy = new FibConfigForwardingDummy(*this);
     _fibconfig_entry_get_click = new FibConfigEntryGetClick(*this);
     _fibconfig_entry_set_click = new FibConfigEntrySetClick(*this);
     _fibconfig_table_get_click = new FibConfigTableGetClick(*this);
     _fibconfig_table_set_click = new FibConfigTableSetClick(*this);
     _ifconfig_get = _ifconfig_get_click;
     _ifconfig_set = _ifconfig_set_click;
+    _fibconfig_forwarding = _fibconfig_forwarding_dummy;
     _fibconfig_entry_get = _fibconfig_entry_get_click;
     _fibconfig_entry_set = _fibconfig_entry_set_click;
     _fibconfig_table_get = _fibconfig_table_get_click;
@@ -110,6 +119,7 @@ FeaDataPlaneManagerClick::unload_plugins(string& error_msg)
 
     XLOG_ASSERT(_ifconfig_get_click != NULL);
     XLOG_ASSERT(_ifconfig_set_click != NULL);
+    XLOG_ASSERT(_fibconfig_forwarding_dummy != NULL);
     XLOG_ASSERT(_fibconfig_entry_get_click != NULL);
     XLOG_ASSERT(_fibconfig_entry_set_click != NULL);
     XLOG_ASSERT(_fibconfig_table_get_click != NULL);
@@ -126,6 +136,7 @@ FeaDataPlaneManagerClick::unload_plugins(string& error_msg)
     //
     _ifconfig_get_click = NULL;
     _ifconfig_set_click = NULL;
+    _fibconfig_forwarding_dummy = NULL;
     _fibconfig_entry_get_click = NULL;
     _fibconfig_entry_set_click = NULL;
     _fibconfig_table_get_click = NULL;
@@ -151,6 +162,15 @@ FeaDataPlaneManagerClick::register_plugins(string& error_msg)
     if (_ifconfig_set != NULL) {
 	if (ifconfig().register_ifconfig_set(_ifconfig_set, false) != XORP_OK) {
 	    error_msg = c_format("Cannot register IfConfigSet plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+    if (_fibconfig_forwarding != NULL) {
+	if (fibconfig().register_fibconfig_forwarding(_fibconfig_forwarding, false) != XORP_OK) {
+	    error_msg = c_format("Cannot register FibConfigForwarding plugin "
 				 "for data plane manager %s",
 				 manager_name().c_str());
 	    unregister_plugins(dummy_error_msg);

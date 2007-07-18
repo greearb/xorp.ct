@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.hh,v 1.1 2007/07/11 22:18:18 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.hh,v 1.2 2007/07/16 23:56:13 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_WINDOWS_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_WINDOWS_HH__
@@ -36,6 +36,14 @@ public:
      * Virtual destructor.
      */
     virtual ~FeaDataPlaneManagerWindows();
+
+    /**
+     * Start data plane manager operation.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start_manager(string& error_msg);
 
     /**
      * Load the plugins.

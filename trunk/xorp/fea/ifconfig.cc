@@ -12,15 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.66 2007/05/08 00:49:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.67 2007/07/11 22:18:02 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
-#include "libcomm/comm_api.h"
 
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
@@ -66,17 +64,9 @@ IfConfig::IfConfig(FeaNode& fea_node)
       _restore_original_config_on_shutdown(false),
       _ifconfig_update_replicator(_local_config),
       _ifconfig_address_table(_ifconfig_update_replicator),
-      _have_ipv4(false),
-      _have_ipv6(false),
       _is_running(false)
 {
     _itm = new IfConfigTransactionManager(_eventloop);
-
-    //
-    // Test if the system supports IPv4 and IPv6 respectively
-    //
-    _have_ipv4 = test_have_ipv4();
-    _have_ipv6 = test_have_ipv6();
 }
 
 IfConfig::~IfConfig()
@@ -497,51 +487,6 @@ IfConfig::stop(string& error_msg)
     _is_running = false;
 
     return (ret_value);
-}
-
-/**
- * Test if the underlying system supports IPv4.
- * 
- * @return true if the underlying system supports IPv4, otherwise false.
- */
-bool
-IfConfig::test_have_ipv4() const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy())
-	return true;
-
-    XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
-    if (!s.is_valid())
-	return (false);
-    
-    comm_close(s);
-
-    return (true);
-}
-
-/**
- * Test if the underlying system supports IPv6.
- * 
- * @return true if the underlying system supports IPv6, otherwise false.
- */
-bool
-IfConfig::test_have_ipv6() const
-{
-    // XXX: always return true if running in dummy mode
-    if (_fea_node.is_dummy())
-	return true;
-
-#ifndef HAVE_IPV6
-    return (false);
-#else
-    XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
-    if (!s.is_valid())
-	return (false);
-    
-    comm_close(s);
-    return (true);
-#endif // HAVE_IPV6
 }
 
 bool

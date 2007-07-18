@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.1 2007/07/11 22:24:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.2 2007/07/17 22:53:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -41,6 +41,8 @@ FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
       _fibconfig_table_get(NULL),
       _fibconfig_table_set(NULL),
       _fibconfig_table_observer(NULL),
+      _have_ipv4(false),
+      _have_ipv6(false),
       _manager_name(manager_name),
       _is_loaded_plugins(false),
       _is_running_manager(false),
@@ -216,6 +218,17 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	return (XORP_ERROR);
     }
 
+    //
+    // XXX: Start first the FibConfigForwarding so we can test whether
+    // the data plane supports IPv4 and IPv6.
+    //
+    if (_fibconfig_forwarding != NULL) {
+	if (_fibconfig_forwarding->start(error_msg) != XORP_OK)
+	    goto error_label;
+	_have_ipv4 = _fibconfig_forwarding->test_have_ipv4();
+	_have_ipv6 = _fibconfig_forwarding->test_have_ipv6();
+    }
+
     if (_ifconfig_get != NULL) {
 	if (_ifconfig_get->start(error_msg) != XORP_OK)
 	    goto error_label;
@@ -226,10 +239,6 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     }
     if (_ifconfig_observer != NULL) {
 	if (_ifconfig_observer->start(error_msg) != XORP_OK)
-	    goto error_label;
-    }
-    if (_fibconfig_forwarding != NULL) {
-	if (_fibconfig_forwarding->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
     if (_fibconfig_entry_get != NULL) {
@@ -290,6 +299,8 @@ FeaDataPlaneManager::stop_plugins(string& error_msg)
 
     unregister_plugins(error_msg2);
 
+    _have_ipv4 = false;
+    _have_ipv6 = false;
     _is_running_plugins = false;
 
     return (ret_value);

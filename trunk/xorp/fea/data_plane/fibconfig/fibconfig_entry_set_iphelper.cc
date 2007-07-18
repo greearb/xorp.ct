@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.6 2007/06/07 01:28:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.7 2007/07/11 22:18:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -130,12 +130,12 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! fibconfig().have_ipv4())
+	    if (! fea_data_plane_manager().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! fibconfig().have_ipv6())
+	    if (! fea_data_plane_manager().have_ipv6())
 		return false;
 	    break;
 	}
@@ -241,12 +241,12 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // Check that the family is supported
     do {
 	if (fte.nexthop().is_ipv4()) {
-	    if (! fibconfig().have_ipv4())
+	    if (! fea_data_plane_manager().have_ipv4())
 		return false;
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
-	    if (! fibconfig().have_ipv6())
+	    if (! fea_data_plane_manager().have_ipv6())
 		return false;
 	    break;
 	}

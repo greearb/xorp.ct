@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.21 2007/06/27 01:27:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.22 2007/07/11 22:18:03 pavlin Exp $"
 
 
 //
@@ -70,8 +70,6 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _xrl_socket_server(xrl_socket_server),
       _is_running(false),
       _is_shutdown_received(false),
-      _have_ipv4(false),
-      _have_ipv6(false),
       _fea_data_plane_manager_click(NULL)
 {
 }
@@ -84,9 +82,6 @@ XrlFeaTarget::~XrlFeaTarget()
 int
 XrlFeaTarget::startup()
 {
-    _have_ipv4 = _fea_node.fibconfig().have_ipv4();
-    _have_ipv6 = _fea_node.fibconfig().have_ipv6();
-
     _is_running = true;
 
     return (XORP_OK);
@@ -725,9 +720,6 @@ XrlFeaTarget::fea_fib_0_1_add_fib_client4(
     const bool&		send_updates,
     const bool&		send_resolves)
 {
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     return _xrl_fib_client_manager.add_fib_client4(client_target_name,
 						   send_updates,
 						   send_resolves);
@@ -740,9 +732,6 @@ XrlFeaTarget::fea_fib_0_1_add_fib_client6(
     const bool&		send_updates,
     const bool&		send_resolves)
 {
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     return _xrl_fib_client_manager.add_fib_client6(client_target_name,
 						   send_updates,
 						   send_resolves);
@@ -758,9 +747,6 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client4(
     // Input values,
     const string&	client_target_name)
 {
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     return _xrl_fib_client_manager.delete_fib_client4(client_target_name);
 }
 
@@ -769,9 +755,6 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
     // Input values,
     const string&	client_target_name)
 {
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     return _xrl_fib_client_manager.delete_fib_client6(client_target_name);
 }
 
@@ -1014,9 +997,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
@@ -1041,9 +1021,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
@@ -1077,9 +1054,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
@@ -1112,9 +1086,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     vifp = ifconfig().local_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
@@ -1142,9 +1113,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
     const IfTreeAddr6* ap = NULL;
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
@@ -1169,9 +1137,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
 {
     const IfTreeAddr6* ap = NULL;
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
@@ -1205,9 +1170,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     vifp = ifconfig().local_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
@@ -1238,9 +1200,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
 {
     const IfTreeAddr4* ap = NULL;
     string error_msg;
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
@@ -1274,9 +1233,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
     const IfTreeAddr6* ap = NULL;
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
@@ -1304,9 +1260,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
@@ -1330,9 +1283,6 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
 {
     const IfTreeAddr6* ap = NULL;
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     ap = ifconfig().local_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
@@ -1665,9 +1615,6 @@ XrlFeaTarget::ifmgr_0_1_create_address4(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new AddAddr4(iftree, ifname, vifname, address),
@@ -1689,9 +1636,6 @@ XrlFeaTarget::ifmgr_0_1_delete_address4(
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (ifconfig().add_transaction_operation(
 	    tid,
@@ -1716,9 +1660,6 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetAddr4Enabled(iftree, ifname, vifname, address, enabled),
@@ -1741,9 +1682,6 @@ XrlFeaTarget::ifmgr_0_1_set_prefix4(
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (ifconfig().add_transaction_operation(
 	    tid,
@@ -1768,9 +1706,6 @@ XrlFeaTarget::ifmgr_0_1_set_broadcast4(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetAddr4Broadcast(iftree, ifname, vifname, address, broadcast),
@@ -1794,9 +1729,6 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint4(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetAddr4Endpoint(iftree, ifname, vifname, address, endpoint),
@@ -1819,9 +1751,6 @@ XrlFeaTarget::ifmgr_0_1_create_address6(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new AddAddr6(iftree, ifname, vifname, address),
@@ -1843,9 +1772,6 @@ XrlFeaTarget::ifmgr_0_1_delete_address6(
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (ifconfig().add_transaction_operation(
 	    tid,
@@ -1870,9 +1796,6 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetAddr6Enabled(iftree, ifname, vifname, address, enabled),
@@ -1896,9 +1819,6 @@ XrlFeaTarget::ifmgr_0_1_set_prefix6(
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetAddr6Prefix(iftree, ifname, vifname, address, prefix_len),
@@ -1921,9 +1841,6 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (ifconfig().add_transaction_operation(
 	    tid,
@@ -1985,9 +1902,6 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
     uint32_t&		admin_distance,
     string&		protocol_origin)
 {
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     Fte4 fte;
     if (fibconfig().lookup_route_by_dest4(dst, fte) == true) {
 	netmask = fte.net();
@@ -2016,9 +1930,6 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
     uint32_t&		admin_distance,
     string&		protocol_origin)
 {
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     Fte6 fte;
     if (fibconfig().lookup_route_by_dest6(dst, fte) == true) {
 	netmask = fte.net();
@@ -2046,9 +1957,6 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network4(
     uint32_t&		admin_distance,
     string&		protocol_origin)
 {
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     Fte4 fte;
     if (fibconfig().lookup_route_by_network4(dst, fte)) {
 	nexthop = fte.nexthop();
@@ -2075,9 +1983,6 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network6(
     uint32_t&		admin_distance,
     string&		protocol_origin)
 {
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     Fte6 fte;
     if (fibconfig().lookup_route_by_network6(dst, fte)) {
 	nexthop = fte.nexthop();
@@ -2097,7 +2002,7 @@ XrlFeaTarget::fti_0_2_have_ipv4(
     // Output values,
     bool&	result)
 {
-    result = fibconfig().have_ipv4();
+    result = _fea_node.have_ipv4();
 
     return XrlCmdError::OKAY();
 }
@@ -2107,7 +2012,7 @@ XrlFeaTarget::fti_0_2_have_ipv6(
     // Output values,
     bool&	result)
 {
-    result = fibconfig().have_ipv6();
+    result = _fea_node.have_ipv6();
 
     return XrlCmdError::OKAY();
 }
@@ -2305,9 +2210,6 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 
     UNUSED(cookie);
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     is_xorp_route = true;	// XXX: unconditionally set to true
 
     // TODO: XXX: get rid of the hard-coded "connected" string here
@@ -2360,9 +2262,6 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
 
     UNUSED(cookie);
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     is_xorp_route = true;	// XXX: unconditionally set to true
 
     // TODO: XXX: get rid of the hard-coded "connected" string here
@@ -2395,9 +2294,6 @@ XrlFeaTarget::redist_transaction4_0_1_delete_all_routes(
     string error_msg;
 
     UNUSED(cookie);
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (fibconfig().add_transaction_operation(
 	    tid,
@@ -2479,9 +2375,6 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 
     UNUSED(cookie);
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     is_xorp_route = true;	// XXX: unconditionally set to true
 
     // TODO: XXX: get rid of the hard-coded "connected" string here
@@ -2534,9 +2427,6 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
 
     UNUSED(cookie);
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     is_xorp_route = true;	// XXX: unconditionally set to true
 
     // TODO: XXX: get rid of the hard-coded "connected" string here
@@ -2569,9 +2459,6 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
     string error_msg;
 
     UNUSED(cookie);
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (fibconfig().add_transaction_operation(
 	    tid,
@@ -2719,9 +2606,6 @@ XrlFeaTarget::raw_packet4_0_1_send(
 {
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     vector<uint8_t> ext_headers_type_vector;
     vector<vector<uint8_t> > ext_headers_payload_vector;
 
@@ -2749,9 +2633,6 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
 {
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     if (_io_ip_manager.register_receiver(IPv4::af(), xrl_target_name,
 					 if_name, vif_name, ip_protocol,
 					 enable_multicast_loopback,
@@ -2772,9 +2653,6 @@ XrlFeaTarget::raw_packet4_0_1_unregister_receiver(
     const uint32_t&	ip_protocol)
 {
     string error_msg;
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (_io_ip_manager.unregister_receiver(IPv4::af(), xrl_target_name,
 					   if_name, vif_name, ip_protocol,
@@ -2797,9 +2675,6 @@ XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
 {
     string error_msg;
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     if (_io_ip_manager.join_multicast_group(xrl_target_name, if_name, vif_name,
 					    ip_protocol, IPvX(group_address),
 					    error_msg)
@@ -2820,9 +2695,6 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     const IPv4&		group_address)
 {
     string error_msg;
-
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
     if (_io_ip_manager.leave_multicast_group(xrl_target_name, if_name,
 					     vif_name, ip_protocol,
@@ -2854,9 +2726,6 @@ XrlFeaTarget::raw_packet6_0_1_send(
     const vector<uint8_t>&	payload)
 {
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     // Decompose the external headers info
     if (ext_headers_type.size() != ext_headers_payload.size()) {
@@ -2908,9 +2777,6 @@ XrlFeaTarget::raw_packet6_0_1_register_receiver(
 {
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     if ( _io_ip_manager.register_receiver(IPv6::af(), xrl_target_name,
 					  if_name, vif_name, ip_protocol,
 					  enable_multicast_loopback, error_msg)
@@ -2930,9 +2796,6 @@ XrlFeaTarget::raw_packet6_0_1_unregister_receiver(
     const uint32_t&	ip_protocol)
 {
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (_io_ip_manager.unregister_receiver(IPv6::af(), xrl_target_name,
 					   if_name, vif_name, ip_protocol,
@@ -2955,9 +2818,6 @@ XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
 {
     string error_msg;
 
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
-
     if (_io_ip_manager.join_multicast_group(xrl_target_name, if_name, vif_name,
 					    ip_protocol, IPvX(group_address),
 					    error_msg)
@@ -2978,9 +2838,6 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
     const IPv6&		group_address)
 {
     string error_msg;
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (_io_ip_manager.leave_multicast_group(xrl_target_name, if_name,
 					     vif_name, ip_protocol,
@@ -3004,9 +2861,6 @@ XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
 {
     UNUSED(addr);
 
-    if (! have_ipv4())
-	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
-
     // If we had multiple socket servers we'd look for the right one
     // to use.  At the present time we only have one so this is the
     // one to return
@@ -3024,9 +2878,6 @@ XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
 							      )
 {
     UNUSED(addr);
-
-    if (! have_ipv6())
-	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     // If we had multiple socket servers we'd look for the right one
     // to use.  At the present time we only have one so this is the

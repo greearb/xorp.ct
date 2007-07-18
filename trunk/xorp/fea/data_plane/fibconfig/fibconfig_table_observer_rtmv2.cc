@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.10 2007/06/11 22:00:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.11 2007/07/11 22:18:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -139,7 +139,7 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv4 routes
     //
-    if (fibconfig().have_ipv4() && _rs4->is_open()) {
+    if (fea_data_plane_manager().have_ipv4() && _rs4->is_open()) {
 	FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET,
 							     fibconfig().iftree(),
 							     fte_list,
@@ -155,7 +155,7 @@ FibConfigTableObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
     //
     // Get the IPv6 routes
     //
-    if (fibconfig().have_ipv6() && _rs6->is_open()) {
+    if (fea_data_plane_manager().have_ipv6() && _rs6->is_open()) {
 	FibConfigTableGetSysctl::parse_buffer_routing_socket(AF_INET6,
 							     fibconfig().iftree(),
 							     fte_list,

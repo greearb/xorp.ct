@@ -12,13 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.7 2007/06/27 01:27:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.8 2007/07/11 22:18:02 pavlin Exp $"
 
 
 //
 // FEA (Forwarding Engine Abstraction) node implementation.
 //
-
 
 #include "fea_module.h"
 
@@ -29,9 +28,6 @@
 
 #include "libcomm/comm_api.h"
 
-#ifdef HOST_OS_WINDOWS
-#include "fea/data_plane/control_socket/windows_rras_support.hh"
-#endif
 #include "fea/data_plane/managers/fea_data_plane_manager_bsd.hh"
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
 #include "fea/data_plane/managers/fea_data_plane_manager_dummy.hh"
@@ -81,24 +77,10 @@ FeaNode::startup()
 		   error_msg.c_str());
     }
 
-#ifdef HOST_OS_WINDOWS
-    //
-    // Load support code for Windows Router Manager V2, if it
-    // is detected as running and/or configured.
-    //
-    if (WinSupport::is_rras_running()) {
-	WinSupport::add_protocol_to_registry(AF_INET);
-#if 0
-	WinSupport::add_protocol_to_registry(AF_INET6);
-#endif
-	WinSupport::restart_rras();
-	WinSupport::add_protocol_to_rras(AF_INET);
-#if 0
-	WinSupport::add_protocol_to_rras(AF_INET6);
-#endif
-	TimerList::system_sleep(TimeVal(2, 0));
+    if (start_data_plane_managers_plugins(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start the data plane manager(s) plugins: %s",
+		   error_msg.c_str());
     }
-#endif // HOST_OS_WINDOWS
 
     //
     // IfConfig and FibConfig
@@ -152,21 +134,30 @@ FeaNode::is_running() const
     return (_is_running);
 }
 
-int
-FeaNode::set_dummy()
+bool
+FeaNode::have_ipv4() const
 {
-    string error_msg;
+    if (_fea_data_plane_managers.empty())
+	return (false);
 
-    _is_dummy = true;
+    //
+    // XXX: We pull the information by using only the first data plane manager.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fea_data_plane_managers.front()->have_ipv4());
+}
 
-    if (load_data_plane_managers(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot configure the FEA in dummy mode: %s",
-		   error_msg.c_str());
-	_is_dummy = false;
-	return (XORP_ERROR);
-    }
+bool
+FeaNode::have_ipv6() const
+{
+    if (_fea_data_plane_managers.empty())
+	return (false);
 
-    return (XORP_OK);
+    //
+    // XXX: We pull the information by using only the first data plane manager.
+    // In the future we need to rething this and be more flexible.
+    //
+    return (_fea_data_plane_managers.front()->have_ipv6());
 }
 
 int
@@ -317,4 +308,45 @@ FeaNode::unload_data_plane_managers(string& error_msg)
     }
 
     return (XORP_OK);
+}
+
+int
+FeaNode::start_data_plane_managers_plugins(string& error_msg)
+{
+    list<FeaDataPlaneManager*>::iterator iter;
+
+    for (iter = _fea_data_plane_managers.begin();
+	 iter != _fea_data_plane_managers.end();
+	 ++iter) {
+	FeaDataPlaneManager* fea_data_plane_manager = *iter;
+	if (fea_data_plane_manager->start_plugins(error_msg) != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
+
+    return (XORP_OK);
+}
+
+int
+FeaNode::stop_data_plane_managers_plugins(string& error_msg)
+{
+    int ret_value = XORP_OK;
+    string error_msg2;
+    list<FeaDataPlaneManager*>::iterator iter;
+
+    error_msg.erase();
+
+    for (iter = _fea_data_plane_managers.begin();
+	 iter != _fea_data_plane_managers.end();
+	 ++iter) {
+	FeaDataPlaneManager* fea_data_plane_manager = *iter;
+	if (fea_data_plane_manager->stop_plugins(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    return (ret_value);
 }

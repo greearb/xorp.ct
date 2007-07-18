@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.cc,v 1.7 2007/06/06 19:55:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.cc,v 1.8 2007/07/11 22:18:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -111,7 +111,7 @@ IfConfigSetIoctl::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (ifconfig().have_ipv4()) {
+    if (fea_data_plane_manager().have_ipv4()) {
 	if (_s4 < 0) {
 	    _s4 = socket(AF_INET, SOCK_DGRAM, 0);
 	    if (_s4 < 0) {
@@ -123,7 +123,7 @@ IfConfigSetIoctl::start(string& error_msg)
     }
     
 #ifdef HAVE_IPV6
-    if (ifconfig().have_ipv6()) {
+    if (fea_data_plane_manager().have_ipv6()) {
 	if (_s6 < 0) {
 	    _s6 = socket(AF_INET6, SOCK_DGRAM, 0);
 	    if (_s6 < 0) {
@@ -504,7 +504,7 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
     UNUSED(if_index);
     UNUSED(is_broadcast);
 
-    if (! ifconfig().have_ipv4()) {
+    if (! fea_data_plane_manager().have_ipv4()) {
 	error_msg = "IPv4 is not supported";
 	return (XORP_ERROR);
     }
@@ -615,7 +615,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 
 #else // HAVE_IPV6
 
-    if (! ifconfig().have_ipv6()) {
+    if (! fea_data_plane_manager().have_ipv6()) {
 	error_msg = "IPv6 is not supported";
 	return (XORP_ERROR);
     }
@@ -712,7 +712,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
     // Check that the family is supported
     switch (addr.af()) {
     case AF_INET:
-	if (! ifconfig().have_ipv4()) {
+	if (! fea_data_plane_manager().have_ipv4()) {
 	    error_msg = "IPv4 is not supported";
 	    return (XORP_ERROR);
 	}
@@ -720,7 +720,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (! ifconfig().have_ipv6()) {
+	if (! fea_data_plane_manager().have_ipv6()) {
 	    error_msg = "IPv6 is not supported";
 	    return (XORP_ERROR);
 	}

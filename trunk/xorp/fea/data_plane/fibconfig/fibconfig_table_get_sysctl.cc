@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.9 2007/06/13 00:15:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.10 2007/07/11 22:18:09 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -133,12 +133,12 @@ FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
     // Check that the family is supported
     switch(family) {
     case AF_INET:
-	if (! fibconfig().have_ipv4())
+	if (! fea_data_plane_manager().have_ipv4())
 	    return false;
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	if (! fibconfig().have_ipv6())
+	if (! fea_data_plane_manager().have_ipv6())
 	    return false;
 	break;
 #endif // HAVE_IPV6

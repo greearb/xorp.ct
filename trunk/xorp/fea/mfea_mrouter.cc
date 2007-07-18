@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.56 2007/06/15 16:55:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.57 2007/06/18 21:22:38 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -126,8 +126,7 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
       _mrt_api_mrt_mfc_flags_border_vif(false),
       _mrt_api_mrt_mfc_rp(false),
       _mrt_api_mrt_mfc_bw_upcall(false),
-      _multicast_forwarding_enabled(false),
-      _is_dummy(false)
+      _multicast_forwarding_enabled(false)
 {
     string error_msg;
 
@@ -214,14 +213,6 @@ MfeaMrouter::~MfeaMrouter()
     delete[] _sndbuf1;
     delete[] _rcvcmsgbuf;
     delete[] _sndcmsgbuf;
-}
-
-int
-MfeaMrouter::set_dummy()
-{
-    _is_dummy = true;
-
-    return (XORP_OK);
 }
 
 /**
@@ -459,7 +450,7 @@ MfeaMrouter::multicast_forwarding_enabled4(bool& ret_value,
     UNUSED(error_msg);
 
     // XXX: always return true if running in dummy mode
-    if (is_dummy()) {
+    if (mfea_node().is_dummy()) {
 	ret_value = true;
 	return (XORP_OK);
     }
@@ -521,7 +512,7 @@ MfeaMrouter::multicast_forwarding_enabled6(bool& ret_value,
     UNUSED(error_msg);
 
     // XXX: always return true if running in dummy mode
-    if (is_dummy()) {
+    if (mfea_node().is_dummy()) {
 	ret_value = true;
 	return (XORP_OK);
     }
@@ -579,7 +570,7 @@ int
 MfeaMrouter::set_multicast_forwarding_enabled4(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
-    if (is_dummy())
+    if (mfea_node().is_dummy())
 	return (XORP_OK);
 
     if (! have_multicast_routing4()) {
@@ -650,7 +641,7 @@ int
 MfeaMrouter::set_multicast_forwarding_enabled6(bool v, string& error_msg)
 {
     // XXX: don't do anything if running in dummy mode
-    if (is_dummy())
+    if (mfea_node().is_dummy())
 	return (XORP_OK);
 
     if (! have_multicast_routing6()) {

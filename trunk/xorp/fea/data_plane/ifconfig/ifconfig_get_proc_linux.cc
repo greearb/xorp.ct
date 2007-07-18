@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.12 2007/06/06 19:55:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.13 2007/07/11 22:18:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -139,7 +139,7 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     //
     // The IPv4 information
     //
-    if (ifconfig().have_ipv4()) {
+    if (fea_data_plane_manager().have_ipv4()) {
 	if (proc_read_ifconf_linux(ifconfig(), iftree, AF_INET,
 				   PROC_LINUX_NET_DEVICES_FILE_V4)
 	    != true)
@@ -150,7 +150,7 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     //
     // The IPv6 information
     //
-    if (ifconfig().have_ipv6()) {
+    if (fea_data_plane_manager().have_ipv6()) {
 	if (proc_read_ifconf_linux(ifconfig(), iftree, AF_INET6,
 				   PROC_LINUX_NET_DEVICES_FILE_V6)
 	    != true)

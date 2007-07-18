@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.1 2007/07/11 22:18:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.2 2007/07/17 22:53:57 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -66,6 +66,31 @@ FeaDataPlaneManagerWindows::FeaDataPlaneManagerWindows(FeaNode& fea_node)
 
 FeaDataPlaneManagerWindows::~FeaDataPlaneManagerWindows()
 {
+}
+
+int
+FeaDataPlaneManagerWindows::start_manager(string& error_msg)
+{
+#if defined(HOST_OS_WINDOWS)
+    //
+    // Load support code for Windows Router Manager V2, if it
+    // is detected as running and/or configured.
+    //
+    if (WinSupport::is_rras_running()) {
+	WinSupport::add_protocol_to_registry(AF_INET);
+#if 0
+	WinSupport::add_protocol_to_registry(AF_INET6);
+#endif
+	WinSupport::restart_rras();
+	WinSupport::add_protocol_to_rras(AF_INET);
+#if 0
+	WinSupport::add_protocol_to_rras(AF_INET6);
+#endif
+	TimerList::system_sleep(TimeVal(2, 0));
+    }
+#endif // HOST_OS_WINDOWS
+
+    return (FeaDataPlaneManager::start_manager(error_msg));
 }
 
 int

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.10 2007/07/11 22:18:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.11 2007/07/17 22:53:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -164,7 +164,7 @@ FibConfig::register_fibconfig_forwarding(FibConfigForwarding* fibconfig_forwardi
 	    string error_msg;
 	    string manager_name = fibconfig_forwarding->fea_data_plane_manager().manager_name();
 
-	    if (have_ipv4()) {
+	    if (fibconfig_forwarding->fea_data_plane_manager().have_ipv4()) {
 		if (unicast_forwarding_enabled4(v, error_msg) != XORP_OK) {
 		    XLOG_ERROR("Cannot push the current IPv4 forwarding "
 			       "information state into the %s mechanism, "
@@ -181,7 +181,7 @@ FibConfig::register_fibconfig_forwarding(FibConfigForwarding* fibconfig_forwardi
 	    }
 
 #ifdef HAVE_IPV6
-	    if (have_ipv6()) {
+	    if (fibconfig_forwarding->fea_data_plane_manager().have_ipv6()) {
 		if (unicast_forwarding_enabled6(v, error_msg) != XORP_OK) {
 		    XLOG_ERROR("Cannot push the current IPv6 forwarding "
 			       "information state into the %s mechanism, "
@@ -815,32 +815,6 @@ FibConfig::end_configuration(string& error_msg)
     }
     
     return (ret_value);
-}
-
-bool
-FibConfig::have_ipv4() const
-{
-    if (_fibconfig_forwarding_plugins.empty())
-	return (false);
-
-    //
-    // XXX: We pull the information by using only the first method.
-    // In the future we need to rething this and be more flexible.
-    //
-    return (_fibconfig_forwarding_plugins.front()->have_ipv4());
-}
-
-bool
-FibConfig::have_ipv6() const
-{
-    if (_fibconfig_forwarding_plugins.empty())
-	return (false);
-
-    //
-    // XXX: We pull the information by using only the first method.
-    // In the future we need to rething this and be more flexible.
-    //
-    return (_fibconfig_forwarding_plugins.front()->have_ipv6());
 }
 
 int

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc,v 1.7 2007/07/11 22:18:06 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -75,14 +75,14 @@ FibConfigEntryObserverNetlinkSocket::start(string& error_msg)
     //
     // Listen to the netlink multicast group for IPv4 routing entries
     //
-    if (fibconfig().have_ipv4())
+    if (fea_data_plane_manager().have_ipv4())
 	nl_groups |= RTMGRP_IPV4_ROUTE;
 
 #ifdef HAVE_IPV6
     //
     // Listen to the netlink multicast group for IPv6 routing entries
     //
-    if (fibconfig().have_ipv6())
+    if (fea_data_plane_manager().have_ipv6())
 	nl_groups |= RTMGRP_IPV6_ROUTE;
 #endif // HAVE_IPV6
 

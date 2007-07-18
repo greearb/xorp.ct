@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.9 2007/07/11 22:18:02 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.10 2007/07/17 22:53:55 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -300,20 +300,6 @@ public:
      * @return true configuration success pushed down into forwarding table.
      */
     bool end_configuration(string& error_msg);
-
-    /**
-     * Return true if the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    bool have_ipv4() const;
-
-    /**
-     * Return true if the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    bool have_ipv6() const;
 
     /**
      * Test whether the IPv4 unicast forwarding engine retains existing

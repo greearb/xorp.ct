@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.7 2007/06/27 01:27:04 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.8 2007/07/11 22:18:02 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -79,11 +79,18 @@ public:
     bool	is_running() const;
 
     /**
-     * Setup the unit to behave as dummy (for testing purpose).
-     *
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * Return true if the underlying system supports IPv4.
+     * 
+     * @return true if the underlying system supports IPv4, otherwise false.
      */
-    int		set_dummy();
+    bool have_ipv4() const;
+
+    /**
+     * Return true if the underlying system supports IPv6.
+     * 
+     * @return true if the underlying system supports IPv6, otherwise false.
+     */
+    bool have_ipv6() const;
 
     /**
      * Test if running in dummy mode.
@@ -190,6 +197,22 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int unload_data_plane_managers(string& error_msg);
+
+    /**
+     * Start the data plane managers plugins.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int start_data_plane_managers_plugins(string& error_msg);
+
+    /**
+     * Stop the data plane managers plugins.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int stop_data_plane_managers_plugins(string& error_msg);
 
     EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running
