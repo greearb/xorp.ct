@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.23 2007/03/14 01:13:32 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.24 2007/03/15 00:43:16 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -142,6 +142,7 @@ order:
   \item Implementing the XRL interface of static\_routes.
   \item The main loop of static routes.
   \item Calling XRLs on the RIB.
+  \item Compiling the source code
 \end{itemize}
 
 
@@ -1350,6 +1351,50 @@ XrlStaticRoutesNode::lookup_route_by_dest4_cb(const XrlError& xrl_error,
 \newpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Compiling the Source Code}
+\label{compiling}
+
+If any of the Makefile.am or configure.in files are modified,
+then the {\it ./bootstrap} script in the XORP top-level directory
+must be executed first.
+It will run the appropriate autotools to generate the corresponding
+Makefile.in files and the {\it configure} script.
+After that the {\it ./configure} script must be run followed by
+{\it gmake}.
+
+Note that XORP assumes certain versions of the autoconf/automake/libtool
+versions have been installed. Those versions are listed in the README
+in the top-level XORP directory. If the installed versions are
+different, then the result is unredicted so it is best to install
+versions that are as close as possible to those listed in the README.
+
+The {\it bootstrap} script itself assumes that the autotools executable
+programs have certain names. E.g.,:
+
+\begin{verbatim}
+ACLOCAL=${ACLOCAL:-"aclocal110"}
+AUTOCONF=${AUTOCONF:-"autoconf261"}
+AUTOHEADER=${AUTOHEADER:-"autoheader261"}
+AUTOMAKE=${AUTOMAKE:-"automake110"}
+LIBTOOLIZE=${LIBTOOLIZE:-"libtoolize"}
+\end{verbatim}
+
+If the default names don't match, then set the following variables in
+the shell environment to the appropriate names before running
+{\it ./bootstrap}:
+
+\begin{itemize}
+  \item {\it ACLOCAL}
+  \item {\it AUTOCONF}
+  \item {\it AUTOHEADER}
+  \item {\it AUTOMAKE}
+  \item {\it LIBTOOLIZE}
+\end{itemize}
+
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The XLOG Logging Facility}
 \label{xlog}
 
@@ -1583,6 +1628,8 @@ file {\stt xorp/etc/templates/static\_routes.tp} as an example.
   sample code is modified to match the original code.
 
   \item March 20, 2007: Updated the version to 1.4, and the date.
+
+  \item July 18, 2007: Added Section 7: Compiling the Source Code.
 
 \end{itemize}
 
