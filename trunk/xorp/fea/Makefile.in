@@ -106,7 +106,7 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
-	$(top_builddir)/fea/libfea_data_plane_base.la \
+	libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -142,7 +142,7 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
-	$(top_builddir)/fea/libfea_data_plane_base.la \
+	libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
@@ -376,7 +376,7 @@ LDADD = libfea.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
-	$(top_builddir)/fea/libfea_data_plane_base.la \
+	libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \

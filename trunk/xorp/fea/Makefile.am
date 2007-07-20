@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.97 2007/07/16 23:39:31 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.98 2007/07/17 22:53:54 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -34,7 +34,7 @@ LDADD		+= $(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la
 LDADD		+= $(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la
 LDADD		+= $(top_builddir)/fea/data_plane/io/libxorp_io.la
 LDADD		+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la
-LDADD		+= $(top_builddir)/fea/libfea_data_plane_base.la
+LDADD		+= libfea_data_plane_base.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclient.la
