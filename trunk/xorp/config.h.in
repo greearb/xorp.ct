@@ -163,6 +163,9 @@
 /* Define to 1 if you have IPv6 multicast routing */
 #undef HAVE_IPV6_MULTICAST_ROUTING
 
+/* Define to 1 if you have IP raw sockets (SOCK_RAW) */
+#undef HAVE_IP_RAW_SOCKETS
+
 /* Define to 1 if you have RFC 2367 key sockets (PF_KEY_V2) */
 #undef HAVE_KEY_SOCKETS
 

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.6 2007/04/14 01:35:06 pavlin Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.7 2007/04/14 07:00:48 pavlin Exp $
 dnl
 
 dnl
@@ -160,6 +160,35 @@ ${test_socket_headers}
 #endif
 ])
 
+
+dnl -------------------------------------------------------------
+dnl Check for IP raw sockets in the build environment (SOCK_RAW)
+dnl -------------------------------------------------------------
+
+AC_MSG_CHECKING(whether the build environment has IP raw sockets (SOCK_RAW))
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#include <errno.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+],
+[
+    int sock;
+
+    sock = socket(AF_INET, SOCK_RAW, 0);
+    if ((sock < 0) && (errno == EINVAL))
+	return (1);
+
+    return (0);
+],
+    [AC_DEFINE(HAVE_IP_RAW_SOCKETS, 1,
+	       [Define to 1 if you have IP raw sockets (SOCK_RAW)])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
 
 dnl -------------------------------------------------------------
 dnl Check for routing sockets in the build environment (AF_ROUTE)
