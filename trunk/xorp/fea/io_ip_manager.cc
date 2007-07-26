@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.4 2007/06/08 01:45:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.5 2007/06/27 01:27:04 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -209,23 +209,26 @@ protected:
 /* ------------------------------------------------------------------------- */
 /* IoIpComm methods */
 
-IoIpComm::IoIpComm(EventLoop& eventloop, const IfTree& iftree, int family,
-		   uint8_t ip_protocol)
-    : IoIpSocket(eventloop, iftree, family, ip_protocol)
+IoIpComm::IoIpComm(IoIpManager& io_ip_manager, const IfTree& iftree,
+		   int family, uint8_t ip_protocol)
+    : IoIpReceiver(),
+      _io_ip_manager(io_ip_manager),
+      _iftree(iftree),
+      _family(family),
+      _ip_protocol(ip_protocol)
 {
 }
 
 IoIpComm::~IoIpComm()
 {
-    if (_input_filters.empty() == false) {
-	string dummy_error_msg;
-	IoIpSocket::stop(dummy_error_msg);
+    IoIpPlugins::iterator iter;
 
-	do {
-	    InputFilter* i = _input_filters.front();
-	    _input_filters.erase(_input_filters.begin());
-	    i->bye();
-	} while (_input_filters.empty() == false);
+    deallocate_io_ip_plugins();
+
+    while (_input_filters.empty() == false) {
+	InputFilter* i = _input_filters.front();
+	_input_filters.erase(_input_filters.begin());
+	i->bye();
     }
 }
 
@@ -244,12 +247,14 @@ IoIpComm::add_filter(InputFilter* filter)
     }
 
     _input_filters.push_back(filter);
+
+    //
+    // Allocate and start the IoIp plugins: one per data plane manager.
+    //
     if (_input_filters.front() == filter) {
-	string error_msg;
-	if (IoIpSocket::start(error_msg) != XORP_OK) {
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return false;
-	}
+	XLOG_ASSERT(_io_ip_plugins.empty());
+	allocate_io_ip_plugins();
+	start_io_ip_plugins();
     }
     return true;
 }
@@ -265,57 +270,80 @@ IoIpComm::remove_filter(InputFilter* filter)
 	return false;
     }
 
+    XLOG_ASSERT(! _io_ip_plugins.empty());
+
     _input_filters.erase(i);
     if (_input_filters.empty()) {
-	string error_msg;
-	if (IoIpSocket::stop(error_msg) != XORP_OK) {
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return false;
-	}
+	deallocate_io_ip_plugins();
     }
     return true;
 }
 
 int
-IoIpComm::proto_socket_write(const string&	if_name,
-			     const string&	vif_name,
-			     const IPvX&	src_address,
-			     const IPvX&	dst_address,
-			     int32_t		ip_ttl,
-			     int32_t		ip_tos,
-			     bool		ip_router_alert,
-			     bool		ip_internet_control,
-			     const vector<uint8_t>& ext_headers_type,
-			     const vector<vector<uint8_t> >& ext_headers_payload,
-			     const vector<uint8_t>& payload,
-			     string&		error_msg)
+IoIpComm::send_packet(const string&	if_name,
+		      const string&	vif_name,
+		      const IPvX&	src_address,
+		      const IPvX&	dst_address,
+		      int32_t		ip_ttl,
+		      int32_t		ip_tos,
+		      bool		ip_router_alert,
+		      bool		ip_internet_control,
+		      const vector<uint8_t>& ext_headers_type,
+		      const vector<vector<uint8_t> >& ext_headers_payload,
+		      const vector<uint8_t>& payload,
+		      string&		error_msg)
 {
-    return (IoIpSocket::proto_socket_write(if_name,
-					   vif_name,
-					   src_address,
-					   dst_address,
-					   ip_ttl,
-					   ip_tos,
-					   ip_router_alert,
-					   ip_internet_control,
-					   ext_headers_type,
-					   ext_headers_payload,
-					   payload,
-					   error_msg));
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_ip_plugins.empty()) {
+	error_msg = c_format("No I/O IP plugin to send a raw IP packet on "
+			     "interface %s vif %s from %s to %s protocol %u",
+			     if_name.c_str(), vif_name.c_str(),
+			     src_address.str().c_str(),
+			     dst_address.str().c_str(),
+			     _ip_protocol);
+	return (XORP_ERROR);
+    }
+
+    IoIpPlugins::iterator iter;
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	IoIp* io_ip = iter->second;
+	if (io_ip->send_packet(if_name,
+			       vif_name,
+			       src_address,
+			       dst_address,
+			       ip_ttl,
+			       ip_tos,
+			       ip_router_alert,
+			       ip_internet_control,
+			       ext_headers_type,
+			       ext_headers_payload,
+			       payload,
+			       error_msg2)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    return (ret_value);
 }
 
 void
-IoIpComm::process_recv_data(const string&	if_name,
-			    const string&	vif_name,
-			    const IPvX&		src_address,
-			    const IPvX&		dst_address,
-			    int32_t		ip_ttl,
-			    int32_t		ip_tos,
-			    bool		ip_router_alert,
-			    bool		ip_internet_control,
-			    const vector<uint8_t>& ext_headers_type,
-			    const vector<vector<uint8_t> >& ext_headers_payload,
-			    const vector<uint8_t>& payload)
+IoIpComm::recv_packet(const string&			if_name,
+		      const string&			vif_name,
+		      const IPvX&			src_address,
+		      const IPvX&			dst_address,
+		      int32_t				ip_ttl,
+		      int32_t				ip_tos,
+		      bool				ip_router_alert,
+		      bool				ip_internet_control,
+		      const vector<uint8_t>&		ext_headers_type,
+		      const vector<vector<uint8_t> >&	ext_headers_payload,
+		      const vector<uint8_t>&		payload)
 {
     struct IPvXHeaderInfo header;
 
@@ -323,7 +351,7 @@ IoIpComm::process_recv_data(const string&	if_name,
     header.vif_name = vif_name;
     header.src_address = src_address;
     header.dst_address = dst_address;
-    header.ip_protocol = IoIpSocket::ip_protocol();
+    header.ip_protocol = _ip_protocol;
     header.ip_ttl = ip_ttl;
     header.ip_tos = ip_tos;
     header.ip_router_alert = ip_router_alert;
@@ -338,7 +366,7 @@ IoIpComm::process_recv_data(const string&	if_name,
 }
 
 void
-IoIpComm::process_system_multicast_upcall(const vector<uint8_t>& payload)
+IoIpComm::recv_system_multicast_upcall(const vector<uint8_t>& payload)
 {
     for (list<InputFilter*>::iterator i = _input_filters.begin();
 	 i != _input_filters.end(); ++i) {
@@ -353,7 +381,18 @@ IoIpComm::join_multicast_group(const string&	if_name,
 			       const string&	receiver_name,
 			       string&		error_msg)
 {
-    JoinedGroupsTable::iterator iter;
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_ip_plugins.empty()) {
+	error_msg = c_format("No I/O IP plugin to join group %s "
+			     "on interface %s vif %s protocol %u "
+			     "receiver name %s",
+			     group_address.str().c_str(),
+			     if_name.c_str(), vif_name.c_str(),
+			     _ip_protocol, receiver_name.c_str());
+	return (XORP_ERROR);
+    }
 
     //
     // Check the arguments
@@ -384,29 +423,39 @@ IoIpComm::join_multicast_group(const string&	if_name,
 	return (XORP_ERROR);
     }
 
+    JoinedGroupsTable::iterator joined_iter;
     JoinedMulticastGroup init_jmg(if_name, vif_name, group_address);
-    iter = _joined_groups_table.find(init_jmg);
-    if (iter == _joined_groups_table.end()) {
+    joined_iter = _joined_groups_table.find(init_jmg);
+    if (joined_iter == _joined_groups_table.end()) {
 	//
 	// First receiver, hence join the multicast group first to check
 	// for errors.
 	//
-	if (IoIpSocket::join_multicast_group(if_name,
-					     vif_name,
-					     group_address,
-					     error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
+	IoIpPlugins::iterator plugin_iter;
+	for (plugin_iter = _io_ip_plugins.begin();
+	     plugin_iter != _io_ip_plugins.end();
+	     ++plugin_iter) {
+	    IoIp* io_ip = plugin_iter->second;
+	    if (io_ip->join_multicast_group(if_name,
+					    vif_name,
+					    group_address,
+					    error_msg2)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		if (! error_msg.empty())
+		    error_msg += " ";
+		error_msg += error_msg2;
+	    }
 	}
 	_joined_groups_table.insert(make_pair(init_jmg, init_jmg));
-	iter = _joined_groups_table.find(init_jmg);
+	joined_iter = _joined_groups_table.find(init_jmg);
     }
-    XLOG_ASSERT(iter != _joined_groups_table.end());
-    JoinedMulticastGroup& jmg = iter->second;
+    XLOG_ASSERT(joined_iter != _joined_groups_table.end());
+    JoinedMulticastGroup& jmg = joined_iter->second;
 
     jmg.add_receiver(receiver_name);
 
-    return (XORP_OK);
+    return (ret_value);
 }
 
 int
@@ -416,11 +465,23 @@ IoIpComm::leave_multicast_group(const string&	if_name,
 				const string&	receiver_name,
 				string&		error_msg)
 {
-    JoinedGroupsTable::iterator iter;
+    int ret_value = XORP_OK;
+    string error_msg2;
 
+    if (_io_ip_plugins.empty()) {
+	error_msg = c_format("No I/O IP plugin to leave group %s "
+			     "on interface %s vif %s protocol %u "
+			     "receiver name %s",
+			     group_address.str().c_str(),
+			     if_name.c_str(), vif_name.c_str(),
+			     _ip_protocol, receiver_name.c_str());
+	return (XORP_ERROR);
+    }
+
+    JoinedGroupsTable::iterator joined_iter;
     JoinedMulticastGroup init_jmg(if_name, vif_name, group_address);
-    iter = _joined_groups_table.find(init_jmg);
-    if (iter == _joined_groups_table.end()) {
+    joined_iter = _joined_groups_table.find(init_jmg);
+    if (joined_iter == _joined_groups_table.end()) {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
 			     "the group was not joined",
 			     group_address.str().c_str(),
@@ -428,24 +489,176 @@ IoIpComm::leave_multicast_group(const string&	if_name,
 			     vif_name.c_str());
 	return (XORP_ERROR);
     }
-    JoinedMulticastGroup& jmg = iter->second;
+    JoinedMulticastGroup& jmg = joined_iter->second;
 
     jmg.delete_receiver(receiver_name);
     if (jmg.empty()) {
 	//
 	// The last receiver, hence leave the group
 	//
-	_joined_groups_table.erase(iter);
-	if (IoIpSocket::leave_multicast_group(if_name,
-					      vif_name,
-					      group_address,
-					      error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
+	_joined_groups_table.erase(joined_iter);
+
+	IoIpPlugins::iterator plugin_iter;
+	for (plugin_iter = _io_ip_plugins.begin();
+	     plugin_iter != _io_ip_plugins.end();
+	     ++plugin_iter) {
+	    IoIp* io_ip = plugin_iter->second;
+	    if (io_ip->leave_multicast_group(if_name,
+					     vif_name,
+					     group_address,
+					     error_msg2)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		if (! error_msg.empty())
+		    error_msg += " ";
+		error_msg += error_msg2;
+	    }
 	}
     }
 
-    return (XORP_OK);
+    return (ret_value);
+}
+
+void
+IoIpComm::allocate_io_ip_plugins()
+{
+    list<FeaDataPlaneManager *>::iterator iter;
+
+    for (iter = _io_ip_manager.fea_data_plane_managers().begin();
+	 iter != _io_ip_manager.fea_data_plane_managers().end();
+	 ++iter) {
+	FeaDataPlaneManager* fea_data_plane_manager = *iter;
+	allocate_io_ip_plugin(fea_data_plane_manager);
+    }
+}
+
+void
+IoIpComm::deallocate_io_ip_plugins()
+{
+    while (! _io_ip_plugins.empty()) {
+	IoIpPlugins::iterator iter = _io_ip_plugins.begin();
+	FeaDataPlaneManager* fea_data_plane_manager = iter->first;
+	deallocate_io_ip_plugin(fea_data_plane_manager);
+    }
+}
+
+void
+IoIpComm::allocate_io_ip_plugin(FeaDataPlaneManager* fea_data_plane_manager)
+{
+    IoIpPlugins::iterator iter;
+
+    XLOG_ASSERT(fea_data_plane_manager != NULL);
+
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	if (iter->first == fea_data_plane_manager)
+	    break;
+    }
+    if (iter != _io_ip_plugins.end()) {
+	return;	// XXX: the plugin was already allocated
+    }
+
+    IoIp* io_ip = fea_data_plane_manager->allocate_io_ip(_iftree, _family,
+							 _ip_protocol);
+    if (io_ip == NULL) {
+	XLOG_ERROR("Couldn't allocate plugin for I/O IP raw "
+		   "communications for data plane manager %s",
+		   fea_data_plane_manager->manager_name().c_str());
+	return;
+    }
+
+    _io_ip_plugins.push_back(make_pair(fea_data_plane_manager, io_ip));
+}
+
+void
+IoIpComm::deallocate_io_ip_plugin(FeaDataPlaneManager* fea_data_plane_manager)
+{
+    IoIpPlugins::iterator iter;
+
+    XLOG_ASSERT(fea_data_plane_manager != NULL);
+
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	if (iter->first == fea_data_plane_manager)
+	    break;
+    }
+    if (iter == _io_ip_plugins.end()) {
+	XLOG_ERROR("Couldn't deallocate plugin for I/O IP raw "
+		   "communications for data plane manager %s: plugin not found",
+		   fea_data_plane_manager->manager_name().c_str());
+	return;
+    }
+
+    IoIp* io_ip = iter->second;
+    fea_data_plane_manager->deallocate_io_ip(io_ip);
+    _io_ip_plugins.erase(iter);
+}
+
+
+void
+IoIpComm::start_io_ip_plugins()
+{
+    IoIpPlugins::iterator iter;
+    string error_msg;
+
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	IoIp* io_ip = iter->second;
+	if (io_ip->is_running())
+	    continue;
+	io_ip->register_io_ip_receiver(this);
+	if (io_ip->start(error_msg) != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    continue;
+	}
+
+	//
+	// Push all multicast joins into the new plugin
+	//
+	JoinedGroupsTable::iterator join_iter;
+	for (join_iter = _joined_groups_table.begin();
+	     join_iter != _joined_groups_table.end();
+	     ++join_iter) {
+	    JoinedMulticastGroup& joined_multicast_group = join_iter->second;
+	    if (io_ip->join_multicast_group(joined_multicast_group.if_name(),
+					    joined_multicast_group.vif_name(),
+					    joined_multicast_group.group_address(),
+					    error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("%s", error_msg.c_str());
+	    }
+	}
+    }
+}
+
+void
+IoIpComm::stop_io_ip_plugins()
+{
+    string error_msg;
+    IoIpPlugins::iterator iter;
+
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	IoIp* io_ip = iter->second;
+	io_ip->unregister_io_ip_receiver();
+	if (io_ip->stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	}
+    }
+}
+
+XorpFd
+IoIpComm::first_valid_protocol_fd_in()
+{
+    XorpFd xorp_fd;
+
+    // Find the first valid file descriptor and return it
+    IoIpPlugins::iterator iter;
+    for (iter = _io_ip_plugins.begin(); iter != _io_ip_plugins.end(); ++iter) {
+	IoIp* io_ip = iter->second;
+	xorp_fd = io_ip->protocol_fd_in();
+	if (xorp_fd.is_valid())
+	    return (xorp_fd);
+    }
+
+    // XXX: nothing found
+    return (xorp_fd);
 }
 
 // ----------------------------------------------------------------------------
@@ -568,18 +781,18 @@ IoIpManager::send(const string&		if_name,
     IoIpComm* io_ip_comm = cti->second;
     XLOG_ASSERT(io_ip_comm != NULL);
 
-    return (io_ip_comm->proto_socket_write(if_name,
-					   vif_name,
-					   src_address,
-					   dst_address,
-					   ip_ttl,
-					   ip_tos,
-					   ip_router_alert,
-					   ip_internet_control,
-					   ext_headers_type,
-					   ext_headers_payload,
-					   payload,
-					   error_msg));
+    return (io_ip_comm->send_packet(if_name,
+				    vif_name,
+				    src_address,
+				    dst_address,
+				    ip_ttl,
+				    ip_tos,
+				    ip_router_alert,
+				    ip_internet_control,
+				    ext_headers_type,
+				    ext_headers_payload,
+				    payload,
+				    error_msg));
 }
 
 int
@@ -604,7 +817,7 @@ IoIpManager::register_receiver(int		family,
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
-	io_ip_comm = new IoIpComm(_eventloop, iftree(), family, ip_protocol);
+	io_ip_comm = new IoIpComm(*this, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
 	io_ip_comm = cti->second;
@@ -827,7 +1040,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     CommTable::iterator cti = comm_table.find(ip_protocol);
     IoIpComm* io_ip_comm = NULL;
     if (cti == comm_table.end()) {
-	io_ip_comm = new IoIpComm(_eventloop, iftree(), family, ip_protocol);
+	io_ip_comm = new IoIpComm(*this, iftree(), family, ip_protocol);
 	comm_table[ip_protocol] = io_ip_comm;
     } else {
 	io_ip_comm = cti->second;
@@ -851,7 +1064,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
 	if (filter->ip_protocol() == ip_protocol) {
 	    // Already have this filter
 	    filter->set_receiver_cb(receiver_cb);
-	    receiver_fd = io_ip_comm->proto_socket_in();
+	    receiver_fd = io_ip_comm->first_valid_protocol_fd_in();
 	    return (XORP_OK);
 	}
     }
@@ -868,7 +1081,7 @@ IoIpManager::register_system_multicast_upcall_receiver(
     // Add the filter to those associated with empty receiver_name
     filters.insert(FilterBag::value_type(receiver_name, filter));
 
-    receiver_fd = io_ip_comm->proto_socket_in();
+    receiver_fd = io_ip_comm->first_valid_protocol_fd_in();
 
     return (XORP_OK);
 }
@@ -936,4 +1149,79 @@ IoIpManager::unregister_system_multicast_upcall_receiver(
 			 family,
 			 ip_protocol);
     return (XORP_ERROR);
+}
+
+int
+IoIpManager::register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager,
+					 bool is_exclusive)
+{
+    if (is_exclusive) {
+	// Unregister all registered data plane managers
+	while (! _fea_data_plane_managers.empty()) {
+	    unregister_data_plane_manager(_fea_data_plane_managers.front());
+	}
+    }
+
+    if (fea_data_plane_manager == NULL) {
+	// XXX: exclusive NULL is used to unregister all data plane managers
+	return (XORP_OK);
+    }
+
+    if (find(_fea_data_plane_managers.begin(),
+	     _fea_data_plane_managers.end(),
+	     fea_data_plane_manager)
+	!= _fea_data_plane_managers.end()) {
+	// XXX: already registered
+	return (XORP_OK);
+    }
+
+    _fea_data_plane_managers.push_back(fea_data_plane_manager);
+
+    //
+    // Allocate all I/O IP plugins for the new data plane manager
+    //
+    CommTable::iterator iter;
+    for (iter = _comm_table4.begin(); iter != _comm_table4.end(); ++iter) {
+	IoIpComm* io_ip_comm = iter->second;
+	io_ip_comm->allocate_io_ip_plugin(fea_data_plane_manager);
+	io_ip_comm->start_io_ip_plugins();
+    }
+    for (iter = _comm_table6.begin(); iter != _comm_table6.end(); ++iter) {
+	IoIpComm* io_ip_comm = iter->second;
+	io_ip_comm->allocate_io_ip_plugin(fea_data_plane_manager);
+	io_ip_comm->start_io_ip_plugins();
+    }
+
+    return (XORP_OK);
+}
+
+int
+IoIpManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager)
+{
+    if (fea_data_plane_manager == NULL)
+	return (XORP_ERROR);
+
+    list<FeaDataPlaneManager*>::iterator data_plane_manager_iter;
+    data_plane_manager_iter = find(_fea_data_plane_managers.begin(),
+				   _fea_data_plane_managers.end(),
+				   fea_data_plane_manager);
+    if (data_plane_manager_iter == _fea_data_plane_managers.end())
+	return (XORP_ERROR);
+
+    //
+    // Dealocate all I/O IP plugins for the unregistered data plane manager
+    //
+    CommTable::iterator iter;
+    for (iter = _comm_table4.begin(); iter != _comm_table4.end(); ++iter) {
+	IoIpComm* io_ip_comm = iter->second;
+	io_ip_comm->deallocate_io_ip_plugin(fea_data_plane_manager);
+    }
+    for (iter = _comm_table6.begin(); iter != _comm_table6.end(); ++iter) {
+	IoIpComm* io_ip_comm = iter->second;
+	io_ip_comm->deallocate_io_ip_plugin(fea_data_plane_manager);
+    }
+
+    _fea_data_plane_managers.erase(data_plane_manager_iter);
+
+    return (XORP_OK);
 }

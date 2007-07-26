@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.98 2007/07/17 22:53:54 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.99 2007/07/20 02:01:08 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -82,8 +82,12 @@ xorp_fea_dummy_SOURCES			= xorp_fea.cc
 # -- Library Sources
 libfea_data_plane_base_la_SOURCES	 = fea_data_plane_manager.hh
 libfea_data_plane_base_la_SOURCES	+= fibconfig_forwarding.hh
+libfea_data_plane_base_la_SOURCES	+= io_ip.hh
+libfea_data_plane_base_la_SOURCES	+= io_link.hh
 libfea_data_plane_base_la_SOURCES	+= fea_data_plane_manager.cc
 libfea_data_plane_base_la_SOURCES	+= fibconfig_forwarding.cc
+libfea_data_plane_base_la_SOURCES	+= io_ip.cc
+libfea_data_plane_base_la_SOURCES	+= io_link.cc
 
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h

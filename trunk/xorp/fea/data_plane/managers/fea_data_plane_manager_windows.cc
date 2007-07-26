@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.2 2007/07/17 22:53:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.3 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -38,6 +38,8 @@
 #include "fea/data_plane/fibconfig/fibconfig_table_set_rtmv2.hh"
 #include "fea/data_plane/fibconfig/fibconfig_table_observer_iphelper.hh"
 #include "fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.hh"
+#include "fea/data_plane/io/io_link_pcap.hh"
+#include "fea/data_plane/io/io_ip_socket.hh"
 
 #include "fea_data_plane_manager_windows.hh"
 
@@ -149,4 +151,46 @@ int
 FeaDataPlaneManagerWindows::register_plugins(string& error_msg)
 {
     return (FeaDataPlaneManager::register_all_plugins(true, error_msg));
+}
+
+IoLink*
+FeaDataPlaneManagerWindows::allocate_io_link(const IfTree& iftree,
+					     const string& if_name,
+					     const string& vif_name,
+					     uint16_t ether_type,
+					     const string& filter_program)
+{
+    IoLink* io_link = NULL;
+
+    UNUSED(iftree);
+    UNUSED(if_name);
+    UNUSED(vif_name);
+    UNUSED(ether_type);
+    UNUSED(filter_program);
+
+#ifdef HAVE_PCAP
+    io_link = new IoLinkPcap(*this, iftree, if_name, vif_name, ether_type,
+			     filter_program);
+    _io_link_list.push_back(io_link);
+#endif
+
+    return (io_link);
+}
+
+IoIp*
+FeaDataPlaneManagerWindows::allocate_io_ip(const IfTree& iftree, int family,
+					   uint8_t ip_protocol)
+{
+    IoIp* io_ip = NULL;
+
+    UNUSED(iftree);
+    UNUSED(family);
+    UNUSED(ip_protocol);
+
+#ifdef HAVE_IP_RAW_SOCKETS
+    io_ip = new IoIpSocket(*this, iftree, family, ip_protocol);
+    _io_ip_list.push_back(io_ip);
+#endif
+
+    return (io_ip);
 }

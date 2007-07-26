@@ -12,39 +12,32 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.3 2007/07/16 23:56:12 pavlin Exp $
+// $XORP$
 
 
-#ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
-#define __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
+#ifndef __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__
+#define __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__
 
 
 //
-// I/O link raw pcap(3)-based support.
+// I/O Dummy Link raw support.
 //
+
+#include <set>
 
 #include "libxorp/xorp.h"
-#include "libxorp/eventloop.hh"
-
-#ifdef HAVE_PCAP_H
-#include <pcap.h>
-#endif
 
 #include "fea/io_link.hh"
-
-
-#ifndef HAVE_PCAP_H
-typedef void pcap_t;
-#endif
+#include "fea/io_link_manager.hh"
 
 
 /**
- * @short A base class for I/O link raw pcap(3)-based communication.
+ * @short A base class for Dummy I/O link raw communication.
  *
  * Each protocol 'registers' for link raw I/O per interface and vif 
  * and gets assigned one object (per interface and vif) of this class.
  */
-class IoLinkPcap : public IoLink {
+class IoLinkDummy : public IoLink {
 public:
     /**
      * Constructor for link-level access for a given interface and vif.
@@ -59,15 +52,15 @@ public:
      * @param filter_program the optional filter program to be applied on the
      * received packets. The program uses tcpdump(1) style expression.
      */
-    IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
-	       const IfTree& iftree, const string& if_name,
-	       const string& vif_name, uint16_t ether_type,
-	       const string& filter_program);
+    IoLinkDummy(FeaDataPlaneManager& fea_data_plane_manager,
+		const IfTree& iftree, const string& if_name,
+		const string& vif_name, uint16_t ether_type,
+		const string& filter_program);
 
     /**
      * Virtual destructor.
      */
-    virtual ~IoLinkPcap();
+    virtual ~IoLinkDummy();
 
     /**
      * Start operation.
@@ -120,58 +113,7 @@ public:
 			    string&		error_msg);
 
 private:
-    /**
-     * Open the pcap access.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		open_pcap_access(string& error_msg);
-    
-    /**
-     * Close the pcap access.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		close_pcap_access(string& error_msg);
-
-    /**
-     * Join or leave a multicast group on an interface.
-     * 
-     * @param is_join if true, then join the group, otherwise leave.
-     * @param group the multicast group to join/leave.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		join_leave_multicast_group(bool is_join, const Mac& group,
-					   string& error_msg);
-
-    /**
-     * Callback that is called when there data to read from the system.
-     *
-     * This is called as a IoEventCb callback.
-     * @param fd file descriptor that with event caused this method to be
-     * called.
-     * @param type the event type.
-     */
-    void	ioevent_read_cb(XorpFd fd, IoEventType type);
-
-    /**
-     * Read data from the system, and then call the appropriate
-     * module to process it.
-     */
-    void	recv_data();
-
-    // Private state
-    XorpFd	_packet_fd;	// The file descriptor to send and recv packets
-    pcap_t*	_pcap;		// The pcap descriptor to send and recv packets
-    int		_datalink_type;	// The pcap-defined DLT_* data link type
-
-    uint8_t*	_databuf;	// Data buffer for sending and receiving
-    char*	_errbuf;	// Buffer for error messages
-
-    XorpTask	_recv_data_task; // Task for receiving pending data
+    set<IoLinkComm::JoinedMulticastGroup> _joined_groups_table;
 };
 
-#endif // __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
+#endif // __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__

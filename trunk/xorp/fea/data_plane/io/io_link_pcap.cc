@@ -12,10 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.4 2007/06/27 18:54:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.5 2007/06/27 19:14:50 pavlin Exp $"
 
 //
-// I/O link raw pcap(3)-based support.
+// I/O link raw communication support.
+//
+// The mechanism is pcap(3).
 //
 
 #include "fea/fea_module.h"
@@ -30,8 +32,11 @@
 #endif
 
 #include "fea/iftree.hh"
+
 #include "io_link_pcap.hh"
 
+
+#ifdef HAVE_PCAP
 
 //
 // Local constants definitions
@@ -47,28 +52,27 @@
 //
 
 
-IoLinkPcap::IoLinkPcap(EventLoop& eventloop, const IfTree& iftree,
-		       const string& if_name, const string& vif_name,
-		       uint16_t ether_type, const string& filter_program)
-    : _eventloop(eventloop),
-      _iftree(iftree),
-      _if_name(if_name),
-      _vif_name(vif_name),
-      _ether_type(ether_type),
-      _filter_program(filter_program),
+IoLinkPcap::IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
+		       const IfTree& iftree, const string& if_name,
+		       const string& vif_name, uint16_t ether_type,
+		       const string& filter_program)
+    : IoLink(fea_data_plane_manager, iftree, if_name, vif_name, ether_type,
+	     filter_program),
       _pcap(NULL),
       _datalink_type(-1),
       _databuf(NULL),
-      _errbuf(NULL),
-      _is_log_trace(false)
+      _errbuf(NULL)
 {
 }
 
 IoLinkPcap::~IoLinkPcap()
 {
-    string dummy_error_msg;
+    string error_msg;
 
-    stop(dummy_error_msg);
+    if (stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop the I/O Link raw pcap(3) mechanism: %s",
+		   error_msg.c_str());
+    }
 
     // Free the buffers
     if (_databuf != NULL)
@@ -80,13 +84,29 @@ IoLinkPcap::~IoLinkPcap()
 int
 IoLinkPcap::start(string& error_msg)
 {
-    return (open_pcap_access(error_msg));
+    if (_is_running)
+	return (XORP_OK);
+
+    if (open_pcap_access(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    _is_running = true;
+
+    return (XORP_OK);
 }
 
 int
 IoLinkPcap::stop(string& error_msg)
 {
-    return (close_pcap_access(error_msg));
+    if (! _is_running)
+	return (XORP_OK);
+
+    if (close_pcap_access(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    _is_running = false;
+
+    return (XORP_OK);
 }
 
 int
@@ -100,59 +120,6 @@ IoLinkPcap::leave_multicast_group(const Mac& group, string& error_msg)
 {
     return (join_leave_multicast_group(false, group, error_msg));
 }
-
-#ifndef HAVE_PCAP
-
-int
-IoLinkPcap::open_pcap_access(string& error_msg)
-{
-    error_msg = c_format("IoLinkPcap::open_pcap_access() failed: "
-			 "The I/O link raw pcap(3)-based mechanism is not "
-			 "supported");
-    return (XORP_ERROR);
-}
-
-int
-IoLinkPcap::close_pcap_access(string& error_msg)
-{
-    error_msg = c_format("IoLinkPcap::close_pcap_access() failed: "
-			 "The I/O link raw pcap(3)-based mechanism is not "
-			 "supported");
-    return (XORP_ERROR);
-}
-
-int
-IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
-				       string& error_msg)
-{
-    UNUSED(is_join);
-    UNUSED(group);
-
-    error_msg = c_format("IoLinkPcap::join_leave_multicast_group() failed: "
-			 "The I/O link raw pcap(3)-based mechanism is not "
-			 "supported");
-    return (XORP_ERROR);
-}
-
-int
-IoLinkPcap::send_packet(const Mac& src_address,
-			const Mac& dst_address,
-			uint16_t ether_type,
-			const vector<uint8_t>& payload,
-			string& error_msg)
-{
-    UNUSED(src_address);
-    UNUSED(dst_address);
-    UNUSED(ether_type);
-    UNUSED(payload);
-
-    error_msg = c_format("IoLinkPcap::send_packet() failed: "
-			 "The I/O link raw pcap(3)-based mechanism is not "
-			 "supported");
-    return (XORP_ERROR);
-}
-
-#else // HAVE_PCAP
 
 int
 IoLinkPcap::open_pcap_access(string& error_msg)
@@ -172,17 +139,17 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // Open the pcap descriptor
     //
     _errbuf[0] = '\0';
-    _pcap = pcap_open_live(_vif_name.c_str(), IO_BUF_SIZE, 0, 1, _errbuf);
+    _pcap = pcap_open_live(vif_name().c_str(), IO_BUF_SIZE, 0, 1, _errbuf);
     if (_pcap == NULL) {
 	error_msg = c_format("Cannot open interface %s vif %s "
 			     "for pcap access: %s",
-			     _if_name.c_str(), _vif_name.c_str(), _errbuf);
+			     if_name().c_str(), vif_name().c_str(), _errbuf);
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
     if (_errbuf[0] != '\0') {
 	XLOG_WARNING("Warning opening interface %s vif %s for pcap access: %s",
-		     _if_name.c_str(), _vif_name.c_str(), _errbuf);
+		     if_name().c_str(), vif_name().c_str(), _errbuf);
     }
 
     //
@@ -192,7 +159,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     if (_datalink_type < 0) {
 	error_msg = c_format("Cannot get the pcap data link type for "
 			     "interface %s vif %s: %s",
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
@@ -235,7 +202,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
 			     "is not supported",
 			     _datalink_type,
 			     pcap_datalink_val_to_name(_datalink_type),
-			     _if_name.c_str(), _vif_name.c_str());
+			     if_name().c_str(), vif_name().c_str());
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
@@ -246,7 +213,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     if (pcap_setnonblock(_pcap, 1, _errbuf) != 0) {
 	error_msg = c_format("Cannot set interface %s vif %s in pcap "
 			     "non-blocking mode: %s",
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
@@ -264,7 +231,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     if (! _packet_fd.is_valid()) {
 	error_msg = c_format("Cannot get selectable file descriptor for "
 			     "pcap access for interface %s vif %s: %s",
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
@@ -273,19 +240,21 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     //
     // Set the pcap filter
     //
-    string filter_program = _filter_program;
-    if (_ether_type > 0) {
+    string pcap_filter_program = filter_program();
+    if (ether_type() > 0) {
 	// Logical AND the EtherType with the filter program
-	filter_program = c_format("(ether proto %u) and (%s)",
-				  _ether_type, _filter_program.c_str());
+	pcap_filter_program = c_format("(ether proto %u) and (%s)",
+				       ether_type(),
+				       pcap_filter_program.c_str());
     }
     //
-    // XXX: We can't use filter_program.c_str() as an argument
+    // XXX: We can't use pcap_filter_program.c_str() as an argument
     // to pcap_compile(), because the pcap_compile() specificiation
     // of the argument is not const-ified.
     //
-    vector<char> program_buf(filter_program.size() + 1);
-    strncpy(&program_buf[0], filter_program.c_str(), program_buf.size() - 1);
+    vector<char> program_buf(pcap_filter_program.size() + 1);
+    strncpy(&program_buf[0], pcap_filter_program.c_str(),
+	    program_buf.size() - 1);
     program_buf[program_buf.size() - 1] = '\0';
     char* program_c_str = &program_buf[0];
     struct bpf_program bpf_program;
@@ -299,7 +268,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
 	pcap_freecode(&bpf_program);
 	error_msg = c_format("Cannot set the pcap filter for "
 			     "interface %s vif %s for program '%s': %s",
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     program_c_str, pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
@@ -315,7 +284,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     if (pcap_setdirection(_pcap, PCAP_D_INOUT) != 0) {
 	error_msg = c_format("Cannot set the pcap packet capture "
 			     "direction for interface %s vif %s: %s",
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     pcap_geterr(_pcap));
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
@@ -365,14 +334,14 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     const IfTreeVif* vifp;
 
     // Find the vif
-    vifp = _iftree.find_vif(_if_name, _vif_name);
+    vifp = iftree().find_vif(if_name(), vif_name());
     if (vifp == NULL) {
 	error_msg = c_format("%s multicast group %s failed: "
 			     "interface %s vif %s not found",
 			     (is_join)? "Joining" : "Leaving",
 			     cstring(group),
-			     _if_name.c_str(),
-			     _vif_name.c_str());
+			     if_name().c_str(),
+			     vif_name().c_str());
 	return (XORP_ERROR);
     }
 
@@ -382,8 +351,8 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 			     "interface/vif is DOWN",
 			     (is_join)? "join" : "leave",
 			     cstring(group),
-			     _if_name.c_str(),
-			     _vif_name.c_str());
+			     if_name().c_str(),
+			     vif_name().c_str());
 	return (XORP_ERROR);
     }
 #endif // 0/1
@@ -404,7 +373,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     struct ifreq ifreq;
     struct sockaddr* sa = NULL;
     memset(&ifreq, 0, sizeof(ifreq));
-    strncpy(ifreq.ifr_name, _vif_name.c_str(), sizeof(ifreq.ifr_name) - 1);
+    strncpy(ifreq.ifr_name, vif_name().c_str(), sizeof(ifreq.ifr_name) - 1);
 #ifdef HAVE_STRUCT_IFREQ_IFR_HWADDR
     sa = &ifreq.ifr_hwaddr;
 #else
@@ -436,7 +405,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 			     "data link type %d (%s) is not supported",
 			     (is_join)? "join" : "leave",
 			     cstring(group),
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     _datalink_type,
 			     pcap_datalink_val_to_name(_datalink_type));
 	return (XORP_ERROR);
@@ -456,7 +425,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 	error_msg = c_format("Cannot %s group %s on interface %s vif %s: %s",
 			     (is_join)? "join" : "leave",
 			     cstring(group),
-			     _if_name.c_str(), _vif_name.c_str(),
+			     if_name().c_str(), vif_name().c_str(),
 			     strerror(errno));
 	return (XORP_ERROR);
     }
@@ -514,8 +483,8 @@ IoLinkPcap::recv_data()
 	    XLOG_WARNING("Received packet on interface %s vif %s: "
 			 "data is too short "
 			 "(captured %u expecting at least %u octets)",
-			 _if_name.c_str(),
-			 _vif_name.c_str(),
+			 if_name().c_str(),
+			 vif_name().c_str(),
 			 XORP_UINT_CAST(pcap_pkthdr.caplen),
 			 XORP_UINT_CAST(sizeof(*ether_header_p)));
 	    return;			// Error
@@ -556,8 +525,8 @@ IoLinkPcap::recv_data()
 		     "data is too short (captured %u expecting %u octets)",
 		     src_address.str().c_str(),
 		     dst_address.str().c_str(),
-		     _if_name.c_str(),
-		     _vif_name.c_str(),
+		     if_name().c_str(),
+		     vif_name().c_str(),
 		     XORP_UINT_CAST(pcap_pkthdr.caplen),
 		     XORP_UINT_CAST(pcap_pkthdr.len));
 	return;			// Error
@@ -574,7 +543,7 @@ IoLinkPcap::recv_data()
     // Process the result
     vector<uint8_t> payload(payload_size);
     memcpy(&payload[0], packet + payload_offset, payload_size);
-    process_recv_data(src_address, dst_address, ether_type, payload);
+    recv_packet(src_address, dst_address, ether_type, payload);
 
     return;			// OK
 }
@@ -593,15 +562,15 @@ IoLinkPcap::send_packet(const Mac& src_address,
     //
     // Test whether the interface/vif is enabled
     //
-    ifp = _iftree.find_interface(_if_name);
+    ifp = iftree().find_interface(if_name());
     if (ifp == NULL) {
-	error_msg = c_format("No interface %s", _if_name.c_str());
+	error_msg = c_format("No interface %s", if_name().c_str());
 	return (XORP_ERROR);
     }
-    vifp = ifp->find_vif(_vif_name);
+    vifp = ifp->find_vif(vif_name());
     if (vifp == NULL) {
 	error_msg = c_format("No interface %s vif %s",
-			     _if_name.c_str(), _vif_name.c_str());
+			     if_name().c_str(), vif_name().c_str());
 	return (XORP_ERROR);
     }
     if (! ifp->enabled()) {
@@ -657,8 +626,8 @@ IoLinkPcap::send_packet(const Mac& src_address,
 				 src_address.str().c_str(),
 				 dst_address.str().c_str(),
 				 ether_type,
-				 _if_name.c_str(),
-				 _vif_name.c_str(),
+				 if_name().c_str(),
+				 vif_name().c_str(),
 				 XORP_UINT_CAST(packet_size),
 				 XORP_UINT_CAST(IO_BUF_SIZE));
 	    return (XORP_ERROR);
@@ -678,7 +647,7 @@ IoLinkPcap::send_packet(const Mac& src_address,
 			     "is not supported",
 			     _datalink_type,
 			     pcap_datalink_val_to_name(_datalink_type),
-			     _if_name.c_str(), _vif_name.c_str());
+			     if_name().c_str(), vif_name().c_str());
 	return (XORP_ERROR);
     }
 
@@ -691,8 +660,8 @@ IoLinkPcap::send_packet(const Mac& src_address,
 			     src_address.str().c_str(),
 			     dst_address.str().c_str(),
 			     ether_type,
-			     _if_name.c_str(),
-			     _vif_name.c_str(),
+			     if_name().c_str(),
+			     vif_name().c_str(),
 			     pcap_geterr(_pcap));
 	return (XORP_ERROR);
     }

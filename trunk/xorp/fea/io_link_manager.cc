@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.1 2007/06/27 01:27:05 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -128,25 +128,29 @@ protected:
 /* ------------------------------------------------------------------------- */
 /* IoLinkComm methods */
 
-IoLinkComm::IoLinkComm(EventLoop& eventloop, const IfTree& iftree,
+IoLinkComm::IoLinkComm(IoLinkManager& io_link_manager, const IfTree& iftree,
 		       const string& if_name, const string& vif_name,
 		       uint16_t ether_type, const string& filter_program)
-    : IoLinkPcap(eventloop, iftree, if_name, vif_name, ether_type,
-		 filter_program)
+    : IoLinkReceiver(),
+      _io_link_manager(io_link_manager),
+      _iftree(iftree),
+      _if_name(if_name),
+      _vif_name(vif_name),
+      _ether_type(ether_type),
+      _filter_program(filter_program)
 {
 }
 
 IoLinkComm::~IoLinkComm()
 {
-    if (_input_filters.empty() == false) {
-	string dummy_error_msg;
-	IoLinkPcap::stop(dummy_error_msg);
+    IoLinkPlugins::iterator iter;
 
-	do {
-	    InputFilter* i = _input_filters.front();
-	    _input_filters.erase(_input_filters.begin());
-	    i->bye();
-	} while (_input_filters.empty() == false);
+    deallocate_io_link_plugins();
+
+    while (_input_filters.empty() == false) {
+	InputFilter* i = _input_filters.front();
+	_input_filters.erase(_input_filters.begin());
+	i->bye();
     }
 }
 
@@ -165,12 +169,14 @@ IoLinkComm::add_filter(InputFilter* filter)
     }
 
     _input_filters.push_back(filter);
+
+    //
+    // Allocate and start the IoLink plugins: one per data plane manager.
+    //
     if (_input_filters.front() == filter) {
-	string error_msg;
-	if (IoLinkPcap::start(error_msg) != XORP_OK) {
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return false;
-	}
+	XLOG_ASSERT(_io_link_plugins.empty());
+	allocate_io_link_plugins();
+	start_io_link_plugins();
     }
     return true;
 }
@@ -186,13 +192,11 @@ IoLinkComm::remove_filter(InputFilter* filter)
 	return false;
     }
 
+    XLOG_ASSERT(! _io_link_plugins.empty());
+
     _input_filters.erase(i);
     if (_input_filters.empty()) {
-	string error_msg;
-	if (IoLinkPcap::stop(error_msg) != XORP_OK) {
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return false;
-	}
+	deallocate_io_link_plugins();
     }
     return true;
 }
@@ -204,18 +208,45 @@ IoLinkComm::send_packet(const Mac&	src_address,
 			const vector<uint8_t>& payload,
 			string&		error_msg)
 {
-    return (IoLinkPcap::send_packet(src_address,
-				    dst_address,
-				    ether_type,
-				    payload,
-				    error_msg));
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_link_plugins.empty()) {
+	error_msg = c_format("No I/O Link plugin to send a link raw packet on "
+			     "interface %s vif %s from %s to %s EtherType %u",
+			     if_name().c_str(), vif_name().c_str(),
+			     src_address.str().c_str(),
+			     dst_address.str().c_str(),
+			     ether_type);
+	return (XORP_ERROR);
+    }
+
+    IoLinkPlugins::iterator iter;
+    for (iter = _io_link_plugins.begin();
+	 iter != _io_link_plugins.end();
+	 ++iter) {
+	IoLink* io_link = iter->second;
+	if (io_link->send_packet(src_address,
+				 dst_address,
+				 ether_type,
+				 payload,
+				 error_msg2)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    return (ret_value);
 }
 
 void
-IoLinkComm::process_recv_data(const Mac&	src_address,
-			      const Mac&	dst_address,
-			      uint16_t		ether_type,
-			      const vector<uint8_t>& payload)
+IoLinkComm::recv_packet(const Mac&		src_address,
+			const Mac&		dst_address,
+			uint16_t		ether_type,
+			const vector<uint8_t>&	payload)
 {
     struct MacHeaderInfo header;
 
@@ -236,7 +267,18 @@ IoLinkComm::join_multicast_group(const Mac&	group_address,
 				 const string&	receiver_name,
 				 string&	error_msg)
 {
-    JoinedGroupsTable::iterator iter;
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_link_plugins.empty()) {
+	error_msg = c_format("No I/O Link plugin to join group %s "
+			     "on interface %s vif %s EtherType %u "
+			     "receiver name %s",
+			     group_address.str().c_str(),
+			     if_name().c_str(), vif_name().c_str(),
+			     ether_type(), receiver_name.c_str());
+	return (XORP_ERROR);
+    }
 
     //
     // Check the arguments
@@ -255,26 +297,36 @@ IoLinkComm::join_multicast_group(const Mac&	group_address,
 	return (XORP_ERROR);
     }
 
+    JoinedGroupsTable::iterator joined_iter;
     JoinedMulticastGroup init_jmg(group_address);
-    iter = _joined_groups_table.find(init_jmg);
-    if (iter == _joined_groups_table.end()) {
+    joined_iter = _joined_groups_table.find(init_jmg);
+    if (joined_iter == _joined_groups_table.end()) {
 	//
 	// First receiver, hence join the multicast group first to check
 	// for errors.
 	//
-	if (IoLinkPcap::join_multicast_group(group_address, error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
+	IoLinkPlugins::iterator plugin_iter;
+	for (plugin_iter = _io_link_plugins.begin();
+	     plugin_iter != _io_link_plugins.end();
+	     ++plugin_iter) {
+	    IoLink* io_link = plugin_iter->second;
+	    if (io_link->join_multicast_group(group_address, error_msg2)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		if (! error_msg.empty())
+		    error_msg += " ";
+		error_msg += error_msg2;
+	    }
 	}
 	_joined_groups_table.insert(make_pair(init_jmg, init_jmg));
-	iter = _joined_groups_table.find(init_jmg);
+	joined_iter = _joined_groups_table.find(init_jmg);
     }
-    XLOG_ASSERT(iter != _joined_groups_table.end());
-    JoinedMulticastGroup& jmg = iter->second;
+    XLOG_ASSERT(joined_iter != _joined_groups_table.end());
+    JoinedMulticastGroup& jmg = joined_iter->second;
 
     jmg.add_receiver(receiver_name);
 
-    return (XORP_OK);
+    return (ret_value);
 }
 
 int
@@ -282,11 +334,23 @@ IoLinkComm::leave_multicast_group(const Mac&	group_address,
 				  const string&	receiver_name,
 				  string&	error_msg)
 {
-    JoinedGroupsTable::iterator iter;
+    int ret_value = XORP_OK;
+    string error_msg2;
 
+    if (_io_link_plugins.empty()) {
+	error_msg = c_format("No I/O Link plugin to leave group %s "
+			     "on interface %s vif %s EtherType %u "
+			     "receiver name %s",
+			     group_address.str().c_str(),
+			     if_name().c_str(), vif_name().c_str(),
+			     ether_type(), receiver_name.c_str());
+	return (XORP_ERROR);
+    }
+
+    JoinedGroupsTable::iterator joined_iter;
     JoinedMulticastGroup init_jmg(group_address);
-    iter = _joined_groups_table.find(init_jmg);
-    if (iter == _joined_groups_table.end()) {
+    joined_iter = _joined_groups_table.find(init_jmg);
+    if (joined_iter == _joined_groups_table.end()) {
 	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
 			     "the group was not joined",
 			     group_address.str().c_str(),
@@ -294,21 +358,164 @@ IoLinkComm::leave_multicast_group(const Mac&	group_address,
 			     vif_name().c_str());
 	return (XORP_ERROR);
     }
-    JoinedMulticastGroup& jmg = iter->second;
+    JoinedMulticastGroup& jmg = joined_iter->second;
 
     jmg.delete_receiver(receiver_name);
     if (jmg.empty()) {
 	//
 	// The last receiver, hence leave the group
 	//
-	_joined_groups_table.erase(iter);
-	if (IoLinkPcap::leave_multicast_group(group_address, error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
+	_joined_groups_table.erase(joined_iter);
+
+	IoLinkPlugins::iterator plugin_iter;
+	for (plugin_iter = _io_link_plugins.begin();
+	     plugin_iter != _io_link_plugins.end();
+	     ++plugin_iter) {
+	    IoLink* io_link = plugin_iter->second;
+	    if (io_link->leave_multicast_group(group_address, error_msg2)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		if (! error_msg.empty())
+		    error_msg += " ";
+		error_msg += error_msg2;
+	    }
 	}
     }
 
-    return (XORP_OK);
+    return (ret_value);
+}
+
+void
+IoLinkComm::allocate_io_link_plugins()
+{
+    list<FeaDataPlaneManager *>::iterator iter;
+
+    for (iter = _io_link_manager.fea_data_plane_managers().begin();
+	 iter != _io_link_manager.fea_data_plane_managers().end();
+	 ++iter) {
+	FeaDataPlaneManager* fea_data_plane_manager = *iter;
+	allocate_io_link_plugin(fea_data_plane_manager);
+    }
+}
+
+void
+IoLinkComm::deallocate_io_link_plugins()
+{
+    while (! _io_link_plugins.empty()) {
+	IoLinkPlugins::iterator iter = _io_link_plugins.begin();
+	FeaDataPlaneManager* fea_data_plane_manager = iter->first;
+	deallocate_io_link_plugin(fea_data_plane_manager);
+    }
+}
+
+void
+IoLinkComm::allocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager)
+{
+    IoLinkPlugins::iterator iter;
+
+    XLOG_ASSERT(fea_data_plane_manager != NULL);
+
+    for (iter = _io_link_plugins.begin();
+	 iter != _io_link_plugins.end();
+	 ++iter) {
+	if (iter->first == fea_data_plane_manager)
+	    break;
+    }
+    if (iter != _io_link_plugins.end()) {
+	return;	// XXX: the plugin was already allocated
+    }
+
+    IoLink* io_link = fea_data_plane_manager->allocate_io_link(_iftree,
+							       _if_name,
+							       _vif_name,
+							       _ether_type,
+							       _filter_program);
+    if (io_link == NULL) {
+	XLOG_ERROR("Couldn't allocate plugin for I/O Link raw "
+		   "communications for data plane manager %s",
+		   fea_data_plane_manager->manager_name().c_str());
+	return;
+    }
+
+    _io_link_plugins.push_back(make_pair(fea_data_plane_manager, io_link));
+}
+
+void
+IoLinkComm::deallocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager)
+{
+    IoLinkPlugins::iterator iter;
+
+    XLOG_ASSERT(fea_data_plane_manager != NULL);
+
+    for (iter = _io_link_plugins.begin();
+	 iter != _io_link_plugins.end();
+	 ++iter) {
+	if (iter->first == fea_data_plane_manager)
+	    break;
+    }
+    if (iter == _io_link_plugins.end()) {
+	XLOG_ERROR("Couldn't deallocate plugin for I/O Link raw "
+		   "communications for data plane manager %s: plugin not found",
+		   fea_data_plane_manager->manager_name().c_str());
+	return;
+    }
+
+    IoLink* io_link = iter->second;
+    fea_data_plane_manager->deallocate_io_link(io_link);
+    _io_link_plugins.erase(iter);
+}
+
+
+void
+IoLinkComm::start_io_link_plugins()
+{
+    IoLinkPlugins::iterator iter;
+    string error_msg;
+
+    for (iter = _io_link_plugins.begin();
+	 iter != _io_link_plugins.end();
+	 ++iter) {
+	IoLink* io_link = iter->second;
+	if (io_link->is_running())
+	    continue;
+	io_link->register_io_link_receiver(this);
+	if (io_link->start(error_msg) != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    continue;
+	}
+
+	//
+	// Push all multicast joins into the new plugin
+	//
+	JoinedGroupsTable::iterator join_iter;
+	for (join_iter = _joined_groups_table.begin();
+	     join_iter != _joined_groups_table.end();
+	     ++join_iter) {
+	    JoinedMulticastGroup& joined_multicast_group = join_iter->second;
+	    if (io_link->join_multicast_group(joined_multicast_group.group_address(),
+					      error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("%s", error_msg.c_str());
+	    }
+	}
+    }
+}
+
+void
+IoLinkComm::stop_io_link_plugins()
+{
+    string error_msg;
+    IoLinkPlugins::iterator iter;
+
+    for (iter = _io_link_plugins.begin();
+	 iter != _io_link_plugins.end();
+	 ++iter) {
+	IoLink* io_link = iter->second;
+	io_link->unregister_io_link_receiver();
+	if (io_link->stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	}
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -446,7 +653,7 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     CommTable::iterator cti = _comm_table.find(key);
     IoLinkComm* io_link_comm = NULL;
     if (cti == _comm_table.end()) {
-	io_link_comm = new IoLinkComm(_eventloop, iftree(), if_name, vif_name,
+	io_link_comm = new IoLinkComm(*this, iftree(), if_name, vif_name,
 				      ether_type, filter_program);
 	_comm_table[key] = io_link_comm;
     } else {
@@ -657,4 +864,70 @@ IoLinkManager::leave_multicast_group(const string&	receiver_name,
 			 filter_program.c_str(),
 			 receiver_name.c_str());
     return (XORP_ERROR);
+}
+
+int
+IoLinkManager::register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager,
+					   bool is_exclusive)
+{
+    if (is_exclusive) {
+	// Unregister all registered data plane managers
+	while (! _fea_data_plane_managers.empty()) {
+	    unregister_data_plane_manager(_fea_data_plane_managers.front());
+	}
+    }
+
+    if (fea_data_plane_manager == NULL) {
+	// XXX: exclusive NULL is used to unregister all data plane managers
+	return (XORP_OK);
+    }
+
+    if (find(_fea_data_plane_managers.begin(),
+	     _fea_data_plane_managers.end(),
+	     fea_data_plane_manager)
+	!= _fea_data_plane_managers.end()) {
+	// XXX: already registered
+	return (XORP_OK);
+    }
+
+    _fea_data_plane_managers.push_back(fea_data_plane_manager);
+
+    //
+    // Allocate all I/O Link plugins for the new data plane manager
+    //
+    CommTable::iterator iter;
+    for (iter = _comm_table.begin(); iter != _comm_table.end(); ++iter) {
+	IoLinkComm* io_link_comm = iter->second;
+	io_link_comm->allocate_io_link_plugin(fea_data_plane_manager);
+	io_link_comm->start_io_link_plugins();
+    }
+
+    return (XORP_OK);
+}
+
+int
+IoLinkManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager)
+{
+    if (fea_data_plane_manager == NULL)
+	return (XORP_ERROR);
+
+    list<FeaDataPlaneManager*>::iterator data_plane_manager_iter;
+    data_plane_manager_iter = find(_fea_data_plane_managers.begin(),
+				   _fea_data_plane_managers.end(),
+				   fea_data_plane_manager);
+    if (data_plane_manager_iter == _fea_data_plane_managers.end())
+	return (XORP_ERROR);
+
+    //
+    // Dealocate all I/O Link plugins for the unregistered data plane manager
+    //
+    CommTable::iterator iter;
+    for (iter = _comm_table.begin(); iter != _comm_table.end(); ++iter) {
+	IoLinkComm* io_link_comm = iter->second;
+	io_link_comm->deallocate_io_link_plugin(fea_data_plane_manager);
+    }
+
+    _fea_data_plane_managers.erase(data_plane_manager_iter);
+
+    return (XORP_OK);
 }

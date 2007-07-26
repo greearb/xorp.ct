@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.hh,v 1.1 2007/07/11 22:18:17 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.hh,v 1.2 2007/07/16 23:56:13 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_BSD_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_BSD_HH__
@@ -51,6 +51,36 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int register_plugins(string& error_msg);
+
+    /**
+     * Allocate IoLink plugin instance.
+     *
+     * @param iftree the interface tree to use.
+     * @param if_name the interface name.
+     * @param vif_name the vif name.
+     * @param ether_type the EtherType protocol number. If it is 0 then
+     * it is unused.
+     * @param filter_program the option filter program to be applied on the
+     * received packets. The program uses tcpdump(1) style expression.
+     * @return a new instance of @ref IoLink plugin on success, otherwise NULL.
+     */
+    IoLink* allocate_io_link(const IfTree& iftree,
+			     const string& if_name,
+			     const string& vif_name,
+			     uint16_t ether_type,
+			     const string& filter_program);
+
+    /**
+     * Allocate IoIp plugin instance.
+     *
+     * @param iftree the interface tree to use.
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
+     * @param ip_protocol the IP protocol number (IPPROTO_*).
+     * @return a new instance of @ref IoIp plugin on success, otherwise NULL.
+     */
+    IoIp* allocate_io_ip(const IfTree& iftree, int family,
+			 uint8_t ip_protocol);
 
 private:
 };

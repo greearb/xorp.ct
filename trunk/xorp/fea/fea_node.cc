@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.8 2007/07/11 22:18:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.9 2007/07/18 01:30:22 pavlin Exp $"
 
 
 //
@@ -197,6 +197,9 @@ FeaNode::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manag
     if (iter == _fea_data_plane_managers.end())
 	return (XORP_ERROR);
 
+    io_link_manager().unregister_data_plane_manager(fea_data_plane_manager);
+    io_ip_manager().unregister_data_plane_manager(fea_data_plane_manager);
+
     fea_data_plane_manager->stop_manager(dummy_error_msg);
     _fea_data_plane_managers.erase(iter);
     delete fea_data_plane_manager;
@@ -286,6 +289,26 @@ FeaNode::load_data_plane_managers(string& error_msg)
 			     "manager plugins: %s",
 			     fea_data_plane_manager->manager_name().c_str(),
 			     error_msg.c_str());
+	unload_data_plane_managers(dummy_error_msg);
+	return (XORP_ERROR);
+    }
+
+    if (io_link_manager().register_data_plane_manager(fea_data_plane_manager,
+						      true)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to register the %s data plane "
+			     "manager with the I/O Link manager",
+			     fea_data_plane_manager->manager_name().c_str());
+	unload_data_plane_managers(dummy_error_msg);
+	return (XORP_ERROR);
+    }
+
+    if (io_ip_manager().register_data_plane_manager(fea_data_plane_manager,
+						    true)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to register the %s data plane "
+			     "manager with the I/O IP manager",
+			     fea_data_plane_manager->manager_name().c_str());
 	unload_data_plane_managers(dummy_error_msg);
 	return (XORP_ERROR);
     }

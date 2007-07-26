@@ -12,10 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.2 2007/07/17 22:53:54 pavlin Exp $
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.3 2007/07/18 01:30:22 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
+
+#include <list>
 
 class EventLoop;
 class FeaNode;
@@ -31,6 +33,11 @@ class IfConfig;
 class IfConfigGet;
 class IfConfigObserver;
 class IfConfigSet;
+class IfTree;
+class IoLink;
+class IoLinkManager;
+class IoIp;
+class IoIpManager;
 
 
 /**
@@ -157,6 +164,20 @@ public:
     FibConfig& fibconfig();
 
     /**
+     * Get the @ref IoLinkManager instance.
+     *
+     * @return the @ref IoLinkManager instance.
+     */
+    IoLinkManager& io_link_manager();
+
+    /**
+     * Get the @ref IoIpManager instance.
+     *
+     * @return the @ref IoIpManager instance.
+     */
+    IoIpManager& io_ip_manager();
+
+    /**
      * Get the IfConfigGet plugin.
      *
      * @return the @ref IfConfigGet plugin.
@@ -226,6 +247,50 @@ public:
      */
     FibConfigTableObserver* fibconfig_table_observer() { return _fibconfig_table_observer; }
 
+    /**
+     * Allocate IoLink plugin instance.
+     *
+     * @param iftree the interface tree to use.
+     * @param if_name the interface name.
+     * @param vif_name the vif name.
+     * @param ether_type the EtherType protocol number. If it is 0 then
+     * it is unused.
+     * @param filter_program the option filter program to be applied on the
+     * received packets. The program uses tcpdump(1) style expression.
+     * @return a new instance of @ref IoLink plugin on success, otherwise NULL.
+     */
+    virtual IoLink* allocate_io_link(const IfTree& iftree,
+				     const string& if_name,
+				     const string& vif_name,
+				     uint16_t ether_type,
+				     const string& filter_program) = 0;
+
+    /**
+     * De-allocate IoLink plugin.
+     *
+     * @param io_link the IoLink plugin to deallocate.
+     */
+    virtual void deallocate_io_link(IoLink* io_link);
+
+    /**
+     * Allocate IoIp plugin instance.
+     *
+     * @param iftree the interface tree to use.
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
+     * @param ip_protocol the IP protocol number (IPPROTO_*).
+     * @return a new instance of @ref IoIp plugin on success, otherwise NULL.
+     */
+    virtual IoIp* allocate_io_ip(const IfTree& iftree, int family,
+				 uint8_t ip_protocol) = 0;
+
+    /**
+     * De-allocate IoIp plugin.
+     *
+     * @param io_ip the IoIp plugin to deallocate.
+     */
+    virtual void deallocate_io_ip(IoIp* io_ip);
+
 protected:
     /**
      * Register all plugins.
@@ -260,6 +325,8 @@ protected:
     FibConfigTableGet*		_fibconfig_table_get;
     FibConfigTableSet*		_fibconfig_table_set;
     FibConfigTableObserver*	_fibconfig_table_observer;
+    list<IoLink *>		_io_link_list;
+    list<IoIp *>		_io_ip_list;
 
     //
     // Data plane properties

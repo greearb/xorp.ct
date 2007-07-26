@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/io_link_manager.hh,v 1.1 2007/06/27 01:27:05 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -22,16 +22,17 @@
 #include <set>
 #include <map>
 
+#include "libxorp/callback.hh"
 #include "libxorp/mac.hh"
 
-#include "fea/data_plane/io/io_link_pcap.hh"
+#include "io_link.hh"
 
+class FeaDataPlaneManager;
 class IoLinkManager;
 
 
 /**
- * Simple structure used to cache commonly passed MAC header
- * information when passed around between different components of the FEA.
+ * Structure used to cache commonly passed MAC header information.
  */
 struct MacHeaderInfo {
     string	if_name;
@@ -47,7 +48,7 @@ struct MacHeaderInfo {
  * It also allows arbitrary filters to receive the raw link-level data for that
  * protocol.
  */
-class IoLinkComm : public IoLinkPcap {
+class IoLinkComm : public IoLinkReceiver {
 public:
     /**
      * Filter class.
@@ -152,6 +153,8 @@ public:
 	{}
 	virtual ~JoinedMulticastGroup() {}
 
+	const Mac& group_address() const { return _group_address; }
+
 	/**
 	 * Less-Than Operator
 	 *
@@ -206,18 +209,57 @@ public:
     /**
      * Constructor for IoLinkComm.
      *
-     * @param eventloop the event loop to use.
-     * @param iftree the interface tree to use (@see IfTree).
+     * @param io_link_manager the corresponding I/O Link manager
+     * (@see IoLinkManager).
+     * @param iftree the interface tree to use.
      * @param if_name the interface name.
      * @param vif_name the vif name.
      * @param ether_type the EtherType protocol number.
      * @param filter_program the optional filter program to be applied on
-     * the received packets. The program uses tcpdump(1) style expression.
+     * the received packets.
      */
-    IoLinkComm(EventLoop& eventloop, const IfTree& iftree,
+    IoLinkComm(IoLinkManager& io_link_manager, const IfTree& iftree,
 	       const string& if_name, const string& vif_name,
 	       uint16_t ether_type, const string& filter_program);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~IoLinkComm();
+
+    /**
+     * Allocate the I/O Link plugins (one per data plane manager).
+     */
+    void allocate_io_link_plugins();
+
+    /**
+     * Deallocate the I/O Link plugins (one per data plane manager).
+     */
+    void deallocate_io_link_plugins();
+
+    /**
+     * Allocate an I/O Link plugin for a given data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager.
+     */
+    void allocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager);
+
+    /**
+     * Deallocate the I/O Link plugin for a given data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager.
+     */
+    void deallocate_io_link_plugin(FeaDataPlaneManager* fea_data_plane_manager);
+
+    /**
+     * Start all I/O Link plugins.
+     */
+    void start_io_link_plugins();
+
+    /**
+     * Stop all I/O Link plugins.
+     */
+    void stop_io_link_plugins();
 
     /**
      * Add a filter to list of input filters.  The IoLinkComm class
@@ -261,10 +303,10 @@ public:
      * @param ether_type the EtherType protocol number.
      * @param packet the payload, everything after the MAC header.
      */
-    void	process_recv_data(const Mac&		src_address,
-				  const Mac&		dst_address,
-				  uint16_t		ether_type,
-				  const vector<uint8_t>& payload);
+    virtual void recv_packet(const Mac&		src_address,
+			     const Mac&		dst_address,
+			     uint16_t		ether_type,
+			     const vector<uint8_t>& payload);
 
     /**
      * Join a MAC multicast group.
@@ -289,10 +331,48 @@ public:
     int		leave_multicast_group(const Mac&	group_address,
 				      const string&	receiver_name,
 				      string&		error_msg);
+    
+    /**
+     * Get the interface name.
+     *
+     * @return the interface name.
+     */
+    const string& if_name() const { return (_if_name); }
+
+    /**
+     * Get the vif name.
+     *
+     * @return the vif name.
+     */
+    const string& vif_name() const { return (_vif_name); }
+
+    /**
+     * Get the EtherType protocol number.
+     *
+     * @return the EtherType protocol number.
+     */
+    uint16_t ether_type() const { return (_ether_type); }
+
+    /**
+     * Get the filter program.
+     *
+     * @return the filter program.
+     */
+    const string& filter_program() const { return (_filter_program); }
 
 private:
     IoLinkComm(const IoLinkComm&);		// Not implemented.
     IoLinkComm& operator=(const IoLinkComm&);	// Not implemented.
+
+    IoLinkManager&		_io_link_manager;
+    const IfTree&		_iftree;
+    const string		_if_name;
+    const string		_vif_name;
+    const uint16_t		_ether_type;
+    const string		_filter_program;
+
+    typedef list<pair<FeaDataPlaneManager*, IoLink*> >IoLinkPlugins;
+    IoLinkPlugins		_io_link_plugins;
 
     list<InputFilter*>		_input_filters;
     typedef map<JoinedMulticastGroup, JoinedMulticastGroup> JoinedGroupsTable;
@@ -489,6 +569,34 @@ public:
      */
     const IfTree&	iftree() const { return _iftree; }
 
+    /**
+     * Register @ref FeaDataPlaneManager data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager to register.
+     * @param is_exclusive if true, the manager is registered as the
+     * exclusive manager, otherwise is added to the list of managers.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager,
+				    bool is_exclusive);
+
+    /**
+     * Unregister @ref FeaDataPlaneManager data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager);
+
+    /**
+     * Get the list of registered data plane managers.
+     *
+     * @return the list of registered data plane managers.
+     */
+    list<FeaDataPlaneManager*>& fea_data_plane_managers() {
+	return _fea_data_plane_managers;
+    }
+
 private:
     class CommTableKey {
     public:
@@ -533,6 +641,8 @@ private:
     FilterBag		_filters;
 
     SendToReceiverBase*	_send_to_receiver_base;
+
+    list<FeaDataPlaneManager*> _fea_data_plane_managers;
 };
 
 #endif // __FEA_IO_LINK_MANAGER_HH__

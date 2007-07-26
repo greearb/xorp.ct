@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.2 2007/07/17 22:53:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.3 2007/07/18 01:30:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -25,7 +25,7 @@
 
 
 //
-//  FEA data plane manager base class implementation.
+// FEA data plane manager base class implementation.
 //
 
 FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
@@ -158,6 +158,8 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	delete _fibconfig_table_observer;
 	_fibconfig_table_observer = NULL;
     }
+    delete_pointers_list(_io_ip_list);
+    delete_pointers_list(_io_link_list);
 
     _is_loaded_plugins = false;
 
@@ -172,6 +174,9 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
     //
     // Unregister the plugins in the reverse order they were registered
     //
+    io_link_manager().unregister_data_plane_manager(this);
+    io_ip_manager().unregister_data_plane_manager(this);
+
     if (_fibconfig_table_observer != NULL)
 	fibconfig().unregister_fibconfig_table_observer(_fibconfig_table_observer);
     if (_fibconfig_table_set != NULL)
@@ -200,6 +205,8 @@ int
 FeaDataPlaneManager::start_plugins(string& error_msg)
 {
     string dummy_error_msg;
+    list<IoLink *>::iterator link_iter;
+    list<IoIp *>::iterator ip_iter;
 
     if (_is_running_plugins)
 	return (XORP_OK);
@@ -263,6 +270,22 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     }
     if (_fibconfig_table_observer != NULL) {
 	if (_fibconfig_table_observer->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+
+    for (link_iter = _io_link_list.begin();
+	 link_iter != _io_link_list.end();
+	 ++link_iter) {
+	IoLink* io_link = *link_iter;
+	if (io_link->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+
+    for (ip_iter = _io_ip_list.begin();
+	 ip_iter != _io_ip_list.end();
+	 ++ip_iter) {
+	IoIp* io_ip = *ip_iter;
+	if (io_ip->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
 
@@ -419,6 +442,10 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
+    //
+    // XXX: The IoLink and IoIp plugins are registered on-demand
+    // when a new client is registered.
+    //
 
     return (XORP_OK);
 }
@@ -426,6 +453,8 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 int
 FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 {
+    list<IoIp *>::iterator ip_iter;
+    list<IoLink *>::iterator link_iter;
     int ret_value = XORP_OK;
     string error_msg2;
 
@@ -434,6 +463,30 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
     //
     // XXX: Stop the plugins in the reverse order they were started
     //
+    for (ip_iter = _io_ip_list.begin();
+	 ip_iter != _io_ip_list.end();
+	 ++ip_iter) {
+	IoIp* io_ip = *ip_iter;
+	if (io_ip->stop(error_msg) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    for (link_iter = _io_link_list.begin();
+	 link_iter != _io_link_list.end();
+	 ++link_iter) {
+	IoLink* io_link = *link_iter;
+	if (io_link->stop(error_msg) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
     if (_fibconfig_table_observer != NULL) {
 	if (_fibconfig_table_observer->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
@@ -534,4 +587,40 @@ FibConfig&
 FeaDataPlaneManager::fibconfig()
 {
     return (_fea_node.fibconfig());
+}
+
+IoLinkManager&
+FeaDataPlaneManager::io_link_manager()
+{
+    return (_fea_node.io_link_manager());
+}
+
+IoIpManager&
+FeaDataPlaneManager::io_ip_manager()
+{
+    return (_fea_node.io_ip_manager());
+}
+
+void
+FeaDataPlaneManager::deallocate_io_link(IoLink* io_link)
+{
+    list<IoLink *>::iterator iter;
+
+    iter = find(_io_link_list.begin(), _io_link_list.end(), io_link);
+    XLOG_ASSERT(iter != _io_link_list.end());
+    _io_link_list.erase(iter);
+
+    delete io_link;
+}
+
+void
+FeaDataPlaneManager::deallocate_io_ip(IoIp* io_ip)
+{
+    list<IoIp *>::iterator iter;
+
+    iter = find(_io_ip_list.begin(), _io_ip_list.end(), io_ip);
+    XLOG_ASSERT(iter != _io_ip_list.end());
+    _io_ip_list.erase(iter);
+
+    delete io_ip;
 }

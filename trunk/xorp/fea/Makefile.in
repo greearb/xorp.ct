@@ -65,7 +65,7 @@ am_libfea_la_OBJECTS = addr_table.lo fea_io.lo fea_node.lo \
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 libfea_data_plane_base_la_LIBADD =
 am_libfea_data_plane_base_la_OBJECTS = fea_data_plane_manager.lo \
-	fibconfig_forwarding.lo
+	fibconfig_forwarding.lo io_ip.lo io_link.lo
 libfea_data_plane_base_la_OBJECTS =  \
 	$(am_libfea_data_plane_base_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
@@ -411,8 +411,9 @@ xorp_fea_dummy_SOURCES = xorp_fea.cc
 
 # -- Library Sources
 libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
-	fibconfig_forwarding.hh fea_data_plane_manager.cc \
-	fibconfig_forwarding.cc
+	fibconfig_forwarding.hh io_ip.hh io_link.hh \
+	fea_data_plane_manager.cc fibconfig_forwarding.cc io_ip.cc \
+	io_link.cc
 libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh fea_io.hh \
 	fea_node.hh fte.hh fibconfig.hh fibconfig_entry_get.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
@@ -609,7 +610,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_reporter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iftree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_ip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_ip_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_link.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_link_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfeaclient_bridge.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_config.Plo@am__quote@

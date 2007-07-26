@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.6 2007/06/08 01:45:21 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.7 2007/06/27 01:27:05 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -22,16 +22,18 @@
 #include <set>
 #include <map>
 
+#include "libxorp/callback.hh"
 #include "libxorp/ipvx.hh"
+#include "libxorp/xorpfd.hh"
 
-#include "fea/data_plane/io/io_ip_socket.hh"
+#include "io_ip.hh"
 
+class FeaDataPlaneManager;
 class IoIpManager;
 
 
 /**
- * Simple structure used to cache commonly passed IPv4 and IPv6 header
- * information which comes from socket control message headers.
+ * Structure used to store commonly passed IPv4 and IPv6 header information.
  */
 struct IPvXHeaderInfo {
     string	if_name;
@@ -53,7 +55,7 @@ struct IPvXHeaderInfo {
  * It also allows arbitrary filters to receive the raw IP data for that
  * protocol.
  */
-class IoIpComm : public IoIpSocket {
+class IoIpComm : public IoIpReceiver {
 public:
     /**
      * Filter class.
@@ -137,6 +139,10 @@ public:
 	{}
 	virtual ~JoinedMulticastGroup() {}
 
+	const string& if_name() const { return _if_name; }
+	const string& vif_name() const { return _vif_name; }
+	const IPvX& group_address() const { return _group_address; }
+
 	/**
 	 * Less-Than Operator
 	 *
@@ -199,15 +205,54 @@ public:
     /**
      * Constructor for IoIpComm.
      *
-     * @param eventloop the event loop to use.
-     * @param iftree the interface tree to use (@see IfTree).
-     * @param family the address family (AF_INET or AF_INET6 for
-     * IPv4 and IPv6 respectively).
-     * @param ip_protocol the IP protocol number.
+     * @param io_ip_manager the corresponding I/O IP manager
+     * (@see IoIpManager).
+     * @param iftree the interface tree to use.
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
+     * @param ip_protocol the IP protocol number (IPPROTO_*).
      */
-    IoIpComm(EventLoop& eventloop, const IfTree& iftree, int family,
+    IoIpComm(IoIpManager& io_ip_manager, const IfTree& iftree, int family,
 	     uint8_t ip_protocol);
+
+    /**
+     * Virtual destructor.
+     */
     virtual ~IoIpComm();
+
+    /**
+     * Allocate the I/O IP plugins (one per data plane manager).
+     */
+    void allocate_io_ip_plugins();
+
+    /**
+     * Deallocate the I/O IP plugins (one per data plane manager).
+     */
+    void deallocate_io_ip_plugins();
+
+    /**
+     * Allocate an I/O IP plugin for a given data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager.
+     */
+    void allocate_io_ip_plugin(FeaDataPlaneManager* fea_data_plane_manager);
+
+    /**
+     * Deallocate the I/O IP plugin for a given data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager.
+     */
+    void deallocate_io_ip_plugin(FeaDataPlaneManager* fea_data_plane_manager);
+
+    /**
+     * Start all I/O IP plugins.
+     */
+    void start_io_ip_plugins();
+
+    /**
+     * Stop all I/O IP plugins.
+     */
+    void stop_io_ip_plugins();
 
     /**
      * Add a filter to list of input filters.  The IoIpComm class
@@ -253,18 +298,18 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		proto_socket_write(const string&	if_name,
-				   const string&	vif_name,
-				   const IPvX&		src_address,
-				   const IPvX&		dst_address,
-				   int32_t		ip_ttl,
-				   int32_t		ip_tos,
-				   bool			ip_router_alert,
-				   bool			ip_internet_control,
-				   const vector<uint8_t>& ext_headers_type,
-				   const vector<vector<uint8_t> >& ext_headers_payload,
-				   const vector<uint8_t>& payload,
-				   string&		error_msg);
+    int		send_packet(const string&	if_name,
+			    const string&	vif_name,
+			    const IPvX&		src_address,
+			    const IPvX&		dst_address,
+			    int32_t		ip_ttl,
+			    int32_t		ip_tos,
+			    bool		ip_router_alert,
+			    bool		ip_internet_control,
+			    const vector<uint8_t>& ext_headers_type,
+			    const vector<vector<uint8_t> >& ext_headers_payload,
+			    const vector<uint8_t>& payload,
+			    string&		error_msg);
 
     /**
      * Received a raw IP packet.
@@ -273,7 +318,6 @@ public:
      * @param vif_name the vif name the packet arrived on.
      * @param src_address the IP source address.
      * @param dst_address the IP destination address.
-     * @param ip_protocol the IP protocol number.
      * @param ip_ttl the IP TTL (hop-limit). If it has a negative value,
      * then the received value is unknown.
      * @param ip_tos The type of service (Diffserv/ECN bits for IPv4). If it
@@ -289,17 +333,17 @@ public:
      * @param packet the payload, everything after the IP header and
      * options.
      */
-    void process_recv_data(const string&	if_name,
-			   const string&	vif_name,
-			   const IPvX&		src_address,
-			   const IPvX&		dst_address,
-			   int32_t		ip_ttl,
-			   int32_t		ip_tos,
-			   bool			ip_router_alert,
-			   bool			ip_internet_control,
-			   const vector<uint8_t>& ext_headers_type,
-			   const vector<vector<uint8_t> >& ext_headers_payload,
-			   const vector<uint8_t>& payload);
+    virtual void recv_packet(const string&	if_name,
+			     const string&	vif_name,
+			     const IPvX&	src_address,
+			     const IPvX&	dst_address,
+			     int32_t		ip_ttl,
+			     int32_t		ip_tos,
+			     bool		ip_router_alert,
+			     bool		ip_internet_control,
+			     const vector<uint8_t>& ext_headers_type,
+			     const vector<vector<uint8_t> >& ext_headers_payload,
+			     const vector<uint8_t>& payload);
 
     /**
      * Received a multicast forwarding related upcall from the system.
@@ -309,7 +353,7 @@ public:
      *
      * @param payload the payload data for the upcall.
      */
-    void process_system_multicast_upcall(const vector<uint8_t>& payload);
+    virtual void recv_system_multicast_upcall(const vector<uint8_t>& payload);
 
     /**
      * Join an IP multicast group.
@@ -344,9 +388,32 @@ public:
 				      const string&	receiver_name,
 				      string&		error_msg);
 
+    /**
+     * Get the IP protocol.
+     *
+     * @return the IP protocol.
+     */
+    uint8_t ip_protocol() const { return (_ip_protocol); }
+
+    /**
+     * Get the first valid file descriptor for receiving protocol messages.
+     *
+     * @return the first valid file descriptor for receiving protocol
+     * messages.
+     */
+    XorpFd first_valid_protocol_fd_in();
+
 private:
     IoIpComm(const IoIpComm&);			// Not implemented.
     IoIpComm& operator=(const IoIpComm&);	// Not implemented.
+
+    IoIpManager&		_io_ip_manager;
+    const IfTree&		_iftree;
+    const int			_family;
+    const uint8_t		_ip_protocol;
+
+    typedef list<pair<FeaDataPlaneManager*, IoIp*> >IoIpPlugins;
+    IoIpPlugins			_io_ip_plugins;
 
     list<InputFilter*>		_input_filters;
     typedef map<JoinedMulticastGroup, JoinedMulticastGroup> JoinedGroupsTable;
@@ -396,7 +463,7 @@ public:
     };
 
     /**
-     * Send an IP packet on a raw socket.
+     * Send a raw IP packet.
      *
      * @param if_name the interface to send the packet on. It is essential for
      * multicast. In the unicast case this field may be empty.
@@ -597,6 +664,34 @@ public:
      */
     const IfTree&	iftree() const { return _iftree; }
 
+    /**
+     * Register @ref FeaDataPlaneManager data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager to register.
+     * @param is_exclusive if true, the manager is registered as the
+     * exclusive manager, otherwise is added to the list of managers.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager,
+				    bool is_exclusive);
+
+    /**
+     * Unregister @ref FeaDataPlaneManager data plane manager.
+     *
+     * @param fea_data_plane_manager the data plane manager to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manager);
+
+    /**
+     * Get the list of registered data plane managers.
+     *
+     * @return the list of registered data plane managers.
+     */
+    list<FeaDataPlaneManager*>& fea_data_plane_managers() {
+	return _fea_data_plane_managers;
+    }
+
 private:
     typedef map<uint8_t, IoIpComm*> CommTable;
     typedef multimap<string, IoIpComm::InputFilter*> FilterBag;
@@ -620,6 +715,8 @@ private:
     FilterBag		_filters6;
 
     SendToReceiverBase*	_send_to_receiver_base;
+
+    list<FeaDataPlaneManager*> _fea_data_plane_managers;
 };
 
 #endif // __FEA_IO_IP_MANAGER_HH__

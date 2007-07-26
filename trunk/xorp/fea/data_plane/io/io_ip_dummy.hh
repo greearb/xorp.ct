@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2007 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,34 +12,32 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.7 2007/07/16 23:56:12 pavlin Exp $
+// $XORP$
 
 
-#ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
-#define __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
+#ifndef __FEA_DATA_PLANE_IO_IO_IP_DUMMY_HH__
+#define __FEA_DATA_PLANE_IO_IO_IP_DUMMY_HH__
 
 
 //
-// I/O IP raw socket support.
+// I/O Dummy IP raw support.
 //
 
-#include "libxorp/xorp.h"
-#include "libxorp/eventloop.hh"
+#include <set>
 
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
+#include "libxorp/xorpfd.hh"
 
 #include "fea/io_ip.hh"
+#include "fea/io_ip_manager.hh"
 
 
 /**
- * @short A base class for I/O IP raw socket communication.
+ * @short A base class for Dummy I/O IP raw communication.
  * 
  * Each protocol 'registers' for I/O and gets assigned one object
  * of this class.
  */
-class IoIpSocket : public IoIp {
+class IoIpDummy : public IoIp {
 public:
     /**
      * Constructor for a given address family and protocol.
@@ -51,13 +49,13 @@ public:
      * respectively).
      * @param ip_protocol the IP protocol number (IPPROTO_*).
      */
-    IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
+    IoIpDummy(FeaDataPlaneManager& fea_data_plane_manager,
 	       const IfTree& iftree, int family, uint8_t ip_protocol);
 
     /**
      * Virtual destructor.
      */
-    virtual ~IoIpSocket();
+    virtual ~IoIpDummy();
 
     /**
      * Start operation.
@@ -185,113 +183,17 @@ public:
      * @return a reference to the file descriptor for receiving protocol
      * messages.
      */
-    XorpFd& protocol_fd_in() { return (_proto_socket_in); }
+    XorpFd& protocol_fd_in() { return (_dummy_protocol_fd_in); }
 
 private:
-    /**
-     * Open the protocol sockets.
-     * 
-     * The protocol sockets are specific to the particular protocol of
-     * this entry.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		open_proto_sockets(string& error_msg);
-
-    /**
-     * Close the protocol sockets.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		close_proto_sockets(string& error_msg);
-
-    /**
-     * Enable/disable the "Header Included" option (for IPv4) on the outgoing
-     * protocol socket.
-     * 
-     * If enabled, the IP header of a raw packet should be created
-     * by the application itself, otherwise the kernel will build it.
-     * Note: used only for IPv4.
-     * In RFC-3542, IPV6_PKTINFO has similar functions,
-     * but because it requires the interface index and outgoing address,
-     * it is of little use for our purpose. Also, in RFC-2292 this option
-     * was a flag, so for compatibility reasons we better not set it
-     * here; instead, we will use sendmsg() to specify the header's field
-     * values.
-     * 
-     * @param is_enabled if true, enable the option, otherwise disable it.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		enable_ip_hdr_include(bool is_enabled, string& error_msg);
-
-    /**
-     * Enable/disable receiving information about a packet received on the
-     * incoming protocol socket.
-     * 
-     * If enabled, values such as interface index, destination address and
-     * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
-     * received as well.
-     * 
-     * @param is_enabled if true, set the option, otherwise reset it.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		enable_recv_pktinfo(bool is_enabled, string& error_msg);
-
-    /**
-     * Read data from a protocol socket, and then call the appropriate protocol
-     * module to process it.
-     *
-     * This is called as a IoEventCb callback.
-     * @param fd file descriptor that with event caused this method to be
-     * called.
-     * @param type the event type.
-     */
-    void	proto_socket_read(XorpFd fd, IoEventType type);
-
-    /**
-     * Transmit a packet on a protocol socket.
-     *
-     * @param ifp the interface to send the packet on.
-     * @param vifp the vif to send the packet on.
-     * @param src_address the IP source address.
-     * @param dst_address the IP destination address.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		proto_socket_transmit(const IfTreeInterface* ifp,
-				      const IfTreeVif*	vifp,
-				      const IPvX&	src_address,
-				      const IPvX&	dst_address,
-				      string&		error_msg);
-
     // Private state
-    XorpFd	_proto_socket_in;    // The socket to receive protocol message
-    XorpFd	_proto_socket_out;   // The socket to end protocol message
-    bool	_is_ip_hdr_included; // True if IP header is included on send
-    uint16_t	_ip_id;		     // IPv4 Header ID
+    XorpFd	_dummy_protocol_fd_in;	// Dummy protocol file descriptor
+    uint8_t	_multicast_ttl;		// Default multicast TTL
+    bool	_multicast_loopback;	// True if mcast loopback is enabled
+    string	_default_multicast_interface;
+    string	_default_multicast_vif;
 
-    uint8_t*	_rcvbuf;	// Data buffer for receiving
-    uint8_t*	_sndbuf;	// Data buffer for sending
-    uint8_t*	_rcvcmsgbuf;	// Control recv info (IPv6 only)
-    uint8_t*	_sndcmsgbuf;	// Control send info (IPv6 only)
-
-    struct iovec	_rcviov[1]; // The scatter/gatter array for receiving
-    struct iovec	_sndiov[1]; // The scatter/gatter array for sending
-
-#ifndef HOST_OS_WINDOWS
-    struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()
-    struct msghdr	_sndmh;	// The msghdr structure used by sendmsg()
-    struct sockaddr_in	_from4;	// The source addr of recvmsg() msg (IPv4)
-    struct sockaddr_in  _to4;	// The dest.  addr of sendmsg() msg (IPv4)
-#ifdef HAVE_IPV6
-    struct sockaddr_in6	_from6;	// The source addr of recvmsg() msg (IPv6)
-    struct sockaddr_in6	_to6;	// The dest.  addr of sendmsg() msg (IPv6)
-#endif
-#endif // ! HOST_OS_WINDOWS
+    set<IoIpComm::JoinedMulticastGroup>	_joined_groups_table;
 };
 
-#endif // __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
+#endif // __FEA_DATA_PLANE_IO_IO_IP_DUMMY_HH__

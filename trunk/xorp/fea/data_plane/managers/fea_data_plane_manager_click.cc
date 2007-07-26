@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.1 2007/07/11 22:18:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.2 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -30,6 +30,8 @@
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_click.hh"
 #include "fea/data_plane/fibconfig/fibconfig_table_get_click.hh"
 #include "fea/data_plane/fibconfig/fibconfig_table_set_click.hh"
+#include "fea/data_plane/io/io_link_dummy.hh"
+#include "fea/data_plane/io/io_ip_dummy.hh"
 
 #include "fea_data_plane_manager_click.hh"
 
@@ -243,6 +245,40 @@ FeaDataPlaneManagerClick::register_plugins(string& error_msg)
     }
 
     return (XORP_OK);
+}
+
+IoLink*
+FeaDataPlaneManagerClick::allocate_io_link(const IfTree& iftree,
+					   const string& if_name,
+					   const string& vif_name,
+					   uint16_t ether_type,
+					   const string& filter_program)
+{
+    IoLink* io_link = NULL;
+
+    //
+    // TODO: XXX: For the time being Click uses the IoLinkDummy plugin.
+    //
+    io_link = new IoLinkDummy(*this, iftree, if_name, vif_name, ether_type,
+			      filter_program);
+    _io_link_list.push_back(io_link);
+
+    return (io_link);
+}
+
+IoIp*
+FeaDataPlaneManagerClick::allocate_io_ip(const IfTree& iftree, int family,
+					 uint8_t ip_protocol)
+{
+    IoIp* io_ip = NULL;
+
+    //
+    // TODO: XXX: For the time being Click uses the IoIpDummy plugin.
+    //
+    io_ip = new IoIpDummy(*this, iftree, family, ip_protocol);
+    _io_ip_list.push_back(io_ip);
+
+    return (io_ip);
 }
 
 int
