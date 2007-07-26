@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.1 2007/06/27 01:27:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.2 2007/07/26 01:18:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -143,8 +143,6 @@ IoLinkComm::IoLinkComm(IoLinkManager& io_link_manager, const IfTree& iftree,
 
 IoLinkComm::~IoLinkComm()
 {
-    IoLinkPlugins::iterator iter;
-
     deallocate_io_link_plugins();
 
     while (_input_filters.empty() == false) {

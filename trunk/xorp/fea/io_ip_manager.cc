@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.5 2007/06/27 01:27:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.6 2007/07/26 01:18:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -221,8 +221,6 @@ IoIpComm::IoIpComm(IoIpManager& io_ip_manager, const IfTree& iftree,
 
 IoIpComm::~IoIpComm()
 {
-    IoIpPlugins::iterator iter;
-
     deallocate_io_ip_plugins();
 
     while (_input_filters.empty() == false) {
