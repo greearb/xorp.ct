@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.17 2007/05/23 12:12:38 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.18 2007/07/12 17:46:04 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -87,7 +87,7 @@ public:
 			IPv4			interface,
 			uint16_t		port,
 			bool			enabled = true)
-	throw (InvalidPort);
+	throw (InvalidAddress, InvalidPort);
 
     ~FinderTcpListener();
 
