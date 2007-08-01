@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.22 2006/10/12 01:24:46 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.23 2007/02/16 22:46:05 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -207,6 +207,11 @@ finder_main(int argc, char* const argv[])
     } catch (const InvalidPort& i) {
 	fprintf(stderr, "%s: a finder may already be running.\n",
 		i.why().c_str());
+	exit(-1);
+    } catch (const InvalidAddress& i) {
+	fprintf(stderr, "Invalid finder server adddress: %s.\n",
+		i.why().c_str());
+	exit(-1);
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
