@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.25 2007/02/16 22:46:07 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.26 2007/06/21 06:10:24 pavlin Exp $"
 
 #include "ipc_module.h"
 
@@ -63,12 +63,6 @@
 
 #include "sockutil.hh"
 
-
-#ifndef HOST_OS_WINDOWS
-static uint32_t if_count();
-static bool if_probe(uint32_t index, string& name, in_addr& addr,
-		     uint16_t& flags);
-#endif
 
 bool
 get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
@@ -246,6 +240,13 @@ address_lookup(const string& addr, in_addr& ia)
 void
 get_active_ipv4_addrs(vector<IPv4>& addrs)
 {
+    //
+    // Always push loopback first.
+    // XXX: Note that this is uncoditional, so things will break
+    // if the loopback interface/address are disabled.
+    //
+    addrs.push_back(IPv4::LOOPBACK());
+
 #ifdef HOST_OS_WINDOWS
     PMIB_IPADDRTABLE	pAddrTable;
     DWORD		result, tries;
@@ -279,21 +280,156 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     free(pAddrTable);
 
 #else // ! HOST_OS_WINDOWS
-    uint32_t n = if_count();
 
+    int s, ifnum, lastlen;
+    struct ifconf ifconf;
+    
+    s = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s < 0) {
+	XLOG_FATAL("Could not initialize ioctl() socket");
+    }
+
+    //
+    // Get the interface information
+    //
+    ifnum = 32;			// XXX: initial guess
+    ifconf.ifc_buf = NULL;
+    lastlen = 0;
+    // Loop until SIOCGIFCONF success.
+    for ( ; ; ) {
+	ifconf.ifc_len = ifnum * sizeof(struct ifreq);
+	if (ifconf.ifc_buf != NULL)
+	    delete[] ifconf.ifc_buf;
+	ifconf.ifc_buf = new char[ifconf.ifc_len];
+	if (ioctl(s, SIOCGIFCONF, &ifconf) < 0) {
+	    // Check UNPv1, 2e, pp 435 for an explanation why we need this
+	    if ((errno != EINVAL) || (lastlen != 0)) {
+		XLOG_ERROR("ioctl(SIOCGIFCONF) failed: %s", strerror(errno));
+		delete[] ifconf.ifc_buf;
+		comm_close(s);
+		return;
+	    }
+	} else {
+	    if (ifconf.ifc_len == lastlen)
+		break;		// success, len has not changed
+	    lastlen = ifconf.ifc_len;
+	}
+	ifnum += 10;
+    }
+
+    //
+    // Copy the interface information to a buffer
+    //
+    vector<uint8_t> buffer(ifconf.ifc_len);
+    memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
+    delete[] ifconf.ifc_buf;
+
+    //
+    // Parse the interface information
+    //
     string if_name;
-    in_addr if_addr;
-    uint16_t if_flags = 0;
+    size_t offset;
+    for (offset = 0; offset < buffer.size(); ) {
+	size_t len = 0;
+	struct ifreq ifreq, ifrcopy;
 
-    // Always push loopback first.
-    addrs.push_back(IPv4::LOOPBACK());
+	memcpy(&ifreq, &buffer[offset], sizeof(ifreq));
 
-    for (uint32_t i = 1; i <= n; i++) {
-	if (if_probe(i, if_name, if_addr, if_flags) &&
-	    (if_addr.s_addr != INADDR_LOOPBACK) && (if_flags & IFF_UP)) {
-	    addrs.push_back(IPv4(if_addr));
+	// Get the length of the ifreq entry
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
+	len = max(sizeof(struct sockaddr),
+		  static_cast<size_t>(ifreq.ifr_addr.sa_len));
+#else
+	switch (ifreq.ifr_addr.sa_family) {
+#ifdef HAVE_IPV6
+	case AF_INET6:
+	    len = sizeof(struct sockaddr_in6);
+	    break;
+#endif // HAVE_IPV6
+	case AF_INET:
+	default:
+	    len = sizeof(struct sockaddr);
+	    break;
+	}
+#endif // HAVE_STRUCT_SOCKADDR_SA_LEN
+	len += sizeof(ifreq.ifr_name);
+	len = max(len, sizeof(struct ifreq));
+	offset += len;				// Point to the next entry
+	
+	//
+	// Get the interface name
+	//
+	char tmp_if_name[IFNAMSIZ+1];
+	strncpy(tmp_if_name, ifreq.ifr_name, sizeof(tmp_if_name) - 1);
+	tmp_if_name[sizeof(tmp_if_name) - 1] = '\0';
+	char* cptr;
+	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
+	    // Replace colon with null. Needed because in Solaris and Linux
+	    // the interface name changes for aliases.
+	    *cptr = '\0';
+	}
+	if_name = string(ifreq.ifr_name);
+	
+	//
+	// Get the flags
+	//
+	unsigned int flags = 0;
+	memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
+	if (ioctl(s, SIOCGIFFLAGS, &ifrcopy) < 0) {
+	    XLOG_ERROR("ioctl(SIOCGIFFLAGS) for interface %s failed: %s",
+		       if_name.c_str(), strerror(errno));
+	} else {
+	    flags = ifrcopy.ifr_flags;
+	}
+
+	//
+	// Get the interface addresses for the same address family only.
+	// XXX: if the address family is zero, then we query the address.
+	//
+	if ((ifreq.ifr_addr.sa_family != AF_INET)
+	    && (ifreq.ifr_addr.sa_family != 0)) {
+	    continue;
+	}
+	
+	//
+	// Get the IP address
+	//
+        // The default values
+	IPv4 lcl_addr = IPv4::ZERO();
+	
+	struct ifreq ip_ifrcopy;
+	memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
+	ip_ifrcopy.ifr_addr.sa_family = AF_INET;
+	
+	// Get the IP address
+	if (ifreq.ifr_addr.sa_family == AF_INET) {
+	    lcl_addr.copy_in(ifreq.ifr_addr);
+	    memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
+	} else {
+	    // XXX: we need to query the local IP address
+	    XLOG_ASSERT(ifreq.ifr_addr.sa_family == 0);
+	    
+#ifdef SIOCGIFADDR
+	    memset(&ifrcopy, 0, sizeof(ifrcopy));
+	    strncpy(ifrcopy.ifr_name, if_name.c_str(),
+		    sizeof(ifrcopy.ifr_name) - 1);
+	    ifrcopy.ifr_addr.sa_family = AF_INET;
+	    if (ioctl(s, SIOCGIFADDR, &ifrcopy) < 0) {
+		// XXX: the interface probably has no address. Ignore.
+		continue;
+	    } else {
+		lcl_addr.copy_in(ifrcopy.ifr_addr);
+		memcpy(&ip_ifrcopy, &ifrcopy, sizeof(ip_ifrcopy));
+	    }
+#endif // SIOCGIFADDR
+	}
+
+	if ((lcl_addr != IPv4::ZERO()) && (flags & IFF_UP)) {
+	    addrs.push_back(lcl_addr);
 	}
     }
+
+    comm_close(s);
 #endif // ! HOST_OS_WINDOWS
 }
 
@@ -369,85 +505,3 @@ get_preferred_ipv4_addr()
 
     return (s_if_preferred);
 }
-
-#ifndef HOST_OS_WINDOWS
-//
-// Return the number of network interfaces currently configured in the system.
-// NOTE: Only used under UNIX.
-//
-static uint32_t
-if_count()
-{
-#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_DRAGONFLYBSD)
-    int cnt, error;
-    size_t cntlen = sizeof(cnt);
-    error = sysctlbyname("net.link.generic.system.ifcount",
-			 (void *)&cnt, &cntlen, NULL, 0);
-    if (error == 0)
-	return ((uint32_t)cnt);
-
-    return (0);
-#elif defined(HAVE_IF_INDEXTONAME)
-    static uint32_t cnt = 0;	// XXX: This is a bug
-    if (cnt == 0) {
-	char buf[IF_NAMESIZE];
-	char* ifname = 0;
-	while ((ifname = if_indextoname(cnt + 1, buf)) != 0)
-	    cnt++;
-    }
-    return cnt;
-#else
-    return (0);
-#endif
-}
-#endif // !HOST_OS_WINDOWS
-
-#ifndef HOST_OS_WINDOWS
-//
-// Probe for an interface given its index.
-// Return its name, IPv4 address, and interface flags.
-// NOTE: Only used under UNIX.
-//
-static bool
-if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
-{
-#if !defined(HAVE_IF_INDEXTONAME)
-    return false;
-    UNUSED(index);
-    UNUSED(name);
-    UNUSED(addr);
-    UNUSED(flags);
-#else // HAVE_IF_INDEXTONAME
-    ifreq ifr;
-
-    if (if_indextoname(index, ifr.ifr_name) == 0) {
-	return false;
-    }
-    name = ifr.ifr_name;
-
-    XorpFd s = comm_open_udp(AF_INET, COMM_SOCK_BLOCKING);
-    if (!s.is_valid()) {
-	debug_msg("Failed to open socket\n");
-	return false;
-    }
-
-    if (ioctl(s, SIOCGIFADDR, &ifr) < 0) {
-	debug_msg("Failed to get interface address\n");
-	comm_close(s);
-	return false;
-    }
-    sockaddr_in* sin = sockaddr2sockaddr_in(&ifr.ifr_addr);
-    addr.s_addr = sin->sin_addr.s_addr;
-
-    if (ioctl(s, SIOCGIFFLAGS, &ifr) < 0) {
-	debug_msg("Failed to get interface flags\n");
-	comm_close(s);
-	return false;
-    }
-    flags = ifr.ifr_flags;
-
-    comm_close(s);
-    return true;
-#endif // HAVE_IF_INDEXTONAME
-}
-#endif // !HOST_OS_WINDOWS
