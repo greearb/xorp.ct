@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.179 2007/06/28 19:19:19 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.180 2007/07/12 21:48:38 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -19,7 +19,10 @@ Release 1.5-WIP (2007/??/??)
       instead of the random(3) provided by the system.
 
   LIBXIPC:
-    - 
+    - Bug fix in the internal mechanism for obtaining the IPv4 addresses
+      from the system. After the bug fix, a secondary (alias) IP address
+      can be specified with the "-i <addr>" command-line option to
+      the xorp_rtrmgr or xorp_finder binaries.
 
   LIBFEACLIENT:
     - 
