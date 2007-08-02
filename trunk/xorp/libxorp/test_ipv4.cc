@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.27 2007/02/16 22:46:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.28 2007/04/14 07:00:52 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -152,6 +152,7 @@ test_ipv4_valid_constructors()
     sin.sin_family = AF_INET;
     sin.sin_addr.s_addr = ui;
     struct sockaddr *sap = (struct sockaddr *)&sin;
+    struct sockaddr_storage *ssp = (struct sockaddr_storage *)&sin;
 
     //
     // Default constructor.
@@ -196,10 +197,16 @@ test_ipv4_valid_constructors()
     verbose_match(ip7.str(), addr_string);
 
     //
+    // Constructor from sockaddr_storage structure.
+    //
+    IPv4 ip8(*ssp);
+    verbose_match(ip8.str(), addr_string);
+
+    //
     // Constructor from sockaddr_in structure.
     //
-    IPv4 ip8(sin);
-    verbose_match(ip8.str(), addr_string);
+    IPv4 ip9(sin);
+    verbose_match(ip9.str(), addr_string);
 }
 
 /**
@@ -217,6 +224,7 @@ test_ipv4_invalid_constructors()
     sin.sin_family = AF_UNSPEC;		// Note: invalid IP address family
     sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
     struct sockaddr *sap = (struct sockaddr *)&sin;
+    struct sockaddr_storage *ssp = (struct sockaddr_storage *)&sin;
 
     //
     // Constructor from an invalid address string.
@@ -237,6 +245,19 @@ test_ipv4_invalid_constructors()
     //
     try {
 	IPv4 ip(*sap);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Constructor from an invalid sockaddr_storage structure.
+    //
+    try {
+	IPv4 ip(*ssp);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
 	UNUSED(ip);
@@ -279,6 +300,7 @@ test_ipv4_valid_copy_in_out()
     sin.sin_addr.s_addr = ui;
 
     struct sockaddr *sap;
+    struct sockaddr_storage *ssp;
 
 
     //
@@ -311,6 +333,17 @@ test_ipv4_valid_copy_in_out()
 		   "copy_out(sockaddr&) for IPv4 address");
     verbose_assert(memcmp(&sin, &ip5_sockaddr_in, sizeof(sin)) == 0,
 		   "compare copy_out(sockaddr&) for IPv4 address");
+
+    //
+    // Copy the IPv4 raw address to a sockaddr_storage structure.
+    //
+    IPv4 ip5_2(addr_string4);
+    struct sockaddr_in ip5_2_sockaddr_in;
+    ssp = (struct sockaddr_storage *)&ip5_2_sockaddr_in;
+    verbose_assert(ip5_2.copy_out(*ssp) == 4,
+		   "copy_out(sockaddr_storage&) for IPv4 address");
+    verbose_assert(memcmp(&sin, &ip5_2_sockaddr_in, sizeof(sin)) == 0,
+		   "compare copy_out(sockaddr_storage&) for IPv4 address");
 
     //
     // Copy the IPv4 raw address to a sockaddr_in structure.
@@ -348,6 +381,16 @@ test_ipv4_valid_copy_in_out()
     verbose_match(ip15.str(), addr_string4);
 
     //
+    // Copy a raw address from a sockaddr_storage structure into IPv4
+    // structure.
+    //
+    IPv4 ip15_2;
+    ssp = (struct sockaddr_storage *)&sin;
+    verbose_assert(ip15_2.copy_in(*ssp) == 4,
+		   "copy_in(sockaddr_storage&) for IPv4 address");
+    verbose_match(ip15_2.str(), addr_string4);
+
+    //
     // Copy a raw address from a sockaddr_in structure into IPv4 structure.
     //
     IPv4 ip17;
@@ -373,6 +416,7 @@ test_ipv4_invalid_copy_in_out()
     sin.sin_addr.s_addr = htonl((12 << 24) | (34 << 16) | (56 << 8) | 78);
 
     struct sockaddr *sap;
+    struct sockaddr_storage *ssp;
 
     //
     // Copy-in from a sockaddr structure for invalid address family.
@@ -381,6 +425,20 @@ test_ipv4_invalid_copy_in_out()
 	IPv4 ip;
 	sap = (struct sockaddr *)&sin;
 	ip.copy_in(*sap);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Copy-in from a sockaddr_storage structure for invalid address family.
+    //
+    try {
+	IPv4 ip;
+	ssp = (struct sockaddr_storage *)&sin;
+	ip.copy_in(*ssp);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
     } catch (const InvalidFamily& e) {

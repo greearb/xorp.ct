@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.28 2007/02/16 22:46:20 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.29 2007/05/23 12:12:43 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -100,6 +100,13 @@ public:
     IPvX(const sockaddr& from_sockaddr) throw (InvalidFamily);
 
     /**
+     * Constructor from sockaddr_storage structure.
+     *
+     * @param from_sockaddr_storage the storage to copy the address from.
+     */
+    IPvX(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily);
+
+    /**
      * Constructor from sockaddr_in structure.
      *
      * @param from_sockaddr_in the storage to copy the address from.
@@ -161,6 +168,20 @@ public:
      * @return the number of copied octets.
      */
     size_t copy_out(sockaddr& to_sockaddr) const throw (InvalidFamily);
+
+    /**
+     * Copy the IPvX raw address to a sockaddr_storage structure.
+     *
+     * Copy the raw address held within an IPvX instance to an sockaddr_storage
+     * structure and assign appropriately and set fields within
+     * sockaddr_storage appropriately. The underlying address representation
+     * may be either IPv4 or IPv6.
+     *
+     * @param to_sockaddr_storage the storage to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(sockaddr_storage& to_sockaddr_storage)
+	const throw (InvalidFamily);
 
     /**
      * Copy the IPvX raw address to a sockaddr_in structure.
@@ -225,6 +246,19 @@ public:
      * @return the number of copied octets.
      */
     size_t copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily);
+
+    /**
+     * Copy a raw address from a sockaddr_storage structure into IPvX
+     * structure.
+     *
+     * Copy a raw address from a sockaddr_storage structure, and set internal
+     * address family appropriately.
+     *
+     * @param from_sockaddr_storage the storage to copy the address from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const sockaddr_storage& from_sockaddr_storage)
+	throw (InvalidFamily);
 
     /**
      * Copy a raw address from a sockaddr_in structure into IPvX structure.

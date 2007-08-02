@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.27 2007/02/16 22:46:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.28 2007/04/14 07:00:52 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -172,6 +172,7 @@ test_ipvx_valid_constructors()
     sin6.sin6_addr = in6_addr;
 
     struct sockaddr *sap;
+    struct sockaddr_storage *ssp;
 
 
     //
@@ -267,11 +268,25 @@ test_ipvx_valid_constructors()
     verbose_match(ip14.str(), addr_string4);
 
     //
+    // Constructor from sockaddr_storage structure: IPv4
+    //
+    ssp = (struct sockaddr_storage *)&sin;
+    IPvX ip14_2(*sap);
+    verbose_match(ip14_2.str(), addr_string4);
+
+    //
     // Constructor from sockaddr structure: IPv6
     //
     sap = (struct sockaddr *)&sin6;
     IPvX ip15(*sap);
     verbose_match(ip15.str(), addr_string6);
+
+    //
+    // Constructor from sockaddr_storage structure: IPv6
+    //
+    ssp = (struct sockaddr_storage *)&sin6;
+    IPvX ip15_2(*ssp);
+    verbose_match(ip15_2.str(), addr_string6);
 
     //
     // Constructor from sockaddr_in structure: IPv4
@@ -333,6 +348,7 @@ test_ipvx_invalid_constructors()
     sin6.sin6_addr = in6_addr;
 
     struct sockaddr *sap;
+    struct sockaddr_storage *ssp;
 
     //
     // Constructor for invalid address family.
@@ -395,6 +411,20 @@ test_ipvx_invalid_constructors()
     try {
 	sap = (struct sockaddr *)&sin;
 	IPvX ip(*sap);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+	UNUSED(ip);
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Constructor from an invalid sockaddr_storage structure.
+    //
+    try {
+	ssp = (struct sockaddr_storage *)&sin;
+	IPvX ip(*ssp);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
 	UNUSED(ip);
@@ -468,6 +498,7 @@ test_ipvx_valid_copy_in_out()
     sin6.sin6_addr = in6_addr;
 
     struct sockaddr *sap;
+    struct sockaddr_storage *ssp;
 
 
     //
@@ -522,6 +553,17 @@ test_ipvx_valid_copy_in_out()
 		   "compare copy_out(sockaddr&) for IPv4 address");
 
     //
+    // Copy the IPvX raw address to a sockaddr_storage structure: IPv4.
+    //
+    IPvX ip5_2(addr_string4);
+    struct sockaddr_in ip5_2_sockaddr_in;
+    ssp = (struct sockaddr_storage *)&ip5_2_sockaddr_in;
+    verbose_assert(ip5.copy_out(*ssp) == 4,
+		   "copy_out(sockaddr_storage&) for IPv4 address");
+    verbose_assert(memcmp(&sin, &ip5_2_sockaddr_in, sizeof(sin)) == 0,
+		   "compare copy_out(sockaddr_storage&) for IPv4 address");
+
+    //
     // Copy the IPvX raw address to a sockaddr structure: IPv6.
     //
     IPvX ip6(addr_string6);
@@ -531,6 +573,17 @@ test_ipvx_valid_copy_in_out()
 		   "copy_out(sockaddr&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip6_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr&) for IPv6 address");
+
+    //
+    // Copy the IPvX raw address to a sockaddr_storage structure: IPv6.
+    //
+    IPvX ip6_2(addr_string6);
+    struct sockaddr_in6 ip6_2_sockaddr_in6;
+    ssp = (struct sockaddr_storage *)&ip6_2_sockaddr_in6;
+    verbose_assert(ip6_2.copy_out(*ssp) == 16,
+		   "copy_out(sockaddr_storage&) for IPv6 address");
+    verbose_assert(memcmp(&sin6, &ip6_2_sockaddr_in6, sizeof(sin6)) == 0,
+		   "compare copy_out(sockaddr_storage&) for IPv6 address");
 
     //
     // Copy the IPvX raw address to a sockaddr_in structure: IPv4.
@@ -616,6 +669,16 @@ test_ipvx_valid_copy_in_out()
     verbose_match(ip15.str(), addr_string4);
 
     //
+    // Copy a raw address from a sockaddr_storage structure into IPvX
+    // structure: IPv4.
+    //
+    IPvX ip15_2(AF_INET);
+    ssp = (struct sockaddr_storage *)&sin;
+    verbose_assert(ip15_2.copy_in(*ssp) == 4,
+		   "copy_in(sockaddr_storage&) for IPv4 address");
+    verbose_match(ip15_2.str(), addr_string4);
+
+    //
     // Copy a raw address from a sockaddr structure into IPvX structure: IPv6.
     //
     IPvX ip16(AF_INET6);
@@ -623,6 +686,16 @@ test_ipvx_valid_copy_in_out()
     verbose_assert(ip16.copy_in(*sap) == 16,
 		   "copy_in(sockaddr&) for IPv6 address");
     verbose_match(ip16.str(), addr_string6);
+
+    //
+    // Copy a raw address from a sockaddr_storage structure into IPvX
+    // structure: IPv6.
+    //
+    IPvX ip16_2(AF_INET6);
+    ssp = (struct sockaddr_storage *)&sin6;
+    verbose_assert(ip16_2.copy_in(*ssp) == 16,
+		   "copy_in(sockaddr_storage&) for IPv6 address");
+    verbose_match(ip16_2.str(), addr_string6);
 
     //
     // Copy a raw address from a sockaddr_in structure into IPvX structure: IPv4.
@@ -694,6 +767,7 @@ test_ipvx_invalid_copy_in_out()
     sin6.sin6_addr = in6_addr;
 
     struct sockaddr *sap;
+    struct sockaddr_storage *ssp;
 
     //
     // Mismatch copy-out: copy-out IPv6 address to in_addr structure.
@@ -723,8 +797,8 @@ test_ipvx_invalid_copy_in_out()
 	verbose_log("%s : OK\n", e.str().c_str());
     }
 
-    // XXX: we should test for copy_out() to sockaddr, sockaddr_in,
-    // sockaddr_in6 structures that throw InvalidFamily.
+    // XXX: we should test for copy_out() to sockaddr, sockaddr_storage,
+    // sockaddr_in, sockaddr_in6 structures that throw InvalidFamily.
     // To do so we must creast first IPvX with invalid address family.
     // However, this doesn't seem possible, hence we skip those checks.
 
@@ -748,6 +822,20 @@ test_ipvx_invalid_copy_in_out()
 	IPvX ip(AF_INET);
 	sap = (struct sockaddr *)&sin;
 	ip.copy_in(*sap);
+	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
+	incr_failures();
+    } catch (const InvalidFamily& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Copy-in from a sockaddr_storage structure for invalid address family.
+    //
+    try {
+	IPvX ip(AF_INET);
+	ssp = (struct sockaddr_storage *)&sin;
+	ip.copy_in(*ssp);
 	verbose_log("Cannot catch invalid IP address family AF_UNSPEC : FAIL\n");
 	incr_failures();
     } catch (const InvalidFamily& e) {

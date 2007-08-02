@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.30 2007/04/20 20:29:01 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.31 2007/06/21 06:10:25 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -87,6 +87,11 @@ IPvX::IPvX(const in6_addr& from_in6_addr)
 IPvX::IPvX(const sockaddr& from_sockaddr) throw (InvalidFamily)
 {
     copy_in(from_sockaddr);
+}
+
+IPvX::IPvX(const sockaddr_storage& from_sockaddr_storage) throw (InvalidFamily)
+{
+    copy_in(from_sockaddr_storage);
 }
 
 IPvX::IPvX(const sockaddr_in& from_sockaddr_in) throw (InvalidFamily)
@@ -319,6 +324,18 @@ IPvX::copy_out(struct sockaddr& to_sockaddr) const throw (InvalidFamily)
 }
 
 /**
+ * Copy the raw address to @to_sockaddr_storage, and assign appropriately
+ * the rest of the fields in @to_sockaddr_storage.
+ * @return the number of copied octets.
+ */
+size_t
+IPvX::copy_out(struct sockaddr_storage& to_sockaddr_storage)
+    const throw (InvalidFamily)
+{
+    return (copy_out(*sockaddr_storage2sockaddr(&to_sockaddr_storage)));
+}
+
+/**
  * Copy the raw address to @to_sockaddr_in, and assign appropriately
  * the rest of the fields in @to_sockaddr_in.
  * @return the number of copied octets.
@@ -442,6 +459,17 @@ size_t
 IPvX::copy_in(const sockaddr& from_sockaddr) throw (InvalidFamily)
 {
     return (copy_in(*sockaddr2sockaddr_in(&from_sockaddr)));
+}
+
+/**
+ * Copy a raw address from @from_sockaddr_storage.
+ * @return the number of copied octets.
+ */
+size_t
+IPvX::copy_in(const sockaddr_storage& from_sockaddr_storage)
+    throw (InvalidFamily)
+{
+    return (copy_in(*sockaddr_storage2sockaddr(&from_sockaddr_storage)));
 }
 
 /**
