@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.15 2007/05/23 04:08:26 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.16 2007/06/21 06:10:25 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -107,6 +107,20 @@ sockaddr2sockaddr_in6(struct sockaddr* sa)
 {
     void* v = sa;
     return (reinterpret_cast<struct sockaddr_in6*>(v));
+}
+
+inline const struct sockaddr *
+sockaddr_storage2sockaddr(const struct sockaddr_storage* ss)
+{
+    const void* v = ss;
+    return (reinterpret_cast<const struct sockaddr*>(v));
+}
+
+inline struct sockaddr *
+sockaddr_storage2sockaddr(struct sockaddr_storage* ss)
+{
+    void* v = ss;
+    return (reinterpret_cast<struct sockaddr*>(v));
 }
 
 #endif /* __cplusplus */
