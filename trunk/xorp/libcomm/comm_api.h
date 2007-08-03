@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.26 2007/03/28 19:31:14 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.27 2007/08/02 00:21:58 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -112,7 +112,7 @@ extern void	comm_exit(void);
 /**
  * Retrieve the most recently occured error for the current thread.
  *
- * @return Operating system specific error code for this thread's
+ * @return operating system specific error code for this thread's
  *         last socket operation.
  */
 extern int	comm_get_last_error(void);
@@ -121,7 +121,7 @@ extern int	comm_get_last_error(void);
  * Retrieve a human readable string (in English) for the given error code.
  *
  * @param serrno the socket error number returned by comm_get_last_error().
- * @return Pointer to a string giving more information about the error.
+ * @return a pointer to a string giving more information about the error.
  */
 extern char const *	comm_get_error_str(int serrno);
 
@@ -260,19 +260,14 @@ extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
  * one of the local interface addresses and the same port number.
  *
  * @param mcast_addr the multicast address to join.
- *
  * @param join_if_addr the local unicast interface address (in network order)
  * to join the multicast group on. If it is NULL, the system will choose the
  * interface each time a datagram is sent.
- *
  * @param my_port the port to bind to (in network order).
- *
  * @param reuse_flag if true, allow other sockets to bind to the same multicast
  * address and port, otherwise disallow it.
- *
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- *
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
@@ -293,19 +288,14 @@ extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * one of the local interface addresses and the same port number.
  *
  * @param mcast_addr the multicast address to join.
- *
  * @param join_if_index the local unicast interface index to join the multicast
  * group on. If it is 0, the system will choose the interface each time a
  * datagram is sent.
- *
  * @param my_port the port to bind to (in network order).
- *
  * @param reuse_flag if true, allow other sockets to bind to the same multicast
  * address and port, otherwise disallow it.
- *
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
- *
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
@@ -525,11 +515,9 @@ extern xsock_t	comm_sock_open(int domain, int type, int protocol,
  * @param type the type of the socket (e.g., SOCK_STREAM, SOCK_DGRAM).
  * @param protocol the particular protocol to be used with the socket.
  * @param sv pointer to an array of two xsock_t handles to receive the
- *        allocated socket pair.
- *
- * @return XORP_OK if the socket pair was created, otherwise if any error
- * is encountered, XORP_ERROR.
- **/
+ * allocated socket pair.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
 extern int	comm_sock_pair(int domain, int type, int protocol,
 			       xsock_t sv[2]);
 
@@ -724,7 +712,7 @@ extern int	comm_set_nodelay(xsock_t sock, int val);
 /**
  * Set/reset the SO_REUSEADDR option on a socket.
  *
- * XXX: if the OS doesn't support this option, XORP_ERROR is returned.
+ * Note: If the OS doesn't support this option, then XORP_ERROR is returned.
  *
  * @param sock the socket whose option we want to set/reset.
  * @param val if non-zero, the option will be set, otherwise will be reset.
@@ -735,7 +723,7 @@ extern int	comm_set_reuseaddr(xsock_t sock, int val);
 /**
  * Set/reset the SO_REUSEPORT option on a socket.
  *
- * XXX: if the OS doesn't support this option, XORP_ERROR is returned.
+ * Note: If the OS doesn't support this option, then XORP_ERROR is returned.
  *
  * @param sock the socket whose option we want to set/reset.
  * @param val if non-zero, the option will be set, otherwise will be reset.
@@ -755,7 +743,7 @@ extern int	comm_set_loopback(xsock_t sock, int val);
 /**
  * Set/reset the TCP_MD5SIG option on a socket.
  *
- * XXX: if the OS doesn't support this option, XORP_ERROR is returned.
+ * Note: If the OS doesn't support this option, XORP_ERROR is returned.
  *
  * @param sock the socket whose option we want to set/reset.
  * @param val if non-zero, the option will be set, otherwise will be reset.
@@ -820,7 +808,8 @@ extern int	comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize,
 
 /**
  * Get the address family of a socket.
- * Idea taken from W. Stevens' UNPv1, 2e (pp 109).
+ *
+ * Note: Idea taken from W. Stevens' UNPv1, 2e (pp 109).
  *
  * @param sock the socket whose address family we need to get.
  * @return the address family on success, otherwise XORP_ERROR.
@@ -840,20 +829,20 @@ extern int	comm_sock_get_type(xsock_t sock);
 
 /**
  * Set the blocking or non-blocking mode of an existing socket.
+ *
  * @param sock the socket whose blocking mode is to be set.
  * @param is_blocking if non-zero, then set socket to blocking mode.
- *
- * @return XORP_OK if the operation was successful, otherwise XORP_ERROR.
- **/
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
 extern int	comm_sock_set_blocking(xsock_t sock, int is_blocking);
 
 /**
  * Determine if an existing socket is in the connected state.
- * @param sock the socket whose connected state is to be queried.
  *
+ * @param sock the socket whose connected state is to be queried.
  * @return XORP_OK if the socket is in the connected state, otherwise
  * if it is not, or any other error is encountered, XORP_ERROR.
- **/
+ */
 extern int	comm_sock_is_connected(xsock_t sock);
 
 __END_DECLS

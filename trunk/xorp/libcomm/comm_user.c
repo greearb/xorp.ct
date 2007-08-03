@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.26 2007/03/28 13:49:31 schooley Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.27 2007/08/02 00:21:58 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -136,7 +136,7 @@ comm_get_last_error(void)
  * XXX: Not currently thread-safe.
  *
  * @param serrno the socket error number returned by comm_get_last_error().
- * @return Pointer to a string giving more information about the error.
+ * @return pointer to a string giving more information about the error.
  */
 char const *
 comm_get_error_str(int serrno)

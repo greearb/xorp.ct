@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.39 2007/04/14 07:00:51 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.40 2007/04/14 09:09:00 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -167,9 +167,7 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
  * @param protocol the particular protocol to be used with the socket.
  * @param sv pointer to an array of two xsock_t handles to receive the
  *        allocated socket pair.
- *
- * @return XORP_OK if the socket pair was created, otherwise if any error
- * is encountered, XORP_ERROR.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
 comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
@@ -1004,7 +1002,7 @@ comm_set_nodelay(xsock_t sock, int val)
  * @val: If non-zero, the option will be set, otherwise will be reset.
  *
  * Set/reset the %SO_REUSEADDR option on a socket.
- * XXX: if the OS doesn't support this option, %XORP_ERROR is returned.
+ * Note: If the OS doesn't support this option, then %XORP_ERROR is returned.
  *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -1038,7 +1036,7 @@ comm_set_reuseaddr(xsock_t sock, int val)
  * @val: If non-zero, the option will be set, otherwise will be reset.
  *
  * Set/reset the %SO_REUSEPORT option on a socket.
- * XXX: if the OS doesn't support this option, %XORP_OK is returned.
+ * Note: If the OS doesn't support this option, then %XORP_OK is returned.
  *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -1126,7 +1124,7 @@ comm_set_loopback(xsock_t sock, int val)
  * @val: If non-zero, the option will be set, otherwise will be reset.
  *
  * Set/reset the %TCP_MD5SIG option on a TCP socket.
- * XXX: if the OS doesn't support this option, %XORP_ERROR is returned.
+ * Note: If the OS doesn't support this option, then %XORP_ERROR is returned.
  *
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -1398,7 +1396,8 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
  * @sock: The socket whose address family we need to get.
  *
  * Get the address family of a socket.
- * XXX: Idea taken from W. Stevens' UNPv1, 2e (pp 109).
+ *
+ * Note: Idea taken from W. Stevens' UNPv1, 2e (pp 109).
  *
  * Return value: The address family on success, otherwise %XORP_ERROR.
  **/
@@ -1480,8 +1479,7 @@ comm_sock_get_type(xsock_t sock)
  * @is_blocking: If non-zero, then the socket will be blocking, otherwise
  * non-blocking.
  *
- * Return value: XORP_OK if the operation was successful, otherwise
- *               if any error is encountered, XORP_ERROR.
+ * Return value: XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
 comm_sock_set_blocking(xsock_t sock, int is_blocking)
