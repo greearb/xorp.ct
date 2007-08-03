@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.7 2007/04/14 07:00:48 pavlin Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.8 2007/07/23 23:49:11 pavlin Exp $
 dnl
 
 dnl
@@ -187,6 +187,40 @@ AC_TRY_COMPILE([
 ],
     [AC_DEFINE(HAVE_IP_RAW_SOCKETS, 1,
 	       [Define to 1 if you have IP raw sockets (SOCK_RAW)])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
+
+dnl -------------------------------------------------------------
+dnl Check for TCP/UDP UNIX sockets in the build environment (SOCK_STREAM
+dnl and SOCK_DGRAM)
+dnl -------------------------------------------------------------
+
+AC_MSG_CHECKING(whether the build environment has TCP/UDP UNIX sockets (SOCK_STREAM and SOCK_DGRAM))
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#include <errno.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+],
+[
+    int sock_tcp, sock_udp;
+
+    sock_tcp = socket(AF_INET, SOCK_STREAM, 0);
+    if ((sock_tcp < 0) && (errno == EINVAL))
+	return (1);
+
+    sock_udp = socket(AF_INET, SOCK_DGRAM, 0);
+    if ((sock_udp < 0) && (errno == EINVAL))
+	return (1);
+
+    return (0);
+],
+    [AC_DEFINE(HAVE_TCPUDP_UNIX_SOCKETS, 1,
+	       [Define to 1 if you have TCP/UDP UNIX sockets (SOCK_STREAM and SOCK_DGRAM)])
      AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)])
 

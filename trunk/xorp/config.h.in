@@ -573,6 +573,10 @@
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
 
+/* Define to 1 if you have TCP/UDP UNIX sockets (SOCK_STREAM and SOCK_DGRAM)
+   */
+#undef HAVE_TCPUDP_UNIX_SOCKETS
+
 /* Define to 1 if you have the <termios.h> header file. */
 #undef HAVE_TERMIOS_H
 
