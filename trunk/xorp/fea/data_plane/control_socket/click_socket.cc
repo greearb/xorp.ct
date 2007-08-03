@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/click_socket.cc,v 1.1 2007/05/01 01:42:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/click_socket.cc,v 1.2 2007/05/01 02:40:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -1145,7 +1145,7 @@ ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
 	ssize_t got;
 	// Find how much data is queued in the first message
 	do {
-	    got = recv(fd, XORP_SOCKOPT_CAST(&buffer[0]),
+	    got = recv(fd, XORP_BUF_CAST(&buffer[0]),
 		       buffer.size(),
 #ifdef MSG_DONTWAIT
 		       MSG_DONTWAIT |
