@@ -155,3 +155,6 @@ POST="/usr/local/libexec/nmh/post"
 # make and make check timeout and timeout check interval, both in seconds
 TIMEOUT=21600
 TIMEOUT_CHECK=24
+
+# Common environment setup
+COMMON_ENV="XORP_FINDER_SERVER_PORT=19797"

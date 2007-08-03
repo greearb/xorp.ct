@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.15 2006/09/29 06:20:13 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.16 2006/10/03 18:43:24 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -44,7 +44,7 @@ init_log_header()
     outfile="$1"
     cfg="$2"
     host="$3"
-    env="$4 XORP_FINDER_SERVER_PORT=19797"
+    env="$4"
     dir="$5"
     ssh_flags="$6"
     now=$(date "+%Y-%m-%d %H:%M:%S %Z")
@@ -95,6 +95,9 @@ run_tinderbox() {
 	eval cfg_env=\$env_$cfg
 	eval cfg_buildflags=\$buildflags_$cfg
 	eval cfg_sshflags=\$sshflags_$cfg
+
+	# Add the common environment
+	cfg_env="${cfg_env} ${COMMON_ENV}"
 
 	errfile="${LOGDIR}/0/${cfg_host}-${cfg}"
 	header="${errfile}.header"
