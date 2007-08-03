@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.24 2007/02/16 22:45:14 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.25 2007/07/10 23:45:23 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -104,11 +104,14 @@ BGPPeerList::detach_peer(BGPPeer *p)
     //really frequest operation, we don't mind iterating through the
     //whole map of readers.
     map <uint32_t, list<BGPPeer *>::iterator>::iterator mi;
-    for (mi = _readers.begin(); mi != _readers.end(); mi++) {
+    for (mi = _readers.begin(); mi != _readers.end(); ) {
+	uint32_t token = mi->first;
 	list<BGPPeer *>::iterator pli = mi->second;
+	++mi;
 	if (*pli == p) {
 	    pli++;
-	    _readers.insert(make_pair(mi->first, pli));
+	    _readers.erase(token);
+	    _readers.insert(make_pair(token, pli));
 	}
     }
 
@@ -174,6 +177,7 @@ BGPPeerList::get_peer_list_next(const uint32_t& token,
 	_readers.erase(mi);
 	return false;
     }
+    _readers.erase(token);
     _readers.insert(make_pair(token, i));
     return true;
 }
