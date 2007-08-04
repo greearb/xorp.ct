@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.28 2007/04/14 07:00:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.29 2007/08/02 18:20:13 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -558,7 +558,7 @@ test_ipvx_valid_copy_in_out()
     IPvX ip5_2(addr_string4);
     struct sockaddr_in ip5_2_sockaddr_in;
     ssp = (struct sockaddr_storage *)&ip5_2_sockaddr_in;
-    verbose_assert(ip5.copy_out(*ssp) == 4,
+    verbose_assert(ip5_2.copy_out(*ssp) == 4,
 		   "copy_out(sockaddr_storage&) for IPv4 address");
     verbose_assert(memcmp(&sin, &ip5_2_sockaddr_in, sizeof(sin)) == 0,
 		   "compare copy_out(sockaddr_storage&) for IPv4 address");
