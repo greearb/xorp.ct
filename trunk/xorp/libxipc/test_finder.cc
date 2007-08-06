@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.21 2006/10/12 01:24:47 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.22 2007/02/16 22:46:07 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -199,13 +199,24 @@ test_main(void)
 {
     EventLoop e;
 
-    IPv4 test_host(FinderConstants::FINDER_DEFAULT_HOST());
-    uint16_t test_port = 16666;
+    IPv4 init_test_host(FinderConstants::FINDER_DEFAULT_HOST());
+    uint16_t init_test_port = 16666;
+    IPv4 test_host = init_test_host;
+    uint16_t test_port = init_test_port;
+    
 
     //
     // Construct finder and messenger source for finder
     //
-    FinderServer* finder_box = new FinderServer(e, test_host, test_port);
+    FinderServer* finder_box = new FinderServer(e, init_test_host,
+						init_test_port);
+
+    //
+    // Set the finder's real host address and port which might have been
+    // overwritten by environmental variables.
+    //
+    test_host = finder_box->addr();
+    test_port = finder_box->port();
 
     //
     // Construct first finder client and messenger source for it.
