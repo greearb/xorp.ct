@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.27 2007/04/14 07:00:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.28 2007/08/02 18:20:13 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -356,7 +356,7 @@ test_ipv6_valid_copy_in_out()
     IPv6 ip6_2(addr_string6);
     struct sockaddr_in6 ip6_2_sockaddr_in6;
     ssp = (struct sockaddr_storage *)&ip6_2_sockaddr_in6;
-    verbose_assert(ip6.copy_out(*ssp) == 16,
+    verbose_assert(ip6_2.copy_out(*ssp) == 16,
 		   "copy_out(sockaddr_storage&) for IPv6 address");
     verbose_assert(memcmp(&sin6, &ip6_2_sockaddr_in6, sizeof(sin6)) == 0,
 		   "compare copy_out(sockaddr_storage&) for IPv6 address");
