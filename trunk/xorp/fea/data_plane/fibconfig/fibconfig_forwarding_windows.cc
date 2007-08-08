@@ -13,13 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_windows.cc,v 1.1 2007/07/17 22:53:56 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#endif
 
 #include "libcomm/comm_api.h"
 
@@ -47,7 +50,7 @@
 
 #ifdef HOST_OS_WINDOWS
 
-FibConfigForwardingWindows::FibConfigForwardingDummy(
+FibConfigForwardingWindows::FibConfigForwardingWindows(
     FeaDataPlaneManager& fea_data_plane_manager)
     : FibConfigForwarding(fea_data_plane_manager),
       _event(NULL),
@@ -56,7 +59,7 @@ FibConfigForwardingWindows::FibConfigForwardingDummy(
     memset(&_overlapped, 0, sizeof(_overlapped));
 }
 
-FibConfigForwardingWindows::~FibConfigForwardingDummy()
+FibConfigForwardingWindows::~FibConfigForwardingWindows()
 {
 }
 
@@ -304,7 +307,6 @@ int
 FibConfigForwardingWindows::set_unicast_forwarding_enabled6(bool v,
 							    string& error_msg)
 {
-    int enable = (v) ? 1 : 0;
     bool old_value, old_value_accept_rtadv;
     MIB_IPSTATS ipstats;
     DWORD error;
@@ -367,7 +369,6 @@ int
 FibConfigForwardingWindows::set_accept_rtadv_enabled6(bool v,
 						      string& error_msg)
 {
-    int enable = (v) ? 1 : 0;
     bool old_value;
 
     if (! have_ipv6()) {
