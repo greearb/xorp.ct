@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.8 2006/10/17 22:26:10 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.9 2007/07/12 21:35:27 pavlin Exp $ */
 
 /*
  * Forwarding Table XRL interface.
@@ -183,4 +183,22 @@ interface fti/0.2 {
 	 * otherwise delete them.
 	 */
 	set_unicast_forwarding_entries_retain_on_shutdown6 ? retain:bool
+
+	/**
+	 * Set the IPv4 unicast forwarding table ID to be used.
+	 *
+	 * @param is_configured if true, the forwarding table ID is configured,
+	 * otherwise the default table should be used.
+	 * @param table_id the IPv4 unicast forwarding table ID to be used.
+	 */
+	set_unicast_forwarding_table_id4 ? is_configured:bool & table_id:u32
+
+	/**
+	 * Set the IPv6 unicast forwarding table ID to be used.
+	 *
+	 * @param is_configured if true, the forwarding table ID is configured,
+	 * otherwise the default table should be used.
+	 * @param table_id the IPv6 unicast forwarding table ID to be used.
+	 */
+	set_unicast_forwarding_table_id6 ? is_configured:bool & table_id:u32
 }

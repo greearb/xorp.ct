@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.180 2007/07/12 21:48:38 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.181 2007/08/01 19:08:09 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -12,7 +12,23 @@ Release 1.5-WIP (2007/??/??)
     - XORP now builds on Linux Fedora 7, Linux Ubuntu-7.04 and OpenBSD-4.1.
 
   CONFIGURATION:
-    - 
+    - Addition of new FEA configuration statements to set the IPv4/IPv6
+      unicast forwarding table IDs:
+
+      fea {
+          unicast-forwarding4 {
+              table-id: 254
+          }
+          unicast-forwarding6 {
+              table-id: 254
+          }
+      }
+
+      If the table ID is not configured, the FEA will use the default
+      table ID for the system.
+      Note that not all systems support multiple forwarding tables.
+      Currently, they exist only on Linux (among all systems supported by
+      XORP).
 
   LIBXORP:
     - The local system-independent xorp_random() implemenation is used

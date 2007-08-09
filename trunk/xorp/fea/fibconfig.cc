@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.11 2007/07/17 22:53:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.12 2007/07/18 01:30:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,6 +44,10 @@ FibConfig::FibConfig(FeaNode& fea_node, const IfTree& iftree)
       _unicast_forwarding_entries_retain_on_shutdown4(false),
       _unicast_forwarding_entries_retain_on_startup6(false),
       _unicast_forwarding_entries_retain_on_shutdown6(false),
+      _unicast_forwarding_table_id4(0),
+      _unicast_forwarding_table_id4_is_configured(false),
+      _unicast_forwarding_table_id6(0),
+      _unicast_forwarding_table_id6_is_configured(false),
       _is_running(false)
 {
     _ftm = new FibConfigTransactionManager(_eventloop, *this);
@@ -852,6 +856,66 @@ FibConfig::set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
 							      string& error_msg)
 {
     _unicast_forwarding_entries_retain_on_shutdown6 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+bool
+FibConfig::unicast_forwarding_table_id_is_configured(int family) const
+{
+    switch (family) {
+    case AF_INET:
+	return (unicast_forwarding_table_id4_is_configured());
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	return (unicast_forwarding_table_id6_is_configured());
+#endif
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+
+    return (false);
+}
+
+uint32_t
+FibConfig::unicast_forwarding_table_id(int family) const
+{
+    switch (family) {
+    case AF_INET:
+	return (unicast_forwarding_table_id4());
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	return (unicast_forwarding_table_id6());
+#endif
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+
+    return (0);
+}
+
+int
+FibConfig::set_unicast_forwarding_table_id4(bool is_configured,
+					    uint32_t table_id,
+					    string& error_msg)
+{
+    _unicast_forwarding_table_id4_is_configured = is_configured;
+    _unicast_forwarding_table_id4 = table_id;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+int
+FibConfig::set_unicast_forwarding_table_id6(bool is_configured,
+					    uint32_t table_id,
+					    string& error_msg)
+{
+    _unicast_forwarding_table_id6_is_configured = is_configured;
+    _unicast_forwarding_table_id6 = table_id;
 
     error_msg = "";		// XXX: reset
     return (XORP_OK);

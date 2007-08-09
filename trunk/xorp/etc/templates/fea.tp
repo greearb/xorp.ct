@@ -1,10 +1,11 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.38 2006/10/18 17:02:11 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.39 2007/07/11 22:18:01 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
 
     unicast-forwarding4 {
 	disable:		toggle = false;
+	table-id:		u32;
 	forwarding-entries {
 	    retain-on-startup:	bool = false;
 	    retain-on-shutdown:	bool = false;
@@ -14,6 +15,7 @@ fea {
 
     unicast-forwarding6 {
 	disable:		toggle = false;
+	table-id:		u32;
 	forwarding-entries {
 	    retain-on-startup:	bool = false;
 	    retain-on-shutdown:	bool = false;
@@ -72,6 +74,12 @@ fea {
 	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
 	}
 
+	table-id {
+	    %help:	short "Configure IPv4 unicast forwarding table ID";
+	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_table_id4?is_configured:bool=true&table_id:u32=$(@)";
+	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_table_id4?is_configured:bool=false&table_id:u32=0";
+	}
+
 	forwarding-entries {
 	    %help:	short "Configure IPv4 forwarding entries properties";
 	    retain-on-startup {
@@ -100,6 +108,12 @@ fea {
 	    %help:	short "Disable IPv6 unicast forwarding";
 	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(@)`";
 	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
+	}
+
+	table-id {
+	    %help:	short "Configure IPv6 unicast forwarding table ID";
+	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_table_id6?is_configured:bool=true&table_id:u32=$(@)";
+	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_table_id6?is_configured:bool=false&table_id:u32=0";
 	}
 
 	forwarding-entries {

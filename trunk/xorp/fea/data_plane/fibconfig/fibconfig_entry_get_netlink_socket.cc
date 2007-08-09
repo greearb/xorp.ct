@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.10 2007/07/11 22:18:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.11 2007/07/18 01:30:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -274,7 +274,11 @@ FibConfigEntryGetNetlinkSocket::lookup_route_by_dest(const IPvX& dst,
     dst.copy_out(reinterpret_cast<uint8_t*>(RTA_DATA(rtattr)));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     rtmsg->rtm_tos = 0;			// XXX: what is this TOS?
-    rtmsg->rtm_table = RT_TABLE_UNSPEC; // Routing table ID
+    // Set the routing/forwarding table ID
+    if (fibconfig().unicast_forwarding_table_id_is_configured(family))
+	rtmsg->rtm_table = fibconfig().unicast_forwarding_table_id(family);
+    else
+	rtmsg->rtm_table = RT_TABLE_UNSPEC;
     rtmsg->rtm_protocol = RTPROT_UNSPEC;
     rtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
     rtmsg->rtm_type  = RTN_UNSPEC;

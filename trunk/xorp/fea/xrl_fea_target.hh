@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.14 2007/07/18 01:30:23 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.15 2007/08/09 00:46:58 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -845,6 +845,32 @@ public:
     XrlCmdError fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
 	// Input values,
 	const bool&	retain);
+
+    /**
+     *  Set the IPv4 unicast forwarding table ID to be used.
+     *
+     *  @param is_configured if true, the forwarding table ID is configured,
+     *  otherwise the default table should be used.
+     *
+     *  @param table_id the IPv4 unicast forwarding table ID to be used.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_table_id4(
+	// Input values,
+	const bool&	is_configured,
+	const uint32_t&	table_id);
+
+    /**
+     *  Set the IPv6 unicast forwarding table ID to be used.
+     *
+     *  @param is_configured if true, the forwarding table ID is configured,
+     *  otherwise the default table should be used.
+     *
+     *  @param table_id the IPv6 unicast forwarding table ID to be used.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_table_id6(
+	// Input values,
+	const bool&	is_configured,
+	const uint32_t&	table_id);
 
     //
     // RIB routes redistribution transaction-based XRL interface

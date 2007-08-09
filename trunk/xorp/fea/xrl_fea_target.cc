@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.23 2007/07/18 01:30:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.24 2007/08/09 00:46:57 pavlin Exp $"
 
 
 //
@@ -2178,6 +2178,44 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
 
     if (fibconfig().set_unicast_forwarding_entries_retain_on_shutdown6(
 	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_table_id4(
+    // Input values,
+    const bool&		is_configured,
+    const uint32_t&	table_id)
+{
+    string error_msg;
+
+    if (fibconfig().set_unicast_forwarding_table_id4(
+	    is_configured,
+	    table_id,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_table_id6(
+    // Input values,
+    const bool&		is_configured,
+    const uint32_t&	table_id)
+{
+    string error_msg;
+
+    if (fibconfig().set_unicast_forwarding_table_id6(
+	    is_configured,
+	    table_id,
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

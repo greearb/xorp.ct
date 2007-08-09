@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.10 2007/07/17 22:53:55 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.11 2007/07/18 01:30:22 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -394,6 +394,88 @@ public:
 							   string& error_msg);
 
     /**
+     * Test whether the unicast forwarding table ID for a given address family
+     * is configured.
+     *
+     * @param family the address family.
+     * @return true if the unicast forwarding table ID for the given address
+     * family is configured, otherwise false.
+     */
+    bool unicast_forwarding_table_id_is_configured(int family) const;
+
+    /**
+     * Get the unicast forwarding table ID for a given address family.
+     *
+     * @param family the address family;
+     * @return the unicast forwarding table ID for the given address family.
+     */
+    uint32_t unicast_forwarding_table_id(int family) const;
+
+    /**
+     * Test whether the IPv4 unicast forwarding table ID is configured.
+     *
+     * @return true if the IPv4 unicast forwarding table ID is configured,
+     * otherwise false.
+     */
+    bool unicast_forwarding_table_id4_is_configured() const {
+	return (_unicast_forwarding_table_id4_is_configured);
+    }
+
+    /**
+     * Get the IPv4 unicast forwarding table ID.
+     *
+     * @return the IPv4 unicast forwarding table ID.
+     */
+    uint32_t unicast_forwarding_table_id4() const {
+	return (_unicast_forwarding_table_id4);
+    }
+
+    /**
+     * Test whether the IPv6 unicast forwarding table ID is configured.
+     *
+     * @return true if the IPv6 unicast forwarding table ID is configured,
+     * otherwise false.
+     */
+    bool unicast_forwarding_table_id6_is_configured() const {
+	return (_unicast_forwarding_table_id6_is_configured);
+    }
+
+    /**
+     * Get the IPv6 unicast forwarding table ID.
+     *
+     * @return the IPv6 unicast forwarding table ID.
+     */
+    uint32_t unicast_forwarding_table_id6() const {
+	return (_unicast_forwarding_table_id6);
+    }
+
+    /**
+     * Set the IPv4 unicast forwarding table ID to be used.
+     *
+     * @param is_configured if true, the forwarding table ID is configured,
+     * otherwise the default table should be used.
+     * @param table_id the IPv4 unicast forwarding table ID to be used.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_table_id4(bool is_configured,
+					 uint32_t table_id,
+					 string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding table ID to be used.
+     *
+     * @param is_configured if true, the forwarding table ID is configured,
+     * otherwise the default table should be used.
+     * @param table_id the IPv6 unicast forwarding table ID to be used.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_table_id6(bool is_configured,
+					 uint32_t table_id,
+					 string& error_msg);
+
+    /**
      * Test whether the IPv4 unicast forwarding engine is enabled or disabled
      * to forward packets.
      * 
@@ -662,6 +744,10 @@ private:
     bool	_unicast_forwarding_entries_retain_on_shutdown4;
     bool	_unicast_forwarding_entries_retain_on_startup6;
     bool	_unicast_forwarding_entries_retain_on_shutdown6;
+    uint32_t	_unicast_forwarding_table_id4;
+    bool	_unicast_forwarding_table_id4_is_configured;
+    uint32_t	_unicast_forwarding_table_id6;
+    bool	_unicast_forwarding_table_id6_is_configured;
 
     //
     // Misc other state
