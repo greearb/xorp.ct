@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_io_link_manager.cc,v 1.1 2007/06/27 01:27:05 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,21 +28,22 @@
 
 XrlIoLinkManager::XrlIoLinkManager(IoLinkManager&	io_link_manager,
 				   XrlRouter&		xrl_router)
-    : _io_link_manager(io_link_manager),
+    : IoLinkManagerReceiver(),
+      _io_link_manager(io_link_manager),
       _xrl_router(xrl_router)
 {
-    _io_link_manager.set_send_to_receiver_base(this);
+    _io_link_manager.set_io_link_manager_receiver(this);
 }
 
 XrlIoLinkManager::~XrlIoLinkManager()
 {
-    _io_link_manager.set_send_to_receiver_base(NULL);
+    _io_link_manager.set_io_link_manager_receiver(NULL);
 }
 
 void
-XrlIoLinkManager::send_to_receiver(const string& receiver_name,
-				   const struct MacHeaderInfo& header,
-				   const vector<uint8_t>& payload)
+XrlIoLinkManager::recv_event(const string& receiver_name,
+			     const struct MacHeaderInfo& header,
+			     const vector<uint8_t>& payload)
 {
     //
     // Instantiate client sending interface
@@ -77,5 +78,5 @@ XrlIoLinkManager::xrl_send_recv_cb(const XrlError& xrl_error,
     //
     // Remove all filters associated with this receiver.
     //
-    _io_link_manager.erase_filters_by_name(receiver_name);
+    _io_link_manager.erase_filters_by_receiver_name(receiver_name);
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.23 2006/07/19 00:43:39 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.24 2007/02/16 22:47:19 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -341,8 +341,7 @@ public:
 					     const string& 	reason,
 					     const bool&	fatal);
 
-    XrlCmdError socket4_user_0_1_close_event(const string&	sockid,
-					     const string&	reason);
+    XrlCmdError socket4_user_0_1_disconnect_event(const string&	sockid);
 
 
     XrlCmdError policy_backend_0_1_configure(

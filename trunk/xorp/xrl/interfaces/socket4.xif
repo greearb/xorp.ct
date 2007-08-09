@@ -1,14 +1,10 @@
-/* $XORP: xorp/xrl/interfaces/socket4.xif,v 1.8 2007/03/28 13:49:32 schooley Exp $ */
+/* $XORP: xorp/xrl/interfaces/socket4.xif,v 1.9 2007/07/12 21:35:32 pavlin Exp $ */
 
 /**
  * Interface implementing basic IPv4 socket functionality.  This interface
  * provides methods for creating and binding sockets, sending data on
- * sockets, and set configuration options on sockets.  The interface is
- * part of a triumvariate:
- *
- *    - socket4_locator/0.1  interface for finding Xrl Target capable of
- *			     of instantiating a socket bound to a
- *			     particular address.
+ * sockets, and set configuration options on sockets.  It is used together
+ * with socket4_user/0.1:
  *
  *    - socket4/0.1	     interface for creating sockets, sending
  *			     data, setting options, etc.
@@ -20,7 +16,7 @@
 interface socket4/0.1 {
 
     /**
-     * Open a tcp socket.
+     * Open a TCP socket.
      *
      * @param creator the Xrl Target instance name of the socket
      *        creator.  The named target must implement socket4_user/0.1.
@@ -28,7 +24,7 @@ interface socket4/0.1 {
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     tcp_open			? creator:txt				\
@@ -36,7 +32,7 @@ interface socket4/0.1 {
 				-> sockid:txt
 
     /**
-     * Open a udp socket.
+     * Open an UDP socket.
      *
      * @param creator the Xrl Target instance name of the socket
      *        creator.  The named target must implement socket4_user/0.1.
@@ -44,26 +40,12 @@ interface socket4/0.1 {
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     udp_open			? creator:txt				\
 				& is_blocking:bool			\
 				-> sockid:txt
-
-    /**
-     * Bind a socket.
-     *
-     * @param sockid the socket id of the socket to bind.
-     *
-     * @param local_addr the interface address to bind socket to.
-     *
-     * @param local_port the port to bind socket to.
-     */
-    bind			? creator:txt				\
-				& sockid:txt				\
-				& local_addr:ipv4			\
-				& local_port:u32
 
     /**
      * Create a bound TCP socket.
@@ -78,7 +60,7 @@ interface socket4/0.1 {
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     tcp_open_and_bind		? creator:txt				\
@@ -100,7 +82,7 @@ interface socket4/0.1 {
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     udp_open_and_bind		? creator:txt				\
@@ -121,14 +103,14 @@ interface socket4/0.1 {
      *
      * @param mcast_addr the multicast group address to join.
      *
-     * @param ttl the ttl to use for this multicast socket.
+     * @param ttl the TTL to use for this multicast socket.
      *
      * @param reuse allow other sockets to bind to same multicast group.
      *
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     udp_open_bind_join		? creator:txt				\
@@ -157,7 +139,7 @@ interface socket4/0.1 {
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     tcp_open_bind_connect	? creator:txt				\
@@ -185,7 +167,7 @@ interface socket4/0.1 {
      * @param is_blocking if true then the socket will be blocking, otherwise
      *        non-blocking.
      *
-     * @param sockid return parameter that contains unique socket id when
+     * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     udp_open_bind_connect	? creator:txt				\
@@ -197,9 +179,22 @@ interface socket4/0.1 {
 				-> sockid:txt
 
     /**
+     * Bind a socket.
+     *
+     * @param sockid the socket ID of the socket to bind.
+     *
+     * @param local_addr the interface address to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     */
+    bind			? sockid:txt				\
+				& local_addr:ipv4			\
+				& local_port:u32
+
+    /**
      * Join multicast group on already bound socket.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param mcast_addr group to join.
      *
@@ -213,7 +208,7 @@ interface socket4/0.1 {
     /**
      * Leave multicast group on already bound socket.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param mcast_addr group to leave.
      *
@@ -227,7 +222,7 @@ interface socket4/0.1 {
     /**
      * Close socket.
      *
-     * @param sockid unique socket id of socket to be closed.
+     * @param sockid unique socket ID of socket to be closed.
      */
     close			? sockid:txt
 
@@ -236,7 +231,7 @@ interface socket4/0.1 {
      * received the socket creator will receive notification through
      * socket4_user/0.1/connect_event.
      *
-     * @param sockid the unique socket id of the socket to perform listen.
+     * @param sockid the unique socket ID of the socket to perform listen.
      *
      * @param backlog the maximum number of pending connections.
      */
@@ -246,7 +241,7 @@ interface socket4/0.1 {
     /**
      * Send data on socket.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param data block of data to be sent.
      */
@@ -262,7 +257,7 @@ interface socket4/0.1 {
      * the particular forwarding engine sending the data may not have
      * access to the full routing table.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param data block of data to be sent.
      *
@@ -283,7 +278,7 @@ interface socket4/0.1 {
      * routed as the forwarding engine sending the packet may not have
      * access to the full routing table.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param remote_addr destination address for data.
      *
@@ -301,7 +296,7 @@ interface socket4/0.1 {
      * routed as the forwarding engine sending the packet may not have
      * access to the full routing table.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param remote_addr destination address for data.
      *
@@ -327,7 +322,7 @@ interface socket4/0.1 {
      * Send data on socket to a given multicast group from a given
      * interface.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param group_addr destination address for data.
      *
@@ -344,7 +339,7 @@ interface socket4/0.1 {
     /**
      * Set a named socket option.
      *
-     * @param sockid unique socket id.
+     * @param sockid unique socket ID.
      *
      * @param optname name of option to be set.  Valid values are:
      * 		"multicast_loopback"
@@ -356,22 +351,4 @@ interface socket4/0.1 {
     set_socket_option		? sockid:txt				\
 				& optname:txt				\
 				& optval:u32
-
-    /**
-     * Get a named socket option.
-     *
-     * @param sockid unique socket id.
-     *
-     * @param optname name of option to be set.  Valid values are documented
-     * in set_socket_option.
-     *
-     * @param optval value of option to be set.  If value is logically boolean
-     *        then zero represents false and any non-zero value true.
-     */
-    get_socket_option		? sockid:txt				\
-				& optname:txt				\
-				-> optval:u32
-
-    /* TODO stats methods (perhaps in a separate interface). */
-    /* TODO non-integer socket options. */
 }

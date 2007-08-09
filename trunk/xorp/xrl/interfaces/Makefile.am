@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.34 2007/04/20 06:36:09 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.35 2007/06/27 01:27:07 pavlin Exp $
 ##
 
 ###############################################################################
@@ -217,10 +217,6 @@ librtrmgr_clientxif_la_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
 noinst_LTLIBRARIES += libsocket4xif.la
 libsocket4xif_la_SOURCES = socket4_xif.hh socket4_xif.cc
 
-# IPv4 Socket Locator Interface
-noinst_LTLIBRARIES += libsocket4locatorxif.la
-libsocket4locatorxif_la_SOURCES = socket4_locator_xif.hh socket4_locator_xif.cc
-
 # IPv4 Socket User Interface
 noinst_LTLIBRARIES += libsocket4userxif.la
 libsocket4userxif_la_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
@@ -228,10 +224,6 @@ libsocket4userxif_la_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
 # IPv6 Socket Interface
 noinst_LTLIBRARIES += libsocket6xif.la
 libsocket6xif_la_SOURCES = socket6_xif.hh socket6_xif.cc
-
-# IPv6 Socket Locator Interface
-noinst_LTLIBRARIES += libsocket6locatorxif.la
-libsocket6locatorxif_la_SOURCES = socket6_locator_xif.hh socket6_locator_xif.cc
 
 # IPv6 Socket User Interface
 noinst_LTLIBRARIES += libsocket6userxif.la

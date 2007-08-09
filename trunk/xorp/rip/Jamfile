@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rip/Jamfile,v 1.1 2007/01/11 22:30:52 bms Exp $
+# $XORP: xorp/rip/Jamfile,v 1.2 2007/04/20 07:17:47 pavlin Exp $
 #
 
 SubDir TOP rip ;
@@ -86,7 +86,6 @@ LinkLibraries xorp_rip :
 	librip
 	libripbase
 	$(LINKLIBS_XORP_RIP_COMMON)
-	libsocket4locatorxif
 	libsocket4xif
 	$(LINKLIBS_XORP_RIP_COMMON_2)
 	;
@@ -101,7 +100,6 @@ LinkLibraries xorp_ripng :
 	libripng
 	libripngbase
 	$(LINKLIBS_XORP_RIP_COMMON)
-	libsocket6locatorxif
 	libsocket6xif
 	$(LINKLIBS_XORP_RIP_COMMON_2)
 	;

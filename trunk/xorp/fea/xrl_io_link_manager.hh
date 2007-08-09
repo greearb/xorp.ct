@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/xrl_io_link_manager.hh,v 1.1 2007/06/27 01:27:05 pavlin Exp $
 
 #ifndef __FEA_XRL_IO_LINK_MANAGER_HH__
 #define __FEA_XRL_IO_LINK_MANAGER_HH__
@@ -25,7 +25,7 @@ class XrlRouter;
  * @short A class that is the bridge between the raw link I/O communications
  * and the XORP XRL interface.
  */
-class XrlIoLinkManager : public IoLinkManager::SendToReceiverBase {
+class XrlIoLinkManager : public IoLinkManagerReceiver {
 public:
     /**
      * Constructor.
@@ -38,16 +38,16 @@ public:
     virtual ~XrlIoLinkManager();
 
     /**
-     * Send a raw link-level packet to a receiver.
+     * Data received event.
      *
      * @param receiver_name the name of the receiver to send the
      * link-level packet to.
      * @param header the link-level header information.
      * @param payload the payload, everything after the link-level header.
      */
-    void send_to_receiver(const string&			receiver_name,
-			  const struct MacHeaderInfo&	header,
-			  const vector<uint8_t>&	payload);
+    void recv_event(const string&		receiver_name,
+		    const struct MacHeaderInfo&	header,
+		    const vector<uint8_t>&	payload);
 
 private:
     XrlRouter&		xrl_router() { return _xrl_router; }

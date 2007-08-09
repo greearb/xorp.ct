@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.13 2007/07/11 22:18:04 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.14 2007/07/18 01:30:23 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -33,10 +33,11 @@ class FeaNode;
 class FibConfig;
 class IfConfig;
 class InterfaceManager;
+class IoLinkManager;
+class IoIpManager;
+class IoTcpUdpManager;
 class LibFeaClientBridge;
 class XrlFibClientManager;
-class XrlIoIpManager;
-class XrlSocketServer;
 class Profile;
 
 /**
@@ -56,8 +57,8 @@ public:
 		 XrlFibClientManager&	xrl_fib_client_manager,
 		 IoLinkManager&		io_link_manager,
 		 IoIpManager&		io_ip_manager,
-		 LibFeaClientBridge&	lib_fea_client_bridge,
-		 XrlSocketServer&	xrl_socket_server);
+		 IoTcpUdpManager&	io_tcpudp_manager,
+		 LibFeaClientBridge&	lib_fea_client_bridge);
 
     /**
      * Destructor
@@ -135,6 +136,30 @@ public:
      * Shutdown FEA cleanly
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Announce target birth to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_birth(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
+
+    /**
+     *  Announce target death to observer.
+     *
+     *  @param target_class the target class name.
+     *
+     *  @param target_instance the target instance name.
+     */
+    XrlCmdError finder_event_observer_0_1_xrl_target_death(
+	// Input values,
+	const string&	target_class,
+	const string&	target_instance);
 
     /**
      *  Load Click FEA support.
@@ -399,6 +424,16 @@ public:
 	// Input values,
 	const uint32_t& tid,
 	const string&	ifname);
+
+    /**
+     *  Implicitly configure all interfaces within the FEA by using information
+     *  from the underlying system.
+     *
+     *  @param tid the transaction ID.
+     */
+    XrlCmdError ifmgr_0_1_configure_all_interfaces_from_system(
+	// Input values,
+	const uint32_t&	tid);
 
     /**
      *  Implicitly configure an interface within the FEA by using information
@@ -1423,20 +1458,760 @@ public:
 	const IPv6&	group_address);
 
     //
-    // Socket Locator interface(s)
+    // TCP/UDP I/O Socket Server Interface
     //
-    XrlCmdError socket4_locator_0_1_find_socket_server_for_addr(
-	// Input value
-	const IPv4& addr,
-	// Output value
-	string&	xrl_target);
 
-    XrlCmdError socket6_locator_0_1_find_socket_server_for_addr(
-	// Input value
-	const IPv6& addr,
-	// Output value
-	string&	xrl_target);
+    /**
+     *  Open a TCP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_tcp_open(
+	// Input values,
+	const string&	creator,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
 
+    /**
+     *  Open an UDP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_udp_open(
+	// Input values,
+	const string&	creator,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound TCP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_tcp_open_and_bind(
+	// Input values,
+	const string&	creator,
+	const IPv4&	local_addr,
+	const uint32_t&	local_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound UDP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_udp_open_and_bind(
+	// Input values,
+	const string&	creator,
+	const IPv4&	local_addr,
+	const uint32_t&	local_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound UDP multicast socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param mcast_addr the multicast group address to join.
+     *
+     *  @param ttl the TTL to use for this multicast socket.
+     *
+     *  @param reuse allow other sockets to bind to same multicast group.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_udp_open_bind_join(
+	// Input values,
+	const string&	creator,
+	const IPv4&	local_addr,
+	const uint32_t&	local_port,
+	const IPv4&	mcast_addr,
+	const uint32_t&	ttl,
+	const bool&	reuse,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound and connected TCP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param remote_addr the address to connect to.
+     *
+     *  @param remote_port the remote port to connect to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_tcp_open_bind_connect(
+	// Input values,
+	const string&	creator,
+	const IPv4&	local_addr,
+	const uint32_t&	local_port,
+	const IPv4&	remote_addr,
+	const uint32_t&	remote_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound and connected UDP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param remote_addr the address to connect to.
+     *
+     *  @param remote_port the remote port to connect to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_udp_open_bind_connect(
+	// Input values,
+	const string&	creator,
+	const IPv4&	local_addr,
+	const uint32_t&	local_port,
+	const IPv4&	remote_addr,
+	const uint32_t&	remote_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Bind a socket.
+     *
+     *  @param sockid the socket ID of the socket to bind.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     */
+    XrlCmdError socket4_0_1_bind(
+	// Input values,
+	const string&	sockid,
+	const IPv4&	local_addr,
+	const uint32_t&	local_port);
+
+    /**
+     *  Join multicast group on already bound socket.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param mcast_addr group to join.
+     *
+     *  @param join_if_addr interface address to perform join on.
+     */
+    XrlCmdError socket4_0_1_udp_join_group(
+	// Input values,
+	const string&	sockid,
+	const IPv4&	mcast_addr,
+	const IPv4&	join_if_addr);
+
+    /**
+     *  Leave multicast group on already bound socket.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param mcast_addr group to leave.
+     *
+     *  @param leave_if_addr interface address to perform leave on.
+     */
+    XrlCmdError socket4_0_1_udp_leave_group(
+	// Input values,
+	const string&	sockid,
+	const IPv4&	mcast_addr,
+	const IPv4&	leave_if_addr);
+
+    /**
+     *  Close socket.
+     *
+     *  @param sockid unique socket ID of socket to be closed.
+     */
+    XrlCmdError socket4_0_1_close(
+	// Input values,
+	const string&	sockid);
+
+    /**
+     *  Listen for inbound connections on socket. When a connection request
+     *  received the socket creator will receive notification through
+     *  socket4_user/0.1/connect_event.
+     *
+     *  @param sockid the unique socket ID of the socket to perform listen.
+     *
+     *  @param backlog the maximum number of pending connections.
+     */
+    XrlCmdError socket4_0_1_tcp_listen(
+	// Input values,
+	const string&	sockid,
+	const uint32_t&	backlog);
+
+    /**
+     *  Send data on socket.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param data block of data to be sent.
+     */
+    XrlCmdError socket4_0_1_send(
+	// Input values,
+	const string&	sockid,
+	const vector<uint8_t>&	data);
+
+    /**
+     *  Send data on socket with optional flags. These flags provide hints to
+     *  the forwarding engine on how to send the packets, they are not
+     *  guaranteed to work. NB: There is no flag for "do not route" as this is
+     *  always true since the particular forwarding engine sending the data may
+     *  not have access to the full routing table.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param data block of data to be sent.
+     *
+     *  @param out_of_band mark data as out of band.
+     *
+     *  @param end_of_record data completes record.
+     *
+     *  @param end_of_file data completes file.
+     */
+    XrlCmdError socket4_0_1_send_with_flags(
+	// Input values,
+	const string&	sockid,
+	const vector<uint8_t>&	data,
+	const bool&	out_of_band,
+	const bool&	end_of_record,
+	const bool&	end_of_file);
+
+    /**
+     *  Send data on socket to a given destination. The packet is not routed as
+     *  the forwarding engine sending the packet may not have access to the
+     *  full routing table.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param remote_addr destination address for data.
+     *
+     *  @param remote_port destination port for data.
+     *
+     *  @param data block of data to be sent.
+     */
+    XrlCmdError socket4_0_1_send_to(
+	// Input values,
+	const string&	sockid,
+	const IPv4&	remote_addr,
+	const uint32_t&	remote_port,
+	const vector<uint8_t>&	data);
+
+    /**
+     *  Send data on socket to a given destination. The packet is not routed as
+     *  the forwarding engine sending the packet may not have access to the
+     *  full routing table.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param remote_addr destination address for data.
+     *
+     *  @param remote_port destination port for data.
+     *
+     *  @param data block of data to be sent.
+     *
+     *  @param out_of_band mark data as out of band.
+     *
+     *  @param end_of_record data completes record.
+     *
+     *  @param end_of_file data completes file.
+     */
+    XrlCmdError socket4_0_1_send_to_with_flags(
+	// Input values,
+	const string&	sockid,
+	const IPv4&	remote_addr,
+	const uint32_t&	remote_port,
+	const vector<uint8_t>&	data,
+	const bool&	out_of_band,
+	const bool&	end_of_record,
+	const bool&	end_of_file);
+
+    /**
+     *  Send data on socket to a given multicast group from a given interface.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param group_addr destination address for data.
+     *
+     *  @param group_port destination port for data.
+     *
+     *  @param ifaddr interface address
+     */
+    XrlCmdError socket4_0_1_send_from_multicast_if(
+	// Input values,
+	const string&	sockid,
+	const IPv4&	group_addr,
+	const uint32_t&	group_port,
+	const IPv4&	ifaddr,
+	const vector<uint8_t>&	data);
+
+    /**
+     *  Set a named socket option.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param optname name of option to be set. Valid values are:
+     *  "multicast_loopback" "multicast_ttl"
+     *
+     *  @param optval value of option to be set. If value is logically boolean
+     *  then zero represents false and any non-zero value true.
+     */
+    XrlCmdError socket4_0_1_set_socket_option(
+	// Input values,
+	const string&	sockid,
+	const string&	optname,
+	const uint32_t&	optval);
+
+    /**
+     *  Open a TCP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_tcp_open(
+	// Input values,
+	const string&	creator,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Open an UDP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket4_user/0.1.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_udp_open(
+	// Input values,
+	const string&	creator,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound TCP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket6_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_tcp_open_and_bind(
+	// Input values,
+	const string&	creator,
+	const IPv6&	local_addr,
+	const uint32_t&	local_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound UDP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket6_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_udp_open_and_bind(
+	// Input values,
+	const string&	creator,
+	const IPv6&	local_addr,
+	const uint32_t&	local_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound UDP multicast socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket6_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param mcast_addr the multicast group address to join.
+     *
+     *  @param ttl the TTL to use for this multicast socket.
+     *
+     *  @param reuse allow other sockets to bind to same multicast group.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_udp_open_bind_join(
+	// Input values,
+	const string&	creator,
+	const IPv6&	local_addr,
+	const uint32_t&	local_port,
+	const IPv6&	mcast_addr,
+	const uint32_t&	ttl,
+	const bool&	reuse,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound and connected TCP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket6_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param remote_addr the address to connect to.
+     *
+     *  @param remote_port the remote port to connect to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_tcp_open_bind_connect(
+	// Input values,
+	const string&	creator,
+	const IPv6&	local_addr,
+	const uint32_t&	local_port,
+	const IPv6&	remote_addr,
+	const uint32_t&	remote_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Create a bound and connected UDP socket.
+     *
+     *  @param creator the Xrl Target instance name of the socket creator. The
+     *  named target must implement socket6_user/0.1.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     *
+     *  @param remote_addr the address to connect to.
+     *
+     *  @param remote_port the remote port to connect to.
+     *
+     *  @param is_blocking if true then the socket will be blocking, otherwise
+     *  non-blocking.
+     *
+     *  @param sockid return parameter that contains unique socket ID when
+     *  socket instantiation is successful.
+     */
+    XrlCmdError socket6_0_1_udp_open_bind_connect(
+	// Input values,
+	const string&	creator,
+	const IPv6&	local_addr,
+	const uint32_t&	local_port,
+	const IPv6&	remote_addr,
+	const uint32_t&	remote_port,
+	const bool&	is_blocking,
+	// Output values,
+	string&	sockid);
+
+    /**
+     *  Bind a socket.
+     *
+     *  @param sockid the socket ID of the socket to bind.
+     *
+     *  @param local_addr the interface address to bind socket to.
+     *
+     *  @param local_port the port to bind socket to.
+     */
+    XrlCmdError socket6_0_1_bind(
+	// Input values,
+	const string&	sockid,
+	const IPv6&	local_addr,
+	const uint32_t&	local_port);
+
+    /**
+     *  Join multicast group on already bound socket.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param mcast_addr group to join.
+     *
+     *  @param join_if_addr interface address to perform join on.
+     */
+    XrlCmdError socket6_0_1_udp_join_group(
+	// Input values,
+	const string&	sockid,
+	const IPv6&	mcast_addr,
+	const IPv6&	join_if_addr);
+
+    /**
+     *  Leave multicast group on already bound socket.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param mcast_addr group to leave.
+     *
+     *  @param leave_if_addr interface address to perform leave on.
+     */
+    XrlCmdError socket6_0_1_udp_leave_group(
+	// Input values,
+	const string&	sockid,
+	const IPv6&	mcast_addr,
+	const IPv6&	leave_if_addr);
+
+    /**
+     *  Close socket.
+     *
+     *  @param sockid unique socket ID of socket to be closed.
+     */
+    XrlCmdError socket6_0_1_close(
+	// Input values,
+	const string&	sockid);
+
+    /**
+     *  Listen for inbound connections on socket. When a connection request
+     *  received the socket creator will receive notification through
+     *  socket6_user/0.1/connect_event.
+     *
+     *  @param sockid the unique socket ID of the socket to perform listen.
+     *
+     *  @param backlog the maximum number of pending connections.
+     */
+    XrlCmdError socket6_0_1_tcp_listen(
+	// Input values,
+	const string&	sockid,
+	const uint32_t&	backlog);
+
+    /**
+     *  Send data on socket.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param data block of data to be sent.
+     */
+    XrlCmdError socket6_0_1_send(
+	// Input values,
+	const string&	sockid,
+	const vector<uint8_t>&	data);
+
+    /**
+     *  Send data on socket with optional flags. These flags provide hints to
+     *  the forwarding engine on how to send the packets, they are not
+     *  guaranteed to work. NB: There is no flag for "do not route" as this is
+     *  always true since the particular forwarding engine sending the data may
+     *  not have access to the full routing table.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param data block of data to be sent.
+     *
+     *  @param out_of_band mark data as out of band.
+     *
+     *  @param end_of_record data completes record.
+     *
+     *  @param end_of_file data completes file.
+     */
+    XrlCmdError socket6_0_1_send_with_flags(
+	// Input values,
+	const string&	sockid,
+	const vector<uint8_t>&	data,
+	const bool&	out_of_band,
+	const bool&	end_of_record,
+	const bool&	end_of_file);
+
+    /**
+     *  Send data on socket to a given destination. The packet is not routed as
+     *  the forwarding engine sending the packet may not have access to the
+     *  full routing table.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param remote_addr destination address for data.
+     *
+     *  @param remote_port destination port for data.
+     *
+     *  @param data block of data to be sent.
+     */
+    XrlCmdError socket6_0_1_send_to(
+	// Input values,
+	const string&	sockid,
+	const IPv6&	remote_addr,
+	const uint32_t&	remote_port,
+	const vector<uint8_t>&	data);
+
+    /**
+     *  Send data on socket to a given destination. The packet is not routed as
+     *  the forwarding engine sending the packet may not have access to the
+     *  full routing table.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param remote_addr destination address for data.
+     *
+     *  @param remote_port destination port for data.
+     *
+     *  @param data block of data to be sent.
+     *
+     *  @param out_of_band mark data as out of band.
+     *
+     *  @param end_of_record data completes record.
+     *
+     *  @param end_of_file data completes file.
+     */
+    XrlCmdError socket6_0_1_send_to_with_flags(
+	// Input values,
+	const string&	sockid,
+	const IPv6&	remote_addr,
+	const uint32_t&	remote_port,
+	const vector<uint8_t>&	data,
+	const bool&	out_of_band,
+	const bool&	end_of_record,
+	const bool&	end_of_file);
+
+    /**
+     *  Send data on socket to a given multicast group from a given interface.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param group_addr destination address for data.
+     *
+     *  @param group_port destination port for data.
+     *
+     *  @param ifaddr interface address
+     */
+    XrlCmdError socket6_0_1_send_from_multicast_if(
+	// Input values,
+	const string&	sockid,
+	const IPv6&	group_addr,
+	const uint32_t&	group_port,
+	const IPv6&	ifaddr,
+	const vector<uint8_t>&	data);
+
+    /**
+     *  Set a named socket option.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param optname name of option to be set. Valid values are:
+     *  "multicast_loopback" "multicast_hops"
+     *
+     *  @param optval value of option to be set. If value is logically boolean
+     *  then zero represents false and any non-zero value true.
+     */
+    XrlCmdError socket6_0_1_set_socket_option(
+	// Input values,
+	const string&	sockid,
+	const string&	optname,
+	const uint32_t&	optval);
+
+    //
+    // Profile-related interface
+    //
     XrlCmdError profile_0_1_enable(
 	// Input values,
 	const string&	pname);
@@ -1467,8 +2242,8 @@ private:
     XrlFibClientManager&	_xrl_fib_client_manager;
     IoLinkManager&		_io_link_manager;
     IoIpManager&		_io_ip_manager;
+    IoTcpUdpManager&		_io_tcpudp_manager;
     LibFeaClientBridge&		_lib_fea_client_bridge;
-    XrlSocketServer&		_xrl_socket_server;
 
     bool	_is_running;	// True if the service is running
     bool	_is_shutdown_received; // True if shutdown XRL request received

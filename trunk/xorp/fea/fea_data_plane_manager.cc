@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.3 2007/07/18 01:30:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.4 2007/07/26 01:18:38 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -158,8 +158,9 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	delete _fibconfig_table_observer;
 	_fibconfig_table_observer = NULL;
     }
-    delete_pointers_list(_io_ip_list);
     delete_pointers_list(_io_link_list);
+    delete_pointers_list(_io_ip_list);
+    delete_pointers_list(_io_tcpudp_list);
 
     _is_loaded_plugins = false;
 
@@ -176,6 +177,7 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
     //
     io_link_manager().unregister_data_plane_manager(this);
     io_ip_manager().unregister_data_plane_manager(this);
+    io_tcpudp_manager().unregister_data_plane_manager(this);
 
     if (_fibconfig_table_observer != NULL)
 	fibconfig().unregister_fibconfig_table_observer(_fibconfig_table_observer);
@@ -207,6 +209,7 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     string dummy_error_msg;
     list<IoLink *>::iterator link_iter;
     list<IoIp *>::iterator ip_iter;
+    list<IoTcpUdp *>::iterator tcpudp_iter;
 
     if (_is_running_plugins)
 	return (XORP_OK);
@@ -273,6 +276,9 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	    goto error_label;
     }
 
+    //
+    // The I/O plugins
+    //
     for (link_iter = _io_link_list.begin();
 	 link_iter != _io_link_list.end();
 	 ++link_iter) {
@@ -280,12 +286,18 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	if (io_link->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
-
     for (ip_iter = _io_ip_list.begin();
 	 ip_iter != _io_ip_list.end();
 	 ++ip_iter) {
 	IoIp* io_ip = *ip_iter;
 	if (io_ip->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+    for (tcpudp_iter = _io_tcpudp_list.begin();
+	 tcpudp_iter != _io_tcpudp_list.end();
+	 ++tcpudp_iter) {
+	IoTcpUdp* io_tcpudp = *tcpudp_iter;
+	if (io_tcpudp->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
 
@@ -443,8 +455,8 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 	}
     }
     //
-    // XXX: The IoLink and IoIp plugins are registered on-demand
-    // when a new client is registered.
+    // XXX: The I/O plugins (IoLink, IoIp and IoTcpUdp) are registered
+    // on-demand when a new client is registered.
     //
 
     return (XORP_OK);
@@ -453,8 +465,9 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 int
 FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 {
-    list<IoIp *>::iterator ip_iter;
     list<IoLink *>::iterator link_iter;
+    list<IoIp *>::iterator ip_iter;
+    list<IoTcpUdp *>::iterator tcpudp_iter;
     int ret_value = XORP_OK;
     string error_msg2;
 
@@ -463,6 +476,17 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
     //
     // XXX: Stop the plugins in the reverse order they were started
     //
+    for (tcpudp_iter = _io_tcpudp_list.begin();
+	 tcpudp_iter != _io_tcpudp_list.end();
+	 ++tcpudp_iter) {
+	IoTcpUdp* io_tcpudp = *tcpudp_iter;
+	if (io_tcpudp->stop(error_msg) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
     for (ip_iter = _io_ip_list.begin();
 	 ip_iter != _io_ip_list.end();
 	 ++ip_iter) {
@@ -474,7 +498,6 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 	    error_msg += error_msg2;
 	}
     }
-
     for (link_iter = _io_link_list.begin();
 	 link_iter != _io_link_list.end();
 	 ++link_iter) {
@@ -601,6 +624,12 @@ FeaDataPlaneManager::io_ip_manager()
     return (_fea_node.io_ip_manager());
 }
 
+IoTcpUdpManager&
+FeaDataPlaneManager::io_tcpudp_manager()
+{
+    return (_fea_node.io_tcpudp_manager());
+}
+
 void
 FeaDataPlaneManager::deallocate_io_link(IoLink* io_link)
 {
@@ -623,4 +652,16 @@ FeaDataPlaneManager::deallocate_io_ip(IoIp* io_ip)
     _io_ip_list.erase(iter);
 
     delete io_ip;
+}
+
+void
+FeaDataPlaneManager::deallocate_io_tcpudp(IoTcpUdp* io_tcpudp)
+{
+    list<IoTcpUdp *>::iterator iter;
+
+    iter = find(_io_tcpudp_list.begin(), _io_tcpudp_list.end(), io_tcpudp);
+    XLOG_ASSERT(iter != _io_tcpudp_list.end());
+    _io_tcpudp_list.erase(iter);
+
+    delete io_tcpudp;
 }

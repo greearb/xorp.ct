@@ -145,7 +145,6 @@ xorp_rip_DEPENDENCIES = ./libripxrl.la ./librip.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4locatorxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -165,7 +164,6 @@ xorp_ripng_DEPENDENCIES = ./libripngxrl.la ./libripng.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket6locatorxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -380,7 +378,6 @@ xorp_rip_LDADD = ./libripxrl.la ./librip.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4locatorxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -397,7 +394,6 @@ xorp_ripng_LDADD = ./libripngxrl.la ./libripng.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket6locatorxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
 	$(top_builddir)/libxipc/libxipc.la \

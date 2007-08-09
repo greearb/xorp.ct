@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_io_ip_manager.hh,v 1.1 2007/05/26 02:04:47 pavlin Exp $
+// $XORP: xorp/fea/xrl_io_ip_manager.hh,v 1.2 2007/05/26 02:10:26 pavlin Exp $
 
 #ifndef __FEA_XRL_IO_IP_MANAGER_HH__
 #define __FEA_XRL_IO_IP_MANAGER_HH__
@@ -25,7 +25,7 @@ class XrlRouter;
  * @short A class that is the bridge between the raw IP I/O communications
  * and the XORP XRL interface.
  */
-class XrlIoIpManager : public IoIpManager::SendToReceiverBase {
+class XrlIoIpManager : public IoIpManagerReceiver {
 public:
     /**
      * Constructor.
@@ -38,7 +38,7 @@ public:
     virtual ~XrlIoIpManager();
 
     /**
-     * Send a raw IP packet to a receiver.
+     * Data received event.
      *
      * @param receiver_name the name of the receiver to send the
      * IP packet to.
@@ -46,9 +46,9 @@ public:
      * @param payload the payload, everything after the IP header
      * and options.
      */
-    void send_to_receiver(const string&			receiver_name,
-			  const struct IPvXHeaderInfo&	header,
-			  const vector<uint8_t>&	payload);
+    void recv_event(const string&			receiver_name,
+		    const struct IPvXHeaderInfo&	header,
+		    const vector<uint8_t>&		payload);
 
 private:
     XrlRouter&		xrl_router() { return _xrl_router; }
@@ -56,8 +56,8 @@ private:
     /**
      * Method to be called by XRL sending filter invoker
      */
-    void xrl_send_recv_cb(const XrlError& xrl_error, string receiver_name,
-			  int family);
+    void xrl_send_recv_cb(const XrlError& xrl_error, int family,
+			  string receiver_name);
 
     IoIpManager&	_io_ip_manager;
     XrlRouter&		_xrl_router;

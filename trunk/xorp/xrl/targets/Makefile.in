@@ -120,9 +120,6 @@ libshowdistancesbase_la_OBJECTS =  \
 libshowroutesbase_la_LIBADD =
 am_libshowroutesbase_la_OBJECTS = show_routes_base.lo
 libshowroutesbase_la_OBJECTS = $(am_libshowroutesbase_la_OBJECTS)
-libsocketserverbase_la_LIBADD =
-am_libsocketserverbase_la_OBJECTS = socket_server_base.lo
-libsocketserverbase_la_OBJECTS = $(am_libsocketserverbase_la_OBJECTS)
 libstaticroutesbase_la_LIBADD =
 am_libstaticroutesbase_la_OBJECTS = static_routes_base.lo
 libstaticroutesbase_la_OBJECTS = $(am_libstaticroutesbase_la_OBJECTS)
@@ -190,7 +187,6 @@ SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libripngbase_la_SOURCES) $(librtrmgrbase_la_SOURCES) \
 	$(libshowdistancesbase_la_SOURCES) \
 	$(libshowroutesbase_la_SOURCES) \
-	$(libsocketserverbase_la_SOURCES) \
 	$(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) \
 	$(libtestfeaifmgrmirrorbase_la_SOURCES) \
 	$(libtestfindereventsbase_la_SOURCES) \
@@ -210,7 +206,6 @@ DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libripngbase_la_SOURCES) $(librtrmgrbase_la_SOURCES) \
 	$(libshowdistancesbase_la_SOURCES) \
 	$(libshowroutesbase_la_SOURCES) \
-	$(libsocketserverbase_la_SOURCES) \
 	$(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) \
 	$(libtestfeaifmgrmirrorbase_la_SOURCES) \
 	$(libtestfindereventsbase_la_SOURCES) \
@@ -373,10 +368,9 @@ tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt fea.tgt \
 	mfea.tgt mld6igmp.tgt ospfv2.tgt ospfv3.tgt packet_acl.tgt \
 	pim.tgt policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt \
 	ripng.tgt rtrmgr.tgt show_distances.tgt show_routes.tgt \
-	socket_server.tgt static_routes.tgt test.tgt \
-	test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt \
-	test_socket4.tgt test_socket6.tgt test_xrls.tgt \
-	xorp_if_mib.tgt xorpsh.tgt
+	static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt \
+	test_finder_events.tgt test_peer.tgt test_socket4.tgt \
+	test_socket6.tgt test_xrls.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -393,7 +387,7 @@ noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la \
 	libpolicybase.la libprofileclientbase.la libribbase.la \
 	libribclientbase.la libripbase.la libripngbase.la \
 	librtrmgrbase.la libshowdistancesbase.la libshowroutesbase.la \
-	libsocketserverbase.la libstaticroutesbase.la libtestbase.la \
+	libstaticroutesbase.la libtestbase.la \
 	libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la \
 	libtestpeerbase.la libtestsocket4.la libtestsocket6.la \
 	libtestxrlsbase.la libxorpifmibbase.la libxorpshbase.la
@@ -477,11 +471,6 @@ libripngbase_la_SOURCES = ripng_base.hh ripng_base.cc
 librtrmgrbase_la_SOURCES = rtrmgr_base.hh rtrmgr_base.cc
 libshowdistancesbase_la_SOURCES = show_distances_base.hh show_distances_base.cc
 libshowroutesbase_la_SOURCES = show_routes_base.hh show_routes_base.cc
-
-# SOCKET SERVER
-libsocketserverbase_la_SOURCES = socket_server_base.hh			\
-libsocketserverbase_la_SOURCES += socket_server_base.cc
-
 
 # StaticRoutes
 libstaticroutesbase_la_SOURCES = static_routes_base.hh static_routes_base.cc
@@ -624,8 +613,6 @@ libshowdistancesbase.la: $(libshowdistancesbase_la_OBJECTS) $(libshowdistancesba
 	$(CXXLINK)  $(libshowdistancesbase_la_OBJECTS) $(libshowdistancesbase_la_LIBADD) $(LIBS)
 libshowroutesbase.la: $(libshowroutesbase_la_OBJECTS) $(libshowroutesbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libshowroutesbase_la_OBJECTS) $(libshowroutesbase_la_LIBADD) $(LIBS)
-libsocketserverbase.la: $(libsocketserverbase_la_OBJECTS) $(libsocketserverbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocketserverbase_la_OBJECTS) $(libsocketserverbase_la_LIBADD) $(LIBS)
 libstaticroutesbase.la: $(libstaticroutesbase_la_OBJECTS) $(libstaticroutesbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libstaticroutesbase_la_OBJECTS) $(libstaticroutesbase_la_LIBADD) $(LIBS)
 libtestbase.la: $(libtestbase_la_OBJECTS) $(libtestbase_la_DEPENDENCIES) 
@@ -677,7 +664,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtrmgr_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/show_distances_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/show_routes_base.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket_server_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/static_routes_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_fea_ifmgr_mirror_base.Plo@am__quote@
@@ -934,6 +920,7 @@ $(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
 		$(INTERFACES_DIR)/datain.xif
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/fea_click.xif				\
 		$(INTERFACES_DIR)/fea_fib.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
@@ -944,8 +931,8 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_rawlink.xif			\
 		$(INTERFACES_DIR)/fea_rawpkt4.xif			\
 		$(INTERFACES_DIR)/fea_rawpkt6.xif			\
-		$(INTERFACES_DIR)/socket4_locator.xif			\
-		$(INTERFACES_DIR)/socket6_locator.xif			\
+		$(INTERFACES_DIR)/socket4.xif				\
+		$(INTERFACES_DIR)/socket6.xif				\
 		$(INTERFACES_DIR)/profile.xif
 $(srcdir)/fea_ifmgr_mirror_base.hh $(srcdir)/fea_ifmgr_mirror_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
@@ -1043,11 +1030,6 @@ $(srcdir)/show_routes_base.hh $(srcdir)/show_routes_base.cc:		\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/redist6.xif
-$(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/finder_event_observer.xif		\
-		$(INTERFACES_DIR)/socket4.xif				\
-		$(INTERFACES_DIR)/socket6.xif
 $(srcdir)/static_routes_base.hh $(srcdir)/static_routes_base.cc:	\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\

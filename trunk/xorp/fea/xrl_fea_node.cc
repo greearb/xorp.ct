@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.11 2007/07/11 22:18:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.12 2007/07/18 01:30:23 pavlin Exp $"
 
 
 //
@@ -36,11 +36,9 @@
 
 #include "fibconfig.hh"
 #include "ifconfig.hh"
-#include "ifconfig_addr_table.hh"
 #include "libfeaclient_bridge.hh"
 #include "xrl_mfea_node.hh"
 #include "xrl_packet_acl.hh"
-#include "xrl_socket_server.hh"
 
 
 XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
@@ -56,10 +54,7 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
       _xrl_io_link_manager(_fea_node.io_link_manager(), _xrl_router),
       _xrl_io_ip_manager(_fea_node.io_ip_manager(), _xrl_router),
-      _xrl_socket_server(_eventloop,
-			 _fea_node.ifconfig().ifconfig_address_table(),
-			 _xrl_router.finder_address(),
-			 _xrl_router.finder_port()),
+      _xrl_io_tcpudp_manager(_fea_node.io_tcpudp_manager(), _xrl_router),
       _xrl_packet_acl_target(_eventloop,
 			     "packet_acl",	// TODO: XXX: hardcoded name
 			     finder_hostname, finder_port,
@@ -81,8 +76,8 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 #endif
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
 		      _xrl_fib_client_manager, _fea_node.io_link_manager(),
-		      _fea_node.io_ip_manager(), _lib_fea_client_bridge,
-		      _xrl_socket_server)
+		      _fea_node.io_ip_manager(), _fea_node.io_tcpudp_manager(),
+		      _lib_fea_client_bridge)
 {
     _cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access
 }
@@ -115,7 +110,6 @@ XrlFeaNode::startup()
     xrl_fea_io().startup();
     xrl_fea_target().startup();
 
-    _xrl_socket_server.startup();
     _xrl_packet_acl_target.startup();
 
     if (! fea_node().is_dummy()) {
@@ -152,7 +146,6 @@ XrlFeaNode::shutdown()
     }
 
     _xrl_packet_acl_target.shutdown();
-    _xrl_socket_server.shutdown();
 
     return (XORP_OK);
 }
@@ -178,8 +171,6 @@ XrlFeaNode::is_running() const
 
     if (_xrl_packet_acl_target.is_running())
 	return (true);
-    if (_xrl_socket_server.is_running())
-	return (true);
 
     //
     // Test whether all XRL operations have completed
@@ -198,8 +189,6 @@ XrlFeaNode::is_running() const
 
 
     if (_xrl_packet_acl_target.xrl_router().pending())
-	return (true);
-    if (_xrl_socket_server.xrl_router().pending())
 	return (true);
 
     if (_xrl_router.pending())

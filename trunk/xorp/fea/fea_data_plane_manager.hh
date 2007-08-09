@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.3 2007/07/18 01:30:22 pavlin Exp $
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.4 2007/07/26 01:18:38 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
@@ -38,6 +38,8 @@ class IoLink;
 class IoLinkManager;
 class IoIp;
 class IoIpManager;
+class IoTcpUdp;
+class IoTcpUdpManager;
 
 
 /**
@@ -178,6 +180,13 @@ public:
     IoIpManager& io_ip_manager();
 
     /**
+     * Get the @ref IoTcpUdpManager instance.
+     *
+     * @return the @ref IoTcpUdpManager instance.
+     */
+    IoTcpUdpManager& io_tcpudp_manager();
+
+    /**
      * Get the IfConfigGet plugin.
      *
      * @return the @ref IfConfigGet plugin.
@@ -291,6 +300,24 @@ public:
      */
     virtual void deallocate_io_ip(IoIp* io_ip);
 
+    /**
+     * Allocate IoTcpUdp plugin instance.
+     *
+     * @param iftree the interface tree to use.
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
+     * @return a new instance of @ref IoTcpUdp plugin on success,
+     * otherwise NULL.
+     */
+    virtual IoTcpUdp* allocate_io_tcpudp(const IfTree& iftree, int family) = 0;
+
+    /**
+     * De-allocate IoTcpUdp plugin.
+     *
+     * @param io_tcpudp the IoTcpUdp plugin to deallocate.
+     */
+    virtual void deallocate_io_tcpudp(IoTcpUdp* io_tcpudp);
+
 protected:
     /**
      * Register all plugins.
@@ -327,6 +354,7 @@ protected:
     FibConfigTableObserver*	_fibconfig_table_observer;
     list<IoLink *>		_io_link_list;
     list<IoIp *>		_io_ip_list;
+    list<IoTcpUdp *>		_io_tcpudp_list;
 
     //
     // Data plane properties

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.37 2005/08/31 19:11:14 pavlin Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.38 2005/08/31 22:45:45 zec Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -49,7 +49,6 @@ xorp_rip_LDADD			+= $(top_builddir)/libfeaclient/libfeaclient.la
 xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 xorp_rip_LDADD			+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
-xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4locatorxif.la
 xorp_rip_LDADD			+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 xorp_rip_LDADD			+= $(top_builddir)/policy/backend/libpolicybackend.la
 xorp_rip_LDADD			+= $(top_builddir)/libxipc/libxipc.la
@@ -69,7 +68,6 @@ xorp_ripng_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
-xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6locatorxif.la
 xorp_ripng_LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
 xorp_ripng_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
 xorp_ripng_LDADD		+= $(top_builddir)/libxipc/libxipc.la

@@ -45,8 +45,9 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libxorp_io_la_LIBADD =
-am_libxorp_io_la_OBJECTS = io_link_dummy.lo io_link_pcap.lo \
-	io_ip_dummy.lo io_ip_socket.lo
+am_libxorp_io_la_OBJECTS = io_ip_dummy.lo io_ip_socket.lo \
+	io_link_dummy.lo io_link_pcap.lo io_tcpudp_dummy.lo \
+	io_tcpudp_socket.lo
 libxorp_io_la_OBJECTS = $(am_libxorp_io_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -210,9 +211,11 @@ top_srcdir = @top_srcdir@
 noinst_LTLIBRARIES = libxorp_io.la
 
 # -- Library Sources
-libxorp_io_la_SOURCES = io_link_dummy.hh io_link_pcap.hh \
-	io_ip_dummy.hh io_ip_socket.hh io_link_dummy.cc \
-	io_link_pcap.cc io_ip_dummy.cc io_ip_socket.cc
+libxorp_io_la_SOURCES = io_ip_dummy.hh io_ip_socket.hh \
+	io_link_dummy.hh io_link_pcap.hh io_tcpudp_dummy.hh \
+	io_tcpudp_socket.hh io_ip_dummy.cc io_ip_socket.cc \
+	io_link_dummy.cc io_link_pcap.cc io_tcpudp_dummy.cc \
+	io_tcpudp_socket.cc
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -271,6 +274,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_ip_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_link_dummy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_link_pcap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_tcpudp_dummy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_tcpudp_socket.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

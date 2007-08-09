@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.cc,v 1.2 2007/07/17 22:53:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.cc,v 1.3 2007/07/26 01:18:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -36,6 +36,7 @@
 #include "fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.hh"
 #include "fea/data_plane/io/io_link_pcap.hh"
 #include "fea/data_plane/io/io_ip_socket.hh"
+#include "fea/data_plane/io/io_tcpudp_socket.hh"
 
 #include "fea_data_plane_manager_linux.hh"
 
@@ -204,4 +205,20 @@ FeaDataPlaneManagerLinux::allocate_io_ip(const IfTree& iftree, int family,
 #endif
 
     return (io_ip);
+}
+
+IoTcpUdp*
+FeaDataPlaneManagerLinux::allocate_io_tcpudp(const IfTree& iftree, int family)
+{
+    IoTcpUdp* io_tcpudp = NULL;
+
+    UNUSED(iftree);
+    UNUSED(family);
+
+#ifdef HAVE_TCPUDP_UNIX_SOCKETS
+    io_tcpudp = new IoTcpUdpSocket(*this, iftree, family);
+    _io_tcpudp_list.push_back(io_tcpudp);
+#endif
+
+    return (io_tcpudp);
 }

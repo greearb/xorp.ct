@@ -528,10 +528,9 @@ XrlRipngTarget::socket6_user_0_1_error_event(const string&	sockid,
 }
 
 XrlCmdError
-XrlRipngTarget::socket6_user_0_1_close_event(const string&	sockid,
-					     const string&	reason)
+XrlRipngTarget::socket6_user_0_1_disconnect_event(const string&	sockid)
 {
-    return _ct->socketx_user_0_1_close_event(sockid, reason);
+    return _ct->socketx_user_0_1_disconnect_event(sockid);
 }
 
 XrlCmdError

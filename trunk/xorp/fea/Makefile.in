@@ -50,22 +50,22 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libfea_la_LIBADD =
-am_libfea_la_OBJECTS = addr_table.lo fea_io.lo fea_node.lo \
-	fibconfig.lo fibconfig_transaction.lo ifconfig.lo \
-	ifconfig_addr_table.lo ifconfig_reporter.lo \
+am_libfea_la_OBJECTS = fea_io.lo fea_node.lo fibconfig.lo \
+	fibconfig_transaction.lo ifconfig.lo ifconfig_reporter.lo \
 	ifconfig_transaction.lo iftree.lo io_ip_manager.lo \
-	io_link_manager.lo libfeaclient_bridge.lo mfea_config.lo \
-	mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo mfea_node_cli.lo \
-	mfea_vif.lo nexthop_port_mapper.lo pa_backend_dummy.lo \
-	pa_backend_ipfw2.lo pa_entry.lo pa_table.lo pa_transaction.lo \
-	profile_vars.lo xrl_packet_acl.lo xrl_fea_io.lo \
-	xrl_fea_node.lo xrl_fea_target.lo xrl_fib_client_manager.lo \
-	xrl_io_ip_manager.lo xrl_io_link_manager.lo xrl_mfea_node.lo \
-	xrl_socket_cmds.lo xrl_socket_server.lo
+	io_link_manager.lo io_tcpudp_manager.lo libfeaclient_bridge.lo \
+	mfea_config.lo mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo \
+	mfea_node_cli.lo mfea_vif.lo nexthop_port_mapper.lo \
+	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
+	pa_table.lo pa_transaction.lo profile_vars.lo \
+	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
+	xrl_fea_target.lo xrl_fib_client_manager.lo \
+	xrl_io_ip_manager.lo xrl_io_link_manager.lo \
+	xrl_io_tcpudp_manager.lo xrl_mfea_node.lo
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 libfea_data_plane_base_la_LIBADD =
 am_libfea_data_plane_base_la_OBJECTS = fea_data_plane_manager.lo \
-	fibconfig_forwarding.lo io_ip.lo io_link.lo
+	fibconfig_forwarding.lo io_ip.lo io_link.lo io_tcpudp.lo
 libfea_data_plane_base_la_OBJECTS =  \
 	$(am_libfea_data_plane_base_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
@@ -78,8 +78,6 @@ test_xrl_sockets4_tcp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -91,8 +89,6 @@ test_xrl_sockets4_udp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -111,6 +107,9 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
@@ -122,12 +121,6 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/targets/libpacketaclbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -147,6 +140,9 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
@@ -158,12 +154,6 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/targets/libpacketaclbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -367,7 +357,6 @@ noinst_LTLIBRARIES = libfea.la libfea_data_plane_base.la
 ### CLI libraries
 ### libfeaclient libraries
 ### Packet ACL front-end XRL libraries
-### socket server libraries and related
 ### XRL client for Profile
 ### XORP misc libraries
 LDADD = libfea.la \
@@ -381,6 +370,9 @@ LDADD = libfea.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
 	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
+	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
+	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/targets/libfeabase.la \
 	$(top_builddir)/xrl/interfaces/libclimanagerxif.la \
 	$(top_builddir)/xrl/interfaces/libmfeaclientxif.la \
@@ -392,12 +384,6 @@ LDADD = libfea.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/targets/libpacketaclbase.la \
-	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
-	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -411,17 +397,17 @@ xorp_fea_dummy_SOURCES = xorp_fea.cc
 
 # -- Library Sources
 libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
-	fibconfig_forwarding.hh io_ip.hh io_link.hh \
+	fibconfig_forwarding.hh io_ip.hh io_link.hh io_tcpudp.hh \
 	fea_data_plane_manager.cc fibconfig_forwarding.cc io_ip.cc \
-	io_link.cc
-libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh fea_io.hh \
-	fea_node.hh fte.hh fibconfig.hh fibconfig_entry_get.hh \
+	io_link.cc io_tcpudp.cc
+libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
+	fte.hh fibconfig.hh fibconfig_entry_get.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
 	fibconfig_table_get.hh fibconfig_table_observer.hh \
 	fibconfig_table_set.hh fibconfig_transaction.hh ifconfig.hh \
-	ifconfig_addr_table.hh ifconfig_get.hh ifconfig_observer.hh \
-	ifconfig_reporter.hh ifconfig_set.hh ifconfig_transaction.hh \
-	iftree.hh io_ip_manager.hh io_link_manager.hh \
+	ifconfig_get.hh ifconfig_observer.hh ifconfig_reporter.hh \
+	ifconfig_set.hh ifconfig_transaction.hh iftree.hh \
+	io_ip_manager.hh io_link_manager.hh io_tcpudp_manager.hh \
 	libfeaclient_bridge.hh mfea_dataflow.hh \
 	mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh \
 	mfea_node_cli.hh mfea_osdep.hh mfea_vif.hh \
@@ -429,20 +415,19 @@ libfea_la_SOURCES = fea_module.h mfea_module.h addr_table.hh fea_io.hh \
 	pa_backend_ipfw2.hh pa_entry.hh pa_table.hh pa_transaction.hh \
 	profile_vars.hh xrl_fea_io.hh xrl_fea_node.hh \
 	xrl_fea_target.hh xrl_fib_client_manager.hh \
-	xrl_io_ip_manager.hh xrl_io_link_manager.hh xrl_mfea_node.hh \
-	xrl_packet_acl.hh xrl_socket_cmds.hh xrl_socket_server.hh \
-	addr_table.cc fea_io.cc fea_node.cc fibconfig.cc \
-	fibconfig_transaction.cc ifconfig.cc ifconfig_addr_table.cc \
-	ifconfig_reporter.cc ifconfig_transaction.cc iftree.cc \
-	io_ip_manager.cc io_link_manager.cc libfeaclient_bridge.cc \
-	mfea_config.cc mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc \
-	mfea_node_cli.cc mfea_vif.cc nexthop_port_mapper.cc \
-	pa_backend_dummy.cc pa_backend_ipfw2.cc pa_entry.cc \
-	pa_table.cc pa_transaction.cc profile_vars.cc \
-	xrl_packet_acl.cc xrl_fea_io.cc xrl_fea_node.cc \
-	xrl_fea_target.cc xrl_fib_client_manager.cc \
-	xrl_io_ip_manager.cc xrl_io_link_manager.cc xrl_mfea_node.cc \
-	xrl_socket_cmds.cc xrl_socket_server.cc
+	xrl_io_ip_manager.hh xrl_io_link_manager.hh \
+	xrl_io_tcpudp_manager.hh xrl_mfea_node.hh xrl_packet_acl.hh \
+	fea_io.cc fea_node.cc fibconfig.cc fibconfig_transaction.cc \
+	ifconfig.cc ifconfig_reporter.cc ifconfig_transaction.cc \
+	iftree.cc io_ip_manager.cc io_link_manager.cc \
+	io_tcpudp_manager.cc libfeaclient_bridge.cc mfea_config.cc \
+	mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc \
+	mfea_vif.cc nexthop_port_mapper.cc pa_backend_dummy.cc \
+	pa_backend_ipfw2.cc pa_entry.cc pa_table.cc pa_transaction.cc \
+	profile_vars.cc xrl_packet_acl.cc xrl_fea_io.cc \
+	xrl_fea_node.cc xrl_fea_target.cc xrl_fib_client_manager.cc \
+	xrl_io_ip_manager.cc xrl_io_link_manager.cc \
+	xrl_io_tcpudp_manager.cc xrl_mfea_node.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
@@ -451,8 +436,6 @@ test_xrl_sockets4_tcp_LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -465,8 +448,6 @@ test_xrl_sockets4_udp_LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/interfaces/libsocket4xif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6xif.la \
-	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
-	$(top_builddir)/xrl/targets/libsocketserverbase.la \
 	$(top_builddir)/xrl/targets/libtestsocket4.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
@@ -598,7 +579,6 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/addr_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_data_plane_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_node.Plo@am__quote@
@@ -606,7 +586,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_forwarding.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_addr_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_reporter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iftree.Plo@am__quote@
@@ -614,6 +593,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_ip_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_link.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_link_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_tcpudp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io_tcpudp_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libfeaclient_bridge.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_dataflow.Plo@am__quote@
@@ -638,10 +619,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_fib_client_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_io_ip_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_io_link_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_io_tcpudp_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_mfea_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_packet_acl.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_socket_cmds.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_socket_server.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -680,14 +680,14 @@ rip_socket4_user_error_event()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_socket4_user_close_event()
+rip_socket4_user_disconnect_event()
 {
-    if [ $# -ne 2 ] ; then
-        echo "Usage: rip_socket4_user_close_event <sockid:txt> <reason:txt>"
+    if [ $# -ne 1 ] ; then
+        echo "Usage: rip_socket4_user_disconnect_event <sockid:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/socket4_user/0.1/close_event?sockid:txt=$1&reason:txt=$2"
+    XRL="finder://rip/socket4_user/0.1/disconnect_event?sockid:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 

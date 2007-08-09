@@ -204,20 +204,12 @@ librtrmgr_clientxif_la_OBJECTS = $(am_librtrmgr_clientxif_la_OBJECTS)
 librtrmgrxif_la_LIBADD =
 am_librtrmgrxif_la_OBJECTS = rtrmgr_xif.lo
 librtrmgrxif_la_OBJECTS = $(am_librtrmgrxif_la_OBJECTS)
-libsocket4locatorxif_la_LIBADD =
-am_libsocket4locatorxif_la_OBJECTS = socket4_locator_xif.lo
-libsocket4locatorxif_la_OBJECTS =  \
-	$(am_libsocket4locatorxif_la_OBJECTS)
 libsocket4userxif_la_LIBADD =
 am_libsocket4userxif_la_OBJECTS = socket4_user_xif.lo
 libsocket4userxif_la_OBJECTS = $(am_libsocket4userxif_la_OBJECTS)
 libsocket4xif_la_LIBADD =
 am_libsocket4xif_la_OBJECTS = socket4_xif.lo
 libsocket4xif_la_OBJECTS = $(am_libsocket4xif_la_OBJECTS)
-libsocket6locatorxif_la_LIBADD =
-am_libsocket6locatorxif_la_OBJECTS = socket6_locator_xif.lo
-libsocket6locatorxif_la_OBJECTS =  \
-	$(am_libsocket6locatorxif_la_OBJECTS)
 libsocket6userxif_la_LIBADD =
 am_libsocket6userxif_la_OBJECTS = socket6_user_xif.lo
 libsocket6userxif_la_OBJECTS = $(am_libsocket6userxif_la_OBJECTS)
@@ -289,9 +281,7 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libribclientxif_la_SOURCES) $(libribxif_la_SOURCES) \
 	$(libripngxif_la_SOURCES) $(libripxif_la_SOURCES) \
 	$(librtrmgr_clientxif_la_SOURCES) $(librtrmgrxif_la_SOURCES) \
-	$(libsocket4locatorxif_la_SOURCES) \
 	$(libsocket4userxif_la_SOURCES) $(libsocket4xif_la_SOURCES) \
-	$(libsocket6locatorxif_la_SOURCES) \
 	$(libsocket6userxif_la_SOURCES) $(libsocket6xif_la_SOURCES) \
 	$(libstaticroutesxif_la_SOURCES) $(libtestpeerxif_la_SOURCES) \
 	$(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) \
@@ -325,9 +315,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libribclientxif_la_SOURCES) $(libribxif_la_SOURCES) \
 	$(libripngxif_la_SOURCES) $(libripxif_la_SOURCES) \
 	$(librtrmgr_clientxif_la_SOURCES) $(librtrmgrxif_la_SOURCES) \
-	$(libsocket4locatorxif_la_SOURCES) \
 	$(libsocket4userxif_la_SOURCES) $(libsocket4xif_la_SOURCES) \
-	$(libsocket6locatorxif_la_SOURCES) \
 	$(libsocket6userxif_la_SOURCES) $(libsocket6xif_la_SOURCES) \
 	$(libstaticroutesxif_la_SOURCES) $(libtestpeerxif_la_SOURCES) \
 	$(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) \
@@ -561,13 +549,9 @@ top_srcdir = @top_srcdir@
 
 # IPv4 Socket Interface
 
-# IPv4 Socket Locator Interface
-
 # IPv4 Socket User Interface
 
 # IPv6 Socket Interface
-
-# IPv6 Socket Locator Interface
 
 # IPv6 Socket User Interface
 
@@ -599,11 +583,10 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libredist4xif.la libredist6xif.la libredisttransaction4xif.la \
 	libredisttransaction6xif.la libribxif.la libribclientxif.la \
 	libripxif.la libripngxif.la librtrmgrxif.la \
-	librtrmgr_clientxif.la libsocket4xif.la \
-	libsocket4locatorxif.la libsocket4userxif.la libsocket6xif.la \
-	libsocket6locatorxif.la libsocket6userxif.la \
-	libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la \
-	libxorpifmibxif.la libtestxif.la
+	librtrmgr_clientxif.la libsocket4xif.la libsocket4userxif.la \
+	libsocket6xif.la libsocket6userxif.la libstaticroutesxif.la \
+	libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la \
+	libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -663,10 +646,8 @@ libripngxif_la_SOURCES = ripng_xif.hh ripng_xif.cc
 librtrmgrxif_la_SOURCES = rtrmgr_xif.hh rtrmgr_xif.cc
 librtrmgr_clientxif_la_SOURCES = rtrmgr_client_xif.hh rtrmgr_client_xif.cc
 libsocket4xif_la_SOURCES = socket4_xif.hh socket4_xif.cc
-libsocket4locatorxif_la_SOURCES = socket4_locator_xif.hh socket4_locator_xif.cc
 libsocket4userxif_la_SOURCES = socket4_user_xif.hh socket4_user_xif.cc
 libsocket6xif_la_SOURCES = socket6_xif.hh socket6_xif.cc
-libsocket6locatorxif_la_SOURCES = socket6_locator_xif.hh socket6_locator_xif.cc
 libsocket6userxif_la_SOURCES = socket6_user_xif.hh socket6_user_xif.cc
 libstaticroutesxif_la_SOURCES = static_routes_xif.hh static_routes_xif.cc
 libtestpeerxif_la_SOURCES = test_peer_xif.hh test_peer_xif.cc
@@ -822,14 +803,10 @@ librtrmgr_clientxif.la: $(librtrmgr_clientxif_la_OBJECTS) $(librtrmgr_clientxif_
 	$(CXXLINK)  $(librtrmgr_clientxif_la_OBJECTS) $(librtrmgr_clientxif_la_LIBADD) $(LIBS)
 librtrmgrxif.la: $(librtrmgrxif_la_OBJECTS) $(librtrmgrxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(librtrmgrxif_la_OBJECTS) $(librtrmgrxif_la_LIBADD) $(LIBS)
-libsocket4locatorxif.la: $(libsocket4locatorxif_la_OBJECTS) $(libsocket4locatorxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocket4locatorxif_la_OBJECTS) $(libsocket4locatorxif_la_LIBADD) $(LIBS)
 libsocket4userxif.la: $(libsocket4userxif_la_OBJECTS) $(libsocket4userxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libsocket4userxif_la_OBJECTS) $(libsocket4userxif_la_LIBADD) $(LIBS)
 libsocket4xif.la: $(libsocket4xif_la_OBJECTS) $(libsocket4xif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libsocket4xif_la_OBJECTS) $(libsocket4xif_la_LIBADD) $(LIBS)
-libsocket6locatorxif.la: $(libsocket6locatorxif_la_OBJECTS) $(libsocket6locatorxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libsocket6locatorxif_la_OBJECTS) $(libsocket6locatorxif_la_LIBADD) $(LIBS)
 libsocket6userxif.la: $(libsocket6userxif_la_OBJECTS) $(libsocket6userxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libsocket6userxif_la_OBJECTS) $(libsocket6userxif_la_LIBADD) $(LIBS)
 libsocket6xif.la: $(libsocket6xif_la_OBJECTS) $(libsocket6xif_la_DEPENDENCIES) 
@@ -900,10 +877,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ripng_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtrmgr_client_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtrmgr_xif.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket4_locator_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket4_user_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket4_xif.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket6_locator_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket6_user_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket6_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/static_routes_xif.Plo@am__quote@

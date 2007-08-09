@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.67 2007/07/16 23:54:05 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.68 2007/07/18 01:30:22 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -20,7 +20,6 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
 
-#include "ifconfig_addr_table.hh"
 #include "ifconfig_get.hh"
 #include "ifconfig_set.hh"
 #include "ifconfig_observer.hh"
@@ -129,16 +128,6 @@ public:
      */
     IfConfigErrorReporterBase& ifconfig_error_reporter() {
 	return _ifconfig_error_reporter;
-    }
-
-    /**
-     * Get the IfConfigAddressTable instance.
-     *
-     * @return a reference to the IfConfigAddressTable instance.
-     * @see IfConfigAddressTable.
-     */
-    IfConfigAddressTable& ifconfig_address_table() {
-	return (_ifconfig_address_table);
     }
 
     IfTree& live_config() { return (_live_config); }
@@ -350,7 +339,6 @@ private:
 
     IfConfigUpdateReplicator	_ifconfig_update_replicator;
     IfConfigErrorReporter	_ifconfig_error_reporter;
-    IfConfigAddressTable	_ifconfig_address_table;
 
     list<IfConfigGet*>		_ifconfig_gets;
     list<IfConfigSet*>		_ifconfig_sets;

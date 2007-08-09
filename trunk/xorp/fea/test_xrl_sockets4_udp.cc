@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.17 2007/04/19 21:36:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.18 2007/05/23 12:12:35 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,9 +33,6 @@
 
 #include "xrl/interfaces/socket4_xif.hh"
 #include "xrl/targets/test_socket4_base.hh"
-
-#include "xrl_socket_server.hh"
-#include "addr_table.hh"
 
 
 static const uint8_t FILLER_VALUE = 0xe7;
@@ -65,80 +62,15 @@ do {                                                                          \
 } while(0)
 
 
-// ----------------------------------------------------------------------------
-// TestAddressTable definition and implementation
-
-class TestAddressTable : public AddressTableBase {
-public:
-    void add_address(const IPv4& addr);
-    void remove_address(const IPv4& addr);
-    bool address_valid(const IPv6& addr) const;
-
-    void add_address(const IPv6& addr);
-    void remove_address(const IPv6& addr);
-    bool address_valid(const IPv4& addr) const;
-
-    uint32_t address_pif_index(const IPv4&) const { return 0; }
-    uint32_t address_pif_index(const IPv6&) const { return 0; }
-
-protected:
-    set<IPv4> _ipv4addrs;
-    set<IPv6> _ipv6addrs;
-};
-
-void
-TestAddressTable::add_address(const IPv4& addr)
-{
-    _ipv4addrs.insert(addr);
-}
-
-void
-TestAddressTable::remove_address(const IPv4& addr)
-{
-    set<IPv4>::iterator i = _ipv4addrs.find(addr);
-    if (i != _ipv4addrs.end()) {
-	_ipv4addrs.erase(i);
-	invalidate_address(addr, "invalidated");
-    }
-}
-
-bool
-TestAddressTable::address_valid(const IPv4& addr) const
-{
-    return _ipv4addrs.find(addr) != _ipv4addrs.end();
-}
-
-void
-TestAddressTable::add_address(const IPv6& addr)
-{
-    _ipv6addrs.insert(addr);
-}
-
-void
-TestAddressTable::remove_address(const IPv6& addr)
-{
-    set<IPv6>::iterator i = _ipv6addrs.find(addr);
-    if (i != _ipv6addrs.end()) {
-	_ipv6addrs.erase(i);
-	invalidate_address(addr, "invalidated");
-    }
-}
-
-bool
-TestAddressTable::address_valid(const IPv6& addr) const
-{
-    return _ipv6addrs.find(addr) != _ipv6addrs.end();
-}
-
 
 // ----------------------------------------------------------------------------
 // UDP client
 
 class TestSocket4UDP : public XrlTestSocket4TargetBase {
 public:
-    TestSocket4UDP(EventLoop& e, const string& ssname,
+    TestSocket4UDP(EventLoop& e, const string& fea_target_name,
 		   IPv4 finder_host, uint16_t finder_port)
-	: _e(e), _ssname(ssname),
+	: _e(e), _fea_target_name(fea_target_name),
 	  _p_snd(0), _p_rcv(0), _b_snd(0), _b_rcv(0), _x_err(0), _closed(false)
     {
 	_r = new XrlStdRouter(_e, "test_xrl_socket", finder_host, finder_port);
@@ -175,9 +107,9 @@ public:
     {
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending bind request (\"%s\", %s/%u)\n",
-		    _ssname.c_str(), addr.str().c_str(), port);
+		    _fea_target_name.c_str(), addr.str().c_str(), port);
 	bool s = c.send_udp_open_and_bind(
-	    _ssname.c_str(), _r->instance_name(), addr, port, false,
+	    _fea_target_name.c_str(), _r->instance_name(), addr, port, false,
 	    callback(this, &TestSocket4UDP::bind_cb));
 	return s;
     }
@@ -195,7 +127,7 @@ public:
     close()
     {
 	XrlSocket4V0p1Client c(_r);
-	bool s = c.send_close(_ssname.c_str(), _sockid,
+	bool s = c.send_close(_fea_target_name.c_str(), _sockid,
 			      callback(this, &TestSocket4UDP::close_cb));
 	return s;
     }
@@ -233,8 +165,8 @@ protected:
 	vector<uint8_t> d(bytes, FILLER_VALUE);
 
 	XrlSocket4V0p1Client c(_r);
-	bool s = c.send_send_to(_ssname.c_str(), _sockid, host, port, d,
-				callback(this, &TestSocket4UDP::send_data_cb));
+	bool s = c.send_send_to(_fea_target_name.c_str(), _sockid, host, port,
+				d, callback(this, &TestSocket4UDP::send_data_cb));
 	if (s) {
 	    verbose_log("Sent %u bytes to %s/%u\n",
 			bytes, host.str().c_str(), port);
@@ -348,11 +280,10 @@ protected:
     }
 
     XrlCmdError
-    socket4_user_0_1_close_event(const string&	sockid,
-				 const string&	reason)
+    socket4_user_0_1_disconnect_event(const string&	sockid)
     {
 	XLOG_ASSERT(sockid == _sockid);
-	verbose_log("close event: %s\n", reason.c_str());
+	verbose_log("disconnect event\n");
 	_closed = true;
 	return XrlCmdError::OKAY();
     }
@@ -360,7 +291,7 @@ protected:
 private:
     EventLoop&	_e;
     XrlRouter*	_r;
-    string	_ssname;
+    string	_fea_target_name;
     string	_sockid;
 
     uint32_t	_p_snd;		// packets sent
@@ -391,75 +322,14 @@ ticker()
 }
 
 static void
-create_socket_server(EventLoop*		pe,
-		     TestAddressTable*	ptat,
-		     IPv4		addr,
-		     uint16_t		port,
-		     XrlSocketServer**	ppxss)
-{
-    XrlSocketServer* pxss = new XrlSocketServer(*pe, *ptat, addr, port);
-    *ppxss = pxss;
-    verbose_log("Created socket server.\n");
-}
-
-static void
-destroy_socket_server(XrlSocketServer** ppxss)
-{
-    delete *ppxss;
-    *ppxss = 0;
-    verbose_log("Destroyed socket server.\n");
-}
-
-static void
-start_socket_server(XrlSocketServer** ppxss)
-{
-    XrlSocketServer* pxss = *ppxss;
-    pxss->startup();
-    verbose_log("Starting socket server.\n");
-}
-
-static void
-shutdown_socket_server(XrlSocketServer** ppxss)
-{
-    XrlSocketServer* pxss = *ppxss;
-    pxss->shutdown();
-    verbose_log("Shutting down socket server.\n");
-}
-
-static void
-verify_socket_owner_count(XrlSocketServer** ppxss, int n, bool* eflag)
-{
-    XrlSocketServer* pxss = *ppxss;
-    int m = pxss->socket_owner_count();
-    if (m != n) {
-	verbose_err("Socket owner count (%d) does not match expected (%d)\n",
-		    m, n);
-	*eflag = true;
-    }
-}
-
-static void
-verify_socket4_count(XrlSocketServer** ppxss, int n, bool* eflag)
-{
-    XrlSocketServer* pxss = *ppxss;
-    int m =  pxss->ipv4_socket_count();
-    if (m != n) {
-	verbose_err("Socket4 count (%d) does not match expected (%d)\n", m, n);
-	*eflag = true;
-    }
-}
-
-static void
 create_test_socket(EventLoop*		pe,
-		   XrlSocketServer**	ppxss,
+		   string		fea_target_name,
 		   IPv4			finder_host,
 		   uint16_t		finder_port,
 		   TestSocket4UDP**	ppu)
 {
-    XrlSocketServer* pxss = *ppxss;
     verbose_log("Creating TestSocket4UDP instance.\n");
-    *ppu = new TestSocket4UDP(*pe, pxss->instance_name(),
-			      finder_host, finder_port);
+    *ppu = new TestSocket4UDP(*pe, fea_target_name, finder_host, finder_port);
 }
 
 static void
@@ -528,12 +398,6 @@ verify_closed(TestSocket4UDP** ppu, bool closed, bool* eflag)
     }
 }
 
-static void
-remove_address(TestAddressTable* ta, IPv4 addr)
-{
-    ta->remove_address(addr);
-}
-
 // ----------------------------------------------------------------------------
 // Test Main
 
@@ -541,10 +405,7 @@ int
 test_main(IPv4 finder_host, uint16_t finder_port)
 {
     EventLoop e;
-    TestAddressTable tat;
-
-    tat.add_address(IPv4::LOOPBACK());
-
+    const string fea_target_name = "fea";
     vector<XorpTimer> ev;	// Vector for timed events
     bool eflag(false);		// Error flag set by timed events
 
@@ -552,25 +413,14 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 	ev.push_back(e.new_periodic_ms(100, callback(ticker)));
 
     //
-    // Create Socket server.
-    //
-    XrlSocketServer* xss;
-    ev.push_back(e.new_oneoff_after_ms(0,
-				       callback(create_socket_server,
-						&e, &tat, finder_host,
-						finder_port, &xss)));
-    ev.push_back(e.new_oneoff_after_ms(500,
-				       callback(start_socket_server,
-						&xss)));
-
-    //
     // Create udp1 socket and bind to port 5000.
     //
     TestSocket4UDP* udp1;
     ev.push_back(e.new_oneoff_after_ms(1000,
 				       callback(create_test_socket,
-						&e, &xss, finder_host,
-						finder_port, &udp1)));
+						&e, fea_target_name,
+						finder_host, finder_port,
+						&udp1)));
 
     ev.push_back(e.new_oneoff_after_ms(1500,
 				       callback(bind_test_socket, &udp1,
@@ -583,8 +433,9 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     TestSocket4UDP* udp2;
     ev.push_back(e.new_oneoff_after_ms(2000,
 				       callback(create_test_socket,
-						&e, &xss, finder_host,
-						finder_port, &udp2)));
+						&e, fea_target_name,
+						finder_host, finder_port,
+						&udp2)));
 
     ev.push_back(e.new_oneoff_after_ms(2500,
 				       callback(bind_test_socket, &udp2,
@@ -647,31 +498,23 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     //
     // Check udp2 is not closed
     //
-    ev.push_back(e.new_oneoff_after_ms(14800,
+    ev.push_back(e.new_oneoff_after_ms(15000,
 				       callback(verify_closed, &udp2,
 						false, &eflag)));
 
     //
-    // Invalidate IPv4::LOOPBACK(), which should cause udp2 to be closed by
-    // server.
+    // Close udp2
     //
-    ev.push_back(e.new_oneoff_after_ms(15000,
-				       callback(remove_address,
-						&tat, IPv4::LOOPBACK())));
+    ev.push_back(e.new_oneoff_after_ms(15500, callback(close_test_socket,
+						       &udp2)));
 
     //
     // Check udp2 is closed.
     //
-    ev.push_back(e.new_oneoff_after_ms(15500,
+    ev.push_back(e.new_oneoff_after_ms(16000,
 				       callback(verify_closed, &udp2,
 						true, &eflag)));
 
-    //
-    // Check no sockets open
-    //
-    ev.push_back(e.new_oneoff_after_ms(16000,
-				       callback(verify_socket4_count,
-						&xss, 0, &eflag)));
     //
     // Destroy udp1 and udp2.
     //
@@ -680,29 +523,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(19998,
 				       callback(destroy_test_socket, &udp2)));
-
-    //
-    // Check socket server is holding no resources.
-    //
-    ev.push_back(e.new_oneoff_after_ms(21000,
-				       callback(verify_socket_owner_count,
-						&xss, 0, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(21000,
-				       callback(verify_socket4_count,
-						&xss, 0, &eflag)));
-    //
-    // Shutdown socket server.
-    //
-    ev.push_back(e.new_oneoff_after_ms(24000,
-				       callback(shutdown_socket_server,
-						&xss)));
-    //
-    // Destroy socket server.
-    //
-    ev.push_back(e.new_oneoff_after_ms(25000,
-				       callback(destroy_socket_server,
-						&xss)));
 
     //
     // Force exit.

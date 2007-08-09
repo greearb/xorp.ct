@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.2 2007/07/26 01:18:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.3 2007/07/26 07:12:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -73,7 +73,7 @@ public:
 	}
 
 	// Forward the packet
-	io_link_manager().send_to_receiver(receiver_name(), header, payload);
+	io_link_manager().recv_event(receiver_name(), header, payload);
     }
 
     void bye() {}
@@ -521,9 +521,10 @@ IoLinkComm::stop_io_link_plugins()
 
 IoLinkManager::IoLinkManager(EventLoop&		eventloop,
 			     const IfTree&	iftree)
-    : _eventloop(eventloop),
+    : IoLinkManagerReceiver(),
+      _eventloop(eventloop),
       _iftree(iftree),
-      _send_to_receiver_base(NULL)
+      _io_link_manager_receiver(NULL)
 {
 }
 
@@ -533,17 +534,16 @@ IoLinkManager::~IoLinkManager()
 }
 
 void
-IoLinkManager::send_to_receiver(const string&			receiver_name,
-				const struct MacHeaderInfo&	header,
-				const vector<uint8_t>&		payload)
+IoLinkManager::recv_event(const string&			receiver_name,
+			  const struct MacHeaderInfo&	header,
+			  const vector<uint8_t>&	payload)
 {
-    if (_send_to_receiver_base != NULL)
-	_send_to_receiver_base->send_to_receiver(receiver_name, header,
-						 payload);
+    if (_io_link_manager_receiver != NULL)
+	_io_link_manager_receiver->recv_event(receiver_name, header, payload);
 }
 
 void
-IoLinkManager::erase_filters_by_name(const string& receiver_name)
+IoLinkManager::erase_filters_by_receiver_name(const string& receiver_name)
 {
     erase_filters(_comm_table, _filters,
 		  _filters.lower_bound(receiver_name),

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/interfaces/Jamfile,v 1.1 2007/01/11 22:30:54 bms Exp $
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.2 2007/04/20 06:36:09 pavlin Exp $
 #
 
 #
@@ -66,10 +66,8 @@ Library libripngxif : ripng_xif.cc ;
 Library librtrmgrxif : rtrmgr_xif.cc ;
 Library librtrmgr_clientxif : rtrmgr_client_xif.cc ;
 Library libsocket4xif : socket4_xif.cc ;
-Library libsocket4locatorxif : socket4_locator_xif.cc ;
 Library libsocket4userxif : socket4_user_xif.cc ;
 Library libsocket6xif : socket6_xif.cc ;
-Library libsocket6locatorxif : socket6_locator_xif.cc ;
 Library libsocket6userxif : socket6_user_xif.cc ;
 Library libstaticroutesxif : static_routes_xif.cc ;
 Library libtestxif : test_xif.cc ;
@@ -126,10 +124,8 @@ XorpXrlXif <xrl!interfaces>ripng_xif.cc <xrl!interfaces>ripng_xif.hh : ripng.xif
 XorpXrlXif <xrl!interfaces>rtrmgr_xif.cc <xrl!interfaces>rtrmgr_xif.hh : rtrmgr.xif ;
 XorpXrlXif <xrl!interfaces>rtrmgr_client_xif.cc <xrl!interfaces>rtrmgr_client_xif.hh : rtrmgr_client.xif ;
 XorpXrlXif <xrl!interfaces>socket4_xif.cc <xrl!interfaces>socket4_xif.hh : socket4.xif ;
-XorpXrlXif <xrl!interfaces>socket4_locator_xif.cc <xrl!interfaces>socket4_locator_xif.hh : socket4_locator.xif ;
 XorpXrlXif <xrl!interfaces>socket4_user_xif.cc <xrl!interfaces>socket4_user_xif.hh : socket4_user.xif ;
 XorpXrlXif <xrl!interfaces>socket6_xif.cc <xrl!interfaces>socket6_xif.hh : socket6.xif ;
-XorpXrlXif <xrl!interfaces>socket6_locator_xif.cc <xrl!interfaces>socket6_locator_xif.hh : socket6_locator.xif ;
 XorpXrlXif <xrl!interfaces>socket6_user_xif.cc <xrl!interfaces>socket6_user_xif.hh : socket6_user.xif ;
 XorpXrlXif <xrl!interfaces>static_routes_xif.cc <xrl!interfaces>static_routes_xif.hh : static_routes.xif ;
 XorpXrlXif <xrl!interfaces>test_xif.cc <xrl!interfaces>test_xif.hh : test.xif ;

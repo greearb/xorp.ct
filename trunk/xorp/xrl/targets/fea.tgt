@@ -1,6 +1,7 @@
-/* $XORP: xorp/xrl/targets/fea.tgt,v 1.15 2007/06/27 01:27:08 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/fea.tgt,v 1.16 2007/07/12 21:39:27 pavlin Exp $ */
 
 #include "common.xif"
+#include "finder_event_observer.xif"
 #include "fea_click.xif"
 #include "fea_fib.xif"
 #include "fea_ifmgr.xif"
@@ -11,11 +12,12 @@
 #include "fea_rawlink.xif"
 #include "fea_rawpkt4.xif"
 #include "fea_rawpkt6.xif"
-#include "socket4_locator.xif"
-#include "socket6_locator.xif"
+#include "socket4.xif"
+#include "socket6.xif"
 #include "profile.xif"
 
 target fea implements	common/0.1,					\
+			finder_event_observer/0.1,			\
 			fea_click/0.1,					\
 			fea_fib/0.1,					\
 			ifmgr/0.1,					\
@@ -26,6 +28,6 @@ target fea implements	common/0.1,					\
 			raw_link/0.1,					\
 			raw_packet4/0.1,				\
 			raw_packet6/0.1,				\
-			socket4_locator/0.1,				\
-			socket6_locator/0.1,				\
+			socket4/0.1,					\
+			socket6/0.1,					\
 			profile/0.1

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.66 2007/05/19 01:52:49 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.67 2007/06/27 01:27:08 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -36,7 +36,6 @@ tgt_files		+= ripng.tgt
 tgt_files		+= rtrmgr.tgt
 tgt_files		+= show_distances.tgt
 tgt_files		+= show_routes.tgt
-tgt_files		+= socket_server.tgt
 tgt_files		+= static_routes.tgt
 tgt_files		+= test.tgt
 tgt_files		+= test_fea_ifmgr_mirror.tgt
@@ -82,7 +81,6 @@ noinst_LTLIBRARIES	+= libripngbase.la
 noinst_LTLIBRARIES	+= librtrmgrbase.la
 noinst_LTLIBRARIES	+= libshowdistancesbase.la
 noinst_LTLIBRARIES	+= libshowroutesbase.la
-noinst_LTLIBRARIES	+= libsocketserverbase.la
 noinst_LTLIBRARIES	+= libstaticroutesbase.la
 noinst_LTLIBRARIES	+= libtestbase.la
 noinst_LTLIBRARIES	+= libtestfeaifmgrmirrorbase.la
@@ -129,6 +127,7 @@ $(srcdir)/coord_base.hh $(srcdir)/coord_base.cc:			\
 libfeabase_la_SOURCES = fea_base.hh fea_base.cc
 $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/common.xif 				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/fea_click.xif				\
 		$(INTERFACES_DIR)/fea_fib.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
@@ -139,8 +138,8 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/fea_rawlink.xif			\
 		$(INTERFACES_DIR)/fea_rawpkt4.xif			\
 		$(INTERFACES_DIR)/fea_rawpkt6.xif			\
-		$(INTERFACES_DIR)/socket4_locator.xif			\
-		$(INTERFACES_DIR)/socket6_locator.xif			\
+		$(INTERFACES_DIR)/socket4.xif				\
+		$(INTERFACES_DIR)/socket6.xif				\
 		$(INTERFACES_DIR)/profile.xif
 
 # FEA IfMgr Mirror
@@ -304,15 +303,6 @@ $(srcdir)/show_routes_base.hh $(srcdir)/show_routes_base.cc:		\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/redist6.xif
-
-# SOCKET SERVER
-libsocketserverbase_la_SOURCES  = socket_server_base.hh			\
-libsocketserverbase_la_SOURCES += socket_server_base.cc
-$(srcdir)/socket_server_base.hh $(srcdir)/socket_server_base.cc:	\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/finder_event_observer.xif		\
-		$(INTERFACES_DIR)/socket4.xif				\
-		$(INTERFACES_DIR)/socket6.xif
 
 # StaticRoutes
 libstaticroutesbase_la_SOURCES = static_routes_base.hh static_routes_base.cc

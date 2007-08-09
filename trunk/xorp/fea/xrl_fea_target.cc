@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.22 2007/07/11 22:18:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.23 2007/07/18 01:30:23 pavlin Exp $"
 
 
 //
@@ -44,7 +44,6 @@
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
-#include "xrl_socket_server.hh"
 
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
 
@@ -56,8 +55,8 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   XrlFibClientManager&		xrl_fib_client_manager,
 			   IoLinkManager&		io_link_manager,
 			   IoIpManager&			io_ip_manager,
-			   LibFeaClientBridge&		lib_fea_client_bridge,
-			   XrlSocketServer&		xrl_socket_server)
+			   IoTcpUdpManager&		io_tcpudp_manager,
+			   LibFeaClientBridge&		lib_fea_client_bridge)
     : XrlFeaTargetBase(&xrl_router),
       _eventloop(eventloop),
       _fea_node(fea_node),
@@ -66,8 +65,8 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _xrl_fib_client_manager(xrl_fib_client_manager),
       _io_link_manager(io_link_manager),
       _io_ip_manager(io_ip_manager),
+      _io_tcpudp_manager(io_tcpudp_manager),
       _lib_fea_client_bridge(lib_fea_client_bridge),
-      _xrl_socket_server(xrl_socket_server),
       _is_running(false),
       _is_shutdown_received(false),
       _fea_data_plane_manager_click(NULL)
@@ -118,7 +117,7 @@ XrlFeaTarget::common_0_1_get_target_name(
     // Output values,
     string&	name)
 {
-    name = "fea";
+    name = this->name();
     return XrlCmdError::OKAY();
 }
 
@@ -127,7 +126,7 @@ XrlFeaTarget::common_0_1_get_version(
     // Output values,
     string&   version)
 {
-    version = "0.1";
+    version = this->version();
     return XrlCmdError::OKAY();
 }
 
@@ -139,8 +138,9 @@ XrlFeaTarget::common_0_1_get_status(
 {
     ProcessStatus s;
     string r;
+
     s = ifconfig().status(r);
-    //if it's bad news, don't bother to ask any other modules.
+    // If it's bad news, don't bother to ask any other modules.
     switch (s) {
     case PROC_FAILED:
     case PROC_SHUTDOWN:
@@ -174,6 +174,30 @@ XrlCmdError
 XrlFeaTarget::common_0_1_shutdown()
 {
     _is_shutdown_received = true;
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::finder_event_observer_0_1_xrl_target_birth(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+    debug_msg("XRL target birth event %s/%s\n",
+	      target_class.c_str(), target_instance.c_str());
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::finder_event_observer_0_1_xrl_target_death(
+    // Input values,
+    const string&	target_class,
+    const string&	target_instance)
+{
+    debug_msg("XRL target death event %s/%s\n",
+	      target_class.c_str(), target_instance.c_str());
 
     return XrlCmdError::OKAY();
 }
@@ -637,6 +661,12 @@ XrlFeaTarget::fea_click_0_1_set_user_click_control_socket_port(
     const uint32_t&	user_click_control_socket_port)
 {
     string error_msg;
+
+    if (user_click_control_socket_port > 0xffff) {
+	error_msg = c_format("Click control socket port %u is out of range",
+			     user_click_control_socket_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     if (_fea_data_plane_manager_click == NULL) {
 	error_msg = c_format("Data plane manager Click is not loaded");
@@ -1368,6 +1398,25 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new RemoveInterface(iftree, ifname),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_configure_all_interfaces_from_system(
+    // Input values,
+    const uint32_t&	tid)
+{
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new ConfigureAllInterfacesFromSystem(ifconfig(), iftree),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2849,45 +2898,850 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
     return XrlCmdError::OKAY();
 }
 
-
 // ----------------------------------------------------------------------------
-// Socket Server related
+// TCP/UDP I/O Socket Server Interface
 
 XrlCmdError
-XrlFeaTarget::socket4_locator_0_1_find_socket_server_for_addr(
-							      const IPv4& addr,
-							      string&	  svr
-							      )
+XrlFeaTarget::socket4_0_1_tcp_open(
+    // Input values,
+    const string&	creator,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
 {
-    UNUSED(addr);
+    string error_msg;
 
-    // If we had multiple socket servers we'd look for the right one
-    // to use.  At the present time we only have one so this is the
-    // one to return
-    if (_xrl_socket_server.status() != SERVICE_RUNNING) {
-	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
+    if (_io_tcpudp_manager.tcp_open(IPv4::af(), creator, is_blocking, sockid,
+				    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    svr = _xrl_socket_server.instance_name();
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlFeaTarget::socket6_locator_0_1_find_socket_server_for_addr(
-							      const IPv6& addr,
-							      string&	  svr
-							      )
+XrlFeaTarget::socket4_0_1_udp_open(
+    // Input values,
+    const string&	creator,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
 {
-    UNUSED(addr);
+    string error_msg;
 
-    // If we had multiple socket servers we'd look for the right one
-    // to use.  At the present time we only have one so this is the
-    // one to return
-
-    if (_xrl_socket_server.status() != SERVICE_RUNNING) {
-	return XrlCmdError::COMMAND_FAILED("Socket Server not running.");
+    if (_io_tcpudp_manager.udp_open(IPv4::af(), creator, is_blocking, sockid,
+				    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    svr = _xrl_socket_server.instance_name();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_tcp_open_and_bind(
+    // Input values,
+    const string&	creator,
+    const IPv4&		local_addr,
+    const uint32_t&	local_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.tcp_open_and_bind(IPv4::af(), creator,
+					     IPvX(local_addr), local_port,
+					     is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_open_and_bind(
+    // Input values,
+    const string&	creator,
+    const IPv4&		local_addr,
+    const uint32_t&	local_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_and_bind(IPv4::af(), creator,
+					     IPvX(local_addr), local_port,
+					     is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_open_bind_join(
+    // Input values,
+    const string&	creator,
+    const IPv4&		local_addr,
+    const uint32_t&	local_port,
+    const IPv4&		mcast_addr,
+    const uint32_t&	ttl,
+    const bool&		reuse,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (ttl > 0xff) {
+	error_msg = c_format("TTL %u is out of range", ttl);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_bind_join(IPv4::af(), creator,
+					      IPvX(local_addr), local_port,
+					      IPvX(mcast_addr), ttl, reuse,
+					      is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_tcp_open_bind_connect(
+    // Input values,
+    const string&	creator,
+    const IPv4&		local_addr,
+    const uint32_t&	local_port,
+    const IPv4&		remote_addr,
+    const uint32_t&	remote_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.tcp_open_bind_connect(IPv4::af(), creator,
+						 IPvX(local_addr), local_port,
+						 IPvX(remote_addr),
+						 remote_port, is_blocking,
+						 sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_open_bind_connect(
+    // Input values,
+    const string&	creator,
+    const IPv4&		local_addr,
+    const uint32_t&	local_port,
+    const IPv4&		remote_addr,
+    const uint32_t&	remote_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_bind_connect(IPv4::af(), creator,
+						 IPvX(local_addr), local_port,
+						 IPvX(remote_addr),
+						 remote_port, is_blocking,
+						 sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_bind(
+    // Input values,
+    const string&	sockid,
+    const IPv4&		local_addr,
+    const uint32_t&	local_port)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.bind(IPv4::af(), sockid, IPvX(local_addr),
+				local_port, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_join_group(
+    // Input values,
+    const string&	sockid,
+    const IPv4&		mcast_addr,
+    const IPv4&		join_if_addr)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.udp_join_group(IPv4::af(), sockid, IPvX(mcast_addr),
+					  IPvX(join_if_addr), error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_leave_group(
+    // Input values,
+    const string&	sockid,
+    const IPv4&		mcast_addr,
+    const IPv4&		leave_if_addr)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.udp_leave_group(IPv4::af(), sockid,
+					   IPvX(mcast_addr),
+					   IPvX(leave_if_addr), error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_close(
+    // Input values,
+    const string&	sockid)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.close(IPv4::af(), sockid, error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_tcp_listen(
+    // Input values,
+    const string&	sockid,
+    const uint32_t&	backlog)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.tcp_listen(IPv4::af(), sockid, backlog, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_send(
+    // Input values,
+    const string&	sockid,
+    const vector<uint8_t>& data)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.send(IPv4::af(), sockid, data, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_send_with_flags(
+    // Input values,
+    const string&	sockid,
+    const vector<uint8_t>& data,
+    const bool&		out_of_band,
+    const bool&		end_of_record,
+    const bool&		end_of_file)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.send_with_flags(IPv4::af(), sockid, data,
+					   out_of_band, end_of_record,
+					   end_of_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_send_to(
+    // Input values,
+    const string&	sockid,
+    const IPv4&		remote_addr,
+    const uint32_t&	remote_port,
+    const vector<uint8_t>& data)
+{
+    string error_msg;
+
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.send_to(IPv4::af(), sockid, IPvX(remote_addr),
+				   remote_port, data, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_send_to_with_flags(
+    // Input values,
+    const string&	sockid,
+    const IPv4&		remote_addr,
+    const uint32_t&	remote_port,
+    const vector<uint8_t>& data,
+    const bool&		out_of_band,
+    const bool&		end_of_record,
+    const bool&		end_of_file)
+{
+    string error_msg;
+
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.send_to_with_flags(IPv4::af(), sockid,
+					      IPvX(remote_addr), remote_port,
+					      data, out_of_band, end_of_record,
+					      end_of_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_send_from_multicast_if(
+    // Input values,
+    const string&	sockid,
+    const IPv4&		group_addr,
+    const uint32_t&	group_port,
+    const IPv4&		ifaddr,
+    const vector<uint8_t>& data)
+{
+    string error_msg;
+
+    if (group_port > 0xffff) {
+	error_msg = c_format("Multicast group port %u is out of range",
+			     group_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.send_from_multicast_if(IPv4::af(), sockid,
+						  IPvX(group_addr), group_port,
+						  ifaddr, data, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_set_socket_option(
+    // Input values,
+    const string&	sockid,
+    const string&	optname,
+    const uint32_t&	optval)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.set_socket_option(IPv4::af(), sockid, optname,
+					     optval, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_tcp_open(
+    // Input values,
+    const string&	creator,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.tcp_open(IPv6::af(), creator, is_blocking, sockid,
+				    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_udp_open(
+    // Input values,
+    const string&	creator,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.udp_open(IPv6::af(), creator, is_blocking, sockid,
+				    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_tcp_open_and_bind(
+    // Input values,
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.tcp_open_and_bind(IPv6::af(), creator,
+					     IPvX(local_addr), local_port,
+					     is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_udp_open_and_bind(
+    // Input values,
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_and_bind(IPv6::af(), creator,
+					     IPvX(local_addr), local_port,
+					     is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_udp_open_bind_join(
+    // Input values,
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port,
+    const IPv6&		mcast_addr,
+    const uint32_t&	ttl,
+    const bool&		reuse,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (ttl > 0xff) {
+	error_msg = c_format("TTL %u is out of range", ttl);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_bind_join(IPv6::af(), creator,
+					      IPvX(local_addr), local_port,
+					      IPvX(mcast_addr), ttl, reuse,
+					      is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_tcp_open_bind_connect(
+    // Input values,
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port,
+    const IPv6&		remote_addr,
+    const uint32_t&	remote_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.tcp_open_bind_connect(IPv6::af(), creator,
+						 IPvX(local_addr), local_port,
+						 IPvX(remote_addr),
+						 remote_port, is_blocking,
+						 sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_udp_open_bind_connect(
+    // Input values,
+    const string&	creator,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port,
+    const IPv6&		remote_addr,
+    const uint32_t&	remote_port,
+    const bool&		is_blocking,
+    // Output values,
+    string&		sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_bind_connect(IPv6::af(), creator,
+						 IPvX(local_addr), local_port,
+						 IPvX(remote_addr),
+						 remote_port, is_blocking,
+						 sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_bind(
+    // Input values,
+    const string&	sockid,
+    const IPv6&		local_addr,
+    const uint32_t&	local_port)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.bind(IPv6::af(), sockid, IPvX(local_addr),
+				local_port, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_udp_join_group(
+    // Input values,
+    const string&	sockid,
+    const IPv6&		mcast_addr,
+    const IPv6&		join_if_addr)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.udp_join_group(IPv6::af(), sockid, IPvX(mcast_addr),
+					  IPvX(join_if_addr), error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_udp_leave_group(
+    // Input values,
+    const string&	sockid,
+    const IPv6&		mcast_addr,
+    const IPv6&		leave_if_addr)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.udp_leave_group(IPv6::af(), sockid,
+					   IPvX(mcast_addr),
+					   IPvX(leave_if_addr), error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_close(
+    // Input values,
+    const string&	sockid)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.close(IPv6::af(), sockid, error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_tcp_listen(
+    // Input values,
+    const string&	sockid,
+    const uint32_t&	backlog)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.tcp_listen(IPv6::af(), sockid, backlog, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_send(
+    // Input values,
+    const string&	sockid,
+    const vector<uint8_t>& data)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.send(IPv6::af(), sockid, data, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_send_with_flags(
+    // Input values,
+    const string&	sockid,
+    const vector<uint8_t>& data,
+    const bool&		out_of_band,
+    const bool&		end_of_record,
+    const bool&		end_of_file)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.send_with_flags(IPv6::af(), sockid, data,
+					   out_of_band, end_of_record,
+					   end_of_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_send_to(
+    // Input values,
+    const string&	sockid,
+    const IPv6&		remote_addr,
+    const uint32_t&	remote_port,
+    const vector<uint8_t>& data)
+{
+    string error_msg;
+
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.send_to(IPv6::af(), sockid, IPvX(remote_addr),
+				   remote_port, data, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_send_to_with_flags(
+    // Input values,
+    const string&	sockid,
+    const IPv6&		remote_addr,
+    const uint32_t&	remote_port,
+    const vector<uint8_t>& data,
+    const bool&		out_of_band,
+    const bool&		end_of_record,
+    const bool&		end_of_file)
+{
+    string error_msg;
+
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.send_to_with_flags(IPv6::af(), sockid,
+					      IPvX(remote_addr), remote_port,
+					      data, out_of_band, end_of_record,
+					      end_of_file, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_send_from_multicast_if(
+    // Input values,
+    const string&	sockid,
+    const IPv6&		group_addr,
+    const uint32_t&	group_port,
+    const IPv6&		ifaddr,
+    const vector<uint8_t>& data)
+{
+    string error_msg;
+
+    if (group_port > 0xffff) {
+	error_msg = c_format("Multicast group port %u is out of range",
+			     group_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.send_from_multicast_if(IPv6::af(), sockid,
+						  IPvX(group_addr), group_port,
+						  ifaddr, data, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket6_0_1_set_socket_option(
+    // Input values,
+    const string&	sockid,
+    const string&	optname,
+    const uint32_t&	optval)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.set_socket_option(IPv6::af(), sockid, optname,
+					     optval, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
     return XrlCmdError::OKAY();
 }
 

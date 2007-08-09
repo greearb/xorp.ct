@@ -9,13 +9,10 @@ interface socket4_user/0.1 {
      * Method invoked by target implementing socket4/0.1 when a packet
      * arrives from an IPv4 source.
      *
-     * @param sockid the identifier associated with socket where error
+     * @param sockid the identifier associated with socket where the event
      *               occurred.
-     *
      * @param src_host the originating host.
-     *
      * @param src_port the originating IP port.
-     *
      * @param data the data received.
      */
     recv_event		? sockid:txt					\
@@ -26,6 +23,17 @@ interface socket4_user/0.1 {
     /**
      * Method invoked by target implementing socket4/0.1 when a connection
      * request is received from an IPv4 source.
+     *
+     * It applies only to TCP sockets.
+     *
+     * @param sockid the identifier associated with socket where the event
+     *               occurred.
+     * @param src_host the connecting host.
+     * @param src_port the connecting IP port.
+     * @param new_sockid the identifier associated with the new socket
+     *                   that has been created to handle the new connection.
+     * @param accept if true, the connection request has been accepted,
+     *               otherwise it has been rejected.
      */
      connect_event	? sockid:txt					\
 			& src_host:ipv4					\
@@ -36,11 +44,9 @@ interface socket4_user/0.1 {
     /**
      * Method invoked by target implementing socket4/0.1 when an error occurs.
      *
-     * @param sockid the identifier associated with socket where error
+     * @param sockid the identifier associated with socket where the event
      *               occurred.
-     *
      * @param error a textual description of the error.
-     *
      * @param fatal indication of whether socket is shutdown because of error.
      */
     error_event		? sockid:txt					\
@@ -48,13 +54,14 @@ interface socket4_user/0.1 {
 			& fatal:bool
 
     /**
-     * Method invoked by target implementing socket4/0.1 when a socket is
-     * forcibly closed.  This would typically happen when the address the
-     * socket is bound to is removed from an interface.
+     * Method invoked by target implementing socket4/0.1 when the peer
+     * has closed the connection.
      *
-     * This method is not called if the socket is closed through
-     * socket/0.1/close.
+     * It applies only to TCP sockets.
+     * Note that the socket itself is left open and must be explicitly closed.
+     *
+     * @param sockid the identifier associated with socket where the event
+     *               occurred.
      */
-     close_event	? sockid:txt					\
-			& reason:txt
+     disconnect_event	? sockid:txt
 }

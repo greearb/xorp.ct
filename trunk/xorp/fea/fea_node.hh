@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.8 2007/07/11 22:18:02 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.9 2007/07/18 01:30:22 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -29,6 +29,7 @@
 #include "ifconfig.hh"
 #include "io_link_manager.hh"
 #include "io_ip_manager.hh"
+#include "io_tcpudp_manager.hh"
 #include "nexthop_port_mapper.hh"
 #include "pa_table.hh"
 #include "pa_transaction.hh"
@@ -155,6 +156,14 @@ public:
     IoIpManager& io_ip_manager() { return (_io_ip_manager); }
 
     /**
+     * Get the IoTcpUdpManager instance.
+     *
+     * @return a reference to the IoTcpUdpManager instance.
+     * @see IoTcpUdpManager.
+     */
+    IoTcpUdpManager& io_tcpudp_manager() { return (_io_tcpudp_manager); }
+
+    /**
      * Get the PaTransactionManager instance.
      *
      * @return a reference to the PaTransactionManager instance.
@@ -225,6 +234,7 @@ private:
 
     IoLinkManager		_io_link_manager;
     IoIpManager			_io_ip_manager;
+    IoTcpUdpManager		_io_tcpudp_manager;
 
     PaTableManager		_pa_table_manager;
     PaTransactionManager	_pa_transaction_manager;

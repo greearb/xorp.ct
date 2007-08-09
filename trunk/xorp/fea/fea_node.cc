@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.9 2007/07/18 01:30:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.10 2007/07/26 01:18:39 pavlin Exp $"
 
 
 //
@@ -53,6 +53,7 @@ FeaNode::FeaNode(EventLoop& eventloop, bool is_dummy)
 	  ),
       _io_link_manager(_eventloop, ifconfig().local_config()),
       _io_ip_manager(_eventloop, ifconfig().local_config()),
+      _io_tcpudp_manager(_eventloop, ifconfig().local_config()),
       _pa_transaction_manager(_eventloop, _pa_table_manager)
 {
 }
@@ -199,6 +200,7 @@ FeaNode::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_manag
 
     io_link_manager().unregister_data_plane_manager(fea_data_plane_manager);
     io_ip_manager().unregister_data_plane_manager(fea_data_plane_manager);
+    io_tcpudp_manager().unregister_data_plane_manager(fea_data_plane_manager);
 
     fea_data_plane_manager->stop_manager(dummy_error_msg);
     _fea_data_plane_managers.erase(iter);
@@ -308,6 +310,16 @@ FeaNode::load_data_plane_managers(string& error_msg)
 	!= XORP_OK) {
 	error_msg = c_format("Failed to register the %s data plane "
 			     "manager with the I/O IP manager",
+			     fea_data_plane_manager->manager_name().c_str());
+	unload_data_plane_managers(dummy_error_msg);
+	return (XORP_ERROR);
+    }
+
+    if (io_tcpudp_manager().register_data_plane_manager(fea_data_plane_manager,
+							true)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to register the %s data plane "
+			     "manager with the I/O TCP/UDP manager",
 			     fea_data_plane_manager->manager_name().c_str());
 	unload_data_plane_managers(dummy_error_msg);
 	return (XORP_ERROR);

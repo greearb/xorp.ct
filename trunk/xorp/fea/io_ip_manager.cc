@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.6 2007/07/26 01:18:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.7 2007/07/26 07:12:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -89,7 +89,7 @@ public:
 	}
 
 	// Forward the packet
-	io_ip_manager().send_to_receiver(receiver_name(), header, payload);
+	io_ip_manager().recv_event(receiver_name(), header, payload);
     }
 
     void recv_system_multicast_upcall(const vector<uint8_t>& payload) {
@@ -664,9 +664,10 @@ IoIpComm::first_valid_protocol_fd_in()
 
 IoIpManager::IoIpManager(EventLoop&	eventloop,
 			 const IfTree&	iftree)
-    : _eventloop(eventloop),
+    : IoIpManagerReceiver(),
+      _eventloop(eventloop),
       _iftree(iftree),
-      _send_to_receiver_base(NULL)
+      _io_ip_manager_receiver(NULL)
 {
 }
 
@@ -701,17 +702,17 @@ IoIpManager::filters_by_family(int family)
 }
 
 void
-IoIpManager::send_to_receiver(const string&			receiver_name,
-			      const struct IPvXHeaderInfo&	header,
-			      const vector<uint8_t>&		payload)
+IoIpManager::recv_event(const string&			receiver_name,
+			const struct IPvXHeaderInfo&	header,
+			const vector<uint8_t>&		payload)
 {
-    if (_send_to_receiver_base != NULL)
-	_send_to_receiver_base->send_to_receiver(receiver_name, header,
-						 payload);
+    if (_io_ip_manager_receiver != NULL)
+	_io_ip_manager_receiver->recv_event(receiver_name, header, payload);
 }
 
 void
-IoIpManager::erase_filters_by_name(const string& receiver_name, int family)
+IoIpManager::erase_filters_by_receiver_name(int family,
+					    const string& receiver_name)
 {
     CommTable& comm_table = comm_table_by_family(family);
     FilterBag& filters = filters_by_family(family);

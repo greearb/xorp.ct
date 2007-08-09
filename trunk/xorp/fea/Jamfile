@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.18 2007/07/31 01:15:44 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.19 2007/07/31 01:18:07 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -21,20 +21,20 @@ Library libfea_data_plane_base :
 	fibconfig_forwarding.cc
 	io_ip.cc
 	io_link.cc
+	io_tcpudp.cc
 
 Library libfea : 
-	addr_table.cc
 	fea_io.cc
 	fea_node.cc
 	fibconfig.cc
 	fibconfig_transaction.cc
 	ifconfig.cc
-	ifconfig_addr_table.cc
 	ifconfig_reporter.cc
 	ifconfig_transaction.cc
 	iftree.cc
 	io_ip_manager.cc
 	io_link_manager.cc
+	io_tcpudp_manager.cc
 	libfeaclient_bridge.cc
 	mfea_config.cc
 	mfea_dataflow.cc
@@ -56,9 +56,8 @@ Library libfea :
 	xrl_fib_client_manager.cc
 	xrl_io_ip_manager.cc
 	xrl_io_link_manager.cc
+	xrl_io_tcpudp_manager.cc
 	xrl_mfea_node.cc
-	xrl_socket_cmds.cc
-	xrl_socket_server.cc
 	;
 
 FEA_LDADD =
@@ -72,6 +71,9 @@ FEA_LDADD =
 	libfearawlinkclient
 	libfearawpkt4client
 	libfearawpkt6client
+	libsocket4userxif
+	libsocket6userxif
+	libfindereventnotifierxif
 	libfeabase
 	libclimanagerxif
 	libmfeaclientxif
@@ -84,12 +86,6 @@ FEA_LDADD =
 	libfeaclient
 	libfeaifmgrmirrorxif
 	libpacketaclbase
-	libsocket4userxif
-	libsocket4xif
-	libsocket6userxif
-	libsocket6xif
-	libfindereventnotifierxif
-	libsocketserverbase
 	libprofileclientxif
 	libproto
 	libxipc
@@ -122,11 +118,7 @@ if $(MAKE_CHECK) {
 	libxorp_control_socket
 	libfea_data_plane_base
 	libsocket4userxif
-	libsocket4xif
 	libsocket6userxif
-	libsocket6xif
-	libfindereventnotifierxif
-	libsocketserverbase
 	libtestsocket4
 	libxipc
 	libcomm
@@ -142,11 +134,7 @@ if $(MAKE_CHECK) {
 	libxorp_control_socket
 	libfea_data_plane_base
 	libsocket4userxif
-	libsocket4xif
 	libsocket6userxif
-	libsocket6xif
-	libfindereventnotifierxif
-	libsocketserverbase
 	libtestsocket4
 	libxipc
 	libcomm

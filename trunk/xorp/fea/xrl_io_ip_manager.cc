@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_io_ip_manager.cc,v 1.1 2007/05/26 02:04:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_io_ip_manager.cc,v 1.2 2007/05/26 02:10:26 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,21 +29,22 @@
 
 XrlIoIpManager::XrlIoIpManager(IoIpManager&	io_ip_manager,
 			       XrlRouter&	xrl_router)
-    : _io_ip_manager(io_ip_manager),
+    : IoIpManagerReceiver(),
+      _io_ip_manager(io_ip_manager),
       _xrl_router(xrl_router)
 {
-    _io_ip_manager.set_send_to_receiver_base(this);
+    _io_ip_manager.set_io_ip_manager_receiver(this);
 }
 
 XrlIoIpManager::~XrlIoIpManager()
 {
-    _io_ip_manager.set_send_to_receiver_base(NULL);
+    _io_ip_manager.set_io_ip_manager_receiver(NULL);
 }
 
 void
-XrlIoIpManager::send_to_receiver(const string& receiver_name,
-				 const struct IPvXHeaderInfo& header,
-				 const vector<uint8_t>& payload)
+XrlIoIpManager::recv_event(const string& receiver_name,
+			   const struct IPvXHeaderInfo& header,
+			   const vector<uint8_t>& payload)
 {
     size_t i;
 
@@ -80,7 +81,7 @@ XrlIoIpManager::send_to_receiver(const string& receiver_name,
 		     payload,
 		     callback(this,
 			      &XrlIoIpManager::xrl_send_recv_cb,
-			      receiver_name, header.src_address.af()));
+			      header.src_address.af(), receiver_name));
     }
 
     if (header.src_address.is_ipv6()) {
@@ -107,13 +108,13 @@ XrlIoIpManager::send_to_receiver(const string& receiver_name,
 		     payload,
 		     callback(this,
 			      &XrlIoIpManager::xrl_send_recv_cb,
-			      receiver_name, header.src_address.af()));
+			      header.src_address.af(), receiver_name));
     }
 }
 
 void
-XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error,
-				 string receiver_name, int family)
+XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error, int family,
+				 string receiver_name)
 {
     if (xrl_error == XrlError::OKAY())
 	return;
@@ -125,5 +126,5 @@ XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error,
     //
     // Remove all filters associated with this receiver.
     //
-    _io_ip_manager.erase_filters_by_name(receiver_name, family);
+    _io_ip_manager.erase_filters_by_receiver_name(family, receiver_name);
 }

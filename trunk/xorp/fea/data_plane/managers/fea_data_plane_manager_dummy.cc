@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.3 2007/07/17 22:53:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.4 2007/07/26 01:18:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -32,6 +32,7 @@
 #include "fea/data_plane/fibconfig/fibconfig_table_observer_dummy.hh"
 #include "fea/data_plane/io/io_link_dummy.hh"
 #include "fea/data_plane/io/io_ip_dummy.hh"
+#include "fea/data_plane/io/io_tcpudp_dummy.hh"
 
 #include "fea_data_plane_manager_dummy.hh"
 
@@ -132,4 +133,15 @@ FeaDataPlaneManagerDummy::allocate_io_ip(const IfTree& iftree, int family,
     _io_ip_list.push_back(io_ip);
 
     return (io_ip);
+}
+
+IoTcpUdp*
+FeaDataPlaneManagerDummy::allocate_io_tcpudp(const IfTree& iftree, int family)
+{
+    IoTcpUdp* io_tcpudp = NULL;
+
+    io_tcpudp = new IoTcpUdpDummy(*this, iftree, family);
+    _io_tcpudp_list.push_back(io_tcpudp);
+
+    return (io_tcpudp);
 }

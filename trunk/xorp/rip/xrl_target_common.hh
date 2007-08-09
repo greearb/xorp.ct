@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.28 2006/07/19 00:43:39 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.29 2007/02/16 22:47:18 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -310,8 +310,7 @@ public:
 					     const string& 	reason,
 					     const bool&	fatal);
 
-    XrlCmdError socketx_user_0_1_close_event(const string&	sockid,
-					     const string&	reason);
+    XrlCmdError socketx_user_0_1_disconnect_event(const string&	sockid);
 
     XrlCmdError policy_backend_0_1_configure(const uint32_t& filter,
 					     const string& conf);
@@ -1298,16 +1297,14 @@ XrlRipCommonTarget<A>::socketx_user_0_1_error_event(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::socketx_user_0_1_close_event(
-					const string&	sockid,
-					const string&	reason
+XrlRipCommonTarget<A>::socketx_user_0_1_disconnect_event(
+					const string&	sockid
 					)
 {
-    debug_msg("socketx_user_0_1_close_event %s %s\n",
-	      sockid.c_str(), reason.c_str());
+    debug_msg("socketx_user_0_1_disconnect_event %s\n",
+	      sockid.c_str());
 
     UNUSED(sockid);
-    UNUSED(reason);
 
     return XrlCmdError::OKAY();
 }

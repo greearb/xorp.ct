@@ -33,9 +33,6 @@
 #include "xrl/interfaces/socket4_xif.hh"
 #include "xrl/targets/test_socket4_base.hh"
 
-#include "xrl_socket_server.hh"
-#include "addr_table.hh"
-
 
 static const uint8_t FILLER_VALUE = 0xe7;
 
@@ -64,71 +61,6 @@ do {                                                                          \
 } while(0)
 
 
-// ----------------------------------------------------------------------------
-// TestAddressTable definition and implementation
-
-class TestAddressTable : public AddressTableBase {
-public:
-    void add_address(const IPv4& addr);
-    void remove_address(const IPv4& addr);
-    bool address_valid(const IPv6& addr) const;
-
-    void add_address(const IPv6& addr);
-    void remove_address(const IPv6& addr);
-    bool address_valid(const IPv4& addr) const;
-
-    uint32_t address_pif_index(const IPv4&) const { return 0; }
-    uint32_t address_pif_index(const IPv6&) const { return 0; }
-
-protected:
-    set<IPv4> _ipv4addrs;
-    set<IPv6> _ipv6addrs;
-};
-
-void
-TestAddressTable::add_address(const IPv4& addr)
-{
-    _ipv4addrs.insert(addr);
-}
-
-void
-TestAddressTable::remove_address(const IPv4& addr)
-{
-    set<IPv4>::iterator i = _ipv4addrs.find(addr);
-    if (i != _ipv4addrs.end()) {
-	_ipv4addrs.erase(i);
-	invalidate_address(addr, "invalidated");
-    }
-}
-
-bool
-TestAddressTable::address_valid(const IPv4& addr) const
-{
-    return _ipv4addrs.find(addr) != _ipv4addrs.end();
-}
-
-void
-TestAddressTable::add_address(const IPv6& addr)
-{
-    _ipv6addrs.insert(addr);
-}
-
-void
-TestAddressTable::remove_address(const IPv6& addr)
-{
-    set<IPv6>::iterator i = _ipv6addrs.find(addr);
-    if (i != _ipv6addrs.end()) {
-	_ipv6addrs.erase(i);
-	invalidate_address(addr, "invalidated");
-    }
-}
-
-bool
-TestAddressTable::address_valid(const IPv6& addr) const
-{
-    return _ipv6addrs.find(addr) != _ipv6addrs.end();
-}
-
 //
 // ----------------------------------------------------------------------------
 // Scheduling Time class
@@ -138,7 +70,7 @@ private:
     int _increment;
 	
 public:
-    SchedulingTime(int start_time =0, int increment =250) 
+    SchedulingTime(int start_time = 0, int increment = 250) 
 	: _time(start_time), _increment(increment) {}
 	
     int now() { return _time; } 
@@ -152,10 +84,10 @@ public:
 
 class TestSocket4TCP : public XrlTestSocket4TargetBase {
 public:
-    TestSocket4TCP(EventLoop& e, const string& ssname,
+    TestSocket4TCP(EventLoop& e, const string& fea_target_name,
 		   IPv4 finder_host, uint16_t finder_port) :
-		   _e(e), _ssname(ssname), _p_snd(0), _p_rcv(0),
-		   _b_snd(0), _b_rcv(0), _x_err(0) {
+		   _e(e), _fea_target_name(fea_target_name), _p_snd(0),
+		   _p_rcv(0), _b_snd(0), _b_rcv(0), _x_err(0) {
 	_r = new XrlStdRouter(_e, "test_xrl_socket", finder_host, finder_port);
 	set_command_map(_r);
 	_r->finalize();
@@ -195,7 +127,7 @@ public:
     {
 	vector<uint8_t> data(bytes, FILLER_VALUE);
 	XrlSocket4V0p1Client c(_r);
-	if (c.send_send(_ssname.c_str(), sockid, data,
+	if (c.send_send(_fea_target_name.c_str(), sockid, data,
 		callback(this, &TestSocket4TCP::send_data_cb))) {
 	    verbose_log("Sent %u bytes...\n", bytes);
 	    _b_snd += bytes;
@@ -260,12 +192,11 @@ protected:
 				 const bool&		fatal) = 0;
 
     XrlCmdError
-    socket4_user_0_1_close_event(const string&	sockid,
-				 const string&	reason) = 0;
+    socket4_user_0_1_disconnect_event(const string&	sockid) = 0;
 
     EventLoop&	_e;
     XrlRouter*	_r;
-    string	_ssname;
+    string	_fea_target_name;
 
     uint32_t	_p_snd;		// packets sent
     uint32_t	_p_rcv;		// packets received
@@ -283,9 +214,9 @@ protected:
 class TestSocket4TCPServer : public TestSocket4TCP {
 
 public:
-    TestSocket4TCPServer(EventLoop& e, const string& ssname,
+    TestSocket4TCPServer(EventLoop& e, const string& fea_target_name,
 			 IPv4 finder_host, uint16_t finder_port)
-	: TestSocket4TCP(e, ssname, finder_host, finder_port),
+	: TestSocket4TCP(e, fea_target_name, finder_host, finder_port),
 	  _server_closed(true), _client_closed(true) {}
 
     bool server_closed() const { return _server_closed; }
@@ -308,7 +239,7 @@ public:
 	verbose_log("Sending bind (%s:%u) request.\n",
 		    addr.str().c_str(), port);
 	return c.send_tcp_open_and_bind(
-	    _ssname.c_str(), _r->instance_name(), addr, port, false,
+	    _fea_target_name.c_str(), _r->instance_name(), addr, port, false,
 	    callback(this, &TestSocket4TCPServer::bind_cb));
     }
 
@@ -324,7 +255,7 @@ public:
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending listen request.\n");
 	bool s = c.send_tcp_listen(
-	    _ssname.c_str(), _server_sockid, backlog,
+	    _fea_target_name.c_str(), _server_sockid, backlog,
 	    callback(this, &TestSocket4TCPServer::listen_cb));
 	return s;
     }
@@ -343,7 +274,7 @@ public:
     {
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending close request for server socket.\n");
-	return c.send_close(_ssname.c_str(), _server_sockid,
+	return c.send_close(_fea_target_name.c_str(), _server_sockid,
 	      callback(this, &TestSocket4TCPServer::close_server_cb));
     }
 
@@ -362,7 +293,7 @@ public:
     {
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending close request for server client socket.\n");
-	return c.send_close(_ssname.c_str(), _client_sockid,
+	return c.send_close(_fea_target_name.c_str(), _client_sockid,
 	      callback(this, &TestSocket4TCPServer::close_client_cb));
     }
 
@@ -506,17 +437,17 @@ protected:
     }
 
     XrlCmdError
-    socket4_user_0_1_close_event(const string&	sockid,
-				 const string&	reason)
+    socket4_user_0_1_disconnect_event(const string&	sockid)
     {
 	// socket must be one of the two...
 	XLOG_ASSERT(sockid == _server_sockid || sockid == _client_sockid);
-	verbose_log("Server close event on %s socket: %s\n",
-	    (sockid == _server_sockid) ? "server" : "client", reason.c_str());
-	if (sockid == _server_sockid)
+	verbose_log("Server disconnect event on %s socket\n",
+	    (sockid == _server_sockid) ? "server" : "client");
+	if (sockid == _server_sockid) {
 	    _server_closed = true;
-	else
+	} else {
 	    _client_closed = true;
+	}
 	return XrlCmdError::OKAY();
     }
 
@@ -537,9 +468,9 @@ private:
 class TestSocket4TCPClient : public TestSocket4TCP {
 
 public:
-    TestSocket4TCPClient(EventLoop& e, const string& ssname,
+    TestSocket4TCPClient(EventLoop& e, const string& fea_target_name,
 		   IPv4 finder_host, uint16_t finder_port)
-	: TestSocket4TCP(e, ssname, finder_host, finder_port),
+	: TestSocket4TCP(e, fea_target_name, finder_host, finder_port),
 	  _closed(true) {}
 
     bool closed() const { return _closed; }
@@ -558,11 +489,11 @@ public:
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending bind (%s/%u) and connect request (\"%s\", %s/%u)\n",
 		    local_addr.str().c_str(), local_port,
-		    _ssname.c_str(),
+		    _fea_target_name.c_str(),
 		    remote_addr.str().c_str(), remote_port);
 	return c.send_tcp_open_bind_connect(
-	    _ssname.c_str(), _r->instance_name(), local_addr, local_port,
-	    remote_addr, remote_port, is_blocking,
+	    _fea_target_name.c_str(), _r->instance_name(), local_addr,
+	    local_port, remote_addr, remote_port, is_blocking,
 	    callback(this, &TestSocket4TCPClient::bind_connect_cb));
     }
 
@@ -577,7 +508,7 @@ public:
     {
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending close request for client socket.\n");
-	return c.send_close(_ssname.c_str(), _sockid,
+	return c.send_close(_fea_target_name.c_str(), _sockid,
 	      callback(this, &TestSocket4TCPClient::close_cb));
     }
 
@@ -690,11 +621,10 @@ protected:
     }
 
     XrlCmdError
-    socket4_user_0_1_close_event(const string&	sockid,
-				 const string&	reason)
+    socket4_user_0_1_disconnect_event(const string&	sockid)
     {
 	XLOG_ASSERT(sockid == _sockid);
-	verbose_log("Client close event: %s\n", reason.c_str());
+	verbose_log("Client disconnect event\n");
 	_closed = true;
 	return XrlCmdError::OKAY();
     }	
@@ -721,97 +651,19 @@ ticker()
     return true;
 }
 
-static void
-create_socket_server(EventLoop*		pe,
-		     TestAddressTable*	ptat,
-		     IPv4		addr,
-		     uint16_t		port,
-		     XrlSocketServer**	ppxss)
-{
-    XrlSocketServer* pxss = new XrlSocketServer(*pe, *ptat, addr, port);
-    *ppxss = pxss;
-    verbose_log("Created socket server.\n");
-}
-
-static void
-destroy_socket_server(XrlSocketServer** ppxss)
-{
-    delete *ppxss;
-    *ppxss = 0;
-    verbose_log("Destroyed socket server.\n");
-}
-
-static void
-start_socket_server(XrlSocketServer** ppxss)
-{
-    XrlSocketServer* pxss = *ppxss;
-    pxss->startup();
-    verbose_log("Starting socket server.\n");
-}
-
-static void
-shutdown_socket_server(XrlSocketServer** ppxss)
-{
-    XrlSocketServer* pxss = *ppxss;
-    pxss->shutdown();
-    verbose_log("Shutting down socket server.\n");
-}
-
-static void
-remove_address(TestAddressTable* ta, IPv4 addr)
-{
-    verbose_log("Invalidating address %s\n", addr.str().c_str());
-    ta->remove_address(addr);
-}
-
-static void
-add_address(TestAddressTable* ta, IPv4 addr)
-{
-    verbose_log("Validating address %s\n", addr.str().c_str());
-    ta->add_address(addr);
-}
-
-//
-// ----------------------------------------------------------------------------
-// Main test functions
-
-static void
-verify_socket_owner_count(XrlSocketServer** ppxss, int n, bool* eflag)
-{
-    XrlSocketServer* pxss = *ppxss;
-    int m = pxss->socket_owner_count();
-    if (m != n) {
-	verbose_err("Socket owner count (%d) does not match expected (%d)\n",
-		    m, n);
-	*eflag = true;
-    }
-}
-
-static void
-verify_socket4_count(XrlSocketServer** ppxss, int n, bool* eflag)
-{
-    XrlSocketServer* pxss = *ppxss;
-    int m =  pxss->ipv4_socket_count();
-    if (m != n) {
-	verbose_err("Socket4 count (%d) does not match expected (%d)\n", m, n);
-	*eflag = true;
-    }
-}
-
 //
 // ----------------------------------------------------------------------------
 // Server functions
 
 static void
-create_server(EventLoop*		pe,
-		   XrlSocketServer**	ppxss,
-		   IPv4			finder_host,
-		   uint16_t		finder_port,
-		   TestSocket4TCP**	ppu)
+create_server(EventLoop*	pe,
+	      string		fea_target_name,
+	      IPv4		finder_host,
+	      uint16_t		finder_port,
+	      TestSocket4TCP**	ppu)
 {
-    XrlSocketServer* pxss = *ppxss;
     verbose_log("Creating TestSocket4TCPServer instance.\n");
-    *ppu = new TestSocket4TCPServer(*pe, pxss->instance_name(),
+    *ppu = new TestSocket4TCPServer(*pe, fea_target_name,
 				    finder_host, finder_port);
 }
 
@@ -885,14 +737,13 @@ verify_server_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
 
 static void
 create_client(EventLoop*	pe,
-	      XrlSocketServer**	ppxss,
+	      string		fea_target_name,
 	      IPv4		finder_host,
 	      uint16_t		finder_port,
 	      TestSocket4TCP**	ppu)
 {
-    XrlSocketServer* pxss = *ppxss;
     verbose_log("Creating TestSocket4TCPClient instance.\n");
-    *ppu = new TestSocket4TCPClient(*pe, pxss->instance_name(),
+    *ppu = new TestSocket4TCPClient(*pe, fea_target_name,
 				    finder_host, finder_port);
 }
 
@@ -982,10 +833,7 @@ int
 test_main(IPv4 finder_host, uint16_t finder_port)
 {
     EventLoop e;
-    TestAddressTable tat;
-
-    tat.add_address(IPv4::LOOPBACK());
-
+    const string fea_target_name = "fea";
     vector<XorpTimer> ev;	// Vector for timed events
     bool eflag(false);		// Error flag set by timed events
 
@@ -995,29 +843,12 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     SchedulingTime stime;
 
     //
-    // Create Socket server, check socket count.
-    //
-    XrlSocketServer* xss;
-    ev.push_back(e.new_oneoff_after_ms(stime.now(),
-			       callback(create_socket_server,
-					&e, &tat, finder_host,
-					finder_port, &xss)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(start_socket_server,
-					&xss)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 0, &eflag)));
-
-    //
     // Create server, bind to port 5000, listen, check states.
     //
     TestSocket4TCP* server;
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(create_server,
-					&e, &xss, finder_host,
+					&e, fea_target_name, finder_host,
 					finder_port, &server)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
@@ -1040,10 +871,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					&eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 1, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
 					false, &eflag)));
 
@@ -1057,16 +884,12 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     TestSocket4TCP* client;
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(create_client,
-					&e, &xss, finder_host,
+					&e, fea_target_name, finder_host,
 					finder_port, &client)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
 					true, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 1, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(bind_connect_client, &client,
@@ -1077,10 +900,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
 					false, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 3, &eflag)));
 
     //
     // Send packets from client to server, check bytes send/received and states
@@ -1107,10 +926,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 			       callback(verify_server_client_closed, &server,
 					false, &eflag)));
 
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 3, &eflag)));
-
     //
     // Send packets from server to client, check bytes send/received and states
     //
@@ -1136,10 +951,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 			       callback(verify_server_client_closed, &server,
 					false, &eflag)));
 
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 3, &eflag)));
-
     //
     // Close/disconnect client, verify states
     //
@@ -1159,26 +970,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 			       callback(verify_server_closed, &server,
 					false, &eflag)));
 
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 1, &eflag)));
-
-    //
-    // Invalidate IPv4::LOOPBACK(), which should cause server socket to
-    // be closed. Check states.
-    //
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(remove_address,
-					&tat, IPv4::LOOPBACK())));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_server_closed, &server,
-					true, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 0, &eflag)));
-
     //
     // Destroy client and server.
     //
@@ -1189,28 +980,12 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 			       callback(destroy_test_socket, &server)));
 
     //
-    // Re-add loopback address, and check states.
-    //
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(add_address,
-					&tat, IPv4::LOOPBACK())));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket_owner_count,
-					&xss, 0, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 0, &eflag)));
-
-    //
     // Create server and client again, and connect as before, and this time
     // use the wildcard port 0 for the client.
     //
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(create_server,
-					&e, &xss, finder_host,
+					&e, fea_target_name, finder_host,
 					finder_port, &server)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
@@ -1225,7 +1000,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(create_client,
-					&e, &xss, finder_host,
+					&e, fea_target_name, finder_host,
 					finder_port, &client)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
@@ -1250,10 +1025,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					false, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 3, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(close_server_client_socket,
 					&server)));
 
@@ -1274,10 +1045,6 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					true, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
-    			       callback(verify_socket4_count,
-					&xss, 1, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(close_server_socket,
 					&server)));
 
@@ -1289,33 +1056,9 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 			       callback(verify_server_closed, &server,
 					true, &eflag)));
 
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 0, &eflag)));
-
-
-    //
-    // Check socket server is holding no resources.
-    //
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket_owner_count,
-					&xss, 0, &eflag)));
-
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(verify_socket4_count,
-					&xss, 0, &eflag)));
-    //
-    // Shutdown socket server.
-    //
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(shutdown_socket_server,
-					&xss)));
     //
     // Destroy socket server.
     //
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(destroy_socket_server,
-					&xss)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(destroy_test_socket, &client)));

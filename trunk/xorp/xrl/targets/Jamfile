@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/targets/Jamfile,v 1.2 2007/03/22 20:48:21 bms Exp $
+# $XORP: xorp/xrl/targets/Jamfile,v 1.3 2007/04/20 06:08:14 pavlin Exp $
 #
 
 SubDir TOP xrl targets ;
@@ -36,7 +36,6 @@ XorpXrlTgt <xrl!targets>ripng_base.cc <xrl!targets>ripng_base.hh <xrl!targets>ri
 XorpXrlTgt <xrl!targets>rtrmgr_base.cc <xrl!targets>rtrmgr_base.hh <xrl!targets>rtrmgr_base.xrls : rtrmgr.tgt ;
 XorpXrlTgt <xrl!targets>show_distances_base.cc <xrl!targets>show_distances_base.hh <xrl!targets>show_distances_base.xrls : show_distances.tgt ;
 XorpXrlTgt <xrl!targets>show_routes_base.cc <xrl!targets>show_routes_base.hh <xrl!targets>show_routes_base.xrls : show_routes.tgt ;
-XorpXrlTgt <xrl!targets>socket_server_base.cc <xrl!targets>socket_server_base.hh <xrl!targets>socket_server_base.xrls : socket_server.tgt ;
 XorpXrlTgt <xrl!targets>static_routes_base.cc <xrl!targets>static_routes_base.hh <xrl!targets>static_routes_base.xrls : static_routes.tgt ;
 XorpXrlTgt <xrl!targets>test_base.cc <xrl!targets>test_base.hh <xrl!targets>test_base.xrls : test.tgt ;
 XorpXrlTgt <xrl!targets>test_fea_ifmgr_mirror_base.cc <xrl!targets>test_fea_ifmgr_mirror_base.hh <xrl!targets>test_fea_ifmgr_mirror_base.xrls : test_fea_ifmgr_mirror.tgt ;
@@ -72,7 +71,6 @@ Library libripngbase : ripng_base.cc ;
 Library librtrmgrbase : rtrmgr_base.cc ;
 Library libshowdistancesbase : show_distances_base.cc ;
 Library libshowroutesbase : show_routes_base.cc ;
-Library libsocketserverbase : socket_server_base.cc ;
 Library libstaticroutesbase : static_routes_base.cc ;
 Library libtestbase : test_base.cc ;
 Library libtestfeaifmgrmirrorbase : test_fea_ifmgr_mirror_base.cc ;
@@ -111,7 +109,6 @@ INSTALLABLE_XRLS =
 	rtrmgr.xrls
 	show_distances.xrls
 	show_routes.xrls
-	socket_server.xrls
 	static_routes.xrls
 	test.xrls
 	test_fea_ifmgr_mirror.xrls

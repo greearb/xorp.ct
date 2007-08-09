@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.8 2007/06/07 01:23:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.9 2007/07/11 21:20:24 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -57,11 +57,6 @@ public:
 	: _iftree(iftree), _ifname(ifname) {}
 
     /**
-     * The interface / vif / address stored in operation exist.
-     */
-    virtual bool path_valid() const = 0;
-
-    /**
      * @return space separated path description.
      */
     virtual string path() const 		{ return _ifname; }
@@ -89,8 +84,6 @@ public:
     bool dispatch() 	{ iftree().add_interface(ifname()); return true; }
 
     string str() const 		{ return string("AddInterface: ") + ifname(); }
-
-    bool path_valid() const	{ return true; }
 };
 
 /**
@@ -106,8 +99,40 @@ public:
     string str() const {
 	return string("RemoveInterface: ") + ifname();
     }
+};
 
-    bool path_valid() const	{ return true; }
+/**
+ * Class for configuring all interfaces within the FEA by using information
+ * from the underlying system.
+ */
+class ConfigureAllInterfacesFromSystem : public IfConfigTransactionOperation {
+public:
+    ConfigureAllInterfacesFromSystem(IfConfig& ifconfig, IfTree& iftree)
+	: IfConfigTransactionOperation(iftree, ""), _ifconfig(ifconfig) {}
+
+    bool dispatch() {
+	const IfTree& dev_config = _ifconfig.pulled_config();
+	IfTree::IfMap::const_iterator iter;
+	bool success = true;
+
+	// Configure all interfaces
+	for (iter = dev_config.interfaces().begin();
+	     iter != dev_config.interfaces().end();
+	     ++iter) {
+	    const IfTreeInterface& iface = iter->second;
+	    if (iftree().update_interface(iface) != true)
+		success = false;
+	}
+
+	return (success);
+    }
+
+    string str() const {
+	return string("ConfigureAllInterfacesFromSystem");
+    }
+
+private:
+    IfConfig& _ifconfig;
 };
 
 /**
@@ -133,8 +158,6 @@ public:
 	return string("ConfigureInterfaceFromSystem: ") + ifname();
     }
 
-    bool path_valid() const	{ return true; }
-
 private:
     IfConfig& _ifconfig;
 };
@@ -146,8 +169,6 @@ class InterfaceModifier : public IfConfigTransactionOperation {
 public:
     InterfaceModifier(IfTree& iftree, const string& ifname)
 	: IfConfigTransactionOperation(iftree, ifname) {}
-
-    bool path_valid() const	{ return interface() != NULL; }
 
 protected:
     IfTreeInterface* interface() {
@@ -343,8 +364,6 @@ public:
 		const string&	vifname)
 	: InterfaceModifier(iftree, ifname), _vifname(vifname) {}
 
-    bool path_valid() const			{ return vif() != NULL; }
-
     string path() const {
 	return InterfaceModifier::path() + string(" ") + vifname();
     }
@@ -514,8 +533,6 @@ public:
 		  const IPv4&	addr)
 	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
 
-    bool path_valid() const	{ return addr() != NULL; }
-
     string path() const {
 	return VifModifier::path() + string(" ") + _addr.str();
     }
@@ -668,8 +685,6 @@ public:
 		  const string&	vifname,
 		  const IPv6&	addr)
 	: VifModifier(iftree, ifname, vifname), _addr(addr) {}
-
-    bool path_valid() const	{ return addr() != NULL; }
 
     string path() const {
 	return VifModifier::path() + string(" ") + _addr.str();

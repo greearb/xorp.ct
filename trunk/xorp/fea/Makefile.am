@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.99 2007/07/20 02:01:08 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.100 2007/07/26 01:18:38 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -40,6 +40,9 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6client.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/targets/libfeabase.la
 ### MFEA XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la
@@ -58,13 +61,6 @@ LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 ### Packet ACL front-end XRL libraries
 LDADD		+= $(top_builddir)/xrl/targets/libpacketaclbase.la
-### socket server libraries and related
-LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-LDADD		+= $(top_builddir)/xrl/targets/libsocketserverbase.la
 ### XRL client for Profile
 LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
 ### XORP misc libraries
@@ -84,14 +80,15 @@ libfea_data_plane_base_la_SOURCES	 = fea_data_plane_manager.hh
 libfea_data_plane_base_la_SOURCES	+= fibconfig_forwarding.hh
 libfea_data_plane_base_la_SOURCES	+= io_ip.hh
 libfea_data_plane_base_la_SOURCES	+= io_link.hh
+libfea_data_plane_base_la_SOURCES	+= io_tcpudp.hh
 libfea_data_plane_base_la_SOURCES	+= fea_data_plane_manager.cc
 libfea_data_plane_base_la_SOURCES	+= fibconfig_forwarding.cc
 libfea_data_plane_base_la_SOURCES	+= io_ip.cc
 libfea_data_plane_base_la_SOURCES	+= io_link.cc
+libfea_data_plane_base_la_SOURCES	+= io_tcpudp.cc
 
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
-libfea_la_SOURCES	+= addr_table.hh
 libfea_la_SOURCES	+= fea_io.hh
 libfea_la_SOURCES	+= fea_node.hh
 libfea_la_SOURCES	+= fte.hh
@@ -104,7 +101,6 @@ libfea_la_SOURCES	+= fibconfig_table_observer.hh
 libfea_la_SOURCES	+= fibconfig_table_set.hh
 libfea_la_SOURCES	+= fibconfig_transaction.hh
 libfea_la_SOURCES	+= ifconfig.hh
-libfea_la_SOURCES	+= ifconfig_addr_table.hh
 libfea_la_SOURCES	+= ifconfig_get.hh
 libfea_la_SOURCES	+= ifconfig_observer.hh
 libfea_la_SOURCES	+= ifconfig_reporter.hh
@@ -113,6 +109,7 @@ libfea_la_SOURCES	+= ifconfig_transaction.hh
 libfea_la_SOURCES	+= iftree.hh
 libfea_la_SOURCES	+= io_ip_manager.hh
 libfea_la_SOURCES	+= io_link_manager.hh
+libfea_la_SOURCES	+= io_tcpudp_manager.hh
 libfea_la_SOURCES	+= libfeaclient_bridge.hh
 libfea_la_SOURCES	+= mfea_dataflow.hh
 libfea_la_SOURCES	+= mfea_kernel_messages.hh
@@ -135,23 +132,21 @@ libfea_la_SOURCES	+= xrl_fea_target.hh
 libfea_la_SOURCES	+= xrl_fib_client_manager.hh
 libfea_la_SOURCES	+= xrl_io_ip_manager.hh
 libfea_la_SOURCES	+= xrl_io_link_manager.hh
+libfea_la_SOURCES	+= xrl_io_tcpudp_manager.hh
 libfea_la_SOURCES	+= xrl_mfea_node.hh
 libfea_la_SOURCES	+= xrl_packet_acl.hh
-libfea_la_SOURCES	+= xrl_socket_cmds.hh
-libfea_la_SOURCES	+= xrl_socket_server.hh
 
-libfea_la_SOURCES	+= addr_table.cc
 libfea_la_SOURCES	+= fea_io.cc
 libfea_la_SOURCES	+= fea_node.cc
 libfea_la_SOURCES	+= fibconfig.cc
 libfea_la_SOURCES	+= fibconfig_transaction.cc
 libfea_la_SOURCES	+= ifconfig.cc
-libfea_la_SOURCES	+= ifconfig_addr_table.cc
 libfea_la_SOURCES	+= ifconfig_reporter.cc
 libfea_la_SOURCES	+= ifconfig_transaction.cc
 libfea_la_SOURCES	+= iftree.cc
 libfea_la_SOURCES	+= io_ip_manager.cc
 libfea_la_SOURCES	+= io_link_manager.cc
+libfea_la_SOURCES	+= io_tcpudp_manager.cc
 libfea_la_SOURCES	+= libfeaclient_bridge.cc
 libfea_la_SOURCES	+= mfea_config.cc
 libfea_la_SOURCES	+= mfea_dataflow.cc
@@ -173,9 +168,8 @@ libfea_la_SOURCES	+= xrl_fea_target.cc
 libfea_la_SOURCES	+= xrl_fib_client_manager.cc
 libfea_la_SOURCES	+= xrl_io_ip_manager.cc
 libfea_la_SOURCES	+= xrl_io_link_manager.cc
+libfea_la_SOURCES	+= xrl_io_tcpudp_manager.cc
 libfea_la_SOURCES	+= xrl_mfea_node.cc
-libfea_la_SOURCES	+= xrl_socket_cmds.cc
-libfea_la_SOURCES	+= xrl_socket_server.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES	 = test_xrl_sockets4_tcp.cc
@@ -184,8 +178,6 @@ test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_tcp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
@@ -198,8 +190,6 @@ test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4userxif.
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket4xif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libsocket6xif.la
-test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
-test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libsocketserverbase.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libcomm/libcomm.la

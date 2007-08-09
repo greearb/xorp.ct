@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_ip_manager.hh,v 1.7 2007/06/27 01:27:05 pavlin Exp $
+// $XORP: xorp/fea/io_ip_manager.hh,v 1.8 2007/07/26 01:18:39 pavlin Exp $
 
 #ifndef __FEA_IO_IP_MANAGER_HH__
 #define __FEA_IO_IP_MANAGER_HH__
@@ -421,6 +421,31 @@ private:
 };
 
 /**
+ * @short Class that implements the API for sending IP packet to a
+ * receiver.
+ */
+class IoIpManagerReceiver {
+public:
+    /**
+     * Virtual destructor.
+     */
+    virtual ~IoIpManagerReceiver() {}
+
+    /**
+     * Data received event.
+     *
+     * @param receiver_name the name of the receiver to send the
+     * IP packet to.
+     * @param header the IP header information.
+     * @param payload the payload, everything after the IP header
+     * and options.
+     */
+    virtual void recv_event(const string&			receiver_name,
+			    const struct IPvXHeaderInfo&	header,
+			    const vector<uint8_t>&		payload) = 0;
+};
+
+/**
  * @short A class that manages raw IP I/O.
  *
  * The IoIpManager has two containers: a container for IP protocol handlers
@@ -430,7 +455,7 @@ private:
  * packet a handler (@see IoIpComm) is created if necessary, then the
  * relevent filter is created and associated with the IoIpComm.
  */
-class IoIpManager {
+class IoIpManager : public IoIpManagerReceiver {
 public:
     typedef XorpCallback2<int, const uint8_t*, size_t>::RefPtr UpcallReceiverCb;
 
@@ -439,28 +464,10 @@ public:
      */
     IoIpManager(EventLoop& eventloop, const IfTree& iftree);
 
-    virtual ~IoIpManager();
-
     /**
-     * @short Class that implements the API for sending IP packet to a
-     * receiver.
+     * Virtual destructor.
      */
-    class SendToReceiverBase {
-    public:
-	virtual ~SendToReceiverBase() {}
-	/**
-	 * Send a raw IP packet to a receiver.
-	 *
-	 * @param receiver_name the name of the receiver to send the
-	 * IP packet to.
-	 * @param header the IP header information.
-	 * @param payload the payload, everything after the IP header
-	 * and options.
-	 */
-	virtual void send_to_receiver(const string&		receiver_name,
-				      const struct IPvXHeaderInfo& header,
-				      const vector<uint8_t>&	payload) = 0;
-    };
+    virtual ~IoIpManager();
 
     /**
      * Send a raw IP packet.
@@ -631,31 +638,32 @@ public:
 						    string&	error_msg);
 
     /**
-     * Send a raw IP packet to a receiver.
+     * Data received event.
      *
      * @param receiver_name the name of the receiver to send the IP packet to.
      * @param header the IP header information.
      * @param payload the payload, everything after the IP header and options.
      */
-    void send_to_receiver(const string&			receiver_name,
-			  const struct IPvXHeaderInfo&	header,
-			  const vector<uint8_t>&	payload);
+    void recv_event(const string&			receiver_name,
+		    const struct IPvXHeaderInfo&	header,
+		    const vector<uint8_t>&		payload);
 
     /**
      * Set the instance that is responsible for sending IP packets
      * to a receiver.
      */
-    void set_send_to_receiver_base(SendToReceiverBase* v) {
-	_send_to_receiver_base = v;
+    void set_io_ip_manager_receiver(IoIpManagerReceiver* v) {
+	_io_ip_manager_receiver = v;
     }
 
     /**
      * Erase filters for a given receiver name.
      *
-     * @param receiver_name the name of the receiver.
      * @param family the address family.
+     * @param receiver_name the name of the receiver.
      */
-    void erase_filters_by_name(const string& receiver_name, int family);
+    void erase_filters_by_receiver_name(int family,
+					const string& receiver_name);
 
     /**
      * Get a reference to the interface tree.
@@ -714,7 +722,7 @@ private:
     FilterBag		_filters4;
     FilterBag		_filters6;
 
-    SendToReceiverBase*	_send_to_receiver_base;
+    IoIpManagerReceiver* _io_ip_manager_receiver;
 
     list<FeaDataPlaneManager*> _fea_data_plane_managers;
 };

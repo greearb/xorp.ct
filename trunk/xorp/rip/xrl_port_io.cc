@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.21 2006/10/12 01:25:10 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.22 2007/02/16 22:47:17 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -72,17 +72,7 @@ static SocketManager<IPv6> socket_manager;
 
 #ifdef INSTANTIATE_IPV4
 
-#include "xrl/interfaces/socket4_locator_xif.hh"
 #include "xrl/interfaces/socket4_xif.hh"
-
-template <>
-bool
-XrlPortIO<IPv4>::request_socket_server()
-{
-    XrlSocket4LocatorV0p1Client cl(&_xr);
-    return cl.send_find_socket_server_for_addr(xrl_fea_name(), _addr,
-		callback(this, &XrlPortIO<IPv4>::socket_server_cb));
-}
 
 template <>
 bool
@@ -185,17 +175,7 @@ XrlPortIO<IPv4>::send(const IPv4& 		dst_addr,
 
 #ifdef INSTANTIATE_IPV6
 
-#include "xrl/interfaces/socket6_locator_xif.hh"
 #include "xrl/interfaces/socket6_xif.hh"
-
-template <>
-bool
-XrlPortIO<IPv6>::request_socket_server()
-{
-    XrlSocket6LocatorV0p1Client cl(&_xr);
-    return cl.send_find_socket_server_for_addr(xrl_fea_name(), _addr,
-		callback(this, &XrlPortIO<IPv6>::socket_server_cb));
-}
 
 template <>
 bool
@@ -328,7 +308,7 @@ XrlPortIO<A>::startup()
 {
     _pending = true;
     set_status(SERVICE_STARTING);
-    if (request_socket_server() == false) {
+    if (startup_socket() == false) {
 	set_status(SERVICE_FAILED,
 		   "Failed to find appropriate socket server.");
 	return false;
@@ -352,15 +332,10 @@ XrlPortIO<A>::shutdown()
 }
 
 template <typename A>
-void
-XrlPortIO<A>::socket_server_cb(const XrlError& e, const string* pss)
+bool
+XrlPortIO<A>::startup_socket()
 {
-    if (e != XrlError::OKAY()) {
-	set_status(SERVICE_FAILED);
-	return;
-    }
-
-    _ss = *pss;
+    _ss = xrl_fea_name();
 
     _sid = socket_manager.sockid(_ss);
     if (_sid == SocketManager<A>::no_entry) {
@@ -377,6 +352,7 @@ XrlPortIO<A>::socket_server_cb(const XrlError& e, const string* pss)
 	if (request_open_bind_socket() == false) {
 	    set_status(SERVICE_FAILED,
 		       "Failed sending RIP socket open request.");
+	    return false;
 	}
     } else {
 	// RIP socket exists, join appropriate interface to multicast
@@ -384,8 +360,11 @@ XrlPortIO<A>::socket_server_cb(const XrlError& e, const string* pss)
 	if (request_socket_join() == false) {
 	    set_status(SERVICE_FAILED,
 		       "Failed sending multicast join request.");
+	    return false;
 	}
     }
+
+    return true;
 }
 
 template <typename A>

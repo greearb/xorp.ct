@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.67 2007/07/11 22:18:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.68 2007/07/18 01:30:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -63,7 +63,6 @@ IfConfig::IfConfig(FeaNode& fea_node)
       _itm(NULL),
       _restore_original_config_on_shutdown(false),
       _ifconfig_update_replicator(_local_config),
-      _ifconfig_address_table(_ifconfig_update_replicator),
       _is_running(false)
 {
     _itm = new IfConfigTransactionManager(_eventloop);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.1 2007/06/27 01:27:05 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.2 2007/07/26 01:18:39 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -380,6 +380,30 @@ private:
 };
 
 /**
+ * @short Class that implements the API for sending raw link-level packet
+ * to a receiver.
+ */
+class IoLinkManagerReceiver {
+public:
+    /**
+     * Virtual destructor.
+     */
+    virtual ~IoLinkManagerReceiver() {}
+
+    /**
+     * Data received event.
+     *
+     * @param receiver_name the name of the receiver to send the
+     * raw link-level packet to.
+     * @param header the MAC header information.
+     * @param payload the payload, everything after the MAC header.
+     */
+    virtual void recv_event(const string&		receiver_name,
+			    const struct MacHeaderInfo& header,
+			    const vector<uint8_t>&	payload) = 0;
+};
+
+/**
  * @short A class that manages raw link-level I/O.
  *
  * The IoLinkManager has two containers: a container for link-level handlers
@@ -389,7 +413,7 @@ private:
  * packet a handler (@see IoLinkComm) is created if necessary, then the
  * relevent filter is created and associated with the IoLinkComm.
  */
-class IoLinkManager {
+class IoLinkManager : public IoLinkManagerReceiver {
 public:
     typedef XorpCallback2<int, const uint8_t*, size_t>::RefPtr UpcallReceiverCb;
 
@@ -398,27 +422,10 @@ public:
      */
     IoLinkManager(EventLoop& eventloop, const IfTree& iftree);
 
-    virtual ~IoLinkManager();
-
     /**
-     * @short Class that implements the API for sending raw link-level packet
-     * to a receiver.
+     * Virtual destructor.
      */
-    class SendToReceiverBase {
-    public:
-	virtual ~SendToReceiverBase() {}
-	/**
-	 * Send a raw link-level packet to a receiver.
-	 *
-	 * @param receiver_name the name of the receiver to send the
-	 * raw link-level packet to.
-	 * @param header the MAC header information.
-	 * @param payload the payload, everything after the MAC header.
-	 */
-	virtual void send_to_receiver(const string&		receiver_name,
-				      const struct MacHeaderInfo& header,
-				      const vector<uint8_t>&	payload) = 0;
-    };
+    virtual ~IoLinkManager();
 
     /**
      * Send a raw link-level packet on an interface.
@@ -536,23 +543,23 @@ public:
 			      string&		error_msg);
 
     /**
-     * Send a raw link-level packet to a receiver.
+     * Data received event.
      *
      * @param receiver_name the name of the receiver to send the raw link-level
      * packet to.
      * @param header the MAC header information.
      * @param payload the payload, everything after the MAC header.
      */
-    void send_to_receiver(const string&			receiver_name,
-			  const struct MacHeaderInfo&	header,
-			  const vector<uint8_t>&	payload);
+    void recv_event(const string&		receiver_name,
+		    const struct MacHeaderInfo&	header,
+		    const vector<uint8_t>&	payload);
 
     /**
      * Set the instance that is responsible for sending raw link-level packets
      * to a receiver.
      */
-    void set_send_to_receiver_base(SendToReceiverBase* v) {
-	_send_to_receiver_base = v;
+    void set_io_link_manager_receiver(IoLinkManagerReceiver* v) {
+	_io_link_manager_receiver = v;
     }
 
     /**
@@ -560,7 +567,7 @@ public:
      *
      * @param receiver_name the name of the receiver.
      */
-    void erase_filters_by_name(const string& receiver_name);
+    void erase_filters_by_receiver_name(const string& receiver_name);
 
     /**
      * Get a reference to the interface tree.
@@ -640,7 +647,7 @@ private:
     // Collection of input filters created by IoLinkManager
     FilterBag		_filters;
 
-    SendToReceiverBase*	_send_to_receiver_base;
+    IoLinkManagerReceiver* _io_link_manager_receiver;
 
     list<FeaDataPlaneManager*> _fea_data_plane_managers;
 };
