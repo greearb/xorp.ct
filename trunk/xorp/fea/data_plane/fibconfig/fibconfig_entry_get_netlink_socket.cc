@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.11 2007/07/18 01:30:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.cc,v 1.12 2007/08/09 07:03:25 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -215,9 +215,15 @@ FibConfigEntryGetNetlinkSocket::lookup_route_by_dest(const IPvX& dst,
     struct rtmsg*	rtmsg;
     struct rtattr*	rtattr;
     int			rta_len;
+    uint8_t*		data;
     NetlinkSocket&	ns = *this;
     int			family = dst.af();
-    
+    void*		rta_align_data;
+    uint32_t		table_id = RT_TABLE_UNSPEC; // Default value for lookup
+
+    UNUSED(data);
+    UNUSED(rta_align_data);
+
     // Zero the return information
     fte.zero();
 
@@ -274,16 +280,45 @@ FibConfigEntryGetNetlinkSocket::lookup_route_by_dest(const IPvX& dst,
     dst.copy_out(reinterpret_cast<uint8_t*>(RTA_DATA(rtattr)));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     rtmsg->rtm_tos = 0;			// XXX: what is this TOS?
-    // Set the routing/forwarding table ID
-    if (fibconfig().unicast_forwarding_table_id_is_configured(family))
-	rtmsg->rtm_table = fibconfig().unicast_forwarding_table_id(family);
-    else
-	rtmsg->rtm_table = RT_TABLE_UNSPEC;
     rtmsg->rtm_protocol = RTPROT_UNSPEC;
     rtmsg->rtm_scope = RT_SCOPE_UNIVERSE;
     rtmsg->rtm_type  = RTN_UNSPEC;
     rtmsg->rtm_flags = 0;
-    
+
+    //
+    // Set the routing/forwarding table ID.
+    // If the table ID is <= 0xff, then we set it in rtmsg->rtm_table,
+    // otherwise we set rtmsg->rtm_table to RT_TABLE_UNSPEC and add the
+    // real value as an RTA_TABLE attribute.
+    //
+    if (fibconfig().unicast_forwarding_table_id_is_configured(family))
+	table_id = fibconfig().unicast_forwarding_table_id(family);
+    if (table_id <= 0xff)
+	rtmsg->rtm_table = table_id;
+    else
+	rtmsg->rtm_table = RT_TABLE_UNSPEC;
+
+#ifdef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+    // Add the table ID as an attribute
+    if (table_id > 0xff) {
+	uint32_t uint32_table_id = table_id;
+	rta_len = RTA_LENGTH(sizeof(uint32_table_id));
+	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
+	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
+		       XORP_UINT_CAST(sizeof(buffer)),
+		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
+	}
+	rta_align_data = reinterpret_cast<char*>(rtattr)
+	    + RTA_ALIGN(rtattr->rta_len);
+	rtattr = static_cast<struct rtattr*>(rta_align_data);
+	rtattr->rta_type = RTA_TABLE;
+	rtattr->rta_len = rta_len;
+	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
+	memcpy(data, &uint32_table_id, sizeof(uint32_table_id));
+	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
+    }
+#endif // HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
