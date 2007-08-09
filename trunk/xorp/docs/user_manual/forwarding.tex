@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.11 2006/08/02 05:31:48 pavlin Exp $
+% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.12 2006/10/17 22:26:07 pavlin Exp $
 %
 
 \chapter{Forwarding Engine}
@@ -47,6 +47,7 @@ fea \{\\
 \>targetname: {\it txt}\\
 \>unicast-forwarding4 \{\\
 \>\>disable: {\it bool}\\
+\>\>table-id: {\it u32}\\
 \>\>forwarding-entries \{\\
 \>\>\>retain-on-startup: {\it bool}\\
 \>\>\>retain-on-shutdown: {\it bool}\\
@@ -54,6 +55,7 @@ fea \{\\
 \>\}\\
 \>unicast-forwarding6 \{\\
 \>\>disable: {\it bool}\\
+\>\>table-id: {\it u32}\\
 \>\>forwarding-entries \{\\
 \>\>\>retain-on-startup: {\it bool}\\
 \>\>\>retain-on-shutdown: {\it bool}\\
@@ -162,6 +164,11 @@ plumbing \{\\
 \item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and disables or enables all IPv4 unicast forwarding on the router.
   The default is {\stt false}.
+\item{\tt table-id}: this specifies the IPv4 unicast forwarding table ID.
+  If it is not configured, the FEA will use the default table ID for the
+  system. Note that not all systems support multiple forwarding tables.
+  Currently, they exist only on Linux (among all systems supported by XORP).
+
 \item{\tt forwarding-entries}: this directive is used to configure the
   properties of the IPv4 forwarding entries.
 \begin{description}
@@ -188,6 +195,11 @@ plumbing \{\\
 \item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and disables or enables all IPv6 unicast forwarding on the router.
   The default is {\stt false}.
+\item{\tt table-id}: this specifies the IPv4 unicast forwarding table ID.
+  If it is not configured, the FEA will use the default table ID for the
+  system. Note that not all systems support multiple forwarding tables.
+  Currently, they exist only on Linux (among all systems supported by XORP).
+
 \item{\tt forwarding-entries}: this directive is used to configure the
   properties of the IPv6 forwarding entries.
 \begin{description}
