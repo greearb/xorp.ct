@@ -267,6 +267,9 @@
    cannot be used to set the MTU on an interface */
 #undef HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN
 
+/* Define to 1 if you have netlink socket RTA_TABLE message attribute */
+#undef HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE
+
 /* Define to 1 if you have the <net/ethernet.h> header file. */
 #undef HAVE_NET_ETHERNET_H
 

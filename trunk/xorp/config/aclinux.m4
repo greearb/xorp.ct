@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aclinux.m4,v 1.7 2007/06/08 23:45:14 pavlin Exp $
+dnl $XORP: xorp/config/aclinux.m4,v 1.8 2007/06/11 21:50:40 pavlin Exp $
 dnl
 
 dnl
@@ -283,6 +283,38 @@ ${test_broken_netlink_macro_headers}
 
 dnl Restore the original CFLAGS
 CFLAGS="${_save_cflags}"
+
+
+dnl ----------------------------------------------------
+dnl Check for netlink socket RTA_TABLE message attribute
+dnl ----------------------------------------------------
+AC_MSG_CHECKING(whether the build environment has netlink socket RTA_TABLE message attribute)
+AC_TRY_COMPILE([
+#include <stdlib.h>
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
+#endif
+#ifdef HAVE_LINUX_NETLINK_H
+#include <linux/netlink.h>
+#endif
+#ifdef HAVE_LINUX_RTNETLINK_H
+#include <linux/rtnetlink.h>
+#endif
+],
+[
+    int table_id = RTA_TABLE;
+    return (0);
+],
+    [AC_MSG_RESULT(yes)],
+    [AC_DEFINE(HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE, 1,
+	       [Define to 1 if you have netlink socket RTA_TABLE message attribute])
+     AC_MSG_RESULT(no)])
 
 
 AC_LANG_POP(C)
