@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.38 2007/03/21 18:14:28 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.39 2007/03/23 18:47:39 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -113,6 +113,21 @@
       earlier and MacOS X (note: if the Windows kernel supports this
       feature, it is not used yet in XORP). Though, for those systems
       the link status should be read properly on startup.
+
+    - On Linux with kernel version linux-2.6.17 and older there is a kernel
+      bug which prevents adding an IPv6 address to an interface if the
+      interface is DOWN:
+        # ip link set eth1 down
+        # ip addr add 3ffe:c00:0:0:1111:1111:1111:1111/64 dev eth1
+        RTNETLINK answers: Network is down
+        Exit 2
+
+      As a result of that, XORP cannot be started with explicitly
+      configured IPv6 addresses on an interface if that interface is DOWN.
+      The problem has been fixed between linux-2.6.17 and linux-2.6.20.
+      If updating to a newer Linux kernel is not feasible, a possible
+      work-around is to explicitly set the interface status to UP before
+      adding/configuring IPv6 addresses to it. 
 
   RIB:
     - In some rare cases, the RIB may fail to delete an existing route:
