@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aclinux.m4,v 1.8 2007/06/11 21:50:40 pavlin Exp $
+dnl $XORP: xorp/config/aclinux.m4,v 1.9 2007/08/09 22:15:21 pavlin Exp $
 dnl
 
 dnl
@@ -311,10 +311,10 @@ AC_TRY_COMPILE([
     int table_id = RTA_TABLE;
     return (0);
 ],
-    [AC_MSG_RESULT(yes)],
-    [AC_DEFINE(HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE, 1,
-	       [Define to 1 if you have netlink socket RTA_TABLE message attribute])
-     AC_MSG_RESULT(no)])
+    [AC_MSG_RESULT(yes)
+     AC_DEFINE(HAVE_NETLINK_SOCKET_ATTRIBUTE_RTA_TABLE, 1,
+	       [Define to 1 if you have netlink socket RTA_TABLE message attribute])],
+     [AC_MSG_RESULT(no)])
 
 
 AC_LANG_POP(C)
