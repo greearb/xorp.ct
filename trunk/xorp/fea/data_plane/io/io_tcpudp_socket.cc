@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.1 2007/08/09 00:47:00 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -46,6 +46,8 @@
  * @param error_msg the error message (if error).
  * @return the physical interface index on success, otherwise 0.
  */
+#ifdef HAVE_IPV6
+// XXX: For now the function is used only by the IPv6 code
 static uint32_t
 find_pif_index_by_addr(const IfTree& iftree, const IPvX& local_addr,
 		       string& error_msg)
@@ -71,6 +73,7 @@ find_pif_index_by_addr(const IfTree& iftree, const IPvX& local_addr,
 
     return (pif_index);
 }
+#endif
 
 /**
  * Extract the port number from struct sockaddr_storage.
@@ -775,7 +778,8 @@ IoTcpUdpSocket::send_with_flags(const vector<uint8_t>& data, bool out_of_band,
 #endif
     }
 
-    bytes_sent = ::send(_socket_fd, &data[0], data.size(), flags);
+    bytes_sent = ::send(_socket_fd, XORP_CONST_BUF_CAST(&data[0]),
+			data.size(), flags);
     if (bytes_sent != static_cast<ssize_t>(data.size())) {
 	error_msg = c_format("Failed to send data: %s", strerror(errno));
 	return (XORP_ERROR);
@@ -847,7 +851,8 @@ IoTcpUdpSocket::send_to_with_flags(const IPvX& remote_addr,
 	remote_addr.copy_out(sin);
 	sin.sin_port = htons(remote_port);
 	
-	bytes_sent = ::sendto(_socket_fd, &data[0], data.size(), flags,
+	bytes_sent = ::sendto(_socket_fd, XORP_CONST_BUF_CAST(&data[0]),
+			      data.size(), flags,
 			      reinterpret_cast<const sockaddr*>(&sin),
 			      sizeof(sin));
 	break;
@@ -860,7 +865,8 @@ IoTcpUdpSocket::send_to_with_flags(const IPvX& remote_addr,
 	remote_addr.copy_out(sin6);
 	sin6.sin6_port = htons(remote_port);
 	
-	bytes_sent = ::sendto(_socket_fd, &data[0], data.size(), flags,
+	bytes_sent = ::sendto(_socket_fd, XORP_CONST_BUF_CAST(&data[0]),
+			      data.size(), flags,
 			      reinterpret_cast<const sockaddr*>(&sin6),
 			      sizeof(sin6));
 	break;
