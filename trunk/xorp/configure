@@ -32527,9 +32527,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -32596,9 +32594,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -32669,9 +32665,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -32742,9 +32736,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.8 2007/07/23 23:49:11 pavlin Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.9 2007/08/03 00:24:23 pavlin Exp $
 dnl
 
 dnl
@@ -169,9 +169,7 @@ AC_MSG_CHECKING(whether the build environment has IP raw sockets (SOCK_RAW))
 AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -199,9 +197,7 @@ AC_MSG_CHECKING(whether the build environment has TCP/UDP UNIX sockets (SOCK_STR
 AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -232,9 +228,7 @@ AC_MSG_CHECKING(whether the build environment has routing sockets (AF_ROUTE))
 AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -265,9 +259,7 @@ AC_MSG_CHECKING(whether the system has key sockets (PF_KEY_V2))
 AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+${test_socket_headers}
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
