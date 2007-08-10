@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.8 2007/04/22 01:03:53 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.9 2007/04/22 01:57:09 pavlin Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -134,9 +134,12 @@ typedef _sigset_t sigset_t;	/* XXX: Appease libtecla. */
 #define XORP_BAD_FD		INVALID_HANDLE_VALUE
 #define XORP_BAD_SOCKET		INVALID_SOCKET
 
-/* Windows expects char * for socket option data. */
+/*
+ * Windows expects (char *) and (const char *) pointers for transmitted
+ * data and socket option data.
+ */
 #define XORP_BUF_CAST(x) ((char *)(x))
-#define XORP_BUF_CONST_CAST(x) (const_cast<char *>(x))
+#define XORP_CONST_BUF_CAST(x) ((const char *)(x))
 #define XORP_SOCKOPT_CAST(x) ((char *)(x))
 
 /* I/O errors pertaining to non-blocking sockets. */
@@ -155,11 +158,11 @@ typedef int xsock_t;
 #define XORP_BAD_SOCKET		XORP_BAD_FD
 
 /*
- * The rest of the world now expects void pointers to socket options.
- *
+ * The rest of the world expects void pointers to transmitted
+ * data and socket option data.
  */
 #define XORP_BUF_CAST(x) ((void *)(x))
-#define XORP_BUF_CONST_CAST(x) (const_cast<void *>(x))
+#define XORP_CONST_BUF_CAST(x) ((const void *)(x))
 #define XORP_SOCKOPT_CAST(x) (x)
 
 #endif /* HOST_OS_WINDOWS */
