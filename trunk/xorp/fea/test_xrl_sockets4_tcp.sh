@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/fea/test_xrl_sockets4_tcp.sh,v 1.4 2007/08/09 00:46:57 pavlin Exp $
 #
 
 #

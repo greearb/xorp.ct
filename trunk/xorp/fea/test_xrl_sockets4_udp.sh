@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/fea/test_xrl_sockets4_udp.sh,v 1.6 2007/08/09 00:46:57 pavlin Exp $
 #
 
 #
