@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/fea/test_xrl_sockets4_udp.sh,v 1.6 2007/08/09 00:46:57 pavlin Exp $
+# $XORP: xorp/fea/test_xrl_sockets4_udp.sh,v 1.7 2007/08/10 01:59:33 pavlin Exp $
 #
 
 #
@@ -12,6 +12,21 @@
 #
 
 set -e
+
+onexit()
+{
+    last=$?
+    if [ $last = "0" ]
+    then
+	echo "$0: Tests Succeeded"
+    else
+	echo "$0: Tests Failed"
+    fi
+
+    trap '' 0 2
+}
+
+trap onexit 0 2
 
 # Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
@@ -36,36 +51,33 @@ test_xrl_sockets4_udp()
     ./test_xrl_sockets4_udp
 }
 
+TESTS_NOT_FIXED=""
 TESTS="test_xrl_sockets4_udp"
 
 # Include command line
+RUNITDIR="../utils"
 . ${srcdir}/../utils/args.sh
 
 if [ $START_PROGRAMS = "yes" ] ; then
-    CXRL="../libxipc/call_xrl -w 10 -r 10"
-    ../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    CXRL="$CALLXRL -r 10"
+    runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../libxipc/xorp_finder = $CXRL finder://finder/finder/0.2/get_xrl_targets
-    ../fea/xorp_fea = $CXRL finder://fea/common/0.1/get_target_name
+    ../fea/xorp_fea        = $CXRL finder://fea/common/0.1/get_target_name
 EOF
+    trap '' 0
     exit $?
 fi
 
-if [ $CONFIGURE = "yes" ]
-then
+if [ $CONFIGURE = "yes" ] ; then
     configure_fea
-    set +e
+    set -e
 fi
 
-for t in ${TESTS} ; do
-    $t
-    _ret_value=$?
-    if [ ${_ret_value} -ne 0 ] ; then
-        echo
-        echo "$0: Tests Failed"
-        exit ${_ret_value}
-    fi
+for i in $TESTS ; do
+    $i
 done
 
-echo
-echo "$0: Tests Succeeded"
-exit 0
+# Local Variables:
+# mode: shell-script
+# sh-indentation: 4
+# End:
