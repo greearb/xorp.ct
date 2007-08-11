@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.1 2007/08/09 00:47:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.2 2007/08/10 23:02:33 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -382,20 +382,6 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
     }
     if (comm_set_loopback(_socket_fd, 0) != XORP_OK) {
 	error_msg = c_format("Cannot disable multicast loopback: %s",
-			     comm_get_last_error_str());
-	comm_close(_socket_fd);
-	_socket_fd.clear();
-	return (XORP_ERROR);
-    }
-    if (comm_set_reuseaddr(_socket_fd, reuse) != XORP_OK) {
-	error_msg = c_format("Cannot set/reset the reuse address option: %s",
-			     comm_get_last_error_str());
-	comm_close(_socket_fd);
-	_socket_fd.clear();
-	return (XORP_ERROR);
-    }
-    if (comm_set_reuseport(_socket_fd, reuse) != XORP_OK) {
-	error_msg = c_format("Cannot set/reset the reuse port option: %s",
 			     comm_get_last_error_str());
 	comm_close(_socket_fd);
 	_socket_fd.clear();
