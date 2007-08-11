@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/utils/args.sh,v 1.1 2003/10/23 00:20:43 pavlin Exp $
+# $XORP: xorp/utils/args.sh,v 1.2 2003/10/24 02:14:27 pavlin Exp $
 #
 
 #
@@ -11,6 +11,20 @@ CONFIGURE="yes"
 QUIET=""
 VERBOSE=""
 RESTART="yes"
+
+# Perform Win32 path conversion for runit if required.
+RUNIT="runit"
+RUNITDIR=${RUNITDIR:-"../../utils"}
+RUNITPRE=""
+if [ x"$OSTYPE" = xmsys ]; then
+    RUNITPRE="cmd //c"
+    RUNITDIR=$(cd ${RUNITDIR} && pwd -W)
+fi
+
+runit()
+{
+    ${RUNITPRE} ${RUNITDIR}/${RUNIT} "$@"
+}
 
 # -q (Quiet)
 # -v (Verbose)
@@ -68,11 +82,6 @@ then
 	COMMAND="$0 $QUIET $VERBOSE -l -t $i"
 	echo "Entering $COMMAND"
 	$COMMAND
-	_ret_value=$?
-	if [ ${_ret_value} -ne 0 ] ; then
-	    echo "$0: Tests Failed"
-	    exit ${_ret_value}
-	fi
 	echo "Leaving $COMMAND"
     done
     trap '' 0
