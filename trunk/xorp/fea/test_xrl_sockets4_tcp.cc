@@ -1077,7 +1077,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     }
 
     if (eflag)
-	return -1;
+	return 1;
 
     return 0;
 }
@@ -1189,6 +1189,7 @@ main(int argc, char* const argv[])
     xlog_stop();
     xlog_exit();
 
-    return r;
+    if (r != 0)
+	return (1);
+    return (0);
 }
-

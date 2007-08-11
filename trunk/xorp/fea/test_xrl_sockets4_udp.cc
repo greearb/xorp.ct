@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.18 2007/05/23 12:12:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.19 2007/08/09 00:46:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -535,7 +535,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     }
 
     if (eflag)
-	return -1;
+	return 1;
 
     return 0;
 }
@@ -647,5 +647,7 @@ main(int argc, char* const argv[])
     xlog_stop();
     xlog_exit();
 
-    return r;
+    if (r != 0)
+	return (1);
+    return (0);
 }
