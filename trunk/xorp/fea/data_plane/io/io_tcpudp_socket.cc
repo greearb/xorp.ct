@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.2 2007/08/10 23:02:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.3 2007/08/11 00:42:02 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -1046,6 +1046,19 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 	return (XORP_ERROR);
     }
 
+#ifdef HOST_OS_WINDOWS
+    // XXX: IOT_DISCONNECT is available only on Windows
+    if (is_tcp) {
+	if (eventloop().add_ioevent_cb(_socket_fd, IOT_DISCONNECT,
+				       callback(this, &IoTcpUdpSocket::disconnect_io_cb))
+	    != true) {
+	    error_msg = c_format("Failed to add I/O callback to detect peer disconnect");
+	    stop(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+#endif // HOST_OS_WINDOWS
+
     return (XORP_OK);
 }
 
@@ -1198,6 +1211,27 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp)
     // Send the event to the receiver
     //
     io_tcpudp_receiver()->recv_event(src_host, src_port, data);
+}
+
+void
+IoTcpUdpSocket::disconnect_io_cb(XorpFd fd, IoEventType io_event_type)
+{
+    XLOG_ASSERT(fd == _socket_fd);
+
+    UNUSED(io_event_type);
+
+    //
+    // Test whether there is a registered receiver
+    //
+    if (io_tcpudp_receiver() == NULL) {
+	//
+	// This might happen only during startup and should be transient.
+	//
+	XLOG_WARNING("Received disconnect event, but no receiver is registered.");
+	return;
+    }
+
+    io_tcpudp_receiver()->disconnect_event();
 }
 
 #endif // HAVE_TCPUDP_UNIX_SOCKETS

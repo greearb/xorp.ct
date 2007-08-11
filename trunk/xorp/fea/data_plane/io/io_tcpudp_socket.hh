@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.1 2007/08/09 00:47:00 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -348,6 +348,16 @@ private:
      * @param is_tcp if true, this is TCP connection, otherwise UDP.
      */
     void data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp);
+
+    /**
+     * I/O event callback: the peer has closed the connection.
+     *
+     * This callback is used only for Windows, and only for TCP sockets.
+     *
+     * @param fd the file descriptor of the socket with the data.
+     * @param io_event_type the event type (@see IoEventType).
+     */
+    void disconnect_io_cb(XorpFd fd, IoEventType io_event_type);
 
     XorpFd	_socket_fd;
     IPvX	_peer_address;		// Peer address (valid for TCP only)
