@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.20 2007/05/04 19:57:34 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.21 2007/08/13 17:47:16 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -100,23 +100,11 @@ Vif::Vif(const string& vifname, const string& ifname)
 //
 Vif::Vif(const Vif& vif)
 {
-    list<VifAddr>::const_iterator vif_addr_iter;
-
     _name = vif.name();
     _ifname = vif.ifname();
     set_pif_index(vif.pif_index());
     set_vif_index(vif.vif_index());
-    //
-    // XXX: Copy the elements one-by-one instead of using list assignment,
-    // because of a coredump issue on Gentoo 2007.0-r1 with the hardened
-    // profile and the following compiler:
-    // gcc (GCC) 3.4.6 (Gentoo Hardened 3.4.6-r2, ssp-3.4.6-1.0, pie-8.7.10)
-    //
-    for (vif_addr_iter = vif.addr_list().begin();
-	 vif_addr_iter != vif.addr_list().end();
-	 ++vif_addr_iter) {
-	_addr_list.push_back(*vif_addr_iter);
-    }
+    _addr_list = vif.addr_list();
     set_pim_register(vif.is_pim_register());
     set_p2p(vif.is_p2p());
     set_loopback(vif.is_loopback());
