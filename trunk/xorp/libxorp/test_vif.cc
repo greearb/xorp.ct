@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.13 2006/10/12 01:24:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.14 2007/02/16 22:46:26 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -434,7 +434,18 @@ test_vif_methods()
     // Get the default list of all addresses for this vif.
     //
     list<VifAddr> addr_list;
-    addr_list = vif1.addr_list();
+    list<VifAddr>::const_iterator vif_addr_iter;
+    //
+    // XXX: Copy the elements one-by-one instead of using list assignment,
+    // because of a coredump issue on Gentoo 2007.0-r1 with the hardened
+    // profile and the following compiler:
+    // gcc (GCC) 3.4.6 (Gentoo Hardened 3.4.6-r2, ssp-3.4.6-1.0, pie-8.7.10)
+    //
+    for (vif_addr_iter = vif1.addr_list().begin();
+	 vif_addr_iter != vif1.addr_list().end();
+	 ++vif_addr_iter) {
+	addr_list.push_back(*vif_addr_iter);
+    }
     verbose_assert(addr_list.size() == 0, "default addr_list()");
     
     //
