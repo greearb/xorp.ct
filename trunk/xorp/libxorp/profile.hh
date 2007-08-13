@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.9 2007/03/15 05:58:48 pavlin Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.10 2007/05/23 12:12:43 pavlin Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -91,7 +91,7 @@ class Profile {
 
     class ProfileState {
     public:
-	ProfileState() {}
+	ProfileState() : _enabled(false), _locked(false), _log(NULL) {}
 	ProfileState(const string& comment, bool enabled, bool locked,
 		     logentries *log) 
 	    : _comment(comment), _enabled(enabled), _locked(locked), _log(log)
@@ -102,7 +102,7 @@ class Profile {
 	bool locked() const { return _locked; }
 	logentries *logptr() const { return _log; }
 	void zap() const { delete _log; }
-	void set_iterator(logentries::iterator i) { _i = i; }
+	void set_iterator(const logentries::iterator& i) { _i = i; }
 	void get_iterator(logentries::iterator& i) { i = _i; }
 	int size() const { return _log->size(); }
 	const string& comment() const {return _comment;}
