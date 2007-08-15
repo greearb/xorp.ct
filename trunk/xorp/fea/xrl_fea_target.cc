@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.25 2007/08/09 07:03:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.26 2007/08/15 18:55:17 pavlin Exp $"
 
 
 //
@@ -3247,27 +3247,6 @@ XrlFeaTarget::socket4_0_1_send(
 }
 
 XrlCmdError
-XrlFeaTarget::socket4_0_1_send_with_flags(
-    // Input values,
-    const string&	sockid,
-    const vector<uint8_t>& data,
-    const bool&		out_of_band,
-    const bool&		end_of_record,
-    const bool&		end_of_file)
-{
-    string error_msg;
-
-    if (_io_tcpudp_manager.send_with_flags(IPv4::af(), sockid, data,
-					   out_of_band, end_of_record,
-					   end_of_file, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlFeaTarget::socket4_0_1_send_to(
     // Input values,
     const string&	sockid,
@@ -3284,35 +3263,6 @@ XrlFeaTarget::socket4_0_1_send_to(
 
     if (_io_tcpudp_manager.send_to(IPv4::af(), sockid, IPvX(remote_addr),
 				   remote_port, data, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::socket4_0_1_send_to_with_flags(
-    // Input values,
-    const string&	sockid,
-    const IPv4&		remote_addr,
-    const uint32_t&	remote_port,
-    const vector<uint8_t>& data,
-    const bool&		out_of_band,
-    const bool&		end_of_record,
-    const bool&		end_of_file)
-{
-    string error_msg;
-
-    if (remote_port > 0xffff) {
-	error_msg = c_format("Remote port %u is out of range", remote_port);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (_io_tcpudp_manager.send_to_with_flags(IPv4::af(), sockid,
-					      IPvX(remote_addr), remote_port,
-					      data, out_of_band, end_of_record,
-					      end_of_file, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3669,27 +3619,6 @@ XrlFeaTarget::socket6_0_1_send(
 }
 
 XrlCmdError
-XrlFeaTarget::socket6_0_1_send_with_flags(
-    // Input values,
-    const string&	sockid,
-    const vector<uint8_t>& data,
-    const bool&		out_of_band,
-    const bool&		end_of_record,
-    const bool&		end_of_file)
-{
-    string error_msg;
-
-    if (_io_tcpudp_manager.send_with_flags(IPv6::af(), sockid, data,
-					   out_of_band, end_of_record,
-					   end_of_file, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
 XrlFeaTarget::socket6_0_1_send_to(
     // Input values,
     const string&	sockid,
@@ -3706,35 +3635,6 @@ XrlFeaTarget::socket6_0_1_send_to(
 
     if (_io_tcpudp_manager.send_to(IPv6::af(), sockid, IPvX(remote_addr),
 				   remote_port, data, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlFeaTarget::socket6_0_1_send_to_with_flags(
-    // Input values,
-    const string&	sockid,
-    const IPv6&		remote_addr,
-    const uint32_t&	remote_port,
-    const vector<uint8_t>& data,
-    const bool&		out_of_band,
-    const bool&		end_of_record,
-    const bool&		end_of_file)
-{
-    string error_msg;
-
-    if (remote_port > 0xffff) {
-	error_msg = c_format("Remote port %u is out of range", remote_port);
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-
-    if (_io_tcpudp_manager.send_to_with_flags(IPv6::af(), sockid,
-					      IPvX(remote_addr), remote_port,
-					      data, out_of_band, end_of_record,
-					      end_of_file, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.15 2007/08/09 00:46:58 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.16 2007/08/09 07:03:24 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1752,31 +1752,6 @@ public:
 	const vector<uint8_t>&	data);
 
     /**
-     *  Send data on socket with optional flags. These flags provide hints to
-     *  the forwarding engine on how to send the packets, they are not
-     *  guaranteed to work. NB: There is no flag for "do not route" as this is
-     *  always true since the particular forwarding engine sending the data may
-     *  not have access to the full routing table.
-     *
-     *  @param sockid unique socket ID.
-     *
-     *  @param data block of data to be sent.
-     *
-     *  @param out_of_band mark data as out of band.
-     *
-     *  @param end_of_record data completes record.
-     *
-     *  @param end_of_file data completes file.
-     */
-    XrlCmdError socket4_0_1_send_with_flags(
-	// Input values,
-	const string&	sockid,
-	const vector<uint8_t>&	data,
-	const bool&	out_of_band,
-	const bool&	end_of_record,
-	const bool&	end_of_file);
-
-    /**
      *  Send data on socket to a given destination. The packet is not routed as
      *  the forwarding engine sending the packet may not have access to the
      *  full routing table.
@@ -1795,35 +1770,6 @@ public:
 	const IPv4&	remote_addr,
 	const uint32_t&	remote_port,
 	const vector<uint8_t>&	data);
-
-    /**
-     *  Send data on socket to a given destination. The packet is not routed as
-     *  the forwarding engine sending the packet may not have access to the
-     *  full routing table.
-     *
-     *  @param sockid unique socket ID.
-     *
-     *  @param remote_addr destination address for data.
-     *
-     *  @param remote_port destination port for data.
-     *
-     *  @param data block of data to be sent.
-     *
-     *  @param out_of_band mark data as out of band.
-     *
-     *  @param end_of_record data completes record.
-     *
-     *  @param end_of_file data completes file.
-     */
-    XrlCmdError socket4_0_1_send_to_with_flags(
-	// Input values,
-	const string&	sockid,
-	const IPv4&	remote_addr,
-	const uint32_t&	remote_port,
-	const vector<uint8_t>&	data,
-	const bool&	out_of_band,
-	const bool&	end_of_record,
-	const bool&	end_of_file);
 
     /**
      *  Send data on socket to a given multicast group from a given interface.
@@ -2126,31 +2072,6 @@ public:
 	const vector<uint8_t>&	data);
 
     /**
-     *  Send data on socket with optional flags. These flags provide hints to
-     *  the forwarding engine on how to send the packets, they are not
-     *  guaranteed to work. NB: There is no flag for "do not route" as this is
-     *  always true since the particular forwarding engine sending the data may
-     *  not have access to the full routing table.
-     *
-     *  @param sockid unique socket ID.
-     *
-     *  @param data block of data to be sent.
-     *
-     *  @param out_of_band mark data as out of band.
-     *
-     *  @param end_of_record data completes record.
-     *
-     *  @param end_of_file data completes file.
-     */
-    XrlCmdError socket6_0_1_send_with_flags(
-	// Input values,
-	const string&	sockid,
-	const vector<uint8_t>&	data,
-	const bool&	out_of_band,
-	const bool&	end_of_record,
-	const bool&	end_of_file);
-
-    /**
      *  Send data on socket to a given destination. The packet is not routed as
      *  the forwarding engine sending the packet may not have access to the
      *  full routing table.
@@ -2169,35 +2090,6 @@ public:
 	const IPv6&	remote_addr,
 	const uint32_t&	remote_port,
 	const vector<uint8_t>&	data);
-
-    /**
-     *  Send data on socket to a given destination. The packet is not routed as
-     *  the forwarding engine sending the packet may not have access to the
-     *  full routing table.
-     *
-     *  @param sockid unique socket ID.
-     *
-     *  @param remote_addr destination address for data.
-     *
-     *  @param remote_port destination port for data.
-     *
-     *  @param data block of data to be sent.
-     *
-     *  @param out_of_band mark data as out of band.
-     *
-     *  @param end_of_record data completes record.
-     *
-     *  @param end_of_file data completes file.
-     */
-    XrlCmdError socket6_0_1_send_to_with_flags(
-	// Input values,
-	const string&	sockid,
-	const IPv6&	remote_addr,
-	const uint32_t&	remote_port,
-	const vector<uint8_t>&	data,
-	const bool&	out_of_band,
-	const bool&	end_of_record,
-	const bool&	end_of_file);
 
     /**
      *  Send data on socket to a given multicast group from a given interface.

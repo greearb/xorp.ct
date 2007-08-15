@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.1 2007/08/09 00:46:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.2 2007/08/15 18:55:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -578,38 +578,6 @@ IoTcpUdpComm::send(const vector<uint8_t>& data, string& error_msg)
 }
 
 int
-IoTcpUdpComm::send_with_flags(const vector<uint8_t>& data, bool out_of_band,
-			      bool end_of_record, bool end_of_file,
-			      string& error_msg)
-{
-    int ret_value = XORP_OK;
-    string error_msg2;
-
-    if (_io_tcpudp_plugins.empty()) {
-	error_msg = c_format("No I/O TCP/UDP plugin to send data with flags "
-			     "on socket");
-	return (XORP_ERROR);
-    }
-
-    IoTcpUdpPlugins::iterator iter;
-    for (iter = _io_tcpudp_plugins.begin();
-	 iter != _io_tcpudp_plugins.end();
-	 ++iter) {
-	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->send_with_flags(data, out_of_band, end_of_record,
-				       end_of_file, error_msg2)
-	    != XORP_OK) {
-	    ret_value = XORP_ERROR;
-	    if (! error_msg.empty())
-		error_msg += " ";
-	    error_msg += error_msg2;
-	}
-    }
-
-    return (ret_value);
-}
-
-int
 IoTcpUdpComm::send_to(const IPvX& remote_addr, uint16_t remote_port,
 		      const vector<uint8_t>& data, string& error_msg)
 {
@@ -629,41 +597,6 @@ IoTcpUdpComm::send_to(const IPvX& remote_addr, uint16_t remote_port,
 	 ++iter) {
 	IoTcpUdp* io_tcpudp = iter->second;
 	if (io_tcpudp->send_to(remote_addr, remote_port, data, error_msg2)
-	    != XORP_OK) {
-	    ret_value = XORP_ERROR;
-	    if (! error_msg.empty())
-		error_msg += " ";
-	    error_msg += error_msg2;
-	}
-    }
-
-    return (ret_value);
-}
-
-int
-IoTcpUdpComm::send_to_with_flags(const IPvX& remote_addr, uint16_t remote_port,
-				 const vector<uint8_t>& data, bool out_of_band,
-				 bool end_of_record, bool end_of_file,
-				 string& error_msg)
-{
-    int ret_value = XORP_OK;
-    string error_msg2;
-
-    if (_io_tcpudp_plugins.empty()) {
-	error_msg = c_format("No I/O TCP/UDP plugin to send data with flags "
-			     "on socket to remote address %s and port %u",
-			     remote_addr.str().c_str(), remote_port);
-	return (XORP_ERROR);
-    }
-
-    IoTcpUdpPlugins::iterator iter;
-    for (iter = _io_tcpudp_plugins.begin();
-	 iter != _io_tcpudp_plugins.end();
-	 ++iter) {
-	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->send_to_with_flags(remote_addr, remote_port, data,
-					  out_of_band, end_of_record,
-					  end_of_file, error_msg2)
 	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
@@ -1526,22 +1459,6 @@ IoTcpUdpManager::send(int family, const string& sockid,
 }
 
 int
-IoTcpUdpManager::send_with_flags(int family, const string& sockid,
-				 const vector<uint8_t>& data, bool out_of_band,
-				 bool end_of_record, bool end_of_file,
-				 string& error_msg)
-{
-    IoTcpUdpComm* io_tcpudp_comm;
-
-    io_tcpudp_comm = find_io_tcpudp_comm(family, sockid, error_msg);
-    if (io_tcpudp_comm == NULL)
-	return (XORP_ERROR);
-
-    return (io_tcpudp_comm->send_with_flags(data, out_of_band, end_of_record,
-					    end_of_file, error_msg));
-}
-
-int
 IoTcpUdpManager::send_to(int family, const string& sockid,
 			 const IPvX& remote_addr, uint16_t remote_port,
 			 const vector<uint8_t>& data, string& error_msg)
@@ -1554,25 +1471,6 @@ IoTcpUdpManager::send_to(int family, const string& sockid,
 
     return (io_tcpudp_comm->send_to(remote_addr, remote_port, data,
 				    error_msg));
-}
-
-int
-IoTcpUdpManager::send_to_with_flags(int family, const string& sockid,
-				    const IPvX& remote_addr,
-				    uint16_t remote_port,
-				    const vector<uint8_t>& data,
-				    bool out_of_band, bool end_of_record,
-				    bool end_of_file, string& error_msg)
-{
-    IoTcpUdpComm* io_tcpudp_comm;
-
-    io_tcpudp_comm = find_io_tcpudp_comm(family, sockid, error_msg);
-    if (io_tcpudp_comm == NULL)
-	return (XORP_ERROR);
-
-    return (io_tcpudp_comm->send_to_with_flags(remote_addr, remote_port, data,
-					       out_of_band, end_of_record,
-					       end_of_file, error_msg));
 }
 
 int

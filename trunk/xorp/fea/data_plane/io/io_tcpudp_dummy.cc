@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.1 2007/08/09 00:47:00 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -241,18 +241,7 @@ IoTcpUdpDummy::tcp_listen(uint32_t backlog, string& error_msg)
 int
 IoTcpUdpDummy::send(const vector<uint8_t>& data, string& error_msg)
 {
-    return (send_with_flags(data, false, false, false, error_msg));
-}
-
-int
-IoTcpUdpDummy::send_with_flags(const vector<uint8_t>& data, bool out_of_band,
-			       bool end_of_record, bool end_of_file,
-			       string& error_msg)
-{
     UNUSED(data);
-    UNUSED(out_of_band);
-    UNUSED(end_of_record);
-    UNUSED(end_of_file);
     UNUSED(error_msg);
 
     return (XORP_OK);
@@ -262,25 +251,11 @@ int
 IoTcpUdpDummy::send_to(const IPvX& remote_addr, uint16_t remote_port,
 		       const vector<uint8_t>& data, string& error_msg)
 {
-    return (send_to_with_flags(remote_addr, remote_port, data, false, false,
-			       false, error_msg));
-}
-
-int
-IoTcpUdpDummy::send_to_with_flags(const IPvX& remote_addr,
-				  uint16_t remote_port,
-				  const vector<uint8_t>& data,
-				  bool out_of_band, bool end_of_record,
-				  bool end_of_file, string& error_msg)
-{
     XLOG_ASSERT(family() == remote_addr.af());
 
     UNUSED(remote_addr);
     UNUSED(remote_port);
     UNUSED(data);
-    UNUSED(out_of_band);
-    UNUSED(end_of_record);
-    UNUSED(end_of_file);
     UNUSED(error_msg);
 
     return (XORP_OK);

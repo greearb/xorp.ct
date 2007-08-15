@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/io_tcpudp.hh,v 1.1 2007/08/09 00:46:57 pavlin Exp $
 
 
 #ifndef __FEA_IO_TCPUDP_HH__
@@ -302,27 +302,6 @@ public:
     virtual int send(const vector<uint8_t>& data, string& error_msg) = 0;
 
     /**
-     * Send data on socket with optional flags.
-     *
-     * These flags provide hints to the forwarding engine on how to send the
-     * packets, they are not guaranteed to work.
-     *
-     * Note: There is no flag for "do not route" as this is always true since
-     * the particular forwarding engine sending the data may not have access
-     * to the full routing table.
-     *
-     * @param data block of data to be sent.
-     * @param out_of_band mark data as out of band.
-     * @param end_of_record data completes record.
-     * @param end_of_file data completes file.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int send_with_flags(const vector<uint8_t>& data, bool out_of_band,
-				bool end_of_record, bool end_of_file,
-				string& error_msg) = 0;
-
-    /**
      * Send data on socket to a given destination.
      *
      * The packet is not routed as the forwarding engine sending the packet
@@ -336,29 +315,6 @@ public:
      */
     virtual int send_to(const IPvX& remote_addr, uint16_t remote_port,
 			const vector<uint8_t>& data, string& error_msg) = 0;
-
-    /**
-     * Send data on socket to a given destination.
-     *
-     * The packet is not routed as the forwarding engine sending the packet
-     * may not have access to the full routing table.
-     *
-     * @param remote_addr destination address for data.
-     * @param remote_port destination port for data.
-     * @param data block of data to be sent.
-     * @param out_of_band mark data as out of band.
-     * @param end_of_record data completes record.
-     * @param end_of_file data completes file.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int send_to_with_flags(const IPvX& remote_addr,
-				   uint16_t remote_port,
-				   const vector<uint8_t>& data,
-				   bool out_of_band,
-				   bool end_of_record,
-				   bool end_of_file,
-				   string& error_msg) = 0;
 
     /**
      * Send data on socket to a given multicast group from a given interface.

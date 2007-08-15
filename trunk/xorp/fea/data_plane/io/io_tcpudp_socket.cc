@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.4 2007/08/11 05:49:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.5 2007/08/15 17:57:32 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -718,50 +718,12 @@ IoTcpUdpSocket::tcp_listen(uint32_t backlog, string& error_msg)
 int
 IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 {
-    return (send_with_flags(data, false, false, false, error_msg));
-}
-
-int
-IoTcpUdpSocket::send_with_flags(const vector<uint8_t>& data, bool out_of_band,
-				bool end_of_record, bool end_of_file,
-				string& error_msg)
-{
     ssize_t bytes_sent = 0;
     int flags = 0;
 
     if (! _socket_fd.is_valid()) {
 	error_msg = c_format("The socket is not open");
 	return (XORP_ERROR);
-    }
-
-    //
-    // Assign the flags
-    //
-    if (out_of_band) {
-#ifdef MSG_OOB
-	flags |= MSG_OOB;
-#else
-	XLOG_WARNING("Sending a packet with out_of_band set, "
-		     "but the system doesn't have MSG_OOB flag");
-#endif
-    }
-
-    if (end_of_record) {
-#ifdef MSG_EOR
-	flags |= MSG_EOR;
-#else
-	XLOG_WARNING("Sending a packet with end_of_record set, "
-		     "but the system doesn't have MSG_EOR flag");
-#endif
-    }
-
-    if (end_of_file) {
-#ifdef MSG_EOF
-	flags |= MSG_EOF;
-#else
-	XLOG_WARNING("Sending a packet with end_of_file set, "
-		     "but the system doesn't have MSG_EOF flag");
-#endif
     }
 
     bytes_sent = ::send(_socket_fd, XORP_CONST_BUF_CAST(&data[0]),
@@ -778,17 +740,6 @@ int
 IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
 			const vector<uint8_t>& data, string& error_msg)
 {
-    return (send_to_with_flags(remote_addr, remote_port, data, false, false,
-			       false, error_msg));
-}
-
-int
-IoTcpUdpSocket::send_to_with_flags(const IPvX& remote_addr,
-				   uint16_t remote_port,
-				   const vector<uint8_t>& data,
-				   bool out_of_band, bool end_of_record,
-				   bool end_of_file, string& error_msg)
-{
     ssize_t bytes_sent = 0;
     int flags = 0;
 
@@ -797,36 +748,6 @@ IoTcpUdpSocket::send_to_with_flags(const IPvX& remote_addr,
     if (! _socket_fd.is_valid()) {
 	error_msg = c_format("The socket is not open");
 	return (XORP_ERROR);
-    }
-
-    //
-    // Assign the flags
-    //
-    if (out_of_band) {
-#ifdef MSG_OOB
-	flags |= MSG_OOB;
-#else
-	XLOG_WARNING("Sending a packet with out_of_band set, "
-		     "but the system doesn't have MSG_OOB flag");
-#endif
-    }
-
-    if (end_of_record) {
-#ifdef MSG_EOR
-	flags |= MSG_EOR;
-#else
-	XLOG_WARNING("Sending a packet with end_of_record set, "
-		     "but the system doesn't have MSG_EOR flag");
-#endif
-    }
-
-    if (end_of_file) {
-#ifdef MSG_EOF
-	flags |= MSG_EOF;
-#else
-	XLOG_WARNING("Sending a packet with end_of_file set, "
-		     "but the system doesn't have MSG_EOF flag");
-#endif
     }
 
     switch (family()) {

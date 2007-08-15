@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.1 2007/08/09 00:46:57 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.2 2007/08/15 18:55:16 pavlin Exp $
 
 #ifndef __FEA_IO_TCPUDP_MANAGER_HH__
 #define __FEA_IO_TCPUDP_MANAGER_HH__
@@ -354,27 +354,6 @@ public:
     int send(const vector<uint8_t>& data, string& error_msg);
 
     /**
-     * Send data on socket with optional flags.
-     *
-     * These flags provide hints to the forwarding engine on how to send the
-     * packets, they are not guaranteed to work.
-     *
-     * Note: There is no flag for "do not route" as this is always true since
-     * the particular forwarding engine sending the data may not have access
-     * to the full routing table.
-     *
-     * @param data block of data to be sent.
-     * @param out_of_band mark data as out of band.
-     * @param end_of_record data completes record.
-     * @param end_of_file data completes file.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int send_with_flags(const vector<uint8_t>& data, bool out_of_band,
-			bool end_of_record, bool end_of_file,
-			string& error_msg);
-
-    /**
      * Send data on socket to a given destination.
      *
      * The packet is not routed as the forwarding engine sending the packet
@@ -388,26 +367,6 @@ public:
      */
     int send_to(const IPvX& remote_addr, uint16_t remote_port,
 		const vector<uint8_t>& data, string& error_msg);
-
-    /**
-     * Send data on socket to a given destination.
-     *
-     * The packet is not routed as the forwarding engine sending the packet
-     * may not have access to the full routing table.
-     *
-     * @param remote_addr destination address for data.
-     * @param remote_port destination port for data.
-     * @param data block of data to be sent.
-     * @param out_of_band mark data as out of band.
-     * @param end_of_record data completes record.
-     * @param end_of_file data completes file.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int send_to_with_flags(const IPvX& remote_addr, uint16_t remote_port,
-			   const vector<uint8_t>& data, bool out_of_band,
-			   bool end_of_record, bool end_of_file,
-			   string& error_msg);
 
     /**
      * Send data on socket to a given multicast group from a given interface.
@@ -865,31 +824,6 @@ public:
 	     string& error_msg);
 
     /**
-     * Send data on socket with optional flags.
-     *
-     * These flags provide hints to the forwarding engine on how to send the
-     * packets, they are not guaranteed to work.
-     *
-     * Note: There is no flag for "do not route" as this is always true since
-     * the particular forwarding engine sending the data may not have access
-     * to the full routing table.
-     *
-     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
-     * respectively).
-     * @param sockid unique socket ID.
-     * @param data block of data to be sent.
-     * @param out_of_band mark data as out of band.
-     * @param end_of_record data completes record.
-     * @param end_of_file data completes file.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int send_with_flags(int family, const string& sockid,
-			const vector<uint8_t>& data, bool out_of_band,
-			bool end_of_record, bool end_of_file,
-			string& error_msg);
-
-    /**
      * Send data on socket to a given destination.
      *
      * The packet is not routed as the forwarding engine sending the packet
@@ -907,30 +841,6 @@ public:
     int send_to(int family, const string& sockid, const IPvX& remote_addr,
 		uint16_t remote_port, const vector<uint8_t>& data,
 		string& error_msg);
-
-    /**
-     * Send data on socket to a given destination.
-     *
-     * The packet is not routed as the forwarding engine sending the packet
-     * may not have access to the full routing table.
-     *
-     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
-     * respectively).
-     * @param sockid unique socket ID.
-     * @param remote_addr destination address for data.
-     * @param remote_port destination port for data.
-     * @param data block of data to be sent.
-     * @param out_of_band mark data as out of band.
-     * @param end_of_record data completes record.
-     * @param end_of_file data completes file.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int send_to_with_flags(int family, const string& sockid,
-			   const IPvX& remote_addr, uint16_t remote_port,
-			   const vector<uint8_t>& data, bool out_of_band,
-			   bool end_of_record, bool end_of_file,
-			   string& error_msg);
 
     /**
      * Send data on socket to a given multicast group from a given interface.
