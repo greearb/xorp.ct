@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.40 2007/03/20 22:09:54 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.41 2007/05/08 19:23:18 pavlin Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -601,6 +601,11 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	IPv4&	bdr,
 	uint32_t&	up,
 	uint32_t&	adjacent);
+
+    /**
+     *  Clear the OSPF database.
+     */
+    XrlCmdError ospfv2_0_1_clear_database();
 
  private:
     Ospf<IPv4>& _ospf;
@@ -1199,6 +1204,11 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	IPv4&	bdr,
 	uint32_t&	up,
 	uint32_t&	adjacent);
+
+    /**
+     *  Clear the OSPF database.
+     */
+    XrlCmdError ospfv3_0_1_clear_database();
 
  private:
 //     Ospf<IPv4>& _ospf_ipv4;

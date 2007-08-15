@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.55 2007/05/08 19:23:17 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.56 2007/05/23 04:08:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1767,3 +1767,16 @@ XrlOspfV3Target::ospfv3_0_1_get_neighbour_info(const uint32_t& nid,
 
     return XrlCmdError::OKAY();
 }
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_clear_database()
+{
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_clear_database()
+{
+    return XrlCmdError::OKAY();
+}
+

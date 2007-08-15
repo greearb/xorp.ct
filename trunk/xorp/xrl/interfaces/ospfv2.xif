@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.23 2006/10/13 20:26:52 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.24 2007/07/12 21:35:28 pavlin Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -369,4 +369,9 @@ interface ospfv2/0.1 {
 	& bdr:ipv4 \
 	& up:u32 \
 	& adjacent:u32
+
+    /**
+     * Clear the OSPF database.
+     */
+    clear_database
 }
