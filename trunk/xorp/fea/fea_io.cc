@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_io.cc,v 1.1 2007/04/18 06:20:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_io.cc,v 1.2 2007/08/15 18:55:16 pavlin Exp $"
 
 
 //
@@ -148,7 +148,7 @@ FeaIO::delete_instance_watch(const string& instance_name,
 void
 FeaIO::instance_birth(const string& instance_name)
 {
-    list<pair<string, InstanceWatcher *> >::iterator iter, tmp_iter;
+    list<pair<string, InstanceWatcher *> >::iterator iter;
 
     for (iter = _instance_watchers.begin();
 	 iter != _instance_watchers.end();
@@ -171,7 +171,7 @@ FeaIO::instance_birth(const string& instance_name)
 void
 FeaIO::instance_death(const string& instance_name)
 {
-    list<pair<string, InstanceWatcher *> >::iterator iter, tmp_iter;
+    list<pair<string, InstanceWatcher *> >::iterator iter;
 
     for (iter = _instance_watchers.begin();
 	 iter != _instance_watchers.end();
