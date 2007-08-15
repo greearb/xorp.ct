@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.3 2007/08/11 00:42:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.4 2007/08/11 05:49:44 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -1196,6 +1196,13 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp)
     if (is_tcp) {
 	// TCP data
 	if (bytes_recv == 0) {
+	    //
+	    // XXX: Remove from the eventloop for disconnect events.
+	    //
+	    // Note that IOT_DISCONNECT is available only on Windows,
+	    // hence we need to use IOT_READ instead.
+	    //
+	    eventloop().remove_ioevent_cb(_socket_fd, IOT_READ);
 	    io_tcpudp_receiver()->disconnect_event();
 	    return;
 	}
@@ -1231,6 +1238,10 @@ IoTcpUdpSocket::disconnect_io_cb(XorpFd fd, IoEventType io_event_type)
 	return;
     }
 
+    //
+    // XXX: Remove from the eventloop for disconnect events.
+    //
+    eventloop().remove_ioevent_cb(_socket_fd, IOT_DISCONNECT);
     io_tcpudp_receiver()->disconnect_event();
 }
 
