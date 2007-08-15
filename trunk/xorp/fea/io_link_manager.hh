@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.2 2007/07/26 01:18:39 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.3 2007/08/09 00:46:56 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -25,9 +25,11 @@
 #include "libxorp/callback.hh"
 #include "libxorp/mac.hh"
 
+#include "fea_io.hh"
 #include "io_link.hh"
 
 class FeaDataPlaneManager;
+class FeaNode;
 class IoLinkManager;
 
 
@@ -413,14 +415,15 @@ public:
  * packet a handler (@see IoLinkComm) is created if necessary, then the
  * relevent filter is created and associated with the IoLinkComm.
  */
-class IoLinkManager : public IoLinkManagerReceiver {
+class IoLinkManager : public IoLinkManagerReceiver,
+		      public InstanceWatcher {
 public:
     typedef XorpCallback2<int, const uint8_t*, size_t>::RefPtr UpcallReceiverCb;
 
     /**
      * Constructor for IoLinkManager.
      */
-    IoLinkManager(EventLoop& eventloop, const IfTree& iftree);
+    IoLinkManager(FeaNode& fea_node, const IfTree& iftree);
 
     /**
      * Virtual destructor.
@@ -555,19 +558,26 @@ public:
 		    const vector<uint8_t>&	payload);
 
     /**
+     * Inform the watcher that a component instance is alive.
+     *
+     * @param instance_name the name of the instance that is alive.
+     */
+    void instance_birth(const string& instance_name);
+
+    /**
+     * Inform the watcher that a component instance is dead.
+     *
+     * @param instance_name the name of the instance that is dead.
+     */
+    void instance_death(const string& instance_name);
+
+    /**
      * Set the instance that is responsible for sending raw link-level packets
      * to a receiver.
      */
     void set_io_link_manager_receiver(IoLinkManagerReceiver* v) {
 	_io_link_manager_receiver = v;
     }
-
-    /**
-     * Erase filters for a given receiver name.
-     *
-     * @param receiver_name the name of the receiver.
-     */
-    void erase_filters_by_receiver_name(const string& receiver_name);
 
     /**
      * Get a reference to the interface tree.
@@ -634,10 +644,37 @@ private:
     typedef map<CommTableKey, IoLinkComm*> CommTable;
     typedef multimap<string, IoLinkComm::InputFilter*> FilterBag;
 
+    /**
+     * Erase filters for a given receiver name.
+     *
+     * @param receiver_name the name of the receiver.
+     */
+    void erase_filters_by_receiver_name(const string& receiver_name);
+
+    /**
+     * Test whether there is a filter for a given receiver name.
+     *
+     * @param receiver_name the name of the receiver.
+     * @return true if there is a filter for the given receiver name,
+     * otherwise false.
+     */
+    bool has_filter_by_receiver_name(const string& receiver_name) const;
+
+    /**
+     * Erase filters for a given CommTable and FilterBag.
+     *
+     * @param comm_table the associated CommTable.
+     * @param filters the associated FilterBag.
+     * @param begin the begin iterator to the FilterBag for the set of
+     * filters to erase.
+     * @param end the end iterator to the FilterBag for the set of filters
+     * to erase.
+     */
     void erase_filters(CommTable& comm_table, FilterBag& filters,
 		       const FilterBag::iterator& begin,
 		       const FilterBag::iterator& end);
 
+    FeaNode&		_fea_node;
     EventLoop&		_eventloop;
     const IfTree&	_iftree;
 

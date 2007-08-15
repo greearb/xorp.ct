@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.8 2007/07/18 01:30:23 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.9 2007/08/09 00:46:57 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -106,18 +106,25 @@ public:
     EventLoop&	eventloop() { return (_eventloop); }
 
     /**
+     * Get the XRL transmission and reception point.
+     *
+     * @return reference to the XRL transmission and reception point.
+     */
+    XrlStdRouter& xrl_router() { return (_xrl_router); }
+
+    /**
+     * Get the FEA I/O XRL instance.
+     *
+     * @return reference to the FEA I/O XRL instance.
+     */
+    XrlFeaIO&	xrl_fea_io() { return (_xrl_fea_io); }
+
+    /**
      * Get the FEA node instance.
      *
      * @return reference to the FEA node instance.
      */
     FeaNode&	fea_node() { return (_fea_node); }
-
-    /**
-     * Get the FEA I/O XRL interface.
-     *
-     * @return reference to the FEA I/O XRL interface.
-     */
-    XrlFeaIO&	xrl_fea_io() { return (_xrl_fea_io); }
 
     /**
      * Get the FEA XRL target.
@@ -127,18 +134,18 @@ public:
     XrlFeaTarget& xrl_fea_target() { return (_xrl_fea_target); }
 
     /**
-     * Get the XRL transmission and reception point.
+     * Get the Finder's XRL target name.
      *
-     * @return referenct to the XRL transmission and reception point.
+     * @return the Finder's XRL target name.
      */
-    XrlStdRouter& xrl_router() { return (_xrl_router); }
+    const string& xrl_finder_targetname() const { return (_xrl_finder_targetname); }
 
 private:
     EventLoop&		_eventloop;	// The event loop to use
-    FeaNode		_fea_node;	// The FEA node
     XrlStdRouter	_xrl_router;	// The standard XRL send/recv point
+    XrlFeaIO		_xrl_fea_io;	// The FEA I/O XRL instance
+    FeaNode		_fea_node;	// The FEA node
     LibFeaClientBridge	_lib_fea_client_bridge;
-    XrlFeaIO		_xrl_fea_io;	// The FEA I/O XRL interface
 
     XrlFibClientManager	_xrl_fib_client_manager; // The FIB client manager
     XrlIoLinkManager	_xrl_io_link_manager;	// Link raw I/O manager
@@ -162,7 +169,9 @@ private:
     XrlMfeaNode		_xrl_mfea_node6;	// The IPv6 MFEA
 #endif
 
-    XrlFeaTarget	_xrl_fea_target; // The FEA XRL target
+    XrlFeaTarget	_xrl_fea_target;	// The FEA XRL target
+
+    const string	_xrl_finder_targetname;	// The Finder target name
 };
 
 #endif // __FEA_XRL_FEA_NODE_HH__

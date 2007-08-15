@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_io_ip_manager.cc,v 1.2 2007/05/26 02:10:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_io_ip_manager.cc,v 1.3 2007/08/09 00:46:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -116,6 +116,8 @@ void
 XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error, int family,
 				 string receiver_name)
 {
+    UNUSED(family);
+
     if (xrl_error == XrlError::OKAY())
 	return;
 
@@ -126,5 +128,5 @@ XrlIoIpManager::xrl_send_recv_cb(const XrlError& xrl_error, int family,
     //
     // Remove all filters associated with this receiver.
     //
-    _io_ip_manager.erase_filters_by_receiver_name(family, receiver_name);
+    _io_ip_manager.instance_death(receiver_name);
 }

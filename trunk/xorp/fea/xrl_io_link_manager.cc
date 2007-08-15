@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_io_link_manager.cc,v 1.1 2007/06/27 01:27:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_io_link_manager.cc,v 1.2 2007/08/09 00:46:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -78,5 +78,5 @@ XrlIoLinkManager::xrl_send_recv_cb(const XrlError& xrl_error,
     //
     // Remove all filters associated with this receiver.
     //
-    _io_link_manager.erase_filters_by_receiver_name(receiver_name);
+    _io_link_manager.instance_death(receiver_name);
 }

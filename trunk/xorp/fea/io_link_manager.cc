@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.3 2007/07/26 07:12:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.4 2007/08/09 00:46:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "fea_node.hh"
 #include "iftree.hh"
 #include "io_link_manager.hh"
 
@@ -519,10 +520,11 @@ IoLinkComm::stop_io_link_plugins()
 // ----------------------------------------------------------------------------
 // IoLinkManager code
 
-IoLinkManager::IoLinkManager(EventLoop&		eventloop,
+IoLinkManager::IoLinkManager(FeaNode&		fea_node,
 			     const IfTree&	iftree)
     : IoLinkManagerReceiver(),
-      _eventloop(eventloop),
+      _fea_node(fea_node),
+      _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _io_link_manager_receiver(NULL)
 {
@@ -548,6 +550,16 @@ IoLinkManager::erase_filters_by_receiver_name(const string& receiver_name)
     erase_filters(_comm_table, _filters,
 		  _filters.lower_bound(receiver_name),
 		  _filters.upper_bound(receiver_name));
+}
+
+bool
+IoLinkManager::has_filter_by_receiver_name(const string& receiver_name) const
+{
+    // There whether there is an entry for a given receiver name
+    if (_filters.find(receiver_name) != _filters.end())
+	return (true);
+
+    return (false);
 }
 
 void
@@ -695,6 +707,15 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     // Add the filter to those associated with receiver_name
     _filters.insert(FilterBag::value_type(receiver_name, filter));
 
+    // Register interest in watching the receiver
+    if (_fea_node.fea_io().add_instance_watch(receiver_name, this, error_msg)
+	!= XORP_OK) {
+	string dummy_error_msg;
+	unregister_receiver(receiver_name, if_name, vif_name, ether_type,
+			    filter_program, dummy_error_msg);
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -757,6 +778,13 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
 	    if (io_link_comm->no_input_filters()) {
 		_comm_table.erase(key);
 		delete io_link_comm;
+	    }
+
+	    // Deregister interest in watching the receiver
+	    if (! has_filter_by_receiver_name(receiver_name)) {
+		string dummy_error_msg;
+		_fea_node.fea_io().delete_instance_watch(receiver_name, this,
+							 dummy_error_msg);
 	    }
 
 	    return (XORP_OK);
@@ -928,4 +956,22 @@ IoLinkManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane
     _fea_data_plane_managers.erase(data_plane_manager_iter);
 
     return (XORP_OK);
+}
+
+void
+IoLinkManager::instance_birth(const string& instance_name)
+{
+    // XXX: Nothing to do
+    UNUSED(instance_name);
+}
+
+void
+IoLinkManager::instance_death(const string& instance_name)
+{
+    string dummy_error_msg;
+
+    _fea_node.fea_io().delete_instance_watch(instance_name, this,
+					     dummy_error_msg);
+
+    erase_filters_by_receiver_name(instance_name);
 }

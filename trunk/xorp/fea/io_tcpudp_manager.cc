@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.1 2007/08/09 00:46:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,6 +22,7 @@
 
 #include "libxipc/xuid.hh"	// XXX: Needed for the purpose of using XUID()
 
+#include "fea_node.hh"
 #include "iftree.hh"
 #include "io_tcpudp_manager.hh"
 
@@ -965,10 +966,11 @@ IoTcpUdpComm::stop_io_tcpudp_plugins()
 // ----------------------------------------------------------------------------
 // IoTcpUdpManager code
 
-IoTcpUdpManager::IoTcpUdpManager(EventLoop&	eventloop,
+IoTcpUdpManager::IoTcpUdpManager(FeaNode&	fea_node,
 				 const IfTree&	iftree)
     : IoTcpUdpManagerReceiver(),
-      _eventloop(eventloop),
+      _fea_node(fea_node),
+      _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _io_tcpudp_manager_receiver(NULL)
 {
@@ -1022,6 +1024,26 @@ IoTcpUdpManager::erase_comm_handlers_by_creator(int family,
 	    delete io_tcpudp_comm;
 	}
     }
+}
+
+bool
+IoTcpUdpManager::has_comm_handler_by_creator(const string& creator) const
+{
+    CommTable::const_iterator iter;
+
+    // There whether there is an entry for a given creator name
+    for (iter = _comm_table4.begin(); iter != _comm_table4.end(); ++iter) {
+	const IoTcpUdpComm* io_tcpudp_comm = iter->second;
+	if (io_tcpudp_comm->creator() == creator)
+	    return (true);
+    }
+    for (iter = _comm_table6.begin(); iter != _comm_table6.end(); ++iter) {
+	const IoTcpUdpComm* io_tcpudp_comm = iter->second;
+	if (io_tcpudp_comm->creator() == creator)
+	    return (true);
+    }
+
+    return (false);
 }
 
 int
@@ -1116,6 +1138,12 @@ IoTcpUdpManager::tcp_open(int family, const string& creator, bool is_blocking,
 	return (XORP_ERROR);
     }
 
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -1129,6 +1157,12 @@ IoTcpUdpManager::udp_open(int family, const string& creator, bool is_blocking,
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
     if (io_tcpudp_comm->udp_open(is_blocking, sockid, error_msg) != XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
+	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
     }
@@ -1166,6 +1200,12 @@ IoTcpUdpManager::tcp_open_and_bind(int family, const string& creator,
 	return (XORP_ERROR);
     }
 
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -1194,6 +1234,12 @@ IoTcpUdpManager::udp_open_and_bind(int family, const string& creator,
 
     if (io_tcpudp_comm->udp_open_and_bind(local_addr, local_port, is_blocking,
 					  sockid, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
@@ -1241,6 +1287,12 @@ IoTcpUdpManager::udp_open_bind_join(int family, const string& creator,
 	return (XORP_ERROR);
     }
 
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -1278,6 +1330,12 @@ IoTcpUdpManager::tcp_open_bind_connect(int family, const string& creator,
 	return (XORP_ERROR);
     }
 
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -1310,6 +1368,12 @@ IoTcpUdpManager::udp_open_bind_connect(int family, const string& creator,
     if (io_tcpudp_comm->udp_open_bind_connect(local_addr, local_port,
 					      remote_addr, remote_port,
 					      is_blocking, sockid, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
@@ -1414,14 +1478,23 @@ IoTcpUdpManager::close(int family, const string& sockid, string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
     int ret_value;
+    string creator;
 
     io_tcpudp_comm = find_io_tcpudp_comm(family, sockid, error_msg);
     if (io_tcpudp_comm == NULL)
 	return (XORP_ERROR);
 
-    ret_value = io_tcpudp_comm->close(error_msg);
+    creator = io_tcpudp_comm->creator();
 
+    ret_value = io_tcpudp_comm->close(error_msg);
     delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+
+    // Deregister interest in watching the creator
+    if (! has_comm_handler_by_creator(creator)) {
+	string dummy_error_msg;
+	_fea_node.fea_io().delete_instance_watch(creator, this,
+						 dummy_error_msg);
+    }
 
     return (ret_value);
 }
@@ -1630,6 +1703,27 @@ IoTcpUdpManager::disconnect_event(int		family,
 						      sockid);
 }
 
+void
+IoTcpUdpManager::instance_birth(const string& instance_name)
+{
+    // XXX: Nothing to do
+    UNUSED(instance_name);
+}
+
+void
+IoTcpUdpManager::instance_death(const string& instance_name)
+{
+    string dummy_error_msg;
+
+    _fea_node.fea_io().delete_instance_watch(instance_name, this,
+					     dummy_error_msg);
+
+    erase_comm_handlers_by_creator(AF_INET, instance_name);
+#ifdef HAVE_IPV6
+    erase_comm_handlers_by_creator(AF_INET6, instance_name);
+#endif
+}
+
 IoTcpUdpComm*
 IoTcpUdpManager::connect_io_tcpudp_comm(int family,
 					const string& creator,
@@ -1659,12 +1753,10 @@ IoTcpUdpManager::connect_io_tcpudp_comm(int family,
     if (io_tcpudp_comm == NULL) {
 	//
 	// Entry not found, therefore create it. However, it shouldn't
-	// contain any plugins, therefore we can't use open_io_tcpudp_comm()
+	// contain any plugins.
 	//
-	io_tcpudp_comm = new IoTcpUdpComm(*this, iftree(), family, creator,
-					  listener_sockid, peer_host,
-					  peer_port);
-	comm_table[io_tcpudp_comm->sockid()] = io_tcpudp_comm;
+	io_tcpudp_comm = open_io_tcpudp_comm(family, creator, false);
+	XLOG_ASSERT(io_tcpudp_comm != NULL);
     }
 
     //
@@ -1693,7 +1785,8 @@ IoTcpUdpManager::find_io_tcpudp_comm(int family, const string& sockid,
 }
 
 IoTcpUdpComm*
-IoTcpUdpManager::open_io_tcpudp_comm(int family, const string& creator)
+IoTcpUdpManager::open_io_tcpudp_comm(int family, const string& creator,
+				     bool allocate_plugins)
 {
     CommTable& comm_table = comm_table_by_family(family);
     IoTcpUdpComm* io_tcpudp_comm;
@@ -1704,8 +1797,10 @@ IoTcpUdpManager::open_io_tcpudp_comm(int family, const string& creator)
     //
     // Allocate and start the IoTcpUdp plugins: one per data plane manager.
     //
-    io_tcpudp_comm->allocate_io_tcpudp_plugins();
-    io_tcpudp_comm->start_io_tcpudp_plugins();
+    if (allocate_plugins) {
+	io_tcpudp_comm->allocate_io_tcpudp_plugins();
+	io_tcpudp_comm->start_io_tcpudp_plugins();
+    }
 
     return (io_tcpudp_comm);
 }

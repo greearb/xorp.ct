@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.1 2007/08/09 00:46:57 pavlin Exp $
 
 #ifndef __FEA_IO_TCPUDP_MANAGER_HH__
 #define __FEA_IO_TCPUDP_MANAGER_HH__
@@ -22,8 +22,10 @@
 
 #include "libxorp/ipvx.hh"
 
+#include "fea_io.hh"
 #include "io_tcpudp.hh"
 
+class FeaNode;
 class FeaDataPlaneManager;
 
 
@@ -625,12 +627,13 @@ public:
 /**
  * @short A class that manages I/O TCP/UDP communications.
  */
-class IoTcpUdpManager : public IoTcpUdpManagerReceiver {
+class IoTcpUdpManager : public IoTcpUdpManagerReceiver,
+			public InstanceWatcher {
 public:
     /**
      * Constructor for IoTcpUdpManager.
      */
-    IoTcpUdpManager(EventLoop& eventloop, const IfTree& iftree);
+    IoTcpUdpManager(FeaNode& fea_node, const IfTree& iftree);
 
     /**
      * Virtual destructor.
@@ -1039,20 +1042,26 @@ public:
 			  const string&		sockid);
 
     /**
+     * Inform the watcher that a component instance is alive.
+     *
+     * @param instance_name the name of the instance that is alive.
+     */
+    void instance_birth(const string& instance_name);
+
+    /**
+     * Inform the watcher that a component instance is dead.
+     *
+     * @param instance_name the name of the instance that is dead.
+     */
+    void instance_death(const string& instance_name);
+
+    /**
      * Set the instance that is responsible for sending IP packets
      * to a receiver.
      */
     void set_io_tcpudp_manager_receiver(IoTcpUdpManagerReceiver* v) {
 	_io_tcpudp_manager_receiver = v;
     }
-
-    /**
-     * Erase CommTable handlers for a given creator name.
-     *
-     * @param family the address family.
-     * @param creator the name of the creator.
-     */
-    void erase_comm_handlers_by_creator(int family, const string& creator);
 
     /**
      * Get a reference to the interface tree.
@@ -1111,14 +1120,69 @@ public:
 private:
     typedef map<string, IoTcpUdpComm*> CommTable;
 
+    /**
+     * Find an IoTcpUdpComm entry.
+     *
+     * @param family the address family.
+     * @param sockid the socket ID to search for.
+     * @raturn the IoTcpUdpComm entry if found, otherwise NULL.
+     */
     IoTcpUdpComm*	find_io_tcpudp_comm(int family, const string& sockid,
 					    string& error_msg);
-    IoTcpUdpComm*	open_io_tcpudp_comm(int family, const string& creator);
+    /**
+     * Create and open IoTcpUdpComm entry.
+     *
+     * @param family the address family.
+     * @param creator the name of the creator.
+     * @param allocate_plugins if true, then allocate the plugin handler(s)
+     * internally, otherwise they will be explicitly added externally.
+     */
+    IoTcpUdpComm*	open_io_tcpudp_comm(int family, const string& creator,
+					    bool allocate_plugins = true);
+
+    /**
+     * Delete an existing IoTcpUdoComm entry.
+     *
+     * @param family the address family.
+     * @param sockid the socket ID of the entry to delete.
+     */
     void		delete_io_tcpudp_comm(int family,
 					      const string& sockid);
+
+    /**
+     * Get the CommTable for an address family.
+     *
+     * @param family the address family.
+     * @return a reference to the CommTable for the address family.
+     */
     CommTable&		comm_table_by_family(int family);
+
+    /**
+     * Erase CommTable handlers for a given creator name.
+     *
+     * @param family the address family.
+     * @param creator the name of the creator.
+     */
+    void erase_comm_handlers_by_creator(int family, const string& creator);
+
+    /**
+     * Test whether there is a CommTable handler for a given creator name.
+     *
+     * @param creator the name of the creator.
+     * @return true if there is a CommTable handler for the given creator name,
+     * otherwise false.
+     */
+    bool has_comm_handler_by_creator(const string& creator) const;
+
+    /**
+     * Test whether an address belongs to this host.
+     *
+     * @param local_addr the address to test.
+     * @return true if the address belongs to this host, otherwise false.
+     */
     bool		is_my_address(const IPvX& local_addr) const;
 
+    FeaNode&		_fea_node;
     EventLoop&		_eventloop;
     const IfTree&	_iftree;
 

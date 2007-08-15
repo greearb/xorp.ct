@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.7 2007/07/26 07:12:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.8 2007/08/09 00:46:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "fea_node.hh"
 #include "iftree.hh"
 #include "io_ip_manager.hh"
 
@@ -662,10 +663,11 @@ IoIpComm::first_valid_protocol_fd_in()
 // ----------------------------------------------------------------------------
 // IoIpManager code
 
-IoIpManager::IoIpManager(EventLoop&	eventloop,
+IoIpManager::IoIpManager(FeaNode&	fea_node,
 			 const IfTree&	iftree)
     : IoIpManagerReceiver(),
-      _eventloop(eventloop),
+      _fea_node(fea_node),
+      _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _io_ip_manager_receiver(NULL)
 {
@@ -720,6 +722,18 @@ IoIpManager::erase_filters_by_receiver_name(int family,
     erase_filters(comm_table, filters,
 		  filters.lower_bound(receiver_name),
 		  filters.upper_bound(receiver_name));
+}
+
+bool
+IoIpManager::has_filter_by_receiver_name(const string& receiver_name) const
+{
+    // There whether there is an entry for a given receiver name
+    if (_filters4.find(receiver_name) != _filters4.end())
+	return (true);
+    if (_filters6.find(receiver_name) != _filters6.end())
+	return (true);
+
+    return (false);
 }
 
 void
@@ -858,6 +872,15 @@ IoIpManager::register_receiver(int		family,
     // Add the filter to those associated with receiver_name
     filters.insert(FilterBag::value_type(receiver_name, filter));
 
+    // Register interest in watching the receiver
+    if (_fea_node.fea_io().add_instance_watch(receiver_name, this, error_msg)
+	!= XORP_OK) {
+	string dummy_error_msg;
+	unregister_receiver(family, receiver_name, if_name, vif_name,
+			    ip_protocol, dummy_error_msg);
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -917,6 +940,13 @@ IoIpManager::unregister_receiver(int		family,
 	    if (io_ip_comm->no_input_filters()) {
 		comm_table.erase(ip_protocol);
 		delete io_ip_comm;
+	    }
+
+	    // Deregister interest in watching the receiver
+	    if (! has_filter_by_receiver_name(receiver_name)) {
+		string dummy_error_msg;
+		_fea_node.fea_io().delete_instance_watch(receiver_name, this,
+							 dummy_error_msg);
 	    }
 
 	    return (XORP_OK);
@@ -1223,4 +1253,25 @@ IoIpManager::unregister_data_plane_manager(FeaDataPlaneManager* fea_data_plane_m
     _fea_data_plane_managers.erase(data_plane_manager_iter);
 
     return (XORP_OK);
+}
+
+void
+IoIpManager::instance_birth(const string& instance_name)
+{
+    // XXX: Nothing to do
+    UNUSED(instance_name);
+}
+
+void
+IoIpManager::instance_death(const string& instance_name)
+{
+    string dummy_error_msg;
+
+    _fea_node.fea_io().delete_instance_watch(instance_name, this,
+					     dummy_error_msg);
+
+    erase_filters_by_receiver_name(AF_INET, instance_name);
+#ifdef HAVE_IPV6
+    erase_filters_by_receiver_name(AF_INET6, instance_name);
+#endif
 }

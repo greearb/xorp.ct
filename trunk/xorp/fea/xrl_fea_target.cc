@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.24 2007/08/09 00:46:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.25 2007/08/09 07:03:24 pavlin Exp $"
 
 
 //
@@ -187,6 +187,8 @@ XrlFeaTarget::finder_event_observer_0_1_xrl_target_birth(
     debug_msg("XRL target birth event %s/%s\n",
 	      target_class.c_str(), target_instance.c_str());
 
+    _fea_node.fea_io().instance_birth(target_instance);
+
     return XrlCmdError::OKAY();
 }
 
@@ -198,6 +200,8 @@ XrlFeaTarget::finder_event_observer_0_1_xrl_target_death(
 {
     debug_msg("XRL target death event %s/%s\n",
 	      target_class.c_str(), target_instance.c_str());
+
+    _fea_node.fea_io().instance_death(target_instance);
 
     return XrlCmdError::OKAY();
 }

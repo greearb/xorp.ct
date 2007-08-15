@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.10 2007/07/26 01:18:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.11 2007/08/09 00:46:55 pavlin Exp $"
 
 
 //
@@ -34,11 +34,12 @@
 #include "fea/data_plane/managers/fea_data_plane_manager_linux.hh"
 #include "fea/data_plane/managers/fea_data_plane_manager_windows.hh"
 
+#include "fea_io.hh"
 #include "fea_node.hh"
 #include "profile_vars.hh"
 
 
-FeaNode::FeaNode(EventLoop& eventloop, bool is_dummy)
+FeaNode::FeaNode(EventLoop& eventloop, FeaIO& fea_io, bool is_dummy)
     : _eventloop(eventloop),
       _is_running(false),
       _is_dummy(is_dummy),
@@ -51,10 +52,11 @@ FeaNode::FeaNode(EventLoop& eventloop, bool is_dummy)
 		 _ifconfig.local_config()
 #endif
 	  ),
-      _io_link_manager(_eventloop, ifconfig().local_config()),
-      _io_ip_manager(_eventloop, ifconfig().local_config()),
-      _io_tcpudp_manager(_eventloop, ifconfig().local_config()),
-      _pa_transaction_manager(_eventloop, _pa_table_manager)
+      _io_link_manager(*this, ifconfig().local_config()),
+      _io_ip_manager(*this, ifconfig().local_config()),
+      _io_tcpudp_manager(*this, ifconfig().local_config()),
+      _pa_transaction_manager(_eventloop, _pa_table_manager),
+      _fea_io(fea_io)
 {
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.12 2007/07/18 01:30:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.13 2007/08/09 00:46:57 pavlin Exp $"
 
 
 //
@@ -46,11 +46,11 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		       const string& finder_hostname, uint16_t finder_port,
 		       bool is_dummy)
     : _eventloop(eventloop),
-      _fea_node(eventloop, is_dummy),
       _xrl_router(eventloop, xrl_fea_targetname.c_str(),
 		  finder_hostname.c_str(), finder_port),
+      _xrl_fea_io(eventloop, _xrl_router, xrl_finder_targetname, *this),
+      _fea_node(eventloop, _xrl_fea_io, is_dummy),
       _lib_fea_client_bridge(_xrl_router, _fea_node.ifconfig().ifconfig_update_replicator()),
-      _xrl_fea_io(eventloop),
       _xrl_fib_client_manager(_fea_node.fibconfig(), _xrl_router),
       _xrl_io_link_manager(_fea_node.io_link_manager(), _xrl_router),
       _xrl_io_ip_manager(_fea_node.io_ip_manager(), _xrl_router),
@@ -77,7 +77,8 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
 		      _xrl_fib_client_manager, _fea_node.io_link_manager(),
 		      _fea_node.io_ip_manager(), _fea_node.io_tcpudp_manager(),
-		      _lib_fea_client_bridge)
+		      _lib_fea_client_bridge),
+      _xrl_finder_targetname(xrl_finder_targetname)
 {
     _cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access
 }
@@ -106,8 +107,8 @@ XrlFeaNode::startup()
 #endif
     }
 
-    fea_node().startup();
     xrl_fea_io().startup();
+    fea_node().startup();
     xrl_fea_target().startup();
 
     _xrl_packet_acl_target.startup();
@@ -134,8 +135,8 @@ XrlFeaNode::startup()
 int
 XrlFeaNode::shutdown()
 {
-    fea_node().shutdown();
     xrl_fea_io().shutdown();
+    fea_node().shutdown();
     xrl_fea_target().shutdown();
 
     if (! fea_node().is_dummy()) {
@@ -153,9 +154,9 @@ XrlFeaNode::shutdown()
 bool
 XrlFeaNode::is_running() const
 {
-    if (_fea_node.is_running())
-	return (true);
     if (_xrl_fea_io.is_running())
+	return (true);
+    if (_fea_node.is_running())
 	return (true);
     if (_xrl_fea_target.is_running())
 	return (true);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.1 2007/08/09 00:46:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -221,6 +221,8 @@ void
 XrlIoTcpUdpManager::xrl_send_recv_event_cb(const XrlError& xrl_error,
 					   int family, string receiver_name)
 {
+    UNUSED(family);
+
     if (xrl_error == XrlError::OKAY())
 	return;
 
@@ -231,7 +233,7 @@ XrlIoTcpUdpManager::xrl_send_recv_event_cb(const XrlError& xrl_error,
     //
     // Remove all communication handlers associated with this receiver.
     //
-    _io_tcpudp_manager.erase_comm_handlers_by_creator(family, receiver_name);
+    _io_tcpudp_manager.instance_death(receiver_name);
 }
 
 void
@@ -260,13 +262,15 @@ XrlIoTcpUdpManager::xrl_send_connect_event_cb(const XrlError& xrl_error,
     //
     // Remove all communication handlers associated with this receiver.
     //
-    _io_tcpudp_manager.erase_comm_handlers_by_creator(family, receiver_name);
+    _io_tcpudp_manager.instance_death(receiver_name);
 }
 
 void
 XrlIoTcpUdpManager::xrl_send_error_event_cb(const XrlError& xrl_error,
 					    int family, string receiver_name)
 {
+    UNUSED(family);
+
     if (xrl_error == XrlError::OKAY())
 	return;
 
@@ -277,13 +281,15 @@ XrlIoTcpUdpManager::xrl_send_error_event_cb(const XrlError& xrl_error,
     //
     // Remove all communication handlers associated with this receiver.
     //
-    _io_tcpudp_manager.erase_comm_handlers_by_creator(family, receiver_name);
+    _io_tcpudp_manager.instance_death(receiver_name);
 }
 
 void
 XrlIoTcpUdpManager::xrl_send_disconnect_event_cb(const XrlError& xrl_error,
 						 int family, string receiver_name)
 {
+    UNUSED(family);
+
     if (xrl_error == XrlError::OKAY())
 	return;
 
@@ -295,5 +301,5 @@ XrlIoTcpUdpManager::xrl_send_disconnect_event_cb(const XrlError& xrl_error,
     //
     // Remove all communication handlers associated with this receiver.
     //
-    _io_tcpudp_manager.erase_comm_handlers_by_creator(family, receiver_name);
+    _io_tcpudp_manager.instance_death(receiver_name);
 }

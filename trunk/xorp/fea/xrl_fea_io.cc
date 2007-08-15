@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/xrl_fea_io.cc,v 1.1 2007/04/18 06:21:00 pavlin Exp $"
 
 
 //
@@ -26,11 +26,22 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "libxipc/xrl_router.hh"
+
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
+
 #include "xrl_fea_io.hh"
+#include "xrl_fea_node.hh"
 
 
-XrlFeaIO::XrlFeaIO(EventLoop& eventloop)
-    : FeaIO(eventloop)
+XrlFeaIO::XrlFeaIO(EventLoop& eventloop, XrlRouter& xrl_router,
+		   const string& xrl_finder_targetname,
+		   XrlFeaNode& xrl_fea_node)
+    
+    : FeaIO(eventloop),
+      _xrl_router(xrl_router),
+      _xrl_finder_targetname(xrl_finder_targetname),
+      _xrl_fea_node(xrl_fea_node)
 {
 }
 
@@ -55,4 +66,86 @@ bool
 XrlFeaIO::is_running() const
 {
     return (FeaIO::is_running());
+}
+
+FeaNode&
+XrlFeaIO::fea_node()
+{
+    return (_xrl_fea_node.fea_node());
+}
+
+int
+XrlFeaIO::register_instance_event_interest(const string& instance_name,
+					   string& error_msg)
+{
+    XrlFinderEventNotifierV0p1Client client(&_xrl_router);
+    bool success;
+
+    success = client.send_register_instance_event_interest(
+	_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
+	instance_name,
+	callback(this, &XrlFeaIO::register_instance_event_interest_cb,
+		 instance_name));
+    if (success != true) {
+	error_msg = c_format("Failed to register event interest in "
+			     "instance %s: could not transmit the request",
+			     instance_name.c_str());
+	// XXX: If an error, then assume the target is dead
+	instance_death(instance_name);
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+XrlFeaIO::deregister_instance_event_interest(const string& instance_name,
+					     string& error_msg)
+{
+    XrlFinderEventNotifierV0p1Client client(&_xrl_router);
+    bool success;
+
+    success = client.send_deregister_instance_event_interest(
+	_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
+	instance_name,
+	callback(this, &XrlFeaIO::deregister_instance_event_interest_cb,
+		 instance_name));
+    if (success != true) {
+	error_msg = c_format("Failed to deregister event interest in "
+			     "instance %s: could not transmit the request",
+			     instance_name.c_str());
+	//
+	// XXX: If we are deregistering, then we don't care whether the
+	// target is dead.
+	//
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+void
+XrlFeaIO::register_instance_event_interest_cb(const XrlError& xrl_error,
+					      string instance_name)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to register event interest in instance %s: %s",
+		   instance_name.c_str(), xrl_error.str().c_str());
+	// XXX: If an error, then assume the target is dead
+	instance_death(instance_name);
+    }
+}
+
+void
+XrlFeaIO::deregister_instance_event_interest_cb(const XrlError& xrl_error,
+						string instance_name)
+{
+    if (xrl_error != XrlError::OKAY()) {
+	XLOG_ERROR("Failed to deregister event interest in instance %s: %s",
+		   instance_name.c_str(), xrl_error.str().c_str());
+	//
+	// XXX: If we are deregistering, then we don't care whether the
+	// target is dead.
+	//
+    }
 }

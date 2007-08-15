@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/xrl_fea_io.hh,v 1.1 2007/04/18 06:21:00 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_IO_HH__
@@ -26,6 +26,8 @@
 #include "fea_io.hh"
 
 class EventLoop;
+class XrlFeaNode;
+class XrlRouter;
 
 /**
  * @short FEA (Forwarding Engine Abstraction) XRL-based I/O class.
@@ -36,8 +38,12 @@ public:
      * Constructor.
      *
      * @param eventloop the event loop to use.
+     * @param xrl_router the XRL transmission and reception point.
+     * @param xrl_finder_targetname the XRL targetname of the Finder.
+     * @param xrl_fea_node the XRL FEA node instance to use (@ref XrlFeaNode).
      */
-    XrlFeaIO(EventLoop& eventloop);
+    XrlFeaIO(EventLoop& eventloop, XrlRouter& xrl_router,
+	     const string& xrl_finder_targetname, XrlFeaNode& xrl_fea_node);
 
     /**
      * Destructor
@@ -65,7 +71,45 @@ public:
      */
     bool	is_running() const;
 
+    /**
+     * Get the FEA node instance.
+     *
+     * @return a reference to the FEA node instance (@ref FeaNode).
+     */
+    FeaNode& fea_node();
+
+    /**
+     * Register interest in events relating to a particular instance.
+     *
+     * @param instance_name name of target instance to receive event
+     * notifications for.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_instance_event_interest(const string& instance_name,
+					 string& error_msg);
+
+    /**
+     * Deregister interest in events relating to a particular instance.
+     *
+     * @param instance_name name of target instance to stop event
+     * notifications for.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int deregister_instance_event_interest(const string& instance_name,
+					   string& error_msg);
+
 private:
+    void register_instance_event_interest_cb(const XrlError& xrl_error,
+					     string instance_name);
+    void deregister_instance_event_interest_cb(const XrlError& xrl_error,
+					       string instance_name);
+
+    XrlRouter&		_xrl_router;	// The standard XRL send/recv point
+    const string	_xrl_finder_targetname;	// The Finder target name
+
+    XrlFeaNode&		_xrl_fea_node;	// The XRL FEA node instance
 };
 
 #endif // __FEA_XRL_FEA_IO_HH__
