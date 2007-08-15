@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.107 2007/03/22 01:44:44 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.108 2007/05/23 04:08:27 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -810,6 +810,11 @@ class Ospf {
      */
     bool get_neighbour_info(OspfTypes::NeighbourID nid,
 			    NeighbourInfo& ninfo) const;
+
+    /**
+     * Clear the database.
+     */
+    bool clear_database();
 
     /**
      * Add route

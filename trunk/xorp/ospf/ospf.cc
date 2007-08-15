@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.91 2007/03/12 10:16:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.92 2007/05/23 04:08:27 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -700,6 +700,15 @@ Ospf<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
 			    NeighbourInfo& ninfo) const
 {
     return _peer_manager.get_neighbour_info(nid, ninfo);
+}
+
+template <typename A>
+bool
+Ospf<A>::clear_database()
+{
+    XLOG_WARNING("TBD - CLEAR OSPF DATABASE");
+
+    return true;
 }
 
 template <typename A>
