@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.27 2007/08/02 00:21:58 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.28 2007/08/03 23:49:00 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -825,6 +825,10 @@ comm_bind_connect_tcp4(const struct in_addr *local_addr,
     sock = comm_sock_open(AF_INET, SOCK_STREAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+    if (comm_set_reuseaddr(sock, 1) != XORP_OK) {
+	comm_sock_close(sock);
+	return (XORP_BAD_SOCKET);
+    }
     if (comm_sock_bind4(sock, local_addr, local_port) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
@@ -882,6 +886,10 @@ comm_bind_connect_tcp6(const struct in6_addr *local_addr,
     sock = comm_sock_open(AF_INET6, SOCK_STREAM, 0, is_blocking);
     if (sock == XORP_BAD_SOCKET)
 	return (XORP_BAD_SOCKET);
+    if (comm_set_reuseaddr(sock, 1) != XORP_OK) {
+	comm_sock_close(sock);
+	return (XORP_BAD_SOCKET);
+    }
     if (comm_sock_bind6(sock, local_addr, local_port) != XORP_OK) {
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
