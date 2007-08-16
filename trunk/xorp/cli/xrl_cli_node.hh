@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.20 2007/02/16 22:45:29 pavlin Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.21 2007/04/18 00:34:05 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -232,9 +232,6 @@ private:
      */
     virtual void finder_disconnect_event();
 
-    const string& my_xrl_target_name() {
-	return XrlCliTargetBase::name();
-    }
     CliNode&	cli_node() const { return (_cli_node); }
 
     EventLoop&		_eventloop;
