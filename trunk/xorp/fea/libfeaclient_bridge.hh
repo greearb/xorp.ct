@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.12 2007/05/03 18:46:27 pavlin Exp $
+// $XORP: xorp/fea/libfeaclient_bridge.hh,v 1.13 2007/05/04 01:43:22 pavlin Exp $
 
 #ifndef __FEA_LIBFEACLIENT_BRIDGE_HH__
 #define __FEA_LIBFEACLIENT_BRIDGE_HH__
@@ -52,18 +52,18 @@ public:
     /**
      * Add named Xrl target to list to receive libfeaclient updates.
      *
-     * @param xrl_target_name Xrl target instance name.
+     * @param xrl_target_instance_name Xrl target instance name.
      * @return true on success, false if target is already on the list.
      */
-    bool add_libfeaclient_mirror(const string& xrl_target_name);
+    bool add_libfeaclient_mirror(const string& xrl_target_instance_name);
 
     /**
      * Add named Xrl target to list to receive libfeaclient updates.
      *
-     * @param xrl_target_name Xrl target instance name.
+     * @param xrl_target_instance_name Xrl target instance name.
      * @return true on success, false if named target is not on the list.
      */
-    bool remove_libfeaclient_mirror(const string& xrl_target_name);
+    bool remove_libfeaclient_mirror(const string& xrl_target_instance_name);
 
 protected:
     void interface_update(const string& ifname,
