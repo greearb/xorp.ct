@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawlink.xif,v 1.1 2007/06/27 01:27:07 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawlink.xif,v 1.2 2007/07/12 21:35:27 pavlin Exp $ */
 
 /*
  * Interface for sending raw link-level packets on an interface.
@@ -28,7 +28,8 @@ interface raw_link/0.1 {
 	 * Register to receive raw link-level packets. The receiver is
 	 *  expected to support raw_link_client/0.1 interface.
 	 *
-	 * @param xrl_target_name the receiver's XRL target name.
+	 * @param xrl_target_instance_name the receiver's XRL target instance
+	 * name.
          * @param if_name the interface through which packets should be
 	 * accepted.
          * @param vif_name the vif through which packets should be accepted.
@@ -41,7 +42,7 @@ interface raw_link/0.1 {
 	 * of multicast datagrams back to this host (assuming the host is
 	 * a member of the same multicast group).
 	 */
-	register_receiver	? xrl_target_name:txt			\
+	register_receiver	? xrl_target_instance_name:txt		\
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ether_type:u32			\
@@ -51,7 +52,8 @@ interface raw_link/0.1 {
 	/**
 	 * Unregister to receive raw link-level packets.
 	 *
-	 * @param xrl_target_name the receiver's XRL target name.
+	 * @param xrl_target_instance_name the receiver's XRL target instance
+	 * name.
          * @param if_name the interface through which packets should not
 	 * be accepted.
          * @param vif_name the vif through which packets should not be
@@ -62,7 +64,7 @@ interface raw_link/0.1 {
 	 * @param filter_program the filter program that was applied on the
 	 * received packets. The program uses tcpdump(1) style expression.
 	 */
-	unregister_receiver	? xrl_target_name:txt			\
+	unregister_receiver	? xrl_target_instance_name:txt		\
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ether_type:u32			\
@@ -71,7 +73,8 @@ interface raw_link/0.1 {
 	/**
 	 * Join a MAC multicast group.
 	 *
-	 * @param xrl_target_name the receiver's XRL target name.
+	 * @param xrl_target_instance_name the receiver's XRL target instance
+	 * name.
          * @param if_name the interface through which packets should be
 	 * accepted.
          * @param vif_name the vif through which packets should be accepted.
@@ -82,7 +85,7 @@ interface raw_link/0.1 {
 	 * the received packets. The program uses tcpdump(1) style expression.
 	 * @param group_address the multicast group address to join.
 	 */
-	join_multicast_group	? xrl_target_name:txt			\
+	join_multicast_group	? xrl_target_instance_name:txt		\
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ether_type:u32			\
@@ -92,7 +95,8 @@ interface raw_link/0.1 {
 	/**
 	 * Leave a MAC multicast group.
 	 *
-	 * @param xrl_target_name the receiver's XRL target name.
+	 * @param xrl_target_instance_name the receiver's XRL target instance
+	 * name.
          * @param if_name the interface through which packets should not be
 	 * accepted.
          * @param vif_name the vif through which packets should not be
@@ -104,7 +108,7 @@ interface raw_link/0.1 {
 	 * received packets. The program uses tcpdump(1) style expression.
 	 * @param group_address the multicast group address to leave.
 	 */
-	leave_multicast_group	? xrl_target_name:txt			\
+	leave_multicast_group	? xrl_target_instance_name:txt		\
 				& if_name:txt				\
 				& vif_name:txt				\
 				& ether_type:u32			\
