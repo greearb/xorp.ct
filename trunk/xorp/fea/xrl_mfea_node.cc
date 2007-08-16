@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.58 2007/05/10 00:08:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.59 2007/05/19 01:52:41 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -46,8 +46,6 @@ XrlMfeaNode::XrlMfeaNode(FeaNode&	fea_node,
       XrlMfeaTargetBase(&xrl_router()),
       MfeaNodeCli(*static_cast<MfeaNode *>(this)),
       _eventloop(eventloop),
-      _class_name(xrl_router().class_name()),
-      _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
       _xrl_mfea_client_client(&xrl_router()),
       _xrl_cli_manager_client(&xrl_router()),
@@ -243,7 +241,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 	if (dst.is_ipv4()) {
 	    _xrl_mfea_client_client.send_recv_kernel_signal_message4(
 		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		message_type,
 		mfea_vif->name(),
 		vif_index,
@@ -257,7 +255,7 @@ XrlMfeaNode::signal_message_send(const string& dst_module_instance_name,
 	if (dst.is_ipv6()) {
 	    _xrl_mfea_client_client.send_recv_kernel_signal_message6(
 		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		message_type,
 		mfea_vif->name(),
 		vif_index,
@@ -361,7 +359,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 	if (source_addr.is_ipv4()) {
 	    _xrl_mfea_client_client.send_recv_dataflow_signal4(
 		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		source_addr.get_ipv4(),
 		group_addr.get_ipv4(),
 		threshold_interval_sec,
@@ -383,7 +381,7 @@ XrlMfeaNode::dataflow_signal_send(const string& dst_module_instance_name,
 	if (source_addr.is_ipv6()) {
 	    _xrl_mfea_client_client.send_recv_dataflow_signal6(
 		dst_module_instance_name.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		source_addr.get_ipv6(),
 		group_addr.get_ipv6(),
 		threshold_interval_sec,
@@ -484,7 +482,7 @@ XrlMfeaNode::add_cli_command_to_cli_manager(const char *command_name,
 
     success = _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
-	my_xrl_target_name(),
+	xrl_router().class_name(),
 	string(command_name),
 	string(command_help),
 	is_command_cd,
@@ -570,7 +568,7 @@ XrlMfeaNode::delete_cli_command_from_cli_manager(const char *command_name)
 
     success = _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
-	my_xrl_target_name(),
+	xrl_router().class_name(),
 	string(command_name),
 	callback(this, &XrlMfeaNode::cli_manager_client_send_delete_cli_command_cb));
 
@@ -652,7 +650,7 @@ XrlMfeaNode::common_0_1_get_target_name(
     // Output values, 
     string&		name)
 {
-    name = my_xrl_target_name();
+    name = xrl_router().class_name();
     
     return XrlCmdError::OKAY();
 }

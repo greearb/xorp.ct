@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.34 2007/05/10 00:08:17 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.35 2007/05/19 01:52:42 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -557,15 +557,9 @@ private:
     int delete_cli_command_from_cli_manager(const char *command_name);
     void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
     
-    const string& my_xrl_target_name() {
-	return XrlMfeaTargetBase::name();
-    }
-    
     int family() const { return (MfeaNode::family()); }
 
     EventLoop&			_eventloop;
-    const string		_class_name;
-    const string		_instance_name;
     const string		_finder_target;
 
     XrlMfeaClientV0p1Client	_xrl_mfea_client_client;
