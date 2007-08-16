@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.37 2007/05/19 01:33:41 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.38 2007/05/23 04:08:25 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -39,8 +39,6 @@ XrlFib2mribNode::XrlFib2mribNode(EventLoop&	eventloop,
 		   finder_port),
       XrlFib2mribTargetBase(&xrl_router()),
       _eventloop(eventloop),
-      _class_name(xrl_router().class_name()),
-      _instance_name(xrl_router().instance_name()),
       _xrl_fea_fti_client(&xrl_router()),
       _xrl_fea_fib_client(&xrl_router()),
       _xrl_rib_client(&xrl_router()),
@@ -153,7 +151,7 @@ XrlFib2mribNode::fea_register_startup()
     // Register interest in the FEA with the Finder
     //
     success = _xrl_finder_client.send_register_class_event_interest(
-	_finder_target.c_str(), _instance_name, _fea_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _fea_target,
 	callback(this, &XrlFib2mribNode::finder_register_interest_fea_cb));
 
     if (! success) {
@@ -264,7 +262,7 @@ XrlFib2mribNode::fea_register_shutdown()
     // De-register interest in the FEA with the Finder
     //
     success = _xrl_finder_client.send_deregister_class_event_interest(
-	_finder_target.c_str(), _instance_name, _fea_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _fea_target,
 	callback(this, &XrlFib2mribNode::finder_deregister_interest_fea_cb));
 
     if (! success) {
@@ -379,7 +377,7 @@ XrlFib2mribNode::rib_register_startup()
     // Register interest in the RIB with the Finder
     //
     success = _xrl_finder_client.send_register_class_event_interest(
-	_finder_target.c_str(), _instance_name, _rib_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _rib_target,
 	callback(this, &XrlFib2mribNode::finder_register_interest_rib_cb));
 
     if (! success) {
@@ -489,7 +487,7 @@ XrlFib2mribNode::rib_register_shutdown()
     // De-register interest in the RIB with the Finder
     //
     success = _xrl_finder_client.send_deregister_class_event_interest(
-	_finder_target.c_str(), _instance_name, _rib_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _rib_target,
 	callback(this, &XrlFib2mribNode::finder_deregister_interest_rib_cb));
 
     if (! success) {
@@ -612,7 +610,7 @@ XrlFib2mribNode::send_fea_add_fib_client()
     if (_fea_have_ipv4 && ! _is_fea_fib_client4_registered) {
 	success = _xrl_fea_fib_client.send_add_fib_client4(
 	    _fea_target.c_str(),
-	    my_xrl_target_name(),
+	    xrl_router().class_name(),
 	    true,		/* send_updates */
 	    false,		/* send_resolves */
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client4_cb));
@@ -626,7 +624,7 @@ XrlFib2mribNode::send_fea_add_fib_client()
     if (_fea_have_ipv6 && ! _is_fea_fib_client6_registered) {
 	success = _xrl_fea_fib_client.send_add_fib_client6(
 	    _fea_target.c_str(),
-	    my_xrl_target_name(),
+	    xrl_router().class_name(),
 	    true,		/* send_updates */
 	    false,		/* send_resolves */
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_add_fib_client6_cb));
@@ -929,7 +927,7 @@ XrlFib2mribNode::send_fea_delete_fib_client()
 	bool success4;
 	success4 = _xrl_fea_fib_client.send_delete_fib_client4(
 	    _fea_target.c_str(),
-	    my_xrl_target_name(),
+	    xrl_router().class_name(),
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_delete_fib_client4_cb));
 	if (success4 != true) {
 	    XLOG_ERROR("Failed to deregister IPv4 FIB client with the FEA. "
@@ -942,7 +940,7 @@ XrlFib2mribNode::send_fea_delete_fib_client()
 	bool success6;
 	success6 = _xrl_fea_fib_client.send_delete_fib_client6(
 	    _fea_target.c_str(),
-	    my_xrl_target_name(),
+	    xrl_router().class_name(),
 	    callback(this, &XrlFib2mribNode::fea_fib_client_send_delete_fib_client6_cb));
 	if (success6 != true) {
 	    XLOG_ERROR("Failed to deregister IPv6 FIB client with the FEA. "
@@ -1108,8 +1106,8 @@ XrlFib2mribNode::send_rib_add_tables()
 	success = _xrl_rib_client.send_add_igp_table4(
 	    _rib_target.c_str(),
 	    Fib2mribNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::rib_client_send_add_igp_table4_cb));
@@ -1124,8 +1122,8 @@ XrlFib2mribNode::send_rib_add_tables()
 	success = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
 	    Fib2mribNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::rib_client_send_add_igp_table6_cb));
@@ -1289,8 +1287,8 @@ XrlFib2mribNode::send_rib_delete_tables()
 	success4 = _xrl_rib_client.send_delete_igp_table4(
 	    _rib_target.c_str(),
 	    Fib2mribNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::rib_client_send_delete_igp_table4_cb));
@@ -1306,8 +1304,8 @@ XrlFib2mribNode::send_rib_delete_tables()
 	success6 = _xrl_rib_client.send_delete_igp_table6(
 	    _rib_target.c_str(),
 	    Fib2mribNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    false,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlFib2mribNode::rib_client_send_delete_igp_table6_cb));
@@ -1465,7 +1463,7 @@ XrlFib2mribNode::common_0_1_get_target_name(
     // Output values, 
     string&	name)
 {
-    name = my_xrl_target_name();
+    name = xrl_router().class_name();
 
     return XrlCmdError::OKAY();
 }

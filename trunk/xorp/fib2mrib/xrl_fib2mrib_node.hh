@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.18 2007/01/13 04:20:46 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.19 2007/02/16 22:45:58 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -370,13 +370,7 @@ private:
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
-    const string& my_xrl_target_name() {
-	return XrlFib2mribTargetBase::name();
-    }
-
     EventLoop&		_eventloop;
-    const string	_class_name;
-    const string	_instance_name;
     XrlFtiV0p2Client	_xrl_fea_fti_client;
     XrlFeaFibV0p1Client	_xrl_fea_fib_client;
     XrlRibV0p1Client	_xrl_rib_client;
