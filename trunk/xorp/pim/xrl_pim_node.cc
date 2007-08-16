@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.98 2007/05/10 00:08:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.99 2007/05/19 01:52:47 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -52,8 +52,6 @@ XrlPimNode::XrlPimNode(int		family,
       XrlPimTargetBase(&xrl_router()),
       PimNodeCli(*static_cast<PimNode *>(this)),
       _eventloop(eventloop),
-      _class_name(xrl_router().class_name()),
-      _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _mfea_target(mfea_target),
@@ -771,7 +769,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_rib_client.send_redist_transaction_enable4(
 		_rib_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
@@ -785,7 +783,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_rib_client.send_redist_transaction_enable6(
 		_rib_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
@@ -888,7 +886,7 @@ XrlPimNode::send_rib_redist_transaction_disable()
 	    bool success4;
 	    success4 = _xrl_rib_client.send_redist_transaction_disable4(
 		_rib_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
@@ -902,7 +900,7 @@ XrlPimNode::send_rib_redist_transaction_disable()
 	    bool success6;
 	    success6 = _xrl_rib_client.send_redist_transaction_disable6(
 		_rib_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
@@ -1041,7 +1039,7 @@ XrlPimNode::send_register_unregister_receiver()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_register_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1054,7 +1052,7 @@ XrlPimNode::send_register_unregister_receiver()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_register_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1068,7 +1066,7 @@ XrlPimNode::send_register_unregister_receiver()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_unregister_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1080,7 +1078,7 @@ XrlPimNode::send_register_unregister_receiver()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_unregister_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1235,7 +1233,7 @@ XrlPimNode::send_register_unregister_protocol()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_register_protocol4(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1247,7 +1245,7 @@ XrlPimNode::send_register_unregister_protocol()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_register_protocol6(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1260,7 +1258,7 @@ XrlPimNode::send_register_unregister_protocol()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_unregister_protocol4(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		callback(this, &XrlPimNode::mfea_client_send_register_unregister_protocol_cb));
@@ -1271,7 +1269,7 @@ XrlPimNode::send_register_unregister_protocol()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_unregister_protocol6(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		callback(this, &XrlPimNode::mfea_client_send_register_unregister_protocol_cb));
@@ -1425,7 +1423,7 @@ XrlPimNode::send_join_leave_multicast_group()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_join_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1438,7 +1436,7 @@ XrlPimNode::send_join_leave_multicast_group()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_join_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1452,7 +1450,7 @@ XrlPimNode::send_join_leave_multicast_group()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_leave_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1465,7 +1463,7 @@ XrlPimNode::send_join_leave_multicast_group()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_leave_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -1628,7 +1626,7 @@ XrlPimNode::send_add_delete_mfc()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_add_mfc4(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		source_addr.get_ipv4(),
 		group_addr.get_ipv4(),
 		iif_vif_index,
@@ -1644,7 +1642,7 @@ XrlPimNode::send_add_delete_mfc()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_add_mfc6(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		source_addr.get_ipv6(),
 		group_addr.get_ipv6(),
 		iif_vif_index,
@@ -1661,7 +1659,7 @@ XrlPimNode::send_add_delete_mfc()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_delete_mfc4(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		source_addr.get_ipv4(),
 		group_addr.get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
@@ -1672,7 +1670,7 @@ XrlPimNode::send_add_delete_mfc()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_delete_mfc6(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		source_addr.get_ipv6(),
 		group_addr.get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_mfc_cb));
@@ -1856,7 +1854,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor4(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		entry->source_addr().get_ipv4(),
 		entry->group_addr().get_ipv4(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
@@ -1867,7 +1865,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mfea_client.send_delete_all_dataflow_monitor6(
 		_mfea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		entry->source_addr().get_ipv6(),
 		entry->group_addr().get_ipv6(),
 		callback(this, &XrlPimNode::mfea_client_send_add_delete_dataflow_monitor_cb));
@@ -1880,7 +1878,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	    if (PimNode::is_ipv4()) {
 		success = _xrl_mfea_client.send_add_dataflow_monitor4(
 		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
+		    xrl_router().class_name(),
 		    entry->source_addr().get_ipv4(),
 		    entry->group_addr().get_ipv4(),
 		    entry->threshold_interval_sec(),
@@ -1899,7 +1897,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	    if (PimNode::is_ipv6()) {
 		success = _xrl_mfea_client.send_add_dataflow_monitor6(
 		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
+		    xrl_router().class_name(),
 		    entry->source_addr().get_ipv6(),
 		    entry->group_addr().get_ipv6(),
 		    entry->threshold_interval_sec(),
@@ -1919,7 +1917,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	    if (PimNode::is_ipv4()) {
 		success = _xrl_mfea_client.send_delete_dataflow_monitor4(
 		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
+		    xrl_router().class_name(),
 		    entry->source_addr().get_ipv4(),
 		    entry->group_addr().get_ipv4(),
 		    entry->threshold_interval_sec(),
@@ -1938,7 +1936,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	    if (PimNode::is_ipv6()) {
 		success = _xrl_mfea_client.send_delete_dataflow_monitor6(
 		    _mfea_target.c_str(),
-		    my_xrl_target_name(),
+		    xrl_router().class_name(),
 		    entry->source_addr().get_ipv6(),
 		    entry->group_addr().get_ipv6(),
 		    entry->threshold_interval_sec(),
@@ -2116,7 +2114,7 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mld6igmp_client.send_add_protocol4(
 		_mld6igmp_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
@@ -2129,7 +2127,7 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mld6igmp_client.send_add_protocol6(
 		_mld6igmp_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
@@ -2146,7 +2144,7 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 	if (PimNode::is_ipv4()) {
 	    success = _xrl_mld6igmp_client.send_delete_protocol4(
 		_mld6igmp_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
@@ -2159,7 +2157,7 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 	if (PimNode::is_ipv6()) {
 	    success = _xrl_mld6igmp_client.send_delete_protocol6(
 		_mld6igmp_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		string(PimNode::module_name()),
 		PimNode::module_id(),
 		pim_vif->name(),
@@ -2520,7 +2518,7 @@ XrlPimNode::add_cli_command_to_cli_manager(const char *command_name,
 
     success = _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
-	my_xrl_target_name(),
+	xrl_router().class_name(),
 	string(command_name),
 	string(command_help),
 	is_command_cd,
@@ -2605,7 +2603,7 @@ XrlPimNode::delete_cli_command_from_cli_manager(const char *command_name)
 
     success = _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
-	my_xrl_target_name(),
+	xrl_router().class_name(),
 	string(command_name),
 	callback(this, &XrlPimNode::cli_manager_client_send_delete_cli_command_cb));
 
@@ -2686,7 +2684,7 @@ XrlPimNode::common_0_1_get_target_name(
     // Output values, 
     string&		name)
 {
-    name = my_xrl_target_name();
+    name = xrl_router().class_name();
     
     return XrlCmdError::OKAY();
 }

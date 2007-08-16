@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.73 2007/05/19 01:52:47 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.74 2007/05/19 08:11:23 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2210,7 +2210,6 @@ private:
     int delete_cli_command_from_cli_manager(const char *command_name);
     void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
     
-    const string& my_xrl_target_name() { return XrlPimTargetBase::name(); }
     int family() const { return PimNode::family(); }
 
 
@@ -2558,8 +2557,6 @@ private:
     };
 
     EventLoop&			_eventloop;
-    const string		_class_name;
-    const string		_instance_name;
     const string		_finder_target;
     const string		_fea_target;
     const string		_mfea_target;
