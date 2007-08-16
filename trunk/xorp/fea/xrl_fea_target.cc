@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.26 2007/08/15 18:55:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.27 2007/08/15 19:29:19 pavlin Exp $"
 
 
 //
@@ -2589,7 +2589,7 @@ XrlFeaTarget::raw_link_0_1_send(
 XrlCmdError
 XrlFeaTarget::raw_link_0_1_register_receiver(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ether_type,
@@ -2598,7 +2598,7 @@ XrlFeaTarget::raw_link_0_1_register_receiver(
 {
     string error_msg;
 
-    if (_io_link_manager.register_receiver(xrl_target_name,
+    if (_io_link_manager.register_receiver(xrl_target_instance_name,
 					   if_name, vif_name,
 					   ether_type, filter_program,
 					   enable_multicast_loopback,
@@ -2613,7 +2613,7 @@ XrlFeaTarget::raw_link_0_1_register_receiver(
 XrlCmdError
 XrlFeaTarget::raw_link_0_1_unregister_receiver(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ether_type,
@@ -2621,7 +2621,7 @@ XrlFeaTarget::raw_link_0_1_unregister_receiver(
 {
     string error_msg;
 
-    if (_io_link_manager.unregister_receiver(xrl_target_name,
+    if (_io_link_manager.unregister_receiver(xrl_target_instance_name,
 					     if_name, vif_name,
 					     ether_type, filter_program,
 					     error_msg)
@@ -2635,7 +2635,7 @@ XrlFeaTarget::raw_link_0_1_unregister_receiver(
 XrlCmdError
 XrlFeaTarget::raw_link_0_1_join_multicast_group(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ether_type,
@@ -2644,7 +2644,7 @@ XrlFeaTarget::raw_link_0_1_join_multicast_group(
 {
     string error_msg;
 
-    if (_io_link_manager.join_multicast_group(xrl_target_name,
+    if (_io_link_manager.join_multicast_group(xrl_target_instance_name,
 					      if_name, vif_name,
 					      ether_type, filter_program,
 					      group_address, error_msg)
@@ -2658,7 +2658,7 @@ XrlFeaTarget::raw_link_0_1_join_multicast_group(
 XrlCmdError
 XrlFeaTarget::raw_link_0_1_leave_multicast_group(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ether_type,
@@ -2667,7 +2667,7 @@ XrlFeaTarget::raw_link_0_1_leave_multicast_group(
 {
     string error_msg;
 
-    if (_io_link_manager.leave_multicast_group(xrl_target_name,
+    if (_io_link_manager.leave_multicast_group(xrl_target_instance_name,
 					       if_name, vif_name,
 					       ether_type, filter_program,
 					       group_address, error_msg)
@@ -2716,7 +2716,7 @@ XrlFeaTarget::raw_packet4_0_1_send(
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_register_receiver(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol,
@@ -2724,7 +2724,8 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
 {
     string error_msg;
 
-    if (_io_ip_manager.register_receiver(IPv4::af(), xrl_target_name,
+    if (_io_ip_manager.register_receiver(IPv4::af(),
+					 xrl_target_instance_name,
 					 if_name, vif_name, ip_protocol,
 					 enable_multicast_loopback,
 					 error_msg)
@@ -2738,14 +2739,15 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_unregister_receiver(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol)
 {
     string error_msg;
 
-    if (_io_ip_manager.unregister_receiver(IPv4::af(), xrl_target_name,
+    if (_io_ip_manager.unregister_receiver(IPv4::af(),
+					   xrl_target_instance_name,
 					   if_name, vif_name, ip_protocol,
 					   error_msg)
 	!= XORP_OK) {
@@ -2758,7 +2760,7 @@ XrlFeaTarget::raw_packet4_0_1_unregister_receiver(
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol,
@@ -2766,9 +2768,9 @@ XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
 {
     string error_msg;
 
-    if (_io_ip_manager.join_multicast_group(xrl_target_name, if_name, vif_name,
-					    ip_protocol, IPvX(group_address),
-					    error_msg)
+    if (_io_ip_manager.join_multicast_group(xrl_target_instance_name,
+					    if_name, vif_name, ip_protocol,
+					    IPvX(group_address), error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2779,7 +2781,7 @@ XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol,
@@ -2787,8 +2789,8 @@ XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
 {
     string error_msg;
 
-    if (_io_ip_manager.leave_multicast_group(xrl_target_name, if_name,
-					     vif_name, ip_protocol,
+    if (_io_ip_manager.leave_multicast_group(xrl_target_instance_name,
+					     if_name, vif_name, ip_protocol,
 					     IPvX(group_address), error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2860,7 +2862,7 @@ XrlFeaTarget::raw_packet6_0_1_send(
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_register_receiver(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol,
@@ -2868,7 +2870,8 @@ XrlFeaTarget::raw_packet6_0_1_register_receiver(
 {
     string error_msg;
 
-    if ( _io_ip_manager.register_receiver(IPv6::af(), xrl_target_name,
+    if ( _io_ip_manager.register_receiver(IPv6::af(),
+					  xrl_target_instance_name,
 					  if_name, vif_name, ip_protocol,
 					  enable_multicast_loopback, error_msg)
 	 != XORP_OK) {
@@ -2881,14 +2884,15 @@ XrlFeaTarget::raw_packet6_0_1_register_receiver(
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_unregister_receiver(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol)
 {
     string error_msg;
 
-    if (_io_ip_manager.unregister_receiver(IPv6::af(), xrl_target_name,
+    if (_io_ip_manager.unregister_receiver(IPv6::af(),
+					   xrl_target_instance_name,
 					   if_name, vif_name, ip_protocol,
 					   error_msg)
 	!= XORP_OK) {
@@ -2901,7 +2905,7 @@ XrlFeaTarget::raw_packet6_0_1_unregister_receiver(
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol,
@@ -2909,9 +2913,9 @@ XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
 {
     string error_msg;
 
-    if (_io_ip_manager.join_multicast_group(xrl_target_name, if_name, vif_name,
-					    ip_protocol, IPvX(group_address),
-					    error_msg)
+    if (_io_ip_manager.join_multicast_group(xrl_target_instance_name,
+					    if_name, vif_name, ip_protocol,
+					    IPvX(group_address), error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2922,7 +2926,7 @@ XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
 XrlCmdError
 XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
     // Input values,
-    const string&	xrl_target_name,
+    const string&	xrl_target_instance_name,
     const string&	if_name,
     const string&	vif_name,
     const uint32_t&	ip_protocol,
@@ -2930,8 +2934,8 @@ XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
 {
     string error_msg;
 
-    if (_io_ip_manager.leave_multicast_group(xrl_target_name, if_name,
-					     vif_name, ip_protocol,
+    if (_io_ip_manager.leave_multicast_group(xrl_target_instance_name,
+					     if_name, vif_name, ip_protocol,
 					     IPvX(group_address), error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

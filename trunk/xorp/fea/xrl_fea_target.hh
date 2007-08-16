@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.16 2007/08/09 07:03:24 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.17 2007/08/15 19:29:20 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1085,7 +1085,8 @@ public:
      *  Register to receive raw link-level packets. The receiver is expected to
      *  support raw_link_client/0.1 interface.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should be accepted.
      *
@@ -1104,7 +1105,7 @@ public:
      */
     XrlCmdError raw_link_0_1_register_receiver(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ether_type,
@@ -1114,7 +1115,8 @@ public:
     /**
      *  Unregister to receive raw link-level packets.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should not be
      *  accepted.
@@ -1130,7 +1132,7 @@ public:
      */
     XrlCmdError raw_link_0_1_unregister_receiver(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ether_type,
@@ -1139,7 +1141,8 @@ public:
     /**
      *  Join a MAC multicast group.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should be accepted.
      *
@@ -1156,7 +1159,7 @@ public:
      */
     XrlCmdError raw_link_0_1_join_multicast_group(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ether_type,
@@ -1166,7 +1169,8 @@ public:
     /**
      *  Leave a MAC multicast group.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should not be
      *  accepted.
@@ -1184,7 +1188,7 @@ public:
      */
     XrlCmdError raw_link_0_1_leave_multicast_group(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ether_type,
@@ -1243,7 +1247,8 @@ public:
      *  Register to receive IPv4 packets. The receiver is expected to support
      *  raw_packet4_client/0.1 interface.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should be accepted.
      *
@@ -1259,7 +1264,7 @@ public:
      */
     XrlCmdError raw_packet4_0_1_register_receiver(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
@@ -1268,7 +1273,8 @@ public:
     /**
      *  Unregister to receive IPv4 packets.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should not be
      *  accepted.
@@ -1281,7 +1287,7 @@ public:
      */
     XrlCmdError raw_packet4_0_1_unregister_receiver(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol);
@@ -1289,7 +1295,8 @@ public:
     /**
      *  Join an IPv4 multicast group.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should be accepted.
      *
@@ -1303,7 +1310,7 @@ public:
      */
     XrlCmdError raw_packet4_0_1_join_multicast_group(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
@@ -1312,7 +1319,8 @@ public:
     /**
      *  Leave an IPv4 multicast group.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should not be
      *  accepted.
@@ -1327,7 +1335,7 @@ public:
      */
     XrlCmdError raw_packet4_0_1_leave_multicast_group(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
@@ -1393,7 +1401,8 @@ public:
      *  Register to receive IPv6 packets. The receiver is expected to support
      *  raw_packet6_client/0.1 interface.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should be accepted.
      *
@@ -1409,7 +1418,7 @@ public:
      */
     XrlCmdError raw_packet6_0_1_register_receiver(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
@@ -1418,7 +1427,8 @@ public:
     /**
      *  Unregister to receive IPv6 packets.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should not be
      *  accepted.
@@ -1431,7 +1441,7 @@ public:
      */
     XrlCmdError raw_packet6_0_1_unregister_receiver(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol);
@@ -1439,7 +1449,8 @@ public:
     /**
      *  Join an IPv6 multicast group.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should be accepted.
      *
@@ -1453,7 +1464,7 @@ public:
      */
     XrlCmdError raw_packet6_0_1_join_multicast_group(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
@@ -1462,7 +1473,8 @@ public:
     /**
      *  Leave an IPv6 multicast group.
      *
-     *  @param xrl_target_name the receiver's XRL target name.
+     *  @param xrl_target_instance_name the receiver's XRL target instance
+     *  name.
      *
      *  @param if_name the interface through which packets should not be
      *  accepted.
@@ -1477,7 +1489,7 @@ public:
      */
     XrlCmdError raw_packet6_0_1_leave_multicast_group(
 	// Input values,
-	const string&	xrl_target_name,
+	const string&	xrl_target_instance_name,
 	const string&	if_name,
 	const string&	vif_name,
 	const uint32_t&	ip_protocol,
