@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.45 2007/05/19 00:57:19 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.46 2007/05/23 04:08:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -201,7 +201,7 @@ XrlIO<IPv4>::enable_interface_vif(const string& interface, const string& vif)
     XrlRawPacket4V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_register_receiver(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -222,7 +222,7 @@ XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
     XrlRawPacket6V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_register_receiver(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -280,7 +280,7 @@ XrlIO<IPv4>::disable_interface_vif(const string& interface, const string& vif)
     XrlRawPacket4V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_unregister_receiver(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -300,7 +300,7 @@ XrlIO<IPv6>::disable_interface_vif(const string& interface, const string& vif)
     XrlRawPacket6V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_unregister_receiver(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -570,7 +570,7 @@ XrlIO<IPv4>::join_multicast_group(const string& interface, const string& vif,
     XrlRawPacket4V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_join_multicast_group(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -593,7 +593,7 @@ XrlIO<IPv6>::join_multicast_group(const string& interface, const string& vif,
     XrlRawPacket6V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_join_multicast_group(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -653,7 +653,7 @@ XrlIO<IPv4>::leave_multicast_group(const string& interface, const string& vif,
     XrlRawPacket4V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_leave_multicast_group(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
@@ -676,7 +676,7 @@ XrlIO<IPv6>::leave_multicast_group(const string& interface, const string& vif,
     XrlRawPacket6V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_leave_multicast_group(
 	_feaname.c_str(),
-	_class_name,		// XXX: maybe we should use _instance_name?
+	_xrl_router.instance_name(),
 	interface,
 	vif,
 	get_ip_protocol_number(),
