@@ -34,7 +34,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = print_lsas$(EXEEXT) print_neighbours$(EXEEXT)
+bin_PROGRAMS = clear_database$(EXEEXT) print_lsas$(EXEEXT) \
+	print_neighbours$(EXEEXT)
 TESTS =
 noinst_PROGRAMS =
 subdir = ospf/tools
@@ -51,8 +52,8 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
-am_print_lsas_OBJECTS = print_lsas.$(OBJEXT)
-print_lsas_OBJECTS = $(am_print_lsas_OBJECTS)
+am_clear_database_OBJECTS = clear_database.$(OBJEXT)
+clear_database_OBJECTS = $(am_clear_database_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -60,6 +61,10 @@ am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/xrl/interfaces/libospfv2xif.la \
 	$(top_builddir)/xrl/interfaces/libospfv3xif.la
+clear_database_DEPENDENCIES = $(am__DEPENDENCIES_2) \
+	$(top_builddir)/ospf/libospf.la
+am_print_lsas_OBJECTS = print_lsas.$(OBJEXT)
+print_lsas_OBJECTS = $(am_print_lsas_OBJECTS)
 print_lsas_DEPENDENCIES = $(am__DEPENDENCIES_2) \
 	$(top_builddir)/ospf/libospf.la
 am_print_neighbours_OBJECTS = print_neighbours.$(OBJEXT)
@@ -78,8 +83,10 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(print_lsas_SOURCES) $(print_neighbours_SOURCES)
-DIST_SOURCES = $(print_lsas_SOURCES) $(print_neighbours_SOURCES)
+SOURCES = $(clear_database_SOURCES) $(print_lsas_SOURCES) \
+	$(print_neighbours_SOURCES)
+DIST_SOURCES = $(clear_database_SOURCES) $(print_lsas_SOURCES) \
+	$(print_neighbours_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -226,6 +233,8 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/xrl/interfaces/libospfv3xif.la
 
 # -- Program Sources
+clear_database_SOURCES = clear_database.cc
+clear_database_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
 print_lsas_SOURCES = print_lsas.cc
 print_lsas_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
 print_neighbours_SOURCES = print_neighbours.cc
@@ -310,6 +319,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+clear_database$(EXEEXT): $(clear_database_OBJECTS) $(clear_database_DEPENDENCIES) 
+	@rm -f clear_database$(EXEEXT)
+	$(CXXLINK) $(clear_database_OBJECTS) $(clear_database_LDADD) $(LIBS)
 print_lsas$(EXEEXT): $(print_lsas_OBJECTS) $(print_lsas_DEPENDENCIES) 
 	@rm -f print_lsas$(EXEEXT)
 	$(CXXLINK) $(print_lsas_OBJECTS) $(print_lsas_LDADD) $(LIBS)
@@ -323,6 +335,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clear_database.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_lsas.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/print_neighbours.Po@am__quote@
 
