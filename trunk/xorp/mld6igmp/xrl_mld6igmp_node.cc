@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.62 2007/05/10 00:08:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.63 2007/05/19 01:52:44 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -49,8 +49,6 @@ XrlMld6igmpNode::XrlMld6igmpNode(int		family,
       XrlMld6igmpTargetBase(&xrl_router()),
       Mld6igmpNodeCli(*static_cast<Mld6igmpNode *>(this)),
       _eventloop(eventloop),
-      _class_name(xrl_router().class_name()),
-      _instance_name(xrl_router().instance_name()),
       _finder_target(finder_target),
       _fea_target(fea_target),
       _mfea_target(mfea_target),
@@ -363,12 +361,14 @@ XrlMld6igmpNode::send_register_unregister_interest()
     if (entry->is_register()) {
 	// Register interest
 	success = _xrl_finder_client.send_register_class_event_interest(
-	    _finder_target.c_str(), _instance_name, entry->target_name(),
+	    _finder_target.c_str(), xrl_router().instance_name(),
+	    entry->target_name(),
 	    callback(this, &XrlMld6igmpNode::finder_send_register_unregister_interest_cb));
     } else {
 	// Unregister interest
 	success = _xrl_finder_client.send_deregister_class_event_interest(
-	    _finder_target.c_str(), _instance_name, entry->target_name(),
+	    _finder_target.c_str(), xrl_router().instance_name(),
+	    entry->target_name(),
 	    callback(this, &XrlMld6igmpNode::finder_send_register_unregister_interest_cb));
     }
 
@@ -550,7 +550,7 @@ XrlMld6igmpNode::send_register_unregister_receiver()
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_register_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -563,7 +563,7 @@ XrlMld6igmpNode::send_register_unregister_receiver()
 	if (Mld6igmpNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_register_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -577,7 +577,7 @@ XrlMld6igmpNode::send_register_unregister_receiver()
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_unregister_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -589,7 +589,7 @@ XrlMld6igmpNode::send_register_unregister_receiver()
 	if (Mld6igmpNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_unregister_receiver(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -744,7 +744,7 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_join_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -757,7 +757,7 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 	if (Mld6igmpNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_join_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -771,7 +771,7 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_fea_client4.send_leave_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -784,7 +784,7 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
 	if (Mld6igmpNode::is_ipv6()) {
 	    success = _xrl_fea_client6.send_leave_multicast_group(
 		_fea_target.c_str(),
-		my_xrl_target_name(),
+		xrl_router().instance_name(),
 		entry->if_name(),
 		entry->vif_name(),
 		entry->ip_protocol(),
@@ -993,7 +993,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_mld6igmp_client_client.send_add_membership4(
 		membership.dst_module_instance_name().c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		mld6igmp_vif->name(),
 		membership.vif_index(),
 		membership.source().get_ipv4(),
@@ -1006,7 +1006,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 	if (Mld6igmpNode::is_ipv6()) {
 	    success = _xrl_mld6igmp_client_client.send_add_membership6(
 		membership.dst_module_instance_name().c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		mld6igmp_vif->name(),
 		membership.vif_index(),
 		membership.source().get_ipv6(),
@@ -1020,7 +1020,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 	if (Mld6igmpNode::is_ipv4()) {
 	    success = _xrl_mld6igmp_client_client.send_delete_membership4(
 		membership.dst_module_instance_name().c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		mld6igmp_vif->name(),
 		membership.vif_index(),
 		membership.source().get_ipv4(),
@@ -1033,7 +1033,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 	if (Mld6igmpNode::is_ipv6()) {
 	    success = _xrl_mld6igmp_client_client.send_delete_membership6(
 		membership.dst_module_instance_name().c_str(),
-		my_xrl_target_name(),
+		xrl_router().class_name(),
 		mld6igmp_vif->name(),
 		membership.vif_index(),
 		membership.source().get_ipv6(),
@@ -1353,7 +1353,7 @@ XrlMld6igmpNode::add_cli_command_to_cli_manager(const char *command_name,
 
     success = _xrl_cli_manager_client.send_add_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
-	my_xrl_target_name(),
+	xrl_router().class_name(),
 	string(command_name),
 	string(command_help),
 	is_command_cd,
@@ -1438,7 +1438,7 @@ XrlMld6igmpNode::delete_cli_command_from_cli_manager(const char *command_name)
 
     success = _xrl_cli_manager_client.send_delete_cli_command(
 	xorp_module_name(family(), XORP_MODULE_CLI),
-	my_xrl_target_name(),
+	xrl_router().class_name(),
 	string(command_name),
 	callback(this, &XrlMld6igmpNode::cli_manager_client_send_delete_cli_command_cb));
 
@@ -1519,7 +1519,7 @@ XrlMld6igmpNode::common_0_1_get_target_name(
     // Output values, 
     string&		name)
 {
-    name = my_xrl_target_name();
+    name = xrl_router().class_name();
     
     return XrlCmdError::OKAY();
 }

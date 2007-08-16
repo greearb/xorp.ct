@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.43 2007/05/19 01:52:45 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.44 2007/05/19 08:11:22 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -717,9 +717,6 @@ private:
     int delete_cli_command_from_cli_manager(const char *command_name);
     void cli_manager_client_send_delete_cli_command_cb(const XrlError& xrl_error);
 
-    const string& my_xrl_target_name() {
-	return XrlMld6igmpTargetBase::name();
-    }
     int family() const { return (Mld6igmpNode::family()); }
 
 
@@ -945,8 +942,6 @@ private:
     };
 
     EventLoop&			_eventloop;
-    const string		_class_name;
-    const string		_instance_name;
     const string		_finder_target;
     const string		_fea_target;
     const string		_mfea_target;
