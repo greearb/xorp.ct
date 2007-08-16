@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.20 2007/01/23 01:57:37 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.21 2007/02/16 22:47:30 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -514,13 +514,7 @@ private:
     void send_rib_route_change();
     void send_rib_route_change_cb(const XrlError& xrl_error);
 
-    const string& my_xrl_target_name() {
-	return XrlStaticRoutesTargetBase::name();
-    }
-
     EventLoop&		_eventloop;
-    const string	_class_name;
-    const string	_instance_name;
     XrlRibV0p1Client	_xrl_rib_client;
     const string	_finder_target;
     const string	_fea_target;

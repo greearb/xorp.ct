@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.37 2007/02/16 22:47:30 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.38 2007/05/19 01:33:41 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -40,8 +40,6 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
 		   finder_port),
       XrlStaticRoutesTargetBase(&xrl_router()),
       _eventloop(eventloop),
-      _class_name(xrl_router().class_name()),
-      _instance_name(xrl_router().instance_name()),
       _xrl_rib_client(&xrl_router()),
       _finder_target(finder_target),
       _fea_target(fea_target),
@@ -141,7 +139,7 @@ XrlStaticRoutesNode::fea_register_startup()
     // Register interest in the FEA with the Finder
     //
     success = _xrl_finder_client.send_register_class_event_interest(
-	_finder_target.c_str(), _instance_name, _fea_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _fea_target,
 	callback(this, &XrlStaticRoutesNode::finder_register_interest_fea_cb));
 
     if (! success) {
@@ -247,7 +245,7 @@ XrlStaticRoutesNode::fea_register_shutdown()
     // De-register interest in the FEA with the Finder
     //
     success = _xrl_finder_client.send_deregister_class_event_interest(
-	_finder_target.c_str(), _instance_name, _fea_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _fea_target,
 	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_fea_cb));
 
     if (! success) {
@@ -361,7 +359,7 @@ XrlStaticRoutesNode::rib_register_startup()
     // Register interest in the RIB with the Finder
     //
     success = _xrl_finder_client.send_register_class_event_interest(
-	_finder_target.c_str(), _instance_name, _rib_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _rib_target,
 	callback(this, &XrlStaticRoutesNode::finder_register_interest_rib_cb));
 
     if (! success) {
@@ -471,7 +469,7 @@ XrlStaticRoutesNode::rib_register_shutdown()
     // De-register interest in the RIB with the Finder
     //
     success = _xrl_finder_client.send_deregister_class_event_interest(
-	_finder_target.c_str(), _instance_name, _rib_target,
+	_finder_target.c_str(), xrl_router().instance_name(), _rib_target,
 	callback(this, &XrlStaticRoutesNode::finder_deregister_interest_rib_cb));
 
     if (! success) {
@@ -566,8 +564,8 @@ XrlStaticRoutesNode::send_rib_add_tables()
 	success = _xrl_rib_client.send_add_igp_table4(
 	    _rib_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    true,	/* unicast */
 	    true,	/* multicast */
 	    callback(this,
@@ -583,8 +581,8 @@ XrlStaticRoutesNode::send_rib_add_tables()
 	success = _xrl_rib_client.send_add_igp_table6(
 	    _rib_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    true,	/* unicast */
 	    true,	/* multicast */
 	    callback(this,
@@ -751,8 +749,8 @@ XrlStaticRoutesNode::send_rib_delete_tables()
 	success4 = _xrl_rib_client.send_delete_igp_table4(
 	    _rib_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    true,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlStaticRoutesNode::rib_client_send_delete_igp_table4_cb));
@@ -768,8 +766,8 @@ XrlStaticRoutesNode::send_rib_delete_tables()
 	success6 = _xrl_rib_client.send_delete_igp_table6(
 	    _rib_target.c_str(),
 	    StaticRoutesNode::protocol_name(),
-	    _class_name,
-	    _instance_name,
+	    xrl_router().class_name(),
+	    xrl_router().instance_name(),
 	    true,	/* unicast */
 	    true,	/* multicast */
 	    callback(this, &XrlStaticRoutesNode::rib_client_send_delete_igp_table6_cb));
@@ -927,7 +925,7 @@ XrlStaticRoutesNode::common_0_1_get_target_name(
     // Output values, 
     string&	name)
 {
-    name = my_xrl_target_name();
+    name = xrl_router().class_name();
 
     return XrlCmdError::OKAY();
 }
