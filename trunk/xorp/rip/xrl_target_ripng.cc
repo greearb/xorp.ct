@@ -506,17 +506,25 @@ XrlRipngTarget::socket6_user_0_1_recv_event(
 }
 
 XrlCmdError
-XrlRipngTarget::socket6_user_0_1_connect_event(const string&	sockid,
-					     const IPv6&	src_host,
-					     const uint32_t&	src_port,
-					     const string&	new_sockid,
-					     bool&		accept)
+XrlRipngTarget::socket6_user_0_1_inbound_connect_event(
+    const string&	sockid,
+    const IPv6&		src_host,
+    const uint32_t&	src_port,
+    const string&	new_sockid,
+    bool&		accept)
 {
-    return _ct->socketx_user_0_1_connect_event(sockid,
-					       src_host,
-					       src_port,
-					       new_sockid,
-					       accept);
+    return _ct->socketx_user_0_1_inbound_connect_event(sockid,
+						       src_host,
+						       src_port,
+						       new_sockid,
+						       accept);
+}
+
+XrlCmdError
+XrlRipngTarget::socket6_user_0_1_outgoing_connect_event(
+    const string&	sockid)
+{
+    return _ct->socketx_user_0_1_outgoing_connect_event(sockid);
 }
 
 XrlCmdError

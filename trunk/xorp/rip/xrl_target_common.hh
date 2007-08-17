@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.29 2007/02/16 22:47:18 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.30 2007/08/09 00:47:02 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -300,11 +300,15 @@ public:
 					    const uint32_t&	src_port,
 					    const vector<uint8_t>& pdata);
 
-    XrlCmdError socketx_user_0_1_connect_event(const string&	sockid,
-					       const A&		src_host,
-					       const uint32_t&	src_port,
-					       const string&	new_sockid,
-					       bool&		accept);
+    XrlCmdError socketx_user_0_1_inbound_connect_event(
+	const string&	sockid,
+	const A&	src_host,
+	const uint32_t&	src_port,
+	const string&	new_sockid,
+	bool&		accept);
+
+    XrlCmdError socketx_user_0_1_outgoing_connect_event(
+	const string&	sockid);
 
     XrlCmdError socketx_user_0_1_error_event(const string&	sockid,
 					     const string& 	reason,
@@ -1255,7 +1259,7 @@ XrlRipCommonTarget<A>::socketx_user_0_1_recv_event(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::socketx_user_0_1_connect_event(
+XrlRipCommonTarget<A>::socketx_user_0_1_inbound_connect_event(
 					const string&	sockid,
 					const A&	src_host,
 					const uint32_t&	src_port,
@@ -1263,7 +1267,7 @@ XrlRipCommonTarget<A>::socketx_user_0_1_connect_event(
 					bool&		accept
 					)
 {
-    debug_msg("socketx_user_0_1_connect_event %s %s/%u %s\n",
+    debug_msg("socketx_user_0_1_inbound_connect_event %s %s/%u %s\n",
 	      sockid.c_str(), src_host.str().c_str(),
 	      XORP_UINT_CAST(src_port), new_sockid.c_str());
 
@@ -1273,7 +1277,20 @@ XrlRipCommonTarget<A>::socketx_user_0_1_connect_event(
     UNUSED(new_sockid);
 
     accept = false;
-    return XrlCmdError::COMMAND_FAILED("Connect not requested.");
+    return XrlCmdError::COMMAND_FAILED("Inbound connect not requested.");
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::socketx_user_0_1_outgoing_connect_event(
+					const string&	sockid
+					)
+{
+    debug_msg("socketx_user_0_1_outgoing_connect_event %s\n",
+	      sockid.c_str());
+
+    UNUSED(sockid);
+    return XrlCmdError::COMMAND_FAILED("Outgoing connect not requested.");
 }
 
 template <typename A>

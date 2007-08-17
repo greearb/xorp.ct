@@ -614,14 +614,25 @@ ripng_socket6_user_recv_event()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_socket6_user_connect_event()
+ripng_socket6_user_inbound_connect_event()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_socket6_user_connect_event <sockid:txt> <src_host:ipv6> <src_port:u32> <new_sockid:txt>"
+        echo "Usage: ripng_socket6_user_inbound_connect_event <sockid:txt> <src_host:ipv6> <src_port:u32> <new_sockid:txt>"
         exit 1
     fi
 
-    XRL="finder://ripng/socket6_user/0.1/connect_event?sockid:txt=$1&src_host:ipv6=$2&src_port:u32=$3&new_sockid:txt=$4"
+    XRL="finder://ripng/socket6_user/0.1/inbound_connect_event?sockid:txt=$1&src_host:ipv6=$2&src_port:u32=$3&new_sockid:txt=$4"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+ripng_socket6_user_outgoing_connect_event()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: ripng_socket6_user_outgoing_connect_event <sockid:txt>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/socket6_user/0.1/outgoing_connect_event?sockid:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 

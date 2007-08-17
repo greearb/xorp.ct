@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.23 2007/02/16 22:47:19 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.24 2007/08/09 00:47:03 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -302,11 +302,15 @@ public:
 					    const uint32_t&	src_port,
 					    const vector<uint8_t>& pdata);
 
-    XrlCmdError socket6_user_0_1_connect_event(const string&	sockid,
-					       const IPv6&	src_host,
-					       const uint32_t&	src_port,
-					       const string&	new_sockid,
-					       bool&		accept);
+    XrlCmdError socket6_user_0_1_inbound_connect_event(
+	const string&	sockid,
+	const IPv6&	src_host,
+	const uint32_t&	src_port,
+	const string&	new_sockid,
+	bool&		accept);
+
+    XrlCmdError socket6_user_0_1_outgoing_connect_event(
+	const string&	sockid);
 
     XrlCmdError socket6_user_0_1_error_event(const string&	sockid,
 					     const string& 	reason,

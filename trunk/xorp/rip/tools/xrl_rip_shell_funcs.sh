@@ -658,14 +658,25 @@ rip_socket4_user_recv_event()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_socket4_user_connect_event()
+rip_socket4_user_inbound_connect_event()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_socket4_user_connect_event <sockid:txt> <src_host:ipv4> <src_port:u32> <new_sockid:txt>"
+        echo "Usage: rip_socket4_user_inbound_connect_event <sockid:txt> <src_host:ipv4> <src_port:u32> <new_sockid:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/socket4_user/0.1/connect_event?sockid:txt=$1&src_host:ipv4=$2&src_port:u32=$3&new_sockid:txt=$4"
+    XRL="finder://rip/socket4_user/0.1/inbound_connect_event?sockid:txt=$1&src_host:ipv4=$2&src_port:u32=$3&new_sockid:txt=$4"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+rip_socket4_user_outgoing_connect_event()
+{
+    if [ $# -ne 1 ] ; then
+        echo "Usage: rip_socket4_user_outgoing_connect_event <sockid:txt>"
+        exit 1
+    fi
+
+    XRL="finder://rip/socket4_user/0.1/outgoing_connect_event?sockid:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 
