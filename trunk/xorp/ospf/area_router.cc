@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.279 2007/05/23 04:08:27 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.280 2007/08/17 22:18:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2299,11 +2299,11 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 			    list<Lsa::LsaRef>& lsas, 
 			    list<Lsa_header>& direct_ack,
 			    list<Lsa_header>& delayed_ack,
-			    bool backup, bool dr)
+			    bool is_router_bdr, bool is_neighbour_dr)
 {
     debug_msg("PeerID %u NeighbourID %u %s\nbackup %s dr %s\n", peerid, nid,
 	      pp_lsas(lsas).c_str(),
-	      bool_c_str(backup), bool_c_str(dr));
+	      bool_c_str(is_router_bdr), bool_c_str(is_neighbour_dr));
 
     OspfTypes::Version version = _ospf.get_version();
 
@@ -2399,7 +2399,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	case OspfTypes::V2:
 	    break;
 	case OspfTypes::V3:
-	    if (!dr)
+	    if (!is_neighbour_dr)
 		break;
 	    LinkLsa *ollsa = 0;
 	    LinkLsa *nllsa = 0;
@@ -2514,10 +2514,11 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 
 	    debug_msg("LSA multicast out on peer: %s "
 		      "LSA from DR: %s interface in state backup: %s\n",
-		      bool_c_str(multicast_on_peer), bool_c_str(dr),
-		      bool_c_str(backup));
+		      bool_c_str(multicast_on_peer),
+		      bool_c_str(is_neighbour_dr),
+		      bool_c_str(is_router_bdr));
 	    if (!multicast_on_peer) {
-		if ((backup && dr) || !backup)
+		if ((is_router_bdr && is_neighbour_dr) || !is_router_bdr)
 		    delayed_ack.push_back(lsah);
 	    }
 	    
@@ -2554,7 +2555,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 
 		_db[index]->remove_nack(nid);
 		// (b) An "implied acknowledgement".
-		if (backup && dr)
+		if (is_router_bdr && is_neighbour_dr)
 		    delayed_ack.push_back(lsah);
 	    } else {
 		// (b) Not an "implied acknowledgement".

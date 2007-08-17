@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.278 2007/03/30 04:37:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.279 2007/05/23 04:08:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4500,11 +4500,11 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     }
 
     list<Lsa_header> direct_ack, delayed_ack;
-    bool dr = false;
-    bool bdr = false;
+    bool is_router_bdr = false;
+    bool is_neighbour_dr = false;
     if (_peer.do_dr_or_bdr()) {
-	dr = is_neighbour_DR();
-	bdr = is_BDR();
+	is_router_bdr = is_BDR();
+	is_neighbour_dr = is_neighbour_DR();
     }
     
     get_area_router()->
@@ -4513,8 +4513,8 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 		     lsup->get_lsas(),
 		     direct_ack,
 		     delayed_ack,
-		     bdr,
-		     dr);
+		     is_router_bdr,
+		     is_neighbour_dr);
 
     // A more efficient way of sending the direct ack.
 //     bool multicast_on_peer;
