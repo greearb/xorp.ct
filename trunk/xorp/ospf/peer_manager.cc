@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.142 2007/05/23 04:08:28 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.143 2007/07/10 23:45:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2059,11 +2059,11 @@ PeerManager<A>::external_withdraw(const IPNet<A>& net)
 
 template <typename A>
 bool
-PeerManager<A>::external_shove(OspfTypes::AreaID area)
+PeerManager<A>::external_announce_complete(OspfTypes::AreaID area)
 {
     debug_msg("Area %s\n", pr_id(area).c_str());
 
-    return _external.shove(area);
+    return _external.announce_complete(area);
 }
 
 template <typename A>

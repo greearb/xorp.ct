@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.30 2007/03/19 01:00:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.31 2007/06/28 02:43:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -83,13 +83,13 @@ External<A>::announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
 
 template <typename A>
 bool
-External<A>::shove(OspfTypes::AreaID area)
+External<A>::announce_complete(OspfTypes::AreaID area)
 {
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
     for (i = _areas.begin(); i != _areas.end(); i++) {
  	if ((*i).first == area)
  	    continue;
-	(*i).second->external_shove();
+	(*i).second->external_announce_complete();
     }
 
     return true;
@@ -306,7 +306,7 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     for (i = _areas.begin(); i != _areas.end(); i++) {
 	(*i).second->external_announce(lsar, false /* push */,
 				       true /* redist */);
-	(*i).second->external_shove();
+	(*i).second->external_announce_complete();
     }
 
     start_refresh_timer(lsar);

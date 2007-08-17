@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.16 2007/02/23 21:08:08 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.17 2007/02/24 11:00:11 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -69,7 +69,7 @@ class External {
     /**
      * Called to complete a series of calls to announce().
      */
-    bool shove(OspfTypes::AreaID area);
+    bool announce_complete(OspfTypes::AreaID area);
 
     /**
      * Provide this area with the stored AS-External-LSAs.

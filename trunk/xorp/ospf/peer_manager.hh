@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.89 2007/03/22 01:44:44 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.90 2007/03/29 23:49:19 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -738,9 +738,10 @@ class PeerManager {
      * all others.
      *
      * The LSAs should not be scheduled for transmission until the
-     * external_shove() is seen. In many cases a number of LSAs may
-     * arrive in a single packet, waiting for the external_shove()
-     * offers an opportunity for aggregation.
+     * external_accounce_complete() is seen. In many cases a number of
+     * LSAs may arrive in a single packet, waiting for the
+     * external_announce_complete() offers an opportunity for
+     * aggregation.
      *
      */
     bool external_announce(OspfTypes::AreaID area, Lsa::LsaRef lsar);
@@ -768,7 +769,7 @@ class PeerManager {
     /**
      * Called to complete a series of calls to external_announce(area).
      */
-    bool external_shove(OspfTypes::AreaID area);
+    bool external_announce_complete(OspfTypes::AreaID area);
 
     /**
      * When a new area is configured it can use this method to 

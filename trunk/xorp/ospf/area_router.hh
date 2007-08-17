@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.130 2007/03/19 14:51:56 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.131 2007/03/29 23:49:18 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -287,9 +287,10 @@ class AreaRouter : public ServiceBase {
      * from the RIB as a redist.
      *
      * The LSAs should not be scheduled for transmission until the
-     * external_shove() is seen. In many cases a number of LSAs may
-     * arrive in a single packet, waiting for the external_shove()
-     * offers an opportunity for aggregation.
+     * external_announce_complete() is seen. In many cases a number of
+     * LSAs may arrive in a single packet, waiting for the
+     * external_announce_complete() offers an opportunity for
+     * aggregation.
      *
      * @param lsar the AS-External-LSA
      * @param push set to true if the push is a result of an external_push().
@@ -301,7 +302,7 @@ class AreaRouter : public ServiceBase {
     /**
      * Called to complete a series of calls to external_announce().
      */
-    void external_shove();
+    void external_announce_complete();
 
     /**
      * Refresh this LSA either because a timer has expired or because

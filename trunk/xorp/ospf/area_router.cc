@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.278 2007/04/25 01:40:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.279 2007/05/23 04:08:27 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1507,7 +1507,7 @@ AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/, bool redist)
 
 template <typename A>
 void
-AreaRouter<A>::external_shove()
+AreaRouter<A>::external_announce_complete()
 {
     if (!external_area_type())
 	return;
@@ -3535,7 +3535,7 @@ AreaRouter<A>::external_push_all_areas()
 {
     if (_external_flooding) {
 	PeerManager<A>& pm = _ospf.get_peer_manager();
-	pm.external_shove(_area);
+	pm.external_announce_complete(_area);
 	_external_flooding = false;
     }
 }
