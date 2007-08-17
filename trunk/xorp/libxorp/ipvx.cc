@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.31 2007/06/21 06:10:25 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.32 2007/08/02 18:20:13 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -33,6 +33,13 @@
 //
 // Static class members
 //
+
+// Construct an IN_ADDR_ANY address of family AF_INET.
+IPvX::IPvX()
+    : _af(AF_INET)
+{
+    memset(_addr, 0, sizeof(_addr));
+}
 
 // Construct an IN_ADDR_ANY address of @family.
 IPvX::IPvX(int family) throw (InvalidFamily)

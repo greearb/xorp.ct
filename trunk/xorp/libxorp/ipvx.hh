@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.29 2007/05/23 12:12:43 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.30 2007/08/02 18:20:13 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -32,7 +32,7 @@ public:
      * Creates an IPvX address with address family of AF_INET, and
      * address value of INADDR_ANY (i.e., containing IPv4(0)).
      */
-    IPvX() : _af(AF_INET) { _addr[0] = 0; }
+    IPvX();
 
     /**
      * Constructor for a specified address family.
