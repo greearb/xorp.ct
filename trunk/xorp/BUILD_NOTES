@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.92 2007/06/12 16:44:00 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.93 2007/06/21 08:35:34 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -300,6 +300,17 @@ gmake check
         cd /usr/bin; ln -s cpp-3.3 cpp
     - The code compiles, and the internal tests appear to succeed.
     - gcc-3.3 (GCC) 3.3.5 (Debian 1:3.3.5-13)
+
+  * Linux Gentoo 2006.1:
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.1.1 (Gentoo 4.1.1-r3)
+
+  * Linux Gentoo 2007.0 with hardened profile:
+    - The following hardened compiler has some issues (correct C++ programs
+      might coredump), and should not be used:
+        g++ (GCC) 3.4.6 (Gentoo Hardened 3.4.6-r2, ssp-3.4.6-1.0, pie-8.7.10)
+      The solution is to use gcc-config and switch to a gcc profile that
+      disables ssp, e.g., the "hardenednossp" profile.
 
   * Linux Ubuntu-7.04 (Server Edition, kernel 2.6.20-15-server):
     - You must install the following packages:
