@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.21 2007/02/16 22:46:15 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.22 2007/05/23 12:12:41 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -28,6 +28,7 @@
 #include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/ipvx.hh"
 
 struct iovec;
 
@@ -202,9 +203,11 @@ protected:
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
 	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb) {}
+
 	void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
+
 	uint8_t*	_buffer;
 	size_t		_buffer_bytes;
 	size_t		_offset;
@@ -253,6 +256,22 @@ public:
 		    const Callback&	cb);
 
     /**
+     * Add an additional buffer for writing from by using sendto(2).
+     *
+     * @param buffer pointer to buffer.
+     * @param buffer_bytes size of buffer in bytes.
+     * @param dst_addr the destination address to send the data to.
+     * @param dst_port the destination port (in host order) to send the
+     * data to.
+     * @param cb Callback object to invoke when I/O is performed.
+     */
+    void add_sendto_buffer(const uint8_t*	buffer,
+			   size_t		buffer_bytes,
+			   const IPvX&		dst_addr,
+			   uint16_t		dst_port,
+			   const Callback&	cb);
+
+    /**
      * Add an additional buffer for writing from.
      *
      * @param buffer pointer to buffer.
@@ -295,11 +314,19 @@ private:
 protected:
     struct BufferInfo {
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
-	BufferInfo(const uint8_t* b, size_t bb, size_t off,
-		   const Callback& cb)
-	    : _buffer(b), _buffer_bytes(bb), _offset(off), _cb(cb)
-	{}
+	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
+	      _cb(cb) {}
+	BufferInfo(const uint8_t* b, size_t bb, const IPvX& dst_addr,
+		   uint16_t dst_port, const Callback& cb)
+	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_addr(dst_addr),
+	      _dst_port(dst_port), _cb(cb) {}
+	BufferInfo(const uint8_t* b, size_t bb, size_t off, const Callback& cb)
+	    : _buffer(b), _buffer_bytes(bb), _offset(off), _dst_port(0),
+	      _cb(cb) {}
+
+	bool is_sendto() const { return (! _dst_addr.is_zero()); }
+	const IPvX& dst_addr() const { return (_dst_addr); }
+	uint16_t dst_port() const { return (_dst_port); }
 
 	void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
@@ -308,6 +335,8 @@ protected:
 	const uint8_t*	_buffer;
 	size_t		_buffer_bytes;
 	size_t		_offset;
+	const IPvX	_dst_addr;
+	const uint16_t	_dst_port;
 	Callback	_cb;
     };
 

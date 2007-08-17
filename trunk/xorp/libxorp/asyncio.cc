@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.30 2006/10/12 01:24:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.31 2007/02/16 22:46:15 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -381,6 +381,24 @@ AsyncFileWriter::add_buffer(const uint8_t*	b,
 }
 
 void
+AsyncFileWriter::add_sendto_buffer(const uint8_t*	b,
+				   size_t		b_bytes,
+				   const IPvX&		dst_addr,
+				   uint16_t		dst_port,
+				   const Callback&	cb)
+{
+    assert(b_bytes != 0);
+    _buffers.push_back(BufferInfo(b, b_bytes, dst_addr, dst_port, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
+}
+
+void
 AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 					size_t		b_bytes,
 					size_t		off,
@@ -430,6 +448,10 @@ AsyncFileWriter::disconnect(XorpFd fd, IoEventType type)
 void
 AsyncFileWriter::write(XorpFd fd, IoEventType type)
 {
+    bool is_sendto = false;
+    IPvX dst_addr;
+    uint16_t dst_port;
+
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == false)
 	return;
@@ -450,10 +472,20 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     size_t   total_bytes = 0;
     ssize_t  done = 0;
 
-    list<BufferInfo>::iterator i = _buffers.begin();
+    list<BufferInfo>::const_iterator i = _buffers.begin();
 
+    //
+    // Group together a number of buffers.
+    // If the buffer is sendto()-type, then send that buffer on its own.
+    //
     while (i != _buffers.end()) {
-	BufferInfo bi = *i;
+	const BufferInfo& bi = *i;
+	is_sendto = bi.is_sendto();
+
+	if (is_sendto && (iov_cnt > 0)) {
+	    // XXX: Send first all buffers before this sendto()-type
+	    break;
+	}
 
 	uint8_t* u = const_cast<uint8_t*>(bi._buffer + bi._offset);
 	size_t   u_bytes = bi._buffer_bytes - bi._offset;
@@ -462,48 +494,118 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	total_bytes += u_bytes;
 	assert(total_bytes != 0);
 	iov_cnt++;
+	if (is_sendto) {
+	    dst_addr = bi.dst_addr();
+	    dst_port = bi.dst_port();
+	    break;
+	}
 	if (iov_cnt == _coalesce)
 	    break;
 	++i;
     }
 
-#ifdef HOST_OS_WINDOWS
-    if (fd.is_socket()) {
-	// Socket handles take non-blocking writes.
-	// WSASend() approximates writev().
-	int result = WSASend((SOCKET)_fd, (LPWSABUF)_iov, iov_cnt,
-			     (LPDWORD)&done, 0, NULL, NULL);
-	_last_error = (result == SOCKET_ERROR) ? WSAGetLastError() : 0;
-#if 1
-	if (_last_error != 0)
-	    debug_msg("writer: winsock error %d\n", _last_error);
-#endif // 1
-    } else {
-	// Non-socket handles take blocking writes.
-	// There is no writev() equivalent, so emulate it.
-	BOOL result;
-	DWORD done2;
-	for (uint32_t j = 0; j < iov_cnt; j++) {
-	    result = WriteFile(_fd, (LPVOID)_iov[j].iov_base,
-			       (DWORD)_iov[j].iov_len, (LPDWORD)&done2, NULL);
-	    done += done2;
-	    if (result == FALSE)
-		 break;
+    if (is_sendto) {
+	//
+	// Use sendto(2) to send the data from the first buffer only
+	//
+	XLOG_ASSERT(! dst_addr.is_zero());
+
+#ifndef HOST_OS_WINDOWS
+	sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+#endif
+
+	switch (dst_addr.af()) {
+	case AF_INET:
+	{
+	    struct sockaddr_in sin;
+
+	    dst_addr.copy_out(sin);
+	    sin.sin_port = htons(dst_port);
+
+	    done = ::sendto(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
+			    _iov[0].iov_len,
+			    0,
+			    reinterpret_cast<const sockaddr*>(&sin),
+			    sizeof(sin));
+	    break;
 	}
-	_last_error = (result == FALSE) ? GetLastError() : 0;
-    }	
+#ifdef HAVE_IPV6
+	case AF_INET6:
+	{
+	    struct sockaddr_in6 sin6;
+
+	    dst_addr.copy_out(sin6);
+	    sin6.sin6_port = htons(dst_port);
+
+	    done = ::sendto(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
+			    _iov[0].iov_len,
+			    0,
+			    reinterpret_cast<const sockaddr*>(&sin6),
+			    sizeof(sin6));
+	    break;
+	}
+#endif // HAVE_IPV6
+	default:
+	    XLOG_ERROR("Address family %d is not supported", dst_addr.af());
+	    done = _iov[0].iov_len;	// XXX: Pretend that the data was sent
+	    break;
+	}
+
+	if (done < 0) {
+#ifdef HOST_OS_WINDOWS
+	    _last_error = WSAGetLastError();
+#else
+	    _last_error = errno;
+#endif
+	}
+
+#ifndef HOST_OS_WINDOWS
+	signal(SIGPIPE, saved_sigpipe);
+#endif
+
+    } else {
+	//
+	// Write the data to the socket/file descriptor
+	//
+#ifdef HOST_OS_WINDOWS
+	if (fd.is_socket()) {
+	    // Socket handles take non-blocking writes.
+	    // WSASend() approximates writev().
+	    int result = WSASend((SOCKET)_fd, (LPWSABUF)_iov, iov_cnt,
+				 (LPDWORD)&done, 0, NULL, NULL);
+	    _last_error = (result == SOCKET_ERROR) ? WSAGetLastError() : 0;
+#if 1
+	    if (_last_error != 0)
+		debug_msg("writer: winsock error %d\n", _last_error);
+#endif // 1
+	} else {
+	    // Non-socket handles take blocking writes.
+	    // There is no writev() equivalent, so emulate it.
+	    BOOL result;
+	    DWORD done2;
+	    for (uint32_t j = 0; j < iov_cnt; j++) {
+		result = WriteFile(_fd, (LPVOID)_iov[j].iov_base,
+				   (DWORD)_iov[j].iov_len, (LPDWORD)&done2,
+				   NULL);
+		done += done2;
+		if (result == FALSE)
+		    break;
+	    }
+	    _last_error = (result == FALSE) ? GetLastError() : 0;
+	}
 #else // ! HOST_OS_WINDOWS
-    sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+	sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
 
-    errno = 0;
-    _last_error = 0;
-    done = ::writev(_fd, _iov, (int)iov_cnt);
-    if (done < 0)
-	_last_error = errno;
-    errno = 0;
+	errno = 0;
+	_last_error = 0;
+	done = ::writev(_fd, _iov, (int)iov_cnt);
+	if (done < 0)
+	    _last_error = errno;
+	errno = 0;
 
-    signal(SIGPIPE, saved_sigpipe);
+	signal(SIGPIPE, saved_sigpipe);
 #endif // ! HOST_OS_WINDOWS
+    }
 
     debug_msg("Wrote %d of %u bytes\n",
 	      XORP_INT_CAST(done), XORP_UINT_CAST(total_bytes));
