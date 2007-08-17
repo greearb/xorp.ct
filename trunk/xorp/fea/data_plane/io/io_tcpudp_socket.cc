@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.6 2007/08/15 19:29:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.7 2007/08/17 19:48:07 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -114,7 +114,8 @@ IoTcpUdpSocket::IoTcpUdpSocket(FeaDataPlaneManager& fea_data_plane_manager,
 			       const IfTree& iftree, int family)
     : IoTcpUdp(fea_data_plane_manager, iftree, family),
       _peer_address(IPvX::ZERO(family)),
-      _peer_port(0)
+      _peer_port(0),
+      _async_writer(NULL)
 {
 }
 
@@ -688,6 +689,14 @@ IoTcpUdpSocket::close(string& error_msg)
     // Remove it just in case, even though it may not be select()-ed
     eventloop().remove_ioevent_cb(_socket_fd);
 
+    // Delete the async writer
+    if (_async_writer != NULL) {
+	_async_writer->stop();
+	_async_writer->flush_buffers();
+	delete _async_writer;
+	_async_writer = NULL;
+    }
+
     if (comm_close(_socket_fd) != XORP_OK) {
 	error_msg = c_format("Cannot close the socket: %s",
 			     comm_get_last_error_str());
@@ -726,22 +735,59 @@ IoTcpUdpSocket::tcp_listen(uint32_t backlog, string& error_msg)
 int
 IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 {
-    ssize_t bytes_sent = 0;
-    int flags = 0;
-
     if (! _socket_fd.is_valid()) {
 	error_msg = c_format("The socket is not open");
 	return (XORP_ERROR);
     }
 
-    bytes_sent = ::send(_socket_fd, XORP_CONST_BUF_CAST(&data[0]),
-			data.size(), flags);
-    if (bytes_sent != static_cast<ssize_t>(data.size())) {
-	error_msg = c_format("Failed to send data: %s", strerror(errno));
-	return (XORP_ERROR);
+    // Allocate the async writer
+    if (_async_writer == NULL) {
+	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
+					    XorpTask::PRIORITY_DEFAULT);
     }
 
+    // Queue the data for transmission
+    _async_writer->add_buffer(&data[0], data.size(),
+			      callback(this, &IoTcpUdpSocket::send_completed_cb));
+    _async_writer->start();
+
     return (XORP_OK);
+}
+
+void
+IoTcpUdpSocket::send_completed_cb(AsyncFileWriter::Event	event,
+				  const uint8_t*		buffer,
+				  size_t			buffer_bytes,
+				  size_t			offset)
+{
+    string error_msg;
+
+    UNUSED(buffer);
+    UNUSED(buffer_bytes);
+    UNUSED(offset);
+
+    switch (event) {
+    case AsyncFileWriter::DATA:
+	// I/O occured
+	XLOG_ASSERT(offset <= buffer_bytes);
+	break;
+    case AsyncFileWriter::FLUSHING:
+	// Buffer is being flushed
+	break;
+    case AsyncFileWriter::OS_ERROR:
+	// I/O error has occured
+	error_msg = c_format("Failed to send data: Unknown I/O error");
+	if (io_tcpudp_receiver() != NULL)
+	    io_tcpudp_receiver()->error_event(error_msg, true);
+	break;
+    case AsyncFileWriter::END_OF_FILE:
+	// End of file reached (applies to read only)
+	XLOG_UNREACHABLE();
+	break;
+    case AsyncFileWriter::WOULDBLOCK:
+	// I/O would block the current thread
+	break;
+    }
 }
 
 int
@@ -756,6 +802,11 @@ IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
     if (! _socket_fd.is_valid()) {
 	error_msg = c_format("The socket is not open");
 	return (XORP_ERROR);
+    }
+
+    if (_async_writer == NULL) {
+	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
+					    XorpTask::PRIORITY_DEFAULT);
     }
 
     switch (family()) {

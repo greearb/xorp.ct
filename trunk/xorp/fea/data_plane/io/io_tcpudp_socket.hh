@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.3 2007/08/15 19:29:20 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.4 2007/08/17 19:48:07 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -23,8 +23,13 @@
 // I/O TCP/UDP socket support.
 //
 
+
+class AsyncFileWriter;
+
+
 #include "libxorp/xorp.h"
 #include "libxorp/eventloop.hh"
+#include "libxorp/asyncio.hh"
 
 #include "fea/io_tcpudp.hh"
 
@@ -317,6 +322,20 @@ private:
     void data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp);
 
     /**
+     * Data transmission completed callback.
+     *
+     * @param event the event code (@see AsyncFileOperator::Event).
+     * @param buffer the buffer with the transmitted data.
+     * @param buffer_bytes the size of the buffer with the data.
+     * @param offset the offset of the last byte written (from the beginning
+     * of the buffer.
+     */
+    void send_completed_cb(AsyncFileWriter::Event	event,
+			   const uint8_t*		buffer,
+			   size_t			buffer_bytes,
+			   size_t			offset);
+
+    /**
      * I/O event callback: the peer has closed the connection.
      *
      * This callback is used only for Windows, and only for TCP sockets.
@@ -329,6 +348,7 @@ private:
     XorpFd	_socket_fd;
     IPvX	_peer_address;		// Peer address (valid for TCP only)
     uint16_t	_peer_port;		// Peer port (valid for TCP only)
+    AsyncFileWriter* _async_writer;	// Async writer for sending data
 };
 
 #endif // __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
