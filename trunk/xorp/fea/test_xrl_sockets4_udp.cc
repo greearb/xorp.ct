@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.19 2007/08/09 00:46:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.20 2007/08/11 01:48:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -260,11 +260,17 @@ protected:
     }
 
     XrlCmdError
-    socket4_user_0_1_connect_event(const string&	/* sockid */,
-				   const IPv4&		/* src_host */,
-				   const uint32_t&	/* src_port */,
-				   const string&	/* new_sockid */,
-				   bool&		/* accept */)
+    socket4_user_0_1_inbound_connect_event(const string&	/* sockid */,
+					   const IPv4&		/* src_host */,
+					   const uint32_t&	/* src_port */,
+					   const string&	/* new_sockid */,
+					   bool&		/* accept */)
+    {
+	return XrlCmdError::COMMAND_FAILED("Not implemented");
+    }
+
+    XrlCmdError
+    socket4_user_0_1_outgoing_connect_event(const string&	/* sockid */)
     {
 	return XrlCmdError::COMMAND_FAILED("Not implemented");
     }

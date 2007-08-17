@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.2 2007/08/11 05:49:44 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.3 2007/08/15 19:29:20 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -298,6 +298,14 @@ private:
      * @param io_event_type the event type (@see IoEventType).
      */
     void accept_io_cb(XorpFd fd, IoEventType io_event_type);
+
+    /**
+     * I/O event callback: connection opening to the peer has completed.
+     *
+     * @param fd the file descriptor of the socket with the new connection.
+     * @param io_event_type the event type (@see IoEventType).
+     */
+    void connect_io_cb(XorpFd fd, IoEventType io_event_type);
 
     /**
      * I/O event callback: data is received.

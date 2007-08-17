@@ -35,11 +35,24 @@ interface socket4_user/0.1 {
      * @param accept if true, the connection request has been accepted,
      *               otherwise it has been rejected.
      */
-     connect_event	? sockid:txt					\
-			& src_host:ipv4					\
-			& src_port:u32					\
-			& new_sockid:txt				\
-			-> accept:bool
+     inbound_connect_event	? sockid:txt				\
+				& src_host:ipv4				\
+				& src_port:u32				\
+				& new_sockid:txt			\
+				-> accept:bool
+
+    /**
+     * Method invoked by target implementing socket4/0.1 when an outgoing
+     * connection request originated by the local host is completed.
+     *
+     * It applies only to TCP sockets.
+     * Note that if the connection failed, the error_event will be dispatched
+     * instead.
+     *
+     * @param sockid the identifier associated with socket where the event
+     *               occurred.
+     */
+     outgoing_connect_event	? sockid:txt
 
     /**
      * Method invoked by target implementing socket4/0.1 when an error occurs.

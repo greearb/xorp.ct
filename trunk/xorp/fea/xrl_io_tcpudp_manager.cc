@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.1 2007/08/09 00:46:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.2 2007/08/15 18:55:17 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -88,11 +88,11 @@ XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
 }
 
 void
-XrlIoTcpUdpManager::connect_event(const string&		receiver_name,
-				  const string&		sockid,
-				  const IPvX&		src_host,
-				  uint16_t		src_port,
-				  const string&		new_sockid)
+XrlIoTcpUdpManager::inbound_connect_event(const string&		receiver_name,
+					  const string&		sockid,
+					  const IPvX&		src_host,
+					  uint16_t		src_port,
+					  const string&		new_sockid)
 {
     if (src_host.is_ipv4()) {
 	//
@@ -103,15 +103,15 @@ XrlIoTcpUdpManager::connect_event(const string&		receiver_name,
 	//
 	// Send notification
 	//
-	cl.send_connect_event(receiver_name.c_str(),
-			      sockid,
-			      src_host.get_ipv4(),
-			      src_port,
-			      new_sockid,
-			      callback(this,
-				       &XrlIoTcpUdpManager::xrl_send_connect_event_cb,
-				       src_host.af(), new_sockid,
-				       receiver_name));
+	cl.send_inbound_connect_event(receiver_name.c_str(),
+				      sockid,
+				      src_host.get_ipv4(),
+				      src_port,
+				      new_sockid,
+				      callback(this,
+					       &XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb,
+					       src_host.af(), new_sockid,
+					       receiver_name));
     }
 
     if (src_host.is_ipv6()) {
@@ -123,15 +123,53 @@ XrlIoTcpUdpManager::connect_event(const string&		receiver_name,
 	//
 	// Send notification
 	//
-	cl.send_connect_event(receiver_name.c_str(),
-			      sockid,
-			      src_host.get_ipv6(),
-			      src_port,
-			      new_sockid,
-			      callback(this,
-				       &XrlIoTcpUdpManager::xrl_send_connect_event_cb,
+	cl.send_inbound_connect_event(receiver_name.c_str(),
+				      sockid,
+				      src_host.get_ipv6(),
+				      src_port,
+				      new_sockid,
+				      callback(this,
+					       &XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb,
 				       src_host.af(), new_sockid,
 				       receiver_name));
+    }
+}
+
+void
+XrlIoTcpUdpManager::outgoing_connect_event(int			family,
+					   const string&	receiver_name,
+					   const string&	sockid)
+{
+    if (family == IPv4::af()) {
+	//
+	// Instantiate client sending interface
+	//
+	XrlSocket4UserV0p1Client cl(&xrl_router());
+
+	//
+	// Send notification
+	//
+	cl.send_outgoing_connect_event(receiver_name.c_str(),
+				       sockid,
+				       callback(this,
+						&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
+						family, receiver_name));
+    }
+
+    if (family == IPv6::af()) {
+	//
+	// Instantiate client sending interface
+	//
+	XrlSocket6UserV0p1Client cl(&xrl_router());
+
+	//
+	// Send notification
+	//
+	cl.send_outgoing_connect_event(receiver_name.c_str(),
+				       sockid,
+				       callback(this,
+						&XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb,
+						family, receiver_name));
     }
 }
 
@@ -237,10 +275,11 @@ XrlIoTcpUdpManager::xrl_send_recv_event_cb(const XrlError& xrl_error,
 }
 
 void
-XrlIoTcpUdpManager::xrl_send_connect_event_cb(const XrlError& xrl_error,
-					      const bool* accept, int family,
-					      string sockid,
-					      string receiver_name)
+XrlIoTcpUdpManager::xrl_send_inbound_connect_event_cb(const XrlError& xrl_error,
+						      const bool* accept,
+						      int family,
+						      string sockid,
+						      string receiver_name)
 {
     if (xrl_error == XrlError::OKAY()) {
 	string error_msg;
@@ -254,7 +293,28 @@ XrlIoTcpUdpManager::xrl_send_connect_event_cb(const XrlError& xrl_error,
 	return;
     }
 
-    debug_msg("xrl_send_connect_event_cb: error %s\n",
+    debug_msg("xrl_send_inbound_connect_event_cb: error %s\n",
+	      xrl_error.str().c_str());
+
+    //
+    // Sending Xrl generated an error.
+    //
+    // Remove all communication handlers associated with this receiver.
+    //
+    _io_tcpudp_manager.instance_death(receiver_name);
+}
+
+void
+XrlIoTcpUdpManager::xrl_send_outgoing_connect_event_cb(const XrlError& xrl_error,
+						       int family,
+						       string receiver_name)
+{
+    UNUSED(family);
+
+    if (xrl_error == XrlError::OKAY())
+	return;
+
+    debug_msg("xrl_send_outgoing_connect_event_cb: error %s\n",
 	      xrl_error.str().c_str());
 
     //

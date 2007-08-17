@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.2 2007/08/15 18:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.3 2007/08/15 19:29:19 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -714,9 +714,9 @@ IoTcpUdpComm::recv_event(const IPvX&		src_host,
 }
 
 void
-IoTcpUdpComm::connect_event(const IPvX&		src_host,
-			    uint16_t		src_port,
-			    IoTcpUdp*		new_io_tcpudp)
+IoTcpUdpComm::inbound_connect_event(const IPvX&		src_host,
+				    uint16_t		src_port,
+				    IoTcpUdp*		new_io_tcpudp)
 {
     IoTcpUdpComm* new_io_tcpudp_comm;
 
@@ -727,8 +727,15 @@ IoTcpUdpComm::connect_event(const IPvX&		src_host,
 								   src_port,
 								   new_io_tcpudp);
 
-    _io_tcpudp_manager.connect_event(_creator, sockid(), src_host, src_port,
-				     new_io_tcpudp_comm->sockid());
+    _io_tcpudp_manager.inbound_connect_event(_creator, sockid(),
+					     src_host, src_port,
+					     new_io_tcpudp_comm->sockid());
+}
+
+void
+IoTcpUdpComm::outgoing_connect_event()
+{
+    _io_tcpudp_manager.outgoing_connect_event(_family, _creator, sockid());
 }
 
 void
@@ -1559,16 +1566,28 @@ IoTcpUdpManager::recv_event(const string&		receiver_name,
 }
 
 void
-IoTcpUdpManager::connect_event(const string&	receiver_name,
-			       const string&	sockid,
-			       const IPvX&	src_host,
-			       uint16_t		src_port,
-			       const string&	new_sockid)
+IoTcpUdpManager::inbound_connect_event(const string&	receiver_name,
+				       const string&	sockid,
+				       const IPvX&	src_host,
+				       uint16_t		src_port,
+				       const string&	new_sockid)
 {
     if (_io_tcpudp_manager_receiver != NULL)
-	_io_tcpudp_manager_receiver->connect_event(receiver_name, sockid,
-						   src_host, src_port,
-						   new_sockid);
+	_io_tcpudp_manager_receiver->inbound_connect_event(receiver_name,
+							   sockid,
+							   src_host, src_port,
+							   new_sockid);
+}
+
+void
+IoTcpUdpManager::outgoing_connect_event(int		family,
+					const string&	receiver_name,
+					const string&	sockid)
+{
+    if (_io_tcpudp_manager_receiver != NULL)
+	_io_tcpudp_manager_receiver->outgoing_connect_event(family,
+							    receiver_name,
+							    sockid);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/xrl_io_tcpudp_manager.hh,v 1.1 2007/08/09 00:46:58 pavlin Exp $
 
 #ifndef __FEA_XRL_IO_TCPUDP_MANAGER_HH__
 #define __FEA_XRL_IO_TCPUDP_MANAGER_HH__
@@ -54,7 +54,7 @@ public:
 		    const vector<uint8_t>&	data);
 
     /**
-     * Connection request received event.
+     * Inbound connection request received event.
      *
      * It applies only to TCP sockets.
      *
@@ -64,16 +64,31 @@ public:
      * @param src_port the originating host port number.
      * @param new_sockid the new socket ID.
      */
-    void connect_event(const string&		receiver_name,
-		       const string&		sockid,
-		       const IPvX&		src_host,
-		       uint16_t			src_port,
-		       const string&		new_sockid);
+    void inbound_connect_event(const string&	receiver_name,
+			       const string&	sockid,
+			       const IPvX&	src_host,
+			       uint16_t		src_port,
+			       const string&	new_sockid);
+
+    /**
+     * Outgoing connection request completed event.
+     *
+     * It applies only to TCP sockets.
+     *
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
+     * @param receiver_name the name of the receiver to send the event to.
+     * @param sockid unique socket ID.
+     */
+    void outgoing_connect_event(int		family,
+				const string&	receiver_name,
+				const string&	sockid);
 
     /**
      * Error occured event.
      *
-     * @param family the address family.
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
      * @param receiver_name the name of the receiver to send the event to.
      * @param sockid unique socket ID.
      * @param error a textual description of the error.
@@ -93,7 +108,8 @@ public:
      * This method is not called if the socket is gracefully closed
      * through close().
      *
-     * @param family the address family.
+     * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
+     * respectively).
      * @param receiver_name the name of the receiver to send the event to.
      * @param sockid unique socket ID.
      */
@@ -109,9 +125,12 @@ private:
      */
     void xrl_send_recv_event_cb(const XrlError& xrl_error, int family,
 				string receiver_name);
-    void xrl_send_connect_event_cb(const XrlError& xrl_error,
-				   const bool* accept, int family,
-				   string sockid, string receiver_name);
+    void xrl_send_inbound_connect_event_cb(const XrlError& xrl_error,
+					   const bool* accept, int family,
+					   string sockid, 
+					   string receiver_name);
+    void xrl_send_outgoing_connect_event_cb(const XrlError& xrl_error,
+					    int family, string receiver_name);
     void xrl_send_error_event_cb(const XrlError& xrl_error, int family,
 				 string receiver_name);
     void xrl_send_disconnect_event_cb(const XrlError& xrl_error, int family,

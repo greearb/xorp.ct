@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.5 2007/08/15 17:57:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.6 2007/08/15 19:29:20 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -398,6 +398,8 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 				      uint16_t remote_port,
 				      bool is_blocking, string& error_msg)
 {
+    int in_progress = 0;
+
     XLOG_ASSERT(family() == local_addr.af());
     XLOG_ASSERT(family() == remote_addr.af());
 
@@ -410,7 +412,6 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
     case AF_INET:
     {
 	struct in_addr local_in_addr, remote_in_addr;
-	int in_progress = 0;
 
 	local_addr.copy_out(local_in_addr);
 	remote_addr.copy_out(remote_in_addr);
@@ -424,7 +425,6 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr, remote_in6_addr;
-	int in_progress = 0;
 
 	local_addr.copy_out(local_in6_addr);
 	remote_addr.copy_out(remote_in6_addr);
@@ -446,7 +446,15 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 	return (XORP_ERROR);
     }
 
-    return (enable_data_recv(error_msg));
+    // Add the socket to the eventloop
+    if (eventloop().add_ioevent_cb(_socket_fd, IOT_CONNECT,
+				   callback(this, &IoTcpUdpSocket::connect_io_cb))
+	!= true) {
+	error_msg = c_format("Failed to add I/O callback to complete outgoing connection");
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
 }
 
 int
@@ -456,6 +464,8 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 				      uint16_t remote_port,
 				      bool is_blocking, string& error_msg)
 {
+    int in_progress = 0;
+
     XLOG_ASSERT(family() == local_addr.af());
     XLOG_ASSERT(family() == remote_addr.af());
 
@@ -468,7 +478,6 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
     case AF_INET:
     {
 	struct in_addr local_in_addr, remote_in_addr;
-	int in_progress = 0;
 
 	local_addr.copy_out(local_in_addr);
 	remote_addr.copy_out(remote_in_addr);
@@ -482,7 +491,6 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr, remote_in6_addr;
-	int in_progress = 0;
 
 	local_addr.copy_out(local_in6_addr);
 	remote_addr.copy_out(remote_in6_addr);
@@ -1067,7 +1075,50 @@ IoTcpUdpSocket::accept_io_cb(XorpFd fd, IoEventType io_event_type)
     //
     // Send the event to the receiver
     //
-    io_tcpudp_receiver()->connect_event(src_host, src_port, io_tcpudp);
+    io_tcpudp_receiver()->inbound_connect_event(src_host, src_port, io_tcpudp);
+}
+
+void
+IoTcpUdpSocket::connect_io_cb(XorpFd fd, IoEventType io_event_type)
+{
+    string error_msg;
+
+    XLOG_ASSERT(fd == _socket_fd);
+
+    UNUSED(io_event_type);
+
+    //
+    // Test whether there is a registered receiver
+    //
+    if (io_tcpudp_receiver() == NULL) {
+	//
+	// This might happen only during startup and should be transient.
+	//
+	XLOG_WARNING("Connection opening to the peer has completed, "
+		     "but no receiver is registered.");
+	return;
+    }
+
+    //
+    // XXX: Remove from the eventloop for connect events.
+    //
+    eventloop().remove_ioevent_cb(_socket_fd, IOT_CONNECT);
+
+    // Test whether the connection succeeded
+    if (comm_sock_is_connected(_socket_fd) != XORP_OK) {
+	io_tcpudp_receiver()->error_event(comm_get_last_error_str(), true);
+	return;
+    }
+
+    if (enable_data_recv(error_msg) != XORP_OK) {
+	io_tcpudp_receiver()->error_event(error_msg, true);
+	return;
+    }
+
+    //
+    // Send the event to the receiver
+    //
+    io_tcpudp_receiver()->outgoing_connect_event();
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp.hh,v 1.1 2007/08/09 00:46:57 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp.hh,v 1.2 2007/08/15 19:29:19 pavlin Exp $
 
 
 #ifndef __FEA_IO_TCPUDP_HH__
@@ -367,16 +367,24 @@ protected:
 			    const vector<uint8_t>&	data);
 
     /**
-     * Connection request received event.
+     * Inbound connection request received event.
      *
      * It applies only to TCP sockets.
      *
      * @param src_host the originating host IP address.
      * @param src_port the originating host port number.
+     * @param new_io_tcpudp the handler for the new connection.
      */
-    virtual void connect_event(const IPvX&		src_host,
-			       uint16_t			src_port,
-			       IoTcpUdp*		new_io_tcpudp);
+    virtual void inbound_connect_event(const IPvX&	src_host,
+				       uint16_t		src_port,
+				       IoTcpUdp*	new_io_tcpudp);
+
+    /**
+     * Outgoing connection request completed event.
+     *
+     * It applies only to TCP sockets.
+     */
+    virtual void outgoing_connect_event();
 
     /**
      * Error occured event.
@@ -441,7 +449,7 @@ public:
 			    const vector<uint8_t>&	data) = 0;
 
     /**
-     * Connection request received event.
+     * Inbound connection request received event.
      *
      * It applies only to TCP sockets.
      *
@@ -449,9 +457,16 @@ public:
      * @param src_port the originating host port number.
      * @param new_io_tcpudp the handler for the new connection.
      */
-    virtual void connect_event(const IPvX&		src_host,
-			       uint16_t			src_port,
-			       IoTcpUdp*		new_io_tcpudp) = 0;
+    virtual void inbound_connect_event(const IPvX&	src_host,
+				       uint16_t		src_port,
+				       IoTcpUdp*	Xnew_io_tcpudp) = 0;
+
+    /**
+     * Outgoing connection request completed event.
+     *
+     * It applies only to TCP sockets.
+     */
+    virtual void outgoing_connect_event() = 0;
 
     /**
      * Error occured event.

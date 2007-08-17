@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/io_tcpudp.cc,v 1.1 2007/08/09 00:46:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -69,16 +69,28 @@ IoTcpUdp::recv_event(const IPvX&		src_host,
 }
 
 void
-IoTcpUdp::connect_event(const IPvX&		src_host,
-			uint16_t		src_port,
-			IoTcpUdp*		new_io_tcpudp)
+IoTcpUdp::inbound_connect_event(const IPvX&	src_host,
+				uint16_t	src_port,
+				IoTcpUdp*	new_io_tcpudp)
 {
     if (_io_tcpudp_receiver == NULL) {
 	// XXX: should happen only during transient setup stage
 	return;
     }
 
-    _io_tcpudp_receiver->connect_event(src_host, src_port, new_io_tcpudp);
+    _io_tcpudp_receiver->inbound_connect_event(src_host, src_port,
+					       new_io_tcpudp);
+}
+
+void
+IoTcpUdp::outgoing_connect_event()
+{
+    if (_io_tcpudp_receiver == NULL) {
+	// XXX: should happen only during transient setup stage
+	return;
+    }
+
+    _io_tcpudp_receiver->outgoing_connect_event();
 }
 
 void

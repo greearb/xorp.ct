@@ -180,11 +180,14 @@ protected:
 				const vector<uint8_t>&	data) = 0;
 
     XrlCmdError
-    socket4_user_0_1_connect_event(const string& 	sockid,
-				   const IPv4&		src_host,
-				   const uint32_t&	src_port,
-				   const string&	new_sockid,
-				   bool&		accept) = 0;
+    socket4_user_0_1_inbound_connect_event(const string& 	sockid,
+					   const IPv4&		src_host,
+					   const uint32_t&	src_port,
+					   const string&	new_sockid,
+					   bool&		accept) = 0;
+
+    XrlCmdError
+    socket4_user_0_1_outgoing_connect_event(const string& 	sockid) = 0;
 
     XrlCmdError
     socket4_user_0_1_error_event(const string& 		sockid, 
@@ -407,11 +410,11 @@ protected:
     }
 
     XrlCmdError
-    socket4_user_0_1_connect_event(const string& sockid,
-				   const IPv4&		src_host,
-				   const uint32_t&	src_port,
-				   const string&	new_sockid,
-				   bool&			accept)
+    socket4_user_0_1_inbound_connect_event(const string&	sockid,
+					   const IPv4&		src_host,
+					   const uint32_t&	src_port,
+					   const string&	new_sockid,
+					   bool&		accept)
     {
 	// should only be receiving connections from the server socket
 	XLOG_ASSERT(sockid == _server_sockid);
@@ -421,6 +424,15 @@ protected:
 	_client_sockid = new_sockid;
 	_client_closed = false;
 	return XrlCmdError::OKAY();
+    }
+
+    XrlCmdError
+    socket4_user_0_1_outgoing_connect_event(const string&	sockid)
+
+    {
+	// should only be originating connections from the client socket
+	XLOG_ASSERT(sockid == _server_sockid);
+	return XrlCmdError::COMMAND_FAILED("Not supported");
     }
 
     XrlCmdError
@@ -471,9 +483,10 @@ public:
     TestSocket4TCPClient(EventLoop& e, const string& fea_target_name,
 		   IPv4 finder_host, uint16_t finder_port)
 	: TestSocket4TCP(e, fea_target_name, finder_host, finder_port),
-	  _closed(true) {}
+	  _closed(true), _connected(false) {}
 
     bool closed() const { return _closed; }
+    bool connected() const { return _connected; }
 
     /**
      * Bind to interface and port, and connect to remote address and port.
@@ -563,6 +576,7 @@ protected:
 	}
 	_sockid.erase();
 	_closed = true;
+	_connected = false;
     }
 
     void
@@ -600,13 +614,22 @@ protected:
     }
 
     XrlCmdError
-    socket4_user_0_1_connect_event(const string&    /* sockid */,
-				   const IPv4&	    /* src_host */,
-				   const uint32_t&  /* src_port */,
-				   const string&    /* new_sockid */,
-				   bool&	    /* accept */)
+    socket4_user_0_1_inbound_connect_event(const string&    /* sockid */,
+					   const IPv4&	    /* src_host */,
+					   const uint32_t&  /* src_port */,
+					   const string&    /* new_sockid */,
+					   bool&	    /* accept */)
     {
 	return XrlCmdError::COMMAND_FAILED("Not supported");
+    }
+
+    XrlCmdError
+    socket4_user_0_1_outgoing_connect_event(const string&	sockid)
+    {
+	XLOG_ASSERT(_sockid == sockid);
+	verbose_log("Client connected to server\n");
+	_connected = true;
+	return XrlCmdError::OKAY();
     }
 
     XrlCmdError
@@ -626,12 +649,14 @@ protected:
 	XLOG_ASSERT(sockid == _sockid);
 	verbose_log("Client disconnect event\n");
 	_closed = true;
+	_connected = false;
 	return XrlCmdError::OKAY();
     }	
 
 private:
-    string _sockid; // socket used to connect to server
-    bool _closed;   // flag indicating whether socket is closed
+    string _sockid;	// socket used to connect to server
+    bool _closed;	// flag indicating whether socket is closed
+    bool _connected;	// flag indicating whether the socket is connected
 };
 
 //
@@ -783,6 +808,19 @@ verify_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
     }
 }
 
+static void
+verify_client_connected(TestSocket4TCP** ppu, bool connected, bool* eflag)
+{
+    TestSocket4TCPClient* pu = dynamic_cast<TestSocket4TCPClient*>(*ppu);
+    if (pu->connected() != connected) {
+	verbose_err("Client socket connected state (%s) "
+		    "does not matched expected (%s)\n",
+		    bool_c_str(pu->connected()),
+		    bool_c_str(connected));
+	*eflag = true;
+    }
+}
+
 //
 // ----------------------------------------------------------------------------
 // Common functions
@@ -901,6 +939,10 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 			       callback(verify_client_closed, &client,
 					false, &eflag)));
 
+    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+			       callback(verify_client_connected, &client,
+					true, &eflag)));
+
     //
     // Send packets from client to server, check bytes send/received and states
     //
@@ -917,6 +959,10 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
 					false, &eflag)));
+
+    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+			       callback(verify_client_connected, &client,
+					true, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
@@ -944,6 +990,10 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					false, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
+			       callback(verify_client_connected, &client,
+					true, &eflag)));
+
+    ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
 					false, &eflag)));
 
@@ -961,6 +1011,10 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
 					true, &eflag)));
+
+    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+			       callback(verify_client_connected, &client,
+					false, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_client_closed, &server,
@@ -1017,6 +1071,10 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					false, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
+    			       callback(verify_client_connected, &client,
+					true, &eflag)));
+
+    ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_server_closed, &server,
 					false, &eflag)));
 
@@ -1035,6 +1093,10 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_client_closed, &client,
 					true, &eflag)));
+
+    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+    			       callback(verify_client_connected, &client,
+					false, &eflag)));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_server_closed, &server,
