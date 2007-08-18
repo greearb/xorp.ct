@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.132 2007/08/17 22:18:47 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.133 2007/08/17 23:28:13 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -529,6 +529,7 @@ class AreaRouter : public ServiceBase {
      * @param lsas list of recived lsas.
      * @param direct_ack list of direct acks to send in response to the LSA
      * @param delayed_ack list of delayed acks to send in response to the LSA
+     * @param is_router_dr true if the router is the designated router.
      * @param is_router_bdr true if the receiving interface was in
      * state backup.
      * @param is_neighbour_dr true if the LSA was received from the
@@ -538,7 +539,8 @@ class AreaRouter : public ServiceBase {
 		      list<Lsa::LsaRef>& lsas, 
 		      list<Lsa_header>& direct_ack,
 		      list<Lsa_header>& delayed_ack,
-		      bool is_router_bdr, bool is_neighbour_dr);
+		      bool is_router_dr, bool is_router_bdr,
+		      bool is_neighbour_dr);
 
     /**
      * Returned by compare_lsa.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.280 2007/08/17 22:18:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.281 2007/08/17 23:28:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2299,7 +2299,8 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 			    list<Lsa::LsaRef>& lsas, 
 			    list<Lsa_header>& direct_ack,
 			    list<Lsa_header>& delayed_ack,
-			    bool is_router_bdr, bool is_neighbour_dr)
+			    bool is_router_dr, bool is_router_bdr,
+			    bool is_neighbour_dr)
 {
     debug_msg("PeerID %u NeighbourID %u %s\nbackup %s dr %s\n", peerid, nid,
 	      pp_lsas(lsas).c_str(),
@@ -2399,7 +2400,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	case OspfTypes::V2:
 	    break;
 	case OspfTypes::V3:
-	    if (!is_neighbour_dr)
+	    if (!is_router_dr)
 		break;
 	    LinkLsa *ollsa = 0;
 	    LinkLsa *nllsa = 0;
