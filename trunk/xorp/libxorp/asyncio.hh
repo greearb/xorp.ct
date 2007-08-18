@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.22 2007/05/23 12:12:41 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.23 2007/08/17 23:47:52 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -315,16 +315,16 @@ protected:
     struct BufferInfo {
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
-	      _cb(cb) {}
+	      _cb(cb), _is_sendto(false) {}
 	BufferInfo(const uint8_t* b, size_t bb, const IPvX& dst_addr,
 		   uint16_t dst_port, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_addr(dst_addr),
-	      _dst_port(dst_port), _cb(cb) {}
+	      _dst_port(dst_port), _cb(cb), _is_sendto(true) {}
 	BufferInfo(const uint8_t* b, size_t bb, size_t off, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _dst_port(0),
-	      _cb(cb) {}
+	      _cb(cb), _is_sendto(false) {}
 
-	bool is_sendto() const { return (! _dst_addr.is_zero()); }
+	bool is_sendto() const { return (_is_sendto); }
 	const IPvX& dst_addr() const { return (_dst_addr); }
 	uint16_t dst_port() const { return (_dst_port); }
 
@@ -338,6 +338,7 @@ protected:
 	const IPvX	_dst_addr;
 	const uint16_t	_dst_port;
 	Callback	_cb;
+	bool		_is_sendto;
     };
 
     void write(XorpFd, IoEventType);
