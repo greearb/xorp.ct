@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.31 2007/02/16 22:46:15 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.32 2007/08/17 23:47:52 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -450,7 +450,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 {
     bool is_sendto = false;
     IPvX dst_addr;
-    uint16_t dst_port;
+    uint16_t dst_port = 0;
 
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == false)
