@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.57 2007/06/18 21:22:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.58 2007/07/18 01:30:23 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -50,6 +50,10 @@
 #endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
+// if_name() is a macro in FreeBSD 7.0 conflicting with our method names.
+#ifdef if_name
+#undef if_name
+#endif
 #endif
 #ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
