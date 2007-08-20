@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.10 2007/08/20 19:12:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.11 2007/08/20 19:29:34 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -743,16 +743,21 @@ IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 
     // Allocate the async writer
     if (_async_writer == NULL) {
-	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd);
+	//
+	// XXX: Don't coalesce the buffers.
+	// Note that we shouldn't coalesce for UDP, because it might break
+	// the semantics of protocol control packets that use UDP.
+	// We don't coalesce for TCP as well, but this could be changed in the
+	// future if it improves performance.
+	//
+	int coalesce_buffers_n = 1;
+	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
+					    coalesce_buffers_n);
     }
-
-    // XXX: Aggregate the transmission buffers only for TCP
-    bool do_aggregate = is_tcp();
 
     // Queue the data for transmission
     _async_writer->add_buffer(&data[0], data.size(),
-			      callback(this, &IoTcpUdpSocket::send_completed_cb),
-			      do_aggregate);
+			      callback(this, &IoTcpUdpSocket::send_completed_cb));
     _async_writer->start();
 
     return (XORP_OK);
@@ -771,7 +776,16 @@ IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
 
     // Allocate the async writer
     if (_async_writer == NULL) {
-	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd);
+	//
+	// XXX: Don't coalesce the buffers.
+	// Note that we shouldn't coalesce for UDP, because it might break
+	// the semantics of protocol control packets that use UDP.
+	// We don't coalesce for TCP as well, but this could be changed in the
+	// future if it improves performance.
+	//
+	int coalesce_buffers_n = 1;
+	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
+					    coalesce_buffers_n);
     }
 
     // Queue the data for transmission
