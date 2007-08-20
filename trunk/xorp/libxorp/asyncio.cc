@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.34 2007/08/20 19:08:08 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.35 2007/08/20 19:43:37 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -482,6 +482,11 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	const BufferInfo& bi = *i;
 	is_sendto = bi.is_sendto();
 
+	if (is_sendto && (iov_cnt > 0)) {
+	    // XXX: Send first all buffers before this sendto()-type
+	    break;
+	}
+
 	uint8_t* u = const_cast<uint8_t*>(bi._buffer + bi._offset);
 	size_t   u_bytes = bi._buffer_bytes - bi._offset;
 	iov_place(_iov[iov_cnt].iov_base, _iov[iov_cnt].iov_len, u, u_bytes);
@@ -492,6 +497,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	if (is_sendto) {
 	    dst_addr = bi.dst_addr();
 	    dst_port = bi.dst_port();
+	    break;
 	}
 	if (iov_cnt == _coalesce)
 	    break;
