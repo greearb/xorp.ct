@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.25 2007/08/20 19:08:08 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.26 2007/08/20 19:43:37 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -257,6 +257,8 @@ public:
 
     /**
      * Add an additional buffer for writing from by using sendto(2).
+     *
+     * Note that sendto()-buffers are never coalesced with other buffers.
      *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
