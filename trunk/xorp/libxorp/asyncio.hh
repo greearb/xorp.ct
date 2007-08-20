@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.23 2007/08/17 23:47:52 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.24 2007/08/18 02:19:27 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -250,13 +250,19 @@ public:
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param cb Callback object to invoke when I/O is performed.
+     * @param do_aggregate if true, then attempt to aggregate all
+     * data in the buffers pending to be transmitted.
      */
     void add_buffer(const uint8_t*	buffer,
 		    size_t		buffer_bytes,
-		    const Callback&	cb);
+		    const Callback&	cb,
+		    bool		do_aggregate = true);
 
     /**
      * Add an additional buffer for writing from by using sendto(2).
+     *
+     * Note that the data in the added buffer will have the "do_aggregate"
+     * flag set to false.
      *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
@@ -265,7 +271,7 @@ public:
      * data to.
      * @param cb Callback object to invoke when I/O is performed.
      */
-    void add_sendto_buffer(const uint8_t*	buffer,
+    void add_buffer_sendto(const uint8_t*	buffer,
 			   size_t		buffer_bytes,
 			   const IPvX&		dst_addr,
 			   uint16_t		dst_port,
@@ -278,11 +284,14 @@ public:
      * @param buffer_bytes size of buffer in bytes.
      * @param offset the starting point to write from in the buffer.
      * @param cb Callback object to invoke when I/O is performed.
+     * @param do_aggregate if true, then attempt to aggregate all
+     * data in the buffers pending to be transmitted.
      */
     void add_buffer_with_offset(const uint8_t*	buffer,
 				size_t		buffer_bytes,
 				size_t		offset,
-				const Callback&	cb);
+				const Callback&	cb,
+				bool		do_aggregate = true);
 
     /**
      * Start asynchronous operation.
@@ -313,18 +322,22 @@ private:
 
 protected:
     struct BufferInfo {
-	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
+	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb,
+		   bool do_aggregate = true)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
-	      _cb(cb), _is_sendto(false) {}
+	      _cb(cb), _is_sendto(false), _do_aggregate(do_aggregate) {}
 	BufferInfo(const uint8_t* b, size_t bb, const IPvX& dst_addr,
 		   uint16_t dst_port, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_addr(dst_addr),
-	      _dst_port(dst_port), _cb(cb), _is_sendto(true) {}
-	BufferInfo(const uint8_t* b, size_t bb, size_t off, const Callback& cb)
+	      _dst_port(dst_port), _cb(cb), _is_sendto(true),
+	      _do_aggregate(false) {}
+	BufferInfo(const uint8_t* b, size_t bb, size_t off, const Callback& cb,
+		   bool do_aggregate = true)
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _dst_port(0),
-	      _cb(cb), _is_sendto(false) {}
+	      _cb(cb), _is_sendto(false), _do_aggregate(do_aggregate) {}
 
 	bool is_sendto() const { return (_is_sendto); }
+	bool do_aggregate() const { return (_do_aggregate); }
 	const IPvX& dst_addr() const { return (_dst_addr); }
 	uint16_t dst_port() const { return (_dst_port); }
 
@@ -339,6 +352,7 @@ protected:
 	const uint16_t	_dst_port;
 	Callback	_cb;
 	bool		_is_sendto;
+	bool		_do_aggregate;
     };
 
     void write(XorpFd, IoEventType);
