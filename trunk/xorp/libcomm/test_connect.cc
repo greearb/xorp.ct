@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libcomm/test_connect.cc,v 1.4 2006/10/12 01:24:45 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/test_connect.cc,v 1.5 2007/02/16 22:45:59 pavlin Exp $"
 
 #include "comm_module.h"
 
@@ -52,11 +52,13 @@ ConnectCB::connect_callback(XorpFd fd, IoEventType type)
      * when using Selector as underlying dispatcher */
     //fputc('.',stderr);
     if (fd_connect_callback_called == false) {
+	int is_conn = 0;
+
 	printf("connect callback fired for first time\n");
         fd_connect_callback_called = true;
-        int is_conn = comm_sock_is_connected(fd);
+        comm_sock_is_connected(fd, &is_conn);
 	fd_success_connection = true;
-	printf("comm_sock_is_connected() returned %d\n", is_conn);
+	printf("comm_sock_is_connected() is %d\n", is_conn);
     }
     UNUSED(fd);
     UNUSED(type);
@@ -100,8 +102,9 @@ run_test()
 
     printf("connection in progress\n");
 
-    printf("comm_sock_is_connected() returned %d before eventloop\n",
-	   comm_sock_is_connected(s));
+    int is_conn = 0;
+    comm_sock_is_connected(s, &is_conn);
+    printf("comm_sock_is_connected() is %d before eventloop\n", is_conn);
 
     while (!times_up || fd_connect_callback_called || fd_success_connection)
 	e.run();

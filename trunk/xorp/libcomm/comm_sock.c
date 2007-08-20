@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.40 2007/04/14 09:09:00 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.41 2007/08/03 23:48:59 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1528,26 +1528,41 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
 
 /**
  * comm_sock_is_connected:
+ * @psock: The socket whose connected state is to be queried.
+ * @is_connected: If the socket is in the connected state, then the
+ * referenced value is set to 1, otherwise it is set to 0.
  *
  * Determine if an existing socket is in the connected state.
  *
- * Return value: XORP_OK if the socket is in the connected state, otherwise
- * if it is not, or any other error is encountered, XORP_ERROR.
+ * Return value: XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-comm_sock_is_connected(xsock_t sock)
+comm_sock_is_connected(xsock_t sock, int *is_connected)
 {
     struct sockaddr_storage ss;
     int err;
     socklen_t sslen;
 
+    if (is_connected == NULL) {
+	XLOG_ERROR("comm_sock_is_connected() error: "
+		   "return value pointer is NULL");
+	return (XORP_ERROR);
+    }
+    *is_connected = 0;
+
     sslen = sizeof(ss);
     memset(&ss, 0, sslen);
     err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
     if (err != 0) {
+	if ((err == ENOTCONN) || (err == ECONNRESET)) {
+	    return (XORP_OK);	/* Socket is not connected */
+	}
 	_comm_set_serrno();
 	return (XORP_ERROR);
     }
+
+    /*  Socket is connected */
+    *is_connected = 1;
 
     return (XORP_OK);
 }

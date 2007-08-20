@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.52 2007/04/10 07:29:01 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.53 2007/08/20 19:29:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -491,6 +491,7 @@ SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
 				      ConnectCallback cb)
 {
     int soerror;
+    int is_connected = 0;
     socklen_t len = sizeof(soerror);
 
     debug_msg("connect socket complete %s %d\n", sock.str().c_str(), type);
@@ -505,9 +506,14 @@ SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
     eventloop().remove_ioevent_cb(sock);
 
     // Did the connection succeed?
-    if (comm_sock_is_connected(sock) != XORP_OK) {
+    if (comm_sock_is_connected(sock, &is_connected) != XORP_OK) {
 	debug_msg("connect failed (comm_sock_is_connected: %s) %s\n",
 		  comm_get_last_error_str(), sock.str().c_str());
+	goto failed;
+    }
+    if (is_connected == 0) {
+	debug_msg("connect failed (comm_sock_is_connected: false) %s\n",
+		  sock.str().c_str());
 	goto failed;
     }
 

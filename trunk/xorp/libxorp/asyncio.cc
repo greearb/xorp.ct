@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.36 2007/08/20 19:51:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.37 2007/08/20 20:42:40 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -129,10 +129,16 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 
 #if 0
     // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    if (_fd.is_socket() && (XORP_OK != comm_sock_is_connected(_fd))) {
-	debug_msg("Warning: socket %p may have been closed\n", (HANDLE)_fd);
+    int is_connected = 0;
+    if (_fd.is_socket()) {
+	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
+	    || (is_connected == 0)) {
+	    debug_msg("Warning: socket %p may have been closed\n",
+		      (HANDLE)_fd);
+	}
     }
-#endif
+#endif // 0
+
     debug_msg("Buffer count %u\n", XORP_UINT_CAST(_buffers.size()));
 
     BufferInfo& head = _buffers.front();
@@ -266,8 +272,13 @@ AsyncFileReader::start()
 
 #if 0
     // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    if (_fd.is_socket() && (XORP_OK != comm_sock_is_connected(_fd))) {
-	debug_msg("Warning: socket %p may have been closed\n", (HANDLE)_fd);
+    int is_connected = 0;
+    if (_fd.is_socket()) {
+	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
+	    || (is_connected == 0)) {
+	    debug_msg("Warning: socket %p may have been closed\n",
+		      (HANDLE)_fd);
+	}
     }
 #endif // 0
 
@@ -488,10 +499,16 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     if (_running == false)
 	return;
 #endif
+
 #if 0
     // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    if (_fd.is_socket() && (XORP_OK != comm_sock_is_connected(_fd))) {
-	debug_msg("Warning: socket %p may have been closed\n", (HANDLE)_fd);
+    int is_connected = 0;
+    if (_fd.is_socket()) {
+	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
+	    || (is_connected == 0)) {
+	    debug_msg("Warning: socket %p may have been closed\n",
+		      (HANDLE)_fd);
+	}
     }
 #endif // 0
 
@@ -746,8 +763,13 @@ AsyncFileWriter::start()
 
 #if 0
     // XXX: comm_sock_is_connected() is cross-reference to libcomm
-    if (_fd.is_socket() && (XORP_OK != comm_sock_is_connected(_fd))) {
-	debug_msg("Warning: socket %p may have been closed\n", (HANDLE)_fd);
+    int is_connected = 0;
+    if (_fd.is_socket()) {
+	if ((comm_sock_is_connected(_fd, &is_connected) != XORP_OK)
+	    || (is_connected == 0)) {
+	    debug_msg("Warning: socket %p may have been closed\n",
+		      (HANDLE)_fd);
+	}
     }
 #endif // 0
 

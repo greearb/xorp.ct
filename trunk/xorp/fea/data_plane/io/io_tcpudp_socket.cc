@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.12 2007/08/20 19:44:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.13 2007/08/20 20:48:06 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -1087,6 +1087,7 @@ void
 IoTcpUdpSocket::connect_io_cb(XorpFd fd, IoEventType io_event_type)
 {
     string error_msg;
+    int is_connected = 0;
 
     XLOG_ASSERT(fd == _socket_fd);
 
@@ -1110,8 +1111,14 @@ IoTcpUdpSocket::connect_io_cb(XorpFd fd, IoEventType io_event_type)
     eventloop().remove_ioevent_cb(_socket_fd, IOT_CONNECT);
 
     // Test whether the connection succeeded
-    if (comm_sock_is_connected(_socket_fd) != XORP_OK) {
+    if (comm_sock_is_connected(_socket_fd, &is_connected) != XORP_OK) {
 	io_tcpudp_receiver()->error_event(comm_get_last_error_str(), true);
+	return;
+    }
+    if (is_connected == 0) {
+	// Socket is not connected
+	error_msg = c_format("Socket connect failed");
+	io_tcpudp_receiver()->error_event(error_msg, true);
 	return;
     }
 
