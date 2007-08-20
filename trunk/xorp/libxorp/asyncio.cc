@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.35 2007/08/20 19:43:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.36 2007/08/20 19:51:37 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -406,6 +406,38 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 {
     assert(off < b_bytes);
     _buffers.push_back(BufferInfo(b, b_bytes, off, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
+}
+
+void
+AsyncFileWriter::add_data(const vector<uint8_t>&	data,
+			  const Callback&		cb)
+{
+    assert(data.size() != 0);
+    _buffers.push_back(BufferInfo(data, cb));
+#ifdef EDGE_TRIGGERED_WRITES
+    if (_running == true) {
+	_deferred_io_task = _eventloop.new_oneoff_task(
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	XLOG_ASSERT(_deferred_io_task.scheduled());
+    }
+#endif // EDGE_TRIGGERED_WRITES
+}
+
+void
+AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
+				 const IPvX&		dst_addr,
+				 uint16_t		dst_port,
+				 const Callback&	cb)
+{
+    assert(data.size() != 0);
+    _buffers.push_back(BufferInfo(data, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(

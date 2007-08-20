@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.26 2007/08/20 19:43:37 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.27 2007/08/20 19:52:34 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -20,6 +20,7 @@
 #include "libxorp/xorp.h"
 
 #include <list>
+#include <vector>
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -37,6 +38,10 @@ struct iovec;
 // user creates and AsyncFile{Reader,Writer} and adds a buffer for
 // reading / writing with add_buffer().  A callback is provided with
 // each buffer is called every time I/O happens on the buffer.
+//
+// Note that in case of AsyncFileWriter the user can use add_data() to
+// add the data to write/send, and that data will be stored/buffered
+// internally by AsyncFileWriter itself.
 //
 // Reading/Writing only begins when start() is called, and normally
 // continues until there are no buffers left.
@@ -158,6 +163,8 @@ public:
     /**
      * Add an additional buffer for reading to.
      *
+     * Note that the buffer with the data is managed by the user.
+     *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param cb Callback object to invoke when I/O is performed.
@@ -166,6 +173,8 @@ public:
 
     /**
      * Add an additional buffer for reading to.
+     *
+     * Note that the buffer with the data is managed by the user.
      *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
@@ -247,6 +256,8 @@ public:
     /**
      * Add an additional buffer for writing from.
      *
+     * Note that the buffer with the data is managed by the user.
+     *
      * @param buffer pointer to buffer.
      * @param buffer_bytes size of buffer in bytes.
      * @param cb Callback object to invoke when I/O is performed.
@@ -287,6 +298,36 @@ public:
 				const Callback&	cb);
 
     /**
+     * Add additional data for writing from.
+     *
+     * Note that the data is stored to write is stored internally by
+     * AsyncFileWriter.
+     *
+     * @param data the data to write.
+     * @param cb Callback object to invoke when I/O is performed.
+     */
+    void add_data(const vector<uint8_t>&	data,
+		  const Callback&		cb);
+
+    /**
+     * Add additional data for writing from by using sendto(2).
+     *
+     * Note that the data is stored to write is stored internally by
+     * AsyncFileWriter.
+     * Note that sendto()-buffers are never coalesced with other buffers.
+     *
+     * @param data the data to send.
+     * @param dst_addr the destination address to send the data to.
+     * @param dst_port the destination port (in host order) to send the
+     * data to.
+     * @param cb Callback object to invoke when I/O is performed.
+     */
+    void add_data_sendto(const vector<uint8_t>&	data,
+			 const IPvX&		dst_addr,
+			 uint16_t		dst_port,
+			 const Callback&	cb);
+
+    /**
      * Start asynchronous operation.
      *
      * @return true on success, false if no buffers are available.
@@ -315,6 +356,21 @@ private:
 
 protected:
     struct BufferInfo {
+	BufferInfo(const BufferInfo& other)
+	    : _data(other._data),
+	      _buffer(other._buffer),
+	      _buffer_bytes(other._buffer_bytes),
+	      _offset(other._offset),
+	      _dst_addr(other._dst_addr),
+	      _dst_port(other._dst_port),
+	      _cb(other._cb),
+	      _is_sendto(other._is_sendto) {
+	    if (! _data.empty()) {
+		_buffer = &_data[0];
+		_buffer_bytes = _data.size();
+	    }
+	}
+
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
 	      _cb(cb), _is_sendto(false) {}
@@ -326,6 +382,15 @@ protected:
 	    : _buffer(b), _buffer_bytes(bb), _offset(off), _dst_port(0),
 	      _cb(cb), _is_sendto(false) {}
 
+	BufferInfo(const vector<uint8_t>& data, const Callback& cb)
+	    : _data(data), _buffer(&_data[0]), _buffer_bytes(_data.size()),
+	      _offset(0), _dst_port(0), _cb(cb), _is_sendto(false) {}
+	BufferInfo(const vector<uint8_t>& data, const IPvX& dst_addr,
+		   uint16_t dst_port, const Callback& cb)
+	    : _data(data), _buffer(&_data[0]), _buffer_bytes(_data.size()),
+	      _offset(0), _dst_addr(dst_addr), _dst_port(dst_port),
+	      _cb(cb), _is_sendto(true) {}
+
 	bool is_sendto() const { return (_is_sendto); }
 	const IPvX& dst_addr() const { return (_dst_addr); }
 	uint16_t dst_port() const { return (_dst_port); }
@@ -334,13 +399,14 @@ protected:
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
 
-	const uint8_t*	_buffer;
-	size_t		_buffer_bytes;
-	size_t		_offset;
-	const IPvX	_dst_addr;
-	const uint16_t	_dst_port;
-	Callback	_cb;
-	bool		_is_sendto;
+	const vector<uint8_t>	_data;		// Local copy of the data
+	const uint8_t*		_buffer;
+	size_t			_buffer_bytes;
+	size_t			_offset;
+	const IPvX		_dst_addr;
+	const uint16_t		_dst_port;
+	Callback		_cb;
+	bool			_is_sendto;
     };
 
     void write(XorpFd, IoEventType);
