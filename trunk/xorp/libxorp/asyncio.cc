@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.33 2007/08/18 22:27:06 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.34 2007/08/20 19:08:08 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -367,11 +367,10 @@ AsyncFileWriter::~AsyncFileWriter()
 void
 AsyncFileWriter::add_buffer(const uint8_t*	b,
 			    size_t		b_bytes,
-			    const Callback&	cb,
-			    bool		do_aggregate)
+			    const Callback&	cb)
 {
     assert(b_bytes != 0);
-    _buffers.push_back(BufferInfo(b, b_bytes, cb, do_aggregate));
+    _buffers.push_back(BufferInfo(b, b_bytes, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -403,11 +402,10 @@ void
 AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 					size_t		b_bytes,
 					size_t		off,
-					const Callback&	cb,
-					bool		do_aggregate)
+					const Callback&	cb)
 {
     assert(off < b_bytes);
-    _buffers.push_back(BufferInfo(b, b_bytes, off, cb, do_aggregate));
+    _buffers.push_back(BufferInfo(b, b_bytes, off, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -484,14 +482,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	const BufferInfo& bi = *i;
 	is_sendto = bi.is_sendto();
 
-	if ((! bi.do_aggregate()) && (iov_cnt > 0)) {
-	    //
-	    // XXX: Send first all buffers before this buffer that don't
-	    // aggregate.
-	    //
-	    break;
-	}
-
 	uint8_t* u = const_cast<uint8_t*>(bi._buffer + bi._offset);
 	size_t   u_bytes = bi._buffer_bytes - bi._offset;
 	iov_place(_iov[iov_cnt].iov_base, _iov[iov_cnt].iov_len, u, u_bytes);
@@ -503,8 +493,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    dst_addr = bi.dst_addr();
 	    dst_port = bi.dst_port();
 	}
-	if (! bi.do_aggregate())
-	    break;
 	if (iov_cnt == _coalesce)
 	    break;
 	++i;
