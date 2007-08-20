@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.51 2007/04/09 18:45:55 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.52 2007/04/10 07:29:01 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -549,8 +549,7 @@ SocketClient::async_add(XorpFd sock)
 	XLOG_FATAL("Failed to go non-blocking");
 
     XLOG_ASSERT(0 == _async_writer);
-    _async_writer = new AsyncFileWriter(eventloop(), sock,
-					XorpTask::PRIORITY_DEFAULT);
+    _async_writer = new AsyncFileWriter(eventloop(), sock);
 
     XLOG_ASSERT(0 == _async_reader);
     //

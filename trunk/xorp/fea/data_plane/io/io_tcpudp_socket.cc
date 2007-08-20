@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.9 2007/08/17 23:49:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.10 2007/08/20 19:12:15 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -743,8 +743,7 @@ IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 
     // Allocate the async writer
     if (_async_writer == NULL) {
-	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
-					    XorpTask::PRIORITY_DEFAULT);
+	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd);
     }
 
     // XXX: Aggregate the transmission buffers only for TCP
@@ -772,8 +771,7 @@ IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
 
     // Allocate the async writer
     if (_async_writer == NULL) {
-	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd,
-					    XorpTask::PRIORITY_DEFAULT);
+	_async_writer = new AsyncFileWriter(eventloop(), _socket_fd);
     }
 
     // Queue the data for transmission
