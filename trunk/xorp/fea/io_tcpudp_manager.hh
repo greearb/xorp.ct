@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.3 2007/08/15 19:29:19 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.4 2007/08/17 19:48:07 pavlin Exp $
 
 #ifndef __FEA_IO_TCPUDP_MANAGER_HH__
 #define __FEA_IO_TCPUDP_MANAGER_HH__
@@ -111,10 +111,11 @@ public:
      * @param iftree the interface tree to use.
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
+     * @param is_tcp if true this is TCP entry, otherwise UDP.
      * @param creator the name of the socket creator.
      */
     IoTcpUdpComm(IoTcpUdpManager& io_tcpudp_manager, const IfTree& iftree,
-		 int family, const string& creator);
+		 int family, bool is_tcp, const string& creator);
 
     /**
      * Constructor for connected IoTcpUdpComm.
@@ -124,13 +125,14 @@ public:
      * @param iftree the interface tree to use.
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
+     * @param is_tcp if true this is TCP entry, otherwise UDP.
      * @param creator the name of the socket creator.
      * @param listener_sockid the socket ID of the listener socket.
      * @param peer_host the peer host IP address.
      * @param peer_port the peer host port number.
      */
     IoTcpUdpComm(IoTcpUdpManager& io_tcpudp_manager, const IfTree& iftree,
-		 int family, const string& creator,
+		 int family, bool is_tcp, const string& creator,
 		 const string& listener_sockid, const IPvX& peer_host,
 		 uint16_t peer_port);
 
@@ -502,6 +504,7 @@ private:
     IoTcpUdpManager&		_io_tcpudp_manager;
     const IfTree&		_iftree;
     const int			_family;
+    const bool			_is_tcp;
     const string		_creator;
     const string		_sockid;
 
@@ -1055,6 +1058,7 @@ public:
      * Connect IoTcpUdpComm entry to a new plugin.
      *
      * @param family the address family.
+     * @param is_tcp if true this is TCP entry, otherwise UDP.
      * @param creator the name of the creator.
      * @param listener_sockid the socket ID of the listener socket.
      * @param peer_host the peer host IP address.
@@ -1064,6 +1068,7 @@ public:
      * from the new plugin.
      */
     IoTcpUdpComm* connect_io_tcpudp_comm(int family,
+					 bool is_tcp,
 					 const string& creator,
 					 const string& listener_sockid,
 					 const IPvX& peer_host,
@@ -1086,11 +1091,13 @@ private:
      * Create and open IoTcpUdpComm entry.
      *
      * @param family the address family.
+     * @param is_tcp if true this is TCP entry, otherwise UDP.
      * @param creator the name of the creator.
      * @param allocate_plugins if true, then allocate the plugin handler(s)
      * internally, otherwise they will be explicitly added externally.
      */
-    IoTcpUdpComm*	open_io_tcpudp_comm(int family, const string& creator,
+    IoTcpUdpComm*	open_io_tcpudp_comm(int family, bool is_tcp,
+					    const string& creator,
 					    bool allocate_plugins = true);
 
     /**

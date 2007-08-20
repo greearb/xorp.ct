@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp.cc,v 1.1 2007/08/09 00:46:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp.cc,v 1.2 2007/08/17 19:48:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,13 +28,14 @@
 //
 
 IoTcpUdp::IoTcpUdp(FeaDataPlaneManager& fea_data_plane_manager,
-		   const IfTree& iftree, int family)
+		   const IfTree& iftree, int family, bool is_tcp)
     : _is_running(false),
       _io_tcpudp_manager(fea_data_plane_manager.io_tcpudp_manager()),
       _fea_data_plane_manager(fea_data_plane_manager),
       _eventloop(fea_data_plane_manager.eventloop()),
       _iftree(iftree),
       _family(family),
+      _is_tcp(is_tcp),
       _io_tcpudp_receiver(NULL)
 {
 }

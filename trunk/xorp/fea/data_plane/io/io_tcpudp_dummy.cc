@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.1 2007/08/09 00:47:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.2 2007/08/15 19:29:20 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -31,8 +31,9 @@
 
 
 IoTcpUdpDummy::IoTcpUdpDummy(FeaDataPlaneManager& fea_data_plane_manager,
-			     const IfTree& iftree, int family)
-    : IoTcpUdp(fea_data_plane_manager, iftree, family)
+			     const IfTree& iftree, int family,
+			     bool is_tcp)
+    : IoTcpUdp(fea_data_plane_manager, iftree, family, is_tcp)
 {
 }
 

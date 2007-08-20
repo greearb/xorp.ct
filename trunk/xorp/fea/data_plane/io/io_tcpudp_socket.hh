@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.4 2007/08/17 19:48:07 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.5 2007/08/17 20:33:04 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -47,9 +47,10 @@ public:
      * @param iftree the interface tree to use.
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
+     * @param is_tcp if true this is TCP entry, otherwise UDP.
      */
     IoTcpUdpSocket(FeaDataPlaneManager& fea_data_plane_manager,
-		   const IfTree& iftree, int family);
+		   const IfTree& iftree, int family, bool is_tcp);
 
     /**
      * Virtual destructor.
@@ -317,9 +318,8 @@ private:
      *
      * @param fd the file descriptor of the socket with the data.
      * @param io_event_type the event type (@see IoEventType).
-     * @param is_tcp if true, this is TCP connection, otherwise UDP.
      */
-    void data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp);
+    void data_io_cb(XorpFd fd, IoEventType io_event_type);
 
     /**
      * Data transmission completed callback.

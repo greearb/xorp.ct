@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.3 2007/07/26 01:18:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.4 2007/08/09 00:47:01 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -283,14 +283,15 @@ FeaDataPlaneManagerClick::allocate_io_ip(const IfTree& iftree, int family,
 }
 
 IoTcpUdp*
-FeaDataPlaneManagerClick::allocate_io_tcpudp(const IfTree& iftree, int family)
+FeaDataPlaneManagerClick::allocate_io_tcpudp(const IfTree& iftree, int family,
+					     bool is_tcp)
 {
     IoTcpUdp* io_tcpudp = NULL;
 
     //
     // TODO: XXX: For the time being Click uses the IoTcpUdpDummy plugin.
     //
-    io_tcpudp = new IoTcpUdpDummy(*this, iftree, family);
+    io_tcpudp = new IoTcpUdpDummy(*this, iftree, family, is_tcp);
     _io_tcpudp_list.push_back(io_tcpudp);
 
     return (io_tcpudp);

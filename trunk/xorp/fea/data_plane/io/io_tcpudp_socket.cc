@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.8 2007/08/17 20:33:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.9 2007/08/17 23:49:19 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -111,8 +111,9 @@ get_sockadr_storage_port_number(const struct sockaddr_storage& ss)
 }
 
 IoTcpUdpSocket::IoTcpUdpSocket(FeaDataPlaneManager& fea_data_plane_manager,
-			       const IfTree& iftree, int family)
-    : IoTcpUdp(fea_data_plane_manager, iftree, family),
+			       const IfTree& iftree, int family,
+			       bool is_tcp)
+    : IoTcpUdp(fea_data_plane_manager, iftree, family, is_tcp),
       _peer_address(IPvX::ZERO(family)),
       _peer_port(0),
       _async_writer(NULL)
@@ -746,9 +747,13 @@ IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 					    XorpTask::PRIORITY_DEFAULT);
     }
 
+    // XXX: Aggregate the transmission buffers only for TCP
+    bool do_aggregate = is_tcp();
+
     // Queue the data for transmission
     _async_writer->add_buffer(&data[0], data.size(),
-			      callback(this, &IoTcpUdpSocket::send_completed_cb));
+			      callback(this, &IoTcpUdpSocket::send_completed_cb),
+			      do_aggregate);
     _async_writer->start();
 
     return (XORP_OK);
@@ -772,7 +777,7 @@ IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
     }
 
     // Queue the data for transmission
-    _async_writer->add_sendto_buffer(&data[0], data.size(),
+    _async_writer->add_buffer_sendto(&data[0], data.size(),
 				     remote_addr, remote_port,
 				     callback(this, &IoTcpUdpSocket::send_completed_cb));
     _async_writer->start();
@@ -938,27 +943,8 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    // Get the socket type
-    bool is_tcp = false;
-    int sock_type = comm_sock_get_type(_socket_fd);
-    if (sock_type == XORP_ERROR) {
-	error_msg = c_format("Cannot get the socket type: %s",
-			     comm_get_last_error_str());
-	stop(dummy_error_msg);
-	return (XORP_ERROR);
-    }
-    switch (sock_type) {
-    case SOCK_DGRAM:
-    {
-	// UDP socket
-	is_tcp = false;
-	break;
-    }
-    case SOCK_STREAM:
-    {
-	// TCP socket
-	is_tcp = true;
-
+    // Get the peer address and port for TCP connection
+    if (is_tcp()) {
 	// Get the peer address and port
 	struct sockaddr_storage ss;
 	socklen_t ss_len = sizeof(ss);
@@ -973,17 +959,10 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 	XLOG_ASSERT(ss.ss_family == family());
 	_peer_address.copy_in(ss);
 	_peer_port = get_sockadr_storage_port_number(ss);	
-	break;
-    }
-    default:
-	XLOG_FATAL("Unexpected socket type %d", sock_type);
-	stop(dummy_error_msg);
-	return (XORP_ERROR);
     }
 
     if (eventloop().add_ioevent_cb(_socket_fd, IOT_READ,
-				   callback(this, &IoTcpUdpSocket::data_io_cb,
-					    is_tcp))
+				   callback(this, &IoTcpUdpSocket::data_io_cb))
 	!= true) {
 	error_msg = c_format("Failed to add I/O callback to receive data");
 	stop(dummy_error_msg);
@@ -992,7 +971,7 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 
 #ifdef HOST_OS_WINDOWS
     // XXX: IOT_DISCONNECT is available only on Windows
-    if (is_tcp) {
+    if (is_tcp()) {
 	if (eventloop().add_ioevent_cb(_socket_fd, IOT_DISCONNECT,
 				       callback(this, &IoTcpUdpSocket::disconnect_io_cb))
 	    != true) {
@@ -1064,7 +1043,8 @@ IoTcpUdpSocket::accept_io_cb(XorpFd fd, IoEventType io_event_type)
     IoTcpUdp* io_tcpudp;
     IoTcpUdpSocket* io_tcpudp_socket;
     io_tcpudp = fea_data_plane_manager().allocate_io_tcpudp(iftree(),
-							    family());
+							    family(),
+							    is_tcp());
     if (io_tcpudp == NULL) {
 	XLOG_ERROR("Connection request from %s rejected: "
 		   "cannot allocate I/O TCP/UDP plugin from data plane "
@@ -1137,7 +1117,7 @@ IoTcpUdpSocket::connect_io_cb(XorpFd fd, IoEventType io_event_type)
 }
 
 void
-IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp)
+IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 {
     IPvX src_host = IPvX::ZERO(family());
     uint16_t src_port = 0;
@@ -1180,7 +1160,7 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type, bool is_tcp)
     // - If TCP, test whether the connection was closed by the remote host
     // - Get the sender's address and port
     //
-    if (is_tcp) {
+    if (is_tcp()) {
 	// TCP data
 	if (bytes_recv == 0) {
 	    //

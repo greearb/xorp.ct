@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.hh,v 1.4 2007/07/26 01:18:41 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.hh,v 1.5 2007/08/09 00:47:01 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_DUMMY_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_DUMMY_HH__
@@ -99,10 +99,12 @@ public:
      * @param iftree the interface tree to use.
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
+     * @param is_tcp if true allocate a TCP entry, otherwise UDP.
      * @return a new instance of @ref IoTcpUdp plugin on success,
      * otherwise NULL.
      */
-    IoTcpUdp* allocate_io_tcpudp(const IfTree& iftree, int family);
+    IoTcpUdp* allocate_io_tcpudp(const IfTree& iftree, int family,
+				 bool is_tcp);
 
 private:
 };
