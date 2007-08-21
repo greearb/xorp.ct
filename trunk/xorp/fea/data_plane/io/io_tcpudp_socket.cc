@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.14 2007/08/20 22:57:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.15 2007/08/21 00:10:37 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -1046,6 +1046,17 @@ IoTcpUdpSocket::accept_io_cb(XorpFd fd, IoEventType io_event_type)
 	return;
     }
     XLOG_ASSERT(ss.ss_family == family());
+
+    //
+    // Set the socket as non-blocking
+    //
+    if (comm_sock_set_blocking(accept_fd, COMM_SOCK_NONBLOCKING) != XORP_OK) {
+	error_msg = c_format("Error setting the socket as non-blocking: %s",
+			     comm_get_last_error_str());
+	comm_close(accept_fd);
+	io_tcpudp_receiver()->error_event(error_msg, false);
+	return;
+    }
 
     IPvX src_host(ss);
     uint16_t src_port = get_sockadr_storage_port_number(ss);
