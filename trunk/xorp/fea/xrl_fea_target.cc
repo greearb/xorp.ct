@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.27 2007/08/15 19:29:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.28 2007/08/16 01:13:24 pavlin Exp $"
 
 
 //
@@ -2951,14 +2951,12 @@ XrlCmdError
 XrlFeaTarget::socket4_0_1_tcp_open(
     // Input values,
     const string&	creator,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
     string error_msg;
 
-    if (_io_tcpudp_manager.tcp_open(IPv4::af(), creator, is_blocking, sockid,
-				    error_msg)
+    if (_io_tcpudp_manager.tcp_open(IPv4::af(), creator, sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2970,14 +2968,12 @@ XrlCmdError
 XrlFeaTarget::socket4_0_1_udp_open(
     // Input values,
     const string&	creator,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
     string error_msg;
 
-    if (_io_tcpudp_manager.udp_open(IPv4::af(), creator, is_blocking, sockid,
-				    error_msg)
+    if (_io_tcpudp_manager.udp_open(IPv4::af(), creator, sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2991,7 +2987,6 @@ XrlFeaTarget::socket4_0_1_tcp_open_and_bind(
     const string&	creator,
     const IPv4&		local_addr,
     const uint32_t&	local_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3004,7 +2999,7 @@ XrlFeaTarget::socket4_0_1_tcp_open_and_bind(
 
     if (_io_tcpudp_manager.tcp_open_and_bind(IPv4::af(), creator,
 					     IPvX(local_addr), local_port,
-					     is_blocking, sockid, error_msg)
+					     sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3018,7 +3013,6 @@ XrlFeaTarget::socket4_0_1_udp_open_and_bind(
     const string&	creator,
     const IPv4&		local_addr,
     const uint32_t&	local_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3031,7 +3025,7 @@ XrlFeaTarget::socket4_0_1_udp_open_and_bind(
 
     if (_io_tcpudp_manager.udp_open_and_bind(IPv4::af(), creator,
 					     IPvX(local_addr), local_port,
-					     is_blocking, sockid, error_msg)
+					     sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3048,7 +3042,6 @@ XrlFeaTarget::socket4_0_1_udp_open_bind_join(
     const IPv4&		mcast_addr,
     const uint32_t&	ttl,
     const bool&		reuse,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3066,7 +3059,7 @@ XrlFeaTarget::socket4_0_1_udp_open_bind_join(
     if (_io_tcpudp_manager.udp_open_bind_join(IPv4::af(), creator,
 					      IPvX(local_addr), local_port,
 					      IPvX(mcast_addr), ttl, reuse,
-					      is_blocking, sockid, error_msg)
+					      sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3082,7 +3075,6 @@ XrlFeaTarget::socket4_0_1_tcp_open_bind_connect(
     const uint32_t&	local_port,
     const IPv4&		remote_addr,
     const uint32_t&	remote_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3100,8 +3092,8 @@ XrlFeaTarget::socket4_0_1_tcp_open_bind_connect(
     if (_io_tcpudp_manager.tcp_open_bind_connect(IPv4::af(), creator,
 						 IPvX(local_addr), local_port,
 						 IPvX(remote_addr),
-						 remote_port, is_blocking,
-						 sockid, error_msg)
+						 remote_port, sockid,
+						 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3117,7 +3109,6 @@ XrlFeaTarget::socket4_0_1_udp_open_bind_connect(
     const uint32_t&	local_port,
     const IPv4&		remote_addr,
     const uint32_t&	remote_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3135,8 +3126,8 @@ XrlFeaTarget::socket4_0_1_udp_open_bind_connect(
     if (_io_tcpudp_manager.udp_open_bind_connect(IPv4::af(), creator,
 						 IPvX(local_addr), local_port,
 						 IPvX(remote_addr),
-						 remote_port, is_blocking,
-						 sockid, error_msg)
+						 remote_port, sockid,
+						 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3323,14 +3314,12 @@ XrlCmdError
 XrlFeaTarget::socket6_0_1_tcp_open(
     // Input values,
     const string&	creator,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
     string error_msg;
 
-    if (_io_tcpudp_manager.tcp_open(IPv6::af(), creator, is_blocking, sockid,
-				    error_msg)
+    if (_io_tcpudp_manager.tcp_open(IPv6::af(), creator, sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3342,14 +3331,12 @@ XrlCmdError
 XrlFeaTarget::socket6_0_1_udp_open(
     // Input values,
     const string&	creator,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
     string error_msg;
 
-    if (_io_tcpudp_manager.udp_open(IPv6::af(), creator, is_blocking, sockid,
-				    error_msg)
+    if (_io_tcpudp_manager.udp_open(IPv6::af(), creator, sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3363,7 +3350,6 @@ XrlFeaTarget::socket6_0_1_tcp_open_and_bind(
     const string&	creator,
     const IPv6&		local_addr,
     const uint32_t&	local_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3376,7 +3362,7 @@ XrlFeaTarget::socket6_0_1_tcp_open_and_bind(
 
     if (_io_tcpudp_manager.tcp_open_and_bind(IPv6::af(), creator,
 					     IPvX(local_addr), local_port,
-					     is_blocking, sockid, error_msg)
+					     sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3390,7 +3376,6 @@ XrlFeaTarget::socket6_0_1_udp_open_and_bind(
     const string&	creator,
     const IPv6&		local_addr,
     const uint32_t&	local_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3403,7 +3388,7 @@ XrlFeaTarget::socket6_0_1_udp_open_and_bind(
 
     if (_io_tcpudp_manager.udp_open_and_bind(IPv6::af(), creator,
 					     IPvX(local_addr), local_port,
-					     is_blocking, sockid, error_msg)
+					     sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3420,7 +3405,6 @@ XrlFeaTarget::socket6_0_1_udp_open_bind_join(
     const IPv6&		mcast_addr,
     const uint32_t&	ttl,
     const bool&		reuse,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3438,7 +3422,7 @@ XrlFeaTarget::socket6_0_1_udp_open_bind_join(
     if (_io_tcpudp_manager.udp_open_bind_join(IPv6::af(), creator,
 					      IPvX(local_addr), local_port,
 					      IPvX(mcast_addr), ttl, reuse,
-					      is_blocking, sockid, error_msg)
+					      sockid, error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3454,7 +3438,6 @@ XrlFeaTarget::socket6_0_1_tcp_open_bind_connect(
     const uint32_t&	local_port,
     const IPv6&		remote_addr,
     const uint32_t&	remote_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3472,8 +3455,8 @@ XrlFeaTarget::socket6_0_1_tcp_open_bind_connect(
     if (_io_tcpudp_manager.tcp_open_bind_connect(IPv6::af(), creator,
 						 IPvX(local_addr), local_port,
 						 IPvX(remote_addr),
-						 remote_port, is_blocking,
-						 sockid, error_msg)
+						 remote_port, sockid,
+						 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3489,7 +3472,6 @@ XrlFeaTarget::socket6_0_1_udp_open_bind_connect(
     const uint32_t&	local_port,
     const IPv6&		remote_addr,
     const uint32_t&	remote_port,
-    const bool&		is_blocking,
     // Output values,
     string&		sockid)
 {
@@ -3507,8 +3489,8 @@ XrlFeaTarget::socket6_0_1_udp_open_bind_connect(
     if (_io_tcpudp_manager.udp_open_bind_connect(IPv6::af(), creator,
 						 IPvX(local_addr), local_port,
 						 IPvX(remote_addr),
-						 remote_port, is_blocking,
-						 sockid, error_msg)
+						 remote_port, sockid,
+						 error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

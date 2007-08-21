@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.10 2007/08/15 19:29:21 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.11 2007/08/17 19:48:08 pavlin Exp $ */
 
 /**
  * Interface implementing basic IPv6 socket functionality.  This interface
@@ -21,14 +21,10 @@ interface socket6/0.1 {
      * @param creator the Xrl Target instance name of the socket
      *        creator.  The named target must implement socket4_user/0.1.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     tcp_open			? creator:txt				\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -37,14 +33,10 @@ interface socket6/0.1 {
      * @param creator the Xrl Target instance name of the socket
      *        creator.  The named target must implement socket4_user/0.1.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     udp_open			? creator:txt				\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -57,16 +49,12 @@ interface socket6/0.1 {
      *
      * @param local_port the port to bind socket to.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     tcp_open_and_bind		? creator:txt				\
 				& local_addr:ipv6			\
 				& local_port:u32			\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -79,16 +67,12 @@ interface socket6/0.1 {
      *
      * @param local_port the port to bind socket to.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
     udp_open_and_bind		? creator:txt				\
 				& local_addr:ipv6			\
 				& local_port:u32			\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -107,9 +91,6 @@ interface socket6/0.1 {
      *
      * @param reuse allow other sockets to bind to same multicast group.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
@@ -119,7 +100,6 @@ interface socket6/0.1 {
 				& mcast_addr:ipv6			\
 				& ttl:u32				\
 				& reuse:bool				\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -136,9 +116,6 @@ interface socket6/0.1 {
      *
      * @param remote_port the remote port to connect to.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
@@ -147,7 +124,6 @@ interface socket6/0.1 {
 				& local_port:u32			\
 				& remote_addr:ipv6			\
 				& remote_port:u32			\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**
@@ -164,9 +140,6 @@ interface socket6/0.1 {
      *
      * @param remote_port the remote port to connect to.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     *        non-blocking.
-     *
      * @param sockid return parameter that contains unique socket ID when
      *        socket instantiation is successful.
      */
@@ -175,7 +148,6 @@ interface socket6/0.1 {
 				& local_port:u32			\
 				& remote_addr:ipv6			\
 				& remote_port:u32			\
-				& is_blocking:bool			\
 				-> sockid:txt
 
     /**

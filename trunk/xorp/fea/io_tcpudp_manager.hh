@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.4 2007/08/17 19:48:07 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.5 2007/08/20 19:12:14 pavlin Exp $
 
 #ifndef __FEA_IO_TCPUDP_MANAGER_HH__
 #define __FEA_IO_TCPUDP_MANAGER_HH__
@@ -185,56 +185,48 @@ public:
     /**
      * Open a TCP socket.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int tcp_open(bool is_blocking, string& sockid, string& error_msg);
+    int tcp_open(string& sockid, string& error_msg);
 
     /**
      * Open an UDP socket.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int udp_open(bool is_blocking, string& sockid, string& error_msg);
+    int udp_open(string& sockid, string& error_msg);
 
     /**
      * Create a bound TCP socket.
      *
      * @param local_addr the interface address to bind socket to.
      * @param local_port the port to bind socket to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-			  bool is_blocking, string& sockid, string& error_msg);
+			  string& sockid, string& error_msg);
 
     /**
      * Create a bound UDP socket.
      *
      * @param local_addr the interface address to bind socket to.
      * @param local_port the port to bind socket to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-			  bool is_blocking, string& sockid, string& error_msg);
+			  string& sockid, string& error_msg);
 
     /**
      * Create a bound UDP multicast socket.
@@ -244,8 +236,6 @@ public:
      * @param mcast_addr the multicast group address to join.
      * @param ttl the TTL to use for this multicast socket.
      * @param reuse allow other sockets to bind to same multicast group.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -253,8 +243,7 @@ public:
      */
     int udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 			   const IPvX& mcast_addr, uint8_t ttl, bool reuse,
-			   bool is_blocking, string& sockid,
-			   string& error_msg);
+			   string& sockid, string& error_msg);
 
     /**
      * Create a bound and connected TCP socket.
@@ -263,8 +252,6 @@ public:
      * @param local_port the port to bind socket to.
      * @param remote_addr the address to connect to.
      * @param remote_port the remote port to connect to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -272,8 +259,7 @@ public:
      */
     int tcp_open_bind_connect(const IPvX& local_addr, uint16_t local_port,
 			      const IPvX& remote_addr, uint16_t remote_port,
-			      bool is_blocking, string& sockid,
-			      string& error_msg);
+			      string& sockid, string& error_msg);
 
     /**
      * Create a bound and connected UDP socket.
@@ -282,8 +268,6 @@ public:
      * @param local_port the port to bind socket to.
      * @param remote_addr the address to connect to.
      * @param remote_port the remote port to connect to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -291,8 +275,7 @@ public:
      */
     int udp_open_bind_connect(const IPvX& local_addr, uint16_t local_port,
 			      const IPvX& remote_addr, uint16_t remote_port,
-			      bool is_blocking, string& sockid,
-			      string& error_msg);
+			      string& sockid, string& error_msg);
 
     /**
      * Bind a socket.
@@ -633,15 +616,13 @@ public:
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
      * @param creator the name of the socket creator.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int tcp_open(int family, const string& creator, bool is_blocking,
-		 string& sockid, string& error_msg);
+    int tcp_open(int family, const string& creator, string& sockid,
+		 string& error_msg);
 
     /**
      * Open an UDP socket.
@@ -649,15 +630,13 @@ public:
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
      * @param creator the name of the socket creator.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int udp_open(int family, const string& creator, bool is_blocking,
-		 string& sockid, string& error_msg);
+    int udp_open(int family, const string& creator, string& sockid,
+		 string& error_msg);
 
     /**
      * Create a bound TCP socket.
@@ -667,8 +646,6 @@ public:
      * @param creator the name of the socket creator.
      * @param local_addr the interface address to bind socket to.
      * @param local_port the port to bind socket to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -676,7 +653,7 @@ public:
      */
     int tcp_open_and_bind(int family, const string& creator,
 			  const IPvX& local_addr, uint16_t local_port,
-			  bool is_blocking, string& sockid, string& error_msg);
+			  string& sockid, string& error_msg);
 
     /**
      * Create a bound UDP socket.
@@ -686,8 +663,6 @@ public:
      * @param creator the name of the socket creator.
      * @param local_addr the interface address to bind socket to.
      * @param local_port the port to bind socket to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -695,7 +670,7 @@ public:
      */
     int udp_open_and_bind(int family, const string& creator,
 			  const IPvX& local_addr, uint16_t local_port,
-			  bool is_blocking, string& sockid, string& error_msg);
+			  string& sockid, string& error_msg);
 
     /**
      * Create a bound UDP multicast socket.
@@ -708,8 +683,6 @@ public:
      * @param mcast_addr the multicast group address to join.
      * @param ttl the TTL to use for this multicast socket.
      * @param reuse allow other sockets to bind to same multicast group.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -718,8 +691,7 @@ public:
     int udp_open_bind_join(int family, const string& creator,
 			   const IPvX& local_addr, uint16_t local_port,
 			   const IPvX& mcast_addr, uint8_t ttl, bool reuse,
-			   bool is_blocking, string& sockid,
-			   string& error_msg);
+			   string& sockid, string& error_msg);
 
     /**
      * Create a bound and connected TCP socket.
@@ -731,8 +703,6 @@ public:
      * @param local_port the port to bind socket to.
      * @param remote_addr the address to connect to.
      * @param remote_port the remote port to connect to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -741,8 +711,7 @@ public:
     int tcp_open_bind_connect(int family, const string& creator,
 			      const IPvX& local_addr, uint16_t local_port,
 			      const IPvX& remote_addr, uint16_t remote_port,
-			      bool is_blocking, string& sockid,
-			      string& error_msg);
+			      string& sockid, string& error_msg);
 
     /**
      * Create a bound and connected UDP socket.
@@ -754,8 +723,6 @@ public:
      * @param local_port the port to bind socket to.
      * @param remote_addr the address to connect to.
      * @param remote_port the remote port to connect to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param sockid return parameter that contains unique socket ID when
      * socket instantiation is successful.
      * @param error_msg the error message (if error).
@@ -764,8 +731,7 @@ public:
     int udp_open_bind_connect(int family, const string& creator,
 			      const IPvX& local_addr, uint16_t local_port,
 			      const IPvX& remote_addr, uint16_t remote_port,
-			      bool is_blocking, string& sockid,
-			      string& error_msg);
+			      string& sockid, string& error_msg);
 
     /**
      * Bind a socket.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.4 2007/08/17 19:48:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.5 2007/08/20 19:12:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -71,7 +71,7 @@ IoTcpUdpComm::~IoTcpUdpComm()
 }
 
 int
-IoTcpUdpComm::tcp_open(bool is_blocking, string& sockid, string& error_msg)
+IoTcpUdpComm::tcp_open(string& sockid, string& error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
@@ -86,7 +86,7 @@ IoTcpUdpComm::tcp_open(bool is_blocking, string& sockid, string& error_msg)
 	 iter != _io_tcpudp_plugins.end();
 	 ++iter) {
 	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->tcp_open(is_blocking, error_msg2) != XORP_OK) {
+	if (io_tcpudp->tcp_open(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -101,7 +101,7 @@ IoTcpUdpComm::tcp_open(bool is_blocking, string& sockid, string& error_msg)
 }
 
 int
-IoTcpUdpComm::udp_open(bool is_blocking, string& sockid, string& error_msg)
+IoTcpUdpComm::udp_open(string& sockid, string& error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
@@ -116,7 +116,7 @@ IoTcpUdpComm::udp_open(bool is_blocking, string& sockid, string& error_msg)
 	 iter != _io_tcpudp_plugins.end();
 	 ++iter) {
 	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->udp_open(is_blocking, error_msg2) != XORP_OK) {
+	if (io_tcpudp->udp_open(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -132,8 +132,7 @@ IoTcpUdpComm::udp_open(bool is_blocking, string& sockid, string& error_msg)
 
 int
 IoTcpUdpComm::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				bool is_blocking, string& sockid,
-				string& error_msg)
+				string& sockid, string& error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
@@ -150,8 +149,7 @@ IoTcpUdpComm::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 	 iter != _io_tcpudp_plugins.end();
 	 ++iter) {
 	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->tcp_open_and_bind(local_addr, local_port, is_blocking,
-					 error_msg2)
+	if (io_tcpudp->tcp_open_and_bind(local_addr, local_port, error_msg2)
 	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
@@ -168,8 +166,7 @@ IoTcpUdpComm::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 int
 IoTcpUdpComm::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				bool is_blocking, string& sockid,
-				string& error_msg)
+				string& sockid, string& error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
@@ -186,8 +183,7 @@ IoTcpUdpComm::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 	 iter != _io_tcpudp_plugins.end();
 	 ++iter) {
 	IoTcpUdp* io_tcpudp = iter->second;
-	if (io_tcpudp->udp_open_and_bind(local_addr, local_port, is_blocking,
-					 error_msg2)
+	if (io_tcpudp->udp_open_and_bind(local_addr, local_port, error_msg2)
 	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
@@ -205,8 +201,7 @@ IoTcpUdpComm::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 int
 IoTcpUdpComm::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 				 const IPvX& mcast_addr, uint8_t ttl,
-				 bool reuse, bool is_blocking, string& sockid,
-				 string& error_msg)
+				 bool reuse, string& sockid, string& error_msg)
 {
     int ret_value = XORP_OK;
     string error_msg2;
@@ -238,7 +233,7 @@ IoTcpUdpComm::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	    IoTcpUdp* io_tcpudp = plugin_iter->second;
 	    if (io_tcpudp->udp_open_bind_join(local_addr, local_port,
 					      mcast_addr, ttl, reuse,
-					      is_blocking, error_msg2)
+					      error_msg2)
 		!= XORP_OK) {
 		ret_value = XORP_ERROR;
 		if (! error_msg.empty())
@@ -268,7 +263,7 @@ IoTcpUdpComm::tcp_open_bind_connect(const IPvX& local_addr,
 				    uint16_t local_port,
 				    const IPvX& remote_addr,
 				    uint16_t remote_port,
-				    bool is_blocking, string& sockid,
+				    string& sockid,
 				    string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -290,7 +285,7 @@ IoTcpUdpComm::tcp_open_bind_connect(const IPvX& local_addr,
 	IoTcpUdp* io_tcpudp = iter->second;
 	if (io_tcpudp->tcp_open_bind_connect(local_addr, local_port,
 					     remote_addr, remote_port,
-					     is_blocking, error_msg2)
+					     error_msg2)
 	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
@@ -310,7 +305,7 @@ IoTcpUdpComm::udp_open_bind_connect(const IPvX& local_addr,
 				    uint16_t local_port,
 				    const IPvX& remote_addr,
 				    uint16_t remote_port,
-				    bool is_blocking, string& sockid,
+				    string& sockid,
 				    string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -332,7 +327,7 @@ IoTcpUdpComm::udp_open_bind_connect(const IPvX& local_addr,
 	IoTcpUdp* io_tcpudp = iter->second;
 	if (io_tcpudp->udp_open_bind_connect(local_addr, local_port,
 					     remote_addr, remote_port,
-					     is_blocking, error_msg2)
+					     error_msg2)
 	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
@@ -1068,15 +1063,15 @@ IoTcpUdpManager::unregister_data_plane_manager(
 }
 
 int
-IoTcpUdpManager::tcp_open(int family, const string& creator, bool is_blocking,
-			  string& sockid, string& error_msg)
+IoTcpUdpManager::tcp_open(int family, const string& creator, string& sockid,
+			  string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
 
     io_tcpudp_comm = open_io_tcpudp_comm(family, true, creator);
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
-    if (io_tcpudp_comm->tcp_open(is_blocking, sockid, error_msg) != XORP_OK) {
+    if (io_tcpudp_comm->tcp_open(sockid, error_msg) != XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
     }
@@ -1091,15 +1086,15 @@ IoTcpUdpManager::tcp_open(int family, const string& creator, bool is_blocking,
 }
 
 int
-IoTcpUdpManager::udp_open(int family, const string& creator, bool is_blocking,
-			  string& sockid, string& error_msg)
+IoTcpUdpManager::udp_open(int family, const string& creator, string& sockid,
+			  string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
 
     io_tcpudp_comm = open_io_tcpudp_comm(family, false, creator);
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
-    if (io_tcpudp_comm->udp_open(is_blocking, sockid, error_msg) != XORP_OK) {
+    if (io_tcpudp_comm->udp_open(sockid, error_msg) != XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
     }
@@ -1116,8 +1111,7 @@ IoTcpUdpManager::udp_open(int family, const string& creator, bool is_blocking,
 int
 IoTcpUdpManager::tcp_open_and_bind(int family, const string& creator,
 				   const IPvX& local_addr, uint16_t local_port,
-				   bool is_blocking, string& sockid,
-				   string& error_msg)
+				   string& sockid, string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
 
@@ -1136,8 +1130,8 @@ IoTcpUdpManager::tcp_open_and_bind(int family, const string& creator,
     io_tcpudp_comm = open_io_tcpudp_comm(family, true, creator);
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
-    if (io_tcpudp_comm->tcp_open_and_bind(local_addr, local_port, is_blocking,
-					  sockid, error_msg)
+    if (io_tcpudp_comm->tcp_open_and_bind(local_addr, local_port, sockid,
+					  error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
@@ -1155,8 +1149,7 @@ IoTcpUdpManager::tcp_open_and_bind(int family, const string& creator,
 int
 IoTcpUdpManager::udp_open_and_bind(int family, const string& creator,
 				   const IPvX& local_addr, uint16_t local_port,
-				   bool is_blocking, string& sockid,
-				   string& error_msg)
+				   string& sockid, string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
 
@@ -1175,8 +1168,8 @@ IoTcpUdpManager::udp_open_and_bind(int family, const string& creator,
     io_tcpudp_comm = open_io_tcpudp_comm(family, false, creator);
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
-    if (io_tcpudp_comm->udp_open_and_bind(local_addr, local_port, is_blocking,
-					  sockid, error_msg)
+    if (io_tcpudp_comm->udp_open_and_bind(local_addr, local_port, sockid,
+					  error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
@@ -1197,7 +1190,7 @@ IoTcpUdpManager::udp_open_bind_join(int family, const string& creator,
 				    uint16_t local_port,
 				    const IPvX& mcast_addr,
 				    uint8_t ttl, bool reuse,
-				    bool is_blocking, string& sockid,
+				    string& sockid,
 				    string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
@@ -1223,8 +1216,7 @@ IoTcpUdpManager::udp_open_bind_join(int family, const string& creator,
     XLOG_ASSERT(io_tcpudp_comm != NULL);
 
     if (io_tcpudp_comm->udp_open_bind_join(local_addr, local_port, mcast_addr,
-					   ttl, reuse, is_blocking, sockid,
-					   error_msg)
+					   ttl, reuse, sockid, error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
@@ -1245,7 +1237,7 @@ IoTcpUdpManager::tcp_open_bind_connect(int family, const string& creator,
 				       uint16_t local_port,
 				       const IPvX& remote_addr,
 				       uint16_t remote_port,
-				       bool is_blocking, string& sockid,
+				       string& sockid,
 				       string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
@@ -1267,7 +1259,7 @@ IoTcpUdpManager::tcp_open_bind_connect(int family, const string& creator,
 
     if (io_tcpudp_comm->tcp_open_bind_connect(local_addr, local_port,
 					      remote_addr, remote_port,
-					      is_blocking, sockid, error_msg)
+					      sockid, error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);
@@ -1288,7 +1280,7 @@ IoTcpUdpManager::udp_open_bind_connect(int family, const string& creator,
 				       uint16_t local_port,
 				       const IPvX& remote_addr,
 				       uint16_t remote_port,
-				       bool is_blocking, string& sockid,
+				       string& sockid,
 				       string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;
@@ -1310,7 +1302,7 @@ IoTcpUdpManager::udp_open_bind_connect(int family, const string& creator,
 
     if (io_tcpudp_comm->udp_open_bind_connect(local_addr, local_port,
 					      remote_addr, remote_port,
-					      is_blocking, sockid, error_msg)
+					      sockid, error_msg)
 	!= XORP_OK) {
 	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
 	return (XORP_ERROR);

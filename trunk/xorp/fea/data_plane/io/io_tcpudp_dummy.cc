@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.2 2007/08/15 19:29:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.3 2007/08/20 19:12:15 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -74,18 +74,16 @@ IoTcpUdpDummy::stop(string& error_msg)
 }
 
 int
-IoTcpUdpDummy::tcp_open(bool is_blocking, string& error_msg)
+IoTcpUdpDummy::tcp_open(string& error_msg)
 {
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IoTcpUdpDummy::udp_open(bool is_blocking, string& error_msg)
+IoTcpUdpDummy::udp_open(string& error_msg)
 {
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);
@@ -93,13 +91,12 @@ IoTcpUdpDummy::udp_open(bool is_blocking, string& error_msg)
 
 int
 IoTcpUdpDummy::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				 bool is_blocking, string& error_msg)
+				 string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
 
     UNUSED(local_addr);
     UNUSED(local_port);
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);
@@ -107,13 +104,12 @@ IoTcpUdpDummy::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 int
 IoTcpUdpDummy::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				 bool is_blocking, string& error_msg)
+				 string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
 
     UNUSED(local_addr);
     UNUSED(local_port);
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);
@@ -122,8 +118,7 @@ IoTcpUdpDummy::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 int
 IoTcpUdpDummy::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 				  const IPvX& mcast_addr, uint8_t ttl,
-				  bool reuse, bool is_blocking,
-				  string& error_msg)
+				  bool reuse, string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
     XLOG_ASSERT(family() == mcast_addr.af());
@@ -133,7 +128,6 @@ IoTcpUdpDummy::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
     UNUSED(mcast_addr);
     UNUSED(ttl);
     UNUSED(reuse);
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);
@@ -144,7 +138,7 @@ IoTcpUdpDummy::tcp_open_bind_connect(const IPvX& local_addr,
 				     uint16_t local_port,
 				     const IPvX& remote_addr,
 				     uint16_t remote_port,
-				     bool is_blocking, string& error_msg)
+				     string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
     XLOG_ASSERT(family() == remote_addr.af());
@@ -153,7 +147,6 @@ IoTcpUdpDummy::tcp_open_bind_connect(const IPvX& local_addr,
     UNUSED(local_port);
     UNUSED(remote_addr);
     UNUSED(remote_port);
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);
@@ -164,7 +157,7 @@ IoTcpUdpDummy::udp_open_bind_connect(const IPvX& local_addr,
 				     uint16_t local_port,
 				     const IPvX& remote_addr,
 				     uint16_t remote_port,
-				     bool is_blocking, string& error_msg)
+				     string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
     XLOG_ASSERT(family() == remote_addr.af());
@@ -173,7 +166,6 @@ IoTcpUdpDummy::udp_open_bind_connect(const IPvX& local_addr,
     UNUSED(local_port);
     UNUSED(remote_addr);
     UNUSED(remote_port);
-    UNUSED(is_blocking);
     UNUSED(error_msg);
 
     return (XORP_OK);

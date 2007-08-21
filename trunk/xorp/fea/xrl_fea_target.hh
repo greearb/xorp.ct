@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.17 2007/08/15 19:29:20 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.18 2007/08/16 01:13:24 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1505,16 +1505,12 @@ public:
      *  @param creator the Xrl Target instance name of the socket creator. The
      *  named target must implement socket4_user/0.1.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
     XrlCmdError socket4_0_1_tcp_open(
 	// Input values,
 	const string&	creator,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1524,16 +1520,12 @@ public:
      *  @param creator the Xrl Target instance name of the socket creator. The
      *  named target must implement socket4_user/0.1.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
     XrlCmdError socket4_0_1_udp_open(
 	// Input values,
 	const string&	creator,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1547,9 +1539,6 @@ public:
      *
      *  @param local_port the port to bind socket to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1558,7 +1547,6 @@ public:
 	const string&	creator,
 	const IPv4&	local_addr,
 	const uint32_t&	local_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1572,9 +1560,6 @@ public:
      *
      *  @param local_port the port to bind socket to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1583,7 +1568,6 @@ public:
 	const string&	creator,
 	const IPv4&	local_addr,
 	const uint32_t&	local_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1603,9 +1587,6 @@ public:
      *
      *  @param reuse allow other sockets to bind to same multicast group.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1617,7 +1598,6 @@ public:
 	const IPv4&	mcast_addr,
 	const uint32_t&	ttl,
 	const bool&	reuse,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1635,9 +1615,6 @@ public:
      *
      *  @param remote_port the remote port to connect to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1648,7 +1625,6 @@ public:
 	const uint32_t&	local_port,
 	const IPv4&	remote_addr,
 	const uint32_t&	remote_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1666,9 +1642,6 @@ public:
      *
      *  @param remote_port the remote port to connect to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1679,7 +1652,6 @@ public:
 	const uint32_t&	local_port,
 	const IPv4&	remote_addr,
 	const uint32_t&	remote_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1825,16 +1797,12 @@ public:
      *  @param creator the Xrl Target instance name of the socket creator. The
      *  named target must implement socket4_user/0.1.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
     XrlCmdError socket6_0_1_tcp_open(
 	// Input values,
 	const string&	creator,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1844,16 +1812,12 @@ public:
      *  @param creator the Xrl Target instance name of the socket creator. The
      *  named target must implement socket4_user/0.1.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
     XrlCmdError socket6_0_1_udp_open(
 	// Input values,
 	const string&	creator,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1867,9 +1831,6 @@ public:
      *
      *  @param local_port the port to bind socket to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1878,7 +1839,6 @@ public:
 	const string&	creator,
 	const IPv6&	local_addr,
 	const uint32_t&	local_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1892,9 +1852,6 @@ public:
      *
      *  @param local_port the port to bind socket to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1903,7 +1860,6 @@ public:
 	const string&	creator,
 	const IPv6&	local_addr,
 	const uint32_t&	local_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1923,9 +1879,6 @@ public:
      *
      *  @param reuse allow other sockets to bind to same multicast group.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1937,7 +1890,6 @@ public:
 	const IPv6&	mcast_addr,
 	const uint32_t&	ttl,
 	const bool&	reuse,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1955,9 +1907,6 @@ public:
      *
      *  @param remote_port the remote port to connect to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1968,7 +1917,6 @@ public:
 	const uint32_t&	local_port,
 	const IPv6&	remote_addr,
 	const uint32_t&	remote_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 
@@ -1986,9 +1934,6 @@ public:
      *
      *  @param remote_port the remote port to connect to.
      *
-     *  @param is_blocking if true then the socket will be blocking, otherwise
-     *  non-blocking.
-     *
      *  @param sockid return parameter that contains unique socket ID when
      *  socket instantiation is successful.
      */
@@ -1999,7 +1944,6 @@ public:
 	const uint32_t&	local_port,
 	const IPv6&	remote_addr,
 	const uint32_t&	remote_port,
-	const bool&	is_blocking,
 	// Output values,
 	string&	sockid);
 

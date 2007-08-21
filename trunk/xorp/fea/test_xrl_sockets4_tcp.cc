@@ -242,7 +242,7 @@ public:
 	verbose_log("Sending bind (%s:%u) request.\n",
 		    addr.str().c_str(), port);
 	return c.send_tcp_open_and_bind(
-	    _fea_target_name.c_str(), _r->instance_name(), addr, port, false,
+	    _fea_target_name.c_str(), _r->instance_name(), addr, port,
 	    callback(this, &TestSocket4TCPServer::bind_cb));
     }
 
@@ -497,7 +497,7 @@ public:
      */
     bool
     bind_connect(IPv4 local_addr, uint16_t local_port, IPv4 remote_addr,
-		 uint16_t remote_port, bool is_blocking)
+		 uint16_t remote_port)
     {
 	XrlSocket4V0p1Client c(_r);
 	verbose_log("Sending bind (%s/%u) and connect request (\"%s\", %s/%u)\n",
@@ -506,7 +506,7 @@ public:
 		    remote_addr.str().c_str(), remote_port);
 	return c.send_tcp_open_bind_connect(
 	    _fea_target_name.c_str(), _r->instance_name(), local_addr,
-	    local_port, remote_addr, remote_port, is_blocking,
+	    local_port, remote_addr, remote_port,
 	    callback(this, &TestSocket4TCPClient::bind_connect_cb));
     }
 
@@ -779,7 +779,7 @@ bind_connect_client(TestSocket4TCP** ppu, IPv4 local_addr,
 {
     TestSocket4TCPClient* pu = dynamic_cast<TestSocket4TCPClient*>(*ppu);
     bool s = pu->bind_connect(local_addr, local_port, remote_addr,
-    			      remote_port, false);
+			      remote_port);
     if (s == false)
 	*err = true;
 }

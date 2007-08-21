@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.13 2007/08/20 20:48:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.14 2007/08/20 22:57:57 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -160,14 +160,14 @@ IoTcpUdpSocket::stop(string& error_msg)
 }
 
 int
-IoTcpUdpSocket::tcp_open(bool is_blocking, string& error_msg)
+IoTcpUdpSocket::tcp_open(string& error_msg)
 {
     if (_socket_fd.is_valid()) {
 	error_msg = c_format("The socket is already open");
 	return (XORP_ERROR);
     }
 	
-    _socket_fd = comm_open_tcp(family(), is_blocking);
+    _socket_fd = comm_open_tcp(family(), COMM_SOCK_NONBLOCKING);
     if (! _socket_fd.is_valid()) {
 	error_msg = c_format("Cannot open the socket: %s",
 			     comm_get_last_error_str());
@@ -178,14 +178,14 @@ IoTcpUdpSocket::tcp_open(bool is_blocking, string& error_msg)
 }
 
 int
-IoTcpUdpSocket::udp_open(bool is_blocking, string& error_msg)
+IoTcpUdpSocket::udp_open(string& error_msg)
 {
     if (_socket_fd.is_valid()) {
 	error_msg = c_format("The socket is already open");
 	return (XORP_ERROR);
     }
 	
-    _socket_fd = comm_open_udp(family(), is_blocking);
+    _socket_fd = comm_open_udp(family(), COMM_SOCK_NONBLOCKING);
     if (! _socket_fd.is_valid()) {
 	error_msg = c_format("Cannot open the socket: %s",
 			     comm_get_last_error_str());
@@ -197,7 +197,7 @@ IoTcpUdpSocket::udp_open(bool is_blocking, string& error_msg)
 
 int
 IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				  bool is_blocking, string& error_msg)
+				  string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
 
@@ -213,7 +213,7 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in_addr);
 	_socket_fd = comm_bind_tcp4(&local_in_addr, htons(local_port),
-				    is_blocking);
+				    COMM_SOCK_NONBLOCKING);
 	break;
     }
 #ifdef HAVE_IPV6
@@ -223,7 +223,7 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in6_addr);
 	_socket_fd = comm_bind_tcp6(&local_in6_addr, htons(local_port),
-				    is_blocking);
+				    COMM_SOCK_NONBLOCKING);
 	break;
     }
 #endif // HAVE_IPV6
@@ -249,7 +249,7 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 int
 IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				  bool is_blocking, string& error_msg)
+				  string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
 
@@ -265,7 +265,7 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in_addr);
 	_socket_fd = comm_bind_udp4(&local_in_addr, htons(local_port),
-				    is_blocking);
+				    COMM_SOCK_NONBLOCKING);
 	break;
     }
 #ifdef HAVE_IPV6
@@ -275,7 +275,7 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 
 	local_addr.copy_out(local_in6_addr);
 	_socket_fd = comm_bind_udp6(&local_in6_addr, htons(local_port),
-				    is_blocking);
+				    COMM_SOCK_NONBLOCKING);
 	break;
     }
 #endif // HAVE_IPV6
@@ -296,8 +296,7 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
 int
 IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 				   const IPvX& mcast_addr, uint8_t ttl,
-				   bool reuse, bool is_blocking,
-				   string& error_msg)
+				   bool reuse, string& error_msg)
 {
     XLOG_ASSERT(family() == local_addr.af());
     XLOG_ASSERT(family() == mcast_addr.af());
@@ -316,7 +315,7 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	mcast_addr.copy_out(mcast_in_addr);
 	_socket_fd = comm_bind_join_udp4(&mcast_in_addr, &local_in_addr,
 					 htons(local_port), reuse,
-					 is_blocking);
+					 COMM_SOCK_NONBLOCKING);
 	if (! _socket_fd.is_valid()) {
 	    error_msg = c_format("Cannot open, bind and join the socket: %s",
 				 comm_get_last_error_str());
@@ -349,7 +348,7 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	mcast_addr.copy_out(mcast_in6_addr);
 	_socket_fd = comm_bind_join_udp6(&mcast_in6_addr, pif_index,
 					 htons(local_port), reuse,
-					 is_blocking);
+					 COMM_SOCK_NONBLOCKING);
 
 	if (! _socket_fd.is_valid()) {
 	    error_msg = c_format("Cannot open, bind and join the socket: %s",
@@ -398,7 +397,7 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 				      uint16_t local_port,
 				      const IPvX& remote_addr,
 				      uint16_t remote_port,
-				      bool is_blocking, string& error_msg)
+				      string& error_msg)
 {
     int in_progress = 0;
 
@@ -420,7 +419,8 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 	_socket_fd = comm_bind_connect_tcp4(&local_in_addr, htons(local_port),
 					    &remote_in_addr,
 					    htons(remote_port),
-					    is_blocking, &in_progress);
+					    COMM_SOCK_NONBLOCKING,
+					    &in_progress);
 	break;
     }
 #ifdef HAVE_IPV6
@@ -433,7 +433,8 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
 	_socket_fd = comm_bind_connect_tcp6(&local_in6_addr, htons(local_port),
 					    &remote_in6_addr,
 					    htons(remote_port),
-					    is_blocking, &in_progress);
+					    COMM_SOCK_NONBLOCKING,
+					    &in_progress);
 	break;
     }
 #endif // HAVE_IPV6
@@ -464,7 +465,7 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 				      uint16_t local_port,
 				      const IPvX& remote_addr,
 				      uint16_t remote_port,
-				      bool is_blocking, string& error_msg)
+				      string& error_msg)
 {
     int in_progress = 0;
 
@@ -486,7 +487,8 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 	_socket_fd = comm_bind_connect_udp4(&local_in_addr, htons(local_port),
 					    &remote_in_addr,
 					    htons(remote_port),
-					    is_blocking, &in_progress);
+					    COMM_SOCK_NONBLOCKING,
+					    &in_progress);
 	break;
     }
 #ifdef HAVE_IPV6
@@ -499,7 +501,8 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 	_socket_fd = comm_bind_connect_udp6(&local_in6_addr, htons(local_port),
 					    &remote_in6_addr,
 					    htons(remote_port),
-					    is_blocking, &in_progress);
+					    COMM_SOCK_NONBLOCKING,
+					    &in_progress);
 	break;
     }
 #endif // HAVE_IPV6

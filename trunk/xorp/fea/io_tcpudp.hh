@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp.hh,v 1.3 2007/08/17 19:48:07 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp.hh,v 1.4 2007/08/20 19:12:14 pavlin Exp $
 
 
 #ifndef __FEA_IO_TCPUDP_HH__
@@ -146,48 +146,40 @@ public:
     /**
      * Open a TCP socket.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int tcp_open(bool is_blocking, string& error_msg) = 0;
+    virtual int tcp_open(string& error_msg) = 0;
 
     /**
      * Open an UDP socket.
      *
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int udp_open(bool is_blocking, string& error_msg) = 0;
+    virtual int udp_open(string& error_msg) = 0;
 
     /**
      * Create a bound TCP socket.
      *
      * @param local_addr the interface address to bind socket to.
      * @param local_port the port to bind socket to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				  bool is_blocking, string& error_msg) = 0;
+				  string& error_msg) = 0;
 
     /**
      * Create a bound UDP socket.
      *
      * @param local_addr the interface address to bind socket to.
      * @param local_port the port to bind socket to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
-				  bool is_blocking, string& error_msg) = 0;
+				  string& error_msg) = 0;
 
     /**
      * Create a bound UDP multicast socket.
@@ -197,15 +189,12 @@ public:
      * @param mcast_addr the multicast group address to join.
      * @param ttl the TTL to use for this multicast socket.
      * @param reuse allow other sockets to bind to same multicast group.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 				   const IPvX& mcast_addr, uint8_t ttl,
-				   bool reuse, bool is_blocking,
-				   string& error_msg) = 0;
+				   bool reuse, string& error_msg) = 0;
 
     /**
      * Create a bound and connected TCP socket.
@@ -214,8 +203,6 @@ public:
      * @param local_port the port to bind socket to.
      * @param remote_addr the address to connect to.
      * @param remote_port the remote port to connect to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -223,7 +210,6 @@ public:
 				      uint16_t local_port,
 				      const IPvX& remote_addr,
 				      uint16_t remote_port,
-				      bool is_blocking,
 				      string& error_msg) = 0;
 
     /**
@@ -233,8 +219,6 @@ public:
      * @param local_port the port to bind socket to.
      * @param remote_addr the address to connect to.
      * @param remote_port the remote port to connect to.
-     * @param is_blocking if true then the socket will be blocking, otherwise
-     * non-blocking.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -242,7 +226,6 @@ public:
 				      uint16_t local_port,
 				      const IPvX& remote_addr,
 				      uint16_t remote_port,
-				      bool is_blocking,
 				      string& error_msg) = 0;
 
     /**
