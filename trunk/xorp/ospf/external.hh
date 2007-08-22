@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.17 2007/02/24 11:00:11 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.18 2007/08/17 22:18:47 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -40,6 +40,7 @@ class ASExternalDatabase {
     iterator end() { return _lsas.end(); }
     void erase(iterator i) { _lsas.erase(i); }
     void insert(Lsa::LsaRef lsar) { _lsas.insert(lsar); }
+    void clear() { _lsas.clear(); }
 
     iterator find(Lsa::LsaRef lsar);
 
@@ -86,6 +87,11 @@ class External {
      * A true external route redistributed from the RIB (withdraw).
      */
     bool withdraw(const IPNet<A>& net);
+
+    /**
+     * Clear the AS-External-LSA database.
+     */
+    bool clear_database();
 
     /**
      * Is this an AS boundary router?

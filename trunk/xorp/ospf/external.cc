@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.31 2007/06/28 02:43:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.32 2007/08/17 22:18:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -416,6 +416,14 @@ External<A>::withdraw(const IPNet<A>& net)
     lsar->set_maxage();
     maxage_reached(lsar);
 
+    return true;
+}
+
+template <typename A>
+bool
+External<A>::clear_database()
+{
+    _lsas.clear();
     return true;
 }
 
