@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.41 2007/08/03 23:48:59 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.42 2007/08/20 22:57:58 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1553,6 +1553,18 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
     sslen = sizeof(ss);
     memset(&ss, 0, sslen);
     err = getpeername(sock, (struct sockaddr *)&ss, &sslen);
+
+#ifdef HOST_OS_WINDOWS
+    if (err == SOCKET_ERROR) {
+	if ((WSAGetLastError() == WSAENOTCONN)
+	    || (WSAGetLastError() == WSAEINPROGRESS)) {
+	    return (XORP_OK);	/* Socket is not connected */
+	}
+	_comm_set_serrno();
+	return (XORP_ERROR);
+    }
+
+#else /* ! HOST_OS_WINDOWS */
     if (err != 0) {
 	if ((err == ENOTCONN) || (err == ECONNRESET)) {
 	    return (XORP_OK);	/* Socket is not connected */
@@ -1560,6 +1572,7 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
 	_comm_set_serrno();
 	return (XORP_ERROR);
     }
+#endif /* ! HOST_OS_WINDOWS */
 
     /*  Socket is connected */
     *is_connected = 1;
