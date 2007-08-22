@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.90 2007/03/29 23:49:19 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.91 2007/08/17 22:18:47 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -267,7 +267,7 @@ class PeerManager {
     /**
      * Queue an LSA for transmission.
      *
-     * @param peerid to queue to LSA on.
+     * @param peerid to queue the LSA on.
      * @param peer the LSA arrived on.
      * @param nid the LSA arrived on.
      * @param lsar the lsa
