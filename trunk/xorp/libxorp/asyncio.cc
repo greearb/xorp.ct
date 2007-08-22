@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.37 2007/08/20 20:42:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.38 2007/08/20 22:57:58 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -85,11 +85,22 @@ AsyncFileOperator::~AsyncFileOperator()
 // ----------------------------------------------------------------------------
 // AsyncFileReader read method and entry hook
 
+AsyncFileReader::AsyncFileReader(EventLoop& e, XorpFd fd, int priority)
+    : AsyncFileOperator(e, fd, priority)
+{
+}
+
+AsyncFileReader::~AsyncFileReader()
+{
+    stop();
+    delete_pointers_list(_buffers);
+}
+
 void
 AsyncFileReader::add_buffer(uint8_t* b, size_t b_bytes, const Callback& cb)
 {
     assert(b_bytes != 0);
-    _buffers.push_back(BufferInfo(b, b_bytes, cb));
+    _buffers.push_back(new BufferInfo(b, b_bytes, cb));
 }
 
 void
@@ -99,7 +110,7 @@ AsyncFileReader::add_buffer_with_offset(uint8_t*	b,
 					const Callback&	cb) 
 {
     assert(off < b_bytes);
-    _buffers.push_back(BufferInfo(b, b_bytes, off, cb));
+    _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
 }
 
 #ifdef HOST_OS_WINDOWS
@@ -111,8 +122,8 @@ AsyncFileReader::disconnect(XorpFd fd, IoEventType type)
     assert(fd.is_valid()); 
     assert(fd.is_socket()); 
     debug_msg("IOT_DISCONNECT close detected (reader side)\n");
-    BufferInfo& head = _buffers.front();
-    head.dispatch_callback(END_OF_FILE);
+    BufferInfo* head = _buffers.front();
+    head->dispatch_callback(END_OF_FILE);
 }
 #endif // HOST_OS_WINDOWS
 
@@ -141,15 +152,15 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 
     debug_msg("Buffer count %u\n", XORP_UINT_CAST(_buffers.size()));
 
-    BufferInfo& head = _buffers.front();
+    BufferInfo* head = _buffers.front();
     ssize_t done = 0;
 #ifdef HOST_OS_WINDOWS
     BOOL result = FALSE;
 
     switch (fd.type()) {
     case XorpFd::FDTYPE_SOCKET:
-	done = recv((SOCKET)_fd, (char *)(head._buffer + head._offset),
-		    head._buffer_bytes - head._offset, 0);
+	done = recv((SOCKET)_fd, (char *)(head->buffer() + head->offset()),
+		    head->buffer_bytes() - head->offset(), 0);
 	if (done == SOCKET_ERROR) {
 	    _last_error = WSAGetLastError();
 	    done = -1;
@@ -163,21 +174,21 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 
     case XorpFd::FDTYPE_PIPE:
 	// XXX: Return values need review.
-	done = win_pipe_read(_fd, head._buffer + head._offset,
-			     head._buffer_bytes - head._offset);
+	done = win_pipe_read(_fd, head->buffer() + head->offset(),
+			     head->buffer_bytes() - head->offset());
 	_last_error = GetLastError();
 	break;
 
     case XorpFd::FDTYPE_CONSOLE:
 	// XXX: Return values need review.
-	done = win_con_read(_fd, head._buffer + head._offset,
-			     head._buffer_bytes - head._offset);
+	done = win_con_read(_fd, head->buffer() + head->offset(),
+			     head->buffer_bytes() - head->offset());
 	_last_error = GetLastError();
 	break;
 
     case XorpFd::FDTYPE_FILE:
-	result = ReadFile(_fd, (LPVOID)(head._buffer + head._offset),
-			       (DWORD)(head._buffer_bytes - head._offset),
+	result = ReadFile(_fd, (LPVOID)(head->buffer() + head->offset()),
+			       (DWORD)(head->buffer_bytes() - head->offset()),
 			       (LPDWORD)&done, NULL);
 	if (result == FALSE) {
 	    _last_error = GetLastError();
@@ -192,8 +203,8 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 #else // ! HOST_OS_WINDOWS
     errno = 0;
     _last_error = 0;
-    done = ::read(_fd, head._buffer + head._offset,
-		  head._buffer_bytes - head._offset);
+    done = ::read(_fd, head->buffer() + head->offset(),
+		  head->buffer_bytes() - head->offset());
     if (done < 0)
 	_last_error = errno;
     errno = 0;
@@ -235,27 +246,27 @@ AsyncFileReader::complete_transfer(int err, ssize_t done)
     // not reference any object state after callback.
 
     if (done > 0) {
-	BufferInfo& head = _buffers.front();
-	head._offset += done;
-	if (head._offset == head._buffer_bytes) {
-	    BufferInfo copy = head; 		// copy head
-	    _buffers.erase(_buffers.begin());	// remove head
+	BufferInfo* head = _buffers.front();
+	head->incr_offset(done);
+	if (head->offset() == head->buffer_bytes()) {
+	    _buffers.pop_front();
 	    if (_buffers.empty()) {
 		stop();
 	    }
-	    copy.dispatch_callback(DATA);
+	    head->dispatch_callback(DATA);
+	    delete head;
 	} else {
-	    head.dispatch_callback(DATA);
+	    head->dispatch_callback(DATA);
 	}
 	return;
     }
 
-    BufferInfo& head = _buffers.front();
+    BufferInfo* head = _buffers.front();
     if (err != 0 || done < 0) {
 	stop();
-	head.dispatch_callback(OS_ERROR);
+	head->dispatch_callback(OS_ERROR);
     } else {
-	head.dispatch_callback(END_OF_FILE);
+	head->dispatch_callback(END_OF_FILE);
     }
 }
 
@@ -340,11 +351,10 @@ AsyncFileReader::flush_buffers()
 {
     stop();
     while (_buffers.empty() == false) {
-	// Copy out buffer so flush buffers can be called re-entrantly (even
-	// if we happen to think this is bad coding style :-).
-	BufferInfo head = _buffers.front();
-	_buffers.erase(_buffers.begin());
-	head.dispatch_callback(FLUSHING);
+	BufferInfo* head = _buffers.front();
+	_buffers.pop_front();
+	head->dispatch_callback(FLUSHING);
+	delete head;
     }
 }
 
@@ -373,6 +383,7 @@ AsyncFileWriter::~AsyncFileWriter()
     stop();
 
     delete[] _iov;
+    delete_pointers_list(_buffers);
 }
 
 void
@@ -381,7 +392,7 @@ AsyncFileWriter::add_buffer(const uint8_t*	b,
 			    const Callback&	cb)
 {
     assert(b_bytes != 0);
-    _buffers.push_back(BufferInfo(b, b_bytes, cb));
+    _buffers.push_back(new BufferInfo(b, b_bytes, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -399,7 +410,7 @@ AsyncFileWriter::add_buffer_sendto(const uint8_t*	b,
 				   const Callback&	cb)
 {
     assert(b_bytes != 0);
-    _buffers.push_back(BufferInfo(b, b_bytes, dst_addr, dst_port, cb));
+    _buffers.push_back(new BufferInfo(b, b_bytes, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -416,7 +427,7 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 					const Callback&	cb)
 {
     assert(off < b_bytes);
-    _buffers.push_back(BufferInfo(b, b_bytes, off, cb));
+    _buffers.push_back(new BufferInfo(b, b_bytes, off, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -431,7 +442,7 @@ AsyncFileWriter::add_data(const vector<uint8_t>&	data,
 			  const Callback&		cb)
 {
     assert(data.size() != 0);
-    _buffers.push_back(BufferInfo(data, cb));
+    _buffers.push_back(new BufferInfo(data, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -448,7 +459,7 @@ AsyncFileWriter::add_data_sendto(const vector<uint8_t>&	data,
 				 const Callback&	cb)
 {
     assert(data.size() != 0);
-    _buffers.push_back(BufferInfo(data, dst_addr, dst_port, cb));
+    _buffers.push_back(new BufferInfo(data, dst_addr, dst_port, cb));
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
@@ -482,8 +493,8 @@ AsyncFileWriter::disconnect(XorpFd fd, IoEventType type)
     assert(fd.is_socket()); 
     debug_msg("IOT_DISCONNECT close detected (writer side)\n");
 #if 0
-    BufferInfo& head = _buffers.front();
-    head.dispatch_callback(END_OF_FILE);
+    BufferInfo* head = _buffers.front();
+    head->dispatch_callback(END_OF_FILE);
 #endif // 0
 }
 #endif // HOST_OS_WINDOWS
@@ -521,31 +532,31 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     size_t   total_bytes = 0;
     ssize_t  done = 0;
 
-    list<BufferInfo>::const_iterator i = _buffers.begin();
+    list<BufferInfo *>::const_iterator i = _buffers.begin();
 
     //
     // Group together a number of buffers.
     // If the buffer is sendto()-type, then send that buffer on its own.
     //
     while (i != _buffers.end()) {
-	const BufferInfo& bi = *i;
-	is_sendto = bi.is_sendto();
+	const BufferInfo* bi = *i;
+	is_sendto = bi->is_sendto();
 
 	if (is_sendto && (iov_cnt > 0)) {
 	    // XXX: Send first all buffers before this sendto()-type
 	    break;
 	}
 
-	uint8_t* u = const_cast<uint8_t*>(bi._buffer + bi._offset);
-	size_t   u_bytes = bi._buffer_bytes - bi._offset;
+	uint8_t* u = const_cast<uint8_t*>(bi->buffer() + bi->offset());
+	size_t   u_bytes = bi->buffer_bytes() - bi->offset();
 	iov_place(_iov[iov_cnt].iov_base, _iov[iov_cnt].iov_len, u, u_bytes);
 
 	total_bytes += u_bytes;
 	assert(total_bytes != 0);
 	iov_cnt++;
 	if (is_sendto) {
-	    dst_addr = bi.dst_addr();
-	    dst_port = bi.dst_port();
+	    dst_addr = bi->dst_addr();
+	    dst_port = bi->dst_port();
 	    break;
 	}
 	if (iov_cnt == _coalesce)
@@ -683,8 +694,8 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
     if (sdone < 0) {
 	XLOG_ERROR("Write error %d\n", _last_error);
 	stop();
-	BufferInfo& head = _buffers.front();
-	head.dispatch_callback(OS_ERROR);
+	BufferInfo* head = _buffers.front();
+	head->dispatch_callback(OS_ERROR);
 	return;
     }
 
@@ -709,20 +720,19 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
 	assert(notified <= done);
 	assert(_buffers.empty() == false);
 
-	BufferInfo& head = _buffers.front();
-	assert(head._buffer_bytes >= head._offset);
+	BufferInfo* head = _buffers.front();
+	assert(head->buffer_bytes() >= head->offset());
 
-	size_t bytes_needed = head._buffer_bytes - head._offset;
+	size_t bytes_needed = head->buffer_bytes() - head->offset();
 
 	if (done - notified >= bytes_needed) {
 	    //
 	    // All data in this buffer has been written
 	    //
-	    head._offset += bytes_needed;
-	    assert(head._offset == head._buffer_bytes);
+	    head->incr_offset(bytes_needed);
+	    assert(head->offset() == head->buffer_bytes());
 
-	    // Copy, then detach head buffer and update state
-	    BufferInfo copy = head;
+	    // Detach head buffer and update state
 	    _buffers.pop_front();
 	    if (_buffers.empty()) {
 		stop();
@@ -730,7 +740,8 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
 
 	    assert(stack_token.is_only() == false);
 
-	    copy.dispatch_callback(DATA);
+	    head->dispatch_callback(DATA);
+	    delete head;
 	    if (stack_token.is_only() == true) {
 		// "this" instance of AsyncFileWriter was deleted by the
 		// calback, return immediately.
@@ -742,8 +753,8 @@ AsyncFileWriter::complete_transfer(ssize_t sdone)
 	    //
 	    // Not enough data has been written
 	    //
-	    head._offset += (done - notified);
-	    assert(head._offset < head._buffer_bytes);
+	    head->incr_offset(done - notified);
+	    assert(head->offset() < head->buffer_bytes());
 
 	    return;
 	}
@@ -838,10 +849,9 @@ AsyncFileWriter::flush_buffers()
 {
     stop();
     while (_buffers.empty() == false) {
-	// Copy out buffer so flush buffers can be called re-entrantly (even
-	// if we happen to think this is bad coding style :-).
-	BufferInfo head = _buffers.front();
-	_buffers.erase(_buffers.begin());
-	head.dispatch_callback(FLUSHING);
+	BufferInfo* head = _buffers.front();
+	_buffers.pop_front();
+	head->dispatch_callback(FLUSHING);
+	delete head;
     }
 }

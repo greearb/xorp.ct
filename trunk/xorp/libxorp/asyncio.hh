@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.27 2007/08/20 19:52:34 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.28 2007/08/20 20:42:40 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -155,10 +155,9 @@ public:
      * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor to read from.
      */
-    AsyncFileReader(EventLoop& e, XorpFd fd, 
-		    int priority = XorpTask::PRIORITY_DEFAULT)
-	: AsyncFileOperator(e, fd, priority) {}
-    ~AsyncFileReader() { stop(); }
+    AsyncFileReader(EventLoop& e, XorpFd fd,
+		    int priority = XorpTask::PRIORITY_DEFAULT);
+    ~AsyncFileReader();
 
     /**
      * Add an additional buffer for reading to.
@@ -207,7 +206,8 @@ public:
     void flush_buffers();
 
 protected:
-    struct BufferInfo {
+    class BufferInfo {
+    public:
 	BufferInfo(uint8_t* b, size_t bb, Callback cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _cb(cb) {}
 	BufferInfo(uint8_t* b, size_t bb, size_t off, Callback cb)
@@ -216,6 +216,16 @@ protected:
 	void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
+
+	uint8_t* buffer() { return (_buffer); }
+	size_t buffer_bytes() const { return (_buffer_bytes); }
+	size_t offset() const { return (_offset); }
+	void incr_offset(size_t done) { _offset += done; }
+
+    private:
+	BufferInfo();					// Not implemented
+	BufferInfo(const BufferInfo&);			// Not implemented
+	BufferInfo& operator=(const BufferInfo&);	// Not implemented
 
 	uint8_t*	_buffer;
 	size_t		_buffer_bytes;
@@ -226,7 +236,7 @@ protected:
     void read(XorpFd fd, IoEventType type);
     void complete_transfer(int err, ssize_t done);
 
-    list<BufferInfo> _buffers;
+    list<BufferInfo *> _buffers;
 
 #ifdef HOST_OS_WINDOWS
     void disconnect(XorpFd fd, IoEventType type);
@@ -350,27 +360,13 @@ public:
     void flush_buffers();
 
 private:
-    AsyncFileWriter();					// Not Implemented
-    AsyncFileWriter(const AsyncFileWriter&);		// Not Implemented
-    AsyncFileWriter& operator=(const AsyncFileWriter&);	// Not Implemented
+    AsyncFileWriter();					// Not implemented
+    AsyncFileWriter(const AsyncFileWriter&);		// Not implemented
+    AsyncFileWriter& operator=(const AsyncFileWriter&);	// Not implemented
 
 protected:
-    struct BufferInfo {
-	BufferInfo(const BufferInfo& other)
-	    : _data(other._data),
-	      _buffer(other._buffer),
-	      _buffer_bytes(other._buffer_bytes),
-	      _offset(other._offset),
-	      _dst_addr(other._dst_addr),
-	      _dst_port(other._dst_port),
-	      _cb(other._cb),
-	      _is_sendto(other._is_sendto) {
-	    if (! _data.empty()) {
-		_buffer = &_data[0];
-		_buffer_bytes = _data.size();
-	    }
-	}
-
+    class BufferInfo {
+    public:
 	BufferInfo(const uint8_t* b, size_t bb, const Callback& cb)
 	    : _buffer(b), _buffer_bytes(bb), _offset(0), _dst_port(0),
 	      _cb(cb), _is_sendto(false) {}
@@ -391,13 +387,22 @@ protected:
 	      _offset(0), _dst_addr(dst_addr), _dst_port(dst_port),
 	      _cb(cb), _is_sendto(true) {}
 
-	bool is_sendto() const { return (_is_sendto); }
-	const IPvX& dst_addr() const { return (_dst_addr); }
-	uint16_t dst_port() const { return (_dst_port); }
-
 	void dispatch_callback(AsyncFileOperator::Event e) {
 	    _cb->dispatch(e, _buffer, _buffer_bytes, _offset);
 	}
+
+	const uint8_t* buffer() const { return (_buffer); }
+	size_t buffer_bytes() const { return (_buffer_bytes); }
+	size_t offset() const { return (_offset); }
+	void incr_offset(size_t done) { _offset += done; }
+	const IPvX& dst_addr() const { return (_dst_addr); }
+	uint16_t dst_port() const { return (_dst_port); }
+	bool is_sendto() const { return (_is_sendto); }
+
+    private:
+	BufferInfo();					// Not implemented
+	BufferInfo(const BufferInfo&);			// Not implemented
+	BufferInfo& operator=(const BufferInfo&);	// Not implemented
 
 	const vector<uint8_t>	_data;		// Local copy of the data
 	const uint8_t*		_buffer;
@@ -415,7 +420,7 @@ protected:
     uint32_t		_coalesce;
     struct iovec* 	_iov;
     ref_ptr<int>	_dtoken;
-    list<BufferInfo> 	_buffers;
+    list<BufferInfo *> 	_buffers;
 
 #ifdef HOST_OS_WINDOWS
     void disconnect(XorpFd fd, IoEventType type);
