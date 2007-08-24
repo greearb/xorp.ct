@@ -1,4 +1,10 @@
-/* $XORP: xorp/etc/templates/ospfv3.cmds,v 1.5 2007/02/26 11:04:46 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.cmds,v 1.6 2007/02/26 11:08:37 atanu Exp $ */
+
+clear ospf6 database {
+    %command: "ospf/tools/clear_database -3" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Clear LSA database";
+}
 
 show ospf6 {
     %command: "" %help: "Display information about OSPFv3";

@@ -1,4 +1,10 @@
-/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.9 2006/03/08 19:23:09 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.10 2006/04/27 20:01:32 pavlin Exp $ */
+
+clear ospf4 database {
+    %command: "ospf/tools/clear_database -2" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Clear LSA database";
+}
 
 show ospf4 {
     %command: "" %help: "Display information about OSPFv2";
