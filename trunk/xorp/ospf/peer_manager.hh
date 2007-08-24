@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.91 2007/08/17 22:18:47 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.92 2007/08/22 01:35:04 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -263,6 +263,11 @@ class PeerManager {
     bool receive(const string& interface, const string& vif, A dst, A src,
 		 Packet *packet)
 	throw(BadPeer);
+
+    /**
+     * Drop all adjacencies and hence clear database.
+     */
+    bool clear_database();
 
     /**
      * Queue an LSA for transmission.
