@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.281 2007/08/17 23:28:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.282 2007/08/18 00:11:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -231,7 +231,7 @@ AreaRouter<A>::change_area_router_type(OspfTypes::AreaType area_type)
 
     save_default_route();
 
-    clear_database();
+    clear_database(true /* Preserve Link-LSAs OSPFv3 */);
 
     // Put the Router-LSA back.
     add_lsa(_router_lsa);
@@ -3128,7 +3128,7 @@ AreaRouter<A>::close_database(DataBaseHandle& dbh)
 
 template <typename A>
 void
-AreaRouter<A>::clear_database()
+AreaRouter<A>::clear_database(bool preserve_link_lsas)
 {
     for (size_t index = 0 ; index < _last_entry; index++) {
 	if (!_db[index]->valid())
@@ -3136,6 +3136,15 @@ AreaRouter<A>::clear_database()
 	if (_db[index]->external()) {
 	    _db[index] = _invalid_lsa;
 	    continue;
+	}
+	switch (_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    if (preserve_link_lsas && _db[index]->get_self_originating() &&
+		dynamic_cast<LinkLsa *>(_db[index].get()))
+		continue;
+	    break;
 	}
 	_db[index]->invalidate();
     }
