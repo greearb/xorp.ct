@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.92 2007/05/23 04:08:27 pavlin Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.93 2007/08/15 23:58:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -706,9 +706,7 @@ template <typename A>
 bool
 Ospf<A>::clear_database()
 {
-    XLOG_WARNING("TBD - CLEAR OSPF DATABASE");
-
-    return true;
+    return _peer_manager.clear_database();
 }
 
 template <typename A>
