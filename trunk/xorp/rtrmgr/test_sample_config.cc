@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.25 2006/08/12 00:32:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.26 2007/02/16 22:47:26 pavlin Exp $"
 
 
 #include <signal.h>
@@ -47,7 +47,18 @@ static const string srcdir = c_srcdir ? c_srcdir : ".";
 static const string default_xorp_root_dir = "..";
 static const string default_config_template_dir = srcdir + "/../etc/templates";
 static const string default_xrl_targets_dir = srcdir + "/../xrl/targets";
-static const string default_config_boot = srcdir + "/config.boot.sample";
+static const string default_config_boot_set[] = {
+    "bgp.boot",
+    "click.boot",
+    "multicast4.boot",
+    "multicast6.boot",
+    "ospfv2.boot",
+    "ospfv3.boot",
+    "rip.boot",
+    "ripng.boot",
+    "snmp.boot",
+    "static.boot"
+};
 
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
@@ -83,7 +94,6 @@ Rtrmgr::run()
 {
     const string& config_template_dir = default_config_template_dir;
     const string& xrl_targets_dir = default_xrl_targets_dir;
-    const string& config_boot = default_config_boot;
 
     XRLdb* xrldb = NULL;
     try {
@@ -131,29 +141,35 @@ Rtrmgr::run()
 		       false,	/* verbose */
 		       default_xorp_root_dir);
 
-    try {
-	// Initialize the IPC mechanism
-	XrlStdRouter xrl_router(eventloop, "rtrmgr-test", fs.addr(),
-				fs.port());
-	XorpClient xclient(eventloop, xrl_router);
+    // Try each configuration file in a loop
+    for (size_t i = 0;
+	 i < sizeof(default_config_boot_set)/sizeof(default_config_boot_set[0]);
+	 i++) {
+	string config_boot = srcdir + "/config/" + default_config_boot_set[i];
+	try {
+	    // Initialize the IPC mechanism
+	    XrlStdRouter xrl_router(eventloop, "rtrmgr-test", fs.addr(),
+				    fs.port());
+	    XorpClient xclient(eventloop, xrl_router);
 
-	//
-	// Read the router startup configuration file, start the processes
-	// required, and initialize them.
-	//
-	MasterConfigTree ct(config_boot, tt, mmgr, xclient,
-			    false /* do_exec */,
-			    true /* verbose */);
-    } catch (const InitError& e) {
-	fprintf(stderr, "test_sample_config: config tree init error: %s\n",
-		e.why().c_str());
-	fprintf(stderr, "test_sample_config: TEST FAILED\n");
-	exit(1);
-    } catch (...) {
-	xorp_unexpected_handler();
-	fprintf(stderr, "test_sample_config: unexpected error\n");
-	fprintf(stderr, "test_sample_config: TEST FAILED\n");
-	exit(1);
+	    //
+	    // Read the router startup configuration file, start the processes
+	    // required, and initialize them.
+	    //
+	    MasterConfigTree ct(config_boot, tt, mmgr, xclient,
+				false /* do_exec */,
+				true /* verbose */);
+	} catch (const InitError& e) {
+	    fprintf(stderr, "test_sample_config: config tree init error: %s\n",
+		    e.why().c_str());
+	    fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	    exit(1);
+	} catch (...) {
+	    xorp_unexpected_handler();
+	    fprintf(stderr, "test_sample_config: unexpected error\n");
+	    fprintf(stderr, "test_sample_config: TEST FAILED\n");
+	    exit(1);
+	}
     }
 
     mmgr.shutdown();
