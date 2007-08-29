@@ -459,7 +459,7 @@ libbgp_la_SOURCES = bgp_module.h aspath.hh attribute_manager.hh \
 	update_attrib.cc update_packet.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = BUGS configs configure_bgp.sh docs run_tests \
+EXTRA_DIST = BUGS configs configure_bgp.sh run_tests \
 	test_cache.reference test_decision.reference \
 	test_deletion.reference test_dump.reference \
 	test_fanout.reference test_filter.reference \

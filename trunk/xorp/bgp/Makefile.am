@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.44 2006/08/15 23:03:53 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.45 2006/09/08 18:45:58 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -192,7 +192,6 @@ libbgp_la_SOURCES += xrl_target.cc
 EXTRA_DIST	 = BUGS
 EXTRA_DIST	+= configs
 EXTRA_DIST	+= configure_bgp.sh
-EXTRA_DIST	+= docs
 EXTRA_DIST	+= run_tests
 EXTRA_DIST	+= test_cache.reference
 EXTRA_DIST	+= test_decision.reference

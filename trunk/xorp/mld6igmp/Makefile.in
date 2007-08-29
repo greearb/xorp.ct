@@ -291,7 +291,7 @@ libmld6igmp_la_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h \
 	mld6igmp_source_record.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = command_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
+EXTRA_DIST = command_mld6igmp xrl_mld6igmp_shell_funcs.sh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)

@@ -314,7 +314,7 @@ libpim_la_SOURCES = pim_module.h pim_proto.h pim_bsr.hh pim_mfc.hh \
 	pim_scope_zone_table.cc pim_vif.cc xrl_pim_node.cc
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = DEVNOTES command_pim docs xrl_pim_shell_funcs.sh
+EXTRA_DIST = DEVNOTES command_pim xrl_pim_shell_funcs.sh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)

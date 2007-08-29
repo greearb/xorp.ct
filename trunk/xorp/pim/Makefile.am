@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/pim/Makefile.am,v 1.37 2007/05/10 00:08:19 pavlin Exp $
+## $XORP: xorp/pim/Makefile.am,v 1.38 2007/05/19 01:52:45 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -101,7 +101,6 @@ libpim_la_SOURCES += xrl_pim_node.cc
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = DEVNOTES
 EXTRA_DIST	 += command_pim
-EXTRA_DIST	 += docs
 EXTRA_DIST	 += xrl_pim_shell_funcs.sh
 
 

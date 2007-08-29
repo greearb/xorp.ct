@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.34 2007/05/10 00:08:17 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.35 2007/05/19 01:52:44 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -64,7 +64,6 @@ libmld6igmp_la_SOURCES += xrl_mld6igmp_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = command_mld6igmp
-EXTRA_DIST	 += docs
 EXTRA_DIST	 += xrl_mld6igmp_shell_funcs.sh
 
 
