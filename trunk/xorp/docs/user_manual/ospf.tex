@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.11 2006/08/02 05:31:48 pavlin Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.12 2007/03/20 21:44:33 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -594,6 +594,28 @@ This configuration is an example of the minimal possible
 configuration. OSPFv3 is running in the {\tt BACKBONE} area, on a single
 interface/vif the {\tt router-id} is set to an an IPv4 address owned
 by the router.
+
+\newpage
+\section{Clearing OSPF database}
+
+It may be necessary to drop all adjacencies and clear the OSPF
+database. After the clear command is run the OSPF database will only
+contain the LSAs of the router itself and all adjacencies will have been
+removed.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xxxxxxxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{clear ospf4 database}\\
+Or:\\
+user@hostname> \textbf{clear ospf6 database}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
 
 \newpage
 \section{Monitoring OSPF}
