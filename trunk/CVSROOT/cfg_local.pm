@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/cfg_local.pm,v 1.2 2004/08/02 07:57:48 pavlin Exp $
+# $XORP: CVSROOT/cfg_local.pm,v 1.3 2004/08/06 00:42:16 pavlin Exp $
 # $FreeBSD: CVSROOT-src/cfg_local.pm,v 1.27 2004/06/05 10:47:00 des Exp $
 #
 
@@ -93,6 +93,7 @@ if ($hostname =~ /^xorpc\.icir\.org$/i) {
 	'CVSROOT'	=> '^CVSROOT/',
 	'data'		=> '^data/',
 	'other'		=> '^other/',
+	'specs'		=> '^specs/',
 	'www'		=> '^www/',
 	'xorp'		=> '^xorp/',
 	'misc'		=> '.*'

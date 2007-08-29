@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/avail,v 1.10 2004/07/30 22:57:58 pavlin Exp $
+# $XORP: CVSROOT/avail,v 1.1 2004/08/02 07:06:52 pavlin Exp $
 #
 # This can be used to implement finer grain access controls beyond
 # being in access.  Look in cvs_acls.pl for details on this file's
@@ -25,6 +25,7 @@ unavail
 avail|:cvs_managers|CVSROOT
 avail|:core|data
 avail|:core|other
+avail|:core,:doc|specs
 avail|:core,:doc|www
 avail|:core|xorp
 avail|:core,:doc|xorp/docs
