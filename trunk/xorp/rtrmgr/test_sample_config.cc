@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.26 2007/02/16 22:47:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.27 2007/08/29 07:55:08 pavlin Exp $"
 
 
 #include <signal.h>
@@ -50,6 +50,7 @@ static const string default_xrl_targets_dir = srcdir + "/../xrl/targets";
 static const string default_config_boot_set[] = {
     "bgp.boot",
     "click.boot",
+    "interfaces.boot",
     "multicast4.boot",
     "multicast6.boot",
     "ospfv2.boot",

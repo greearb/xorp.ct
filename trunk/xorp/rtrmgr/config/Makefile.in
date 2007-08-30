@@ -176,9 +176,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- Extra files and directories to add to the distribution
-EXTRA_DIST = README bgp.boot click.boot multicast4.boot \
-	multicast6.boot ospfv2.boot ospfv3.boot rip.boot ripng.boot \
-	snmp.boot static.boot
+EXTRA_DIST = README bgp.boot click.boot interfaces.boot \
+	multicast4.boot multicast6.boot ospfv2.boot ospfv3.boot \
+	rip.boot ripng.boot snmp.boot static.boot
 
 ################################################################
 INCLUDES = -I$(top_srcdir)

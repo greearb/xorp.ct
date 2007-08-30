@@ -1,12 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/rtrmgr/config/Makefile.am,v 1.1 2007/08/29 06:49:43 pavlin Exp $
 ##
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = README
 EXTRA_DIST	+= bgp.boot
 EXTRA_DIST	+= click.boot
+EXTRA_DIST	+= interfaces.boot
 EXTRA_DIST	+= multicast4.boot
 EXTRA_DIST	+= multicast6.boot
 EXTRA_DIST	+= ospfv2.boot
