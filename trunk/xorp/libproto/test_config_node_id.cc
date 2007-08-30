@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.7 2006/10/12 01:24:46 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.8 2007/02/16 22:46:03 pavlin Exp $"
 
 #include "libproto_module.h"
 
@@ -34,7 +34,7 @@ static const char *program_name		= "test_config_node_id";
 static const char *program_description	= "Test ConfigNodeId class";
 static const char *program_version_id	= "0.1";
 static const char *program_date		= "September 23, 2005";
-static const char *program_copyright	= "See file LICENSE.XORP";
+static const char *program_copyright	= "See file LICENSE";
 static const char *program_return_value	= "0 on success, 1 if test error, 2 if internal error";
 
 static bool s_verbose = false;

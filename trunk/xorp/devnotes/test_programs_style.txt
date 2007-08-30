@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/test_programs_style.txt,v 1.2 2002/12/09 03:41:03 pavlin Exp $
+# $XORP: xorp/devnotes/test_programs_style.txt,v 1.1.1.1 2002/12/11 23:55:54 hodson Exp $
 #
 
 			XORP test programs style
@@ -90,7 +90,7 @@ have some clues about what those programs should be about.
 	Description:	Test IPv4 and IPv6 address manipulation
 	Versions:	0.5.1 0.3 0.2.2
 	Date:		Oct 10, 2002
-	Copyright:	See file LICENSE.XORP
+	Copyright:	See file LICENSE
 	Return:		0 on success, 1 if test error, 2 if internal error
 
 	--verbose-level=<level>

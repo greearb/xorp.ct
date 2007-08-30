@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.25 2006/08/20 06:19:27 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.26 2007/02/16 22:47:16 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -39,7 +39,7 @@ static const char *program_name         = "test_auth";
 static const char *program_description  = "Test RIP authentication operations";
 static const char *program_version_id   = "0.1";
 static const char *program_date         = "April, 2003";
-static const char *program_copyright    = "See file LICENSE.XORP";
+static const char *program_copyright    = "See file LICENSE";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.22 2007/02/16 22:46:07 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder.cc,v 1.23 2007/08/06 18:03:04 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -45,7 +45,7 @@ static const char *program_description  = "Test carrying and execution of "
 					  "Finder and Finder client";
 static const char *program_version_id   = "0.1";
 static const char *program_date         = "February, 2003";
-static const char *program_copyright    = "See file LICENSE.XORP";
+static const char *program_copyright    = "See file LICENSE";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
 
 ///////////////////////////////////////////////////////////////////////////////

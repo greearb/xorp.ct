@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.28 2007/04/14 07:00:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.29 2007/08/02 18:20:13 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -34,7 +34,7 @@ static const char *program_name		= "test_ipv4";
 static const char *program_description	= "Test IPv4 address class";
 static const char *program_version_id	= "0.1";
 static const char *program_date		= "December 2, 2002";
-static const char *program_copyright	= "See file LICENSE.XORP";
+static const char *program_copyright	= "See file LICENSE";
 static const char *program_return_value	= "0 on success, 1 if test error, 2 if internal error";
 
 static bool s_verbose = false;

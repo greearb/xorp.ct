@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.12 2006/06/21 23:36:36 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.13 2007/02/16 22:47:11 pavlin Exp $"
 
 #include <set>
 
@@ -42,7 +42,7 @@ static const char* program_name         = "test_redist";
 static const char* program_description  = "Test Route Redistribution Components";
 static const char* program_version_id   = "0.1";
 static const char* program_date         = "April, 2004";
-static const char* program_copyright    = "See file LICENSE.XORP";
+static const char* program_copyright    = "See file LICENSE";
 static const char* program_return_value = "0 on success, 1 if test error, "
 					  "2 if internal error";
 

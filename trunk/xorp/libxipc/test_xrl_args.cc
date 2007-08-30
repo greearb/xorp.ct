@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.14 2007/02/16 22:46:09 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.15 2007/07/12 21:23:23 pavlin Exp $"
 
 // test_xrl_args: String Serialization Tests
 
@@ -37,7 +37,7 @@ static const char *program_name         = "test_xrl_args";
 static const char *program_description  = "Test Xrl argument class";
 static const char *program_version_id   = "0.2";
 static const char *program_date         = "October, 2003";
-static const char *program_copyright    = "See file LICENSE.XORP";
+static const char *program_copyright    = "See file LICENSE";
 static const char *program_return_value = "0 on success, 1 if test error, "
 					  "2 if internal error";
 

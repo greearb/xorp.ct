@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.12 2007/04/19 21:36:51 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.13 2007/04/19 23:53:05 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -38,7 +38,7 @@ static const char *program_name         = "test_local_copy";
 static const char *program_description  = "Test local copying of IfMgr configuration state";
 static const char *program_version_id   = "0.1";
 static const char *program_date         = "August, 2003";
-static const char *program_copyright    = "See file LICENSE.XORP";
+static const char *program_copyright    = "See file LICENSE";
 static const char *program_return_value = "0 on success, 1 if test error, 2 if internal error";
 
 ///////////////////////////////////////////////////////////////////////////////
