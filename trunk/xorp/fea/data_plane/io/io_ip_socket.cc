@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.9 2007/06/27 01:27:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.10 2007/07/26 01:18:40 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -1744,8 +1744,8 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
     if ((ifp == NULL) || (vifp == NULL)) {
 	// No vif found. Ignore this packet.
 	XLOG_WARNING("proto_socket_read() failed: "
-		     "RX packet from %s to %s: no vif found",
-		     cstring(src_address), cstring(dst_address));
+		     "RX packet from %s to %s pif_index %u: no vif found",
+		     cstring(src_address), cstring(dst_address), pif_index);
 	return;			// Error
     }
     if (! (ifp->enabled() || vifp->enabled())) {
