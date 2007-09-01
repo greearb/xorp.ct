@@ -3,7 +3,7 @@
 
 /*
  * This file is part of the XORP software.
- * See file `LICENSE.xorp' for copyright and license information.
+ * See file `LICENSE' for copyright and license information.
  */
 
 #ifndef __XORP_CONFIG_H__

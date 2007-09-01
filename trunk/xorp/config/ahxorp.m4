@@ -2,14 +2,14 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl Autoheader definitions
 dnl
-dnl $XORP: xorp/config/ahxorp.m4,v 1.3 2007/04/11 00:58:33 pavlin Exp $
+dnl $XORP: xorp/config/ahxorp.m4,v 1.4 2007/04/11 18:26:47 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 
 AH_TOP([
 /*
  * This file is part of the XORP software.
- * See file `LICENSE.xorp' for copyright and license information.
+ * See file `LICENSE' for copyright and license information.
  */
 
 #ifndef __XORP_CONFIG_H__
