@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.64 2007/03/27 17:35:54 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.65 2007/03/27 17:52:01 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -375,6 +375,12 @@ the login shell is csh or tcsh):
  ./configure
  cd docs
  cp -p ../RELEASE_NOTES .
+ # TODO: For the next 1.5 release, the link to that file inside
+ # www/html_src/license.html must be fixed to be
+ # releases/current/LICENSE.other instead of releases/LICENSE.other .
+ # Also, the xorp-releases/LICENSE.other file should be removed from
+ the Web site.
+ cp -p ../LICENSE.other .
  cp -p ../rtrmgr/config.boot.sample .
  ln -s config.boot.sample config.boot.sample.txt
  gmake
