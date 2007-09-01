@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.94 2007/08/17 17:10:36 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.95 2007/08/24 06:47:21 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -8,6 +8,9 @@
 
 1. Compilation
 ==============
+
+1.1 Compiling the binaries
+==========================
 
 To compile XORP, you must have GNU make (gmake) installed. Then just
 run the following commands in the top-level directory:
@@ -30,6 +33,32 @@ If the flags must be after all other compiler flags (e.g., if they
 are suppose to overwrite some internally added flags), then use
 environmental variables CFLAGS_END and CXXFLAGS_END (for the C and C++
 compiler respectively).
+
+1.2 Generating documentation
+============================
+
+The documentation for each XORP release is available from the XORP Web
+site. The following procedure (for FreeBSD) can be used to generate the
+documentation directly from the source files.
+
+# Install TeX and LaTeX:
+cd /usr/ports/print/teTeX
+make
+make install
+
+# Optionally install the Prosper LaTeX class:
+cd /usr/ports/textproc/prosper
+make
+make install
+
+# Compile the documentation.
+# Note that this must be done directly in the XORP directory with the
+# original source files.
+cd /path/to/xorp
+./configure
+cd docs
+gmake
+gmake
 
 2. Internal tests
 =================
