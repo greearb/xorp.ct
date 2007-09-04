@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/clock.cc,v 1.4 2006/03/16 00:04:28 pavlin Exp $
+// $XORP: xorp/libxorp/clock.cc,v 1.5 2007/02/16 22:46:18 pavlin Exp $
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -38,21 +38,30 @@ SystemClock::~SystemClock()
 
 void
 SystemClock::advance_time()
-#ifndef HOST_OS_WINDOWS
+#if defined(HAVE_CLOCK_GETTIME) && defined(HAVE_CLOCK_MONOTONIC)
 {
-    struct timeval t;
+    int error;
+    struct timespec ts;
 
-    ::gettimeofday(&t, 0);
-    _tv->copy_in(t);
+    error = ::clock_gettime(CLOCK_MONOTONIC, &ts);
+    assert(error == 0);
+    _tv->copy_in(ts);
 }
-#else /* HOST_OS_WINDOWS */
+#elif defined(HOST_OS_WINDOWS)
 {
     FILETIME ft;
 
     ::GetSystemTimeAsFileTime(&ft);
     _tv->copy_in(ft);
 }
-#endif /* !HOST_OS_WINDOWS */
+#else
+{
+    struct timeval t;
+
+    ::gettimeofday(&t, 0);
+    _tv->copy_in(t);
+}
+#endif
 
 void
 SystemClock::current_time(TimeVal& tv)

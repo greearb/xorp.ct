@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.31 2007/04/14 08:59:50 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.32 2007/05/23 12:12:44 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -73,6 +73,17 @@ public:
      */
     explicit TimeVal(const timeval& timeval)
 	: _sec(timeval.tv_sec), _usec(timeval.tv_usec) {}
+
+#ifdef HAVE_STRUCT_TIMESPEC
+    /**
+     * Constructor for given POSIX "struct timespec".
+     *
+     * @param timespec the "struct timespec" time value to initialize this
+     * object with.
+     */
+    explicit TimeVal(const timespec& timespec)
+	: _sec(timespec.tv_sec), _usec(timespec.tv_nsec / 1000) {}
+#endif
 
 #else /* HOST_OS_WINDOWS */
 
@@ -167,6 +178,24 @@ public:
      * @return the number of copied octets.
      */
     size_t copy_out(timeval& timeval) const;
+
+#ifdef HAVE_STRUCT_TIMESPEC
+    /**
+     * Copy the time value from a POSIX timespec structure.
+     *
+     * @param timespec the storage to copy the time from.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const timespec& timespec);
+
+    /**
+     * Copy the time value to a POSIX timespec structure.
+     *
+     * @param timespec the storage to copy the time to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(timespec& timespec) const;
+#endif
 
     /**
      * Return an int32_t containing the total number of milliseconds
@@ -357,6 +386,26 @@ TimeVal::copy_out(timeval& timeval) const
     timeval.tv_usec = _usec;
     return (sizeof(_sec) + sizeof(_usec));
 }
+
+#ifdef HAVE_STRUCT_TIMESPEC
+
+inline size_t
+TimeVal::copy_in(const timespec& timespec)
+{
+    _sec = timespec.tv_sec;
+    _usec = timespec.tv_nsec / 1000;
+    return (sizeof(_sec) + sizeof(_usec));
+}
+
+inline size_t
+TimeVal::copy_out(timespec& timespec) const
+{
+    timespec.tv_sec = _sec;
+    timespec.tv_nsec = _usec * 1000;
+    return (sizeof(_sec) + sizeof(_usec));
+}
+
+#endif
 
 inline int32_t
 TimeVal::to_ms() const

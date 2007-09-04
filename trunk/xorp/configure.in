@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.209 2007/07/11 22:18:01 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.210 2007/08/29 06:51:10 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.209 2007/07/11 22:18:01 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.210 2007/08/29 06:51:10 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -802,6 +802,9 @@ AC_C_BIGENDIAN
 
 dnl Check whether the C type "char" is unsigned
 AC_C_CHAR_UNSIGNED
+
+dnl Check for the CLOCK_MONOTONIC argument to clock_gettime()
+builtin(include, config/actime.m4)
 
 dnl Check whether the system has va_copy()
 AC_LANG_PUSH(C)
