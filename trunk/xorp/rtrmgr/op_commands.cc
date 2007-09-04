@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.67 2006/10/12 01:25:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.68 2007/02/16 22:47:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -47,9 +47,11 @@
 
 
 #ifdef HOST_OS_WINDOWS
+#ifdef _NO_OLDNAMES
 #define	stat	_stat
 #define	S_IFDIR	_S_IFDIR
 #define	S_ISREG	_S_ISREG
+#endif
 #endif
 
 extern int init_opcmd_parser(const char *filename, OpCommandList *o);

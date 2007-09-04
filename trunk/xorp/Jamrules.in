@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.6 2007/04/12 10:03:14 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.7 2007/09/04 15:26:22 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -54,13 +54,12 @@ if $(C++) = "g++"
 #
 if $(OS) = "NT"
 {
-# XXX: -Werror has been removed for now due to spurious warnings
- CCFLAGS =  -g -W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs -pipe ;
+ CCFLAGS =  -g -W -Wall -Wwrite-strings -Wbad-function-cast -Wcast-qual -Wpointer-arith -Wcast-align -Wnested-externs -pipe ;
  C++FLAGS = -g -W -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wcast-align -Woverloaded-virtual -ftemplate-depth-25 -pipe ;
 #
 PYTHON		?= python ;
 HDRS		 = . $(SEARCH_SOURCE) $(TOP) /mingw/include ;
-DEFINES		 = _NO_OLDNAMES MPR50=1 ;
+DEFINES		 = MPR50=1 ;
 LINKFLAGS	+= -mconsole ;
 CLI_CURSES_LIB	 = ;
 CRYPTO_LIB	 = -lcrypto ;

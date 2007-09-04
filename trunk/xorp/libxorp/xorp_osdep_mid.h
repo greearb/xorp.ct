@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.9 2007/04/22 01:57:09 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.10 2007/08/10 22:52:58 pavlin Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -100,8 +100,8 @@ struct iovec {
 typedef HANDLE xfd_t;
 typedef SOCKET xsock_t;
 
-typedef uint32_t gid_t;		/* XXX: This is a hack. */
-typedef uint32_t uid_t;		/* XXX: This is a hack. */
+typedef unsigned long gid_t;		/* XXX: This is a hack. */
+typedef unsigned long uid_t;		/* XXX: This is a hack. */
 
 #ifdef _NO_OLDNAMES
 /*
@@ -115,6 +115,7 @@ typedef uint32_t uid_t;		/* XXX: This is a hack. */
 #ifdef pid_t
 #undef pid_t
 #endif
+typedef _off_t off_t;
 typedef _pid_t pid_t;
 typedef long ssize_t;		/* XXX: This is a hack. */
 typedef _sigset_t sigset_t;	/* XXX: Appease libtecla. */

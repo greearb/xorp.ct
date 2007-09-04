@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.30 2006/11/07 06:44:43 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.31 2007/02/16 22:46:22 pavlin Exp $
 
 #include "libxorp_module.h"
 
@@ -46,6 +46,11 @@
 
 #ifndef _PATH_BSHELL
 #define _PATH_BSHELL "C:\\MSYS\\bin\\sh.exe"
+#endif
+
+
+#ifdef fileno
+#undef fileno
 #endif
 
 #define	fileno(stream) (_get_osfhandle(_fileno(stream)))

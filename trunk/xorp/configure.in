@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.210 2007/08/29 06:51:10 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.211 2007/09/04 16:00:50 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.210 2007/08/29 06:51:10 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.211 2007/09/04 16:00:50 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -104,7 +104,7 @@ case "${host_os}" in
 	dnl This has to be here to stop the ssize_t test from telling lies.
 	dnl Also, <routprot.h> and friends need the MPR version to be defined
 	dnl before inclusion.
-	CPPFLAGS="${CPPFLAGS} -D_NO_OLDNAMES -DMPR50=1"
+	CPPFLAGS="${CPPFLAGS} -DMPR50=1"
     ;;
 esac
 AC_CACHE_SAVE
@@ -975,6 +975,11 @@ if test "${GCC}" = "yes" ; then
     dnl XXX: For extra debugging, the following g++ flag may be enabled
     dnl and added to CXXFLAGS: -D_GLIBCXX_DEBUG
     dnl
+    dnl XXX: -Wstrict-prototypes and other prototype warning flags will
+    dnl cause compilation to fail under MinGW, as the __CRT_INLINE header
+    dnl file macro does not declare before defining functions in the MinGW
+    dnl system headers.
+    dnl
     dnl XXX: Intel compiler, although tries to mimic GCC, has different
     dnl warnings handling:
     dnl   - It doesn't support most of the GCC -W<feature> options.
@@ -989,6 +994,9 @@ if test "${GCC}" = "yes" ; then
     if test "${ICC}" = "yes" ; then
 	CPARANOIDFLAGS="-Werror"
 	CXXPARANOIDFLAGS="-Werror"
+    elif test "${_USING_WINDOWS}" = "1" ; then
+	CPARANOIDFLAGS="-Werror -W -Wall -Wwrite-strings -Wbad-function-cast -Wcast-qual -Wpointer-arith -Wcast-align -Wnested-externs"
+	CXXPARANOIDFLAGS="-Werror -W -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
     else
 	CPARANOIDFLAGS="-Werror -W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
 	CXXPARANOIDFLAGS="-Werror -W -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
