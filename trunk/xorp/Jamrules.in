@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.5 2007/01/14 21:46:08 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.6 2007/04/12 10:03:14 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -18,10 +18,21 @@ C++		= @CXX@ ;
 CCFLAGS		= @CFLAGS@ ;
 C++FLAGS	= @CXXFLAGS@ ;
 LINKFLAGS	= @LDFLAGS@ ;
-PYTHON		= @PYTHON@ ;
 CLI_CURSES_LIB	= @CLI_CURSES_LIB@ ;
-PYTHON_BUILD 	= @PYTHON_BUILD@ defined
-		; # will != defined if commented out.
+
+#
+# PYTHON_DEFINED will be substituted with a comment character if configure
+# did not define PYTHON for us; however, the automake macros prefer to
+# substitute a colon character. Detect both situations and make sure that
+# the build fails with a meaningful error message if either case arises.
+# 
+AC_PYTHON	= @PYTHON@ ;
+PYTHON_DEFINED	= @PYTHON_BUILD@ defined
+		; # This semicolon must be on a new line.
+if ( ! $(PYTHON_DEFINED) || $(AC_PYTHON) = \: )
+{
+ PYTHON = false ;
+}
 
 # failsafe
 CRYPTO_LIB	?= -lcrypto ;
@@ -37,7 +48,10 @@ if $(C++) = "g++"
  LINK = $(C++) ;
 }
 
+#
 # Win32 failsafe overrides; only really applicable for mingw gcc.
+# TODO: Support Microsoft Visual C++ when JAM_TOOLSET is VISUALC.
+#
 if $(OS) = "NT"
 {
 # XXX: -Werror has been removed for now due to spurious warnings
@@ -60,10 +74,8 @@ LINKLIBS	+= -lpcreposix -lws2_32 -liphlpapi -lmprapi -ladvapi32 ;
 #
 # XORP project custom rules follow.
 #
-# TODO: Conditionalize this on variable PYTHON_BUILD being set
-# to something other than '#'.
-# TODO: double check yacc version: $(YACC), not bison, version contingent.
 # TODO: double check flex version: $(FLEX), version contingent.
+# TODO: double check yacc version: $(YACC), not bison, version contingent.
 
 #
 # Variables used by XORP custom build.
@@ -136,6 +148,11 @@ rule XorpXrlXif
  local _cc ;
  local _hh ;
 
+ if $(PYTHON) = false
+ { 
+   Exit "Python was not detected, and is required to rebuild XRLs. Aborting." ;
+ }
+
  SEARCH on $(>) = $(SEARCH_SOURCE) ;	# source .xif file
  MakeLocate $(<) : $(LOCATE_SOURCE) ;	# generated sources
 
@@ -168,6 +185,11 @@ rule XorpXrlTgt
  local _cc ;
  local _hh ;
  local _xrls ;
+
+ if $(PYTHON) = false
+ { 
+   Exit "Python was not detected, and is required to rebuild XRLs. Aborting." ;
+ }
 
  SEARCH on $(>) = $(SEARCH_SOURCE) ;	# source .tgt file
  MakeLocate $(<) : $(LOCATE_SOURCE) ;	# generated sources
