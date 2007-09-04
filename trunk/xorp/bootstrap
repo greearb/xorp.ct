@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.27 2007/04/11 01:20:31 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.28 2007/04/17 19:40:54 pavlin Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -12,10 +12,10 @@
 # Allow the autotools commands used to be overridden using environment
 # variables, to help off-site package maintainers.
 #
-ACLOCAL=${ACLOCAL:-"aclocal110"}
-AUTOCONF=${AUTOCONF:-"autoconf261"}
-AUTOHEADER=${AUTOHEADER:-"autoheader261"}
-AUTOMAKE=${AUTOMAKE:-"automake110"}
+ACLOCAL=${ACLOCAL:-"aclocal-1.10"}
+AUTOCONF=${AUTOCONF:-"autoconf-2.61"}
+AUTOHEADER=${AUTOHEADER:-"autoheader-2.61"}
+AUTOMAKE=${AUTOMAKE:-"automake-1.10"}
 LIBTOOLIZE=${LIBTOOLIZE:-"libtoolize"}
 
 # Figure out if we were invoked with an autoconf name other than the
