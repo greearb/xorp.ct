@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.19 2007/07/31 01:18:07 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.20 2007/08/09 00:46:54 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -22,6 +22,7 @@ Library libfea_data_plane_base :
 	io_ip.cc
 	io_link.cc
 	io_tcpudp.cc
+	;
 
 Library libfea : 
 	fea_io.cc
