@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.11 2007/08/30 17:37:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.12 2007/09/07 10:47:46 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -2400,8 +2400,10 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	FibConfig& fibconfig = fea_data_plane_manager().fibconfig();
 	if (fibconfig.unicast_forwarding_table_id_is_configured(family())
 	    && (! vifp->vifname().empty())) {
+	    char ifname[IFNAMSIZ];
+	    strlcpy(ifname, vifp->vifname().c_str(), sizeof(ifname));
 	    if (setsockopt(_proto_socket_out, SOL_SOCKET, SO_BINDTODEVICE,
-			   vifp->vifname().c_str(), vifp->vifname().size())
+			   ifname, sizeof(ifname))
 		!= 0) {
 		error_msg = c_format("setsockopt(SO_BINDTODEVICE, %s) failed: %s",
 				     vifp->vifname().c_str(), strerror(errno));
