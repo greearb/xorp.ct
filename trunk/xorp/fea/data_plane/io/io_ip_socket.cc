@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.10 2007/07/26 01:18:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.11 2007/08/30 17:37:51 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -80,6 +80,11 @@
 #include "fea/data_plane/control_socket/system_utilities.hh"
 
 #include "fea/iftree.hh"
+//
+// TODO: "fea/fibconfig.hh" is temporary needed to test whether the table ID
+// is configured.
+//
+#include "fea/fibconfig.hh"
 
 #include "io_ip_socket.hh"
 
@@ -2346,6 +2351,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 				  string&		error_msg)
 {
     bool setloop = false;
+    bool setbind = false;
     int ret_value = XORP_OK;
 
     //
@@ -2363,23 +2369,48 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 #endif // ! IPV4_RAW_INPUT_IS_RAW
 
     //
-    // Multicast-related setting
+    // Unicast/multicast related setting
     //
     if (dst_address.is_multicast()) {
+	// Multicast-related setting
 	if (set_default_multicast_interface(ifp->ifname(),
 					    vifp->vifname(),
 					    error_msg)
 	    != XORP_OK) {
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	//
 	// XXX: we need to enable the multicast loopback so other processes
 	// on the same host can receive the multicast packets.
 	//
 	if (enable_multicast_loopback(true, error_msg) != XORP_OK) {
-	    return (XORP_ERROR);
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
 	}
 	setloop = true;
+    } else {
+	// Unicast-related setting
+#ifdef SO_BINDTODEVICE
+	//
+	// XXX: We need to bind to a network interface only if we might be
+	// running multiple XORP instances. The heuristic for that is to
+	// test whether the unicast forwarding table ID is configured.
+	// 
+	FibConfig& fibconfig = fea_data_plane_manager().fibconfig();
+	if (fibconfig.unicast_forwarding_table_id_is_configured(family())
+	    && (! vifp->vifname().empty())) {
+	    if (setsockopt(_proto_socket_out, SOL_SOCKET, SO_BINDTODEVICE,
+			   vifp->vifname().c_str(), vifp->vifname().size())
+		!= 0) {
+		error_msg = c_format("setsockopt(SO_BINDTODEVICE, %s) failed: %s",
+				     vifp->vifname().c_str(), strerror(errno));
+		ret_value = XORP_ERROR;
+		goto ret_label;
+	    }
+	    setbind = true;
+	}
+#endif // SO_BINDTODEVICE
     }
 
     //
@@ -2406,7 +2437,8 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
-	return (XORP_ERROR);
+	ret_value = XORP_ERROR;
+	goto ret_label;
     }
 
     if (sendmsg(_proto_socket_out, &_sndmh, 0) < 0) {
@@ -2453,7 +2485,8 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     default:
 	XLOG_UNREACHABLE();
 	error_msg = c_format("Invalid address family %d", family());
-	return (XORP_ERROR);
+	ret_value = XORP_ERROR;
+	goto ret_label;
     }
 
     error = WSASendTo(_proto_socket_out,
@@ -2476,12 +2509,29 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     }
 #endif // HOST_OS_WINDOWS
 
+ ret_label:
     //
-    // Restore some multicast related settings
+    // Restore some settings
     //
     if (setloop) {
+	// Disable multicast loopback
 	string dummy_error_msg;
 	enable_multicast_loopback(false, dummy_error_msg);
+    }
+    if (setbind) {
+	// Unbind the interface
+#ifdef SO_BINDTODEVICE
+	string tmp_error_msg;
+	char empty_ifname[IFNAMSIZ];
+	empty_ifname[0] = '\0';
+	if (setsockopt(_proto_socket_out, SOL_SOCKET, SO_BINDTODEVICE,
+		       &empty_ifname, sizeof(empty_ifname))
+	    != 0) {
+	    tmp_error_msg = c_format("setsockopt(SO_BINDTODEVICE, NULL) failed: %s",
+				     strerror(errno));
+	    XLOG_ERROR("%s", tmp_error_msg.c_str());
+	}
+#endif // SO_BINDTODEVICE
     }
 
     return (ret_value);
