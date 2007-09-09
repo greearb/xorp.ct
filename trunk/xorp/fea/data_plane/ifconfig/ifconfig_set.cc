@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.5 2007/06/15 22:27:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.6 2007/07/11 22:18:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -319,7 +319,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    error_msg = c_format("Failed to set MTU to %u bytes: %s",
 				 XORP_UINT_CAST(new_mtu),
 				 error_msg.c_str());
-	    ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+	    ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
 								 error_msg);
 	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    if (was_disabled) {
@@ -371,7 +371,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 		error_msg = c_format("Expected Ethernet MAC address, "
 				     "got \"%s\"",
 				     new_mac.str().c_str());
-		ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+		ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
 								     error_msg);
 		XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 		return;
@@ -379,7 +379,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	} catch (const BadMac& bm) {
 	    error_msg = c_format("Invalid MAC address \"%s\"",
 				 new_mac.str().c_str());
-	    ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+	    ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
 								 error_msg);
 	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    return;
@@ -399,7 +399,7 @@ IfConfigSet::push_interface_end(IfTreeInterface& i)
 	    < 0) {
 	    error_msg = c_format("Failed to set the MAC address: %s",
 				 error_msg.c_str());
-	    ifconfig().ifconfig_error_reporter().interface_error(i.name(),
+	    ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
 								 error_msg);
 	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
 	    if (was_disabled) {

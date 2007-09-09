@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.46 2007/06/07 01:23:03 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.47 2007/06/08 01:45:20 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -393,8 +393,6 @@ public:
     typedef map<const string, IfTreeVif> VifMap;
 
     IfTreeInterface(const string& ifname);
-
-    const string& name() const		{ return _ifname; }
 
     const string& ifname() const	{ return _ifname; }
 
