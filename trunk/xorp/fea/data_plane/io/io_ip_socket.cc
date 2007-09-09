@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.12 2007/09/07 10:47:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.13 2007/09/07 11:05:38 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -2464,51 +2464,53 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
     }
 
 #else // HOST_OS_WINDOWS
-    // XXX: We may use WSASendMsg() on Longhorn to support IPv6.
+    do {
+	// XXX: We may use WSASendMsg() on Longhorn to support IPv6.
 
-    DWORD sent, error;
-    struct sockaddr_storage to;
-    DWORD buffer_count = 1;
-    int to_len = 0;
+	DWORD sent, error;
+	struct sockaddr_storage to;
+	DWORD buffer_count = 1;
+	int to_len = 0;
 
-    memset(&to, 0, sizeof(to));
-    dst_address.copy_out(reinterpret_cast<struct sockaddr&>(to));
+	memset(&to, 0, sizeof(to));
+	dst_address.copy_out(reinterpret_cast<struct sockaddr&>(to));
 
-    // Set some family-specific arguments
-    switch (family()) {
-    case AF_INET:
-	to_len = sizeof(struct sockaddr_in);
-	break;
+	// Set some family-specific arguments
+	switch (family()) {
+	case AF_INET:
+	    to_len = sizeof(struct sockaddr_in);
+	    break;
 #ifdef HAVE_IPV6
-    case AF_INET6:
-	to_len = sizeof(struct sockaddr_in6);
-	break;
+	case AF_INET6:
+	    to_len = sizeof(struct sockaddr_in6);
+	    break;
 #endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	error_msg = c_format("Invalid address family %d", family());
-	ret_value = XORP_ERROR;
-	goto ret_label;
-    }
+	default:
+	    XLOG_UNREACHABLE();
+	    error_msg = c_format("Invalid address family %d", family());
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
+	}
 
-    error = WSASendTo(_proto_socket_out,
-		      reinterpret_cast<WSABUF *>(_sndiov),
-		      buffer_count, &sent, 0,
-		      reinterpret_cast<struct sockaddr *>(&to),
-		      to_len, NULL, NULL);
-    if (error != 0) {
-	ret_value = XORP_ERROR;
-	error_msg = c_format("WSASendTo(proto %d size %u from %s to %s "
-			     "on interface %s vif %s) failed: %s",
-			     ip_protocol(),
-			     XORP_UINT_CAST(_sndiov[0].iov_len),
-			     cstring(src_address),
-			     cstring(dst_address),
-			     ifp->ifname().c_str(),
-			     vifp->vifname().c_str(),
-			     win_strerror(GetLastError()));
-	XLOG_ERROR("%s", error_msg.c_str());
-    }
+	error = WSASendTo(_proto_socket_out,
+			  reinterpret_cast<WSABUF *>(_sndiov),
+			  buffer_count, &sent, 0,
+			  reinterpret_cast<struct sockaddr *>(&to),
+			  to_len, NULL, NULL);
+	if (error != 0) {
+	    ret_value = XORP_ERROR;
+	    error_msg = c_format("WSASendTo(proto %d size %u from %s to %s "
+				 "on interface %s vif %s) failed: %s",
+				 ip_protocol(),
+				 XORP_UINT_CAST(_sndiov[0].iov_len),
+				 cstring(src_address),
+				 cstring(dst_address),
+				 ifp->ifname().c_str(),
+				 vifp->vifname().c_str(),
+				 win_strerror(GetLastError()));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	}
+    } while (false);
 #endif // HOST_OS_WINDOWS
 
  ret_label:
