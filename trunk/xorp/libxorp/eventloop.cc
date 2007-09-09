@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.21 2007/02/16 22:46:18 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.22 2007/03/08 00:03:55 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -26,15 +26,12 @@
 
 //
 // Number of EventLoop instances.
-// XXX: Warning: static instance. Not suitable for shared library use.
 //
-static int instance_count = 0;
+int eventloop_instance_count;
 
 //
 // Last call to EventLoop::run.  0 is a special value that indicates
 // EventLoop::run has not been called.
-//
-// XXX: Warning: static instance. Not suitable for shared library use.
 //
 static time_t last_ev_run;
 
@@ -46,16 +43,16 @@ EventLoop::EventLoop()
       _selector_list(_clock)
 #endif
 {
-    instance_count++;
-    XLOG_ASSERT(instance_count == 1);
+    XLOG_ASSERT(eventloop_instance_count == 0);
+    eventloop_instance_count++;
     last_ev_run = 0;
 }
 
 EventLoop::~EventLoop()
 {
-    instance_count--;
-    XLOG_ASSERT(instance_count == 0);
-    delete _clock;
+    eventloop_instance_count--;
+    XLOG_ASSERT(eventloop_instance_count == 0);
+    _clock = NULL;
 }
 
 void

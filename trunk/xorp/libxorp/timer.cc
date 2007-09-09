@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.37 2006/11/10 23:03:01 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.38 2007/02/16 22:46:27 pavlin Exp $"
 
 
 #include "libxorp_module.h"
@@ -206,18 +206,21 @@ private:
 // ----------------------------------------------------------------------------
 // TimerList implemention
 
-static TimerList* the_timerlist = NULL;
+TimerList* the_timerlist = NULL;
+int timerlist_instance_count;
 
 TimerList::TimerList(ClockBase* clock)
     : _clock(clock), _observer(NULL)
 {
     assert(the_timerlist == NULL);
-    the_timerlist = this;
+    assert(timerlist_instance_count == 0);
 #ifdef HOST_OS_WINDOWS
     // timeBeginPeriod(1);	// requires WINMM.DLL
     _hirestimer = CreateWaitableTimer(NULL, TRUE, NULL);
     assert(_hirestimer != NULL);
 #endif // HOST_OS_WINDOWS
+    the_timerlist = this;
+    timerlist_instance_count++;
 }
 
 TimerList::~TimerList()
@@ -227,6 +230,7 @@ TimerList::~TimerList()
 	CloseHandle(_hirestimer);
     //timeEndPeriod(1);
 #endif // HOST_OS_WINDOWS
+    timerlist_instance_count--;
     the_timerlist = NULL;
 }
 
