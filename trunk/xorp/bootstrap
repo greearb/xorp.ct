@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bootstrap,v 1.28 2007/04/17 19:40:54 pavlin Exp $
+# $XORP: xorp/bootstrap,v 1.29 2007/09/04 15:39:44 bms Exp $
 #
 #
 # A script of autoconf/automake/libtool commands to bring the system
@@ -15,8 +15,13 @@
 ACLOCAL=${ACLOCAL:-"aclocal-1.10"}
 AUTOCONF=${AUTOCONF:-"autoconf-2.61"}
 AUTOHEADER=${AUTOHEADER:-"autoheader-2.61"}
+AUTOM4TE=${AUTOM4TE:-"autom4te-2.61"}
 AUTOMAKE=${AUTOMAKE:-"automake-1.10"}
 LIBTOOLIZE=${LIBTOOLIZE:-"libtoolize"}
+
+# Export autotools variables that might be used by some of the tools
+export AUTOCONF
+export AUTOM4TE
 
 # Figure out if we were invoked with an autoconf name other than the
 # default (as this chnages the name of the autom4te.cache directories).
