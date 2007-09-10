@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.28 2007/05/08 00:16:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.29 2007/05/08 22:16:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -200,6 +200,12 @@ LibFeaClientBridge::vif_update(const string& ifname,
 	      );
     _rm->push(new
 	      IfMgrVifSetPimRegister(ifname, vifname, vifp->pim_register())
+	      );
+    _rm->push(new
+	      IfMgrVifSetIsVlan(ifname, vifname, vifp->is_vlan())
+	      );
+    _rm->push(new
+	      IfMgrVifSetVlanTag(ifname, vifname, vifp->vlan_tag())
 	      );
 }
 
