@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.13 2007/04/19 23:53:05 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.14 2007/08/30 06:02:26 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -132,6 +132,14 @@ test_main()
     }
     if (IfMgrVifSetPifIndex("if0", "vif0", 74).execute(t) == false) {
 	verbose_log("Failed to set pif index\n");
+	return 1;
+    }
+    if (IfMgrVifSetIsVlan("if0", "vif0", true).execute(t) == false) {
+	verbose_log("Failed to set VLAN vif\n");
+	return 1;
+    }
+    if (IfMgrVifSetVlanTag("if0", "vif0", 1234).execute(t) == false) {
+	verbose_log("Failed to set VLAN tag\n");
 	return 1;
     }
 

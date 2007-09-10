@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.17 2007/05/08 21:47:23 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.18 2007/05/23 12:12:36 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -480,6 +480,58 @@ public:
 
 protected:
     uint32_t	_vif_index;
+};
+
+/**
+ * @short Command to mark virtual interface as VLAN vif.
+ */
+class IfMgrVifSetIsVlan : public IfMgrVifCommandBase {
+public:
+    IfMgrVifSetIsVlan(const string&	ifname,
+		      const string&	vifname,
+		      bool		is_vlan)
+	: IfMgrVifCommandBase(ifname, vifname),
+	  _is_vlan(is_vlan)
+    {}
+
+    bool is_vlan() const 	{ return _is_vlan; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    bool	_is_vlan;
+};
+
+/**
+ * @short Command to set the VLAN tag to a virtual interface.
+ */
+class IfMgrVifSetVlanTag : public IfMgrVifCommandBase {
+public:
+    IfMgrVifSetVlanTag(const string&	ifname,
+		       const string&	vifname,
+		       uint16_t		vlan_tag)
+	: IfMgrVifCommandBase(ifname, vifname),
+	  _vlan_tag(vlan_tag)
+    {}
+
+    uint16_t vlan_tag() const 	{ return _vlan_tag; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    uint16_t	_vlan_tag;
 };
 
 
