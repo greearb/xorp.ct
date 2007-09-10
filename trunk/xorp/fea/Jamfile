@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.20 2007/08/09 00:46:54 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.21 2007/09/07 12:07:45 bms Exp $
 #
 
 SubDir TOP fea ;
@@ -66,6 +66,7 @@ FEA_LDADD =
 	libxorp_data_plane_managers
 	libxorp_fibconfig
 	libxorp_ifconfig
+	libxorp_io
 	libxorp_control_socket
 	libfea_data_plane_base
 	libfeafibclientxif
@@ -95,6 +96,7 @@ FEA_LDADD =
 	;
 
 Main xorp_fea : xorp_fea.cc ;
+LINKLIBS on xorp_fea = $(LINKLIBS) $(PCAP_LIB) ;
 LinkLibraries xorp_fea : $(FEA_LDADD) ;
 
 #
@@ -104,6 +106,7 @@ LinkLibraries xorp_fea : $(FEA_LDADD) ;
 # the filename is not explicitly gristed. Here, it has to be.
 #
 MainFromObjects <fea>xorp_fea_dummy$(SUFEXE) : <fea>fea_dummy$(SUFOBJ) ;
+LINKLIBS on <fea>xorp_fea_dummy$(SUFEXE) = $(LINKLIBS) $(PCAP_LIB) ;
 LinkLibraries <fea>xorp_fea_dummy$(SUFEXE) : $(FEA_LDADD) ;
 Object <fea>fea_dummy$(SUFOBJ) : xorp_fea.cc ;
 C++FLAGS on <fea>fea_dummy$(SUFOBJ) += -DFEA_DUMMY ;

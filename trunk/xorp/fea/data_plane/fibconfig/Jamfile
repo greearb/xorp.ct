@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/data_plane/fibconfig/Jamfile,v 1.1 2007/05/01 16:55:22 bms Exp $
+# $XORP: xorp/fea/data_plane/fibconfig/Jamfile,v 1.2 2007/06/04 23:17:34 pavlin Exp $
 #
 
 SubDir TOP fea data_plane fibconfig ;
@@ -13,6 +13,11 @@ SubIncludeOnce TOP fea ;
 SubDir TOP fea data_plane fibconfig ;
 
 Library libxorp_fibconfig : 
+	fibconfig_forwarding_dummy.cc
+	fibconfig_forwarding_proc_linux.cc
+	fibconfig_forwarding_solaris.cc
+	fibconfig_forwarding_sysctl.cc
+	fibconfig_forwarding_windows.cc
 	fibconfig_entry_get_click.cc
 	fibconfig_entry_get_dummy.cc
 	fibconfig_entry_get_iphelper.cc

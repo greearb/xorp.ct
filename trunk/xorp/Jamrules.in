@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.7 2007/09/04 15:26:22 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.8 2007/09/04 16:40:08 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -36,6 +36,7 @@ if ( ! $(PYTHON_DEFINED) || $(AC_PYTHON) = \: )
 
 # failsafe
 CRYPTO_LIB	?= -lcrypto ;
+PCAP_LIB	?= -lpcap ;
 
 # top level stuff
 HDRS		 = . $(SEARCH_SOURCE) $(TOP) ;
