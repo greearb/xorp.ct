@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.21 2007/09/07 12:07:45 bms Exp $
+# $XORP: xorp/fea/Jamfile,v 1.22 2007/09/10 10:42:03 bms Exp $
 #
 
 SubDir TOP fea ;
@@ -121,6 +121,8 @@ if $(MAKE_CHECK) {
 	libxorp_ifconfig
 	libxorp_control_socket
 	libfea_data_plane_base
+	libsocket4xif
+	libsocket6xif
 	libsocket4userxif
 	libsocket6userxif
 	libtestsocket4
@@ -137,6 +139,8 @@ if $(MAKE_CHECK) {
 	libxorp_ifconfig
 	libxorp_control_socket
 	libfea_data_plane_base
+	libsocket4xif
+	libsocket6xif
 	libsocket4userxif
 	libsocket6userxif
 	libtestsocket4
