@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.40 2006/07/12 02:35:19 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.41 2007/02/16 22:45:15 pavlin Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -241,6 +241,8 @@ public:
     PolicyFilters& policy_filters() { return _policy_filters; }
 
 private:
+    BGPMain &_bgp;
+
     RibIpcHandler *_rib_handler;
     AggregationHandler *_aggr_handler;
 
@@ -253,8 +255,6 @@ private:
 
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
-
-    BGPMain &_bgp;
 };
 
 #endif // __BGP_PLUMBING_HH__

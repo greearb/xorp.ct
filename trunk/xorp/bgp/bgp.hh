@@ -13,12 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.65 2007/05/23 04:08:21 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.66 2007/07/10 23:45:23 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
 
-#include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_std_router.hh"
 #include "libxorp/profile.hh"
@@ -37,13 +36,14 @@
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "policy/backend/version_filters.hh"
 
+class EventLoop;
 class XrlBgpTarget;
 
 class BGPMain : public ServiceBase,
 		public IfMgrHintObserver,
 		public ServiceChangeObserverBase {
 public:
-    BGPMain();
+    BGPMain(EventLoop& eventloop);
     ~BGPMain();
 
     /**
@@ -940,6 +940,7 @@ private:
 			    vector<uint8_t>& attr_unknown);
 
 
+    EventLoop& _eventloop;
     bool _exit_loop;
     BGPPeerList *_peerlist;		// List of current BGP peers.
     BGPPeerList *_deleted_peerlist;	// List of deleted BGP peers.
@@ -1027,7 +1028,6 @@ private:
     AggregationHandler *_aggregation_handler;
     LocalData _local_data;
     XrlStdRouter *_xrl_router;
-    static EventLoop _eventloop;
     ProcessWatch *_process_watch;
     VersionFilters _policy_filters;
     Profile _profile;

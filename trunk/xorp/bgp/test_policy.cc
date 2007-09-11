@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_policy.cc,v 1.6 2006/10/12 01:24:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_policy.cc,v 1.7 2007/02/16 22:45:22 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -51,7 +51,8 @@ test_policy_export(TestInfo& /*info*/)
     string filename = string(tmppath) + "test_policy_export";
     free(tmppath);
 #endif
-    BGPMain bgpmain;
+    EventLoop eventloop;
+    BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
     Iptuple iptuple;
     BGPPeerData *pd1 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
@@ -281,7 +282,8 @@ test_policy(TestInfo& /*info*/)
     string filename = string(tmppath) + "test_policy";
     free(tmppath);
 #endif
-    BGPMain bgpmain;
+    EventLoop eventloop;
+    BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
     Iptuple iptuple;
     BGPPeerData *pd1 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
@@ -554,7 +556,8 @@ test_policy_dump(TestInfo& /*info*/)
     string filename = string(tmppath) + "test_policy_dump";
     free(tmppath);
 #endif
-    BGPMain bgpmain;
+    EventLoop eventloop;
+    BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
     Iptuple iptuple;
     BGPPeerData *pd1 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);

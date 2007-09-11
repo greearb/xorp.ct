@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.99 2006/12/08 01:12:32 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.100 2007/02/16 22:45:14 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,7 +41,8 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
 			 NextHopResolver<IPv6>& next_hop_resolver_ipv6,
 			 PolicyFilters& pfs,
 			 BGPMain& bgp)
-    : _rib_handler(ribhandler),
+    : _bgp(bgp),
+      _rib_handler(ribhandler),
       _aggr_handler(aggrhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
@@ -50,8 +51,7 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
       _plumbing_ipv4("[IPv4:" + string(pretty_string_safi(safi)) + "]", *this,
 		     _next_hop_resolver_ipv4),
       _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
-		     _next_hop_resolver_ipv6),
-      _bgp(bgp)
+		     _next_hop_resolver_ipv6)
 {
 }
 

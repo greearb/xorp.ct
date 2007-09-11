@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.18 2006/10/12 01:24:36 pavlin Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.19 2007/02/16 22:45:11 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -26,9 +26,9 @@
 #include "iptuple.hh"
 
 
-EventLoop BGPMain::_eventloop;
-
-BGPMain::BGPMain() : _local_data(_eventloop)
+BGPMain::BGPMain(EventLoop& eventloop)
+    : _eventloop(eventloop),
+      _local_data(_eventloop)
 {
     _xrl_router = NULL;
 }

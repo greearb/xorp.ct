@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.46 2006/10/12 01:24:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.47 2007/02/16 22:45:12 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -60,9 +60,11 @@ main(int /*argc*/, char **argv)
     comm_init();
 
     try {
+	EventLoop eventloop;
+
 // 	signal(SIGINT, terminate_main_loop);
 
-	BGPMain bgp;
+	BGPMain bgp(eventloop);
 	bgpmain = &bgp;		// An external reference for the
 				// signal handler.
 
@@ -76,7 +78,7 @@ main(int /*argc*/, char **argv)
 	** FEA and RIB to start.
 	*/
 	while (bgp.get_xrl_target()->waiting() && bgp.run()) {
-	    bgp.eventloop().run();
+	    eventloop.run();
 	}
 
 	/*

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.27 2006/10/12 01:24:39 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.28 2007/02/16 22:45:20 pavlin Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -112,8 +112,8 @@ nhr_test1(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
 
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
@@ -203,8 +203,8 @@ nhr_test2(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -296,8 +296,8 @@ nhr_test3(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -395,8 +395,8 @@ nhr_test4(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -481,8 +481,8 @@ nhr_test5(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyDecisionTable<A> dt(info, nhr);
@@ -627,8 +627,8 @@ nhr_test6(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);
@@ -704,8 +704,8 @@ nhr_test7(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyDecisionTable<A> dt(info, nhr);
@@ -834,8 +834,8 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyDecisionTable<A> dt(info, nhr);
@@ -1139,8 +1139,8 @@ nhr_test9(TestInfo& info, A nexthop, A /*real_nexthop*/, IPNet<A> subnet,
 {
     DOUT(info) << "nexthop: " << nexthop.str() << endl;
 
-    BGPMain bgp;
-    EventLoop& eventloop = bgp.eventloop();
+    EventLoop eventloop;
+    BGPMain bgp(eventloop);
     DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
 
     DummyNhLookupTable<A> nht(info, &nhr);

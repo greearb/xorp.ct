@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.21 2006/03/16 00:03:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.22 2007/02/16 22:45:21 pavlin Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -394,7 +394,8 @@ int main(int /* argc */, char *argv[])
     }
 #endif	// !HOST_OS_WINDOWS
 
-	BGPMain bgpm;
+	EventLoop eventloop;
+	BGPMain bgpm(eventloop);
 
 	PlumbingTest *tester;
  	tester = (PlumbingTest*)(bgpm.plumbing_unicast());

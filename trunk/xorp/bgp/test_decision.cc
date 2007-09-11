@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.40 2007/02/16 22:45:20 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.41 2007/06/18 23:30:25 atanu Exp $"
 
 #include "bgp_module.h"
 
@@ -52,7 +52,8 @@ test_decision(TestInfo& /*info*/)
     free(tmppath);
 #endif
 
-    BGPMain bgpmain;
+    EventLoop eventloop;
+    BGPMain bgpmain(eventloop);
     LocalData localdata(bgpmain.eventloop());
     localdata.set_as(AsNum(1));
 

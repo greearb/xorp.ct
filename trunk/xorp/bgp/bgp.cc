@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.86 2007/05/23 04:08:21 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.87 2007/07/06 01:25:41 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -40,15 +40,11 @@
 
 
 // ----------------------------------------------------------------------------
-// Static class members
-
-EventLoop BGPMain::_eventloop;
-
-// ----------------------------------------------------------------------------
 // BGPMain implementation
 
-BGPMain::BGPMain()
-    : _exit_loop(false),
+BGPMain::BGPMain(EventLoop& eventloop)
+    : _eventloop(eventloop),
+      _exit_loop(false),
       _local_data(_eventloop),
       _component_count(0),
       _ifmgr(NULL),
@@ -62,18 +58,18 @@ BGPMain::BGPMain()
     */
     _peerlist = new BGPPeerList();
     _deleted_peerlist = new BGPPeerList();
-    _xrl_router = new XrlStdRouter(eventloop(), "bgp");
+    _xrl_router = new XrlStdRouter(_eventloop, "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
 
-    wait_until_xrl_router_is_ready(eventloop(), *_xrl_router);
+    wait_until_xrl_router_is_ready(_eventloop, *_xrl_router);
 
     _rib_ipc_handler = new RibIpcHandler(*_xrl_router, *this);
     _aggregation_handler = new AggregationHandler();
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
-							eventloop(),
+							_eventloop,
 							*this);
     _next_hop_resolver_ipv6 = new NextHopResolver<IPv6>(_xrl_router,
-							eventloop(),
+							_eventloop,
 							*this);
     _plumbing_unicast = new BGPPlumbing(SAFI_UNICAST,
 					_rib_ipc_handler,
@@ -91,7 +87,7 @@ BGPMain::BGPMain()
 					  *this);
     _rib_ipc_handler->set_plumbing(_plumbing_unicast, _plumbing_multicast);
 
-    _process_watch = new ProcessWatch(_xrl_router, eventloop(),
+    _process_watch = new ProcessWatch(_xrl_router, _eventloop,
 				      bgp_mib_name().c_str(),
 				      ::callback(this,
 						 &BGPMain::terminate));
