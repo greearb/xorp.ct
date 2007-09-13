@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.280 2007/08/17 23:28:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.281 2007/08/18 00:11:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3947,8 +3947,12 @@ Neighbour<A>::tear_down_state(State previous_state)
     if (_peer.do_dr_or_bdr() && is_DR() && Full == previous_state)
 	_peer.adjacency_change(false);
 
-    if (_peer.do_dr_or_bdr() && TwoWay <= previous_state)
-	_peer.schedule_event("NeighbourChange");
+    if (TwoWay <= previous_state) {
+	if (_peer.do_dr_or_bdr())
+	    _peer.schedule_event("NeighbourChange");
+	else
+	    _peer.update_router_links();
+    }
 }
 
 /**
