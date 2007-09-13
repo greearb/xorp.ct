@@ -232,6 +232,10 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 test_comm_SOURCES = test_comm.c
 test_connect_SOURCES = test_connect.cc
 
+# -- Miscellaneous Setup
+# XXX: Linking C programs with C++ libraries requires C++ linker
+test_comm_LINK = $(CXXLINK)
+
 # -- Library Sources
 libcomm_la_SOURCES = comm_module.h comm_api.h comm_private.h \
 	comm_sock.c comm_user.c
@@ -319,7 +323,7 @@ clean-checkPROGRAMS:
 	done
 test_comm$(EXEEXT): $(test_comm_OBJECTS) $(test_comm_DEPENDENCIES) 
 	@rm -f test_comm$(EXEEXT)
-	$(LINK) $(test_comm_OBJECTS) $(test_comm_LDADD) $(LIBS)
+	$(test_comm_LINK) $(test_comm_OBJECTS) $(test_comm_LDADD) $(LIBS)
 test_connect$(EXEEXT): $(test_connect_OBJECTS) $(test_connect_DEPENDENCIES) 
 	@rm -f test_connect$(EXEEXT)
 	$(CXXLINK) $(test_connect_OBJECTS) $(test_connect_LDADD) $(LIBS)
