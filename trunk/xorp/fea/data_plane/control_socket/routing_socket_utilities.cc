@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.6 2007/05/08 00:49:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.7 2007/06/21 06:10:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -445,13 +445,13 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     // XXX: Currently RTF_REJECT is assumed to mean the same thing.
     // XXX: Windows does not currently support blackhole/reject routes.
     //
-    if (rtm->rtm_flags & (RTF_BLACKHOLE|RTF_REJECT)) {
+    if (rtm->rtm_flags & (RTF_BLACKHOLE | RTF_REJECT)) {
 	//
-	// Find first discard interface in the FEA. If we don't have one,
-	// log a warning and ignore this route. Because IfTree elements
-	// are held in a map, and we don't key on this property, we
-	// have to walk for it.
-	//
+        // Try to map discard routes back to the first software discard
+        // interface in the tree. If we don't have one, then ignore this route.
+        // We have to scan all interfaces because IfTree elements
+        // are held in a map, and we don't key on this property.
+        //
 	const IfTreeInterface* pi = NULL;
 	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	     ii != iftree.interfaces().end(); ++ii) {
@@ -460,10 +460,11 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			break;
 		}
 	}
-
 	if (pi == NULL) {
-	    XLOG_ERROR(
-"Cannot map a discard route back to an FEA soft discard interface.");
+	    //
+	    // XXX: Cannot map a discard route back to an FEA soft discard
+	    // interface.
+	    //
 	    return false;
 	}
 
