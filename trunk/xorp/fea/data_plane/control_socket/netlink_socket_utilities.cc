@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/forwarding_plane/control_socket/netlink_socket_utilities.cc,v 1.3 2007/05/01 02:40:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.4 2007/05/08 00:49:02 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -184,59 +184,68 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     IPvX nexthop_addr(family);
     IPvX dst_addr(family);
     int dst_mask_len = 0;
-    
-    // rtmsg check
-    if (rtmsg->rtm_type == RTN_LOCAL) {
-	// TODO: XXX: PAVPAVPAV: handle it, if needed!
-	return false;		// TODO: is it really an error?
-    }
 
     //
-    // Try to map discard routes back to the first software discard
-    // interface in the tree.
+    // Type-specific processing
     //
-    if ((rtmsg->rtm_type == RTN_BLACKHOLE) ||
-	(rtmsg->rtm_type == RTN_PROHIBIT)) {
+    switch (rtmsg->rtm_type) {
+    case RTN_LOCAL:
+	// TODO: XXX: PAVPAVPAV: handle it, if needed!
+	return false;		// TODO: is it really an error?
+
+    case RTN_BLACKHOLE:
+    case RTN_PROHIBIT:
+    {
 	//
-	// Find first discard interface in the FEA. If we don't have one,
-	// log a warning and ignore this route. Because IfTree elements
-	// are held in a map, and we don't key on this property, we
-	// have to walk for it.
+	// Try to map discard routes back to the first software discard
+	// interface in the tree. If we don't have one, then ignore this route.
+	// We have to scan all interfaces because IfTree elements
+	// are held in a map, and we don't key on this property.
 	//
 	const IfTreeInterface* pi = NULL;
 	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	     ii != iftree.interfaces().end(); ++ii) {
-		if (ii->second.discard()) {
-			pi = &ii->second;
-			break;
-		}
+	    if (ii->second.discard()) {
+		pi = &ii->second;
+		break;
+	    }
 	}
-
 	if (pi == NULL) {
-	    XLOG_ERROR(
-"Cannot map a discard route back to an FEA soft discard interface.");
+	    //
+	    // XXX: Cannot map a discard route back to an FEA soft discard
+	    // interface.
+	    //
 	    return false;
 	}
-
 	if_name = pi->ifname();		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
 	lookup_ifindex = false;
+	break;
     }
 
-    if (rtmsg->rtm_type == RTN_UNREACHABLE) {
-	// Ignore "destination unreachable" notifications.
+    case RTN_UNREACHABLE:
+	// XXX: Ignore "destination unreachable" notifications.
 	return false;
-    }
-    if (rtmsg->rtm_type != RTN_UNICAST) {
+
+    case RTN_UNICAST:
+	break;
+
+    default:
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: "
-		   "wrong AF_NETLINK route type: %d instead of %d",
-		   rtmsg->rtm_type, RTN_UNICAST);
+		   "unrecognized AF_NETLINK route type: %d",
+		   rtmsg->rtm_type);
 	return false;
     }
+
+    //
+    // Check the address family
+    //
     if (rtmsg->rtm_family != family)
 	return false;		// Invalid address family
-    
-    // The attributes
+
+    //
+    // Get the attributes
+    //
     memset(rta_array, 0, sizeof(rta_array));
     rtattr = RTM_RTA(const_cast<struct rtmsg *>(rtmsg));
     NlmUtils::get_rtattr(rtattr, rta_len, rta_array,
