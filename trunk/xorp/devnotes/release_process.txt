@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.65 2007/03/27 17:52:01 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.66 2007/09/01 02:00:45 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -381,6 +381,9 @@ the login shell is csh or tcsh):
  # Also, the xorp-releases/LICENSE.other file should be removed from
  the Web site.
  cp -p ../LICENSE.other .
+ # TODO: For the next 1.5 release, the split of config.boot.sample
+ # split into number of files inside rtrmgr/config/*.boot must be
+ # accomodated.
  cp -p ../rtrmgr/config.boot.sample .
  ln -s config.boot.sample config.boot.sample.txt
  gmake
