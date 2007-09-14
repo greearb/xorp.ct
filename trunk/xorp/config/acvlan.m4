@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acvlan.m4,v 1.1 2007/09/14 01:26:54 pavlin Exp $
+dnl $XORP: xorp/config/acvlan.m4,v 1.2 2007/09/14 23:12:35 pavlin Exp $
 dnl
 
 dnl
@@ -155,6 +155,8 @@ AC_TRY_COMPILE([
     strncpy(ifreq.ifr_name, vlan_name, sizeof(ifreq.ifr_name) - 1);
     if (ioctl(sock, SIOCIFCREATE, &ifreq) < 0)
         return (1);
+    if (strcmp(vlan_name, ifreq.ifr_name) != 0)
+        return (1);    /* XXX: The created name didn't match */
 
     /* Set the VLAN state */
     memset(&ifreq, 0, sizeof(ifreq));
@@ -165,8 +167,6 @@ AC_TRY_COMPILE([
     ifreq.ifr_data = (caddr_t)(&vlanreq);
     if (ioctl(sock, SIOCSETVLAN, (caddr_t)&ifreq) < 0)
         return (1);
-    if (strcmp(vlan_name, ifreq.ifr_name) != 0)
-        return (1);    /* XXX: The created name didn't match */
 
     /* Get the VLAN state */
     memset(&ifreq, 0, sizeof(ifreq));

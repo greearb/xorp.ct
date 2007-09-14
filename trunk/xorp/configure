@@ -41034,6 +41034,8 @@ main ()
     strncpy(ifreq.ifr_name, vlan_name, sizeof(ifreq.ifr_name) - 1);
     if (ioctl(sock, SIOCIFCREATE, &ifreq) < 0)
         return (1);
+    if (strcmp(vlan_name, ifreq.ifr_name) != 0)
+        return (1);    /* XXX: The created name didn't match */
 
     /* Set the VLAN state */
     memset(&ifreq, 0, sizeof(ifreq));
@@ -41044,8 +41046,6 @@ main ()
     ifreq.ifr_data = (caddr_t)(&vlanreq);
     if (ioctl(sock, SIOCSETVLAN, (caddr_t)&ifreq) < 0)
         return (1);
-    if (strcmp(vlan_name, ifreq.ifr_name) != 0)
-        return (1);    /* XXX: The created name didn't match */
 
     /* Get the VLAN state */
     memset(&ifreq, 0, sizeof(ifreq));
