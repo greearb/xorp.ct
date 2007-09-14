@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/acvlan.m4,v 1.1 2007/09/14 01:26:54 pavlin Exp $
 dnl
 
 dnl
@@ -12,7 +12,7 @@ dnl -----------------------------------------------
 dnl Check for header files that might be used later
 dnl -----------------------------------------------
 
-AC_CHECK_HEADERS([sys/types.h sys/socket.h sys/ioctl.h sys/ioctl.h])
+AC_CHECK_HEADERS([string.h sys/types.h sys/socket.h sys/sockio.h sys/ioctl.h])
 AC_CHECK_HEADERS([net/ethernet.h netinet/in.h])
 
 dnl XXX: Header files <net/if.h> might need <sys/types.h> and <sys/socket.h>
@@ -98,11 +98,17 @@ dnl -------------------------------------------------------------
 AC_MSG_CHECKING(whether the system has BSD-style ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN) VLAN interface get/set)
 AC_TRY_COMPILE([
 #include <stdlib.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -137,31 +143,43 @@ AC_TRY_COMPILE([
     int sock;
     struct ifreq ifreq;
     struct vlanreq vlanreq;
-    uint16_t vlan_tag;
-    const char *parent_ifname;
-
-    memset(&ifreq, 0, sizeof(ifreq));
-    memset(&vlanreq, 0, sizeof(vlanreq));
-    strncpy(ifreq.ifr_name, "foo", sizeof(ifreq.ifr_name) - 1);
-    ifreq.ifr_data = (caddr_t)(&vlanreq);
+    uint16_t vlan_id = 10;
+    const char *vlan_name = "vlan10";
+    const char *parent_ifname = "sk0";
 
     if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
         return (1);
 
-    if (ioctl(sock, SIOCGETVLAN, (caddr_t)&ifreq) < 0)
-        return (0);	/* XXX: Most likely not a VLAN interface */
+    /* Create the VLAN interface */
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, vlan_name, sizeof(ifreq.ifr_name) - 1);
+    if (ioctl(sock, SIOCIFCREATE, &ifreq) < 0)
+        return (1);
 
-    /*
-     *  XXX: VLAN interface
-     */
-    vlan_tag = vlanreq.vlr_tag;
-    parent_ifname = vlanreq.vlr_parent;
-
-    /* Update the VLAN tag ID */
-    vlanreq.vlr_tag = 10;
-    if (vlanreq.vlr_tag == vlan_tag)
-        vlanreq.vlr_tag++;
+    /* Set the VLAN state */
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, vlan_name, sizeof(ifreq.ifr_name) - 1);
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    vlanreq.vlr_tag = vlan_id;
+    strncpy(vlanreq.vlr_parent, parent_ifname, sizeof(vlanreq.vlr_parent) - 1);
+    ifreq.ifr_data = (caddr_t)(&vlanreq);
     if (ioctl(sock, SIOCSETVLAN, (caddr_t)&ifreq) < 0)
+        return (1);
+    if (strcmp(vlan_name, ifreq.ifr_name) != 0)
+        return (1);    /* XXX: The created name didn't match */
+
+    /* Get the VLAN state */
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, vlan_name, sizeof(ifreq.ifr_name) - 1);
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    ifreq.ifr_data = (caddr_t)(&vlanreq);
+    if (ioctl(sock, SIOCGETVLAN, (caddr_t)&ifreq) < 0)
+        return (1);
+
+    /* Destroy the VLAN interface */
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, vlan_name, sizeof(ifreq.ifr_name) - 1);
+    if (ioctl(sock, SIOCIFDESTROY, &ifreq) < 0)
         return (1);
 
     return (0);
