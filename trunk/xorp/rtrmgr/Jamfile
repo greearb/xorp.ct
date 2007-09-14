@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/Jamfile,v 1.1 2007/01/11 22:30:53 bms Exp $
+# $XORP: xorp/rtrmgr/Jamfile,v 1.2 2007/04/20 07:17:48 pavlin Exp $
 #
 
 SubDir TOP rtrmgr ;
@@ -11,6 +11,7 @@ SubIncludeOnce TOP libxipc ;
 SubIncludeOnce TOP libproto ;
 SubIncludeOnce TOP cli ;
 SubIncludeOnce TOP cli libtecla ;
+SubIncludeOnce TOP rtrmgr config ;
 SubDir TOP rtrmgr ;
 
 LINKLIBS_RTRMGR_COMMON = 
@@ -118,6 +119,3 @@ if $(MAKE_CHECK) {
 }
 
 InstallBin $(PREFIX)/bin : xorp_profiler xorp_rtrmgr xorpsh ;
-
-# XXX: This file may need to be renamed.
-InstallFile $(PREFIX)/etc : config.boot.sample ;
