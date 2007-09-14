@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.211 2007/09/04 16:00:50 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.212 2007/09/04 16:40:08 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.211 2007/09/04 16:00:50 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.212 2007/09/04 16:40:08 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -889,6 +889,11 @@ dnl
 dnl Interface configuration method checks
 dnl
 builtin(include, config/acifconf.m4)
+
+dnl
+dnl VLAN interface configuration method checks
+dnl
+builtin(include, config/acvlan.m4)
 
 
 dnl ---------------------------------------------------------------------------

@@ -297,6 +297,12 @@
 /* Define to 1 if you have the <net/if_var.h> header file. */
 #undef HAVE_NET_IF_VAR_H
 
+/* Define to 1 if you have the <net/if_vlanvar.h> header file. */
+#undef HAVE_NET_IF_VLANVAR_H
+
+/* Define to 1 if you have the <net/if_vlan_var.h> header file. */
+#undef HAVE_NET_IF_VLAN_VAR_H
+
 /* Define to 1 if you have the <net/ip_mroute/ip_mroute.h> header file. */
 #undef HAVE_NET_IP_MROUTE_IP_MROUTE_H
 
@@ -305,6 +311,9 @@
 
 /* Define to 1 if you have the <net/route.h> header file. */
 #undef HAVE_NET_ROUTE_H
+
+/* Define to 1 if you have the <net/vlan/if_vlan_var.h> header file. */
+#undef HAVE_NET_VLAN_IF_VLAN_VAR_H
 
 /* Define to 1 if the host has IPF support in the build environment */
 #undef HAVE_PACKETFILTER_IPF
@@ -615,6 +624,10 @@
 
 /* Define to 1 if you have the <vfork.h> header file. */
 #undef HAVE_VFORK_H
+
+/* Define to 1 if you have ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN) VLAN
+   interface get/set methods */
+#undef HAVE_VLAN_BSD
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
