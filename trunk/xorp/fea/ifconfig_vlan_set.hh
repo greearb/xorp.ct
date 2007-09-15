@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.1 2007/09/15 00:32:16 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.2 2007/09/15 00:57:04 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_VLAN_SET_HH__
 #define __FEA_IFCONFIG_VLAN_SET_HH__
@@ -87,9 +87,9 @@ public:
      * may be modified.
      *
      * @param iftree the interface tree configuration to push.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool push_config(IfTree& iftree) = 0;
+    virtual int push_config(IfTree& iftree) = 0;
 
     /**
      * Add a VLAN.

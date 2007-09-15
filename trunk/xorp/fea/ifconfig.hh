@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.69 2007/08/09 00:46:56 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.70 2007/09/15 00:32:16 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -280,10 +280,10 @@ public:
      * Note that on return some of the interface tree configuration state
      * may be modified.
      *
-     * @param config the configuration to be pushed down.
-     * @return true on success, otherwise false.
+     * @param iftree the configuration to be pushed down.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool push_config(IfTree& config);
+    int push_config(IfTree& iftree);
 
     /**
      * Pull up current config from platform.

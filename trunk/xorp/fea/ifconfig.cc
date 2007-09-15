@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.69 2007/08/09 00:46:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.70 2007/09/15 00:32:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -171,7 +171,7 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     // Push the configuration
     //
     do {
-	if (push_config(local_config()) == true)
+	if (push_config(local_config()) == XORP_OK)
 	    break;		// Success
 
 	error_msg = push_error();
@@ -181,7 +181,7 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
 	IfTree restore_config = old_local_config();
 	restore_config.prepare_replacement_state(local_config());
 	set_local_config(restore_config);
-	if (push_config(local_config()) == true)
+	if (push_config(local_config()) == XORP_OK)
 	    break;		// Continue with finalizing the reverse-back
 
 	// Failed to reverse back
@@ -532,7 +532,7 @@ IfConfig::stop(string& error_msg)
 	pull_config();
 	IfTree tmp_push_tree = _original_config;
 	tmp_push_tree.prepare_replacement_state(_pulled_config);
-	if (push_config(tmp_push_tree) != true) {
+	if (push_config(tmp_push_tree) != XORP_OK) {
 	    error_msg2 = push_error();
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -620,10 +620,10 @@ IfConfig::stop(string& error_msg)
     return (ret_value);
 }
 
-bool
-IfConfig::push_config(IfTree& config)
+int
+IfConfig::push_config(IfTree& iftree)
 {
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
     list<IfConfigSet*>::iterator ifconfig_set_iter;
 
     if (_ifconfig_sets.empty())
@@ -639,17 +639,17 @@ IfConfig::push_config(IfTree& config)
 	 ifconfig_set_iter != _ifconfig_sets.end();
 	 ++ifconfig_set_iter) {
 	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
-	if (ifconfig_set->push_config(config) != true)
+	if (ifconfig_set->push_config(iftree) != XORP_OK)
 	    goto ret_label;
     }
-    ret_value = true;		// Success
+    ret_value = XORP_OK;	// Success
 
  ret_label:
     //
     // Save a copy of the pushed config
     //
-    if (ret_value == true)
-	_pushed_config = config;
+    if (ret_value == XORP_OK)
+	_pushed_config = iftree;
 
     return ret_value;
 }

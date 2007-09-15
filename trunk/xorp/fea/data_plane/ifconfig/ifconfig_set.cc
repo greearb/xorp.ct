@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.7 2007/09/09 04:40:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.8 2007/09/10 17:38:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -40,7 +40,7 @@
 // in the class that inherits from IfConfigSet.
 //
 
-bool
+int
 IfConfigSet::push_config(IfTree& iftree)
 {
     IfTree::IfMap::iterator ii;
@@ -75,7 +75,7 @@ IfConfigSet::push_config(IfTree& iftree)
 		i.ifname(),
 		"interface not recognized");
 	    XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
-	    return false;
+	    return (XORP_ERROR);
 	}
 
 	//
@@ -90,7 +90,7 @@ IfConfigSet::push_config(IfTree& iftree)
 							       v.vifname(),
 							       "bad vif name");
 		XLOG_ERROR("%s", ifconfig().ifconfig_error_reporter().last_error().c_str());
-		return false;
+		return (XORP_ERROR);
 	    }
 	}
     }
@@ -162,9 +162,9 @@ IfConfigSet::push_config(IfTree& iftree)
     push_iftree_end();
 
     if (ifconfig().ifconfig_error_reporter().error_count() != 0)
-	return false;
+	return (XORP_ERROR);
     
-    return true;
+    return (XORP_OK);
 }
 
 void

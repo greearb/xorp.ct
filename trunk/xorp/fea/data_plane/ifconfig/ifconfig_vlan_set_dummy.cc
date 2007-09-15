@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.1 2007/09/15 00:32:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.2 2007/09/15 00:57:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -78,7 +78,7 @@ IfConfigVlanSetDummy::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigVlanSetDummy::push_config(IfTree& iftree)
 {
     IfTree::IfMap::iterator ii;
@@ -100,7 +100,7 @@ IfConfigVlanSetDummy::push_config(IfTree& iftree)
 		if (delete_vlan(i.ifname(), v.vifname(), error_msg)
 		    != XORP_OK) {
 		    XLOG_ERROR("%s", error_msg.c_str());
-		    return (false);
+		    return (XORP_ERROR);
 		}
 		continue;
 	    }
@@ -108,17 +108,17 @@ IfConfigVlanSetDummy::push_config(IfTree& iftree)
 	    // Add and configure the VLAN
 	    if (add_vlan(i.ifname(), v.vifname(), error_msg) != XORP_OK) {
 		XLOG_ERROR("%s", error_msg.c_str());
-		return (false);
+		return (XORP_ERROR);
 	    }
 	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_id(), error_msg)
 		!= XORP_OK) {
 		XLOG_ERROR("%s", error_msg.c_str());
-		return (false);
+		return (XORP_ERROR);
 	    }
 	}
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
 int
