@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.hh,v 1.2 2007/07/11 22:18:10 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.hh,v 1.3 2007/07/16 23:56:10 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_SET_CLICK_HH__
@@ -58,36 +58,34 @@ public:
      *
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool set_table4(const list<Fte4>& fte_list);
+    virtual int set_table4(const list<Fte4>& fte_list);
 
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_all_entries4();
+    virtual int delete_all_entries4();
 
     /**
      * Set the unicast forwarding table.
      *
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool set_table6(const list<Fte6>& fte_list);
+    virtual int set_table6(const list<Fte6>& fte_list);
     
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_all_entries6();
+    virtual int delete_all_entries6();
     
 private:
     ClickSocketReader	_cs_reader;

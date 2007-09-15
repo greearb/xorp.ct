@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.11 2007/07/11 22:18:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_routing_socket.cc,v 1.12 2007/07/12 17:32:18 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -52,7 +52,7 @@
 //
 #if defined(HAVE_ROUTING_SOCKETS) || defined(HOST_OS_WINDOWS)
 
-bool
+int
 FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
 						     const IfTree& iftree,
 						     list<FteX>& fte_list,
@@ -130,12 +130,12 @@ FibConfigTableGetSysctl::parse_buffer_routing_socket(int family,
 #endif
 
 	FteX fte(family);
-	if (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm) == true) {
+	if (RtmUtils::rtm_get_to_fte_cfg(iftree, fte, rtm) == XORP_OK) {
 	    fte_list.push_back(fte);
 	}
     }
 
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HAVE_ROUTING_SOCKETS || HOST_OS_WINDOWS

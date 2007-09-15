@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.7 2007/04/14 08:59:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.8 2007/04/18 06:21:01 pavlin Exp $"
 
 #include <map>
 
@@ -159,7 +159,7 @@ XrlPacketAclTarget::packet_acl_0_1_set_backend(
 	// Input values,
 	const string&	name)
 {
-    if (_pat.set_backend(name.c_str()))
+    if (_pat.set_backend(name.c_str()) == XORP_OK)
 	return XrlCmdError::OKAY();
 
     return XrlCmdError::COMMAND_FAILED(PA_NOT_READY);

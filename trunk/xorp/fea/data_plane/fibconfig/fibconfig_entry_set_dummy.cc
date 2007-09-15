@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.7 2007/07/11 22:18:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.cc,v 1.8 2007/07/17 23:24:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -77,11 +77,11 @@ FibConfigEntrySetDummy::stop(string& error_msg)
 }
 
 
-bool
+int
 FibConfigEntrySetDummy::add_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
-	return false;
+	return (XORP_ERROR);
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -96,14 +96,14 @@ FibConfigEntrySetDummy::add_entry4(const Fte4& fte)
 		     fte.net().str().c_str(), rc, fibconfig().trie4().route_count());
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetDummy::delete_entry4(const Fte4& fte)
 {
     if (in_configuration() == false)
-	return false;
+	return (XORP_ERROR);
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -111,17 +111,17 @@ FibConfigEntrySetDummy::delete_entry4(const Fte4& fte)
     
     Trie4::iterator ti = fibconfig().trie4().find(fte.net());
     if (ti == fibconfig().trie4().end())
-	return false;
+	return (XORP_ERROR);
     fibconfig().trie4().erase(ti);
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetDummy::add_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
-	return false;
+	return (XORP_ERROR);
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -137,14 +137,14 @@ FibConfigEntrySetDummy::add_entry6(const Fte6& fte)
 		     fibconfig().trie6().route_count());
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetDummy::delete_entry6(const Fte6& fte)
 {
     if (in_configuration() == false)
-	return false;
+	return (XORP_ERROR);
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -152,8 +152,8 @@ FibConfigEntrySetDummy::delete_entry6(const Fte6& fte)
     
     Trie6::iterator ti = fibconfig().trie6().find(fte.net());
     if (ti == fibconfig().trie6().end())
-	return false;
+	return (XORP_ERROR);
     fibconfig().trie6().erase(ti);
     
-    return true;
+    return (XORP_OK);
 }

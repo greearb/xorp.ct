@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.9 2007/07/11 22:18:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.10 2007/07/18 01:30:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -90,20 +90,12 @@ FibConfigEntryGetRoutingSocket::stop(string& error_msg)
     return (XORP_OK);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetRoutingSocket::lookup_route_by_dest4(const IPv4& dst,
 						      Fte4& fte)
 {
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
@@ -112,20 +104,12 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest4(const IPv4& dst,
     return (ret_value);
 }
 
-/**
- * Lookup a route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetRoutingSocket::lookup_route_by_network4(const IPv4Net& dst,
 							 Fte4& fte)
 {
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
@@ -134,20 +118,12 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network4(const IPv4Net& dst,
     return (ret_value);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetRoutingSocket::lookup_route_by_dest6(const IPv6& dst,
 						      Fte6& fte)
 {
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
@@ -156,20 +132,12 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest6(const IPv6& dst,
     return (ret_value);
 }
 
-/**
- * Lookup route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetRoutingSocket::lookup_route_by_network6(const IPv6Net& dst,
 							 Fte6& fte)
 { 
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
@@ -178,15 +146,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network6(const IPv6Net& dst,
     return (ret_value);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
 						     FteX& fte)
 {
@@ -206,12 +166,12 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
     do {
 	if (dst.is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (dst.is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
@@ -219,7 +179,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
     
     // Check that the destination address is valid
     if (! dst.is_unicast()) {
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -285,7 +245,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
 
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -294,26 +254,18 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
     string error_msg;
     if (_rs_reader.receive_data(rs, rtm->rtm_seq, error_msg) != XORP_OK) {
 	XLOG_ERROR("Error reading from routing socket: %s", error_msg.c_str());
-	return (false);
+	return (XORP_ERROR);
     }
     if (parse_buffer_routing_socket(fibconfig().iftree(), fte,
 				    _rs_reader.buffer(), FibMsg::GETS)
-	!= true) {
-	return (false);
+	!= XORP_OK) {
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
-/**
- * Lookup route by network.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 							FteX& fte)
 {
@@ -333,12 +285,12 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
     do {
 	if (dst.is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (dst.is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
@@ -346,7 +298,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 
     // Check that the destination address is valid    
     if (! dst.is_unicast()) {
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -431,7 +383,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -440,16 +392,16 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
     string error_msg;
     if (_rs_reader.receive_data(rs, rtm->rtm_seq, error_msg) != XORP_OK) {
 	XLOG_ERROR("Error reading from routing socket: %s", error_msg.c_str());
-	return (false);
+	return (XORP_ERROR);
     }
 
     if (parse_buffer_routing_socket(fibconfig().iftree(), fte,
 				    _rs_reader.buffer(), FibMsg::GETS)
-	!= true) {
-	return (false);
+	!= XORP_OK) {
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

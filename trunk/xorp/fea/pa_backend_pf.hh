@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend_pf.hh,v 1.3 2007/02/16 22:45:48 pavlin Exp $
+// $XORP: xorp/fea/pa_backend_pf.hh,v 1.4 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_PF_HH__
 #define __FEA_PA_BACKEND_PF_HH__
@@ -99,30 +99,30 @@ public:
     /* --------------------------------------------------------------------- */
     /* IPv4 ACL back-end methods. */
 
-    bool push_entries4(const PaSnapshot4* snap);
-    bool delete_all_entries4();
+    int push_entries4(const PaSnapshot4* snap);
+    int delete_all_entries4();
     const PaBackend::Snapshot4Base* create_snapshot4();
-    bool restore_snapshot4(const PaBackend::Snapshot4Base* snap);
+    int restore_snapshot4(const PaBackend::Snapshot4Base* snap);
 
 #ifdef notyet
     /* --------------------------------------------------------------------- */
     /* IPv6 ACL back-end methods. */
 
-    bool push_entries6(const PaSnapshot6* snap);
-    bool delete_all_entries6();
+    int push_entries6(const PaSnapshot6* snap);
+    int delete_all_entries6();
     const PaBackend::Snapshot6Base* create_snapshot6() const;
-    bool restore_snapshot6(const PaBackend::Snapshot6Base* snap);
+    int restore_snapshot6(const PaBackend::Snapshot6Base* snap);
 #endif
 
 #ifdef HAVE_PACKETFILTER_PF
 protected:
     /* --------------------------------------------------------------------- */
     /* Private back-end methods. */
-    bool set_pf_enabled(bool enable);
+    int set_pf_enabled(bool enable);
     u_int32_t start_transaction();
     void abort_transaction(u_int32_t ticket);
-    bool commit_transaction(u_int32_t ticket);
-    bool transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket);
+    int commit_transaction(u_int32_t ticket);
+    int transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket);
 
     // XXX: For some reason this access isn't permitted even though
     // Snapshot4 is a friend of PaPfBackend in this scope, which

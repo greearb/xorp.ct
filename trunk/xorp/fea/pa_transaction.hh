@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_transaction.hh,v 1.5 2007/02/16 22:45:49 pavlin Exp $
+// $XORP: xorp/fea/pa_transaction.hh,v 1.6 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_PA_TRANSACTION_HH__
 #define __FEA_PA_TRANSACTION_HH__
@@ -62,7 +62,11 @@ public:
 	  _entry(ifname, vifname, src, dst, proto, sport, dport, action)
 	  {}
 
-    bool dispatch() { return ptm().add_entry4(_entry); }
+    bool dispatch() {
+	if (ptm().add_entry4(_entry) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("AddEntry4: ") + _entry.str(); }
 
@@ -85,7 +89,11 @@ public:
 		PaAction(ACTION_ANY))
 	  {}
 
-    bool dispatch() { return ptm().delete_entry4(_entry); }
+    bool dispatch() {
+	if (ptm().delete_entry4(_entry) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteEntry4: ") + _entry.str();  }
 
@@ -97,7 +105,11 @@ class PaDeleteAllEntries4 : public PaTransactionOperation {
 public:
     PaDeleteAllEntries4(PaTableManager& ptm) : PaTransactionOperation(ptm) {}
 
-    bool dispatch() { return ptm().delete_all_entries4(); }
+    bool dispatch() {
+	if (ptm().delete_all_entries4() != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteAllEntries4");  }
 };
@@ -117,7 +129,11 @@ public:
 	  _entry(ifname, vifname, src, dst, proto, sport, dport, action)
 	  {}
 
-    bool dispatch() { return ptm().add_entry6(_entry); }
+    bool dispatch() {
+	if (ptm().add_entry6(_entry) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("AddEntry6: ") + _entry.str(); }
 
@@ -140,7 +156,11 @@ public:
 		PaAction(ACTION_ANY))
 	  {}
 
-    bool dispatch() { return ptm().delete_entry6(_entry); }
+    bool dispatch() {
+	if (ptm().delete_entry6(_entry) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteEntry6: ") + _entry.str();  }
 
@@ -152,7 +172,11 @@ class PaDeleteAllEntries6 : public PaTransactionOperation {
 public:
     PaDeleteAllEntries6(PaTableManager& ptm) : PaTransactionOperation(ptm) {}
 
-    bool dispatch() { return ptm().delete_all_entries6(); }
+    bool dispatch() {
+	if (ptm().delete_all_entries6() != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteAllEntries6");  }
 };
@@ -213,7 +237,7 @@ public:
      * The currently active PaBackend, if any, will be freed, only if
      * construction was successful.
      */
-    bool set_backend(const char* name);
+    int set_backend(const char* name);
 
 protected:
     /**
@@ -255,7 +279,7 @@ protected:
     };
 
     void unset_error();
-    bool set_unset_error(const string& error);
+    int set_unset_error(const string& error);
 
     /* Methods overridden from TransactionManager */
     void pre_commit(uint32_t tid);
@@ -280,14 +304,14 @@ PaTransactionManager::unset_error()
     _error.erase();
 }
 
-inline bool
+inline int
 PaTransactionManager::set_unset_error(const string& error)
 {
     if (_error.empty()) {
 	_error = error;
-	return (true);
+	return (XORP_OK);
     }
-    return (false);
+    return (XORP_ERROR);
 }
 
 /* ------------------------------------------------------------------------- */

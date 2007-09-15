@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.5 2007/07/16 23:56:11 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.6 2007/09/15 05:10:21 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
@@ -71,11 +71,11 @@ public:
      * @param ifconfig the IfConfig instance.
      * @param iftree the IfTree storage to store the parsed information.
      * @param buffer the buffer with the data to parse.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      * @see IfTree.
      */
-    static bool parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
-					    const vector<uint8_t>& buffer);
+    static int parse_buffer_netlink_socket(IfConfig& ifconfig, IfTree& iftree,
+					   const vector<uint8_t>& buffer);
     
 private:
     int read_config(IfTree& iftree);

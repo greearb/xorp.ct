@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.49 2007/09/10 17:37:49 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.50 2007/09/15 00:57:04 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -45,29 +45,29 @@ public:
 	CHANGED = 0x04
     };
 
-    bool set_state(State st) {
+    int set_state(State st) {
 	if (bits(st) > 1) {
-	    return false;
+	    return (XORP_ERROR);
 	}
 	_st = st;
-	return true;
+	return (XORP_OK);
     }
 
     State state() const 		{ return _st; }
 
-    bool mark(State st) {
+    int mark(State st) {
 	if (bits(st) > 1) {
-	    return false;
+	    return (XORP_ERROR);
 	}
 	if (st & (CREATED | DELETED)) {
 	    _st = st;
-	    return true;
+	    return (XORP_OK);
 	}
 	if (_st & (CREATED | DELETED)) {
-	    return true;
+	    return (XORP_OK);
 	}
 	_st = st;
-	return true;
+	return (XORP_OK);
     }
     bool is_marked(State st) const	{ return st == _st; }
 
@@ -121,29 +121,26 @@ public:
      * Create a new interface.
      *
      * @param ifname interface name.
-     *
-     * @return true on success, false if an error.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool add_interface(const string& ifname);
+    int add_interface(const string& ifname);
 
     /**
      * Label interface as ready for deletion.  Deletion does not occur
      * until finalize_state() is called.
      *
      * @param ifname name of interface to be labelled.
-     *
-     * @return true on success, false if ifname is invalid.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool remove_interface(const string& ifname);
+    int remove_interface(const string& ifname);
 
     /**
      * Create a new interface or update its state if it already exists.
      *
      * @param other_iface the interface with the state to copy from.
-     *
-     * @return true on success, false if an error.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool update_interface(const IfTreeInterface& other_iface);
+    int update_interface(const IfTreeInterface& other_iface);
 
     /**
      * Find an interface.
@@ -463,9 +460,8 @@ public:
     const VifMap& vifs() const		{ return _vifs; }
     VifMap& vifs()			{ return _vifs; }
 
-    bool add_vif(const string& vifname);
-
-    bool remove_vif(const string& vifname);
+    int add_vif(const string& vifname);
+    int remove_vif(const string& vifname);
 
     /**
      * Find a vif.
@@ -639,10 +635,9 @@ public:
      * Add IPv4 address.
      *
      * @param addr address to be added.
-     *
-     * @return true on success, false if an error.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool add_addr(const IPv4& addr);
+    int add_addr(const IPv4& addr);
 
     /**
      * Mark IPv4 address as DELETED.
@@ -650,19 +645,17 @@ public:
      * Deletion occurs when finalize_state is called.
      *
      * @param addr address to labelled.
-     *
-     * @return true on success, false if address does not exist.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool remove_addr(const IPv4& addr);
+    int remove_addr(const IPv4& addr);
 
     /**
      * Add IPv6 address.
      *
      * @param addr address to be added.
-     *
-     * @return true on success, false if an error.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool add_addr(const IPv6& addr);
+    int add_addr(const IPv6& addr);
 
     /**
      * Mark IPv6 address as DELETED.
@@ -670,10 +663,9 @@ public:
      * Deletion occurs when finalize_state is called.
      *
      * @param addr address to labelled.
-     *
-     * @return true on success, false if address does not exist.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool remove_addr(const IPv6& addr);
+    int remove_addr(const IPv6& addr);
 
     /**
      * Find an IPv4 address.
@@ -799,12 +791,14 @@ public:
 
     /**
      * Set prefix length associate with address.
-     * @return true on success, false if prefix length is invalid.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool set_prefix_len(uint32_t prefix_len);
+    int set_prefix_len(uint32_t prefix_len);
 
     /**
      * Get the broadcast address.
+     *
      * @return the broadcast address or IPv4::ZERO() if there is no
      * broadcast address set.
      */
@@ -911,9 +905,10 @@ public:
 
     /**
      * Set prefix length associate with address.
-     * @return true on success, false if prefix length is invalid.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool set_prefix_len(uint32_t prefix_len);
+    int set_prefix_len(uint32_t prefix_len);
 
     IPv6 endpoint() const;
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_nf.cc,v 1.1 2006/07/07 10:28:21 bms Exp $"
+#ident "$XORP: xorp/fea/pa_backend_nf.cc,v 1.2 2007/02/16 22:45:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -125,17 +125,17 @@ PaNfBackend::get_version() const
 /* ------------------------------------------------------------------------- */
 /* IPv4 ACL back-end methods. */
 
-bool
+int
 PaNfBackend::push_entries4(const PaSnapshot4* snap)
 {
 #ifndef HAVE_PACKETFILTER_NF
     UNUSED(snap);
-    return (false);
+    return (XORP_ERROR);
 #else
     XLOG_ASSERT(snap != NULL);
 
     const PaSnapTable4& table = snap->data();
-    bool result;
+    int ret_value;
     struct ipt_entry *ipt;
     char *buf;
     ssize_t size;
@@ -148,36 +148,36 @@ PaNfBackend::push_entries4(const PaSnapshot4* snap)
     ipt = malloc(tsize);
     if (ipt == NULL) {
 	XLOG_ERROR("malloc: %s", strerror(errno));
-	return (false);
+	return (XORP_ERROR);
     }
 #endif
 
-    result = false;
+    ret_value = XORP_ERROR;
 
     // Transcribe all the rules contained within the snapshot
     // into Netfilter format.
     pipt = ipt;
     for (PaSnapTable4::const_iterator i = table.begin();
 	 i != table.end(); i++) {
-	result = transcribe_rule4(*i, pipt);
-	if (!result)
-	    break;
-	++pipt;
+	  ret_value = transcribe_rule4(*i, pipt);
+	  if (ret_value != XORP_OK)
+		break;
+	  ++pipt;
     }
 
     // Push the new ruleset to Netfilter.
-    result = push_rules4(tsize, table.size(), ipt);
+    ret_value = push_rules4(tsize, table.size(), ipt);
 
-    return (result);
+    return (ret_value);
 #endif
 }
 
 // Clear all entries by committing an empty transaction.
-bool
+int
 PaNfBackend::delete_all_entries4()
 {
 #ifndef HAVE_PACKETFILTER_NF
-    return (false);
+    return (XORP_ERROR);
 #else
     return (push_rules4(0, 0, NULL));
 #endif
@@ -243,12 +243,12 @@ PaNfBackend::create_snapshot4()
 #endif
 }
 
-bool
+int
 PaNfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 {
 #ifndef HAVE_PACKETFILTER_NF
     UNUSED(snap4);
-    return (false);
+    return (XORP_ERROR);
 #else
     // Simply check if the snapshot is an instance of our derived snapshot.
     // If it is not, we received it in error, and it is of no interest to us.
@@ -269,13 +269,13 @@ PaNfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 
 // Push a ruleset to the kernel, specified as a buffer containing
 // a vector of variable-sized ipt_entry elements.
-bool
+int
 PaNfBackend::push_rules4(unsigned int size, unsigned int num_entries,
 			 struct ipt_entry *rules)
 {
     struct ipt_replace *ipr;
     unsigned int rsize;
-    bool result;
+    int ret_value;
     //
     // Allocate buffer for the ipt_replace message, fill
     // it out, and copy the rule list vector into the message.
@@ -289,11 +289,11 @@ PaNfBackend::push_rules4(unsigned int size, unsigned int num_entries,
     ipr = malloc(rsize);
     if (ipr == NULL) {
         XLOG_ERROR("malloc: %s", strerror(errno));
-        return (false);
+        return (XORP_ERROR);
     }
     memset(ipr, 0, sizeof(ipr));
     strncpy(ipr->name, "FILTER", IPT_TABLE_MAXNAMELEN);
-    if (rules)
+    if (rules) {
 	memcpy(ipr->entries, rules, size);
         ipr->num_entries = num_entries;
 	ipr->size = size;
@@ -301,17 +301,17 @@ PaNfBackend::push_rules4(unsigned int size, unsigned int num_entries,
 	ipr->hook_entry[NF_IP_FORWARD] = 0;
     }
 
-    result = true;
+    ret_value = XORP_OK;
 
     if (setsockopt(_fd4, IPPROTO_IP, IPT_SO_SET_REPLACE, ipr, rsize) < 0) {
 	XLOG_ERROR("Failed to commit transaction for adding rules"
 		   "to NF firewall: setsockopt SO_SET_REPLACE: %s",
 		    strerror(errno));
-	result = false;
+	ret_value = XORP_ERROR;
     }
 
     free(ipr);
-    return (result);
+    return (ret_value);
 }
 
 // Return 0 on failure, otherwise, size of rule required or transcribed.

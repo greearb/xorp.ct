@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.82 2007/06/15 16:53:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.83 2007/07/18 01:30:23 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -987,7 +987,7 @@ MfeaNode::add_pim_register_vif()
 	    register_vif.add_address(ipvx, IPvXNet(ipvx, ipvx.addr_bitlen()),
 				     ipvx, IPvX::ZERO(family()));
 	}
-	if (add_vif(register_vif, error_msg) < 0) {
+	if (add_vif(register_vif, error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot add Register vif: %s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.11 2007/08/09 07:03:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.12 2007/08/09 22:20:51 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -92,7 +92,7 @@ FibConfigEntrySetNetlinkSocket::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetNetlinkSocket::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -100,7 +100,7 @@ FibConfigEntrySetNetlinkSocket::add_entry4(const Fte4& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetNetlinkSocket::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -108,7 +108,7 @@ FibConfigEntrySetNetlinkSocket::delete_entry4(const Fte4& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetNetlinkSocket::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -116,7 +116,7 @@ FibConfigEntrySetNetlinkSocket::add_entry6(const Fte6& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetNetlinkSocket::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -124,7 +124,7 @@ FibConfigEntrySetNetlinkSocket::delete_entry6(const Fte6& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
@@ -153,19 +153,19 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
 
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -337,18 +337,18 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
 	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
@@ -378,19 +378,19 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
 
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -494,7 +494,7 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
@@ -532,14 +532,14 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 	    if ((ifp != NULL) && ifp->enabled())
 		break;		// The interface is UP
 
-	    return (true);
+	    return (XORP_OK);
 	} while (false);
 
 	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HAVE_NETLINK_SOCKETS

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fib_client_manager.cc,v 1.1 2007/04/28 00:19:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fib_client_manager.cc,v 1.2 2007/04/28 00:49:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -81,7 +81,7 @@ XrlFibClientManager::add_fib_client4(const string& client_target_name,
 
     // Activate the client
     list<Fte4> fte_list;
-    if (_fibconfig.get_table4(fte_list) != true) {
+    if (_fibconfig.get_table4(fte_list) != XORP_OK) {
 	string error_msg = "Cannot get the IPv4 FIB";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -112,7 +112,7 @@ XrlFibClientManager::add_fib_client6(const string& client_target_name,
 
     // Activate the client
     list<Fte6> fte_list;
-    if (_fibconfig.get_table6(fte_list) != true) {
+    if (_fibconfig.get_table6(fte_list) != XORP_OK) {
 	string error_msg = "Cannot get the IPv6 FIB";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

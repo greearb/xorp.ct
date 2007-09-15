@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc,v 1.8 2007/06/07 01:28:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_parse_netlink_socket.cc,v 1.9 2007/07/11 22:18:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -46,7 +46,7 @@
 
 #ifdef HAVE_NETLINK_SOCKETS
 
-bool
+int
 FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
     int family,
     const IfTree& iftree,
@@ -80,7 +80,7 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	
 	case NLMSG_DONE:
 	{
-	    return true;	// XXX: OK even if there were no entries
+	    return (XORP_OK);	// XXX: OK even if there were no entries
 	}
 	break;
 	
@@ -120,7 +120,7 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	    
 	    FteX fte(family);
 	    if (NlmUtils::nlm_get_to_fte_cfg(iftree, fte, nlh, rtmsg, rta_len)
-		== true) {
+		== XORP_OK) {
 		fte_list.push_back(fte);
 	    }
 	}
@@ -133,7 +133,7 @@ FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	}
     }
     
-    return true;	// XXX: OK even if there were no entries
+    return (XORP_OK);		// XXX: OK even if there were no entries
 }
 
 #endif // HAVE_NETLINK_SOCKETS

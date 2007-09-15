@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.4 2007/05/08 00:49:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.5 2007/09/13 01:13:20 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -161,7 +161,7 @@ NlmUtils::get_rtattr(const struct rtattr* rtattr, int rta_len,
     }
 }
 
-bool
+int
 NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct nlmsghdr* nlh,
 			     const struct rtmsg* rtmsg, int rta_len)
@@ -191,7 +191,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     switch (rtmsg->rtm_type) {
     case RTN_LOCAL:
 	// TODO: XXX: PAVPAVPAV: handle it, if needed!
-	return false;		// TODO: is it really an error?
+	return (XORP_ERROR);		// TODO: is it really an error?
 
     case RTN_BLACKHOLE:
     case RTN_PROHIBIT:
@@ -215,7 +215,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    // XXX: Cannot map a discard route back to an FEA soft discard
 	    // interface.
 	    //
-	    return false;
+	    return (XORP_ERROR);
 	}
 	if_name = pi->ifname();		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
@@ -225,7 +225,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 
     case RTN_UNREACHABLE:
 	// XXX: Ignore "destination unreachable" notifications.
-	return false;
+	return (XORP_ERROR);
 
     case RTN_UNICAST:
 	break;
@@ -234,14 +234,14 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	XLOG_ERROR("nlm_get_to_fte_cfg() failed: "
 		   "unrecognized AF_NETLINK route type: %d",
 		   rtmsg->rtm_type);
-	return false;
+	return (XORP_ERROR);
     }
 
     //
     // Check the address family
     //
     if (rtmsg->rtm_family != family)
-	return false;		// Invalid address family
+	return (XORP_ERROR);		// Invalid address family
 
     //
     // Get the attributes
@@ -263,7 +263,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	if (! dst_addr.is_unicast()) {
 	    // TODO: should we make this check?
 	    fte.zero();
-	    return false;	// XXX: invalid unicast address
+	    return (XORP_ERROR);	// XXX: invalid unicast address
 	}
     }
     
@@ -299,7 +299,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    if_index = extract_host_int(p);
 	} else {
 	    XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
-	    return false;
+	    return (XORP_ERROR);
 	}
 
 	// Get the interface name
@@ -333,7 +333,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     if (is_deleted)
 	fte.mark_deleted();
     
-    return true;
+    return (XORP_OK);
 }
 
 /**

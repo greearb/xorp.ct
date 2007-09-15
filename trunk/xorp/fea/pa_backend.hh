@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend.hh,v 1.5 2006/03/27 01:04:28 pavlin Exp $
+// $XORP: xorp/fea/pa_backend.hh,v 1.6 2007/02/16 22:45:47 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_HH__
 #define __FEA_PA_BACKEND_HH__
@@ -85,19 +85,19 @@ public:
     /* --------------------------------------------------------------------- */
     /* IPv4 ACL back-end methods. */
 
-    virtual bool push_entries4(const PaSnapshot4* snap) = 0;
-    virtual bool delete_all_entries4() = 0;
+    virtual int push_entries4(const PaSnapshot4* snap) = 0;
+    virtual int delete_all_entries4() = 0;
     virtual const Snapshot4Base* create_snapshot4() = 0;
-    virtual bool restore_snapshot4(const Snapshot4Base* snap) = 0;
+    virtual int restore_snapshot4(const Snapshot4Base* snap) = 0;
 
 #ifdef notyet
     /* --------------------------------------------------------------------- */
     /* IPv6 ACL back-end methods. */
 
-    virtual bool push_entries6(const PaSnapshot6* snap) = 0;
-    virtual bool delete_all_entries6() = 0;
+    virtual int push_entries6(const PaSnapshot6* snap) = 0;
+    virtual int delete_all_entries6() = 0;
     virtual const Snapshot6Base* create_snapshot6() = 0;
-    virtual bool restore_snapshot6(const Snapshot6Base* snap) = 0;
+    virtual int restore_snapshot6(const Snapshot6Base* snap) = 0;
 #endif
 };
 

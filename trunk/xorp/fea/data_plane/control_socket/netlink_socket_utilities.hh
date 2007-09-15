@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.hh,v 1.2 2007/05/01 02:43:05 pavlin Exp $
+// $XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.hh,v 1.3 2007/06/04 23:17:33 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
@@ -112,9 +112,9 @@ public:
      * @param nlh the netlink message header.
      * @param rtmsg the routing message.
      * @param rta_len the routing message payload.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    static bool	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
+    static int	nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 				   const struct nlmsghdr* nlh,
 				   const struct rtmsg* rtmsg, int rta_len);
 

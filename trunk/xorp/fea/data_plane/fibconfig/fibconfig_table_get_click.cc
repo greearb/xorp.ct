@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.cc,v 1.6 2007/06/07 01:28:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_click.cc,v 1.7 2007/07/11 22:18:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -88,7 +88,7 @@ FibConfigTableGetClick::stop(string& error_msg)
     return (ret_value);
 }
 
-bool
+int
 FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 {
     //
@@ -99,7 +99,7 @@ FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
     //
     FibConfigEntrySet* fibconfig_entry_set = fea_data_plane_manager().fibconfig_entry_set();
     if ((fibconfig_entry_set == NULL) || (! fibconfig_entry_set->is_running()))
-	return (false);
+	return (XORP_ERROR);
 
     FibConfigEntrySetClick* fibconfig_entry_set_click;
     fibconfig_entry_set_click = dynamic_cast<FibConfigEntrySetClick*>(fibconfig_entry_set);
@@ -108,7 +108,7 @@ FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 	// XXX: The FibConfigEntrySet plugin was probably changed to
 	// something else which we don't know how to deal with.
 	//
-	return (false);
+	return (XORP_ERROR);
     }
 
     const map<IPv4Net, Fte4>& fte_table4 = fibconfig_entry_set_click->fte_table4();
@@ -118,16 +118,16 @@ FibConfigTableGetClick::get_table4(list<Fte4>& fte_list)
 	fte_list.push_back(iter->second);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
     UNUSED(fte_list);
     
-    return false;
+    return (XORP_ERROR);
 #else
 
     //
@@ -138,7 +138,7 @@ FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
     //
     FibConfigEntrySet* fibconfig_entry_set = fea_data_plane_manager().fibconfig_entry_set();
     if ((fibconfig_entry_set == NULL) || (! fibconfig_entry_set->is_running()))
-	return (false);
+	return (XORP_ERROR);
 
     FibConfigEntrySetClick* fibconfig_entry_set_click;
     fibconfig_entry_set_click = dynamic_cast<FibConfigEntrySetClick*>(fibconfig_entry_set);
@@ -147,7 +147,7 @@ FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
 	// XXX: The FibConfigEntrySet plugin was probably changed to
 	// something else which we don't know how to deal with.
 	//
-	return (false);
+	return (XORP_ERROR);
     }
 
     const map<IPv6Net, Fte6>& fte_table6 = fibconfig_entry_set_click->fte_table6();
@@ -157,6 +157,6 @@ FibConfigTableGetClick::get_table6(list<Fte6>& fte_list)
 	fte_list.push_back(iter->second);
     }
     
-    return true;
+    return (XORP_OK);
 #endif // HAVE_IPV6
 }

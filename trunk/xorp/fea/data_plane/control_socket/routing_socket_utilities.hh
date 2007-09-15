@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/forwarding_plane/control_socket/routing_socket_utilities.hh,v 1.1 2007/05/01 01:42:40 pavlin Exp $
+// $XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.hh,v 1.2 2007/05/01 02:43:05 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_UTILS_HH__
 #define __FEA_ROUTING_SOCKET_UTILS_HH__
@@ -59,10 +59,10 @@ public:
      * @param iftree the interface tree to use.
      * @param fte the return-by-reference @ref FteX entry to return the result.
      * @param rtm the RTM routing message.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    static bool rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
-				   const struct rt_msghdr* rtm);
+    static int rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
+				  const struct rt_msghdr* rtm);
 };
 
 #endif // __FEA_ROUTING_SOCKET_UTILS_HH__

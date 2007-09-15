@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.8 2007/09/10 17:38:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.9 2007/09/15 01:22:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -218,7 +218,7 @@ IfConfigSet::push_interface_begin(const IfTreeInterface& i)
     // Add the interface
     //
     do {
-	if (add_interface(i.ifname(), if_index, error_msg) < 0) {
+	if (add_interface(i.ifname(), if_index, error_msg) != XORP_OK) {
 	    error_msg = c_format("Failed to add interface: %s",
 				 error_msg.c_str());
 	    ifconfig().ifconfig_error_reporter().interface_error(i.ifname(),
@@ -433,7 +433,7 @@ IfConfigSet::push_vif_begin(const IfTreeInterface&	i,
     // Add the vif
     //
     do {
-	if (add_vif(i.ifname(), v.vifname(), if_index, error_msg) < 0) {
+	if (add_vif(i.ifname(), v.vifname(), if_index, error_msg) != XORP_OK) {
 	    error_msg = c_format("Failed to add vif: %s", error_msg.c_str());
 	    ifconfig().ifconfig_error_reporter().vif_error(i.ifname(),
 							   v.vifname(),
@@ -642,7 +642,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	if (add_vif_address(i.ifname(), v.vifname(), if_index, is_broadcast,
 			    a.point_to_point(), IPvX(a.addr()), IPvX(oaddr),
 			    prefix_len, error_msg)
-	    < 0) {
+	    != XORP_OK) {
 	    error_msg = c_format("Failed to configure address: %s",
 				 error_msg.c_str());
 	    ifconfig().ifconfig_error_reporter().vifaddr_error(i.ifname(),
@@ -752,7 +752,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	if (add_vif_address(i.ifname(), v.vifname(), if_index, false,
 			    a.point_to_point(), IPvX(a.addr()), IPvX(oaddr),
 			    prefix_len, error_msg)
-	    < 0) {
+	    != XORP_OK) {
 	    error_msg = c_format("Failed to configure address: %s",
 				 error_msg.c_str());
 	    ifconfig().ifconfig_error_reporter().vifaddr_error(i.ifname(),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.8 2007/07/11 22:18:02 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.9 2007/07/16 23:54:05 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
 #define __FEA_FIBCONFIG_TABLE_SET_HH__
@@ -92,9 +92,9 @@ public:
      * be made.
      *
      * @param error_msg the error message (if error).
-     * @return true if configuration successfully started.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool start_configuration(string& error_msg) {
+    virtual int start_configuration(string& error_msg) {
 	// Nothing particular to do, just label start.
 	return mark_configuration_start(error_msg);
     }
@@ -107,9 +107,9 @@ public:
      * write a file.
      *
      * @param error_msg the error message (if error).
-     * @return true configuration success pushed down into forwarding table.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool end_configuration(string& error_msg) {
+    virtual int end_configuration(string& error_msg) {
 	// Nothing particular to do, just label start.
 	return mark_configuration_end(error_msg);
     }
@@ -119,68 +119,66 @@ public:
      *
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool set_table4(const list<Fte4>& fte_list) = 0;
+    virtual int set_table4(const list<Fte4>& fte_list) = 0;
 
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_all_entries4() = 0;
+    virtual int delete_all_entries4() = 0;
 
     /**
      * Set the unicast forwarding table.
      *
      * @param fte_list the list with all entries to install into
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool set_table6(const list<Fte6>& fte_list) = 0;
+    virtual int set_table6(const list<Fte6>& fte_list) = 0;
     
     /**
      * Delete all entries in the routing table. Must be within a
      * configuration interval.
      *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_all_entries6() = 0;
+    virtual int delete_all_entries6() = 0;
 
 protected:
     /**
      * Mark start of a configuration.
      *
      * @param error_msg the error message (if error).
-     * @return true if configuration can be marked as started, false otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool mark_configuration_start(string& error_msg) {
-	if (false == _in_configuration) {
+    int mark_configuration_start(string& error_msg) {
+	if (_in_configuration != true) {
 	    _in_configuration = true;
-	    return true;
+	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot start configuration: "
 			     "configuration in progress");
-	return false;
+	return (XORP_ERROR);
     }
 
     /**
      * Mark end of a configuration.
      *
      * @param error_msg the error message (if error).
-     * @return true if configuration can be marked as ended, false otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool mark_configuration_end(string& error_msg) {
-	if (true == _in_configuration) {
+    int mark_configuration_end(string& error_msg) {
+	if (_in_configuration != false) {
 	    _in_configuration = false;
-	    return true;
+	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot end configuration: "
 			     "configuration not in progress");
-	return false;
+	return (XORP_ERROR);
     }
     
     bool in_configuration() const { return _in_configuration; }

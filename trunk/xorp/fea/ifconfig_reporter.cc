@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_reporter.cc,v 1.3 2007/05/04 01:43:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_reporter.cc,v 1.4 2007/05/08 00:49:01 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -66,11 +66,11 @@ IfConfigUpdateReplicator::~IfConfigUpdateReplicator()
 {
 }
 
-bool
+int
 IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
 {
     if (find(_reporters.begin(), _reporters.end(), rp) != _reporters.end())
-	return false;
+	return (XORP_ERROR);
     _reporters.push_back(rp);
 
     //
@@ -113,19 +113,19 @@ IfConfigUpdateReplicator::add_reporter(IfConfigUpdateReporterBase* rp)
     }
     rp->updates_completed();
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IfConfigUpdateReplicator::remove_reporter(IfConfigUpdateReporterBase* rp)
 {
     list<IfConfigUpdateReporterBase*>::iterator i = find(_reporters.begin(),
 							 _reporters.end(),
 							 rp);
     if (i == _reporters.end())
-	return false;
+	return (XORP_ERROR);
     _reporters.erase(i);
-    return true;
+    return (XORP_OK);
 }
 
 void

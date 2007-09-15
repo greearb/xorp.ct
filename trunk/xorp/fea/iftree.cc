@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.47 2007/09/10 17:37:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.48 2007/09/15 00:57:04 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -57,16 +57,16 @@ IfTree::clear()
     _interfaces.clear();
 }
 
-bool
+int
 IfTree::add_interface(const string& ifname)
 {
     IfTreeInterface* ifp = find_interface(ifname);
     if (ifp != NULL) {
 	ifp->mark(CREATED);
-	return true;
+	return (XORP_OK);
     }
     _interfaces.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
-    return true;
+    return (XORP_OK);
 }
 
 IfTreeInterface *
@@ -315,15 +315,15 @@ IfTree::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
     return (false);
 }
 
-bool
+int
 IfTree::remove_interface(const string& ifname)
 {
     IfTreeInterface* ifp = find_interface(ifname);
     if (ifp == NULL)
-	return false;
+	return (XORP_ERROR);
 
     ifp->mark(DELETED);
-    return true;
+    return (XORP_OK);
 }
 
 /**
@@ -333,7 +333,7 @@ IfTree::remove_interface(const string& ifname)
  *
  * @return true on success, false if an error.
  */
-bool
+int
 IfTree::update_interface(const IfTreeInterface& other_iface)
 {
     IfTreeInterface* this_ifp;
@@ -456,7 +456,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	}
     }
 
-    return true;
+    return (XORP_OK);
 }
 
 void
@@ -909,7 +909,7 @@ IfTreeInterface::IfTreeInterface(const string& ifname)
       _mtu(0), _no_carrier(false), _flipped(false), _interface_flags(0)
 {}
 
-bool
+int
 IfTreeInterface::add_vif(const string& vifname)
 {
     IfTreeVif* vifp;
@@ -917,24 +917,24 @@ IfTreeInterface::add_vif(const string& vifname)
     vifp = find_vif(vifname);
     if (vifp != NULL) {
 	vifp->mark(CREATED);
-	return true;
+	return (XORP_OK);
     }
 
     _vifs.insert(VifMap::value_type(vifname, IfTreeVif(ifname(), vifname)));
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IfTreeInterface::remove_vif(const string& vifname)
 {
     IfTreeVif* vifp;
 
     vifp = find_vif(vifname);
     if (vifp == NULL)
-	return false;
+	return (XORP_ERROR);
 
     vifp->mark(DELETED);
-    return true;
+    return (XORP_OK);
 }
 
 IfTreeVif *
@@ -1075,52 +1075,52 @@ IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
       _multicast(false), _pim_register(false), _is_vlan(false), _vlan_id(0)
 {}
 
-bool
+int
 IfTreeVif::add_addr(const IPv4& addr)
 {
     IfTreeAddr4* ap = find_addr(addr);
 
     if (ap != NULL) {
 	ap->mark(CREATED);
-	return true;
+	return (XORP_OK);
     }
     _ipv4addrs.insert(IPv4Map::value_type(addr, IfTreeAddr4(addr)));
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IfTreeVif::remove_addr(const IPv4& addr)
 {
     IfTreeAddr4* ap = find_addr(addr);
 
     if (ap == NULL)
-	return false;
+	return (XORP_ERROR);
     ap->mark(DELETED);
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IfTreeVif::add_addr(const IPv6& addr)
 {
     IfTreeAddr6* ap = find_addr(addr);
 
     if (ap != NULL) {
 	ap->mark(CREATED);
-	return true;
+	return (XORP_OK);
     }
     _ipv6addrs.insert(IPv6Map::value_type(addr, IfTreeAddr6(addr)));
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IfTreeVif::remove_addr(const IPv6& addr)
 {
     IfTreeAddr6* ap = find_addr(addr);
 
     if (ap == NULL)
-	return false;
+	return (XORP_ERROR);
     ap->mark(DELETED);
-    return true;
+    return (XORP_OK);
 }
 
 IfTreeAddr4*
@@ -1242,15 +1242,15 @@ IfTreeVif::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTreeAddr4 code */
 
-bool
+int
 IfTreeAddr4::set_prefix_len(uint32_t prefix_len)
 {
     if (prefix_len > IPv4::addr_bitlen())
-	return false;
+	return (XORP_ERROR);
 
     _prefix_len = prefix_len;
     mark(CHANGED);
-    return true;
+    return (XORP_OK);
 }
 
 void
@@ -1311,15 +1311,15 @@ IfTreeAddr4::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTreeAddr6 code */
 
-bool
+int
 IfTreeAddr6::set_prefix_len(uint32_t prefix_len)
 {
     if (prefix_len > IPv6::addr_bitlen())
-	return false;
+	return (XORP_ERROR);
 
     _prefix_len = prefix_len;
     mark(CHANGED);
-    return true;
+    return (XORP_OK);
 }
 
 void

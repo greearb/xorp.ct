@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.11 2006/07/07 10:26:17 bms Exp $"
+#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.12 2007/02/16 22:45:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -103,7 +103,7 @@ PaTransactionManager::operation_result(bool success,
     // Only print the error message for the first failed operation.
     // Flush the transaction if an error occurred, thus halting it.
     //
-    if (set_unset_error(fto->str())) {
+    if (set_unset_error(fto->str()) == XORP_OK) {
 #ifdef notyet
 	flush(fto->tid);
 #endif
@@ -122,11 +122,11 @@ PaTransactionManager::operation_result(bool success,
 // event driven. In any other parallelism scheme,
 // a lock must be held.
 //
-bool
+int
 PaTransactionManager::set_backend(const char* name)
 {
     if (name == NULL)
-	return false;
+	return (XORP_ERROR);
 
     PaBackend* nbp = NULL;
 
@@ -163,10 +163,10 @@ PaTransactionManager::set_backend(const char* name)
 #endif
 
 	} else {
-	    return false;
+	    return (XORP_ERROR);
 	}
     } catch (PaInvalidBackendException) {
-	return false;
+	return (XORP_ERROR);
     }
 
     XLOG_ASSERT(nbp != NULL);
@@ -186,7 +186,7 @@ PaTransactionManager::set_backend(const char* name)
     delete ps6;
 #endif
 
-    return true;
+    return (XORP_OK);
 }
 
 /* ------------------------------------------------------------------------- */

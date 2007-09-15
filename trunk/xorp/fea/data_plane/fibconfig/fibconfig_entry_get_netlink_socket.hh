@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh,v 1.2 2007/07/11 22:18:06 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh,v 1.3 2007/07/16 23:56:07 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_NETLINK_SOCKET_HH__
@@ -58,40 +58,36 @@ public:
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
+    virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
      * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
+    virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
      * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
+    virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
      * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
+    virtual int lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
     /**
      * Parse information about routing entry information received from
@@ -105,12 +101,12 @@ public:
      * @param buffer the buffer with the data to parse.
      * @param is_nlm_get_only if true, consider only the entries obtained
      * by RTM_GETROUTE.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      * @see FteX.
      */
-    static bool parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
-					    const vector<uint8_t>& buffer,
-					    bool is_nlm_get_only);
+    static int parse_buffer_netlink_socket(const IfTree& iftree, FteX& fte,
+					   const vector<uint8_t>& buffer,
+					   bool is_nlm_get_only);
 
 private:
     /**
@@ -118,10 +114,9 @@ private:
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_dest(const IPvX& dst, FteX& fte);
+    virtual int lookup_route_by_dest(const IPvX& dst, FteX& fte);
 
     NetlinkSocketReader	_ns_reader;
 };

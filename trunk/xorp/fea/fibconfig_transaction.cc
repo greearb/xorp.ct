@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.2 2007/04/27 21:47:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.3 2007/04/27 23:48:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -29,14 +29,14 @@ FibConfigTransactionManager::unset_error()
     _error.erase();
 }
 
-bool
+int
 FibConfigTransactionManager::set_unset_error(const string& error)
 {
     if (_error.empty()) {
 	_error = error;
-	return true;
+	return (XORP_OK);
     }
-    return false;
+    return (XORP_ERROR);
 }
 
 void
@@ -45,7 +45,7 @@ FibConfigTransactionManager::pre_commit(uint32_t /* tid */)
     string error_msg;
 
     unset_error();
-    if (fibconfig().start_configuration(error_msg) != true) {
+    if (fibconfig().start_configuration(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot start configuration: %s", error_msg.c_str());
 	set_unset_error(error_msg);
     }
@@ -55,7 +55,7 @@ void
 FibConfigTransactionManager::post_commit(uint32_t /* tid */)
 {
     string error_msg;
-    if (fibconfig().end_configuration(error_msg) != true) {
+    if (fibconfig().end_configuration(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot end configuration: %s", error_msg.c_str());
 	set_unset_error(error_msg);
     }
@@ -84,7 +84,7 @@ FibConfigTransactionManager::operation_result(bool success,
     //
     // Record error and xlog first error only
     //
-    if (set_unset_error(fto->str())) {
+    if (set_unset_error(fto->str()) == XORP_OK) {
 	XLOG_ERROR("FIB transaction commit failed on %s",
 		   fto->str().c_str());
     }

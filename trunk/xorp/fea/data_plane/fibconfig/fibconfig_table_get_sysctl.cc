@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.10 2007/07/11 22:18:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.11 2007/07/18 01:30:25 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -81,14 +81,14 @@ FibConfigTableGetSysctl::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET, ftex_list) != true)
-	return false;
+    if (get_table(AF_INET, ftex_list) != XORP_OK)
+	return (XORP_ERROR);
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -97,22 +97,22 @@ FibConfigTableGetSysctl::get_table4(list<Fte4>& fte_list)
 	fte_list.push_back(ftex.get_fte4());
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
     UNUSED(fte_list);
     
-    return false;
+    return (XORP_ERROR);
 #else
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET6, ftex_list) != true)
-	return false;
+    if (get_table(AF_INET6, ftex_list) != XORP_OK)
+	return (XORP_ERROR);
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -121,11 +121,11 @@ FibConfigTableGetSysctl::get_table6(list<Fte6>& fte_list)
 	fte_list.push_back(ftex.get_fte6());
     }
     
-    return true;
+    return (XORP_OK);
 #endif // HAVE_IPV6
 }
 
-bool
+int
 FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 {
     int mib[6];
@@ -134,12 +134,12 @@ FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
     switch(family) {
     case AF_INET:
 	if (! fea_data_plane_manager().have_ipv4())
-	    return false;
+	    return (XORP_ERROR);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	if (! fea_data_plane_manager().have_ipv6())
-	    return false;
+	    return (XORP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -158,7 +158,7 @@ FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
     size_t sz;
     if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, &sz, NULL, 0) != 0) {
 	XLOG_ERROR("sysctl(NET_RT_DUMP) failed: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -188,7 +188,7 @@ FibConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
 	    continue;
 	}
 	XLOG_ERROR("sysctl(NET_RT_DUMP) failed: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
 }
 

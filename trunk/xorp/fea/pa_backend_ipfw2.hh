@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend_ipfw2.hh,v 1.5 2007/02/16 22:45:48 pavlin Exp $
+// $XORP: xorp/fea/pa_backend_ipfw2.hh,v 1.6 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_IPFW2_HH__
 #define __FEA_PA_BACKEND_IPFW2_HH__
@@ -113,27 +113,27 @@ public:
     /* --------------------------------------------------------------------- */
     /* IPv4 ACL back-end methods. */
 
-    bool push_entries4(const PaSnapshot4* snap);
-    bool delete_all_entries4();
+    int push_entries4(const PaSnapshot4* snap);
+    int delete_all_entries4();
     const PaBackend::Snapshot4Base* create_snapshot4();
-    bool restore_snapshot4(const PaBackend::Snapshot4Base* snap);
+    int restore_snapshot4(const PaBackend::Snapshot4Base* snap);
 
 #ifdef notyet
     /* --------------------------------------------------------------------- */
     /* IPv6 ACL back-end methods. */
 
-    bool push_entries6(const PaSnapshot6* snap);
-    bool delete_all_entries6();
+    int push_entries6(const PaSnapshot6* snap);
+    int delete_all_entries6();
     const PaBackend::Snapshot6Base* create_snapshot6() const;
-    bool restore_snapshot6(const PaBackend::Snapshot6Base* snap);
+    int restore_snapshot6(const PaBackend::Snapshot6Base* snap);
 #endif
 
 #ifdef HAVE_PACKETFILTER_IPFW2
 protected:
     /* --------------------------------------------------------------------- */
     /* Private back-end methods. */
-    static bool get_autoinc_step(uint32_t& step);
-    static bool set_autoinc_step(const uint32_t& step);
+    static int get_autoinc_step(uint32_t& step);
+    static int set_autoinc_step(const uint32_t& step);
 
     int docmd4(int optname, void *optval, socklen_t optlen);
 

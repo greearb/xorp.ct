@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.7 2007/06/21 06:10:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.8 2007/09/13 01:09:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -307,7 +307,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
     return (-1);
 }
 
-bool
+int
 RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct rt_msghdr* rtm)
 {
@@ -343,7 +343,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	      rtm_msg_type(rtm->rtm_type).c_str());
 
     if (rtm->rtm_errno != 0)
-	return false;		 // XXX: ignore entries with an error
+	return (XORP_ERROR);		 // XXX: ignore entries with an error
 
     // Reset the result
     fte.zero();
@@ -413,7 +413,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    nexthop_addr = dst_addr;
     }
     if (! is_family_match)
-	return false;
+	return (XORP_ERROR);
     
     //
     // Get the destination mask length
@@ -465,7 +465,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    // XXX: Cannot map a discard route back to an FEA soft discard
 	    // interface.
 	    //
-	    return false;
+	    return (XORP_ERROR);
 	}
 
 	if_name = pi->ifname();		// XXX: ifname == vifname
@@ -490,7 +490,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 		    // TODO: verify whether this is really an error.
 		    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
 			       sa->sa_family);
-		    return false;
+		    return (XORP_ERROR);
 		}
 		const struct sockaddr_dl* sdl;
 		sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
@@ -531,7 +531,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     if (is_unresolved)
 	fte.mark_unresolved();
     
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

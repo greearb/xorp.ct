@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.hh,v 1.2 2007/07/11 22:18:08 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_dummy.hh,v 1.3 2007/07/16 23:56:08 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_DUMMY_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_DUMMY_HH__
@@ -56,39 +56,35 @@ public:
      * interval.
      *
      * @param fte the entry to add.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool add_entry4(const Fte4& fte);
+    virtual int add_entry4(const Fte4& fte);
 
     /**
      * Delete a single routing entry. Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_entry4(const Fte4& fte);
+    virtual int delete_entry4(const Fte4& fte);
 
     /**
      * Add a single routing entry. Must be within a configuration
      * interval.
      *
      * @param fte the entry to add.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool add_entry6(const Fte6& fte);
+    virtual int add_entry6(const Fte6& fte);
 
     /**
      * Delete a single routing entry.  Must be within a configuration
      * interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_entry6(const Fte6& fte);
+    virtual int delete_entry6(const Fte6& fte);
     
 private:
 };

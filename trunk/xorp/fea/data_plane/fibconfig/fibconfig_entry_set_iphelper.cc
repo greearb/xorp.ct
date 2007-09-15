@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.8 2007/07/18 01:30:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.9 2007/09/04 16:40:10 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -93,7 +93,7 @@ FibConfigEntrySetIPHelper::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetIPHelper::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -101,7 +101,7 @@ FibConfigEntrySetIPHelper::add_entry4(const Fte4& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetIPHelper::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -109,7 +109,7 @@ FibConfigEntrySetIPHelper::delete_entry4(const Fte4& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetIPHelper::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -117,7 +117,7 @@ FibConfigEntrySetIPHelper::add_entry6(const Fte6& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetIPHelper::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -125,7 +125,7 @@ FibConfigEntrySetIPHelper::delete_entry6(const Fte6& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
 {
     MIB_IPFORWARDROW	ipfwdrow;
@@ -138,26 +138,26 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
 
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
 
     switch (family) {
     case AF_INET:
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	return false;
+	return (XORP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -230,13 +230,13 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
     if (result != NO_ERROR) {
 	XLOG_ERROR("%sIpForwardEntry() failed, error: %s\n",
 		   is_existing ? "Set" : "Create", win_strerror(result));
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
 {
     MIB_IPFORWARDROW	ipfwdrow;
@@ -249,26 +249,26 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
 
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
 
     switch (family) {
     case AF_INET:
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	return false;
+	return (XORP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -358,10 +358,10 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     if (result != NO_ERROR) {
 	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %s\n",
 		   win_strerror(result));
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HOST_OS_WINDOWS

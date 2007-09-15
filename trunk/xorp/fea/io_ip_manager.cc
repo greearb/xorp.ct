@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.8 2007/08/09 00:46:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.9 2007/08/15 18:55:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -231,18 +231,18 @@ IoIpComm::~IoIpComm()
     }
 }
 
-bool
+int
 IoIpComm::add_filter(InputFilter* filter)
 {
     if (filter == NULL) {
 	XLOG_FATAL("Adding a null filter");
-	return false;
+	return (XORP_ERROR);
     }
 
     if (find(_input_filters.begin(), _input_filters.end(), filter)
 	!= _input_filters.end()) {
 	debug_msg("filter already exists\n");
-	return false;
+	return (XORP_ERROR);
     }
 
     _input_filters.push_back(filter);
@@ -255,10 +255,10 @@ IoIpComm::add_filter(InputFilter* filter)
 	allocate_io_ip_plugins();
 	start_io_ip_plugins();
     }
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IoIpComm::remove_filter(InputFilter* filter)
 {
     list<InputFilter*>::iterator i;
@@ -266,7 +266,7 @@ IoIpComm::remove_filter(InputFilter* filter)
     i = find(_input_filters.begin(), _input_filters.end(), filter);
     if (i == _input_filters.end()) {
 	debug_msg("filter does not exist\n");
-	return false;
+	return (XORP_ERROR);
     }
 
     XLOG_ASSERT(! _io_ip_plugins.empty());
@@ -275,7 +275,7 @@ IoIpComm::remove_filter(InputFilter* filter)
     if (_input_filters.empty()) {
 	deallocate_io_ip_plugins();
     }
-    return true;
+    return (XORP_OK);
 }
 
 int

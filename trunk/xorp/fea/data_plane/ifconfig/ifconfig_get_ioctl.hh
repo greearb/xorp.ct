@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.hh,v 1.5 2007/07/16 23:56:11 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.hh,v 1.6 2007/09/15 05:10:21 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IOCTL_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_IOCTL_HH__
@@ -71,11 +71,11 @@ public:
      * @param family the address family to consider only (e.g., AF_INET
      * or AF_INET6 for IPv4 and IPv6 respectively).
      * @param buffer the buffer with the data to parse.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      * @see IfTree.
      */
-    static bool parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
-				   int family, const vector<uint8_t>& buffer);
+    static int parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
+				  int family, const vector<uint8_t>& buffer);
 
 private:
     int read_config(IfTree& iftree);

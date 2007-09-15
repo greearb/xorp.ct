@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_dummy.cc,v 1.7 2007/07/11 22:18:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_dummy.cc,v 1.8 2007/07/17 23:24:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -76,7 +76,7 @@ FibConfigTableGetDummy::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 {
     Trie4::iterator ti;
@@ -85,10 +85,10 @@ FibConfigTableGetDummy::get_table4(list<Fte4>& fte_list)
 	fte_list.push_back(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
 {
     Trie6::iterator ti;
@@ -97,5 +97,5 @@ FibConfigTableGetDummy::get_table6(list<Fte6>& fte_list)
 	fte_list.push_back(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }

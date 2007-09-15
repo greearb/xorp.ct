@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.8 2007/07/18 01:30:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.9 2007/09/04 16:40:10 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -96,14 +96,14 @@ FibConfigTableGetIPHelper::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetIPHelper::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET, ftex_list) != true)
-	return false;
+    if (get_table(AF_INET, ftex_list) != XORP_OK)
+	return (XORP_ERROR);
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -112,28 +112,28 @@ FibConfigTableGetIPHelper::get_table4(list<Fte4>& fte_list)
 	fte_list.push_back(ftex.get_fte4());
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetIPHelper::get_table6(list<Fte6>& fte_list)
 {
     UNUSED(fte_list);
-    return false;
+    return (XORP_ERROR);
 }
 
-bool
+int
 FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 {
     // Check that the family is supported
     switch(family) {
     case AF_INET:
 	if (! fea_data_plane_manager().have_ipv4())
-	    return false;
+	    return (XORP_ERROR);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	return false;
+	return (XORP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -161,7 +161,7 @@ FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 	XLOG_ERROR("GetIpForwardTable(): %s\n", win_strerror(result));
 	if (pFwdTable != NULL)
 	    free(pFwdTable);
-	return false;
+	return (XORP_ERROR);
     }
 
     IPv4 dst_addr;
@@ -212,7 +212,7 @@ FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 
     free(pFwdTable);
 
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HOST_OS_WINDOWS

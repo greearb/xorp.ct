@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh,v 1.5 2007/07/16 23:56:11 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh,v 1.6 2007/09/15 05:10:21 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_GETIFADDRS_HH__
@@ -70,11 +70,11 @@ public:
      * @param iftree the IfTree storage to store the parsed information.
      * @param ifap a linked list of the network interfaces on the
      * local machine.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      * @see IfTree.
      */
-    static bool parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& iftree,
-					const struct ifaddrs* ifap);
+    static int parse_buffer_getifaddrs(IfConfig& ifconfig, IfTree& iftree,
+				       const struct ifaddrs* ifap);
 
 private:
     int read_config(IfTree& iftree);

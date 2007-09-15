@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.7 2007/07/11 22:18:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.8 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -310,13 +310,14 @@ IfConfigSetIPHelper::add_vif_address(const string& ifname,
 
     switch (addr.af()) {
     case AF_INET:
-	return add_vif_address4(ifname, vifname, if_index, is_broadcast,
-	is_p2p, addr, dst_or_bcast, prefix_len, error_msg);
+	return (add_vif_address4(ifname, vifname, if_index, is_broadcast,
+				 is_p2p, addr, dst_or_bcast, prefix_len,
+				 error_msg));
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	return add_vif_address6(ifname, vifname, if_index, is_p2p,
-	addr, dst_or_bcast, prefix_len, error_msg);
+	return (add_vif_address6(ifname, vifname, if_index, is_p2p,
+				 addr, dst_or_bcast, prefix_len, error_msg));
 	break;
 #endif // HAVE_IPV6
     default:
@@ -380,14 +381,14 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
         XLOG_ERROR("GetIpAddrTable(): %s\n", win_strerror(result));
         if (pAddrTable != NULL)
             free(pAddrTable);
-        return XORP_OK;
+        return (XORP_OK);
     }
 
     for (unsigned int i = 0; i < pAddrTable->dwNumEntries; i++) {
 	if (pAddrTable->table[i].dwAddr == ipaddr) {
 	    XLOG_ERROR("IP address already exists on interface with index %lu.",
 			pAddrTable->table[i].dwIndex);
-            return XORP_OK;
+            return (XORP_OK);
 	}
     }
 
@@ -397,7 +398,7 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
     if (result != NO_ERROR) {
 	error_msg = c_format("Cannot add IP address to interface %u: "
 			     "error %d\n", if_index, (int)result);
-	return XORP_OK;
+	return (XORP_OK);
     }
 
     // We can't delete IP addresses using IP Helper unless we cache the
@@ -410,7 +411,7 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
     _nte_map.insert(make_pair(make_pair(if_index,
 					(IPAddr)addr.get_ipv4().addr()),
 					ntectx));
-    return XORP_OK;
+    return (XORP_OK);
 };
 
 int

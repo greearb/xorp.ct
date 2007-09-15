@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.2 2007/04/27 21:47:26 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.3 2007/04/27 23:48:56 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TRANSACTION_HH__
 #define __FEA_FIBCONFIG_TRANSACTION_HH__
@@ -55,7 +55,7 @@ public:
 
 protected:
     void unset_error();
-    bool set_unset_error(const string& error);
+    int set_unset_error(const string& error);
 
     // Overriding methods
     void pre_commit(uint32_t tid);
@@ -108,7 +108,11 @@ public:
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return fibconfig().add_entry4(_fte); }
+    bool dispatch() {
+	if (fibconfig().add_entry4(_fte) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("AddEntry4: ") + _fte.str(); }
 
@@ -138,7 +142,11 @@ public:
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return fibconfig().delete_entry4(_fte); }
+    bool dispatch() {
+	if (fibconfig().delete_entry4(_fte) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteEntry4: ") + _fte.str();  }
 
@@ -155,7 +163,11 @@ public:
     FibDeleteAllEntries4(FibConfig& fibconfig)
 	: FibConfigTransactionOperation(fibconfig) {}
 
-    bool dispatch() { return fibconfig().delete_all_entries4(); }
+    bool dispatch() {
+	if (fibconfig().delete_all_entries4() != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteAllEntries4");  }
 };
@@ -182,7 +194,11 @@ public:
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return fibconfig().add_entry6(_fte); }
+    bool dispatch() {
+	if (fibconfig().add_entry6(_fte) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("AddEntry6: ") + _fte.str(); }
 
@@ -212,7 +228,11 @@ public:
 	    _fte.mark_connected_route();
     }
 
-    bool dispatch() { return fibconfig().delete_entry6(_fte); }
+    bool dispatch() {
+	if (fibconfig().delete_entry6(_fte) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteEntry6: ") + _fte.str();  }
 
@@ -229,7 +249,11 @@ public:
     FibDeleteAllEntries6(FibConfig& fibconfig)
 	: FibConfigTransactionOperation(fibconfig) {}
 
-    bool dispatch() { return fibconfig().delete_all_entries6(); }
+    bool dispatch() {
+	if (fibconfig().delete_all_entries6() != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const { return string("DeleteAllEntries6");  }
 };

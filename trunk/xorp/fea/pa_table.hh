@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_table.hh,v 1.4 2007/02/16 22:45:49 pavlin Exp $
+// $XORP: xorp/fea/pa_table.hh,v 1.5 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_PA_TABLE_HH__
 #define __FEA_PA_TABLE_HH__
@@ -70,7 +70,7 @@ typedef vector<PaEntry6> PaSnapTable6;
 class PaSnapshot4 {
 public:
     PaSnapshot4(const PaTableManager& parent);
-    bool restore(PaTableManager& parent) const;
+    int restore(PaTableManager& parent) const;
     const PaSnapTable4& data() const { return _pal4; }
 protected:
     PaSnapTable4	_pal4;
@@ -79,7 +79,7 @@ protected:
 class PaSnapshot6 {
 public:
     PaSnapshot6(const PaTableManager& parent);
-    bool restore(PaTableManager& parent) const;
+    int restore(PaTableManager& parent) const;
     const PaSnapTable6& data() const { return _pal6; }
 protected:
     PaSnapTable6	_pal6;
@@ -124,17 +124,17 @@ public:
     /*
      * Add an IPv4 ACL entry to XORP's tables.
      */
-    bool add_entry4(const PaEntry4& entry);
+    int add_entry4(const PaEntry4& entry);
 
     /*
      * Delete an IPv4 ACL entry from XORP's tables.
      */
-    bool delete_entry4(const PaEntry4& entry);
+    int delete_entry4(const PaEntry4& entry);
 
     /*
      * Delete an IPv4 ACL entry from XORP's tables.
      */
-    bool delete_all_entries4();
+    int delete_all_entries4();
 
     /*
      * Create a snapshot of XORP's current IPv4 ACLs.
@@ -144,7 +144,7 @@ public:
     /*
      * Restore XORP's current IPv4 ACLs from a previous snapshot.
      */
-    bool restore_snapshot4(const PaSnapshot4* snap);
+    int restore_snapshot4(const PaSnapshot4* snap);
 
     /* --------------------------------------------------------------------- */
     /* IPv6 ACL management */
@@ -152,17 +152,17 @@ public:
     /*
      * Add an IPv6 ACL entry to XORP's tables.
      */
-    bool add_entry6(const PaEntry6& entry);
+    int add_entry6(const PaEntry6& entry);
 
     /*
      * Delete an IPv6 ACL entry from XORP's tables.
      */
-    bool delete_entry6(const PaEntry6& entry);
+    int delete_entry6(const PaEntry6& entry);
 
     /*
      * Delete an IPv6 ACL entry from XORP's tables.
      */
-    bool delete_all_entries6();
+    int delete_all_entries6();
 
     /*
      * Create a snapshot of XORP's current IPv6 ACLs.
@@ -172,7 +172,7 @@ public:
     /*
      * Restore XORP's current IPv6 ACLs from a previous snapshot.
      */
-    bool restore_snapshot6(const PaSnapshot6* snap);
+    int restore_snapshot6(const PaSnapshot6* snap);
 
 protected:
     PaTable4	_pal4;

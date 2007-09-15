@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.9 2007/07/11 22:18:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.10 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -117,7 +117,7 @@ IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 {
     if (IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(
 	    ifconfig(), ifconfig().live_config(), buffer)
-	!= true) {
+	!= XORP_OK) {
 	return;
     }
 

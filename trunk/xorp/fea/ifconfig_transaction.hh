@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.10 2007/08/09 00:46:56 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.11 2007/09/15 02:11:18 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -81,9 +81,13 @@ public:
     AddInterface(IfTree& iftree, const string& ifname)
 	: IfConfigTransactionOperation(iftree, ifname) {}
 
-    bool dispatch() 	{ iftree().add_interface(ifname()); return true; }
+    bool dispatch() {
+	if (iftree().add_interface(ifname()) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
-    string str() const 		{ return string("AddInterface: ") + ifname(); }
+    string str() const { return string("AddInterface: ") + ifname(); }
 };
 
 /**
@@ -94,7 +98,11 @@ public:
     RemoveInterface(IfTree& iftree, const string& ifname)
 	: IfConfigTransactionOperation(iftree, ifname) {}
 
-    bool dispatch() 		{ return iftree().remove_interface(ifname()); }
+    bool dispatch() {
+	if (iftree().remove_interface(ifname()) != XORP_OK)
+	    return (false);
+	return (true);
+    }
 
     string str() const {
 	return string("RemoveInterface: ") + ifname();
@@ -120,7 +128,7 @@ public:
 	     iter != dev_config.interfaces().end();
 	     ++iter) {
 	    const IfTreeInterface& iface = iter->second;
-	    if (iftree().update_interface(iface) != true)
+	    if (iftree().update_interface(iface) != XORP_OK)
 		success = false;
 	}
 
@@ -149,9 +157,11 @@ public:
 	const IfTree& dev_config = _ifconfig.pulled_config();
 	const IfTreeInterface* ifp = dev_config.find_interface(ifname());
 	if (ifp == NULL)
-	    return false;
+	    return (false);
 	
-	return iftree().update_interface(*ifp);
+	if (iftree().update_interface(*ifp) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -194,9 +204,9 @@ public:
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
-	    return false;
+	    return (false);
 	fi->set_enabled(_enabled);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -221,9 +231,9 @@ public:
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
-	    return false;
+	    return (false);
 	fi->set_discard(_discard);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -252,13 +262,13 @@ public:
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
-	    return false;
+	    return (false);
 
 	if (_mtu < MIN_MTU || _mtu > MAX_MTU)
-	    return false;
+	    return (false);
 	
 	fi->set_mtu(_mtu);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -288,9 +298,9 @@ public:
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
-	    return false;
+	    return (false);
 	fi->set_mac(_mac);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -314,9 +324,9 @@ public:
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
-	    return false;
+	    return (false);
 	fi->add_vif(_vifname);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -341,8 +351,10 @@ public:
     bool dispatch() {
 	IfTreeInterface* fi = interface();
 	if (fi == NULL)
-	    return false;
-	return fi->remove_vif(_vifname);
+	    return (false);
+	if (fi->remove_vif(_vifname) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -398,9 +410,9 @@ public:
     bool dispatch() {
 	IfTreeVif* fv = vif();
 	if (fv == NULL)
-	    return false;
+	    return (false);
 	fv->set_enabled(_enabled);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -423,13 +435,18 @@ public:
 	       uint32_t		vlan_id)
 	: VifModifier(iftree, ifname, vifname), _vlan_id(vlan_id) {}
 
+    // Maximum VLAN ID
+    static const uint32_t MAX_VLAN_ID = 4095;
+
     bool dispatch() {
 	IfTreeVif* fv = vif();
 	if (fv == NULL)
-	    return false;
+	    return (false);
+	if (_vlan_id > MAX_VLAN_ID)
+	    return (false);
 	fv->set_vlan(true);
 	fv->set_vlan_id(_vlan_id);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -455,9 +472,9 @@ public:
     bool dispatch() {
 	IfTreeVif* fv = vif();
 	if (fv == NULL)
-	    return false;
+	    return (false);
 	fv->add_addr(_addr);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -483,8 +500,10 @@ public:
     bool dispatch() {
 	IfTreeVif* fv = vif();
 	if (fv == NULL)
-	    return false;
-	return fv->remove_addr(_addr);
+	    return (false);
+	if (fv->remove_addr(_addr) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -510,9 +529,10 @@ public:
     bool dispatch() {
 	IfTreeVif* fv = vif();
 	if (fv == NULL)
-	    return false;
-	fv->add_addr(_addr);
-	return true;
+	    return (false);
+	if (fv->add_addr(_addr) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -538,8 +558,10 @@ public:
     bool dispatch() {
 	IfTreeVif* fv = vif();
 	if (fv == NULL)
-	    return false;
-	return fv->remove_addr(_addr);
+	    return (false);
+	if (fv->remove_addr(_addr) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -595,9 +617,9 @@ public:
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
 	if (fa == NULL)
-	    return false;
+	    return (false);
 	fa->set_enabled(_enabled);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -627,8 +649,10 @@ public:
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
 	if (fa == NULL || _prefix_len > MAX_PREFIX_LEN)
-	    return false;
-	return fa->set_prefix_len(_prefix_len);
+	    return (false);
+	if (fa->set_prefix_len(_prefix_len) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -659,10 +683,10 @@ public:
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
 	if (fa == NULL)
-	    return false;
+	    return (false);
 	fa->set_endpoint(_endpoint);
 	fa->set_point_to_point(true);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -689,10 +713,10 @@ public:
     bool dispatch() {
 	IfTreeAddr4* fa = addr();
 	if (fa == NULL)
-	    return false;
+	    return (false);
 	fa->set_bcast(_bcast);
 	fa->set_broadcast(true);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -749,9 +773,9 @@ public:
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
 	if (fa == NULL)
-	    return false;
+	    return (false);
 	fa->set_enabled(_enabled);
-	return true;
+	return (true);
     }
 
     string str() const {
@@ -781,8 +805,10 @@ public:
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
 	if (fa == NULL || _prefix_len > MAX_PREFIX_LEN)
-	    return false;
-	return fa->set_prefix_len(_prefix_len);
+	    return (false);
+	if (fa->set_prefix_len(_prefix_len) != XORP_OK)
+	    return (false);
+	return (true);
     }
 
     string str() const {
@@ -813,10 +839,10 @@ public:
     bool dispatch() {
 	IfTreeAddr6* fa = addr();
 	if (fa == NULL)
-	    return false;
+	    return (false);
 	fa->set_endpoint(_endpoint);
 	fa->set_point_to_point(true);
-	return true;
+	return (true);
     }
 
     string str() const {

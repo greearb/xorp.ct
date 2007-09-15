@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.3 2007/08/09 00:46:56 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.4 2007/08/15 18:55:16 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -264,17 +264,24 @@ public:
     void stop_io_link_plugins();
 
     /**
-     * Add a filter to list of input filters.  The IoLinkComm class
-     * assumes that the callee will be responsible for managing the memory
-     * associated with the filter and will call remove_filter() if the
-     * filter is deleted or goes out of scope.
+     * Add a filter to list of input filters.
+     *
+     * The IoLinkComm class assumes that the callee will be responsible for
+     * managing the memory associated with the filter and will call
+     * remove_filter() if the filter is deleted or goes out of scope.
+     *
+     * @param filter the filter to add.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool add_filter(InputFilter* filter);
+    int add_filter(InputFilter* filter);
 
     /**
      * Remove filter from list of input filters.
+     *
+     * @param filter the filter to remove.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool remove_filter(InputFilter* filter);
+    int remove_filter(InputFilter* filter);
 
     /**
      * @return true if there are no filters associated with this instance.

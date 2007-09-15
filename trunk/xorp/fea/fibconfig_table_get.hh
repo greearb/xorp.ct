@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.10 2007/07/11 22:18:02 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.11 2007/07/16 23:54:05 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -87,20 +87,18 @@ public:
      *
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool get_table4(list<Fte4>& fte_list) = 0;
+    virtual int get_table4(list<Fte4>& fte_list) = 0;
 
     /**
      * Obtain the unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool get_table6(list<Fte6>& fte_list) = 0;
+    virtual int get_table6(list<Fte6>& fte_list) = 0;
 
 protected:
     // Misc other state

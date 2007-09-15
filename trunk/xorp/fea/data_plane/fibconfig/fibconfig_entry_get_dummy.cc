@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_dummy.cc,v 1.7 2007/07/11 22:18:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_dummy.cc,v 1.8 2007/07/17 23:24:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -77,82 +77,50 @@ FibConfigEntryGetDummy::stop(string& error_msg)
     return (XORP_OK);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetDummy::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     Trie4::iterator ti = fibconfig().trie4().find(dst);
     if (ti != fibconfig().trie4().end()) {
 	fte = ti.payload();
-	return true;
+	return (XORP_OK);
     }
     
-    return false;
+    return (XORP_ERROR);
 }
 
-/**
- * Lookup route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetDummy::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
     Trie4::iterator ti = fibconfig().trie4().find(dst);
     if (ti != fibconfig().trie4().end()) {
 	fte = ti.payload();
-	return true;
+	return (XORP_OK);
     }
     
-    return false;
+    return (XORP_ERROR);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetDummy::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     Trie6::iterator ti = fibconfig().trie6().find(dst);
     if (ti != fibconfig().trie6().end()) {
 	fte = ti.payload();
-	return true;
+	return (XORP_OK);
     }
     
-    return false;
+    return (XORP_ERROR);
 }
 
-/**
- * Lookup route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetDummy::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
     Trie6::iterator ti = fibconfig().trie6().find(dst);
     if (ti != fibconfig().trie6().end()) {
 	fte = ti.payload();
-	return true;
+	return (XORP_OK);
     }
     
-    return false;
+    return (XORP_ERROR);
 }

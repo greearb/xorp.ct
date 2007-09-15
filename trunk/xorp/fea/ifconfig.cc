@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.70 2007/09/15 00:32:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.71 2007/09/15 01:22:35 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -678,10 +678,10 @@ IfConfig::report_update(const IfTreeInterface& fi)
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fi.state(), u)) {
 	_ifconfig_update_replicator.interface_update(fi.ifname(), u);
-	return true;
+	return (true);
     }
 
-    return false;
+    return (false);
 }
 
 bool
@@ -691,10 +691,10 @@ IfConfig::report_update(const IfTreeInterface&	fi,
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fv.state(), u)) {
 	_ifconfig_update_replicator.vif_update(fi.ifname(), fv.vifname(), u);
-	return true;
+	return (true);
     }
 
-    return false;
+    return (false);
 }
 
 bool
@@ -707,10 +707,10 @@ IfConfig::report_update(const IfTreeInterface&	fi,
     if (map_changes(fa.state(), u)) {
 	_ifconfig_update_replicator.vifaddr4_update(fi.ifname(), fv.vifname(),
 						    fa.addr(), u);
-	return true;
+	return (true);
     }
 
-    return false;
+    return (false);
 }
 
 bool
@@ -722,10 +722,10 @@ IfConfig::report_update(const IfTreeInterface&	fi,
     if (map_changes(fa.state(), u)) {
 	_ifconfig_update_replicator.vifaddr6_update(fi.ifname(), fv.ifname(),
 						    fa.addr(), u);
-	return true;
+	return (true);
     }
 
-    return false;
+    return (false);
 }
 
 void

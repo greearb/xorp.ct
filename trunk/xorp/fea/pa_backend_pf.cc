@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.2 2006/06/30 14:04:49 bms Exp $"
+#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.3 2007/02/16 22:45:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -111,52 +111,52 @@ PaPfBackend::get_version() const
 /* ------------------------------------------------------------------------- */
 /* IPv4 ACL back-end methods. */
 
-bool
+int
 PaPfBackend::push_entries4(const PaSnapshot4* snap)
 {
 #ifndef HAVE_PACKETFILTER_PF
     UNUSED(snap);
-    return (false);
+    return (XORP_ERROR);
 #else
     XLOG_ASSERT(snap != NULL);
 
     const PaSnapTable4& table = snap->data();
     uint32_t rulebuf[MAX_PF_RULE_WORDS];
     uint32_t size_used;
-    bool result;
+    int ret_value;
     u_int32_t ticket;
 
-    result = false;
+    ret_value = XORP_ERROR;
 
     // Begin a pf transaction.
     ticket = start_transaction();
     if (ticket == -1)
-	return (result);
+	return (ret_value);
 
     // Transcribe all the rules contained within the snapshot,
     // pushing each one into the inactive ruleset.
     for (PaSnapTable4::const_iterator i = table.begin();
 	 i != table.end(); i++) {
-	result = transcribe_and_push_rule4(*i, ticket);
-	if (!result)
-	    break;
+	  ret_value = transcribe_and_push_rule4(*i, ticket);
+	  if (ret_value != XORP_OK)
+		break;
     }
 
     // Attempt to commit the transaction, thus flipping
     // the active and inactive rulesets.
-    if (result)
-	result = commit_transaction(ticket);
+    if (ret_value == XORP_OK)
+	  ret_value = commit_transaction(ticket);
 
-    return (result);
+    return (ret_value);
 #endif
 }
 
 // Clear all entries by committing an empty transaction.
-bool
+int
 PaPfBackend::delete_all_entries4()
 {
 #ifndef HAVE_PACKETFILTER_PF
-    return (false);
+    return (XORP_ERROR);
 #else
     struct pfioc_trans trans;
     struct pfioc_trans_e trans_e;
@@ -173,10 +173,10 @@ PaPfBackend::delete_all_entries4()
 	(0 < ioctl(_fd, DIOCXCOMMIT, &trans))) {
 	XLOG_ERROR("Failed to delete all entries from PF "
 		   "firewall: %s", strerror(errno));
-	return (false);
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 #endif
 }
 
@@ -239,12 +239,12 @@ PaPfBackend::create_snapshot4()
 #endif
 }
 
-bool
+int
 PaPfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 {
 #ifndef HAVE_PACKETFILTER_PF
     UNUSED(snap4);
-    return (false);
+    return (XORP_ERROR);
 #else
     // Simply check if the snapshot is an instance of our derived snapshot.
     // If it is not, we received it in error, and it is of no interest to us.
@@ -255,7 +255,7 @@ PaPfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
     // Begin a pf transaction.
     u_int32_t ticket = start_transaction();
     if (ticket == -1)
-	return (false);
+	return (XORP_ERROR);
 
     // Push the rules back.
     struct pfioc_rule *ppr = dsnap4._rulebuf;
@@ -263,7 +263,7 @@ PaPfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 	if (0 < ioctl(_fd, DIOCADDRULE, ppr)) {
 	    XLOG_ERROR("Failed to add rule to a PF firewall "
 		       "transaction: %s", strerror(errno));
-	    return (false);
+	    return (XORP_ERROR);
 	}
 	ppr++;
     }
@@ -278,10 +278,10 @@ PaPfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 /* Private utility methods used for manipulating PF itself */
 
 // Enable or disable the pf firewall.
-bool
+int
 PaPfBackend::set_pf_enabled(bool enable)
 {
-    bool retval = true;
+    int ret_value = XORP_OK;
 
     if (enable) {
 	if (0 > ioctl(_fd, DIOCSTART)) {
@@ -290,11 +290,11 @@ PaPfBackend::set_pf_enabled(bool enable)
 #ifdef __FreeBSD__
 	    } else if (errno == ESRCH) {
 		XLOG_ERROR("pfil_hooks registration failed");
-		retval = false;
+		ret_value = XORP_ERROR;
 #endif
 	    } else {
 		XLOG_ERROR("DIOCSTART: %s", strerror(errno));
-		retval = false;
+		ret_value = XORP_ERROR;
 	    }
 	}
     } else {
@@ -303,7 +303,7 @@ PaPfBackend::set_pf_enabled(bool enable)
 		XLOG_ERROR("PF already disabled");
 	    } else {
 		XLOG_ERROR("DIOCSTOP: %s", strerror(errno));
-		retval = false;
+		ret_value = XORP_ERROR;
 	    }
 	}
     }
@@ -358,7 +358,7 @@ PaPfBackend::abort_transaction(u_int32_t ticket)
     }
 }
 
-bool
+int
 PaPfBackend::commit_transaction(u_int32_t ticket)
 {
     struct pfioc_trans trans;
@@ -376,13 +376,13 @@ PaPfBackend::commit_transaction(u_int32_t ticket)
     if (0 < ioctl(_fd, DIOCXCOMMIT, &trans)) {
 	XLOG_ERROR("Failed to commit transaction for adding rules"
 		   "to PF firewall: %s", strerror(errno));
-	return (false);
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
-bool
+int
 PaPfBackend::transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket)
 {
     struct pfioc_rule pfr;
@@ -421,10 +421,10 @@ PaPfBackend::transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket)
     if (0 < ioctl(_fd, DIOCADDRULE, &pfr)) {
 	XLOG_ERROR("Failed to add rule to a PF firewall "
 		   "transaction: %s", strerror(errno));
-	return (false);
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
 /* ------------------------------------------------------------------------- */

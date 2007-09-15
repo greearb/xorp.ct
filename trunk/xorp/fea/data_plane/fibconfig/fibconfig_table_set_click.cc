@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.cc,v 1.6 2007/06/07 01:28:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.cc,v 1.7 2007/07/11 22:18:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -77,8 +77,8 @@ FibConfigTableSetClick::start(string& error_msg)
     // XXX: Push the current config into the new method
     //
     list<Fte4> fte_list4;
-    if (fibconfig().get_table4(fte_list4) == true) {
-	if (set_table4(fte_list4) != true) {
+    if (fibconfig().get_table4(fte_list4) == XORP_OK) {
+	if (set_table4(fte_list4) != XORP_OK) {
 	    XLOG_ERROR("Cannot push the current IPv4 forwarding table "
 		       "into the FibConfigTableSetClick plugin for setting "
 		       "the forwarding table");
@@ -87,8 +87,8 @@ FibConfigTableSetClick::start(string& error_msg)
 
 #ifdef HAVE_IPV6
     list<Fte6> fte_list6;
-    if (fibconfig().get_table6(fte_list6) == true) {
-	if (set_table6(fte_list6) != true) {
+    if (fibconfig().get_table6(fte_list6) == XORP_OK) {
+	if (set_table6(fte_list6) != XORP_OK) {
 	    XLOG_ERROR("Cannot push the current IPv6 forwarding table "
 		       "into the FibConfigTableSetClick plugin for setting "
 		       "the forwarding table");
@@ -120,7 +120,7 @@ FibConfigTableSetClick::stop(string& error_msg)
     return (ret_value);
 }
 
-bool
+int
 FibConfigTableSetClick::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
@@ -131,10 +131,10 @@ FibConfigTableSetClick::set_table4(const list<Fte4>& fte_list)
 	fibconfig().add_entry4(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetClick::delete_all_entries4()
 {
     list<Fte4> fte_list;
@@ -150,10 +150,10 @@ FibConfigTableSetClick::delete_all_entries4()
 	    fibconfig().delete_entry4(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetClick::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
@@ -164,10 +164,10 @@ FibConfigTableSetClick::set_table6(const list<Fte6>& fte_list)
 	fibconfig().add_entry6(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetClick::delete_all_entries6()
 {
     list<Fte6> fte_list;
@@ -183,5 +183,5 @@ FibConfigTableSetClick::delete_all_entries6()
 	    fibconfig().delete_entry6(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }

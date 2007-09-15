@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.hh,v 1.2 2007/07/11 22:18:07 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.hh,v 1.3 2007/07/16 23:56:08 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_SET_CLICK_HH__
@@ -67,39 +67,35 @@ public:
      * interval.
      *
      * @param fte the entry to add.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool add_entry4(const Fte4& fte);
+    virtual int add_entry4(const Fte4& fte);
 
     /**
      * Delete a single routing entry. Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_entry4(const Fte4& fte);
+    virtual int delete_entry4(const Fte4& fte);
 
     /**
      * Add a single routing entry. Must be within a configuration
      * interval.
      *
      * @param fte the entry to add.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool add_entry6(const Fte6& fte);
+    virtual int add_entry6(const Fte6& fte);
 
     /**
      * Delete a single routing entry.  Must be within a configuration
      * interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_entry6(const Fte6& fte);
+    virtual int delete_entry6(const Fte6& fte);
 
     /**
      * Obtain a reference to the table with the IPv4 forwarding entries.
@@ -118,13 +114,19 @@ public:
 private:
     virtual void nexthop_port_mapper_event(bool is_mapping_changed);
 
-    bool add_entry(const FteX& fte);
-    bool delete_entry(const FteX& fte);
+    int add_entry(const FteX& fte);
+    int delete_entry(const FteX& fte);
 
     // Methods related to reinstalling all IPv4 and IPv6 forwarding entries
     void start_task_reinstall_all_entries();
     void run_task_reinstall_all_entries();
+    /**
+     * @return true if there are more entries to install, otherwise false.
+     */
     bool reinstall_all_entries4();
+    /**
+     * @return true if there are more entries to install, otherwise false.
+     */
     bool reinstall_all_entries6();
 
     ClickSocketReader _cs_reader;

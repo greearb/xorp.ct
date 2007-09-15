@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.10 2007/07/11 22:18:02 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.11 2007/07/16 23:54:05 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
 #define __FEA_FIBCONFIG_ENTRY_GET_HH__
@@ -85,40 +85,36 @@ public:
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return bool on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte) = 0;
+    virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte) = 0;
 
     /**
      * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte) = 0;
+    virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte) = 0;
 
     /**
      * Lookup a route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte) = 0;
+    virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte) = 0;
 
     /**
      * Lookup route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte) = 0;
+    virtual int lookup_route_by_network6(const IPv6Net& dst, Fte6& fte) = 0;
 
 protected:
     // Misc other state

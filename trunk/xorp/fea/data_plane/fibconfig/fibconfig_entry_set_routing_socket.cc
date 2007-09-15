@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.10 2007/07/11 22:18:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.11 2007/07/18 01:30:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -88,7 +88,7 @@ FibConfigEntrySetRoutingSocket::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetRoutingSocket::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -96,7 +96,7 @@ FibConfigEntrySetRoutingSocket::add_entry4(const Fte4& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRoutingSocket::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -104,7 +104,7 @@ FibConfigEntrySetRoutingSocket::delete_entry4(const Fte4& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRoutingSocket::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -112,7 +112,7 @@ FibConfigEntrySetRoutingSocket::add_entry6(const Fte6& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRoutingSocket::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -139,7 +139,7 @@ static const size_t SOCKADDR_DL_ROUNDUP_LEN = LONG_ROUNDUP_SIZEOF(struct sockadd
 #endif
 #undef LONG_ROUNDUP_SIZEOF
 
-bool
+int
 FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
@@ -174,19 +174,19 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
     do {
 	if (fte_nexthop.is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte_nexthop.is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
     
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
 
     if (! fte.ifname().empty())
 	is_interface_route = true;
@@ -204,7 +204,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
-	    return false;
+	    return (XORP_ERROR);
 	}
 	if (ifp->discard()) {
 	    is_discard_route = true;
@@ -326,7 +326,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	    if (ifp == NULL) {
 		XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
-		return false;
+		return (XORP_ERROR);
 	    }
 	    pif_index = ifp->pif_index();
 	} while (false);
@@ -380,7 +380,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -388,10 +388,10 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
     // succeeded.
     //
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
@@ -416,19 +416,19 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
 
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
     
     //
     // Set the request
@@ -522,11 +522,11 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 	    if ((ifp != NULL) && ifp->enabled())
 		break;		// The interface is UP
 
-	    return (true);
+	    return (XORP_OK);
 	} while (false);
 
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -534,7 +534,7 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
     // succeeded.
     //
     
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HAVE_ROUTING_SOCKETS

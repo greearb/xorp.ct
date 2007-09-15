@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.9 2007/01/10 20:22:58 bms Exp $"
+#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.10 2007/02/16 22:45:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -75,7 +75,7 @@ PaIpfw2Backend::PaIpfw2Backend()
     // change any of the state, and allows us to tell the presence
     // of IPFW2 apart from that of IPFW1.
     uint32_t step;
-    if (get_autoinc_step(step) == false) {
+    if (get_autoinc_step(step) != XORP_OK) {
 	XLOG_ERROR("IPFW2 does not appear to be present in the system.");
 	throw PaInvalidBackendException();
     }
@@ -137,12 +137,12 @@ PaIpfw2Backend::get_version() const
 /* ------------------------------------------------------------------------- */
 /* IPv4 ACL back-end methods. */
 
-bool
+int
 PaIpfw2Backend::push_entries4(const PaSnapshot4* snap)
 {
 #ifndef HAVE_PACKETFILTER_IPFW2
     UNUSED(snap);
-    return (false);
+    return (XORP_ERROR);
 #else
     XLOG_ASSERT(snap != NULL);
 
@@ -166,18 +166,18 @@ PaIpfw2Backend::push_entries4(const PaSnapshot4* snap)
     // atomically when complete.
     swap_ruleset4(DEFAULT_RULESET, TRANSCRIPT_RULESET);
 
-    return (true);
+    return (XORP_OK);
 #endif
 }
 
-bool
+int
 PaIpfw2Backend::delete_all_entries4()
 {
 #ifndef HAVE_PACKETFILTER_IPFW2
-    return (false);
+    return (XORP_ERROR);
 #else
     flush_ruleset4(DEFAULT_RULESET);
-    return (true);
+    return (XORP_OK);
 #endif
 }
 
@@ -213,12 +213,12 @@ PaIpfw2Backend::create_snapshot4()
 #endif
 }
 
-bool
+int
 PaIpfw2Backend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 {
 #ifndef HAVE_PACKETFILTER_IPFW2
     UNUSED(snap4);
-    return (false);
+    return (XORP_ERROR);
 #else
     // Simply check if the snapshot is an instance of our derived snapshot.
     // If it is not, we received it in error, and it is of no interest to us.
@@ -235,7 +235,7 @@ PaIpfw2Backend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
     // Deallocate slot.
     _snapshot4db[setnum] = NULL;
 
-    return (true);
+    return (XORP_OK);
 #endif
 }
 
@@ -246,24 +246,28 @@ PaIpfw2Backend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 // Class method to retrieve the auto-increment step size. This only
 // exists in IPFW2 and is used to tell it apart from IPFW1, as well as
 // telling if IPFW1 is loaded at runtime.
-bool
+int
 PaIpfw2Backend::get_autoinc_step(uint32_t& step)
 {
     size_t step_size = sizeof(step);
     int ret = sysctlbyname("net.inet.ip.fw.autoinc_step",
 			   &step, &step_size, NULL, 0);
-    return (ret == -1 ? false : true);
+    if (ret == -1)
+	return (XORP_ERROR);
+    return (XORP_OK);
 }
 
 // Set the auto-increment step for when rule numbers are not specified.
-bool
+int
 PaIpfw2Backend::set_autoinc_step(const uint32_t& step)
 {
     size_t step_size = sizeof(step);
     int ret = sysctlbyname("net.inet.ip.fw.autoinc_step",
 			   NULL, NULL,
 			   const_cast<void*>((const void*)&step), step_size);
-    return (ret == -1 ? false : true);
+    if (ret == -1)
+	return (XORP_ERROR);
+    return (XORP_OK);
 }
 
 // Pass an IPFW2 command to the kernel using the correct calling

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.hh,v 1.2 2007/07/11 22:18:09 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.hh,v 1.3 2007/07/16 23:56:09 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_IPHELPER_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_IPHELPER_HH__
@@ -56,23 +56,21 @@ public:
      *
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool get_table4(list<Fte4>& fte_list);
+    virtual int get_table4(list<Fte4>& fte_list);
 
     /**
      * Obtain the unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
      * the unicast forwarding table.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool get_table6(list<Fte6>& fte_list);
+    virtual int get_table6(list<Fte6>& fte_list);
 
 private:
-    bool get_table(int family, list<FteX>& fte_list);
+    int get_table(int family, list<FteX>& fte_list);
 };
 
 #endif // __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_IPHELPER_HH__

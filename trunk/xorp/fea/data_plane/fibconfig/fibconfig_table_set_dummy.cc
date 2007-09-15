@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_dummy.cc,v 1.7 2007/07/11 22:18:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_dummy.cc,v 1.8 2007/07/17 23:24:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -76,7 +76,7 @@ FibConfigTableSetDummy::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
@@ -87,21 +87,21 @@ FibConfigTableSetDummy::set_table4(const list<Fte4>& fte_list)
 	fibconfig().add_entry4(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetDummy::delete_all_entries4()
 {
     if (in_configuration() == false)
-	return false;
+	return (XORP_ERROR);
     
     fibconfig().trie4().delete_all_nodes();
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
@@ -112,16 +112,16 @@ FibConfigTableSetDummy::set_table6(const list<Fte6>& fte_list)
 	fibconfig().add_entry6(fte);
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableSetDummy::delete_all_entries6()
 {
     if (in_configuration() == false)
-	return false;
+	return (XORP_ERROR);
     
     fibconfig().trie6().delete_all_nodes();
     
-    return true;
+    return (XORP_OK);
 }

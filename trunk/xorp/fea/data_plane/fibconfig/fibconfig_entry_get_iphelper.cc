@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.cc,v 1.7 2007/07/11 22:18:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_iphelper.cc,v 1.8 2007/07/18 01:30:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -87,19 +87,11 @@ FibConfigEntryGetIPHelper::stop(string& error_msg)
     return (XORP_OK);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
@@ -108,20 +100,12 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
     return (ret_value);
 }
 
-/**
- * Lookup a route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
 						    Fte4& fte)
 {
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
@@ -130,19 +114,11 @@ FibConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
     return (ret_value);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_dest(IPvX(dst), ftex);
     
@@ -151,20 +127,12 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
     return (ret_value);
 }
 
-/**
- * Lookup route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
 						    Fte6& fte)
 { 
     FteX ftex(dst.af());
-    bool ret_value = false;
+    int ret_value = XORP_ERROR;
 
     ret_value = lookup_route_by_network(IPvXNet(dst), ftex);
     
@@ -173,15 +141,7 @@ FibConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
     return (ret_value);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
     // Zero the return information
@@ -191,12 +151,12 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     do {
 	if (dst.is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (dst.is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
@@ -204,7 +164,7 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 
     // Check that the destination address is valid
     if (! dst.is_unicast()) {
-	return false;
+	return (XORP_ERROR);
     }
 
     switch (dst.af()) {
@@ -212,7 +172,7 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	return false;
+	return (XOPRP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -240,7 +200,7 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	XLOG_ERROR("GetIpForwardTable(): %s\n", win_strerror(result));
 	if (pfwdtable != NULL)
 	    free(pfwdtable);
-	return false;
+	return (XORP_ERROR);
     }
 
     IPv4	dest;
@@ -279,19 +239,12 @@ FibConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	}
     }
 
-    return (found);
+    if (! found)
+	return (XORP_ERROR);
+    return (XORP_OK);
 }
 
-/**
- * Lookup route by network.
- * XXX: The tests here may not be correct
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 						   FteX& fte)
 {
@@ -302,12 +255,12 @@ FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
     do {
 	if (dst.is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (dst.is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
@@ -318,7 +271,7 @@ FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	return false;
+	return (XORP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -346,7 +299,7 @@ FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 	XLOG_ERROR("GetIpForwardTable(): %s\n", win_strerror(result));
 	if (pfwdtable != NULL)
 	    free(pfwdtable);
-	return false;
+	return (XORP_ERROR);
     }
 
     IPv4Net	destnet;
@@ -377,7 +330,9 @@ FibConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 	}
     }
 
-    return (found);
+    if (! found)
+	return (XORP_ERROR);
+    return (XORP_OK);
 }
 
 #endif // HOST_OS_WINDOWS

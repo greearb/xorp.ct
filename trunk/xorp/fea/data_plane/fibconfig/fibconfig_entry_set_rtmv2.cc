@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.12 2007/07/11 22:18:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.13 2007/07/18 01:30:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -125,7 +125,7 @@ FibConfigEntrySetRtmV2::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetRtmV2::add_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -133,7 +133,7 @@ FibConfigEntrySetRtmV2::add_entry4(const Fte4& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRtmV2::delete_entry4(const Fte4& fte)
 {
     FteX ftex(fte);
@@ -141,7 +141,7 @@ FibConfigEntrySetRtmV2::delete_entry4(const Fte4& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRtmV2::add_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -149,7 +149,7 @@ FibConfigEntrySetRtmV2::add_entry6(const Fte6& fte)
     return (add_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRtmV2::delete_entry6(const Fte6& fte)
 {
     FteX ftex(fte);
@@ -157,7 +157,7 @@ FibConfigEntrySetRtmV2::delete_entry6(const Fte6& fte)
     return (delete_entry(ftex));
 }
 
-bool
+int
 FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr)
@@ -182,19 +182,19 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
     do {
 	if (fte_nexthop.is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte_nexthop.is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
     
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
 
 #if 0
     if (! fte.ifname().empty())
@@ -215,7 +215,7 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
-	    return false;
+	    return (XORP_ERROR);
 	}
 	if (ifp->discard()) {
 	    is_discard_route = true;
@@ -262,7 +262,7 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
     result = ((family == AF_INET ? _rs4 : _rs6))->write(rtm, rtm->rtm_msglen);
     if (result != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to Rtmv2 pipe: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -270,10 +270,10 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
     // succeeded.
     //
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr)
@@ -296,19 +296,19 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return false;
+		return (XORP_ERROR);
 	    break;
 	}
 	break;
     } while (false);
 
     if (fte.is_connected_route())
-	return true;	// XXX: don't add/remove directly-connected routes
+	return (XORP_OK);  // XXX: don't add/remove directly-connected routes
     
     //
     // Set the request
@@ -345,7 +345,7 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     result = ((family == AF_INET ? _rs4 : _rs6))->write(rtm, rtm->rtm_msglen);
     if (result != rtm->rtm_msglen) {
 	XLOG_ERROR("Error writing to Rtmv2 pipe: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -353,7 +353,7 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     // succeeded.
     //
     
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HOST_OS_WINDOWS

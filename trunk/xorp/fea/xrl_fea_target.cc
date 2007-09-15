@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.29 2007/08/21 00:10:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.30 2007/09/15 02:11:18 pavlin Exp $"
 
 
 //
@@ -1945,7 +1945,7 @@ XrlFeaTarget::ifmgr_replicator_0_1_register_ifmgr_mirror(
 {
     string error_msg;
 
-    if (_lib_fea_client_bridge.add_libfeaclient_mirror(clientname) == false) {
+    if (_lib_fea_client_bridge.add_libfeaclient_mirror(clientname) != XORP_OK) {
 	error_msg = c_format("Cannot register ifmgr mirror client %s",
 			     clientname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1962,7 +1962,7 @@ XrlFeaTarget::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
     string error_msg;
 
     if (_lib_fea_client_bridge.remove_libfeaclient_mirror(clientname)
-	== false) {
+	!= XORP_OK) {
 	error_msg = c_format("Cannot unregister ifmgr mirror client %s",
 			     clientname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1988,7 +1988,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest4(
     string&		protocol_origin)
 {
     Fte4 fte;
-    if (fibconfig().lookup_route_by_dest4(dst, fte) == true) {
+    if (fibconfig().lookup_route_by_dest4(dst, fte) == XORP_OK) {
 	netmask = fte.net();
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
@@ -2016,7 +2016,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_dest6(
     string&		protocol_origin)
 {
     Fte6 fte;
-    if (fibconfig().lookup_route_by_dest6(dst, fte) == true) {
+    if (fibconfig().lookup_route_by_dest6(dst, fte) == XORP_OK) {
 	netmask = fte.net();
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
@@ -2043,7 +2043,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network4(
     string&		protocol_origin)
 {
     Fte4 fte;
-    if (fibconfig().lookup_route_by_network4(dst, fte)) {
+    if (fibconfig().lookup_route_by_network4(dst, fte) == XORP_OK) {
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();
@@ -2069,7 +2069,7 @@ XrlFeaTarget::fti_0_2_lookup_route_by_network6(
     string&		protocol_origin)
 {
     Fte6 fte;
-    if (fibconfig().lookup_route_by_network6(dst, fte)) {
+    if (fibconfig().lookup_route_by_network6(dst, fte) == XORP_OK) {
 	nexthop = fte.nexthop();
 	ifname = fte.ifname();
 	vifname = fte.vifname();

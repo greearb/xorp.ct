@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_click.cc,v 1.6 2007/06/07 01:28:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_click.cc,v 1.7 2007/07/11 22:18:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -85,15 +85,7 @@ FibConfigEntryGetClick::stop(string& error_msg)
     return (ret_value);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 {
     list<Fte4> fte_list4;
@@ -104,8 +96,8 @@ FibConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
     // for the longest-prefix match.
     // TODO: This implementation is very inefficient.
     //
-    if (fibconfig().get_table4(fte_list4) != true)
-	return (false);
+    if (fibconfig().get_table4(fte_list4) != XORP_OK)
+	return (XORP_ERROR);
 
     list<Fte4>::iterator iter4;
     for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) {
@@ -118,18 +110,12 @@ FibConfigEntryGetClick::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
 	}
     }
 
-    return (found);
+    if (! found)
+	return (XORP_ERROR);
+    return (XORP_OK);
 }
 
-/**
- * Lookup route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
 {
     list<Fte4> fte_list4;
@@ -139,30 +125,22 @@ FibConfigEntryGetClick::lookup_route_by_network4(const IPv4Net& dst, Fte4& fte)
     // for the exact match.
     // TODO: This implementation is very inefficient.
     //
-    if (fibconfig().get_table4(fte_list4) != true)
-	return (false);
+    if (fibconfig().get_table4(fte_list4) != XORP_OK)
+	return (XORP_ERROR);
 
     list<Fte4>::iterator iter4;
     for (iter4 = fte_list4.begin(); iter4 != fte_list4.end(); ++iter4) {
 	Fte4& fte4 = *iter4;
 	if (fte4.net() == dst) {
 	    fte = fte4;
-	    return (true);
+	    return (XORP_OK);
 	}
     }
 
-    return (false);
+    return (XORP_ERROR);
 }
 
-/**
- * Lookup a route by destination address.
- *
- * @param dst host address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 {
     list<Fte6> fte_list6;
@@ -173,8 +151,8 @@ FibConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
     // for the longest-prefix match.
     // TODO: This implementation is very inefficient.
     //
-    if (fibconfig().get_table6(fte_list6) != true)
-	return (false);
+    if (fibconfig().get_table6(fte_list6) != XORP_OK)
+	return (XORP_ERROR);
 
     list<Fte6>::iterator iter6;
     for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) {
@@ -187,18 +165,12 @@ FibConfigEntryGetClick::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
 	}
     }
 
-    return (found);
+    if (! found)
+	return (XORP_ERROR);
+    return (XORP_OK);
 }
 
-/**
- * Lookup route by network address.
- *
- * @param dst network address to resolve.
- * @param fte return-by-reference forwarding table entry.
- *
- * @return true on success, otherwise false.
- */
-bool
+int
 FibConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
 { 
     list<Fte6> fte_list6;
@@ -208,17 +180,17 @@ FibConfigEntryGetClick::lookup_route_by_network6(const IPv6Net& dst, Fte6& fte)
     // for the longest-prefix match.
     // TODO: This implementation is very inefficient.
     //
-    if (fibconfig().get_table6(fte_list6) != true)
-	return (false);
+    if (fibconfig().get_table6(fte_list6) != XORP_OK)
+	return (XORP_ERROR);
 
     list<Fte6>::iterator iter6;
     for (iter6 = fte_list6.begin(); iter6 != fte_list6.end(); ++iter6) {
 	Fte6& fte6 = *iter6;
 	if (fte6.net() == dst) {
 	    fte = fte6;
-	    return (true);
+	    return (XORP_OK);
 	}
     }
 
-    return (false);
+    return (XORP_ERROR);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.7 2007/07/11 22:18:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_click.cc,v 1.8 2007/07/18 01:30:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -98,10 +98,10 @@ FibConfigEntrySetClick::stop(string& error_msg)
     return (ret_value);
 }
 
-bool
+int
 FibConfigEntrySetClick::add_entry4(const Fte4& fte)
 {
-    bool ret_value;
+    int ret_value;
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -112,7 +112,7 @@ FibConfigEntrySetClick::add_entry4(const Fte4& fte)
     ret_value = add_entry(ftex);
 
     // Add the entry to the local copy of the forwarding table
-    if (ret_value) {
+    if (ret_value == XORP_OK) {
 	map<IPv4Net, Fte4>::iterator iter;
 
 	// Erase the entry with the same key (if exists)
@@ -126,10 +126,10 @@ FibConfigEntrySetClick::add_entry4(const Fte4& fte)
     return (ret_value);
 }
 
-bool
+int
 FibConfigEntrySetClick::delete_entry4(const Fte4& fte)
 {
-    bool ret_value;
+    int ret_value;
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -140,7 +140,7 @@ FibConfigEntrySetClick::delete_entry4(const Fte4& fte)
     ret_value = delete_entry(ftex);
 
     // Delete the entry from the local copy of the forwarding table
-    if (ret_value) {
+    if (ret_value == XORP_OK) {
 	map<IPv4Net, Fte4>::iterator iter;
 
 	// Erase the entry with the same key (if exists)
@@ -152,10 +152,10 @@ FibConfigEntrySetClick::delete_entry4(const Fte4& fte)
     return (ret_value);
 }
 
-bool
+int
 FibConfigEntrySetClick::add_entry6(const Fte6& fte)
 {
-    bool ret_value;
+    int ret_value;
 
     if (fte.is_connected_route()) {
 	// XXX: accept directly-connected routes
@@ -166,7 +166,7 @@ FibConfigEntrySetClick::add_entry6(const Fte6& fte)
     ret_value = add_entry(ftex);
 
     // Add the entry to the local copy of the forwarding table
-    if (ret_value) {
+    if (ret_value == XORP_OK) {
 	map<IPv6Net, Fte6>::iterator iter;
 
 	// Erase the entry with the same key (if exists)
@@ -180,7 +180,7 @@ FibConfigEntrySetClick::add_entry6(const Fte6& fte)
     return (ret_value);
 }
 
-bool
+int
 FibConfigEntrySetClick::delete_entry6(const Fte6& fte)
 {
     bool ret_value;
@@ -194,7 +194,7 @@ FibConfigEntrySetClick::delete_entry6(const Fte6& fte)
     ret_value = delete_entry(ftex);
 
     // Delete the entry from the local copy of the forwarding table
-    if (ret_value) {
+    if (ret_value == XORP_OK) {
 	map<IPv6Net, Fte6>::iterator iter;
 
 	// Erase the entry with the same key (if exists)
@@ -206,7 +206,7 @@ FibConfigEntrySetClick::delete_entry6(const Fte6& fte)
     return (ret_value);
 }
 
-bool
+int
 FibConfigEntrySetClick::add_entry(const FteX& fte)
 {
     int port = -1;
@@ -222,13 +222,13 @@ FibConfigEntrySetClick::add_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return (false);
+		return (XORP_ERROR);
 	    element = "_xorp_rt4";
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return (false);
+		return (XORP_ERROR);
 	    element = "_xorp_rt6";
 	    break;
 	}
@@ -291,7 +291,7 @@ FibConfigEntrySetClick::add_entry(const FteX& fte)
     if (port < 0) {
 	XLOG_ERROR("Cannot find outgoing port number for the Click forwarding "
 		   "table element to add entry %s", fte.str().c_str());
-	return (false);
+	return (XORP_ERROR);
     }
 
     //
@@ -321,13 +321,13 @@ FibConfigEntrySetClick::add_entry(const FteX& fte)
 				  error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (false);
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigEntrySetClick::delete_entry(const FteX& fte)
 {
     int port = -1;
@@ -343,13 +343,13 @@ FibConfigEntrySetClick::delete_entry(const FteX& fte)
     do {
 	if (fte.nexthop().is_ipv4()) {
 	    if (! fea_data_plane_manager().have_ipv4())
-		return (false);
+		return (XORP_ERROR);
 	    element = "_xorp_rt4";
 	    break;
 	}
 	if (fte.nexthop().is_ipv6()) {
 	    if (! fea_data_plane_manager().have_ipv6())
-		return (false);
+		return (XORP_ERROR);
 	    element = "_xorp_rt6";
 	    break;
 	}
@@ -383,7 +383,7 @@ FibConfigEntrySetClick::delete_entry(const FteX& fte)
     if (port < 0) {
 	XLOG_ERROR("Cannot find outgoing port number for the Click forwarding "
 		   "table element to delete entry %s", fte.str().c_str());
-	return (false);
+	return (XORP_ERROR);
     }
 #endif // 0
 
@@ -427,10 +427,10 @@ FibConfigEntrySetClick::delete_entry(const FteX& fte)
 				  error_msg)
 	!= XORP_OK) {
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (false);
+	return (XORP_ERROR);
     }
 
-    return (true);
+    return (XORP_OK);
 }
 
 void

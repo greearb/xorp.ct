@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.8 2007/07/11 22:18:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.9 2007/07/18 01:30:25 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -88,14 +88,14 @@ FibConfigTableGetNetlinkSocket::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetNetlinkSocket::get_table4(list<Fte4>& fte_list)
 {
     list<FteX> ftex_list;
 
     // Get the table
-    if (get_table(AF_INET, ftex_list) != true)
-	return false;
+    if (get_table(AF_INET, ftex_list) != XORP_OK)
+	return (XORP_ERROR);
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -104,22 +104,22 @@ FibConfigTableGetNetlinkSocket::get_table4(list<Fte4>& fte_list)
 	fte_list.push_back(ftex.get_fte4());
     }
     
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 FibConfigTableGetNetlinkSocket::get_table6(list<Fte6>& fte_list)
 {
 #ifndef HAVE_IPV6
     UNUSED(fte_list);
     
-    return false;
+    return (XORP_ERROR);
 #else
     list<FteX> ftex_list;
     
     // Get the table
-    if (get_table(AF_INET6, ftex_list) != true)
-	return false;
+    if (get_table(AF_INET6, ftex_list) != XORP_OK)
+	return (XORP_ERROR);
     
     // Copy the result back to the original list
     list<FteX>::iterator iter;
@@ -128,11 +128,11 @@ FibConfigTableGetNetlinkSocket::get_table6(list<Fte6>& fte_list)
 	fte_list.push_back(ftex.get_fte6());
     }
     
-    return true;
+    return (XORP_OK);
 #endif // HAVE_IPV6
 }
 
-bool
+int
 FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
@@ -150,12 +150,12 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
     switch(family) {
     case AF_INET:
 	if (! fea_data_plane_manager().have_ipv4())
-	    return false;
+	    return (XORP_ERROR);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	if (! fea_data_plane_manager().have_ipv6())
-	    return false;
+	    return (XORP_ERROR);
 	break;
 #endif // HAVE_IPV6
     default:
@@ -189,7 +189,7 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s",
 		   strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -206,16 +206,16 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
 	!= XORP_OK) {
 	ns.set_multipart_message_read(false);
 	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
-	return false;
+	return (XORP_ERROR);
     }
     // XXX: reset the multipart message read hackish flag
     ns.set_multipart_message_read(false);
     if (parse_buffer_netlink_socket(family, fibconfig().iftree(), fte_list,
 				    _ns_reader.buffer(), true)
-	!= true) {
-	return (false);
+	!= XORP_OK) {
+	return (XORP_ERROR);
     }
-    return (true);
+    return (XORP_OK);
 }
 
 #endif // HAVE_NETLINK_SOCKETS

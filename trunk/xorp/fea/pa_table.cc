@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_table.cc,v 1.4 2006/03/16 00:04:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_table.cc,v 1.5 2007/02/16 22:45:49 pavlin Exp $"
 
 #include <vector>
 
@@ -42,11 +42,11 @@ PaTableManager::~PaTableManager()
 /*
  * Add an IPv4 ACL entry to XORP's tables.
  */
-bool
+int
 PaTableManager::add_entry4(const PaEntry4& entry)
 {
     _pal4.push_back(entry);
-    return true;
+    return (XORP_OK);
 }
 
 /*
@@ -54,26 +54,26 @@ PaTableManager::add_entry4(const PaEntry4& entry)
  * Note that only the rule-match part of the rule is compared,
  * i.e. all fields except the rule action.
  */
-bool
+int
 PaTableManager::delete_entry4(const PaEntry4& entry)
 {
     for (PaTable4::iterator ti = _pal4.begin(); ti != _pal4.end(); ti++) {
 	if (entry.match(*ti)) {
 	    (void)_pal4.erase(ti);
-	    return true;
+	    return (XORP_OK);
 	}
     }
-    return false;
+    return (XORP_ERROR);
 }
 
 /*
  * Delete an IPv4 ACL entry from XORP's tables.
  */
-bool
+int
 PaTableManager::delete_all_entries4()
 {
     _pal4.clear();
-    return true;
+    return (XORP_OK);
 }
 
 /*
@@ -88,7 +88,7 @@ PaTableManager::create_snapshot4() const
 /*
  * Restore XORP's current IPv6 ACLs from a previous snapshot.
  */
-bool
+int
 PaTableManager::restore_snapshot4(const PaSnapshot4* snap)
 {
     return (snap->restore(*this));
@@ -99,14 +99,14 @@ PaSnapshot4::PaSnapshot4(const PaTableManager& parent)
     this->_pal4 = parent._pal4;
 }
 
-bool
+int
 PaSnapshot4::restore(PaTableManager& parent) const
 {
     // Assignment from vector<PaEntry4> to same type
     // will DTRT according to STL Container model documentation,
     // i.e. make a complete identical copy.
     parent._pal4 = this->_pal4;
-    return true;
+    return (XORP_OK);
 }
 
 /* --------------------------------------------------------------------- */
@@ -115,49 +115,49 @@ PaSnapshot4::restore(PaTableManager& parent) const
 /*
  * Add an IPv6 ACL entry to XORP's tables.
  */
-bool
+int
 PaTableManager::add_entry6(const PaEntry6& entry)
 {
 #ifdef notyet
     _pal6.push_back(entry);
-    return true;
+    return (XORP_OK);
 #else
     UNUSED(entry);
-    return false;
+    return (XORP_ERROR);
 #endif
 }
 
 /*
  * Delete an IPv6 ACL entry from XORP's tables.
  */
-bool
+int
 PaTableManager::delete_entry6(const PaEntry6& entry)
 {
 #ifdef notyet
     for (PaTable6::iterator ti = _pal6.begin(); ti != _pal6.end(); ti++) {
 	if (entry.match(*ti)) {
 	    (void)_pal6.erase(ti);
-	    return true;
+	    return (XORP_OK);
 	}
     }
-    return false;
+    return (XORP_ERROR);
 #else
     UNUSED(entry);
-    return false;
+    return (XORP_ERROR);
 #endif
 }
 
 /*
  * Delete an IPv6 ACL entry from XORP's tables.
  */
-bool
+int
 PaTableManager::delete_all_entries6()
 {
 #ifdef notyet
     _pal6.clear();
-    return true;
+    return (XORP_OK);
 #else
-    return false;
+    return (XORP_ERROR);
 #endif
 }
 
@@ -177,14 +177,14 @@ PaTableManager::create_snapshot6() const
 /*
  * Restore XORP's current IPv6 ACLs from a previous snapshot.
  */
-bool
+int
 PaTableManager::restore_snapshot6(const PaSnapshot6* snap)
 {
 #ifdef notyet
     return (snap->restore(*this));
 #else
     UNUSED(snap);
-    return false;
+    return (XORP_ERROR);
 #endif
 }
 
@@ -197,14 +197,14 @@ PaSnapshot6::PaSnapshot6(const PaTableManager& parent)
 #endif
 }
 
-bool
+int
 PaSnapshot6::restore(PaTableManager& parent) const
 {
 #ifdef notyet
     parent._pal6 = this->_pal6;
-    return true;
+    return (XORP_OK);
 #else
     UNUSED(parent);
-    return false;
+    return (XORP_ERROR);
 #endif
 }

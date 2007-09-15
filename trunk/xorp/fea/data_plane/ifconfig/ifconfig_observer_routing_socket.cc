@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.8 2007/06/06 19:55:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.9 2007/07/11 22:18:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -87,7 +87,7 @@ IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 {
     if (IfConfigGetSysctl::parse_buffer_routing_socket(
 	    ifconfig(), ifconfig().live_config(), buffer)
-	!= true) {
+	!= XORP_OK) {
 	return;
     }
 

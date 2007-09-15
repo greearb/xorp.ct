@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_dummy.cc,v 1.6 2006/03/27 01:04:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_dummy.cc,v 1.7 2007/02/16 22:45:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -55,19 +55,19 @@ PaDummyBackend::get_version() const
 /* ------------------------------------------------------------------------- */
 /* IPv4 ACL back-end methods. */
 
-bool
+int
 PaDummyBackend::push_entries4(const PaSnapshot4* snap)
 {
     // Do nothing.
     UNUSED(snap);
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 PaDummyBackend::delete_all_entries4()
 {
     // Do nothing.
-    return true;
+    return (XORP_OK);
 }
 
 const PaBackend::Snapshot4Base*
@@ -76,7 +76,7 @@ PaDummyBackend::create_snapshot4()
     return (new PaDummyBackend::Snapshot4());
 }
 
-bool
+int
 PaDummyBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 {
     // Simply check if the snapshot is an instance of our derived snapshot.
@@ -84,7 +84,7 @@ PaDummyBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
     const PaDummyBackend::Snapshot4* dsnap4 =
 	dynamic_cast<const PaDummyBackend::Snapshot4*>(snap4);
     XLOG_ASSERT(dsnap4 != NULL);
-    return true;
+    return (XORP_OK);
 }
 
 /* ------------------------------------------------------------------------- */

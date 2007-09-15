@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.9 2007/07/11 22:18:02 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.10 2007/07/16 23:54:05 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
 #define __FEA_FIBCONFIG_ENTRY_SET_HH__
@@ -90,9 +90,9 @@ public:
      * be made.
      *
      * @param error_msg the error message (if error).
-     * @return true if configuration successfully started.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool start_configuration(string& error_msg) {
+    virtual int start_configuration(string& error_msg) {
 	// Nothing particular to do, just label start.
 	return mark_configuration_start(error_msg);
     }
@@ -105,9 +105,9 @@ public:
      * write a file.
      *
      * @param error_msg the error message (if error).
-     * @return true configuration success pushed down into forwarding table.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool end_configuration(string& error_msg) {
+    virtual int end_configuration(string& error_msg) {
 	// Nothing particular to do, just label start.
 	return mark_configuration_end(error_msg);
     }
@@ -117,71 +117,67 @@ public:
      * interval.
      *
      * @param fte the entry to add.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool add_entry4(const Fte4& fte) = 0;
+    virtual int add_entry4(const Fte4& fte) = 0;
 
     /**
      * Delete a single routing entry. Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_entry4(const Fte4& fte) = 0;
+    virtual int delete_entry4(const Fte4& fte) = 0;
 
     /**
      * Add a single routing entry. Must be within a configuration
      * interval.
      *
      * @param fte the entry to add.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool add_entry6(const Fte6& fte) = 0;
+    virtual int add_entry6(const Fte6& fte) = 0;
 
     /**
      * Delete a single routing entry.  Must be within a configuration
      * interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
-     *
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool delete_entry6(const Fte6& fte) = 0;
+    virtual int delete_entry6(const Fte6& fte) = 0;
 
 protected:
     /**
      * Mark start of a configuration.
      *
      * @param error_msg the error message (if error).
-     * @return true if configuration can be marked as started, false otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool mark_configuration_start(string& error_msg) {
-	if (false == _in_configuration) {
+    int mark_configuration_start(string& error_msg) {
+	if (_in_configuration != true) {
 	    _in_configuration = true;
-	    return true;
+	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot start configuration: "
 			     "configuration in progress");
-	return false;
+	return (XORP_ERROR);
     }
 
     /**
      * Mark end of a configuration.
      *
      * @param error_msg the error message (if error).
-     * @return true if configuration can be marked as ended, false otherwise.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool mark_configuration_end(string& error_msg) {
-	if (true == _in_configuration) {
+    int mark_configuration_end(string& error_msg) {
+	if (_in_configuration != false) {
 	    _in_configuration = false;
-	    return true;
+	    return (XORP_OK);
 	}
 	error_msg = c_format("Cannot end configuration: "
 			     "configuration not in progress");
-	return false;
+	return (XORP_ERROR);
     }
     
     bool in_configuration() const { return _in_configuration; }

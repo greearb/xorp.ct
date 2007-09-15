@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.3 2007/05/04 01:43:22 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.4 2007/05/23 12:12:34 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_REPORTER_HH__
 #define __FEA_IFCONFIG_REPORTER_HH__
@@ -121,18 +121,16 @@ public:
     /**
      * Add a reporter instance to update notification list.
      *
-     * @return true on success, false if object already receiving updates or
-     * could not be added.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool add_reporter(IfConfigUpdateReporterBase* rp);
+    int add_reporter(IfConfigUpdateReporterBase* rp);
 
     /**
      * Remove a reporter instance from update notification list.
      *
-     * @return true on success, false if instance is not on the
-     * receiving updates list.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool remove_reporter(IfConfigUpdateReporterBase* rp);
+    int remove_reporter(IfConfigUpdateReporterBase* rp);
 
     /**
      * Forward interface update notification to reporter instances on

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.59 2007/05/19 01:52:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.60 2007/08/16 01:16:41 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -761,7 +761,7 @@ XrlMfeaNode::ifmgr_replicator_0_1_register_ifmgr_mirror(
 {
     string error_msg;
 
-    if (_lib_mfea_client_bridge.add_libfeaclient_mirror(clientname) == false) {
+    if (_lib_mfea_client_bridge.add_libfeaclient_mirror(clientname) != XORP_OK) {
 	error_msg = c_format("Cannot register ifmgr mirror client %s",
 			     clientname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -778,7 +778,7 @@ XrlMfeaNode::ifmgr_replicator_0_1_unregister_ifmgr_mirror(
     string error_msg;
 
     if (_lib_mfea_client_bridge.remove_libfeaclient_mirror(clientname)
-	== false) {
+	!= XORP_OK) {
 	error_msg = c_format("Cannot unregister ifmgr mirror client %s",
 			     clientname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);

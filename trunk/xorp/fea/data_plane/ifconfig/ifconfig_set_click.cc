@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.8 2007/06/06 19:55:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.9 2007/07/11 22:18:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -152,7 +152,7 @@ IfConfigSetClick::add_interface(const string& ifname,
 	//
 	// Add the new interface
 	//
-	if (_iftree.add_interface(ifname) != true) {
+	if (_iftree.add_interface(ifname) != XORP_OK) {
 	    error_msg = c_format("Cannot add interface '%s'", ifname.c_str());
 	    return (XORP_ERROR);
 	}
@@ -195,7 +195,7 @@ IfConfigSetClick::add_vif(const string& ifname,
 	//
 	// Add the new vif
 	//
-	if (ifp->add_vif(vifname) != true) {
+	if (ifp->add_vif(vifname) != XORP_OK) {
 	    error_msg = c_format("Cannot add interface '%s' vif '%s'",
 				 ifname.c_str(), vifname.c_str());
 	    return (XORP_ERROR);
@@ -447,7 +447,7 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	IfTreeAddr4* ap = vifp->find_addr(addr4);
 
 	if (ap == NULL) {
-	    if (vifp->add_addr(addr4) != true) {
+	    if (vifp->add_addr(addr4) != XORP_OK) {
 		error_msg = c_format("Cannot add address '%s' "
 				     "to interface '%s' vif '%s'",
 				     addr4.str().c_str(),
@@ -491,7 +491,7 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	IfTreeAddr6* ap = vifp->find_addr(addr6);
 
 	if (ap == NULL) {
-	    if (vifp->add_addr(addr6) != true) {
+	    if (vifp->add_addr(addr6) != XORP_OK) {
 		error_msg = c_format("Cannot add address '%s' "
 				     "to interface '%s' vif '%s'",
 				     addr6.str().c_str(),

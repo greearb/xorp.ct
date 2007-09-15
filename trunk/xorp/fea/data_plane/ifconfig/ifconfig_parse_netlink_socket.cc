@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.8 2007/06/04 23:17:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.9 2007/07/11 22:18:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -64,7 +64,7 @@ static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
 				      const struct ifaddrmsg* ifaddrmsg,
 				      int rta_len, bool is_deleted);
 
-bool
+int
 IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 						      IfTree& iftree,
 						      const vector<uint8_t>& buffer)
@@ -97,8 +97,8 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	case NLMSG_DONE:
 	{
 	    if (! recognized)
-		return false;
-	    return true;
+		return (XORP_ERROR);
+	    return (XORP_OK);
 	}
 	break;
 	
@@ -155,9 +155,9 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
     }
     
     if (! recognized)
-	return false;
+	return (XORP_ERROR);
     
-    return true;
+    return (XORP_OK);
 }
 
 static void
