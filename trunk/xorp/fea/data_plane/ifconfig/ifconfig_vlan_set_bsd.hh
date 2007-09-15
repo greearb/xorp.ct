@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.hh,v 1.2 2007/09/15 00:57:05 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.hh,v 1.3 2007/09/15 01:22:36 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_BSD_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_BSD_HH__
 
-#include "fea/ifconfig_set.hh"
+#include "fea/ifconfig_vlan_set.hh"
 
 
 class IfConfigVlanSetBsd : public IfConfigVlanSet {
