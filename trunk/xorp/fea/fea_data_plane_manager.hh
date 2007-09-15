@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.5 2007/08/09 00:46:55 pavlin Exp $
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.6 2007/08/20 19:12:14 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
@@ -33,6 +33,8 @@ class IfConfig;
 class IfConfigGet;
 class IfConfigObserver;
 class IfConfigSet;
+class IfConfigVlanGet;
+class IfConfigVlanSet;
 class IfTree;
 class IoLink;
 class IoLinkManager;
@@ -208,6 +210,20 @@ public:
     IfConfigObserver* ifconfig_observer() { return _ifconfig_observer; }
 
     /**
+     * Get the IfConfigVlanGet plugin.
+     *
+     * @return the @ref IfConfigVlanGet plugin.
+     */
+    IfConfigVlanGet* ifconfig_vlan_get() { return _ifconfig_vlan_get; }
+
+    /**
+     * Get the IfConfigVlanSet plugin.
+     *
+     * @return the @ref IfConfigVlanSet plugin.
+     */
+    IfConfigVlanSet* ifconfig_vlan_set() { return _ifconfig_vlan_set; }
+
+    /**
      * Get the FibConfigForwarding plugin.
      *
      * @return the @ref FibConfigForwarding plugin.
@@ -347,6 +363,8 @@ protected:
     IfConfigGet*		_ifconfig_get;
     IfConfigSet*		_ifconfig_set;
     IfConfigObserver*		_ifconfig_observer;
+    IfConfigVlanGet*		_ifconfig_vlan_get;
+    IfConfigVlanSet*		_ifconfig_vlan_set;
     FibConfigForwarding*	_fibconfig_forwarding;
     FibConfigEntryGet*		_fibconfig_entry_get;
     FibConfigEntrySet*		_fibconfig_entry_set;

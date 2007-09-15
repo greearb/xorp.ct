@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.68 2007/07/18 01:30:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.69 2007/08/09 00:46:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -337,11 +337,85 @@ IfConfig::unregister_ifconfig_observer(IfConfigObserver* ifconfig_observer)
 }
 
 int
+IfConfig::register_ifconfig_vlan_get(IfConfigVlanGet* ifconfig_vlan_get,
+				     bool is_exclusive)
+{
+    if (is_exclusive)
+	_ifconfig_vlan_gets.clear();
+
+    if ((ifconfig_vlan_get != NULL)
+	&& (find(_ifconfig_vlan_gets.begin(), _ifconfig_vlan_gets.end(),
+		 ifconfig_vlan_get)
+	    == _ifconfig_vlan_gets.end())) {
+	_ifconfig_vlan_gets.push_back(ifconfig_vlan_get);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::unregister_ifconfig_vlan_get(IfConfigVlanGet* ifconfig_vlan_get)
+{
+    if (ifconfig_vlan_get == NULL)
+	return (XORP_ERROR);
+
+    list<IfConfigVlanGet*>::iterator iter;
+    iter = find(_ifconfig_vlan_gets.begin(), _ifconfig_vlan_gets.end(),
+		ifconfig_vlan_get);
+    if (iter == _ifconfig_vlan_gets.end())
+	return (XORP_ERROR);
+    _ifconfig_vlan_gets.erase(iter);
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::register_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set,
+				     bool is_exclusive)
+{
+    if (is_exclusive)
+	_ifconfig_vlan_sets.clear();
+
+    if ((ifconfig_vlan_set != NULL)
+	&& (find(_ifconfig_vlan_sets.begin(), _ifconfig_vlan_sets.end(),
+		 ifconfig_vlan_set)
+	    == _ifconfig_vlan_sets.end())) {
+	_ifconfig_vlan_sets.push_back(ifconfig_vlan_set);
+
+	//
+	// XXX: Push the current config into the new method
+	//
+	if (ifconfig_vlan_set->is_running())
+	    ifconfig_vlan_set->push_config(pushed_config());
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::unregister_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set)
+{
+    if (ifconfig_vlan_set == NULL)
+	return (XORP_ERROR);
+
+    list<IfConfigVlanSet*>::iterator iter;
+    iter = find(_ifconfig_vlan_sets.begin(), _ifconfig_vlan_sets.end(),
+		ifconfig_vlan_set);
+    if (iter == _ifconfig_vlan_sets.end())
+	return (XORP_ERROR);
+    _ifconfig_vlan_sets.erase(iter);
+
+    return (XORP_OK);
+}
+
+int
 IfConfig::start(string& error_msg)
 {
     list<IfConfigGet*>::iterator ifconfig_get_iter;
     list<IfConfigSet*>::iterator ifconfig_set_iter;
     list<IfConfigObserver*>::iterator ifconfig_observer_iter;
+    list<IfConfigVlanGet*>::iterator ifconfig_vlan_get_iter;
+    list<IfConfigVlanSet*>::iterator ifconfig_vlan_set_iter;
 
     if (_is_running)
 	return (XORP_OK);
@@ -361,6 +435,10 @@ IfConfig::start(string& error_msg)
 	error_msg = c_format("No mechanism to observe the interface information");
 	return (XORP_ERROR);
     }
+    //
+    // XXX: Don't check the IfConfigVlanGet and IfConfigVlanSet mechanisms,
+    // because they are optional.
+    //
 
     //
     // Start the IfConfigGet methods
@@ -395,6 +473,28 @@ IfConfig::start(string& error_msg)
 	    return (XORP_ERROR);
     }
 
+    //
+    // Start the IfConfigVlanGet methods
+    //
+    for (ifconfig_vlan_get_iter = _ifconfig_vlan_gets.begin();
+	 ifconfig_vlan_get_iter != _ifconfig_vlan_gets.end();
+	 ++ifconfig_vlan_get_iter) {
+	IfConfigVlanGet* ifconfig_vlan_get = *ifconfig_vlan_get_iter;
+	if (ifconfig_vlan_get->start(error_msg) < 0)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // Start the IfConfigSetSet methods
+    //
+    for (ifconfig_vlan_set_iter = _ifconfig_vlan_sets.begin();
+	 ifconfig_vlan_set_iter != _ifconfig_vlan_sets.end();
+	 ++ifconfig_vlan_set_iter) {
+	IfConfigVlanSet* ifconfig_vlan_set = *ifconfig_vlan_set_iter;
+	if (ifconfig_vlan_set->start(error_msg) < 0)
+	    return (XORP_ERROR);
+    }
+
     _live_config = pull_config();
     _live_config.finalize_state();
 
@@ -415,6 +515,8 @@ IfConfig::stop(string& error_msg)
     list<IfConfigGet*>::iterator ifconfig_get_iter;
     list<IfConfigSet*>::iterator ifconfig_set_iter;
     list<IfConfigObserver*>::iterator ifconfig_observer_iter;
+    list<IfConfigVlanGet*>::iterator ifconfig_vlan_get_iter;
+    list<IfConfigVlanSet*>::iterator ifconfig_vlan_set_iter;
     int ret_value = XORP_OK;
     string error_msg2;
 
@@ -432,6 +534,36 @@ IfConfig::stop(string& error_msg)
 	tmp_push_tree.prepare_replacement_state(_pulled_config);
 	if (push_config(tmp_push_tree) != true) {
 	    error_msg2 = push_error();
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    //
+    // Stop the IfConfigVlanSet methods
+    //
+    for (ifconfig_vlan_set_iter = _ifconfig_vlan_sets.begin();
+	 ifconfig_vlan_set_iter != _ifconfig_vlan_sets.end();
+	 ++ifconfig_vlan_set_iter) {
+	IfConfigVlanSet* ifconfig_vlan_set = *ifconfig_vlan_set_iter;
+	if (ifconfig_vlan_set->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    //
+    // Stop the IfConfigVlanGet methods
+    //
+    for (ifconfig_vlan_get_iter = _ifconfig_vlan_gets.begin();
+	 ifconfig_vlan_get_iter != _ifconfig_vlan_gets.end();
+	 ++ifconfig_vlan_get_iter) {
+	IfConfigVlanGet* ifconfig_vlan_get = *ifconfig_vlan_get_iter;
+	if (ifconfig_vlan_get->stop(error_msg2) < 0) {
+	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
 	    error_msg += error_msg2;

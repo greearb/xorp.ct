@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.68 2007/07/18 01:30:22 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.69 2007/08/09 00:46:56 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -23,6 +23,8 @@
 #include "ifconfig_get.hh"
 #include "ifconfig_set.hh"
 #include "ifconfig_observer.hh"
+#include "ifconfig_vlan_get.hh"
+#include "ifconfig_vlan_set.hh"
 #include "ifconfig_reporter.hh"
 #include "iftree.hh"
 
@@ -218,6 +220,44 @@ public:
     int unregister_ifconfig_observer(IfConfigObserver* ifconfig_observer);
 
     /**
+     * Register @ref IfConfigVlanGet plugin.
+     *
+     * @param ifconfig_vlan_get the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_ifconfig_vlan_get(IfConfigVlanGet* ifconfig_vlan_get,
+				   bool is_exclusive);
+
+    /**
+     * Unregister @ref IfConfigVlanGet plugin.
+     *
+     * @param ifconfig_vlan_get the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_ifconfig_vlan_get(IfConfigVlanGet* ifconfig_vlan_get);
+
+    /**
+     * Register @ref IfConfigVlanSet plugin.
+     *
+     * @param ifconfig_vlan_set the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set,
+				   bool is_exclusive);
+
+    /**
+     * Unregister @ref IfConfigVlanSet plugin.
+     *
+     * @param ifconfig_vlan_set the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set);
+
+    /**
      * Start operation.
      *
      * @param error_msg the error message (if error).
@@ -343,6 +383,8 @@ private:
     list<IfConfigGet*>		_ifconfig_gets;
     list<IfConfigSet*>		_ifconfig_sets;
     list<IfConfigObserver*>	_ifconfig_observers;
+    list<IfConfigVlanGet*>	_ifconfig_vlan_gets;
+    list<IfConfigVlanSet*>	_ifconfig_vlan_sets;
 
     //
     // Misc other state

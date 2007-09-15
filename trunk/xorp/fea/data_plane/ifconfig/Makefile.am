@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.2 2007/05/01 06:36:45 pavlin Exp $
+## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.3 2007/06/06 19:52:54 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -28,6 +28,10 @@ libxorp_ifconfig_la_SOURCES	+= ifconfig_set_dummy.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_ioctl.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_iphelper.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_netlink_socket.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_get_bsd.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_get_dummy.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_set_bsd.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_set_dummy.hh
 
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_click.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_get_dummy.cc
@@ -52,6 +56,10 @@ libxorp_ifconfig_la_SOURCES	+= ifconfig_set_dummy.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_ioctl.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_iphelper.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_netlink_socket.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_get_bsd.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_get_dummy.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_set_bsd.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_vlan_set_dummy.cc
 
 
 ################################################################

@@ -406,11 +406,11 @@ libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
 	fibconfig_table_get.hh fibconfig_table_observer.hh \
 	fibconfig_table_set.hh fibconfig_transaction.hh ifconfig.hh \
 	ifconfig_get.hh ifconfig_observer.hh ifconfig_reporter.hh \
-	ifconfig_set.hh ifconfig_transaction.hh iftree.hh \
-	io_ip_manager.hh io_link_manager.hh io_tcpudp_manager.hh \
-	libfeaclient_bridge.hh mfea_dataflow.hh \
-	mfea_kernel_messages.hh mfea_mrouter.hh mfea_node.hh \
-	mfea_node_cli.hh mfea_osdep.hh mfea_vif.hh \
+	ifconfig_set.hh ifconfig_vlan_get.hh ifconfig_vlan_set.hh \
+	ifconfig_transaction.hh iftree.hh io_ip_manager.hh \
+	io_link_manager.hh io_tcpudp_manager.hh libfeaclient_bridge.hh \
+	mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh \
+	mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_vif.hh \
 	nexthop_port_mapper.hh pa_backend.hh pa_backend_dummy.hh \
 	pa_backend_ipfw2.hh pa_entry.hh pa_table.hh pa_transaction.hh \
 	profile_vars.hh xrl_fea_io.hh xrl_fea_node.hh \

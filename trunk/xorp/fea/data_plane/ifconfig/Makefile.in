@@ -58,7 +58,9 @@ am_libxorp_ifconfig_la_OBJECTS = ifconfig_get_click.lo \
 	ifconfig_parse_routing_socket.lo ifconfig_set.lo \
 	ifconfig_set_click.lo ifconfig_set_dummy.lo \
 	ifconfig_set_ioctl.lo ifconfig_set_iphelper.lo \
-	ifconfig_set_netlink_socket.lo
+	ifconfig_set_netlink_socket.lo ifconfig_vlan_get_bsd.lo \
+	ifconfig_vlan_get_dummy.lo ifconfig_vlan_set_bsd.lo \
+	ifconfig_vlan_set_dummy.lo
 libxorp_ifconfig_la_OBJECTS = $(am_libxorp_ifconfig_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -232,6 +234,8 @@ libxorp_ifconfig_la_SOURCES = ifconfig_get_click.hh \
 	ifconfig_observer_routing_socket.hh ifconfig_set_click.hh \
 	ifconfig_set_dummy.hh ifconfig_set_ioctl.hh \
 	ifconfig_set_iphelper.hh ifconfig_set_netlink_socket.hh \
+	ifconfig_vlan_get_bsd.hh ifconfig_vlan_get_dummy.hh \
+	ifconfig_vlan_set_bsd.hh ifconfig_vlan_set_dummy.hh \
 	ifconfig_get_click.cc ifconfig_get_dummy.cc \
 	ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc \
 	ifconfig_get_iphelper.cc ifconfig_get_netlink_socket.cc \
@@ -245,7 +249,9 @@ libxorp_ifconfig_la_SOURCES = ifconfig_get_click.hh \
 	ifconfig_parse_routing_socket.cc ifconfig_set.cc \
 	ifconfig_set_click.cc ifconfig_set_dummy.cc \
 	ifconfig_set_ioctl.cc ifconfig_set_iphelper.cc \
-	ifconfig_set_netlink_socket.cc
+	ifconfig_set_netlink_socket.cc ifconfig_vlan_get_bsd.cc \
+	ifconfig_vlan_get_dummy.cc ifconfig_vlan_set_bsd.cc \
+	ifconfig_vlan_set_dummy.cc
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -323,6 +329,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_ioctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_iphelper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_netlink_socket.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_vlan_get_bsd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_vlan_get_dummy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_vlan_set_bsd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_vlan_set_dummy.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
