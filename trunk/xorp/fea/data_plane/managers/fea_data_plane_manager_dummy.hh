@@ -12,22 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.hh,v 1.5 2007/08/09 00:47:01 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.hh,v 1.6 2007/08/20 19:12:16 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_DUMMY_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_DUMMY_HH__
 
 #include "fea/fea_data_plane_manager.hh"
-
-class FibConfigEntryGetDummy;
-class FibConfigEntryObserverDummy;
-class FibConfigEntrySetDummy;
-class FibConfigTableGetDummy;
-class FibConfigTableObserverDummy;
-class FibConfigTableSetDummy;
-class IfConfigGetDummy;
-class IfConfigObserverDummy;
-class IfConfigSetDummy;
 
 
 /**
