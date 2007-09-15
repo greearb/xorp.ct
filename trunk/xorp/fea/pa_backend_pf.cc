@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.4 2007/09/15 19:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.5 2007/09/15 21:31:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -123,7 +123,7 @@ PaPfBackend::push_entries4(const PaSnapshot4* snap)
     uint32_t rulebuf[MAX_PF_RULE_WORDS];
     uint32_t size_used;
     int ret_value;
-    u_int32_t ticket;
+    uint32_t ticket;
 
     ret_value = XORP_ERROR;
 
@@ -252,7 +252,7 @@ PaPfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
     XLOG_ASSERT(dsnap4 != NULL);
 
     // Begin a pf transaction.
-    u_int32_t ticket = start_transaction();
+    uint32_t ticket = start_transaction();
     if (ticket == -1)
 	return (XORP_ERROR);
 
@@ -336,7 +336,7 @@ PaPfBackend::start_transaction()
 }
 
 int
-PaPfBackend::abort_transaction(u_int32_t ticket)
+PaPfBackend::abort_transaction(uint32_t ticket)
 {
     struct pfioc_trans trans;
     struct pfioc_trans_e trans_e;
@@ -358,7 +358,7 @@ PaPfBackend::abort_transaction(u_int32_t ticket)
 }
 
 int
-PaPfBackend::commit_transaction(u_int32_t ticket)
+PaPfBackend::commit_transaction(uint32_t ticket)
 {
     struct pfioc_trans trans;
     struct pfioc_trans_e trans_e;
@@ -382,7 +382,7 @@ PaPfBackend::commit_transaction(u_int32_t ticket)
 }
 
 int
-PaPfBackend::transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket)
+PaPfBackend::transcribe_and_add_rule4(const PaEntry4& entry, uint32_t ticket)
 {
     struct pfioc_rule pfr;
 
