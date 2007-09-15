@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.18 2007/05/23 12:12:36 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.19 2007/09/10 17:35:23 pavlin Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -256,7 +256,7 @@ IfMgrVifAtomToCommands::convert(IfMgrCommandSinkBase& s) const
     s.push(new IfMgrVifSetPifIndex(ifn, vifn, _v.pif_index()));
     s.push(new IfMgrVifSetVifIndex(ifn, vifn, _v.vif_index()));
     s.push(new IfMgrVifSetIsVlan(ifn, vifn, _v.is_vlan()));
-    s.push(new IfMgrVifSetVlanTag(ifn, vifn, _v.vlan_tag()));
+    s.push(new IfMgrVifSetVlanId(ifn, vifn, _v.vlan_id()));
 
     const IfMgrVifAtom::IPv4Map& v4s = _v.ipv4addrs();
     for (IfMgrVifAtom::IPv4Map::const_iterator cai = v4s.begin();

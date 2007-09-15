@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.1 2007/09/15 00:32:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -158,7 +158,7 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 	//
 
 	// Get the VLAN information
-	uint16_t vlan_tag = vlanreq.vlr_tag;
+	uint16_t vlan_id = vlanreq.vlr_tag;
 	string parent_ifname = vlanreq.vlr_parent;
 
 	//
@@ -192,7 +192,7 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 
 	// Set the VLAN vif info
 	parent_vifp->set_vlan(true);
-	parent_vifp->set_vlan_tag(vlan_tag);
+	parent_vifp->set_vlan_id(vlan_id);
     }
 
     return (XORP_OK);

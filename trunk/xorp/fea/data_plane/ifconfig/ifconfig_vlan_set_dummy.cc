@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.1 2007/09/15 00:32:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -110,7 +110,7 @@ IfConfigVlanSetDummy::push_config(IfTree& iftree)
 		XLOG_ERROR("%s", error_msg.c_str());
 		return (false);
 	    }
-	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_tag(), error_msg)
+	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_id(), error_msg)
 		!= XORP_OK) {
 		XLOG_ERROR("%s", error_msg.c_str());
 		return (false);
@@ -148,12 +148,12 @@ IfConfigVlanSetDummy::delete_vlan(const string& parent_ifname,
 int
 IfConfigVlanSetDummy::config_vlan(const string& parent_ifname,
 				  const string& vlan_name,
-				  uint16_t vlan_tag,
+				  uint16_t vlan_id,
 				  string& error_msg)
 {
     UNUSED(parent_ifname);
     UNUSED(vlan_name);
-    UNUSED(vlan_tag);
+    UNUSED(vlan_id);
     UNUSED(error_msg);
 
     return (XORP_OK);

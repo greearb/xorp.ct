@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.23 2007/05/23 04:08:25 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.24 2007/09/10 17:35:23 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -759,35 +759,34 @@ IfMgrVifSetIsVlan::str() const
 }
 
 // ----------------------------------------------------------------------------
-// IfMgrVifSetVlanTag
+// IfMgrVifSetVlanId
 
 bool
-IfMgrVifSetVlanTag::execute(IfMgrIfTree& tree) const
+IfMgrVifSetVlanId::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
     if (vifa == NULL)
 	return false;
 
-    vifa->set_vlan_tag(vlan_tag());
+    vifa->set_vlan_id(vlan_id());
     return true;
 }
 
 bool
-IfMgrVifSetVlanTag::forward(XrlSender&			sender,
-			    const string&		xrl_target,
-			    const IfMgrXrlSendCB&	xscb) const
+IfMgrVifSetVlanId::forward(XrlSender&			sender,
+			   const string&		xrl_target,
+			   const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
-    return c.send_vif_set_vlan_tag(xt, ifname(), vifname(),
-				   vlan_tag(), xscb);
+    return c.send_vif_set_vlan_id(xt, ifname(), vifname(), vlan_id(), xscb);
 }
 
 string
-IfMgrVifSetVlanTag::str() const
+IfMgrVifSetVlanId::str() const
 {
-    return vif_str_begin(this, "SetVlanTag")
-	+ ", " + c_format("%u", XORP_UINT_CAST(vlan_tag())) + vif_str_end();
+    return vif_str_begin(this, "SetVlanId")
+	+ ", " + c_format("%u", XORP_UINT_CAST(vlan_id())) + vif_str_end();
 }
 
 

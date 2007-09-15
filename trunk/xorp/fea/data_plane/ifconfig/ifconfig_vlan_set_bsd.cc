@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.1 2007/09/15 00:32:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -148,7 +148,7 @@ IfConfigVlanSetBsd::push_config(IfTree& iftree)
 		XLOG_ERROR("%s", error_msg.c_str());
 		return (false);
 	    }
-	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_tag(), error_msg)
+	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_id(), error_msg)
 		!= XORP_OK) {
 		XLOG_ERROR("%s", error_msg.c_str());
 		return (false);
@@ -212,7 +212,7 @@ IfConfigVlanSetBsd::delete_vlan(const string& parent_ifname,
 int
 IfConfigVlanSetBsd::config_vlan(const string& parent_ifname,
 				const string& vlan_name,
-				uint16_t vlan_tag,
+				uint16_t vlan_id,
 				string& error_msg)
 {
     struct ifreq ifreq;
@@ -221,7 +221,7 @@ IfConfigVlanSetBsd::config_vlan(const string& parent_ifname,
     memset(&ifreq, 0, sizeof(ifreq));
     strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
     memset(&vlanreq, 0, sizeof(vlanreq));
-    vlanreq.vlr_tag = vlan_tag;
+    vlanreq.vlr_tag = vlan_id;
     strlcpy(vlanreq.vlr_parent, parent_ifname.c_str(),
 	    sizeof(vlanreq.vlr_parent));
     ifreq.ifr_data = (caddr_t)(&vlanreq);
@@ -229,7 +229,7 @@ IfConfigVlanSetBsd::config_vlan(const string& parent_ifname,
 	error_msg = c_format("Cannot set VLAN interface %s "
 			     "(parent = %s VLAN ID = %u): %s",
 			     vlan_name.c_str(), parent_ifname.c_str(),
-			     vlan_tag, strerror(errno));
+			     vlan_id, strerror(errno));
 	return (XORP_ERROR);
     }
 

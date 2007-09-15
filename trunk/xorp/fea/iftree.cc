@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.46 2007/09/09 04:40:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.47 2007/09/10 17:37:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1072,7 +1072,7 @@ IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
     : IfTreeItem(), _ifname(ifname), _vifname(vifname),
       _pif_index(0), _vif_index(Vif::VIF_INDEX_INVALID), _enabled(false),
       _broadcast(false), _loopback(false), _point_to_point(false),
-      _multicast(false), _pim_register(false), _is_vlan(false), _vlan_tag(0)
+      _multicast(false), _pim_register(false), _is_vlan(false), _vlan_id(0)
 {}
 
 bool
@@ -1222,9 +1222,9 @@ IfTreeVif::str() const
 	vif_index_str = c_format("{ vif_index := %u } ",
 				 XORP_UINT_CAST(_vif_index));
     }
-    // XXX: Conditionally print the VLAN tag
+    // XXX: Conditionally print the VLAN ID
     if (_is_vlan) {
-	vlan_str = c_format("{ vlan_tag = %u } ", _vlan_tag);
+	vlan_str = c_format("{ vlan_id = %u } ", _vlan_id);
     }
     vif_index_str += pim_register_str;
     vif_index_str += vlan_str;

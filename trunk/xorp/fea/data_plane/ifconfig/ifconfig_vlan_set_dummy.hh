@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.hh,v 1.1 2007/09/15 00:32:17 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_DUMMY_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_DUMMY_HH__
@@ -92,13 +92,13 @@ public:
      *
      * @param parent_ifname the parent interface name.
      * @param vlan_name the VLAN vif name.
-     * @param vlan_tag the VLAN tag.
+     * @param vlan_id the VLAN ID.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_vlan(const string& parent_ifname,
 			    const string& vlan_name,
-			    uint16_t vlan_tag,
+			    uint16_t vlan_id,
 			    string& error_msg);
 
 private:

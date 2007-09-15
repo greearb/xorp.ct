@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.48 2007/09/09 04:40:42 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.49 2007/09/10 17:37:49 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -626,8 +626,8 @@ public:
     bool is_vlan() const		{ return _is_vlan; }
     void set_vlan(bool v)		{ _is_vlan = v; mark(CHANGED); }
 
-    uint16_t vlan_tag() const		{ return _vlan_tag; }
-    void set_vlan_tag(uint16_t v)	{ _vlan_tag = v; mark(CHANGED); }
+    uint16_t vlan_id() const		{ return _vlan_id; }
+    void set_vlan_id(uint16_t v)	{ _vlan_id = v; mark(CHANGED); }
 
     const IPv4Map& ipv4addrs() const	{ return _ipv4addrs; }
     IPv4Map& ipv4addrs()		{ return _ipv4addrs; }
@@ -721,7 +721,7 @@ public:
 	set_multicast(o.multicast());
 	set_pim_register(o.pim_register());
 	set_vlan(o.is_vlan());
-	set_vlan_tag(o.vlan_tag());
+	set_vlan_id(o.vlan_id());
     }
 
     /**
@@ -740,7 +740,7 @@ public:
 		&& (multicast() == o.multicast())
 		&& (pim_register() == o.pim_register())
 		&& (is_vlan() == o.is_vlan())
-		&& (vlan_tag() == o.vlan_tag()));
+		&& (vlan_id() == o.vlan_id()));
     }
 
     void finalize_state();
@@ -760,7 +760,7 @@ protected:
     bool	_multicast;
     bool	_pim_register;
     bool	_is_vlan;
-    uint16_t	_vlan_tag;
+    uint16_t	_vlan_id;
 
     IPv4Map	 _ipv4addrs;
     IPv6Map	 _ipv6addrs;

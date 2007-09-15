@@ -26,7 +26,7 @@ interface fea_ifmgr_mirror/0.1 {
 	vif_set_pif_index ? ifname:txt & vifname:txt & pif_index:u32
 	vif_set_vif_index ? ifname:txt & vifname:txt & vif_index:u32
 	vif_set_vlan ? ifname:txt & vifname:txt & is_vlan:bool
-	vif_set_vlan_tag ? ifname:txt & vifname:txt & vlan_tag:u32
+	vif_set_vlan_id ? ifname:txt & vifname:txt & vlan_id:u32
 
 
 

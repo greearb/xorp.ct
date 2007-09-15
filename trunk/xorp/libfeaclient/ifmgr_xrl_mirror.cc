@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.23 2007/05/08 21:47:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.24 2007/09/10 17:35:23 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -171,11 +171,11 @@ protected:
 	const string&	vifname,
 	const bool&	is_vlan);
 
-    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_vlan_tag(
+    XrlCmdError fea_ifmgr_mirror_0_1_vif_set_vlan_id(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
-	const uint32_t&	vlan_tag);
+	const uint32_t&	vlan_id);
 
     XrlCmdError fea_ifmgr_mirror_0_1_ipv4_add(
 	// Input values,
@@ -594,13 +594,13 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vlan(
 }
 
 XrlCmdError
-IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vlan_tag(
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_vif_set_vlan_id(
 	const string&	ifname,
 	const string&	vifname,
-	const uint32_t&	vlan_tag
+	const uint32_t&	vlan_id
 	)
 {
-    _dispatcher.push(new IfMgrVifSetVlanTag(ifname, vifname, vlan_tag));
+    _dispatcher.push(new IfMgrVifSetVlanId(ifname, vifname, vlan_id));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

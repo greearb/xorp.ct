@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.31 2007/05/23 12:12:36 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.32 2007/09/10 17:35:23 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -353,8 +353,8 @@ public:
     bool	is_vlan() const			{ return _is_vlan; }
     void	set_vlan(bool v)		{ _is_vlan = v; }
 
-    uint16_t	vlan_tag() const		{ return _vlan_tag; }
-    void	set_vlan_tag(uint16_t v)	{ _vlan_tag = v; }
+    uint16_t	vlan_id() const			{ return _vlan_id; }
+    void	set_vlan_id(uint16_t v)		{ _vlan_id = v; }
 
     const IPv4Map&	ipv4addrs() const	{ return _ipv4addrs; }
     IPv4Map&		ipv4addrs() 		{ return _ipv4addrs; }
@@ -383,7 +383,7 @@ protected:
     uint32_t	_pif_index;		// Physical interface index
     uint32_t	_vif_index;		// Virtual interface index
     bool	_is_vlan;		// True if VLAN vif
-    uint16_t	_vlan_tag;		// The VLAN tag
+    uint16_t	_vlan_id;		// The VLAN ID
 
     IPv4Map	_ipv4addrs;		// The IPv4 addresses
     IPv6Map	_ipv6addrs;		// The IPv6 addresses
@@ -564,7 +564,7 @@ IfMgrVifAtom::IfMgrVifAtom(const string& name)
       _pif_index(0),
       _vif_index(Vif::VIF_INDEX_INVALID),
       _is_vlan(false),
-      _vlan_tag(0)
+      _vlan_id(0)
 {
 }
 

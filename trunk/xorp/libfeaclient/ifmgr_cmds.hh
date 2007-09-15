@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.18 2007/05/23 12:12:36 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.19 2007/09/10 17:35:23 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -509,18 +509,18 @@ protected:
 };
 
 /**
- * @short Command to set the VLAN tag to a virtual interface.
+ * @short Command to set the VLAN ID to a virtual interface.
  */
-class IfMgrVifSetVlanTag : public IfMgrVifCommandBase {
+class IfMgrVifSetVlanId : public IfMgrVifCommandBase {
 public:
-    IfMgrVifSetVlanTag(const string&	ifname,
-		       const string&	vifname,
-		       uint16_t		vlan_tag)
+    IfMgrVifSetVlanId(const string&	ifname,
+		      const string&	vifname,
+		      uint16_t		vlan_id)
 	: IfMgrVifCommandBase(ifname, vifname),
-	  _vlan_tag(vlan_tag)
+	  _vlan_id(vlan_id)
     {}
 
-    uint16_t vlan_tag() const 	{ return _vlan_tag; }
+    uint16_t vlan_id() const 	{ return _vlan_id; }
 
     bool execute(IfMgrIfTree& tree) const;
 
@@ -531,7 +531,7 @@ public:
     string str() const;
 
 protected:
-    uint16_t	_vlan_tag;
+    uint16_t	_vlan_id;
 };
 
 
