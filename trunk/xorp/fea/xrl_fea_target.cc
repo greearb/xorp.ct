@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.28 2007/08/16 01:13:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.29 2007/08/21 00:10:37 pavlin Exp $"
 
 
 //
@@ -1649,6 +1649,38 @@ XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetVifEnabled(iftree, ifname, vifname, enabled),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_vif_vlan(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const string&	vif,
+    const uint32_t&	vlan_id)
+{
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+    const uint32_t max_vlan_id = 4096;
+
+    // Check the VLAN ID value
+    if (vlan_id >= max_vlan_id) {
+	error_msg = c_format("Invalid VLAN ID %u for interface %s vif %s: "
+			     "maximum value is %u",
+			     vlan_id, ifname.c_str(), vif.c_str(),
+			     max_vlan_id);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetVifVlan(iftree, ifname, vif, vlan_id),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

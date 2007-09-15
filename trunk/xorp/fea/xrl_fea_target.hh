@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.18 2007/08/16 01:13:24 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.19 2007/08/21 00:10:37 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -567,6 +567,21 @@ public:
 	const string&	vif,
 	// Output values,
 	XrlAtomList&	addresses);
+
+    /**
+     *  Set VLAN vif.
+     *
+     *  @param ifname the name of the physical interface associated with the
+     *  VLAN.
+     *  @param vif the name of the VLAN.
+     *  @param vlan_id the VLAN ID. It must be in the range 0 through 4095.
+     */
+    XrlCmdError ifmgr_0_1_set_vif_vlan(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	ifname,
+	const string&	vif,
+	const uint32_t&	vlan_id);
 
     XrlCmdError ifmgr_0_1_create_address4(
 	// Input values,

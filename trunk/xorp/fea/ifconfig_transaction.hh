@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.9 2007/07/11 21:20:24 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.10 2007/08/09 00:46:56 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -410,6 +410,35 @@ public:
 
 private:
     bool _enabled;
+};
+
+/**
+ * Class for setting the VLAN state of a vif.
+ */
+class SetVifVlan : public VifModifier {
+public:
+    SetVifVlan(IfTree& 	iftree,
+	       const string&	ifname,
+	       const string&	vifname,
+	       uint32_t		vlan_id)
+	: VifModifier(iftree, ifname, vifname), _vlan_id(vlan_id) {}
+
+    bool dispatch() {
+	IfTreeVif* fv = vif();
+	if (fv == NULL)
+	    return false;
+	fv->set_vlan(true);
+	fv->set_vlan_id(_vlan_id);
+	return true;
+    }
+
+    string str() const {
+	return c_format("SetVifVlan: %s %u",
+			path().c_str(), _vlan_id);
+    }
+
+private:
+    uint32_t _vlan_id;
 };
 
 /**
