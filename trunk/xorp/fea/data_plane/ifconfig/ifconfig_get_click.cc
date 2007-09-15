@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.cc,v 1.6 2007/06/06 19:55:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.cc,v 1.7 2007/07/11 22:18:12 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -85,13 +85,13 @@ IfConfigGetClick::stop(string& error_msg)
     return (ret_value);
 }
 
-bool
+int
 IfConfigGetClick::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigGetClick::read_config(IfTree& iftree)
 {
     //
@@ -102,7 +102,7 @@ IfConfigGetClick::read_config(IfTree& iftree)
     //
     IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
     if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
-	return (false);
+	return (XORP_ERROR);
 
     IfConfigSetClick* ifconfig_set_click;
     ifconfig_set_click = dynamic_cast<IfConfigSetClick*>(ifconfig_set);
@@ -111,10 +111,10 @@ IfConfigGetClick::read_config(IfTree& iftree)
 	// XXX: The IfConfigSet plugin was probably changed to something else
 	// which we don't know how to deal with.
 	//
-	return (false);
+	return (XORP_ERROR);
     }
 
     iftree = ifconfig_set_click->iftree();
 
-    return (true);
+    return (XORP_OK);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.cc,v 1.7 2007/06/06 19:55:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_getifaddrs.cc,v 1.8 2007/07/11 22:18:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -79,27 +79,27 @@ IfConfigGetGetifaddrs::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigGetGetifaddrs::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigGetGetifaddrs::read_config(IfTree& iftree)
 {
     struct ifaddrs *ifap;
     
     if (getifaddrs(&ifap) != 0) {
 	XLOG_ERROR("getifaddrs() failed: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
 
     parse_buffer_getifaddrs(ifconfig(), iftree, ifap);
 
     freeifaddrs(ifap);
     
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HAVE_GETIFADDRS

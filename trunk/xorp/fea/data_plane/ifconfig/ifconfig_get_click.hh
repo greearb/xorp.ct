@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.hh,v 1.4 2007/07/11 22:18:12 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_click.hh,v 1.5 2007/07/16 23:56:11 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_CLICK_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_CLICK_HH__
@@ -56,13 +56,13 @@ public:
     /**
      * Pull the network interface information from the underlying system.
      * 
-     * @param config the IfTree storage to store the pulled information.
-     * @return true on success, otherwise false.
+     * @param iftree the IfTree storage to store the pulled information.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool pull_config(IfTree& config);
+    virtual int pull_config(IfTree& iftree);
     
 private:
-    bool read_config(IfTree& iftree);
+    int read_config(IfTree& iftree);
 
     ClickSocketReader	_cs_reader;
 };

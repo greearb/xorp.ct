@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.hh,v 1.4 2007/07/11 22:18:14 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.hh,v 1.5 2007/07/16 23:56:11 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_SYSCTL_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_SYSCTL_HH__
@@ -54,10 +54,10 @@ public:
     /**
      * Pull the network interface information from the underlying system.
      * 
-     * @param config the IfTree storage to store the pulled information.
-     * @return true on success, otherwise false.
+     * @param iftree the IfTree storage to store the pulled information.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool pull_config(IfTree& config);
+    virtual int pull_config(IfTree& iftree);
 
     /**
      * Parse information about network interface configuration change from
@@ -69,14 +69,14 @@ public:
      * @param ifconfig the IfConfig instance.
      * @param iftree the IfTree storage to store the parsed information.
      * @param buffer the buffer with the data to parse.
-     * @return true on success, otherwise false.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      * @see IfTree.
      */
-    static bool parse_buffer_routing_socket(IfConfig& ifconfig, IfTree& iftree,
+    static int parse_buffer_routing_socket(IfConfig& ifconfig, IfTree& iftree,
 					    const vector<uint8_t>& buffer);
 
 private:
-    bool read_config(IfTree& iftree);
+    int read_config(IfTree& iftree);
     static string iff_flags(uint32_t flags);
 };
 

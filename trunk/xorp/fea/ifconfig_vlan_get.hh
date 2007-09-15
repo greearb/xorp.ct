@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/ifconfig_vlan_get.hh,v 1.1 2007/09/15 00:32:16 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_VLAN_GET_HH__
 #define __FEA_IFCONFIG_VLAN_GET_HH__
@@ -80,12 +80,14 @@ public:
     virtual int stop(string& error_msg) = 0;
 
     /**
-     * Pull the network interface information from the underlying system.
+     * Pull the VLAN network interface information from the underlying system.
      * 
-     * @param config the IfTree storage to store the pulled information.
-     * @return true on success, otherwise false.
+     * The VLAN information is added to the existing state in the iftree.
+     *
+     * @param iftree the IfTree storage to store the pulled information.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool pull_config(IfTree& config) = 0;
+    virtual int pull_config(IfTree& iftree) = 0;
     
 protected:
     // Misc other state

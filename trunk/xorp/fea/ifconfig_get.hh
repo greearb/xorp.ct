@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.43 2007/07/11 22:18:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.44 2007/07/16 23:54:05 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -82,10 +82,10 @@ public:
     /**
      * Pull the network interface information from the underlying system.
      * 
-     * @param config the IfTree storage to store the pulled information.
-     * @return true on success, otherwise false.
+     * @param iftree the IfTree storage to store the pulled information.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool pull_config(IfTree& config) = 0;
+    virtual int pull_config(IfTree& iftree) = 0;
     
 protected:
     // Misc other state

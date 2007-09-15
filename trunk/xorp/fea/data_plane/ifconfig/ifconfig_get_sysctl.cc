@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.cc,v 1.8 2007/06/13 00:15:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_sysctl.cc,v 1.9 2007/07/11 22:18:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -86,13 +86,13 @@ IfConfigGetSysctl::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigGetSysctl::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigGetSysctl::read_config(IfTree& iftree)
 {
     int mib[6];
@@ -108,7 +108,7 @@ IfConfigGetSysctl::read_config(IfTree& iftree)
     size_t sz;
     if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), NULL, &sz, NULL, 0) != 0) {
 	XLOG_ERROR("sysctl(NET_RT_IFLIST) failed: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
     
     //
@@ -136,7 +136,7 @@ IfConfigGetSysctl::read_config(IfTree& iftree)
 	    continue;
 	}
 	XLOG_ERROR("sysctl(NET_RT_IFLIST) failed: %s", strerror(errno));
-	return false;
+	return (XORP_ERROR);
     }
 }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.7 2007/06/06 19:55:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.8 2007/07/11 22:18:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -87,13 +87,13 @@ IfConfigGetIPHelper::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigGetIPHelper::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigGetIPHelper::read_config(IfTree& iftree)
 {
     PIP_ADAPTER_ADDRESSES	pAdapters, curAdapter;
@@ -124,7 +124,7 @@ IfConfigGetIPHelper::read_config(IfTree& iftree)
 	XLOG_ERROR("GetAdaptersAddresses(): %s\n", win_strerror(result));
 	if (pAdapters != NULL)
 	    free(pAdapters);
-	return false;
+	return (XORP_ERROR);
     }
 
     char	if_name[MAX_ADAPTER_NAME_LENGTH+4];
@@ -267,7 +267,7 @@ IfConfigGetIPHelper::read_config(IfTree& iftree)
 
     free(pAdapters);
 
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HOST_OS_WINDOWS

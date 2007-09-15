@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_dummy.cc,v 1.1 2007/09/15 00:32:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -74,10 +74,10 @@ IfConfigVlanGetDummy::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigVlanGetDummy::pull_config(IfTree& iftree)
 {
     UNUSED(iftree);
 
-    return true;
+    return (XORP_OK);
 }

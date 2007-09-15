@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.11 2007/06/04 23:17:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.12 2007/07/11 22:18:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -198,7 +198,7 @@ IfConfigGetSysctl::iff_flags(uint32_t flags)
     return ret;
 }
 
-bool
+int
 IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 					       IfTree& iftree,
 					       const vector<uint8_t>& buffer)
@@ -255,9 +255,9 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
     }
     
     if (! recognized)
-	return false;
-    
-    return true;
+	return (XORP_ERROR);
+
+    return (XORP_OK);
 }
 
 static void

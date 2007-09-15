@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.10 2007/07/18 01:30:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.11 2007/09/15 00:27:53 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -135,13 +135,13 @@ IfConfigGetIoctl::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigGetIoctl::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigGetIoctl::read_config(IfTree& iftree)
 {
     struct ifconf ifconf;
@@ -151,7 +151,7 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
     //
     if (fea_data_plane_manager().have_ipv4()) {
 	if (ioctl_read_ifconf(AF_INET, &ifconf) != true)
-	    return false;
+	    return (XORP_ERROR);
 	vector<uint8_t> buffer(ifconf.ifc_len);
 	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
 	delete[] ifconf.ifc_buf;
@@ -165,7 +165,7 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
     //
     if (fea_data_plane_manager().have_ipv6()) {
 	if (ioctl_read_ifconf(AF_INET6, &ifconf) != true)
-	    return false;
+	    return (XORP_ERROR);
 	vector<uint8_t> buffer(ifconf.ifc_len);
 	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
 	delete[] ifconf.ifc_buf;
@@ -174,7 +174,7 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
     }
 #endif // HAVE_IPV6
     
-    return true;
+    return (XORP_OK);
 }
 
 static bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.1 2007/09/15 00:32:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.2 2007/09/15 00:57:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -112,13 +112,13 @@ IfConfigVlanGetBsd::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigVlanGetBsd::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigVlanGetBsd::read_config(IfTree& iftree)
 {
     IfTree::IfMap::iterator ii;
@@ -128,7 +128,7 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 	error_msg = c_format("Cannot read VLAN interface intormation: "
 			     "the IfConfigVlanGetBsd plugin is not running");
 	XLOG_ERROR("%s", error_msg.c_str());
-	return (false);
+	return (XORP_ERROR);
     }
     XLOG_ASSERT(_s4 >= 0);
 

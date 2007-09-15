@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.13 2007/07/11 22:18:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.14 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -49,15 +49,15 @@ const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V6 = "/proc/net/i
 #ifdef HAVE_PROC_LINUX
 
 static char* get_proc_linux_iface_name(char* name, char* p);
-static bool proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree,
-				   int family,
-				   const string& proc_linux_net_device_file);
-static bool if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
-			      const string& proc_linux_net_device_file);
+static int proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree,
+				  int family,
+				  const string& proc_linux_net_device_file);
+static int if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
+			     const string& proc_linux_net_device_file);
 
 #ifdef HAVE_IPV6
-static bool if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
-			      const string& proc_linux_net_device_file);
+static int if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
+			     const string& proc_linux_net_device_file);
 #endif
 
 IfConfigGetProcLinux::IfConfigGetProcLinux(FeaDataPlaneManager& fea_data_plane_manager)
@@ -124,13 +124,13 @@ IfConfigGetProcLinux::stop(string& error_msg)
     return (XORP_OK);
 }
 
-bool
+int
 IfConfigGetProcLinux::pull_config(IfTree& iftree)
 {
     return read_config(iftree);
 }
 
-bool
+int
 IfConfigGetProcLinux::read_config(IfTree& iftree)
 {
     // XXX: this method relies on the ioctl() method
@@ -142,8 +142,8 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     if (fea_data_plane_manager().have_ipv4()) {
 	if (proc_read_ifconf_linux(ifconfig(), iftree, AF_INET,
 				   PROC_LINUX_NET_DEVICES_FILE_V4)
-	    != true)
-	    return false;
+	    != XORP_OK)
+	    return (XORP_ERROR);
     }
     
 #ifdef HAVE_IPV6
@@ -153,19 +153,19 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
     if (fea_data_plane_manager().have_ipv6()) {
 	if (proc_read_ifconf_linux(ifconfig(), iftree, AF_INET6,
 				   PROC_LINUX_NET_DEVICES_FILE_V6)
-	    != true)
-	    return false;
+	    != XORP_OK)
+	    return (XORP_ERROR);
     }
 #endif // HAVE_IPV6
     
-    return true;
+    return (XORP_OK);
 }
 
 //
 // Derived from Redhat Linux ifconfig code
 //
 
-static bool
+static int
 proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree, int family,
 		       const string& proc_linux_net_device_file)
 {
@@ -191,7 +191,7 @@ proc_read_ifconf_linux(IfConfig& ifconfig, IfTree& iftree, int family,
 	break;
     }
     
-    return true;
+    return (XORP_OK);
 }
 
 static char*
@@ -245,7 +245,7 @@ get_proc_linux_iface_name(char* name, char* p)
 // (as part of the net-tools collection) to merge the information from
 // both mechanisms. Enjoy!
 //
-static bool
+static int
 if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 		  const string& proc_linux_net_device_file)
 {
@@ -257,7 +257,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
     if (fh == NULL) {
 	XLOG_FATAL("Cannot open file %s for reading: %s",
 		   proc_linux_net_device_file.c_str(), strerror(errno)); 
-	return false;
+	return (XORP_ERROR);
     }
     fgets(buf, sizeof(buf), fh);	// lose starting 2 lines of comments
     s = get_proc_linux_iface_name(ifname, buf);
@@ -265,7 +265,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 	XLOG_ERROR("%s: improper file contents",
 		   proc_linux_net_device_file.c_str());
 	fclose(fh);
-	return false;
+	return (XORP_ERROR);
     }
     fgets(buf, sizeof(buf), fh);
     s = get_proc_linux_iface_name(ifname, buf);    
@@ -273,7 +273,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 	XLOG_ERROR("%s: improper file contents",
 		   proc_linux_net_device_file.c_str());
 	fclose(fh);
-	return false;
+	return (XORP_ERROR);
     }
     
     while (fgets(buf, sizeof(buf), fh) != NULL) {
@@ -309,7 +309,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
     // Clean up
     fclose(fh);
     
-    return true;
+    return (XORP_OK);
 }
 
 // 
@@ -329,7 +329,7 @@ if_fetch_linux_v4(IfConfig& ifconfig, IfTree& iftree,
 // the same name. No comment.
 //
 #ifdef HAVE_IPV6
-static bool
+static int
 if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 		  const string& proc_linux_net_device_file)
 {
@@ -344,14 +344,14 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
     if (fh == NULL) {
 	XLOG_FATAL("Cannot open file %s for reading: %s",
 		   proc_linux_net_device_file.c_str(), strerror(errno)); 
-	return false;
+	return (XORP_ERROR);
     }
     
     sock = socket(AF_INET6, SOCK_DGRAM, 0);
     if (sock < 0) {
 	XLOG_FATAL("Could not initialize ioctl() socket");
 	fclose(fh);
-	return false;
+	return (XORP_ERROR);
     }
     
     while (fscanf(fh, "%4s%4s%4s%4s%4s%4s%4s%4s %02x %02x %02x %02x %20s\n",
@@ -545,7 +545,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
     close(sock);
     fclose(fh);
     
-    return true;
+    return (XORP_OK);
 }
 #endif // HAVE_IPV6
 
