@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 6; tab-width: 8; indent-tabs-mode: t -*-
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2007 International Computer Science Institute
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_nf.cc,v 1.2 2007/02/16 22:45:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_nf.cc,v 1.3 2007/09/15 19:52:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -65,8 +65,7 @@
 /* ------------------------------------------------------------------------- */
 /* Constructor and destructor. */
 
-PaNfBackend::PaNfBackend()
-    throw(PaInvalidBackendException)
+PaNfBackend::PaNfBackend() throw(PaInvalidBackendException)
     : _fd4(-1),
       _fd6(-1)
 {
@@ -159,10 +158,10 @@ PaNfBackend::push_entries4(const PaSnapshot4* snap)
     pipt = ipt;
     for (PaSnapTable4::const_iterator i = table.begin();
 	 i != table.end(); i++) {
-	  ret_value = transcribe_rule4(*i, pipt);
-	  if (ret_value != XORP_OK)
-		break;
-	  ++pipt;
+	ret_value = transcribe_rule4(*i, pipt);
+	if (ret_value != XORP_OK)
+	    break;
+	++pipt;
     }
 
     // Push the new ruleset to Netfilter.
@@ -218,7 +217,7 @@ PaNfBackend::create_snapshot4()
     ige = malloc(bufsize);
     if (ige == NULL) {
 	XLOG_ERROR("Cannot allocate NF rule state: malloc: %s",
-		    strerror(errno));
+		   strerror(errno));
 	return (NULL);
     }
 
@@ -226,9 +225,10 @@ PaNfBackend::create_snapshot4()
     // Request the firewall rule list from the kernel.
     //
     strncpy(ige->name, "FILTER", IPT_TABLE_MAXNAMELEN);
-    if (getsockopt(sockfd, TC_IPPROTO, SO_GET_ENTRIES, ige, &bufsize) < 0)
+    if (getsockopt(sockfd, TC_IPPROTO, SO_GET_ENTRIES, ige, &bufsize) < 0) {
 	XLOG_ERROR("Cannot snapshot NF rule state: SO_GET_ENTRIES: %s",
 		   strerror(errno));
+	return (NULL);
     }
 
     // Create a snapshot of the current NF rule set using the
@@ -306,7 +306,7 @@ PaNfBackend::push_rules4(unsigned int size, unsigned int num_entries,
     if (setsockopt(_fd4, IPPROTO_IP, IPT_SO_SET_REPLACE, ipr, rsize) < 0) {
 	XLOG_ERROR("Failed to commit transaction for adding rules"
 		   "to NF firewall: setsockopt SO_SET_REPLACE: %s",
-		    strerror(errno));
+		   strerror(errno));
 	ret_value = XORP_ERROR;
     }
 
@@ -324,7 +324,7 @@ PaNfBackend::transcribe_rule4(const PaEntry4& entry, struct ipt_entry *buf,
     // it out. We can use this as a sanity check.
     //
     ssize_t needed = sizeof(struct ipt_entry) +
-		     sizeof(struct ipt_standard_target);
+	sizeof(struct ipt_standard_target);
     if (ipt->ip_proto == IPPROTO_TCP || ipt->ip_proto == IPPROTO_UDP)
 	needed += sizeof(struct ipt_entry_match); // XXX
     //

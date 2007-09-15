@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 6; tab-width: 8; indent-tabs-mode: t -*-
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2007 International Computer Science Institute
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.3 2007/02/16 22:45:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.4 2007/09/15 19:52:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -62,8 +62,7 @@
 
 const char* PaPfBackend::_pfdevname = "/dev/pf";
 
-PaPfBackend::PaPfBackend()
-    throw(PaInvalidBackendException)
+PaPfBackend::PaPfBackend() throw(PaInvalidBackendException)
     : _fd(-1)
 {
 #ifndef HAVE_PACKETFILTER_PF
@@ -137,15 +136,15 @@ PaPfBackend::push_entries4(const PaSnapshot4* snap)
     // pushing each one into the inactive ruleset.
     for (PaSnapTable4::const_iterator i = table.begin();
 	 i != table.end(); i++) {
-	  ret_value = transcribe_and_push_rule4(*i, ticket);
-	  if (ret_value != XORP_OK)
-		break;
+	ret_value = transcribe_and_push_rule4(*i, ticket);
+	if (ret_value != XORP_OK)
+	    break;
     }
 
     // Attempt to commit the transaction, thus flipping
     // the active and inactive rulesets.
     if (ret_value == XORP_OK)
-	  ret_value = commit_transaction(ticket);
+	ret_value = commit_transaction(ticket);
 
     return (ret_value);
 #endif
@@ -196,7 +195,7 @@ PaPfBackend::create_snapshot4()
     memset(&pr, 0, sizeof(pr));
     if (0 < ioctl(_fd, DIOCGETRULES, &pr)) {
 	XLOG_ERROR("Cannot snapshot PF rule state: DIOCGETRULES: %s",
-		    strerror(errno));
+		   strerror(errno));
 	return (NULL);
     }
 
@@ -219,7 +218,7 @@ PaPfBackend::create_snapshot4()
 	ppr->ticket = pr.ticket;
 	if (0 < ioctl(_fd, DIOCGETRULE, ppr)) {
 	    XLOG_ERROR("Cannot snapshot PF rule state: DIOCGETRULE: %s",
-			strerror(errno));
+		       strerror(errno));
 	    break;
 	}
 	ppr++;
@@ -434,7 +433,7 @@ PaPfBackend::transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket)
 PaPfBackend::Snapshot4::Snapshot4(const PaBackend::Snapshot4Base& snap4)
     throw(PaInvalidSnapshotException)
     : PaBackend::Snapshot4Base(snap4),
-      _parent(NULL), _nrules(0), _rulebuf(NULL)
+    _parent(NULL), _nrules(0), _rulebuf(NULL)
 {
     throw PaInvalidSnapshotException();
 }
