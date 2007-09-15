@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.21 2007/04/19 23:53:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.22 2007/05/08 01:15:50 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -445,9 +445,18 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    //
 	    fprintf(stdout, "        physical index %d\n",
 		    ifmgr_vif.pif_index());
-	    if (!ifmgr_iface.mac().empty())
+	    if (!ifmgr_iface.mac().empty()) {
 		fprintf(stdout, "        ether %s\n",
 			ifmgr_iface.mac().str().c_str());
+	    }
+
+	    //
+	    // Print the VLAN-related information
+	    //
+	    if (ifmgr_vif.is_vlan()) {
+		fprintf(stdout, "        vlan: %u parent interface: %s\n",
+			ifmgr_vif.vlan_id(), ifmgr_iface_name.c_str());
+	    }
 	}
     }
 
