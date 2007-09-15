@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.9 2007/07/11 22:18:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.10 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -59,7 +59,7 @@ IfConfigGetIoctl::~IfConfigGetIoctl()
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the ioctl(3) mechanism to get "
+	XLOG_ERROR("Cannot stop the ioctl(2) mechanism to get "
 		   "information about network interfaces from the underlying "
 		   "system: %s",
 		   error_msg.c_str());
@@ -114,16 +114,16 @@ IfConfigGetIoctl::stop(string& error_msg)
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
 	if (ret_value4 < 0) {
-	    error_msg = c_format("Could not close IPv4 ioctl() "
-				 "socket: %s", strerror(errno));
+	    error_msg = c_format("Could not close IPv4 ioctl() socket: %s",
+				 strerror(errno));
 	}
     }
     if (_s6 >= 0) {
 	ret_value6 = comm_close(_s6);
 	_s6 = -1;
 	if ((ret_value6 < 0) && (ret_value4 >= 0)) {
-	    error_msg = c_format("Could not close IPv6 ioctl() "
-				 "socket: %s", strerror(errno));
+	    error_msg = c_format("Could not close IPv6 ioctl() socket: %s",
+				 strerror(errno));
 	}
     }
 
