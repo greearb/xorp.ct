@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.281 2007/08/18 00:11:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.282 2007/09/13 22:06:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -377,6 +377,18 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
 	xorp_throw(BadPeer, c_format("Area %s not handled by %s/%s",
 				     pr_id(packet->get_area_id()).c_str(),
 				     _interface.c_str(), _vif.c_str()));
+    }
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (!src.is_linklocal_unicast()) {
+	    XLOG_WARNING("Packet has not been sent from a link-local address "
+			 "%s %s", cstring(src), cstring(*packet));
+	    return false;
+	}
+	break;
     }
 
     return _areas[area]->receive(dst, src, packet);
