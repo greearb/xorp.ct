@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.283 2007/09/17 23:42:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.284 2007/09/18 00:13:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -383,13 +383,16 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
-	if (!src.is_linklocal_unicast()) {
+	// Non link-local addreses are only allowed for virtual links
+	// which by definition are in the backbone.
+	if (!src.is_linklocal_unicast() && OspfTypes::BACKBONE != area
+	    && get_linktype() != OspfTypes::VirtualLink) {
 	    typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
 
 	    for(i = _areas.begin(); i != _areas.end(); i++)
 		XLOG_WARNING("area %s:", pr_id((*i).first).c_str());
 
-	    XLOG_WARNING("Packet has not been sent from a link-local address "
+	    XLOG_WARNING("Packet has not been sent with a link-local address "
 			 "%s %s", cstring(src), cstring(*packet));
 	    return false;
 	}
