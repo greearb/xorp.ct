@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.11 2007/09/15 00:27:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_ioctl.cc,v 1.12 2007/09/15 05:10:21 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -173,6 +173,16 @@ IfConfigGetIoctl::read_config(IfTree& iftree)
 	parse_buffer_ioctl(ifconfig(), iftree, AF_INET6, buffer);
     }
 #endif // HAVE_IPV6
+
+    //
+    // Get the VLAN vif info
+    //
+    IfConfigVlanGet* ifconfig_vlan_get;
+    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
+    if (ifconfig_vlan_get != NULL) {
+	if (ifconfig_vlan_get->pull_config(iftree) != XORP_OK)
+	    return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }

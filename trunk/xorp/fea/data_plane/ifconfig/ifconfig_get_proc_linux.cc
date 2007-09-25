@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.14 2007/07/18 01:30:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.15 2007/09/15 05:10:22 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -157,6 +157,16 @@ IfConfigGetProcLinux::read_config(IfTree& iftree)
 	    return (XORP_ERROR);
     }
 #endif // HAVE_IPV6
+
+    //
+    // Get the VLAN vif info
+    //
+    IfConfigVlanGet* ifconfig_vlan_get;
+    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
+    if (ifconfig_vlan_get != NULL) {
+	if (ifconfig_vlan_get->pull_config(iftree) != XORP_OK)
+	    return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }

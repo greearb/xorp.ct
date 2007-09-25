@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.10 2007/07/18 01:30:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc,v 1.11 2007/09/15 19:52:48 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -119,6 +119,18 @@ IfConfigObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
 	    ifconfig(), ifconfig().live_config(), buffer)
 	!= XORP_OK) {
 	return;
+    }
+
+    //
+    // Get the VLAN vif info
+    //
+    IfConfigVlanGet* ifconfig_vlan_get;
+    ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
+    if (ifconfig_vlan_get != NULL) {
+	if (ifconfig_vlan_get->pull_config(ifconfig().live_config())
+	    != XORP_OK) {
+	    XLOG_ERROR("Unknown error while pulling VLAN information");
+	}
     }
 
     ifconfig().report_updates(ifconfig().live_config(), true);
