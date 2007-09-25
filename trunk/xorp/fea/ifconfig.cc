@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.71 2007/09/15 01:22:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.72 2007/09/15 19:52:38 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -385,8 +385,17 @@ IfConfig::register_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set,
 	//
 	// XXX: Push the current config into the new method
 	//
-	if (ifconfig_vlan_set->is_running())
-	    ifconfig_vlan_set->push_config(pushed_config());
+	// Note that we use the corresponding IfConfigSet plugin,
+	// because it is the entry poing for pushing interface configuration,
+	// while the IfConfigVlanSet plugin is supporting the IfConfigSet
+	// plugin.
+	//
+	if (ifconfig_vlan_set->is_running()) {
+	    FeaDataPlaneManager& m = ifconfig_vlan_set->fea_data_plane_manager();
+	    IfConfigSet* ifconfig_set = m.ifconfig_set();
+	    if (ifconfig_set->is_running())
+		ifconfig_set->push_config(pushed_config());
+	}
     }
 
     return (XORP_OK);
@@ -720,7 +729,7 @@ IfConfig::report_update(const IfTreeInterface&	fi,
 {
     IfConfigUpdateReporterBase::Update u;
     if (map_changes(fa.state(), u)) {
-	_ifconfig_update_replicator.vifaddr6_update(fi.ifname(), fv.ifname(),
+	_ifconfig_update_replicator.vifaddr6_update(fi.ifname(), fv.vifname(),
 						    fa.addr(), u);
 	return (true);
     }
@@ -850,6 +859,20 @@ IfConfig::unmap_ifindex(uint32_t ifindex)
     IfIndex2NameMap::iterator i = _ifnames.find(ifindex);
     if (_ifnames.end() != i)
 	_ifnames.erase(i);
+}
+
+void
+IfConfig::unmap_ifname(const string& ifname)
+{
+    IfIndex2NameMap::iterator i;
+
+    // Erase all entries for the ifname
+    for (i = _ifnames.begin(); i != _ifnames.end(); ) {
+	IfIndex2NameMap::iterator tmp_iter = i;
+	++i;
+	if (tmp_iter->second == ifname)
+	    _ifnames.erase(tmp_iter);
+    }
 }
 
 const char *
