@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.54 2007/07/16 23:54:06 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.55 2007/09/15 01:22:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -35,7 +35,8 @@ public:
     IfConfigSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _ifconfig(fea_data_plane_manager.ifconfig()),
-	  _fea_data_plane_manager(fea_data_plane_manager)
+	  _fea_data_plane_manager(fea_data_plane_manager),
+	  _is_interface_flipped(false)
     {}
 
     /**
@@ -91,18 +92,6 @@ public:
      */
     virtual int push_config(IfTree& iftree);
 
-    /**
-     * Test whether the provider mirrors the pulled interface configuration
-     * from the system.
-     *
-     * Note that this method is a short-term solution and might disappear
-     * in the future.
-     *
-     * @return true if the provider mirrors the pulled interface configuration
-     * from the system.
-     */
-    virtual bool is_pulled_config_mirror() const { return (false); }
-
 protected:
     /**
      * Determine if the interface's underlying provider implements discard
@@ -130,165 +119,147 @@ protected:
     virtual int config_end(string& error_msg) = 0;
 
     /**
-     * Add an interface.
+     * Begin the interface configuration.
      *
-     * @param ifname the interface name.
-     * @param if_index the interface index.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int add_interface(const string& ifname,
-			      uint32_t if_index,
-			      string& error_msg) = 0;
+    virtual int config_interface_begin(const IfTreeInterface* pulled_ifp,
+				       const IfTreeInterface& config_iface,
+				       string& error_msg) = 0;
 
     /**
-     * Add a vif.
+     * End the interface configuration.
      *
-     * @param ifname the interface name.
-     * @param vifname the vif name.
-     * @param if_index the interface index.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int add_vif(const string& ifname,
-			const string& vifname,
-			uint32_t if_index,
-			string& error_msg) = 0;
+    virtual int config_interface_end(const IfTreeInterface* pulled_ifp,
+				     const IfTreeInterface& config_iface,
+				     string& error_msg) = 0;
 
     /**
-     * Configure an interface.
+     * Begin the vif configuration.
      *
-     * @param ifname the interface name.
-     * @param if_index the interface index.
-     * @param flags the flags to set on the interface.
-     * @param is_up if true, the interface is UP, otherwise is DOWN.
-     * @param is_deleted if true, the interface is deleted.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_interface(const string& ifname,
-				 uint32_t if_index,
-				 uint32_t flags,
-				 bool is_up,
-				 bool is_deleted,
+    virtual int config_vif_begin(const IfTreeInterface* pulled_ifp,
+				 const IfTreeVif* pulled_vif,
+				 const IfTreeInterface& config_iface,
+				 const IfTreeVif& config_vif,
 				 string& error_msg) = 0;
 
     /**
-     * Configure a vif.
+     * End the vif configuration.
      *
-     * @param ifname the interface name.
-     * @param vifname the vif name.
-     * @param if_index the interface index.
-     * @param flags the flags to set on the vif.
-     * @param is_up if true, the vif is UP, otherwise is DOWN.
-     * @param is_deleted if true, the vif is deleted.
-     * @param broadcast if true, the vif is broadcast capable.
-     * @param loopback if true, the vif corresponds to the loopback interface.
-     * @param point_to_point if true, the vif is a point-to-point interface.
-     * @param multicast if true, the vif is multicast capable.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_vif(const string& ifname,
-			   const string& vifname,
-			   uint32_t if_index,
-			   uint32_t flags,
-			   bool is_up,
-			   bool is_deleted,
-			   bool broadcast,
-			   bool loopback,
-			   bool point_to_point,
-			   bool multicast,
-			   string& error_msg) = 0;
+    virtual int config_vif_end(const IfTreeInterface* pulled_ifp,
+			       const IfTreeVif* pulled_vif,
+			       const IfTreeInterface& config_iface,
+			       const IfTreeVif& config_vif,
+			       string& error_msg) = 0;
 
     /**
-     * Set the MAC address of an interface.
+     * Configure IPv4 address information.
      *
-     * @param ifname the interface name.
-     * @param if_index the interface index.
-     * @param ether_addr the Ethernet MAC address to set.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param pulled_addrp pointer to the address information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param config_addr reference to the address with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int set_interface_mac_address(const string& ifname,
-					  uint32_t if_index,
-					  const struct ether_addr& ether_addr,
-					  string& error_msg) = 0;
+    virtual int config_addr(const IfTreeInterface* pulled_ifp,
+			    const IfTreeVif* pulled_vif,
+			    const IfTreeAddr4* pulled_addr,
+			    const IfTreeInterface& config_iface,
+			    const IfTreeVif& config_vif,
+			    const IfTreeAddr4& config_addr,
+			    string& error_msg) = 0;
 
     /**
-     * Set the MTU of an interface.
+     * Configure IPv6 address information.
      *
-     * @param ifname the interface name.
-     * @param if_index the interface index.
-     * @param mtu the MTU to set.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param pulled_addrp pointer to the address information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param config_addr reference to the address with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int set_interface_mtu(const string& ifname,
-				  uint32_t if_index,
-				  uint32_t mtu,
-				  string& error_msg) = 0;
-
-    /**
-     * Add an address to a vif.
-     *
-     * @param ifname the interface name.
-     * @param vifname the vif name.
-     * @param if_index the interface index.
-     * @param is_broadcast true if @ref dst_or_bcast is a broadcast address.
-     * @param is_p2p true if dst_or_bcast is a destination/peer address.
-     * @param addr the address to add.
-     * @param dst_or_bcast the broadcast or the destination/peer address.
-     * @param prefix_len the prefix length of the subnet mask.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_vif_address(const string& ifname,
-				const string& vifname,
-				uint32_t if_index,
-				bool is_broadcast,
-				bool is_p2p,
-				const IPvX& addr,
-				const IPvX& dst_or_bcast,
-				uint32_t prefix_len,
-				string& error_msg) = 0;
-
-    /**
-     * Delete an address from a vif. 
-     * 
-     * @param ifname the interface name.
-     * @param vifname the vif name.
-     * @param if_index the interface index.
-     * @param addr the address to delete.
-     * @param prefix_len the prefix length of the subnet mask.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_vif_address(const string& ifname,
-				   const string& vifname,
-				   uint32_t if_index,
-				   const IPvX& addr,
-				   uint32_t prefix_len,
-				   string& error_msg) = 0;
+    virtual int config_addr(const IfTreeInterface* pulled_ifp,
+			    const IfTreeVif* pulled_vif,
+			    const IfTreeAddr6* pulled_addr,
+			    const IfTreeInterface& config_iface,
+			    const IfTreeVif& config_vif,
+			    const IfTreeAddr6& config_addr,
+			    string& error_msg) = 0;
 
 protected:
+    // Test whether the status of an interface was flipped
+    bool is_interface_flipped() const { return (_is_interface_flipped); }
+    void set_interface_flipped(bool v) { _is_interface_flipped = v; }
+
     // Misc other state
     bool	_is_running;
 
 private:
-    void push_iftree_begin();
-    void push_iftree_end();
-    void push_interface_begin(const IfTreeInterface& i);
+    void push_iftree_begin(IfTree& iftree);
+    void push_iftree_end(IfTree& iftree);
+    void push_interface_begin(IfTreeInterface& i);
     void push_interface_end(IfTreeInterface& i);
-    void push_vif_begin(const IfTreeInterface& i, const IfTreeVif& v);
-    void push_vif_end(const IfTreeInterface& i, const IfTreeVif& v);
-    void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
-			  const IfTreeAddr4& a);
-    void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,
-			  const IfTreeAddr6& a);
+    void push_vif_begin(IfTreeInterface& i, IfTreeVif& v);
+    void push_vif_end(IfTreeInterface& i, IfTreeVif& v);
+    void push_vif_address(IfTreeInterface& i, IfTreeVif& v, IfTreeAddr4& a);
+    void push_vif_address(IfTreeInterface& i, IfTreeVif& v, IfTreeAddr6& a);
 
     IfConfig&		_ifconfig;
     FeaDataPlaneManager& _fea_data_plane_manager;
+
+    bool _is_interface_flipped;		// If true, an interface was flipped
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

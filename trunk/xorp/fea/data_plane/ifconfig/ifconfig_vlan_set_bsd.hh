@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.hh,v 1.3 2007/09/15 01:22:36 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.hh,v 1.4 2007/09/15 02:07:54 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_BSD_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_SET_BSD_HH__
@@ -52,28 +52,39 @@ public:
     virtual int stop(string& error_msg);
 
     /**
-     * Push the VLAN network interface configuration into the underlying
-     * system.
+     * Configure a VLAN.
      *
-     * Note that on return some of the interface tree configuration state
-     * may be modified.
-     *
-     * @param iftree the interface tree configuration to push.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int push_config(IfTree& iftree);
+    virtual int config_vlan(const IfTreeInterface* pulled_ifp,
+			    const IfTreeVif* pulled_vifp,
+			    const IfTreeInterface& config_iface,
+			    const IfTreeVif& config_vif,
+			    string& error_msg);
 
+private:
     /**
      * Add a VLAN.
      *
      * @param parent_ifname the parent interface name.
      * @param vlan_name the VLAN vif name.
+     * @param vlan_id the VLAN ID.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int add_vlan(const string& parent_ifname,
-			 const string& vlan_name,
-			 string& error_msg);
+    int add_vlan(const string& parent_ifname,
+		 const string& vlan_name,
+		 uint16_t vlan_id,
+		 string& error_msg);
 
     /**
      * Delete a VLAN.
@@ -83,25 +94,10 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int delete_vlan(const string& parent_ifname,
-			    const string& vlan_name,
-			    string& error_msg);
+    int delete_vlan(const string& parent_ifname,
+		    const string& vlan_name,
+		    string& error_msg);
 
-    /**
-     * Configure a VLAN.
-     *
-     * @param parent_ifname the parent interface name.
-     * @param vlan_name the VLAN vif name.
-     * @param vlan_id the VLAN ID.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int config_vlan(const string& parent_ifname,
-			    const string& vlan_name,
-			    uint16_t vlan_id,
-			    string& error_msg);
-
-private:
     int _s4;
 };
 

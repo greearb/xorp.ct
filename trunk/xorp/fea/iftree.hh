@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.50 2007/09/15 00:57:04 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.51 2007/09/15 19:52:39 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -299,8 +299,8 @@ public:
      * - If an item from the local tree is not in the other tree,
      *   it is marked as deleted in the local tree.
      *   However, if an interface from the local tree is marked as "soft"
-     *   or "discard_emulated", and is not in the other tree, the interface
-     *   is not marked as deleted in the local tree.
+     *   and is not in the other tree, the interface is not marked as deleted
+     *   in the local tree.
      * - If an item from the local tree is in the other tree,
      *   its state is copied from the other tree to the local tree.
      *   However, if an item from the local tree is marked as "flipped",
@@ -324,9 +324,6 @@ public:
      * - All items in the local tree are preserved and marked as created.
      * - All items in the other tree that are not in the local tree are
      *   added to the local tree and are marked as deleted.
-     *   Only if the interface is marked as "soft" or "discard_emulated",
-     *   or if the item in the other state is marked as disabled, then it
-     *   is not added.
      *
      * @param other the configuration tree to be used to prepare the
      * replacement state.
@@ -410,11 +407,6 @@ public:
 
     bool discard() const		{ return _discard; }
     void set_discard(bool discard)	{ _discard = discard; mark(CHANGED); }
-
-    bool is_discard_emulated() const	{ return _is_discard_emulated; }
-    void set_discard_emulated(bool v)	{
-	_is_discard_emulated = v; mark(CHANGED);
-    }
 
     /**
      * Get the flipped flag.
@@ -572,16 +564,15 @@ public:
 
 protected:
     const string _ifname;
-    uint32_t	 _pif_index;
-    bool 	 _enabled;
-    bool	 _discard;
-    bool	 _is_discard_emulated;
-    uint32_t 	 _mtu;
-    Mac 	 _mac;
-    bool	 _no_carrier;
-    bool	 _flipped;	// If true, interface -> down, then -> up
-    uint32_t	 _interface_flags;	// The system-specific interface flags
-    VifMap	 _vifs;
+    uint32_t	_pif_index;
+    bool 	_enabled;
+    bool	_discard;
+    uint32_t 	_mtu;
+    Mac 	_mac;
+    bool	_no_carrier;
+    bool	_flipped;	// If true, interface -> down, then -> up
+    uint32_t	_interface_flags;	// The system-specific interface flags
+    VifMap	_vifs;
 };
 
 
@@ -618,6 +609,26 @@ public:
     void set_point_to_point(bool v)	{ _point_to_point = v; mark(CHANGED); }
     void set_multicast(bool v)		{ _multicast = v; mark(CHANGED); }
     void set_pim_register(bool v)	{ _pim_register = v; mark(CHANGED); }
+
+    /**
+     * Get the system-specific vif flags.
+     *
+     * Typically, this value is read from the underlying system, and is
+     * used only for internal purpose.
+     *
+     * @return the system-specific vif flags.
+     */
+    uint32_t vif_flags() const		{ return _vif_flags; }
+
+    /**
+     * Store the system-specific vif flags.
+     *
+     * Typically, this value is read from the underlying system, and is
+     * used only for internal purpose.
+     *
+     * @param v the value of the system-specific vif flags to store.
+     */
+    void set_vif_flags(uint32_t v)	{ _vif_flags = v; mark(CHANGED); }
 
     bool is_vlan() const		{ return _is_vlan; }
     void set_vlan(bool v)		{ _is_vlan = v; mark(CHANGED); }
@@ -712,6 +723,7 @@ public:
 	set_point_to_point(o.point_to_point());
 	set_multicast(o.multicast());
 	set_pim_register(o.pim_register());
+	set_vif_flags(o.vif_flags());
 	set_vlan(o.is_vlan());
 	set_vlan_id(o.vlan_id());
     }
@@ -731,6 +743,7 @@ public:
 		&& (point_to_point() == o.point_to_point())
 		&& (multicast() == o.multicast())
 		&& (pim_register() == o.pim_register())
+		&& (vif_flags() == o.vif_flags())
 		&& (is_vlan() == o.is_vlan())
 		&& (vlan_id() == o.vlan_id()));
     }
@@ -751,6 +764,7 @@ protected:
     bool	_point_to_point;
     bool	_multicast;
     bool	_pim_register;
+    uint32_t	_vif_flags;		// The system-specific vif flags
     bool	_is_vlan;
     uint16_t	_vlan_id;
 

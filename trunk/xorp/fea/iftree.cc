@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.48 2007/09/15 00:57:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.49 2007/09/15 19:52:38 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -525,8 +525,8 @@ IfTree::str() const
  * - If an item from the local tree is not in the other tree,
  *   it is marked as deleted in the local tree.
  *   However, if an interface from the local tree is marked as "soft"
- *   or "discard_emulated", and is not in the other tree, the interface
- *   is not marked as deleted in the local tree.
+ *   and is not in the other tree, the interface is not marked as deleted
+ *   in the local tree.
  * - If an item from the local tree is in the other tree,
  *   its state is copied from the other tree to the local tree.
  *   However, if an item from the local tree is marked as "flipped",
@@ -560,11 +560,10 @@ IfTree::align_with(const IfTree& other)
 
 	if (other_ifp == NULL) {
 	    //
-	    // Mark local interface for deletion, not present in other,
-	    // unless the local interface is marked as "soft" or
-	    // "discard_emulated".
+	    // Mark local interface for deletion if not present in other,
+	    // unless the local interface is marked as "soft".
 	    //
-	    if (! (ii->second.is_soft() || ii->second.is_discard_emulated()))
+	    if (! ii->second.is_soft())
 		ii->second.mark(DELETED);
 	    continue;
 	} else {
@@ -656,9 +655,6 @@ IfTree::align_with(const IfTree& other)
  * - All items in the local tree are preserved and are marked as created.
  * - All items in the other tree that are not in the local tree are
  *   added to the local tree and are marked as deleted.
- *   Only if the interface is marked as "soft" or "discard_emulated",
- *   or if the item in the other state is marked as disabled, then it
- *   is not added.
  *
  * @param other the configuration tree to be used to prepare the
  * replacement state.
@@ -693,32 +689,24 @@ IfTree::prepare_replacement_state(const IfTree& other)
     }
 
     for (oi = other.interfaces().begin(); oi != other.interfaces().end(); ++oi) {
-	if (! oi->second.enabled())
-	    continue;		// XXX: ignore disabled state
 	const string& ifname = oi->second.ifname();
 	IfTreeInterface* ifp = find_interface(ifname);
 	if (ifp == NULL) {
 	    //
 	    // Add local interface and mark it for deletion.
 	    //
-	    // Mark local interface for deletion, not present in other,
-	    // unless the local interface is marked as "soft" or
-	    // "discard_emulated".
+	    // Mark local interface for deletion if not present in other.
 	    //
-	    if (! (oi->second.is_soft() || oi->second.is_discard_emulated())) {
-		add_interface(ifname);
-		ifp = find_interface(ifname);
-		XLOG_ASSERT(ifp != NULL);
-		ifp->copy_state(oi->second);
-		ifp->mark(DELETED);
-	    }
+	    add_interface(ifname);
+	    ifp = find_interface(ifname);
+	    XLOG_ASSERT(ifp != NULL);
+	    ifp->copy_state(oi->second);
+	    ifp->mark(DELETED);
 	}
 
 	IfTreeInterface::VifMap::const_iterator ov;
 	for (ov = oi->second.vifs().begin();
 	     ov != oi->second.vifs().end(); ++ov) {
-	    if (! ov->second.enabled())
-		continue;	// XXX: ignore disabled state
 	    const string& vifname = ov->second.vifname();
 	    IfTreeVif* vifp = ifp->find_vif(vifname);
 	    if (vifp == NULL) {
@@ -735,8 +723,6 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    IfTreeVif::IPv4Map::const_iterator oa4;
 	    for (oa4 = ov->second.ipv4addrs().begin();
 		 oa4 != ov->second.ipv4addrs().end(); ++oa4) {
-		if (! oa4->second.enabled())
-		    continue;	// XXX: ignore disabled state
 		IfTreeAddr4* ap = vifp->find_addr(oa4->second.addr());
 		if (ap == NULL) {
 		    //
@@ -753,8 +739,6 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    IfTreeVif::IPv6Map::const_iterator oa6;
 	    for (oa6 = ov->second.ipv6addrs().begin();
 		 oa6 != ov->second.ipv6addrs().end(); ++oa6) {
-		if (! oa6->second.enabled())
-		    continue;	// XXX: ignore disabled state
 		IfTreeAddr6* ap = vifp->find_addr(oa6->second.addr());
 		if (ap == NULL) {
 		    //
@@ -905,8 +889,8 @@ IfTree::track_live_config_state(const IfTree& other)
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
-      _enabled(false), _discard(false), _is_discard_emulated(false),
-      _mtu(0), _no_carrier(false), _flipped(false), _interface_flags(0)
+      _enabled(false), _discard(false), _mtu(0), _no_carrier(false),
+      _flipped(false), _interface_flags(0)
 {}
 
 int
@@ -1052,7 +1036,7 @@ string
 IfTreeInterface::str() const
 {
     return c_format("Interface %s { enabled := %s } "
-		    "{ mtu := %u } { mac := %s } {no_carrier = %s} "
+		    "{ mtu := %u } { mac := %s } { no_carrier = %s } "
 		    "{ flipped := %s } { flags := %u }",
 		    _ifname.c_str(),
 		    bool_c_str(_enabled),
@@ -1072,7 +1056,8 @@ IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
     : IfTreeItem(), _ifname(ifname), _vifname(vifname),
       _pif_index(0), _vif_index(Vif::VIF_INDEX_INVALID), _enabled(false),
       _broadcast(false), _loopback(false), _point_to_point(false),
-      _multicast(false), _pim_register(false), _is_vlan(false), _vlan_id(0)
+      _multicast(false), _pim_register(false), _vif_flags(0),
+      _is_vlan(false), _vlan_id(0)
 {}
 
 int
@@ -1232,10 +1217,11 @@ IfTreeVif::str() const
 
     return c_format("VIF %s { enabled := %s } { broadcast := %s } "
 		    "{ loopback := %s } { point_to_point := %s } "
-		    "{ multicast := %s } ",
+		    "{ multicast := %s } { flags := %u }",
 		    _vifname.c_str(), bool_c_str(_enabled),
 		    bool_c_str(_broadcast), bool_c_str(_loopback),
-		    bool_c_str(_point_to_point), bool_c_str(_multicast))
+		    bool_c_str(_point_to_point), bool_c_str(_multicast),
+		    XORP_UINT_CAST(_vif_flags))
 	+ vif_index_str + IfTreeItem::str();
 }
 

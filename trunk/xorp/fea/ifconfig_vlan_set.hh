@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.2 2007/09/15 00:57:04 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.3 2007/09/15 01:22:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_VLAN_SET_HH__
 #define __FEA_IFCONFIG_VLAN_SET_HH__
@@ -34,7 +34,8 @@ public:
     IfConfigVlanSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _ifconfig(fea_data_plane_manager.ifconfig()),
-	  _fea_data_plane_manager(fea_data_plane_manager)
+	  _fea_data_plane_manager(fea_data_plane_manager),
+	  _is_vif_deleted(false)
     {}
 
     /**
@@ -80,54 +81,38 @@ public:
     virtual int stop(string& error_msg) = 0;
 
     /**
-     * Push the VLAN network interface configuration into the underlying
-     * system.
-     *
-     * Note that on return some of the interface tree configuration state
-     * may be modified.
-     *
-     * @param iftree the interface tree configuration to push.
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int push_config(IfTree& iftree) = 0;
-
-    /**
-     * Add a VLAN.
-     *
-     * @param parent_ifname the parent interface name.
-     * @param vlan_name the VLAN vif name.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_vlan(const string& parent_ifname,
-			 const string& vlan_name,
-			 string& error_msg) = 0;
-
-    /**
-     * Delete a VLAN.
-     *
-     * @param parent_ifname the parent interface name.
-     * @param vlan_name the VLAN vif name.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_vlan(const string& ifname,
-			    const string& vifname,
-			    string& error_msg) = 0;
-
-    /**
      * Configure a VLAN.
      *
-     * @param parent_ifname the parent interface name.
-     * @param vlan_name the VLAN vif name.
-     * @param vlan_id the VLAN ID.
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_vlan(const string& parent_ifname,
-			    const string& vlan_name,
-			    uint16_t vlan_id,
+    virtual int config_vlan(const IfTreeInterface* pulled_ifp,
+			    const IfTreeVif* pulled_vifp,
+			    const IfTreeInterface& config_iface,
+			    const IfTreeVif& config_vif,
 			    string& error_msg) = 0;
+
+    /**
+     * Test whether a vif was deleted.
+     *
+     * @return if true a vif was deleted.
+     */
+    bool is_vif_deleted() const { return (_is_vif_deleted); }
+
+    /**
+     * Set/reset the flag indicating that a vif was deleted.
+     *
+     * @param v if true the vif was deleted.
+     */
+    void set_vif_deleted(bool v) { _is_vif_deleted = v; }
 
 protected:
     // Misc other state
@@ -136,6 +121,8 @@ protected:
 private:
     IfConfig&		_ifconfig;
     FeaDataPlaneManager& _fea_data_plane_manager;
+
+    bool _is_vif_deleted;		// If true, a vif was deleted
 };
 
 #endif // __FEA_IFCONFIG_VLAN_SET_HH__

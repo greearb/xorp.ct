@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.cc,v 1.9 2007/07/17 23:24:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.cc,v 1.10 2007/09/15 01:22:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -86,26 +86,6 @@ IfConfigSetDummy::push_config(IfTree& iftree)
     return (XORP_OK);
 }
 
-int
-IfConfigSetDummy::config_begin(string& error_msg)
-{
-    debug_msg("config_begin\n");
-
-    UNUSED(error_msg);
-
-    return (XORP_OK);
-}
-
-int
-IfConfigSetDummy::config_end(string& error_msg)
-{
-    debug_msg("config_end\n");
-
-    UNUSED(error_msg);
-
-    return (XORP_OK);
-}
-
 bool
 IfConfigSetDummy::is_discard_emulated(const IfTreeInterface& i) const
 {
@@ -115,193 +95,112 @@ IfConfigSetDummy::is_discard_emulated(const IfTreeInterface& i) const
 }
 
 int
-IfConfigSetDummy::add_interface(const string& ifname,
-				uint32_t if_index,
-				string& error_msg)
+IfConfigSetDummy::config_begin(string& error_msg)
 {
-    debug_msg("add_interface "
-	      "(ifname = %s if_index = %u)\n",
-	      ifname.c_str(), if_index);
-
-    UNUSED(ifname);
-    UNUSED(if_index);
     UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetDummy::add_vif(const string& ifname,
-			  const string& vifname,
-			  uint32_t if_index,
-			  string& error_msg)
+IfConfigSetDummy::config_end(string& error_msg)
 {
-    debug_msg("add_vif "
-	      "(ifname = %s vifname = %s if_index = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index);
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
     UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetDummy::config_interface(const string& ifname,
-				   uint32_t if_index,
-				   uint32_t flags,
-				   bool is_up,
-				   bool is_deleted,
+IfConfigSetDummy::config_interface_begin(const IfTreeInterface* pulled_ifp,
+					 const IfTreeInterface& config_iface,
+					 string& error_msg)
+{
+    UNUSED(pulled_ifp);
+    UNUSED(config_iface);
+    UNUSED(error_msg);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetDummy::config_interface_end(const IfTreeInterface* pulled_ifp,
+				       const IfTreeInterface& config_iface,
+				       string& error_msg)
+{
+    UNUSED(pulled_ifp);
+    UNUSED(config_iface);
+    UNUSED(error_msg);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetDummy::config_vif_begin(const IfTreeInterface* pulled_ifp,
+				   const IfTreeVif* pulled_vifp,
+				   const IfTreeInterface& config_iface,
+				   const IfTreeVif& config_vif,
 				   string& error_msg)
 {
-    debug_msg("config_interface "
-	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index,
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted));
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(config_iface);
+    UNUSED(config_vif);
     UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetDummy::config_vif(const string& ifname,
-			     const string& vifname,
-			     uint32_t if_index,
-			     uint32_t flags,
-			     bool is_up,
-			     bool is_deleted,
-			     bool broadcast,
-			     bool loopback,
-			     bool point_to_point,
-			     bool multicast,
-			     string& error_msg)
+IfConfigSetDummy::config_vif_end(const IfTreeInterface* pulled_ifp,
+				 const IfTreeVif* pulled_vifp,
+				 const IfTreeInterface& config_iface,
+				 const IfTreeVif& config_vif,
+				 string& error_msg)
 {
-    debug_msg("config_vif "
-	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted),
-	      bool_c_str(broadcast),
-	      bool_c_str(loopback),
-	      bool_c_str(point_to_point),
-	      bool_c_str(multicast));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-    UNUSED(broadcast);
-    UNUSED(loopback);
-    UNUSED(point_to_point);
-    UNUSED(multicast);
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(config_iface);
+    UNUSED(config_vif);
     UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetDummy::set_interface_mac_address(const string& ifname,
-					    uint32_t if_index,
-					    const struct ether_addr& ether_addr,
-					    string& error_msg)
+IfConfigSetDummy::config_addr(const IfTreeInterface* pulled_ifp,
+			      const IfTreeVif* pulled_vifp,
+			      const IfTreeAddr4* pulled_addrp,
+			      const IfTreeInterface& config_iface,
+			      const IfTreeVif& config_vif,
+			      const IfTreeAddr4& config_addr,
+			      string& error_msg)
 {
-    debug_msg("set_interface_mac "
-	      "(ifname = %s if_index = %u mac = %s)\n",
-	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(ether_addr);
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(pulled_addrp);
+    UNUSED(config_iface);
+    UNUSED(config_vif);
+    UNUSED(config_addr);
     UNUSED(error_msg);
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetDummy::set_interface_mtu(const string& ifname,
-				    uint32_t if_index,
-				    uint32_t mtu,
-				    string& error_msg)
+IfConfigSetDummy::config_addr(const IfTreeInterface* pulled_ifp,
+			      const IfTreeVif* pulled_vifp,
+			      const IfTreeAddr6* pulled_addrp,
+			      const IfTreeInterface& config_iface,
+			      const IfTreeVif& config_vif,
+			      const IfTreeAddr6& config_addr,
+			      string& error_msg)
 {
-    debug_msg("set_interface_mtu "
-	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
-
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(mtu);
-    UNUSED(error_msg);
-
-    return (XORP_OK);
-}
-
-int
-IfConfigSetDummy::add_vif_address(const string& ifname,
-				  const string& vifname,
-				  uint32_t if_index,
-				  bool is_broadcast,
-				  bool is_p2p,
-				  const IPvX& addr,
-				  const IPvX& dst_or_bcast,
-				  uint32_t prefix_len,
-				  string& error_msg)
-{
-    debug_msg("add_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
-	      addr.str().c_str(), dst_or_bcast.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(is_broadcast);
-    UNUSED(is_p2p);
-    UNUSED(addr);
-    UNUSED(dst_or_bcast);
-    UNUSED(prefix_len);
-    UNUSED(error_msg);
-
-    return (XORP_OK);
-}
-
-int
-IfConfigSetDummy::delete_vif_address(const string& ifname,
-				     const string& vifname,
-				     uint32_t if_index,
-				     const IPvX& addr,
-				     uint32_t prefix_len,
-				     string& error_msg)
-{
-    debug_msg("delete_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u addr = %s "
-	      "prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(addr);
-    UNUSED(prefix_len);
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(pulled_addrp);
+    UNUSED(config_iface);
+    UNUSED(config_vif);
+    UNUSED(config_addr);
     UNUSED(error_msg);
 
     return (XORP_OK);

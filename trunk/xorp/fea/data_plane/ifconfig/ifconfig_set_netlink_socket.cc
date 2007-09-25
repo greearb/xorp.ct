@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.10 2007/07/11 22:18:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.11 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -116,8 +116,6 @@ IfConfigSetNetlinkSocket::is_discard_emulated(const IfTreeInterface& i) const
 int
 IfConfigSetNetlinkSocket::config_begin(string& error_msg)
 {
-    debug_msg("config_begin\n");
-
     // XXX: nothing to do
 
     UNUSED(error_msg);
@@ -128,8 +126,6 @@ IfConfigSetNetlinkSocket::config_begin(string& error_msg)
 int
 IfConfigSetNetlinkSocket::config_end(string& error_msg)
 {
-    debug_msg("config_end\n");
-
     // XXX: nothing to do
 
     UNUSED(error_msg);
@@ -138,56 +134,407 @@ IfConfigSetNetlinkSocket::config_end(string& error_msg)
 }
 
 int
-IfConfigSetNetlinkSocket::add_interface(const string& ifname,
-					uint32_t if_index,
-					string& error_msg)
+IfConfigSetNetlinkSocket::config_interface_begin(
+    const IfTreeInterface* pulled_ifp,
+    const IfTreeInterface& config_iface,
+    string& error_msg)
 {
-    debug_msg("add_interface "
-	      "(ifname = %s if_index = %u)\n",
-	      ifname.c_str(), if_index);
+    int ret_value = XORP_OK;
+    bool was_disabled = false;
+    bool should_disable = false;
 
-    // XXX: nothing to do
+    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the interface has been deleted from the system
+	return (XORP_OK);
+    }
 
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(error_msg);
+    uint32_t interface_flags = 0;
+    if (pulled_ifp != NULL)
+	interface_flags = pulled_ifp->interface_flags();
 
-    return (XORP_OK);
+#ifdef HOST_OS_LINUX
+    //
+    // XXX: Set the interface DOWN otherwise we may not be able to
+    // set the MAC address or the MTU (limitation imposed by the Linux kernel).
+    //
+    if ((pulled_ifp != NULL) && pulled_ifp->enabled())
+	should_disable = true;
+#endif
+
+    //
+    // Set the MTU
+    //
+    do {
+	uint32_t mtu = config_iface.mtu();
+	if ((mtu == 0) && (pulled_ifp != NULL))
+	    mtu = pulled_ifp->mtu();
+	if (mtu == 0)
+	    break;
+	if ((pulled_ifp == NULL) || (mtu != pulled_ifp->mtu())) {
+	    if (should_disable && (! was_disabled)) {
+		if (set_interface_status(config_iface.ifname(),
+					 config_iface.pif_index(),
+					 interface_flags, false, error_msg)
+		    != XORP_OK) {
+		    ret_value = XORP_ERROR;
+		    goto done;
+		}
+		was_disabled = true;
+	    }
+	    if (set_interface_mtu(config_iface.ifname(),
+				  config_iface.pif_index(), mtu, error_msg)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		goto done;
+	    }
+	}
+	break;
+    } while (false);
+
+    //
+    // Set the MAC address
+    //
+    do {
+	Mac mac config_iface.mac();
+	if (mac.empty() && (pulled_ifp != NULL))
+	    mac = pulled_ifp->mac();
+	if (mac.empty())
+	    break;
+	if ((pulled_ifp == NULL) || (mac != pulled_ifp->mac())) {
+	    if (should_disable && (! was_disabled)) {
+		if (set_interface_status(config_iface.ifname(),
+					 config_iface.pif_index(),
+					 interface_flags, false, error_msg)
+		    != XORP_OK) {
+		    ret_value = XORP_ERROR;
+		    goto done;
+		}
+		was_disabled = true;
+	    }
+	    if (set_interface_mac_address(config_iface.ifname(),
+					  config_iface.pif_index(), mac,
+					  error_msg)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		goto done;
+	    }
+	}
+	break;
+    } while (false);
+
+ done:
+    if (was_disabled) {
+	if (set_interface_status(config_iface.ifname(),
+				 config_iface.pif_index(),
+				 interface_flags, true, error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	set_interface_flipped(true);
+    }
+
+    return (ret_value);
 }
 
 int
-IfConfigSetNetlinkSocket::add_vif(const string& ifname,
-				  const string& vifname,
-				  uint32_t if_index,
-				  string& error_msg)
+IfConfigSetNetlinkSocket::config_interface_end(
+    const IfTreeInterface* pulled_ifp,
+    const IfTreeInterface& config_iface,
+    string& error_msg)
 {
-    debug_msg("add_vif "
-	      "(ifname = %s vifname = %s if_index = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index);
+    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the interface has been deleted from the system
+	return (XORP_OK);
+    }
 
-    // XXX: nothing to do
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(error_msg);
+    //
+    // Set the interface flags
+    //
+    uint32_t interface_flags = config_iface.interface_flags();
+    if (pulled_ifp != NULL)
+	interface_flags = pulled_ifp->interface_flags();
+    if ((pulled_ifp == NULL)
+	|| (interface_flags != pulled_ifp->interface_flags())
+	|| (config_iface.enabled() != pulled_ifp->enabled())) {
+	if (set_interface_status(config_iface.ifname(),
+				 config_iface.pif_index(), interface_flags,
+				 config_iface.enabled(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetNetlinkSocket::config_interface(const string& ifname,
-					   uint32_t if_index,
-					   uint32_t flags,
-					   bool is_up,
-					   bool is_deleted,
+IfConfigSetNetlinkSocket::config_vif_begin(const IfTreeInterface* pulled_ifp,
+					   const IfTreeVif* pulled_vifp,
+					   const IfTreeInterface& config_iface,
+					   const IfTreeVif& config_vif,
 					   string& error_msg)
 {
-    debug_msg("config_interface "
-	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index, flags, bool_c_str(is_up),
-	      bool_c_str(is_deleted));
+    UNUSED(pulled_ifp);
+    UNUSED(config_iface);
+    UNUSED(error_msg);
+
+    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the vif has been deleted from the system
+	return (XORP_OK);
+    }
+
+    // XXX: nothing to do
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetNetlinkSocket::config_vif_end(const IfTreeInterface* pulled_ifp,
+					 const IfTreeVif* pulled_vifp,
+					 const IfTreeInterface& config_iface,
+					 const IfTreeVif& config_vif,
+					 string& error_msg)
+{
+    UNUSED(pulled_ifp);
+
+    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the vif has been deleted from the system
+	return (XORP_OK);
+    }
+
+    //
+    // XXX: If the interface name and vif name are different, then
+    // they might have different status: the interface can be UP, while
+    // the vif can be DOWN.
+    //
+    if (config_iface.ifname() != config_vif.vifname()) {
+	//
+	// Set the vif flags
+	//
+	uint32_t vif_flags = config_vif.vif_flags();
+	if (pulled_vifp != NULL)
+	    vif_flags = pulled_vifp->vif_flags();
+	if ((pulled_vifp == NULL)
+	    || (vif_flags != pulled_vifp->vif_flags())
+	    || (config_vif.enabled() != pulled_vifp->enabled())) {
+	    //
+	    // XXX: The interface and vif status setting mechanism is
+	    // equivalent for this platform.
+	    //
+	    if (set_interface_status(config_vif.vifname(),
+				     config_vif.pif_index(), vif_flags,
+				     config_vif.enabled(), error_msg)
+		!= XORP_OK) {
+		return (XORP_ERROR);
+	    }
+	}
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetNetlinkSocket::config_addr(const IfTreeInterface* pulled_ifp,
+				      const IfTreeVif* pulled_vifp,
+				      const IfTreeAddr4* pulled_addrp,
+				      const IfTreeInterface& config_iface,
+				      const IfTreeVif& config_vif,
+				      const IfTreeAddr4& config_addr,
+				      string& error_msg)
+{
+    bool is_deleted = false;
+
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+
+    if (! fea_data_plane_manager().have_ipv4()) {
+	error_msg = "IPv4 is not supported";
+	return (XORP_ERROR);
+    }
+
+    // XXX: Disabling an address is same as deleting it
+    if (config_addr.is_marked(IfTreeItem::DELETED)
+	|| (! config_addr.enabled())) {
+	is_deleted = true;
+    }
+
+    //
+    // Delete the address if marked for deletion
+    //
+    if (is_deleted) {
+	if (pulled_addrp == NULL)
+	    return (XORP_OK);		// XXX: nothing to delete
+
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), IPvX(config_addr.addr()),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+
+	return (XORP_OK);
+    }
+
+    //
+    // Test whether a new address
+    //
+    do {
+	if (pulled_addrp == NULL)
+	    break;
+	if (pulled_addrp->addr() != config_addr.addr())
+	    break;
+	if (pulled_addrp->broadcast() != config_addr.broadcast())
+	    break;
+	if (pulled_addrp->broadcast()
+	    && (pulled_addrp->bcast() != config_addr.bcast())) {
+	    break;
+	}
+	if (pulled_addrp->point_to_point() != config_addr.point_to_point())
+	    break;
+	if (pulled_addrp->point_to_point()
+	    && (pulled_addrp->endpoint() != config_addr.endpoint())) {
+	    break;
+	}
+	if (pulled_addrp->prefix_len() != config_addr.prefix_len())
+	    break;
+
+	// XXX: Same address, therefore ignore it
+	return (XORP_OK);
+    } while (false);
+
+    //
+    // Delete the old address if necessary
+    //
+    if (pulled_addrp != NULL) {
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), IPvX(config_addr.addr()),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // Add the address
+    //
+    if (add_addr(config_iface.ifname(), config_vif.vifname(),
+		 config_vif.pif_index(), IPvX(config_addr.addr()),
+		 config_addr.prefix_len(),
+		 config_addr.broadcast(), IPvX(config_addr.bcast()),
+		 config_addr.point_to_point(), IPvX(config_addr.endpoint()),
+		 error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetNetlinkSocket::config_addr(const IfTreeInterface* pulled_ifp,
+				      const IfTreeVif* pulled_vifp,
+				      const IfTreeAddr6* pulled_addrp,
+				      const IfTreeInterface& config_iface,
+				      const IfTreeVif& config_vif,
+				      const IfTreeAddr6& config_addr,
+				      string& error_msg)
+{
+    bool is_deleted = false;
+
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+
+    if (! fea_data_plane_manager().have_ipv6()) {
+	error_msg = "IPv6 is not supported";
+	return (XORP_ERROR);
+    }
+
+    // XXX: Disabling an address is same as deleting it
+    if (config_addr.is_marked(IfTreeItem::DELETED)
+	|| (! config_addr.enabled())) {
+	is_deleted = true;
+    }
+
+    //
+    // Delete the address if marked for deletion
+    //
+    if (is_deleted) {
+	if (pulled_addrp == NULL)
+	    return (XORP_OK);		// XXX: nothing to delete
+
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), IPvX(config_addr.addr()),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+
+	return (XORP_OK);
+    }
+
+    //
+    // Test whether a new address
+    //
+    do {
+	if (pulled_addrp == NULL)
+	    break;
+	if (pulled_addrp->addr() != config_addr.addr())
+	    break;
+	if (pulled_addrp->point_to_point() != config_addr.point_to_point())
+	    break;
+	if (pulled_addrp->point_to_point()
+	    && (pulled_addrp->endpoint() != config_addr.endpoint())) {
+	    break;
+	}
+	if (pulled_addrp->prefix_len() != config_addr.prefix_len())
+	    break;
+
+	// XXX: Same address, therefore ignore it
+	return (XORP_OK);
+    } while (false);
+
+    //
+    // Delete the old address if necessary
+    //
+    if (pulled_addrp != NULL) {
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), IPvX(config_addr.addr()),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // Add the address
+    //
+    if (add_addr(config_iface.ifname(), config_vif.vifname(),
+		 config_vif.pif_index(), IPvX(config_addr.addr()),
+		 config_addr.prefix_len(),
+		 false, IPvX::ZERO(config_addr.addr().af()),
+		 config_addr.point_to_point(), IPvX(config_addr.endpoint()),
+		 error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
+					       uint32_t if_index,
+					       uint32_t interface_flags,
+					       bool is_enabled,
+					       string& error_msg)
+{
+    //
+    // Update the interface flags
+    //
+    if (is_enabled)
+	interface_flags |= IFF_UP;
+    else
+	interface_flags &= ~IFF_UP;
 
 #ifndef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
@@ -201,10 +548,6 @@ IfConfigSetNetlinkSocket::config_interface(const string& ifname,
     struct ifinfomsg*	ifinfomsg;
     NetlinkSocket&	ns = *this;
     int			last_errno = 0;
-
-    UNUSED(ifname);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -226,7 +569,7 @@ IfConfigSetNetlinkSocket::config_interface(const string& ifname,
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
     ifinfomsg->ifi_index = if_index;
-    ifinfomsg->ifi_flags = flags;
+    ifinfomsg->ifi_flags = interface_flags;
     ifinfomsg->ifi_change = 0xffffffff;
 
     if (NLMSG_ALIGN(nlh->nlmsg_len) > sizeof(buffer)) {
@@ -239,97 +582,76 @@ IfConfigSetNetlinkSocket::config_interface(const string& ifname,
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("error writing to netlink socket: %s",
-			     strerror(errno));
+	error_msg = c_format("Cannot set the interface flags to 0x%x on "
+			     "interface %s: %s",
+			     interface_flags, ifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
+	error_msg = c_format("Cannot set the interface flags to 0x%x on "
+			     "interface %s: %s",
+			     interface_flags, ifname.c_str(),
+			     error_msg.c_str());
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #else // HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
     //
     // XXX: a work-around in case the kernel doesn't support setting
-    // the MTU on an interface by using netlink.
+    // the flags on an interface by using netlink.
     // In this case, the work-around is to use ioctl(). Sigh...
     //
     struct ifreq ifreq;
+
+    UNUSED(if_index);
+
     int s = socket(AF_INET, SOCK_DGRAM, 0);
-
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-
     if (s < 0) {
 	XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
     }
 
     memset(&ifreq, 0, sizeof(ifreq));
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
-    ifreq.ifr_flags = flags;
+    ifreq.ifr_flags = interface_flags;
     if (ioctl(s, SIOCSIFFLAGS, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot set the interface flags to 0x%x on "
+			     "interface %s: %s",
+			     interface_flags,
+			     ifname.c_str(),
+			     strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
     close(s);
 
     return (XORP_OK);
+
 #endif // HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
-}
-
-int
-IfConfigSetNetlinkSocket::config_vif(const string& ifname,
-				     const string& vifname,
-				     uint32_t if_index,
-				     uint32_t flags,
-				     bool is_up,
-				     bool is_deleted,
-				     bool broadcast,
-				     bool loopback,
-				     bool point_to_point,
-				     bool multicast,
-				     string& error_msg)
-{
-    debug_msg("config_vif "
-	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, flags,
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted),
-	      bool_c_str(broadcast),
-	      bool_c_str(loopback),
-	      bool_c_str(point_to_point),
-	      bool_c_str(multicast));
-
-    // XXX: nothing to do
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-    UNUSED(broadcast);
-    UNUSED(loopback);
-    UNUSED(point_to_point);
-    UNUSED(multicast);
-    UNUSED(error_msg);
-
-    return (XORP_OK);
 }
 
 int
 IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
 						    uint32_t if_index,
-						    const struct ether_addr& ether_addr,
+						    const Mac& mac,
 						    string& error_msg)
 {
-    debug_msg("set_interface_mac "
-	      "(ifname = %s if_index = %u mac = %s)\n",
-	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
+    struct ether_addr ether_addr;
+
+    // XXX: Hard-coded assumption that this is an Ethernet interface
+    try {
+	EtherMac ether_mac(mac);
+	if (ether_mac.copy_out(ether_addr) != EtherMac::ADDR_BYTELEN) {
+	    error_msg = c_format("Expected Ethernet MAC address, got \"%s\"",
+				 mac.str().c_str());
+	    return (XORP_ERROR);
+	}
+    } catch (const BadMac& bad_mac) {
+	error_msg = c_format("Invalid MAC address \"%s\"", mac.str().c_str());
+	return (XORP_ERROR);
+    }
 
 #ifdef RTM_SETLINK
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
@@ -345,8 +667,6 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
     int			rta_len;
     NetlinkSocket&	ns = *this;
     int			last_errno = 0;
-
-    UNUSED(ifname);
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -387,14 +707,23 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("error writing to netlink socket: %s",
+	error_msg = c_format("Cannot set the MAC address to %s "
+			     "on interface %s: %s",
+			     mac.str().c_str(),
+			     ifname.c_str(),
 			     strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
+	error_msg = c_format("Cannot set the MAC address to %s "
+			     "on interface %s: %s",
+			     mac.str().c_str(),
+			     ifname.c_str(),
+			     error_msg.c_str());
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #elif defined(SIOCSIFHWADDR)
@@ -404,10 +733,10 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
     // In this case, the work-around is to use ioctl(). Sigh...
     //
     struct ifreq ifreq;
-    int s = socket(AF_INET, SOCK_DGRAM, 0);
 
     UNUSED(if_index);
 
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s < 0) {
 	XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
     }
@@ -420,7 +749,11 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
     ifreq.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
     if (ioctl(s, SIOCSIFHWADDR, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot set the MAC address to %s "
+			     "on interface %s: %s",
+			     mac.str().c_str(),
+			     ifname.c_str(),
+			     strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
@@ -439,10 +772,6 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
 					    uint32_t mtu,
 					    string& error_msg)
 {
-    debug_msg("set_interface_mtu "
-	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, mtu);
-
 #ifndef HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
@@ -457,8 +786,6 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
     int			rta_len;
     NetlinkSocket&	ns = *this;
     int			last_errno = 0;
-
-    UNUSED(ifname);
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -500,14 +827,19 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("error writing to netlink socket: %s",
-			     strerror(errno));
+	error_msg = c_format("Cannot set the MTU to %u on "
+			     "interface %s: %s",
+			     mtu, ifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
+	error_msg = c_format("Cannot set the MTU to %u on "
+			     "interface %s: %s",
+			     mtu, ifname.c_str(), error_msg.c_str());
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #else // HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN
@@ -517,10 +849,10 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
     // In this case, the work-around is to use ioctl(). Sigh...
     //
     struct ifreq ifreq;
-    int s = socket(AF_INET, SOCK_DGRAM, 0);
 
     UNUSED(if_index);
 
+    int s = socket(AF_INET, SOCK_DGRAM, 0);
     if (s < 0) {
 	XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
     }
@@ -529,7 +861,11 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
     ifreq.ifr_mtu = mtu;
     if (ioctl(s, SIOCSIFMTU, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot set the MTU to %u on "
+			     "interface %s: %s",
+			     mtu,
+			     ifname.c_str(),
+			     strerror(errno));
 	close(s);
 	return (XORP_ERROR);
     }
@@ -540,15 +876,16 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
 }
 
 int
-IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
-					  const string& vifname,
-					  uint32_t if_index,
-					  bool is_broadcast,
-					  bool is_p2p,
-					  const IPvX& addr,
-					  const IPvX& dst_or_bcast,
-					  uint32_t prefix_len,
-					  string& error_msg)
+IfConfigSetNetlinkSocket::add_addr(const string& ifname,
+				   const string& vifname,
+				   uint32_t if_index,
+				   const IPvX& addr,
+				   uint32_t prefix_len,
+				   bool is_broadcast,
+				   const IPvX& broadcast_addr,
+				   bool is_point_to_point,
+				   const IPvX& endpoint_addr,
+				   string& error_msg)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
@@ -565,40 +902,6 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
     NetlinkSocket&	ns = *this;
     void*		rta_align_data;
     int			last_errno = 0;
-
-    debug_msg("add_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast),
-	      bool_c_str(is_p2p), addr.str().c_str(),
-	      dst_or_bcast.str().c_str(), prefix_len);
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-
-    // Check that the family is supported
-    switch (addr.af()) {
-    case AF_INET:
-	if (! fea_data_plane_manager().have_ipv4()) {
-	    error_msg = "IPv4 is not supported";
-	    return (XORP_ERROR);
-	}
-	break;
-
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	if (! fea_data_plane_manager().have_ipv6()) {
-	    error_msg = "IPv6 is not supported";
-	    return (XORP_ERROR);
-	}
-	break;
-#endif // HAVE_IPV6
-
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -637,9 +940,9 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
     addr.copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (is_broadcast || is_p2p) {
-	// Set the p2p or broadcast address	
-	rta_len = RTA_LENGTH(dst_or_bcast.addr_bytelen());
+    if (is_broadcast || is_point_to_point) {
+	// Set the broadcast or point-to-point address
+	rta_len = RTA_LENGTH(addr.addr_bytelen());
 	if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	    XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		       XORP_UINT_CAST(sizeof(buffer)),
@@ -651,36 +954,46 @@ IfConfigSetNetlinkSocket::add_vif_address(const string& ifname,
 	rtattr->rta_type = IFA_UNSPEC;
 	rtattr->rta_len = rta_len;
 	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
-	dst_or_bcast.copy_out(data);
-	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
-	if (is_p2p) {
-	    rtattr->rta_type = IFA_ADDRESS;
-	} else {
+	if (is_broadcast) {
 	    rtattr->rta_type = IFA_BROADCAST;
+	    broadcast_addr.copy_out(data);
 	}
+	if (is_point_to_point) {
+	    rtattr->rta_type = IFA_ADDRESS;
+	    endpoint_addr.copy_out(data);
+	}
+	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
 
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("error writing to netlink socket: %s",
-			     strerror(errno));
+	error_msg = c_format("Cannot add address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
+	error_msg = c_format("Cannot add address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(),
+			     error_msg.c_str());
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 }
 
 int
-IfConfigSetNetlinkSocket::delete_vif_address(const string& ifname,
-					     const string& vifname,
-					     uint32_t if_index,
-					     const IPvX& addr,
-					     uint32_t prefix_len,
-					     string& error_msg)
+IfConfigSetNetlinkSocket::delete_addr(const string& ifname,
+				      const string& vifname,
+				      uint32_t if_index,
+				      const IPvX& addr,
+				      uint32_t prefix_len,
+				      string& error_msg)
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
@@ -696,38 +1009,6 @@ IfConfigSetNetlinkSocket::delete_vif_address(const string& ifname,
     uint8_t*		data;
     NetlinkSocket&	ns = *this;
     int			last_errno = 0;
-
-    debug_msg("delete_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u addr = %s "
-	      "prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      prefix_len);
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-
-    // Check that the family is supported
-    switch (addr.af()) {
-    case AF_INET:
-	if (! fea_data_plane_manager().have_ipv4()) {
-	    error_msg = "IPv4 is not supported";
-	    return (XORP_ERROR);
-	}
-	break;
-
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	if (! fea_data_plane_manager().have_ipv6()) {
-	    error_msg = "IPv6 is not supported";
-	    return (XORP_ERROR);
-	}
-	break;
-#endif // HAVE_IPV6
-
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
 
     memset(&buffer, 0, sizeof(buffer));
 
@@ -769,14 +1050,23 @@ IfConfigSetNetlinkSocket::delete_vif_address(const string& ifname,
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
-	error_msg = c_format("error writing to netlink socket: %s",
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(),
 			     strerror(errno));
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					last_errno, error_msg) < 0) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(),
+			     error_msg.c_str());
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 }
 

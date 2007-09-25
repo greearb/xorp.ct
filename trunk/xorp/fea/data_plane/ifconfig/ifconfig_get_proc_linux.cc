@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.15 2007/09/15 05:10:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.16 2007/09/25 22:51:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -496,6 +496,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 	vifp->set_loopback(flags & IFF_LOOPBACK);
 	vifp->set_point_to_point(flags & IFF_POINTOPOINT);
 	vifp->set_multicast(flags & IFF_MULTICAST);
+	vifp->set_vif_flags(flags);
 	debug_msg("vif enabled: %s\n", bool_c_str(vifp->enabled()));
 	debug_msg("vif broadcast: %s\n", bool_c_str(vifp->broadcast()));
 	debug_msg("vif loopback: %s\n", bool_c_str(vifp->loopback()));

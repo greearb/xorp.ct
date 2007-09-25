@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.10 2007/07/11 22:18:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.11 2007/09/15 19:52:48 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -301,7 +301,8 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 	//
 	// Set the vif flags
 	//
-	if (is_newlink || (flags != ifp->interface_flags())) {
+	if (is_newlink || (flags != vifp->vif_flags())) {
+	    vifp->set_vif_flags(flags);
 	    vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
 	    vifp->set_broadcast(flags & IFF_BROADCAST);
 	    vifp->set_loopback(flags & IFF_LOOPBACK);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.12 2007/07/11 22:18:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.13 2007/09/15 05:10:22 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -359,7 +359,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	//
 	// Set the vif flags
 	//
-	if (is_newlink || (flags != ifp->interface_flags())) {
+	if (is_newlink || (flags != vifp->vif_flags())) {
+	    vifp->set_vif_flags(flags);
 	    vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
 	    vifp->set_broadcast(flags & IFF_BROADCAST);
 	    vifp->set_loopback(flags & IFF_LOOPBACK);
@@ -561,7 +562,8 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     //
     // Set the vif flags
     //
-    if (is_newlink || (flags != ifp->interface_flags())) {
+    if (is_newlink || (flags != vifp->vif_flags())) {
+	vifp->set_vif_flags(flags);
 	vifp->set_enabled(ifp->enabled() && (flags & IFF_UP));
 	vifp->set_broadcast(flags & IFF_BROADCAST);
 	vifp->set_loopback(flags & IFF_LOOPBACK);

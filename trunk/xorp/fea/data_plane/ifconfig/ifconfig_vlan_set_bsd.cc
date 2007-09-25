@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.2 2007/09/15 00:57:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.3 2007/09/15 01:22:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -117,43 +117,64 @@ IfConfigVlanSetBsd::stop(string& error_msg)
 }
 
 int
-IfConfigVlanSetBsd::push_config(IfTree& iftree)
+IfConfigVlanSetBsd::config_vlan(const IfTreeInterface* pulled_ifp,
+				const IfTreeVif* pulled_vifp,
+				const IfTreeInterface& config_iface,
+				const IfTreeVif& config_vif,
+				string& error_msg)
 {
-    IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::iterator vi;
-    string error_msg;
+    UNUSED(pulled_ifp);
 
-    for (ii = iftree.interfaces().begin();
-	 ii != iftree.interfaces().end();
-	 ++ii) {
-	IfTreeInterface& i = ii->second;
-	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
-	    IfTreeVif& v = vi->second;
-	    if (! v.is_vlan())
-		continue;
-
-	    // Delete the VLAN
-	    if ((i.state() == IfTreeItem::DELETED)
-		|| (v.state() == IfTreeItem::DELETED)) {
-		if (delete_vlan(i.ifname(), v.vifname(), error_msg)
-		    != XORP_OK) {
-		    XLOG_ERROR("%s", error_msg.c_str());
-		    return (XORP_ERROR);
-		}
-		continue;
-	    }
-
-	    // Add and configure the VLAN
-	    if (add_vlan(i.ifname(), v.vifname(), error_msg) != XORP_OK) {
-		XLOG_ERROR("%s", error_msg.c_str());
-		return (XORP_ERROR);
-	    }
-	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_id(), error_msg)
-		!= XORP_OK) {
-		XLOG_ERROR("%s", error_msg.c_str());
-		return (XORP_ERROR);
-	    }
+    //
+    // Delete the VLAN if marked for deletion
+    //
+    if (config_vif.state() == IfTreeItem::DELETED) {
+	if (delete_vlan(config_iface.ifname(), config_vif.vifname(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
 	}
+	set_vif_deleted(true);
+
+	return (XORP_OK);
+    }
+
+    //
+    // Test whether the VLAN already exists
+    //
+    if ((pulled_vifp != NULL)
+	&& (pulled_vifp->is_vlan())
+	&& (pulled_vifp->vlan_id() == config_vif.vlan_id())) {
+	return (XORP_OK);		// XXX: nothing changed
+    }
+
+    //
+    // Delete the old VLAN if necessary
+    //
+    if (pulled_vifp != NULL) {
+	if (delete_vlan(config_iface.ifname(), config_vif.vifname(), error_msg)
+	    != XORP_OK) {
+	    error_msg = c_format("Failed to delete VLAN %s on "
+				 "interface %s: %s",
+				 config_vif.vifname().c_str(),
+				 config_iface.ifname().c_str(),
+				 error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	set_vif_deleted(true);
+    }
+
+    //
+    // Add the VLAN
+    //
+    if (add_vlan(config_iface.ifname(), config_vif.vifname(),
+		 config_vif.vlan_id(), error_msg)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to configure VLAN %s to "
+			     "interface %s: %s",
+			     config_vif.vifname().c_str(),
+			     config_iface.ifname().c_str(),
+			     error_msg.c_str());
+	return (XORP_ERROR);
     }
 
     return (XORP_OK);
@@ -162,12 +183,15 @@ IfConfigVlanSetBsd::push_config(IfTree& iftree)
 int
 IfConfigVlanSetBsd::add_vlan(const string& parent_ifname,
 			     const string& vlan_name,
+			     uint16_t vlan_id,
 			     string& error_msg)
 {
     struct ifreq ifreq;
+    struct vlanreq vlanreq;
 
-    UNUSED(parent_ifname);
-
+    //
+    // Create the VLAN
+    //
     memset(&ifreq, 0, sizeof(ifreq));
     strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
     if (ioctl(_s4, SIOCIFCREATE, &ifreq) < 0) {
@@ -186,6 +210,24 @@ IfConfigVlanSetBsd::add_vlan(const string& parent_ifname,
 	return (XORP_ERROR);
     }
 
+    //
+    // Configure the VLAN
+    //
+    memset(&ifreq, 0, sizeof(ifreq));
+    strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    vlanreq.vlr_tag = vlan_id;
+    strlcpy(vlanreq.vlr_parent, parent_ifname.c_str(),
+	    sizeof(vlanreq.vlr_parent));
+    ifreq.ifr_data = (caddr_t)(&vlanreq);
+    if (ioctl(_s4, SIOCSETVLAN, (caddr_t)&ifreq) < 0) {
+	error_msg = c_format("Cannot configure VLAN interface %s "
+			     "(parent = %s VLAN ID = %u): %s",
+			     vlan_name.c_str(), parent_ifname.c_str(),
+			     vlan_id, strerror(errno));
+	return (XORP_ERROR);
+    }
+
     return (XORP_OK);
 }
 
@@ -198,38 +240,14 @@ IfConfigVlanSetBsd::delete_vlan(const string& parent_ifname,
 
     UNUSED(parent_ifname);
 
+    //
+    // Delete the VLAN
+    //
     memset(&ifreq, 0, sizeof(ifreq));
     strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
     if (ioctl(_s4, SIOCIFDESTROY, &ifreq) < 0) {
 	error_msg = c_format("Cannot destroy VLAN interface %s: %s",
 			     vlan_name.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-IfConfigVlanSetBsd::config_vlan(const string& parent_ifname,
-				const string& vlan_name,
-				uint16_t vlan_id,
-				string& error_msg)
-{
-    struct ifreq ifreq;
-    struct vlanreq vlanreq;
-
-    memset(&ifreq, 0, sizeof(ifreq));
-    strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
-    memset(&vlanreq, 0, sizeof(vlanreq));
-    vlanreq.vlr_tag = vlan_id;
-    strlcpy(vlanreq.vlr_parent, parent_ifname.c_str(),
-	    sizeof(vlanreq.vlr_parent));
-    ifreq.ifr_data = (caddr_t)(&vlanreq);
-    if (ioctl(_s4, SIOCSETVLAN, (caddr_t)&ifreq) < 0) {
-	error_msg = c_format("Cannot set VLAN interface %s "
-			     "(parent = %s VLAN ID = %u): %s",
-			     vlan_name.c_str(), parent_ifname.c_str(),
-			     vlan_id, strerror(errno));
 	return (XORP_ERROR);
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.2 2007/09/15 00:57:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.3 2007/09/15 01:22:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -79,81 +79,16 @@ IfConfigVlanSetDummy::stop(string& error_msg)
 }
 
 int
-IfConfigVlanSetDummy::push_config(IfTree& iftree)
-{
-    IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::iterator vi;
-    string error_msg;
-
-    for (ii = iftree.interfaces().begin();
-	 ii != iftree.interfaces().end();
-	 ++ii) {
-	IfTreeInterface& i = ii->second;
-	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
-	    IfTreeVif& v = vi->second;
-	    if (! v.is_vlan())
-		continue;
-
-	    // Delete the VLAN
-	    if ((i.state() == IfTreeItem::DELETED)
-		|| (v.state() == IfTreeItem::DELETED)) {
-		if (delete_vlan(i.ifname(), v.vifname(), error_msg)
-		    != XORP_OK) {
-		    XLOG_ERROR("%s", error_msg.c_str());
-		    return (XORP_ERROR);
-		}
-		continue;
-	    }
-
-	    // Add and configure the VLAN
-	    if (add_vlan(i.ifname(), v.vifname(), error_msg) != XORP_OK) {
-		XLOG_ERROR("%s", error_msg.c_str());
-		return (XORP_ERROR);
-	    }
-	    if (config_vlan(i.ifname(), v.vifname(), v.vlan_id(), error_msg)
-		!= XORP_OK) {
-		XLOG_ERROR("%s", error_msg.c_str());
-		return (XORP_ERROR);
-	    }
-	}
-    }
-
-    return (XORP_OK);
-}
-
-int
-IfConfigVlanSetDummy::add_vlan(const string& parent_ifname,
-			       const string& vlan_name,
-			       string& error_msg)
-{
-    UNUSED(parent_ifname);
-    UNUSED(vlan_name);
-    UNUSED(error_msg);
-
-    return (XORP_OK);
-}
-
-int
-IfConfigVlanSetDummy::delete_vlan(const string& parent_ifname,
-				  const string& vlan_name,
+IfConfigVlanSetDummy::config_vlan(const IfTreeInterface* pulled_ifp,
+				  const IfTreeVif* pulled_vifp,
+				  const IfTreeInterface& config_iface,
+				  const IfTreeVif& config_vif,
 				  string& error_msg)
 {
-    UNUSED(parent_ifname);
-    UNUSED(vlan_name);
-    UNUSED(error_msg);
-
-    return (XORP_OK);
-}
-
-int
-IfConfigVlanSetDummy::config_vlan(const string& parent_ifname,
-				  const string& vlan_name,
-				  uint16_t vlan_id,
-				  string& error_msg)
-{
-    UNUSED(parent_ifname);
-    UNUSED(vlan_name);
-    UNUSED(vlan_id);
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(config_iface);
+    UNUSED(config_vif);
     UNUSED(error_msg);
 
     return (XORP_OK);

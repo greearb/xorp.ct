@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.2 2007/09/15 00:57:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.3 2007/09/15 05:10:22 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -132,7 +132,14 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
     }
     XLOG_ASSERT(_s4 >= 0);
 
-    // Check all interfaces whether they are actually VLANs
+    //
+    // Check all interfaces whether they are actually VLANs.
+    // If an interface is found to be a VLAN, then its vif state is
+    // copied as a vif child to its physical parent interface.
+    // Note that we keep the original VLAN interface state in the IfTree
+    // so the rest of the FEA is not surprised if that state suddenly is
+    // deleted.
+    //
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
@@ -160,12 +167,6 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 	// Get the VLAN information
 	uint16_t vlan_id = vlanreq.vlr_tag;
 	string parent_ifname = vlanreq.vlr_parent;
-
-	//
-	// Mark the VLAN interface for deletion and add it as a VLAN vif if
-	// the parent interface exists.
-	//
-	ifp->mark(IfTreeItem::DELETED);
 
 	if (parent_ifname.empty())
 	    continue;

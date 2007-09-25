@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.4 2007/07/11 22:18:15 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.hh,v 1.5 2007/07/16 23:56:11 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_CLICK_HH__
@@ -80,69 +80,151 @@ public:
 	bool success,
 	const string& error_msg);
 
-    /**
-     * Test whether the provider mirrors the pulled interface configuration
-     * from the system.
-     *
-     * Note that this method is a short-term solution and might disappear
-     * in the future.
-     *
-     * @return true if the provider mirrors the pulled interface configuration
-     * from the system.
-     */
-    virtual bool is_pulled_config_mirror() const { return (true); }
-
 private:
+    /**
+     * Determine if the interface's underlying provider implements discard
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if discard semantics are emulated.
+     */
     virtual bool is_discard_emulated(const IfTreeInterface& i) const;
+
+    /**
+     * Start the configuration.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int config_begin(string& error_msg);
+
+    /**
+     * Complete the configuration.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     virtual int config_end(string& error_msg);
-    virtual int add_interface(const string& ifname,
-			      uint32_t if_index,
-			      string& error_msg);
-    virtual int add_vif(const string& ifname,
-			const string& vifname,
-			uint32_t if_index,
-			string& error_msg);
-    virtual int config_interface(const string& ifname,
-				 uint32_t if_index,
-				 uint32_t flags,
-				 bool is_up,
-				 bool is_deleted,
+
+    /**
+     * Begin the interface configuration.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_interface_begin(const IfTreeInterface* pulled_ifp,
+				       const IfTreeInterface& config_iface,
+				       string& error_msg);
+
+    /**
+     * End the interface configuration.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_interface_end(const IfTreeInterface* pulled_ifp,
+				     const IfTreeInterface& config_iface,
+				     string& error_msg);
+
+    /**
+     * Begin the vif configuration.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_vif_begin(const IfTreeInterface* pulled_ifp,
+				 const IfTreeVif* pulled_vifp,
+				 const IfTreeInterface& config_iface,
+				 const IfTreeVif& config_vif,
 				 string& error_msg);
-    virtual int config_vif(const string& ifname,
-			   const string& vifname,
-			   uint32_t if_index,
-			   uint32_t flags,
-			   bool is_up,
-			   bool is_deleted,
-			   bool broadcast,
-			   bool loopback,
-			   bool point_to_point,
-			   bool multicast,
-			   string& error_msg);
-    virtual int set_interface_mac_address(const string& ifname,
-					  uint32_t if_index,
-					  const struct ether_addr& ether_addr,
-					  string& error_msg);
-    virtual int set_interface_mtu(const string& ifname,
-				  uint32_t if_index,
-				  uint32_t mtu,
-				  string& error_msg);
-    virtual int add_vif_address(const string& ifname,
-				const string& vifname,
-				uint32_t if_index,
-				bool is_broadcast,
-				bool is_p2p,
-				const IPvX& addr,
-				const IPvX& dst_or_bcast,
-				uint32_t prefix_len,
-				string& error_msg);
-    virtual int delete_vif_address(const string& ifname,
-				   const string& vifname,
-				   uint32_t if_index,
-				   const IPvX& addr,
-				   uint32_t prefix_len,
-				   string& error_msg);
+
+    /**
+     * End the vif configuration.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_vif_end(const IfTreeInterface* pulled_ifp,
+			       const IfTreeVif* pulled_vifp,
+			       const IfTreeInterface& config_iface,
+			       const IfTreeVif& config_vif,
+			       string& error_msg);
+
+    /**
+     * Configure IPv4 address information.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param pulled_addrp pointer to the address information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param config_addr reference to the address with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_addr(const IfTreeInterface* pulled_ifp,
+			    const IfTreeVif* pulled_vifp,
+			    const IfTreeAddr4* pulled_addrp,
+			    const IfTreeInterface& config_iface,
+			    const IfTreeVif& config_vif,
+			    const IfTreeAddr4& config_addr,
+			    string& error_msg);
+
+    /**
+     * Configure IPv6 address information.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param pulled_addrp pointer to the address information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param config_addr reference to the address with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_addr(const IfTreeInterface* pulled_ifp,
+			    const IfTreeVif* pulled_vifp,
+			    const IfTreeAddr6* pulled_addrp,
+			    const IfTreeInterface& config_iface,
+			    const IfTreeVif& config_vif,
+			    const IfTreeAddr6& config_addr,
+			    string& error_msg);
 
     int execute_click_config_generator(string& error_msg);
     void terminate_click_config_generator();

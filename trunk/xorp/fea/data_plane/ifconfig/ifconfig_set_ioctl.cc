@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.cc,v 1.8 2007/07/11 22:18:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.cc,v 1.9 2007/07/18 01:30:26 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -179,7 +179,12 @@ IfConfigSetIoctl::is_discard_emulated(const IfTreeInterface& i) const
 {
     UNUSED(i);
 
-#if defined(HOST_OS_BSDI) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_MACOSX) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD) || defined(HOST_OS_DRAGONFLYBSD)
+#if	defined(HOST_OS_BSDI)		\
+	|| defined(HOST_OS_FREEBSD)	\
+	|| defined(HOST_OS_MACOSX)	\
+	|| defined(HOST_OS_NETBSD)	\
+	|| defined(HOST_OS_OPENBSD)	\
+	|| defined(HOST_OS_DRAGONFLYBSD)
     return (true);
 #else
     return (false);
@@ -189,8 +194,6 @@ IfConfigSetIoctl::is_discard_emulated(const IfTreeInterface& i) const
 int
 IfConfigSetIoctl::config_begin(string& error_msg)
 {
-    debug_msg("config_begin\n");
-
     // XXX: nothing to do
 
     UNUSED(error_msg);
@@ -201,8 +204,6 @@ IfConfigSetIoctl::config_begin(string& error_msg)
 int
 IfConfigSetIoctl::config_end(string& error_msg)
 {
-    debug_msg("config_end\n");
-
     // XXX: nothing to do
 
     UNUSED(error_msg);
@@ -211,146 +212,442 @@ IfConfigSetIoctl::config_end(string& error_msg)
 }
 
 int
-IfConfigSetIoctl::add_interface(const string& ifname,
-				uint32_t if_index,
-				string& error_msg)
+IfConfigSetIoctl::config_interface_begin(const IfTreeInterface* pulled_ifp,
+					 const IfTreeInterface& config_iface,
+					 string& error_msg)
 {
-    debug_msg("add_interface "
-	      "(ifname = %s if_index = %u)\n",
-	      ifname.c_str(), if_index);
+    int ret_value = XORP_OK;
+    bool was_disabled = false;
+    bool should_disable = false;
 
-    // XXX: nothing to do
+    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the interface has been deleted from the system
+	return (XORP_OK);
+    }
 
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(error_msg);
+    uint32_t interface_flags = 0;
+    if (pulled_ifp != NULL)
+	interface_flags = pulled_ifp->interface_flags();
 
-    return (XORP_OK);
+#ifdef HOST_OS_LINUX
+    //
+    // XXX: Set the interface DOWN otherwise we may not be able to
+    // set the MAC address or the MTU (limitation imposed by the Linux kernel).
+    //
+    if ((pulled_ifp != NULL) && pulled_ifp->enabled())
+	should_disable = true;
+#endif
+
+    //
+    // Set the MTU
+    //
+    do {
+	uint32_t mtu = config_iface.mtu();
+	if ((mtu == 0) && (pulled_ifp != NULL))
+	    mtu = pulled_ifp->mtu();
+	if (mtu == 0)
+	    break;
+	if ((pulled_ifp == NULL) || (mtu != pulled_ifp->mtu())) {
+	    if (should_disable && (! was_disabled)) {
+		if (set_interface_status(config_iface.ifname(),
+					 config_iface.pif_index(),
+					 interface_flags, false, error_msg)
+		    != XORP_OK) {
+		    ret_value = XORP_ERROR;
+		    goto done;
+		}
+		was_disabled = true;
+	    }
+	    if (set_interface_mtu(config_iface.ifname(), mtu, error_msg)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		goto done;
+	    }
+	}
+	break;
+    } while (false);
+
+    //
+    // Set the MAC address
+    //
+    do {
+	Mac mac = config_iface.mac();
+	if (mac.empty() && (pulled_ifp != NULL))
+	    mac = pulled_ifp->mac();
+	if (mac.empty())
+	    break;
+	if ((pulled_ifp == NULL) || (mac != pulled_ifp->mac())) {
+	    if (should_disable && (! was_disabled)) {
+		if (set_interface_status(config_iface.ifname(),
+					 config_iface.pif_index(),
+					 interface_flags, false, error_msg)
+		    != XORP_OK) {
+		    ret_value = XORP_ERROR;
+		    goto done;
+		}
+		was_disabled = true;
+	    }
+	    if (set_interface_mac_address(config_iface.ifname(), mac,
+					  error_msg)
+		!= XORP_OK) {
+		ret_value = XORP_ERROR;
+		goto done;
+	    }
+	}
+	break;
+    } while (false);
+
+ done:
+    if (was_disabled) {
+	if (set_interface_status(config_iface.ifname(),
+				 config_iface.pif_index(), interface_flags,
+				 true, error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	set_interface_flipped(true);
+    }
+
+    return (ret_value);
 }
 
 int
-IfConfigSetIoctl::add_vif(const string& ifname,
-			  const string& vifname,
-			  uint32_t if_index,
-			  string& error_msg)
+IfConfigSetIoctl::config_interface_end(const IfTreeInterface* pulled_ifp,
+				       const IfTreeInterface& config_iface,
+				       string& error_msg)
 {
-    debug_msg("add_vif "
-	      "(ifname = %s vifname = %s if_index = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index);
+    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the interface has been deleted from the system
+	return (XORP_OK);
+    }
 
-    // XXX: nothing to do
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(error_msg);
+    //
+    // Set the interface flags
+    //
+    uint32_t interface_flags = config_iface.interface_flags();
+    if (pulled_ifp != NULL)
+	interface_flags = pulled_ifp->interface_flags();
+    if ((pulled_ifp == NULL)
+	|| (interface_flags != pulled_ifp->interface_flags())
+	|| (config_iface.enabled() != pulled_ifp->enabled())) {
+	if (set_interface_status(config_iface.ifname(),
+				 config_iface.pif_index(), interface_flags,
+				 config_iface.enabled(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetIoctl::config_interface(const string& ifname,
-				   uint32_t if_index,
-				   uint32_t flags,
-				   bool is_up,
-				   bool is_deleted,
+IfConfigSetIoctl::config_vif_begin(const IfTreeInterface* pulled_ifp,
+				   const IfTreeVif* pulled_vifp,
+				   const IfTreeInterface& config_iface,
+				   const IfTreeVif& config_vif,
 				   string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
+    UNUSED(pulled_ifp);
+    UNUSED(config_iface);
     UNUSED(error_msg);
 
-    return (XORP_ERROR);
-#else
-    struct ifreq ifreq;
+    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the vif has been deleted from the system
+	return (XORP_OK);
+    }
 
-    debug_msg("config_interface "
-	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-	      "is_deleted = %s)\n",
-	      ifname.c_str(),
-	      XORP_UINT_CAST(if_index),
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted));
+    // XXX: nothing to do
 
-    UNUSED(if_index);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
+    return (XORP_OK);
+}
 
-    memset(&ifreq, 0, sizeof(ifreq));
-    strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+int
+IfConfigSetIoctl::config_vif_end(const IfTreeInterface* pulled_ifp,
+				 const IfTreeVif* pulled_vifp,
+				 const IfTreeInterface& config_iface,
+				 const IfTreeVif& config_vif,
+				 string& error_msg)
+{
+    UNUSED(pulled_ifp);
 
-    ifreq.ifr_flags = flags;
-    if (ioctl(_s4, SIOCSIFFLAGS, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the vif has been deleted from the system
+	return (XORP_OK);
+    }
+
+    //
+    // XXX: If the interface name and vif name are different, then
+    // they might have different status: the interface can be UP, while
+    // the vif can be DOWN.
+    //
+    if (config_iface.ifname() != config_vif.vifname()) {
+	//
+	// Set the vif flags
+	//
+	uint32_t vif_flags = config_vif.vif_flags();
+	if (pulled_vifp != NULL)
+	    vif_flags = pulled_vifp->vif_flags();
+	if ((pulled_vifp == NULL)
+	    || (vif_flags != pulled_vifp->vif_flags())
+	    || (config_vif.enabled() != pulled_vifp->enabled())) {
+	    //
+	    // XXX: The interface and vif status setting mechanism is
+	    // equivalent for this platform.
+	    //
+	    if (set_interface_status(config_vif.vifname(),
+				     config_vif.pif_index(), vif_flags,
+				     config_vif.enabled(), error_msg)
+		!= XORP_OK) {
+		return (XORP_ERROR);
+	    }
+	}
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetIoctl::config_addr(const IfTreeInterface* pulled_ifp,
+			      const IfTreeVif* pulled_vifp,
+			      const IfTreeAddr4* pulled_addrp,
+			      const IfTreeInterface& config_iface,
+			      const IfTreeVif& config_vif,
+			      const IfTreeAddr4& config_addr,
+			      string& error_msg)
+{
+    bool is_deleted = false;
+
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+
+    if (! fea_data_plane_manager().have_ipv4()) {
+	error_msg = "IPv4 is not supported";
+	return (XORP_ERROR);
+    }
+
+    // XXX: Disabling an address is same as deleting it
+    if (config_addr.is_marked(IfTreeItem::DELETED)
+	|| (! config_addr.enabled())) {
+	is_deleted = true;
+    }
+
+    //
+    // Delete the address if marked for deletion
+    //
+    if (is_deleted) {
+	if (pulled_addrp == NULL)
+	    return (XORP_OK);		// XXX: nothing to delete
+
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), config_addr.addr(),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+
+	return (XORP_OK);
+    }
+
+    //
+    // Test whether a new address
+    //
+    do {
+	if (pulled_addrp == NULL)
+	    break;
+	if (pulled_addrp->addr() != config_addr.addr())
+	    break;
+	if (pulled_addrp->broadcast() != config_addr.broadcast())
+	    break;
+	if (pulled_addrp->broadcast()
+	    && (pulled_addrp->bcast() != config_addr.bcast())) {
+	    break;
+	}
+	if (pulled_addrp->point_to_point() != config_addr.point_to_point())
+	    break;
+	if (pulled_addrp->point_to_point()
+	    && (pulled_addrp->endpoint() != config_addr.endpoint())) {
+	    break;
+	}
+	if (pulled_addrp->prefix_len() != config_addr.prefix_len())
+	    break;
+
+	// XXX: Same address, therefore ignore it
+	return (XORP_OK);
+    } while (false);
+
+    //
+    // Delete the old address if necessary
+    //
+    if (pulled_addrp != NULL) {
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), config_addr.addr(),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // Add the address
+    //
+    if (add_addr(config_iface.ifname(), config_vif.vifname(),
+		 config_vif.pif_index(), config_addr.addr(),
+		 config_addr.prefix_len(),
+		 config_addr.broadcast(), config_addr.bcast(),
+		 config_addr.point_to_point(), config_addr.endpoint(),
+		 error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
-#endif // HOST_OS_WINDOWS
 }
 
 int
-IfConfigSetIoctl::config_vif(const string& ifname,
-			     const string& vifname,
-			     uint32_t if_index,
-			     uint32_t flags,
-			     bool is_up,
-			     bool is_deleted,
-			     bool broadcast,
-			     bool loopback,
-			     bool point_to_point,
-			     bool multicast,
-			     string& error_msg)
+IfConfigSetIoctl::config_addr(const IfTreeInterface* pulled_ifp,
+			      const IfTreeVif* pulled_vifp,
+			      const IfTreeAddr6* pulled_addrp,
+			      const IfTreeInterface& config_iface,
+			      const IfTreeVif& config_vif,
+			      const IfTreeAddr6& config_addr,
+			      string& error_msg)
 {
-    debug_msg("config_vif "
-	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(),
-	      XORP_UINT_CAST(if_index),
-	      XORP_UINT_CAST(flags),
-	      bool_c_str(is_up),
-	      bool_c_str(is_deleted),
-	      bool_c_str(broadcast),
-	      bool_c_str(loopback),
-	      bool_c_str(point_to_point),
-	      bool_c_str(multicast));
+    bool is_deleted = false;
 
-    // XXX: nothing to do
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
 
-    UNUSED(ifname);
-    UNUSED(vifname);
+    if (! fea_data_plane_manager().have_ipv6()) {
+	error_msg = "IPv6 is not supported";
+	return (XORP_ERROR);
+    }
+
+    // XXX: Disabling an address is same as deleting it
+    if (config_addr.is_marked(IfTreeItem::DELETED)
+	|| (! config_addr.enabled())) {
+	is_deleted = true;
+    }
+
+    //
+    // Delete the address if marked for deletion
+    //
+    if (is_deleted) {
+	if (pulled_addrp == NULL)
+	    return (XORP_OK);		// XXX: nothing to delete
+
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), config_addr.addr(),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+
+	return (XORP_OK);
+    }
+
+    //
+    // Test whether a new address
+    //
+    do {
+	if (pulled_addrp == NULL)
+	    break;
+	if (pulled_addrp->addr() != config_addr.addr())
+	    break;
+	if (pulled_addrp->point_to_point() != config_addr.point_to_point())
+	    break;
+	if (pulled_addrp->point_to_point()
+	    && (pulled_addrp->endpoint() != config_addr.endpoint())) {
+	    break;
+	}
+	if (pulled_addrp->prefix_len() != config_addr.prefix_len())
+	    break;
+
+	// XXX: Same address, therefore ignore it
+	return (XORP_OK);
+    } while (false);
+
+    //
+    // Delete the old address if necessary
+    //
+    if (pulled_addrp != NULL) {
+	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+			config_vif.pif_index(), config_addr.addr(),
+			config_addr.prefix_len(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // Add the address
+    //
+    if (add_addr(config_iface.ifname(), config_vif.vifname(),
+		 config_vif.pif_index(), config_addr.addr(),
+		 config_addr.prefix_len(),
+		 config_addr.point_to_point(), config_addr.endpoint(),
+		 error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetIoctl::set_interface_status(const string& ifname,
+				       uint32_t if_index,
+				       uint32_t interface_flags,
+				       bool is_enabled,
+				       string& error_msg)
+{
+    struct ifreq ifreq;
+
     UNUSED(if_index);
-    UNUSED(flags);
-    UNUSED(is_up);
-    UNUSED(is_deleted);
-    UNUSED(broadcast);
-    UNUSED(loopback);
-    UNUSED(point_to_point);
-    UNUSED(multicast);
-    UNUSED(error_msg);
+
+    //
+    // Update the interface flags
+    //
+    if (is_enabled)
+	interface_flags |= IFF_UP;
+    else
+	interface_flags &= ~IFF_UP;
+
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+    ifreq.ifr_flags = interface_flags;
+
+    if (ioctl(_s4, SIOCSIFFLAGS, &ifreq) < 0) {
+	error_msg = c_format("Cannot set the interface flags to 0x%x on "
+			     "interface %s: %s",
+			     interface_flags, ifname.c_str(), strerror(errno));
+	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
 
 int
 IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
-					    uint32_t if_index,
-					    const struct ether_addr& ether_addr,
+					    const Mac& mac,
 					    string& error_msg)
 {
+    struct ether_addr ether_addr;
     struct ifreq ifreq;
 
-    debug_msg("set_interface_mac "
-	      "(ifname = %s if_index = %u mac = %s)\n",
-	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
-
-    UNUSED(if_index);
+    // XXX: Hard-coded assumption that this is an Ethernet interface
+    try {
+	EtherMac ether_mac(mac);
+	if (ether_mac.copy_out(ether_addr) != EtherMac::ADDR_BYTELEN) {
+	    error_msg = c_format("Expected Ethernet MAC address, "
+				 "got \"%s\"",
+				 mac.str().c_str());
+	    return (XORP_ERROR);
+	}
+    } catch (const BadMac& bad_mac) {
+	error_msg = c_format("Invalid MAC address \"%s\"", mac.str().c_str());
+	return (XORP_ERROR);
+    }
 
     memset(&ifreq, 0, sizeof(ifreq));
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
@@ -365,9 +662,14 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     ifreq.ifr_addr.sa_len = sizeof(ether_addr);
 #endif
     if (ioctl(_s4, SIOCSIFLLADDR, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot set the MAC address to %s "
+			     "on interface %s: %s",
+			     mac.str().c_str(),
+			     ifname.c_str(),
+			     strerror(errno));
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #elif defined(SIOCSIFHWADDR)
@@ -380,9 +682,14 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     ifreq.ifr_hwaddr.sa_len = ETH_ALEN;
 #endif
     if (ioctl(_s4, SIOCSIFHWADDR, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot set the MAC address %s "
+			     "on interface %s: %s",
+			     mac.str().c_str(),
+			     ifname.c_str(),
+			     strerror(errno));
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #else
@@ -392,7 +699,6 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
     // XXX: currently (NetBSD-1.6.1 and OpenBSD-3.3) do not support
     // setting the MAC address.
     //
-    UNUSED(ether_addr);
     error_msg = c_format("No mechanism to set the MAC address "
 			 "on an interface");
     return (XORP_ERROR);
@@ -401,113 +707,38 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetIoctl::set_interface_mtu(const string& ifname,
-				    uint32_t if_index,
 				    uint32_t mtu,
 				    string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(ifname);
-    UNUSED(if_index);
-    UNUSED(mtu);
-    UNUSED(error_msg);
-    return (XORP_ERROR);
-#else
     struct ifreq ifreq;
-
-    debug_msg("set_interface_mtu "
-	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(),
-	      XORP_UINT_CAST(if_index),
-	      XORP_UINT_CAST(mtu));
-
-    UNUSED(if_index);
 
     memset(&ifreq, 0, sizeof(ifreq));
     strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
-
     ifreq.ifr_mtu = mtu;
+
     if (ioctl(_s4, SIOCSIFMTU, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot set the MTU to %u on "
+			     "interface %s: %s",
+			     mtu, ifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
-#endif /* HOST_OS_WINDOWS */
 }
 
 int
-IfConfigSetIoctl::add_vif_address(const string& ifname,
-				  const string& vifname,
-				  uint32_t if_index,
-				  bool is_broadcast,
-				  bool is_p2p,
-				  const IPvX& addr,
-				  const IPvX& dst_or_bcast,
-				  uint32_t prefix_len,
-				  string& error_msg)
+IfConfigSetIoctl::add_addr(const string& ifname, const string& vifname,
+			   uint32_t if_index, const IPv4& addr,
+			   uint32_t prefix_len,
+			   bool is_broadcast, const IPv4& broadcast_addr,
+			   bool is_point_to_point, const IPv4& endpoint_addr,
+			   string& error_msg)
 {
-    debug_msg("add_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
-	      addr.str().c_str(), dst_or_bcast.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    switch (addr.af()) {
-    case AF_INET:
-	return add_vif_address4(ifname, vifname, if_index, is_broadcast,
-				is_p2p, addr, dst_or_bcast, prefix_len,
-				error_msg);
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	return add_vif_address6(ifname, vifname, if_index, is_p2p,
-				addr, dst_or_bcast, prefix_len, error_msg);
-	break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-
-    XLOG_UNREACHABLE();
-    return (XORP_ERROR);
-}
-
-/**
- * Add an IPv4 address to an interface.
- *
- * Note: if the system has ioctl(SIOCAIFADDR) (e.g., FreeBSD), then
- * the interface address is added as an alias, otherwise it overwrites the
- * previous address (if such exists).
- */
-int
-IfConfigSetIoctl::add_vif_address4(const string& ifname,
-				   const string& vifname,
-				   uint32_t if_index,
-				   bool is_broadcast,
-				   bool is_p2p,
-				   const IPvX& addr,
-				   const IPvX& dst_or_bcast,
-				   uint32_t prefix_len,
-				   string& error_msg)
-{
-    debug_msg("add_vif_address4 "
-	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_broadcast), bool_c_str(is_p2p),
-	      addr.str().c_str(), dst_or_bcast.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
-
-    UNUSED(vifname);
-    UNUSED(if_index);
-    UNUSED(is_broadcast);
-
-    if (! fea_data_plane_manager().have_ipv4()) {
-	error_msg = "IPv4 is not supported";
-	return (XORP_ERROR);
-    }
+    //
+    // XXX: If the system has ioctl(SIOCAIFADDR) (e.g., FreeBSD), then
+    // an interface address is added as an alias, otherwise it overwrites the
+    // previous address (if such exists).
+    //
 
 #if defined(SIOCAIFADDR)
     //
@@ -515,110 +746,196 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
     //
     struct in_aliasreq ifra;
 
+    UNUSED(if_index);
+
     memset(&ifra, 0, sizeof(ifra));
-    strncpy(ifra.ifra_name, ifname.c_str(), sizeof(ifra.ifra_name) - 1);
+    strncpy(ifra.ifra_name, vifname.c_str(), sizeof(ifra.ifra_name) - 1);
     addr.copy_out(ifra.ifra_addr);
-    if (is_p2p)
-	dst_or_bcast.copy_out(ifra.ifra_dstaddr);
-    else
-	dst_or_bcast.copy_out(ifra.ifra_broadaddr);
-    IPvX::make_prefix(addr.af(), prefix_len).copy_out(ifra.ifra_mask);
+    if (is_broadcast)
+	broadcast_addr.copy_out(ifra.ifra_broadaddr);
+    if (is_point_to_point)
+	endpoint_addr.copy_out(ifra.ifra_dstaddr);
+    IPv4 prefix_addr = IPv4::make_prefix(prefix_len);
+    prefix_addr.copy_out(ifra.ifra_mask);
+
     if (ioctl(_s4, SIOCAIFADDR, &ifra) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot add address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #elif defined(SIOCSIFADDR)
-
     //
     // Set a new address
     //
     struct ifreq ifreq;
 
+    UNUSED(if_index);
+
     memset(&ifreq, 0, sizeof(ifreq));
-    strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+    strncpy(ifreq.ifr_name, vifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 
     // Set the address
     addr.copy_out(ifreq.ifr_addr);
     if (ioctl(_s4, SIOCSIFADDR, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot add address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
 
     // Set the netmask
-    IPvX::make_prefix(addr.af(), prefix_len).copy_out(ifreq.ifr_addr);
+    IPv4 prefix_addr = IPv4::make_prefix(prefix_len);
+    prefix_addr.copy_out(ifreq.ifr_addr);
     if (ioctl(_s4, SIOCSIFNETMASK, &ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot add network mask '%s' to address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     prefix_addr.str().c_str(),
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
 
-    // Set the p2p or broadcast address
-    if (is_p2p) {
-	dst_or_bcast.copy_out(ifreq.ifr_dstaddr);
-	if (ioctl(_s4, SIOCSIFDSTADDR, &ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
-	    return (XORP_ERROR);
-	}
-    } else {
-	dst_or_bcast.copy_out(ifreq.ifr_broadaddr);
+    // Set the broadcast or point-to-point address
+    if (is_broadcast) {
+	broadcast_addr.copy_out(ifreq.ifr_broadaddr);
 	if (ioctl(_s4, SIOCSIFBRDADDR, &ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
+	    error_msg = c_format("Cannot add broadcast address '%s' "
+				 "to address '%s' "
+				 "on interface '%s' vif '%s': %s",
+				 broadcast_addr.str().c_str(),
+				 addr.str().c_str(),
+				 ifname.c_str(), vifname.c_str(),
+				 strerror(errno));
 	    return (XORP_ERROR);
 	}
     }
+    if (is_point_to_point) {
+	endpoint_addr.copy_out(ifreq.ifr_dstaddr);
+	if (ioctl(_s4, SIOCSIFDSTADDR, &ifreq) < 0) {
+	    error_msg = c_format("Cannot add endpoint address '%s' "
+				 "to address '%s' "
+				 "on interface '%s' vif '%s': %s",
+				 endpoint_addr.str().c_str(),
+				 addr.str().c_str(),
+				 ifname.c_str(), vifname.c_str(),
+				 strerror(errno));
+	    return (XORP_ERROR);
+	}
+    }
+
     return (XORP_OK);
+
 #else
+    //
+    // No mechanism to add the address
+    //
     UNUSED(ifname);
-    UNUSED(is_p2p);
+    UNUSED(vifname);
+    UNUSED(if_index);
     UNUSED(addr);
-    UNUSED(dst_or_bcast);
     UNUSED(prefix_len);
-    UNUSED(error_msg);
+    UNUSED(is_broadcast);
+    UNUSED(broadcast_addr);
+    UNUSED(is_point_to_point);
+    UNUSED(endpoint_addr);
+
+    error_msg = c_format("No mechanism to add an IPv4 address "
+			 "on an interface");
     return (XORP_ERROR);
 #endif
 }
 
-/**
- * Add an IPv6 address to an interface.
- */
 int
-IfConfigSetIoctl::add_vif_address6(const string& ifname,
-				   const string& vifname,
-				   uint32_t if_index,
-				   bool is_p2p,
-				   const IPvX& addr,
-				   const IPvX& dst,
-				   uint32_t prefix_len,
-				   string& error_msg)
+IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
+			      uint32_t if_index, const IPv4& addr,
+			      uint32_t prefix_len, string& error_msg)
 {
-    debug_msg("add_vif_address6 "
-	      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
-	      "addr = %s dst = %s prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index,
-	      bool_c_str(is_p2p), addr.str().c_str(),
-	      dst.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
+    struct ifreq ifreq;
 
+    memset(&ifreq, 0, sizeof(ifreq));
+    strncpy(ifreq.ifr_name, vifname.c_str(), sizeof(ifreq.ifr_name) - 1);
+
+#if defined(HOST_OS_LINUX)
+    //
+    // XXX: In case of Linux, SIOCDIFADDR doesn't delete IPv4 addresses.
+    // Hence, we use SIOCSIFADDR to add 0.0.0.0 as an address. The
+    // effect of this hack is that the IPv4 address on that interface
+    // is deleted. Sigh...
+    //
+    UNUSED(if_index);
+    UNUSED(prefix_len);
+
+    IPv4::ZERO().copy_out(ifreq.ifr_addr);
+    if (ioctl(_s4, SIOCSIFADDR, &ifreq) < 0) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(),
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#elif defined(SIOCDIFADDR)
+    UNUSED(if_index);
+    UNUSED(prefix_len);
+
+    addr.copy_out(ifreq.ifr_addr);
+    if (ioctl(_s4, SIOCDIFADDR, &ifreq) < 0) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(),
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#else
+    //
+    // No mechanism to delete the address
+    //
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(if_index);
+    UNUSED(addr);
+    UNUSED(prefix_len);
+
+    error_msg = c_format("No mechanism to delete an IPv4 address "
+			 "on an interface");
+    return (XORP_ERROR);
+#endif
+}
+
+int
+IfConfigSetIoctl::add_addr(const string& ifname, const string& vifname,
+			   uint32_t if_index, const IPv6& addr,
+			   uint32_t prefix_len, bool is_point_to_point,
+			   const IPv6& endpoint_addr, string& error_msg)
+
+{
 #ifndef HAVE_IPV6
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
-    UNUSED(is_p2p);
     UNUSED(addr);
-    UNUSED(dst);
     UNUSED(prefix_len);
-    
+    UNUSED(is_point_to_point);
+    UNUSED(endpoint_addr);
+
     error_msg = "IPv6 is not supported";
 
     return (XORP_ERROR);
 
 #else // HAVE_IPV6
-
-    if (! fea_data_plane_manager().have_ipv6()) {
-	error_msg = "IPv6 is not supported";
-	return (XORP_ERROR);
-    }
 
 #if defined(SIOCAIFADDR_IN6)
     //
@@ -626,27 +943,28 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     //
     struct in6_aliasreq ifra;
 
-    UNUSED(vifname);
     UNUSED(if_index);
 
     memset(&ifra, 0, sizeof(ifra));
-    strncpy(ifra.ifra_name, ifname.c_str(), sizeof(ifra.ifra_name) - 1);
-
+    strncpy(ifra.ifra_name, vifname.c_str(), sizeof(ifra.ifra_name) - 1);
     addr.copy_out(ifra.ifra_addr);
-    if (is_p2p)
-	dst.copy_out(ifra.ifra_dstaddr);
-    IPvX::make_prefix(addr.af(), prefix_len).copy_out(ifra.ifra_prefixmask);
+    if (is_point_to_point)
+	endpoint_addr.copy_out(ifra.ifra_dstaddr);
+    IPv6 prefix_addr = IPv6::make_prefix(prefix_len);
+    prefix_addr.copy_out(ifra.ifra_prefixmask);
     ifra.ifra_lifetime.ia6t_vltime = ND6_INFINITE_LIFETIME;
     ifra.ifra_lifetime.ia6t_pltime = ND6_INFINITE_LIFETIME;
-
     if (ioctl(_s6, SIOCAIFADDR_IN6, &ifra) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot add address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
+
     return (XORP_OK);
 
 #elif defined(SIOCSIFADDR)
-
     //
     // Set a new address
     //
@@ -658,9 +976,6 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     //
     struct in6_ifreq in6_ifreq;
 
-    UNUSED(ifname);
-    UNUSED(vifname);
-
     memset(&in6_ifreq, 0, sizeof(in6_ifreq));
     in6_ifreq.ifr6_ifindex = if_index;
 
@@ -668,167 +983,125 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     addr.copy_out(in6_ifreq.ifr6_addr);
     in6_ifreq.ifr6_prefixlen = prefix_len;
     if (ioctl(_s6, SIOCSIFADDR, &in6_ifreq) < 0) {
-	error_msg = c_format("%s", strerror(errno));
+	error_msg = c_format("Cannot add address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
     }
 
     // Set the p2p address
-    if (is_p2p) {
-	dst.copy_out(in6_ifreq.ifr6_addr);
+    if (is_point_to_point) {
+	endpoint_addr.copy_out(in6_ifreq.ifr6_addr);
 	if (ioctl(_s6, SIOCSIFDSTADDR, &in6_ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
+	    error_msg = c_format("Cannot add endpoint address '%s' "
+				 "to address '%s' "
+				 "on interface '%s' vif '%s': %s",
+				 endpoint_addr.str().c_str(),
+				 addr.str().c_str(),
+				 ifname.c_str(), vifname.c_str(),
+				 strerror(errno));
 	    return (XORP_ERROR);
 	}
     }
+
     return (XORP_OK);
+
 #else
+    //
+    // No mechanism to add the address
+    //
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
-    UNUSED(is_p2p);
     UNUSED(addr);
-    UNUSED(dst);
     UNUSED(prefix_len);
+    UNUSED(is_point_to_point);
+    UNUSED(endpoint_addr);
+
+    error_msg = c_format("No mechanism to add an IPv6 address "
+			 "on an interface");
     return (XORP_ERROR);
 #endif
-
 #endif // HAVE_IPV6
 }
 
 int
-IfConfigSetIoctl::delete_vif_address(const string& ifname,
-				     const string& vifname,
-				     uint32_t if_index,
-				     const IPvX& addr,
-				     uint32_t prefix_len,
-				     string& error_msg)
+IfConfigSetIoctl::delete_addr(const string& ifname, const string& vifname,
+			      uint32_t if_index, const IPv6& addr,
+			      uint32_t prefix_len, string& error_msg)
 {
-    debug_msg("delete_vif_address "
-	      "(ifname = %s vifname = %s if_index = %u addr = %s "
-	      "prefix_len = %u)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      XORP_UINT_CAST(prefix_len));
+#ifndef HAVE_IPV6
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(if_index);
+    UNUSED(addr);
+    UNUSED(prefix_len);
 
-    // Check that the family is supported
-    switch (addr.af()) {
-    case AF_INET:
-	if (! fea_data_plane_manager().have_ipv4()) {
-	    error_msg = "IPv4 is not supported";
-	    return (XORP_ERROR);
-	}
-	break;
+    error_msg = "IPv6 is not supported";
 
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	if (! fea_data_plane_manager().have_ipv6()) {
-	    error_msg = "IPv6 is not supported";
-	    return (XORP_ERROR);
-	}
-	break;
-#endif // HAVE_IPV6
+    return (XORP_ERROR);
 
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
+#else // HAVE_IPV6
 
-    switch (addr.af()) {
-    case AF_INET:
-    {
-	struct ifreq ifreq;
+#if defined(HOST_OS_LINUX)
+    //
+    // XXX: Linux uses a weird struct in6_ifreq to do this, and this
+    // name clashes with the KAME in6_ifreq.
+    //
+    struct in6_ifreq in6_ifreq;
 
-	UNUSED(vifname);
-	UNUSED(if_index);
-	UNUSED(prefix_len);
+    memset(&in6_ifreq, 0, sizeof(in6_ifreq));
+    in6_ifreq.ifr6_ifindex = if_index;
+    addr.copy_out(in6_ifreq.ifr6_addr);
+    in6_ifreq.ifr6_prefixlen = prefix_len;
 
-	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
-
-#if !defined(HOST_OS_LINUX) && defined(SIOCDIFADDR)
-	addr.copy_out(ifreq.ifr_addr);
-	if (ioctl(_s4, SIOCDIFADDR, &ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
-	    return (XORP_ERROR);
-	}
-#elif defined(HOST_OS_LINUX)
-	// XXX: In case of Linux, SIOCDIFADDR doesn't delete IPv4 addresses.
-	// Hence, we use SIOCSIFADDR to add 0.0.0.0 as an address. The
-	// effect of this hack is that the IPv4 address on that interface
-	// is deleted. Sigh...
-	UNUSED(addr);
-	IPv4::ZERO().copy_out(ifreq.ifr_addr);
-	if (ioctl(_s4, SIOCSIFADDR, &ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
-	    return (XORP_ERROR);
-	}
-#else
-	UNUSED(ifname);
-	UNUSED(addr);
-	UNUSED(error_msg);
-	return (XORP_ERROR);	
-#endif
-	return (XORP_OK);
-	break;
-    }
-
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-#if !defined(HOST_OS_LINUX) && defined(SIOCDIFADDR_IN6)
-	struct in6_ifreq in6_ifreq;
-
-	UNUSED(if_index);
-	UNUSED(prefix_len);
-
-	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
-	strncpy(in6_ifreq.ifr_name, ifname.c_str(),
-		sizeof(in6_ifreq.ifr_name) - 1);
-
-	addr.copy_out(in6_ifreq.ifr_addr);
-
-	if (ioctl(_s6, SIOCDIFADDR_IN6, &in6_ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
-	    return (XORP_ERROR);
-	}
-	return (XORP_OK);
-
-#elif defined(HOST_OS_LINUX)
-	//
-	// XXX: Linux uses a weird struct in6_ifreq to do this, and this
-	// name clashes with the KAME in6_ifreq.
-	// For now, we don't make this code specific only to Linux.
-	//
-	struct in6_ifreq in6_ifreq;
-
-	UNUSED(ifname);
-
-	memset(&in6_ifreq, 0, sizeof(in6_ifreq));
-	in6_ifreq.ifr6_ifindex = if_index;
-	addr.copy_out(in6_ifreq.ifr6_addr);
-	in6_ifreq.ifr6_prefixlen = prefix_len;
-
-	if (ioctl(_s6, SIOCDIFADDR, &in6_ifreq) < 0) {
-	    error_msg = c_format("%s", strerror(errno));
-	    return (XORP_ERROR);
-	}
-	return (XORP_OK);
-#else
-	UNUSED(ifname);
-	UNUSED(prefix_len);
-	UNUSED(if_index);
+    if (ioctl(_s6, SIOCDIFADDR, &in6_ifreq) < 0) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
 	return (XORP_ERROR);
-#endif
-
-	break;
-    }
-#endif // HAVE_IPV6
-
-    default:
-	XLOG_UNREACHABLE();
-	break;
     }
 
     return (XORP_OK);
+
+#elif defined(SIOCDIFADDR_IN6)
+    struct in6_ifreq in6_ifreq;
+
+    UNUSED(if_index);
+    UNUSED(prefix_len);
+
+    memset(&in6_ifreq, 0, sizeof(in6_ifreq));
+    strncpy(in6_ifreq.ifr_name, vifname.c_str(),
+	    sizeof(in6_ifreq.ifr_name) - 1);
+    addr.copy_out(in6_ifreq.ifr_addr);
+
+    if (ioctl(_s6, SIOCDIFADDR_IN6, &in6_ifreq) < 0) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': %s",
+			     addr.str().c_str(),
+			     ifname.c_str(), vifname.c_str(), strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#else
+    //
+    // No mechanism to delete the address
+    //
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(if_index);
+    UNUSED(addr);
+    UNUSED(prefix_len);
+
+    error_msg = c_format("No mechanism to delete an IPv6 address "
+			 "on an interface");
+    return (XORP_ERROR);
+#endif
+#endif // HAVE_IPV6
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF
