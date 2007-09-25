@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.9 2007/09/15 19:52:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.10 2007/09/25 23:00:29 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -149,7 +149,7 @@ IfConfigSetIPHelper::config_interface_begin(const IfTreeInterface* pulled_ifp,
     // Set the MAC address
     //
     do {
-	Mac mac config_iface.mac();
+	Mac mac = config_iface.mac();
 	if (mac.empty() && (pulled_ifp != NULL))
 	    mac = pulled_ifp->mac();
 	if (mac.empty())
