@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.3 2007/09/15 05:10:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.4 2007/09/25 23:00:30 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -151,12 +151,12 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 	struct ifreq ifreq;
 	struct vlanreq vlanreq;
 
+	// Test whether a VLAN interface
 	memset(&ifreq, 0, sizeof(ifreq));
 	memset(&vlanreq, 0, sizeof(vlanreq));
 	strncpy(ifreq.ifr_name, ifp->ifname().c_str(),
 		sizeof(ifreq.ifr_name) - 1);
 	ifreq.ifr_data = reinterpret_cast<caddr_t>(&vlanreq);
-	
 	if (ioctl(_s4, SIOCGETVLAN, (caddr_t)&ifreq) < 0)
 	    continue;		// XXX: Most likely not a VLAN interface
 
