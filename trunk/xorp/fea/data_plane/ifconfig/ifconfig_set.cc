@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.10 2007/09/15 19:52:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.11 2007/09/25 23:00:29 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -304,7 +304,7 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
     uint32_t if_index = ifconfig().get_insert_ifindex(v.vifname());
     const IfTreeInterface* pulled_ifp = NULL;
     const IfTreeVif* pulled_vifp = NULL;
-    bool is_vif_deleted = false;
+    bool is_vif_obsoleted = false;
 
     pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
     if (pulled_ifp != NULL)
@@ -342,8 +342,8 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
 		break;
 	    }
 
-	    // Reset the delete flag for this vif
-	    ifconfig_vlan_set->set_vif_deleted(false);
+	    // Reset the obsoleted flag for this vif
+	    ifconfig_vlan_set->set_vif_obsoleted(false);
 
 	    if (ifconfig_vlan_set->config_vlan(pulled_ifp, pulled_vifp, i, v,
 					       error_msg)
@@ -356,9 +356,9 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
 		break;
 	    }
 
-	    if (ifconfig_vlan_set->is_vif_deleted()) {
-		is_vif_deleted = true;
-		ifconfig_vlan_set->set_vif_deleted(false);
+	    if (ifconfig_vlan_set->is_vif_obsoleted()) {
+		is_vif_obsoleted = true;
+		ifconfig_vlan_set->set_vif_obsoleted(false);
 	    }
 	}
 
@@ -366,9 +366,9 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
     } while (false);
 
     //
-    // Pull the new configuration if the vif was deleted
+    // Pull the new configuration if the vif was obsoleted (added or deleted)
     //
-    if (is_vif_deleted) {
+    if (is_vif_obsoleted) {
 	ifconfig().unmap_ifname(v.vifname());
 	ifconfig().pull_config();
     }

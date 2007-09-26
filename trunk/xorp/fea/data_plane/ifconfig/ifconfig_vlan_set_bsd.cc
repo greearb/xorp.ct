@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.3 2007/09/15 01:22:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.4 2007/09/25 23:00:30 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -133,7 +133,7 @@ IfConfigVlanSetBsd::config_vlan(const IfTreeInterface* pulled_ifp,
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
-	set_vif_deleted(true);
+	set_vif_obsoleted(true);
 
 	return (XORP_OK);
     }
@@ -160,7 +160,7 @@ IfConfigVlanSetBsd::config_vlan(const IfTreeInterface* pulled_ifp,
 				 error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-	set_vif_deleted(true);
+	set_vif_obsoleted(true);
     }
 
     //
@@ -176,6 +176,7 @@ IfConfigVlanSetBsd::config_vlan(const IfTreeInterface* pulled_ifp,
 			     error_msg.c_str());
 	return (XORP_ERROR);
     }
+    set_vif_obsoleted(true);
 
     return (XORP_OK);
 }
