@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.1 2007/09/26 01:40:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -181,7 +181,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			       string& error_msg)
 {
     struct vlan_ioctl_args vlanreq;
-    char expected_vlan_name;
+    string expected_vlan_name;
 
     //
     // Test whether the VLAN name matches
@@ -200,7 +200,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
     memset(&vlanreq, 0, sizeof(vlanreq));
     vlanreq.u.name_type = VLAN_NAME_TYPE_PLUS_VID_NO_PAD;	// vlan10
     vlanreq.cmd = SET_VLAN_NAME_TYPE_CMD;
-    if (ioctl(sock, SIOCSIFVLAN, &vlanreq) < 0) {
+    if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
 	error_msg = c_format("Cannot set the VLAN interface name type"
 			     "to %s: %s",
 			     "VLAN_NAME_TYPE_PLUS_VID_NO_PAD",
@@ -216,7 +216,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 	    sizeof(vlanreq.device1) - 1);
     vlanreq.u.VID = vlan_id;
     vlanreq.cmd = ADD_VLAN_CMD;
-    if (ioctl(sock, SIOCSIFVLAN, &vlanreq) < 0) {
+    if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
 	error_msg = c_format("Cannot create VLAN interface %s "
 			     "(parent = %s VLAN ID = %u): %s",
 			     vlan_name.c_str(), parent_ifname.c_str(),
@@ -242,7 +242,7 @@ IfConfigVlanSetLinux::delete_vlan(const string& parent_ifname,
     memset(&vlanreq, 0, sizeof(vlanreq));
     strncpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1) - 1);
     vlanreq.cmd = DEL_VLAN_CMD;
-    if (ioctl(sock, SIOCSIFVLAN, &vlanreq) < 0) {
+    if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
 	error_msg = c_format("Cannot destroy VLAN interface %s: %s",
 			     vlan_name.c_str(), strerror(errno));
 	return (XORP_ERROR);

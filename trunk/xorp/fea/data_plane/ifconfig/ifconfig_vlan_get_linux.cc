@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_linux.cc,v 1.1 2007/09/26 01:40:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -152,7 +152,7 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree)
 	strncpy(vlanreq.device1, ifp->ifname().c_str(),
 		sizeof(vlanreq.device1) - 1);
 	vlanreq.cmd = GET_VLAN_REALDEV_NAME_CMD;
-	if (ioctl(sock, SIOCGIFVLAN, &vlanreq) < 0) {
+	if (ioctl(_s4, SIOCGIFVLAN, &vlanreq) < 0)
 	    continue;		// XXX: Most likely not a VLAN interface
 
 	//
@@ -169,7 +169,7 @@ IfConfigVlanGetLinux::read_config(IfTree& iftree)
 	strncpy(vlanreq.device1, ifp->ifname().c_str(),
 		sizeof(vlanreq.device1) - 1);
 	vlanreq.cmd = GET_VLAN_VID_CMD;
-	if (ioctl(sock, SIOCGIFVLAN, &vlanreq) < 0) {
+	if (ioctl(_s4, SIOCGIFVLAN, &vlanreq) < 0) {
 	    error_msg = c_format("Cannot get the VLAN ID for interface %s: %s",
 				 ifp->ifname().c_str(), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());
