@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acvlan.m4,v 1.2 2007/09/14 23:12:35 pavlin Exp $
+dnl $XORP: xorp/config/acvlan.m4,v 1.3 2007/09/14 23:37:18 pavlin Exp $
 dnl
 
 dnl
@@ -89,6 +89,8 @@ AC_CHECK_HEADERS([net/if_vlan_var.h net/if_vlanvar.h net/vlan/if_vlan_var.h],
 #include <netinet/if_ether.h>
 #endif
 ])
+
+AC_CHECK_HEADERS([linux/sockios.h linux/if_vlan.h])
 
 dnl -------------------------------------------------------------
 dnl Check for BSD-style ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN)
@@ -186,7 +188,106 @@ AC_TRY_COMPILE([
 }
 ],
     [AC_DEFINE(HAVE_VLAN_BSD, 1,
-	       [Define to 1 if you have ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN) VLAN interface get/set methods])
+	       [Define to 1 if you have BSD-style ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN) VLAN interface get/set methods])
+     AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)])
+
+
+dnl -------------------------------------------------------------
+dnl Check for Linux-style ioctl(SIOCGIFVLAN) and ioctl(SIOCSIFVLAN)
+dnl VLAN interface get/set
+dnl -------------------------------------------------------------
+
+AC_MSG_CHECKING(whether the system has Linux-style ioctl(SIOCGIFVLAN) and ioctl(SIOCSIFVLAN) VLAN interface get/set)
+AC_TRY_COMPILE([
+#include <stdio.h>
+#include <stdlib.h>
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+#ifdef HAVE_LINUX_SOCKIOS_H
+#include <linux/sockios.h>
+#endif
+#ifdef HAVE_LINUX_IF_VLAN_H
+#include <linux/if_vlan.h>
+#endif
+],
+[
+{
+    int sock;
+    struct vlan_ioctl_args vlanreq;
+    int vlan_id = 10;
+    const char *vlan_name = "vlan10";
+    const char *parent_ifname = "eth1";
+
+    if ( (sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	perror("Can't create socket");
+        return (1);
+    }
+
+    /* Set the VLAN interface naming: vlan10 */
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    vlanreq.u.name_type = VLAN_NAME_TYPE_PLUS_VID_NO_PAD;
+    vlanreq.cmd = SET_VLAN_NAME_TYPE_CMD;
+    if (ioctl(sock, SIOCSIFVLAN, &vlanreq) < 0) {
+	perror("Can't set VLAN interface name type");
+        return (1);
+    }
+
+    /* Create the VLAN interface */
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    strncpy(vlanreq.device1, parent_ifname, sizeof(vlanreq.device1) - 1);
+    vlanreq.u.VID = vlan_id;
+    vlanreq.cmd = ADD_VLAN_CMD;
+    if (ioctl(sock, SIOCSIFVLAN, &vlanreq) < 0) {
+	perror("Can't create VLAN interface");
+        return (1);
+    }
+
+    /* Test whether VLAN interface */
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    strncpy(vlanreq.device1, vlan_name, sizeof(vlanreq.device1) - 1);
+    vlanreq.cmd = GET_VLAN_REALDEV_NAME_CMD;
+    if (ioctl(sock, SIOCGIFVLAN, &vlanreq) < 0) {
+	perror("Can't test whether VLAN interface");
+        return (1);
+    }
+    printf("Parent device: %s\n", vlanreq.u.device2);
+
+    /* Get the VLAN ID */
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    strncpy(vlanreq.device1, vlan_name, sizeof(vlanreq.device1) - 1);
+    vlanreq.cmd = GET_VLAN_VID_CMD;
+    if (ioctl(sock, SIOCGIFVLAN, &vlanreq) < 0) {
+	perror("Can't get the VLAN ID");
+        return (1);
+    }
+    printf("VLAN ID: %u\n", vlanreq.u.VID);
+
+    /* Destroy the VLAN interface */
+    memset(&vlanreq, 0, sizeof(vlanreq));
+    strncpy(vlanreq.device1, vlan_name, sizeof(vlanreq.device1) - 1);
+    // vlanreq.u.VID = vlan_id;
+    vlanreq.cmd = DEL_VLAN_CMD;
+    if (ioctl(sock, SIOCSIFVLAN, &vlanreq) < 0) {
+	perror("Can't destroy VLAN interface");
+        return (1);
+    }
+
+    return (0);
+}
+],
+    [AC_DEFINE(HAVE_VLAN_LINUX, 1,
+	       [Define to 1 if you have Linux-style ioctl(SIOCGIFVLAN) and ioctl(SIOCSIFVLAN) VLAN interface get/set methods])
      AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)])
 

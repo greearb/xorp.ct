@@ -181,6 +181,9 @@
 /* Define to 1 if you have the <linux/ethtool.h> header file. */
 #undef HAVE_LINUX_ETHTOOL_H
 
+/* Define to 1 if you have the <linux/if_vlan.h> header file. */
+#undef HAVE_LINUX_IF_VLAN_H
+
 /* Define to 1 if you have the <linux/mroute6.h> header file. */
 #undef HAVE_LINUX_MROUTE6_H
 
@@ -625,9 +628,13 @@
 /* Define to 1 if you have the <vfork.h> header file. */
 #undef HAVE_VFORK_H
 
-/* Define to 1 if you have ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN) VLAN
-   interface get/set methods */
+/* Define to 1 if you have BSD-style ioctl(SIOCGETVLAN) and ioctl(SIOCSETVLAN)
+   VLAN interface get/set methods */
 #undef HAVE_VLAN_BSD
+
+/* Define to 1 if you have Linux-style ioctl(SIOCGIFVLAN) and
+   ioctl(SIOCSIFVLAN) VLAN interface get/set methods */
+#undef HAVE_VLAN_LINUX
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
