@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.11 2007/09/25 23:00:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.12 2007/09/26 05:30:38 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -55,7 +55,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	IfTreeInterface& i = ii->second;
 
 	//
-	// Set the "soft" flag for discard interfaces that are emulated
+	// Set the "soft" flag for interfaces that are emulated
 	//
 	if (i.discard() && is_discard_emulated(i))
 	    i.set_soft(true);
@@ -111,6 +111,16 @@ IfConfigSet::push_config(IfTree& iftree)
 	 ii != iftree.interfaces().end();
 	 ++ii) {
 	IfTreeInterface& i = ii->second;
+
+	//
+	// Set the "soft" flag for interfaces that are emulated
+	//
+	// XXX: We need to do it again in case some of the push_*() methods
+	// explicitly called pull_config() and destroyed the previously
+	// set "soft" flag.
+	//
+	if (i.discard() && is_discard_emulated(i))
+	    i.set_soft(true);
 
 	// Soft interfaces and their child nodes should never be pushed
 	if (i.is_soft())
@@ -367,6 +377,9 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
 
     //
     // Pull the new configuration if the vif was obsoleted (added or deleted)
+    //
+    // XXX: Calling pull_config() here is sub-optimal. Future refactoring
+    // of the push_config() method should eliminate those excessive calls.
     //
     if (is_vif_obsoleted) {
 	ifconfig().unmap_ifname(v.vifname());
