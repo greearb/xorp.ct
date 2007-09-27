@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.2 2007/09/26 01:45:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.3 2007/09/26 05:30:38 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -25,6 +25,9 @@
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
 #endif
 #ifdef HAVE_LINUX_SOCKIOS_H
 #include <linux/sockios.h>
@@ -182,18 +185,6 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			       string& error_msg)
 {
     struct vlan_ioctl_args vlanreq;
-    string expected_vlan_name;
-
-    //
-    // Test whether the VLAN name matches
-    //
-    expected_vlan_name = c_format("vlan%u", vlan_id);
-    if (vlan_name != expected_vlan_name) {
-	error_msg = c_format("Cannot create VLAN interface %s: "
-			     "expected VLAN name is %s",
-			     vlan_name.c_str(), expected_vlan_name.c_str());
-	return (XORP_ERROR);
-    }
 
     //
     // Set the VLAN interface naming
@@ -213,8 +204,7 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
     // Create the VLAN
     //
     memset(&vlanreq, 0, sizeof(vlanreq));
-    strncpy(vlanreq.device1, parent_ifname.c_str(),
-	    sizeof(vlanreq.device1) - 1);
+    strlcpy(vlanreq.device1, parent_ifname.c_str(), sizeof(vlanreq.device1));
     vlanreq.u.VID = vlan_id;
     vlanreq.cmd = ADD_VLAN_CMD;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
@@ -223,6 +213,45 @@ IfConfigVlanSetLinux::add_vlan(const string& parent_ifname,
 			     vlan_name.c_str(), parent_ifname.c_str(),
 			     vlan_id, strerror(errno));
 	return (XORP_ERROR);
+    }
+
+    //
+    // Rename the VLAN interface if necessary
+    //
+    string tmp_vlan_name = c_format("vlan%u", vlan_id);
+
+    if (vlan_name != tmp_vlan_name) {
+#ifndef SIOCSIFNAME
+	//
+	// No support for interface renaming, therefore return an error
+	//
+	error_msg = c_format("Cannot create VLAN interface %s "
+			     "(parent = %s VLAN ID = %u): "
+			     "no support for interface renaming",
+			     vlan_name.c_str(), parent_ifname.c_str(),
+			     vlan_id);
+	return (XORP_ERROR);
+
+#else // SIOCSIFNAME
+	//
+	// Rename the VLAN interface
+	//
+	struct ifreq ifreq;
+	char new_vlan_name[sizeof(ifreq.ifr_newname)];
+
+	memset(&ifreq, 0, sizeof(ifreq));
+	strlcpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	strlcpy(new_vlan_name, vlan_name.c_str(), sizeof(new_vlan_name));
+	strlcpy(ifreq.ifr_newname, new_vlan_name, sizeof(ifreq.ifr_newname));
+	if (ioctl(_s4, SIOCSIFNAME, &ifreq) < 0) {
+	    error_msg = c_format("Cannot rename VLAN interface %s to %s: %s",
+				 tmp_vlan_name.c_str(), new_vlan_name,
+				 strerror(errno));
+	    string dummy_error_msg;
+	    delete_vlan(parent_ifname, tmp_vlan_name, dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+#endif // SIOCSIFNAME
     }
 
     return (XORP_OK);
@@ -241,7 +270,7 @@ IfConfigVlanSetLinux::delete_vlan(const string& parent_ifname,
     // Delete the VLAN
     //
     memset(&vlanreq, 0, sizeof(vlanreq));
-    strncpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1) - 1);
+    strlcpy(vlanreq.device1, vlan_name.c_str(), sizeof(vlanreq.device1));
     vlanreq.cmd = DEL_VLAN_CMD;
     if (ioctl(_s4, SIOCSIFVLAN, &vlanreq) < 0) {
 	error_msg = c_format("Cannot destroy VLAN interface %s: %s",
