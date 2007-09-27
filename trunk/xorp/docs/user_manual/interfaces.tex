@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.12 2007/03/14 01:07:01 pavlin Exp $
+% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.13 2007/04/02 21:53:23 pavlin Exp $
 %
 
 \chapter{Network Interfaces}
@@ -76,6 +76,8 @@ interfaces \{\\
 \>\>mtu: {\it uint}\\
 \>\>default-system-config\\
 \>\>disable: {\it bool}\\
+\>\>discard: {\it bool}\\
+\>\>unreachable: {\it bool}\\
 \>\>vif {\it text} \{\\
 \>\>\>disable: {\it bool}\\
 \>\>\>address {\it IPv4-addr} \{\\
@@ -143,11 +145,31 @@ interfaces \{\\
   {\tt address} sections must not be configured. 
 \item{\tt disable}: this flag disables or enables the interface for
   routing and forwarding~\footnote{Note
-  that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
-  {\tt disable}.}.  It takes the value {\stt true} or {\stt
+  that prior to XORP Release-1.1, the {\tt enable} flag was used instead
+  of {\tt disable}.}.  It takes the value {\stt true} or {\stt
   false}.  Configuring an interface to be disabled has the same effect
   as removing its configuration, but without losing what the
   configuration used to be.
+\item{\tt discard}: this flag enables an interface to be used as a
+  discard interface. It takes the value {\stt true} or {\stt false}.
+  The default is {\stt false} (\ie the interface is not a discard
+  interface).
+  All traffic sent on such interface will be silently thrown away (\ie
+  the interface will act as a blackhole).
+  Note that on some systems (\eg most UNIX systems) we cannot assign
+  the discard property to a physical interface. Instead, the name of the
+  discard interface should be made-up and should not match the name of
+  an interface that already exists in the system.
+\item{\tt unreachable}: this flag enables an interface to be used as an
+  unreachable interface. It takes the value {\stt true} or {\stt false}.
+  The default is {\stt false} (\ie the interface is not an unreachable
+  interface).
+  A packet sent on such interface will be trigger ``ICMP destination
+  unreachable'' back to the sender.
+  Note that on some systems (\eg most UNIX systems) we cannot assign
+  the unreachable property to a physical interface. Instead, the name of
+  the unreachable interface should be made-up and should not match the
+  name of an interface that already exists in the system.
 \item{\tt vif}: this configures a vif on the corresponding interface.
   In some cases this may cause the vif to be created; an example
   might be an Ethernet VLAN.  In other cases this merely denotes the
