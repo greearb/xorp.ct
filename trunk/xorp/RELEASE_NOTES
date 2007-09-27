@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.183 2007/08/24 02:15:55 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.184 2007/08/24 06:47:21 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -30,6 +30,21 @@ Release 1.5-WIP (2007/??/??)
       Note that not all systems support multiple forwarding tables.
       Currently, they exist only on Linux (among all systems supported by
       XORP).
+
+    - Addition of new FEA configuration statement to support
+      "unreachable" interfaces. Such interfaces are similar to "discard"
+      interfaces, except that instead of silently throwing away packets,
+      the system will respond with "ICMP destination unreachable".
+
+      interfaces {
+          interface my_unreachable {
+              unreachable: true
+              vif my_unreachable {
+              }
+          }
+      }
+
+      The default value for the "unreachable" statement is false.
 
   LIBXORP:
     - The local system-independent xorp_random() implemenation is used
