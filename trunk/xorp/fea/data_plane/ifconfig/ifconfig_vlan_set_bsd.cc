@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.4 2007/09/25 23:00:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.cc,v 1.5 2007/09/26 05:30:38 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -193,23 +193,84 @@ IfConfigVlanSetBsd::add_vlan(const string& parent_ifname,
     //
     // Create the VLAN
     //
-    memset(&ifreq, 0, sizeof(ifreq));
-    strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
-    if (ioctl(_s4, SIOCIFCREATE, &ifreq) < 0) {
-	error_msg = c_format("Cannot create VLAN interface %s: %s",
-			     vlan_name.c_str(), strerror(errno));
-	return (XORP_ERROR);
-    }
-    if (strncmp(vlan_name.c_str(), ifreq.ifr_name, sizeof(ifreq.ifr_name))
-	!= 0) {
+    do {
+	//
+	// Try to create the VLAN interface by using the user-supplied name
+	//
+	int result;
+	int saved_errno;
+	bool is_same_name = false;
+
+	memset(&ifreq, 0, sizeof(ifreq));
+	strlcpy(ifreq.ifr_name, vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	result = ioctl(_s4, SIOCIFCREATE, &ifreq);
+	saved_errno = errno;
+	if (strncmp(vlan_name.c_str(), ifreq.ifr_name, sizeof(ifreq.ifr_name))
+	    == 0) {
+	    is_same_name = true;
+	}
+	if ((result >= 0) && is_same_name) {
+	    break;		// Success
+	}
+
+#ifndef SIOCSIFNAME
+	//
+	// No support for interface renaming, therefore return an error
+	//
+	if (result < 0) {
+	    error_msg = c_format("Cannot create VLAN interface %s: %s",
+				 vlan_name.c_str(), strerror(saved_errno));
+	    return (XORP_ERROR);
+	}
 	// XXX: The created name didn't match
+	XLOG_ASSERT(is_same_name == false);
 	error_msg = c_format("Cannot create VLAN interface %s: "
 			     "the created name (%s) doesn't match",
 			     vlan_name.c_str(), ifreq.ifr_name);
 	string dummy_error_msg;
 	delete_vlan(parent_ifname, string(ifreq.ifr_name), dummy_error_msg);
 	return (XORP_ERROR);
-    }
+
+#else // SIOCSIFNAME
+	//
+	// Create the VLAN interface with a temporary name
+	//
+	string tmp_vlan_name = c_format("vlan%u", vlan_id);
+
+	memset(&ifreq, 0, sizeof(ifreq));
+	strlcpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	if (ioctl(_s4, SIOCIFCREATE, &ifreq) < 0) {
+	    error_msg = c_format("Cannot create VLAN interface %s: %s",
+				 tmp_vlan_name.c_str(), strerror(errno));
+	    return (XORP_ERROR);
+	}
+	//
+	// XXX: We don't care if the created name doesn't match the
+	// intended name, because this is just a temporary one.
+	//
+	tmp_vlan_name = string(ifreq.ifr_name);
+
+	//
+	// Rename the VLAN interface
+	//
+	char new_vlan_name[sizeof(ifreq.ifr_name)];
+	memset(&ifreq, 0, sizeof(ifreq));
+	strlcpy(ifreq.ifr_name, tmp_vlan_name.c_str(), sizeof(ifreq.ifr_name));
+	strlcpy(new_vlan_name, vlan_name.c_str(), sizeof(new_vlan_name));
+	ifreq.ifr_data = new_vlan_name;
+	if (ioctl(_s4, SIOCSIFNAME, &ifreq) < 0) {
+	    error_msg = c_format("Cannot rename VLAN interface %s to %s: %s",
+				 tmp_vlan_name.c_str(), new_vlan_name,
+				 strerror(errno));
+	    string dummy_error_msg;
+	    delete_vlan(parent_ifname, string(ifreq.ifr_name),
+			dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+#endif // SIOCSIFNAME
+
+	break;
+    } while (false);
 
     //
     // Configure the VLAN
