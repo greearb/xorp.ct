@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.49 2007/09/15 19:52:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.50 2007/09/25 23:00:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -889,8 +889,8 @@ IfTree::track_live_config_state(const IfTree& other)
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
-      _enabled(false), _discard(false), _mtu(0), _no_carrier(false),
-      _flipped(false), _interface_flags(0)
+      _enabled(false), _discard(false), _unreachable(false), _mtu(0),
+      _no_carrier(false), _flipped(false), _interface_flags(0)
 {}
 
 int

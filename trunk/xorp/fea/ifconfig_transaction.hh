@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.11 2007/09/15 02:11:18 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.12 2007/09/15 19:52:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -243,6 +243,33 @@ public:
 
 private:
     bool _discard;
+};
+
+/**
+ * Class for setting the unreachable state of an interface.
+ */
+class SetInterfaceUnreachable : public InterfaceModifier {
+public:
+    SetInterfaceUnreachable(IfTree&		iftree,
+			    const string&	ifname,
+			    bool		unreachable)
+	: InterfaceModifier(iftree, ifname), _unreachable(unreachable) {}
+
+    bool dispatch() {
+	IfTreeInterface* fi = interface();
+	if (fi == NULL)
+	    return (false);
+	fi->set_unreachable(_unreachable);
+	return (true);
+    }
+
+    string str() const {
+	return c_format("SetInterfaceUnreachable: %s %s",
+			ifname().c_str(), bool_c_str(_unreachable));
+    }
+
+private:
+    bool _unreachable;
 };
 
 /**

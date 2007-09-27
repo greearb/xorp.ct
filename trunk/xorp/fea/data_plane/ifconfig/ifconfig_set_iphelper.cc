@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.10 2007/09/25 23:00:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.11 2007/09/25 23:07:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -90,6 +90,14 @@ IfConfigSetIPHelper::stop(string& error_msg)
 
 bool
 IfConfigSetIPHelper::is_discard_emulated(const IfTreeInterface& i) const
+{
+    UNUSED(i);
+
+    return (false);
+}
+
+bool
+IfConfigSetIPHelper::is_unreachable_emulated(const IfTreeInterface& i) const
 {
     UNUSED(i);
 

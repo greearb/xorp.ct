@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.8 2007/09/13 01:09:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.9 2007/09/15 19:52:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -442,10 +442,9 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     // Older BSD kernels do not implement a software discard interface,
     // so map this back to a reference to the FEA's notion of one.
     //
-    // XXX: Currently RTF_REJECT is assumed to mean the same thing.
     // XXX: Windows does not currently support blackhole/reject routes.
     //
-    if (rtm->rtm_flags & (RTF_BLACKHOLE | RTF_REJECT)) {
+    if (rtm->rtm_flags & RTF_BLACKHOLE) {
 	//
         // Try to map discard routes back to the first software discard
         // interface in the tree. If we don't have one, then ignore this route.
@@ -456,14 +455,50 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	     ii != iftree.interfaces().end(); ++ii) {
 		if (ii->second.discard()) {
-			pi = &ii->second;
-			break;
+		    pi = &ii->second;
+		    break;
 		}
 	}
 	if (pi == NULL) {
 	    //
 	    // XXX: Cannot map a discard route back to an FEA soft discard
 	    // interface.
+	    //
+	    return (XORP_ERROR);
+	}
+
+	if_name = pi->ifname();		// XXX: ifname == vifname
+	// XXX: Do we need to change nexthop_addr?
+	lookup_ifindex = false;
+    }
+
+    //
+    // Test whether this route is an unreachable route.
+    // Older BSD kernels do not implement a software unreachable interface,
+    // so map this back to a reference to the FEA's notion of one.
+    //
+    // XXX: Windows does not currently support blackhole/reject routes.
+    //
+    if (rtm->rtm_flags & RTF_REJECT) {
+	//
+        // Try to map unreachable routes back to the first software
+        // unreachable interface in the tree. If we don't have one, then 
+	// ignore this route.
+        // We have to scan all interfaces because IfTree elements
+        // are held in a map, and we don't key on this property.
+        //
+	const IfTreeInterface* pi = NULL;
+	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
+	     ii != iftree.interfaces().end(); ++ii) {
+		if (ii->second.unreachable()) {
+		    pi = &ii->second;
+		    break;
+		}
+	}
+	if (pi == NULL) {
+	    //
+	    // XXX: Cannot map an unreachable route back to an FEA soft
+	    // unreachable interface.
 	    //
 	    return (XORP_ERROR);
 	}

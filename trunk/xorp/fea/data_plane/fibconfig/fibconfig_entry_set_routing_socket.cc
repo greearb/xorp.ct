@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.11 2007/07/18 01:30:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.12 2007/09/15 19:52:44 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -164,6 +164,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
     bool		is_interface_route = false;
     bool		is_nexthop_sockaddr_dl = false;
     bool		is_discard_route = false;
+    bool		is_unreachable_route = false;
     IPvX		fte_nexthop = fte.nexthop();
 
     debug_msg("add_entry "
@@ -193,10 +194,11 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 
     do {
 	//
-	// Check for a discard route; the referenced ifname must have the
-	// discard property. The next-hop is forcibly rewritten to be the
-	// loopback address, in order for the RTF_BLACKHOLE flag to take
-	// effect on BSD platforms.
+	// Check for a discard or unreachable route.
+	// The referenced ifname must have respectively the discard or
+	// unreachable property. The next-hop is forcibly rewritten to be the
+	// loopback address, in order for the RTF_BLACKHOLE or RTF_REJECT
+	// flag to take effect on BSD platforms.
 	//
 	if (fte.ifname().empty())
 	    break;
@@ -210,6 +212,10 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	    is_discard_route = true;
 	    fte_nexthop = IPvX::LOOPBACK(family);
 	}
+	if (ifp->unreachable()) {
+	    is_unreachable_route = true;
+	    fte_nexthop = IPvX::LOOPBACK(family);
+	}
 	break;
     } while (false);
 
@@ -218,8 +224,9 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
     // XXX: If we want to add an interface-specific route, and if
     // there is no nexthop IP address, then the nexthop (RTA_GATEWAY)
     // must be "struct sockaddr_dl" with the interface information.
-    // Note: this check must ba after the discard route check, because
-    // the discard route check may overwrite fte_nexthop.
+    // Note: this check must ba after the discard or unreachable route check,
+    // because the discard or unreachable route check may overwrite
+    // fte_nexthop.
     //
     if (is_interface_route && (fte_nexthop == IPvX::ZERO(family))) {
 	is_nexthop_sockaddr_dl = true;
@@ -290,6 +297,8 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	rtm->rtm_flags |= RTF_HOST;
     if (is_discard_route)
 	rtm->rtm_flags |= RTF_BLACKHOLE;
+    if (is_unreachable_route)
+	rtm->rtm_flags |= RTF_REJECT;
     if ((fte_nexthop != IPvX::ZERO(family)) && (! is_nexthop_sockaddr_dl))
 	rtm->rtm_flags |= RTF_GATEWAY;
     rtm->rtm_flags |= RTF_PROTO1;	// XXX: mark this as a XORP route

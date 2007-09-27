@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.16 2007/08/13 23:29:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.17 2007/08/30 06:02:29 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -391,6 +391,14 @@ test_vif_methods()
     verbose_assert(vif1.is_discard(), "is_discard()");
     vif1.set_discard(false);
     verbose_assert(! vif1.is_discard(), "is_discard()");
+
+    //
+    // Test if this vif is an unreachable interface.
+    //
+    vif1.set_unreachable(true);
+    verbose_assert(vif1.is_unreachable(), "is_unreachable()");
+    vif1.set_unreachable(false);
+    verbose_assert(! vif1.is_unreachable(), "is_unreachable()");
 
     //
     // Test if this vif is multicast capable.

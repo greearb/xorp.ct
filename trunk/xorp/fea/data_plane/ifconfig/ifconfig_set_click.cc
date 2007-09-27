@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.10 2007/09/15 19:52:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.11 2007/09/25 23:00:29 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -112,6 +112,14 @@ IfConfigSetClick::is_discard_emulated(const IfTreeInterface& i) const
     return (false);	// TODO: return correct value
 }
 
+bool
+IfConfigSetClick::is_unreachable_emulated(const IfTreeInterface& i) const
+{
+    UNUSED(i);
+
+    return (false);	// TODO: return correct value
+}
+
 int
 IfConfigSetClick::config_begin(string& error_msg)
 {
@@ -172,6 +180,8 @@ IfConfigSetClick::config_interface_begin(const IfTreeInterface* pulled_ifp,
 	ifp->set_pif_index(config_iface.pif_index());
     if (ifp->discard() != config_iface.discard())
 	ifp->set_discard(config_iface.discard());
+    if (ifp->unreachable() != config_iface.unreachable())
+	ifp->set_unreachable(config_iface.unreachable());
     if (mtu != 0) {
 	if (ifp->mtu() != mtu)
 	    ifp->set_mtu(mtu);
@@ -764,6 +774,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 				      bool_c_str(! fi.enabled()));
 	config += preamble + c_format("discard: %s\n",
 				      bool_c_str(fi.discard()));
+	config += preamble + c_format("unreachable: %s\n",
+				      bool_c_str(fi.unreachable()));
 	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
 	config += preamble + c_format("mtu: %u\n", XORP_UINT_CAST(fi.mtu()));
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {

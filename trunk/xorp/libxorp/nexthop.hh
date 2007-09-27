@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/nexthop.hh,v 1.6 2007/02/16 22:46:21 pavlin Exp $
+// $XORP: xorp/libxorp/nexthop.hh,v 1.7 2007/05/23 12:12:43 pavlin Exp $
 
 #ifndef __LIBXORP_NEXTHOP_HH__
 #define __LIBXORP_NEXTHOP_HH__
@@ -28,6 +28,7 @@
 //  encapsulation to reach.  Eg. PIM Register Encaps.
 // ExternalNextHop An IP nexthop that is not an intermediate neighbor.
 // DiscardNextHop is a discard interface.
+// UnreachableNextHop is an unreachable interface.
 //
 // there will probably be more needed at some point
 
@@ -36,13 +37,14 @@
 #define ENCAPS_NEXTHOP		2
 #define EXTERNAL_NEXTHOP	3
 #define DISCARD_NEXTHOP		4
+#define UNREACHABLE_NEXTHOP	5
 
 /**
  * @short Generic class for next-hop information.
  *
  * NextHop is the generic class for holding information about routing
  * next hops.  NextHops can be of many types, including immediate
- * neighbors, remote routers (with IBGP), discard interfaces,
+ * neighbors, remote routers (with IBGP), discard or unreachable interfaces
  * encapsulation endpoints, etc.  NextHop itself doesn't really do
  * anything useful, except to provide a generic handle for the
  * specialized subclasses.
@@ -69,6 +71,7 @@ public:
    ENCAPS_NEXTHOP	2
    EXTERNAL_NEXTHOP	3
    DISCARD_NEXTHOP	4
+   UNREACHABLE_NEXTHOP	5
 </pre>
      */
     virtual int type() = 0;
@@ -263,6 +266,38 @@ public:
      * @return the nexthop type.  In this case, it is DISCARD_NEXTHOP.
      */
     int type() { return DISCARD_NEXTHOP; }
+
+    /**
+     * Convert this nexthop from binary form to presentation format.
+     * 
+     * @return C++ string with the human-readable ASCII representation
+     * of the nexthop.
+     */
+    string str() const;
+    
+private:
+    
+};
+
+/**
+ * @short A nexthop that is the unreachable interface.
+ * 
+ * Specialization of @ref NextHop for adding routing entries that return
+ * ICMP destination unreachable messages.
+ */
+class UnreachableNextHop : public NextHop {
+public:
+    /**
+     * Default constructor
+     */
+    UnreachableNextHop();
+    
+    /**
+     * Get the type of the nexthop.
+     * 
+     * @return the nexthop type.  In this case, it is UNREACHABLE_NEXTHOP.
+     */
+    int type() { return UNREACHABLE_NEXTHOP; }
 
     /**
      * Convert this nexthop from binary form to presentation format.

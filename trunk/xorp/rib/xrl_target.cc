@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.60 2007/03/22 20:48:18 bms Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.61 2007/05/23 04:08:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1164,6 +1164,7 @@ XrlRibTarget::rib_0_1_register_interest4(// Input values,
 	    break;
 	case EXTERNAL_NEXTHOP:
 	case DISCARD_NEXTHOP:
+	case UNREACHABLE_NEXTHOP:
 	    resolves = false;
 	    break;
 	}
@@ -1228,6 +1229,7 @@ XrlRibTarget::rib_0_1_register_interest6(// Input values,
 	    break;
 	case EXTERNAL_NEXTHOP:
 	case DISCARD_NEXTHOP:
+	case UNREACHABLE_NEXTHOP:
 	    resolves = false;
 	    break;
 	}

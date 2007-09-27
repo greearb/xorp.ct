@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.24 2007/09/10 17:35:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.25 2007/09/15 00:57:06 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -86,6 +86,11 @@ protected:
 	// Input values,
 	const string&	ifname,
 	const bool&	discard);
+
+    XrlCmdError fea_ifmgr_mirror_0_1_interface_set_unreachable(
+	// Input values,
+	const string&	ifname,
+	const bool&	unreachable);
 
     XrlCmdError fea_ifmgr_mirror_0_1_interface_set_mtu(
 	// Input values,
@@ -382,6 +387,19 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_discard(
 	)
 {
     _dispatcher.push(new IfMgrIfSetDiscard(ifname, discard));
+    if (_dispatcher.execute() == true) {
+	return XrlCmdError::OKAY();
+    }
+    return XrlCmdError::COMMAND_FAILED(DISPATCH_FAILED);
+}
+
+XrlCmdError
+IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_unreachable(
+	const string&	ifname,
+	const bool&	unreachable
+	)
+{
+    _dispatcher.push(new IfMgrIfSetUnreachable(ifname, unreachable));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

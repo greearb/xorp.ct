@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.32 2007/09/10 17:35:23 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.33 2007/09/15 00:57:05 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -275,6 +275,9 @@ public:
     bool	discard() const			{ return _discard; }
     void	set_discard(bool v)		{ _discard = v; }
 
+    bool	unreachable() const		{ return _unreachable; }
+    void	set_unreachable(bool v)		{ _unreachable = v; }
+
     uint32_t	mtu() const			{ return _mtu; }
     void	set_mtu(uint32_t v)		{ _mtu = v; }
 
@@ -302,6 +305,7 @@ protected:
 
     bool	_enabled;	// True if enabled
     bool	_discard;	// True if a discard interface
+    bool	_unreachable;	// True if an unreachable interface
     uint32_t	_mtu;		// The interface MTU (in bytes)
     Mac		_mac;		// The interface MAC address
     uint32_t	_pif_index;	// Physical interface index
@@ -542,6 +546,7 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
     : _name(name),
       _enabled(false),
       _discard(false),
+      _unreachable(false),
       _mtu(0),
       _pif_index(0),
       _no_carrier(false)

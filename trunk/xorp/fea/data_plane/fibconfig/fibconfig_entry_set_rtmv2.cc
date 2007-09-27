@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.13 2007/07/18 01:30:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.14 2007/09/15 19:52:44 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -204,10 +204,11 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 #if 0
     do {
 	//
-	// Check for a discard route; the referenced ifname must have the
-	// discard property. The next-hop is forcibly rewritten to be the
-	// loopback address, in order for the RTF_BLACKHOLE flag to take
-	// effect on BSD platforms.
+	// Check for a discard or unreachable route.
+	// The referenced ifname must have respectively the discard or
+	// unreachable property. The next-hop is forcibly rewritten to be the
+	// loopback address, in order for the RTF_BLACKHOLE or RTF_REJECT
+	// flag to take effect on BSD platforms.
 	//
 	if (fte.ifname().empty())
 	    break;
@@ -219,6 +220,10 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 	}
 	if (ifp->discard()) {
 	    is_discard_route = true;
+	    fte_nexthop = IPvX::LOOPBACK(family);
+	}
+	if (ifp->unreachable()) {
+	    is_unreachable_route = true;
 	    fte_nexthop = IPvX::LOOPBACK(family);
 	}
 	break;

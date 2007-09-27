@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.19 2007/09/10 17:35:23 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.20 2007/09/15 00:57:06 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -119,6 +119,30 @@ public:
 
 protected:
     bool	_discard;
+};
+
+/**
+ * @short Command to set unreachable condition on interface.
+ */
+class IfMgrIfSetUnreachable : public IfMgrIfCommandBase {
+public:
+    IfMgrIfSetUnreachable(const string& ifname, bool unreachable)
+	: IfMgrIfCommandBase(ifname),
+	  _unreachable(unreachable)
+    {}
+
+    bool unreachable() const			{ return _unreachable; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    bool	_unreachable;
 };
 
 /**

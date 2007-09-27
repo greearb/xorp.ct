@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.12 2007/08/09 22:20:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.13 2007/09/15 19:52:44 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -246,8 +246,9 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
     if (if_index == 0) {
 	do {
 	    //
-	    // Check for a discard route; the referenced ifname must have
-	    // the discard property. These use a separate route type in netlink
+	    // Check for discard and unreachable routes.
+	    // The referenced ifname must have respectively the discard or the
+	    // unreachable property. These use a separate route type in netlink
 	    // land. Unlike BSD, it need not reference a loopback interface.
 	    // Because this interface exists only in the FEA, it has no index.
 	    //
@@ -259,11 +260,16 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 
 	    if (ifp->discard()) {
 		rtmsg->rtm_type = RTN_BLACKHOLE;
-	    } else {
-		// Catchall.
-		XLOG_FATAL("Could not find interface index for name %s",
-			   fte.vifname().c_str());
+		break;
 	    }
+	    if (ifp->unreachable()) {
+		rtmsg->rtm_type = RTN_UNREACHABLE;
+		break;
+	    }
+
+	    // Catchall.
+	    XLOG_FATAL("Could not find interface index for name %s",
+		       fte.vifname().c_str());
 	    break;
 	} while (false);
     }
@@ -468,8 +474,8 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 
     do {
 	//
-	// When deleting a route which points to a discard interface,
-	// pass the correct route type to the kernel.
+	// When deleting a route which points to a discard or unreachable
+	// interface, pass the correct route type to the kernel.
 	//
 	if (fte.ifname().empty())
 	    break;
@@ -482,8 +488,16 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 	// routes while we still don't have any interface tree configuration.
 	//
 
-	if ((ifp != NULL) && ifp->discard())
-	    rtmsg->rtm_type = RTN_BLACKHOLE;
+	if (ifp != NULL) {
+	    if (ifp->discard()) {
+		rtmsg->rtm_type = RTN_BLACKHOLE;
+		break;
+	    }
+	    if (ifp->unreachable()) {
+		rtmsg->rtm_type = RTN_UNREACHABLE;
+		break;
+	    }
+	}
 
 	break;
     } while (false);

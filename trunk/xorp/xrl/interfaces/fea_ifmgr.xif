@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.21 2007/08/09 00:47:04 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.22 2007/09/15 02:11:18 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -47,6 +47,8 @@ interface ifmgr/0.1 {
 	get_configured_interface_enabled ? ifname:txt -> enabled:bool
 
 	get_configured_interface_discard ? ifname:txt -> discard:bool
+
+	get_configured_interface_unreachable ? ifname:txt -> unreachable:bool
 
 	get_configured_mac ? ifname:txt -> mac:mac
 
@@ -102,6 +104,8 @@ interface ifmgr/0.1 {
 	set_interface_enabled ? tid:u32 & ifname:txt & enabled:bool
 
 	set_interface_discard ? tid:u32 & ifname:txt & discard:bool
+
+	set_interface_unreachable ? tid:u32 & ifname:txt & unreachable:bool
 
 	set_mac ? tid:u32 & ifname:txt & mac:mac
 

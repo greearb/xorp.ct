@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.11 2005/03/09 22:50:41 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.12 2005/03/16 01:36:58 pavlin Exp $
 #
 
 #
@@ -698,6 +698,16 @@ function process_statement(statement)
 		v = tokens[i];
 		p = iftree_interfaces_max - 1;
 		iftree_interfaces_discard[p] = v;
+		continue;
+	    }
+
+	    if (tokens[i] == "unreachable:") {
+		if (i == tokens_n)
+		    syntax_error("Missing value");
+		i++;
+		v = tokens[i];
+		p = iftree_interfaces_max - 1;
+		iftree_interfaces_unreachable[p] = v;
 		continue;
 	    }
 

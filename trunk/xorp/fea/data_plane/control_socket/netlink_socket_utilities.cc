@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.5 2007/09/13 01:13:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.6 2007/09/15 19:52:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -224,8 +224,33 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     }
 
     case RTN_UNREACHABLE:
-	// XXX: Ignore "destination unreachable" notifications.
-	return (XORP_ERROR);
+    {
+	//
+	// Try to map unreachable routes back to the first software unreachable
+	// interface in the tree. If we don't have one, then ignore this route.
+	// We have to scan all interfaces because IfTree elements
+	// are held in a map, and we don't key on this property.
+	//
+	const IfTreeInterface* pi = NULL;
+	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
+	     ii != iftree.interfaces().end(); ++ii) {
+	    if (ii->second.unreachable()) {
+		pi = &ii->second;
+		break;
+	    }
+	}
+	if (pi == NULL) {
+	    //
+	    // XXX: Cannot map an unreachable route back to an FEA soft
+	    // unreachable interface.
+	    //
+	    return (XORP_ERROR);
+	}
+	if_name = pi->ifname();		// XXX: ifname == vifname
+	// XXX: Do we need to change nexthop_addr?
+	lookup_ifindex = false;
+	break;
+    }
 
     case RTN_UNICAST:
 	break;

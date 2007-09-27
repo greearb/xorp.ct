@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.12 2007/09/25 23:00:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.13 2007/09/25 23:07:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -103,6 +103,19 @@ IfConfigSetNetlinkSocket::stop(string& error_msg)
 
 bool
 IfConfigSetNetlinkSocket::is_discard_emulated(const IfTreeInterface& i) const
+{
+    UNUSED(i);
+
+#ifdef HOST_OS_LINUX
+    return (true);
+#else
+    return (false);
+#endif
+}
+
+bool
+IfConfigSetNetlinkSocket::is_unreachable_emulated(const IfTreeInterface& i)
+    const
 {
     UNUSED(i);
 

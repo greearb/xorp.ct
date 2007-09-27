@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.19 2007/08/21 00:10:37 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.20 2007/09/15 02:11:18 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -471,6 +471,18 @@ public:
 	const string&	ifname,
 	// Output values,
 	bool&		discard);
+
+    XrlCmdError ifmgr_0_1_set_interface_unreachable(
+	// Input values,
+	const uint32_t& tid,
+	const string&	ifname,
+	const bool&	unreachable);
+
+    XrlCmdError ifmgr_0_1_get_configured_interface_unreachable(
+	// Input values,
+	const string&	ifname,
+	// Output values,
+	bool&		unreachable);
 
     XrlCmdError ifmgr_0_1_set_mac(
 	// Input values,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.17 2007/02/16 22:46:28 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.18 2007/05/04 19:57:34 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -175,8 +175,8 @@ private:
  * 
  * Vif holds information about a virtual interface.  A Vif may
  * represent a physical interface, or may represent more abstract
- * entities such as the Discard interface, or a VLAN on a physical
- * interface.
+ * entities such as the Discard or Unreachable interface, or a VLAN
+ * on a physical interface.
  */
 class Vif {
 public:
@@ -302,6 +302,13 @@ public:
      * @return true if this vif is a discard interface, otherwise false.
      */
     bool	is_discard()		const	{ return _is_discard; }
+
+    /**
+     * Test if this vif is an unreachable interface.
+     * 
+     * @return true if this vif is an unreachable interface, otherwise false.
+     */
+    bool	is_unreachable()	const	{ return _is_unreachable; }
     
     /**
      * Test if this vif is multicast capable.
@@ -367,6 +374,14 @@ public:
      * otherwise reset it.
      */
     void	set_discard(bool v)		{ _is_discard = v; }
+
+    /**
+     * Set/reset the vif as an unreachable interface.
+     * 
+     * @param v if true, then set this vif as an unreachable interface,
+     * otherwise reset it.
+     */
+    void	set_unreachable(bool v)		{ _is_unreachable = v; }
     
     /**
      * Set/reset the vif as multicast capable.
@@ -531,6 +546,7 @@ private:
     bool	_is_p2p;		// Point-to-point interface
     bool	_is_loopback;		// Loopback interface
     bool	_is_discard;		// Discard interface
+    bool	_is_unreachable;	// Unreachable interface
     bool	_is_multicast_capable;	// Multicast-capable interface
     bool	_is_broadcast_capable;	// Broadcast-capable interface
     bool	_is_underlying_vif_up;	// True if underlying vif is up

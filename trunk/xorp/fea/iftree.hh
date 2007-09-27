@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.51 2007/09/15 19:52:39 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.52 2007/09/25 23:00:28 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -408,6 +408,9 @@ public:
     bool discard() const		{ return _discard; }
     void set_discard(bool discard)	{ _discard = discard; mark(CHANGED); }
 
+    bool unreachable() const		{ return _unreachable; }
+    void set_unreachable(bool v)	{ _unreachable = v; mark(CHANGED); }
+
     /**
      * Get the flipped flag.
      *
@@ -567,6 +570,7 @@ protected:
     uint32_t	_pif_index;
     bool 	_enabled;
     bool	_discard;
+    bool	_unreachable;
     uint32_t 	_mtu;
     Mac 	_mac;
     bool	_no_carrier;

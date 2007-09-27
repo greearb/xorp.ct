@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.20 2006/03/16 00:05:28 pavlin Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.21 2007/02/16 22:47:07 pavlin Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -97,6 +97,8 @@ public:
 		verifytype = RibVerifyType(MISS);
 	else if (_type == "discard")
 		verifytype = RibVerifyType(DISCARD);
+	else if (_type == "unreachable")
+		verifytype = RibVerifyType(UNREACHABLE);
 	else if (_type == "ip")
 		verifytype = RibVerifyType(IP);
 	else {
@@ -141,6 +143,28 @@ public:
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
 	vif.add_address(vifaddr);
 	vif.set_discard(true);
+	vif.set_underlying_vif_up(true);
+	cout << "**** Vif: " << vif.str() << endl;
+
+	return _rib.new_vif(_ifname, vif);
+    }
+private:
+    RIB<IPv4>& _rib;
+};
+
+class DirectUnreachableVifCommand : public UnreachableVifCommand {
+public:
+    DirectUnreachableVifCommand(RIB<IPv4>& rib)
+	: UnreachableVifCommand(), _rib(rib) {}
+    int execute() {
+	cout << "UnreachableVifCommand::execute " << _ifname << " ";
+	cout << _addr.str() << "\n";
+
+	Vif vif(_ifname);
+	IPv4Net subnet(_addr, _prefix_len);
+	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
+	vif.add_address(vifaddr);
+	vif.set_unreachable(true);
 	vif.set_underlying_vif_up(true);
 	cout << "**** Vif: " << vif.str() << endl;
 

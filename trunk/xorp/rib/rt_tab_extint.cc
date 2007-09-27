@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.30 2006/07/06 21:05:43 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.31 2007/02/16 22:47:09 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -513,6 +513,7 @@ ExtIntTable<A>::recalculate_nexthops(const IPRouteEntry<A>& new_route)
     while (found != NULL) {
 	egp_parent = found->egp_parent();
 	XLOG_ASSERT(egp_parent->nexthop()->type() != DISCARD_NEXTHOP);
+	XLOG_ASSERT(egp_parent->nexthop()->type() != UNREACHABLE_NEXTHOP);
 	A nexthop = (reinterpret_cast<IPNextHop<A>* >(egp_parent->nexthop()))->addr();
 
 	if (new_route.net().contains(nexthop)) {

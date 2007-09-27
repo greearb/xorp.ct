@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.22 2006/03/16 00:05:41 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.23 2007/02/16 22:47:11 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -63,6 +63,8 @@ test_route_range(const string& ipv4,
 	verifytype = RibVerifyType(MISS);
     else if (verifytypestr == "discard")
 	verifytype = RibVerifyType(DISCARD);
+    else if (verifytypestr == "unreachable")
+	verifytype = RibVerifyType(UNREACHABLE);
     else if (verifytypestr == "ip")
 	verifytype = RibVerifyType(IP);
     else {
@@ -79,6 +81,13 @@ test_route_range(const string& ipv4,
 	if (verifytype != RibVerifyType(DISCARD) && dnh == NULL) {
 	    printf("**RouteRange for %s\n", ipv4.c_str());
 	    printf("Expected discard route\n");
+	    abort();
+	}
+	UnreachableNextHop* unh;
+	unh = reinterpret_cast<UnreachableNextHop* >(rr->route()->nexthop());
+	if (verifytype != RibVerifyType(UNREACHABLE) && unh == NULL) {
+	    printf("**RouteRange for %s\n", ipv4.c_str());
+	    printf("Expected unreachable route\n");
 	    abort();
 	}
 	if (rr->route()->vif() == NULL) {

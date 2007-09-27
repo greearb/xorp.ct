@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.24 2007/09/10 17:35:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.25 2007/09/15 00:57:05 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -249,6 +249,41 @@ IfMgrIfSetDiscard::str() const
 {
     return if_str_begin(this, "SetDiscard")
 	+ "\", " + bool_c_str(discard()) + if_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrIfSetUnreachable
+
+bool
+IfMgrIfSetUnreachable::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_unreachable(unreachable());
+    return true;
+}
+
+bool
+IfMgrIfSetUnreachable::forward(XrlSender&	sender,
+			       const string&	 xrl_target,
+			       const IfMgrXrlSendCB& xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_interface_set_unreachable(xt, ifname(), unreachable(), xcb);
+}
+
+string
+IfMgrIfSetUnreachable::str() const
+{
+    return if_str_begin(this, "SetUnreachable")
+	+ "\", " + bool_c_str(unreachable()) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------

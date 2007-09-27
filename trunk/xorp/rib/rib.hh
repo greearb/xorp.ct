@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.38 2007/03/22 20:48:18 bms Exp $
+// $XORP: xorp/rib/rib.hh,v 1.39 2007/05/23 12:12:46 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -51,7 +51,8 @@ enum RibTransportType {
 enum RibVerifyType {
     MISS	= 0,	// No route to destination
     DISCARD	= 1,	// Discard route for destination
-    IP		= 2	// Protocol route to destination
+    UNREACHABLE	= 2,	// Unreachable route for destination
+    IP		= 3	// Protocol route to destination
 };
 
 /**

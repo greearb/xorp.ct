@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.55 2007/09/15 01:22:35 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.56 2007/09/25 23:00:28 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -101,6 +101,15 @@ protected:
      * @return true if discard semantics are emulated.
      */
     virtual bool is_discard_emulated(const IfTreeInterface& i) const = 0;
+
+    /**
+     * Determine if the interface's underlying provider implements unreachable
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if unreachable semantics are emulated.
+     */
+    virtual bool is_unreachable_emulated(const IfTreeInterface& i) const = 0;
 
     /**
      * Start the configuration.

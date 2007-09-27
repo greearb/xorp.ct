@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.31 2006/10/13 06:24:08 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.32 2007/09/26 08:00:29 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -8,6 +8,7 @@ interfaces {
 	disable:	toggle = false;
 	enabled:	bool;			/* %deprecated */
 	discard:	toggle = false;
+	unreachable:	toggle = false;
 	description:	txt = "";
 	mac:		macaddr;
 	mtu:		u32;
@@ -94,6 +95,11 @@ interfaces {
 	discard {
 	    %help:	short "Configure a discard interface";
 	    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_interface_discard?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&discard:bool=$(@)";
+	}
+
+	unreachable {
+	    %help:	short "Configure an unreachable interface";
+	    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_interface_unreachable?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&unreachable:bool=$(@)";
 	}
 
 	default-system-config {

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.28 2007/03/15 00:43:13 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.29 2007/04/14 08:59:48 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -416,7 +416,7 @@ This file declares a number of classes that can be used to contain
 routing next-hop information. For example, \emph{class NextHop}
 is the generic class for holding information about routing
 next hops.  NextHops can be of many types, including immediate
-neighbors, remote routers (with IBGP), discard interfaces,
+neighbors, remote routers (with IBGP), discard or unreachable interfaces,
 encapsulation endpoints, etc.  NextHop itself doesn't really do
 anything useful, except to provide a generic handle for the
 specialized subclasses. The specialized subclasses are:
@@ -432,6 +432,8 @@ specialized subclasses. The specialized subclasses are:
   neighbor.
 
   \item DiscardNextHop is a discard interface.
+
+  \item UnreachableNextHop is an unreachable interface.
 
 \end{itemize}
 
@@ -702,8 +704,8 @@ VifAddr}.
 
 Class Vif holds information about a virtual interface.  A Vif may
 represent a physical interface, or may represent more abstract
-entities such as the Discard interface, or a VLAN on a physical
-interface.
+entities such as the Discard or Unreachable interface, or a VLAN on a
+physical interface.
 VifAddr holds information about an address of a virtual interface.
 A virtual interface may have more than one VifAddr.
 

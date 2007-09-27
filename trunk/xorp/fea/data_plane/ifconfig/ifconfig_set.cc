@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.12 2007/09/26 05:30:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.13 2007/09/26 07:01:23 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -58,6 +58,8 @@ IfConfigSet::push_config(IfTree& iftree)
 	// Set the "soft" flag for interfaces that are emulated
 	//
 	if (i.discard() && is_discard_emulated(i))
+	    i.set_soft(true);
+	if (i.unreachable() && is_unreachable_emulated(i))
 	    i.set_soft(true);
 
 	//
@@ -120,6 +122,8 @@ IfConfigSet::push_config(IfTree& iftree)
 	// set "soft" flag.
 	//
 	if (i.discard() && is_discard_emulated(i))
+	    i.set_soft(true);
+	if (i.unreachable() && is_unreachable_emulated(i))
 	    i.set_soft(true);
 
 	// Soft interfaces and their child nodes should never be pushed

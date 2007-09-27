@@ -12,55 +12,77 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/nexthop.cc,v 1.8 2006/03/16 00:04:31 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/nexthop.cc,v 1.9 2007/02/16 22:46:21 pavlin Exp $"
+
+#include "libxorp_module.h"
 
 #include "xorp.h"
 #include "nexthop.hh"
 
 template<class A>
-IPNextHop<A>::IPNextHop(const A &from_ipaddr) {
-    _addr = from_ipaddr;
+IPNextHop<A>::IPNextHop(const A& from_ipaddr)
+    : _addr(from_ipaddr)
+{
 }
 
 template<class A>
-IPPeerNextHop<A>::IPPeerNextHop(const A &from_ipaddr)
-    : IPNextHop<A>(from_ipaddr) {
+IPPeerNextHop<A>::IPPeerNextHop(const A& from_ipaddr)
+    : IPNextHop<A>(from_ipaddr)
+{
 }
 
 template<class A> string
-IPPeerNextHop<A>::str() const {
+IPPeerNextHop<A>::str() const
+{
     string nh = "NH:";
     return nh + this->_addr.str();
 }
 
 template<class A>
-IPEncapsNextHop<A>::IPEncapsNextHop(const A &from_ipaddr)
-    : IPNextHop<A>(from_ipaddr) {
+IPEncapsNextHop<A>::IPEncapsNextHop(const A& from_ipaddr)
+    : IPNextHop<A>(from_ipaddr)
+{
 }
 
 template<class A> string
-IPEncapsNextHop<A>::str() const {
+IPEncapsNextHop<A>::str() const
+{
     string enh = "NH->";
     return enh + this->_addr.str();
 }
 
 template<class A>
-IPExternalNextHop<A>::IPExternalNextHop(const A &from_ipaddr) 
+IPExternalNextHop<A>::IPExternalNextHop(const A& from_ipaddr) 
     : IPNextHop<A>(from_ipaddr) 
 {
 }
 
 template<class A> string
-IPExternalNextHop<A>::str() const {
+IPExternalNextHop<A>::str() const
+{
     return string("Ext>") + this->_addr.str();
 }
 
-DiscardNextHop::DiscardNextHop() : NextHop() {
+DiscardNextHop::DiscardNextHop()
+    : NextHop()
+{
 }
 
 string
-DiscardNextHop::str() const {
+DiscardNextHop::str() const
+{
     return string("DISCARD");
+}
+
+UnreachableNextHop::UnreachableNextHop()
+    : NextHop()
+{
+}
+
+string
+UnreachableNextHop::str() const
+{
+    return string("UNREACHABLE");
 }
 
 

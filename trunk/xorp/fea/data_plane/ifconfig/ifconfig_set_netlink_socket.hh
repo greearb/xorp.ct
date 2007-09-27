@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh,v 1.5 2007/07/16 23:56:12 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.hh,v 1.6 2007/09/25 23:00:30 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_NETLINK_SOCKET_HH__
@@ -62,6 +62,15 @@ private:
      * @return true if discard semantics are emulated.
      */
     virtual bool is_discard_emulated(const IfTreeInterface& i) const;
+
+    /**
+     * Determine if the interface's underlying provider implements unreachable
+     * semantics natively, or if they are emulated through other means.
+     *
+     * @param i the interface item to inspect.
+     * @return true if unreachable semantics are emulated.
+     */
+    virtual bool is_unreachable_emulated(const IfTreeInterface& i) const;
 
     /**
      * Start the configuration.

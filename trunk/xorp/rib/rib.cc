@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.65 2007/03/22 22:17:03 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.66 2007/05/23 12:12:46 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -910,17 +910,29 @@ RIB<A>::verify_route(const A& lookup_addr,
     }
 
 #ifdef notyet
-    // 3. Check for discard (blackhole) routes.
+    // 3a. Check for discard (blackhole) routes.
     // XXX: re->vif() must be non-NULL and valid. Revisit this in future.
     DiscardNextHop* dnh = dynamic_cast<DiscardNextHop*>(re->nexthop());
     if (matchtype == RibVerifyType(DISCARD)) {
-	    if (dnh == NULL) {
-		    debug_msg("Next hop is not a DiscardNextHop");
-		    return XORP_ERROR;
-	    } else {
-		debug_msg("****DISCARD ROUTE SUCCESSFULLY VERIFIED****\n");
-		return XORP_OK;
-	    }
+	if (dnh == NULL) {
+	    debug_msg("Next hop is not a DiscardNextHop");
+	    return XORP_ERROR;
+	} else {
+	    debug_msg("****DISCARD ROUTE SUCCESSFULLY VERIFIED****\n");
+	    return XORP_OK;
+	}
+    }
+    // 3b. Check for unreachable routes.
+    // XXX: re->vif() must be non-NULL and valid. Revisit this in future.
+    UnreachableNextHop* unh = dynamic_cast<UnreachableNextHop*>(re->nexthop());
+    if (matchtype == RibVerifyType(UNREACHABLE)) {
+	if (unh == NULL) {
+	    debug_msg("Next hop is not an UnreachableNextHop");
+	    return XORP_ERROR;
+	} else {
+	    debug_msg("****UNREACHABLE ROUTE SUCCESSFULLY VERIFIED****\n");
+	    return XORP_OK;
+	}
     }
 #endif
 
@@ -976,8 +988,14 @@ RIB<A>::lookup_route(const A& lookupaddr)
 #ifdef notyet
     DiscardNextHop* discard_nexthop =
 	dynamic_cast<DiscardNextHop* >(re->nexthop());
-    // Case 2: Discard route. Return the loopback address.
+    // Case 2a: Discard route. Return the loopback address.
     if (discard_nexthop != NULL)
+	return A::LOOPBACK();
+
+    UnreachableNextHop* unreachable_nexthop =
+	dynamic_cast<UnreachableNextHop* >(re->nexthop());
+    // Case 2b: Unreachable route. Return the loopback address.
+    if (unreachable_nexthop != NULL)
 	return A::LOOPBACK();
 
     IPNextHop<A>* ip_nexthop = dynamic_cast<IPNextHop<A>* >(re->nexthop());
