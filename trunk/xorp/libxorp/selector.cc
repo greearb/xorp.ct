@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.38 2006/10/12 01:24:54 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.39 2007/02/16 22:46:22 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -370,14 +370,14 @@ SelectorList::get_ready_priority()
 }
 
 int
-SelectorList::wait_and_dispatch(TimeVal* timeout)
+SelectorList::wait_and_dispatch(TimeVal& timeout)
 {
     fd_set testfds[SEL_MAX_IDX];
     int n = 0;
 
     memcpy(testfds, _fds, sizeof(_fds));
 
-    if (timeout == 0 || *timeout == TimeVal::MAXIMUM()) {
+    if (timeout == TimeVal::MAXIMUM()) {
 	n = ::select(_maxfd + 1,
 		     &testfds[SEL_RD_IDX],
 		     &testfds[SEL_WR_IDX],
@@ -385,7 +385,7 @@ SelectorList::wait_and_dispatch(TimeVal* timeout)
 		     0);
     } else {
 	struct timeval tv_to;
-	timeout->copy_out(tv_to);
+	timeout.copy_out(tv_to);
 	n = ::select(_maxfd + 1,
 		     &testfds[SEL_RD_IDX],
 		     &testfds[SEL_WR_IDX],
@@ -406,10 +406,12 @@ SelectorList::wait_and_dispatch(TimeVal* timeout)
 	case EINTR:
 	    // The system call was interrupted by a signal, hence return
 	    // immediately to the event loop without printing an error.
-	    debug_msg("SelectorList::wait_and_dispatch() interrupted by a signal\n");
+	    debug_msg("SelectorList::wait_and_dispatch() interrupted "
+		      "by a signal\n");
 	    break;
 	default:
-	    XLOG_ERROR("SelectorList::wait_and_dispatch() failed: %s", strerror(errno));
+	    XLOG_ERROR("SelectorList::wait_and_dispatch() failed: %s",
+		       strerror(errno));
 	    break;
 	}
 	return 0;
@@ -447,7 +449,7 @@ int
 SelectorList::wait_and_dispatch(int millisecs)
 {
     TimeVal t(millisecs / 1000, (millisecs % 1000) * 1000);
-    return wait_and_dispatch(&t);
+    return wait_and_dispatch(t);
 }
 
 void

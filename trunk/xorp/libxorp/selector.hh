@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.23 2007/02/16 22:46:23 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.24 2007/05/23 12:12:43 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -93,7 +93,6 @@ private:
  * operations on file descriptors may be registered.  The callbacks
  * are invoked when one of the @ref wait_and_dispatch methods is called
  * and I/O is pending on the particular descriptors.
- *
  */
 class SelectorList {
 public:
@@ -167,7 +166,7 @@ public:
      *
      * @return the number of callbacks that were made.
      */
-    int	wait_and_dispatch(TimeVal *timeout);
+    int	wait_and_dispatch(TimeVal& timeout);
 
     /**
      * Wait for a pending I/O events and invoke callbacks when they

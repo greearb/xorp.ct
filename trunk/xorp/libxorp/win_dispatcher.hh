@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.18 2007/02/28 01:26:51 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.19 2007/05/23 12:12:44 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -207,11 +207,11 @@ public:
      *
      * @param timeout the maximum period to wait for.
      */
-    void wait_and_dispatch(TimeVal* timeout) {
-	if (timeout == NULL || *timeout == TimeVal::MAXIMUM())
+    void wait_and_dispatch(TimeVal& timeout) {
+	if (timeout == TimeVal::MAXIMUM())
 	    wait_and_dispatch(INFINITE);
 	else
-	    wait_and_dispatch(timeout->to_ms());
+	    wait_and_dispatch(timeout.to_ms());
     }
 
     /**
