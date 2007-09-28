@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.11 2007/09/25 23:07:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.12 2007/09/27 00:33:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -167,7 +167,7 @@ IfConfigSetIPHelper::config_interface_begin(const IfTreeInterface* pulled_ifp,
 				 "on interface %s: method not supported",
 				 mac.str().c_str(),
 				 config_iface.ifname().c_str());
-	    return (XORP_ERROR):
+	    return (XORP_ERROR);
 	}
 	break;
     } while (false);
@@ -459,13 +459,19 @@ IfConfigSetIPHelper::config_addr(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetIoctl::set_interface_status(const string& ifname,
-				       uint32_t if_index,
-				       uint32_t interface_flags,
-				       bool is_enabled,
-				       string& error_msg)
+IfConfigSetIPHelper::set_interface_status(const string& ifname,
+					  uint32_t if_index,
+					  uint32_t interface_flags,
+					  bool is_enabled,
+					  string& error_msg)
 {
     // TODO: implement/test it!
+
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(interface_flags);
+    UNUSED(is_enabled);
+    UNUSED(error_msg);
 #if 0
     MIB_IFROW ifrow;
     DWORD result;
@@ -514,6 +520,11 @@ IfConfigSetIPHelper::add_addr(const string& ifname, const string& vifname,
     ULONG       dwSize;
     IPAddr	ipaddr;
     IPMask	ipmask;
+
+    UNUSED(is_broadcast);
+    UNUSED(broadcast_addr);
+    UNUSED(is_point_to_point);
+    UNUSED(endpoint_addr);
 
     addr.copy_out((uint8_t*)&ipaddr);
     IPv4 prefix_addr = IPv4::make_prefix(prefix_len);
@@ -568,7 +579,8 @@ IfConfigSetIPHelper::add_addr(const string& ifname, const string& vifname,
     // Also, these entries have to be keyed by the address we added,
     // so we can figure out which ntectx value to use when deleting it.
     //
-    _nte_map.insert(make_pair(make_pair(if_index, (IPAddr)addr), ntectx));
+    _nte_map.insert(make_pair(make_pair(if_index, (IPAddr)addr.addr()),
+			      ntectx));
 
     return (XORP_OK);
 }
@@ -582,7 +594,7 @@ IfConfigSetIPHelper::delete_addr(const string& ifname, const string& vifname,
 
     UNUSED(prefix_len);
 
-    ii = _nte_map.find(make_pair(if_index, (IPAddr)addr));
+    ii = _nte_map.find(make_pair(if_index, (IPAddr)addr.addr()));
     if (ii == _nte_map.end()) {
 	error_msg = c_format("Cannot delete address '%s' "
 			     "on interface '%s' vif '%s': "
