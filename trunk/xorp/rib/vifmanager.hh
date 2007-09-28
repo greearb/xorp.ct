@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.18 2006/03/16 00:05:43 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.19 2007/02/16 22:47:12 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -24,7 +24,6 @@
 
 class EventLoop;
 class RibManager;
-class Vif;
 class XrlRouter;
 
 /**
