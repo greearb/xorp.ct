@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.72 2007/09/15 19:52:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.73 2007/09/25 22:45:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -179,7 +179,7 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
 
 	// Reverse-back to the previously working configuration
 	IfTree restore_config = old_local_config();
-	restore_config.prepare_replacement_state(local_config());
+	restore_config.prepare_replacement_state(pull_config());
 	set_local_config(restore_config);
 	if (push_config(local_config()) == XORP_OK)
 	    break;		// Continue with finalizing the reverse-back
@@ -509,6 +509,13 @@ IfConfig::start(string& error_msg)
 
     _original_config = _live_config;
     _original_config.finalize_state();
+
+    //
+    // XXX: Start with the original system config in case the first
+    // configuration fails and tries to reverse to the old config.
+    //
+    _old_local_config = _original_config;
+    _old_local_config.finalize_state();
 
     debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
     debug_msg("\nEnd configuration read.\n");
