@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.184 2007/08/24 06:47:21 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.185 2007/09/27 00:38:57 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -72,14 +72,17 @@ Release 1.5-WIP (2007/??/??)
       This fixes "Found out-of-order term(s) inside policy ..." error
       inside the policy manager.
 
+    - The "-c <cmd>" command line option can be used more than once to
+      run multiple commands.
+
   POLICY:
     - 
 
   FEA/MFEA:
     - Critical bug fix that affects recent NetBSD and OpenBSD releases.
 
-    - If MFEA is started, then explicitly enable the multicast forwarding
-      flags that have been added to recent OpenBSD releases:
+    - If MFEA is started, it will explicitly enable the multicast
+      forwarding flags that have been added to recent OpenBSD releases:
       net.inet.ip.mforwarding (for OpenBSD-3.9 and later) and
       net.inet6.ip6.mforwarding (for OpenBSD-4.0 and later).
 
