@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.66 2007/02/16 22:47:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.67 2007/05/23 04:08:30 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -851,7 +851,9 @@ main(int argc, char *argv[])
     while ((c = getopt(argc, argv, "c:t:x:vh")) != EOF) {
 	switch(c) {
 	case 'c':
-	    commands = optarg;
+	    // XXX: Append the arguments to allow multiple "-c cmd" commands
+	    commands += optarg;
+	    commands += "\n";
 	    break;
 	case 't':
 	    template_dir = optarg;
