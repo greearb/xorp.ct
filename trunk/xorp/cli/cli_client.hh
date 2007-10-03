@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.32 2007/01/12 22:20:10 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.33 2007/02/16 22:45:28 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -589,7 +589,7 @@ private:
     // Misc state
     //
     vector<uint8_t>	_pending_input_data;
-    XorpTask		_process_pending_input_data_task;
+    XorpTimer		_process_pending_input_data_timer;
 };
 
 

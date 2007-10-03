@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.62 2007/03/29 22:07:25 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.63 2007/03/30 00:02:29 pavlin Exp $"
 
 
 //
@@ -889,9 +889,16 @@ void
 CliClient::schedule_process_input_data()
 {
     EventLoop& eventloop = cli_node().eventloop();
-    OneoffTaskCallback cb = callback(this, &CliClient::process_input_data);
+    OneoffTimerCallback cb = callback(this, &CliClient::process_input_data);
 
-    _process_pending_input_data_task = eventloop.new_oneoff_task(cb);
+    //
+    // XXX: Schedule the processing after 10ms to avoid increasing
+    // the CPU usage.
+    //
+    _process_pending_input_data_timer = eventloop.new_oneoff_after(
+	TimeVal(0, 10),
+	cb,
+	XorpTask::PRIORITY_LOWEST);
 }
 
 //

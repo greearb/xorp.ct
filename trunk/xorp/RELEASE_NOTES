@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.185 2007/09/27 00:38:57 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.186 2007/09/30 04:09:06 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -74,6 +74,9 @@ Release 1.5-WIP (2007/??/??)
 
     - The "-c <cmd>" command line option can be used more than once to
       run multiple commands.
+
+    - Fix a long configuration delay when using xorpsh in
+      non-interactive mode (e.g., "cat commands.txt | xorpsh").
 
   POLICY:
     - 
