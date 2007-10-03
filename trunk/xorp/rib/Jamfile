@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rib/Jamfile,v 1.2 2007/04/17 21:40:50 pavlin Exp $
+# $XORP: xorp/rib/Jamfile,v 1.3 2007/04/20 07:17:46 pavlin Exp $
 #
 
 SubDir TOP rib ;
@@ -20,6 +20,7 @@ Library librib :
 	profile_vars.cc protocol.cc
 	register_server.cc
 	rib.cc rib_manager.cc rib_varrw.cc
+	route.cc
 	rt_tab_base.cc rt_tab_deletion.cc rt_tab_extint.cc
 	rt_tab_log.cc rt_tab_merged.cc rt_tab_origin.cc
 	rt_tab_pol_conn.cc rt_tab_pol_redist.cc rt_tab_redist.cc
