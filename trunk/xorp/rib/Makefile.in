@@ -52,7 +52,7 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 librib_la_LIBADD =
 am_librib_la_OBJECTS = profile_vars.lo protocol.lo register_server.lo \
-	rib.lo rib_manager.lo rib_varrw.lo rt_tab_base.lo \
+	rib.lo rib_manager.lo rib_varrw.lo route.lo rt_tab_base.lo \
 	rt_tab_deletion.lo rt_tab_extint.lo rt_tab_log.lo \
 	rt_tab_merged.lo rt_tab_origin.lo rt_tab_pol_conn.lo \
 	rt_tab_pol_redist.lo rt_tab_redist.lo rt_tab_register.lo \
@@ -375,7 +375,7 @@ librib_la_SOURCES = rib_module.h protocol.hh register_server.hh rib.hh \
 	rt_tab_pol_redist.hh rt_tab_redist.hh rt_tab_register.hh \
 	vifmanager.hh xrl_target.hh profile_vars.hh profile_vars.cc \
 	protocol.cc register_server.cc rib.cc rib_manager.cc \
-	rib_varrw.cc rt_tab_base.cc rt_tab_deletion.cc \
+	rib_varrw.cc route.cc rt_tab_base.cc rt_tab_deletion.cc \
 	rt_tab_extint.cc rt_tab_log.cc rt_tab_merged.cc \
 	rt_tab_origin.cc rt_tab_pol_conn.cc rt_tab_pol_redist.cc \
 	rt_tab_redist.cc rt_tab_register.cc vifmanager.cc \
@@ -522,6 +522,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rib_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rib_varrw.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/route.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/routemap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rt_tab_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rt_tab_deletion.Plo@am__quote@

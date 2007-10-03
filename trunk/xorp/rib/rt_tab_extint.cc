@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.31 2007/02/16 22:47:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.32 2007/09/27 00:33:39 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "rib.hh"
 #include "rt_tab_extint.hh"
 
 template <typename A>
@@ -99,7 +100,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    const IPRouteEntry<A>* nexthop_route;
 	    nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
 	    if (nexthop_route != NULL) {
-		Vif* vif = nexthop_route->vif();
+		RibVif* vif = nexthop_route->vif();
 		if ((vif != NULL)
 		    && (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
 			|| vif->is_same_p2p(IPvX(nexthop_addr)))) {
@@ -160,7 +161,7 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 		    this->next_table()->delete_route(found, this);
 	    }
 
-	    Vif* vif = nexthop_route->vif();
+	    RibVif* vif = nexthop_route->vif();
 	    if ((vif != NULL)
 		&& (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
 		    || vif->is_same_p2p(IPvX(nexthop_addr)))) {

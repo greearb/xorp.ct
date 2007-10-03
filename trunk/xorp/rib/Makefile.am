@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rib/Makefile.am,v 1.40 2005/08/04 11:52:32 bms Exp $
+## $XORP: xorp/rib/Makefile.am,v 1.41 2007/04/17 21:40:50 pavlin Exp $
 ##
 
 SUBDIRS = . tools
@@ -222,6 +222,7 @@ librib_la_SOURCES		+= register_server.cc
 librib_la_SOURCES		+= rib.cc
 librib_la_SOURCES		+= rib_manager.cc
 librib_la_SOURCES		+= rib_varrw.cc
+librib_la_SOURCES		+= route.cc
 librib_la_SOURCES		+= rt_tab_base.cc
 librib_la_SOURCES		+= rt_tab_deletion.cc
 librib_la_SOURCES		+= rt_tab_extint.cc

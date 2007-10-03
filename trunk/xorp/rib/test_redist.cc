@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.13 2007/02/16 22:47:11 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.14 2007/08/30 06:02:29 pavlin Exp $"
 
 #include <set>
 
@@ -25,6 +25,7 @@
 #include "libxorp/eventloop.hh"
 
 #include "route.hh"
+#include "rib.hh"
 #include "rt_tab_redist.hh"
 #include "rt_tab_origin.hh"
 #include "rt_tab_deletion.hh"
@@ -270,7 +271,8 @@ test_deterministic()
     OriginTable<IPv4> 	origin("static", 1, IGP, e);
     IPPeerNextHop<IPv4> nh("22.0.0.1");
     Protocol		protocol("static", IGP, 1);
-    Vif			vif("vif0");
+    Vif			tmp_vif("vif0");
+    RibVif		vif((RIB<IPv4>*)NULL, tmp_vif);
 
     // Attach redist table
     RedistTable<IPv4> redist_table("StaticRedistTable", &origin);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_deletion.cc,v 1.10 2006/03/16 00:05:41 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_deletion.cc,v 1.11 2007/02/16 22:47:11 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -21,6 +21,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
+#include "rib.hh"
 #include "rt_tab_origin.hh"
 #include "rt_tab_expect.hh"
 
@@ -41,8 +42,10 @@ main(int /* argc */, char* argv[])
     OriginTable<IPv4> ot("origin", 1, IGP, eventloop);
     ExpectTable<IPv4> dt("expect", &ot);
 
-    Vif vif1("vif1");
-    Vif vif2("vif2");
+    Vif tmp_vif1("vif1");
+    Vif tmp_vif2("vif2");
+    RibVif vif1((RIB<IPv4>*)NULL, tmp_vif1);
+    RibVif vif2((RIB<IPv4>*)NULL, tmp_vif2);
     IPPeerNextHop<IPv4> nh1(IPv4("1.0.0.1"));
     IPPeerNextHop<IPv4> nh2(IPv4("1.0.0.2"));
     Protocol protocol("test", IGP, 0);

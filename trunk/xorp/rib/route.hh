@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.22 2007/03/22 20:48:18 bms Exp $
+// $XORP: xorp/rib/route.hh,v 1.23 2007/05/23 12:12:47 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -31,6 +31,7 @@
 
 #include "protocol.hh"
 
+class RibVif;
 
 /**
  * @short Base class for RIB routing table entries.
@@ -50,18 +51,13 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    RouteEntry(Vif* vif, NextHop* nexthop, const Protocol& protocol,
-	       uint16_t metric)
-	: _vif(vif), _nexthop(nexthop), _protocol(protocol),
-	  _admin_distance(UNKNOWN_ADMIN_DISTANCE), _metric(metric)
-    {
-    }
-
+    RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
+	       uint16_t metric);
 
     /**
      * Destructor
      */
-    virtual ~RouteEntry() {}
+    virtual ~RouteEntry();
 
     /**
      * Get the VIF.
@@ -69,7 +65,7 @@ public:
      * @return the Virtual Interface on which packets matching this
      * routing table entry should be forwarded.
      */
-    Vif* vif() const { return _vif; }
+    RibVif* vif() const { return _vif; }
 
     /**
      * Get the NextHop router.
@@ -132,7 +128,7 @@ public:
     uint16_t metric() const { return _metric; }
 
 protected:
-    Vif*		_vif;
+    RibVif*		_vif;
     NextHop*		_nexthop;		// The next-hop router
     // The routing protocol that instantiated this route
     const Protocol&	_protocol;
@@ -161,7 +157,7 @@ public:
      * @param protocol the routing protocol that originated this route.
      * @param metric the routing protocol metric for this route.
      */
-    IPRouteEntry(const IPNet<A>& net, Vif* vif, NextHop* nexthop,
+    IPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
 		 const Protocol& protocol, uint16_t metric)
 	: RouteEntry(vif, nexthop, protocol, metric), _net(net) {}
 
@@ -177,7 +173,7 @@ public:
      * @param metric the routing protocol metric for this route.
      * @param policytags the policy-tags for this route.
      */
-    IPRouteEntry(const IPNet<A>& net, Vif* vif, NextHop* nexthop,
+    IPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
 		 const Protocol& protocol, uint16_t metric,
 		 const PolicyTags& policytags)
 	: RouteEntry(vif, nexthop, protocol, metric), _net(net),
@@ -236,15 +232,7 @@ public:
      *
      * @return a human readable representation of the route entry.
      */
-    string str() const {
-	string dst = (_net.is_valid()) ? _net.str() : string("NULL");
-	string vif = (_vif) ? string(_vif->name()) : string("NULL");
-	return string("Dst: ") + dst + string(" Vif: ") + vif +
-	    string(" NextHop: ") + _nexthop->str() +
-	    string(" Metric: ") + c_format("%d", _metric) +
-	    string(" Protocol: ") + _protocol.name() +
-	    string(" PolicyTags: ") + _policytags.str();
-    }
+    string str() const;
 
 protected:
     IPNet<A> _net;		// The route entry's subnet address
@@ -288,7 +276,7 @@ public:
      * nexthop in the egp_parent into a local nexthop.
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
-    ResolvedIPRouteEntry(const IPNet<A>& net, Vif* vif, NextHop* nexthop,
+    ResolvedIPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
 			 const Protocol& protocol, uint16_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.30 2007/02/16 22:47:07 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.31 2007/05/23 12:12:46 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -31,6 +31,7 @@
 #include "xrl/interfaces/redist_transaction4_xif.hh"
 #include "xrl/interfaces/redist_transaction6_xif.hh"
 
+#include "rib.hh"
 #include "route.hh"
 #include "redist_xrl.hh"
 #include "profile_vars.hh"

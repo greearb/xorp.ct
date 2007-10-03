@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.66 2007/05/23 12:12:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.67 2007/09/27 00:33:38 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -158,19 +158,19 @@ RIB<A>::get_protocol_admin_distance(const string& protocol_name)
 }
 
 template <typename A>
-inline Vif*
+inline RibVif*
 RIB<A>::find_vif(const A& addr)
 {
-    map<string, Vif>::iterator iter;
+    map<string, RibVif*>::iterator iter;
 
     for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	Vif& vif = iter->second;
-	if (! vif.is_underlying_vif_up())
+	RibVif* vif = iter->second;
+	if (! vif->is_underlying_vif_up())
 	    continue;		// XXX: ignore vifs that are not up
-	if (vif.is_my_addr(addr))
-	    return &vif;
-	if (vif.is_p2p() && vif.is_same_p2p(addr))
-	    return &vif;
+	if (vif->is_my_addr(addr))
+	    return vif;
+	if (vif->is_p2p() && vif->is_same_p2p(addr))
+	    return vif;
     }
     return NULL;
 }
@@ -280,6 +280,14 @@ RIB<A>::~RIB()
     while (_tables.empty() == false) {
 	delete _tables.front();
 	_tables.pop_front();
+    }
+    while (_vifs.empty() == false) {
+	delete _vifs.begin()->second;
+	_vifs.erase(_vifs.begin());
+    }
+    while (_deleted_vifs.empty() == false) {
+	delete _deleted_vifs.begin()->second;
+	_deleted_vifs.erase(_deleted_vifs.begin());
     }
 }
 
@@ -447,7 +455,7 @@ RIB<A>::new_origin_table(const string&	tablename,
 
 template <typename A>
 int
-RIB<A>::add_connected_route(const Vif& vif,
+RIB<A>::add_connected_route(const RibVif& vif,
 			    const IPNet<A>& net,
 			    const A& nexthop_addr,
 			    const A& peer_addr)
@@ -468,7 +476,7 @@ RIB<A>::add_connected_route(const Vif& vif,
 
 template <typename A>
 int
-RIB<A>::delete_connected_route(const Vif& vif, const IPNet<A>& net,
+RIB<A>::delete_connected_route(const RibVif& vif, const IPNet<A>& net,
 			       const A& peer_addr)
 {
     delete_route("connected", net);
@@ -484,27 +492,37 @@ template <typename A>
 int
 RIB<A>::new_vif(const string& vifname, const Vif& vif)
 {
+    map<string, RibVif*>::iterator vi;
+    RibVif* new_rib_vif = NULL;
+
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
     if (_vifs.find(vifname) != _vifs.end())
 	return XORP_ERROR;
 
-    // Can't use _vifs[vifname] = vif because no Vif() constructor
-    map<string, Vif>::value_type v(vifname, vif);
-    _vifs.insert(_vifs.end(), v);
+    //
+    // If the vif is pending deletion, then reuse it instead
+    //
+    vi = _deleted_vifs.find(vifname);
+    if (vi != _deleted_vifs.end()) {
+	// Reuse previously deleted vif
+	new_rib_vif = vi->second;
+	new_rib_vif->set_deleted(false);
+	_deleted_vifs.erase(vi);
+	new_rib_vif->copy_in(vif);
+    } else {
+	// Create a new vif
+	new_rib_vif = new RibVif(this, vif);
+	_vifs[vifname] = new_rib_vif;
+    }
+    XLOG_ASSERT(new_rib_vif != NULL);
 
-    // We need to add the routes from the VIF to the connected table
-    map<string, Vif>::iterator iter = _vifs.find(vifname);
-    XLOG_ASSERT(iter != _vifs.end());
-    Vif* new_vif = &(iter->second);
-    XLOG_ASSERT(new_vif != NULL);
-
-    if (vif.is_underlying_vif_up()) {
+    if (new_rib_vif->is_underlying_vif_up()) {
 	//
 	// Add the directly connected routes associated with this vif
 	//
 	list<VifAddr>::const_iterator ai;
-	for (ai = new_vif->addr_list().begin();
-	     ai != new_vif->addr_list().end();
+	for (ai = new_rib_vif->addr_list().begin();
+	     ai != new_rib_vif->addr_list().end();
 	     ++ai) {
 	    if (ai->addr().af() != A::af())
 		continue;
@@ -514,7 +532,7 @@ RIB<A>::new_vif(const string& vifname, const Vif& vif)
 	    ai->subnet_addr().get(subnet_addr);
 	    ai->addr().get(addr);
 	    ai->peer_addr().get(peer_addr);
-	    add_connected_route(*new_vif, subnet_addr, addr, peer_addr);
+	    add_connected_route(*new_rib_vif, subnet_addr, addr, peer_addr);
 	}
     }
 
@@ -526,18 +544,20 @@ int
 RIB<A>::delete_vif(const string& vifname)
 {
     debug_msg("RIB::delete_vif: %s\n", vifname.c_str());
-    map<string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	return XORP_ERROR;
     }
-    Vif& vif = vi->second;
+    RibVif* rib_vif = vi->second;
 
-    if (vif.is_underlying_vif_up()) {
+    if (rib_vif->is_underlying_vif_up()) {
 	//
 	// Delete the directly connected routes associated with this vif
 	//
 	list<VifAddr>::const_iterator ai;
-	for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	for (ai = rib_vif->addr_list().begin();
+	     ai != rib_vif->addr_list().end();
+	     ++ai) {
 	    if (ai->addr().af() != A::af())
 		continue;
 
@@ -545,12 +565,39 @@ RIB<A>::delete_vif(const string& vifname)
 	    A peer_addr;
 	    ai->subnet_addr().get(subnet_addr);
 	    ai->peer_addr().get(peer_addr);
-	    delete_connected_route(vif, subnet_addr, peer_addr);
+	    delete_connected_route(*rib_vif, subnet_addr, peer_addr);
 	}
     }
 
     _vifs.erase(vi);
+
+    //
+    // If the vif is still used by some routes, then add it to the
+    // container with vifs pending deletion.
+    // Otherwise just delete it.
+    //
+    if (rib_vif->usage_counter() > 0) {
+	XLOG_ASSERT(_deleted_vifs.find(vifname) == _deleted_vifs.end());
+	_deleted_vifs[vifname] = rib_vif;
+	rib_vif->set_deleted(true);
+    } else {
+	delete rib_vif;
+    }
+    
     return XORP_OK;
+}
+
+template <typename A>
+void
+RIB<A>::destroy_deleted_vif(RibVif* rib_vif)
+{
+    map<string, RibVif*>::iterator vi = _deleted_vifs.find(rib_vif->name());
+
+    XLOG_ASSERT(vi != _deleted_vifs.end());
+    XLOG_ASSERT(vi->second == rib_vif);
+
+    _deleted_vifs.erase(vi);
+    delete rib_vif;
 }
 
 template <typename A>
@@ -563,22 +610,22 @@ RIB<A>::set_vif_flags(const string& vifname,
 		      bool is_up,
 		      uint32_t mtu)
 {
-    map<string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to set flags to non-existant Vif \"%s\"",
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    Vif& vif = vi->second;
+    RibVif* vif = vi->second;
 
-    bool old_is_up = vif.is_underlying_vif_up();
+    bool old_is_up = vif->is_underlying_vif_up();
 
-    vif.set_p2p(is_p2p);
-    vif.set_loopback(is_loopback);
-    vif.set_multicast_capable(is_multicast);
-    vif.set_broadcast_capable(is_broadcast);
-    vif.set_underlying_vif_up(is_up);
-    vif.set_mtu(mtu);
+    vif->set_p2p(is_p2p);
+    vif->set_loopback(is_loopback);
+    vif->set_multicast_capable(is_multicast);
+    vif->set_broadcast_capable(is_broadcast);
+    vif->set_underlying_vif_up(is_up);
+    vif->set_mtu(mtu);
 
     if (old_is_up == is_up)
 	return XORP_OK;
@@ -589,7 +636,9 @@ RIB<A>::set_vif_flags(const string& vifname,
 	//
 	// Add all connected routes
 	//
-	for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	for (ai = vif->addr_list().begin();
+	     ai != vif->addr_list().end();
+	     ++ai) {
 	    if (ai->addr().af() != A::af())
 		continue;
 
@@ -598,7 +647,7 @@ RIB<A>::set_vif_flags(const string& vifname,
 	    ai->subnet_addr().get(subnet_addr);
 	    ai->addr().get(addr);
 	    ai->peer_addr().get(peer_addr);
-	    add_connected_route(vif, subnet_addr, addr, peer_addr);
+	    add_connected_route(*vif, subnet_addr, addr, peer_addr);
 	}
     }
 
@@ -607,7 +656,9 @@ RIB<A>::set_vif_flags(const string& vifname,
 	//
 	// Delete all connected routes
 	//
-	for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	for (ai = vif->addr_list().begin();
+	     ai != vif->addr_list().end();
+	     ++ai) {
 	    if (ai->addr().af() != A::af())
 		continue;
 
@@ -615,7 +666,7 @@ RIB<A>::set_vif_flags(const string& vifname,
 	    A peer_addr;
 	    ai->subnet_addr().get(subnet_addr);
 	    ai->peer_addr().get(peer_addr);
-	    delete_connected_route(vif, subnet_addr, peer_addr);
+	    delete_connected_route(*vif, subnet_addr, peer_addr);
 	}
     }
 
@@ -630,18 +681,18 @@ RIB<A>::add_vif_address(const string&	vifname,
 			const A&	broadcast_addr,
 			const A&	peer_addr)
 {
-    map<string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to add address to non-existant Vif \"%s\"",
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    Vif& vif = vi->second;
+    RibVif* vif = vi->second;
 
-    vif.add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
+    vif->add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
 
-    if (vif.is_underlying_vif_up())
-	add_connected_route(vif, subnet, addr, peer_addr);
+    if (vif->is_underlying_vif_up())
+	add_connected_route(*vif, subnet, addr, peer_addr);
 
     return XORP_OK;
 }
@@ -651,16 +702,16 @@ int
 RIB<A>::delete_vif_address(const string& vifname,
 			   const A& addr)
 {
-    map<string, Vif>::iterator vi = _vifs.find(vifname);
+    map<string, RibVif*>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
 	XLOG_ERROR("Attempting to delete address from non-existant Vif \"%s\"",
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    Vif& vif = vi->second;
+    RibVif* vif = vi->second;
     
     list<VifAddr>::const_iterator ai;
-    for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+    for (ai = vif->addr_list().begin(); ai != vif->addr_list().end(); ++ai) {
 	const IPvX& ipvx = ai->addr();
 	if (ipvx.af() != A::af())
 	    continue;
@@ -672,10 +723,10 @@ RIB<A>::delete_vif_address(const string& vifname,
 	ai->subnet_addr().get(subnet_addr);
 	ai->peer_addr().get(peer_addr);
 
-	vif.delete_address(ipvx);
+	vif->delete_address(ipvx);
 
-	if (vif.is_underlying_vif_up())
-	    delete_connected_route(vif, subnet_addr, peer_addr);
+	if (vif->is_underlying_vif_up())
+	    delete_connected_route(*vif, subnet_addr, peer_addr);
 
 	return XORP_OK;
     }
@@ -732,7 +783,7 @@ RIB<A>::add_route(const string&		tablename,
 	//
 	// Add a route with explicitly specified network interface
 	//
-	map<string, Vif>::iterator iter = _vifs.find(vifname);
+	map<string, RibVif*>::iterator iter = _vifs.find(vifname);
 	if (iter == _vifs.end()) {
 	    XLOG_ERROR("Attempting to add route to table \"%s\" "
 		       "(prefix %s next-hop %s ifname %s vifname %s): "
@@ -742,7 +793,7 @@ RIB<A>::add_route(const string&		tablename,
 		       ifname.c_str(), vifname.c_str());
 	    return XORP_ERROR;
 	}
-	Vif* vif = &iter->second;
+	RibVif* vif = iter->second;
 	IPNextHop<A>* nexthop = find_or_create_peer_nexthop(nexthop_addr);
 	ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol,
 		      metric, policytags));
@@ -753,7 +804,7 @@ RIB<A>::add_route(const string&		tablename,
     //
     // Find the vif so we can see if the nexthop is directly connected
     //
-    Vif* vif = NULL;
+    RibVif* vif = NULL;
     IPNextHop<A>* nexthop = NULL;
     do {
 	//
