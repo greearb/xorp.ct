@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.284 2007/09/18 00:13:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.285 2007/09/20 18:38:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -91,21 +91,18 @@ template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
 		     const OspfTypes::PeerID peerid,
 		     const A interface_address,
-		     const uint16_t interface_prefix_length,
-		     const uint16_t interface_mtu,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif), _peerid(peerid),
       _interface_id(0),
       _interface_address(interface_address),
-      _interface_prefix_length(interface_prefix_length),
-      _interface_mtu(interface_mtu),
+      _interface_prefix_length(0),
+      _interface_mtu(0),
       _interface_cost(1), // Must be greater than 0.
       _inftransdelay(1),  // Must be greater than 0.
       _linktype(linktype), _running(false), _link_status(false), _status(false)
 {
-    Peer<A> *peer = _areas[area] = new Peer<A>(ospf, *this, area, area_type);
-    set_mask(peer);
+    _areas[area] = new Peer<A>(ospf, *this, area, area_type);
 }
 
 template <typename A>
@@ -116,18 +113,6 @@ PeerOut<A>::~PeerOut()
 
     for(i = _areas.begin(); i != _areas.end(); i++)
 	delete (*i).second;
-}
-
-template <typename A>
-bool 
-PeerOut<A>::go(OspfTypes::AreaID area)
-{
-    if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
-	return false;
-    }
-
-    return _areas[area]->go();
 }
 
 template <>
@@ -320,7 +305,7 @@ PeerOut<A>::peer_change()
     case false:
 	if (true == _status && true == _link_status) {
 	    _running = true;
-	    bring_up_peering();
+	    _running = bring_up_peering();
 	}
 	break;
     }
@@ -527,9 +512,54 @@ PeerOut<A>::virtual_link_endpoint(OspfTypes::AreaID area)
 }
 
 template <typename A>
-void
+bool
 PeerOut<A>::bring_up_peering()
 {
+    uint32_t interface_id = 0;
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	// Get the interface ID.
+	if (!_ospf.get_interface_id(_interface, _vif, interface_id)) {
+	    XLOG_ERROR("Unable to get interface ID for %s",
+		       _interface.c_str());
+	    return false;
+	}
+	set_interface_id(interface_id);
+
+	// Get the link-local address to use for transmission unless
+	// this is a virtual link.
+	if (OspfTypes::VirtualLink != get_linktype()) {
+	    A link_local_address;
+	    if (!_ospf.get_link_local_address(_interface, _vif,
+					      link_local_address)) {
+		XLOG_ERROR("Unable to get link local address for %s/%s",
+			   _interface.c_str(), _vif.c_str());
+		return false;
+	    }
+	    set_interface_address(link_local_address);
+	}
+	break;
+    }
+
+    // Get the prefix length.
+    A source = get_interface_address();
+    if (!_ospf.get_prefix_length(_interface, _vif, source,
+				 _interface_prefix_length)) {
+	XLOG_ERROR("Unable to get prefix length for %s/%s/%s",
+		   _interface.c_str(), _vif.c_str(),
+		   cstring(source));
+	return false;
+    }
+
+    // Get the MTU.
+    _interface_mtu = _ospf.get_mtu(_interface);
+    if (0 == _interface_mtu) {
+	XLOG_ERROR("Unable to get MTU for %s", _interface.c_str());
+	return false;
+    }
+
     // Start receiving packets on this peering.
     _ospf.enable_interface_vif(_interface, _vif);
 
@@ -539,12 +569,15 @@ PeerOut<A>::bring_up_peering()
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
     for(i = _areas.begin(); i != _areas.end(); i++) {
+	set_mask((*i).second);
 	(*i).second->start();
 	AreaRouter<A> *area_router = 
 	    _ospf.get_peer_manager().get_area_router((*i).first);
 	XLOG_ASSERT(area_router);
 	area_router->peer_up(_peerid);
     }
+
+    return true;
 }
 
 template <typename A>
@@ -1674,6 +1707,8 @@ template <typename A>
 void
 Peer<A>::start()
 {
+    go();
+
     _enabled = true;
     //    _interface_state = Down;
     set_designated_router(set_id("0.0.0.0"));
@@ -1690,6 +1725,8 @@ Peer<A>::stop()
 {
     _enabled = false;
     event_interface_down();
+
+    shutdown();
 }
 
 template <typename A>
@@ -1845,6 +1882,7 @@ Peer<A>::event_neighbour_change()
 
     switch(get_state()) {
     case Down:
+	break;
     case Loopback:
     case Waiting:
     case Point2Point:

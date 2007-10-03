@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.108 2007/05/23 04:08:27 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.109 2007/08/15 23:58:32 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -481,6 +481,15 @@ class Ospf {
      * Disable this interface/vif from receiving frames.
      */
     bool disable_interface_vif(const string& interface, const string& vif);
+
+    /**
+     * Is this interface/vif enabled?
+     * This is a question asked of the FEA, has the interface/vif been
+     * marked as up.
+     *
+     * @return true if it is.
+     */
+    bool enabled(const string& interface, const string& vif);
 
     /**
      * Is this interface/vif/address enabled? 

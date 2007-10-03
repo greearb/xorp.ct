@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.144 2007/08/17 22:18:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.145 2007/08/24 02:07:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -431,6 +431,30 @@ PeerManager<A>::destroy_peerid(const string& interface, const string& vif)
 }
 
 template <typename A>
+bool
+PeerManager<A>::enabled(const string& interface, const string& vif, A address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	// If the address is set to zero then try and get the
+	// link-local address.
+	if (A::ZERO() == address) {
+	    if (!_ospf.get_link_local_address(interface, vif, address))
+		if (_ospf.enabled(interface, vif))
+		    XLOG_WARNING("link-local address must be configured "
+				 "on %s/%s", interface.c_str(), vif.c_str());
+	}
+	break;
+    }
+    return _ospf.enabled(interface, vif, address);
+}
+
+template <typename A>
 OspfTypes::PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
 			    A source,
@@ -451,103 +475,30 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 
     OspfTypes::PeerID peerid = create_peerid(interface, vif);
 
-    switch (_ospf.get_version()) {
-    case OspfTypes::V2:
-	break;
-    case OspfTypes::V3:
-	if (OspfTypes::VirtualLink != linktype) {
-	    // Note that the source address is going to be replaced with
-	    // the link local address, unless this is a virtual link.
-	    if (!_ospf.get_link_local_address(interface, vif, source)) {
-		destroy_peerid(interface, vif);
-		xorp_throw(BadPeer, 
-			   c_format("Unable to get link local address for "
-				    "%s/%s",
-				    interface.c_str(), vif.c_str()));
-	    }
-	}
-	break;
-    }
-
-    // Get the prefix length.
-    uint16_t interface_prefix_length;
-    if (!_ospf.get_prefix_length(interface, vif, source,
-				 interface_prefix_length)) {
-	destroy_peerid(interface, vif);
-	xorp_throw(BadPeer, 
-		   c_format("Unable to get prefix length for %s/%s/%s",
-			    interface.c_str(), vif.c_str(), cstring(source)));
-    }
-
-    // Get the MTU.
-    uint16_t interface_mtu = _ospf.get_mtu(interface);
-    if (0 == interface_mtu) {
-	destroy_peerid(interface, vif);
-	xorp_throw(BadPeer, 
-		   c_format("Unable to get MTU for %s", interface.c_str()));
-    }
-
     // If we got this far create_peerid did not throw an exception so
     // this interface/vif is unique.
 
     _peers[peerid] = new PeerOut<A>(_ospf, interface, vif, peerid,
-				    source, interface_prefix_length,
-				    interface_mtu, linktype,
-				    area, area_router->get_area_type());
-
-    switch (_ospf.get_version()) {
-    case OspfTypes::V2:
-	break;
-    case OspfTypes::V3: {
-	uint32_t interface_id;
-	if (!_ospf.get_interface_id(interface, vif, interface_id)) {
-	    delete_peer(peerid);
-	    xorp_throw(BadPeer, 
-		       c_format("Unable to get interface ID for %s",
-				interface.c_str()));
-	}
-	_peers[peerid]->set_interface_id(interface_id);
-    }
-	break;
-    }
+				    source, linktype, area,
+				    area_router->get_area_type());
 
     // Pass in the option to be sent by the hello packet.
     _peers[peerid]->set_options(area,
 				compute_options(area_router->get_area_type()));
 
-    switch (_ospf.get_version()) {
-    case OspfTypes::V2:
-	_peers[peerid]->set_link_status(_ospf.enabled(interface, vif, source));
-	break;
-    case OspfTypes::V3:
-#if	0
-	// If this is a virtual link bring it up now, otherwise
-	// wait for the call to activate.
-	if (OspfTypes::VirtualLink == linktype) {
-	    _peers[peerid]->set_link_status(_ospf.enabled(interface, vif,
-							  source));
-	}
-#endif
-	// This call needs to be made only once per invocation of OSPF
-	// but at this point we know that the interface mirror is up
-	// and running.
-	_ospf.register_address_status(callback(this,
-					       &PeerManager<A>::
-					       address_status_change));
-	break;
-    }
-
-    // This call needs to be made only once per invocation of OSPF
-    // but at this point we know that the interface mirror is up
-    // and running.
+    // These two registrations need to be made only once per
+    // invocation of OSPF, however, at this point we know that the interface
+    // mirror is up and running.
     _ospf.register_vif_status(callback(this,
 				       &PeerManager<A>::
 				       vif_status_change));
+    _ospf.register_address_status(callback(this, &PeerManager<A>::
+					   address_status_change));
 
     area_router->add_peer(peerid);
 
-    // The peer has now been fully configured so initialise it.
-    _peers[peerid]->go(area);
+    // If the interface, vif and source are up the peer will start running.
+    _peers[peerid]->set_link_status(enabled(interface, vif, source));
 
     return peerid;
 }
@@ -712,7 +663,7 @@ PeerManager<A>::activate_peer(const string& interface, const string& vif,
     recompute_addresses_peer(peerid, area);
 
     A source = _peers[peerid]->get_interface_address();
-    _peers[peerid]->set_link_status(_ospf.enabled(interface, vif, source));
+    _peers[peerid]->set_link_status(enabled(interface, vif, source));
 
     return true;
 }
@@ -757,6 +708,10 @@ PeerManager<A>::recompute_addresses_peer(const OspfTypes::PeerID peerid,
 		       "PeerID %u", peerid);
 	    return false;
 	}
+	// Before trying to get the addresses verify that this
+	// interface/vif exists and has a usable address configured.
+	if (!enabled(interface, vif, _peers[peerid]->get_interface_address()))
+	    return false;
 	list<A> addresses;
 	if (!_ospf.get_addresses(interface, vif, addresses)) {
 	    XLOG_ERROR("Unable to find addresses on %s/%s ", interface.c_str(),
@@ -848,6 +803,11 @@ PeerManager<A>::address_status_change(const string& interface,
 	XLOG_ERROR("Unknown PeerID %u", peerid);
 	return;
     }
+
+    _peers[peerid]->set_link_status(enabled(interface,
+					    vif,
+					    _peers[peerid]->
+					    get_interface_address()));
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:

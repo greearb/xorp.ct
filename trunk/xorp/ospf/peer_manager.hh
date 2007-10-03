@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.92 2007/08/22 01:35:04 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.93 2007/08/24 02:07:07 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -142,6 +142,15 @@ class PeerManager {
      */
     bool get_interface_vif_by_peerid(OspfTypes::PeerID peerid,
 				     string& interface, string& vif) const;
+
+    /**
+     * Is this interface/vif/address enabled?
+     * This is a question asked of the FEA, has the interface/vif been
+     * marked as up.
+     *
+     * @return true if it is.
+     */
+    bool enabled(const string& interface, const string& vif, A address);
 
     /**
      * Create a peer.

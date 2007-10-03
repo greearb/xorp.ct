@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.141 2007/03/22 17:15:52 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.142 2007/03/29 23:49:19 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -41,9 +41,7 @@ class PeerOut {
  public:
 
     PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
-	    OspfTypes::PeerID peerid,
-	    const A source, const uint16_t prefix_length,
-	    const uint16_t interface_mtu,
+	    OspfTypes::PeerID peerid, const A source,
 	    OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 	    OspfTypes::AreaType area_type);
 
@@ -53,11 +51,6 @@ class PeerOut {
      * For debugging only printable rendition of this interface/vif.
      */
     string get_if_name() const { return _interface + "/" + _vif; }
-
-    /**
-     * Called after the peer has been initialised.
-     */
-    bool go(OspfTypes::AreaID area);
 
     /**
      * If the source address matches the interface address return the
@@ -89,6 +82,7 @@ class PeerOut {
      * @return prefix length of this interface.
      */
     uint16_t get_interface_prefix_length() const {
+	XLOG_ASSERT(0 != _interface_prefix_length);
 	return _interface_prefix_length;
     }
 
@@ -96,6 +90,7 @@ class PeerOut {
      * @return mtu of this interface.
      */
     uint16_t get_interface_mtu() const {
+	XLOG_ASSERT(0 != _interface_mtu);
 	return _interface_mtu;
     }
 
@@ -485,8 +480,8 @@ class PeerOut {
     const OspfTypes::PeerID _peerid;	// The peers ID.
     uint32_t _interface_id;		// Inferface ID OSPFv3 only.
     A _interface_address;		// Interface address.
-    const uint16_t _interface_prefix_length;	// Interface prefix length
-    const uint16_t _interface_mtu;	// MTU of this interface.
+    uint16_t _interface_prefix_length;	// Interface prefix length
+    uint16_t _interface_mtu;		// MTU of this interface.
     uint16_t _interface_cost;		// Cost of this interface.
     uint16_t _inftransdelay;		// InfTransDelay.
 
@@ -520,7 +515,7 @@ class PeerOut {
     // read off the queue and transmitted at the interpacket gap rate.
     queue<typename Transmit<A>::TransmitRef> _transmit_queue;	
 
-    void bring_up_peering();
+    bool bring_up_peering();
     void take_down_peering();
 };
 
@@ -548,7 +543,8 @@ class Peer {
     Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area_id,
 	 OspfTypes::AreaType area_type)
 	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
-	  _area_type(area_type), _enabled(false), _passive(false),
+	  _area_type(area_type), _go_called(false),
+	  _enabled(false), _passive(false),
 	  _auth_handler(_ospf.get_eventloop()),
 	  _interface_state(Down),
 	  _hello_packet(ospf.get_version())
@@ -578,6 +574,9 @@ class Peer {
 	shutdown();
     }
 
+    /**
+     * Should be invoked just once.
+     */
     bool init() {
 	bool status = true;
 	switch(_ospf.get_version()) {
@@ -590,8 +589,16 @@ class Peer {
 	return status;
     }
 
+    /**
+     * Will only execute if go() has been called. Can be called multiple
+     * times paired with go().
+     */
     bool shutdown() {
 	bool status = true;
+	if (!_go_called)
+	    return status;
+	else
+	    _go_called = false;
 	switch(_ospf.get_version()) {
 	    case OspfTypes::V2:
 		break;
@@ -603,10 +610,13 @@ class Peer {
     }
 
     /**
-     * Called after all the state has been configured in the peer.
+     * Called once the peer is configured and enabled. Can be called
+     * multiple times paired with shutdown().
      */
     bool go() {
 	bool status = true;
+	XLOG_ASSERT(!_go_called);
+	_go_called = true;
 	switch(_ospf.get_version()) {
 	    case OspfTypes::V2:
 		break;
@@ -1263,6 +1273,7 @@ class Peer {
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
     const OspfTypes::AreaID _area_id;	// Area that is being represented.
     OspfTypes::AreaType _area_type;	// NORMAL or STUB or NSSA.
+    bool _go_called;			// True if go() has been called.
     bool _enabled;			// True if the interface is enabled.
     bool _passive;			// True if the interface is in loopback
 
