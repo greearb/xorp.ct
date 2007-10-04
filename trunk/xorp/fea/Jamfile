@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.22 2007/09/10 10:42:03 bms Exp $
+# $XORP: xorp/fea/Jamfile,v 1.23 2007/09/10 13:48:46 bms Exp $
 #
 
 SubDir TOP fea ;
@@ -70,9 +70,9 @@ FEA_LDADD =
 	libxorp_control_socket
 	libfea_data_plane_base
 	libfeafibclientxif
-	libfearawlinkclient
-	libfearawpkt4client
-	libfearawpkt6client
+	libfearawlinkclientxif
+	libfearawpkt4clientxif
+	libfearawpkt6clientxif
 	libsocket4userxif
 	libsocket6userxif
 	libfindereventnotifierxif

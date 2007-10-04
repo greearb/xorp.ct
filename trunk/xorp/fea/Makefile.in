@@ -104,9 +104,9 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
 	libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
@@ -137,9 +137,9 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
 	libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
@@ -367,9 +367,9 @@ LDADD = libfea.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
 	libfea_data_plane_base.la \
 	$(top_builddir)/xrl/interfaces/libfeafibclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawlinkclient.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4client.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6client.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket4userxif.la \
 	$(top_builddir)/xrl/interfaces/libsocket6userxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \

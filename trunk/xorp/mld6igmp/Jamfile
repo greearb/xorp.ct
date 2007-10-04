@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/Jamfile,v 1.4 2007/05/10 22:32:14 pavlin Exp $
+# $XORP: xorp/mld6igmp/Jamfile,v 1.5 2007/05/19 01:52:44 pavlin Exp $
 #
 
 SubDir TOP mld6igmp ;
@@ -24,8 +24,8 @@ MLD6IGMP_LINKLIBS_COMMON =
 	libmld6igmp
 	libfeaclient
 	libmld6igmpclientxif
-	libfearawpkt4
-	libfearawpkt6
+	libfearawpkt4xif
+	libfearawpkt6xif
 	libfeaifmgrmirrorxif
 	libfeaifmgrreplicatorxif
 	libclimanagerxif

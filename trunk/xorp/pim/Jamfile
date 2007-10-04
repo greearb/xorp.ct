@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/Jamfile,v 1.4 2007/05/10 22:32:14 pavlin Exp $
+# $XORP: xorp/pim/Jamfile,v 1.5 2007/05/19 01:52:45 pavlin Exp $
 #
 
 SubDir TOP pim ;
@@ -19,8 +19,8 @@ LINKLIBS_PIM_COMMON =
 	libribxif
 	libmld6igmpxif
 	libmfeaxif
-	libfearawpkt4
-	libfearawpkt6
+	libfearawpkt4xif
+	libfearawpkt6xif
 	libfeaifmgrmirrorxif
 	libfeaifmgrreplicatorxif
 	libclimanagerxif

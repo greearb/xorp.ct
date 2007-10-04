@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/interfaces/Jamfile,v 1.3 2007/08/09 00:47:04 pavlin Exp $
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.4 2007/09/07 12:48:57 bms Exp $
 #
 
 #
@@ -30,12 +30,12 @@ Library libfeafibclientxif : fea_fib_client_xif.cc ;
 Library libfeaifmgrxif : fea_ifmgr_xif.cc ;
 Library libfeaifmgrmirrorxif : fea_ifmgr_mirror_xif.cc ;
 Library libfeaifmgrreplicatorxif : fea_ifmgr_replicator_xif.cc ;
-Library libfearawlink : fea_rawlink_xif.cc ;
-Library libfearawlinkclient : fea_rawlink_client_xif.cc ;
-Library libfearawpkt4 : fea_rawpkt4_xif.cc ;
-Library libfearawpkt4client : fea_rawpkt4_client_xif.cc ;
-Library libfearawpkt6 : fea_rawpkt6_xif.cc ;
-Library libfearawpkt6client : fea_rawpkt6_client_xif.cc ;
+Library libfearawlinkxif : fea_rawlink_xif.cc ;
+Library libfearawlinkclientxif : fea_rawlink_client_xif.cc ;
+Library libfearawpkt4xif : fea_rawpkt4_xif.cc ;
+Library libfearawpkt4clientxif : fea_rawpkt4_client_xif.cc ;
+Library libfearawpkt6xif : fea_rawpkt6_xif.cc ;
+Library libfearawpkt6clientxif : fea_rawpkt6_client_xif.cc ;
 Library libfib2mribxif : fib2mrib_xif.cc ;
 Library libfinderxif : finder_xif.cc ;
 Library libfinderclientxif : finder_client_xif.cc ;

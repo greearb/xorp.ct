@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/Jamfile,v 1.2 2007/04/17 21:40:49 pavlin Exp $
+# $XORP: xorp/ospf/Jamfile,v 1.3 2007/04/20 07:17:44 pavlin Exp $
 #
 
 SubDir TOP ospf ;
@@ -43,8 +43,8 @@ LINKLIBS_OSPF_COMMON =
 	libfeaifmgrmirrorxif
 	libfeaifmgrreplicatorxif
 	libprofileclientxif
-	libfearawpkt4
-	libfearawpkt6
+	libfearawpkt4xif
+	libfearawpkt6xif
 	libfeaifmgrmirrorbase
 	libproto
 	libxipc

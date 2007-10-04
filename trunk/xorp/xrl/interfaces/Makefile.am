@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.35 2007/06/27 01:27:07 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.36 2007/08/09 00:47:04 pavlin Exp $
 ##
 
 ###############################################################################
@@ -70,34 +70,34 @@ noinst_LTLIBRARIES += libftixif.la
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
 
 # FEA Raw Link-Level I/O Server Interface
-noinst_LTLIBRARIES += libfearawlink.la
-libfearawlink_la_SOURCES  = fea_rawlink_xif.hh
-libfearawlink_la_SOURCES += fea_rawlink_xif.cc
+noinst_LTLIBRARIES += libfearawlinkxif.la
+libfearawlinkxif_la_SOURCES  = fea_rawlink_xif.hh
+libfearawlinkxif_la_SOURCES += fea_rawlink_xif.cc
 
 # FEA Raw Link-Level I/O Client Interface
-noinst_LTLIBRARIES += libfearawlinkclient.la
-libfearawlinkclient_la_SOURCES  = fea_rawlink_client_xif.hh
-libfearawlinkclient_la_SOURCES += fea_rawlink_client_xif.cc
+noinst_LTLIBRARIES += libfearawlinkclientxif.la
+libfearawlinkclientxif_la_SOURCES  = fea_rawlink_client_xif.hh
+libfearawlinkclientxif_la_SOURCES += fea_rawlink_client_xif.cc
 
 # FEA IPv4 Raw Packet Server Interface
-noinst_LTLIBRARIES += libfearawpkt4.la
-libfearawpkt4_la_SOURCES  = fea_rawpkt4_xif.hh
-libfearawpkt4_la_SOURCES += fea_rawpkt4_xif.cc
+noinst_LTLIBRARIES += libfearawpkt4xif.la
+libfearawpkt4xif_la_SOURCES  = fea_rawpkt4_xif.hh
+libfearawpkt4xif_la_SOURCES += fea_rawpkt4_xif.cc
 
 # FEA IPv4 Raw Packet Client Interface
-noinst_LTLIBRARIES += libfearawpkt4client.la
-libfearawpkt4client_la_SOURCES  = fea_rawpkt4_client_xif.hh
-libfearawpkt4client_la_SOURCES += fea_rawpkt4_client_xif.cc
+noinst_LTLIBRARIES += libfearawpkt4clientxif.la
+libfearawpkt4clientxif_la_SOURCES  = fea_rawpkt4_client_xif.hh
+libfearawpkt4clientxif_la_SOURCES += fea_rawpkt4_client_xif.cc
 
 # FEA IPv6 Raw Packet Server Interface
-noinst_LTLIBRARIES += libfearawpkt6.la
-libfearawpkt6_la_SOURCES  = fea_rawpkt6_xif.hh
-libfearawpkt6_la_SOURCES += fea_rawpkt6_xif.cc
+noinst_LTLIBRARIES += libfearawpkt6xif.la
+libfearawpkt6xif_la_SOURCES  = fea_rawpkt6_xif.hh
+libfearawpkt6xif_la_SOURCES += fea_rawpkt6_xif.cc
 
 # FEA IPv6 Raw Packet Client Interface
-noinst_LTLIBRARIES += libfearawpkt6client.la
-libfearawpkt6client_la_SOURCES  = fea_rawpkt6_client_xif.hh
-libfearawpkt6client_la_SOURCES += fea_rawpkt6_client_xif.cc
+noinst_LTLIBRARIES += libfearawpkt6clientxif.la
+libfearawpkt6clientxif_la_SOURCES  = fea_rawpkt6_client_xif.hh
+libfearawpkt6clientxif_la_SOURCES += fea_rawpkt6_client_xif.cc
 
 # Finder Interface
 noinst_LTLIBRARIES += libfinderxif.la

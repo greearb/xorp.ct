@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.35 2007/05/19 01:52:44 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.36 2007/08/29 19:03:12 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -23,8 +23,8 @@ LDADD		 = $(noinst_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libmld6igmpclientxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4xif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6xif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libclimanagerxif.la

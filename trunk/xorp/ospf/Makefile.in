@@ -73,8 +73,8 @@ test_build_lsa_main_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -93,8 +93,8 @@ test_checksum_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -113,8 +113,8 @@ test_packet_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -133,8 +133,8 @@ test_peering_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -153,8 +153,8 @@ test_routing_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -175,8 +175,8 @@ test_routing_interactive_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -195,8 +195,8 @@ test_routing_table_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -215,8 +215,8 @@ xorp_ospfv2_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -235,8 +235,8 @@ xorp_ospfv3_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -439,8 +439,8 @@ LDADD = libospf.la $(top_builddir)/xrl/targets/libospfv2base.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
-	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \

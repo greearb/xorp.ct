@@ -89,24 +89,27 @@ libfeaifmgrreplicatorxif_la_OBJECTS =  \
 libfeaifmgrxif_la_LIBADD =
 am_libfeaifmgrxif_la_OBJECTS = fea_ifmgr_xif.lo
 libfeaifmgrxif_la_OBJECTS = $(am_libfeaifmgrxif_la_OBJECTS)
-libfearawlink_la_LIBADD =
-am_libfearawlink_la_OBJECTS = fea_rawlink_xif.lo
-libfearawlink_la_OBJECTS = $(am_libfearawlink_la_OBJECTS)
-libfearawlinkclient_la_LIBADD =
-am_libfearawlinkclient_la_OBJECTS = fea_rawlink_client_xif.lo
-libfearawlinkclient_la_OBJECTS = $(am_libfearawlinkclient_la_OBJECTS)
-libfearawpkt4_la_LIBADD =
-am_libfearawpkt4_la_OBJECTS = fea_rawpkt4_xif.lo
-libfearawpkt4_la_OBJECTS = $(am_libfearawpkt4_la_OBJECTS)
-libfearawpkt4client_la_LIBADD =
-am_libfearawpkt4client_la_OBJECTS = fea_rawpkt4_client_xif.lo
-libfearawpkt4client_la_OBJECTS = $(am_libfearawpkt4client_la_OBJECTS)
-libfearawpkt6_la_LIBADD =
-am_libfearawpkt6_la_OBJECTS = fea_rawpkt6_xif.lo
-libfearawpkt6_la_OBJECTS = $(am_libfearawpkt6_la_OBJECTS)
-libfearawpkt6client_la_LIBADD =
-am_libfearawpkt6client_la_OBJECTS = fea_rawpkt6_client_xif.lo
-libfearawpkt6client_la_OBJECTS = $(am_libfearawpkt6client_la_OBJECTS)
+libfearawlinkclientxif_la_LIBADD =
+am_libfearawlinkclientxif_la_OBJECTS = fea_rawlink_client_xif.lo
+libfearawlinkclientxif_la_OBJECTS =  \
+	$(am_libfearawlinkclientxif_la_OBJECTS)
+libfearawlinkxif_la_LIBADD =
+am_libfearawlinkxif_la_OBJECTS = fea_rawlink_xif.lo
+libfearawlinkxif_la_OBJECTS = $(am_libfearawlinkxif_la_OBJECTS)
+libfearawpkt4clientxif_la_LIBADD =
+am_libfearawpkt4clientxif_la_OBJECTS = fea_rawpkt4_client_xif.lo
+libfearawpkt4clientxif_la_OBJECTS =  \
+	$(am_libfearawpkt4clientxif_la_OBJECTS)
+libfearawpkt4xif_la_LIBADD =
+am_libfearawpkt4xif_la_OBJECTS = fea_rawpkt4_xif.lo
+libfearawpkt4xif_la_OBJECTS = $(am_libfearawpkt4xif_la_OBJECTS)
+libfearawpkt6clientxif_la_LIBADD =
+am_libfearawpkt6clientxif_la_OBJECTS = fea_rawpkt6_client_xif.lo
+libfearawpkt6clientxif_la_OBJECTS =  \
+	$(am_libfearawpkt6clientxif_la_OBJECTS)
+libfearawpkt6xif_la_LIBADD =
+am_libfearawpkt6xif_la_OBJECTS = fea_rawpkt6_xif.lo
+libfearawpkt6xif_la_OBJECTS = $(am_libfearawpkt6xif_la_OBJECTS)
 libfib2mribxif_la_LIBADD =
 am_libfib2mribxif_la_OBJECTS = fib2mrib_xif.lo
 libfib2mribxif_la_OBJECTS = $(am_libfib2mribxif_la_OBJECTS)
@@ -259,10 +262,13 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) \
 	$(libfeafibxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
-	$(libfeaifmgrxif_la_SOURCES) $(libfearawlink_la_SOURCES) \
-	$(libfearawlinkclient_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
-	$(libfearawpkt4client_la_SOURCES) $(libfearawpkt6_la_SOURCES) \
-	$(libfearawpkt6client_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
+	$(libfeaifmgrxif_la_SOURCES) \
+	$(libfearawlinkclientxif_la_SOURCES) \
+	$(libfearawlinkxif_la_SOURCES) \
+	$(libfearawpkt4clientxif_la_SOURCES) \
+	$(libfearawpkt4xif_la_SOURCES) \
+	$(libfearawpkt6clientxif_la_SOURCES) \
+	$(libfearawpkt6xif_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
 	$(libfinderclientxif_la_SOURCES) \
 	$(libfindereventnotifierxif_la_SOURCES) \
 	$(libfindereventobserverxif_la_SOURCES) \
@@ -293,10 +299,13 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) \
 	$(libfeafibxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
-	$(libfeaifmgrxif_la_SOURCES) $(libfearawlink_la_SOURCES) \
-	$(libfearawlinkclient_la_SOURCES) $(libfearawpkt4_la_SOURCES) \
-	$(libfearawpkt4client_la_SOURCES) $(libfearawpkt6_la_SOURCES) \
-	$(libfearawpkt6client_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
+	$(libfeaifmgrxif_la_SOURCES) \
+	$(libfearawlinkclientxif_la_SOURCES) \
+	$(libfearawlinkxif_la_SOURCES) \
+	$(libfearawpkt4clientxif_la_SOURCES) \
+	$(libfearawpkt4xif_la_SOURCES) \
+	$(libfearawpkt6clientxif_la_SOURCES) \
+	$(libfearawpkt6xif_la_SOURCES) $(libfib2mribxif_la_SOURCES) \
 	$(libfinderclientxif_la_SOURCES) \
 	$(libfindereventnotifierxif_la_SOURCES) \
 	$(libfindereventobserverxif_la_SOURCES) \
@@ -571,9 +580,10 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libcoordxif.la libdatainxif.la libfeaclickxif.la \
 	libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la \
 	libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la \
-	libfib2mribxif.la libftixif.la libfearawlink.la \
-	libfearawlinkclient.la libfearawpkt4.la libfearawpkt4client.la \
-	libfearawpkt6.la libfearawpkt6client.la libfinderxif.la \
+	libfib2mribxif.la libftixif.la libfearawlinkxif.la \
+	libfearawlinkclientxif.la libfearawpkt4xif.la \
+	libfearawpkt4clientxif.la libfearawpkt6xif.la \
+	libfearawpkt6clientxif.la libfinderxif.la \
 	libfindereventnotifierxif.la libfindereventobserverxif.la \
 	libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la \
 	libmld6igmpxif.la libmld6igmpclientxif.la libospfv2xif.la \
@@ -604,14 +614,14 @@ libfeaifmgrreplicatorxif_la_SOURCES = fea_ifmgr_replicator_xif.hh \
 	fea_ifmgr_replicator_xif.cc
 libfib2mribxif_la_SOURCES = fib2mrib_xif.hh fib2mrib_xif.cc
 libftixif_la_SOURCES = fti_xif.hh fti_xif.cc
-libfearawlink_la_SOURCES = fea_rawlink_xif.hh fea_rawlink_xif.cc
-libfearawlinkclient_la_SOURCES = fea_rawlink_client_xif.hh \
+libfearawlinkxif_la_SOURCES = fea_rawlink_xif.hh fea_rawlink_xif.cc
+libfearawlinkclientxif_la_SOURCES = fea_rawlink_client_xif.hh \
 	fea_rawlink_client_xif.cc
-libfearawpkt4_la_SOURCES = fea_rawpkt4_xif.hh fea_rawpkt4_xif.cc
-libfearawpkt4client_la_SOURCES = fea_rawpkt4_client_xif.hh \
+libfearawpkt4xif_la_SOURCES = fea_rawpkt4_xif.hh fea_rawpkt4_xif.cc
+libfearawpkt4clientxif_la_SOURCES = fea_rawpkt4_client_xif.hh \
 	fea_rawpkt4_client_xif.cc
-libfearawpkt6_la_SOURCES = fea_rawpkt6_xif.hh fea_rawpkt6_xif.cc
-libfearawpkt6client_la_SOURCES = fea_rawpkt6_client_xif.hh \
+libfearawpkt6xif_la_SOURCES = fea_rawpkt6_xif.hh fea_rawpkt6_xif.cc
+libfearawpkt6clientxif_la_SOURCES = fea_rawpkt6_client_xif.hh \
 	fea_rawpkt6_client_xif.cc
 libfinderxif_la_SOURCES = finder_xif.hh finder_xif.cc
 libfindereventnotifierxif_la_SOURCES = finder_event_notifier_xif.hh \
@@ -731,18 +741,18 @@ libfeaifmgrreplicatorxif.la: $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmg
 	$(CXXLINK)  $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmgrreplicatorxif_la_LIBADD) $(LIBS)
 libfeaifmgrxif.la: $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfeaifmgrxif_la_OBJECTS) $(libfeaifmgrxif_la_LIBADD) $(LIBS)
-libfearawlink.la: $(libfearawlink_la_OBJECTS) $(libfearawlink_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawlink_la_OBJECTS) $(libfearawlink_la_LIBADD) $(LIBS)
-libfearawlinkclient.la: $(libfearawlinkclient_la_OBJECTS) $(libfearawlinkclient_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawlinkclient_la_OBJECTS) $(libfearawlinkclient_la_LIBADD) $(LIBS)
-libfearawpkt4.la: $(libfearawpkt4_la_OBJECTS) $(libfearawpkt4_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt4_la_OBJECTS) $(libfearawpkt4_la_LIBADD) $(LIBS)
-libfearawpkt4client.la: $(libfearawpkt4client_la_OBJECTS) $(libfearawpkt4client_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt4client_la_OBJECTS) $(libfearawpkt4client_la_LIBADD) $(LIBS)
-libfearawpkt6.la: $(libfearawpkt6_la_OBJECTS) $(libfearawpkt6_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt6_la_OBJECTS) $(libfearawpkt6_la_LIBADD) $(LIBS)
-libfearawpkt6client.la: $(libfearawpkt6client_la_OBJECTS) $(libfearawpkt6client_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libfearawpkt6client_la_OBJECTS) $(libfearawpkt6client_la_LIBADD) $(LIBS)
+libfearawlinkclientxif.la: $(libfearawlinkclientxif_la_OBJECTS) $(libfearawlinkclientxif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawlinkclientxif_la_OBJECTS) $(libfearawlinkclientxif_la_LIBADD) $(LIBS)
+libfearawlinkxif.la: $(libfearawlinkxif_la_OBJECTS) $(libfearawlinkxif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawlinkxif_la_OBJECTS) $(libfearawlinkxif_la_LIBADD) $(LIBS)
+libfearawpkt4clientxif.la: $(libfearawpkt4clientxif_la_OBJECTS) $(libfearawpkt4clientxif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawpkt4clientxif_la_OBJECTS) $(libfearawpkt4clientxif_la_LIBADD) $(LIBS)
+libfearawpkt4xif.la: $(libfearawpkt4xif_la_OBJECTS) $(libfearawpkt4xif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawpkt4xif_la_OBJECTS) $(libfearawpkt4xif_la_LIBADD) $(LIBS)
+libfearawpkt6clientxif.la: $(libfearawpkt6clientxif_la_OBJECTS) $(libfearawpkt6clientxif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawpkt6clientxif_la_OBJECTS) $(libfearawpkt6clientxif_la_LIBADD) $(LIBS)
+libfearawpkt6xif.la: $(libfearawpkt6xif_la_OBJECTS) $(libfearawpkt6xif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfearawpkt6xif_la_OBJECTS) $(libfearawpkt6xif_la_LIBADD) $(LIBS)
 libfib2mribxif.la: $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfib2mribxif_la_OBJECTS) $(libfib2mribxif_la_LIBADD) $(LIBS)
 libfinderclientxif.la: $(libfinderclientxif_la_OBJECTS) $(libfinderclientxif_la_DEPENDENCIES) 

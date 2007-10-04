@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.101 2007/08/09 00:46:54 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.102 2007/09/15 00:32:15 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -37,9 +37,9 @@ LDADD		+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.l
 LDADD		+= libfea_data_plane_base.la
 ### XRL libraries
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeafibclientxif.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclient.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4client.la
-LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6client.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4clientxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6clientxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libsocket4userxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libsocket6userxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
