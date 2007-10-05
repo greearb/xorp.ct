@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.142 2007/03/29 23:49:19 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.143 2007/10/03 21:23:53 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1474,7 +1474,11 @@ class Neighbour {
     /**
      * Neighbours router ID.
      */
-    OspfTypes::RouterID get_router_id() const { return _router_id; }
+    OspfTypes::RouterID get_router_id() const { 
+	if (_hello_packet)
+	    return _hello_packet->get_router_id();
+	return _router_id;
+    }
 
     /**
      * Neighbour's source address.
@@ -1487,7 +1491,7 @@ class Neighbour {
      * In OSPFv3 its the router ID.
      */
     OspfTypes::RouterID get_candidate_id() const {
-	return Peer<A>::get_candidate_id(_neighbour_address, _router_id);
+	return Peer<A>::get_candidate_id(_neighbour_address, get_router_id());
     }
 
     /**
@@ -1612,7 +1616,7 @@ class Neighbour {
 
     string str() {
 	return "Address: " + _neighbour_address.str() +
-	    "RouterID: " + pr_id(_router_id);
+	    "RouterID: " + pr_id(get_router_id());
     }
 
     static OspfTypes::NeighbourID _ticket;	// Allocator for NeighbourID's
