@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.287 2007/10/04 23:48:57 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.288 2007/10/05 00:01:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1111,14 +1111,13 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	return false;
     }
 
-    uint16_t plen;
     switch(get_linktype()) {
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
 	switch(_ospf.get_version()) {
-	case OspfTypes::V2:
-	    plen = get_interface_prefix_length();
+	case OspfTypes::V2: {
+	    const uint16_t plen = get_interface_prefix_length();
 	    if (IPNet<A>(get_interface_address(), plen) != 
 		IPNet<A>(src, plen)) {
 		XLOG_TRACE(_ospf.trace()._input_errors,
@@ -1126,6 +1125,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 			   cstring(IPNet<A>(src, plen)));
 		return false;
 	    }
+	}
 	    break;
 	case OspfTypes::V3:
 	    break;
