@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.15 2007/01/23 03:56:47 pavlin Exp $
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.16 2007/04/02 21:53:24 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -197,7 +197,8 @@ The configuration parameters are used as follows:
 \item{\tt qualified-next-hop}: this specifies an alternative nexthop
   router for the route, but with a different metric. Typically it is
   used to install a backup static route that will be used in case the
-  original next hop becomes unreachable.
+  original next hop becomes unreachable (\eg the interface toward it is
+  disabled, or the cable has been disconnected).
 
   Each {\stt qualified-next-hop}: specification takes the following
   attributes:
