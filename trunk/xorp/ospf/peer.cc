@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.288 2007/10/05 00:01:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.289 2007/10/05 00:06:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4132,6 +4132,13 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 
     if (OspfTypes::NBMA == get_linktype())
 	XLOG_WARNING("TBD");
+
+    // This step is not explicitly in the RFC but is required if no BDR has
+    // yet been choosen. A new neighbour even if it isn't advertising
+    // itself as the BDR and it's BDR is set to 0.0.0.0 is a candidate.
+    if(set_id("0.0.0.0") == _peer.get_backup_designated_router() &&
+       set_id("0.0.0.0") == hello->get_backup_designated_router())
+	_peer.schedule_event("NeighbourChange");
 }
 
 template <typename A>
