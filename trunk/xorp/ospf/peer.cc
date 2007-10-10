@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.289 2007/10/05 00:06:59 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.290 2007/10/10 23:48:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2208,6 +2208,8 @@ OspfTypes::RouterID
 Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 {
     XLOG_ASSERT(do_dr_or_bdr());
+    XLOG_TRACE(_ospf.trace()._election, "Current BDR %s",
+	       pr_id(get_backup_designated_router()).c_str());
 
     // Step (2)
     // Calculate the the new backup designated router.
@@ -2217,6 +2219,7 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 		set_id("0.0.0.0"), 0);
     typename list<Candidate>::const_iterator i;
     for(i = candidates.begin(); i != candidates.end(); i++) {
+	XLOG_TRACE(_ospf.trace()._election, "Candidate: %s ", cstring((*i)));
 	if ((*i)._candidate_id != (*i)._dr &&
 	    (*i)._candidate_id == (*i)._bdr) {
 	    if ((*i)._router_priority > c._router_priority)
@@ -2243,6 +2246,9 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 	}
     }
 
+    XLOG_TRACE(_ospf.trace()._election, "New BDR %s",
+	       pr_id(c._candidate_id).c_str());
+
     return c._candidate_id;
 }
 
@@ -2252,6 +2258,8 @@ Peer<A>::designated_router(list<Candidate>& candidates,
 			   OspfTypes::RouterID backup_designated_router) const
 {
     XLOG_ASSERT(do_dr_or_bdr());
+    XLOG_TRACE(_ospf.trace()._election, "Current DR %s",
+	       pr_id(get_designated_router()).c_str());
 
     // Step (3)
     // Calculate the designated router.
@@ -2259,6 +2267,7 @@ Peer<A>::designated_router(list<Candidate>& candidates,
 		set_id("0.0.0.0"), 0);
     typename list<Candidate>::const_iterator i;
     for(i = candidates.begin(); i != candidates.end(); i++) {
+	XLOG_TRACE(_ospf.trace()._election, "Candidate: %s ", cstring((*i)));
 	if ((*i)._candidate_id == (*i)._dr) {
 	    if ((*i)._router_priority > c._router_priority)
 		c = *i;
@@ -2272,8 +2281,13 @@ Peer<A>::designated_router(list<Candidate>& candidates,
     // It is possible that no router was selected because no router
     // had itself as DR. Therefore just select the backup designated router.
     if (0 == c._router_priority) {
+	XLOG_TRACE(_ospf.trace()._election,"New DR chose BDR %s",
+		  pr_id(backup_designated_router).c_str());
 	return backup_designated_router;
     }
+
+    XLOG_TRACE(_ospf.trace()._election, "New DR %s",
+	      pr_id(c._candidate_id).c_str());
 
     return c._candidate_id;
 }
@@ -2283,6 +2297,9 @@ void
 Peer<A>::compute_designated_router_and_backup_designated_router()
 {
     XLOG_ASSERT(do_dr_or_bdr());
+    XLOG_TRACE(_ospf.trace()._election, "Start election: DR %s BDR %s",
+	       pr_id(get_designated_router()).c_str(),
+	       pr_id(get_backup_designated_router()).c_str());
 
     list<Candidate> candidates;
 
@@ -2330,8 +2347,10 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     // If nothing has changed out of here.
     if (_hello_packet.get_designated_router() == dr &&
 	_hello_packet.get_backup_designated_router() == bdr)
-	if (Waiting != get_state())
+	if (Waiting != get_state()) {
+	    XLOG_TRACE(_ospf.trace()._election, "End election: No change");
 	    return;
+	}
 
     bool recompute = false;
     // Has this router just become the DR or BDR
@@ -2367,6 +2386,9 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	dr = designated_router(candidates, bdr);
     }
     
+    XLOG_TRACE(_ospf.trace()._election, "End election: DR %s BDR %s",
+	       pr_id(dr).c_str(), pr_id(bdr).c_str());
+
     // Step(5)
     set_designated_router(dr);
     set_backup_designated_router(bdr);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/trace.hh,v 1.15 2006/03/16 00:04:49 pavlin Exp $
+// $XORP: xorp/ospf/trace.hh,v 1.16 2007/02/16 22:46:43 pavlin Exp $
 
 #ifndef __OSPF_TRACE_HH__
 #define __OSPF_TRACE_HH__
@@ -31,7 +31,8 @@ struct Trace {
 	      _virtual_link(false),
 	      _find_interface_address(false),
 	      _routes(false),
-	      _retransmit(false)
+	      _retransmit(false),
+	      _election(false)
 	      // Don't forget to add new variables to the all() method.
 	{}
 
@@ -41,7 +42,7 @@ struct Trace {
     void all(bool val) {
 	_input_errors = _interface_events = _neighbour_events = _spt = 
 	    _import_policy = _export_policy = _virtual_link = 
-	    _find_interface_address = _routes = _retransmit = val;
+	    _find_interface_address = _routes = _retransmit = _election = val;
     }
 
     bool _input_errors;
@@ -54,6 +55,7 @@ struct Trace {
     bool _find_interface_address;
     bool _routes;	// add,replace,delete route.
     bool _retransmit;
+    bool _election;	// DR and BDR election.
 };
 
 #endif // __OSPF_TRACE_HH__
