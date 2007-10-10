@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.143 2007/10/03 21:23:53 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.144 2007/10/05 02:34:29 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1315,6 +1315,15 @@ class Peer {
 	OspfTypes::RouterID _dr;	// Designated router.
 	OspfTypes::RouterID _bdr;	// Backup Designated router.
 	uint8_t  _router_priority;	// Router Priority.
+
+	string str() const {
+	    return c_format("CID %s RID %s DR %s BDR %s PRI %s",
+			    pr_id(_candidate_id).c_str(),
+			    pr_id(_router_id).c_str(),
+			    pr_id(_dr).c_str(),
+			    pr_id(_bdr).c_str(),
+			    pr_id(_router_priority).c_str());
+	}
     };
 
     list<string> _scheduled_events;	// List of deferred events.
