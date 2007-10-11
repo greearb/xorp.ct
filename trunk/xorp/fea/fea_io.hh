@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_io.hh,v 1.1 2007/04/18 06:20:56 pavlin Exp $
+// $XORP: xorp/fea/fea_io.hh,v 1.2 2007/08/15 18:55:16 pavlin Exp $
 
 
 #ifndef __FEA_FEA_IO_HH__
@@ -32,19 +32,19 @@ class InstanceWatcher;
 /**
  * @short FEA (Forwarding Engine Abstraction) I/O class.
  */
-class FeaIO {
+class FeaIo {
 public:
     /**
      * Constructor.
      *
      * @param eventloop the event loop to use.
      */
-    FeaIO(EventLoop& eventloop);
+    FeaIo(EventLoop& eventloop);
 
     /**
      * Destructor
      */
-    virtual	~FeaIO();
+    virtual	~FeaIo();
 
     /**
      * Startup the service operation.
@@ -69,10 +69,10 @@ public:
 
     /**
      * Get the event loop this service is added to.
-     * 
+     *
      * @return the event loop this service is added to.
      */
-    EventLoop&	eventloop() { return (_eventloop); }
+    EventLoop& eventloop() { return (_eventloop); }
 
     /**
      * Get the FEA node instance.

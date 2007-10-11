@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_io.cc,v 1.1 2007/04/18 06:21:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_io.cc,v 1.2 2007/08/15 18:55:16 pavlin Exp $"
 
 
 //
@@ -34,48 +34,47 @@
 #include "xrl_fea_node.hh"
 
 
-XrlFeaIO::XrlFeaIO(EventLoop& eventloop, XrlRouter& xrl_router,
+XrlFeaIo::XrlFeaIo(EventLoop& eventloop, XrlRouter& xrl_router,
 		   const string& xrl_finder_targetname,
 		   XrlFeaNode& xrl_fea_node)
-    
-    : FeaIO(eventloop),
+    : FeaIo(eventloop),
       _xrl_router(xrl_router),
       _xrl_finder_targetname(xrl_finder_targetname),
       _xrl_fea_node(xrl_fea_node)
 {
 }
 
-XrlFeaIO::~XrlFeaIO()
+XrlFeaIo::~XrlFeaIo()
 {
     shutdown();
 }
 
 int
-XrlFeaIO::startup()
+XrlFeaIo::startup()
 {
-    return (FeaIO::startup());
+    return (FeaIo::startup());
 }
 
 int
-XrlFeaIO::shutdown()
+XrlFeaIo::shutdown()
 {
-    return (FeaIO::shutdown());
+    return (FeaIo::shutdown());
 }
 
 bool
-XrlFeaIO::is_running() const
+XrlFeaIo::is_running() const
 {
-    return (FeaIO::is_running());
+    return (FeaIo::is_running());
 }
 
 FeaNode&
-XrlFeaIO::fea_node()
+XrlFeaIo::fea_node()
 {
     return (_xrl_fea_node.fea_node());
 }
 
 int
-XrlFeaIO::register_instance_event_interest(const string& instance_name,
+XrlFeaIo::register_instance_event_interest(const string& instance_name,
 					   string& error_msg)
 {
     XrlFinderEventNotifierV0p1Client client(&_xrl_router);
@@ -84,7 +83,7 @@ XrlFeaIO::register_instance_event_interest(const string& instance_name,
     success = client.send_register_instance_event_interest(
 	_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
 	instance_name,
-	callback(this, &XrlFeaIO::register_instance_event_interest_cb,
+	callback(this, &XrlFeaIo::register_instance_event_interest_cb,
 		 instance_name));
     if (success != true) {
 	error_msg = c_format("Failed to register event interest in "
@@ -99,7 +98,7 @@ XrlFeaIO::register_instance_event_interest(const string& instance_name,
 }
 
 int
-XrlFeaIO::deregister_instance_event_interest(const string& instance_name,
+XrlFeaIo::deregister_instance_event_interest(const string& instance_name,
 					     string& error_msg)
 {
     XrlFinderEventNotifierV0p1Client client(&_xrl_router);
@@ -108,7 +107,7 @@ XrlFeaIO::deregister_instance_event_interest(const string& instance_name,
     success = client.send_deregister_instance_event_interest(
 	_xrl_finder_targetname.c_str(), _xrl_router.instance_name(),
 	instance_name,
-	callback(this, &XrlFeaIO::deregister_instance_event_interest_cb,
+	callback(this, &XrlFeaIo::deregister_instance_event_interest_cb,
 		 instance_name));
     if (success != true) {
 	error_msg = c_format("Failed to deregister event interest in "
@@ -125,7 +124,7 @@ XrlFeaIO::deregister_instance_event_interest(const string& instance_name,
 }
 
 void
-XrlFeaIO::register_instance_event_interest_cb(const XrlError& xrl_error,
+XrlFeaIo::register_instance_event_interest_cb(const XrlError& xrl_error,
 					      string instance_name)
 {
     if (xrl_error != XrlError::OKAY()) {
@@ -137,7 +136,7 @@ XrlFeaIO::register_instance_event_interest_cb(const XrlError& xrl_error,
 }
 
 void
-XrlFeaIO::deregister_instance_event_interest_cb(const XrlError& xrl_error,
+XrlFeaIo::deregister_instance_event_interest_cb(const XrlError& xrl_error,
 						string instance_name)
 {
     if (xrl_error != XrlError::OKAY()) {

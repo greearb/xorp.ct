@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.9 2007/08/09 00:46:57 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.10 2007/08/15 18:55:17 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -117,7 +117,7 @@ public:
      *
      * @return reference to the FEA I/O XRL instance.
      */
-    XrlFeaIO&	xrl_fea_io() { return (_xrl_fea_io); }
+    XrlFeaIo&	xrl_fea_io() { return (_xrl_fea_io); }
 
     /**
      * Get the FEA node instance.
@@ -143,7 +143,7 @@ public:
 private:
     EventLoop&		_eventloop;	// The event loop to use
     XrlStdRouter	_xrl_router;	// The standard XRL send/recv point
-    XrlFeaIO		_xrl_fea_io;	// The FEA I/O XRL instance
+    XrlFeaIo		_xrl_fea_io;	// The FEA I/O XRL instance
     FeaNode		_fea_node;	// The FEA node
     LibFeaClientBridge	_lib_fea_client_bridge;
 

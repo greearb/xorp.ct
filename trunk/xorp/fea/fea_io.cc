@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_io.cc,v 1.2 2007/08/15 18:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_io.cc,v 1.3 2007/08/15 23:09:51 pavlin Exp $"
 
 
 //
@@ -30,19 +30,19 @@
 #include "fea_io.hh"
 
 
-FeaIO::FeaIO(EventLoop& eventloop)
+FeaIo::FeaIo(EventLoop& eventloop)
     : _eventloop(eventloop),
       _is_running(false)
 {
 }
 
-FeaIO::~FeaIO()
+FeaIo::~FeaIo()
 {
     shutdown();
 }
 
 int
-FeaIO::startup()
+FeaIo::startup()
 {
     _is_running = true;
 
@@ -50,7 +50,7 @@ FeaIO::startup()
 }
 
 int
-FeaIO::shutdown()
+FeaIo::shutdown()
 {
     _is_running = false;
 
@@ -58,13 +58,13 @@ FeaIO::shutdown()
 }
 
 bool
-FeaIO::is_running() const
+FeaIo::is_running() const
 {
     return (_is_running);
 }
 
 int
-FeaIO::add_instance_watch(const string& instance_name,
+FeaIo::add_instance_watch(const string& instance_name,
 			  InstanceWatcher* instance_watcher,
 			  string& error_msg)
 {
@@ -103,7 +103,7 @@ FeaIO::add_instance_watch(const string& instance_name,
 }
 
 int
-FeaIO::delete_instance_watch(const string& instance_name,
+FeaIo::delete_instance_watch(const string& instance_name,
 			     InstanceWatcher* instance_watcher,
 			     string& error_msg)
 {
@@ -146,7 +146,7 @@ FeaIO::delete_instance_watch(const string& instance_name,
 }
 
 void
-FeaIO::instance_birth(const string& instance_name)
+FeaIo::instance_birth(const string& instance_name)
 {
     list<pair<string, InstanceWatcher *> >::iterator iter;
 
@@ -169,7 +169,7 @@ FeaIO::instance_birth(const string& instance_name)
 }
 
 void
-FeaIO::instance_death(const string& instance_name)
+FeaIo::instance_death(const string& instance_name)
 {
     list<pair<string, InstanceWatcher *> >::iterator iter;
 

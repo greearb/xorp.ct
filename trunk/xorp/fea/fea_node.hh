@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.10 2007/08/09 00:46:55 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.11 2007/08/15 18:55:16 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -35,7 +35,7 @@
 #include "pa_transaction.hh"
 
 class EventLoop;
-class FeaIO;
+class FeaIo;
 
 /**
  * @short The FEA (Forwarding Engine Abstraction) node class.
@@ -48,10 +48,10 @@ public:
      * Constructor for a given event loop.
      *
      * @param eventloop the event loop to use.
-     * @param fea_io the FeaIO instance to use.
+     * @param fea_io the FeaIo instance to use.
      * @param is_dummy if true, then run the FEA in dummy mode.
      */
-    FeaNode(EventLoop& eventloop, FeaIO& fea_io, bool is_dummy);
+    FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy);
 
     /**
      * Destructor
@@ -197,7 +197,7 @@ public:
      *
      * @return reference to the FEA I/O instance.
      */
-    FeaIO& fea_io() { return (_fea_io); }
+    FeaIo& fea_io() { return (_fea_io); }
 
 private:
     /**
@@ -250,7 +250,7 @@ private:
 
     list<FeaDataPlaneManager*>	_fea_data_plane_managers;
 
-    FeaIO&			_fea_io;	// The FeaIO entry to use
+    FeaIo&			_fea_io;	// The FeaIo entry to use
 };
 
 #endif // __FEA_FEA_NODE_HH__

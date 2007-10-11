@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_io.hh,v 1.1 2007/04/18 06:21:00 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_io.hh,v 1.2 2007/08/15 18:55:16 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_IO_HH__
@@ -32,7 +32,7 @@ class XrlRouter;
 /**
  * @short FEA (Forwarding Engine Abstraction) XRL-based I/O class.
  */
-class XrlFeaIO : public FeaIO {
+class XrlFeaIo : public FeaIo {
 public:
     /**
      * Constructor.
@@ -42,13 +42,13 @@ public:
      * @param xrl_finder_targetname the XRL targetname of the Finder.
      * @param xrl_fea_node the XRL FEA node instance to use (@ref XrlFeaNode).
      */
-    XrlFeaIO(EventLoop& eventloop, XrlRouter& xrl_router,
+    XrlFeaIo(EventLoop& eventloop, XrlRouter& xrl_router,
 	     const string& xrl_finder_targetname, XrlFeaNode& xrl_fea_node);
 
     /**
      * Destructor
      */
-    virtual	~XrlFeaIO();
+    virtual	~XrlFeaIo();
 
     /**
      * Startup the service operation.

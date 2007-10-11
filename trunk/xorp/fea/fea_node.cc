@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.11 2007/08/09 00:46:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.12 2007/08/15 18:55:16 pavlin Exp $"
 
 
 //
@@ -39,7 +39,7 @@
 #include "profile_vars.hh"
 
 
-FeaNode::FeaNode(EventLoop& eventloop, FeaIO& fea_io, bool is_dummy)
+FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
     : _eventloop(eventloop),
       _is_running(false),
       _is_dummy(is_dummy),
