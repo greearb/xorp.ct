@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.290 2007/10/10 23:48:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.291 2007/10/10 23:55:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2208,8 +2208,6 @@ OspfTypes::RouterID
 Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 {
     XLOG_ASSERT(do_dr_or_bdr());
-    XLOG_TRACE(_ospf.trace()._election, "Current BDR %s",
-	       pr_id(get_backup_designated_router()).c_str());
 
     // Step (2)
     // Calculate the the new backup designated router.
@@ -2258,8 +2256,6 @@ Peer<A>::designated_router(list<Candidate>& candidates,
 			   OspfTypes::RouterID backup_designated_router) const
 {
     XLOG_ASSERT(do_dr_or_bdr());
-    XLOG_TRACE(_ospf.trace()._election, "Current DR %s",
-	       pr_id(get_designated_router()).c_str());
 
     // Step (3)
     // Calculate the designated router.
@@ -4154,13 +4150,6 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 
     if (OspfTypes::NBMA == get_linktype())
 	XLOG_WARNING("TBD");
-
-    // This step is not explicitly in the RFC but is required if no BDR has
-    // yet been choosen. A new neighbour even if it isn't advertising
-    // itself as the BDR and it's BDR is set to 0.0.0.0 is a candidate.
-    if(set_id("0.0.0.0") == _peer.get_backup_designated_router() &&
-       set_id("0.0.0.0") == hello->get_backup_designated_router())
-	_peer.schedule_event("NeighbourChange");
 }
 
 template <typename A>
