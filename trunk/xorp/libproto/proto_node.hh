@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.41 2007/05/19 01:52:43 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.42 2007/05/23 12:12:37 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -987,7 +987,7 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& error_msg)
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
-    if (add_config_vif(vif.name(), vif.vif_index(), error_msg) < 0)
+    if (add_config_vif(vif.name(), vif.vif_index(), error_msg) != XORP_OK)
 	return (XORP_ERROR);
     
     list<VifAddr>::const_iterator vif_addr_iter;
@@ -1000,16 +1000,16 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& error_msg)
 				vif_addr.subnet_addr(),
 				vif_addr.broadcast_addr(),
 				vif_addr.peer_addr(),
-				error_msg) < 0) {
+				error_msg)
+	    != XORP_OK) {
 	    string dummy_error_msg;
 	    delete_config_vif(vif.name(), dummy_error_msg);
 	    return (XORP_ERROR);
 	}
     }
     
-    if (set_config_pif_index(vif.name(),
-			     vif.pif_index(),
-			     error_msg) < 0) {
+    if (set_config_pif_index(vif.name(), vif.pif_index(), error_msg)
+	!= XORP_OK) {
 	string dummy_error_msg;
 	delete_config_vif(vif.name(), dummy_error_msg);
 	return (XORP_ERROR);
@@ -1023,7 +1023,8 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& error_msg)
 			     vif.is_broadcast_capable(),
 			     vif.is_underlying_vif_up(),
 			     vif.mtu(),
-			     error_msg) < 0) {
+			     error_msg)
+	!= XORP_OK) {
 	string dummy_error_msg;
 	delete_config_vif(vif.name(), dummy_error_msg);
 	return (XORP_ERROR);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.73 2007/09/25 22:45:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.74 2007/09/29 00:23:30 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -456,7 +456,7 @@ IfConfig::start(string& error_msg)
 	 ifconfig_get_iter != _ifconfig_gets.end();
 	 ++ifconfig_get_iter) {
 	IfConfigGet* ifconfig_get = *ifconfig_get_iter;
-	if (ifconfig_get->start(error_msg) < 0)
+	if (ifconfig_get->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -467,7 +467,7 @@ IfConfig::start(string& error_msg)
 	 ifconfig_set_iter != _ifconfig_sets.end();
 	 ++ifconfig_set_iter) {
 	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
-	if (ifconfig_set->start(error_msg) < 0)
+	if (ifconfig_set->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -478,7 +478,7 @@ IfConfig::start(string& error_msg)
 	 ifconfig_observer_iter != _ifconfig_observers.end();
 	 ++ifconfig_observer_iter) {
 	IfConfigObserver* ifconfig_observer = *ifconfig_observer_iter;
-	if (ifconfig_observer->start(error_msg) < 0)
+	if (ifconfig_observer->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -489,7 +489,7 @@ IfConfig::start(string& error_msg)
 	 ifconfig_vlan_get_iter != _ifconfig_vlan_gets.end();
 	 ++ifconfig_vlan_get_iter) {
 	IfConfigVlanGet* ifconfig_vlan_get = *ifconfig_vlan_get_iter;
-	if (ifconfig_vlan_get->start(error_msg) < 0)
+	if (ifconfig_vlan_get->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -500,7 +500,7 @@ IfConfig::start(string& error_msg)
 	 ifconfig_vlan_set_iter != _ifconfig_vlan_sets.end();
 	 ++ifconfig_vlan_set_iter) {
 	IfConfigVlanSet* ifconfig_vlan_set = *ifconfig_vlan_set_iter;
-	if (ifconfig_vlan_set->start(error_msg) < 0)
+	if (ifconfig_vlan_set->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -563,7 +563,7 @@ IfConfig::stop(string& error_msg)
 	 ifconfig_vlan_set_iter != _ifconfig_vlan_sets.end();
 	 ++ifconfig_vlan_set_iter) {
 	IfConfigVlanSet* ifconfig_vlan_set = *ifconfig_vlan_set_iter;
-	if (ifconfig_vlan_set->stop(error_msg2) < 0) {
+	if (ifconfig_vlan_set->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -578,7 +578,7 @@ IfConfig::stop(string& error_msg)
 	 ifconfig_vlan_get_iter != _ifconfig_vlan_gets.end();
 	 ++ifconfig_vlan_get_iter) {
 	IfConfigVlanGet* ifconfig_vlan_get = *ifconfig_vlan_get_iter;
-	if (ifconfig_vlan_get->stop(error_msg2) < 0) {
+	if (ifconfig_vlan_get->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -593,7 +593,7 @@ IfConfig::stop(string& error_msg)
 	 ifconfig_observer_iter != _ifconfig_observers.end();
 	 ++ifconfig_observer_iter) {
 	IfConfigObserver* ifconfig_observer = *ifconfig_observer_iter;
-	if (ifconfig_observer->stop(error_msg2) < 0) {
+	if (ifconfig_observer->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -608,7 +608,7 @@ IfConfig::stop(string& error_msg)
 	 ifconfig_set_iter != _ifconfig_sets.end();
 	 ++ifconfig_set_iter) {
 	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
-	if (ifconfig_set->stop(error_msg2) < 0) {
+	if (ifconfig_set->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -623,7 +623,7 @@ IfConfig::stop(string& error_msg)
 	 ifconfig_get_iter != _ifconfig_gets.end();
 	 ++ifconfig_get_iter) {
 	IfConfigGet* ifconfig_get = *ifconfig_get_iter;
-	if (ifconfig_get->stop(error_msg2) < 0) {
+	if (ifconfig_get->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";

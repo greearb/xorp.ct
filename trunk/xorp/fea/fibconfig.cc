@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.13 2007/08/09 07:03:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.14 2007/09/15 19:52:37 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -534,7 +534,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
 	 ++fibconfig_forwarding_iter) {
 	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
-	if (fibconfig_forwarding->start(error_msg) < 0)
+	if (fibconfig_forwarding->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -545,7 +545,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_entry_get_iter != _fibconfig_entry_gets.end();
 	 ++fibconfig_entry_get_iter) {
 	FibConfigEntryGet* fibconfig_entry_get = *fibconfig_entry_get_iter;
-	if (fibconfig_entry_get->start(error_msg) < 0)
+	if (fibconfig_entry_get->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -556,7 +556,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
 	 ++fibconfig_entry_set_iter) {
 	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
-	if (fibconfig_entry_set->start(error_msg) < 0)
+	if (fibconfig_entry_set->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -567,7 +567,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_entry_observer_iter != _fibconfig_entry_observers.end();
 	 ++fibconfig_entry_observer_iter) {
 	FibConfigEntryObserver* fibconfig_entry_observer = *fibconfig_entry_observer_iter;
-	if (fibconfig_entry_observer->start(error_msg) < 0)
+	if (fibconfig_entry_observer->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -578,7 +578,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_table_get_iter != _fibconfig_table_gets.end();
 	 ++fibconfig_table_get_iter) {
 	FibConfigTableGet* fibconfig_table_get = *fibconfig_table_get_iter;
-	if (fibconfig_table_get->start(error_msg) < 0)
+	if (fibconfig_table_get->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -589,7 +589,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_table_set_iter != _fibconfig_table_sets.end();
 	 ++fibconfig_table_set_iter) {
 	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
-	if (fibconfig_table_set->start(error_msg) < 0)
+	if (fibconfig_table_set->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -600,7 +600,7 @@ FibConfig::start(string& error_msg)
 	 fibconfig_table_observer_iter != _fibconfig_table_observers.end();
 	 ++fibconfig_table_observer_iter) {
 	FibConfigTableObserver* fibconfig_table_observer = *fibconfig_table_observer_iter;
-	if (fibconfig_table_observer->start(error_msg) < 0)
+	if (fibconfig_table_observer->start(error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
@@ -634,7 +634,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_table_observer_iter != _fibconfig_table_observers.end();
 	 ++fibconfig_table_observer_iter) {
 	FibConfigTableObserver* fibconfig_table_observer = *fibconfig_table_observer_iter;
-	if (fibconfig_table_observer->stop(error_msg2) < 0) {
+	if (fibconfig_table_observer->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -649,7 +649,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_table_set_iter != _fibconfig_table_sets.end();
 	 ++fibconfig_table_set_iter) {
 	FibConfigTableSet* fibconfig_table_set = *fibconfig_table_set_iter;
-	if (fibconfig_table_set->stop(error_msg2) < 0) {
+	if (fibconfig_table_set->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -664,7 +664,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_table_get_iter != _fibconfig_table_gets.end();
 	 ++fibconfig_table_get_iter) {
 	FibConfigTableGet* fibconfig_table_get = *fibconfig_table_get_iter;
-	if (fibconfig_table_get->stop(error_msg2) < 0) {
+	if (fibconfig_table_get->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -679,7 +679,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_entry_observer_iter != _fibconfig_entry_observers.end();
 	 ++fibconfig_entry_observer_iter) {
 	FibConfigEntryObserver* fibconfig_entry_observer = *fibconfig_entry_observer_iter;
-	if (fibconfig_entry_observer->stop(error_msg2) < 0) {
+	if (fibconfig_entry_observer->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -694,7 +694,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_entry_set_iter != _fibconfig_entry_sets.end();
 	 ++fibconfig_entry_set_iter) {
 	FibConfigEntrySet* fibconfig_entry_set = *fibconfig_entry_set_iter;
-	if (fibconfig_entry_set->stop(error_msg2) < 0) {
+	if (fibconfig_entry_set->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -709,7 +709,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_entry_get_iter != _fibconfig_entry_gets.end();
 	 ++fibconfig_entry_get_iter) {
 	FibConfigEntryGet* fibconfig_entry_get = *fibconfig_entry_get_iter;
-	if (fibconfig_entry_get->stop(error_msg2) < 0) {
+	if (fibconfig_entry_get->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
@@ -724,7 +724,7 @@ FibConfig::stop(string& error_msg)
 	 fibconfig_forwarding_iter != _fibconfig_forwarding_plugins.end();
 	 ++fibconfig_forwarding_iter) {
 	FibConfigForwarding* fibconfig_forwarding = *fibconfig_forwarding_iter;
-	if (fibconfig_forwarding->stop(error_msg2) < 0) {
+	if (fibconfig_forwarding->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";

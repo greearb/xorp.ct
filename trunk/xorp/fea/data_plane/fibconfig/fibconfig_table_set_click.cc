@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.cc,v 1.7 2007/07/11 22:18:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_set_click.cc,v 1.8 2007/09/15 19:52:46 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -62,7 +62,7 @@ FibConfigTableSetClick::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (ClickSocket::start(error_msg) < 0)
+    if (ClickSocket::start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     // Cleanup any leftover entries from previously run XORP instance

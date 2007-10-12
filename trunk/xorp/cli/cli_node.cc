@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.36 2007/02/16 22:45:28 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.37 2007/05/26 01:58:44 pavlin Exp $"
 
 
 //
@@ -115,7 +115,7 @@ CliNode::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoNode<Vif>::start() < 0)
+    if (ProtoNode<Vif>::start() != XORP_OK)
 	return (XORP_ERROR);
     
     // Perform misc. CLI-specific start operations
@@ -157,7 +157,7 @@ CliNode::stop()
     if (! is_up())
 	return (XORP_ERROR);
 
-    if (ProtoNode<Vif>::pending_stop() < 0)
+    if (ProtoNode<Vif>::pending_stop() != XORP_OK)
 	return (XORP_ERROR);
 
     // Perform misc. CLI-specific stop operations
@@ -169,7 +169,7 @@ CliNode::stop()
 	eventloop().remove_ioevent_cb(_cli_socket, IOT_ACCEPT);
     sock_serv_close();
 
-    if (ProtoNode<Vif>::stop() < 0)
+    if (ProtoNode<Vif>::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_TRACE(is_log_trace(), "CLI stopped");

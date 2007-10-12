@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.30 2007/02/16 22:45:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.31 2007/08/16 01:10:50 pavlin Exp $"
 
 #include "cli_module.h"
 #include "libxorp/xorp.h"
@@ -74,7 +74,7 @@ XrlCliNode::start_cli()
 {
     int ret_code = XORP_OK;
     
-    if (cli_node().start() < 0)
+    if (cli_node().start() != XORP_OK)
 	ret_code = XORP_ERROR;
     
     return (ret_code);
@@ -85,7 +85,7 @@ XrlCliNode::stop_cli()
 {
     int ret_code = XORP_OK;
     
-    if (cli_node().stop() < 0)
+    if (cli_node().stop() != XORP_OK)
 	ret_code = XORP_ERROR;
     
     return (ret_code);

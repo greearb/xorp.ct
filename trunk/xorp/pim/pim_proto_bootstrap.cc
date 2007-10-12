@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.22 2006/03/16 00:04:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.23 2007/02/16 22:46:49 pavlin Exp $"
 
 
 //
@@ -420,7 +420,8 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
 	    if (iter_prefix != bsr_zone.bsr_group_prefix_list().begin()) {
 		// Send the accumulated prefixes so far
 		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer,
-			     error_msg) < 0) {
+			     error_msg)
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
@@ -478,7 +479,8 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
 		// Send the accumulated RPs so far
 		//
 		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer,
-			     error_msg) < 0) {
+			     error_msg)
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
@@ -544,8 +546,10 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
     //
     // Send the lastest fragment
     //
-    if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer, error_msg) < 0)
+    if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer, error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
+    }
     
     return (XORP_OK);
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.31 2007/09/15 19:52:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.32 2007/09/27 00:33:34 pavlin Exp $"
 
 
 //
@@ -2151,7 +2151,7 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled4(
 {
     string error_msg;
 
-    if (fibconfig().unicast_forwarding_enabled4(enabled, error_msg) < 0)
+    if (fibconfig().unicast_forwarding_enabled4(enabled, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
@@ -2164,7 +2164,7 @@ XrlFeaTarget::fti_0_2_get_unicast_forwarding_enabled6(
 {
     string error_msg;
 
-    if (fibconfig().unicast_forwarding_enabled6(enabled, error_msg) < 0)
+    if (fibconfig().unicast_forwarding_enabled6(enabled, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
@@ -2177,8 +2177,10 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled4(
 {
     string error_msg;
 
-    if (fibconfig().set_unicast_forwarding_enabled4(enabled, error_msg) < 0)
+    if (fibconfig().set_unicast_forwarding_enabled4(enabled, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -2190,8 +2192,10 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
 {
     string error_msg;
 
-    if (fibconfig().set_unicast_forwarding_enabled6(enabled, error_msg) < 0)
+    if (fibconfig().set_unicast_forwarding_enabled6(enabled, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }

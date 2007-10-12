@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.27 2006/03/16 00:04:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.28 2007/02/16 22:46:50 pavlin Exp $"
 
 
 //
@@ -825,7 +825,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 	if (jp_header.jp_groups_n() == 0xff) {
 	    // Send what we have already
 	    if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		< 0) {
+		!= XORP_OK) {
 		return (XORP_ERROR);
 	    }
 	    jp_header.reset();
@@ -839,7 +839,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 	    if (jp_header.jp_groups_n() > 0) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -864,7 +864,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -890,7 +890,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -920,7 +920,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -946,7 +946,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -989,7 +989,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -1019,7 +1019,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -1049,7 +1049,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -1075,7 +1075,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
 		    > max_packet_size)) {
 		// Send what we have already
 		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
-		    < 0) {
+		    != XORP_OK) {
 		    return (XORP_ERROR);
 		}
 		jp_header.reset();
@@ -1096,8 +1096,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
     
     // Sent the last fragment (if such)
     if (jp_header.jp_groups_n() > 0) {
-	if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg) < 0)
+	if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+	    != XORP_OK) {
 	    return (XORP_ERROR);
+	}
 	jp_header.reset();
     }
     
@@ -1227,7 +1229,8 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr,
     // Send the message
     //
     if (pim_vif->pim_send(pim_vif->primary_addr(), IPvX::PIM_ROUTERS(family()),
-			  PIM_JOIN_PRUNE, buffer, error_msg) < 0) {
+			  PIM_JOIN_PRUNE, buffer, error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     

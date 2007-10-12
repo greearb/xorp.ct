@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.21 2006/07/03 23:56:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.22 2007/02/16 22:45:46 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) CLI implementation
@@ -78,10 +78,10 @@ MfeaNodeCli::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoUnit::start() < 0)
+    if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
 
-    if (add_all_cli_commands() < 0)
+    if (add_all_cli_commands() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_INFO("CLI started");
@@ -97,10 +97,10 @@ MfeaNodeCli::stop()
     if (is_down())
 	return (XORP_OK);
 
-    if (ProtoUnit::stop() < 0)
+    if (ProtoUnit::stop() != XORP_OK)
 	return (XORP_ERROR);
 
-    if (delete_all_cli_commands() < 0)
+    if (delete_all_cli_commands() != XORP_OK)
 	ret_code = XORP_ERROR;
 
     XLOG_INFO("CLI stopped");

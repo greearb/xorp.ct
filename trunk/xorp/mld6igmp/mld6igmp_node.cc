@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.55 2007/05/10 00:08:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.56 2007/05/19 01:52:44 pavlin Exp $"
 
 
 //
@@ -141,7 +141,7 @@ Mld6igmpNode::start()
 	return (XORP_ERROR);
     }
 
-    if (ProtoNode<Mld6igmpVif>::pending_start() < 0)
+    if (ProtoNode<Mld6igmpVif>::pending_start() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -179,7 +179,7 @@ Mld6igmpNode::final_start()
 	return (XORP_ERROR);
 #endif
 
-    if (ProtoNode<Mld6igmpVif>::start() < 0) {
+    if (ProtoNode<Mld6igmpVif>::start() != XORP_OK) {
 	ProtoNode<Mld6igmpVif>::stop();
 	return (XORP_ERROR);
     }
@@ -223,7 +223,7 @@ Mld6igmpNode::stop()
 	return (XORP_ERROR);
     }
 
-    if (ProtoNode<Mld6igmpVif>::pending_stop() < 0)
+    if (ProtoNode<Mld6igmpVif>::pending_stop() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -261,7 +261,7 @@ Mld6igmpNode::final_stop()
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 
-    if (ProtoNode<Mld6igmpVif>::stop() < 0)
+    if (ProtoNode<Mld6igmpVif>::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_INFO("Protocol stopped");
@@ -324,7 +324,7 @@ Mld6igmpNode::status_change(ServiceBase*  service,
 	if ((old_status == SERVICE_STARTING)
 	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
-	    if (final_start() < 0) {
+	    if (final_start() != XORP_OK) {
 		XLOG_ERROR("Cannot complete the startup process; "
 			   "current state is %s",
 			   ProtoNode<Mld6igmpVif>::state_str().c_str());
@@ -407,7 +407,8 @@ Mld6igmpNode::updates_made()
 	    if (node_vif == NULL) {
 		uint32_t vif_index = ifmgr_vif.vif_index();
 		XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
-		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg) < 0) {
+		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg)
+		    != XORP_OK) {
 		    XLOG_ERROR("Cannot add vif %s to the set of configured "
 			       "vifs: %s",
 			       ifmgr_vif_name.c_str(), error_msg.c_str());
@@ -494,7 +495,8 @@ Mld6igmpNode::updates_made()
 				subnet_addr,
 				broadcast_addr,
 				peer_addr,
-				error_msg) < 0) {
+				error_msg)
+			    != XORP_OK) {
 			    XLOG_ERROR("Cannot add address %s to vif %s from "
 				       "the set of configured vifs: %s",
 				       cstring(addr), ifmgr_vif_name.c_str(),
@@ -512,7 +514,8 @@ Mld6igmpNode::updates_made()
 		    // Update the address
 		    if (delete_config_vif_addr(ifmgr_vif_name,
 					       addr,
-					       error_msg) < 0) {
+					       error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot delete address %s from vif %s "
 				   "from the set of configured vifs: %s",
 				   cstring(addr),
@@ -525,7 +528,8 @@ Mld6igmpNode::updates_made()
 			    subnet_addr,
 			    broadcast_addr,
 			    peer_addr,
-			    error_msg) < 0) {
+			    error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot add address %s to vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(addr), ifmgr_vif_name.c_str(),
@@ -556,7 +560,8 @@ Mld6igmpNode::updates_made()
 				subnet_addr,
 				broadcast_addr,
 				peer_addr,
-				error_msg) < 0) {
+				error_msg)
+			    != XORP_OK) {
 			    XLOG_ERROR("Cannot add address %s to vif %s from "
 				       "the set of configured vifs: %s",
 				       cstring(addr), ifmgr_vif_name.c_str(),
@@ -573,7 +578,8 @@ Mld6igmpNode::updates_made()
 		    // Update the address
 		    if (delete_config_vif_addr(ifmgr_vif_name,
 					       addr,
-					       error_msg) < 0) {
+					       error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot delete address %s from vif %s "
 				   "from the set of configured vifs: %s",
 				   cstring(addr),
@@ -586,7 +592,8 @@ Mld6igmpNode::updates_made()
 			    subnet_addr,
 			    broadcast_addr,
 			    peer_addr,
-			    error_msg) < 0) {
+			    error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot add address %s to vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(addr), ifmgr_vif_name.c_str(),
@@ -628,7 +635,7 @@ Mld6igmpNode::updates_made()
 		     ++ipvx_iter) {
 		    const IPvX& ipvx = *ipvx_iter;
 		    if (delete_config_vif_addr(ifmgr_vif_name, ipvx, error_msg)
-			< 0) {
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot delete address %s from vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(ipvx), ifmgr_vif_name.c_str(),
@@ -662,7 +669,7 @@ Mld6igmpNode::updates_made()
 	 vif_name_iter != delete_vifs_list.end();
 	 ++vif_name_iter) {
 	const string& vif_name = *vif_name_iter;
-	if (delete_config_vif(vif_name, error_msg) < 0) {
+	if (delete_config_vif(vif_name, error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
 		       "vifs: %s",
 		       vif_name.c_str(), error_msg.c_str());
@@ -1386,7 +1393,8 @@ Mld6igmpNode::mld6igmp_send(const string& if_name,
 		   ip_internet_control,
 		   BUFFER_DATA_HEAD(buffer),
 		   BUFFER_DATA_SIZE(buffer),
-		   error_msg) < 0) {
+		   error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -1418,7 +1426,7 @@ Mld6igmpNode::add_protocol(const string& module_instance_name,
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->add_protocol(module_id, module_instance_name) < 0)
+    if (mld6igmp_vif->add_protocol(module_id, module_instance_name) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -1449,8 +1457,10 @@ Mld6igmpNode::delete_protocol(const string& module_instance_name,
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->delete_protocol(module_id, module_instance_name) < 0)
+    if (mld6igmp_vif->delete_protocol(module_id, module_instance_name)
+	!= XORP_OK) {
 	return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }

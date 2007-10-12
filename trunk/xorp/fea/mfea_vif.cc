@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.16 2007/02/16 22:45:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_vif.cc,v 1.17 2007/05/19 01:52:41 pavlin Exp $"
 
 //
 // MFEA virtual interfaces implementation.
@@ -135,12 +135,12 @@ MfeaVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (ProtoUnit::start() < 0) {
+    if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
 	return (XORP_ERROR);
     }
     
-    if (mfea_node().add_multicast_vif(vif_index()) < 0) {
+    if (mfea_node().add_multicast_vif(vif_index()) != XORP_OK) {
 	error_msg = "cannot add the multicast vif to the kernel";
 	return (XORP_ERROR);
     }
@@ -172,17 +172,17 @@ MfeaVif::stop(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (ProtoUnit::pending_stop() < 0) {
+    if (ProtoUnit::pending_stop() != XORP_OK) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
 
-    if (ProtoUnit::stop() < 0) {
+    if (ProtoUnit::stop() != XORP_OK) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
 
-    if (mfea_node().delete_multicast_vif(vif_index()) < 0) {
+    if (mfea_node().delete_multicast_vif(vif_index()) != XORP_OK) {
 	XLOG_ERROR("Cannot delete multicast vif %s with the kernel",
 		   name().c_str());
 	ret_value = XORP_ERROR;

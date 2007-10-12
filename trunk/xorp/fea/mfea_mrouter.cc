@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.58 2007/07/18 01:30:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.59 2007/08/19 00:34:09 zec Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -243,7 +243,7 @@ MfeaMrouter::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoUnit::start() < 0)
+    if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
     
 #ifndef HOST_OS_WINDOWS
@@ -275,7 +275,7 @@ MfeaMrouter::start()
     }
 
     // Start the multicast routing in the kernel
-    if (start_mrt() < 0)
+    if (start_mrt() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -297,7 +297,7 @@ MfeaMrouter::stop()
     if (is_down())
 	return (XORP_OK);
 
-    if (ProtoUnit::stop() < 0)
+    if (ProtoUnit::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     // Stop the multicast routing in the kernel
@@ -597,7 +597,7 @@ MfeaMrouter::set_multicast_forwarding_enabled4(bool v, string& error_msg)
 
     UNUSED(enable);
 
-    if (multicast_forwarding_enabled4(old_value, error_msg) < 0)
+    if (multicast_forwarding_enabled4(old_value, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     if (old_value == v)
@@ -668,7 +668,7 @@ MfeaMrouter::set_multicast_forwarding_enabled6(bool v, string& error_msg)
 
     UNUSED(enable);
 
-    if (multicast_forwarding_enabled6(old_value, error_msg) < 0)
+    if (multicast_forwarding_enabled6(old_value, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     if (old_value == v)
@@ -709,7 +709,7 @@ MfeaMrouter::set_multicast_forwarding_enabled6(bool v, string& error_msg)
  * 
  * Get the protocol that would be used in case of mrouter socket.
  * 
- * Return value: the protocol number on success, otherwise %XORP_ERROR.
+ * Return value: the protocol number on success, otherwise -1.
  **/
 int
 MfeaMrouter::kernel_mrouter_ip_protocol() const
@@ -723,10 +723,10 @@ MfeaMrouter::kernel_mrouter_ip_protocol() const
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
+	return (-1);
     }
     
-    return (XORP_ERROR);
+    return (-1);
 }
 
 /**

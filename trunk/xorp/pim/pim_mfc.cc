@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.33 2006/05/12 19:32:09 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.34 2007/02/16 22:46:46 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -504,7 +504,7 @@ PimMfc::add_mfc_to_kernel()
 		   res2.c_str());
     }
     
-    if (pim_node().add_mfc_to_kernel(*this) < 0)
+    if (pim_node().add_mfc_to_kernel(*this) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -534,7 +534,7 @@ PimMfc::delete_mfc_from_kernel()
     // the deletion of the MFC entry itself will remove all associated
     // dataflow monitors.
     //
-    if (pim_node().delete_mfc_from_kernel(*this) < 0)
+    if (pim_node().delete_mfc_from_kernel(*this) != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -572,7 +572,8 @@ PimMfc::add_dataflow_monitor(uint32_t threshold_interval_sec,
 					is_threshold_in_packets,
 					is_threshold_in_bytes,
 					is_geq_upcall,
-					is_leq_upcall) < 0) {
+					is_leq_upcall)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -621,7 +622,8 @@ PimMfc::delete_dataflow_monitor(uint32_t threshold_interval_sec,
 					   is_threshold_in_packets,
 					   is_threshold_in_bytes,
 					   is_geq_upcall,
-					   is_leq_upcall) < 0) {
+					   is_leq_upcall)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
 
@@ -650,7 +652,8 @@ PimMfc::delete_all_dataflow_monitor()
     set_has_spt_switch_dataflow_monitor(false);
     
     if (pim_node().delete_all_dataflow_monitor(source_addr(),
-					       group_addr()) < 0) {
+					       group_addr())
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     

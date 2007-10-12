@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.60 2007/08/16 01:16:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.61 2007/09/15 19:52:41 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -63,7 +63,7 @@ XrlMfeaNode::~XrlMfeaNode()
 bool
 XrlMfeaNode::startup()
 {
-    if (start_mfea() < 0)
+    if (start_mfea() != XORP_OK)
 	return false;
 
     return true;
@@ -74,10 +74,10 @@ XrlMfeaNode::shutdown()
 {
     bool ret_value = true;
 
-    if (stop_cli() < 0)
+    if (stop_cli() != XORP_OK)
 	ret_value = false;
 
-    if (stop_mfea() < 0)
+    if (stop_mfea() != XORP_OK)
 	ret_value = false;
 
     return (ret_value);
@@ -102,7 +102,7 @@ XrlMfeaNode::disable_cli()
 int
 XrlMfeaNode::start_cli()
 {
-    if (MfeaNodeCli::start() < 0)
+    if (MfeaNodeCli::start() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -111,7 +111,7 @@ XrlMfeaNode::start_cli()
 int
 XrlMfeaNode::stop_cli()
 {
-    if (MfeaNodeCli::stop() < 0)
+    if (MfeaNodeCli::stop() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -136,7 +136,7 @@ XrlMfeaNode::disable_mfea()
 int
 XrlMfeaNode::start_mfea()
 {
-    if (MfeaNode::start() < 0)
+    if (MfeaNode::start() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -147,7 +147,7 @@ XrlMfeaNode::stop_mfea()
 {
     int ret_code = XORP_OK;
 
-    if (MfeaNode::stop() < 0)
+    if (MfeaNode::stop() != XORP_OK)
 	return (XORP_ERROR);
     
     return (ret_code);
@@ -987,7 +987,7 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 			  iif_vif_index, mifset, mifset_disable_wrongvif,
 			  max_vifs_oiflist,
 			  IPvX(rp_address))
-	< 0) {
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot add MFC for "
 			     "source %s and group %s "
@@ -1050,7 +1050,7 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 			  iif_vif_index, mifset, mifset_disable_wrongvif,
 			  max_vifs_oiflist,
 			  IPvX(rp_address))
-	< 0) {
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot add MFC for "
 			     "source %s and group %s "
@@ -1086,7 +1086,8 @@ XrlMfeaNode::mfea_0_1_delete_mfc4(
     }
 
     if (MfeaNode::delete_mfc(xrl_sender_name,
-			     IPvX(source_address), IPvX(group_address)) < 0) {
+			     IPvX(source_address), IPvX(group_address))
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot delete MFC for "
 			     "source %s and group %s",
@@ -1120,7 +1121,8 @@ XrlMfeaNode::mfea_0_1_delete_mfc6(
     }
 
     if (MfeaNode::delete_mfc(xrl_sender_name,
-			     IPvX(source_address), IPvX(group_address)) < 0) {
+			     IPvX(source_address), IPvX(group_address))
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot delete MFC for "
 			     "source %s and group %s",
@@ -1172,7 +1174,8 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor4(
 				       is_threshold_in_bytes,
 				       is_geq_upcall,
 				       is_leq_upcall,
-				       error_msg) < 0) {
+				       error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1219,7 +1222,8 @@ XrlMfeaNode::mfea_0_1_add_dataflow_monitor6(
 				       is_threshold_in_bytes,
 				       is_geq_upcall,
 				       is_leq_upcall,
-				       error_msg) < 0) {
+				       error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1266,7 +1270,8 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor4(
 					  is_threshold_in_bytes,
 					  is_geq_upcall,
 					  is_leq_upcall,
-					  error_msg) < 0) {
+					  error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1313,7 +1318,8 @@ XrlMfeaNode::mfea_0_1_delete_dataflow_monitor6(
 					  is_threshold_in_bytes,
 					  is_geq_upcall,
 					  is_leq_upcall,
-					  error_msg) < 0) {
+					  error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1344,7 +1350,8 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor4(
     if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
 					      IPvX(source_address),
 					      IPvX(group_address),
-					      error_msg) < 0) {
+					      error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1375,7 +1382,8 @@ XrlMfeaNode::mfea_0_1_delete_all_dataflow_monitor6(
     if (MfeaNode::delete_all_dataflow_monitor(xrl_sender_name,
 					      IPvX(source_address),
 					      IPvX(group_address),
-					      error_msg) < 0) {
+					      error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1460,7 +1468,7 @@ XrlMfeaNode::mfea_0_1_start_all_vifs()
 {
     string error_msg;
 
-    if (MfeaNode::start_all_vifs() < 0) {
+    if (MfeaNode::start_all_vifs() != XORP_OK) {
 	error_msg = c_format("Failed to start all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1473,7 +1481,7 @@ XrlMfeaNode::mfea_0_1_stop_all_vifs()
 {
     string error_msg;
 
-    if (MfeaNode::stop_all_vifs() < 0) {
+    if (MfeaNode::stop_all_vifs() != XORP_OK) {
 	error_msg = c_format("Failed to stop all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_linux.cc,v 1.1 2007/09/26 01:40:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_linux.cc,v 1.2 2007/09/26 01:45:32 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -95,13 +95,13 @@ IfConfigVlanGetLinux::stop(string& error_msg)
     if (_s4 >= 0) {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
-	if (ret_value4 < 0) {
+	if (ret_value4 != XORP_OK) {
 	    error_msg = c_format("Could not close IPv4 ioctl() socket: %s",
-				 strerror(errno));
+				 comm_get_last_error_str());
 	}
     }
 
-    if (ret_value4 < 0)
+    if (ret_value4 != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.16 2007/09/25 22:51:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.17 2007/09/25 23:00:28 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -101,7 +101,7 @@ IfConfigGetProcLinux::start(string& error_msg)
     }
 
     // XXX: this method relies on the ioctl() method
-    if (_ifconfig_get_ioctl->start(error_msg) < 0)
+    if (_ifconfig_get_ioctl->start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -116,7 +116,7 @@ IfConfigGetProcLinux::stop(string& error_msg)
 	return (XORP_OK);
 
     // XXX: this method relies on the ioctl() method
-    if (_ifconfig_get_ioctl->stop(error_msg) < 0)
+    if (_ifconfig_get_ioctl->stop(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;

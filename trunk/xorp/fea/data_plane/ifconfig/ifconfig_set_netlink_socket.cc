@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.13 2007/09/25 23:07:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.14 2007/09/27 00:33:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -79,7 +79,7 @@ IfConfigSetNetlinkSocket::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (NetlinkSocket::start(error_msg) < 0)
+    if (NetlinkSocket::start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -93,7 +93,7 @@ IfConfigSetNetlinkSocket::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (NetlinkSocket::stop(error_msg) < 0)
+    if (NetlinkSocket::stop(error_msg) !+ XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;
@@ -601,7 +601,8 @@ IfConfigSetNetlinkSocket::set_interface_status(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg) < 0) {
+					last_errno, error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Cannot set the interface flags to 0x%x on "
 			     "interface %s: %s",
 			     interface_flags, ifname.c_str(),
@@ -728,7 +729,8 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg) < 0) {
+					last_errno, error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Cannot set the MAC address to %s "
 			     "on interface %s: %s",
 			     mac.str().c_str(),
@@ -846,7 +848,8 @@ IfConfigSetNetlinkSocket::set_interface_mtu(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg) < 0) {
+					last_errno, error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Cannot set the MTU to %u on "
 			     "interface %s: %s",
 			     mtu, ifname.c_str(), error_msg.c_str());
@@ -988,7 +991,8 @@ IfConfigSetNetlinkSocket::add_addr(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg) < 0) {
+					last_errno, error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Cannot add address '%s' "
 			     "on interface '%s' vif '%s': %s",
 			     addr.str().c_str(),
@@ -1071,7 +1075,8 @@ IfConfigSetNetlinkSocket::delete_addr(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					last_errno, error_msg) < 0) {
+					last_errno, error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Cannot delete address '%s' "
 			     "on interface '%s' vif '%s': %s",
 			     addr.str().c_str(),

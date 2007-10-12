@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.51 2007/04/14 08:59:51 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.52 2007/05/10 00:08:19 pavlin Exp $"
 
 
 //
@@ -201,7 +201,7 @@ PimNode::set_vif_proto_version(const string& vif_name, int proto_version,
 	return (XORP_ERROR);
     }
     
-    if (pim_vif->set_proto_version(proto_version) < 0) {
+    if (pim_vif->set_proto_version(proto_version) != XORP_OK) {
 	end_config(error_msg);
 	error_msg = c_format("Cannot set protocol version for vif %s: "
 			     "invalid protocol version %d",
@@ -1933,7 +1933,8 @@ PimNode::send_test_assert(const string& vif_name,
 				 rpt_bit,
 				 metric_preference,
 				 metric,
-				 error_msg) < 0) {
+				 error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -1990,7 +1991,7 @@ PimNode::add_test_bsr_rp(const PimScopeZoneId& zone_id,
 int
 PimNode::send_test_bootstrap(const string& vif_name, string& error_msg)
 {
-    if (pim_bsr().send_test_bootstrap(vif_name, error_msg) < 0) {
+    if (pim_bsr().send_test_bootstrap(vif_name, error_msg) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2004,7 +2005,7 @@ PimNode::send_test_bootstrap_by_dest(const string& vif_name,
 {
     if (pim_bsr().send_test_bootstrap_by_dest(vif_name, dest_addr,
 					      error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2014,7 +2015,7 @@ PimNode::send_test_bootstrap_by_dest(const string& vif_name,
 int
 PimNode::send_test_cand_rp_adv()
 {
-    if (pim_bsr().send_test_cand_rp_adv() < 0) {
+    if (pim_bsr().send_test_cand_rp_adv() != XORP_OK) {
 	return (XORP_ERROR);
     }
     

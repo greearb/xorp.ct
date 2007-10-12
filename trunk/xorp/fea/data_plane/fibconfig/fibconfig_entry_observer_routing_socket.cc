@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc,v 1.6 2007/06/07 01:28:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_routing_socket.cc,v 1.7 2007/07/11 22:18:07 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -63,7 +63,7 @@ FibConfigEntryObserverRoutingSocket::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (RoutingSocket::start(error_msg) < 0)
+    if (RoutingSocket::start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -77,7 +77,7 @@ FibConfigEntryObserverRoutingSocket::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (RoutingSocket::stop(error_msg) < 0)
+    if (RoutingSocket::stop(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;

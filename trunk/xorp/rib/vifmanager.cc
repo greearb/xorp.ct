@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.46 2007/05/08 01:15:51 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.47 2007/09/27 00:33:39 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -82,7 +82,7 @@ VifManager::start()
 
     enable();	// XXX: by default the VifManager is always enabled
 
-    if (ProtoState::pending_start() < 0)
+    if (ProtoState::pending_start() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -112,7 +112,7 @@ VifManager::final_start()
 	return (XORP_ERROR);
 #endif
 
-    if (ProtoState::start() < 0) {
+    if (ProtoState::start() != XORP_OK) {
 	ProtoState::stop();
 	return (XORP_ERROR);
     }
@@ -139,7 +139,7 @@ VifManager::stop()
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 
-    if (ProtoState::pending_stop() < 0)
+    if (ProtoState::pending_stop() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -168,7 +168,7 @@ VifManager::final_stop()
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 #endif
-    if (ProtoState::stop() < 0)
+    if (ProtoState::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     // Clear the old state
@@ -188,7 +188,7 @@ VifManager::status_change(ServiceBase*  service,
 	if ((old_status == SERVICE_STARTING)
 	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
-	    if (final_start() < 0) {
+	    if (final_start() != XORP_OK) {
 		XLOG_ERROR("Cannot complete the startup process; "
 			   "current state is %s",
 			   ProtoState::state_str().c_str());

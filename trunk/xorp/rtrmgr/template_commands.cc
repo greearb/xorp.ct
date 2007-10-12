@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.68 2006/03/27 02:13:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.69 2007/02/16 22:47:25 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -1289,7 +1289,7 @@ Command::add_action(const list<string>& action, const XRLdb& xrldb)
 int
 Command::execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const
 {
-    int result = 0;
+    int result = XORP_OK;
     int actions = 0;
 
     list<Action*>::const_iterator iter;
@@ -1316,10 +1316,10 @@ Command::execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const
 		       ctn.str().c_str());
 	    break;
 	} while (false);
-	if (result < 0) {
+	if (result != XORP_OK) {
 	    debug_msg("command execute returning %d\n", result);
 	    // XXX: how do we communicate this error back up
-	    // return result;
+	    // return (-1);
 	}
 	actions++;
     }

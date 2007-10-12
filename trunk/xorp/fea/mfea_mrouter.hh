@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.19 2007/06/14 17:35:42 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.20 2007/07/18 01:30:23 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -146,7 +146,7 @@ public:
     /**
      * Get the protocol that would be used in case of mrouter socket.
      * 
-     * Return value: the protocol number on success, otherwise XORP_ERROR.
+     * Return value: the protocol number on success, otherwise -1.
      **/
     int		kernel_mrouter_ip_protocol() const;
     

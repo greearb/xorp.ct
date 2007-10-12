@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_windows.cc,v 1.1 2007/07/17 22:53:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_windows.cc,v 1.2 2007/08/08 01:16:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -254,7 +254,7 @@ FibConfigForwardingWindows::set_unicast_forwarding_enabled4(bool v,
     //
     // Get the old value
     //
-    if (unicast_forwarding_enabled4(old_value, error_msg) < 0)
+    if (unicast_forwarding_enabled4(old_value, error_msg) != XORP_OK)
 	return (XORP_ERROR);
     if (old_value == v)
 	return (XORP_OK);	// Nothing changed
@@ -329,9 +329,9 @@ FibConfigForwardingWindows::set_unicast_forwarding_enabled6(bool v,
     //
     // Get the old value
     //
-    if (unicast_forwarding_enabled6(old_value, error_msg) < 0)
+    if (unicast_forwarding_enabled6(old_value, error_msg) != XORP_OK)
 	return (XORP_ERROR);
-    if (accept_rtadv_enabled6(old_value_accept_rtadv, error_msg) < 0)
+    if (accept_rtadv_enabled6(old_value_accept_rtadv, error_msg) != XORP_OK)
 	return (XORP_ERROR);
     if ((old_value == v) && (old_value_accept_rtadv == !v))
 	return (XORP_OK);	// Nothing changed
@@ -339,7 +339,7 @@ FibConfigForwardingWindows::set_unicast_forwarding_enabled6(bool v,
     //
     // Set the IPv6 Router Advertisement value
     //
-    if (set_accept_rtadv_enabled6(!v, error_msg) < 0)
+    if (set_accept_rtadv_enabled6(!v, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     UNUSED(ipstats);
@@ -391,7 +391,7 @@ FibConfigForwardingWindows::set_accept_rtadv_enabled6(bool v,
     //
     // Get the old value
     //
-    if (accept_rtadv_enabled6(old_value, error_msg) < 0)
+    if (accept_rtadv_enabled6(old_value, error_msg) != XORP_OK)
 	return (XORP_ERROR);
     if (old_value == v)
 	return (XORP_OK);	// Nothing changed

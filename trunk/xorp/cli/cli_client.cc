@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.57 2007/01/12 22:20:10 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.58 2007/02/16 22:45:28 pavlin Exp $"
 
 
 //
@@ -1271,7 +1271,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing)
     ret_value = XORP_OK;
     for (int i = 0; line[i] != '\0'; i++) {
 	ret_value = command_buffer().add_data(line[i]);
-	if (ret_value < 0)
+	if (ret_value != XORP_OK)
 	    break;
     }
     if (ret_value == XORP_OK)

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.11 2007/07/11 22:18:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_rtmv2.cc,v 1.12 2007/07/18 01:30:25 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -94,11 +94,11 @@ FibConfigTableObserverRtmV2::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (_rs4 == NULL || _rs4->start(AF_INET, error_msg) < 0)
+    if (_rs4 == NULL || (_rs4->start(AF_INET, error_msg) != XORP_OK))
 	return (XORP_ERROR);
 #if 0
 #ifdef HAVE_IPV6
-    if (_rs6 == NULL || _rs6->start(AF_INET6, error_msg) < 0)
+    if (_rs6 == NULL || (_rs6->start(AF_INET6, error_msg) != XORP_OK))
 	return (XORP_ERROR);
 #endif
 #endif
@@ -115,11 +115,11 @@ FibConfigTableObserverRtmV2::stop(string& error_msg)
     if (! _is_running)
 	return (result);
 
-    if (_rs4 == NULL || _rs4->stop(error_msg) < 0)
+    if (_rs4 == NULL || (_rs4->stop(error_msg) != XORP_OK))
 	result = XORP_ERROR;
 #if 0
 #ifdef HAVE_IPV6
-    if (rs6 == NULL || _rs6->stop(error_msg) < 0)
+    if (rs6 == NULL || (_rs6->stop(error_msg) != XORP_OK))
 	result = XORP_ERROR;
 #endif
 #endif

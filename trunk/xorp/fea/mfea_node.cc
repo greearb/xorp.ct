@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.83 2007/07/18 01:30:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.84 2007/09/15 19:52:39 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -164,7 +164,7 @@ MfeaNode::start()
 	return (XORP_ERROR);
     }
 
-    if (ProtoNode<MfeaVif>::pending_start() < 0)
+    if (ProtoNode<MfeaVif>::pending_start() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -200,7 +200,7 @@ MfeaNode::final_start()
 	return (XORP_ERROR);
 #endif
 
-    if (ProtoNode<MfeaVif>::start() < 0) {
+    if (ProtoNode<MfeaVif>::start() != XORP_OK) {
 	ProtoNode<MfeaVif>::stop();
 	return (XORP_ERROR);
     }
@@ -244,7 +244,7 @@ MfeaNode::stop()
 	return (XORP_ERROR);
     }
 
-    if (ProtoNode<MfeaVif>::pending_stop() < 0)
+    if (ProtoNode<MfeaVif>::pending_stop() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -290,7 +290,7 @@ MfeaNode::final_stop()
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 
-    if (ProtoNode<MfeaVif>::stop() < 0)
+    if (ProtoNode<MfeaVif>::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_INFO("MFEA stopped");
@@ -336,7 +336,7 @@ MfeaNode::status_change(ServiceBase*  service,
 	if ((old_status == SERVICE_STARTING)
 	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
-	    if (final_start() < 0) {
+	    if (final_start() != XORP_OK) {
 		XLOG_ERROR("Cannot complete the startup process; "
 			   "current state is %s",
 			   ProtoNode<MfeaVif>::state_str().c_str());
@@ -992,7 +992,7 @@ MfeaNode::add_pim_register_vif()
 	    return (XORP_ERROR);
 	}
 	
-	if (add_config_vif(register_vif, error_msg) < 0) {
+	if (add_config_vif(register_vif, error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot add Register vif to set of configured vifs: %s",
 		       error_msg.c_str());
 	    return (XORP_ERROR);
@@ -1831,7 +1831,7 @@ MfeaNode::add_mfc(const string& , // module_instance_name,
     
     if (_mfea_mrouter.add_mfc(source, group, iif_vif_index, oifs_ttl,
 			      oifs_flags, rp_addr)
-	< 0) {
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -1854,7 +1854,7 @@ int
 MfeaNode::delete_mfc(const string& , // module_instance_name,
 		     const IPvX& source, const IPvX& group)
 {
-    if (_mfea_mrouter.delete_mfc(source, group) < 0) {
+    if (_mfea_mrouter.delete_mfc(source, group) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -1937,7 +1937,7 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 					is_geq_upcall,
 					is_leq_upcall,
 					error_msg)
-	    < 0) {
+	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
 	return (XORP_OK);
@@ -1956,7 +1956,7 @@ MfeaNode::add_dataflow_monitor(const string& ,	// module_instance_name,
 			     is_geq_upcall,
 			     is_leq_upcall,
 			     error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2034,7 +2034,7 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 					   is_geq_upcall,
 					   is_leq_upcall,
 					   error_msg)
-	    < 0) {
+	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
 	return (XORP_OK);
@@ -2053,7 +2053,7 @@ MfeaNode::delete_dataflow_monitor(const string& , // module_instance_name,
 				is_geq_upcall,
 				is_leq_upcall,
 				error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2081,7 +2081,8 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
     // If the kernel supports bandwidth-related upcalls, use it
     //
     if (_mfea_mrouter.mrt_api_mrt_mfc_bw_upcall()) {
-	if (_mfea_mrouter.delete_all_bw_upcall(source, group, error_msg) < 0) {
+	if (_mfea_mrouter.delete_all_bw_upcall(source, group, error_msg)
+	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
 	return (XORP_OK);
@@ -2091,7 +2092,7 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
     // The kernel doesn't support bandwidth-related upcalls, hence use
     // a work-around mechanism (periodic quering).
     //
-    if (mfea_dft().delete_entry(source, group) < 0) {
+    if (mfea_dft().delete_entry(source, group) != XORP_OK) {
 	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
 			     "no such entry",
 			     cstring(source), cstring(group));
@@ -2113,7 +2114,7 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
 int
 MfeaNode::add_multicast_vif(uint32_t vif_index)
 {
-    if (_mfea_mrouter.add_multicast_vif(vif_index) < 0) {
+    if (_mfea_mrouter.add_multicast_vif(vif_index) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2131,7 +2132,7 @@ MfeaNode::add_multicast_vif(uint32_t vif_index)
 int
 MfeaNode::delete_multicast_vif(uint32_t vif_index)
 {
-    if (_mfea_mrouter.delete_multicast_vif(vif_index) < 0) {
+    if (_mfea_mrouter.delete_multicast_vif(vif_index) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2156,7 +2157,7 @@ int
 MfeaNode::get_sg_count(const IPvX& source, const IPvX& group,
 		       SgCount& sg_count)
 {
-    if (_mfea_mrouter.get_sg_count(source, group, sg_count) < 0) {
+    if (_mfea_mrouter.get_sg_count(source, group, sg_count) != XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -2177,7 +2178,7 @@ MfeaNode::get_sg_count(const IPvX& source, const IPvX& group,
 int
 MfeaNode::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 {
-    if (_mfea_mrouter.get_vif_count(vif_index, vif_count) < 0) {
+    if (_mfea_mrouter.get_vif_count(vif_index, vif_count) != XORP_OK) {
 	return (XORP_ERROR);
     }
     

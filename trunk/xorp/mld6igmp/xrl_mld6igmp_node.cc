@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.63 2007/05/19 01:52:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.64 2007/08/16 01:21:51 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -82,7 +82,7 @@ XrlMld6igmpNode::~XrlMld6igmpNode()
 bool
 XrlMld6igmpNode::startup()
 {
-    if (start_mld6igmp() < 0)
+    if (start_mld6igmp() != XORP_OK)
 	return false;
 
     return true;
@@ -93,10 +93,10 @@ XrlMld6igmpNode::shutdown()
 {
     bool ret_value = true;
 
-    if (stop_cli() < 0)
+    if (stop_cli() != XORP_OK)
 	ret_value = false;
 
-    if (stop_mld6igmp() < 0)
+    if (stop_mld6igmp() != XORP_OK)
 	ret_value = false;
 
     return (ret_value);
@@ -121,7 +121,7 @@ XrlMld6igmpNode::disable_cli()
 int
 XrlMld6igmpNode::start_cli()
 {
-    if (Mld6igmpNodeCli::start() < 0)
+    if (Mld6igmpNodeCli::start() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -130,7 +130,7 @@ XrlMld6igmpNode::start_cli()
 int
 XrlMld6igmpNode::stop_cli()
 {
-    if (Mld6igmpNodeCli::stop() < 0)
+    if (Mld6igmpNodeCli::stop() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -155,7 +155,7 @@ XrlMld6igmpNode::disable_mld6igmp()
 int
 XrlMld6igmpNode::start_mld6igmp()
 {
-    if (Mld6igmpNode::start() < 0)
+    if (Mld6igmpNode::start() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -164,7 +164,7 @@ XrlMld6igmpNode::start_mld6igmp()
 int
 XrlMld6igmpNode::stop_mld6igmp()
 {
-    if (Mld6igmpNode::stop() < 0)
+    if (Mld6igmpNode::stop() != XORP_OK)
 	return (XORP_ERROR);
     
     return (XORP_OK);
@@ -1836,7 +1836,7 @@ XrlMld6igmpNode::mld6igmp_0_1_start_all_vifs()
 {
     string error_msg;
 
-    if (Mld6igmpNode::start_all_vifs() < 0) {
+    if (Mld6igmpNode::start_all_vifs() != XORP_OK) {
 	error_msg = c_format("Failed to start all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1849,7 +1849,7 @@ XrlMld6igmpNode::mld6igmp_0_1_stop_all_vifs()
 {
     string error_msg;
 
-    if (Mld6igmpNode::stop_all_vifs() < 0) {
+    if (Mld6igmpNode::stop_all_vifs() != XORP_OK) {
 	error_msg = c_format("Failed to stop all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -2312,7 +2312,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     }
     
     if (Mld6igmpNode::add_protocol(xrl_sender_name, src_module_id, vif_index)
-	< 0) {
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot add protocol instance '%s' "
 			     "on vif %s with vif_index %d",
@@ -2386,7 +2386,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     }
     
     if (Mld6igmpNode::add_protocol(xrl_sender_name, src_module_id, vif_index)
-	< 0) {
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot add protocol instance '%s' "
 			     "on vif %s with vif_index %d",
@@ -2460,7 +2460,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     }
     
     if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index)
-	< 0) {
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot delete protocol instance '%s' "
 			     "on vif %s with vif_index %d",
@@ -2507,7 +2507,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     }
     
     if (Mld6igmpNode::delete_protocol(xrl_sender_name, src_module_id, vif_index)
-	< 0) {
+	!= XORP_OK) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot delete protocol instance '%s' "
 			     "on vif %s with vif_index %d",

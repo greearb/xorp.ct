@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.85 2007/05/08 19:23:16 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.86 2007/05/19 01:52:44 pavlin Exp $"
 
 
 //
@@ -235,10 +235,10 @@ Mld6igmpVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (update_primary_address(error_msg) < 0)
+    if (update_primary_address(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
-    if (ProtoUnit::start() < 0) {
+    if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
 	return (XORP_ERROR);
     }
@@ -332,7 +332,7 @@ Mld6igmpVif::stop(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (ProtoUnit::pending_stop() < 0) {
+    if (ProtoUnit::pending_stop() != XORP_OK) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
@@ -343,7 +343,7 @@ Mld6igmpVif::stop(string& error_msg)
     // automatically when we stop the vif through the MFEA.
     //
 
-    if (ProtoUnit::stop() < 0) {
+    if (ProtoUnit::stop() != XORP_OK) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
@@ -1779,7 +1779,8 @@ Mld6igmpVif::join_prune_notify_routing(const IPvX& source,
 						      vif_index(),
 						      source,
 						      group,
-						      action_jp) < 0) {
+						      action_jp)
+	    != XORP_OK) {
 	    //
 	    // TODO: remove <module_id, module_instance_name> ??
 	    //

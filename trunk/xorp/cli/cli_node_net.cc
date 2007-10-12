@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.63 2007/03/30 00:02:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.64 2007/10/03 23:14:13 pavlin Exp $"
 
 
 //
@@ -152,7 +152,7 @@ CliNode::sock_serv_close()
     if (!_cli_socket.is_valid())
 	return (XORP_OK);	// Nothing to do
 
-    if (comm_close(_cli_socket) < 0)
+    if (comm_close(_cli_socket) != XORP_OK)
 	ret_value = XORP_ERROR;
 
     _cli_socket.clear();
@@ -224,8 +224,8 @@ ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
 	struct sockaddr_storage ss;
 	socklen_t len = sizeof(ss);
 	// XXX
-	if (getpeername(cli_client->input_fd(), (struct sockaddr *)&ss,
-			&len) < 0) {
+	if (getpeername(cli_client->input_fd(), (struct sockaddr *)&ss, &len)
+	    < 0) {
 	    error_msg = c_format("Cannot get peer name");
 	    // Error getting peer address
 	    delete_connection(cli_client, dummy_error_msg);
@@ -271,7 +271,7 @@ ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
 	return (NULL);
     }
     
-    if (cli_client->start_connection(error_msg) < 0) {
+    if (cli_client->start_connection(error_msg) != XORP_OK) {
 	// Error connecting to the client
 	delete_connection(cli_client, dummy_error_msg);
 	return (NULL);
@@ -788,8 +788,9 @@ CliClient::process_input_data()
 	
 	if (is_telnet()) {
 	    // Filter-out the Telnet commands
-	    int ret = process_telnet_option(val);
-	    if (ret < 0) {
+	    bool is_telnet_option = false;
+	    int ret = process_telnet_option(val, is_telnet_option);
+	    if (ret != XORP_OK) {
 		// Kick-out the client
 		// TODO: print more informative message about the client:
 		// E.g. where it came from, etc.
@@ -800,7 +801,7 @@ CliClient::process_input_data()
 		cli_node().delete_connection(this, dummy_error_msg);
 		return;
 	    }
-	    if (ret == 0) {
+	    if (is_telnet_option) {
 		// Telnet option processed
 		continue;
 	    }
@@ -949,27 +950,20 @@ CliClient::preprocess_char(uint8_t val, bool& stop_processing)
     return (XORP_OK);
 }
 
-//
-// Process octet that may be part of a telnet option.
-// Parameter 'val' is the value of the next octet.
-// Return -1 if the caller should remove this client.
-// Return 0 if @val is part of a telnet option, and the telnet option was
-// processed.
-// Return 1 if @val is not part of a telnet option and should be processed
-// as input data.
-//
 int
-CliClient::process_telnet_option(int val)
+CliClient::process_telnet_option(int val, bool& is_telnet_option)
 {
 #ifdef HOST_OS_WINDOWS
-    return (1);
     UNUSED(val);
+    is_telnet_option = false;
+    return (XORP_OK);
 #else
+    is_telnet_option = true;
     if (val == IAC) {
 	// Probably a telnet command
 	if (! telnet_iac()) {
 	    set_telnet_iac(true);
-	    return (0);
+	    return (XORP_OK);
 	}
 	set_telnet_iac(false);
     }
@@ -1092,40 +1086,43 @@ CliClient::process_telnet_option(int val)
 	    break;
 	}
 	set_telnet_iac(false);
-	return (0);
+	return (XORP_OK);
     }
     //
     // Cleanup the telnet options state
     //
     if (telnet_sb()) {
 	// A negotiated option value
-	if (telnet_sb_buffer().add_data(val) < 0) {
+	if (telnet_sb_buffer().add_data(val) != XORP_OK) {
 	    // This client is sending too much options. Kick it out!
 	    return (XORP_ERROR);
 	}
-	return (0);
+	return (XORP_OK);
     }
     if (telnet_dont()) {
 	// Telnet DONT option code
 	set_telnet_dont(false);
-	return (0);
+	return (XORP_OK);
     }
     if (telnet_do()) {
 	// Telnet DO option code
 	set_telnet_do(false);
-	return (0);
+	return (XORP_OK);
     }
     if (telnet_wont()) {
 	// Telnet WONT option code
 	set_telnet_wont(false);
-	return (0);
+	return (XORP_OK);
     }
     if (telnet_will()) {
 	// Telnet WILL option code
 	set_telnet_will(false);
-	return (0);
+	return (XORP_OK);
     }
-    
-    return (1);
+
+    // XXX: Not a telnet option
+    is_telnet_option = false;
+
+    return (XORP_OK);
 #endif // HOST_OS_WINDOWS
 }

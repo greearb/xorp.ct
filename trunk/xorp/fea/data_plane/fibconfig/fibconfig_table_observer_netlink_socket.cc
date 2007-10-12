@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.9 2007/07/11 22:18:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.10 2007/07/18 01:30:25 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -92,7 +92,7 @@ FibConfigTableObserverNetlinkSocket::start(string& error_msg)
     //
     NetlinkSocket::set_nl_groups(nl_groups);
 
-    if (NetlinkSocket::start(error_msg) < 0)
+    if (NetlinkSocket::start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -106,7 +106,7 @@ FibConfigTableObserverNetlinkSocket::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (NetlinkSocket::stop(error_msg) < 0)
+    if (NetlinkSocket::stop(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;

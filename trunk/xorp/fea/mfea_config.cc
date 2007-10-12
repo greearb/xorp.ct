@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.19 2007/04/20 00:30:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.20 2007/05/10 00:08:16 pavlin Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
@@ -43,7 +43,7 @@ MfeaNode::add_config_vif(const Vif& vif, string& error_msg)
     //
     if (ProtoNode<MfeaVif>::add_config_vif(vif.name(), vif.vif_index(),
 					   error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -57,13 +57,15 @@ MfeaNode::add_config_vif(const Vif& vif, string& error_msg)
 						    vif_addr.subnet_addr(),
 						    vif_addr.broadcast_addr(),
 						    vif_addr.peer_addr(),
-						    error_msg) < 0) {
+						    error_msg)
+	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
     }
     if (ProtoNode<MfeaVif>::set_config_pif_index(vif.name(),
 						 vif.pif_index(),
-						 error_msg) < 0) {
+						 error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     if (ProtoNode<MfeaVif>::set_config_vif_flags(vif.name(),
@@ -74,7 +76,8 @@ MfeaNode::add_config_vif(const Vif& vif, string& error_msg)
 						 vif.is_broadcast_capable(),
 						 vif.is_underlying_vif_up(),
 						 vif.mtu(),
-						 error_msg) < 0) {
+						 error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     

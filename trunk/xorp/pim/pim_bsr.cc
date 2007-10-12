@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.49 2007/02/16 22:46:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.50 2007/04/14 08:59:51 pavlin Exp $"
 
 
 //
@@ -116,7 +116,7 @@ PimBsr::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoUnit::start() < 0)
+    if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
     
     //
@@ -163,7 +163,7 @@ PimBsr::stop()
     if (is_down())
 	return (XORP_OK);
 
-    if (ProtoUnit::stop() < 0)
+    if (ProtoUnit::stop() != XORP_OK)
 	return (XORP_ERROR);
     
     //
@@ -1208,7 +1208,7 @@ PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
 	 ++iter_zone) {
 	BsrZone *bsr_zone = *iter_zone;
 	if (pim_vif->pim_bootstrap_send(dest_addr, *bsr_zone, error_msg)
-	    < 0) {
+	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    goto ret_label;
 	}
@@ -1273,7 +1273,7 @@ PimBsr::send_test_cand_rp_adv()
 	}
 
 	if (pim_vif->pim_cand_rp_adv_send(bsr_zone->bsr_addr(), *bsr_zone)
-	    < 0) {
+	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    goto ret_label;
 	}

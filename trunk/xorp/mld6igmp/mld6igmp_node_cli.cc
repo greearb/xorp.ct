@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.29 2006/07/10 08:53:02 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.30 2007/02/16 22:46:36 pavlin Exp $"
 
 
 //
@@ -81,10 +81,10 @@ Mld6igmpNodeCli::start()
     if (is_up() || is_pending_up())
 	return (XORP_OK);
 
-    if (ProtoUnit::start() < 0)
+    if (ProtoUnit::start() != XORP_OK)
 	return (XORP_ERROR);
 
-    if (add_all_cli_commands() < 0)
+    if (add_all_cli_commands() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_INFO("CLI started");
@@ -100,7 +100,7 @@ Mld6igmpNodeCli::stop()
     if (is_down())
 	return (XORP_OK);
 
-    if (delete_all_cli_commands() < 0)
+    if (delete_all_cli_commands() != XORP_OK)
 	ret_code = XORP_ERROR;
 
     XLOG_INFO("CLI stopped");

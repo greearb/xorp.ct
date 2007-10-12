@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.67 2007/05/08 19:23:18 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.68 2007/05/19 01:52:46 pavlin Exp $"
 
 
 //
@@ -293,10 +293,10 @@ PimVif::start(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (update_primary_and_domain_wide_address(error_msg) < 0)
+    if (update_primary_and_domain_wide_address(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
-    if (ProtoUnit::start() < 0) {
+    if (ProtoUnit::start() != XORP_OK) {
 	error_msg = "internal error";
 	return (XORP_ERROR);
     }
@@ -390,7 +390,7 @@ PimVif::stop(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    if (ProtoUnit::pending_stop() < 0) {
+    if (ProtoUnit::pending_stop() != XORP_OK) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
@@ -458,7 +458,7 @@ PimVif::final_stop(string& error_msg)
     // automatically when we stop the vif through the MFEA.
     //
     
-    if (ProtoUnit::stop() < 0) {
+    if (ProtoUnit::stop() != XORP_OK) {
 	error_msg = "internal error";
 	ret_value = XORP_ERROR;
     }
@@ -752,7 +752,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     //
     // Actions after the message is sent
     //
-    if (ret_value >= 0) {
+    if (ret_value == XORP_OK) {
 	switch (message_type) {
 	case PIM_HELLO:
 	    set_should_send_pim_hello(false);
@@ -765,7 +765,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     //
     // Keep statistics per message type
     //
-    if (ret_value >= 0) {
+    if (ret_value == XORP_OK) {
 	switch (message_type) {
 	case PIM_HELLO:
 	    ++_pimstat_hello_messages_sent;
@@ -1409,7 +1409,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     //
     // Keep statistics per message type
     //
-    if (ret_value >= 0) {
+    if (ret_value == XORP_OK) {
 	switch (message_type) {
 	case PIM_HELLO:
 	    ++_pimstat_hello_messages_received;

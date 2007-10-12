@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.17 2007/02/16 22:46:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.18 2007/05/10 00:08:18 pavlin Exp $"
 
 
 //
@@ -174,7 +174,7 @@ Mld6igmpNode::set_vif_proto_version(const string& vif_name, int proto_version,
 	return (XORP_ERROR);
     }
     
-    if (mld6igmp_vif->set_proto_version(proto_version) < 0) {
+    if (mld6igmp_vif->set_proto_version(proto_version) != XORP_OK) {
 	end_config(error_msg);
         error_msg = c_format("Cannot set protocol version for vif %s: "
 			     "invalid protocol version %d",

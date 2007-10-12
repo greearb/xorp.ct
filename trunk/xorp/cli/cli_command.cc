@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.30 2007/02/16 22:45:28 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.31 2007/04/20 20:28:58 pavlin Exp $"
 
 
 //
@@ -203,7 +203,7 @@ CliCommand::add_command(const string& init_command_name,
 				 command_name_string,
 				 init_command_help);
     
-    if (parent_cli_command->add_command(cli_command, error_msg) < 0) {
+    if (parent_cli_command->add_command(cli_command, error_msg) != XORP_OK) {
 	delete cli_command;
 	goto error_label_failed;
     }
@@ -364,7 +364,7 @@ CliCommand::delete_command(const string& delete_command_name)
     if (delete_cli_command == NULL)
 	goto error_label;
     
-    if (parent_cli_command->delete_command(delete_cli_command) < 0)
+    if (parent_cli_command->delete_command(delete_cli_command) != XORP_OK)
 	goto error_label;
     return (XORP_OK);
     

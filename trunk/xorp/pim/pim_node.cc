@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.85 2007/05/10 00:08:19 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.86 2007/05/19 01:52:46 pavlin Exp $"
 
 
 //
@@ -174,7 +174,7 @@ PimNode::start()
 	return (XORP_ERROR);
     }
 
-    if (ProtoNode<PimVif>::pending_start() < 0)
+    if (ProtoNode<PimVif>::pending_start() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -217,7 +217,7 @@ PimNode::final_start()
 	return (XORP_ERROR);
 #endif
 
-    if (ProtoNode<PimVif>::start() < 0) {
+    if (ProtoNode<PimVif>::start() != XORP_OK) {
 	ProtoNode<PimVif>::stop();
 	return (XORP_ERROR);
     }
@@ -226,7 +226,7 @@ PimNode::final_start()
     start_all_vifs();
     
     // Start the BSR module
-    if (_pim_bsr.start() < 0)
+    if (_pim_bsr.start() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_INFO("Protocol started");
@@ -268,7 +268,7 @@ PimNode::stop()
 	return (XORP_ERROR);
     }
 
-    if (ProtoNode<PimVif>::pending_stop() < 0)
+    if (ProtoNode<PimVif>::pending_stop() != XORP_OK)
 	return (XORP_ERROR);
 
     //
@@ -306,7 +306,7 @@ PimNode::final_stop()
     if (! (is_up() || is_pending_up() || is_pending_down()))
 	return (XORP_ERROR);
 
-    if (ProtoNode<PimVif>::stop() < 0)
+    if (ProtoNode<PimVif>::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     XLOG_INFO("Protocol stopped");
@@ -362,7 +362,7 @@ PimNode::status_change(ServiceBase*  service,
 	if ((old_status == SERVICE_STARTING)
 	    && (new_status == SERVICE_RUNNING)) {
 	    // The startup process has completed
-	    if (final_start() < 0) {
+	    if (final_start() != XORP_OK) {
 		XLOG_ERROR("Cannot complete the startup process; "
 			   "current state is %s",
 			   ProtoNode<PimVif>::state_str().c_str());
@@ -444,7 +444,8 @@ PimNode::updates_made()
 	    if (node_vif == NULL) {
 		uint32_t vif_index = ifmgr_vif.vif_index();
 		XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
-		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg) < 0) {
+		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg)
+		    != XORP_OK) {
 		    XLOG_ERROR("Cannot add vif %s to the set of configured "
 			       "vifs: %s",
 			       ifmgr_vif_name.c_str(), error_msg.c_str());
@@ -531,7 +532,8 @@ PimNode::updates_made()
 				subnet_addr,
 				broadcast_addr,
 				peer_addr,
-				error_msg) < 0) {
+				error_msg)
+			    != XORP_OK) {
 			    XLOG_ERROR("Cannot add address %s to vif %s from "
 				       "the set of configured vifs: %s",
 				       cstring(addr), ifmgr_vif_name.c_str(),
@@ -549,7 +551,8 @@ PimNode::updates_made()
 		    // Update the address
 		    if (delete_config_vif_addr(ifmgr_vif_name,
 					       addr,
-					       error_msg) < 0) {
+					       error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot delete address %s from vif %s "
 				   "from the set of configured vifs: %s",
 				   cstring(addr),
@@ -562,7 +565,8 @@ PimNode::updates_made()
 			    subnet_addr,
 			    broadcast_addr,
 			    peer_addr,
-			    error_msg) < 0) {
+			    error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot add address %s to vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(addr), ifmgr_vif_name.c_str(),
@@ -593,7 +597,8 @@ PimNode::updates_made()
 				subnet_addr,
 				broadcast_addr,
 				peer_addr,
-				error_msg) < 0) {
+				error_msg)
+			    != XORP_OK) {
 			    XLOG_ERROR("Cannot add address %s to vif %s from "
 				       "the set of configured vifs: %s",
 				       cstring(addr), ifmgr_vif_name.c_str(),
@@ -610,7 +615,8 @@ PimNode::updates_made()
 		    // Update the address
 		    if (delete_config_vif_addr(ifmgr_vif_name,
 					       addr,
-					       error_msg) < 0) {
+					       error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot delete address %s from vif %s "
 				   "from the set of configured vifs: %s",
 				   cstring(addr),
@@ -623,7 +629,8 @@ PimNode::updates_made()
 			    subnet_addr,
 			    broadcast_addr,
 			    peer_addr,
-			    error_msg) < 0) {
+			    error_msg)
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot add address %s to vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(addr), ifmgr_vif_name.c_str(),
@@ -665,7 +672,7 @@ PimNode::updates_made()
 		     ++ipvx_iter) {
 		    const IPvX& ipvx = *ipvx_iter;
 		    if (delete_config_vif_addr(ifmgr_vif_name, ipvx, error_msg)
-			< 0) {
+			!= XORP_OK) {
 			XLOG_ERROR("Cannot delete address %s from vif %s from "
 				   "the set of configured vifs: %s",
 				   cstring(ipvx), ifmgr_vif_name.c_str(),
@@ -699,7 +706,7 @@ PimNode::updates_made()
 	 vif_name_iter != delete_vifs_list.end();
 	 ++vif_name_iter) {
 	const string& vif_name = *vif_name_iter;
-	if (delete_config_vif(vif_name, error_msg) < 0) {
+	if (delete_config_vif(vif_name, error_msg) != XORP_OK) {
 	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
 		       "vifs: %s",
 		       vif_name.c_str(), error_msg.c_str());
@@ -1516,7 +1523,8 @@ PimNode::pim_send(const string& if_name,
 		   ip_internet_control,
 		   BUFFER_DATA_HEAD(buffer),
 		   BUFFER_DATA_SIZE(buffer),
-		   error_msg) < 0) {
+		   error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     

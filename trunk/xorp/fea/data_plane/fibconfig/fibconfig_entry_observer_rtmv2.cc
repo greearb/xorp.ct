@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc,v 1.7 2007/07/11 22:18:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_observer_rtmv2.cc,v 1.8 2007/07/12 22:51:50 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -66,7 +66,7 @@ FibConfigEntryObserverRtmV2::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (WinRtmPipe::start(error_msg) < 0)
+    if (WinRtmPipe::start(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = true;
@@ -82,7 +82,7 @@ FibConfigEntryObserverRtmV2::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (WinRtmPipe::stop(error_msg) < 0)
+    if (WinRtmPipe::stop(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;

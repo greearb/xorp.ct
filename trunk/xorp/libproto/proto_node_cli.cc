@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_node_cli.cc,v 1.7 2006/03/16 00:04:12 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_node_cli.cc,v 1.8 2007/02/16 22:46:02 pavlin Exp $"
 
 
 //
@@ -143,7 +143,7 @@ ProtoNodeCli::add_cli_command_entry(const char *command_name,
 				       is_command_cd,
 				       command_cd_prompt,
 				       is_command_processor)
-	< 0) {
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -192,7 +192,8 @@ ProtoNodeCli::delete_cli_command(const char *command_name)
     //
     // Call the virtual function to delete the command from the CLI manager.
     //
-    if (delete_cli_command_from_cli_manager(command_name_str.c_str()) < 0) {
+    if (delete_cli_command_from_cli_manager(command_name_str.c_str())
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
     
@@ -213,7 +214,7 @@ ProtoNodeCli::delete_all_cli_commands()
     //
     while (_cli_callback_vector.size() > 0) {
 	size_t i = _cli_callback_vector.size() - 1;
-	if (delete_cli_command(_cli_callback_vector[i].c_str()) < 0)
+	if (delete_cli_command(_cli_callback_vector[i].c_str()) != XORP_OK)
 	    ret_code = XORP_ERROR;
     }
     

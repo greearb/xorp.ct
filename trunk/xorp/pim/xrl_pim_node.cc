@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.99 2007/05/19 01:52:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.100 2007/08/16 01:21:53 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -99,7 +99,7 @@ XrlPimNode::~XrlPimNode()
 bool
 XrlPimNode::startup()
 {
-    if (start_pim() < 0)
+    if (start_pim() != XORP_OK)
 	return false;
 
     return true;
@@ -110,10 +110,10 @@ XrlPimNode::shutdown()
 {
     bool ret_value = true;
 
-    if (stop_cli() < 0)
+    if (stop_cli() != XORP_OK)
 	ret_value = false;
 
-    if (stop_pim() < 0)
+    if (stop_pim() != XORP_OK)
 	ret_value = false;
 
     return (ret_value);
@@ -138,7 +138,7 @@ XrlPimNode::disable_cli()
 int
 XrlPimNode::start_cli()
 {
-    if (PimNodeCli::start() < 0)
+    if (PimNodeCli::start() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -147,7 +147,7 @@ XrlPimNode::start_cli()
 int
 XrlPimNode::stop_cli()
 {
-    if (PimNodeCli::stop() < 0)
+    if (PimNodeCli::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -172,7 +172,7 @@ XrlPimNode::disable_pim()
 int
 XrlPimNode::start_pim()
 {
-    if (PimNode::start() < 0)
+    if (PimNode::start() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -181,7 +181,7 @@ XrlPimNode::start_pim()
 int
 XrlPimNode::stop_pim()
 {
-    if (PimNode::stop() < 0)
+    if (PimNode::stop() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -206,7 +206,7 @@ XrlPimNode::disable_bsr()
 int
 XrlPimNode::start_bsr()
 {
-    if (PimNode::start_bsr() < 0)
+    if (PimNode::start_bsr() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -215,7 +215,7 @@ XrlPimNode::start_bsr()
 int
 XrlPimNode::stop_bsr()
 {
-    if (PimNode::stop_bsr() < 0)
+    if (PimNode::stop_bsr() != XORP_OK)
 	return (XORP_ERROR);
 
     return (XORP_OK);
@@ -3754,7 +3754,7 @@ XrlPimNode::pim_0_1_start_all_vifs()
 {
     string error_msg;
 
-    if (PimNode::start_all_vifs() < 0) {
+    if (PimNode::start_all_vifs() != XORP_OK) {
 	error_msg = c_format("Failed to start all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3767,7 +3767,7 @@ XrlPimNode::pim_0_1_stop_all_vifs()
 {
     string error_msg;
 
-    if (PimNode::stop_all_vifs() < 0) {
+    if (PimNode::stop_all_vifs() != XORP_OK) {
 	error_msg = c_format("Failed to stop all vifs");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -3947,7 +3947,7 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name4(
 
     if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
 						   vif_name, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3973,7 +3973,7 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_name6(
 
     if (PimNode::add_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
 						   vif_name, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3999,7 +3999,7 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr4(
 
     if (PimNode::add_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
 						   IPvX(vif_addr), error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4025,7 +4025,7 @@ XrlPimNode::pim_0_1_add_config_scope_zone_by_vif_addr6(
 
     if (PimNode::add_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
 						   IPvX(vif_addr), error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4051,7 +4051,7 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name4(
 
     if (PimNode::delete_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
 						      vif_name, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4077,7 +4077,7 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_name6(
 
     if (PimNode::delete_config_scope_zone_by_vif_name(IPvXNet(scope_zone_id),
 						      vif_name, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4102,8 +4102,9 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr4(
     }
 
     if (PimNode::delete_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
-						      IPvX(vif_addr), error_msg)
-	< 0) {
+						      IPvX(vif_addr),
+						      error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4128,8 +4129,9 @@ XrlPimNode::pim_0_1_delete_config_scope_zone_by_vif_addr6(
     }
 
     if (PimNode::delete_config_scope_zone_by_vif_addr(IPvXNet(scope_zone_id),
-						      IPvX(vif_addr), error_msg)
-	< 0) {
+						      IPvX(vif_addr),
+						      error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4176,7 +4178,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr4(
 				     reinterpret_cast<const uint8_t&>(bsr_priority),
 				     reinterpret_cast<const uint8_t&>(hash_mask_len),
 				     error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4223,7 +4225,7 @@ XrlPimNode::pim_0_1_add_config_cand_bsr6(
 				     reinterpret_cast<const uint8_t&>(bsr_priority),
 				     reinterpret_cast<const uint8_t&>(hash_mask_len),
 				     error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4249,7 +4251,7 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr4(
 
     if (PimNode::delete_config_cand_bsr(IPvXNet(scope_zone_id),
 					is_scope_zone, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4275,7 +4277,7 @@ XrlPimNode::pim_0_1_delete_config_cand_bsr6(
 
     if (PimNode::delete_config_cand_bsr(IPvXNet(scope_zone_id),
 					is_scope_zone, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4322,7 +4324,7 @@ XrlPimNode::pim_0_1_add_config_cand_rp4(
 				    reinterpret_cast<const uint8_t&>(rp_priority),
 				    reinterpret_cast<const uint16_t&>(rp_holdtime),
 				    error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4369,7 +4371,7 @@ XrlPimNode::pim_0_1_add_config_cand_rp6(
 				    reinterpret_cast<const uint8_t&>(rp_priority),
 				    reinterpret_cast<const uint16_t&>(rp_holdtime),
 				    error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4400,7 +4402,7 @@ XrlPimNode::pim_0_1_delete_config_cand_rp4(
 				       vif_name,
 				       IPvX(vif_addr),
 				       error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4431,7 +4433,7 @@ XrlPimNode::pim_0_1_delete_config_cand_rp6(
 				       vif_name,
 				       IPvX(vif_addr),
 				       error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4474,7 +4476,7 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
 				      reinterpret_cast<const uint8_t&>(rp_priority),
 				      reinterpret_cast<const uint8_t&>(hash_mask_len),
 				      error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4517,7 +4519,7 @@ XrlPimNode::pim_0_1_add_config_static_rp6(
 				      reinterpret_cast<const uint8_t&>(rp_priority),
 				      reinterpret_cast<const uint8_t&>(hash_mask_len),
 				      error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4544,7 +4546,7 @@ XrlPimNode::pim_0_1_delete_config_static_rp4(
     if (PimNode::delete_config_static_rp(IPvXNet(group_prefix),
 					 IPvX(rp_addr),
 					 error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4570,7 +4572,7 @@ XrlPimNode::pim_0_1_delete_config_static_rp6(
 
     if (PimNode::delete_config_static_rp(IPvXNet(group_prefix),
 					 IPvX(rp_addr), error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4595,7 +4597,7 @@ XrlPimNode::pim_0_1_delete_config_all_static_group_prefixes_rp4(
 
     if (PimNode::delete_config_all_static_group_prefixes_rp(IPvX(rp_addr),
 							    error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4620,7 +4622,7 @@ XrlPimNode::pim_0_1_delete_config_all_static_group_prefixes_rp6(
 
     if (PimNode::delete_config_all_static_group_prefixes_rp(IPvX(rp_addr),
 							    error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4632,7 +4634,7 @@ XrlPimNode::pim_0_1_delete_config_all_static_rps()
 {
     string error_msg;
     
-    if (PimNode::delete_config_all_static_rps(error_msg) < 0)
+    if (PimNode::delete_config_all_static_rps(error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -4643,7 +4645,7 @@ XrlPimNode::pim_0_1_config_static_rp_done()
 {
     string error_msg;
     
-    if (PimNode::config_static_rp_done(error_msg) < 0)
+    if (PimNode::config_static_rp_done(error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -4786,7 +4788,7 @@ XrlPimNode::pim_0_1_set_vif_hello_triggered_delay(
     if (PimNode::set_vif_hello_triggered_delay(vif_name,
 					       hello_triggered_delay,
 					       error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4800,7 +4802,8 @@ XrlPimNode::pim_0_1_reset_vif_hello_triggered_delay(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_hello_triggered_delay(vif_name, error_msg) < 0) {
+    if (PimNode::reset_vif_hello_triggered_delay(vif_name, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4840,8 +4843,10 @@ XrlPimNode::pim_0_1_set_vif_hello_period(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::set_vif_hello_period(vif_name, hello_period, error_msg) < 0)
+    if (PimNode::set_vif_hello_period(vif_name, hello_period, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -4853,7 +4858,7 @@ XrlPimNode::pim_0_1_reset_vif_hello_period(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_hello_period(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_hello_period(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -4893,7 +4898,7 @@ XrlPimNode::pim_0_1_set_vif_hello_holdtime(
     }
     
     if (PimNode::set_vif_hello_holdtime(vif_name, hello_holdtime, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4907,7 +4912,7 @@ XrlPimNode::pim_0_1_reset_vif_hello_holdtime(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_hello_holdtime(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_hello_holdtime(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -4946,8 +4951,10 @@ XrlPimNode::pim_0_1_set_vif_dr_priority(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (PimNode::set_vif_dr_priority(vif_name, dr_priority, error_msg) < 0)
+    if (PimNode::set_vif_dr_priority(vif_name, dr_priority, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -4959,7 +4966,7 @@ XrlPimNode::pim_0_1_reset_vif_dr_priority(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_dr_priority(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_dr_priority(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -5000,7 +5007,7 @@ XrlPimNode::pim_0_1_set_vif_propagation_delay(
     
     if (PimNode::set_vif_propagation_delay(vif_name, propagation_delay,
 					   error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5014,7 +5021,7 @@ XrlPimNode::pim_0_1_reset_vif_propagation_delay(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_propagation_delay(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_propagation_delay(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -5055,7 +5062,7 @@ XrlPimNode::pim_0_1_set_vif_override_interval(
     
     if (PimNode::set_vif_override_interval(vif_name, override_interval,
 					   error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5069,7 +5076,7 @@ XrlPimNode::pim_0_1_reset_vif_override_interval(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_override_interval(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_override_interval(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -5105,7 +5112,7 @@ XrlPimNode::pim_0_1_set_vif_is_tracking_support_disabled(
     if (PimNode::set_vif_is_tracking_support_disabled(
 	vif_name,
 	is_tracking_support_disabled, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5120,7 +5127,7 @@ XrlPimNode::pim_0_1_reset_vif_is_tracking_support_disabled(
     string error_msg;
     
     if (PimNode::reset_vif_is_tracking_support_disabled(vif_name, error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5157,7 +5164,7 @@ XrlPimNode::pim_0_1_set_vif_accept_nohello_neighbors(
     if (PimNode::set_vif_accept_nohello_neighbors(vif_name,
 						  accept_nohello_neighbors,
 						  error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5171,8 +5178,10 @@ XrlPimNode::pim_0_1_reset_vif_accept_nohello_neighbors(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_accept_nohello_neighbors(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_accept_nohello_neighbors(vif_name, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
     
     return XrlCmdError::OKAY();
 }
@@ -5212,7 +5221,7 @@ XrlPimNode::pim_0_1_set_vif_join_prune_period(
     
     if (PimNode::set_vif_join_prune_period(vif_name, join_prune_period,
 					   error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5226,7 +5235,7 @@ XrlPimNode::pim_0_1_reset_vif_join_prune_period(
 {
     string error_msg;
     
-    if (PimNode::reset_vif_join_prune_period(vif_name, error_msg) < 0)
+    if (PimNode::reset_vif_join_prune_period(vif_name, error_msg) != XORP_OK)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     
     return XrlCmdError::OKAY();
@@ -5265,7 +5274,7 @@ XrlPimNode::pim_0_1_set_switch_to_spt_threshold(
 					     interval_sec,
 					     bytes,
 					     error_msg)
-	    < 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5277,7 +5286,7 @@ XrlPimNode::pim_0_1_reset_switch_to_spt_threshold()
 {
     string error_msg;
     
-    if (PimNode::reset_switch_to_spt_threshold(error_msg) < 0) {
+    if (PimNode::reset_switch_to_spt_threshold(error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5302,7 +5311,7 @@ XrlPimNode::pim_0_1_add_alternative_subnet4(
     }
 
     if (PimNode::add_alternative_subnet(vif_name, IPvXNet(subnet), error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -5327,7 +5336,7 @@ XrlPimNode::pim_0_1_add_alternative_subnet6(
     }
 
     if (PimNode::add_alternative_subnet(vif_name, IPvXNet(subnet), error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -5353,7 +5362,7 @@ XrlPimNode::pim_0_1_delete_alternative_subnet4(
 
     if (PimNode::delete_alternative_subnet(vif_name, IPvXNet(subnet),
 					   error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -5379,7 +5388,7 @@ XrlPimNode::pim_0_1_delete_alternative_subnet6(
 
     if (PimNode::delete_alternative_subnet(vif_name, IPvXNet(subnet),
 					   error_msg)
-	< 0) {
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -5393,7 +5402,8 @@ XrlPimNode::pim_0_1_remove_all_alternative_subnets(
 {
     string error_msg;
 
-    if (PimNode::remove_all_alternative_subnets(vif_name, error_msg) < 0) {
+    if (PimNode::remove_all_alternative_subnets(vif_name, error_msg)
+	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -5502,7 +5512,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
 				   entry_type, action_type,
 				   reinterpret_cast<const uint16_t&>(holdtime),
 				   is_new_group)
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add Join/Prune test entry "
 			     "for (%s, %s)",
 			     cstring(source_addr),
@@ -5598,7 +5608,7 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
 				   entry_type, action_type,
 				   reinterpret_cast<const uint16_t&>(holdtime),
 				   is_new_group)
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add Join/Prune test entry "
 			     "for (%s, %s)",
 			     cstring(source_addr),
@@ -5626,7 +5636,8 @@ XrlPimNode::pim_0_1_send_test_jp_entry4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr), error_msg) < 0) {
+    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr), error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Failed to send Join/Prune test message to %s "
 			     "on vif %s: %s",
 			     cstring(nbr_addr), vif_name.c_str(),
@@ -5654,7 +5665,8 @@ XrlPimNode::pim_0_1_send_test_jp_entry6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr), error_msg) < 0) {
+    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr), error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Failed to send Join/Prune test message to %s "
 			     "on vif %s: %s",
 			     cstring(nbr_addr), vif_name.c_str(),
@@ -5693,7 +5705,7 @@ XrlPimNode::pim_0_1_send_test_assert4(
 				  metric_preference,
 				  metric,
 				  error_msg)
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to send Assert test message "
 			     "for (%s, %s) on vif %s: %s",
 			     cstring(source_addr),
@@ -5734,7 +5746,7 @@ XrlPimNode::pim_0_1_send_test_assert6(
 				  metric_preference,
 				  metric,
 				  error_msg)
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to send Assert test message "
 			     "for (%s, %s) on vif %s: %s",
 			     cstring(source_addr),
@@ -5792,7 +5804,7 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
 				   reinterpret_cast<const uint8_t&>(bsr_priority),
 				   reinterpret_cast<const uint8_t&>(hash_mask_len),
 				   reinterpret_cast<const uint16_t&>(fragment_tag))
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add BSR test zone %s "
 			     "with BSR address %s",
 			     cstring(PimScopeZoneId(zone_id_scope_zone_prefix,
@@ -5849,7 +5861,7 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
 				   reinterpret_cast<const uint8_t&>(bsr_priority),
 				   reinterpret_cast<const uint8_t&>(hash_mask_len),
 				   reinterpret_cast<const uint16_t&>(fragment_tag))
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add BSR test zone %s "
 			     "with BSR address %s",
 			     cstring(PimScopeZoneId(zone_id_scope_zone_prefix,
@@ -5893,7 +5905,7 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
 	IPvXNet(group_prefix),
 	is_scope_zone,
 	reinterpret_cast<const uint8_t&>(expected_rp_count))
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add group prefix %s "
 			     "for BSR test zone %s",
 			     cstring(group_prefix),
@@ -5937,7 +5949,7 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
 	IPvXNet(group_prefix),
 	is_scope_zone,
 	reinterpret_cast<const uint8_t&>(expected_rp_count))
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add group prefix %s "
 			     "for BSR test zone %s",
 			     cstring(group_prefix),
@@ -5988,7 +6000,7 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
 				 IPvX(rp_addr),
 				 reinterpret_cast<const uint8_t&>(rp_priority),
 				 reinterpret_cast<const uint16_t&>(rp_holdtime))
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add test Cand-RP %s "
 			     "for group prefix %s for BSR zone %s",
 			     cstring(rp_addr),
@@ -6040,7 +6052,7 @@ XrlPimNode::pim_0_1_add_test_bsr_rp6(
 				 IPvX(rp_addr),
 				 reinterpret_cast<const uint8_t&>(rp_priority),
 				 reinterpret_cast<const uint16_t&>(rp_holdtime))
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to add test Cand-RP %s "
 			     "for group prefix %s for BSR zone %s",
 			     cstring(rp_addr),
@@ -6060,7 +6072,7 @@ XrlPimNode::pim_0_1_send_test_bootstrap(
 {
     string error_msg;
 
-    if (PimNode::send_test_bootstrap(vif_name, error_msg) < 0) {
+    if (PimNode::send_test_bootstrap(vif_name, error_msg) != XORP_OK) {
 	error_msg = c_format("Failed to send Bootstrap test message "
 			     "on vif %s: %s",
 			     vif_name.c_str(),
@@ -6090,7 +6102,7 @@ XrlPimNode::pim_0_1_send_test_bootstrap_by_dest4(
 
     if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr),
 					     error_msg)
-	< 0) {
+	!= XORP_OK) {
 	error_msg = c_format("Failed to send Bootstrap test message "
 			     "on vif %s to address %s: %s",
 			     vif_name.c_str(),
@@ -6120,7 +6132,8 @@ XrlPimNode::pim_0_1_send_test_bootstrap_by_dest6(
     }
 
     if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr),
-					     error_msg) < 0) {
+					     error_msg)
+	!= XORP_OK) {
 	error_msg = c_format("Failed to send Bootstrap test message "
 			     "on vif %s to address %s: %s",
 			     vif_name.c_str(),
@@ -6137,7 +6150,7 @@ XrlPimNode::pim_0_1_send_test_cand_rp_adv()
 {
     string error_msg;
 
-    if (PimNode::send_test_cand_rp_adv() < 0) {
+    if (PimNode::send_test_cand_rp_adv() != XORP_OK) {
 	error_msg = c_format("Failed to send Cand-RP-Adv test message");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

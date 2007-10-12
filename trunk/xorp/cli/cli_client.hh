@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.33 2007/02/16 22:45:28 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.34 2007/10/03 23:14:13 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -375,8 +375,17 @@ private:
     CliNode&	cli_node() { return (_cli_node); }
     
     GetLine	*gl() { return (_gl); }
-    
-    int		process_telnet_option(int val);
+
+    /**
+     * Process octet that may be part of a telnet option.
+     *
+     * @param val the value of the next octet.
+     * @param is_telnet_option return-by-reference result: if true,
+     * then @ref val is part of a telnet option and it was processed.
+     * If it is false, then @ref value should be processed as input data.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		process_telnet_option(int val, bool& is_telnet_option);
     
     bool	telnet_iac() { return (_telnet_iac); }
     void	set_telnet_iac(bool v) { _telnet_iac = v; }

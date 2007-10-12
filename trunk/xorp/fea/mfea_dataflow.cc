@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_dataflow.cc,v 1.6 2006/03/16 00:03:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_dataflow.cc,v 1.7 2007/02/16 22:45:45 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) dataflow implementation.
@@ -173,7 +173,7 @@ MfeaDft::delete_entry(const IPvX& source, const IPvX& group,
 	return (XORP_ERROR);	// Not found
     }
     
-    if (delete_entry(mfea_dfe) < 0) {
+    if (delete_entry(mfea_dfe) != XORP_OK) {
 	error_msg = c_format("Cannot delete dataflow monitor for (%s, %s): "
 			     "internal error",
 			     cstring(source), cstring(group));
@@ -381,7 +381,7 @@ MfeaDfe::test_sg_count()
     //
     if (mfea_dft().mfea_node().get_sg_count(source_addr(), group_addr(),
 					    _last_sg_count)
-	< 0) {
+	!= XORP_OK) {
 	// Error
 	return (false);		// TODO: what do we do when error occured?
     }

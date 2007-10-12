@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.cc,v 1.10 2007/09/25 23:00:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.cc,v 1.11 2007/09/27 00:33:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -152,21 +152,21 @@ IfConfigSetIoctl::stop(string& error_msg)
     if (_s4 >= 0) {
 	ret_value4 = comm_close(_s4);
 	_s4 = -1;
-	if (ret_value4 < 0) {
-	    error_msg = c_format("Could not close IPv4 ioctl() "
-				 "socket: %s", strerror(errno));
+	if (ret_value4 != XORP_OK) {
+	    error_msg = c_format("Could not close IPv4 ioctl() socket: %s",
+				 comm_get_last_error_str());
 	}
     }
     if (_s6 >= 0) {
 	ret_value6 = comm_close(_s6);
 	_s6 = -1;
-	if ((ret_value6 < 0) && (ret_value4 >= 0)) {
-	    error_msg = c_format("Could not close IPv6 ioctl() "
-				 "socket: %s", strerror(errno));
+	if ((ret_value6 != XORP_OK) && (ret_value4 == XORP_OK)) {
+	    error_msg = c_format("Could not close IPv6 ioctl() socket: %s",
+				 comm_get_last_error_str());
 	}
     }
 
-    if ((ret_value4 < 0) || (ret_value6 < 0))
+    if ((ret_value4 != XORP_OK) || (ret_value6 != XORP_OK))
 	return (XORP_ERROR);
 
     _is_running = false;
