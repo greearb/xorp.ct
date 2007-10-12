@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.14 2007/09/27 00:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.15 2007/10/12 07:53:50 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -93,7 +93,7 @@ IfConfigSetNetlinkSocket::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    if (NetlinkSocket::stop(error_msg) !+ XORP_OK)
+    if (NetlinkSocket::stop(error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
     _is_running = false;
