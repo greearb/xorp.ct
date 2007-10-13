@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/clock.hh,v 1.4 2006/03/16 00:04:28 pavlin Exp $
+// $XORP: xorp/libxorp/clock.hh,v 1.5 2007/02/16 22:46:18 pavlin Exp $
 
 #ifndef __LIBXORP_CLOCK_HH__
 #define __LIBXORP_CLOCK_HH__
@@ -22,7 +22,7 @@ class TimeVal;
 
 class ClockBase {
 public:
-    virtual ~ClockBase() = 0;
+    virtual ~ClockBase();
 
     /**
      * Update internal concept of time.
