@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.67 2007/05/23 04:08:30 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.68 2007/09/30 03:55:15 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -79,7 +79,8 @@ announce_waiting()
 }
 
 static bool
-wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router,
+			  bool exit_on_error)
 {
     XorpTimer announcer = eventloop.new_oneoff_after_ms(
 				3 * 1000, callback(&announce_waiting)
@@ -91,6 +92,8 @@ wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 	    return false;
 	    break;
 	}
+	if (xrl_router.connect_failed() && exit_on_error)
+	    return false;
     }
     return true;
 }
@@ -195,7 +198,7 @@ XorpShell::~XorpShell()
 }
 
 void
-XorpShell::run(const string& commands)
+XorpShell::run(const string& commands, bool exit_on_error)
 {
     bool success;
     string error_msg;
@@ -238,7 +241,8 @@ XorpShell::run(const string& commands)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
 
     _is_connected_to_finder = false;
-    if (wait_for_xrl_router_ready(_eventloop, _xrl_router) == false) {
+    if (wait_for_xrl_router_ready(_eventloop, _xrl_router, exit_on_error)
+	== false) {
 	// RtrMgr contains finder
 	error_msg = c_format("Failed to connect to the router manager");
 	xorp_throw(InitError, error_msg);
@@ -797,6 +801,7 @@ usage(const char *argv0)
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -c        Specify command(s) to execute\n");
+    fprintf(stderr, "  -e        Exit immediately if cannot connect to the rtrmgr\n");
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
@@ -820,6 +825,7 @@ main(int argc, char *argv[])
 {
     int errcode = 0;
     string commands;
+    bool exit_on_error = false;
 
     //
     // Initialize and start xlog
@@ -848,12 +854,15 @@ main(int argc, char *argv[])
     string xrl_targets_dir	= xorp_xrl_targets_dir();
 
     int c;
-    while ((c = getopt(argc, argv, "c:t:x:vh")) != EOF) {
+    while ((c = getopt(argc, argv, "c:et:x:vh")) != EOF) {
 	switch(c) {
 	case 'c':
 	    // XXX: Append the arguments to allow multiple "-c cmd" commands
 	    commands += optarg;
 	    commands += "\n";
+	    break;
+	case 'e':
+	    exit_on_error = true;
 	    break;
 	case 't':
 	    template_dir = optarg;
@@ -894,7 +903,7 @@ main(int argc, char *argv[])
 					   hostname);
 	XorpShell xorpsh(eventloop, xname, xorp_binary_root_dir(),
 			 template_dir, xrl_targets_dir, verbose);
-	xorpsh.run(commands);
+	xorpsh.run(commands, exit_on_error);
     } catch (const InitError& e) {
 	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());
 	errcode = 1;

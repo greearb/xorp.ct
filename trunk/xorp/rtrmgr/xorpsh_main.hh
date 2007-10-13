@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.32 2006/03/16 00:06:05 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.33 2007/02/16 22:47:27 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -47,7 +47,7 @@ public:
 	      bool verbose) throw (InitError);
     ~XorpShell();
 
-    void run(const string& command);
+    void run(const string& command, bool exit_on_error);
     bool done() const;
 
 
