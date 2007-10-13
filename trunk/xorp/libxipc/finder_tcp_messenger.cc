@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.30 2007/07/12 17:46:04 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.31 2007/08/01 19:27:49 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -304,8 +304,8 @@ FinderTcpAutoConnector::FinderTcpAutoConnector(
 				uint32_t 		give_up_ms
 				)
     : FinderTcpConnector(e, *this, cmds, host, port),
-      _real_manager(real_manager), _connected(false), _enabled(en),
-      _once_active(false), _last_error(0), _consec_error(0)
+      _real_manager(real_manager), _connected(false), _connect_failed(false),
+      _enabled(en), _once_active(false), _last_error(0), _consec_error(0)
 {
     if (en) {
 	start_timer();
@@ -357,10 +357,18 @@ FinderTcpAutoConnector::connected() const
     return _connected;
 }
 
+bool
+FinderTcpAutoConnector::connect_failed() const
+{
+    return _connect_failed;
+}
+
 void
 FinderTcpAutoConnector::do_auto_connect()
 {
     XLOG_ASSERT(false == _connected);
+
+    _connect_failed = false;
 
     FinderTcpMessenger* fm;
     int r = connect(fm);
@@ -370,6 +378,7 @@ FinderTcpAutoConnector::do_auto_connect()
 	_connected = true;
     } else {
 	XLOG_ASSERT(fm == 0);
+	_connect_failed = true;
 	if (r != _last_error) {
 	    XLOG_ERROR("Failed to connect to %s/%u: %s",
 		       _host.str().c_str(), _port, strerror(r));

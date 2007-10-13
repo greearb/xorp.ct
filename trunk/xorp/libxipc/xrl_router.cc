@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.53 2007/02/16 22:46:13 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.54 2007/05/23 12:12:40 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -287,6 +287,12 @@ bool
 XrlRouter::connected() const
 {
     return _fc && _fc->connected();
+}
+
+bool
+XrlRouter::connect_failed() const
+{
+    return _fac && _fac->connect_failed();
 }
 
 bool

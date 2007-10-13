@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.37 2007/02/16 22:46:13 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.38 2007/05/23 12:12:40 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -82,6 +82,12 @@ public:
      * @return true if instance has established a connection to the Finder.
      */
     bool connected() const;
+
+    /**
+     * @return true if instance has encountered a connection error to the
+     * Finder.
+     */
+    bool connect_failed() const;
 
     /**
      * @return true if instance has established a connection to the Finder,

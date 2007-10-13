@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.18 2007/07/12 17:46:04 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp_messenger.hh,v 1.19 2007/08/01 19:27:49 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_MESSENGER_HH__
 #define __LIBXIPC_FINDER_TCP_MESSENGER_HH__
@@ -153,6 +153,7 @@ public:
     void set_enabled(bool en);
     bool enabled() const;
     bool connected() const;
+    bool connect_failed() const;
 
 protected:
     void do_auto_connect();
@@ -175,6 +176,7 @@ protected:
 protected:
     FinderMessengerManager& _real_manager;
     bool		    _connected;
+    bool		    _connect_failed;
     bool		    _enabled;
     bool		    _once_active;
     XorpTimer		    _retry_timer;
