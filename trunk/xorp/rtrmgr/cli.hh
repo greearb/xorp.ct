@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.50 2006/10/13 20:48:17 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.51 2007/02/16 22:47:21 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -257,6 +257,7 @@ private:
 
     CliNode&		_cli_node;
     CliClient*		_cli_client_ptr;
+    CliClient*		_removed_cli_client_ptr;
     bool		_verbose;	// Set to true if output is verbose
     string		_operational_mode_prompt;
     string		_configuration_mode_prompt;

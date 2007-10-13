@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.29 2007/05/08 19:23:13 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.30 2007/05/19 01:52:39 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -351,13 +351,15 @@ public:
 			  const string& startup_cli_prompt, string& error_msg);
 
     /**
-     * Delete a CLI client (@ref CliClient) from the CLI.
+     * Remove a CLI client (@ref CliClient) from the CLI.
      * 
-     * @param cli_client the CLI client (@ref CliClient) to delete.
+     * Note that the CLI client object itself is not deleted.
+     * 
+     * @param cli_client the CLI client (@ref CliClient) to remove.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_client(CliClient *cli_client, string& error_msg);
+    int remove_client(CliClient *cli_client, string& error_msg);
 
     typedef XorpCallback1<void,
 	CliClient*		// CLI client to delete

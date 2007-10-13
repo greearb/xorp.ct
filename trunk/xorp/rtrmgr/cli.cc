@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.136 2006/11/03 01:55:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.137 2007/02/16 22:47:20 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -99,6 +99,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     : _xorpsh(xorpsh),
       _cli_node(cli_node),
       _cli_client_ptr(NULL),
+      _removed_cli_client_ptr(NULL),
       _verbose(verbose),
       _operational_mode_prompt(DEFAULT_XORP_PROMPT_OPERATIONAL),
       _configuration_mode_prompt(DEFAULT_XORP_PROMPT_CONFIGURATION),
@@ -557,6 +558,10 @@ RouterCLI::~RouterCLI()
     if (_cli_client_ptr != NULL) {
 	delete _cli_client_ptr;
 	_cli_client_ptr = NULL;
+    }
+    if (_removed_cli_client_ptr != NULL) {
+	delete _removed_cli_client_ptr;
+	_removed_cli_client_ptr = NULL;
     }
 }
 
@@ -1875,11 +1880,15 @@ RouterCLI::logout_func(const string& ,
     }
 
     idle_ui();
-    if (_cli_node.delete_client(_cli_client_ptr, error_msg) != XORP_OK) {
+    if (_cli_node.remove_client(_cli_client_ptr, error_msg) != XORP_OK) {
 	XLOG_FATAL("internal error deleting CLI client: %s",
 		   error_msg.c_str());
 	return (XORP_ERROR);
     }
+
+    // Save the pointer to the removed client so it can be deleted later
+    XLOG_ASSERT(_removed_cli_client_ptr == NULL);
+    _removed_cli_client_ptr = _cli_client_ptr;
     _cli_client_ptr = NULL;
 
     return (XORP_OK);
