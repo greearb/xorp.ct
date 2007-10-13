@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.58 2007/02/16 22:45:28 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.59 2007/10/12 07:53:44 pavlin Exp $"
 
 
 //
@@ -67,59 +67,55 @@ CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd,
     : _cli_node(init_cli_node),
       _input_fd(input_fd),
       _output_fd(output_fd),
+      _input_fd_file(NULL),
+      _output_fd_file(NULL),
+      _client_type(CLIENT_TERMINAL),	// XXX: default is terminal
+      _gl(NULL),
+      _telnet_iac(false),
+      _telnet_sb(false),
+      _telnet_dont(false),
+      _telnet_do(false),
+      _telnet_wont(false),
+      _telnet_will(false),
+      _telnet_binary(false),
+      _window_width(80),		// TODO: use a parameter instead
+      _window_height(25),		// TODO: use a parameter instead
       _command_buffer(1024),
       _telnet_sb_buffer(1024),
+      _is_modified_stdio_termios_icanon(false),
+      _is_modified_stdio_termios_echo(false),
+      _is_modified_stdio_termios_isig(false),
+      _saved_stdio_termios_vmin(0),
+      _saved_stdio_termios_vtime(0),
+      _executed_cli_command(NULL),
+      _current_cli_command(NULL),
+      _buff_curpos(0),
+      _is_pipe_mode(false),
+      _is_nomore_mode(false),
+      _is_hold_mode(false),
+      _is_page_mode(false),
+      _is_page_buffer_mode(NULL),
+      _page_buffer(NULL),
+      _page_buffer_last_line_n(NULL),
+      _is_output_buffer_mode(false),
+      _output_buffer_last_line_n(0),
+      _is_help_buffer_mode(false),
+      _help_buffer_last_line_n(0),
+      _is_help_mode(false),
+      _is_prompt_flushed(false),
       _cli_session_from_address(_cli_node.family()),
-      _is_network(false)
+      _is_cli_session_active(false),
+      _cli_session_session_id(0),
+      _is_network(false),
+      _is_log_output(false),
+      _is_waiting_for_data(false)
 {
-    _input_fd_file = NULL;
-    _output_fd_file = NULL;
-    _client_type = CLIENT_TERMINAL;	// XXX: default is terminal
-    
-    _gl = NULL;
-    
-    _telnet_iac = false;
-    _telnet_sb = false;
-    _telnet_dont = false;
-    _telnet_do = false;
-    _telnet_wont = false;
-    _telnet_will = false;
-    _telnet_binary = false;
-
-    // TODO: use parameters instead
-    _window_width = 80;
-    _window_height = 25;
-    
-    _is_modified_stdio_termios_icanon = false;
-    _is_modified_stdio_termios_echo = false;
-    _is_modified_stdio_termios_isig = false;
-    _saved_stdio_termios_vmin = 0;
-    _saved_stdio_termios_vtime = 0;
-
-    _executed_cli_command = NULL;
-
     set_current_cli_command(_cli_node.cli_command_root());
     set_current_cli_prompt(startup_cli_prompt);
-    _buff_curpos = 0;
-    
-    _is_pipe_mode = false;
-    _is_nomore_mode = false;
-    _is_hold_mode = false;
-    
-    _is_page_mode = false;
-    
-    _is_output_buffer_mode = false;
-    _output_buffer_last_line_n = 0;
-    
-    _is_help_buffer_mode = false;
-    _help_buffer_last_line_n = 0;
-    _is_help_mode = false;
-    
+
     _is_page_buffer_mode = &_is_output_buffer_mode;
     _page_buffer = &_output_buffer;
     _page_buffer_last_line_n = &_output_buffer_last_line_n;
-    
-    _is_prompt_flushed = false;
 
     //
     // Session info state
@@ -130,16 +126,6 @@ CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd,
     set_cli_session_start_time(TimeVal(0, 0));
     set_cli_session_stop_time(TimeVal(0, 0));
     set_is_cli_session_active(false);
-    
-    //
-    // Log-related state
-    //
-    _is_log_output = false;
-
-    //
-    // Server communication state
-    //
-    _is_waiting_for_data = false;
 
     //
     // Set in "no-more" mode if a non-interactive client
