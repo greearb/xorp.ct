@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.13 2006/11/07 22:10:42 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.14 2007/02/16 22:46:19 pavlin Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -52,8 +52,9 @@ const int NOT_IN_HEAP =	-1 ;
  */
 class HeapBase {
  public:
-    HeapBase() : _pos_in_heap(NOT_IN_HEAP)
-    {}
+    HeapBase() : _pos_in_heap(NOT_IN_HEAP) {}
+    virtual ~HeapBase() {}
+
     int		_pos_in_heap;	// position of this object in the heap
 };
 
