@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.22 2007/05/08 01:15:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.23 2007/09/15 01:54:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -62,7 +62,7 @@ InterfaceMonitor::~InterfaceMonitor()
     _ifmgr.unset_observer(this);
 }
 
-bool
+int
 InterfaceMonitor::startup()
 {
     //
@@ -70,10 +70,10 @@ InterfaceMonitor::startup()
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
 	|| (ServiceBase::status() == SERVICE_RUNNING))
-	return true;
+	return (XORP_OK);
 
     if (ServiceBase::status() != SERVICE_READY)
-	return false;
+	return (XORP_ERROR);
 
     //
     // Transition to SERVICE_RUNNING occurs when all transient startup
@@ -85,16 +85,16 @@ InterfaceMonitor::startup()
     //
     // Startup the interface manager
     //
-    if (ifmgr_startup() != true) {
+    if (ifmgr_startup() != XORP_OK) {
 	XLOG_ERROR("Cannot startup the interface mirroring manager");
 	ServiceBase::set_status(SERVICE_FAILED);
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 InterfaceMonitor::shutdown()
 {
     //
@@ -102,11 +102,11 @@ InterfaceMonitor::shutdown()
     //
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
 	|| (ServiceBase::status() == SERVICE_FAILED)) {
-	return true;
+	return (XORP_OK);
     }
 
     if (ServiceBase::status() != SERVICE_RUNNING)
-	return false;
+	return (XORP_ERROR);
 
     //
     // Transition to SERVICE_SHUTDOWN occurs when all transient shutdown
@@ -118,13 +118,13 @@ InterfaceMonitor::shutdown()
     //
     // Shutdown the interface manager
     //
-    if (ifmgr_shutdown() != true) {
+    if (ifmgr_shutdown() != XORP_OK) {
 	XLOG_ERROR("Cannot shutdown the interface mirroring manager");
 	ServiceBase::set_status(SERVICE_FAILED);
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
 void
@@ -244,10 +244,10 @@ InterfaceMonitor::updates_made()
 
 }
 
-bool
+int
 InterfaceMonitor::ifmgr_startup()
 {
-    bool ret_value;
+    int ret_value;
 
     // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
     incr_startup_requests_n();
@@ -259,13 +259,13 @@ InterfaceMonitor::ifmgr_startup()
     // will be called.
     //
 
-    return ret_value;
+    return (ret_value);
 }
 
-bool
+int
 InterfaceMonitor::ifmgr_shutdown()
 {
-    bool ret_value;
+    int ret_value;
 
     incr_shutdown_requests_n();
 
@@ -276,7 +276,7 @@ InterfaceMonitor::ifmgr_shutdown()
     // will be called.
     //
 
-    return ret_value;
+    return (ret_value);
 }
 
 void

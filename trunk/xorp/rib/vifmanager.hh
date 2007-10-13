@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/vifmanager.hh,v 1.19 2007/02/16 22:47:12 pavlin Exp $
+// $XORP: xorp/rib/vifmanager.hh,v 1.20 2007/09/28 20:48:02 pavlin Exp $
 
 #ifndef __RIB_VIFMANAGER_HH__
 #define __RIB_VIFMANAGER_HH__
@@ -147,16 +147,16 @@ private:
     /**
      * Initiate startup of the interface manager.
      * 
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool ifmgr_startup();
+    int ifmgr_startup();
 
     /**
      * Initiate shutdown of the interface manager.
      * 
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool ifmgr_shutdown();
+    int ifmgr_shutdown();
 
     XrlRouter&		_xrl_router;
     EventLoop&		_eventloop;

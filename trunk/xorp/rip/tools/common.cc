@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/common.cc,v 1.8 2007/01/30 22:32:25 atanu Exp $"
+#ident "$XORP: xorp/rip/tools/common.cc,v 1.9 2007/02/16 22:47:20 pavlin Exp $"
 
 #include <string>
 
@@ -94,7 +94,7 @@ XrlJobQueue::~XrlJobQueue()
     delete _rtr;
 }
 
-bool
+int
 XrlJobQueue::startup()
 {
     string cls = c_format("%s-%u\n", xlog_process_name(),
@@ -104,17 +104,17 @@ XrlJobQueue::startup()
     set_status(SERVICE_STARTING);
     _rtr_poll = _e.new_periodic_ms(100,
 				   callback(this, &XrlJobQueue::xrl_router_ready_poll));
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 XrlJobQueue::shutdown()
 {
     while (_jobs.empty() == false) {
 	_jobs.pop_front();
     }
     set_status(SERVICE_SHUTDOWN);
-    return true;
+    return (XORP_OK);
 }
 
 void

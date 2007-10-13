@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.74 2007/05/19 08:11:23 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.75 2007/08/16 01:21:53 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -68,16 +68,16 @@ public:
     /**
      * Startup the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	startup();
+    int startup();
 
     /**
      * Shutdown the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	shutdown();
+    int shutdown();
 
     /**
      * Get a reference to the XrlRouter instance.

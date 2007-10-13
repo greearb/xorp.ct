@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_distances.cc,v 1.1 2007/03/22 20:48:19 bms Exp $"
+#ident "$XORP: xorp/rib/tools/show_distances.cc,v 1.2 2007/05/23 12:12:48 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -67,8 +67,8 @@ public:
 			   ShowDistancesOptions&    opts);
     ~ShowDistancesProcessor();
 
-    bool startup();
-    bool shutdown();
+    int startup();
+    int shutdown();
 
 public:
     XrlCmdError common_0_1_get_target_name(string& name);
@@ -123,11 +123,11 @@ ShowDistancesProcessor::~ShowDistancesProcessor()
     }
 }
 
-bool
+int
 ShowDistancesProcessor::startup()
 {
     if (status() != SERVICE_READY) {
-	return false;
+	return (XORP_ERROR);
     }
 
     // Create XrlRouter
@@ -146,10 +146,10 @@ ShowDistancesProcessor::startup()
     _t = _e.new_periodic_ms(250, callback(this,
 			    &ShowDistancesProcessor::poll_ready_failed));
     set_status(SERVICE_STARTING);
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 ShowDistancesProcessor::shutdown()
 {
     this->set_command_map(NULL);
@@ -158,10 +158,10 @@ ShowDistancesProcessor::shutdown()
     if (st == SERVICE_FAILED
 	|| st == SERVICE_SHUTTING_DOWN
 	|| st == SERVICE_SHUTDOWN)
-	return false;
+	return (XORP_ERROR);
 
     set_status(SERVICE_SHUTTING_DOWN);
-    return true;
+    return (XORP_OK);
 }
 
 bool

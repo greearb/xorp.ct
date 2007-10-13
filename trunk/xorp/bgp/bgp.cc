@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.87 2007/07/06 01:25:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.88 2007/09/11 08:06:19 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -241,16 +241,16 @@ BGPMain::status(string& reason)
     return s;
 }
 
-bool
+int
 BGPMain::startup()
 {
     //
     // XXX: when the startup is completed,
     // IfMgrHintObserver::tree_complete() will be called.
     //
-    if (_ifmgr->startup() != true) {
+    if (_ifmgr->startup() != XORP_OK) {
 	ServiceBase::set_status(SERVICE_FAILED);
-	return (false);
+	return (XORP_ERROR);
     }
 
     component_up("startup");
@@ -258,10 +258,10 @@ BGPMain::startup()
     register_address_status(callback(this, &BGPMain::address_status_change4));
     register_address_status(callback(this, &BGPMain::address_status_change6));
 
-    return (true);
+    return (XORP_OK);
 }
 
-bool
+int
 BGPMain::shutdown()
 {
     //

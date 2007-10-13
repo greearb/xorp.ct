@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.23 2007/02/16 22:47:13 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.24 2007/05/23 12:12:48 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -198,8 +198,8 @@ public:
 			ShowRoutesOptions& opts);
     ~ShowRoutesProcessor();
 
-    bool startup();
-    bool shutdown();
+    int startup();
+    int shutdown();
 
 public:
     XrlCmdError common_0_1_get_target_name(string& name);
@@ -306,11 +306,11 @@ ShowRoutesProcessor::~ShowRoutesProcessor()
     }
 }
 
-bool
+int
 ShowRoutesProcessor::startup()
 {
     if (status() != SERVICE_READY) {
-	return false;
+	return (XORP_ERROR);
     }
 
     // Create XrlRouter
@@ -330,10 +330,10 @@ ShowRoutesProcessor::startup()
 			    callback(this,
 				     &ShowRoutesProcessor::poll_ready_failed));
     set_status(SERVICE_STARTING);
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 ShowRoutesProcessor::shutdown()
 {
     // Withdraw the Xrl methods
@@ -343,11 +343,11 @@ ShowRoutesProcessor::shutdown()
     if (st == SERVICE_FAILED
 	|| st == SERVICE_SHUTTING_DOWN
 	|| st == SERVICE_SHUTDOWN)
-	return false;
+	return (XORP_ERROR);
 
     set_status(SERVICE_SHUTTING_DOWN);
     step_1000_request_cease();
-    return true;
+    return (XORP_OK);
 }
 
 bool

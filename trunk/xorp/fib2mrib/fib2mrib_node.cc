@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.35 2007/04/23 23:05:09 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.36 2007/05/08 01:15:50 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -46,7 +46,7 @@ Fib2mribNode::~Fib2mribNode()
     shutdown();
 }
 
-bool
+int
 Fib2mribNode::startup()
 {
     //
@@ -54,10 +54,10 @@ Fib2mribNode::startup()
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
 	|| (ServiceBase::status() == SERVICE_RUNNING)) {
-	return true;
+	return (XORP_OK);
     }
     if (ServiceBase::status() != SERVICE_READY) {
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -82,10 +82,10 @@ Fib2mribNode::startup()
     //
     rib_register_startup();
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 Fib2mribNode::shutdown()
 {
     //
@@ -94,14 +94,14 @@ Fib2mribNode::shutdown()
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
 	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
 	|| (ServiceBase::status() == SERVICE_FAILED)) {
-	return true;
+	return (XORP_OK);
     }
     if ((ServiceBase::status() != SERVICE_RUNNING)
 	&& (ServiceBase::status() != SERVICE_STARTING)
 	&& (ServiceBase::status() != SERVICE_PAUSING)
 	&& (ServiceBase::status() != SERVICE_PAUSED)
 	&& (ServiceBase::status() != SERVICE_RESUMING)) {
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -131,7 +131,7 @@ Fib2mribNode::shutdown()
     //
     update_status();
 
-    return true;
+    return (XORP_OK);
 }
 
 void

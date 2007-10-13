@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.14 2007/02/16 22:47:18 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.15 2007/05/23 12:12:50 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -366,7 +366,7 @@ XrlRedistManager<A>::~XrlRedistManager()
 }
 
 template <typename A>
-bool
+int
 XrlRedistManager<A>::startup()
 {
     if (status() == SERVICE_READY) {
@@ -376,17 +376,17 @@ XrlRedistManager<A>::startup()
 	_redists.push_back(rr);
 	
 	set_status(SERVICE_RUNNING);
-	return true;
+	return (XORP_OK);
     }
-    return false;
+    return (XORP_ERROR);
 }
 
 template <typename A>
-bool
+int
 XrlRedistManager<A>::shutdown()
 {
     if (status() != SERVICE_RUNNING) {
-	return false;
+	return (XORP_ERROR);
     }
 
     while (_redists.empty() == false) {
@@ -397,7 +397,7 @@ XrlRedistManager<A>::shutdown()
     }
     set_status(SERVICE_SHUTDOWN);
 
-    return true;
+    return (XORP_OK);
 }
 
 template <typename A>

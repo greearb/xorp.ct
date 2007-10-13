@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/tools/show_interfaces.hh,v 1.6 2006/03/16 00:04:08 pavlin Exp $
+// $XORP: xorp/fea/tools/show_interfaces.hh,v 1.7 2007/02/16 22:45:57 pavlin Exp $
 
 #ifndef __FEA_TOOLS_SHOW_INTERFACES_HH__
 #define __FEA_TOOLS_SHOW_INTERFACES_HH__
@@ -53,16 +53,16 @@ public:
     /**
      * Startup operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	startup();
+    int startup();
 
     /**
      * Shutdown operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	shutdown();
+    int shutdown();
 
     /**
      * Print information about network interfaces that was received
@@ -116,16 +116,16 @@ private:
     /**
      * Initiate startup of the interface manager.
      * 
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool ifmgr_startup();
+    int ifmgr_startup();
 
     /**
      * Initiate shutdown of the interface manager.
      * 
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool ifmgr_shutdown();
+    int ifmgr_shutdown();
 
     EventLoop&		_eventloop;
 

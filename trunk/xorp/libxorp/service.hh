@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/service.hh,v 1.9 2007/02/16 22:46:23 pavlin Exp $
+// $XORP: xorp/libxorp/service.hh,v 1.10 2007/05/23 12:12:44 pavlin Exp $
 
 #ifndef __LIBXORP_SERVICE_HH__
 #define __LIBXORP_SERVICE_HH__
@@ -82,18 +82,18 @@ public:
      * SERVICE_STARTING immediately and onto SERVICE_RUNNING or
      * SERVICE_FAILED in the near future.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool startup() = 0;
+    virtual int startup() = 0;
 
     /**
      * Shutdown service.  Service should transition from SERVICE_RUNNING to
      * SERVICE_SHUTTING_DOWN immediately and onto SERVICE_SHUTDOWN or
      * SERVICE_FAILED in the near future.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool shutdown() = 0;
+    virtual int shutdown() = 0;
 
     /**
      * Reset service.  Service should transition in SERVICE_READY from
@@ -102,9 +102,9 @@ public:
      * The default implementation always returns false as there is no
      * default behaviour.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool reset();
+    virtual int reset();
 
     /**
      * Pause service.  Service should transition from SERVICE_RUNNING to
@@ -113,9 +113,9 @@ public:
      * The default implementation always returns false as there is no
      * default behaviour.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool pause();
+    virtual int pause();
 
     /**
      * Resume paused service.  Service should transition from SERVICE_PAUSED
@@ -124,9 +124,9 @@ public:
      * The default implementation always returns false as there is no
      * default behaviour.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual bool resume();
+    virtual int resume();
 
     /**
      * Get name of service.
@@ -156,18 +156,17 @@ public:
      * synchronous notifications of changes in service state.
      *
      * @param so service change observer to add.
-     * @return true on success, false if an observer is already set.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool set_observer(ServiceChangeObserverBase* so);
+    int set_observer(ServiceChangeObserverBase* so);
 
     /**
      * Remove service status change observer.
      *
      * @param so observer to remove.
-     * @return true on success, false if supplied observer does match
-     * the last set observer.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool unset_observer(ServiceChangeObserverBase* so);
+    int unset_observer(ServiceChangeObserverBase* so);
 
 protected:
     /**

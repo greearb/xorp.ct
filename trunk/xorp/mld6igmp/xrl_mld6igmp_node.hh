@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.44 2007/05/19 08:11:22 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.45 2007/08/16 01:21:51 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -59,16 +59,16 @@ public:
     /**
      * Startup the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	startup();
+    int startup();
 
     /**
      * Shutdown the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	shutdown();
+    int shutdown();
 
     /**
      * Get a reference to the XrlRouter instance.

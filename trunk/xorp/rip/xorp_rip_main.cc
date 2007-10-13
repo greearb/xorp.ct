@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.15 2007/02/16 22:47:17 pavlin Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.16 2007/05/23 12:12:50 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -114,7 +114,7 @@ public:
 
     bool add_service(ServiceBase* sb)
     {
-	if (sb->set_observer(this)) {
+	if (sb->set_observer(this) == XORP_OK) {
 	    _services.push_back(sb);
 	    update_status();
 	    return true;

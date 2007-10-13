@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/proto_state.cc,v 1.13 2006/12/22 18:54:24 pavlin Exp $"
+#ident "$XORP: xorp/libproto/proto_state.cc,v 1.14 2007/02/16 22:46:03 pavlin Exp $"
 
 
 //
@@ -76,7 +76,7 @@ ProtoState::start()
 
     ProtoState::reset();
 
-    if (ProtoState::startup() != true)
+    if (ProtoState::startup() != XORP_OK)
 	return (XORP_ERROR);
 
     ServiceBase::set_status(SERVICE_RUNNING);
@@ -90,7 +90,7 @@ ProtoState::stop()
     if (is_down())
 	return (XORP_OK);		// Already down
 
-    if (ProtoState::shutdown() != true)
+    if (ProtoState::shutdown() != XORP_OK)
 	return (XORP_ERROR);
 
     ServiceBase::set_status(SERVICE_SHUTDOWN);
@@ -126,7 +126,7 @@ ProtoState::pending_stop()
     return (XORP_OK);
 }
 
-bool
+int
 ProtoState::startup()
 {
     //
@@ -134,24 +134,24 @@ ProtoState::startup()
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
 	|| (ServiceBase::status() == SERVICE_RUNNING))
-	return true;
+	return (XORP_OK);
 
     if (ServiceBase::status() != SERVICE_READY)
-	return false;
+	return (XORP_ERROR);
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 ProtoState::reset()
 {
     if (ServiceBase::status() != SERVICE_READY)
 	ServiceBase::set_status(SERVICE_READY);
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 ProtoState::shutdown()
 {
     //
@@ -160,7 +160,7 @@ ProtoState::shutdown()
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
 	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
 	|| (ServiceBase::status() == SERVICE_FAILED)) {
-	return true;
+	return (XORP_OK);
     }
 
     if ((ServiceBase::status() != SERVICE_RUNNING)
@@ -168,10 +168,10 @@ ProtoState::shutdown()
 	&& (ServiceBase::status() != SERVICE_PAUSING)
 	&& (ServiceBase::status() != SERVICE_PAUSED)
 	&& (ServiceBase::status() != SERVICE_RESUMING)) {
-	return false;
+	return (XORP_ERROR);
     }
 
-    return true;
+    return (XORP_OK);
 }
 
 void

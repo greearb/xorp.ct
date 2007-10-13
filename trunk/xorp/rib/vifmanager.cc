@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.47 2007/09/27 00:33:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.48 2007/10/12 07:53:54 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -88,7 +88,7 @@ VifManager::start()
     //
     // Startup the interface manager
     //
-    if (ifmgr_startup() != true) {
+    if (ifmgr_startup() != XORP_OK) {
 	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
@@ -145,7 +145,7 @@ VifManager::stop()
     //
     // Shutdown the interface manager
     //
-    if (ifmgr_shutdown() != true) {
+    if (ifmgr_shutdown() != XORP_OK) {
 	ServiceBase::set_status(SERVICE_FAILED);
 	return (XORP_ERROR);
     }
@@ -253,10 +253,10 @@ VifManager::update_status()
     }
 }
 
-bool
+int
 VifManager::ifmgr_startup()
 {
-    bool ret_value;
+    int ret_value;
 
     // TODO: XXX: we should startup the ifmgr only if it hasn't started yet
     incr_startup_requests_n();
@@ -268,13 +268,13 @@ VifManager::ifmgr_startup()
     // will be called.
     //
 
-    return ret_value;
+    return (ret_value);
 }
 
-bool
+int
 VifManager::ifmgr_shutdown()
 {
-    bool ret_value;
+    int ret_value;
 
     incr_shutdown_requests_n();
 
@@ -285,7 +285,7 @@ VifManager::ifmgr_shutdown()
     // will be called.
     //
 
-    return ret_value;
+    return (ret_value);
 }
 
 void

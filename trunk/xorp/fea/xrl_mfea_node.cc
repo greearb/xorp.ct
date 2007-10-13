@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.61 2007/09/15 19:52:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.62 2007/10/12 07:53:46 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -60,25 +60,25 @@ XrlMfeaNode::~XrlMfeaNode()
     shutdown();
 }
 
-bool
+int
 XrlMfeaNode::startup()
 {
     if (start_mfea() != XORP_OK)
-	return false;
+	return (XORP_ERROR);
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 XrlMfeaNode::shutdown()
 {
-    bool ret_value = true;
+    int ret_value = XORP_OK;
 
     if (stop_cli() != XORP_OK)
-	ret_value = false;
+	ret_value = XORP_ERROR;
 
     if (stop_mfea() != XORP_OK)
-	ret_value = false;
+	ret_value = XORP_ERROR;
 
     return (ret_value);
 }
@@ -681,7 +681,7 @@ XrlMfeaNode::common_0_1_shutdown()
 {
     string error_msg;
 
-    if (shutdown() != true) {
+    if (shutdown() != XORP_OK) {
 	error_msg = c_format("Failed to shutdown MFEA");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }

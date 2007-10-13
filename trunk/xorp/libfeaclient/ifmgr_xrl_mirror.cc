@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.25 2007/09/15 00:57:06 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.26 2007/09/27 00:33:37 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -1010,11 +1010,11 @@ IfMgrXrlMirror::~IfMgrXrlMirror()
     }
 }
 
-bool
+int
 IfMgrXrlMirror::startup()
 {
     if (status() != SERVICE_READY)
-	return false;
+	return (XORP_ERROR);
 
     if (_rtr == NULL) {
 	if (! _finder_hostname.empty()) {
@@ -1034,19 +1034,19 @@ IfMgrXrlMirror::startup()
     }
     set_status(SERVICE_STARTING, "Initializing Xrl Router.");
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 IfMgrXrlMirror::shutdown()
 {
     if (status() != SERVICE_RUNNING)
-	return false;
+	return (XORP_ERROR);
 
     set_status(SERVICE_SHUTTING_DOWN);
     unregister_with_ifmgr();
 
-    return true;
+    return (XORP_OK);
 }
 
 void

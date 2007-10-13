@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.21 2007/02/16 22:47:30 pavlin Exp $
+// $XORP: xorp/static_routes/xrl_static_routes_node.hh,v 1.22 2007/08/16 01:19:06 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_XRL_STATIC_ROUTES_NODE_HH__
@@ -53,16 +53,16 @@ public:
     /**
      * Startup the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	startup();
+    int startup();
 
     /**
      * Shutdown the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	shutdown();
+    int shutdown();
 
     /**
      * Get a reference to the XrlRouter instance.

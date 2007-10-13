@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_service.cc,v 1.12 2007/02/16 22:46:25 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_service.cc,v 1.13 2007/05/23 12:12:44 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -81,22 +81,22 @@ public:
 	: _e(e)
     {}
 
-    bool
+    int
     startup()
     {
 	set_status(SERVICE_STARTING, "Waiting for timed start event");
 	_xt = _e.new_oneoff_after_ms(TRANS_MS,
 				     callback(this, &TestService::go_running));
-	return true;
+	return (XORP_OK);
     }
 
-    bool
+    int
     shutdown()
     {
 	set_status(SERVICE_SHUTTING_DOWN, "Waiting for timed shutdown event");
 	_xt = _e.new_oneoff_after_ms(TRANS_MS,
 				     callback(this, &TestService::go_shutdown));
-	return true;
+	return (XORP_OK);
     }
 
 protected:

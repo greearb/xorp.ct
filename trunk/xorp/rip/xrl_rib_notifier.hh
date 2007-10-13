@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_rib_notifier.hh,v 1.7 2007/02/16 22:47:18 pavlin Exp $
+// $XORP: xorp/rip/xrl_rib_notifier.hh,v 1.8 2007/05/23 12:12:51 pavlin Exp $
 
 #ifndef __RIP_XRL_RIB_NOTIFIER_HH__
 #define __RIP_XRL_RIB_NOTIFIER_HH__
@@ -83,17 +83,17 @@ public:
      * Request RIB instantiates a RIP routing table and once instantiated
      * start passing route updates to RIB.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool startup();
+    int startup();
 
     /**
      * Stop forwarding route updates to RIB and request RIB
      * unregisters RIP routing table.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool shutdown();
+    int shutdown();
 
     /**
      * Accessor returning the current number of Xrls inflight.

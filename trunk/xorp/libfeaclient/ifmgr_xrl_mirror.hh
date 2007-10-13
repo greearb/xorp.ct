@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.16 2007/02/16 22:46:00 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.17 2007/05/23 12:12:36 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -130,17 +130,17 @@ public:
      * transition into the SERVICE_RUNNING state (see @ref ServiceBase for
      * states).
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool startup();
+    int startup();
 
     /**
      * Stop running and shutdown.  Deregister with the registration
      * target and transition to SERVICE_SHUTDOWN state when complete.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool shutdown();
+    int shutdown();
 
     /**
      * @return interface configuration tree.  Should only be trusted when

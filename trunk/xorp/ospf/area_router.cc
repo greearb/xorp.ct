@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.282 2007/08/18 00:11:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.283 2007/08/24 02:03:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -108,7 +108,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 }
 
 template <typename A>
-bool
+int
 AreaRouter<A>::startup()
 {
     generate_default_route();
@@ -125,17 +125,17 @@ AreaRouter<A>::startup()
     if (external_area_type())
 	pm.external_push(_area);
 
-    return true;
+    return (XORP_OK);
 }
 
 template <typename A>
-bool
+int
 AreaRouter<A>::shutdown()
 {
     _ospf.get_routing_table().remove_area(_area);
     clear_database();
 
-    return true;
+    return (XORP_OK);
 }
 
 template <typename A>

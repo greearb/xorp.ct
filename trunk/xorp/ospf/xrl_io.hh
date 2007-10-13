@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.29 2007/05/23 12:12:45 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.30 2007/08/16 01:05:51 pavlin Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -139,31 +139,31 @@ class XrlIO : public IO<A>,
     /**
      * Startup operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool startup() {
+    int startup() {
 	//
 	// XXX: when the startup is completed,
 	// IfMgrHintObserver::tree_complete() will be called.
 	//
-	if (_ifmgr.startup() != true) {
+	if (_ifmgr.startup() != XORP_OK) {
 	    ServiceBase::set_status(SERVICE_FAILED);
-	    return (false);
+	    return (XORP_ERROR);
 	}
 
  	register_rib();
 	component_up("startup");
 
-	return (true);
+	return (XORP_OK);
     }
 
 
     /**
      * Shutdown operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool shutdown() {
+    int shutdown() {
 	//
 	// XXX: when the shutdown is completed, XrlIO::status_change()
 	// will be called.

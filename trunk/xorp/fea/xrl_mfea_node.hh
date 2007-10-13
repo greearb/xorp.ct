@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.35 2007/05/19 01:52:42 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.36 2007/08/16 01:16:41 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -55,16 +55,16 @@ public:
     /**
      * Startup the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	startup();
+    int startup();
 
     /**
      * Shutdown the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	shutdown();
+    int shutdown();
 
     /**
      * Get a reference to the XrlRouter instance.

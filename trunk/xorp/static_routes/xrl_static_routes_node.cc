@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.38 2007/05/19 01:33:41 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.39 2007/08/16 01:19:06 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -71,13 +71,13 @@ XrlStaticRoutesNode::~XrlStaticRoutesNode()
     _ifmgr.unset_observer(dynamic_cast<StaticRoutesNode*>(this));
 }
 
-bool
+int
 XrlStaticRoutesNode::startup()
 {
     return StaticRoutesNode::startup();
 }
 
-bool
+int
 XrlStaticRoutesNode::shutdown()
 {
     return StaticRoutesNode::shutdown();
@@ -965,7 +965,7 @@ XrlStaticRoutesNode::common_0_1_shutdown()
 {
     string error_msg;
 
-    if (shutdown() != true) {
+    if (shutdown() != XORP_OK) {
 	error_msg = c_format("Failed to shutdown StaticRoutes");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -992,7 +992,7 @@ XrlStaticRoutesNode::finder_event_observer_0_1_xrl_target_birth(
 	// IfMgrHintObserver::tree_complete() will be called.
 	//
 	_is_fea_alive = true;
-	if (_ifmgr.startup() != true) {
+	if (_ifmgr.startup() != XORP_OK) {
 	    StaticRoutesNode::ServiceBase::set_status(SERVICE_FAILED);
 	    StaticRoutesNode::update_status();
 	}

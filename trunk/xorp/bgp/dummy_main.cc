@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.19 2007/02/16 22:45:11 pavlin Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.20 2007/09/11 08:06:19 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -44,16 +44,16 @@ BGPMain::~BGPMain() {
     
 }
 
-bool
+int
 BGPMain::startup()
 {
-    return (true);
+    return (XORP_OK);
 }
 
-bool
+int
 BGPMain::shutdown()
 {
-    return (true);
+    return (XORP_OK);
 }
 
 void

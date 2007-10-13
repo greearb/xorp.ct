@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.19 2007/02/16 22:45:58 pavlin Exp $
+// $XORP: xorp/fib2mrib/xrl_fib2mrib_node.hh,v 1.20 2007/08/16 01:18:20 pavlin Exp $
 
 #ifndef __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_XRL_FIB2MRIB_NODE_HH__
@@ -54,16 +54,16 @@ public:
     /**
      * Startup the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	startup();
+    int startup();
 
     /**
      * Shutdown the node operation.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool	shutdown();
+    int shutdown();
 
     /**
      * Get a reference to the XrlRouter instance.

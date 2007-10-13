@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.64 2007/08/16 01:21:51 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.65 2007/10/12 07:53:51 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -79,25 +79,25 @@ XrlMld6igmpNode::~XrlMld6igmpNode()
     delete_pointers_list(_xrl_tasks_queue);
 }
 
-bool
+int
 XrlMld6igmpNode::startup()
 {
     if (start_mld6igmp() != XORP_OK)
-	return false;
+	return (XORP_ERROR);
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 XrlMld6igmpNode::shutdown()
 {
-    bool ret_value = true;
+   int ret_value = true;
 
     if (stop_cli() != XORP_OK)
-	ret_value = false;
+	ret_value = XORP_ERROR;
 
     if (stop_mld6igmp() != XORP_OK)
-	ret_value = false;
+	ret_value = XORP_ERROR;
 
     return (ret_value);
 }
@@ -1550,7 +1550,7 @@ XrlMld6igmpNode::common_0_1_shutdown()
     bool is_error = false;
     string error_msg;
 
-    if (shutdown() != true) {
+    if (shutdown() != XORP_OK) {
 	if (! is_error)
 	    error_msg = c_format("Failed to shutdown %s",
 				 Mld6igmpNode::proto_is_igmp() ?
@@ -1589,7 +1589,7 @@ XrlMld6igmpNode::finder_event_observer_0_1_xrl_target_birth(
 	// XXX: when the startup is completed,
 	// IfMgrHintObserver::tree_complete() will be called.
 	//
-	if (_ifmgr.startup() != true) {
+	if (_ifmgr.startup() != XORP_OK) {
 	    Mld6igmpNode::set_status(SERVICE_FAILED);
 	    Mld6igmpNode::update_status();
 	}

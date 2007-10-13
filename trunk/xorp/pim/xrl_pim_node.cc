@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.100 2007/08/16 01:21:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.101 2007/10/12 07:53:53 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -96,25 +96,25 @@ XrlPimNode::~XrlPimNode()
     delete_pointers_list(_xrl_tasks_queue);
 }
 
-bool
+int
 XrlPimNode::startup()
 {
     if (start_pim() != XORP_OK)
-	return false;
+	return (XORP_ERROR);
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 XrlPimNode::shutdown()
 {
-    bool ret_value = true;
+    int ret_value = XORP_OK;
 
     if (stop_cli() != XORP_OK)
-	ret_value = false;
+	ret_value = XORP_ERROR;
 
     if (stop_pim() != XORP_OK)
-	ret_value = false;
+	ret_value = XORP_ERROR;
 
     return (ret_value);
 }
@@ -2715,7 +2715,7 @@ XrlPimNode::common_0_1_shutdown()
     bool is_error = false;
     string error_msg;
 
-    if (shutdown() != true) {
+    if (shutdown() != XORP_OK) {
 	if (! is_error)
 	    error_msg = c_format("Failed to shutdown PIM");
 	is_error = true;
@@ -2752,7 +2752,7 @@ XrlPimNode::finder_event_observer_0_1_xrl_target_birth(
 	// XXX: when the startup is completed,
 	// IfMgrHintObserver::tree_complete() will be called.
 	//
-	if (_ifmgr.startup() != true) {
+	if (_ifmgr.startup() != XORP_OK) {
 	    PimNode::set_status(SERVICE_FAILED);
 	    PimNode::update_status();
 	}

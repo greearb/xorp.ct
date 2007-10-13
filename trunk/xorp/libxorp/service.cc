@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/service.cc,v 1.8 2006/08/09 15:57:53 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/service.cc,v 1.9 2007/02/16 22:46:23 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -44,7 +44,9 @@ service_status_name(ServiceStatus s)
 // ServiceBase implmentation
 
 ServiceBase::ServiceBase(const string& n)
-    : _name(n), _status(SERVICE_READY), _observer(0)
+    : _name(n),
+      _status(SERVICE_READY),
+      _observer(NULL)
 {
 }
 
@@ -52,49 +54,49 @@ ServiceBase::~ServiceBase()
 {
 }
 
-bool
+int
 ServiceBase::reset()
 {
-    return false;
+    return (XORP_ERROR);
 }
 
-bool
+int
 ServiceBase::pause()
 {
-    return false;
+    return (XORP_ERROR);
 }
 
-bool
+int
 ServiceBase::resume()
 {
-    return false;
+    return (XORP_ERROR);
 }
 
 
 const char*
 ServiceBase::status_name() const
 {
-    return service_status_name(_status);
+    return (service_status_name(_status));
 }
 
-bool
+int
 ServiceBase::set_observer(ServiceChangeObserverBase* so)
 {
-    if (_observer) {
-	return false;
-    }
+    if (_observer != NULL)
+	return (XORP_ERROR);
+
     _observer = so;
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 ServiceBase::unset_observer(ServiceChangeObserverBase* so)
 {
-    if (_observer == so) {
-	_observer = 0;
-	return true;
-    }
-    return false;
+    if (_observer != so)
+	return (XORP_ERROR);
+
+    _observer = NULL;
+    return (XORP_OK);
 }
 
 void
@@ -106,9 +108,8 @@ ServiceBase::set_status(ServiceStatus status, const string& note)
     bool note_changed = (_note != note);
     _note = note;
 
-    if (_observer && (ost != _status || note_changed)) {
+    if ((_observer != NULL) && (ost != _status || note_changed))
 	_observer->status_change(this, ost, _status);
-    }
 }
 
 void
@@ -119,9 +120,8 @@ ServiceBase::set_status(ServiceStatus status)
 
     _note.erase();
 
-    if (_observer && ost != _status) {
+    if ((_observer != NULL) && (ost != _status))
 	_observer->status_change(this, ost, _status);
-    }
 }
 
 
@@ -140,7 +140,9 @@ ServiceFilteredChangeObserver::ServiceFilteredChangeObserver(
 					ServiceStatus		   from,
 					ServiceStatus		   to
 					)
-    : _child(child), _from_mask(from), _to_mask(to)
+    : _child(child),
+      _from_mask(from),
+      _to_mask(to)
 {
 }
 
@@ -149,8 +151,6 @@ ServiceFilteredChangeObserver::status_change(ServiceBase*	service,
 					     ServiceStatus 	old_status,
 					     ServiceStatus 	new_status)
 {
-    if (old_status & _from_mask &&
-	new_status & _to_mask) {
+    if ((old_status & _from_mask) && (new_status & _to_mask))
 	_child->status_change(service, old_status, new_status);
-    }
 }

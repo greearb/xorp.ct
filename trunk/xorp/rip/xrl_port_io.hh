@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.10 2007/05/23 12:12:50 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.11 2007/08/09 00:47:02 pavlin Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -48,18 +48,18 @@ public:
      * both operations are successful, instance status transitions to
      * SERVICE_RUNNING.  Otherwise, it transitions to failed.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool startup();
+    int startup();
 
     /**
      * Shutdown.  Sends request to close socket and transitions into
      * SERVICE_SHUTTING_DOWN state.  When socket is closed transition to
      * SERVICE_SHUTDOWN occurs.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool shutdown();
+    int shutdown();
 
     /**
      * Send packet.  Status of instance must be running.  When packet is sent,

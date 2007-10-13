@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_process_spy.hh,v 1.7 2006/03/16 00:05:54 pavlin Exp $
+// $XORP: xorp/rip/xrl_process_spy.hh,v 1.8 2007/02/16 22:47:18 pavlin Exp $
 
 #ifndef __RIP_XRL_PROCESS_SPY_HH__
 #define __RIP_XRL_PROCESS_SPY_HH__
@@ -36,16 +36,16 @@ public:
     /**
      * Register interest in FEA and RIB with Finder.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool startup();
+    int startup();
 
     /**
      * Deregister interest in FEA and RIB with Finder.
      *
-     * @return true on success, false on failure.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    bool shutdown();
+    int shutdown();
 
     /**
      * Get indication of whether FEA is present.

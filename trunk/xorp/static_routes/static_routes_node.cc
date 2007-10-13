@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.36 2007/02/16 22:47:29 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.37 2007/04/23 23:05:10 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -46,7 +46,7 @@ StaticRoutesNode::~StaticRoutesNode()
     shutdown();
 }
 
-bool
+int
 StaticRoutesNode::startup()
 {
     //
@@ -54,10 +54,10 @@ StaticRoutesNode::startup()
     //
     if ((ServiceBase::status() == SERVICE_STARTING)
 	|| (ServiceBase::status() == SERVICE_RUNNING)) {
-	return true;
+	return (XORP_OK);
     }
     if (ServiceBase::status() != SERVICE_READY) {
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -82,10 +82,10 @@ StaticRoutesNode::startup()
     //
     rib_register_startup();
 
-    return true;
+    return (XORP_OK);
 }
 
-bool
+int
 StaticRoutesNode::shutdown()
 {
     //
@@ -94,14 +94,14 @@ StaticRoutesNode::shutdown()
     if ((ServiceBase::status() == SERVICE_SHUTDOWN)
 	|| (ServiceBase::status() == SERVICE_SHUTTING_DOWN)
 	|| (ServiceBase::status() == SERVICE_FAILED)) {
-	return true;
+	return (XORP_OK);
     }
     if ((ServiceBase::status() != SERVICE_RUNNING)
 	&& (ServiceBase::status() != SERVICE_STARTING)
 	&& (ServiceBase::status() != SERVICE_PAUSING)
 	&& (ServiceBase::status() != SERVICE_PAUSED)
 	&& (ServiceBase::status() != SERVICE_RESUMING)) {
-	return false;
+	return (XORP_ERROR);
     }
 
     //
@@ -131,7 +131,7 @@ StaticRoutesNode::shutdown()
     //
     update_status();
 
-    return true;
+    return (XORP_OK);
 }
 
 void

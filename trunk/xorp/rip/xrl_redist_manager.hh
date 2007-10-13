@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.9 2007/02/16 22:47:18 pavlin Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.10 2007/05/23 12:12:51 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
@@ -52,8 +52,8 @@ public:
     XrlRedistManager(System<A>& system, XrlRouter& router);
     ~XrlRedistManager();
 
-    bool startup();
-    bool shutdown();
+    int startup();
+    int shutdown();
 
     void request_redist_for(const string& protocol,
 			    uint16_t	  cost,

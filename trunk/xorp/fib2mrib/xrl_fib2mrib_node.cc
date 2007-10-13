@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.38 2007/05/23 04:08:25 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.39 2007/08/16 01:18:19 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -78,16 +78,16 @@ XrlFib2mribNode::~XrlFib2mribNode()
     _ifmgr.unset_observer(dynamic_cast<Fib2mribNode*>(this));
 }
 
-bool
+int
 XrlFib2mribNode::startup()
 {
-    return Fib2mribNode::startup();
+    return (Fib2mribNode::startup());
 }
 
-bool
+int
 XrlFib2mribNode::shutdown()
 {
-    return Fib2mribNode::shutdown();
+    return (Fib2mribNode::shutdown());
 }
 
 //
@@ -1503,7 +1503,7 @@ XrlFib2mribNode::common_0_1_shutdown()
 {
     string error_msg;
 
-    if (shutdown() != true) {
+    if (shutdown() != XORP_OK) {
 	error_msg = c_format("Failed to shutdown Fib2mrib");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
@@ -1530,7 +1530,7 @@ XrlFib2mribNode::finder_event_observer_0_1_xrl_target_birth(
 	// IfMgrHintObserver::tree_complete() will be called.
 	//
 	_is_fea_alive = true;
-	if (_ifmgr.startup() != true) {
+	if (_ifmgr.startup() != XORP_OK) {
 	    Fib2mribNode::ServiceBase::set_status(SERVICE_FAILED);
 	    Fib2mribNode::update_status();
 	} else {
