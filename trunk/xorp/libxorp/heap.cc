@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.18 2006/08/12 00:38:36 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.19 2007/02/16 22:46:19 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -258,12 +258,10 @@ Heap::Heap(bool intrude)
     debug_msg("++ constructor for 0x%p\n", this);
 }
 
-// cleanup the heap and free data structure
 Heap::~Heap()
 {
-    if (_size >0)
+    if (_p != NULL)
         delete[] _p;
-    memset(this, 0, sizeof(*this));
 }
 
 void
