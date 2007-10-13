@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.186 2007/09/30 04:09:06 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.187 2007/10/03 23:14:12 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -77,6 +77,9 @@ Release 1.5-WIP (2007/??/??)
 
     - Fix a long configuration delay when using xorpsh in
       non-interactive mode (e.g., "cat commands.txt | xorpsh").
+
+    - Addition of a new "-e" command line option. It can be used to tell
+      xorpsh to exit immediately if the connection to the Finder fails.
 
   POLICY:
     - 
