@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.293 2007/10/16 00:15:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.294 2007/10/16 00:17:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4042,10 +4042,13 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 {
     const char *event_name = "HelloReceived";
     XLOG_TRACE(_ospf.trace()._neighbour_events, 
-	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       "Event(%s) Interface(%s) Neighbour(%s) DR (%s) BDR (%s) "
+	       "State(%s)",
 	       event_name,
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
+	       pr_id(hello->get_designated_router()).c_str(),
+	       pr_id(hello->get_backup_designated_router()).c_str(),
 	       pp_state(get_state()).c_str());
 
     debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
