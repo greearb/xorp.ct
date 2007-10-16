@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.291 2007/10/10 23:55:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.292 2007/10/12 17:31:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1884,8 +1884,9 @@ Peer<A>::event_neighbour_change()
     switch(get_state()) {
     case Down:
 	break;
-    case Loopback:
     case Waiting:
+	break;
+    case Loopback:
     case Point2Point:
 	XLOG_WARNING("Unexpected state %s",
 		     pp_interface_state(get_state()).c_str());
