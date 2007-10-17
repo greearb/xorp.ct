@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.283 2007/08/24 02:03:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.284 2007/10/13 01:50:04 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1903,9 +1903,8 @@ operator==(const LinkLsa& lhs, const LinkLsa& rhs)
 }
 
 template <typename A>
-void
-AreaRouter<A>::check_link_lsa(OspfTypes::PeerID peerid, LinkLsa *nllsa,
-			      LinkLsa *ollsa)
+bool
+AreaRouter<A>::check_link_lsa(LinkLsa *nllsa, LinkLsa *ollsa)
 {
     XLOG_ASSERT(nllsa);
 
@@ -1913,9 +1912,16 @@ AreaRouter<A>::check_link_lsa(OspfTypes::PeerID peerid, LinkLsa *nllsa,
     // Link-LSA then there is nothing that needs to be done.
     if (ollsa) {
 	if (*nllsa == *ollsa)
-	    return;
+	    return false;
     }
 
+    return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::update_intra_area_prefix_lsa(OspfTypes::PeerID peerid)
+{
     PeerManager<A>& pm = _ospf.get_peer_manager();
     uint32_t interface_id = pm.get_interface_id(peerid);
     list<RouterInfo> routers;
@@ -2396,6 +2402,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	// If this router is the designated router for this peer and
 	// this is a Link-LSA it may be necessary for the router to
 	// generate a new Intra-Area-Prefix-LSA.
+	bool invoke_update_intra_area_prefix_lsa = false;
 	switch(_ospf.get_version()) {
 	case OspfTypes::V2:
 	    break;
@@ -2414,7 +2421,8 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
  		nllsa = dynamic_cast<LinkLsa *>((*i).get());
 		if (0 == nllsa)
 		    break;
-		check_link_lsa(peerid, nllsa, ollsa);
+		invoke_update_intra_area_prefix_lsa =
+		    check_link_lsa(nllsa, ollsa);
 		break;
 	    case OLDER:
 	    case EQUIVALENT:
@@ -2527,6 +2535,18 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	    // (f) Self orignating LSAs 
 	    // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
+	    // OSPFv3 only.
+	    // If this router is the designated router for this peer and
+	    // this is a Link-LSA it may be necessary for the router to
+	    // generate a new Intra-Area-Prefix-LSA.
+	    switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		break;
+	    case OspfTypes::V3:
+		if (invoke_update_intra_area_prefix_lsa)
+		    update_intra_area_prefix_lsa(peerid);
+		break;
+	    }
 	}
 	    break;
 	case OLDER:
