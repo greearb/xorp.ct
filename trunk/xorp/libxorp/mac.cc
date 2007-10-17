@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.18 2007/06/26 18:39:30 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.19 2007/06/27 01:08:44 pavlin Exp $"
 
 #include <vector>
 
@@ -82,6 +82,12 @@ Mac::normalized_str() const
 
     XLOG_UNREACHABLE();
     return (_srep);
+}
+
+bool
+Mac::is_zero() const
+{
+    return (*this == ZERO());
 }
 
 bool
@@ -326,3 +332,7 @@ EtherMac::is_multicast() const
 
     return (addr[0] & MULTICAST_BIT);
 }
+
+const Mac MacConstants::zero(Mac("00:00:00:00:00:00"));
+const Mac MacConstants::all_ones(Mac("ff:ff:ff:ff:ff:ff"));
+const Mac MacConstants::lldp_multicast(Mac("01:80:c2:00:00:0e"));

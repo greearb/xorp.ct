@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.19 2007/06/26 21:43:26 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.20 2007/06/27 01:08:44 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -104,16 +104,49 @@ public:
     bool empty() const { return _srep.empty(); }
 
     /**
+     * Test if this address is numerically zero.
+     *
+     * @return true if the address is numerically zero.
+     */
+    bool is_zero() const;
+
+    /**
      * Test if this address is a valid multicast address.
      *
      * @return true if the address is a valid multicast address.
      */
     bool is_multicast() const;
 
+    /**
+     * Pre-defined MAC address constants.
+     */
+    static const Mac& ZERO();
+    static const Mac& ALL_ONES();
+    static const Mac& LLDP_MULTICAST();
+
 protected:
     void set_rep(const string& s) { _srep = s; }
     string _srep;
 };
+
+struct MacConstants {
+    static const Mac zero,
+	all_ones,
+	lldp_multicast;
+};
+
+inline const Mac& Mac::ZERO() {
+    return MacConstants::zero;
+}
+
+inline const Mac& Mac::ALL_ONES() {
+    return MacConstants::all_ones;
+}
+
+inline const Mac& Mac::LLDP_MULTICAST() {
+    return MacConstants::lldp_multicast;
+}
+
 
 //
 // EtherMac is really IEEE standard 6 octet address
