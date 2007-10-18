@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.296 2007/10/18 00:23:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.297 2007/10/18 00:49:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3188,7 +3188,11 @@ template <>
 bool
 Peer<IPv6>::update_nets()
 {
-    return get_area_router()->update_link_lsa(get_peerid(), _link_lsa);
+    bool status = get_area_router()->update_link_lsa(get_peerid(), _link_lsa);
+    if (is_DR())
+	get_area_router()->update_intra_area_prefix_lsa(get_peerid());
+
+    return status;
 }
 
 template <typename A>
