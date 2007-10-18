@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.295 2007/10/16 00:53:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.296 2007/10/18 00:23:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1288,7 +1288,10 @@ Peer<A>::is_DR() const
     XLOG_ASSERT(do_dr_or_bdr());
 
     if (DR == get_state()) {
-	XLOG_ASSERT(get_candidate_id() == get_designated_router());
+	if(get_candidate_id() != get_designated_router())
+	    XLOG_WARNING("State DR %s != %s Did the router ID change?",
+			 pr_id(get_candidate_id()).c_str(),
+			 pr_id(get_designated_router()).c_str());
 	return true;
     }
 
@@ -1302,7 +1305,10 @@ Peer<A>::is_BDR() const
     XLOG_ASSERT(do_dr_or_bdr());
 
     if (Backup == get_state()) {
-	XLOG_ASSERT(get_candidate_id() == get_backup_designated_router());
+	if (get_candidate_id() != get_backup_designated_router())
+	    XLOG_WARNING("State Backup %s != %s Did the router ID change?",
+			 pr_id(get_candidate_id()).c_str(),
+			 pr_id(get_backup_designated_router()).c_str());
 	return true;
     }
 
