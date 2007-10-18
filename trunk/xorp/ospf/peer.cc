@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.294 2007/10/16 00:17:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.295 2007/10/16 00:53:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4080,7 +4080,17 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     OspfTypes::RouterID previous_bdr = 0;
     if (first) {
 	XLOG_ASSERT(!_inactivity_timer.scheduled());
+	if (_peer.do_dr_or_bdr()) {
+	    previous_router_priority = hello->get_router_priority();
+	    previous_dr = hello->get_designated_router();
+	    previous_bdr = hello->get_backup_designated_router();
+	}
     } else {
+	if (hello->get_router_id() != _hello_packet->get_router_id()) {
+	    XLOG_INFO("Router ID changed from %s to %s",
+		      pr_id(_hello_packet->get_router_id()).c_str(),
+		      pr_id(hello->get_router_id()).c_str());
+	}
 	if (_peer.do_dr_or_bdr()) {
 	    previous_router_priority = _hello_packet->get_router_priority();
 	    previous_dr = _hello_packet->get_designated_router();
@@ -4112,6 +4122,9 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     if (!_peer.do_dr_or_bdr())
 	return;
 
+    if (previous_router_priority != hello->get_router_priority())
+	_peer.schedule_event("NeighbourChange");
+
     // Everything below here it trying to figure out if a
     // "NeighbourChange" event should be scheduled. Which is not
     // allowed in state Waiting.
@@ -4121,36 +4134,35 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	    get_candidate_id() == hello->get_backup_designated_router()) {
 	    _peer.schedule_event("BackupSeen");
 	}
-	return;
     }
 
-    if (previous_router_priority != hello->get_router_priority())
+    // If the neighbour is declaring itself the designated router and
+    // it had not previously.
+    if ((get_candidate_id() == hello->get_designated_router() &&
+	 previous_dr != hello->get_designated_router())) {
 	_peer.schedule_event("NeighbourChange");
+    }
 
-    bool is_dr = _peer.get_designated_router() == 
-	hello->get_designated_router();
-
-    bool was_dr;
-
-    if (first)
-	was_dr = false;
-    else
-	was_dr = _peer.get_designated_router() == previous_dr;
-
-    if(is_dr != was_dr)
+    // If the neighbour is not declaring itself the designated router and
+    // it had previously.
+    if ((get_candidate_id() == previous_dr &&
+	 previous_dr != hello->get_designated_router())) {
 	_peer.schedule_event("NeighbourChange");
+    }
 
-    bool is_bdr = _peer.get_backup_designated_router() ==
-	hello->get_backup_designated_router();
-	  
-    bool was_bdr;
-    if (first)
-	was_bdr = false;
-    else
-	was_bdr = _peer.get_backup_designated_router() == previous_bdr;
-
-    if(is_bdr != was_bdr)
+    // If the neighbour is declaring itself the designated backup router and
+    // it had not previously.
+    if ((get_candidate_id() == hello->get_backup_designated_router() &&
+	 previous_bdr != hello->get_backup_designated_router())) {
 	_peer.schedule_event("NeighbourChange");
+    }
+
+    // If the neighbour is not declaring itself the designated backup
+    // router and it had previously.
+    if ((get_candidate_id() == previous_bdr &&
+	 previous_bdr != hello->get_backup_designated_router())) {
+	_peer.schedule_event("NeighbourChange");
+    }
 
     if (OspfTypes::NBMA == get_linktype())
 	XLOG_WARNING("TBD");
@@ -4213,6 +4225,8 @@ Neighbour<A>::event_2_way_received()
 	} else {
 	    change_state(TwoWay);
 	}
+	if (_peer.do_dr_or_bdr())
+	    _peer.schedule_event("NeighbourChange");
 	break;
     case TwoWay:
     case ExStart:
