@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.5 2007/08/15 18:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.6 2007/09/15 19:52:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,22 +28,22 @@
 // Filter class for checking incoming raw link-level packets and checking
 // whether to forward them.
 //
-class VifInputFilter : public IoLinkComm::InputFilter {
+class LinkVifInputFilter : public IoLinkComm::InputFilter {
 public:
-    VifInputFilter(IoLinkManager&	io_link_manager,
-		   IoLinkComm&		io_link_comm,
-		   const string&	receiver_name,
-		   const string&	if_name,
-		   const string&	vif_name,
-		   uint16_t		ether_type,
-		   const string&	filter_program)
+    LinkVifInputFilter(IoLinkManager&	io_link_manager,
+		       IoLinkComm&	io_link_comm,
+		       const string&	receiver_name,
+		       const string&	if_name,
+		       const string&	vif_name,
+		       uint16_t		ether_type,
+		       const string&	filter_program)
 	: IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
 				  vif_name, ether_type, filter_program),
 	  _io_link_comm(io_link_comm),
 	  _enable_multicast_loopback(false)
     {}
 
-    virtual ~VifInputFilter() {
+    virtual ~LinkVifInputFilter() {
 	leave_all_multicast_groups();
     }
 
@@ -102,7 +102,7 @@ public:
     void leave_all_multicast_groups() {
 	string error_msg;
 	while (! _joined_multicast_groups.empty()) {
-	    const Mac& group_address = *(_joined_multicast_groups.begin());
+	    Mac group_address = *(_joined_multicast_groups.begin());
 	    leave_multicast_group(group_address, error_msg);
 	}
     }
@@ -652,7 +652,7 @@ IoLinkManager::register_receiver(const string&	receiver_name,
 				 string&	error_msg)
 {
     CommTableKey key(if_name, vif_name, ether_type, filter_program);
-    VifInputFilter* filter;
+    LinkVifInputFilter* filter;
 
     error_msg = "";
 
@@ -677,7 +677,7 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
     for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -697,8 +697,9 @@ IoLinkManager::register_receiver(const string&	receiver_name,
     //
     // Create the filter
     //
-    filter = new VifInputFilter(*this, *io_link_comm, receiver_name, if_name,
-				vif_name, ether_type, filter_program);
+    filter = new LinkVifInputFilter(*this, *io_link_comm, receiver_name,
+				    if_name, vif_name, ether_type,
+				    filter_program);
     filter->set_enable_multicast_loopback(enable_multicast_loopback);
 
     // Add the filter to the appropriate IoLinkComm entry
@@ -750,8 +751,8 @@ IoLinkManager::unregister_receiver(const string&	receiver_name,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
     for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter* filter;
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	LinkVifInputFilter* filter;
+	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -817,8 +818,8 @@ IoLinkManager::join_multicast_group(const string&	receiver_name,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
     for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter* filter;
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	LinkVifInputFilter* filter;
+	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -862,8 +863,8 @@ IoLinkManager::leave_multicast_group(const string&	receiver_name,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = _filters.upper_bound(receiver_name);
     for (fi = _filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter* filter;
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	LinkVifInputFilter* filter;
+	filter = dynamic_cast<LinkVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.9 2007/08/15 18:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_ip_manager.cc,v 1.10 2007/09/15 19:52:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,14 +28,14 @@
 // Filter class for checking incoming raw packets and checking whether
 // to forward them.
 //
-class VifInputFilter : public IoIpComm::InputFilter {
+class IpVifInputFilter : public IoIpComm::InputFilter {
 public:
-    VifInputFilter(IoIpManager&		io_ip_manager,
-		   IoIpComm&		io_ip_comm,
-		   const string&	receiver_name,
-		   const string&	if_name,
-		   const string&	vif_name,
-		   uint8_t		ip_protocol)
+    IpVifInputFilter(IoIpManager&	io_ip_manager,
+		     IoIpComm&		io_ip_comm,
+		     const string&	receiver_name,
+		     const string&	if_name,
+		     const string&	vif_name,
+		     uint8_t		ip_protocol)
 	: IoIpComm::InputFilter(io_ip_manager, receiver_name, ip_protocol),
 	  _io_ip_comm(io_ip_comm),
 	  _if_name(if_name),
@@ -43,7 +43,7 @@ public:
 	  _enable_multicast_loopback(false)
     {}
 
-    virtual ~VifInputFilter() {
+    virtual ~IpVifInputFilter() {
 	leave_all_multicast_groups();
     }
 
@@ -127,7 +127,7 @@ public:
     void leave_all_multicast_groups() {
 	string error_msg;
 	while (! _joined_multicast_groups.empty()) {
-	    const IPvX& group_address = *(_joined_multicast_groups.begin());
+	    IPvX group_address = *(_joined_multicast_groups.begin());
 	    leave_multicast_group(group_address, error_msg);
 	}
     }
@@ -817,7 +817,7 @@ IoIpManager::register_receiver(int		family,
 			       bool		enable_multicast_loopback,
 			       string&		error_msg)
 {
-    VifInputFilter* filter;
+    IpVifInputFilter* filter;
     CommTable& comm_table = comm_table_by_family(family);
     FilterBag& filters = filters_by_family(family);
 
@@ -843,7 +843,7 @@ IoIpManager::register_receiver(int		family,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
     for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	filter = dynamic_cast<IpVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -862,8 +862,8 @@ IoIpManager::register_receiver(int		family,
     //
     // Create the filter
     //
-    filter = new VifInputFilter(*this, *io_ip_comm, receiver_name, if_name,
-				vif_name, ip_protocol);
+    filter = new IpVifInputFilter(*this, *io_ip_comm, receiver_name, if_name,
+				  vif_name, ip_protocol);
     filter->set_enable_multicast_loopback(enable_multicast_loopback);
 
     // Add the filter to the appropriate IoIpComm entry
@@ -913,8 +913,8 @@ IoIpManager::unregister_receiver(int		family,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
     for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter* filter;
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	IpVifInputFilter* filter;
+	filter = dynamic_cast<IpVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -978,8 +978,8 @@ IoIpManager::join_multicast_group(const string&	receiver_name,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
     for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter* filter;
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	IpVifInputFilter* filter;
+	filter = dynamic_cast<IpVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
@@ -1021,8 +1021,8 @@ IoIpManager::leave_multicast_group(const string&	receiver_name,
     FilterBag::iterator fi;
     FilterBag::iterator fi_end = filters.upper_bound(receiver_name);
     for (fi = filters.lower_bound(receiver_name); fi != fi_end; ++fi) {
-	VifInputFilter* filter;
-	filter = dynamic_cast<VifInputFilter*>(fi->second);
+	IpVifInputFilter* filter;
+	filter = dynamic_cast<IpVifInputFilter*>(fi->second);
 	if (filter == NULL)
 	    continue; // Not a vif filter
 
