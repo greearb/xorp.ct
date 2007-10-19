@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.284 2007/10/13 01:50:04 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.285 2007/10/17 16:08:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1580,7 +1580,9 @@ AreaRouter<A>::external_withdraw(Lsa::LsaRef lsar)
     XLOG_ASSERT(lsar == _db[index]);
     XLOG_ASSERT(lsar->maxage());
     // XXX - Will cause a routing recomputation.
+#ifndef	MAX_AGE_IN_DATABASE
     delete_lsa(lsar, index, false /* Don't invalidate */);
+#endif
     publish_all(lsar);
 }
 
