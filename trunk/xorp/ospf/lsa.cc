@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.105 2007/09/24 21:59:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.106 2007/10/19 01:13:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -384,7 +384,8 @@ Ls_request::str() const
     string output;
 
     output = c_format(" LS type %#x", get_ls_type());
-    output += c_format(" Link State ID %#x", get_link_state_id());
+    output += c_format(" Link State ID %s", 
+		       pr_id(get_link_state_id()).c_str());
     output += c_format(" Advertising Router %s",
 		       pr_id(get_advertising_router()).c_str());
     
