@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.11 2007/06/15 22:27:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.12 2007/10/17 23:03:40 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -375,7 +375,7 @@ test_ethermac_valid_constructors(TestInfo& test_info)
     // Default constructor.
     //
     EtherMac ether_mac1;
-    verbose_match(ether_mac1.str(), "");
+    verbose_match(ether_mac1.str(), Mac::ZERO().str());
     
     //
     // Constructor from a string.
@@ -627,7 +627,7 @@ test_ethermac_address_type(TestInfo& test_info)
 {
     UNUSED(test_info);
 
-    EtherMac ether_mac_empty;				// Empty address
+    EtherMac ether_mac_default;			// Default (zero) address
     EtherMac ether_mac_zero("00:00:00:00:00:00");	// Zero address
     EtherMac ether_mac_unicast("00:11:11:11:11:11");	// Unicast
     EtherMac ether_mac_multicast("01:22:22:22:22:22");	// Multicast
@@ -635,7 +635,7 @@ test_ethermac_address_type(TestInfo& test_info)
     //
     // Test if an address is empty.
     //
-    verbose_assert(ether_mac_empty.empty() == true, "empty()");
+    verbose_assert(ether_mac_default.empty() == false, "empty()");
     verbose_assert(ether_mac_zero.empty() == false, "empty()");
     verbose_assert(ether_mac_unicast.empty() == false, "empty()");
     verbose_assert(ether_mac_multicast.empty() == false, "empty()");
@@ -643,7 +643,7 @@ test_ethermac_address_type(TestInfo& test_info)
     //
     // Test if an address is numerically zero.
     //
-    verbose_assert(ether_mac_empty.is_zero() == false, "is_zero()");
+    verbose_assert(ether_mac_default.is_zero() == true, "is_zero()");
     verbose_assert(ether_mac_zero.is_zero() == true, "is_zero()");
     verbose_assert(ether_mac_unicast.is_zero() == false, "is_zero()");
     verbose_assert(ether_mac_multicast.is_zero() == false, "is_zero()");
@@ -651,9 +651,11 @@ test_ethermac_address_type(TestInfo& test_info)
     //
     // Test if an address is a valid multicast address.
     //
-    verbose_assert(ether_mac_empty.is_multicast() == false, "is_multicast()");
+    verbose_assert(ether_mac_default.is_multicast() == false,
+		   "is_multicast()");
     verbose_assert(ether_mac_zero.is_multicast() == false, "is_multicast()");
-    verbose_assert(ether_mac_unicast.is_multicast() == false, "is_multicast()");
+    verbose_assert(ether_mac_unicast.is_multicast() == false,
+		   "is_multicast()");
     verbose_assert(ether_mac_multicast.is_multicast() == true,
 		   "is_multicast()");
 

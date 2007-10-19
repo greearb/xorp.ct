@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.20 2007/06/27 01:08:44 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.21 2007/10/17 23:00:36 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -156,7 +156,7 @@ public:
     /**
      * Default constructor
      */
-    EtherMac() : Mac() {}
+    EtherMac() : Mac(Mac::ZERO()) {}
 
     /**
      * Constructor from a (uint8_t *) memory pointer.
