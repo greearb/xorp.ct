@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.6 2007/07/26 01:18:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.7 2007/10/18 00:45:55 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -29,6 +29,9 @@
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
 #endif
 
 #include "fea/iftree.hh"
@@ -61,7 +64,8 @@ IoLinkPcap::IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
       _pcap(NULL),
       _datalink_type(-1),
       _databuf(NULL),
-      _errbuf(NULL)
+      _errbuf(NULL),
+      _multicast_sock(-1)
 {
 }
 
@@ -87,8 +91,22 @@ IoLinkPcap::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (open_pcap_access(error_msg) != XORP_OK)
+    //
+    // Open the multicast L2 join socket
+    //
+    XLOG_ASSERT(_multicast_sock < 0);
+    _multicast_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (_multicast_sock < 0) {
+	error_msg = c_format("Error opening multicast L2 join socket: %s",
+			     strerror(errno));
 	return (XORP_ERROR);
+    }
+
+    if (open_pcap_access(error_msg) != XORP_OK) {
+	close(_multicast_sock);
+	_multicast_sock = -1;
+	return (XORP_ERROR);
+    }
 
     _is_running = true;
 
@@ -103,6 +121,17 @@ IoLinkPcap::stop(string& error_msg)
 
     if (close_pcap_access(error_msg) != XORP_OK)
 	return (XORP_ERROR);
+
+    //
+    // Close the multicast L2 join socket
+    //
+    XLOG_ASSERT(_multicast_sock >= 0);
+    if (close(_multicast_sock) < 0) {
+	error_msg = c_format("Error closing multicast L2 join socket: %s",
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+    _multicast_sock = -1;
 
     _is_running = false;
 
@@ -372,18 +401,20 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     // On Linux we need to use ifreq.ifr_hwaddr with sa_family of AF_UNSPEC.
     //
     // On FreeBSD and DragonFlyBSD we need to use ifreq.ifr_addr with sa_family
-    // of AF_LINK.
+    // of AF_LINK and sockaddr_dl aligned address storage.
     // On NetBSD and OpenBSD we need to use ifreq.ifr_addr with sa_family
     // of AF_UNSPEC.
     //
-    struct ifreq ifreq;
+    uint8_t buffer[sizeof(struct ifreq) + sizeof(struct sockaddr_storage)];
+    struct ifreq* ifreq_p = reinterpret_cast<struct ifreq *>(&buffer[0]);
     struct sockaddr* sa = NULL;
-    memset(&ifreq, 0, sizeof(ifreq));
-    strncpy(ifreq.ifr_name, vif_name().c_str(), sizeof(ifreq.ifr_name) - 1);
+
+    memset(buffer, 0, sizeof(buffer));
+    strlcpy(ifreq_p->ifr_name, vif_name().c_str(), sizeof(ifreq_p->ifr_name));
 #ifdef HAVE_STRUCT_IFREQ_IFR_HWADDR
-    sa = &ifreq.ifr_hwaddr;
+    sa = &ifreq_p->ifr_hwaddr;
 #else
-    sa = &ifreq.ifr_addr;
+    sa = &ifreq_p->ifr_addr;
 #endif
 
     //
@@ -401,7 +432,22 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 				 e.str().c_str());
 	    return (XORP_ERROR);
 	}
+
+#if defined(HOST_OS_DRAGONFLYBSD) || defined(HOST_OS_FREEBSD)
+	{
+	    struct sockaddr_dl* sdl;
+	    struct ether_addr ether_addr;
+
+	    group_ether.copy_out(ether_addr);
+	    sdl = reinterpret_cast<struct sockaddr_dl *>(sa);
+	    sdl->sdl_len = sizeof(*sdl);
+	    sdl->sdl_family = AF_LINK;
+	    sdl->sdl_alen = sizeof(ether_addr);
+	    memcpy(LLADDR(sdl), &ether_addr, sizeof(ether_addr));
+	}
+#else
 	group_ether.copy_out(*sa);
+#endif
 	break;
     }
 
@@ -427,7 +473,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 #endif
 
     int request = (is_join)? SIOCADDMULTI : SIOCDELMULTI;
-    if (ioctl(_packet_fd, request, &ifreq) < 0) {
+    if (ioctl(_multicast_sock, request, ifreq_p) < 0) {
 	error_msg = c_format("Cannot %s group %s on interface %s vif %s: %s",
 			     (is_join)? "join" : "leave",
 			     cstring(group),

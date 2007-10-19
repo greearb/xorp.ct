@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.3 2007/07/16 23:56:12 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.4 2007/07/26 01:18:41 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -170,6 +170,7 @@ private:
 
     uint8_t*	_databuf;	// Data buffer for sending and receiving
     char*	_errbuf;	// Buffer for error messages
+    int		_multicast_sock; // The socket to join L2 multicast groups
 
     XorpTask	_recv_data_task; // Task for receiving pending data
 };
