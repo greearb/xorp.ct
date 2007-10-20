@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/tlv.hh,v 1.4 2006/03/16 00:04:36 pavlin Exp $
+// $XORP: xorp/libxorp/tlv.hh,v 1.5 2007/02/16 22:46:27 pavlin Exp $
 
 #ifndef __LIBXORP_TLV_HH__
 #define __LIBXORP_TLV_HH__
@@ -89,7 +89,7 @@ class Tlv {
 	    return false;
 	
 	uint32_t len = data.size();
-	n = ntohl(len);
+	n = htonl(len);
 
 	if (1 != fwrite(&n, sizeof(n), 1, _fp))
 	    return false;
