@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.298 2007/10/18 22:58:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.299 2007/10/19 01:15:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3600,25 +3600,26 @@ class RxmtWrapper {
 
 template <typename A>
 void
-Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, bool immediate, 
+Neighbour<A>::start_rxmt_timer(uint32_t index, RxmtCallback rcb,
+			       bool immediate, 
 			       const char *comment)
 {
     debug_msg("start_rxmt_timer: %p %s %s\n", this, 
 	      _peer.get_if_name().c_str(),
 	      comment);
-
+    XLOG_ASSERT(index < TIMERS);
 
     // Any outstanding timers should already have been cancelled.
-    XLOG_ASSERT(0 == _rxmt_wrapper);
+    XLOG_ASSERT(0 == _rxmt_wrapper[index]);
 
-    _rxmt_wrapper = new RxmtWrapper(rcb, 
+    _rxmt_wrapper[index] = new RxmtWrapper(rcb, 
 				    c_format("%s %s",
 					     _peer.get_if_name().c_str(),
 					     comment).c_str());
 
-    _rxmt_timer = _ospf.get_eventloop().
+    _rxmt_timer[index] = _ospf.get_eventloop().
  	new_periodic_ms(_peer.get_rxmt_interval() * 1000,
-			callback(_rxmt_wrapper, &RxmtWrapper::doit));
+			callback(_rxmt_wrapper[index], &RxmtWrapper::doit));
 
     // Send one immediately. Do this last so all state is set.
     if (immediate)
@@ -3627,27 +3628,28 @@ Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, bool immediate,
 
 template <typename A>
 void
-Neighbour<A>::stop_rxmt_timer(const char *comment)
+Neighbour<A>::stop_rxmt_timer(uint32_t index, const char *comment)
 {
     debug_msg("stop_rxmt_timer: %p %s %s\n", this,
 	      _peer.get_if_name().c_str(), comment);
-    if (_rxmt_wrapper) {
-	debug_msg("\tstopping %s\n", cstring(*_rxmt_wrapper));
-	delete _rxmt_wrapper;
-	_rxmt_wrapper = 0;
+    XLOG_ASSERT(index < TIMERS);
+    if (_rxmt_wrapper[index]) {
+	debug_msg("\tstopping %s\n", cstring(*_rxmt_wrapper[index]));
+	delete _rxmt_wrapper[index];
+	_rxmt_wrapper[index] = 0;
     }
 
-    _rxmt_timer.unschedule();
+    _rxmt_timer[index].unschedule();
 }
 
 template <typename A>
 void
 Neighbour<A>::restart_retransmitter()
 {
-    if (_rxmt_wrapper)
-	stop_rxmt_timer("restart retransmitter");
+    if (_rxmt_wrapper[FULL])
+	stop_rxmt_timer(FULL, "restart retransmitter");
 
-    start_rxmt_timer(callback(this, &Neighbour<A>::retransmitter),
+    start_rxmt_timer(FULL, callback(this, &Neighbour<A>::retransmitter),
 		     false,
 		     "restart retransmitter");
 }
@@ -3863,7 +3865,8 @@ Neighbour<A>::start_sending_data_description_packets(const char *event_name,
     _data_description_packet.set_ms_bit(true);
     _data_description_packet.get_lsa_headers().clear();
 
-    start_rxmt_timer(callback(this,
+    start_rxmt_timer(INITIAL,
+		     callback(this,
 			      &Neighbour<A>::send_data_description_packet),
 		     immediate,
 		     c_format("send_data_description from %s",
@@ -4016,7 +4019,8 @@ void
 Neighbour<A>::tear_down_state(State previous_state)
 {
     stop_inactivity_timer();
-    stop_rxmt_timer("Tear Down State");
+    for (uint32_t i = 0; i < TIMERS; i++)
+	stop_rxmt_timer(i, "Tear Down State");
     _all_headers_sent = false;
     if (_database_handle.valid())
 	get_area_router()->close_database(_database_handle);
@@ -5095,15 +5099,15 @@ Neighbour<A>::event_negotiation_done()
 	build_data_description_packet();
 	// If we are the master start sending description packets.
 	if (!_last_dd.get_ms_bit()) {
-	    stop_rxmt_timer("NegotiationDone (master)");
-	    start_rxmt_timer(callback(this,
+	    stop_rxmt_timer(INITIAL, "NegotiationDone (master)");
+	    start_rxmt_timer(INITIAL, callback(this,
 				      &Neighbour<A>::
 				      send_data_description_packet),
 			     true,
 			     "send_data_description from NegotiationDone");
 	} else {
 	    // We have now agreed we are the slave so stop retransmitting.
-	    stop_rxmt_timer("NegotiationDone (slave)");
+	    stop_rxmt_timer(INITIAL, "NegotiationDone (slave)");
 	    // Send a response to the poll
 	    send_data_description_packet();
 	}
@@ -5157,7 +5161,7 @@ Neighbour<A>::event_exchange_done()
 	change_state(Loading);
 	// Stop any retransmissions, only the master should have any running.
 	if (!_last_dd.get_ms_bit())
-	    stop_rxmt_timer("ExchangeDone");
+	    stop_rxmt_timer(INITIAL, "ExchangeDone");
 
 	// The protocol allows link state request packets to be sent
 	// before the database exchange has taken place. For the time

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.145 2007/10/10 22:04:32 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.146 2007/10/11 23:06:32 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1434,6 +1434,16 @@ class Neighbour {
 	Full = 8
     };
 
+    static const uint32_t TIMERS = 2;	// Number of timers
+
+    /**
+     * Index for timers.
+     */
+    enum Timers {
+	INITIAL = 0,	// Database exchanges.
+	FULL = 1,	// LSA requests and retransmissions.
+    };
+
     typedef XorpCallback0<bool>::RefPtr RxmtCallback;
 
     /**
@@ -1450,11 +1460,13 @@ class Neighbour {
 	  _linktype(linktype),
 	  _state(state), _hello_packet(0),
 	  _last_dd(ospf.get_version()),
-	  _data_description_packet(ospf.get_version()),
-	  _rxmt_wrapper(0)
+	  _data_description_packet(ospf.get_version())
     {
 	// No neighbour should ever have this ID.
 	XLOG_ASSERT(OspfTypes::ALLNEIGHBOURS != neighbourid);
+	
+	for (uint32_t i = 0; i < TIMERS; i++)
+	    _rxmt_wrapper[i] = 0;
 
 	TimeVal t;
 	_ospf.get_eventloop().current_time(t);
@@ -1470,7 +1482,8 @@ class Neighbour {
 
     ~Neighbour() {
 	delete _hello_packet;
-	delete _rxmt_wrapper;
+	for (uint32_t i = 0; i < TIMERS; i++)
+	    delete _rxmt_wrapper[i];
     }
 
     /**
@@ -1645,8 +1658,8 @@ class Neighbour {
     DataDescriptionPacket _data_description_packet;
     bool _all_headers_sent;		// Tracking database transmssion
 
-    XorpTimer _rxmt_timer;		// Retransmit timer.
-    RxmtWrapper *_rxmt_wrapper;		// Wrapper to retransmiter.
+    XorpTimer _rxmt_timer[TIMERS];	// Retransmit timers.
+    RxmtWrapper *_rxmt_wrapper[TIMERS];	// Wrappers to retransmiter.
 
     DataBaseHandle _database_handle;	// Handle to the Link State Database.
     list<Lsa_header> _ls_request_list;	// Link state request list.
@@ -1709,17 +1722,21 @@ class Neighbour {
     /**
      * Start the retransmit timer.
      *
+     * @param index defining which timer to use.
      * @param RxmtCallback method to be called ever retransmit interval.
      * @param immediate don't wait for the retransmit interval send
      * one now.
      * @param comment to track the callbacks
      */
-    void start_rxmt_timer(RxmtCallback, bool immediate, const char *comment);
+    void start_rxmt_timer(uint32_t index, RxmtCallback, bool immediate, 
+			  const char *comment);
 
     /**
      * Stop the retransmit timer.
+     * @param index defining which timer to use.
+     *
      */
-    void stop_rxmt_timer(const char *comment);
+    void stop_rxmt_timer(uint32_t index, const char *comment);
 
     /**
      * restart transmitter.
