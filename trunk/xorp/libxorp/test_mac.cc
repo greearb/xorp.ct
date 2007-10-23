@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.12 2007/10/17 23:03:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.13 2007/10/19 00:09:40 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -156,6 +156,7 @@ test_mac_valid_constructors(TestInfo& test_info)
 
     // Test values for Mac address: "11:22:33:44:55:66"
     const string addr_string = "11:22:33:44:55:66";
+    const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
     
     //
     // Default constructor.
@@ -174,6 +175,12 @@ test_mac_valid_constructors(TestInfo& test_info)
     //
     Mac mac3(mac2);
     verbose_match(mac3.str(), addr_string);
+
+    //
+    // Constructor from a (uint8_t *) memory pointer.
+    //
+    Mac mac4(ui8_addr, sizeof(ui8_addr));
+    verbose_match(mac4.str(), addr_string);
 
     return (! failures());
 }
@@ -200,6 +207,21 @@ test_mac_invalid_constructors(TestInfo& test_info)
 	verbose_log("%s : OK\n", e.str().c_str());
     }
 
+    //
+    // Constructor from memory location with invalid length.
+    //
+    try {
+	// Memory location with invalid length.
+	const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+	Mac mac(ui8_addr, sizeof(ui8_addr) - 1);
+	verbose_log("Cannot catch Mac address with invalid length : FAIL\n");
+	incr_failures();
+	UNUSED(mac);
+    } catch (const BadMac& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
     return (! failures());
 }
 
@@ -213,27 +235,33 @@ test_mac_valid_copy_in_out(TestInfo& test_info)
 
     // Test values for Mac address: "11:22:33:44:55:66"
     const string addr_string = "11:22:33:44:55:66";
+    const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
 
     //
     // Copy the Mac raw address to specified memory location.
     //
-#if 0
-    // TODO: XXX: Mac doesn't have copy_out() method yet
     Mac mac1(addr_string);
     uint8_t mac1_uint8[6];
     verbose_assert(mac1.copy_out(&mac1_uint8[0]) == 6,
 		   "copy_out(uint8_t *) for Mac address");
-    verbose_assert(memcmp(&ui8, &mac1_uint8[0], 6) == 0,
+    verbose_assert(memcmp(&ui8_addr, &mac1_uint8[0], 6) == 0,
 		   "compare copy_out(uint8_t *) for Mac address");
-#endif
+
+    //
+    // Copy a raw address into Mac address.
+    //
+    Mac mac2;
+    verbose_assert(mac2.copy_in(&ui8_addr[0], sizeof(ui8_addr)) == 6,
+		   "copy_in(uint8_t *) for Mac address");
+    verbose_match(mac2.str(), addr_string);
 
     //
     // Copy a string address into Mac address.
     //
-    Mac mac2;
-    verbose_assert(mac2.copy_in(addr_string) == 6,
+    Mac mac3;
+    verbose_assert(mac3.copy_in(addr_string) == 6,
 		   "copy_in(string) for Mac address");
-    verbose_match(mac2.str(), addr_string);
+    verbose_match(mac3.str(), addr_string);
 
     return (! failures());
 }
@@ -255,6 +283,21 @@ test_mac_invalid_copy_in_out(TestInfo& test_info)
 	verbose_log("Cannot catch invalid Mac address \"hello\" : FAIL\n");
 	incr_failures();
     } catch (const InvalidString& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+
+    //
+    // Copy-in from memory location with invalid length.
+    //
+    try {
+	// Memory location with invalid length.
+	const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+	Mac mac;
+	mac.copy_in(ui8_addr, sizeof(ui8_addr) - 1);
+	verbose_log("Cannot catch Mac address with invalid length : FAIL\n");
+	incr_failures();
+    } catch (const BadMac& e) {
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }

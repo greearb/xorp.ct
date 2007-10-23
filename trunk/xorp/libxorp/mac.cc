@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.19 2007/06/27 01:08:44 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.20 2007/10/17 23:00:36 pavlin Exp $"
 
 #include <vector>
 
@@ -25,9 +25,66 @@
 /* ------------------------------------------------------------------------- */
 /* Base Mac methods */
 
+Mac::Mac(const uint8_t* from_uint8, size_t len) throw (BadMac)
+{
+    copy_in(from_uint8, len);
+}
+
 Mac::Mac(const string& from_string) throw (InvalidString)
 {
     copy_in(from_string);
+}
+
+size_t
+Mac::copy_out(uint8_t* to_uint8) const
+{
+    if (_srep.empty())
+	return (0);	// XXX: the empty string is valid, so don't copy it
+
+    // ------------------------------------------------------------------------
+    // I M P O R T A N T !
+    //
+    // Check all known MAC instance classes for whether string is valid
+    // and use the corresponding copy_out() method.
+    //
+    // Add new MyMac::valid and MyMac::normalize() methods here
+    // ------------------------------------------------------------------------
+    if (EtherMac::valid(_srep)) {
+	EtherMac ether_mac(_srep);
+	return (ether_mac.copy_out(to_uint8));
+    }
+
+    XLOG_UNREACHABLE();
+    return (static_cast<size_t>(-1));
+}
+
+size_t
+Mac::copy_in(const uint8_t* from_uint8, size_t len) throw (BadMac)
+{
+    size_t ret_value = static_cast<size_t>(-1);
+
+    // ------------------------------------------------------------------------
+    // I M P O R T A N T !
+    //
+    // Check all known MAC instance classes for whether address length is valid
+    //
+    // Add new address length checks here
+    // ------------------------------------------------------------------------
+    do {
+	if (len == EtherMac::ADDR_BYTELEN) {
+	    EtherMac ether_mac(from_uint8);
+	    _srep = ether_mac.str();
+	    ret_value = len;
+	    break;
+	}
+
+	xorp_throw(BadMac,
+		   c_format("Unknown Mac representation: length = %u",
+			    XORP_UINT_CAST(len)));
+	return (static_cast<size_t>(-1));
+    } while (false);
+
+    return (ret_value);
 }
 
 size_t

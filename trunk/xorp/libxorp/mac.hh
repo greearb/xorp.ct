@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.21 2007/10/17 23:00:36 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.22 2007/10/19 00:09:40 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -50,6 +50,15 @@ public:
     Mac() {}
 
     /**
+     * Constructor from a (uint8_t *) memory pointer.
+     *
+     * @param from_uint8 the pointer to the memory to copy the address value
+     * from.
+     * @param len the length of the address.
+     */
+    Mac(const uint8_t* from_uint8, size_t len) throw (BadMac);
+
+    /**
      * Construct MAC address from string. Mac address format must conform
      * to one of known types.
      *
@@ -59,7 +68,25 @@ public:
     Mac(const string& from_string) throw (InvalidString);
 
     /**
-     * Copy a MAC address from string. Mac address format must conform
+     * Copy the Mac raw address to specified memory location.
+     *
+     * @param: to_uint8 the pointer to the memory to copy the address to.
+     * @return the number of copied octets.
+     */
+    size_t copy_out(uint8_t* to_uint8) const;
+
+    /**
+     * Copy a raw Mac address from specified memory location into
+     * Mac container.
+     *
+     * @param from_uint8 the memory address to copy the address from.
+     * @param len the length of the address.
+     * @return the number of copied octets.
+     */
+    size_t copy_in(const uint8_t* from_uint8, size_t len) throw (BadMac);
+
+    /**
+     * Copy a Mac address from string. Mac address format must conform
      * to one of known types.
      *
      * @param from_string the storage to copy the address from.
@@ -88,7 +115,7 @@ public:
      * Get the normalized string of MAC address.
      *
      * For example, in case of Ethernet MAC address, the original
-     * string with an EtherMAC address is converted into
+     * string with an EtherMac address is converted into
      * an "struct ether_addr", and then back to a string.
      * Thus, the string address representation is normalized
      * to the system's internal preference. Example:
@@ -280,7 +307,7 @@ public:
     /**
      * Normalize the string representation of an EtherMac address.
      *
-     * Convert the string with an EtherMAC address into
+     * Convert the string with an EtherMac address into
      * an "struct ether_addr", and then back to a string.
      * Thus, the string address representation is normalized
      * to the system's internal preference. Example:
