@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.94 2007/08/24 02:09:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.95 2007/10/03 21:23:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -73,6 +73,11 @@ void
 Ospf<A>::receive(const string& interface, const string& vif,
 		 A dst, A src, uint8_t* data, uint32_t len)
 {
+    XLOG_TRACE(trace()._packets, 
+	       "Interface %s Vif %s dst %s src %s data %p len %u\n",
+	      interface.c_str(), vif.c_str(),
+	      dst.str().c_str(), src.str().c_str(),
+	      data, len);
     debug_msg("Interface %s Vif %s dst %s src %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(),
 	      dst.str().c_str(), src.str().c_str(),
@@ -91,7 +96,8 @@ Ospf<A>::receive(const string& interface, const string& vif,
 	return;
     }
 
-    debug_msg("%s\n", packet->str().c_str());
+    XLOG_TRACE(trace()._packets, "%s\n", cstring(*packet));
+    debug_msg("%s\n", cstring(*packet));
     // We have a packet and its good.
 
     bool packet_accepted = false;
@@ -287,6 +293,8 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 		  A dst, A src,
 		  uint8_t* data, uint32_t len)
 {
+    XLOG_TRACE(trace()._packets, "Interface %s Vif %s data %p len %u\n",
+	      interface.c_str(), vif.c_str(), data, len);
     debug_msg("Interface %s Vif %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(), data, len);
 
@@ -294,6 +302,18 @@ Ospf<A>::transmit(const string& interface, const string& vif,
     // pseudo header. In the IPv4 case this function is a noop.
     ipv6_checksum_apply<A>(src, dst, data, len, Packet::CHECKSUM_OFFSET,
 			   _io->get_ip_protocol_number());
+
+    if (trace()._packets) {
+	try {
+	    // Decode the packet in order to pretty print it.
+	    Packet *packet = _packet_decoder.decode(data, len);
+	    XLOG_TRACE(trace()._packets, "Transmit: %s\n", cstring(*packet));
+	    delete packet;
+	} catch(InvalidPacket& e) {
+	    XLOG_TRACE(trace()._packets, "Unable to decode packet\n");
+	}
+    }
+
 #ifdef	DEBUG_LOGGING
     try {
 	// Decode the packet in order to pretty print it.
