@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.299 2007/10/19 01:15:57 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.300 2007/10/23 08:59:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -311,11 +311,6 @@ PeerOut<A>::peer_change()
     }
 }
 
-/**
- * XXX
- * The outgoing packets should be queued on the transmit queue, for
- * the time being just send them straight out.
- */
 template <typename A>
 bool
 PeerOut<A>::transmit(typename Transmit<A>::TransmitRef tr)
