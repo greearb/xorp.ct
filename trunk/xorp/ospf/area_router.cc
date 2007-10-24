@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.285 2007/10/17 16:08:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.286 2007/10/19 02:43:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2363,8 +2363,15 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
 	    case OspfTypes::V2:
 		break;
 	    case OspfTypes::V3:
-		if (!(*i)->known() && (*i)->as_scope())
+		// Note unknown LSAs are captured in this test.
+		if (!(*i)->link_local_scope() && !(*i)->area_scope())
 		    continue;
+#if	0
+		if (!(*i)->known()) {
+		    XLOG_INFO("%s", cstring(*(*i)));
+		    (*i)->set_tracing(true);
+		}
+#endif
 		break;
 	    }
 	    break;
