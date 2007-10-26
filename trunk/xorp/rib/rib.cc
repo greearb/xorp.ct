@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.67 2007/09/27 00:33:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.68 2007/10/03 00:05:48 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -512,9 +512,9 @@ RIB<A>::new_vif(const string& vifname, const Vif& vif)
     } else {
 	// Create a new vif
 	new_rib_vif = new RibVif(this, vif);
-	_vifs[vifname] = new_rib_vif;
     }
     XLOG_ASSERT(new_rib_vif != NULL);
+    _vifs[vifname] = new_rib_vif;
 
     if (new_rib_vif->is_underlying_vif_up()) {
 	//
