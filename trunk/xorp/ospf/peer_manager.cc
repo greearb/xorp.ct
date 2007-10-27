@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.147 2007/10/27 02:50:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.148 2007/10/27 03:41:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -900,6 +900,9 @@ PeerManager<A>::clear_database()
 	    (*p).second->set_state(true);
 	}
     }
+
+    // Clear the summaries that are sent into other areas.
+    _summaries.clear();
 
     // Clear the AS-External-LSA database.
     _external.clear_database();
