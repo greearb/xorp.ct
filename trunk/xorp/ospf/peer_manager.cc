@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.148 2007/10/27 03:41:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.149 2007/10/27 06:44:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -901,9 +901,6 @@ PeerManager<A>::clear_database()
 	}
     }
 
-    // Clear the summaries that are sent into other areas.
-    _summaries.clear();
-
     // Clear the AS-External-LSA database.
     _external.clear_database();
 
@@ -916,9 +913,12 @@ PeerManager<A>::clear_database()
     }
 
     // Recompute the routes in all areas to withdraw the routes and
-    // remove virtual links. Should not be required as dropping the
+    // remove virtual links. This will also cause the summary routes
+    // to be withdrawn. Should not be required as dropping the
     // adjacencies should prompt a route recomputation.
     routing_recompute_all_areas();
+
+    XLOG_ASSERT(_summaries.empty());
 
     return true;
 }
