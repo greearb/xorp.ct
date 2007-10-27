@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.32 2007/08/17 22:18:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.33 2007/08/22 01:36:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -485,6 +485,16 @@ External<A>::maxage_reached(Lsa::LsaRef lsar)
     // Clear the timer otherwise there is a circular dependency.
     // The LSA contains a XorpTimer that points back to the LSA.
     lsar->get_timer().clear();
+}
+
+void
+ASExternalDatabase::clear()
+{
+    set <Lsa::LsaRef, compare>::iterator i;
+    for(i = _lsas.begin(); i != _lsas.end(); i++)
+	(*i)->invalidate();
+
+    _lsas.clear();
 }
 
 ASExternalDatabase::iterator

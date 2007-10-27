@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.18 2007/08/17 22:18:47 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.19 2007/08/22 01:36:16 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -40,7 +40,7 @@ class ASExternalDatabase {
     iterator end() { return _lsas.end(); }
     void erase(iterator i) { _lsas.erase(i); }
     void insert(Lsa::LsaRef lsar) { _lsas.insert(lsar); }
-    void clear() { _lsas.clear(); }
+    void clear();
 
     iterator find(Lsa::LsaRef lsar);
 
