@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.145 2007/08/24 02:07:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.146 2007/10/03 21:23:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -890,6 +890,17 @@ template <typename A>
 bool
 PeerManager<A>::clear_database()
 {
+    // Drop all adjacencies.
+    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator p;
+    for(p = _peers.begin(); p != _peers.end(); p++) {
+	// If this peer is up then taking it down and bringing it up
+	// should drop all adjacencies.
+	if( (*p).second->get_state()) {
+	    (*p).second->set_state(false);
+	    (*p).second->set_state(true);
+	}
+    }
+
     // Clear the AS-External-LSA database.
     _external.clear_database();
 
@@ -901,17 +912,6 @@ PeerManager<A>::clear_database()
 	(*a).second->change_area_router_type((*a).second->get_area_type());
     }
 
-    // Drop all adjacencies.
-    typename map<OspfTypes::PeerID, PeerOut<A> *>::const_iterator p;
-    for(p = _peers.begin(); p != _peers.end(); p++) {
-	// If this peer is up then taking it down and bringing it up
-	// should drop all adjacencies.
-	if( (*p).second->get_state()) {
-	    (*p).second->set_state(false);
-	    (*p).second->set_state(true);
-	}
-    }
-    
     // Recompute the routes in all areas to withdraw the routes and
     // remove virtual links. Should not be required as dropping the
     // adjacencies should prompt a route recomputation.
