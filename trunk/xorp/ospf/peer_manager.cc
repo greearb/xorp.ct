@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.146 2007/10/03 21:23:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.147 2007/10/27 02:50:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -915,7 +915,7 @@ PeerManager<A>::clear_database()
     // Recompute the routes in all areas to withdraw the routes and
     // remove virtual links. Should not be required as dropping the
     // adjacencies should prompt a route recomputation.
-    // routing_recompute_all_areas();
+    routing_recompute_all_areas();
 
     return true;
 }
