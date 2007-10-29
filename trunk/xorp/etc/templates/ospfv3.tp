@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.8 2007/03/12 10:16:03 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.9 2007/10/29 22:27:56 atanu Exp $ */
 
 protocols {
     ospf6 @: u32 {
@@ -395,8 +395,8 @@ transmitted packets";
 
 policy {
     %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf6&target:txt=ospfv3";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=11";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=ebit&type:txt=bool&access:txt=rw&id:u32=13";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
