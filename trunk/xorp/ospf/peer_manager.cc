@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.149 2007/10/27 06:44:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.150 2007/10/27 07:46:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -918,7 +918,10 @@ PeerManager<A>::clear_database()
     // adjacencies should prompt a route recomputation.
     routing_recompute_all_areas();
 
-    XLOG_ASSERT(_summaries.empty());
+    typename map<IPNet<A>, Summary>::iterator i;
+    for(i = _summaries.begin(); i != _summaries.end(); i++)
+	XLOG_WARNING("Summary not removed %s %s", cstring(i->first),
+		     cstring(i->second._rtentry));
 
     return true;
 }
