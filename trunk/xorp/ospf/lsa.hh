@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.104 2007/03/22 20:20:09 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.105 2007/03/29 23:49:18 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1706,6 +1706,38 @@ class ASExternalLsa : public Lsa {
     IPv6Prefix get_ipv6prefix() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	return _ipv6prefix;;
+    }
+
+    template <typename A>
+    void set_network(IPNet<A>);
+
+    template <typename A>
+    void set_network(IPNet<IPv4> net) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	set_network_mask(ntohl(net.netmask().addr()));
+	get_header().set_link_state_id(ntohl(net.masked_addr().addr()));
+    }
+
+    template <typename A>
+    void set_network(IPNet<IPv6> net) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	IPv6Prefix prefix(get_version());
+	prefix.set_network(net);
+	set_ipv6prefix(prefix);
+    }
+
+    template <typename A>
+    IPNet<A> get_network() const;
+
+    template <typename A>
+    IPNet<IPv4> get_network() const {
+	return IPNet<IPv4>(IPv4(htonl(get_header().get_link_state_id())),
+			   IPv4(htonl(get_network_mask())).mask_len());
+    }
+
+    template <typename A>
+    IPNet<IPv6> get_network() const {
+	return get_ipv6prefix().get_network();
     }
 
     void set_e_bit(bool bit) {
