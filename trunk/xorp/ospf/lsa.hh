@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.105 2007/03/29 23:49:18 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.106 2007/10/31 21:18:06 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -372,6 +372,8 @@ class Lsa {
     bool available() const { return 0 != _pkt.size(); }
 
     Lsa_header& get_header() {return _header; }
+
+    const Lsa_header& get_header() const {return _header; }
 
     /**
      * Is this LSA valid?
@@ -1727,16 +1729,16 @@ class ASExternalLsa : public Lsa {
     }
 
     template <typename A>
-    IPNet<A> get_network() const;
+    IPNet<A> get_network(A) const;
 
     template <typename A>
-    IPNet<IPv4> get_network() const {
+    IPNet<IPv4> get_network(IPv4) const {
 	return IPNet<IPv4>(IPv4(htonl(get_header().get_link_state_id())),
 			   IPv4(htonl(get_network_mask())).mask_len());
     }
 
     template <typename A>
-    IPNet<IPv6> get_network() const {
+    IPNet<IPv6> get_network(IPv6) const {
 	return get_ipv6prefix().get_network();
     }
 
