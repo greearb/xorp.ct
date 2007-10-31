@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.22 2007/10/19 00:09:40 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.23 2007/10/23 21:38:24 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -124,6 +124,13 @@ public:
      * @return normalized string representation of MAC address.
      */
     string normalized_str() const;
+
+    /**
+     * Get the size of the raw MAC address (in octets).
+     *
+     * @return the size of the raw MAC address (in octets).
+     */
+    size_t size() const;
 
     /**
      * @return true if MAC address value is unset.
@@ -317,6 +324,13 @@ public:
      * @return a string with the normalized EtherMac address.
      */
     static string normalize(const string& s) throw (InvalidString);
+
+    /**
+     * Get the size of the raw EtherMac address (in octets).
+     *
+     * @return the size of the raw EtherMac address (in octets).
+     */
+    static size_t size() { return (ADDR_BYTELEN); }
 
     /**
      * Test if this address is a valid multicast address.

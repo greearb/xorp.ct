@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.13 2007/10/19 00:09:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.14 2007/10/23 21:38:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -350,6 +350,14 @@ test_mac_address_type(TestInfo& test_info)
     Mac mac_multicast("01:22:22:22:22:22");	// Multicast
 
     //
+    // Test the size of an address.
+    //
+    verbose_assert(mac_empty.size() == 0, "size()");
+    verbose_assert(mac_zero.size() == 6, "size()");
+    verbose_assert(mac_unicast.size() == 6, "size()");
+    verbose_assert(mac_multicast.size() == 6, "size()");
+
+    //
     // Test if an address is empty.
     //
     verbose_assert(mac_empty.empty() == true, "empty()");
@@ -674,6 +682,14 @@ test_ethermac_address_type(TestInfo& test_info)
     EtherMac ether_mac_zero("00:00:00:00:00:00");	// Zero address
     EtherMac ether_mac_unicast("00:11:11:11:11:11");	// Unicast
     EtherMac ether_mac_multicast("01:22:22:22:22:22");	// Multicast
+
+    //
+    // Test the size of an address.
+    //
+    verbose_assert(ether_mac_default.size() == 6, "size()");
+    verbose_assert(ether_mac_zero.size() == 6, "size()");
+    verbose_assert(ether_mac_unicast.size() == 6, "size()");
+    verbose_assert(ether_mac_multicast.size() == 6, "size()");
 
     //
     // Test if an address is empty.

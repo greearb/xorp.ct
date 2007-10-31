@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.20 2007/10/17 23:00:36 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.21 2007/10/23 21:38:24 pavlin Exp $"
 
 #include <vector>
 
@@ -47,7 +47,7 @@ Mac::copy_out(uint8_t* to_uint8) const
     // Check all known MAC instance classes for whether string is valid
     // and use the corresponding copy_out() method.
     //
-    // Add new MyMac::valid and MyMac::normalize() methods here
+    // Add new MyMac::valid() and MyMac::normalize() methods here
     // ------------------------------------------------------------------------
     if (EtherMac::valid(_srep)) {
 	EtherMac ether_mac(_srep);
@@ -97,7 +97,7 @@ Mac::copy_in(const string& from_string) throw (InvalidString)
     //
     // Check all known MAC instance classes for whether string is valid
     //
-    // Add new MyMac::valid methods here
+    // Add new MyMac::valid() methods here
     // ------------------------------------------------------------------------
     do {
 	if (from_string.empty()) {
@@ -131,7 +131,7 @@ Mac::normalized_str() const
     // Check all known MAC instance classes for whether string is valid
     // and return the corresponding normalized string.
     //
-    // Add new MyMac::valid and MyMac::normalize() methods here
+    // Add new MyMac::valid() and MyMac::normalize() methods here
     // ------------------------------------------------------------------------
     if (EtherMac::valid(_srep)) {
 	return EtherMac::normalize(_srep);
@@ -139,6 +139,28 @@ Mac::normalized_str() const
 
     XLOG_UNREACHABLE();
     return (_srep);
+}
+
+size_t
+Mac::size() const
+{
+    if (_srep.empty())
+	return (0);	// XXX: the empty string is valid, so just return 0
+
+    // ------------------------------------------------------------------------
+    // I M P O R T A N T !
+    //
+    // Check all known MAC instance classes for whether string is valid
+    // and return the corresponding size.
+    //
+    // Add new MyMac::valid() and MyMac::size() methods here
+    // ------------------------------------------------------------------------
+    if (EtherMac::valid(_srep)) {
+	return EtherMac::size();
+    }
+
+    XLOG_UNREACHABLE();
+    return (0);
 }
 
 bool
@@ -155,7 +177,7 @@ Mac::is_multicast() const
     //
     // Check all known MAC instance classes for whether string is valid
     //
-    // Add new MyMac::valid methods here
+    // Add new MyMac::valid() methods here
     // ------------------------------------------------------------------------
     if (EtherMac::valid(_srep)) {
 	EtherMac ether_mac(_srep);
