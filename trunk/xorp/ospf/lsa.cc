@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.106 2007/10/19 01:13:56 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.107 2007/10/19 02:01:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1615,6 +1615,68 @@ ASExternalLsa::encode()
     _header.copy_out(ptr);
 
     return true;
+}
+
+template <>
+void
+ASExternalLsa::set_network<IPv4>(IPNet<IPv4> net)
+{
+    XLOG_ASSERT(OspfTypes::V2 == get_version());
+    set_network_mask(ntohl(net.netmask().addr()));
+    get_header().set_link_state_id(ntohl(net.masked_addr().addr()));
+}
+
+template <>
+void 
+ASExternalLsa::set_network<IPv6>(IPNet<IPv6> net)
+{
+    XLOG_ASSERT(OspfTypes::V3 == get_version());
+    IPv6Prefix prefix(get_version());
+    prefix.set_network(net);
+    set_ipv6prefix(prefix);
+}
+
+template <>
+IPNet<IPv4>
+ASExternalLsa::get_network<IPv4>(IPv4) const
+{
+    return IPNet<IPv4>(IPv4(htonl(get_header().get_link_state_id())),
+		       IPv4(htonl(get_network_mask())).mask_len());
+}
+
+template <>
+IPNet<IPv6>
+ASExternalLsa::get_network<IPv6>(IPv6) const 
+{
+    return get_ipv6prefix().get_network();
+}
+
+template <>
+void
+ASExternalLsa::set_forwarding_address<IPv4>(IPv4 forwarding_address_ipv4)
+{
+    set_forwarding_address_ipv4(forwarding_address_ipv4);
+}
+	
+template <>
+void 
+ASExternalLsa::set_forwarding_address<IPv6>(IPv6 forwarding_address_ipv6)
+{
+    set_forwarding_address_ipv6(forwarding_address_ipv6);
+}
+
+template <>
+IPv4 
+ASExternalLsa::get_forwarding_address<IPv4>(IPv4) const
+{
+    return get_forwarding_address_ipv4();
+}
+	
+template <>
+IPv6
+ASExternalLsa::get_forwarding_address<IPv6>(IPv6) const 
+{
+    return get_forwarding_address_ipv6();
 }
 
 string

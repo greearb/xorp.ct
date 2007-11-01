@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.106 2007/10/31 21:18:06 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.107 2007/10/31 21:42:47 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1714,33 +1714,7 @@ class ASExternalLsa : public Lsa {
     void set_network(IPNet<A>);
 
     template <typename A>
-    void set_network(IPNet<IPv4> net) {
-	XLOG_ASSERT(OspfTypes::V2 == get_version());
-	set_network_mask(ntohl(net.netmask().addr()));
-	get_header().set_link_state_id(ntohl(net.masked_addr().addr()));
-    }
-
-    template <typename A>
-    void set_network(IPNet<IPv6> net) {
-	XLOG_ASSERT(OspfTypes::V3 == get_version());
-	IPv6Prefix prefix(get_version());
-	prefix.set_network(net);
-	set_ipv6prefix(prefix);
-    }
-
-    template <typename A>
     IPNet<A> get_network(A) const;
-
-    template <typename A>
-    IPNet<IPv4> get_network(IPv4) const {
-	return IPNet<IPv4>(IPv4(htonl(get_header().get_link_state_id())),
-			   IPv4(htonl(get_network_mask())).mask_len());
-    }
-
-    template <typename A>
-    IPNet<IPv6> get_network(IPv6) const {
-	return get_ipv6prefix().get_network();
-    }
 
     void set_e_bit(bool bit) {
 	_e_bit = bit;
@@ -1811,17 +1785,10 @@ class ASExternalLsa : public Lsa {
     }
 
     template <typename A>
-    A get_forwarding_address(A) const;
+    void set_forwarding_address(A);
 
     template <typename A>
-    IPv4 get_forwarding_address(IPv4) const {
-	return get_forwarding_address_ipv4();
-    }
-	
-    template <typename A>
-    IPv6 get_forwarding_address(IPv6) const {
-	return get_forwarding_address_ipv6();
-    }
+    A get_forwarding_address(A) const;
 
     void set_external_route_tag(uint32_t external_route_tag) {
 	switch(get_version()) {
