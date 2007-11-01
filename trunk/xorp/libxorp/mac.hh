@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.23 2007/10/23 21:38:24 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.24 2007/10/31 23:17:31 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -130,7 +130,14 @@ public:
      *
      * @return the size of the raw MAC address (in octets).
      */
-    size_t size() const;
+    size_t addr_bytelen() const;
+
+    /**
+     * Get the size of the raw MAC address (in number of bits).
+     *
+     * @return the size of the raw MAC address (in number of bits).
+     */
+    uint32_t addr_bitlen() const;
 
     /**
      * @return true if MAC address value is unset.
@@ -330,7 +337,14 @@ public:
      *
      * @return the size of the raw EtherMac address (in octets).
      */
-    static size_t size() { return (ADDR_BYTELEN); }
+    static size_t addr_bytelen() { return (ADDR_BYTELEN); }
+
+    /**
+     * Get the size of the raw EtherMac address (in number of bits).
+     *
+     * @return the size of the raw EtherMac address (in number of bits).
+     */
+    static uint32_t addr_bitlen() { return (ADDR_BITLEN); }
 
     /**
      * Test if this address is a valid multicast address.

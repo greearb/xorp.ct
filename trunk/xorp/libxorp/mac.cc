@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.21 2007/10/23 21:38:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.22 2007/10/31 23:17:31 pavlin Exp $"
 
 #include <vector>
 
@@ -142,7 +142,7 @@ Mac::normalized_str() const
 }
 
 size_t
-Mac::size() const
+Mac::addr_bytelen() const
 {
     if (_srep.empty())
 	return (0);	// XXX: the empty string is valid, so just return 0
@@ -153,10 +153,32 @@ Mac::size() const
     // Check all known MAC instance classes for whether string is valid
     // and return the corresponding size.
     //
-    // Add new MyMac::valid() and MyMac::size() methods here
+    // Add new MyMac::valid() and MyMac::addr_bytelen() methods here
     // ------------------------------------------------------------------------
     if (EtherMac::valid(_srep)) {
-	return EtherMac::size();
+	return EtherMac::addr_bytelen();
+    }
+
+    XLOG_UNREACHABLE();
+    return (0);
+}
+
+uint32_t
+Mac::addr_bitlen() const
+{
+    if (_srep.empty())
+	return (0);	// XXX: the empty string is valid, so just return 0
+
+    // ------------------------------------------------------------------------
+    // I M P O R T A N T !
+    //
+    // Check all known MAC instance classes for whether string is valid
+    // and return the corresponding size.
+    //
+    // Add new MyMac::valid() and MyMac::addr_bitlen() methods here
+    // ------------------------------------------------------------------------
+    if (EtherMac::valid(_srep)) {
+	return EtherMac::addr_bitlen();
     }
 
     XLOG_UNREACHABLE();

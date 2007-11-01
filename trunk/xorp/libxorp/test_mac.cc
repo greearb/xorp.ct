@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.14 2007/10/23 21:38:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.15 2007/10/31 23:17:31 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -350,12 +350,20 @@ test_mac_address_type(TestInfo& test_info)
     Mac mac_multicast("01:22:22:22:22:22");	// Multicast
 
     //
-    // Test the size of an address.
+    // Test the size of an address (in octets).
     //
-    verbose_assert(mac_empty.size() == 0, "size()");
-    verbose_assert(mac_zero.size() == 6, "size()");
-    verbose_assert(mac_unicast.size() == 6, "size()");
-    verbose_assert(mac_multicast.size() == 6, "size()");
+    verbose_assert(mac_empty.addr_bytelen() == 0, "addr_bytelen()");
+    verbose_assert(mac_zero.addr_bytelen() == 6, "addr_bytelen()");
+    verbose_assert(mac_unicast.addr_bytelen() == 6, "addr_bytelen()");
+    verbose_assert(mac_multicast.addr_bytelen() == 6, "addr_bytelen()");
+
+    //
+    // Test the size of an address (in bits).
+    //
+    verbose_assert(mac_empty.addr_bitlen() == 0, "addr_bitlen()");
+    verbose_assert(mac_zero.addr_bitlen() == 48, "addr_bitlen()");
+    verbose_assert(mac_unicast.addr_bitlen() == 48, "addr_bitlen()");
+    verbose_assert(mac_multicast.addr_bitlen() == 48, "addr_bitlen()");
 
     //
     // Test if an address is empty.
@@ -684,12 +692,20 @@ test_ethermac_address_type(TestInfo& test_info)
     EtherMac ether_mac_multicast("01:22:22:22:22:22");	// Multicast
 
     //
-    // Test the size of an address.
+    // Test the size of an address (in octets).
     //
-    verbose_assert(ether_mac_default.size() == 6, "size()");
-    verbose_assert(ether_mac_zero.size() == 6, "size()");
-    verbose_assert(ether_mac_unicast.size() == 6, "size()");
-    verbose_assert(ether_mac_multicast.size() == 6, "size()");
+    verbose_assert(ether_mac_default.addr_bytelen() == 6, "addr_bytelen()");
+    verbose_assert(ether_mac_zero.addr_bytelen() == 6, "addr_bytelen()");
+    verbose_assert(ether_mac_unicast.addr_bytelen() == 6, "addr_bytelen()");
+    verbose_assert(ether_mac_multicast.addr_bytelen() == 6, "addr_bytelen()");
+
+    //
+    // Test the size of an address (in bits).
+    //
+    verbose_assert(ether_mac_default.addr_bitlen() == 48, "addr_bitlen()");
+    verbose_assert(ether_mac_zero.addr_bitlen() == 48, "addr_bitlen()");
+    verbose_assert(ether_mac_unicast.addr_bitlen() == 48, "addr_bitlen()");
+    verbose_assert(ether_mac_multicast.addr_bitlen() == 48, "addr_bitlen()");
 
     //
     // Test if an address is empty.
