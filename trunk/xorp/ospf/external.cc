@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.33 2007/08/22 01:36:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.34 2007/10/27 07:10:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -203,11 +203,8 @@ void
 External<IPv4>::set_net_nexthop_lsid(ASExternalLsa *aselsa, IPNet<IPv4> net,
 				     IPv4 nexthop)
 {
-    aselsa->set_network_mask(ntohl(net.netmask().addr()));
-    aselsa->set_forwarding_address_ipv4(nexthop);
-
-    Lsa_header& header = aselsa->get_header();
-    header.set_link_state_id(ntohl(net.masked_addr().addr()));
+    aselsa->set_network(net);
+    aselsa->set_forwarding_address(nexthop);
 }
 
 template <>
@@ -215,12 +212,10 @@ void
 External<IPv6>::set_net_nexthop_lsid(ASExternalLsa *aselsa, IPNet<IPv6> net,
 				     IPv6 nexthop)
 {
-    IPv6Prefix prefix(_ospf.get_version());
-    prefix.set_network(net);
-    aselsa->set_ipv6prefix(prefix);
+    aselsa->set_network(net);
     if (!nexthop.is_linklocal_unicast() && !nexthop.is_zero()) {
 	aselsa->set_f_bit(true);
-	aselsa->set_forwarding_address_ipv6(nexthop);
+	aselsa->set_forwarding_address(nexthop);
     }
 
     // Note entries in the _lsmap are never removed, this guarantees

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.286 2007/10/19 02:43:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.287 2007/10/24 00:56:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1325,26 +1325,24 @@ AreaRouter<A>::external_area_type() const
     return accept;
 }
 
-template <>
+template <typename A>
 void
-AreaRouter<IPv4>::external_copy_net_nexthop(IPv4,
-					    ASExternalLsa *dst,
-					    ASExternalLsa *src)
+AreaRouter<A>::external_copy_net_nexthop(A,
+					 ASExternalLsa *dst,
+					 ASExternalLsa *src)
 {
-    dst->get_header().set_link_state_id(src->get_header().get_link_state_id());
-    dst->set_network_mask(src->get_network_mask());
-    dst->set_forwarding_address_ipv4(src->get_forwarding_address_ipv4());
-}
+    dst->set_network(src->get_network(A::ZERO()));
 
-template <>
-void
-AreaRouter<IPv6>::external_copy_net_nexthop(IPv6,
-					    ASExternalLsa *dst,
-					    ASExternalLsa *src)
-{
-    IPv6Prefix prefix = src->get_ipv6prefix();
-    dst->set_ipv6prefix(prefix);
-    dst->set_forwarding_address_ipv6(src->get_forwarding_address_ipv6());
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	dst->set_forwarding_address(src->get_forwarding_address(A::ZERO()));
+	break;
+    case OspfTypes::V3:
+	if (src->get_f_bit())
+	    dst->
+		set_forwarding_address(src->get_forwarding_address(A::ZERO()));
+	break;
+    }
 }
 
 template <typename A>
@@ -4989,10 +4987,11 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	if (OspfTypes::LSInfinity == aselsa->get_metric())
 	    continue;
 	
-	IPv4 mask = IPv4(htonl(aselsa->get_network_mask()));
-	uint32_t lsid = lsar->get_header().get_link_state_id();
+// 	IPv4 mask = IPv4(htonl(aselsa->get_network_mask()));
+ 	uint32_t lsid = lsar->get_header().get_link_state_id();
 	uint32_t adv = lsar->get_header().get_advertising_router();
-	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
+// 	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
+	IPNet<IPv4> n = aselsa->get_network<IPv4>(IPv4::ZERO());
 	
 	// (3)
 	RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
@@ -5152,7 +5151,7 @@ AreaRouter<IPv6>::routing_as_externalV3()
 // 	uint32_t lsid = lsar->get_header().get_link_state_id();
 	uint32_t adv = lsar->get_header().get_advertising_router();
 // 	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
-	IPNet<IPv6> n = aselsa->get_ipv6prefix().get_network();
+	IPNet<IPv6> n = aselsa->get_network<IPv6>(IPv6::ZERO());
 	
 	// (3)
 	RoutingTable<IPv6>& routing_table = _ospf.get_routing_table();
