@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.61 2007/03/30 00:42:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.62 2007/05/23 04:08:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -172,6 +172,9 @@ RoutingTable<A>::lookup_entry(A router, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(router));
 
+    if (0 == _current)
+	return false;
+
     IPNet<A> net(router, A::ADDR_BITLEN);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
@@ -193,6 +196,9 @@ RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, A router,
 {
     debug_msg("area %s %s\n",  pr_id(area).c_str(), cstring(router));
 
+    if (0 == _current)
+	return false;
+
     IPNet<A> net(router, A::ADDR_BITLEN);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
@@ -210,6 +216,9 @@ bool
 RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
+
+    if (0 == _current)
+	return false;
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -230,6 +239,9 @@ RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, IPNet<A> net,
 {
     debug_msg("%s\n", cstring(net));
 
+    if (0 == _current)
+	return false;
+
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
     if (_current->end() == i)
@@ -248,6 +260,9 @@ RoutingTable<A>::lookup_entry_by_advertising_router(OspfTypes::AreaID area,
 {
     debug_msg("area %s %s\n",  pr_id(area).c_str(), pr_id(adv).c_str());
 
+    if (0 == _current)
+	return false;
+
     return _adv.lookup_entry(area, adv, rt);
 }
 
@@ -256,6 +271,9 @@ bool
 RoutingTable<A>::longest_match_entry(A nexthop, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(nexthop));
+
+    if (0 == _current)
+	return false;
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->find(nexthop);
