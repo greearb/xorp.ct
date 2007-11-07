@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.95 2007/08/24 06:47:21 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.96 2007/09/01 00:44:10 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -240,7 +240,7 @@ gmake check
       "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
   * OpenBSD-3.6-current (as of February 2005) on i386 and amd64,
-    OpenBSD-3.8, OpenBSD-3.9, OpenBSD-4.0, OpenBSD-4.1
+    OpenBSD-3.8, OpenBSD-3.9, OpenBSD-4.0, OpenBSD-4.1, OpenBSD-4.2
     - The default gcc/g++ compiler (version 3.3.5 (propolice)) has a bug
       in the propolice implementation:
           http://www.monkey.org/openbsd/archive2/tech/200503/msg00011.html
@@ -260,8 +260,9 @@ gmake check
       "limit datasize 200000" in csh/tcsh or "ulimit -d 200000" in sh.
       If necessary, increase further the datasize limit.
     - The default limit of maximum opened file descriptors per process
-      is 64 which may not be sufficient. If you run a XORP program and
-      there are errors like:
+    - The default limit of maximum opened file descriptors per process
+      is 64 (increased to 128 in OpenBSD-4.2) which may not be
+      sufficient. If you run a XORP program and there are errors like:
 
 	  [ 2004/06/20 22:26:09  ERROR test_pim:31634 LIBCOMM +582 comm_sock.c comm_sock_accept ] Error accepting socket 4: Too many open files
 
