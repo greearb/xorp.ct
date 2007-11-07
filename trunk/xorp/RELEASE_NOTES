@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.188 2007/10/13 01:37:15 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.189 2007/11/07 08:23:27 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -86,6 +86,10 @@ Release 1.5-WIP (2007/??/??)
 
   FEA/MFEA:
     - Critical bug fix that affects recent NetBSD and OpenBSD releases.
+
+    - Critical IPv6-related bug fix when adding unicast forwarding
+      entries to the kernel. This bug was exposed only on *BSD systems
+      with 64-bit CPU.
 
     - If MFEA is started, it will explicitly enable the multicast
       forwarding flags that have been added to recent OpenBSD releases:
