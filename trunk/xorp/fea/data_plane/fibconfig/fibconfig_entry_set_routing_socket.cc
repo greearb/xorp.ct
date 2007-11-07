@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.13 2007/09/27 00:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.14 2007/10/12 07:53:48 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -308,19 +308,9 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 
     // Copy the destination, the nexthop, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-    sin_dst->sin_len = sin_dst_len;
-#endif
-    if (sin_nexthop != NULL) {
+    if (sin_nexthop != NULL)
 	fte_nexthop.copy_out(*sin_nexthop);
-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-	sin_nexthop->sin_len = sin_nexthop_len;
-#endif
-    }
     fte.net().netmask().copy_out(*sin_netmask);
-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-    sin_netmask->sin_len = sin_netmask_len;
-#endif
 
     if (is_interface_route) {
 	//
@@ -374,7 +364,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 
 	sdl->sdl_family = AF_LINK;
 #ifdef HAVE_STRUCT_SOCKADDR_DL_SDL_LEN
-	sdl->sdl_len = sdl_len;
+	sdl->sdl_len = sizeof(*sdl);
 #endif
 	sdl->sdl_index = pif_index;
 	strncpy(sdl->sdl_data, fte.ifname().c_str(), sizeof(sdl->sdl_data));
@@ -485,16 +475,9 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
     
     // Copy the destination, and the netmask addresses (if needed)
     fte.net().masked_addr().copy_out(*sin_dst);
-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-    sin_dst->sin_len = sin_dst_len;
-#endif
 
-    if (! is_host_route) {
+    if (! is_host_route)
 	fte.net().netmask().copy_out(*sin_netmask);
-#ifdef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-	sin_netmask->sin_len = sin_netmask_len;
-#endif
-    }
     
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
 	//
