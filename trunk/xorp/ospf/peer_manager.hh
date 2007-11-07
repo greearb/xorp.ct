@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.93 2007/08/24 02:07:07 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.94 2007/10/03 21:23:53 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -775,7 +775,7 @@ class PeerManager {
     bool external_withdraw(OspfTypes::AreaID area, Lsa::LsaRef lsar);
 
     /**
-     * Withdraw a previously createed and announced AS-External-LSA
+     * Withdraw a previously created and announced AS-External-LSA
      * from all areas.
      */
     bool external_withdraw(const IPNet<A>& net);
@@ -796,6 +796,13 @@ class PeerManager {
      * Re-run the policy filters on all routes.
      */
     void external_push_routes();
+
+    /**
+     * Examine self originated AS-external-LSAs that may need to be
+     * suppressed because another router's AS-external-LSA takes
+     * precedence.
+     */
+    void external_suppress_lsas(OspfTypes::AreaID area);
 
     /**
      * Recompute routing calculation all areas BACKBONE first.

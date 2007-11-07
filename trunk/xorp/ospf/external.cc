@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.34 2007/10/27 07:10:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.35 2007/11/01 00:18:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -62,6 +62,8 @@ External<A>::announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
 	break;
     }
     XLOG_ASSERT(!lsar->get_self_originating());
+
+    suppress_self(lsar);
 
     update_lsa(lsar);
 
@@ -131,7 +133,7 @@ External<IPv4>::unique_link_state_id(Lsa::LsaRef lsar)
     IPv4 mask_in_db = IPv4(htonl(aselsa_in_db->get_network_mask()));
     XLOG_ASSERT(mask != mask_in_db);
 
-    // Be very careful the AS-External-LSAs are stored in a set and
+    // Be very careful the AS-external-LSAs are stored in a set and
     // the comparator method uses the link state ID. If the link state
     // ID of the LSA in the database is going to be changed then it
     // must first be pulled out of the database and then re-inserted.
@@ -288,10 +290,23 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     aselsa->set_metric(metric);
     aselsa->set_e_bit(ebit);
     aselsa->set_self_originating(true);
+
+    if (suppress_candidate(lsar, net, nexthop, metric))
+	return true;
+
+    announce_lsa(lsar);
+
+    return true;
+}
+
+template <typename A>
+void
+External<A>::announce_lsa(Lsa::LsaRef lsar)
+{
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
-    aselsa->record_creation_time(now);
-    aselsa->encode();
+    lsar->record_creation_time(now);
+    lsar->encode();
 
     unique_link_state_id(lsar);
 
@@ -305,8 +320,6 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     }
 
     start_refresh_timer(lsar);
-
-    return true;
 }
 
 template <typename A>
@@ -382,6 +395,10 @@ External<A>::withdraw(const IPNet<A>& net)
     if (0 == _originating)
 	_ospf.get_peer_manager().refresh_router_lsas();
 
+#ifdef	SUPPRESS_DB
+    suppress_database_delete(net, true /* invalidate */);
+#endif
+
     // Construct an LSA that will match the one in the database.
     OspfTypes::Version version = _ospf.version();
     ASExternalLsa *aselsa = new ASExternalLsa(version);
@@ -419,7 +436,357 @@ bool
 External<A>::clear_database()
 {
     _lsas.clear();
+#ifdef	SUPPRESS_DB
+    _suppress_db.delete_all_nodes();
+#endif
     return true;
+}
+
+template <typename A>
+void
+External<A>::suppress_lsas(OspfTypes::AreaID area)
+{
+    RoutingTable<A> &rt = _ospf.get_routing_table();
+    RouteEntry<A> rte;
+    list<Lsa::LsaRef>::iterator i;
+    for (i = _suppress_temp.begin(); i != _suppress_temp.end(); i++) {
+	ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>((*i).get());
+	XLOG_ASSERT(aselsa);
+	Lsa::LsaRef olsar = aselsa->get_suppressed_lsa();
+	aselsa->release_suppressed_lsa();
+	if (!rt.lookup_entry_by_advertising_router(area,
+						   aselsa->get_header().
+						   get_advertising_router(),
+						   rte))
+	    continue;
+	Lsa::LsaRef nlsar = clone_lsa(olsar);
+#ifdef	SUPPRESS_DB
+	suppress_database_add(nlsar, aselsa->get_network(A::ZERO()));
+#endif
+	aselsa->set_suppressed_lsa(nlsar);
+	olsar->set_maxage();
+	maxage_reached(olsar);
+    }
+    _suppress_temp.clear();
+}
+
+template <typename A>
+void 
+External<A>::suppress_route_announce(OspfTypes::AreaID area,
+				     IPNet<A> /*net*/,
+				     RouteEntry<A>& rte)
+{
+    switch (rte.get_destination_type()) {
+    case OspfTypes::Router:
+	return;
+	break;
+    case OspfTypes::Network:
+	break;
+    }
+
+    Lsa::LsaRef lsar = rte.get_lsa();
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    if (0 == aselsa)
+	return;
+    // Should simplify these two methods into a single method without
+    // the intermediate queueing.
+    XLOG_ASSERT(_suppress_temp.empty());
+    suppress_self(lsar);
+    suppress_lsas(area);
+}
+
+template <typename A>
+void 
+External<A>::suppress_route_withdraw(OspfTypes::AreaID /*area*/,
+				     IPNet<A> /*net*/,
+				     RouteEntry<A>& rte)
+{
+    switch (rte.get_destination_type()) {
+    case OspfTypes::Router:
+	return;
+	break;
+    case OspfTypes::Network:
+	break;
+    }
+
+    suppress_release_lsa(rte.get_lsa());
+}
+
+template <typename A>
+Lsa::LsaRef
+External<A>::clone_lsa(Lsa::LsaRef olsar)
+{
+    XLOG_ASSERT(olsar->get_self_originating());
+
+    ASExternalLsa *olsa = dynamic_cast<ASExternalLsa *>(olsar.get());
+    XLOG_ASSERT(olsa);
+
+    OspfTypes::Version version = _ospf.version();
+    ASExternalLsa *nlsa = new ASExternalLsa(version);
+    
+    switch(version) {
+    case OspfTypes::V2:
+	nlsa->get_header().set_options(olsa->get_header().get_options());
+	nlsa->set_external_route_tag(olsa->get_external_route_tag());
+	break;
+    case OspfTypes::V3:
+	XLOG_ASSERT(olsa->get_f_bit());
+	if (olsa->get_t_bit()) {
+	    nlsa->set_t_bit(true);
+	    nlsa->set_external_route_tag(olsa->get_external_route_tag());
+	}
+	break;
+    }
+    
+    set_net_nexthop_lsid(nlsa,
+			 olsa->get_network(A::ZERO()),
+			 olsa->get_forwarding_address(A::ZERO()));
+    nlsa->get_header().set_advertising_router(_ospf.get_router_id());
+    nlsa->set_metric(olsa->get_metric());
+    nlsa->set_e_bit(olsa->get_e_bit());
+    nlsa->set_self_originating(true);
+
+    Lsa::LsaRef nlsar(nlsa);
+
+    // Remember to call unique_link_state_id(lsar) if this LSA is ever
+    // transmitted.
+    
+    return nlsar;
+}
+
+template <typename A>
+bool 
+External<A>::suppress_candidate(Lsa::LsaRef lsar, IPNet<A> net, A nexthop,
+				uint32_t metric)
+{
+    if (A::ZERO() == nexthop)
+	return false;
+
+    RoutingTable<A> &rt = _ospf.get_routing_table();
+    RouteEntry<A> rte;
+    if (!rt.lookup_entry(net, rte))
+	return false;
+
+    Lsa::LsaRef rlsar = rte.get_lsa();
+    
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(rlsar.get());
+    if (!aselsa)
+	return false;
+
+    // Make sure the announcing router is reachable.
+    if (!rt.lookup_entry_by_advertising_router(rte.get_area(),
+					       aselsa->get_header().
+					       get_advertising_router(),
+					       rte))
+	return false;
+    
+    OspfTypes::Version version = _ospf.version();
+
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (!aselsa->get_f_bit())
+	    return false;
+	break;
+    }
+    
+    if (aselsa->get_forwarding_address<A>(A::ZERO()) != nexthop)
+	return false;
+
+    if (aselsa->get_metric() != metric)
+	return false;
+
+    if (aselsa->get_header().get_advertising_router() < _ospf.get_router_id())
+	return false;
+
+    aselsa->set_suppressed_lsa(lsar);
+
+#ifdef	SUPPRESS_DB
+    suppress_database_add(lsar, net);
+#endif
+
+    return true;
+}
+
+#ifdef	SUPPRESS_DB
+template <typename A>
+void 
+External<A>::suppress_database_add(Lsa::LsaRef lsar, const IPNet<A>& net)
+{
+    _suppress_db.insert(net, lsar);
+}
+
+template <typename A>
+void 
+External<A>::suppress_database_delete(const IPNet<A>& net, bool invalidate)
+{
+    typename Trie<A, Lsa::LsaRef>::iterator i = _suppress_db.lookup_node(net);
+    if (_suppress_db.end() == i) {
+// 	XLOG_WARNING("LSA matching %s not found", cstring(net));
+	return;
+    }
+    if (invalidate)
+	i.payload()->invalidate();
+    _suppress_db.erase(i);
+}
+#endif
+
+template <typename A>
+void 
+External<A>::suppress_self(Lsa::LsaRef lsar)
+{
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+
+    // This may be a refresh of previously announce AS-external-LSA.
+    bool suppressed = false;
+    Lsa::LsaRef nlsar;
+    ASExternalDatabase::iterator i = find_lsa(lsar);
+    if (_lsas.end() != i) {
+	nlsar = aselsa->get_suppressed_lsa();
+	if (0 != nlsar.get()) {
+	    aselsa->release_suppressed_lsa();
+	    if (nlsar->valid())
+		suppressed = true;
+	}
+    }
+
+    // If it was previously suppressed and is no longer it needs to be
+    // announced.
+    if (!suppress_self_check(lsar)) {
+	if (suppressed) {
+#ifdef	SUPPRESS_DB
+	    suppress_database_delete(aselsa->get_network(A::ZERO()), false);
+#endif
+	    announce_lsa(nlsar);
+	}
+	return;
+    }
+
+    Lsa::LsaRef olsar = find_lsa_by_net(aselsa->get_network(A::ZERO()));
+    XLOG_ASSERT(0 != olsar.get());
+
+    aselsa->set_suppressed_lsa(olsar);
+
+    // If this self orignated AS-external-LSA was already being
+    // suppressed nothing more todo.
+    if (suppressed)
+	return;
+
+    suppress_queue_lsa(lsar);
+}
+
+template <typename A>
+bool
+External<A>::suppress_self_check(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->external());
+    XLOG_ASSERT(!lsar->get_self_originating());
+
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+
+    OspfTypes::Version version = _ospf.version();
+
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (!aselsa->get_f_bit())
+	    return false;
+	break;
+    }
+
+    if (aselsa->get_forwarding_address<A>(A::ZERO()) == A::ZERO())
+	return false;
+
+    if (aselsa->get_header().get_advertising_router() < _ospf.get_router_id())
+	return false;
+    
+    Lsa::LsaRef olsar = find_lsa_by_net(aselsa->get_network(A::ZERO()));
+    if (0 == olsar.get())
+	return false;
+
+    ASExternalLsa *olsa = dynamic_cast<ASExternalLsa *>(olsar.get());
+    XLOG_ASSERT(olsa);
+
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	if (!olsa->get_f_bit())
+	    return false;
+	break;
+    }
+
+    if (olsa->get_forwarding_address<A>(A::ZERO()) == A::ZERO())
+	return false;
+
+    if (olsa->get_metric() != aselsa->get_metric())
+	return false;
+
+    return true;
+}
+
+template <typename A>
+Lsa::LsaRef
+External<A>::find_lsa_by_net(IPNet<A> net)
+{ 
+    ASExternalLsa *tlsa = new ASExternalLsa(_ospf.get_version());
+    Lsa::LsaRef tlsar(tlsa);
+    tlsa->get_header().set_advertising_router(_ospf.get_router_id());
+    set_net_nexthop_lsid(tlsa, net, A::ZERO());
+
+    Lsa::LsaRef lsar;
+
+    ASExternalDatabase::iterator i = find_lsa(tlsar);
+    if (i != _lsas.end())
+	lsar = *i;
+   
+    return lsar;
+}
+
+template <typename A>
+void 
+External<A>::suppress_queue_lsa(Lsa::LsaRef lsar)
+{
+    _suppress_temp.push_back(lsar);
+}
+
+template <typename A>
+void 
+External<A>::suppress_maxage(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->external());
+    XLOG_ASSERT(lsar->maxage());
+
+    if (lsar->get_self_originating())
+	return;
+
+    suppress_release_lsa(lsar);
+}
+
+template <typename A>
+void 
+External<A>::suppress_release_lsa(Lsa::LsaRef lsar)
+{
+    // If this LSA was suppressing a self originated LSA then announce
+    // it now.
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    if (0 == aselsa)
+	return;
+    Lsa::LsaRef nlsar = aselsa->get_suppressed_lsa();
+    if (0 == nlsar.get())
+	return;
+    aselsa->release_suppressed_lsa();
+    if (!nlsar->valid())
+	return;
+#ifdef	SUPPRESS_DB
+    suppress_database_delete(aselsa->get_network(A::ZERO()), false);
+#endif
+    
+    announce_lsa(nlsar);
 }
 
 template <typename A>
@@ -470,6 +837,8 @@ External<A>::maxage_reached(Lsa::LsaRef lsar)
     if (!lsar->maxage())
 	XLOG_FATAL("LSA is not MaxAge %s", cstring(*lsar));
     
+    suppress_maxage(lsar);
+
     delete_lsa(lsar);
 
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator ia;

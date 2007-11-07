@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.150 2007/10/27 07:46:43 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.151 2007/10/29 19:56:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1827,6 +1827,13 @@ PeerManager<A>::external_push_routes()
 
 template <typename A>
 void
+PeerManager<A>::external_suppress_lsas(OspfTypes::AreaID area)
+{
+    _external.suppress_lsas(area);
+}
+
+template <typename A>
+void
 PeerManager<A>::routing_recompute_all_areas()
 {
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
@@ -1918,6 +1925,8 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     if (!summary_candidate(area, net, rt))
 	return;
 
+    _external.suppress_route_announce(area, net, rt);
+
     // Save this route for possible later replay.
     XLOG_ASSERT(0 == _summaries.count(net));
     Summary s(area, rt);
@@ -1941,6 +1950,8 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 
     if (!summary_candidate(area, net, rt))
 	return;
+
+    _external.suppress_route_withdraw(area, net, rt);
 
     // Remove this saved route.
     XLOG_ASSERT(1 == _summaries.count(net));

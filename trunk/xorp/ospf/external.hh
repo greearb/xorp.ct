@@ -13,13 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.19 2007/08/22 01:36:16 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.20 2007/10/27 07:10:37 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
 
+#include <libxorp/trie.hh>
+
 /**
- * Storage for AS-External-LSAs with efficient access.
+ * Storage for AS-external-LSAs with efficient access.
  */
 class ASExternalDatabase {
  public:
@@ -45,11 +47,11 @@ class ASExternalDatabase {
     iterator find(Lsa::LsaRef lsar);
 
  private:
-    set <Lsa::LsaRef, compare> _lsas;		// Stored AS-External-LSAs.
+    set <Lsa::LsaRef, compare> _lsas;		// Stored AS-external-LSAs.
 };
 
 /**
- * Handle AS-External-LSAs.
+ * Handle AS-external-LSAs.
  */
 template <typename A>
 class External {
@@ -61,7 +63,7 @@ class External {
      * future replay into other areas. Also arrange for the MaxAge
      * timer to start running.
      *
-     * @param area the AS-External-LSA came from.
+     * @param area the AS-external-LSA came from.
      *
      * @return true if this LSA should be propogated to other areas.
      */
@@ -73,7 +75,7 @@ class External {
     bool announce_complete(OspfTypes::AreaID area);
 
     /**
-     * Provide this area with the stored AS-External-LSAs.
+     * Provide this area with the stored AS-external-LSAs.
      */
     void push(AreaRouter<A> *area_router);
 
@@ -89,9 +91,30 @@ class External {
     bool withdraw(const IPNet<A>& net);
 
     /**
-     * Clear the AS-External-LSA database.
+     * Clear the AS-external-LSA database.
      */
     bool clear_database();
+
+    /**
+     * Suppress or remove AS-external-LSAs that are originated by
+     * this router that should yield to externally generated
+     * AS-external-LSAs as described in RFC 2328 Section 12.4.4. By
+     * time this method is called the routing table should have been
+     * updated so it should be clear if the other router is reachable.
+     */
+    void suppress_lsas(OspfTypes::AreaID area);
+
+    /**
+     * A route has just been added to the routing table.
+     */
+    void suppress_route_announce(OspfTypes::AreaID area, IPNet<A> net,
+				 RouteEntry<A>& rt);
+
+    /**
+     * A route has just been withdrawn from the routing table.
+     */
+    void suppress_route_withdraw(OspfTypes::AreaID area, IPNet<A> net,
+				 RouteEntry<A>& rt);
 
     /**
      * Is this an AS boundary router?
@@ -109,11 +132,17 @@ class External {
     Ospf<A>& _ospf;			// Reference to the controlling class.
     map<OspfTypes::AreaID, AreaRouter<A> *>& _areas;	// All the areas
 
-    ASExternalDatabase _lsas;		// Stored AS-External-LSAs.
-    uint32_t _originating;		// Number of AS-External-LSAs
+    ASExternalDatabase _lsas;		// Stored AS-external-LSAs.
+    uint32_t _originating;		// Number of AS-external-LSAs
 					// that are currently being originated.
     uint32_t _lsid;			// OSPFv3 only next Link State ID.
     map<IPNet<IPv6>, uint32_t> _lsmap; 	// OSPFv3 only
+    list<Lsa::LsaRef> _suppress_temp;	// LSAs that could possibly
+					// suppress self originated LSAs
+#ifdef SUPPRESS_DB
+    Trie<A, Lsa::LsaRef> _suppress_db;	// Database of suppressed self
+					// originated LSAs
+#endif
 
     /**
      * Find this LSA
@@ -163,6 +192,19 @@ class External {
      */
     void set_net_nexthop_lsid(ASExternalLsa *aselsa, IPNet<A> net, A nexthop);
 
+
+    /**
+     * Send this self originated LSA out.
+     */
+    void announce_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * Pass this outbound AS-external-LSA through the policy filter.
+     */
+    bool do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
+		      bool& e_bit, uint32_t& tag, bool& tag_set,
+		      const PolicyTags& policytags);
+
     /**
      * Start the refresh timer.
      */
@@ -174,11 +216,66 @@ class External {
     void refresh(Lsa::LsaRef lsar);
 
     /**
-     * Pass this outbound AS-External-LSA through the policy filter.
+     * Clone a self orignated LSA that is about to be removed for
+     * possible later introduction.
      */
-    bool do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
-		      bool& e_bit, uint32_t& tag, bool& tag_set,
-		      const PolicyTags& policytags);
+    Lsa::LsaRef clone_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * Is this a self originated AS-external-LSA a candidate for suppression?
+     */
+    bool suppress_candidate(Lsa::LsaRef lsar, IPNet<A> net, A nexthop,
+			    uint32_t metric);
+      
+#ifdef	SUPPRESS_DB
+    /**
+     * Store a self originated AS-external-LSA that has been
+     * suppressed for possible future revival.
+     */
+    void suppress_database_add(Lsa::LsaRef lsar, const IPNet<A>& net);
+    
+    /**
+     * Delete a self originated AS-external-LSA that is no longer
+     * being redistributed.
+     */
+    void suppress_database_delete(const IPNet<A>& net, bool invalidate);
+#endif
+
+    /**
+     * Should this AS-external-LSA cause a self originated LSA to be
+     * suppressed.
+     */
+    void suppress_self(Lsa::LsaRef lsar);
+
+    /**
+     * Should this AS-external-LSA cause a self originated LSA to be
+     * suppressed.
+     */
+    bool suppress_self_check(Lsa::LsaRef lsar);
+
+    /**
+     * Find a self originated AS-external-LSA by network.
+     */
+    Lsa::LsaRef find_lsa_by_net(IPNet<A> net);
+
+    /**
+     * This LSA if its advertising router is reachable matches a self
+     * origniated LSA that will be suppressed. Store until the routing
+     * computation has completed and the routing table can be checked.
+     */
+    void suppress_queue_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * An AS-external-LSA has reached MaxAge and is being withdrawn.
+     * check to see if it was suppressing a self originated LSA.
+     */
+    void suppress_maxage(Lsa::LsaRef lsar);
+
+    /**
+     * If this is an AS-external-LSA that is suppressing a self
+     * originated route, then release it.
+     */
+    void suppress_release_lsa(Lsa::LsaRef lsar);
 };
 
 #endif // __OSPF_EXTERNAL_HH__

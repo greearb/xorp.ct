@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.287 2007/10/24 00:56:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.288 2007/11/01 00:18:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2597,6 +2597,7 @@ AreaRouter<A>::receive_lsas(OspfTypes::PeerID peerid,
     push_lsas();
     external_push_all_areas();
     routing_end();
+    _ospf.get_peer_manager().external_suppress_lsas(_area);
 }
 
 template <typename A>

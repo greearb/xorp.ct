@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.107 2007/10/31 21:42:47 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.108 2007/11/01 00:16:29 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1849,6 +1849,18 @@ class ASExternalLsa : public Lsa {
 	return get_e_bit() ? "ASExt-2" : "ASExt-1";
     }
 
+    void set_suppressed_lsa(Lsa::LsaRef lsar) {
+	_suppressed_lsa = lsar;
+    }
+
+    Lsa::LsaRef get_suppressed_lsa() const {
+	return _suppressed_lsa;
+    }
+
+    void release_suppressed_lsa() {
+	_suppressed_lsa.release();
+    }
+
     /**
      * Generate a printable representation.
      */
@@ -1870,6 +1882,9 @@ class ASExternalLsa : public Lsa {
     IPv6 _forwarding_address_ipv6;	// OSPFv3 only.
     uint32_t _external_route_tag;
     uint32_t _referenced_link_state_id;	// OSPFv3 only.
+
+    Lsa::LsaRef _suppressed_lsa;	// If a self originated LSA is
+					// being suppressed here it is.
 };
 
 /**
