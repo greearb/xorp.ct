@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.25 2007/02/16 04:43:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.26 2007/02/16 22:46:43 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -721,7 +721,7 @@ routing3(TestInfo& info, OspfTypes::Version version, string fname)
 
     DOUT(info) << lsar->str() << endl;
 
-    ospf.set_router_id(lsar->get_header().get_link_state_id());
+    ospf.set_router_id(lsar->get_header().get_advertising_router());
 
     lsar->set_self_originating(true);
     ar->testing_replace_router_lsa(lsar);
