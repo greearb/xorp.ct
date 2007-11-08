@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.62 2007/05/23 04:08:28 pavlin Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.63 2007/11/02 18:52:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -305,7 +305,7 @@ RoutingTable<A>::end()
 	for (tic = _current->begin(); tic != _current->end(); tic++) {
 	    RouteEntry<A>& rt = tic.payload().get_entry();
 	    if (!add_route(rt.get_area(), tic.key(),
-			   rt.get_nexthop(), rt.get_cost(), rt)) {
+			   rt.get_nexthop(), rt.get_cost(), rt, true)) {
 		XLOG_WARNING("Add of %s failed", cstring(tic.key()));
 	    }
 	}
@@ -325,7 +325,7 @@ RoutingTable<A>::end()
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	if (_current->end() == _current->lookup_node(tip.key())) {
 	    RouteEntry<A>& rt = tip.payload().get_entry();
-	    if (!delete_route(rt.get_area(), tip.key(), rt)) {
+	    if (!delete_route(rt.get_area(), tip.key(), rt, true)) {
 		XLOG_WARNING("Delete of %s failed", cstring(tip.key()));
 	    }
 	}
@@ -336,7 +336,7 @@ RoutingTable<A>::end()
  	RouteEntry<A>& rt = tic.payload().get_entry();
 	if (_previous->end() == tip) {
 	    if (!add_route(rt.get_area(), tic.key(),
-			   rt.get_nexthop(), rt.get_cost(), rt)) {
+			   rt.get_nexthop(), rt.get_cost(), rt, true)) {
 		XLOG_WARNING("Add of %s failed", cstring(tic.key()));
 	    }
 	} else {
@@ -377,7 +377,7 @@ RoutingTable<A>::remove_area(OspfTypes::AreaID area)
 	// If the winning entry is for this area delete it from the
 	// routing table.
 	if (rt.get_area() == area)
-	    delete_route(area, tic.key(), rt);
+	    delete_route(area, tic.key(), rt, true);
 	    
 	// Unconditionally remove the area, it may be a losing route.
 	bool winner_changed;
@@ -393,7 +393,7 @@ RoutingTable<A>::remove_area(OspfTypes::AreaID area)
 	// If a new winner has emerged add it to the routing table.
 	if (winner_changed) {
 	    add_route(area, tic.key(), rt.get_nexthop(), rt.get_cost(),
-		      ire.get_entry());
+		      ire.get_entry(), true);
 	}
     }
 }
@@ -401,7 +401,7 @@ RoutingTable<A>::remove_area(OspfTypes::AreaID area)
 template <typename A>
 bool
 RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
-			   uint32_t metric, RouteEntry<A>& rt)
+			   uint32_t metric, RouteEntry<A>& rt, bool summaries)
 {
     debug_msg("ADD ROUTE area %s net %s nexthop %s metric %u\n",
 	      pr_id(area).c_str(), cstring(net), cstring(nexthop), metric);
@@ -421,7 +421,8 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 	result = false;
     }
 
-    _ospf.get_peer_manager().summary_announce(area, net, rt);
+    if (summaries)
+	_ospf.get_peer_manager().summary_announce(area, net, rt);
 
     return result;
 }
@@ -429,7 +430,7 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 template <typename A>
 bool
 RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
-			      RouteEntry<A>& rt)
+			      RouteEntry<A>& rt, bool summaries)
 {
     debug_msg("DELETE ROUTE area %s %s filtered %s\n", pr_id(area).c_str(), 
 	      cstring(net), bool_c_str(rt.get_filtered()));
@@ -445,7 +446,8 @@ RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 	result = false;
     }
 
-    _ospf.get_peer_manager().summary_withdraw(area, net, rt);
+    if (summaries)
+	_ospf.get_peer_manager().summary_withdraw(area, net, rt);
 
     return result;
 }
@@ -459,10 +461,10 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 {
     debug_msg("REPLACE ROUTE area %s %s\n", pr_id(area).c_str(), cstring(net));
 
-    bool result = delete_route(previous_area, net, previous_rt);
+    bool result = delete_route(previous_area, net, previous_rt, true);
     if (!result)
 	XLOG_WARNING("Failed to delete: %s", cstring(net));
-    result = add_route(area, net, nexthop, metric, rt);
+    result = add_route(area, net, nexthop, metric, rt, true);
 
     return result;
 }
