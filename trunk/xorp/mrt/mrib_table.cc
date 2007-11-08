@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.19 2006/12/13 02:30:53 atanu Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.20 2007/02/16 22:46:38 pavlin Exp $"
 
 
 //
@@ -544,6 +544,14 @@ MribTableIterator::operator++()
 {
     _mrib_lookup = _mrib_lookup->get_next();
     return (*this);
+}
+
+MribTableIterator
+MribTableIterator::operator++(int)
+{
+    MribTableIterator old_value = *this;
+    _mrib_lookup = _mrib_lookup->get_next();
+    return (old_value);
 }
 
 Mrib *

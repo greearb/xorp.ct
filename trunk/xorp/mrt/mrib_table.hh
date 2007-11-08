@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.12 2006/03/16 00:04:47 pavlin Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.13 2007/02/16 22:46:38 pavlin Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -188,14 +188,24 @@ public:
     MribTableIterator() {}
     
     /**
-     * Increment Operator
+     * Increment Operator (prefix).
      * 
      * Increment the iterator to point to the next @ref MribLookup entry.
      * 
-     * @return a reference to the iterator for the next @ref MribLookup entry
-     * (see @ref MribLookup::get_next()).
+     * @return a reference to the iterator after it was incremented.
+     * @see MribLookup::get_next()
      */
     MribTableIterator& operator++();
+
+    /**
+     * Increment Operator (postfix).
+     * 
+     * Increment the iterator to point to the next @ref MribLookup entry.
+     * 
+     * @return the value of the iterator before it was incremented.
+     * @see MribLookup::get_next()
+     */
+    MribTableIterator operator++(int);
     
     /**
      * Equality Operator
