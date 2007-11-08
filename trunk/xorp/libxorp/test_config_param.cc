@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_config_param.cc,v 1.10 2007/08/30 06:02:28 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_config_param.cc,v 1.11 2007/11/08 17:55:59 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -208,11 +208,11 @@ test_config_param()
     // Increment and decrement operators (postfix)
     //
     config_param2 = 111;
-    config_param2++;
+    verbose_assert(config_param2++ == 111, "++ (postfix)");
     verbose_assert(config_param2.get() == 112, "++ (postfix)");
     verbose_assert(config_param_update_callback_value == 112,
 		   "config parameter update callback value");
-    config_param2--;
+    verbose_assert(config_param2-- == 112, "-- (postfix)");
     verbose_assert(config_param2.get() == 111, "-- (postfix)");
     verbose_assert(config_param_update_callback_value == 111,
 		   "config parameter update callback value");
