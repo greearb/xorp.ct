@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/config_param.hh,v 1.12 2007/11/08 17:55:59 pavlin Exp $
+// $XORP: xorp/libxorp/config_param.hh,v 1.13 2007/11/08 18:16:32 pavlin Exp $
 
 #ifndef __LIBXORP_CONFIG_PARAM_HH__
 #define __LIBXORP_CONFIG_PARAM_HH__
@@ -109,7 +109,7 @@ public:
      * The numerical value of this configuration parameter is incremented
      * by one.
      * 
-     * @return a reference to this configuration parameter after it was
+     * @return the value of this configuration parameter before it was
      * incremented by one.
      */
     T operator++(int) {
@@ -146,7 +146,7 @@ public:
      * The numerical value of this configuration parameter is decremented
      * by one.
      * 
-     * @return a reference to this configuration parameter after it was
+     * @return the value of this configuration parameter before it was
      * decremented by one.
      */
     T operator--(int) {
