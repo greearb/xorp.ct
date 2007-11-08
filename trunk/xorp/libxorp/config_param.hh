@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/config_param.hh,v 1.10 2007/02/16 22:46:18 pavlin Exp $
+// $XORP: xorp/libxorp/config_param.hh,v 1.11 2007/05/23 12:12:42 pavlin Exp $
 
 #ifndef __LIBXORP_CONFIG_PARAM_HH__
 #define __LIBXORP_CONFIG_PARAM_HH__
@@ -93,7 +93,7 @@ public:
     }
 
     /**
-     * Increment Operator
+     * Increment Operator (prefix).
      * 
      * The numerical value of this configuration parameter is incremented
      * by one.
@@ -101,10 +101,32 @@ public:
      * @return a reference to this configuration parameter after it was
      * incremented by one.
      */
-    const T& operator++() { set(_value + 1); return (_value); }
+    const T& operator++() { return (incr()); }
 
     /**
-     * Decrement Operator
+     * Increment Operator (postfix).
+     * 
+     * The numerical value of this configuration parameter is incremented
+     * by one.
+     * 
+     * @return a reference to this configuration parameter after it was
+     * incremented by one.
+     */
+    const T& operator++(T) { return (incr()); }
+
+    /**
+     * Increment Operator.
+     * 
+     * The numerical value of this configuration parameter is incremented
+     * by one.
+     * 
+     * @return a reference to this configuration parameter after it was
+     * incremented by one.
+     */
+    const T& incr() { set(_value + 1); return (_value); }
+
+    /**
+     * Decrement Operator (prefix).
      * 
      * The numerical value of this configuration parameter is decremented
      * by one.
@@ -112,7 +134,29 @@ public:
      * @return a reference to this configuration parameter after it was
      * decremented by one.
      */
-    const T& operator--() { set(_value - 1); return (_value); }
+    const T& operator--() { return (decr()); }
+
+    /**
+     * Decrement Operator (postfix).
+     * 
+     * The numerical value of this configuration parameter is decremented
+     * by one.
+     * 
+     * @return a reference to this configuration parameter after it was
+     * decremented by one.
+     */
+    const T& operator--(T) { return (decr()); }
+
+    /**
+     * Decrement Operator.
+     * 
+     * The numerical value of this configuration parameter is decremented
+     * by one.
+     * 
+     * @return a reference to this configuration parameter after it was
+     * decremented by one.
+     */
+    const T& decr() { set(_value - 1); return (_value); }
 
     /**
      * Get the initial value of the parameter.
