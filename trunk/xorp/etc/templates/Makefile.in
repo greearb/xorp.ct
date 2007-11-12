@@ -193,8 +193,8 @@ data_DATA = host.cmds bgp.cmds bgp.tp fea.cmds fea.tp fib2mrib.tp \
 	mfea6.tp mld.cmds mld.tp ospfv2.cmds ospfv2.tp ospfv3.cmds \
 	ospfv3.tp pim.cmds pimsm4.tp pim6.cmds pimsm6.tp plumbing.tp \
 	policy.tp protocols.tp rib.cmds rib.tp rip.cmds rip.tp \
-	ripng.tp rtrmgr.tp snmp.tp static_routes.tp xorpsh.cmds \
-	misc.cmds
+	ripng.cmds ripng.tp rtrmgr.tp snmp.tp static_routes.tp \
+	xorpsh.cmds misc.cmds
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(data_DATA)
