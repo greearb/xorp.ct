@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.11 2007/08/17 19:48:08 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.12 2007/08/21 00:10:38 pavlin Exp $ */
 
 /**
  * Interface implementing basic IPv6 socket functionality.  This interface
@@ -263,7 +263,7 @@ interface socket6/0.1 {
      *
      * @param optname name of option to be set.  Valid values are:
      * 		"multicast_loopback"
-     *		"multicast_hops"
+     *		"multicast_ttl"
      *
      * @param optval value of option to be set.  If value is logically boolean
      *        then zero represents false and any non-zero value true.

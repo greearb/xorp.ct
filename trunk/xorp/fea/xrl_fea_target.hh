@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.20 2007/09/15 02:11:18 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.21 2007/09/27 00:33:35 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -2099,7 +2099,7 @@ public:
      *  @param sockid unique socket ID.
      *
      *  @param optname name of option to be set. Valid values are:
-     *  "multicast_loopback" "multicast_hops"
+     *  "multicast_loopback" "multicast_ttl"
      *
      *  @param optval value of option to be set. If value is logically boolean
      *  then zero represents false and any non-zero value true.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.24 2007/08/21 00:10:38 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.25 2007/10/13 01:50:07 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -195,7 +195,7 @@ XrlPortIO<IPv6>::request_ttl_one()
 {
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_set_socket_option(
-		_ss.c_str(), socket_id(), "multicast_hops", 1,
+		_ss.c_str(), socket_id(), "multicast_ttl", 1,
 		callback(this, &XrlPortIO<IPv6>::ttl_one_cb));
 }
 
