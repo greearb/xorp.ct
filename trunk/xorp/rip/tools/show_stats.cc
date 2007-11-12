@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.13 2007/02/16 22:47:20 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/show_stats.cc,v 1.14 2007/05/23 12:12:51 pavlin Exp $"
 
 #include <iomanip>
 
@@ -354,7 +354,7 @@ template <>
 bool
 GetAllAddressStats<IPv6>::dispatch()
 {
-    XrlRipV0p1Client cl(queue().sender());
+    XrlRipngV0p1Client cl(queue().sender());
     return cl.send_get_all_addresses(queue().target().c_str(),
 		callback(this, &GetAllAddressStats<IPv6>::cmd_callback)
 				     );
