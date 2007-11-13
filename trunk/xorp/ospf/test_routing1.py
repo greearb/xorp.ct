@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.24 2007/03/14 08:12:43 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.25 2007/03/19 09:02:21 atanu Exp $
 
 import getopt
 import sys
@@ -35,6 +35,9 @@ TESTS=[
     ['r5V3', True, 'v3'],
     ['r6V3', True, 'v3'],
     ['r7V3', True, 'v3'],
+    ['r8V2', True, 'v2'],
+    ['r9V2', True, 'v2'],
+    ['r10V2', True, 'v2'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -789,6 +792,219 @@ verify_routing_table_size 1
 verify_routing_entry  5f00:0000:c001:0200::/56 5f00::0002 2 false false
 """ % (RT1,RT1_LINK,RT1_INTRA_R,
        RT2,RT2_LINK,RT2_INTRA_R)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r8V2(verbose, protocol):
+    """
+    Simple two router case the next two tests will add another link between
+    RT1 and RT2.
+    """
+
+    # RT1 is this router
+    # RT2 is its direct neighbour
+    # A single route should be installed for 10.1.1.0/24 via 10.1.2.1
+			       
+    #            +-----+                     +-----+
+    #   	 | RT1 |                     | RT2 |
+    #   	 |     |                     |     |
+    #   	 |     |                     |     |
+    # 10.2.2.0/24|     |                     |     |10.1.1.0/24
+    # -----------|     |                     |     |------------
+    #   	 |     |     10.1.2.0/24     |     |         
+    #   	 |     |---------------------|	   |
+    #   	 |     |10.1.2.2     10.1.2.1|     |
+    #   	 |     |     metric 1        |	   |
+    #   	 +-----+        	     +-----+
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa E-bit lsid 127.1.0.2 adv 127.1.0.2 \
+    stub lsid 10.2.2.0 ldata  255.255.255.0 metric 1 \
+    transit lsid 10.1.2.2 ldata 10.1.2.2 metric 1 \
+    "
+
+    RT2 = "RouterLsa E-bit lsid 127.1.0.1 adv 127.1.0.1 \
+    stub lsid 10.1.1.0 ldata  255.255.255.0 metric 1 \
+    transit lsid 10.1.2.2 ldata 10.1.2.1 metric 1 \
+    "
+
+    RT1_NETWORK1 = "NetworkLsa E-bit lsid 10.1.2.2 adv 127.1.0.2 \
+    netmask 0xffffff00 \
+    add-router 127.1.0.2 \
+    add-router 127.1.0.1 \
+    "
+
+    RT1_NETWORK2 = "NetworkLsa E-bit lsid  99.1.1.2 adv 127.1.0.2 \
+    netmask 0xffffff00 \
+    add-router 127.1.0.2 \
+    add-router 127.1.0.1 \
+    "
+
+    command = """
+set_router_id 127.1.0.2
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
+""" % (RT1, RT2, RT1_NETWORK1, RT1_NETWORK2)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r9V2(verbose, protocol):
+    """
+    Test that when there are two paths between two routers the one
+    with the lowest metric is choosen. This test is the same as the
+    previous test apart from the addition of the more expensive path.
+    """
+
+    # RT1 is this router
+    # RT2 is its direct neighbour via two interfaces.
+    # A single route should be installed for 10.1.1.0/24 via 10.1.2.1
+
+    #            +-----+                     +-----+
+    #   	 | RT1 |     99.1.2.0/24     | RT2 |
+    #   	 |     |---------------------|     |
+    #   	 |     |99.1.2.2     99.1.2.1|     |
+    # 10.2.2.0/24|     |     metric 10       |     |10.1.1.0/24
+    # -----------|     |                     |     |------------
+    #   	 |     |     10.1.2.0/24     |     |         
+    #   	 |     |---------------------|	   |
+    #   	 |     |10.1.2.2     10.1.2.1|     |
+    #   	 |     |     metric 1        |	   |
+    #   	 +-----+                     +-----+
+        	       	       
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa E-bit lsid 127.1.0.2 adv 127.1.0.2 \
+    age 1074 seqno 0x8000001a cksum 0x9976 \
+    transit lsid 99.1.1.2 ldata 99.1.1.2 metric 10 \
+    stub lsid 10.2.2.0 ldata  255.255.255.0 metric 1 \
+    transit lsid 10.1.2.2 ldata 10.1.2.2 metric 1 \
+    "
+
+    RT2 = "RouterLsa E-bit lsid 127.1.0.1 adv 127.1.0.1 \
+    age 1076 seqno 0x8000001a cksum 0x4cc9 \
+    transit lsid 99.1.1.2 ldata 99.1.1.1 metric 10 \
+    stub lsid 10.1.1.0 ldata  255.255.255.0 metric 1 \
+    transit lsid 10.1.2.2 ldata 10.1.2.1 metric 1 \
+    "
+ 
+    RT1_NETWORK1 = "NetworkLsa E-bit lsid 10.1.2.2 adv 127.1.0.2 \
+    age 1075 seqno 0x80000019 cksum 0x3676 \
+    netmask 0xffffff00 \
+    add-router 127.1.0.2 \
+    add-router 127.1.0.1 \
+    "
+
+    RT1_NETWORK2 = "NetworkLsa E-bit lsid  99.1.1.2 adv 127.1.0.2 \
+    age 1074 seqno 0x80000019 cksum 0xb79c \
+    netmask 0xffffff00 \
+    add-router 127.1.0.2 \
+    add-router 127.1.0.1 \
+    "
+
+    command = """
+set_router_id 127.1.0.2
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
+""" % (RT1, RT2, RT1_NETWORK1, RT1_NETWORK2)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r10V2(verbose, protocol):
+    """
+    Test that when there are two paths between two routers the one
+    with the lowest metric is choosen. This test is identical to the
+    previous test apart from the order of the transit links in the
+    Router-LSAs.
+    """
+
+    # RT1 is this router
+    # RT2 is its direct neighbour via two interfaces.
+    # A single route should be installed for 10.1.1.0/24 via 10.1.2.1
+
+    #            +-----+                     +-----+
+    #   	 | RT1 |     99.1.2.0/24     | RT2 |
+    #   	 |     |---------------------|     |
+    #   	 |     |99.1.2.2     99.1.2.1|     |
+    # 10.2.2.0/24|     |     metric 10       |     |10.1.1.0/24
+    # -----------|     |                     |     |------------
+    #   	 |     |     10.1.2.0/24     |     |         
+    #   	 |     |---------------------|	   |
+    #   	 |     |10.1.2.2     10.1.2.1|     |
+    #   	 |     |     metric 1        |	   |
+    #   	 +-----+                     +-----+
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT1 = "RouterLsa E-bit lsid 127.1.0.2 adv 127.1.0.2 \
+    age 1074 seqno 0x8000001a cksum 0x9976 \
+    transit lsid 10.1.2.2 ldata 10.1.2.2 metric 1 \
+    stub lsid 10.2.2.0 ldata  255.255.255.0 metric 1 \
+    transit lsid 99.1.1.2 ldata 99.1.1.2 metric 10 \
+    "
+
+    RT2 = "RouterLsa E-bit lsid 127.1.0.1 adv 127.1.0.1 \
+    age 1076 seqno 0x8000001a cksum 0x4cc9 \
+    transit lsid 10.1.2.2 ldata 10.1.2.1 metric 1 \
+    stub lsid 10.1.1.0 ldata  255.255.255.0 metric 1 \
+    transit lsid 99.1.1.2 ldata 99.1.1.1 metric 10 \
+    "
+ 
+    RT1_NETWORK1 = "NetworkLsa E-bit lsid 10.1.2.2 adv 127.1.0.2 \
+    age 1075 seqno 0x80000019 cksum 0x3676 \
+    netmask 0xffffff00 \
+    add-router 127.1.0.2 \
+    add-router 127.1.0.1 \
+    "
+
+    RT1_NETWORK2 = "NetworkLsa E-bit lsid  99.1.1.2 adv 127.1.0.2 \
+    age 1074 seqno 0x80000019 cksum 0xb79c \
+    netmask 0xffffff00 \
+    add-router 127.1.0.2 \
+    add-router 127.1.0.1 \
+    "
+
+    command = """
+set_router_id 127.1.0.2
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
+""" % (RT1, RT2, RT1_NETWORK1, RT1_NETWORK2)
 
     print >>fp, command
 

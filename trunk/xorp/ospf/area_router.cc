@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.290 2007/11/13 05:30:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.291 2007/11/13 06:13:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -5633,10 +5633,8 @@ AreaRouter<A>::bidirectionalV3(RouterLink::Type rl_type,
 }
 
 /**
- * XXX
- * This is temporary until SPT supports a single call to update an
- * edge adding the edge if necessary.
- *
+ * Update an edge in the normal case an edge will be added twice,
+ * check that the metric has not changed.
  */
 template <typename A>
 inline
@@ -5646,12 +5644,17 @@ update_edge(Spt<A>& spt, const Vertex& src, int metric, const Vertex& dst)
     debug_msg("src %s metric %d dst %s\n", cstring(src), metric, cstring(dst));
 
     if (!spt.add_edge(src, metric, dst)) {
-	// XXX
-	// This warning should not appear during absolute calculation.
-	// It may be normal for it to appear when doing incremental
-	// updates when it should be removed.
-	XLOG_WARNING("Edge exists between %s and %s", cstring(src),
-		     cstring(dst));
+	int current_metric;
+	if (!spt.get_edge_weight(src, current_metric, dst))
+            XLOG_FATAL("Can't get edge weight between %s and %s",
+                       cstring(src), cstring(dst));
+        if (current_metric <= metric)
+            return;
+	// We should only get here if two vertexes have more than one
+	// edge between them, in which case the nexthop for the
+	// destination vertex must be updated.
+        if (!spt.update_node(dst))
+            XLOG_FATAL("Can't update node %s", cstring(dst));
 	if (!spt.update_edge_weight(src, metric, dst))
 	    XLOG_FATAL("Couldn't update edge between %s and %s",
 		       cstring(src), cstring(dst));
