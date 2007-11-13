@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.16 2007/07/10 23:45:23 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.17 2007/11/13 09:37:49 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -65,7 +65,14 @@ class Spt {
      */
     bool add_node(const A& node);
 
-    /**
+     /**
+     * Update node
+     *
+     * @return false if the node doesn't exist, otherwise true.
+     */
+    bool update_node(const A& node);
+
+   /**
      * Remove node
      *
      * @return false if the node doesn't exist or has already been
@@ -180,6 +187,16 @@ class Node {
      * @return nodename
      */
     A nodename();
+
+    /**
+     * Set nodename
+     * DONT' USE THIS METHOD.
+     * Changing the nodename could alter the result of the comparison function,
+     * causing confusion in the spt map.
+     *
+     * @return true on success.
+     */
+    bool set_nodename(A nodename);
 
     /**
      * Add a new edge.
@@ -538,6 +555,26 @@ Spt<A>::add_node(const A& node)
 
 template <typename A>
 bool
+Spt<A>::update_node(const A& node)
+{
+    // If a valid node doesn't exist return false
+    typename Node<A>::NodeRef srcnode = find_node(node);
+    if (srcnode.is_empty()) {
+	XLOG_WARNING("Request to update non-existant node %s",
+		     Node<A>(node).str().c_str());
+	return false;
+    }
+    if (!srcnode->valid()) {
+	XLOG_WARNING("Node is not valid %s", Node<A>(node).str().c_str());
+	return false;
+    }
+    srcnode->set_nodename(node);
+
+    return true;
+}
+
+template <typename A>
+bool
 Spt<A>::remove_node(const A& node)
 {
     // If a valid node doesn't exist return false
@@ -793,6 +830,15 @@ A
 Node<A>::nodename()
 {
     return _nodename;
+}
+
+template <typename A>
+bool
+Node<A>::set_nodename(A nodename)
+{
+    _nodename = nodename;
+    
+    return true;
 }
 
 template <typename A>
