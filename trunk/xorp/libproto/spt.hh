@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.15 2007/05/23 04:08:26 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.16 2007/07/10 23:45:23 pavlin Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -589,9 +589,7 @@ Spt<A>::add_edge(const A& src, int weight, const A& dst)
 	return false;
     }
 
-    srcnode->add_edge(dstnode, weight);
-
-    return true;
+    return srcnode->add_edge(dstnode, weight);
 }
 
 template <typename A>

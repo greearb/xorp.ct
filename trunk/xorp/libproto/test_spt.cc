@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.13 2007/02/16 22:46:03 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.14 2007/05/23 04:08:26 pavlin Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -226,6 +226,10 @@ test2(TestInfo& info)
     spt->add_node("A");
     spt->add_node("B");
     spt->add_edge("A", 10, "B");
+    if (spt->add_edge("A", 10, "B")) {
+	DOUT(info) << "Adding the same edge twice succeeded!!!\n";
+	return false;
+    }
 
     spt->set_origin("A");
 
