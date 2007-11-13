@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.13 2007/02/16 22:46:43 pavlin Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.14 2007/02/27 18:33:14 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -177,6 +177,8 @@ class Vertex {
 	    break;
 	case OspfTypes::V3:
 	    output = "OSPFv3";
+	    if (_origin)
+		output += "(Origin)";
 	    switch(_t) {
 	    case OspfTypes::Router:
 		output += c_format(" Router %s(%#x)", pr_id(_nodeid).c_str(),
