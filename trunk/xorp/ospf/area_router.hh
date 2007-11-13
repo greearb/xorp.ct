@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.136 2007/10/13 01:50:04 pavlin Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.137 2007/10/17 16:08:46 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -256,6 +256,14 @@ class AreaRouter : public ServiceBase {
      */
     void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 			  RouteEntry<A>& rt);
+
+    /**
+     * A route has been replaced in the routing table. A previously
+     * generated Summary-LSA may need to be withdrawn or replaced.
+     */
+    void summary_replace(OspfTypes::AreaID area, IPNet<A> net,
+			 RouteEntry<A>& rt, RouteEntry<A>& previous_rt,
+			 OspfTypes::AreaID previous_area);
 
      /**
       * @return true if this area should accept an AS-External-LSA or

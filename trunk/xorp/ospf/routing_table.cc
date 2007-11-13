@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.63 2007/11/02 18:52:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.64 2007/11/08 20:23:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -461,10 +461,13 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 {
     debug_msg("REPLACE ROUTE area %s %s\n", pr_id(area).c_str(), cstring(net));
 
-    bool result = delete_route(previous_area, net, previous_rt, true);
+    bool result = delete_route(previous_area, net, previous_rt, false);
     if (!result)
 	XLOG_WARNING("Failed to delete: %s", cstring(net));
-    result = add_route(area, net, nexthop, metric, rt, true);
+    result = add_route(area, net, nexthop, metric, rt, false);
+
+    _ospf.get_peer_manager().summary_replace(area, net, rt, previous_rt,
+					     previous_area);
 
     return result;
 }

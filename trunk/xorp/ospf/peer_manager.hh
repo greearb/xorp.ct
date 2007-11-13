@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.94 2007/10/03 21:23:53 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.95 2007/11/07 01:11:32 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -715,6 +715,18 @@ class PeerManager {
      */
     void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 			  RouteEntry<A>& rt);
+
+    /**
+     * A route has been replaced in the routing table. If a generated
+     * Summary-LSA exists it will need to have its metric or nexthop
+     * modified.
+     *
+     * @param area that the route was introduced by.
+     */
+    void summary_replace(OspfTypes::AreaID area, IPNet<A> net,
+			 RouteEntry<A>& rt,
+			 RouteEntry<A>& previous_rt,
+			 OspfTypes::AreaID previous_area);
 
     /**
      * Send all the summary information to specified area.  New areas

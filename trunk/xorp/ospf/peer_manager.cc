@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.151 2007/10/29 19:56:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.152 2007/11/07 01:11:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1969,6 +1969,44 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     for (i = _areas.begin(); i != _areas.end(); i++)
 	if ((*i).first != area)
 	    (*i).second->summary_withdraw(area, net, rt);
+}
+
+template <typename A>
+void
+PeerManager<A>::summary_replace(OspfTypes::AreaID area, IPNet<A> net,
+				RouteEntry<A>& rt,
+				RouteEntry<A>& previous_rt,
+				OspfTypes::AreaID previous_area)
+{
+    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt));
+
+    if (!summary_candidate(area, net, rt))
+	return;
+
+    _external.suppress_route_withdraw(previous_area, net, previous_rt);
+    _external.suppress_route_announce(area, net, rt);
+    
+    XLOG_ASSERT(1 == _summaries.count(net));
+    _summaries.erase(_summaries.find(net));
+    Summary s(area, rt);
+    _summaries.insert(make_pair(net, s));
+
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++) {
+	if ((*i).first == area) {
+	    if (area != previous_area)
+		(*i).second->summary_withdraw(previous_area, net,
+					      previous_rt);
+	    continue;
+	}
+	if ((*i).first == previous_area) {
+	    if (area != previous_area)
+		(*i).second->summary_announce(area, net, rt, false);
+	    continue;
+	}
+ 	(*i).second->summary_replace(area, net, rt, previous_rt,previous_area);
+    }
 }
 
 template <typename A>

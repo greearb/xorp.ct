@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.288 2007/11/01 00:18:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.289 2007/11/07 01:11:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1302,6 +1302,83 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 	    XLOG_WARNING("LSA not being announced! Area range change?\n%s",
 			 cstring(*lsar));
     }
+}
+
+template <typename A>
+void 
+AreaRouter<A>::summary_replace(OspfTypes::AreaID area, IPNet<A> net,
+			       RouteEntry<A>& rt, RouteEntry<A>& previous_rt,
+			       OspfTypes::AreaID previous_area)
+{
+    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt));
+
+    XLOG_ASSERT(area != _area);
+    XLOG_ASSERT(area == rt.get_area());
+
+    bool announce;
+    Lsa::LsaRef olsar = summary_build(previous_area, net, previous_rt,
+				      announce);
+    if (0 == olsar.get()) {
+	// No previous LSA just try and announce the new one.
+	summary_announce(area, net, rt, false);
+	return;
+    }
+    
+    // Set the advertising router otherwise the lookup will fail.
+    olsar->get_header().set_advertising_router(_ospf.get_router_id());
+    
+    bool found = false;
+    size_t index;
+    if (unique_find_lsa(olsar, net, index)) {
+	if (!announce)
+	    XLOG_WARNING("LSA probably should not have been announced! "
+			 "Area range change?\n%s", cstring(*olsar));
+	olsar = _db[index];
+	found = true;
+    } else {
+	if (announce)
+	    XLOG_WARNING("LSA not being announced! Area range change?\n%s",
+			 cstring(*olsar));
+    }
+    
+    // No previous LSA was being announced, nothing to replace, so just
+    // call announce.
+    if (!found) {
+	summary_announce(area, net, rt, false);
+	return;
+    }
+
+    Lsa::LsaRef nlsar = summary_build(area, net, rt, announce);
+    if (0 == nlsar.get()) {
+	premature_aging(olsar, index);
+	return;
+    }
+
+    // Set the general fields.
+    nlsar->get_header().set_advertising_router(_ospf.get_router_id());
+    nlsar->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    nlsar->record_creation_time(now);
+    nlsar->encode();
+
+    if (!announce) {
+	premature_aging(olsar, index);
+	return;
+    }
+
+    unique_link_state_id(nlsar);
+
+    // Confirm the correct LSA is being replaced.
+    XLOG_ASSERT(olsar->get_header().get_link_state_id() ==
+		nlsar->get_header().get_link_state_id());
+
+    nlsar->set_ls_sequence_number(olsar->get_ls_sequence_number());
+    increment_sequence_number(nlsar);
+    delete_lsa(olsar, index, true);
+    add_lsa(nlsar);
+    refresh_summary_lsa(nlsar);
 }
 
 template <typename A>
