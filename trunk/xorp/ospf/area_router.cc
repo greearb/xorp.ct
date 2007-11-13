@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.289 2007/11/07 01:11:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.290 2007/11/13 05:30:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -5837,7 +5837,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
 	if (*i == rlsid)
 	    continue;
 
-	// If this is the designated router then we know have a full
+	// If this is the designated router then we now have a full
 	// adjacency with all the attached routers as this router
 	// created this list. If we are not the designated router then
 	// we need to check that we are at least 2-Way.
