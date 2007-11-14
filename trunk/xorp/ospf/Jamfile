@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/Jamfile,v 1.3 2007/04/20 07:17:44 pavlin Exp $
+# $XORP: xorp/ospf/Jamfile,v 1.4 2007/10/04 20:46:16 pavlin Exp $
 #
 
 SubDir TOP ospf ;
@@ -64,6 +64,7 @@ if $(MAKE_CHECK) {
  Main test_packet : test_packet.cc ;
  Main test_peering : test_peering.cc ;
  Main test_routing : test_routing.cc ;
+ Main test_routing_database : test_routing_database.cc ;
  Main test_routing_table : test_routing.cc ;
  Main test_build_lsa_main : test_build_lsa.cc test_build_lsa_main.cc ;
  Main test_routing_interactive : test_routing_interactive.cc test_build_lsa.cc ;

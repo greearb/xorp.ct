@@ -37,8 +37,8 @@ target_triplet = @target@
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
 	test_peering$(EXEEXT) test_routing$(EXEEXT) \
-	test_routing_table$(EXEEXT) test_build_lsa_main$(EXEEXT) \
-	test_routing_interactive$(EXEEXT)
+	test_routing_database$(EXEEXT) test_routing_table$(EXEEXT) \
+	test_build_lsa_main$(EXEEXT) test_routing_interactive$(EXEEXT)
 subdir = ospf
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -144,6 +144,26 @@ am_test_routing_OBJECTS = test_routing.$(OBJEXT)
 test_routing_OBJECTS = $(am_test_routing_OBJECTS)
 test_routing_LDADD = $(LDADD)
 test_routing_DEPENDENCIES = libospf.la \
+	$(top_builddir)/xrl/targets/libospfv2base.la \
+	$(top_builddir)/xrl/targets/libospfv3base.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4xif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6xif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libproto/libproto.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+am_test_routing_database_OBJECTS = test_routing_database.$(OBJEXT)
+test_routing_database_OBJECTS = $(am_test_routing_database_OBJECTS)
+test_routing_database_LDADD = $(LDADD)
+test_routing_database_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/targets/libospfv2base.la \
 	$(top_builddir)/xrl/targets/libospfv3base.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
@@ -266,12 +286,14 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) \
 	$(test_checksum_SOURCES) $(test_packet_SOURCES) \
 	$(test_peering_SOURCES) $(test_routing_SOURCES) \
+	$(test_routing_database_SOURCES) \
 	$(test_routing_interactive_SOURCES) \
 	$(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) \
 	$(xorp_ospfv3_SOURCES)
 DIST_SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) \
 	$(test_checksum_SOURCES) $(test_packet_SOURCES) \
 	$(test_peering_SOURCES) $(test_routing_SOURCES) \
+	$(test_routing_database_SOURCES) \
 	$(test_routing_interactive_SOURCES) \
 	$(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) \
 	$(xorp_ospfv3_SOURCES)
@@ -353,6 +375,7 @@ PYTHON_PLATFORM = @PYTHON_PLATFORM@
 PYTHON_PREFIX = @PYTHON_PREFIX@
 PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
+SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -454,6 +477,8 @@ test_packet_SOURCES = test_common.hh test_packet.cc
 test_checksum_SOURCES = test_checksum.cc
 test_peering_SOURCES = test_peering.cc
 test_routing_SOURCES = test_common.hh test_routing.cc
+test_routing_database_SOURCES = test_common.hh \
+	test_routing_database.cc
 test_routing_table_SOURCES = test_routing_table.cc
 test_build_lsa_main_SOURCES = test_args.hh test_build_lsa.hh \
 	test_build_lsa.cc test_build_lsa_main.cc
@@ -568,6 +593,9 @@ test_peering$(EXEEXT): $(test_peering_OBJECTS) $(test_peering_DEPENDENCIES)
 test_routing$(EXEEXT): $(test_routing_OBJECTS) $(test_routing_DEPENDENCIES) 
 	@rm -f test_routing$(EXEEXT)
 	$(CXXLINK) $(test_routing_OBJECTS) $(test_routing_LDADD) $(LIBS)
+test_routing_database$(EXEEXT): $(test_routing_database_OBJECTS) $(test_routing_database_DEPENDENCIES) 
+	@rm -f test_routing_database$(EXEEXT)
+	$(CXXLINK) $(test_routing_database_OBJECTS) $(test_routing_database_LDADD) $(LIBS)
 test_routing_interactive$(EXEEXT): $(test_routing_interactive_OBJECTS) $(test_routing_interactive_DEPENDENCIES) 
 	@rm -f test_routing_interactive$(EXEEXT)
 	$(CXXLINK) $(test_routing_interactive_OBJECTS) $(test_routing_interactive_LDADD) $(LIBS)
@@ -604,6 +632,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_peering.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_routing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_routing_database.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_routing_interactive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_routing_table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vlink.Plo@am__quote@

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.26 2007/04/17 21:40:49 pavlin Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.27 2007/10/04 20:46:16 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -17,6 +17,7 @@ check_PROGRAMS	 = test_packet
 check_PROGRAMS	+= test_checksum
 check_PROGRAMS	+= test_peering
 check_PROGRAMS	+= test_routing
+check_PROGRAMS	+= test_routing_database
 check_PROGRAMS	+= test_routing_table
 check_PROGRAMS	+= test_build_lsa_main
 check_PROGRAMS	+= test_routing_interactive
@@ -64,6 +65,9 @@ test_peering_SOURCES		 = test_peering.cc
 
 test_routing_SOURCES		 = test_common.hh
 test_routing_SOURCES		+= test_routing.cc
+
+test_routing_database_SOURCES	 = test_common.hh
+test_routing_database_SOURCES	+= test_routing_database.cc
 
 test_routing_table_SOURCES	 = test_routing_table.cc
 
