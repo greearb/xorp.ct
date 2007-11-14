@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.152 2007/11/07 01:11:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.153 2007/11/13 05:30:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1981,8 +1981,25 @@ PeerManager<A>::summary_replace(OspfTypes::AreaID area, IPNet<A> net,
     debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
 	      cstring(net), cstring(rt));
 
-    if (!summary_candidate(area, net, rt))
+    bool previous = summary_candidate(previous_area, net, previous_rt);
+    bool current = summary_candidate(area, net, rt);
+
+    if (current != previous) {
+	if (previous)
+	    summary_withdraw(previous_area, net, previous_rt);
+	if (current)
+	    summary_announce(area, net, rt);
 	return;
+    }
+
+    XLOG_ASSERT(current == previous);
+
+    // Don't need to check for !previous as it is the same as current.
+    if (!current)
+	return;
+
+    XLOG_ASSERT(current);
+    XLOG_ASSERT(previous);
 
     _external.suppress_route_withdraw(previous_area, net, previous_rt);
     _external.suppress_route_announce(area, net, rt);
