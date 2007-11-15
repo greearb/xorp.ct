@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.153 2007/11/13 05:30:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.154 2007/11/14 20:12:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -126,8 +126,10 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
     // XXX Should subsume the refreshing of the Router-LSA into the
     // generic area border router transition method.
     if (area_border_router_p() != old_border_router_state) {
-	refresh_router_lsas();
-	area_border_router_transition(true /* up */);
+	if (!_ospf.get_testing()) {
+	    refresh_router_lsas();
+	    area_border_router_transition(true /* up */);
+	}
     }
 
     // Inform this area if any virtual links are configured.
@@ -232,8 +234,10 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
     // XXX Should subsume the refreshing of the Router-LSA into the
     // generic area border router transition method.
     if (area_border_router_p() != old_border_router_state) {
-	refresh_router_lsas();
-	area_border_router_transition(false /* down */);
+	if (!_ospf.get_testing()) {
+	    refresh_router_lsas();
+	    area_border_router_transition(false /* down */);
+	}
     }
 
     // Flag to the virtual link code that this area is going away.
@@ -1871,6 +1875,9 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
 {
     debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
 	      cstring(net), cstring(rt));
+
+    if (_ospf.get_testing())
+	return false;
 
     // RFC 2328 Section 12.4.3. Summary-LSAs
     // Select routes that are candidate for summarisation.
