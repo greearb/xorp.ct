@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.27 2007/11/07 03:53:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_database.cc,v 1.1 2007/11/14 03:01:25 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -323,9 +323,15 @@ routing(TestInfo& info, OspfTypes::Version version, string fname)
 	    Lsa::LsaRef lsar = lsa_decoder.decode(&data[0], len);
 
 	    if (first_in_area) {
-		lsar->set_self_originating(true);
-		ar->testing_replace_router_lsa(lsar);
-		first_in_area = false;
+		RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+		if (rlsa && rlsa->get_header().get_advertising_router() ==
+		    ospf.get_router_id()) {
+		    lsar->set_self_originating(true);
+		    ar->testing_replace_router_lsa(lsar);
+		    first_in_area = false;
+		} else {
+		    ar->testing_add_lsa(lsar);
+		}
 	    } else {
 		ar->testing_add_lsa(lsar);
 	    }
