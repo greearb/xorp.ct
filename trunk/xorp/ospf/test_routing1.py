@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.25 2007/03/19 09:02:21 atanu Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.26 2007/11/13 23:19:37 atanu Exp $
 
 import getopt
 import sys
@@ -38,6 +38,9 @@ TESTS=[
     ['r8V2', True, 'v2'],
     ['r9V2', True, 'v2'],
     ['r10V2', True, 'v2'],
+    ['r11V3', True, 'v3'],
+    ['r12V3', True, 'v3'],
+    ['r13V3', True, 'v3'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -1012,6 +1015,250 @@ verify_routing_entry 10.1.1.0/24 10.1.2.1 2 false false
         return True
     else:
         return False
+
+def r11database():
+    """
+    Return the database for test r11V3
+    """
+
+    # RT1 is this router.
+    # RTC is an area border router that generates an Inter-Area-Prefix-LSA.
+    # RT1 is connected to RTC via transit.
+
+    #                            +
+    #     +---+1       1+---+1   |
+    #     |RT1|---------|RTC|----| Other Area
+    #     +---+         +---+    |
+    #                            +
+
+    # Network           IPv6 prefix
+    # -----------------------------------
+    # Other Area	3ffe:4725:c404::/64
+
+    # Router	Interface   Interface ID   link-local address
+    # -------------------------------------------------------
+    # RT1	to RTC	    4		   fe80::8:800:200c:4300
+    # RTC	to RT1	    3		   fe80::8:800:200c:4350
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.0 adv 10.80.52.103 \
+    transit iid 4 nid 4 nrid 10.80.52.103 metric 1 \
+    "
+    RT1_LINK = "LinkLsa lsid 0.0.0.4 adv 10.80.52.103 \
+    link-local-address fe80::8:800:200c:4300"
+
+    RT1_NETWORK = "NetworkLsa lsid 0.0.0.4 adv 10.80.52.103 \
+    add-router 10.80.52.103 \
+    add-router 10.80.52.107 \
+    "
+
+    RTC = "RouterLsa bit-B V6-bit E-bit R-bit lsid 0.0.0.1 adv 10.80.52.107 \
+    transit iid 3 nid 4 nrid 10.80.52.103 metric 1 \
+    "
+
+    RTC_LINK = "LinkLsa lsid 0.0.0.3 adv 10.80.52.107 \
+    link-local-address fe80::8:800:200c:4350"
+
+    RTC_INTER = "SummaryNetworkLsa lsid 0.0.0.2 adv 10.80.52.107 \
+    metric 1 \
+    IPv6Prefix 3ffe:4725:c404::/64 \
+    "
+
+    database = """
+replace %s
+add %s
+add %s
+add %s
+add %s
+add %s
+""" % (RT1,RT1_LINK,RT1_NETWORK,
+       RTC,RTC_LINK,RTC_INTER)
+
+    return database
+
+def r11V3(verbose, protocol):
+    """
+    Verify the correct processing of Inter-Area-Prefix-LSAs, when this router
+    is connected to the generating router by a Network-LSA.
+    """
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    command = """
+set_router_id 10.80.52.103
+create 0.0.0.0 normal
+select 0.0.0.0
+%s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4350 2 false false
+""" % r11database()
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r12database():
+    """
+    Return the database for test r12V3
+    """
+
+    # RT1 is this router.
+    # RTB is an area border router that generates an Intra-Area-Prefix-LSA.
+    # RT1 is connected to RTB via transit.
+
+    #                            +
+    #     +---+1       1+---+1   |
+    #     |RT1|---------|RTB|----| Other Area
+    #     +---+         +---+    |
+    #                            +
+
+    # Network           IPv6 prefix
+    # -----------------------------------
+    # Other Area	3ffe:4725:c404::/64
+
+    # Router	Interface   Interface ID   link-local address
+    # -------------------------------------------------------
+    # RT1	to RTB	    5		   fe80::8:800:200c:4200
+    # RTB	to RT1	    2		   fe80::8:800:200c:4250
+
+    RT1 = "RouterLsa V6-bit E-bit R-bit lsid 0.0.0.0 adv 10.80.52.103 \
+    transit iid 5 nid 5 nrid 10.80.52.103 metric 1 \
+    "
+    RT1_LINK = "LinkLsa lsid 0.0.0.5 adv 10.80.52.103 \
+    link-local-address fe80::8:800:200c:4200"
+
+    RT1_NETWORK = "NetworkLsa lsid 0.0.0.5 adv 10.80.52.103 \
+    add-router 10.80.52.103 \
+    add-router 10.80.52.106 \
+    "
+
+    RTB = "RouterLsa bit-B V6-bit E-bit R-bit lsid 0.0.0.1 adv 10.80.52.106 \
+    transit iid 2 nid 5 nrid 10.80.52.103 metric 1 \
+    "
+
+    RTB_LINK = "LinkLsa lsid 0.0.0.2 adv 10.80.52.106 \
+    link-local-address fe80::8:800:200c:4250"
+
+    RTB_INTRA = "IntraAreaPrefixLsa lsid 0.0.0.2 adv 10.80.52.106 \
+    rlstype 0x2001 rlsid 0.0.0.0 radv 10.80.52.106 \
+    IPv6Prefix 3ffe:4725:c404::/64 metric 3 \
+    "
+
+    database = """
+replace %s
+add %s
+add %s
+add %s
+add %s
+add %s
+""" % (RT1,RT1_LINK,RT1_NETWORK,
+       RTB,RTB_LINK,RTB_INTRA)
+
+    return database
+
+def r12V3(verbose, protocol):
+    """
+    Verify the correct processing of Intra-Area-Prefix-LSAs.
+    """
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    command = """
+set_router_id 10.80.52.103
+create 36.0.0.0 normal
+select 36.0.0.0
+%s
+compute 36.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4250 4 false false
+""" % r12database()
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
+
+def r13V3(verbose, protocol):
+    """
+    Verify that Intra-Area-Prefix-LSAs always win over Inter-Area-Prefix-LSAs.
+    The same route is introduced into thebackbone 0.0.0.0 and area 36.0.0.0,
+    In the backbone 0.0.0.0 it is an Inter-Area-Prefix-LSA, in area 36.0.0.0
+    it is an Intra-Area-Prefix-LSA.
+
+    The two area databases are introduced in various orders and the
+    computations run to make sure that however the LSAs are introduced
+    the IntraAreaPrefixLsa always wins.
+    """
+
+    init = """
+set_router_id 10.80.52.103
+create 0.0.0.0 normal
+create 36.0.0.0 normal
+"""
+
+    area0 = """
+select 0.0.0.0
+%s
+""" % (r11database())
+
+    verify0 = """
+verify_routing_table_size 1
+verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4350 2 false false
+"""
+
+    area36 = """
+select 36.0.0.0
+%s
+""" % (r12database())
+
+    verify36 = """
+verify_routing_table_size 1
+verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4250 4 false false
+"""
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    print >>fp, init
+    print >>fp, area0
+    print >>fp, "compute 0.0.0.0"
+    print >>fp, verify0
+    print >>fp, area36
+    print >>fp, "compute 36.0.0.0"
+    print >>fp, verify36
+
+    if fp.close():
+        return False
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    print >>fp, init
+    print >>fp, area36
+    print >>fp, "compute 36.0.0.0"
+    print >>fp, verify36
+    print >>fp, area0
+    print >>fp, "compute 0.0.0.0"
+    print >>fp, verify36
+
+    if fp.close():
+        return False
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    print >>fp, init
+    print >>fp, area0
+    print >>fp, area36
+    print >>fp, "compute 0.0.0.0"
+    print >>fp, verify0
+
+    if fp.close():
+        return False
+
+    return True
 
 def main():
     def usage():
