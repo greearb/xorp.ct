@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_database.cc,v 1.1 2007/11/14 03:01:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_database.cc,v 1.2 2007/11/15 10:49:01 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -32,6 +32,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/tokenize.hh"
 
 #include <map>
 #include <list>
@@ -151,7 +152,7 @@ pp(TestInfo& info, string fname)
  */
 template <typename A> 
 bool
-routing(TestInfo& info, OspfTypes::Version version, string fname)
+routing(TestInfo& info, OspfTypes::Version version, string fname, string areas)
 {
     if (0 == fname.size()) {
 	DOUT(info) << "No filename supplied\n";
@@ -160,11 +161,13 @@ routing(TestInfo& info, OspfTypes::Version version, string fname)
     }
 
     EventLoop eventloop;
-    DebugIO<A> io(info, version, eventloop);
+    TestInfo ioinfo("routing", true, 0, info.out());
+    DebugIO<A> io(ioinfo, version, eventloop);
     io.startup();
     
     Ospf<A> ospf(version, eventloop, &io);
     ospf.trace().all(info.verbose());
+    ospf.set_testing(true);
     Tlv tlv;
 
     if (!tlv.open(fname, true /* read */)) {
@@ -322,6 +325,10 @@ routing(TestInfo& info, OspfTypes::Version version, string fname)
 	    size_t len = data.size();
 	    Lsa::LsaRef lsar = lsa_decoder.decode(&data[0], len);
 
+	    if (lsar->get_header().get_advertising_router() ==
+		ospf.get_router_id())
+		lsar->set_self_originating(true);
+
 	    if (first_in_area) {
 		RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 		if (rlsa && rlsa->get_header().get_advertising_router() ==
@@ -341,7 +348,18 @@ routing(TestInfo& info, OspfTypes::Version version, string fname)
 	}
     }
 
-    pm.routing_recompute_all_areas();
+    if (areas.empty()) {
+	pm.routing_recompute_all_areas();
+	return true;
+    }
+
+    vector<string> tokens;
+    tokenize(areas, tokens);
+    for (vector<string>::iterator i = tokens.begin(); i != tokens.end(); i++) {
+	ar = pm.get_area_router(set_id(i->c_str()));
+	XLOG_ASSERT(ar);
+	ar->testing_routing_total_recompute();
+    }
 
     return true;
 }
@@ -361,6 +379,7 @@ main(int argc, char **argv)
     string test =
 	t.get_optional_args("-t", "--test", "run only the specified test");
     string fname = t.get_optional_args("-f", "--filename", "lsa database");
+    string areas = t.get_optional_args("-a", "--area", "areas to compute");
     t.complete_args_parsing();
 
     struct test {
@@ -368,8 +387,8 @@ main(int argc, char **argv)
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
     } tests[] = {
 	{"pp", callback(pp, fname)},
-	{"v2", callback(routing<IPv4>, OspfTypes::V2, fname)},
-	{"v3", callback(routing<IPv6>, OspfTypes::V3, fname)},
+	{"v2", callback(routing<IPv4>, OspfTypes::V2, fname, areas)},
+	{"v3", callback(routing<IPv6>, OspfTypes::V3, fname, areas)},
     };
 
     try {
