@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.15 2007/08/21 00:10:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.16 2007/08/21 00:24:35 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -220,9 +220,19 @@ IoTcpUdpSocket::tcp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr;
+	uint32_t pif_index = 0;
+
+	// Find the physical interface index for link-local addresses
+	if (local_addr.is_linklocal_unicast()) {
+	    pif_index = find_pif_index_by_addr(iftree(), local_addr,
+					       error_msg);
+	    if (pif_index == 0)
+		return (XORP_ERROR);
+	}
 
 	local_addr.copy_out(local_in6_addr);
-	_socket_fd = comm_bind_tcp6(&local_in6_addr, htons(local_port),
+	_socket_fd = comm_bind_tcp6(&local_in6_addr, pif_index,
+				    htons(local_port),
 				    COMM_SOCK_NONBLOCKING);
 	break;
     }
@@ -272,9 +282,19 @@ IoTcpUdpSocket::udp_open_and_bind(const IPvX& local_addr, uint16_t local_port,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr;
+	uint32_t pif_index = 0;
+
+	// Find the physical interface index for link-local addresses
+	if (local_addr.is_linklocal_unicast()) {
+	    pif_index = find_pif_index_by_addr(iftree(), local_addr,
+					       error_msg);
+	    if (pif_index == 0)
+		return (XORP_ERROR);
+	}
 
 	local_addr.copy_out(local_in6_addr);
-	_socket_fd = comm_bind_udp6(&local_in6_addr, htons(local_port),
+	_socket_fd = comm_bind_udp6(&local_in6_addr, pif_index,
+				    htons(local_port),
 				    COMM_SOCK_NONBLOCKING);
 	break;
     }
@@ -427,10 +447,20 @@ IoTcpUdpSocket::tcp_open_bind_connect(const IPvX& local_addr,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr, remote_in6_addr;
+	uint32_t pif_index = 0;
+
+	// Find the physical interface index for link-local addresses
+	if (local_addr.is_linklocal_unicast()) {
+	    pif_index = find_pif_index_by_addr(iftree(), local_addr,
+					       error_msg);
+	    if (pif_index == 0)
+		return (XORP_ERROR);
+	}
 
 	local_addr.copy_out(local_in6_addr);
 	remote_addr.copy_out(remote_in6_addr);
-	_socket_fd = comm_bind_connect_tcp6(&local_in6_addr, htons(local_port),
+	_socket_fd = comm_bind_connect_tcp6(&local_in6_addr, pif_index,
+					    htons(local_port),
 					    &remote_in6_addr,
 					    htons(remote_port),
 					    COMM_SOCK_NONBLOCKING,
@@ -495,10 +525,20 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr, remote_in6_addr;
+	uint32_t pif_index = 0;
+
+	// Find the physical interface index for link-local addresses
+	if (local_addr.is_linklocal_unicast()) {
+	    pif_index = find_pif_index_by_addr(iftree(), local_addr,
+					       error_msg);
+	    if (pif_index == 0)
+		return (XORP_ERROR);
+	}
 
 	local_addr.copy_out(local_in6_addr);
 	remote_addr.copy_out(remote_in6_addr);
-	_socket_fd = comm_bind_connect_udp6(&local_in6_addr, htons(local_port),
+	_socket_fd = comm_bind_connect_udp6(&local_in6_addr, pif_index,
+					    htons(local_port),
 					    &remote_in6_addr,
 					    htons(remote_port),
 					    COMM_SOCK_NONBLOCKING,
@@ -547,9 +587,18 @@ IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
     case AF_INET6:
     {
 	struct in6_addr local_in6_addr;
+	uint32_t pif_index = 0;
+
+	// Find the physical interface index for link-local addresses
+	if (local_addr.is_linklocal_unicast()) {
+	    pif_index = find_pif_index_by_addr(iftree(), local_addr,
+					       error_msg);
+	    if (pif_index == 0)
+		return (XORP_ERROR);
+	}
 
 	local_addr.copy_out(local_in6_addr);
-	ret_value = comm_sock_bind6(_socket_fd, &local_in6_addr,
+	ret_value = comm_sock_bind6(_socket_fd, &local_in6_addr, pif_index,
 				    htons(local_port));
 	break;
     }

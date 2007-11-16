@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.28 2007/08/03 23:48:59 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.29 2007/08/20 22:57:58 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -98,14 +98,18 @@ __BEGIN_DECLS
  */
 
 /**
- * Init stuff. Need to be called only once (during startup).
+ * Library initialization. Need be called only once, during startup.
+ *
+ * Note: Currently it is not thread-safe.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_init(void);
 
 /**
- * Finalization. Must be called when client is finished with the library.
+ * Library termination/cleanup. Must be called at process exit.
+ *
+ * Note: Currently it is not thread-safe.
  */
 extern void	comm_exit(void);
 
@@ -113,12 +117,14 @@ extern void	comm_exit(void);
  * Retrieve the most recently occured error for the current thread.
  *
  * @return operating system specific error code for this thread's
- *         last socket operation.
+ * last socket operation.
  */
 extern int	comm_get_last_error(void);
 
 /**
  * Retrieve a human readable string (in English) for the given error code.
+ *
+ * Note: Currently it is not thread-safe.
  *
  * @param serrno the socket error number returned by comm_get_last_error().
  * @return a pointer to a string giving more information about the error.
@@ -133,14 +139,14 @@ extern char const *	comm_get_error_str(int serrno);
 extern char const *comm_get_last_error_str(void);
 
 /**
- * Indicate presence of IPv4 support.
+ * Test whether the underlying system has IPv4 support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_ipv4_present(void);
 
-/**
- * Indicate presence of IPv6 support.
+/*
+ * Test whether the underlying system has IPv6 support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -201,13 +207,17 @@ extern xsock_t	comm_bind_tcp4(const struct in_addr *my_addr,
  *
  * @param my_addr the local IPv6 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
+ * @param my_ifindex the local network interface index to bind to.
+ * It is required if @ref my_addr is a link-local address, otherwise it
+ * should be set to 0.
  * @param my_port the local port to bind to (in network order).
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_tcp6(const struct in6_addr *my_addr,
-			       unsigned short my_port, int is_blocking);
+			       unsigned int my_ifindex, unsigned short my_port,
+			       int is_blocking);
 
 /**
  * Open a TCP (IPv4 or IPv6) socket and bind it to a local address and a port.
@@ -239,13 +249,17 @@ extern xsock_t	comm_bind_udp4(const struct in_addr *my_addr,
  *
  * @param my_addr the local IPv6 address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
+ * @param my_ifindex the network interface index to bind to.
+ * It is required if @ref my_addr is a link-local address, otherwise it
+ * should be set to 0.
  * @param my_port the local port to bind to (in network order).
  * @param is_blocking if true then the socket will be blocking, otherwise
  * non-blocking.
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_udp6(const struct in6_addr *my_addr,
-			       unsigned short my_port, int is_blocking);
+			       unsigned int my_ifindex, unsigned short my_port,
+			       int is_blocking);
 
 /**
  * Open an IPv4 UDP socket on an interface, bind it to a port,
@@ -288,7 +302,7 @@ extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * one of the local interface addresses and the same port number.
  *
  * @param mcast_addr the multicast address to join.
- * @param join_if_index the local unicast interface index to join the multicast
+ * @param my_ifindex the local network interface index to join the multicast
  * group on. If it is 0, the system will choose the interface each time a
  * datagram is sent.
  * @param my_port the port to bind to (in network order).
@@ -299,7 +313,7 @@ extern xsock_t	comm_bind_join_udp4(const struct in_addr *mcast_addr,
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_join_udp6(const struct in6_addr *mcast_addr,
-				    unsigned int join_if_index,
+				    unsigned int my_ifindex,
 				    unsigned short my_port,
 				    int reuse_flag, int is_blocking);
 
@@ -410,6 +424,9 @@ extern xsock_t	comm_bind_connect_tcp4(const struct in_addr *local_addr,
  *
  * @param local_addr the local address to bind to.
  * If it is NULL, will bind to `any' local address.
+ * @param my_ifindex the network interface index to bind to.
+ * It is required if @ref local_addr is a link-local address, otherwise it
+ * should be set to 0.
  * @param local_port the local port to bind to.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
@@ -423,6 +440,7 @@ extern xsock_t	comm_bind_connect_tcp4(const struct in_addr *local_addr,
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_connect_tcp6(const struct in6_addr *local_addr,
+				       unsigned int my_ifindex,
 				       unsigned short local_port,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port,
@@ -460,6 +478,9 @@ extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
  *
  * @param local_addr the local address to bind to.
  * If it is NULL, will bind to `any' local address.
+ * @param my_ifindex the network interface index to bind to.
+ * It is required if @ref local_addr is a link-local address, otherwise it
+ * should be set to 0.
  * @param local_port the local port to bind to.
  * @param remote_addr the remote address to connect to.
  * @param remote_port the remote port to connect to.
@@ -473,6 +494,7 @@ extern xsock_t	comm_bind_connect_udp4(const struct in_addr *local_addr,
  * @return the new socket on success, otherwise XORP_BAD_SOCKET.
  */
 extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
+				       unsigned int my_ifindex,
 				       unsigned short local_port,
 				       const struct in6_addr *remote_addr,
 				       unsigned short remote_port,
@@ -485,8 +507,7 @@ extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
  */
 
 /**
- * Open a socket of domain = @ref domain, type = @ref type,
- * protocol = @protocol, and blocking = @blocking.
+ * Open a socket for given domain, type and protocol.
  *
  * The sending and receiving buffer size are set, and the socket
  * itself is set with TCP_NODELAY (if a TCP socket).
@@ -507,9 +528,11 @@ extern xsock_t	comm_sock_open(int domain, int type, int protocol,
  * The sockets will be created in the blocking state by default, and
  * with no additional socket options set.
  *
- * Currently a domain of AF_UNIX and a type of SOCK_STREAM must be
- * specified. On Windows platforms, the sockets created will actually
- * be in the AF_INET domain.
+ * On Windows platforms, a domain of AF_UNIX, AF_INET, or AF_INET6 must
+ * be specified. For the AF_UNIX case, the sockets created will actually
+ * be in the AF_INET domain. The protocol field is ignored.
+ *
+ * On UNIX, this function simply wraps the socketpair(2) system call.
  *
  * @param domain the domain of the socket (e.g., AF_INET, AF_INET6).
  * @param type the type of the socket (e.g., SOCK_STREAM, SOCK_DGRAM).
@@ -539,10 +562,14 @@ extern int	comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
  * @param sock the socket to bind.
  * @param my_addr the address to bind to (in network order).
  * If it is NULL, will bind to `any' local address.
+ * @param my_ifindex the network interface index to bind to.
+ * It is required if @ref my_addr is a link-local address, otherwise it
+ * should be set to 0.
  * @param my_port the port to bind to (in network order).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
+				unsigned int my_ifindex,
 				unsigned short my_port);
 
 /**
@@ -574,7 +601,7 @@ extern int	comm_sock_join4(xsock_t sock,
  *
  * @param sock he socket to join the group.
  * @param mcast_addr the multicast address to join.
- * @param my_ifindex the local unicast interface index to join.
+ * @param my_ifindex the local network interface index to join.
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -600,7 +627,7 @@ extern int	comm_sock_leave4(xsock_t sock,
  *
  * @param sock he socket to leave the group.
  * @param mcast_addr the multicast address to leave.
- * @param my_ifindex the local unicast interface index to leave.
+ * @param my_ifindex the local network interface index to leave.
  * If it is 0, the interface is chosen by the kernel.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -775,12 +802,12 @@ extern int	comm_set_iface4(xsock_t sock, const struct in_addr *in_addr);
  * Set default interface for IPv6 outgoing multicast on a socket.
  *
  * @param sock the socket whose default multicast interface to set.
- * @param ifindex the IPv6 interface index of the default interface to set.
- * If @ref ifindex is 0, the system will choose the interface each time
+ * @param my_ifindex the local network interface index of the default
+ * interface to set. If it is 0, the system will choose the interface each time
  * a datagram is sent.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_iface6(xsock_t sock, u_int ifindex);
+extern int	comm_set_iface6(xsock_t sock, unsigned int my_ifindex);
 
 /**
  * Set the sending buffer size of a socket.

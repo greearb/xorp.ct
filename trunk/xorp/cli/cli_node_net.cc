@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.64 2007/10/03 23:14:13 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.65 2007/10/12 07:53:45 pavlin Exp $"
 
 
 //
@@ -122,7 +122,8 @@ CliNode::sock_serv_open()
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	_cli_socket = comm_bind_tcp6(NULL, _cli_port, COMM_SOCK_NONBLOCKING);
+	_cli_socket = comm_bind_tcp6(NULL, 0, _cli_port,
+				     COMM_SOCK_NONBLOCKING);
 	break;
 #endif // HAVE_IPV6
     default:

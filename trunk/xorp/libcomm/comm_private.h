@@ -32,7 +32,7 @@
  */
 
 /*
- *  $XORP: xorp/libcomm/comm_private.h,v 1.4 2006/03/01 12:55:33 bms Exp $
+ *  $XORP: xorp/libcomm/comm_private.h,v 1.5 2006/10/12 01:24:45 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_PRIVATE_H__
@@ -63,21 +63,27 @@ extern int _comm_serrno;
 __BEGIN_DECLS
 
 /**
- * Report IPv6 method invoked when IPv6 support is not present.  An
- * error message is output via XLOG_ERROR.  This function is variadic
- * so it can be used to remove unused variable warnings in non-IPv6
- * code as well as log the error.
+ * Log an error if an IPv6 specific method is called when IPv6 is not
+ * present.
  *
- * @param method ipv6 specific method to report.
+ * An error message is output via XLOG_ERROR().
+ * Set an appropriate error code relevant to the underlying system.
+ * Note: This is currently done with knowledge of how the error code is
+ * stored internally, which is a design bug (we're not thread friendly).
+ * This function is variadic so it can be used to remove unused variable
+ * warnings in non-IPv6 code as well as log the error.
+ *
+ * @param method C-style string denoting the ipv6 function called.
  */
 void comm_sock_no_ipv6(const char* method, ...);
 
 /**
- * Fetch and record the last socket layer error code.
+ * Fetch and record the last socket layer error code from the underlying
+ * system.
  *
+ * Note: Currently not thread-safe. Internal use only.
  * This is done using a function to facilitate using explicit
- * Thread Local Storage (TLS) at a later time, but is currently
- * single-threaded.
+ * Thread Local Storage (TLS) at a later time.
  */
 void _comm_set_serrno(void);
 

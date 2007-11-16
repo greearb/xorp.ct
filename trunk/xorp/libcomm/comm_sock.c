@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.42 2007/08/20 22:57:58 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.43 2007/08/22 01:10:02 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -86,20 +86,6 @@ const struct in6_addr in6addr_any = { { IN6ADDR_ANY_INIT } };
 const struct in6_addr in6addr_loopback = { { IN6ADDR_LOOPBACK_INIT } };
 #endif
 
-/**
- * comm_sock_open:
- * @domain: The domain of the socket (e.g., %AF_INET, %AF_INET6).
- * @type: The type of the socket (e.g., %SOCK_STREAM, %SOCK_DGRAM).
- * @protocol: The particular protocol to be used with the socket.
- * @is_blocking: If true, then the socket will be blocking, otherwise
- * non-blocking.
- *
- * Open a socket of domain = @domain, type = @type, and protocol = @protocol.
- * The sending and receiving buffer size are set, and the socket
- * itself is set with %TCP_NODELAY (if a TCP socket).
- *
- * Return value: The open socket on success, otherwise %XORP_BAD_SOCKET.
- **/
 xsock_t
 comm_sock_open(int domain, int type, int protocol, int is_blocking)
 {
@@ -147,28 +133,6 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
     return (sock);
 }
 
-/**
- * comm_sock_pair:
- *
- * Create a pair of connected sockets. The sockets will be created in
- * the blocking state by default, and with no additional socket options set.
- *
- * On Windows platforms, a domain of AF_UNIX, AF_INET, or AF_INET6 must
- * be specified. For the AF_UNIX case, the sockets created will actually
- * be in the AF_INET domain. The protocol field is ignored.
- *
- * On UNIX, this function simply wraps the socketpair() system call.
- *
- * XXX: There may be UNIX platforms lacking socketpair() where we
- * have to emulate it.
- *
- * @param domain the domain of the socket (e.g., AF_INET, AF_INET6).
- * @param type the type of the socket (e.g., SOCK_STREAM, SOCK_DGRAM).
- * @param protocol the particular protocol to be used with the socket.
- * @param sv pointer to an array of two xsock_t handles to receive the
- *        allocated socket pair.
- * @return XORP_OK on success, otherwise XORP_ERROR.
- **/
 int
 comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 {
@@ -313,17 +277,6 @@ error:
 #endif /* HOST_OS_WINDOWS */
 }
 
-/**
- * comm_sock_bind4:
- * @sock: The socket to bind.
- * @my_addr: The address to bind to (in network order).
- * If it is NULL, will bind to `any' local address.
- * @my_port: The port to bind to (in network order).
- *
- * Bind an IPv4 socket to an address and a port.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
 		unsigned short my_port)
@@ -363,20 +316,9 @@ comm_sock_bind4(xsock_t sock, const struct in_addr *my_addr,
     return (XORP_OK);
 }
 
-/**
- * comm_sock_bind6:
- * @sock: The socket to bind.
- * @my_addr: The address to bind to (in network order).
- * If it is NULL, will bind to `any' local address.
- * @my_port: The port to bind to (in network order).
- *
- * Bind an IPv6 socket to an address and a port.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
-		unsigned short my_port)
+		unsigned int my_ifindex, unsigned short my_port)
 {
 #ifdef HAVE_IPV6
     int family;
@@ -400,8 +342,10 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 	memcpy(&sin6_addr.sin6_addr, my_addr, sizeof(sin6_addr.sin6_addr));
     else
 	memcpy(&sin6_addr.sin6_addr, &in6addr_any, sizeof(sin6_addr.sin6_addr));
-
-    sin6_addr.sin6_scope_id = 0;		/* XXX: unused (?)	     */
+    if (IN6_IS_ADDR_LINKLOCAL(&sin6_addr.sin6_addr))
+	sin6_addr.sin6_scope_id = my_ifindex;
+    else
+	sin6_addr.sin6_scope_id = 0;
 
     if (bind(sock, (struct sockaddr *)&sin6_addr, sizeof(sin6_addr)) < 0) {
 	char addr_str[sizeof "ffff:ffff:ffff:ffff:ffff:ffff:255.255.255.255"];
@@ -418,20 +362,11 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
 
     return (XORP_OK);
 #else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_port);
+    comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_ifindex, my_port);
     return (XORP_ERROR);
 #endif /* ! HAVE_IPV6 */
 }
 
-/**
- * Bind a socket (IPv4 or IPv6) to an address and a port.
- *
- * @param sock the socket to bind.
- * @param sin agnostic sockaddr containing the local address (If it is
- * NULL, will bind to `any' local address.)  and the local port to
- * bind to all in network order.
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
 int
 comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
 {
@@ -446,7 +381,8 @@ comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
     case AF_INET6:
 	{
 	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
-	    return comm_sock_bind6(sock, &sin6->sin6_addr, sin6->sin6_port);
+	    return comm_sock_bind6(sock, &sin6->sin6_addr, sin6->sin6_scope_id,
+				   sin6->sin6_port);
 	}
 	break;
 #endif /* HAVE_IPV6 */
@@ -460,17 +396,6 @@ comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
     return XORP_ERROR;
 }
 
-/**
- * comm_sock_join4:
- * @sock: The socket to join the group.
- * @mcast_addr: The multicast address to join.
- * @my_addr: The local unicast address of an interface to join.
- * If it is NULL, the interface is chosen by the kernel.
- *
- * Join an IPv4 multicast group on a socket (and an interface).
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
 		const struct in_addr *my_addr)
@@ -514,17 +439,6 @@ comm_sock_join4(xsock_t sock, const struct in_addr *mcast_addr,
     return (XORP_OK);
 }
 
-/**
- * comm_sock_join6:
- * @sock: The socket to join the group.
- * @mcast_addr: The multicast address to join.
- * @my_ifindex: The local unicast interface index to join.
- * If it is 0, the interface is chosen by the kernel.
- *
- * Join an IPv6 multicast group on a socket (and an interface).
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
 		unsigned int my_ifindex)
@@ -563,17 +477,6 @@ comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-/**
- * comm_sock_leave4:
- * @sock: The socket to leave the group.
- * @mcast_addr: The multicast address to leave.
- * @my_addr: The local unicast address of an interface to leave.
- * If it is NULL, the interface is chosen by the kernel.
- *
- * Leave an IPv4 multicast group on a socket (and an interface).
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
 		const struct in_addr *my_addr)
@@ -617,17 +520,6 @@ comm_sock_leave4(xsock_t sock, const struct in_addr *mcast_addr,
     return (XORP_OK);
 }
 
-/**
- * comm_sock_leave6:
- * @sock: The socket to leave the group.
- * @mcast_addr: The multicast address to leave.
- * @my_ifindex: The local unicast interface index to leave.
- * If it is 0, the interface is chosen by the kernel.
- *
- * Leave an IPv6 multicast group on a socket (and an interface).
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
 		unsigned int my_ifindex)
@@ -666,23 +558,6 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-/**
- * Connect to a remote IPv4 address.
- *
- * Note that we can use this function not only for TCP, but for UDP sockets
- * as well.
- *
- * @param sock the socket to use to connect.
- * @param remote_addr the remote address to connect to.
- * @param remote_port the remote port to connect to.
- * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
- * @param in_progress if the socket is non-blocking and the connect cannot be
- * completed immediately, then the referenced value is set to 1, and the
- * return value is XORP_ERROR. For all other errors or if the non-blocking
- * socket was connected, the referenced value is set to 0. If the return value
- * is XORP_OK or if the socket is blocking, then the return value is undefined.
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
 int
 comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
 		   unsigned short remote_port, int is_blocking,
@@ -738,23 +613,6 @@ comm_sock_connect4(xsock_t sock, const struct in_addr *remote_addr,
     return (XORP_OK);
 }
 
-/**
- * Connect to a remote IPv6 address.
- *
- * Note that we can use this function not only for TCP, but for UDP sockets
- * as well.
- *
- * @param sock the socket to use to connect.
- * @param remote_addr the remote address to connect to.
- * @param remote_port the remote port to connect to.
- * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
- * @param in_progress if the socket is non-blocking and the connect cannot be
- * completed immediately, then the referenced value is set to 1, and the
- * return value is XORP_ERROR. For all other errors or if the non-blocking
- * socket was connected, the referenced value is set to 0. If the return value
- * is XORP_OK or if the socket is blocking, then the return value is undefined.
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
 int
 comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 		   unsigned short remote_port, int is_blocking,
@@ -827,24 +685,6 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
 #endif /* ! HAVE_IPV6 */
 }
 
-/**
- * Connect to a remote address (IPv4 or IPv6).
- *
- * Note that we can use this function not only for TCP, but for UDP sockets
- * as well.
- *
- * @param sock the socket to use to connect.
- * @param sin agnostic sockaddr containing the local address (If it is
- * NULL, will bind to `any' local address.)  and the local port to
- * bind to all in network order.
- * @param is_blocking if true, the socket is blocking, otherwise non-blocking.
- * @param in_progress if the socket is non-blocking and the connect cannot be
- * completed immediately, then the referenced value is set to 1, and the
- * return value is XORP_ERROR. For all other errors or if the non-blocking
- * socket was connected, the referenced value is set to 0. If the return value
- * is XORP_OK or if the socket is blocking, then the return value is undefined.
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
 int
 comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
 		  int *in_progress)
@@ -877,14 +717,6 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
     return XORP_ERROR;
 }
 
-/**
- * comm_sock_accept:
- * @sock: The listening socket to accept on.
- *
- * Accept a connection on a listening socket.
- *
- * Return value: The accepted socket on success, otherwise %XORP_BAD_SOCKET.
- **/
 xsock_t
 comm_sock_accept(xsock_t sock)
 {
@@ -917,15 +749,6 @@ comm_sock_accept(xsock_t sock)
     return (sock_accept);
 }
 
-/**
- * comm_sock_listen:
- * @sock: The socket to listen on.
- * @backlog: The maximum queue size for pending connections.
- *
- * Listen on a socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_listen(xsock_t sock, int backlog)
 {
@@ -942,14 +765,6 @@ comm_sock_listen(xsock_t sock, int backlog)
     return (XORP_OK);
 }
 
-/**
- * comm_sock_close:
- * @sock: The socket to close.
- *
- * Close a socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_close(xsock_t sock)
 {
@@ -972,15 +787,6 @@ comm_sock_close(xsock_t sock)
     return (XORP_OK);
 }
 
-/**
- * comm_set_nodelay:
- * @sock: The socket whose option we want to set/reset.
- * @val: If non-zero, the option will be set, otherwise will be reset.
- *
- * Set/reset the %TCP_NODELAY option on a TCP socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_nodelay(xsock_t sock, int val)
 {
@@ -996,16 +802,6 @@ comm_set_nodelay(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-/**
- * comm_set_reuseaddr:
- * @sock: The socket whose option we want to set/reset.
- * @val: If non-zero, the option will be set, otherwise will be reset.
- *
- * Set/reset the %SO_REUSEADDR option on a socket.
- * Note: If the OS doesn't support this option, then %XORP_ERROR is returned.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_reuseaddr(xsock_t sock, int val)
 {
@@ -1030,16 +826,6 @@ comm_set_reuseaddr(xsock_t sock, int val)
 #endif /* ! SO_REUSEADDR */
 }
 
-/**
- * comm_set_reuseport:
- * @sock: The socket whose option we want to set/reset.
- * @val: If non-zero, the option will be set, otherwise will be reset.
- *
- * Set/reset the %SO_REUSEPORT option on a socket.
- * Note: If the OS doesn't support this option, then %XORP_OK is returned.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_reuseport(xsock_t sock, int val)
 {
@@ -1064,15 +850,6 @@ comm_set_reuseport(xsock_t sock, int val)
 #endif /* ! SO_REUSEPORT */
 }
 
-/**
- * comm_set_loopback:
- * @sock: The socket whose option we want to set/reset.
- * @val: If non-zero, the option will be set, otherwise will be reset.
- *
- * Set/reset the multicast loopback option on a socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_loopback(xsock_t sock, int val)
 {
@@ -1096,7 +873,7 @@ comm_set_loopback(xsock_t sock, int val)
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	u_int loop6 = val;
+	unsigned int loop6 = val;
 
 	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
 		       XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
@@ -1118,16 +895,6 @@ comm_set_loopback(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-/**
- * comm_set_tcpmd5:
- * @sock: The socket whose option we want to set/reset.
- * @val: If non-zero, the option will be set, otherwise will be reset.
- *
- * Set/reset the %TCP_MD5SIG option on a TCP socket.
- * Note: If the OS doesn't support this option, then %XORP_ERROR is returned.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_tcpmd5(xsock_t sock, int val)
 {
@@ -1152,15 +919,6 @@ comm_set_tcpmd5(xsock_t sock, int val)
 #endif /* ! TCP_MD5SIG */
 }
 
-/**
- * comm_set_ttl:
- * @sock: The socket whose TTL we want to set.
- * @val: The TTL of the outgoing multicast packets.
- *
- * Set the TTL of the outgoing multicast packets on a socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_ttl(xsock_t sock, int val)
 {
@@ -1205,17 +963,6 @@ comm_set_ttl(xsock_t sock, int val)
     return (XORP_OK);
 }
 
-/**
- * comm_set_iface4:
- * @sock: The socket whose default multicast interface to set.
- * @in_addr: The IPv4 address of the default interface to set.
- * If @in_addr is NULL, the system will choose the interface each time
- * a datagram is sent.
- *
- * Set default interface for IPv4 outgoing multicast on a socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
 comm_set_iface4(xsock_t sock, const struct in_addr *in_addr)
 {
@@ -1244,19 +991,8 @@ comm_set_iface4(xsock_t sock, const struct in_addr *in_addr)
     return (XORP_OK);
 }
 
-/**
- * comm_set_iface6:
- * @sock: The socket whose default multicast interface to set.
- * @ifindex: The IPv6 interface index of the default interface to set.
- * If @ifindex is 0, the system will choose the interface each time
- * a datagram is sent.
- *
- * Set default interface for IPv6 outgoing multicast on a socket.
- *
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
 int
-comm_set_iface6(xsock_t sock, u_int ifindex)
+comm_set_iface6(xsock_t sock, unsigned int my_ifindex)
 {
 #ifdef HAVE_IPV6
     int family = comm_sock_get_family(sock);
@@ -1268,32 +1004,21 @@ comm_set_iface6(xsock_t sock, u_int ifindex)
     }
 
     if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-		   XORP_SOCKOPT_CAST(&ifindex), sizeof(ifindex)) < 0) {
+		   XORP_SOCKOPT_CAST(&my_ifindex), sizeof(my_ifindex)) < 0) {
 	_comm_set_serrno();
-	XLOG_ERROR("setsockopt IPV6_MULTICAST_IF for ifindex %d: %s",
-		   ifindex, comm_get_error_str(comm_get_last_error()));
+	XLOG_ERROR("setsockopt IPV6_MULTICAST_IF for interface index %d: %s",
+		   my_ifindex, comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
 
     return (XORP_OK);
 
 #else /* ! HAVE_IPV6 */
-    comm_sock_no_ipv6("comm_set_iface6", sock, ifindex);
+    comm_sock_no_ipv6("comm_set_iface6", sock, my_ifindex);
     return (XORP_ERROR);
 #endif /* ! HAVE_IPV6 */
 }
 
-/**
- * comm_sock_set_sndbuf:
- * @sock: The socket whose sending buffer size to set.
- * @desired_bufsize: The preferred buffer size.
- * @min_bufsize: The smallest acceptable buffer size.
- *
- * Set the sending buffer size of a socket.
- *
- * Return value: The successfully set buffer size on success,
- * otherwise %XORP_ERROR.
- **/
 int
 comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 {
@@ -1337,17 +1062,6 @@ comm_sock_set_sndbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
     return (desired_bufsize);
 }
 
-/**
- * comm_sock_set_rcvbuf:
- * @sock: The socket whose receiving buffer size to set.
- * @desired_bufsize: The preferred buffer size.
- * @min_bufsize: The smallest acceptable buffer size.
- *
- * Set the receiving buffer size of a socket.
- *
- * Return value: The successfully set buffer size on success,
- * otherwise %XORP_ERROR.
- **/
 int
 comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 {
@@ -1391,16 +1105,6 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
     return (desired_bufsize);
 }
 
-/**
- * comm_sock_get_family:
- * @sock: The socket whose address family we need to get.
- *
- * Get the address family of a socket.
- *
- * Note: Idea taken from W. Stevens' UNPv1, 2e (pp 109).
- *
- * Return value: The address family on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_get_family(xsock_t sock)
 {
@@ -1443,16 +1147,6 @@ comm_sock_get_family(xsock_t sock)
 #endif /* ! HOST_OS_WINDOWS */
 }
 
-/**
- * comm_sock_get_type:
- * @sock: The socket whose type we need to get.
- *
- * Get the type of a socket.
- * Examples of socket type are SOCK_STREAM for TCP, SOCK_DGRAM for UDP,
- * and SOCK_RAW for raw protocol sockets.
- *
- * Return value: The socket type on success, otherwise %XORP_ERROR.
- **/
 int
 comm_sock_get_type(xsock_t sock)
 {
@@ -1471,16 +1165,6 @@ comm_sock_get_type(xsock_t sock)
     return type;
 }
 
-/**
- * comm_sock_set_blocking:
- *
- * Set the blocking or non-blocking mode of an existing socket.
- * @sock: The socket whose blocking mode is to be set.
- * @is_blocking: If non-zero, then the socket will be blocking, otherwise
- * non-blocking.
- *
- * Return value: XORP_OK on success, otherwise XORP_ERROR.
- **/
 int
 comm_sock_set_blocking(xsock_t sock, int is_blocking)
 {
@@ -1526,16 +1210,6 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
     return (XORP_OK);
 }
 
-/**
- * comm_sock_is_connected:
- * @psock: The socket whose connected state is to be queried.
- * @is_connected: If the socket is in the connected state, then the
- * referenced value is set to 1, otherwise it is set to 0.
- *
- * Determine if an existing socket is in the connected state.
- *
- * Return value: XORP_OK on success, otherwise XORP_ERROR.
- **/
 int
 comm_sock_is_connected(xsock_t sock, int *is_connected)
 {
@@ -1580,18 +1254,6 @@ comm_sock_is_connected(xsock_t sock, int *is_connected)
     return (XORP_OK);
 }
 
-/**
- * comm_sock_no_ipv6:
- *
- * Log an error when an IPv6 specific method is called when IPv6 is
- * not preset. Set an appropriate error code relevant to the platform
- * we're running under.
- *
- * XXX This is currently done with knowledge of how the error code is
- * internally stored, which is a design bug (we're not thread friendly).
- *
- * @param method C-style string denoting the ipv6 function called.
- **/
 void
 comm_sock_no_ipv6(const char* method, ...)
 {
@@ -1603,14 +1265,6 @@ comm_sock_no_ipv6(const char* method, ...)
     XLOG_ERROR("%s: IPv6 support not present.", method);
 }
 
-/**
- * _comm_set_serrno:
- *
- * Fetch the socket layer error code from the underlying system, clear
- * the general error condition, and record it.
- *
- * XXX: Currently not thread-safe. Internal use only.
- **/
 void
 _comm_set_serrno(void)
 {
