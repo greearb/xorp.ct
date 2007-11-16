@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.292 2007/11/13 23:19:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.293 2007/11/15 17:27:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1369,10 +1369,6 @@ AreaRouter<A>::summary_replace(OspfTypes::AreaID area, IPNet<A> net,
     }
 
     unique_link_state_id(nlsar);
-
-    // Confirm the correct LSA is being replaced.
-    XLOG_ASSERT(olsar->get_header().get_link_state_id() ==
-		nlsar->get_header().get_link_state_id());
 
     nlsar->set_ls_sequence_number(olsar->get_ls_sequence_number());
     increment_sequence_number(nlsar);
