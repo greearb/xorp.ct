@@ -13,4 +13,4 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/devnotes/template.cc,v 1.7 2006/08/12 01:08:17 pavlin Exp $"
+#ident "$XORP$"
