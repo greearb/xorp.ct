@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.17 2007/11/16 22:29:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.18 2007/11/17 04:06:47 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -26,6 +26,10 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
+
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
 
 #ifdef HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
