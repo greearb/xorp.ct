@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.15 2007/05/23 12:12:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.16 2007/10/13 01:50:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -412,6 +412,10 @@ XrlRedistManager<A>::add_route(const string&	    protocol,
     debug_msg("got redist add_route for \"%s\" %s %s\n",
 	      protocol.c_str(), net.str().c_str(), nh.str().c_str());
 
+    // XXX: Ignore link-local routes
+    if (net.masked_addr().is_linklocal_unicast())
+	return;
+
     i = find_if(_redists.begin(), _redists.end(),
 		is_redistributor_of<A>(protocol));
     if (i != _redists.end()) {
@@ -442,6 +446,10 @@ XrlRedistManager<A>::add_route(const string&	    protocol,
     debug_msg("got redist add_route for \"%s\" %s %s\n",
 	      protocol.c_str(), net.str().c_str(), nh.str().c_str());
 
+    // XXX: Ignore link-local routes
+    if (net.masked_addr().is_linklocal_unicast())
+	return;
+
     i = find_if(_redists.begin(), _redists.end(),
 		is_redistributor_of<A>(protocol));
     if (i != _redists.end()) {
@@ -464,6 +472,10 @@ XrlRedistManager<A>::delete_route(const string&	protocol,
 				  const Net&	net)
 {
     typename RedistList::iterator i;
+
+    // XXX: Ignore link-local routes
+    if (net.masked_addr().is_linklocal_unicast())
+	return;
 
     i = find_if(_redists.begin(), _redists.end(),
 		is_redistributor_of<A>(protocol));
