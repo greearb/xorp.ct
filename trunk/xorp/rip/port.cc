@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.69 2007/04/19 21:36:53 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.70 2007/05/08 01:15:52 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -774,6 +774,8 @@ Port<A>::port_io_receive(const A&	src_address,
 			 const uint8_t*	rip_packet,
 			 size_t		rip_packet_bytes)
 {
+    string why;
+
     static_assert(RipPacketHeader::SIZE == 4);
     static_assert(PacketRouteEntry<A>::SIZE == 20);
 
@@ -795,10 +797,10 @@ Port<A>::port_io_receive(const A&	src_address,
     record_packet(p);
 
     if (rip_packet_bytes < RIPv2_MIN_PACKET_BYTES) {
-	record_bad_packet(c_format("Packet size less than minimum (%u < %u)",
-				   XORP_UINT_CAST(rip_packet_bytes),
-				   XORP_UINT_CAST(RIPv2_MIN_PACKET_BYTES)),
-			  src_address, src_port, p);
+	why = c_format("Packet size less than minimum (%u < %u)",
+		       XORP_UINT_CAST(rip_packet_bytes),
+		       XORP_UINT_CAST(RIPv2_MIN_PACKET_BYTES));
+	record_bad_packet(why, src_address, src_port, p);
 	return;
     }
 
@@ -808,16 +810,17 @@ Port<A>::port_io_receive(const A&	src_address,
     // Basic RIP packet header validity checks
     //
     if (rph.valid_command() == false) {
-	record_bad_packet("Invalid command", src_address, src_port, p);
+	why = c_format("Invalid command");
+	record_bad_packet(why, src_address, src_port, p);
 	return;
     } else if (rph.valid_version(RIP_AF_CONSTANTS<A>::PACKET_VERSION) == false) {
-	record_bad_packet(c_format("Invalid version (%d).", rph.version()),
-			  src_address, src_port, p);
+	why = c_format("Invalid version (%d)", rph.version());
+	record_bad_packet(why, src_address, src_port, p);
 	return;
     } else if (rph.valid_padding() == false) {
-	record_bad_packet(c_format("Invalid padding (%u,%u).",
-				   rph.unused0(), rph.unused1()),
-			  src_address, src_port, p);
+	why = c_format("Invalid padding (%u,%u)",
+		       rph.unused0(), rph.unused1());
+	record_bad_packet(why,src_address, src_port, p);
 	return;
     }
 
@@ -826,10 +829,9 @@ Port<A>::port_io_receive(const A&	src_address,
     //
     if (rph.command() == RipPacketHeader::RESPONSE &&
 	src_port != RIP_AF_CONSTANTS<A>::IP_PORT) {
-	record_bad_packet(c_format("RIP response originating on wrong port"
-				   " (%d != %d)",
-				   src_port, RIP_AF_CONSTANTS<A>::IP_PORT),
-			  src_address, src_port, p);
+	why = c_format("RIP response originating on wrong port (%d != %d)",
+		       src_port, RIP_AF_CONSTANTS<A>::IP_PORT);
+	record_bad_packet(why, src_address, src_port, p);
 	return;
     }
 
@@ -859,10 +861,10 @@ Port<A>::port_io_receive(const A&	src_address,
 							n_entries,
 							src_address,
 							new_peer) == false) {
-	string cause = c_format("packet failed authentication (%s): %s",
-				af_state().auth_handler()->effective_name(),
-				af_state().auth_handler()->error().c_str());
-	record_bad_auth_packet(cause, src_address, src_port, p);
+	why = c_format("packet failed authentication (%s): %s",
+		       af_state().auth_handler()->effective_name(),
+		       af_state().auth_handler()->error().c_str());
+	record_bad_auth_packet(why, src_address, src_port, p);
 	return;
     }
 
@@ -877,8 +879,9 @@ Port<A>::port_io_receive(const A&	src_address,
     size_t calc_bytes = n_entries * PacketRouteEntry<A>::size()
 	+ RipPacketHeader::size();
     if (calc_bytes != rip_packet_bytes) {
-	record_bad_packet("Packet did not contain an integral number "
-			  "of route entries", src_address, src_port, p);
+	why = c_format("Packet did not contain an integral number of route "
+		       "entries");
+	record_bad_packet(why, src_address, src_port, p);
     }
 #endif
 
@@ -916,6 +919,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
     static IPv4 class_c_net("192.0.0.0");
     static IPv4 class_d_net("224.0.0.0");
     static IPv4 class_e_net("240.0.0.0");
+    string why;
 
     Peer<Addr>* p = peer(src_addr);
     if (p == 0) {
@@ -928,19 +932,24 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	const uint8_t* pre_ptr = entries_ptr + i * PacketRouteEntry<IPv4>::size();
 	const PacketRouteEntry<IPv4> pre(pre_ptr);
 	if (pre.addr_family() != AF_INET) {
-	    record_bad_route("bad address family", src_addr, src_port, p);
+	    why = c_format("Bad address family (%u instead of %u)",
+			   pre.addr_family(), AF_INET);
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 
 	uint16_t metric = pre.metric();
 	if (metric > RIP_INFINITY) {
-	    record_bad_route("bad metric", src_addr, src_port, p);
+	    why = c_format("Bad metric (%u > %u)", metric, RIP_INFINITY);
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 
 	uint32_t prefix_len = pre.prefix_len();
 	if (prefix_len > Addr::ADDR_BITLEN) {
-	    record_bad_packet("bad prefix length", src_addr, src_port, p);
+	    why = c_format("Bad prefix length (%u > %u)",
+			   prefix_len, Addr::ADDR_BITLEN);
+	    record_bad_packet(why, src_addr, src_port, p);
 	    continue;
 	}
 
@@ -966,23 +975,29 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 
 	IPv4 masked_net = net.masked_addr() & net_filter;
 	if (masked_net.is_multicast()) {
-	    record_bad_route("multicast route", src_addr, src_port, p);
+	    why = c_format("Multicast route (%s)", masked_net.str().c_str());
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 	if (masked_net.is_loopback()) {
-	    record_bad_route("loopback route", src_addr, src_port, p);
+	    why = c_format("Loopback route (%s)", masked_net.str().c_str());
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 	if (masked_net >= class_e_net) {
-	    record_bad_route("experimental route", src_addr, src_port, p);
+	    why = c_format("Experimental route (%s)",
+			   masked_net.str().c_str());
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 	if (masked_net == IPv4::ZERO()) {
 	    if (net.prefix_len() != 0) {
-		record_bad_route("net 0", src_addr, src_port, p);
+		why = c_format("Net 0");
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    } else if (accept_default_route() == false) {
-		record_bad_route("default route", src_addr, src_port, p);
+		why = c_format("Default route");
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
 	}
@@ -1046,11 +1061,15 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    }
 
 	    if (my_addr_found) {
-		record_bad_route("my interface address", src_addr, src_port, p);
+		why = c_format("My interface address (%s)",
+			       net.masked_addr().str().c_str());
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
 	    if (bcast_addr_found) {
-		record_bad_route("my broadcast address", src_addr, src_port, p);
+		why = c_format("My broadcast address (%s)",
+			       net.masked_addr().str().c_str());
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
 	}
@@ -1104,6 +1123,8 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 			   const uint8_t*			entries_ptr,
 			   uint32_t				n_entries)
 {
+    string why;
+
     Peer<Addr>* p = peer(src_addr);
     if (p == 0) {
 	p = create_peer(src_addr);
@@ -1125,19 +1146,22 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	    }
 	    continue;
 	} else if (nh == IPv6::ALL_ONES()) {
-	    record_bad_route("route specified before nexthop",
-			     src_addr, src_port, p);
+	    why = c_format("Route specified before nexthop");
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 
 	uint16_t metric = pre.metric();
 	if (metric > RIP_INFINITY) {
-	    record_bad_route("bad metric", src_addr, src_port, p);
+	    why = c_format("Bad metric (%u > %u)", metric, RIP_INFINITY);
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 
 	if (pre.prefix_len() > Addr::ADDR_BITLEN) {
-	    record_bad_packet("bad prefix length", src_addr, src_port, p);
+	    why = c_format("Bad prefix length (%u > %u)",
+			   pre.prefix_len(), Addr::ADDR_BITLEN);
+	    record_bad_packet(why, src_addr, src_port, p);
 	    continue;
 	}
 
@@ -1145,24 +1169,29 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 
 	IPv6 masked_net = net.masked_addr();
 	if (masked_net.is_multicast()) {
-	    record_bad_route("multicast route", src_addr, src_port, p);
+	    why = c_format("Multicast route (%s)", masked_net.str().c_str());
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 	if (masked_net.is_linklocal_unicast()) {
-	    record_bad_route("linklocal route", src_addr, src_port, p);
+	    why = c_format("Linklocal route (%s)", masked_net.str().c_str());
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 	if (masked_net.is_loopback()) {
-	    record_bad_route("loopback route", src_addr, src_port, p);
+	    why = c_format("Loopback route (%s)", masked_net.str().c_str());
+	    record_bad_route(why, src_addr, src_port, p);
 	    continue;
 	}
 
 	if (masked_net == IPv6::ZERO()) {
 	    if (net.prefix_len() != 0) {
-		record_bad_route("net 0", src_addr, src_port, p);
+		why = c_format("Net 0");
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    } else if (accept_default_route() == false) {
-		record_bad_route("default route", src_addr, src_port, p);
+		why = c_format("Default route");
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
 	}
@@ -1218,7 +1247,9 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	    }
 
 	    if (my_addr_found) {
-		record_bad_route("my interface address", src_addr, src_port, p);
+		why = c_format("My interface address (%s)",
+			       net.masked_addr().str().c_str());
+		record_bad_route(why, src_addr, src_port, p);
 		continue;
 	    }
 	}
