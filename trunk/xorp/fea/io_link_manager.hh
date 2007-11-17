@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.4 2007/08/15 18:55:16 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.5 2007/09/15 19:52:39 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -34,7 +34,7 @@ class IoLinkManager;
 
 
 /**
- * Structure used to cache commonly passed MAC header information.
+ * Structure used to store commonly passed MAC header information.
  */
 struct MacHeaderInfo {
     string	if_name;

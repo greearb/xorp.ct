@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.13 2007/09/07 11:05:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.14 2007/09/09 01:33:32 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -826,7 +826,7 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 	close_proto_sockets(dummy_error_msg);
 	return (XORP_ERROR);
     }
-    // Show interest in receiving information from IP header (XXX: IPv6 only)
+    // Show interest in receiving information from IP header
     if (enable_recv_pktinfo(true, error_msg) != XORP_OK) {
 	close_proto_sockets(dummy_error_msg);
 	return (XORP_ERROR);
