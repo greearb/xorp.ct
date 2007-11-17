@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.5 2007/08/20 19:12:14 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.6 2007/08/21 00:10:36 pavlin Exp $
 
 #ifndef __FEA_IO_TCPUDP_MANAGER_HH__
 #define __FEA_IO_TCPUDP_MANAGER_HH__
@@ -398,11 +398,17 @@ public:
     /**
      * Data received event.
      *
+     * @param if_name the interface name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param vif_name the vif name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
      * @param src_host the originating host IP address.
      * @param src_port the originating host port number.
      * @param data the data received.
      */
-    void recv_event(const IPvX&			src_host,
+    void recv_event(const string&		if_name,
+		    const string&		vif_name,
+		    const IPvX&			src_host,
 		    uint16_t			src_port,
 		    const vector<uint8_t>&	data);
 
@@ -519,12 +525,18 @@ public:
      *
      * @param receiver_name the name of the receiver to send the data to.
      * @param sockid unique socket ID.
+     * @param if_name the interface name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param vif_name the vif name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
      * @param src_host the originating host IP address.
      * @param src_port the originating host port number.
      * @param data the data received.
      */
     virtual void recv_event(const string&		receiver_name,
 			    const string&		sockid,
+			    const string&		if_name,
+			    const string&		vif_name,
 			    const IPvX&			src_host,
 			    uint16_t			src_port,
 			    const vector<uint8_t>&	data) = 0;
@@ -889,12 +901,18 @@ public:
      *
      * @param receiver_name the name of the receiver to send the data to.
      * @param sockid unique socket ID.
+     * @param if_name the interface name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param vif_name the vif name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
      * @param src_host the originating host IP address.
      * @param src_port the originating host port number.
      * @param data the data received.
      */
     void recv_event(const string&		receiver_name,
 		    const string&		sockid,
+		    const string&		if_name,
+		    const string&		vif_name,
 		    const IPvX&			src_host,
 		    uint16_t			src_port,
 		    const vector<uint8_t>&	data);

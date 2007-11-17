@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.30 2007/08/09 00:47:02 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.31 2007/08/17 20:44:45 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -296,6 +296,8 @@ public:
 					 const string&		protocol_origin);
 
     XrlCmdError socketx_user_0_1_recv_event(const string&	sockid,
+					    const string&	if_name,
+					    const string&	vif_name,
 					    const A&		src_host,
 					    const uint32_t&	src_port,
 					    const vector<uint8_t>& pdata);
@@ -1248,12 +1250,14 @@ template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::socketx_user_0_1_recv_event(
 					const string&		sockid,
+					const string&		if_name,
+					const string&		vif_name,
 					const A&		src_host,
 					const uint32_t&		src_port,
 					const vector<uint8_t>&	pdata
 					)
 {
-    _xpm.deliver_packet(sockid, src_host, src_port, pdata);
+    _xpm.deliver_packet(sockid, if_name, vif_name, src_host, src_port, pdata);
     return XrlCmdError::OKAY();
 }
 

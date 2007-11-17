@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.15 2007/05/23 12:12:50 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.16 2007/10/13 01:50:07 pavlin Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -106,6 +106,10 @@ public:
      * received the packet.
      *
      * @param sockid unique socket identifier.
+     * @param ifname the interface name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param vifname the vif name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
      * @param src_addr source address of packet.
      * @param src_port source port of packet.
      * @param pdata packet data.
@@ -114,6 +118,8 @@ public:
      * sockid can not be found.
      */
     bool deliver_packet(const string& 		sockid,
+			const string&		ifname,
+			const string&		vifname,
 			const A& 		src_addr,
 			uint16_t 		src_port,
 			const vector<uint8_t>& 	pdata);

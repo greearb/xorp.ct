@@ -175,6 +175,8 @@ protected:
 
     XrlCmdError
     socket4_user_0_1_recv_event(const string&		sockid,
+				const string&		if_name,
+				const string&		vif_name,
 				const IPv4&		src_host,
 				const uint32_t&		src_port,
 				const vector<uint8_t>&	data) = 0;
@@ -390,10 +392,15 @@ protected:
 
     XrlCmdError
     socket4_user_0_1_recv_event(const string&	sockid,
+				const string&	if_name,
+				const string&	vif_name,
 				const IPv4&	src_host,
 				const uint32_t&	src_port,
 				const vector<uint8_t>&	data)
     {
+	UNUSED(if_name);
+	UNUSED(vif_name);
+
 	// should only be receiving data on the client socket
 	XLOG_ASSERT(_client_sockid == sockid);
 	verbose_log("Server received %u bytes from %s:%u\n",
@@ -595,10 +602,15 @@ protected:
 
     XrlCmdError
     socket4_user_0_1_recv_event(const string&	sockid,
+				const string&	if_name,
+				const string&	vif_name,
 				const IPv4&	src_host,
 				const uint32_t&	src_port,
 				const vector<uint8_t>&	data)
     {
+	UNUSED(if_name);
+	UNUSED(vif_name);
+
 	XLOG_ASSERT(_sockid == sockid);
 	verbose_log("Client received %u bytes from %s:%u\n",
 		    XORP_UINT_CAST(data.size()), src_host.str().c_str(),

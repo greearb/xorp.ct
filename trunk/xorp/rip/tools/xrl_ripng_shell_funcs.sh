@@ -605,12 +605,12 @@ ripng_ripng_no_redist_protocol_routes()
 
 ripng_socket6_user_recv_event()
 {
-    if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_socket6_user_recv_event <sockid:txt> <src_host:ipv6> <src_port:u32> <data:binary>"
+    if [ $# -ne 6 ] ; then
+        echo "Usage: ripng_socket6_user_recv_event <sockid:txt> <if_name:txt> <vif_name:txt> <src_host:ipv6> <src_port:u32> <data:binary>"
         exit 1
     fi
 
-    XRL="finder://ripng/socket6_user/0.1/recv_event?sockid:txt=$1&src_host:ipv6=$2&src_port:u32=$3&data:binary=$4"
+    XRL="finder://ripng/socket6_user/0.1/recv_event?sockid:txt=$1&if_name:txt=$2&vif_name:txt=$3&src_host:ipv6=$4&src_port:u32=$5&data:binary=$6"
     call_xrl_wrapper -p all "${XRL}"
 }
 

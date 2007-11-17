@@ -649,12 +649,12 @@ rip_rip_no_redist_protocol_routes()
 
 rip_socket4_user_recv_event()
 {
-    if [ $# -ne 4 ] ; then
-        echo "Usage: rip_socket4_user_recv_event <sockid:txt> <src_host:ipv4> <src_port:u32> <data:binary>"
+    if [ $# -ne 6 ] ; then
+        echo "Usage: rip_socket4_user_recv_event <sockid:txt> <if_name:txt> <vif_name:txt> <src_host:ipv4> <src_port:u32> <data:binary>"
         exit 1
     fi
 
-    XRL="finder://rip/socket4_user/0.1/recv_event?sockid:txt=$1&src_host:ipv4=$2&src_port:u32=$3&data:binary=$4"
+    XRL="finder://rip/socket4_user/0.1/recv_event?sockid:txt=$1&if_name:txt=$2&vif_name:txt=$3&src_host:ipv4=$4&src_port:u32=$5&data:binary=$6"
     call_xrl_wrapper -p all "${XRL}"
 }
 

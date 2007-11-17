@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.21 2007/08/17 19:48:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.22 2007/08/21 00:10:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -241,10 +241,15 @@ protected:
 
     XrlCmdError
     socket4_user_0_1_recv_event(const string&	sockid,
+				const string&	if_name,
+				const string&	vif_name,
 				const IPv4&	src_host,
 				const uint32_t&	src_port,
 				const vector<uint8_t>&	data)
     {
+	UNUSED(if_name);
+	UNUSED(vif_name);
+
 	XLOG_ASSERT(sockid == _sockid);
 
 	verbose_log("Received data from %s %u\n",

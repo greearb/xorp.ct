@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.27 2007/05/23 12:12:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.28 2007/10/13 01:50:07 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -140,8 +140,13 @@ protected:
  */
 template <typename A>
 struct is_port_for {
-    is_port_for(const string* sockid, const A* addr, IfMgrXrlMirror* im)
-	: _psid(sockid), _pa(addr), _pim(im)
+    is_port_for(const string* sockid, const string* ifname,
+		const string* vifname, const A* addr, IfMgrXrlMirror* im)
+	: _psid(sockid),
+	  _ifname(ifname),
+	  _vifname(vifname),
+	  _pa(addr),
+	  _pim(im)
     {}
 
     bool operator() (Port<A>*& p);
@@ -151,6 +156,8 @@ protected:
 
 private:
     const string* 	_psid;
+    const string*	_ifname;
+    const string*	_vifname;
     const A* 		_pa;
     IfMgrXrlMirror* 	_pim;
 };
@@ -194,6 +201,14 @@ is_port_for<A>::operator() (Port<A>*& p)
     // If our packet, ignore
     if (xio->address() == *_pa)
 	return false;
+
+    // Check the incoming interface and vif name (if known)
+    if ((! _ifname->empty()) && (! _vifname->empty())) {
+	if (xio->ifname() != *_ifname)
+	    return false;
+	if (xio->vifname() != *_vifname)
+	    return false;
+    }
 
     //
     // Packet has arrived on multicast socket and is not one of ours.
@@ -370,32 +385,35 @@ XrlPortManager<A>::remove_rip_address(const string& 	/* ifname */,
 template <typename A>
 bool
 XrlPortManager<A>::deliver_packet(const string& 		sockid,
+				  const string&			ifname,
+				  const string&			vifname,
 				  const A& 			src_addr,
 				  uint16_t 			src_port,
 				  const vector<uint8_t>& 	pdata)
 {
     typename PortManagerBase<A>::PortList& pl = this->ports();
     typename PortManagerBase<A>::PortList::iterator i;
+    Port<A>* p = NULL;
 
-    debug_msg("Packet on %s from %s/%u %u bytes\n",
-	      sockid.c_str(), src_addr.str().c_str(), src_port,
-	      XORP_UINT_CAST(pdata.size()));
+    debug_msg("Packet on %s from interface %s vif %s %s/%u %u bytes\n",
+	      sockid.c_str(), ifname.c_str(), vifname.c_str(),
+	      src_addr.str().c_str(), src_port, XORP_UINT_CAST(pdata.size()));
 
     i = find_if(pl.begin(), pl.end(),
-		is_port_for<A>(&sockid, &src_addr, &_ifm));
-
+		is_port_for<A>(&sockid, &ifname, &vifname, &src_addr, &_ifm));
     if (i == this->ports().end()) {
 	debug_msg("Discarding packet %s/%u %u bytes\n",
 		  src_addr.str().c_str(), src_port,
 		  XORP_UINT_CAST(pdata.size()));
 	return false;
     }
-    Port<A>* p = *i;
-    p->port_io_receive(src_addr, src_port, &pdata[0], pdata.size());
-
+    p = *i;
     XLOG_ASSERT(find_if(++i, pl.end(),
-			is_port_for<A>(&sockid, &src_addr, &_ifm))
+			is_port_for<A>(&sockid, &ifname, &vifname, &src_addr,
+				       &_ifm))
 		== pl.end());
+
+    p->port_io_receive(src_addr, src_port, &pdata[0], pdata.size());
 
     return true;
 }

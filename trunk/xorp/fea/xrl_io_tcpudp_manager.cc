@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.2 2007/08/15 18:55:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.3 2007/08/17 19:48:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,6 +44,8 @@ XrlIoTcpUdpManager::~XrlIoTcpUdpManager()
 void
 XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
 			       const string&		sockid,
+			       const string&		if_name,
+			       const string&		vif_name,
 			       const IPvX&		src_host,
 			       uint16_t			src_port,
 			       const vector<uint8_t>&	data)
@@ -59,6 +61,8 @@ XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
 	//
 	cl.send_recv_event(receiver_name.c_str(),
 			   sockid,
+			   if_name,
+			   vif_name,
 			   src_host.get_ipv4(),
 			   src_port,
 			   data,
@@ -78,6 +82,8 @@ XrlIoTcpUdpManager::recv_event(const string&		receiver_name,
 	//
 	cl.send_recv_event(receiver_name.c_str(),
 			   sockid,
+			   if_name,
+			   vif_name,
 			   src_host.get_ipv6(),
 			   src_port,
 			   data,

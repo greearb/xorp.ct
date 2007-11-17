@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.5 2007/08/20 19:12:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.6 2007/08/21 00:10:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -702,12 +702,14 @@ IoTcpUdpComm::accept_connection(bool is_accepted, string& error_msg)
 }
 
 void
-IoTcpUdpComm::recv_event(const IPvX&		src_host,
+IoTcpUdpComm::recv_event(const string&		if_name,
+			 const string&		vif_name,
+			 const IPvX&		src_host,
 			 uint16_t		src_port,
 			 const vector<uint8_t>&	data)
 {
-    _io_tcpudp_manager.recv_event(_creator, sockid(), src_host, src_port,
-				  data);
+    _io_tcpudp_manager.recv_event(_creator, sockid(), if_name, vif_name,
+				  src_host, src_port, data);
 }
 
 void
@@ -1551,12 +1553,15 @@ IoTcpUdpManager::accept_connection(int family, const string& sockid,
 void
 IoTcpUdpManager::recv_event(const string&		receiver_name,
 			    const string&		sockid,
+			    const string&		if_name,
+			    const string&		vif_name,
 			    const IPvX&			src_host,
 			    uint16_t			src_port,
 			    const vector<uint8_t>&	data)
 {
     if (_io_tcpudp_manager_receiver != NULL)
 	_io_tcpudp_manager_receiver->recv_event(receiver_name, sockid,
+						if_name, vif_name,
 						src_host, src_port, data);
 }
 

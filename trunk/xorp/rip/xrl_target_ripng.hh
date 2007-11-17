@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.24 2007/08/09 00:47:03 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.25 2007/08/17 20:44:45 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -298,6 +298,8 @@ public:
     XrlCmdError redist6_0_1_finishing_route_dump(const string&	cookie);
 
     XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
+					    const string&	if_name,
+					    const string&	vif_name,
 					    const IPv6&		src_host,
 					    const uint32_t&	src_port,
 					    const vector<uint8_t>& pdata);

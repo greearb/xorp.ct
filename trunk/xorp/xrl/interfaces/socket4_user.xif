@@ -11,11 +11,17 @@ interface socket4_user/0.1 {
      *
      * @param sockid the identifier associated with socket where the event
      *               occurred.
+     * @param if_name the interface name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
+     * @param vif_name the vif name the packet arrived on, if known.
+     * If unknown, then it is an empty string.
      * @param src_host the originating host.
      * @param src_port the originating IP port.
      * @param data the data received.
      */
     recv_event		? sockid:txt					\
+			& if_name: txt					\
+			& vif_name: txt					\
 			& src_host:ipv4					\
 			& src_port:u32					\
 			& data:binary

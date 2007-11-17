@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.6 2007/08/20 19:12:15 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.7 2007/08/21 00:10:37 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -282,6 +282,18 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int enable_data_recv(string& error_msg);
+
+    /**
+     * Enable/disable receiving information about a packet received on the
+     * protocol socket.
+     *
+     * If enabled, values such as interface index will be received as well.
+     *
+     * @param is_enabled if true, set the option, otherwise reset it.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int enable_recv_pktinfo(bool is_enabled, string& error_msg);
 
     /**
      * I/O event callback: new connection is ready to be accepted.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.16 2007/08/21 00:24:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.17 2007/11/16 22:29:17 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -26,6 +26,10 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
+
+#ifdef HAVE_NET_IF_DL_H
+#include <net/if_dl.h>
+#endif
 
 #include "libcomm/comm_api.h"
 
@@ -156,6 +160,82 @@ IoTcpUdpSocket::stop(string& error_msg)
 
     _is_running = false;
 
+    return (XORP_OK);
+}
+
+int
+IoTcpUdpSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
+{
+    switch (family()) {
+    case AF_INET:
+    {
+	// XXX: the setsockopt() argument must be 'int'
+	int bool_flag = is_enabled;
+	
+	//
+	// Interface index
+	//
+#ifdef IP_RECVIF
+	// XXX: BSD
+	if (setsockopt(_socket_fd, IPPROTO_IP, IP_RECVIF,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IP_RECVIF, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // IP_RECVIF
+
+#ifdef IP_PKTINFO
+	// XXX: Linux
+	if (setsockopt(_socket_fd, IPPROTO_IP, IP_PKTINFO,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // IP_PKTINFO
+
+	UNUSED(bool_flag);
+	break;
+    }
+
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	// XXX: the setsockopt() argument must be 'int'
+	int bool_flag = is_enabled;
+	
+	//
+	// Interface index and address
+	//
+#ifdef IPV6_RECVPKTINFO
+	// The new option (applies to receiving only)
+	if (setsockopt(_socket_fd, IPPROTO_IPV6, IPV6_RECVPKTINFO,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    error_msg = c_format("setsockopt(IPV6_RECVPKTINFO, %u) failed: %s",
+				 bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#else
+	// The old option (see RFC-2292)
+	if (setsockopt(_socket_fd, IPPROTO_IPV6, IPV6_PKTINFO,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    error_msg = c_format("setsockopt(IPV6_PKTINFO, %u) failed: %s",
+				 bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // ! IPV6_RECVPKTINFO
+	
+    }
+    break;
+#endif // HAVE_IPV6
+    
+    default:
+	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family %d", family());
+	return (XORP_ERROR);
+    }
+    
     return (XORP_OK);
 }
 
@@ -1005,6 +1085,14 @@ IoTcpUdpSocket::enable_data_recv(string& error_msg)
 	return (XORP_ERROR);
     }
 
+    // Show interest in receiving additional information
+    if (enable_recv_pktinfo(true, error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot enable receiving of data: %s",
+			     error_msg.c_str());
+	stop(dummy_error_msg);
+	return (XORP_ERROR);
+    }
+
     // Get the peer address and port for TCP connection
     if (is_tcp()) {
 	// Get the peer address and port
@@ -1199,12 +1287,14 @@ IoTcpUdpSocket::connect_io_cb(XorpFd fd, IoEventType io_event_type)
 void
 IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 {
+    string if_name;
+    string vif_name;
     IPvX src_host = IPvX::ZERO(family());
     uint16_t src_port = 0;
     vector<uint8_t> data(0xffff);	// XXX: The max. payload is 0xffff
     ssize_t bytes_recv = 0;
-    struct sockaddr_storage ss;
-    socklen_t ss_len = sizeof(ss);
+    uint32_t pif_index = 0;
+    bool use_recvmsg = false;
     string error_msg;
 
     XLOG_ASSERT(fd == _socket_fd);
@@ -1223,22 +1313,225 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
     }
 
     //
+    // Decide whether to use recfrom(2) or recvmsg(2):
+    // - If Windows, use recvfrom(2)
+    // - On all other systems use recvfrom(2) for TCP, and recvmsg(2) for UDP
+    //
+#ifndef HOST_OS_WINDOWS
+    if (! is_tcp()) {
+	use_recvmsg = true;
+    }
+#endif
+
+    //
     // Receive the data
     //
-    bytes_recv = recvfrom(_socket_fd, XORP_BUF_CAST(&data[0]), data.size(), 0,
-			  reinterpret_cast<struct sockaddr*>(&ss), &ss_len);
-    if (bytes_recv < 0) {
-	error_msg = c_format("Error receiving TCP/UDP data on socket %s: %s",
-			     _socket_fd.str().c_str(), strerror(errno));
-	io_tcpudp_receiver()->error_event(error_msg, false);
-	return;
+    if (! use_recvmsg) {
+	struct sockaddr_storage ss;
+	socklen_t ss_len = sizeof(ss);
+
+	bytes_recv = recvfrom(_socket_fd, XORP_BUF_CAST(&data[0]), data.size(),
+			      0, reinterpret_cast<struct sockaddr*>(&ss),
+			      &ss_len);
+	if (bytes_recv < 0) {
+	    error_msg = c_format("Error receiving TCP/UDP data on "
+				 "socket %s: %s",
+				 _socket_fd.str().c_str(), strerror(errno));
+	    io_tcpudp_receiver()->error_event(error_msg, false);
+	    return;
+	}
+
+	//
+	// Protocol-specific processing:
+	// - Get the sender's address and port
+	//
+	if (is_tcp()) {
+	    // TCP data
+	    src_host = _peer_address;
+	    src_port = _peer_port;
+	} else {
+	    // UDP data
+	    src_host.copy_in(ss);
+	    src_port = get_sockadr_storage_port_number(ss);
+	}
+    } else {
+
+#ifndef HOST_OS_WINDOWS
+	//
+	// XXX: Use recvmsg(2) to receive additional information
+	//
+	struct msghdr rcvmh;
+	struct iovec rcviov[1];
+	vector<uint8_t> rcvcmsgbuf(0xffff);
+	void* cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
+
+	rcviov[0].iov_base = reinterpret_cast<caddr_t>(&data[0]);
+	rcviov[0].iov_len = data.size();
+	rcvmh.msg_iov = rcviov;
+	rcvmh.msg_iovlen = 1;
+	rcvmh.msg_control = reinterpret_cast<caddr_t>(&rcvcmsgbuf[0]);
+	rcvmh.msg_controllen = rcvcmsgbuf.size();
+
+	switch (family()) {
+	case AF_INET:
+	{
+	    struct sockaddr_in from4;
+
+	    memset(&from4, 0, sizeof(from4));
+	    rcvmh.msg_name = reinterpret_cast<caddr_t>(&from4);
+	    rcvmh.msg_namelen = sizeof(from4);
+	    bytes_recv = recvmsg(_socket_fd, &rcvmh, 0);
+	    if (bytes_recv < 0) {
+		error_msg = c_format("Error receiving TCP/UDP data on "
+				     "socket %s: %s",
+				     _socket_fd.str().c_str(),
+				     strerror(errno));
+		io_tcpudp_receiver()->error_event(error_msg, false);
+		return;
+	    }
+	    src_host.copy_in(from4);
+	    src_port = ntohs(from4.sin_port);
+
+	    // Get the pif_index
+	    for (struct cmsghdr *cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_FIRSTHDR(&rcvmh));
+		 cmsgp != NULL;
+		 cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&rcvmh, cmsgp))) {
+		if (cmsgp->cmsg_level != IPPROTO_IP)
+		    continue;
+		switch (cmsgp->cmsg_type) {
+#ifdef IP_RECVIF
+		case IP_RECVIF:
+		{
+		    struct sockaddr_dl *sdl = NULL;
+		    if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct sockaddr_dl)))
+			continue;
+		    cmsg_data = CMSG_DATA(cmsgp);
+		    sdl = reinterpret_cast<struct sockaddr_dl *>(cmsg_data);
+		    pif_index = sdl->sdl_index;
+		}
+		break;
+#endif // IP_RECVIF
+
+#ifdef IP_PKTINFO
+		case IP_PKTINFO:
+		{
+		    struct in_pktinfo *inp = NULL;
+		    if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in_pktinfo)))
+			continue;
+		    cmsg_data = CMSG_DATA(cmsgp);
+		    inp = reinterpret_cast<struct in_pktinfo *>(cmsg_data);
+		    pif_index = inp->ipi_ifindex;
+		}
+		break;
+#endif // IP_PKTINFO
+
+		default:
+		    break;
+		}
+	    }
+	}
+	break;
+
+#ifdef HAVE_IPV6
+	case AF_INET6:
+	{
+	    struct sockaddr_in6 from6;
+	    struct in6_pktinfo *pi = NULL;
+
+	    memset(&from6, 0, sizeof(from6));
+	    rcvmh.msg_name = reinterpret_cast<caddr_t>(&from6);
+	    rcvmh.msg_namelen = sizeof(from6);
+	    bytes_recv = recvmsg(_socket_fd, &rcvmh, 0);
+	    if (bytes_recv < 0) {
+		error_msg = c_format("Error receiving TCP/UDP data on "
+				     "socket %s: %s",
+				     _socket_fd.str().c_str(),
+				     strerror(errno));
+		io_tcpudp_receiver()->error_event(error_msg, false);
+		return;
+	    }
+	    src_host.copy_in(from6);
+	    src_port = ntohs(from6.sin6_port);
+
+	    if (rcvmh.msg_flags & MSG_CTRUNC) {
+		error_msg = c_format("Error receiving TCP/UDP data on "
+				     "socket %s: "
+				     "RX packet from %s with size of %d "
+				     "bytes is truncated",
+				     _socket_fd.str().c_str(),
+				     cstring(src_host),
+				     XORP_UINT_CAST(bytes_recv));
+		io_tcpudp_receiver()->error_event(error_msg, false);
+		return;
+	    }
+	    size_t controllen =  static_cast<size_t>(rcvmh.msg_controllen);
+	    if (controllen < sizeof(struct cmsghdr)) {
+		error_msg = c_format("Error receiving TCP/UDP data on "
+				     "socket %s: "
+				     "RX packet from %s has too short "
+				     "msg_controllen (%u instead of %u)",
+				     _socket_fd.str().c_str(),
+				     cstring(src_host),
+				     XORP_UINT_CAST(controllen),
+				     XORP_UINT_CAST(sizeof(struct cmsghdr)));
+		io_tcpudp_receiver()->error_event(error_msg, false);
+		return;
+	    }
+
+	    // Get the pif_index
+	    for (struct cmsghdr *cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_FIRSTHDR(&rcvmh));
+		 cmsgp != NULL;
+		 cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&rcvmh, cmsgp))) {
+		if (cmsgp->cmsg_level != IPPROTO_IPV6)
+		    continue;
+
+		switch (cmsgp->cmsg_type) {
+		case IPV6_PKTINFO:
+		{
+		    if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in6_pktinfo)))
+			continue;
+		    cmsg_data = CMSG_DATA(cmsgp);
+		    pi = reinterpret_cast<struct in6_pktinfo *>(cmsg_data);
+		    pif_index = pi->ipi6_ifindex;
+		    // dst_address.copy_in(pi->ipi6_addr);
+		}
+		break;
+
+		default:
+		    break;
+		}
+	    }
+	}
+	break;
+#endif // HAVE_IPV6
+
+	default:
+	    XLOG_UNREACHABLE();
+	    break;
+	}
     }
+#endif // ! HOST_OS_WINDOWS
+
     data.resize(bytes_recv);
 
     //
+    // Find the interface and the vif this message was received on.
+    //
+    if (pif_index != 0) {
+	const IfTreeInterface* ifp = NULL;
+	const IfTreeVif* vifp = NULL;
+	ifp = iftree().find_interface(pif_index);
+	if (ifp != NULL) {
+	    if_name = ifp->ifname();
+	    vifp = ifp->find_vif(pif_index);
+	    if (vifp != NULL)
+		vif_name = vifp->vifname();
+	}
+    }
+
+    //
     // Protocol-specific processing:
-    // - If TCP, test whether the connection was closed by the remote host
-    // - Get the sender's address and port
+    // - If TCP, test whether the connection was closed by the remote host.
     //
     if (is_tcp()) {
 	// TCP data
@@ -1253,18 +1546,15 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	    io_tcpudp_receiver()->disconnect_event();
 	    return;
 	}
-	src_host = _peer_address;
-	src_port = _peer_port;
     } else {
 	// UDP data
-	src_host.copy_in(ss);
-	src_port = get_sockadr_storage_port_number(ss);
     }
 
     //
     // Send the event to the receiver
     //
-    io_tcpudp_receiver()->recv_event(src_host, src_port, data);
+    io_tcpudp_receiver()->recv_event(if_name, vif_name, src_host, src_port,
+				     data);
 }
 
 void

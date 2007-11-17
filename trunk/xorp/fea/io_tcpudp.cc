@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp.cc,v 1.2 2007/08/17 19:48:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp.cc,v 1.3 2007/08/20 19:12:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -57,7 +57,9 @@ IoTcpUdp::unregister_io_tcpudp_receiver()
 }
 
 void
-IoTcpUdp::recv_event(const IPvX&		src_host,
+IoTcpUdp::recv_event(const string&		if_name,
+		     const string&		vif_name,
+		     const IPvX&		src_host,
 		     uint16_t			src_port,
 		     const vector<uint8_t>&	data)
 {
@@ -66,7 +68,8 @@ IoTcpUdp::recv_event(const IPvX&		src_host,
 	return;
     }
 
-    _io_tcpudp_receiver->recv_event(src_host, src_port, data);
+    _io_tcpudp_receiver->recv_event(if_name, vif_name, src_host, src_port,
+				    data);
 }
 
 void

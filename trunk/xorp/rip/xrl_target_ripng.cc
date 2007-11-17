@@ -497,12 +497,15 @@ XrlRipngTarget::redist6_0_1_finishing_route_dump(const string& /* cookie */)
 XrlCmdError
 XrlRipngTarget::socket6_user_0_1_recv_event(
 					const string&		sockid,
+					const string&		if_name,
+					const string&		vif_name,
 					const IPv6&		src_host,
 					const uint32_t&		src_port,
 					const vector<uint8_t>&	pdata
 					)
 {
-    return _ct->socketx_user_0_1_recv_event(sockid, src_host, src_port, pdata);
+    return _ct->socketx_user_0_1_recv_event(sockid, if_name, vif_name,
+					    src_host, src_port, pdata);
 }
 
 XrlCmdError
