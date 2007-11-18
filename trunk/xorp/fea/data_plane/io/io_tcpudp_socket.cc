@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.18 2007/11/17 04:06:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.19 2007/11/17 05:14:51 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -1360,7 +1360,9 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	}
     } else {
 
-#ifndef HOST_OS_WINDOWS
+#ifdef HOST_OS_WINDOWS
+	XLOG_UNREACHABLE();
+#else
 	//
 	// XXX: Use recvmsg(2) to receive additional information
 	//
@@ -1513,8 +1515,8 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
 	    XLOG_UNREACHABLE();
 	    break;
 	}
-    }
 #endif // ! HOST_OS_WINDOWS
+    }
 
     data.resize(bytes_recv);
 
