@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.29 2007/08/15 17:53:59 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.30 2007/11/16 22:29:18 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -714,8 +714,9 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
     if (in_progress != NULL)
 	*in_progress = 0;
 
-    comm_sock_no_ipv6("comm_bind_connect_udp6", local_addr, local_port,
-		      remote_addr, remote_port, is_blocking, in_progress);
+    comm_sock_no_ipv6("comm_bind_connect_udp6", local_addr, my_ifindex,
+		      local_port, remote_addr, remote_port, is_blocking,
+		      in_progress);
     return (XORP_BAD_SOCKET);
 #endif /* ! HAVE_IPV6 */
 }
