@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.14 2006/06/27 21:50:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.15 2007/02/16 22:47:16 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -46,23 +46,29 @@ RouteEntry<A>::associate(Origin* o)
 template <typename A>
 RouteEntry<A>::RouteEntry(const Net&	n,
 			  const Addr&	nh,
+			  const string&	ifname,
+			  const string&	vifname,
 			  uint16_t	cost,
 			  Origin*&	o,
 			  uint16_t	tag)
-    : _net(n), _nh(nh), _cost(cost), _tag(tag), _ref_cnt(0), _filtered(false)
+    : _net(n), _nh(nh), _ifname(ifname), _vifname(vifname),
+      _cost(cost), _tag(tag), _ref_cnt(0), _filtered(false)
 {
     associate(o);
 }
 
 template <typename A>
-RouteEntry<A>::RouteEntry(const Net&	    n,
-			  const Addr&	    nh,
-			  uint16_t	    cost,
-			  Origin*&	    o,
-			  uint16_t	    tag,
-			  const PolicyTags& policytags)
-    : _net(n), _nh(nh), _cost(cost), _tag(tag), 
-      _ref_cnt(0), _policytags(policytags), _filtered(false)
+RouteEntry<A>::RouteEntry(const Net&		n,
+			  const Addr&		nh,
+			  const string&		ifname,
+			  const string&		vifname,
+			  uint16_t		cost,
+			  Origin*&		o,
+			  uint16_t		tag,
+			  const PolicyTags&	policytags)
+    : _net(n), _nh(nh), _ifname(ifname), _vifname(vifname),
+      _cost(cost), _tag(tag), _ref_cnt(0), _policytags(policytags),
+      _filtered(false)
 {
     associate(o);
 }
@@ -83,6 +89,41 @@ RouteEntry<A>::set_nexthop(const A& nh)
 {
     if (nh != _nh) {
 	_nh = nh;
+	//
+	// XXX: If the nexthop is not link-local or zero, then reset
+	// the interface and vif name.
+	// Ideally, we shouldn't do this if the policy mechanism has
+	// support for setting the interface and vif name.
+	// For the time being it is safer to reset them and let the RIB
+	// find the interface and vif name based on the common subnet
+	// address to the nexthop.
+	//
+	if (! (_nh.is_linklocal_unicast() || _nh.is_zero())) {
+	    set_ifname("");
+	    set_vifname("");
+	}
+	return true;
+    }
+    return false;
+}
+
+template <typename A>
+bool
+RouteEntry<A>::set_ifname(const string& ifname)
+{
+    if (ifname != _ifname) {
+	_ifname = ifname;
+	return true;
+    }
+    return false;
+}
+
+template <typename A>
+bool
+RouteEntry<A>::set_vifname(const string& vifname)
+{
+    if (vifname != _vifname) {
+	_vifname = vifname;
 	return true;
     }
     return false;

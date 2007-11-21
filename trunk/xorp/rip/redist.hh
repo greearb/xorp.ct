@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/redist.hh,v 1.8 2006/03/16 00:05:50 pavlin Exp $
+// $XORP: xorp/rip/redist.hh,v 1.9 2007/02/16 22:47:15 pavlin Exp $
 
 #ifndef __RIP_ROUTE_REDIST_HH__
 #define __RIP_ROUTE_REDIST_HH__
@@ -90,6 +90,9 @@ public:
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
+     * @param ifname the corresponding interface name toward the destination.
+     * @param vifname the corresponding vif name toward the destination.
+     * 
      * @param policytags policy-tags associated with route.
      *
      * @return true on success, false if route could not be added to
@@ -97,6 +100,7 @@ public:
      *	       or a lower cost route exists.
      */
     bool add_route(const Net& net, const Addr& nexthop,
+		   const string& ifname, const string& vifname,
 		   const PolicyTags& policytags);
 
     /**
@@ -104,17 +108,21 @@ public:
      *
      * @param net network described by route.
      * @param nexthop router capable of forwarding route.
+     * @param ifname the corresponding interface name toward the destination.
+     * @param vifname the corresponding vif name toward the destination.
      * @param policytags policy-tags associated with route.
      *
      * @return true on success, false if route could not be added to
      *         the RouteDatabase.  Failure may occur if route already exists
      *	       or a lower cost route exists.
      */
-    bool add_route(const Net&	     net,
-		   const Addr&	     nexthop,
-		   uint16_t	     cost,
-		   uint16_t	     tag,
-		   const PolicyTags& policytags);
+    bool add_route(const Net&		net,
+		   const Addr&		nexthop,
+		   const string&	ifname,
+		   const string&	vifname,
+		   uint16_t		cost,
+		   uint16_t		tag,
+		   const PolicyTags&	policytags);
 
     /**
      * Trigger route expiry.

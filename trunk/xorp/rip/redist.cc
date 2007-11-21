@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.11 2006/06/27 21:50:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.12 2007/02/16 22:47:15 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -69,34 +69,44 @@ RouteRedistributor<A>::~RouteRedistributor()
 
 template <typename A>
 bool
-RouteRedistributor<A>::add_route(const Net&  net, const Addr& nexthop,
+RouteRedistributor<A>::add_route(const Net&	net,
+				 const Addr&	nexthop,
+				 const string&	ifname,
+				 const string&	vifname,
 				 const PolicyTags& policytags)
 {
-    _route_db.add_rib_route(net, nexthop, _cost, _tag, _rt_origin, policytags);
-    return _route_db.update_route(net, nexthop, _cost, _tag, _rt_origin,
-				  policytags, false);
+    _route_db.add_rib_route(net, nexthop, ifname, vifname, _cost, _tag,
+			    _rt_origin, policytags);
+    return _route_db.update_route(net, nexthop, ifname, vifname, _cost, _tag,
+				  _rt_origin, policytags, false);
 }
 
 template <typename A>
 bool
 RouteRedistributor<A>::add_route(const Net&  	net,
 				 const Addr& 	nexthop,
+				 const string&	ifname,
+				 const string&	vifname,
 				 uint16_t 	cost,
 				 uint16_t 	tag,
 				 const PolicyTags& policytags)
 {
-    _route_db.add_rib_route(net, nexthop, cost, tag, _rt_origin, policytags);
-    return _route_db.update_route(net, nexthop, cost, tag, _rt_origin,
-				  policytags, false);
+    _route_db.add_rib_route(net, nexthop, ifname, vifname, cost, tag,
+			    _rt_origin, policytags);
+    return _route_db.update_route(net, nexthop, ifname, vifname, cost, tag,
+				  _rt_origin, policytags, false);
 }
 
 template <typename A>
 bool
 RouteRedistributor<A>::expire_route(const Net& net)
 {
+    string ifname, vifname;		// XXX: not set, because not needed
+
     _route_db.delete_rib_route(net);
-    return _route_db.update_route(net, A::ZERO(), RIP_INFINITY,
-				  _tag, _rt_origin, PolicyTags(), false);
+    return _route_db.update_route(net, A::ZERO(), ifname, vifname,
+				  RIP_INFINITY, _tag, _rt_origin, PolicyTags(),
+				  false);
 }
 
 template <typename A>
@@ -160,8 +170,8 @@ RouteRedistributor<A>::withdraw_batch()
     const RouteEntry<A>* r = _wdrawer->current_route();
     while (r != 0) {
 	if (r->origin() == _rt_origin) {
-	    _route_db.update_route(r->net(), r->nexthop(),
-				   RIP_INFINITY, r->tag(),
+	    _route_db.update_route(r->net(), r->nexthop(), r->ifname(),
+				   r->vifname(), RIP_INFINITY, r->tag(),
 				   _rt_origin, r->policytags(), false);
 	}
 	r = _wdrawer->next_route();

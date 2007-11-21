@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/test_utils.hh,v 1.11 2007/02/16 22:47:17 pavlin Exp $
+// $XORP: xorp/rip/test_utils.hh,v 1.12 2007/04/14 08:59:52 pavlin Exp $
 
 #ifndef __RIP_TEST_UTILS_HH__
 #define __RIP_TEST_UTILS_HH__
@@ -103,22 +103,28 @@ protected:
 template <typename A>
 struct RouteInjector : public unary_function<A,void>
 {
-    RouteInjector(RouteDB<A>& r, const A& my_addr, uint32_t cost,
+    RouteInjector(RouteDB<A>& r, const A& my_addr, const string& ifname,
+		  const string& vifname, uint32_t cost,
 		  Peer<A>* peer)
-	: _r(r), _m(my_addr), _c(cost), _p(peer), _injected(0) {}
+	: _r(r), _m(my_addr), _ifname(ifname), _vifname(vifname),
+	  _c(cost), _p(peer), _injected(0) {}
 
     void operator() (const IPNet<A>& net)
     {
-	if (_r.update_route(net, _m, _c, 0, _p, PolicyTags(), false) == true)
+	if (_r.update_route(net, _m, _ifname, _vifname, _c, 0, _p,
+			    PolicyTags(), false) == true) {
 	    _injected++;
-	else
+	} else {
 	    fprintf(stderr, "Failed to update %s\n", net.str().c_str());
+	}
     }
     uint32_t injected() const { return _injected; }
 
 protected:
     RouteDB<A>& _r;
     A		_m;
+    string	_ifname;
+    string	_vifname;
     uint32_t	_c;
     Peer<A>*	_p;
     uint32_t	_injected;

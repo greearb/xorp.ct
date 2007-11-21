@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.20 2007/02/16 22:47:16 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.21 2007/08/30 06:02:30 pavlin Exp $"
 
 #include <set>
 
@@ -156,6 +156,7 @@ template <typename A>
 static int
 test_main()
 {
+    string ifname, vifname;		// XXX: not set, because not needed
     const uint32_t n_routes = N_TEST_ROUTES;
     set<IPNet<A> > nets;
     make_nets(nets, n_routes);
@@ -172,7 +173,8 @@ test_main()
     spm.the_port()->constants().set_deletion_secs(2);
 
     for_each(nets.begin(), nets.end(),
-	     RouteInjector<A>(rdb, Address<A>::me(), 1, peer));
+	     RouteInjector<A>(rdb, Address<A>::me(), ifname, vifname, 1,
+			      peer));
 
     if (peer->route_count() != n_routes) {
 	verbose_log("Routes lost (count %u != %u)\n",

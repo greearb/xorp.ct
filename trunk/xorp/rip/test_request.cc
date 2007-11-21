@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.26 2007/02/16 22:47:16 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.27 2007/08/30 06:02:29 pavlin Exp $"
 
 #include <set>
 
@@ -208,13 +208,15 @@ public:
 
     bool init_nets()
     {
+	string ifname, vifname;		// XXX: not set, because not needed
+
 	RouteDB<IPv4>& rdb = _rip_system.route_db();
 	make_nets(_testnets, REQUESTED_ROUTES);
 
 	set<IPv4Net>::const_iterator n = _testnets.begin();
 	for (uint32_t i = 0; i < INJECTED_ROUTES; i++) {
-	    if (rdb.update_route(*n, IPv4::ZERO(), ROUTE_COST, 0,
-				 _pm.the_peer(), PolicyTags(),
+	    if (rdb.update_route(*n, IPv4::ZERO(), ifname, vifname, ROUTE_COST,
+				 0, _pm.the_peer(), PolicyTags(),
 				 false) == false) {
 		verbose_log("Failed to add route for %s\n",
 			    n->str().c_str());

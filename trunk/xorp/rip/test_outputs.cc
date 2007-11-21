@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.30 2007/05/23 12:12:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.31 2007/08/30 06:02:29 pavlin Exp $"
 
 #include <set>
 
@@ -519,6 +519,8 @@ public:
     int
     run_test(RipHorizon horizon, HorizonValidatorBase<A>& validator)
     {
+	string ifname, vifname;		// XXX: not set, because not needed
+
 	_pm.test_port()->set_horizon(horizon);
 
 	RouteDB<A>&    rdb = _rip_system.route_db();
@@ -531,8 +533,8 @@ public:
 	for (typename set<IPNet<A> >::const_iterator n = _tpn.begin();
 	     n != _tpn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.test_peer();
-	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo, PolicyTags(),
-				 false) == false) {
+	    if (rdb.update_route(*n, A::ZERO(), ifname, vifname, 5u, 0u, reo,
+				 PolicyTags(), false) == false) {
 		verbose_log("Failed to add route for %s\n",
 			    n->str().c_str());
 		return 1;
@@ -543,8 +545,8 @@ public:
 	for (typename set<IPNet<A> >::const_iterator n = this->_opn.begin();
 	     n != this->_opn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.other_peer();
-	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo, PolicyTags(),
-				 false) == false) {
+	    if (rdb.update_route(*n, A::ZERO(), ifname, vifname, 5u, 0u, reo,
+				 PolicyTags(), false) == false) {
 		verbose_log("Failed to add route for %s\n",
 			    n->str().c_str());
 		return 1;

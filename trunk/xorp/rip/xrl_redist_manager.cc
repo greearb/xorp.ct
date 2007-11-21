@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.16 2007/10/13 01:50:08 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.17 2007/11/17 05:26:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -402,10 +402,12 @@ XrlRedistManager<A>::shutdown()
 
 template <typename A>
 void
-XrlRedistManager<A>::add_route(const string&	    protocol,
-			       const Net&	    net,
-			       const Addr&	    nh,
-			       const PolicyTags&    policytags)
+XrlRedistManager<A>::add_route(const string&		protocol,
+			       const Net&		net,
+			       const Addr&		nh,
+			       const string&		ifname,
+			       const string&		vifname,
+			       const PolicyTags&	policytags)
 {
     typename RedistList::iterator i;
 
@@ -420,7 +422,7 @@ XrlRedistManager<A>::add_route(const string&	    protocol,
 		is_redistributor_of<A>(protocol));
     if (i != _redists.end()) {
 	RouteRedistributor<A>* rr = *i;
-	rr->add_route(net, nh, policytags);
+	rr->add_route(net, nh, ifname, vifname, policytags);
 	return;
     }
 
@@ -434,12 +436,14 @@ XrlRedistManager<A>::add_route(const string&	    protocol,
 
 template <typename A>
 void
-XrlRedistManager<A>::add_route(const string&	    protocol,
-			       const Net&	    net,
-			       const Addr&	    nh,
-			       uint16_t		    cost,
-			       uint16_t		    tag,
-			       const PolicyTags&    policytags)
+XrlRedistManager<A>::add_route(const string&		protocol,
+			       const Net&		net,
+			       const Addr&		nh,
+			       const string&		ifname,
+			       const string&		vifname,
+			       uint16_t			cost,
+			       uint16_t			tag,
+			       const PolicyTags&	policytags)
 {
     typename RedistList::iterator i;
 
@@ -454,7 +458,7 @@ XrlRedistManager<A>::add_route(const string&	    protocol,
 		is_redistributor_of<A>(protocol));
     if (i != _redists.end()) {
 	RouteRedistributor<A>* rr = *i;
-	rr->add_route(net, nh, cost, tag, policytags);
+	rr->add_route(net, nh, ifname, vifname, cost, tag, policytags);
 	return;
     }
 

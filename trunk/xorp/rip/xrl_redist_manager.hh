@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.10 2007/05/23 12:12:51 pavlin Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.11 2007/10/13 01:50:08 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
@@ -62,9 +62,11 @@ public:
     void request_no_redist_for(const string& protocol);
 
     void add_route(const string& protocol, const Net& net, const Addr& nh,
+		   const string& ifname, const string& vifname,
 		   const PolicyTags& policytags);
     
     void add_route(const string& protocol, const Net& net, const Addr& nh,
+		   const string& ifname, const string& vifname,
 		   uint16_t cost, uint16_t tag, const PolicyTags& policytags);
 
     void delete_route(const string& protocol, const Net& net);

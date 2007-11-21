@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.20 2007/02/16 22:47:16 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.21 2007/08/30 06:02:30 pavlin Exp $"
 
 #include <set>
 
@@ -147,6 +147,7 @@ public:
 
     int run_test()
     {
+	string ifname, vifname;		// XXX: not set, because not needed
 	const uint32_t n_routes = 20000;
 
 	verbose_log("Running test for IPv%u\n",
@@ -170,7 +171,8 @@ public:
 	verbose_log("Creating routes for nets\n");
 
 	for_each(nets.begin(), nets.end(),
-		 RouteInjector<A>(rdb, A::ZERO(), 5, _pm.the_peer()));
+		 RouteInjector<A>(rdb, A::ZERO(), ifname, vifname, 5,
+				  _pm.the_peer()));
 
 	if (uq.updates_queued() != n_routes) {
 	    verbose_log("%u updates queued, expected %u\n",
@@ -240,8 +242,9 @@ public:
 
 	for (typename set<IPNet<A> >::const_iterator n = nets.begin();
 	     n != nets.end(); ++n) {
-	    if (rdb.update_route(*n, A::ZERO(), 5, 0, _pm.the_peer(),
-				 PolicyTags(), false) == false) {
+	    if (rdb.update_route(*n, A::ZERO(), ifname, vifname, 5, 0,
+				 _pm.the_peer(), PolicyTags(),
+				 false) == false) {
 		verbose_log("Failed to add route for %s\n",
 			    n->str().c_str());
 		return 1;

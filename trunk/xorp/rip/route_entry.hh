@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.16 2007/02/16 22:47:16 pavlin Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.17 2007/05/23 12:12:49 pavlin Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -53,12 +53,16 @@ public:
      */
     RouteEntry(const Net&  n,
 	       const Addr& nh,
+	       const string& ifname,
+	       const string& vifname,
 	       uint16_t	   cost,
 	       Origin*&	   o,
 	       uint16_t    tag);
 
     RouteEntry(const Net&  n,
 	       const Addr& nh,
+	       const string& ifname,
+	       const string& vifname,
 	       uint16_t	   cost,
 	       Origin*&	   o,
 	       uint16_t    tag,
@@ -93,6 +97,36 @@ public:
      */
     const A& nexthop() const		{ return _nh; }
 
+    /**
+     * Get the outgoing interface name.
+     *
+     * @return the outgoing interface name.
+     */
+    const string& ifname() const	{ return _ifname; }
+
+    /**
+     * Set the outgoing interface name.
+     *
+     * @ifname the outgoing interface name.
+     * @return true if the stored interface name changed, false otherwise.
+     */
+    bool set_ifname(const string& ifname);
+
+    /**
+     * Get the outgoing vif name.
+     *
+     * @return the outgoing vif name.
+     */
+    const string& vifname() const	{ return _vifname; }
+
+    /**
+     * Set the outgoing vif name.
+     *
+     * @ifname the outgoing vif name.
+     * @return true if the stored vif name changed, false otherwise.
+     */
+    bool set_vifname(const string& vifname);
+    
     /**
      * Set the cost metric.
      *
@@ -200,6 +234,8 @@ protected:
 protected:
     Net		_net;
     Addr	_nh;
+    string	_ifname;
+    string	_vifname;
     uint16_t	_cost;
     Origin*	_origin;
     uint16_t	_tag;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_table.cc,v 1.15 2006/03/16 00:05:49 pavlin Exp $"
+#ident "$XORP: xorp/rip/output_table.cc,v 1.16 2007/02/16 22:47:14 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -55,8 +55,11 @@ OutputTable<A>::output_packet()
 	    continue;
 	}
 
-	RouteEntryOrigin<A>* origin = NULL; // XXX
-	RouteEntry<A>* copy = new RouteEntry<A>(r->net(), p.first, p.second,
+	RouteEntryOrigin<A>* origin = NULL;	// XXX
+	string ifname, vifname;		// XXX: not set, because not needed
+	RouteEntry<A>* copy = new RouteEntry<A>(r->net(), p.first,
+						ifname, vifname,
+						p.second,
 					        origin, r->tag(),
 						r->policytags());
 	

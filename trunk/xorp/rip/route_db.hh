@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.25 2007/02/16 22:47:16 pavlin Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.26 2007/05/23 12:12:49 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -104,6 +104,8 @@ public:
      *
      * @param net the network route being updated.
      * @param nexthop the corresponding nexthop address.
+     * @param ifname the corresponding interface name toward the destination.
+     * @param vifname the corresponding vif name toward the destination.
      * @param cost the corresponding metric value as received from the
      *	      route originator.
      * @param tag the corresponding route tag.
@@ -115,6 +117,8 @@ public:
      */
     bool update_route(const Net&	net,
 		      const Addr&	nexthop,
+		      const string&	ifname,
+		      const string&	vifname,
 		      uint32_t		cost,
 		      uint32_t		tag,
 		      RouteOrigin*	origin,
@@ -129,6 +133,8 @@ public:
      *
      * @param net network of the route being added.
      * @param nexthop the corresponding nexthop address.
+     * @param ifname the corresponding interface name toward the destination.
+     * @param vifname the corresponding vif name toward the destination.
      * @param cost the corresponding metric value.
      * @param the corresponding route tag.
      * @param origin the route originator [RIB in this case].
@@ -136,6 +142,8 @@ public:
      */
     void add_rib_route(const Net&	net,
 		       const Addr&	nexthop,
+		       const string&	ifname,
+		       const string&	vifname,
 		       uint32_t		cost,
 		       uint32_t		tag,
 		       RouteOrigin*	origin,

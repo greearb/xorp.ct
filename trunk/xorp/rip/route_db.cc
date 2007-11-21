@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.32 2006/10/12 06:13:04 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.33 2007/02/16 22:47:16 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -130,8 +130,8 @@ RouteDB<A>::delete_route(Route* r)
 	debug_msg("[RIP] Deleted route, but re-added from RIB routes: %s\n",
 		  r->net().str().c_str());
 
-        update_route(r->net(), r->nexthop(), r->cost(), r->tag(), _rib_origin,
-		     r->policytags(), false);
+        update_route(r->net(), r->nexthop(), r->ifname(), r->vifname(),
+		     r->cost(), r->tag(), _rib_origin, r->policytags(), false);
     }
 }
 
@@ -152,7 +152,8 @@ template <typename A>
 void
 RouteDB<A>::expire_route(Route* r)
 {
-    if (false == update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
+    if (false == update_route(r->net(), r->nexthop(), r->ifname(),
+			      r->vifname(), RIP_INFINITY, r->tag(),
 			      r->origin(), r->policytags(), false)) {
 	XLOG_ERROR("Expire route failed.");
     }
@@ -203,13 +204,15 @@ RouteDB<A>::do_filtering(Route* r)
 
 template <typename A>
 bool
-RouteDB<A>::update_route(const Net&	    net,
-			 const Addr&	    nexthop,
-			 uint32_t	    cost,
-			 uint32_t	    tag,
-			 RouteOrigin*	    o,
-			 const PolicyTags&  policytags,
-			 bool		    is_policy_push)
+RouteDB<A>::update_route(const Net&		net,
+			 const Addr&		nexthop,
+			 const string&		ifname,
+			 const string&		vifname,
+			 uint32_t		cost,
+			 uint32_t		tag,
+			 RouteOrigin*		o,
+			 const PolicyTags&	policytags,
+			 bool			is_policy_push)
 {
     if (tag > 0xffff) {
 	// Ingress sanity checks should take care of this
@@ -242,7 +245,8 @@ RouteDB<A>::update_route(const Net&	    net,
 	// Create route if necessary
 	r = o->find_route(net);
 	if (r == 0) {
-	    r = new Route(net, nexthop, cost, o, tag, policytags);
+	    r = new Route(net, nexthop, ifname, vifname, cost, o, tag,
+			  policytags);
 
 	    set_expiry_timer(r);
 	    bool ok(_routes.insert(typename
@@ -278,6 +282,7 @@ RouteDB<A>::update_route(const Net&	    net,
 
     RouteEntryOrigin<A>* no_origin = NULL;
     RouteEntry<A>* new_route = new RouteEntry<A>(r->net(), nexthop,
+						 ifname, vifname,
 						 cost, no_origin, tag,
 						 policytags);
     // XXX: lost origin
@@ -288,6 +293,8 @@ RouteDB<A>::update_route(const Net&	    net,
 	uint16_t orig_cost = r->cost();
 	
 	updated |= r->set_nexthop(new_route->nexthop());
+	updated |= r->set_ifname(new_route->ifname());
+	updated |= r->set_vifname(new_route->vifname());
 	updated |= r->set_tag(new_route->tag());
 	updated |= r->set_cost(new_route->cost());
 	updated |= r->set_policytags(new_route->policytags());
@@ -400,6 +407,8 @@ RouteDB<A>::update_route(const Net&	    net,
 	    
 	if (should_replace) {
 	    r->set_nexthop(new_route->nexthop());
+	    r->set_ifname(new_route->ifname());
+	    r->set_vifname(new_route->vifname());
 	    r->set_tag(new_route->tag());
 	    r->set_cost(new_route->cost());
 	    r->set_policytags(new_route->policytags());
@@ -610,15 +619,16 @@ RouteDB<A>::push_routes()
 
 	debug_msg("[RIP] Pushing RIB route %s\n", r->net().str().c_str());
 	
-	update_route(r->net(), r->nexthop(), r->cost(), r->tag(),
-		     _rib_origin, r->policytags(), true);
+	update_route(r->net(), r->nexthop(), r->ifname(), r->vifname(),
+		     r->cost(), r->tag(), _rib_origin, r->policytags(), true);
     }
 }
 
 template <typename A>
 void
-RouteDB<A>::add_rib_route(const Net& net, const Addr& nexthop, uint32_t cost,
-			  uint32_t tag, RouteOrigin* origin,
+RouteDB<A>::add_rib_route(const Net& net, const Addr& nexthop,
+			  const string& ifname, const string& vifname,
+			  uint32_t cost, uint32_t tag, RouteOrigin* origin,
 			  const PolicyTags& policytags)
 {
     debug_msg("[RIP] adding RIB route %s\n",net.str().c_str());
@@ -636,7 +646,8 @@ RouteDB<A>::add_rib_route(const Net& net, const Addr& nexthop, uint32_t cost,
     // XXX: We are cheating here NULL origin so we don't get association.
     //
     RouteOrigin* no_origin = NULL;
-    Route* r = new Route(net, nexthop, cost, no_origin, tag, policytags);
+    Route* r = new Route(net, nexthop, ifname, vifname, cost, no_origin, tag,
+			 policytags);
 
     _rib_routes[net] = r;
 }

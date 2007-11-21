@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.15 2007/02/16 22:47:18 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.16 2007/10/13 01:50:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -59,13 +59,15 @@ struct Send {
 
     typedef bool (XrlRibV0p1Client::*AddRoute)
 	(const char*, const string&, const bool&, const bool&,
-	 const IPNet<A>&, const A&, const uint32_t&, const XrlAtomList&,
-	 const XrlRibV0p1Client::AddRoute6CB&);
+	 const IPNet<A>&, const A&, const string&, const string&,
+	 const uint32_t&, const XrlAtomList&,
+	 const XrlRibV0p1Client::AddInterfaceRoute4CB&);
 
     typedef bool (XrlRibV0p1Client::*ReplaceRoute)
 	(const char*, const string&, const bool&, const bool&,
-	 const IPNet<A>&, const A&, const uint32_t&, const XrlAtomList&,
-	 const XrlRibV0p1Client::ReplaceRoute6CB&);
+	 const IPNet<A>&, const A&, const string&, const string&,
+	 const uint32_t&, const XrlAtomList&,
+	 const XrlRibV0p1Client::ReplaceInterfaceRoute4CB&);
 
     typedef bool (XrlRibV0p1Client::*DeleteRoute)
 	(const char*, const string&, const bool&, const bool&,
@@ -95,11 +97,11 @@ Send<IPv4>::delete_igp_table = &XrlRibV0p1Client::send_delete_igp_table4;
 
 template <>
 Send<IPv4>::AddRoute
-Send<IPv4>::add_route = &XrlRibV0p1Client::send_add_route4;
+Send<IPv4>::add_route = &XrlRibV0p1Client::send_add_interface_route4;
 
 template <>
 Send<IPv4>::ReplaceRoute
-Send<IPv4>::replace_route = &XrlRibV0p1Client::send_replace_route4;
+Send<IPv4>::replace_route = &XrlRibV0p1Client::send_replace_interface_route4;
 
 template <>
 Send<IPv4>::DeleteRoute
@@ -120,11 +122,11 @@ Send<IPv6>::delete_igp_table = &XrlRibV0p1Client::send_delete_igp_table6;
 
 template <>
 Send<IPv6>::AddRoute
-Send<IPv6>::add_route = &XrlRibV0p1Client::send_add_route6;
+Send<IPv6>::add_route = &XrlRibV0p1Client::send_add_interface_route6;
 
 template <>
 Send<IPv6>::ReplaceRoute
-Send<IPv6>::replace_route = &XrlRibV0p1Client::send_replace_route6;
+Send<IPv6>::replace_route = &XrlRibV0p1Client::send_replace_interface_route6;
 
 template <>
 Send<IPv6>::DeleteRoute
@@ -268,13 +270,13 @@ XrlRibNotifier<A>::send_add_route(const RouteEntry<A>& re)
 	_ribnets.insert(re.net());
 	ok = (c.*Send<A>::add_route)
 	      (xrl_rib_name(), "rip", true, false,
-	       re.net(), re.nexthop(), re.cost(),
+	       re.net(), re.nexthop(), re.ifname(), re.vifname(), re.cost(),
 	       re.policytags().xrl_atomlist(),
 	       callback(this, &XrlRibNotifier<A>::send_route_cb));
     } else {
 	ok = (c.*Send<A>::replace_route)
 	      (xrl_rib_name(), "rip", true, false,
-	       re.net(), re.nexthop(), re.cost(),
+	       re.net(), re.nexthop(), re.ifname(), re.vifname(), re.cost(),
 	       re.policytags().xrl_atomlist(),
 	       callback(this, &XrlRibNotifier<A>::send_route_cb));
     }

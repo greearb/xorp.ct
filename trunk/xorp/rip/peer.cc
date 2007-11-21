@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/peer.cc,v 1.6 2006/06/27 21:50:47 pavlin Exp $"
+#ident "$XORP: xorp/rip/peer.cc,v 1.7 2007/02/16 22:47:14 pavlin Exp $"
 
 #include "peer.hh"
 #include "port.hh"
@@ -76,16 +76,25 @@ Peer<A>::update_route(const IPNet<A>&	net,
 		      uint32_t		tag,
 		      const PolicyTags& policytags)
 {
+    string ifname, vifname;
+
+    // Get the interface and vif name
+    if (port().io_handler() != NULL) {
+	ifname = port().io_handler()->ifname();
+	vifname = port().io_handler()->vifname();
+    }
+
     Route* route = _peer_routes.find_route(net);
     if (route == NULL) {
 	RouteEntryOrigin<A>* origin = &_peer_routes;
-	route = new Route(net, nexthop, cost, origin, tag, policytags);
+	route = new Route(net, nexthop, ifname, vifname,
+			  cost, origin, tag, policytags);
     }
     set_expiry_timer(route);
 
     RouteDB<A>& rdb = _port.port_manager().system().route_db();
-    return (rdb.update_route(net, nexthop, cost, tag, this, policytags,
-			     false));
+    return (rdb.update_route(net, nexthop, ifname, vifname, cost, tag, this,
+			     policytags, false));
 }
 
 template <typename A>
@@ -102,8 +111,8 @@ Peer<A>::push_routes()
     typename vector<const RouteEntry<A>*>::const_iterator ri;
     for (ri = routes.begin(); ri != routes.end(); ++ri) {
 	const RouteEntry<A>* r = *ri;
-	rdb.update_route(r->net(), r->nexthop(), r->cost(), r->tag(),
-			 this, r->policytags(), true);
+	rdb.update_route(r->net(), r->nexthop(), r->ifname(), r->vifname(),
+			 r->cost(), r->tag(), this, r->policytags(), true);
     }
 }
 

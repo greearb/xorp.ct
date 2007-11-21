@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.31 2007/08/17 20:44:45 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.32 2007/11/17 04:06:47 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -1206,8 +1206,6 @@ XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 					     const string&	cookie,
 					     const string&	protocol_origin)
 {
-    UNUSED(ifname);
-    UNUSED(vifname);
     UNUSED(metric);
     UNUSED(admin_d);
     UNUSED(protocol_origin);
@@ -1216,7 +1214,7 @@ XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
     // XXX: We use cookie of the protocol name to make find the relevant
     // redist table simple.
     //
-    _xrm.add_route(cookie, net, nexthop, PolicyTags());
+    _xrm.add_route(cookie, net, nexthop, ifname, vifname, PolicyTags());
     return XrlCmdError::OKAY();
 }
 
@@ -1375,12 +1373,19 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_add_routex(const IPNet<A>&	net,
 						     const uint32_t&	metric,
 						     const XrlAtomList& policytags)
 {
+    string ifname, vifname;
+
     UNUSED(multicast);
 
     if (! unicast)
 	return XrlCmdError::OKAY();
 
-    _xrm.add_route("policy", net, nexthop, metric, 0, policytags);
+    //
+    // XXX: The interface and vif name are emmpty, because the policy
+    // mechanism doesn't support setting them (yet).
+    //
+    _xrm.add_route("policy", net, nexthop, ifname, vifname, metric, 0,
+		   policytags);
     return XrlCmdError::OKAY();
 }
 
