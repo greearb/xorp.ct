@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.16 2007/05/23 12:12:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/xorp_rip_main.cc,v 1.17 2007/10/13 01:50:07 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -266,7 +266,7 @@ XorpRip<A>::run(const string& finder_host, uint16_t finder_port)
 				    FinderConstants::FINDER_DEFAULT_HOST(),
 				    FinderConstants::FINDER_DEFAULT_PORT());
 	XrlPortManager<A>	xpm(rip_system, xsr, ixm);
-	XrlRedistManager<A>	xrm(rip_system, xsr);
+	XrlRedistManager<A>	xrm(rip_system);
 
 	XrlTargetType xrlt(e, xsr, xps, xpm, xrm, _stop_flag, rip_system);
 

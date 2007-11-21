@@ -1,10 +1,9 @@
-/* $XORP: xorp/xrl/targets/rip.tgt,v 1.5 2007/05/31 19:02:27 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/rip.tgt,v 1.6 2007/07/12 21:39:28 pavlin Exp $ */
 
 #include "common.xif"
 #include "finder_event_observer.xif"
 #include "policy_backend.xif"
 #include "policy_redist4.xif"
-#include "redist4.xif"
 #include "rip.xif"
 #include "socket4_user.xif"
 
@@ -13,6 +12,5 @@ target rip implements							\
 			finder_event_observer/0.1,			\
 			policy_backend/0.1,				\
 			policy_redist4/0.1,				\
-			redist4/0.1,					\
 			rip/0.1,					\
 			socket4_user/0.1

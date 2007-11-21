@@ -119,50 +119,6 @@ ripng_policy_redist6_delete_route6()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_redist6_add_route()
-{
-    if [ $# -ne 8 ] ; then
-        echo "Usage: ripng_redist6_add_route <dst:ipv6net> <nexthop:ipv6> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt> <protocol_origin:txt>"
-        exit 1
-    fi
-
-    XRL="finder://ripng/redist6/0.1/add_route?dst:ipv6net=$1&nexthop:ipv6=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7&protocol_origin:txt=$8"
-    call_xrl_wrapper -p all "${XRL}"
-}
-
-ripng_redist6_delete_route()
-{
-    if [ $# -ne 8 ] ; then
-        echo "Usage: ripng_redist6_delete_route <dst:ipv6net> <nexthop:ipv6> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt> <protocol_origin:txt>"
-        exit 1
-    fi
-
-    XRL="finder://ripng/redist6/0.1/delete_route?dst:ipv6net=$1&nexthop:ipv6=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7&protocol_origin:txt=$8"
-    call_xrl_wrapper -p all "${XRL}"
-}
-
-ripng_redist6_starting_route_dump()
-{
-    if [ $# -ne 1 ] ; then
-        echo "Usage: ripng_redist6_starting_route_dump <cookie:txt>"
-        exit 1
-    fi
-
-    XRL="finder://ripng/redist6/0.1/starting_route_dump?cookie:txt=$1"
-    call_xrl_wrapper -p all "${XRL}"
-}
-
-ripng_redist6_finishing_route_dump()
-{
-    if [ $# -ne 1 ] ; then
-        echo "Usage: ripng_redist6_finishing_route_dump <cookie:txt>"
-        exit 1
-    fi
-
-    XRL="finder://ripng/redist6/0.1/finishing_route_dump?cookie:txt=$1"
-    call_xrl_wrapper -p all "${XRL}"
-}
-
 ripng_ripng_add_rip_address()
 {
     if [ $# -ne 3 ] ; then
@@ -578,28 +534,6 @@ ripng_ripng_get_peer_counters()
     fi
 
     XRL="finder://ripng/ripng/0.1/get_peer_counters?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&peer:ipv6=$4"
-    call_xrl_wrapper -p all "${XRL}"
-}
-
-ripng_ripng_redist_protocol_routes()
-{
-    if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_redist_protocol_routes <protocol_name:txt> <cost:u32> <tag:u32>"
-        exit 1
-    fi
-
-    XRL="finder://ripng/ripng/0.1/redist_protocol_routes?protocol_name:txt=$1&cost:u32=$2&tag:u32=$3"
-    call_xrl_wrapper -p all "${XRL}"
-}
-
-ripng_ripng_no_redist_protocol_routes()
-{
-    if [ $# -ne 1 ] ; then
-        echo "Usage: ripng_ripng_no_redist_protocol_routes <protocol_name:txt>"
-        exit 1
-    fi
-
-    XRL="finder://ripng/ripng/0.1/no_redist_protocol_routes?protocol_name:txt=$1"
     call_xrl_wrapper -p all "${XRL}"
 }
 

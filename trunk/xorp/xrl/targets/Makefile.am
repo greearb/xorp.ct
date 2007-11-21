@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.67 2007/06/27 01:27:08 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.68 2007/08/09 00:47:07 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -272,7 +272,6 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/rip.xif				\
-		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 
 # RIPng
@@ -283,7 +282,6 @@ $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/policy_redist6.xif			\
 		$(INTERFACES_DIR)/ripng.xif				\
-		$(INTERFACES_DIR)/redist6.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
 
 # RTRMGR

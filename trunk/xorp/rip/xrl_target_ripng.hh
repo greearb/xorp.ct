@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.25 2007/08/17 20:44:45 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.26 2007/11/17 04:06:48 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -268,34 +268,6 @@ public:
 				XrlAtomList&	values,
 				uint32_t&	peer_last_active
 				);
-
-    XrlCmdError ripng_0_1_redist_protocol_routes(const string&	protocol,
-						 const uint32_t& cost,
-						 const uint32_t& tag);
-
-    XrlCmdError ripng_0_1_no_redist_protocol_routes(const string& protocol);
-
-    XrlCmdError redist6_0_1_add_route(const IPv6Net&		net,
-				      const IPv6&		nexthop,
-				      const string&		ifname,
-				      const string&		vifname,
-				      const uint32_t&		metric,
-				      const uint32_t&		admin_distance,
-				      const string&		cookie,
-				      const string&		protocol_origin);
-
-    XrlCmdError redist6_0_1_delete_route(const IPv6Net&		net,
-					 const IPv6&		nexthop,
-					 const string&		ifname,
-					 const string&		vifname,
-					 const uint32_t&	metric,
-					 const uint32_t&	admin_distance,
-					 const string&		cookie,
-					 const string&		protocol_origin);
-
-    XrlCmdError redist6_0_1_starting_route_dump(const string&	cookie);
-
-    XrlCmdError redist6_0_1_finishing_route_dump(const string&	cookie);
 
     XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
 					    const string&	if_name,

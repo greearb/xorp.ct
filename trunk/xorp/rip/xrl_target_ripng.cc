@@ -438,61 +438,6 @@ XrlRipngTarget::ripng_0_1_get_peer_counters(const string&	ifn,
 					   descs, vals, last_active);
 }
 
-XrlCmdError
-XrlRipngTarget::ripng_0_1_redist_protocol_routes(const string&	 protocol,
-						 const uint32_t& cost,
-						 const uint32_t& tag)
-{
-    return _ct->ripx_0_1_redist_protocol_routes(protocol, cost, tag);
-}
-
-XrlCmdError
-XrlRipngTarget::ripng_0_1_no_redist_protocol_routes(const string& protocol)
-{
-    return _ct->ripx_0_1_no_redist_protocol_routes(protocol);
-}
-
-XrlCmdError
-XrlRipngTarget::redist6_0_1_add_route(const IPv6Net&	net,
-				      const IPv6&	nexthop,
-				      const string&	ifname,
-				      const string&	vifname,
-				      const uint32_t&	metric,
-				      const uint32_t&	admin_distance,
-				      const string&	cookie,
-				      const string&	protocol_origin)
-{
-    return _ct->redistx_0_1_add_route(net, nexthop, ifname, vifname, metric,
-				      admin_distance, cookie, protocol_origin);
-}
-
-XrlCmdError
-XrlRipngTarget::redist6_0_1_delete_route(const IPv6Net&	net,
-					 const IPv6&	nexthop,
-					 const string&	ifname,
-					 const string&	vifname,
-					 const uint32_t& metric,
-					 const uint32_t& admin_distance,
-					 const string&	cookie,
-					 const string&	protocol_origin)
-{
-    return _ct->redistx_0_1_delete_route(net, nexthop, ifname, vifname, metric,
-					 admin_distance, cookie,
-					 protocol_origin);
-}
-
-XrlCmdError
-XrlRipngTarget::redist6_0_1_starting_route_dump(const string& /* cookie */)
-{
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlRipngTarget::redist6_0_1_finishing_route_dump(const string& /* cookie */)
-{
-    return XrlCmdError::OKAY();
-}
-
 
 XrlCmdError
 XrlRipngTarget::socket6_user_0_1_recv_event(

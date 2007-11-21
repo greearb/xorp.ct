@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.45 2006/07/19 00:43:38 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.46 2006/08/08 20:12:31 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -282,18 +282,6 @@ protocols {
 		}
 	    }
 	}
-/*
- * TODO: the old import/export mechanism is deprecated in favor of the
- * standard policy-based config.  This commented-out section should be
- * removed as soon as policy-based redistribution config is stabilized.
- */
-/*
-	export @: txt {
-	    %activate: xrl "$(rip.targetname)/rip/0.1/redist_protocol_routes?protocol_name:txt=$(@)&cost:u32=$(@.metric)&tag:u32=$(@.tag)";
-	    %delete: xrl "$(rip.targetname)/rip/0.1/no_redist_protocol_routes?protocol_name:txt=$(@)";
-	    %help: short "Export routes from another routing protocol";
-	}
- */
 
 	import {
 	    %help: short "Import policy name(s)";

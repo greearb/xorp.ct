@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.12 2007/02/16 22:47:15 pavlin Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.13 2007/11/21 08:29:39 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -51,11 +51,8 @@ RedistRouteOrigin<A>::deletion_secs() const
 // RouteRedistributor
 
 template <typename A>
-RouteRedistributor<A>::RouteRedistributor(RouteDB<A>&	rdb,
-					  const string&	protocol,
-					  uint16_t	cost,
-					  uint16_t	tag)
-    : _route_db(rdb), _protocol(protocol), _cost(cost), _tag(tag), _wdrawer(0)
+RouteRedistributor<A>::RouteRedistributor(RouteDB<A>&	rdb)
+    : _route_db(rdb), _wdrawer(0)
 {
     _rt_origin = new RedistRouteOrigin<A>();
 }
@@ -65,20 +62,6 @@ RouteRedistributor<A>::~RouteRedistributor()
 {
     delete _rt_origin;
     delete _wdrawer;
-}
-
-template <typename A>
-bool
-RouteRedistributor<A>::add_route(const Net&	net,
-				 const Addr&	nexthop,
-				 const string&	ifname,
-				 const string&	vifname,
-				 const PolicyTags& policytags)
-{
-    _route_db.add_rib_route(net, nexthop, ifname, vifname, _cost, _tag,
-			    _rt_origin, policytags);
-    return _route_db.update_route(net, nexthop, ifname, vifname, _cost, _tag,
-				  _rt_origin, policytags, false);
 }
 
 template <typename A>
@@ -105,29 +88,8 @@ RouteRedistributor<A>::expire_route(const Net& net)
 
     _route_db.delete_rib_route(net);
     return _route_db.update_route(net, A::ZERO(), ifname, vifname,
-				  RIP_INFINITY, _tag, _rt_origin, PolicyTags(),
+				  RIP_INFINITY, 0, _rt_origin, PolicyTags(),
 				  false);
-}
-
-template <typename A>
-const string&
-RouteRedistributor<A>::protocol() const
-{
-    return _protocol;
-}
-
-template <typename A>
-uint16_t
-RouteRedistributor<A>::tag() const
-{
-    return _tag;
-}
-
-template <typename A>
-uint16_t
-RouteRedistributor<A>::cost() const
-{
-    return _cost;
 }
 
 template <typename A>

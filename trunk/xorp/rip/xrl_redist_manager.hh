@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.11 2007/10/13 01:50:08 pavlin Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.12 2007/11/21 08:29:40 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
@@ -27,67 +27,32 @@
 
 #include "redist.hh"
 
-
-class EventLoop;
-class XrlRouter;
-class XrlError;
-
-template <typename A> class RouteDB;
 template <typename A> class System;
-template <typename A> class RedistJob;
 
 /**
- * Xrl Redistribution class.  This class requests the RIB to start and stop
- * route redistribution
+ * Xrl Route redistribution manager.
  */
 template <typename A>
 class XrlRedistManager : public ServiceBase {
 public:
     typedef A		Addr;
     typedef IPNet<A>	Net;
-    typedef list<RouteRedistributor<A>*> RedistList;
 
 public:
-    XrlRedistManager(EventLoop& e, RouteDB<A>& rdb, XrlRouter& router);
-    XrlRedistManager(System<A>& system, XrlRouter& router);
+    XrlRedistManager(System<A>& system);
     ~XrlRedistManager();
 
     int startup();
     int shutdown();
 
-    void request_redist_for(const string& protocol,
-			    uint16_t	  cost,
-			    uint16_t	  tag);
-
-    void request_no_redist_for(const string& protocol);
-
-    void add_route(const string& protocol, const Net& net, const Addr& nh,
-		   const string& ifname, const string& vifname,
+    void add_route(const Net& net, const Addr& nh, const string& ifname,
+		   const string& vifname, uint16_t cost, uint16_t tag,
 		   const PolicyTags& policytags);
-    
-    void add_route(const string& protocol, const Net& net, const Addr& nh,
-		   const string& ifname, const string& vifname,
-		   uint16_t cost, uint16_t tag, const PolicyTags& policytags);
 
-    void delete_route(const string& protocol, const Net& net);
-
-    EventLoop&	eventloop()			{ return _e; }
-    RouteDB<A>&	route_db()			{ return _rdb; }
-    XrlRouter&	xrl_router()			{ return _xr; }
-
-    void job_completed(const RedistJob<A>* job);
+    void delete_route(const Net& net);
 
 protected:
-    void run_next_job();
-
-protected:
-    EventLoop&		_e;
-    RouteDB<A>&		_rdb;
-    XrlRouter&		_xr;
-
-    RedistList		_redists;
-    RedistList		_dead_redists;
-    list<RedistJob<A>*>	_jobs;
+    RouteRedistributor<A> _rr;
 };
 
 #endif // __RIP_XRL_REDIST_MANAGER__

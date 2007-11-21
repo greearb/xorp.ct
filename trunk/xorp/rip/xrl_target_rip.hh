@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.26 2007/08/17 20:44:45 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.27 2007/11/17 04:06:48 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -297,34 +297,6 @@ public:
 					  XrlAtomList&	descriptions,
 					  XrlAtomList&	values,
 					  uint32_t&	peer_last_active);
-
-    XrlCmdError rip_0_1_redist_protocol_routes(const string&	protocol_name,
-					       const uint32_t&	cost,
-					       const uint32_t&	tag);
-
-    XrlCmdError rip_0_1_no_redist_protocol_routes(const string&	protocol_name);
-
-    XrlCmdError redist4_0_1_add_route(const IPv4Net&		net,
-				      const IPv4&		nexthop,
-				      const string&		ifname,
-				      const string&		vifname,
-				      const uint32_t&		metric,
-				      const uint32_t&		ad,
-				      const string&		cookie,
-				      const string&		protocol_origin);
-
-    XrlCmdError redist4_0_1_delete_route(const IPv4Net&		net,
-					 const IPv4&		nexthop,
-					 const string&		ifname,
-					 const string&		vifname,
-					 const uint32_t&	metric,
-					 const uint32_t&	ad,
-					 const string&		cookie,
-					 const string&		protocol_origin);
-
-    XrlCmdError redist4_0_1_starting_route_dump(const string&	cookie);
-
-    XrlCmdError redist4_0_1_finishing_route_dump(const string&	cookie );
 
     XrlCmdError socket4_user_0_1_recv_event(const string&	sockid,
 					    const string&	if_name,

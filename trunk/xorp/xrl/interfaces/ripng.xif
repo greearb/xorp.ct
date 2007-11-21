@@ -338,21 +338,4 @@ interface ripng/0.1 {
 					-> counter_descriptions:list	\
 					&  counter_values:list		\
 					&  peer_last_active:u32
-
-     /**
-      * Configure protocol route redistribution.
-      *
-      * @param protocol_name name of protocol to redistribute routes from.
-      * @param cost RIP cost metric to assign to protocol routes.
-      * @param tag RIP tag to associate with protocol routes.
-      */
-     redist_protocol_routes ? protocol_name:txt & cost:u32 & tag:u32
-
-     /**
-      * Remove protocol route redistribution.
-      *
-      * @param protocol_name name of protocol to stop redistribution
-      * of routes from.
-      */
-     no_redist_protocol_routes ? protocol_name:txt
 }

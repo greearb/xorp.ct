@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/redist.hh,v 1.9 2007/02/16 22:47:15 pavlin Exp $
+// $XORP: xorp/rip/redist.hh,v 1.10 2007/11/21 08:29:39 pavlin Exp $
 
 #ifndef __RIP_ROUTE_REDIST_HH__
 #define __RIP_ROUTE_REDIST_HH__
@@ -22,6 +22,9 @@
 
 template <typename A>
 class RouteDB;
+
+template <typename A>
+class RouteWalker;
 
 /**
  * @short Route Origination class for @ref RouteRedistributor instances.
@@ -74,34 +77,10 @@ public:
      * Constructor for RouteRedistributor
      *
      * @param route_db the route database to add and expire routes in.
-     * @param protocol name of protocol redistributor handles.
-     * @param cost cost to associated with redistributed routes.
-     * @param tag tag to be associated with redistributed routes.
      */
-    RouteRedistributor(RouteDB<A>&	route_db,
-		       const string&	protocol,
-		       uint16_t		cost,
-		       uint16_t		tag);
+    RouteRedistributor(RouteDB<A>&	route_db);
 
     ~RouteRedistributor();
-
-    /**
-     * Add a route to be redistributed.
-     *
-     * @param net network described by route.
-     * @param nexthop router capable of forwarding route.
-     * @param ifname the corresponding interface name toward the destination.
-     * @param vifname the corresponding vif name toward the destination.
-     * 
-     * @param policytags policy-tags associated with route.
-     *
-     * @return true on success, false if route could not be added to
-     *         the RouteDatabase.  Failure may occur if route already exists
-     *	       or a lower cost route exists.
-     */
-    bool add_route(const Net& net, const Addr& nexthop,
-		   const string& ifname, const string& vifname,
-		   const PolicyTags& policytags);
 
     /**
      * Add a route to be redistributed with specific cost and tag values.
@@ -137,27 +116,6 @@ public:
     /**
      * Accessor.
      *
-     * @return protocol name.
-     */
-    const string& protocol() const;
-
-    /**
-     * Accessor.
-     *
-     * @return tag routes are redistributed with.
-     */
-    uint16_t tag() const;
-
-    /**
-     * Accessor.
-     *
-     * @return cost routes are redistributed with.
-     */
-    uint16_t cost() const;
-
-    /**
-     * Accessor.
-     *
      * @return number of routes
      */
     uint32_t route_count() const;
@@ -185,9 +143,6 @@ private:
 
 protected:
     RouteDB<A>&			_route_db;
-    string			_protocol;
-    uint16_t			_cost;
-    uint16_t			_tag;
     RedistRouteOrigin<A>*	_rt_origin;
 
     RouteWalker<A>* 		_wdrawer;	// Route Withdrawl Walker

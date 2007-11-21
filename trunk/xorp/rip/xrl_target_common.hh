@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.32 2007/11/17 04:06:47 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.33 2007/11/21 08:29:40 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -270,30 +270,6 @@ public:
 					   XrlAtomList&		descriptions,
 					   XrlAtomList&		values,
 					   uint32_t&		peer_last_pkt);
-
-    XrlCmdError ripx_0_1_redist_protocol_routes(const string&	protocol,
-						const uint32_t& cost,
-						const uint32_t& tag);
-
-    XrlCmdError ripx_0_1_no_redist_protocol_routes(const string& protocol);
-
-    XrlCmdError redistx_0_1_add_route(const IPNet<A>&		net,
-				      const A&			nexthop,
-				      const string&		ifname,
-				      const string&		vifname,
-				      const uint32_t&		metric,
-				      const uint32_t&		ad,
-				      const string&		cookie,
-				      const string&		protocol_origin);
-
-    XrlCmdError redistx_0_1_delete_route(const IPNet<A>&	net,
-					 const A&		nexthop,
-					 const string&		ifname,
-					 const string&		vifname,
-					 const uint32_t&	metric,
-					 const uint32_t&	ad,
-					 const string&		cookie,
-					 const string&		protocol_origin);
 
     XrlCmdError socketx_user_0_1_recv_event(const string&	sockid,
 					    const string&	if_name,
@@ -1179,73 +1155,6 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_redist_protocol_routes(const string&	protocol,
-						       const uint32_t&	cost,
-						       const uint32_t& 	tag)
-{
-    _xrm.request_redist_for(protocol, cost, tag);
-    return XrlCmdError::OKAY();
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_no_redist_protocol_routes(const string& protocol)
-{
-    _xrm.request_no_redist_for(protocol);
-    return XrlCmdError::OKAY();
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
-					     const A&		nexthop,
-					     const string&	ifname,
-					     const string&	vifname,
-					     const uint32_t&	metric,
-					     const uint32_t&	admin_d,
-					     const string&	cookie,
-					     const string&	protocol_origin)
-{
-    UNUSED(metric);
-    UNUSED(admin_d);
-    UNUSED(protocol_origin);
-
-    //
-    // XXX: We use cookie of the protocol name to make find the relevant
-    // redist table simple.
-    //
-    _xrm.add_route(cookie, net, nexthop, ifname, vifname, PolicyTags());
-    return XrlCmdError::OKAY();
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::redistx_0_1_delete_route(const IPNet<A>&	net,
-						const A&	nexthop,
-						const string&	ifname,
-						const string&	vifname,
-						const uint32_t&	metric,
-						const uint32_t&	admin_d,
-						const string&	cookie,
-						const string&	protocol_origin)
-{
-    UNUSED(nexthop);
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(metric);
-    UNUSED(admin_d);
-    UNUSED(protocol_origin);
-
-    //
-    // XXX: We use cookie of the protocol name to make find the relevant
-    // redist table simple.
-    //
-    _xrm.delete_route(cookie, net);
-    return XrlCmdError::OKAY();
-}
-
-template <typename A>
-XrlCmdError
 XrlRipCommonTarget<A>::socketx_user_0_1_recv_event(
 					const string&		sockid,
 					const string&		if_name,
@@ -1381,11 +1290,10 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_add_routex(const IPNet<A>&	net,
 	return XrlCmdError::OKAY();
 
     //
-    // XXX: The interface and vif name are emmpty, because the policy
+    // XXX: The interface and vif name are empty, because the policy
     // mechanism doesn't support setting them (yet).
     //
-    _xrm.add_route("policy", net, nexthop, ifname, vifname, metric, 0,
-		   policytags);
+    _xrm.add_route(net, nexthop, ifname, vifname, metric, 0, policytags);
     return XrlCmdError::OKAY();
 }
 
@@ -1400,7 +1308,7 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_delete_routex(const IPNet<A>&	net,
     if (! unicast)
 	return XrlCmdError::OKAY();
 
-    _xrm.delete_route("policy", net);
+    _xrm.delete_route(net);
     return XrlCmdError::OKAY();
 }
 #endif // __RIPX_XRL_TARGET_COMMON_HH__
