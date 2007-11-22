@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.190 2007/11/07 20:02:44 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.191 2007/11/12 21:56:13 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -101,6 +101,9 @@ Release 1.5-WIP (2007/??/??)
 
   RIP/RIPng:
     - Addition of support for "show ripng" xorpsh operational commands.
+
+    - Critical RIPng-related bug fix. Previously the RIPng installed
+      routes had incorrect outgoing interface toward the destination.
 
   OSPF:
     - Bug fix related to OSPFv3 link-local scope LSAs. Previously the
