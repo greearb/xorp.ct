@@ -1010,7 +1010,6 @@ $(srcdir)/rip_base.hh $(srcdir)/rip_base.cc:				\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/rip.xif				\
-		$(INTERFACES_DIR)/redist4.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif
 $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
@@ -1018,7 +1017,6 @@ $(srcdir)/ripng_base.hh $(srcdir)/ripng_base.cc:			\
 		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/policy_redist6.xif			\
 		$(INTERFACES_DIR)/ripng.xif				\
-		$(INTERFACES_DIR)/redist6.xif				\
 		$(INTERFACES_DIR)/socket6_user.xif
 $(srcdir)/rtrmgr_base.hh $(srcdir)/rtrmgr_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
