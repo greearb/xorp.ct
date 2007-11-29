@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.12 2007/09/15 19:52:38 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.13 2007/09/27 00:33:33 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -270,6 +270,33 @@ public:
 
 private:
     bool _unreachable;
+};
+
+/**
+ * Class for setting the management state of an interface.
+ */
+class SetInterfaceManagement : public InterfaceModifier {
+public:
+    SetInterfaceManagement(IfTree&		iftree,
+			   const string&	ifname,
+			   bool			management)
+	: InterfaceModifier(iftree, ifname), _management(management) {}
+
+    bool dispatch() {
+	IfTreeInterface* fi = interface();
+	if (fi == NULL)
+	    return (false);
+	fi->set_management(_management);
+	return (true);
+    }
+
+    string str() const {
+	return c_format("SetInterfaceManagement: %s %s",
+			ifname().c_str(), bool_c_str(_management));
+    }
+
+private:
+    bool _management;
 };
 
 /**

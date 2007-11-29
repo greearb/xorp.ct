@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.19 2007/09/10 17:35:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmd_queue.cc,v 1.20 2007/09/15 00:57:05 pavlin Exp $"
 
 #include <algorithm>
 #include <iterator>
@@ -228,6 +228,9 @@ IfMgrIfAtomToCommands::convert(IfMgrCommandSinkBase& s) const
 {
     s.push(new IfMgrIfAdd(_i.name()));
     s.push(new IfMgrIfSetEnabled(_i.name(), _i.enabled()));
+    s.push(new IfMgrIfSetDiscard(_i.name(), _i.discard()));
+    s.push(new IfMgrIfSetUnreachable(_i.name(), _i.unreachable()));
+    s.push(new IfMgrIfSetManagement(_i.name(), _i.management()));
     s.push(new IfMgrIfSetMtu(_i.name(), _i.mtu()));
     s.push(new IfMgrIfSetMac(_i.name(), _i.mac()));
     s.push(new IfMgrIfSetPifIndex(_i.name(), _i.pif_index()));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.18 2007/05/04 19:57:34 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.19 2007/09/27 00:33:38 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -309,6 +309,13 @@ public:
      * @return true if this vif is an unreachable interface, otherwise false.
      */
     bool	is_unreachable()	const	{ return _is_unreachable; }
+
+    /**
+     * Test if this vif is a management interface.
+     * 
+     * @return true if this vif is a management interface, otherwise false.
+     */
+    bool	is_management()	const	{ return _is_management; }
     
     /**
      * Test if this vif is multicast capable.
@@ -382,6 +389,14 @@ public:
      * otherwise reset it.
      */
     void	set_unreachable(bool v)		{ _is_unreachable = v; }
+
+    /**
+     * Set/reset the vif as a management interface.
+     * 
+     * @param v if true, then set this vif as a management interface,
+     * otherwise reset it.
+     */
+    void	set_management(bool v)		{ _is_management = v; }
     
     /**
      * Set/reset the vif as multicast capable.
@@ -547,6 +562,7 @@ private:
     bool	_is_loopback;		// Loopback interface
     bool	_is_discard;		// Discard interface
     bool	_is_unreachable;	// Unreachable interface
+    bool	_is_management;		// Management interface
     bool	_is_multicast_capable;	// Multicast-capable interface
     bool	_is_broadcast_capable;	// Broadcast-capable interface
     bool	_is_underlying_vif_up;	// True if underlying vif is up

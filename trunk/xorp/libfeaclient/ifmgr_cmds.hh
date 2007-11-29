@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.20 2007/09/15 00:57:06 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.21 2007/09/27 00:33:37 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -143,6 +143,30 @@ public:
 
 protected:
     bool	_unreachable;
+};
+
+/**
+ * @short Command to set management condition on interface.
+ */
+class IfMgrIfSetManagement : public IfMgrIfCommandBase {
+public:
+    IfMgrIfSetManagement(const string& ifname, bool management)
+	: IfMgrIfCommandBase(ifname),
+	  _management(management)
+    {}
+
+    bool management() const			{ return _management; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    bool	_management;
 };
 
 /**

@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 #
-# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.12 2005/03/16 01:36:58 pavlin Exp $
+# $XORP: xorp/fea/xorp_fea_click_config_generator,v 1.13 2007/09/27 00:33:34 pavlin Exp $
 #
 
 #
@@ -691,6 +691,22 @@ function process_statement(statement)
 		continue;
 	    }
 
+	    if (tokens[i] == "description:") {
+		if (i == tokens_n)
+		    syntax_error("Missing value");
+		i++;
+		v = tokens[i];
+		p = iftree_interfaces_max - 1;
+		while (! is_end_of_string(v)) {
+		    if (i == tokens_n)
+			syntax_error("Missing end-of-string");
+		    i++;
+		    v = v " " tokens[i];
+		}
+		iftree_interfaces_description[p] = v;
+		continue;
+	    }
+
 	    if (tokens[i] == "discard:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
@@ -711,19 +727,13 @@ function process_statement(statement)
 		continue;
 	    }
 
-	    if (tokens[i] == "description:") {
+	    if (tokens[i] == "management:") {
 		if (i == tokens_n)
 		    syntax_error("Missing value");
 		i++;
 		v = tokens[i];
 		p = iftree_interfaces_max - 1;
-		while (! is_end_of_string(v)) {
-		    if (i == tokens_n)
-			syntax_error("Missing end-of-string");
-		    i++;
-		    v = v " " tokens[i];
-		}
-		iftree_interfaces_description[p] = v;
+		iftree_interfaces_management[p] = v;
 		continue;
 	    }
 

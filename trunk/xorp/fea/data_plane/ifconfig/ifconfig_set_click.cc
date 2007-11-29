@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.12 2007/09/27 00:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.13 2007/10/12 07:53:49 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -182,6 +182,8 @@ IfConfigSetClick::config_interface_begin(const IfTreeInterface* pulled_ifp,
 	ifp->set_discard(config_iface.discard());
     if (ifp->unreachable() != config_iface.unreachable())
 	ifp->set_unreachable(config_iface.unreachable());
+    if (ifp->management() != config_iface.management())
+	ifp->set_management(config_iface.management());
     if (mtu != 0) {
 	if (ifp->mtu() != mtu)
 	    ifp->set_mtu(mtu);
@@ -776,6 +778,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 				      bool_c_str(fi.discard()));
 	config += preamble + c_format("unreachable: %s\n",
 				      bool_c_str(fi.unreachable()));
+	config += preamble + c_format("management: %s\n",
+				      bool_c_str(fi.management()));
 	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
 	config += preamble + c_format("mtu: %u\n", XORP_UINT_CAST(fi.mtu()));
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {

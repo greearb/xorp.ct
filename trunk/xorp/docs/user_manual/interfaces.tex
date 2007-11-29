@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.13 2007/04/02 21:53:23 pavlin Exp $
+% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.14 2007/09/27 01:01:08 pavlin Exp $
 %
 
 \chapter{Network Interfaces}
@@ -78,6 +78,7 @@ interfaces \{\\
 \>\>disable: {\it bool}\\
 \>\>discard: {\it bool}\\
 \>\>unreachable: {\it bool}\\
+\>\>management: {\it bool}\\
 \>\>vif {\it text} \{\\
 \>\>\>disable: {\it bool}\\
 \>\>\>address {\it IPv4-addr} \{\\
@@ -170,6 +171,12 @@ interfaces \{\\
   the unreachable property to a physical interface. Instead, the name of
   the unreachable interface should be made-up and should not match the
   name of an interface that already exists in the system.
+\item{\tt management}: this flag enables an interface to be used as a
+  management interface. It takes the value {\stt true} or {\stt false}.
+  The default is {\stt false} (\ie the interface is not a management
+  interface).
+  An interface that is flagged as ``management'' might be used by some
+  of the protocols for protocol-specific purpose.
 \item{\tt vif}: this configures a vif on the corresponding interface.
   In some cases this may cause the vif to be created; an example
   might be an Ethernet VLAN.  In other cases this merely denotes the

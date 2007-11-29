@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.23 2007/09/15 01:54:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.24 2007/10/13 01:49:59 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -327,6 +327,24 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		fprintf(stdout, "ENABLED");
 		prev = true;
 	    }
+	    if (ifmgr_iface.discard()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "DISCARD");
+		prev = true;
+	    }
+	    if (ifmgr_iface.unreachable()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "UNREACHABLE");
+		prev = true;
+	    }
+	    if (ifmgr_iface.management()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "MANAGEMENT");
+		prev = true;
+	    }
 	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu());
 
 	    //
@@ -363,6 +381,24 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		if (prev)
 		    fprintf(stdout, ",");
 		fprintf(stdout, "ENABLED");
+		prev = true;
+	    }
+	    if (ifmgr_iface.discard()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "DISCARD");
+		prev = true;
+	    }
+	    if (ifmgr_iface.unreachable()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "UNREACHABLE");
+		prev = true;
+	    }
+	    if (ifmgr_iface.management()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "MANAGEMENT");
 		prev = true;
 	    }
 	    if (ifmgr_vif.broadcast_capable()) {

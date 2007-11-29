@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.52 2007/09/25 23:00:28 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.53 2007/09/27 00:33:34 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -411,6 +411,9 @@ public:
     bool unreachable() const		{ return _unreachable; }
     void set_unreachable(bool v)	{ _unreachable = v; mark(CHANGED); }
 
+    bool management() const		{ return _management; }
+    void set_management(bool v)		{ _management = v; mark(CHANGED); }
+
     /**
      * Get the flipped flag.
      *
@@ -536,6 +539,11 @@ public:
      * Copy state of internal variables from another IfTreeInterface.
      */
     void copy_state(const IfTreeInterface& o) {
+	//
+	// XXX: Explicitly don't consider the discard, unreachable and
+	// management flags, because they are always set from user's
+	// configuration.
+	//
 	set_pif_index(o.pif_index());
 	set_enabled(o.enabled());
 	set_mtu(o.mtu());
@@ -552,6 +560,11 @@ public:
      * @return true if the interface-specific internal state is same.
      */
     bool is_same_state(const IfTreeInterface& o) {
+	//
+	// XXX: Explicitly don't consider the discard, unreachable and
+	// management flags, because they are always set from user's
+	// configuration.
+	//
 	return ((pif_index() == o.pif_index())
 		&& (enabled() == o.enabled())
 		&& (mtu() == o.mtu())
@@ -571,6 +584,7 @@ protected:
     bool 	_enabled;
     bool	_discard;
     bool	_unreachable;
+    bool	_management;
     uint32_t 	_mtu;
     Mac 	_mac;
     bool	_no_carrier;
@@ -783,8 +797,13 @@ protected:
 class IfTreeAddr4 : public IfTreeItem {
 public:
     IfTreeAddr4(const IPv4& addr)
-	: IfTreeItem(), _addr(addr), _enabled(false), _broadcast(false),
-	  _loopback(false), _point_to_point(false), _multicast(false),
+	: IfTreeItem(),
+	  _addr(addr),
+	  _enabled(false),
+	  _broadcast(false),
+	  _loopback(false),
+	  _point_to_point(false),
+	  _multicast(false),
 	  _prefix_len(0)
     {}
 
@@ -899,8 +918,12 @@ class IfTreeAddr6 : public IfTreeItem
 {
 public:
     IfTreeAddr6(const IPv6& addr)
-	: IfTreeItem(), _addr(addr), _enabled(false),
-	  _loopback(false), _point_to_point(false), _multicast(false),
+	: IfTreeItem(),
+	  _addr(addr),
+	  _enabled(false),
+	  _loopback(false),
+	  _point_to_point(false),
+	  _multicast(false),
 	  _prefix_len(0)
     {}
 

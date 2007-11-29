@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.191 2007/11/12 21:56:13 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.192 2007/11/22 06:41:59 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -31,6 +31,9 @@ Release 1.5-WIP (2007/??/??)
       Currently, they exist only on Linux (among all systems supported by
       XORP).
 
+    - The "DISCARD" network interface flag is printed as appropriate
+      when displaying the list of interfaces in the CLI.
+
     - Addition of new FEA configuration statement to support
       "unreachable" interfaces. Such interfaces are similar to "discard"
       interfaces, except that instead of silently throwing away packets,
@@ -45,6 +48,24 @@ Release 1.5-WIP (2007/??/??)
       }
 
       The default value for the "unreachable" statement is false.
+
+    - Addition of new FEA configuration statement to flag an interface
+      for "management" purpose. An interface that is flagged as
+      "management" might be used in the future by some of the protocols
+      for protocol-specific purpose.
+
+      interfaces {
+          interface fxp0 {
+              management: true
+              vif fxp0 {
+                  address 10.10.10.10 {
+                      prefix-length: 24
+                  }
+              }
+          }
+      }
+
+      The default value for the "management" statement is false.
 
   LIBXORP:
     - The local system-independent xorp_random() implemenation is used

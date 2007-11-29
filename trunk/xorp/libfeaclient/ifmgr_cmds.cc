@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.25 2007/09/15 00:57:05 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.26 2007/09/27 00:33:37 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -133,9 +133,9 @@ IfMgrIfAdd::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfAdd::forward(XrlSender&		  sender,
-		    const string&	  xrl_target,
-		    const IfMgrXrlSendCB& xcb) const
+IfMgrIfAdd::forward(XrlSender&			sender,
+		    const string&		xrl_target,
+		    const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -200,9 +200,9 @@ IfMgrIfSetEnabled::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetEnabled::forward(XrlSender&		 sender,
-			   const string&	 xrl_target,
-			   const IfMgrXrlSendCB& xcb) const
+IfMgrIfSetEnabled::forward(XrlSender&			sender,
+			   const string&		xrl_target,
+			   const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -235,9 +235,9 @@ IfMgrIfSetDiscard::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetDiscard::forward(XrlSender&		 sender,
-			   const string&	 xrl_target,
-			   const IfMgrXrlSendCB& xcb) const
+IfMgrIfSetDiscard::forward(XrlSender&			sender,
+			   const string&		xrl_target,
+			   const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -270,9 +270,9 @@ IfMgrIfSetUnreachable::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetUnreachable::forward(XrlSender&	sender,
-			       const string&	 xrl_target,
-			       const IfMgrXrlSendCB& xcb) const
+IfMgrIfSetUnreachable::forward(XrlSender&		sender,
+			       const string&		xrl_target,
+			       const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -284,6 +284,41 @@ IfMgrIfSetUnreachable::str() const
 {
     return if_str_begin(this, "SetUnreachable")
 	+ "\", " + bool_c_str(unreachable()) + if_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrIfSetManagement
+
+bool
+IfMgrIfSetManagement::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_management(management());
+    return true;
+}
+
+bool
+IfMgrIfSetManagement::forward(XrlSender&		sender,
+			      const string&		xrl_target,
+			      const IfMgrXrlSendCB&	xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_interface_set_management(xt, ifname(), management(), xcb);
+}
+
+string
+IfMgrIfSetManagement::str() const
+{
+    return if_str_begin(this, "SetManagement")
+	+ "\", " + bool_c_str(management()) + if_str_end();
 }
 
 // ----------------------------------------------------------------------------
@@ -305,9 +340,9 @@ IfMgrIfSetMtu::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetMtu::forward(XrlSender&	     sender,
-		       const string&	     xrl_target,
-		       const IfMgrXrlSendCB& xcb) const
+IfMgrIfSetMtu::forward(XrlSender&		sender,
+		       const string&		xrl_target,
+		       const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -409,9 +444,9 @@ IfMgrIfSetNoCarrier::execute(IfMgrIfTree& t) const
 }
 
 bool
-IfMgrIfSetNoCarrier::forward(XrlSender&		sender,
-			     const string&	xrl_target,
-			     const IfMgrXrlSendCB& xcb) const
+IfMgrIfSetNoCarrier::forward(XrlSender&			sender,
+			     const string&		xrl_target,
+			     const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -455,9 +490,9 @@ IfMgrVifAdd::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifAdd::forward(XrlSender&		   sender,
-		     const string&	   xrl_target,
-		     const IfMgrXrlSendCB& xscb) const
+IfMgrVifAdd::forward(XrlSender&			sender,
+		     const string&		xrl_target,
+		     const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -522,9 +557,9 @@ IfMgrVifSetEnabled::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetEnabled::forward(XrlSender&		  sender,
-			    const string&	  xrl_target,
-			    const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetEnabled::forward(XrlSender&			sender,
+			    const string&		xrl_target,
+			    const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -553,9 +588,9 @@ IfMgrVifSetMulticastCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetMulticastCapable::forward(XrlSender&		   sender,
-				     const string&	   xrl_target,
-				     const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetMulticastCapable::forward(XrlSender&			sender,
+				     const string&		xrl_target,
+				     const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -585,9 +620,9 @@ IfMgrVifSetBroadcastCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetBroadcastCapable::forward(XrlSender&		   sender,
-				     const string&	   xrl_target,
-				     const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetBroadcastCapable::forward(XrlSender&			sender,
+				     const string&		xrl_target,
+				     const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -617,9 +652,9 @@ IfMgrVifSetP2PCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetP2PCapable::forward(XrlSender&	     sender,
-			       const string&	     xrl_target,
-			       const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetP2PCapable::forward(XrlSender&		sender,
+			       const string&		xrl_target,
+			       const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -649,9 +684,9 @@ IfMgrVifSetLoopbackCapable::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetLoopbackCapable::forward(XrlSender&		  sender,
-				    const string&	  xrl_target,
-				    const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetLoopbackCapable::forward(XrlSender&			sender,
+				    const string&		xrl_target,
+				    const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -713,9 +748,9 @@ IfMgrVifSetPifIndex::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetPifIndex::forward(XrlSender&		   sender,
-			     const string&	   xrl_target,
-			     const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetPifIndex::forward(XrlSender&			sender,
+			     const string&		xrl_target,
+			     const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -745,9 +780,9 @@ IfMgrVifSetVifIndex::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrVifSetVifIndex::forward(XrlSender&		   sender,
-			     const string&	   xrl_target,
-			     const IfMgrXrlSendCB& xscb) const
+IfMgrVifSetVifIndex::forward(XrlSender&			sender,
+			     const string&		xrl_target,
+			     const IfMgrXrlSendCB&	xscb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -848,9 +883,9 @@ IfMgrIPv4Add::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4Add::forward(XrlSender&	    sender,
-		      const string&	    xrl_target,
-		      const IfMgrXrlSendCB& xcb) const
+IfMgrIPv4Add::forward(XrlSender&		sender,
+		      const string&		xrl_target,
+		      const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -913,9 +948,9 @@ IfMgrIPv4SetPrefix::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetPrefix::forward(XrlSender&		  sender,
-			    const string&	  xrl_target,
-			    const IfMgrXrlSendCB& xcb) const
+IfMgrIPv4SetPrefix::forward(XrlSender&			sender,
+			    const string&		xrl_target,
+			    const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();
@@ -945,9 +980,9 @@ IfMgrIPv4SetEnabled::execute(IfMgrIfTree& tree) const
 }
 
 bool
-IfMgrIPv4SetEnabled::forward(XrlSender&		   sender,
-			     const string&	   xrl_target,
-			     const IfMgrXrlSendCB& xcb) const
+IfMgrIPv4SetEnabled::forward(XrlSender&			sender,
+			     const string&		xrl_target,
+			     const IfMgrXrlSendCB&	xcb) const
 {
     XrlFeaIfmgrMirrorV0p1Client c(&sender);
     const char* xt = xrl_target.c_str();

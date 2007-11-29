@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.48 2007/10/12 07:53:54 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.49 2007/10/13 01:50:06 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -362,8 +362,9 @@ VifManager::updates_made()
 
 	    //
 	    // Update or set the vif flags
-	    // XXX: discard and unreachable properties need to be inherited
-	    // from the parent interface, once it has been marshaled.
+	    // XXX: Other properties (discard, unreachable, management)
+	    // need to be inherited from the parent interface, once it has
+	    // been marshaled.
 	    //
 	    bool is_up = ifmgr_iface.enabled() && ifmgr_vif.enabled();
 	    is_up &= (! ifmgr_iface.no_carrier());	// XXX: the link state

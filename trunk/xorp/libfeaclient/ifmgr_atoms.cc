@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.23 2007/09/10 17:35:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.24 2007/09/15 00:57:05 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -395,6 +395,9 @@ IfMgrIfAtom::operator==(const IfMgrIfAtom& o) const
     return (
 	    name()			== o.name()			&&
 	    enabled()			== o.enabled()			&&
+	    discard()			== o.discard()			&&
+	    unreachable()		== o.unreachable()		&&
+	    management()		== o.management()		&&
 	    mtu()			== o.mtu()			&&
 	    mac()			== o.mac()			&&
 	    pif_index()			== o.pif_index()		&&

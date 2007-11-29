@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser.hh,v 1.19 2007/02/16 22:47:07 pavlin Exp $
+// $XORP: xorp/rib/parser.hh,v 1.20 2007/09/27 00:33:38 pavlin Exp $
 
 #ifndef __RIB_PARSER_HH__
 #define __RIB_PARSER_HH__
@@ -388,6 +388,22 @@ class UnreachableVifCommand : public Command {
 public:
     UnreachableVifCommand() : Command(
 	"vif Unreachable ~String ~IPv4 ~Uint32", 3) {
+	bind_string(0, _ifname);
+	bind_ipv4(1, _addr);
+	bind_uint32(2, _prefix_len);
+    }
+    virtual int execute() = 0;
+
+protected:
+    string	_ifname;
+    IPv4	_addr;
+    uint32_t	_prefix_len;
+};
+
+class ManagementVifCommand : public Command {
+public:
+    ManagementVifCommand() : Command(
+	"vif Management ~String ~IPv4 ~Uint32", 3) {
 	bind_string(0, _ifname);
 	bind_ipv4(1, _addr);
 	bind_uint32(2, _prefix_len);

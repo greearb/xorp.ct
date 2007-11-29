@@ -9,6 +9,7 @@ interface fea_ifmgr_mirror/0.1 {
 	interface_set_enabled ? ifname:txt & enabled:bool
 	interface_set_discard ? ifname:txt & discard:bool
 	interface_set_unreachable ? ifname:txt & unreachable:bool
+	interface_set_management ? ifname:txt & management:bool
 	interface_set_mtu ? ifname:txt & mtu:u32
 	interface_set_mac ? ifname:txt & mac:mac
 	interface_set_pif_index ? ifname:txt & pif_index:u32

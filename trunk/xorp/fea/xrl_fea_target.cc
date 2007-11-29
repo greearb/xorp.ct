@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.32 2007/09/27 00:33:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.33 2007/10/12 07:53:46 pavlin Exp $"
 
 
 //
@@ -958,6 +958,27 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_unreachable(
 }
 
 XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_interface_management(
+    // Input values,
+    const string&	ifname,
+    // Output values,
+    bool&		management)
+{
+    const IfTreeInterface* ifp = NULL;
+    string error_msg;
+
+    ifp = ifconfig().local_config().find_interface(ifname);
+    if (ifp == NULL) {
+	error_msg = c_format("Interface %s not found", ifname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    management = ifp->management();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_mac(
     // Input values,
     const string& ifname,
@@ -1525,6 +1546,27 @@ XrlFeaTarget::ifmgr_0_1_set_interface_unreachable(
     if (ifconfig().add_transaction_operation(
 	    tid,
 	    new SetInterfaceUnreachable(iftree, ifname, unreachable),
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_interface_management(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname,
+    const bool&		management)
+{
+    IfTree& iftree = ifconfig().local_config();
+    string error_msg;
+
+    if (ifconfig().add_transaction_operation(
+	    tid,
+	    new SetInterfaceManagement(iftree, ifname, management),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

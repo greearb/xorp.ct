@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.50 2007/09/25 23:00:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.51 2007/09/27 00:33:33 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -888,9 +888,17 @@ IfTree::track_live_config_state(const IfTree& other)
 /* IfTreeInterface code */
 
 IfTreeInterface::IfTreeInterface(const string& ifname)
-    : IfTreeItem(), _ifname(ifname), _pif_index(0),
-      _enabled(false), _discard(false), _unreachable(false), _mtu(0),
-      _no_carrier(false), _flipped(false), _interface_flags(0)
+    : IfTreeItem(),
+      _ifname(ifname),
+      _pif_index(0),
+      _enabled(false),
+      _discard(false),
+      _unreachable(false),
+      _management(false),
+      _mtu(0),
+      _no_carrier(false),
+      _flipped(false),
+      _interface_flags(0)
 {}
 
 int
@@ -1035,11 +1043,17 @@ IfTreeInterface::finalize_state()
 string
 IfTreeInterface::str() const
 {
-    return c_format("Interface %s { enabled := %s } "
+    return c_format("Interface %s { pif_index = %u } { enabled := %s } "
+		    "{ discard := %s } { unreachable := %s } "
+		    "{ management = %s } "
 		    "{ mtu := %u } { mac := %s } { no_carrier = %s } "
 		    "{ flipped := %s } { flags := %u }",
 		    _ifname.c_str(),
+		    XORP_UINT_CAST(_pif_index),
 		    bool_c_str(_enabled),
+		    bool_c_str(_discard),
+		    bool_c_str(_unreachable),
+		    bool_c_str(_management),
 		    XORP_UINT_CAST(_mtu),
 		    _mac.str().c_str(),
 		    bool_c_str(_no_carrier),
@@ -1053,11 +1067,20 @@ IfTreeInterface::str() const
 /* IfTreeVif code */
 
 IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
-    : IfTreeItem(), _ifname(ifname), _vifname(vifname),
-      _pif_index(0), _vif_index(Vif::VIF_INDEX_INVALID), _enabled(false),
-      _broadcast(false), _loopback(false), _point_to_point(false),
-      _multicast(false), _pim_register(false), _vif_flags(0),
-      _is_vlan(false), _vlan_id(0)
+    : IfTreeItem(),
+      _ifname(ifname),
+      _vifname(vifname),
+      _pif_index(0),
+      _vif_index(Vif::VIF_INDEX_INVALID),
+      _enabled(false),
+      _broadcast(false),
+      _loopback(false),
+      _point_to_point(false),
+      _multicast(false),
+      _pim_register(false),
+      _vif_flags(0),
+      _is_vlan(false),
+      _vlan_id(0)
 {}
 
 int
@@ -1215,13 +1238,14 @@ IfTreeVif::str() const
     vif_index_str += vlan_str;
     vif_index_str += string(" ");	// XXX: unconditional extra space
 
-    return c_format("VIF %s { enabled := %s } { broadcast := %s } "
-		    "{ loopback := %s } { point_to_point := %s } "
-		    "{ multicast := %s } { flags := %u }",
-		    _vifname.c_str(), bool_c_str(_enabled),
-		    bool_c_str(_broadcast), bool_c_str(_loopback),
-		    bool_c_str(_point_to_point), bool_c_str(_multicast),
-		    XORP_UINT_CAST(_vif_flags))
+    return c_format("VIF %s { pif_index = %u } { enabled := %s } "
+		    "{ broadcast := %s } { loopback := %s } "
+		    "{ point_to_point := %s } { multicast := %s } "
+		    "{ flags := %u }",
+		    _vifname.c_str(), XORP_UINT_CAST(_pif_index),
+		    bool_c_str(_enabled), bool_c_str(_broadcast),
+		    bool_c_str(_loopback), bool_c_str(_point_to_point),
+		    bool_c_str(_multicast), XORP_UINT_CAST(_vif_flags))
 	+ vif_index_str + IfTreeItem::str();
 }
 

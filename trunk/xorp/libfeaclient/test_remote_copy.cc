@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.20 2007/09/10 17:35:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.21 2007/09/15 00:57:06 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -117,6 +117,18 @@ populate_iftree(IfMgrIfTree& t)
     }
     if (IfMgrIfSetEnabled("if0", true).execute(t) == false) {
 	verbose_log("Failed to enable interface\n");
+	return 1;
+    }
+    if (IfMgrIfSetDiscard("if0", true).execute(t) == false) {
+	verbose_log("Failed to set discard\n");
+	return 1;
+    }
+    if (IfMgrIfSetUnreachable("if0", true).execute(t) == false) {
+	verbose_log("Failed to set unreachable\n");
+	return 1;
+    }
+    if (IfMgrIfSetManagement("if0", true).execute(t) == false) {
+	verbose_log("Failed to set management\n");
 	return 1;
     }
     if (IfMgrIfSetMtu("if0", 9000).execute(t) == false) {

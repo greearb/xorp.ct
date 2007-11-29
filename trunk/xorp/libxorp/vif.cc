@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.22 2007/08/13 23:29:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.23 2007/09/27 00:33:38 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -90,6 +90,7 @@ Vif::Vif(const string& vifname, const string& ifname)
     set_loopback(false);
     set_discard(false);
     set_unreachable(false);
+    set_management(false);
     set_multicast_capable(false);
     set_broadcast_capable(false);
     set_underlying_vif_up(false);
@@ -111,6 +112,7 @@ Vif::Vif(const Vif& vif)
     set_loopback(vif.is_loopback());
     set_discard(vif.is_discard());
     set_unreachable(vif.is_unreachable());
+    set_management(vif.is_management());
     set_multicast_capable(vif.is_multicast_capable());
     set_broadcast_capable(vif.is_broadcast_capable());
     set_underlying_vif_up(vif.is_underlying_vif_up());
@@ -167,6 +169,8 @@ Vif::str() const
 	r += " DISCARD";
     if (is_unreachable())
 	r += " UNREACHABLE";
+    if (is_management())
+	r += " MANAGEMENT";
     if (is_underlying_vif_up())
 	r += " UNDERLYING_VIF_UP";
     r += c_format(" MTU: %u", XORP_UINT_CAST(mtu()));
@@ -186,6 +190,7 @@ Vif::operator==(const Vif& other) const
 	    && (is_loopback() == other.is_loopback())
 	    && (is_discard() == other.is_discard())
 	    && (is_unreachable() == other.is_unreachable())
+	    && (is_management() == other.is_management())
 	    && (is_multicast_capable() == other.is_multicast_capable())
 	    && (is_broadcast_capable() == other.is_broadcast_capable())
 	    && (is_underlying_vif_up() == other.is_underlying_vif_up())
