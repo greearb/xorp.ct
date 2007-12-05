@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.300 2007/10/23 08:59:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.301 2007/10/24 06:55:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1980,6 +1980,7 @@ Peer<A>::event_interface_down()
 	    n++;
 	}
     }
+    _scheduled_events.clear();
 }
 
 template <typename A>
