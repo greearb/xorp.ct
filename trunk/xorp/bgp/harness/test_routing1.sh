@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.23 2006/04/13 17:45:40 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.24 2006/08/16 22:10:14 atanu Exp $
 #
 
 #
@@ -66,7 +66,7 @@ PEER1_AS_IPV6=64004
 PEER2_AS_IPV6=64005
 PEER3_AS_IPV6=$AS
 
-HOLDTIME=20
+HOLDTIME=40
 
 # Next Hops
 #NH1=10.10.10.10
