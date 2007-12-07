@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.57 2007/05/12 23:26:23 zec Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.58 2007/06/08 01:59:37 atanu Exp $
 #
 
 #
@@ -166,7 +166,7 @@ bgp_peer_unchanged()
 	status $1
 
 	a=$(status $1)
-	sleep 2
+	sleep 10
 	b=$(status $1)
 	if [ "$a" = "$b" ]
 	then
