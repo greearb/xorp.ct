@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.58 2007/06/08 01:59:37 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.59 2007/12/07 06:51:42 atanu Exp $
 #
 
 #
@@ -349,20 +349,7 @@ test4()
     # Bring up a second peering and wait for all the updates to arrive
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
-    while :
-    do
-	# debug
-	status peer1
-	status peer2
-
-	a=$(status peer1)
-	sleep 2
-	b=$(status peer1)
-	if [ "$a" = "$b" ]
-	then
-	    break
-	fi
-    done
+    bgp_peer_unchanged peer1
 
     # Make sure that the peer1 connection is still established
     coord peer1 assert established
@@ -397,20 +384,7 @@ test5()
     # Bring up a second peering and wait for all the updates to arrive
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
-    while :
-    do
-	# debug
-	status peer1
-	status peer2
-
-	a=$(status peer1)
-	sleep 2
-	b=$(status peer1)
-	if [ "$a" = "$b" ]
-	then
-	    break
-	fi
-    done
+    bgp_peer_unchanged peer1
 
     coord reset
 
@@ -469,20 +443,7 @@ test6()
     # Bring up a second peering and wait for all the updates to arrive
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 
-    while :
-    do
-	# debug
-	status peer1
-	status peer2
-
-	a=$(status peer1)
-	sleep 2
-	b=$(status peer1)
-	if [ "$a" = "$b" ]
-	then
-	    break
-	fi
-    done
+    bgp_peer_unchanged peer1
 
     status peer1
     status peer2
