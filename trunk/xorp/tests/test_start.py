@@ -12,9 +12,9 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_start.py,v 1.3 2007/02/16 22:47:31 pavlin Exp $
+# $XORP: xorp/tests/test_start.py,v 1.4 2007/07/06 00:02:44 atanu Exp $
 
-import threading,time,sys
+import getopt,threading,time,sys
 from test_process import Process
 from test_builddir import builddir
 
@@ -23,9 +23,10 @@ class Start:
     Start the router manager and the test harness processes.
     """
 
-    def __init__(self, builddir=".."):
+    def __init__(self, builddir="..", verbose = False):
         self.builddir = builddir
         self.plist = []
+        self.verbose = verbose
         
     def start(self):
         """
@@ -40,7 +41,10 @@ class Start:
         coord = self.builddir + "bgp/harness/coord"
         self.__start_process(coord)
 
-        peer = self.builddir + "bgp/harness/test_peer -t -v"
+        if self.verbose:
+            peer = self.builddir + "bgp/harness/test_peer -t -v"
+        else:
+            peer = self.builddir + "bgp/harness/test_peer"
         for i in ["peer1", "peer2", "peer3"]:
             self.__start_process(peer + " -s " + i)
 
@@ -83,7 +87,29 @@ class Start:
             i.terminate()
         
 if __name__ == '__main__':
-    s = Start(builddir=builddir())
+    def usage():
+        us = "usage: %s [-h|--help] [-v|--verbose]"
+        print us % sys.argv[0]
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hv", \
+                                   ["help", \
+                                    "verbose", \
+                                    ])
+    except getopt.GetoptError:
+        usage()
+        sys.exit(-1)
+
+    verbose = False
+    
+    for o, a in opts:
+	if o in ("-h", "--help"):
+	    usage()
+	    sys.exit()
+        if o in ("-v", "--verbose"):
+            verbose = True
+    
+    s = Start(builddir=builddir(), verbose=verbose)
     s.start()
     if not s.check():
         print "Processes did not start"
