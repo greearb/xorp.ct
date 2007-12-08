@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_main.py,v 1.2 2006/12/01 02:10:53 atanu Exp $
+# $XORP: xorp/tests/test_main.py,v 1.3 2007/02/16 22:47:30 pavlin Exp $
 
 # A common main to be used by all test programs plus the entry point into
 # running the tests.
@@ -21,6 +21,7 @@ import getopt
 import sys
 import os
 import time
+import re
 from test_builddir import builddir
 from test_call_xrl import call_xrl
 
@@ -66,7 +67,7 @@ def delay(seconds):
         raise Exception, 'Delay was too short should have been %s was %s' % \
               (seconds, slept)
 
-def coord(command):
+def coord(command, noblock=False):
     """
     Send a command to the coordinator
     """
@@ -74,6 +75,9 @@ def coord(command):
     print command
     status, message = call_xrl(builddir(1), "finder://coord/coord/0.1/command?command:txt=%s" % command)
     if 0 != status:
+        if noblock:
+            print message
+            return
         raise Exception, message
 
     # Wait up to five seconds for this command to complete
@@ -94,6 +98,18 @@ def pending():
         return False
     else:
         return True
+
+def status(peer):
+    """
+    Get the status of a test peer.
+    """
+
+    status, message = call_xrl(builddir(1), "finder://coord/coord/0.1/status?peer:txt=" + peer)
+
+    message = re.sub('^status:txt=', '', message)
+    message = re.sub('\+', ' ', message)
+
+    return message
 
 def run_test(test, single, configure, TESTS, config_module, test_module):
     """
