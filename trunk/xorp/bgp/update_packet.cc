@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.43 2007/02/16 22:45:22 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.44 2007/12/10 23:26:30 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -100,7 +100,9 @@ UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
     XLOG_ASSERT(len != 0);
     debug_msg("UpdatePacket::encode: len=%u\n", (uint32_t)len);
 
+#if 0
     list <PathAttribute*>::const_iterator pai;
+#endif
     size_t i, pa_len = 0;
     size_t wr_len = wr_list().wire_size();
     size_t nlri_len = nlri_list().wire_size();
