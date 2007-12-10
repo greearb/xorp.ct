@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.54 2007/03/19 01:00:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.55 2007/03/19 05:47:07 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -135,8 +135,17 @@ packet_bad_length(TestInfo& info, OspfTypes::Version version,
 	DOUT(info) << "Rejected short frame (good): " << e.str() << endl;
     }
 
+    // If we are going to feed in an oversize frame make sure that the
+    // space is actually allocated. OpenBSD actually notices if the
+    // space is not allocated.
+    const int oversize = 64;
+    vector<uint8_t> large_pkt;
+    large_pkt.resize(pkt.size() + oversize);
+    ptr = &large_pkt[0];
+    memcpy(ptr, &pkt[0], pkt.size());
+
     // Make the frame longer.
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < oversize; i++) {
 	try {
 	    packet = packet_decoder.decode(ptr, pkt.size() + i);
 	    DOUT(info) << "Accepted large frame (good)\n";
