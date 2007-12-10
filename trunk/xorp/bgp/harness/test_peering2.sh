@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.59 2007/12/07 06:51:42 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.60 2007/12/07 20:50:16 atanu Exp $
 #
 
 #
@@ -48,6 +48,7 @@ HOST=127.0.0.1
 LOCALHOST=$HOST
 ID=192.150.187.78
 AS=65008
+USE4BYTEAS=false
 
 # IBGP
 PORT1=10001
@@ -76,7 +77,7 @@ EXT=${LOGNAME:-unknown}
 
 configure_bgp()
 {
-    local_config $AS $ID
+    local_config $AS $ID $USE4BYTEAS
 
     # Don't try and talk to the rib.
     register_rib ""

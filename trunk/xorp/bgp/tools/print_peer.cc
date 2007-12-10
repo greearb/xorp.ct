@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.18 2006/03/16 00:03:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/tools/print_peer.cc,v 1.19 2007/02/16 22:45:27 pavlin Exp $"
 
 #include "print_peer.hh"
+#include "libxorp/asnum.hh"
 
 PrintPeers::PrintPeers(bool verbose, int interval) 
-    : XrlBgpV0p2Client(&_xrl_rtr), 
+    : XrlBgpV0p3Client(&_xrl_rtr), 
     _xrl_rtr(_eventloop, "print_peers"), _verbose(verbose)
 {
     _prev_no_bgp = false;
@@ -158,7 +159,7 @@ PrintPeers::print_peer_verbose(const string& local_ip,
     send_get_peer_negotiated_version("bgp", local_ip, local_port, peer_ip, 
 				     peer_port, cb3);
 
-    XorpCallback2<void, const XrlError&, const uint32_t*>::RefPtr cb4;
+    XorpCallback2<void, const XrlError&, const string*>::RefPtr cb4;
     cb4 = callback(this, &PrintPeers::get_peer_as_done);
     send_get_peer_as("bgp", local_ip, local_port, peer_ip, peer_port, cb4);
 
@@ -235,7 +236,7 @@ PrintPeers::get_peer_negotiated_version_done(const XrlError& e,
 
 void 
 PrintPeers::get_peer_as_done(const XrlError& e, 
-			     const uint32_t* peer_as)
+			     const string* peer_as)
 {
     if (e != XrlError::OKAY()) {
 	//printf("Failed to retrieve verbose data\n");
@@ -243,7 +244,8 @@ PrintPeers::get_peer_as_done(const XrlError& e,
 	    get_peer_list_next();
 	return;
     }
-    _peer_as = *peer_as;
+    AsNum asn(*peer_as);
+    _peer_as = asn.as4();
     _received++;
     if (_received == 7)
 	do_verbose_peer_print();

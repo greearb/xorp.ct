@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.13 2006/10/12 01:24:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.14 2007/02/16 22:45:25 pavlin Exp $"
 
 /*
 ** BGP Pretty Print
@@ -28,7 +28,7 @@
 #include "bgppp.hh"
 
 string
-bgppp(const uint8_t *buf, const size_t len)
+bgppp(const uint8_t *buf, const size_t len, const BGPPeerData *peerdata)
 {
     string result;
     uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
@@ -46,7 +46,7 @@ bgppp(const uint8_t *buf, const size_t len)
 	}
 	    break;
 	case MESSAGETYPEUPDATE: {
-	    UpdatePacket pac(buf, len);
+	    UpdatePacket pac(buf, len, peerdata);
 	    result = pac.str().c_str();
 	}
 	    break;

@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+ // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2007 International Computer Science Institute
@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.86 2007/04/05 07:43:19 zec Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.87 2007/07/03 20:36:13 atanu Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+//#define DEBUG_LOGGING
+//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -32,6 +32,7 @@
 #include <netinet/in.h>
 #endif
 
+#include "peer_data.hh"
 #include "path_attribute.hh"
 #include "packet.hh"
 
@@ -70,7 +71,6 @@ inline static void dump_bytes(const uint8_t*, uint8_t) {}
 OriginAttribute::OriginAttribute(OriginType t)
 	: PathAttribute(Transitive, ORIGIN), _origin(t)
 {
-    encode();
 }
 
 PathAttribute *
@@ -83,15 +83,17 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
 {
-    if (length(d) != 1)
+    if (length(d) != 1) {
 	xorp_throw(CorruptMessage,
 		   c_format("OriginAttribute bad length %u",
 			    XORP_UINT_CAST(length(d))),
 		   UPDATEMSGERR, ATTRLEN);
-    if (!well_known() || !transitive())
+    }
+    if (!well_known() || !transitive()) {
 	xorp_throw(CorruptMessage,
 		   c_format("Bad Flags in Origin attribute %#x",flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+    }
 
     const uint8_t* data = payload(d);	// skip header.
 
@@ -107,14 +109,20 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
 		   c_format("Unknown Origin Type %d", data[0]),
 		   UPDATEMSGERR, INVALORGATTR, d, total_tlv_length(d));
     }
-    encode();
 }
 
-void
-OriginAttribute::encode()
+bool
+OriginAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
+const
 {
-    uint8_t *d = set_header(1);
+    UNUSED(peerdata);
+    debug_msg("OriginAttribute::encode\n");
+    // ensure there's enough space
+    if (wire_size < 4) 
+	return false; 
+    uint8_t *d = set_header(buf, 1, wire_size);
     d[0] = origin();
+    return true;
 }
 
 string
@@ -141,11 +149,10 @@ OriginAttribute::str() const
  * ASPathAttribute
  */
 
-ASPathAttribute::ASPathAttribute(const AsPath& p)
+ASPathAttribute::ASPathAttribute(const ASPath& p)
 	: PathAttribute(Transitive, AS_PATH)
 {
-    _as_path = new AsPath(p);
-    encode();
+    _as_path = new ASPath(p);
 }
 
 PathAttribute *
@@ -154,7 +161,7 @@ ASPathAttribute::clone() const
     return new ASPathAttribute(as_path());
 }
 
-ASPathAttribute::ASPathAttribute(const uint8_t* d)
+ASPathAttribute::ASPathAttribute(const uint8_t* d, bool use_4byte_asnums)
 	throw(CorruptMessage)
 	: PathAttribute(d)
 {
@@ -163,19 +170,109 @@ ASPathAttribute::ASPathAttribute(const uint8_t* d)
 		   c_format("Bad Flags in AS Path attribute %#x", flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 
-    _as_path = new AsPath(payload(d), length(d));
-    encode();
+    if (use_4byte_asnums)
+	_as_path = new AS4Path(payload(d), length(d));
+    else
+	_as_path = new ASPath(payload(d), length(d));
 }
 
-void
-ASPathAttribute::encode()
-{
-    debug_msg("ASPathAttribute encode()\n");
-    size_t l = as_path().wire_size();
 
-    uint8_t *d = set_header(l);	// allocate buffer and skip header
-    as_path().encode(l, d);	// encode the payload in the buffer
-    assert(l == _size);		// a posteriori check
+/**
+ * see note in aspath.hh on using 4-byte AS numbers
+ */
+bool
+ASPathAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
+const
+{
+    debug_msg("ASPathAttribute encode(peerdata=%p)\n", peerdata);
+    bool enc_4byte_asnums = false;
+    if (peerdata == NULL) {
+	/* when we're hashing the attributes, we don't know the peer.
+	   Use the most general form, which is 4-byte ASnums */
+	enc_4byte_asnums = true;
+    } else if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+	// both us and the peer use 4-byte AS numbers, so encode using
+	// 4-byte ASnums.
+	enc_4byte_asnums = true;
+    }
+    
+
+    if (enc_4byte_asnums) {
+	size_t l = as4_path().wire_size();
+	if (l + 4 >= wire_size) {
+	    // There's not enough space to encode this.
+	    return false;
+	}
+
+	uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
+	as4_path().encode(l, d);	// encode the payload in the buffer
+    } else {
+	// either we're not using 4-byte AS numbers, or the peer isn't
+	// so encode as two-byte AS nums.  If we've got any 4-byte AS
+	// numbers in there, they'll be mapped to AS_TRAN.
+	size_t l = as_path().wire_size();
+	if (l + 4 >= wire_size) {
+	    // There's not enough space to encode this.
+	    return false;
+	}
+
+	uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
+	as_path().encode(l, d);	// encode the payload in the buffer
+    }
+    return true;
+}
+
+
+
+/*
+ * AS4 Path Attribute - see note in aspath.hh for usage details
+ */
+
+AS4PathAttribute::AS4PathAttribute(const AS4Path& p)
+	: PathAttribute((Flags)(Optional|Transitive), AS4_PATH)
+{
+    _as_path = new AS4Path(p);
+}
+
+AS4PathAttribute::AS4PathAttribute(const uint8_t* d)
+	throw(CorruptMessage)
+	: PathAttribute(d)
+{
+    if (!optional() || !transitive())
+	xorp_throw(CorruptMessage,
+		   c_format("Bad Flags in AS4 Path attribute %#x", flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+
+    _as_path = new AS4Path(payload(d), length(d));
+}
+
+PathAttribute *
+AS4PathAttribute::clone() const
+{
+    return new AS4PathAttribute(as4_path());
+}
+
+bool
+AS4PathAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
+const
+{
+    // If we're encoding this, it's because we're not configured to do
+    // 4-byte AS numbers, but we received a 4-byte AS Path from a peer
+    // and now we're sending it on to another peer unchanged.  So this
+    // should alwasy be encoded as a 4-byte AS Path, no matter who
+    // we're sending it to.
+    
+    UNUSED(peerdata);
+    debug_msg("AS4PathAttribute encode()\n");
+    size_t l = as4_path().wire_size();
+    if (l + 4 >= wire_size) {
+	// There's not enough space to encode this.
+	return false;
+    }
+
+    uint8_t *d = set_header(buf, l, wire_size);	// set and skip header
+    as4_path().encode(l, d);	// encode the payload in the buffer
+    return true;
 }
 
 /**
@@ -186,7 +283,6 @@ template <class A>
 NextHopAttribute<A>::NextHopAttribute(const A& n)
 	: PathAttribute(Transitive, NEXT_HOP), _next_hop(n)
 {
-    encode();
 }
 
 template <class A>
@@ -216,15 +312,21 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 		   c_format("NextHop %s is not a unicast address",
 			    _next_hop.str().c_str()),
 		   UPDATEMSGERR, INVALNHATTR, d, total_tlv_length(d));
-    encode();
 }
 
 template<class A>
-void
-NextHopAttribute<A>::encode()
+bool
+NextHopAttribute<A>::encode(uint8_t *buf, size_t &wire_size, 
+			    const BGPPeerData* peerdata) const
 {
-    uint8_t *d = set_header(A::addr_bytelen());
+    UNUSED(peerdata);
+    debug_msg("NextHopAttribute<A>::encode\n");
+    if (wire_size <= 3 + A::addr_bytelen()) {
+	return false;
+    }
+    uint8_t *d = set_header(buf, A::addr_bytelen(), wire_size);
     _next_hop.copy_out(d);
+    return true;
 }
 
 template class NextHopAttribute<IPv4>;
@@ -238,7 +340,6 @@ template class NextHopAttribute<IPv6>;
 MEDAttribute::MEDAttribute(const uint32_t med)
 	: PathAttribute(Optional, MED), _med(med)
 {
-    encode();
 }
 
 PathAttribute *
@@ -259,15 +360,21 @@ MEDAttribute::MEDAttribute(const uint8_t* d) throw(CorruptMessage)
 		   UPDATEMSGERR, ATTRLEN);
     memcpy(&_med, payload(d), 4);
     _med = ntohl(_med);
-    encode();
 }
 
-void
-MEDAttribute::encode()
+bool
+MEDAttribute::encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata)
+const
 {
-    uint8_t *d = set_header(4);
+    debug_msg("MEDAttribute::encode\n");
+    UNUSED(peerdata);
+    if (wire_size <= 7) {
+	return false;
+    }
+    uint8_t *d = set_header(buf, 4, wire_size);
     uint32_t x = htonl(_med);
     memcpy(d, &x, 4);
+    return true;
 }
 
 string
@@ -284,7 +391,6 @@ MEDAttribute::str() const
 LocalPrefAttribute::LocalPrefAttribute(const uint32_t localpref)
 	: PathAttribute(Transitive, LOCAL_PREF), _localpref(localpref)
 {
-    encode();
 }
 
 PathAttribute *
@@ -306,15 +412,21 @@ LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
 		   UPDATEMSGERR, ATTRLEN);
     memcpy(&_localpref, payload(d), 4);
     _localpref = ntohl(_localpref);
-    encode();
 }
 
-void
-LocalPrefAttribute::encode()
+bool
+LocalPrefAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			   const BGPPeerData* peerdata) const
 {
-    uint8_t *d = set_header(4);
+    debug_msg("LocalPrefAttribute::encode\n");
+    UNUSED(peerdata);
+    if (wire_size < 7) {
+	return false;
+    }
+    uint8_t *d = set_header(buf, 4, wire_size);
     uint32_t x = htonl(_localpref);
     memcpy(d, &x, 4);
+    return true;
 }
 
 string
@@ -331,7 +443,19 @@ LocalPrefAttribute::str() const
 AtomicAggAttribute::AtomicAggAttribute()
 	: PathAttribute(Transitive, ATOMIC_AGGREGATE)
 {
-    set_header(0);	// this is all encode() has to do
+}
+
+bool
+AtomicAggAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			   const BGPPeerData* peerdata) const
+{
+    debug_msg("AAggAttribute::encode\n");
+    UNUSED(peerdata);
+    if (wire_size < 3) {
+	return false;
+    }
+    set_header(buf, 0, wire_size);
+    return true;
 }
 
 PathAttribute *
@@ -354,7 +478,6 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
 		   c_format("Bad Flags in AtomicAggregate attribute %#x",
 			    flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
-    set_header(0);	// this is all encode() has to do
 }
 
 /**
@@ -366,7 +489,6 @@ AggregatorAttribute::AggregatorAttribute(const IPv4& speaker,
 	: PathAttribute((Flags)(Optional|Transitive), AGGREGATOR),
 		_speaker(speaker), _as(as)            
 {
-    encode();
 }
 
 PathAttribute *
@@ -375,11 +497,16 @@ AggregatorAttribute::clone() const
     return new AggregatorAttribute(route_aggregator(), aggregator_as());
 }
 
-AggregatorAttribute::AggregatorAttribute(const uint8_t* d)
+AggregatorAttribute::AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums)
 	throw(CorruptMessage)
 	: PathAttribute(d), _as(AsNum::AS_INVALID)
 {
-    if (length(d) != 6)
+    if (!use_4byte_asnums && length(d) != 6)
+	xorp_throw(CorruptMessage,
+		   c_format("Aggregator bad length %u",
+			    XORP_UINT_CAST(length(d))),
+		   UPDATEMSGERR, ATTRLEN);
+    if (use_4byte_asnums && length(d) != 8)
 	xorp_throw(CorruptMessage,
 		   c_format("Aggregator bad length %u",
 			    XORP_UINT_CAST(length(d))),
@@ -390,22 +517,113 @@ AggregatorAttribute::AggregatorAttribute(const uint8_t* d)
 			    flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     d = payload(d);
-    _as = AsNum(d);
-    _speaker = IPv4(d+2);
-    encode();
+    _as = AsNum(d, use_4byte_asnums);
+    if (use_4byte_asnums)
+	_speaker = IPv4(d+4);
+    else {
+	_speaker = IPv4(d+2);
+    }
 }
 
-void
-AggregatorAttribute::encode()
+bool
+AggregatorAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			    const BGPPeerData* peerdata) const
 {
-    uint8_t *d = set_header(6);
-    _as.copy_out(d);
-    _speaker.copy_out(d + 2); // defined to be an IPv4 address in RFC 2858
+    debug_msg("AggAttribute::encode\n");
+    bool enc_4byte_asnums = false;
+    if (peerdata == NULL) {
+	/* when we're hashing the attributes, we don't know the peer.
+	   Use the most general form, which is 4-byte ASnums */
+	enc_4byte_asnums = true;
+    } else if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+	// both us and the peer use 4-byte AS numbers, so encode using
+	// 4-byte ASnums.
+	enc_4byte_asnums = true;
+    }
+
+    if (enc_4byte_asnums) {
+	if (wire_size < 11) 
+	    return false;
+	uint8_t *d = set_header(buf, 8, wire_size);
+	_as.copy_out4(d);
+	_speaker.copy_out(d + 4); // defined to be an IPv4 address in RFC 2858
+    } else {
+	if (wire_size < 9) 
+	    return false;
+	uint8_t *d = set_header(buf, 6, wire_size);
+	_as.copy_out(d);
+	_speaker.copy_out(d + 2); // defined to be an IPv4 address in RFC 2858
+    }
+    return true;
 }
 
 string AggregatorAttribute::str() const
 {
     return "Aggregator Attribute " + _as.str() + " " + _speaker.str();
+}
+
+
+/**
+ * AS4AggregatorAttribute
+ */
+
+AS4AggregatorAttribute::AS4AggregatorAttribute(const IPv4& speaker,
+			const AsNum& as)
+	: PathAttribute((Flags)(Optional|Transitive), AGGREGATOR),
+		_speaker(speaker), _as(as)            
+{
+}
+
+PathAttribute *
+AS4AggregatorAttribute::clone() const
+{
+    return new AS4AggregatorAttribute(route_aggregator(), aggregator_as());
+}
+
+AS4AggregatorAttribute::AS4AggregatorAttribute(const uint8_t* d)
+	throw(CorruptMessage)
+	: PathAttribute(d), _as(AsNum::AS_INVALID)
+{
+    if (length(d) != 8)
+	xorp_throw(CorruptMessage,
+		   c_format("AS4Aggregator bad length %u",
+			    XORP_UINT_CAST(length(d))),
+		   UPDATEMSGERR, ATTRLEN);
+    if (!optional() || !transitive())
+	xorp_throw(CorruptMessage,
+		   c_format("Bad Flags in AtomicAggregate attribute %#x",
+			    flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
+    d = payload(d);
+    _as = AsNum(d, true); //force interpretation as a 4-byte quantity
+    _speaker = IPv4(d+4);
+}
+
+bool
+AS4AggregatorAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			    const BGPPeerData* peerdata) const
+{
+    debug_msg("AS4AggAttribute::encode\n");
+    if (wire_size < 11) 
+	return false;
+
+    if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+	// we're configured to do 4-byte AS numbers and our peer is
+	// also configured to do them.  We should not be encoding 4
+	// byte AS numbers in an AS4AggregatorAttribute, but rather
+	// doing native 4 byte AS numbers in a regular ASaggregator.
+	XLOG_UNREACHABLE();  
+    }
+
+    uint8_t *d = set_header(buf, 8, wire_size);
+    _as.copy_out4(d);
+    _speaker.copy_out(d + 4); // defined to be an IPv4 address in RFC 2858
+    return true;
+}
+
+string AS4AggregatorAttribute::str() const
+{
+    return "AS4Aggregator Attribute " + _as.str() + " " + _speaker.str();
 }
 
 
@@ -416,8 +634,6 @@ string AggregatorAttribute::str() const
 CommunityAttribute::CommunityAttribute()
 	: PathAttribute((Flags)(Optional | Transitive), COMMUNITY)
 {
-    encode();
-
 }
 
 PathAttribute *
@@ -439,28 +655,33 @@ CommunityAttribute::CommunityAttribute(const uint8_t* d)
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Community attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
+    size_t len = length(d);
     d = payload(d);
-    for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
+    for (size_t l = len; l >= 4;  d += 4, l -= 4) {
 	uint32_t value;
 	memcpy(&value, d, 4);
 	_communities.insert(ntohl(value));
     }
-    encode();
 }
 
-void
-CommunityAttribute::encode()
+bool
+CommunityAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			   const BGPPeerData* peerdata) const
 {
-    XLOG_ASSERT(_size == (4 * _communities.size()) );
-//     XLOG_ASSERT(_size < 256);
+    debug_msg("CommAttribute::encode\n");
+    UNUSED(peerdata);
+    size_t size = 4 * _communities.size();
+    if (wire_size < size + 4) {
+	return false;
+    }
 
-    delete[] _data;
-    uint8_t *d = set_header(_size);
+    uint8_t *d = set_header(buf, size, wire_size);
     const_iterator i = _communities.begin();
     for (; i != _communities.end(); d += 4, i++) {
 	uint32_t value = htonl(*i);
 	memcpy(d, &value, 4);
     }
+    return true;
 }
 
 string
@@ -491,8 +712,6 @@ void
 CommunityAttribute::add_community(uint32_t community)
 {
     _communities.insert(community);
-    _size += 4;
-    encode();
 }
 
 bool
@@ -506,61 +725,64 @@ CommunityAttribute::contains(uint32_t community) const
 
 
 /**
- * ORIGINATOR_IDAttribute
+ * OriginatorIDAttribute
  */
 
-ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const IPv4 originator_id)
+OriginatorIDAttribute::OriginatorIDAttribute(const IPv4 originator_id)
 	: PathAttribute(Optional, ORIGINATOR_ID), _originator_id(originator_id)
 {
-    encode();
 }
 
 PathAttribute *
-ORIGINATOR_IDAttribute::clone() const
+OriginatorIDAttribute::clone() const
 {
-    return new ORIGINATOR_IDAttribute(originator_id());
+    return new OriginatorIDAttribute(originator_id());
 }
 
-ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint8_t* d)
+OriginatorIDAttribute::OriginatorIDAttribute(const uint8_t* d)
     throw(CorruptMessage)
     : PathAttribute(d)
 {
     if (!optional() || transitive())
-	xorp_throw(CorruptMessage, "Bad Flags in ORIGINATOR_IDAttribute",
+	xorp_throw(CorruptMessage, "Bad Flags in OriginatorIDAttribute",
 		   UPDATEMSGERR, ATTRFLAGS);
     if (length(d) != 4)
-	xorp_throw(CorruptMessage, "Bad size in ORIGINATOR_IDAttribute",
+	xorp_throw(CorruptMessage, "Bad size in OriginatorIDAttribute",
 		   UPDATEMSGERR, INVALNHATTR);
 
     _originator_id.copy_in(payload(d));
-    encode();
 }
 
-void
-ORIGINATOR_IDAttribute::encode()
+bool
+OriginatorIDAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			      const BGPPeerData* peerdata) const
 {
-    uint8_t *d = set_header(4);
+    debug_msg("OriginatorIDAttribute::encode\n");
+    UNUSED(peerdata);
+    if (wire_size < 7) {
+	return false;
+    }
+    uint8_t *d = set_header(buf, 4, wire_size);
     _originator_id.copy_out(d);
+    return true;
 }
 
 string
-ORIGINATOR_IDAttribute::str() const
+OriginatorIDAttribute::str() const
 {
     return c_format("ORIGINATOR ID Attribute: %s", cstring(originator_id()));
 }
 
 /**
- * CLUSTER_LISTAttribute
+ * ClusterListAttribute
  */
 
-CLUSTER_LISTAttribute::CLUSTER_LISTAttribute()
+ClusterListAttribute::ClusterListAttribute()
 	: PathAttribute(Optional, CLUSTER_LIST)
 {
-    encode();
-
 }
 
-CLUSTER_LISTAttribute::CLUSTER_LISTAttribute(const uint8_t* d)
+ClusterListAttribute::ClusterListAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
 {
@@ -568,41 +790,47 @@ CLUSTER_LISTAttribute::CLUSTER_LISTAttribute(const uint8_t* d)
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in CLUSTER_LIST attribute",
 		   UPDATEMSGERR, ATTRFLAGS);
+    size_t size = length(d);
     d = payload(d);
-    for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
+    for (size_t l = size; l >= 4;  d += 4, l -= 4) {
 	IPv4 i;
 	i.copy_in(d);
 	_cluster_list.push_back(i);
     }
-    encode();
 }
 
 PathAttribute *
-CLUSTER_LISTAttribute::clone() const
+ClusterListAttribute::clone() const
 {
-    CLUSTER_LISTAttribute *ca = new CLUSTER_LISTAttribute();
+    ClusterListAttribute *ca = new ClusterListAttribute();
     list<IPv4>::const_reverse_iterator i = cluster_list().rbegin();
     for(; i != cluster_list().rend(); i++)
 	ca->prepend_cluster_id(*i);
     return ca;
 }
 
-void
-CLUSTER_LISTAttribute::encode()
+bool
+ClusterListAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			     const BGPPeerData* peerdata) const
 {
-    assert(_size == (4 * _cluster_list.size()) );
-    assert(_size < 256);
+    debug_msg("CLAttribute::encode\n");
+    UNUSED(peerdata);
+    size_t size = 4 * _cluster_list.size();
+    XLOG_ASSERT(size < 256);
+    if (wire_size < size + 4) {
+	return false;
+    }
 
-    delete[] _data;
-    uint8_t *d = set_header(_size);
+    uint8_t *d = set_header(buf, size, wire_size);
     const_iterator i = _cluster_list.begin();
     for (; i != _cluster_list.end(); d += 4, i++) {
 	i->copy_out(d);
     }
+    return true;
 }
 
 string
-CLUSTER_LISTAttribute::str() const
+ClusterListAttribute::str() const
 {
     string s = "Cluster List Attribute ";
     const_iterator i = _cluster_list.begin();
@@ -612,15 +840,13 @@ CLUSTER_LISTAttribute::str() const
 }
 
 void
-CLUSTER_LISTAttribute::prepend_cluster_id(IPv4 cluster_id)
+ClusterListAttribute::prepend_cluster_id(IPv4 cluster_id)
 {
     _cluster_list.push_front(cluster_id);
-    _size += 4;
-    encode();
 }
 
 bool
-CLUSTER_LISTAttribute::contains(IPv4 cluster_id) const
+ClusterListAttribute::contains(IPv4 cluster_id) const
 {
     const_iterator i = find(_cluster_list.begin(), _cluster_list.end(),
 			    cluster_id);
@@ -648,10 +874,12 @@ CLUSTER_LISTAttribute::contains(IPv4 cluster_id) const
  */
 
 template <>
-void
-MPReachNLRIAttribute<IPv6>::encode()
+bool
+MPReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size, 
+				   const BGPPeerData* peerdata) const
 {
-    delete[] _data;	// Zap any old allocation.
+    debug_msg("MPReachAttribute::encode\n");
+    UNUSED(peerdata);
 
     XLOG_ASSERT(AFI_IPV6 == _afi);
     XLOG_ASSERT((SAFI_UNICAST  == _safi) || (SAFI_MULTICAST == _safi));
@@ -673,9 +901,15 @@ MPReachNLRIAttribute<IPv6>::encode()
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	len += 1;
 	len += (i->prefix_len() + 7) / 8;
+
+	// check it will fit
+	if (wire_size < len + 4) {
+	    // not enough space to encode!
+	    return false;
+	}
     }
 
-    uint8_t *d = set_header(len);
+    uint8_t *d = set_header(buf, len, wire_size);
     
     /*
     ** Fill in the buffer.
@@ -701,21 +935,30 @@ MPReachNLRIAttribute<IPv6>::encode()
 
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	int bytes = (i->prefix_len() + 7)/ 8;
+
+	// if there's no space, truncate
+	len -= 1 + bytes;
+	if (len <= 0)
+	    break;
+
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv6::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
-
+	
 	*d++ = i->prefix_len();
 	memcpy(d, buf, bytes);
 	d += bytes;
     }
+    return true;
 }
 
 template <>
-void
-MPReachNLRIAttribute<IPv4>::encode()
+bool
+MPReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size, 
+				   const BGPPeerData* peerdata) const
 {
-    delete[] _data;	// Zap any old allocation.
+    debug_msg("MPReachAttribute::encode\n");
+    UNUSED(peerdata);
 
     XLOG_ASSERT(AFI_IPV4 == _afi && SAFI_MULTICAST == _safi);
     XLOG_ASSERT(4 == IPv4::addr_bytelen());
@@ -734,9 +977,15 @@ MPReachNLRIAttribute<IPv4>::encode()
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	len += 1;
 	len += (i->prefix_len() + 7) / 8;
+
+	// check it will fit
+	if (wire_size < len + 4) {
+	    // not enough space to encode!
+	    return false;
+	}
     }
 
-    uint8_t *d = set_header(len);
+    uint8_t *d = set_header(buf, len, wire_size);
     
     /*
     ** Fill in the buffer.
@@ -754,6 +1003,12 @@ MPReachNLRIAttribute<IPv4>::encode()
 
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	int bytes = (i->prefix_len() + 7) / 8;
+
+	// if there's no space, truncate
+	len -= 1 + bytes;
+	if (len <= 0)
+	    break;
+
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv4::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
@@ -762,6 +1017,7 @@ MPReachNLRIAttribute<IPv4>::encode()
 	memcpy(d, buf, bytes);
 	d += bytes;
     }
+    return true;
 }
 
 template <>
@@ -770,7 +1026,6 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(Safi safi)
       _afi(AFI_IPV6),
       _safi(safi)
 {
-    encode();
 }
 
 template <>
@@ -779,7 +1034,6 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(Safi safi)
       _afi(AFI_IPV4),
       _safi(safi)
 {
-    encode();
 }
 
 template <class A>
@@ -792,8 +1046,6 @@ MPReachNLRIAttribute<A>::clone() const
     mp->_nexthop = _nexthop;
     for(const_iterator i = _nlri.begin(); i != _nlri.end(); i++)
 	mp->_nlri.push_back(*i);
-
-    mp->encode();
 
     return mp;
 }
@@ -912,7 +1164,6 @@ MPReachNLRIAttribute<IPv6>::MPReachNLRIAttribute(const uint8_t* d)
 		  prefix_length, XORP_UINT_CAST(bytes));
     }
 
-    encode();
 }
 
 template <>
@@ -1028,7 +1279,6 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
 		  prefix_length, XORP_UINT_CAST(bytes));
     }
 
-    encode();
 }
 
 template <class A>
@@ -1047,10 +1297,12 @@ MPReachNLRIAttribute<A>::str() const
 }
 
 template <>
-void
-MPUNReachNLRIAttribute<IPv6>::encode()
+bool
+MPUNReachNLRIAttribute<IPv6>::encode(uint8_t *buf, size_t &wire_size, 
+				     const BGPPeerData* peerdata) const
 {
-    delete[] _data;	// Zap any old allocation.
+    debug_msg("MPUnreachAttribute::encode\n");
+    UNUSED(peerdata);
 
     XLOG_ASSERT(AFI_IPV6 == _afi);
     XLOG_ASSERT((SAFI_UNICAST  == _safi) || (SAFI_MULTICAST == _safi));
@@ -1067,9 +1319,15 @@ MPUNReachNLRIAttribute<IPv6>::encode()
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	len += 1;
 	len += (i->prefix_len() + 7)/ 8;
+
+	// check it will fit
+	if (wire_size < len + 4) {
+	    // not enough space to encode!
+	    return false;
+	}
     }
 
-    uint8_t *d = set_header(len);
+    uint8_t *d = set_header(buf, len, wire_size);
     
     /*
     ** Fill in the buffer.
@@ -1081,6 +1339,12 @@ MPUNReachNLRIAttribute<IPv6>::encode()
     
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	int bytes = (i->prefix_len() + 7)/ 8;
+
+	// if there's no space, truncate
+	len -= 1 + bytes;
+	if (len <= 0)
+	    break;
+
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv6::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
@@ -1089,13 +1353,16 @@ MPUNReachNLRIAttribute<IPv6>::encode()
 	memcpy(d, buf, bytes);
 	d += bytes;
     }
+    return true;
 }
 
 template <>
-void
-MPUNReachNLRIAttribute<IPv4>::encode()
+bool
+MPUNReachNLRIAttribute<IPv4>::encode(uint8_t *buf, size_t &wire_size, 
+				     const BGPPeerData* peerdata) const
 {
-    delete[] _data;	// Zap any old allocation.
+    debug_msg("MPUnreachNLRIAttribute::encode\n");
+    UNUSED(peerdata);
 
     XLOG_ASSERT(AFI_IPV4 == _afi && SAFI_MULTICAST == _safi);
     XLOG_ASSERT(4 == IPv4::addr_bytelen());
@@ -1111,9 +1378,14 @@ MPUNReachNLRIAttribute<IPv4>::encode()
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	len += 1;
 	len += (i->prefix_len() + 7) / 8;
+	// check it will fit
+	if (wire_size < len + 4) {
+	    // not enough space to encode!
+	    return false;
+	}
     }
 
-    uint8_t *d = set_header(len);
+    uint8_t *d = set_header(buf, len, wire_size);
     
     /*
     ** Fill in the buffer.
@@ -1125,6 +1397,12 @@ MPUNReachNLRIAttribute<IPv4>::encode()
     
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	int bytes = (i->prefix_len() + 7) / 8;
+
+	// if there's no space, truncate
+	len -= 1 + bytes;
+	if (len <= 0)
+	    break;
+
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv4::addr_bytelen()];
 	i->masked_addr().copy_out(buf);
@@ -1133,6 +1411,7 @@ MPUNReachNLRIAttribute<IPv4>::encode()
 	memcpy(d, buf, bytes);
 	d += bytes;
     }
+    return true;
 }
 
 template <>
@@ -1141,7 +1420,6 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(Safi safi)
       _afi(AFI_IPV6),
       _safi(safi)
 {
-    encode();
 }
 
 template <>
@@ -1150,7 +1428,6 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(Safi safi)
       _afi(AFI_IPV4),
       _safi(safi)
 {
-    encode();
 }
 
 template <class A>
@@ -1162,8 +1439,6 @@ MPUNReachNLRIAttribute<A>::clone() const
     mp->_afi = _afi;
     for(const_iterator i = _withdrawn.begin(); i != _withdrawn.end(); i++)
 	mp->_withdrawn.push_back(*i);
-
-    mp->encode();
 
     return mp;
 }
@@ -1231,8 +1506,6 @@ MPUNReachNLRIAttribute<IPv6>::MPUNReachNLRIAttribute(const uint8_t* d)
 	_withdrawn.push_back(IPNet<IPv6>(nlri, prefix_length));
 	data += bytes;
     }
-
-    encode();
 }
 
 template <>
@@ -1304,8 +1577,6 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
 	_withdrawn.push_back(IPNet<IPv4>(nlri, prefix_length));
 	data += bytes;
     }
-
-    encode();
 }
 
 template <class A>
@@ -1320,9 +1591,12 @@ MPUNReachNLRIAttribute<A>::str() const
     return s;
 }
 
-/**
- * UnknownAttribute
- */
+/**************************************************************************
+ **** 
+ **** PathAttribute
+ **** 
+ **************************************************************************/ 
+
 UnknownAttribute::UnknownAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
@@ -1334,66 +1608,105 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d)
 		   "Bad Flags in Unknown attribute",
 		   UPDATEMSGERR, UNRECOGWATTR, d, total_tlv_length(d));
 	
-    _size = length(d);
-    _data = new uint8_t[wire_size()];
-    memcpy(_data, d, wire_size());
+    _size = total_tlv_length(d);
+    _data = new uint8_t[_size];
+    memcpy(_data, d, _size);
+}
+
+UnknownAttribute::UnknownAttribute(uint8_t *data, size_t size, uint8_t flags) 
+    : PathAttribute(data)
+{
+    /* override the flags from the data because they may have been modified */
+    _flags = flags;
+    _size = size;
+    _data = new uint8_t[_size];
+    memcpy(_data, data, _size);
 }
 
 PathAttribute *
 UnknownAttribute::clone() const
 {
-    return new UnknownAttribute(data());
+     return new UnknownAttribute(_data, _size, _flags);
 }
 
 string
 UnknownAttribute::str() const
 {
     string s = "Unknown Attribute ";
-    for (size_t i=0; i< wire_size(); i++)
+    for (size_t i=0; i < _size; i++)
 	s += c_format("%x ", _data[i]);
+    s += c_format("  flags: %x", _flags);
     return s;
 }
 
+bool
+UnknownAttribute::encode(uint8_t *buf, size_t &wire_size, 
+			 const BGPPeerData* peerdata) const
+{
+    debug_msg("UnknownAttribute::encode\n");
+    UNUSED(peerdata);
+    // check it will fit in the buffer
+    if (wire_size < _size) 
+	return false;
+    memcpy(buf, _data, _size);
 
-/**
- * PathAttribute
- */
+    /* reassert the flags because we may have changed them (typically
+       to set Partial before propagating to a peer) */
+    buf[0]=_flags;
+
+    wire_size = _size;
+    return true;
+}
+
+/**************************************************************************
+ **** 
+ **** PathAttribute
+ **** 
+ **************************************************************************/ 
 
 PathAttribute *
 PathAttribute::create(const uint8_t* d, uint16_t max_len,
-		size_t& l /* actual length */)
+		size_t& l /* actual length */, const BGPPeerData* peerdata)
 	throw(CorruptMessage)
 {
     PathAttribute *pa;
-
-    if (max_len < 3)	// must be at least 3 bytes!
+    if (max_len < 3) {
+	// must be at least 3 bytes! 
 	xorp_throw(CorruptMessage,
 		   c_format("PathAttribute too short %d bytes", max_len),
 		   UPDATEMSGERR, ATTRLEN, d, max_len);
+    }
 
     // compute length, which is 1 or 2 bytes depending on flags d[0]
-    if ( (d[0] & Extended) && max_len < 4)
+    if ( (d[0] & Extended) && max_len < 4) {
 	xorp_throw(CorruptMessage,
 		   c_format("PathAttribute (extended) too short %d bytes",
 			    max_len),
 		   UPDATEMSGERR, ATTRLEN, d, max_len);
+    }
     l = length(d) + (d[0] & Extended ? 4 : 3);
-    if (max_len < l)
+    if (max_len < l) {
 	xorp_throw(CorruptMessage,
 		   c_format("PathAttribute too short %d bytes need %u",
 			    max_len, XORP_UINT_CAST(l)),
 		   UPDATEMSGERR, ATTRLEN, d, max_len);
+    }
 
     // now we are sure that the data block is large enough.
     debug_msg("++ create type %d max_len %d actual_len %u\n",
-	d[1], max_len, XORP_UINT_CAST(l));
+	      d[1], max_len, XORP_UINT_CAST(l));
+    bool use_4byte_asnums = peerdata->use_4byte_asnums();
     switch (d[1]) {	// depending on type, do the right thing.
     case ORIGIN:
 	pa = new OriginAttribute(d);
 	break; 
 
     case AS_PATH:
-	pa = new ASPathAttribute(d);
+	pa = new ASPathAttribute(d, use_4byte_asnums);
+	break;  
+     
+    case AS4_PATH:
+	pa = new AS4PathAttribute(d);
 	break;  
      
     case NEXT_HOP:
@@ -1413,7 +1726,11 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 	break;
 
     case AGGREGATOR:
-	pa = new AggregatorAttribute(d);
+	pa = new AggregatorAttribute(d, use_4byte_asnums);
+	break;
+
+    case AS4_AGGREGATOR:
+	pa = new AS4AggregatorAttribute(d);
 	break;
 
     case COMMUNITY:
@@ -1421,11 +1738,11 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
 	break;
 
     case ORIGINATOR_ID:
-	pa = new ORIGINATOR_IDAttribute(d);
+	pa = new OriginatorIDAttribute(d);
 	break;
 
     case CLUSTER_LIST:
-	pa = new CLUSTER_LISTAttribute(d);
+	pa = new ClusterListAttribute(d);
 	break;
 
     case MP_REACH_NLRI:
@@ -1505,71 +1822,350 @@ PathAttribute::str() const
 	break;
 
     default:
-	s += c_format("UNKNOWN(%d)", type());
+	s += c_format("UNKNOWN(type: %d flags: %x): ", type(), _flags);
     }
     return s;
+}
+
+
+/**
+ * encode a path attribute.  In a sane world, we'd use a virtual
+ * function for this.  But we store so many path attributes that we
+ * can't afford the overhead of a virtual function table for them, so
+ * we have to do this the hard way 
+ */
+
+bool
+PathAttribute::encode(uint8_t* buf, size_t &wire_size, 
+		      const BGPPeerData* peerdata) const
+{
+    string s = "Path attribute of type ";
+    switch (type()) {
+    case ORIGIN:
+	return ((const OriginAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case AS_PATH:
+	return ((const ASPathAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case AS4_PATH:
+	return ((const ASPathAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case NEXT_HOP:
+	if (dynamic_cast<const NextHopAttribute<IPv4>*>(this)) {
+	    return ((const NextHopAttribute<IPv4>*)this)->encode(buf, wire_size, peerdata);
+	} else {
+	    return ((const NextHopAttribute<IPv6>*)this)->encode(buf, wire_size, peerdata);
+	}
+
+    case MED:
+	return ((const MEDAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case LOCAL_PREF:
+	return ((const LocalPrefAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case ATOMIC_AGGREGATE:
+	return ((const AtomicAggAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case AGGREGATOR:
+	return ((const AggregatorAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case AS4_AGGREGATOR:
+	return ((const AS4AggregatorAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case COMMUNITY:
+	return ((const CommunityAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case ORIGINATOR_ID:
+	return ((const OriginatorIDAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case CLUSTER_LIST:
+	return ((const ClusterListAttribute*)this)->encode(buf, wire_size, peerdata);
+
+    case MP_REACH_NLRI:
+	if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(this)) {
+	    return ((const MPReachNLRIAttribute<IPv4>*)this)
+		->encode(buf, wire_size, peerdata);
+	} else {
+	    return ((const MPReachNLRIAttribute<IPv6>*)this)
+		->encode(buf, wire_size, peerdata);
+	}
+
+    case MP_UNREACH_NLRI:
+	if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(this)) {
+	    return ((const MPUNReachNLRIAttribute<IPv4>*)this)
+		->encode(buf, wire_size, peerdata);
+	} else {
+	    return ((const MPUNReachNLRIAttribute<IPv6>*)this)
+		->encode(buf, wire_size, peerdata);
+	}
+
+    }
+    return true;
 }
 
 bool
 PathAttribute::operator<(const PathAttribute& him) const
 {
+    uint8_t mybuf[BGPPacket::MAXPACKETSIZE], hisbuf[BGPPacket::MAXPACKETSIZE];
+    size_t mybuflen, hisbuflen;
     if (sorttype() < him.sorttype())
 	return true;
     if (sorttype() > him.sorttype())
 	return false;
     // equal sorttypes imply equal types
-    if (wire_size() < him.wire_size())
-	return true;
-    if (wire_size() > him.wire_size())
-	return false;
-    // same size, must compare payload
     switch (type()) {
-    default:
-	return (memcmp(data(), him.data(), wire_size()) < 0);
-	break;
+    case ORIGIN:
+	return ( ((OriginAttribute &)*this).origin() <
+		((OriginAttribute &)him).origin() );
 
     case AS_PATH:
 	return ( ((ASPathAttribute &)*this).as_path() <
 		((ASPathAttribute &)him).as_path() );
 
+    case AS4_PATH:
+	return ( ((AS4PathAttribute &)*this).as_path() <
+		((AS4PathAttribute &)him).as_path() );
+
     case NEXT_HOP:
 	return ( ((NextHopAttribute<IPv4> &)*this).nexthop() <
 		((NextHopAttribute<IPv4> &)him).nexthop() );
+
+    case MED:
+	return ( ((MEDAttribute &)*this).med() <
+		((MEDAttribute &)him).med() );
+
+    case LOCAL_PREF:
+	return ( ((LocalPrefAttribute &)*this).localpref() <
+		((LocalPrefAttribute &)him).localpref() );
+
+    case ATOMIC_AGGREGATE:
+	return false;
+
+    case AGGREGATOR:
+	if ( ((AggregatorAttribute &)*this).aggregator_as() 
+	     == ((AggregatorAttribute &)him).aggregator_as() ) {
+	    return ( ((AggregatorAttribute &)*this).route_aggregator() 
+		     < ((AggregatorAttribute &)him).route_aggregator() );
+	} else {
+	    return ( ((AggregatorAttribute &)*this).aggregator_as() 
+		     < ((AggregatorAttribute &)him).aggregator_as() );
+	}
+
+    case AS4_AGGREGATOR:
+	if ( ((AS4AggregatorAttribute &)*this).aggregator_as() 
+	     == ((AS4AggregatorAttribute &)him).aggregator_as() ) {
+	    return ( ((AS4AggregatorAttribute &)*this).route_aggregator() 
+		     < ((AS4AggregatorAttribute &)him).route_aggregator() );
+	} else {
+	    return ( ((AS4AggregatorAttribute &)*this).aggregator_as() 
+		     < ((AS4AggregatorAttribute &)him).aggregator_as() );
+	}
+
+    case COMMUNITY:
+	// XXX using encode for this is a little inefficient
+	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	((const CommunityAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	((const CommunityAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen < hisbuflen)
+	    return true;
+	if (mybuflen > hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen);
+
+    case ORIGINATOR_ID:
+	return ( ((const OriginatorIDAttribute &)*this).originator_id()
+		 < ((const OriginatorIDAttribute &)him).originator_id() );
+
+    case CLUSTER_LIST:
+	// XXX using encode for this is a little inefficient
+	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	((const ClusterListAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	((const ClusterListAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen < hisbuflen)
+	    return true;
+	if (mybuflen > hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen);
+
+    case MP_REACH_NLRI:
+    case MP_UNREACH_NLRI:
+	// at places in the code where we'll use this operator, these
+	// shouldn't be present in the PathAttributes.
+	XLOG_UNREACHABLE();
+    default:
+	/* this must be an unknown attribute */
+#if 0
+	XLOG_ASSERT(dynamic_cast<const UnknownAttribute*>(this) != 0);
+	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	((const UnknownAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	((const UnknownAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen < hisbuflen)
+	    return true;
+	if (mybuflen > hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen);
+#endif
+	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	this->encode(mybuf, mybuflen, NULL);
+	him.encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen < hisbuflen)
+	    return true;
+	if (mybuflen > hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen);
+	
     }
+    XLOG_UNREACHABLE();
 }
 
 bool
 PathAttribute::operator==(const PathAttribute& him) const
 {
-    return (type() == him.type() && wire_size() == him.wire_size() &&
-    	memcmp(data(), him.data(), wire_size()) == 0);
+    uint8_t mybuf[BGPPacket::MAXPACKETSIZE], hisbuf[BGPPacket::MAXPACKETSIZE];
+    size_t mybuflen, hisbuflen;
+    if (sorttype() != him.sorttype())
+	return false;
+    switch (type()) {
+    case ORIGIN:
+	return ( ((OriginAttribute &)*this).origin() ==
+		((OriginAttribute &)him).origin() );
+
+    case AS_PATH:
+	return ( ((ASPathAttribute &)*this).as_path() ==
+		((ASPathAttribute &)him).as_path() );
+
+    case AS4_PATH:
+	return ( ((AS4PathAttribute &)*this).as_path() ==
+		((AS4PathAttribute &)him).as_path() );
+
+    case NEXT_HOP:
+	return ( ((NextHopAttribute<IPv4> &)*this).nexthop() ==
+		((NextHopAttribute<IPv4> &)him).nexthop() );
+
+    case MED:
+	return ( ((MEDAttribute &)*this).med() ==
+		((MEDAttribute &)him).med() );
+
+    case LOCAL_PREF:
+	return ( ((LocalPrefAttribute &)*this).localpref() ==
+		((LocalPrefAttribute &)him).localpref() );
+
+    case ATOMIC_AGGREGATE:
+	return true;
+
+    case AGGREGATOR:
+	return ( ((AggregatorAttribute &)*this).aggregator_as() 
+		 == ((AggregatorAttribute &)him).aggregator_as()
+		 &&  ((AggregatorAttribute &)*this).route_aggregator() 
+		 == ((AggregatorAttribute &)him).route_aggregator() );
+
+    case AS4_AGGREGATOR:
+	return ( ((AS4AggregatorAttribute &)*this).aggregator_as() 
+		 == ((AS4AggregatorAttribute &)him).aggregator_as()
+		 &&  ((AS4AggregatorAttribute &)*this).route_aggregator() 
+		 == ((AS4AggregatorAttribute &)him).route_aggregator() );
+
+    case COMMUNITY:
+	// XXX using encode for this is a little inefficient
+	mybuflen = hisbuflen = 4096;
+	((const CommunityAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	((const CommunityAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen != hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+
+    case ORIGINATOR_ID:
+	return ( ((OriginatorIDAttribute &)*this).originator_id()
+		 == ((OriginatorIDAttribute &)him).originator_id() );
+
+    case CLUSTER_LIST:
+	// XXX using encode for this is a little inefficient
+	mybuflen = hisbuflen = 4096;
+	((const ClusterListAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	((const ClusterListAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen != hisbuflen) 
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+
+    case MP_REACH_NLRI:
+	// XXX using encode for this is a little inefficient
+	mybuflen = hisbuflen = 4096;
+	if (dynamic_cast<const MPReachNLRIAttribute<IPv4>*>(this)) {
+	    ((const MPReachNLRIAttribute<IPv4>*)this)
+		->encode(mybuf, mybuflen, NULL);
+	    ((const MPReachNLRIAttribute<IPv4>&)him)
+		.encode(hisbuf, hisbuflen, NULL);
+	} else {
+	    ((const MPReachNLRIAttribute<IPv6>*)this)
+		->encode(mybuf, mybuflen, NULL);
+	    ((const MPReachNLRIAttribute<IPv6>&)him)
+		.encode(hisbuf, hisbuflen, NULL);
+	}
+	if (mybuflen != hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+
+    case MP_UNREACH_NLRI:
+	// XXX using encode for this is a little inefficient
+	mybuflen = hisbuflen = 4096;
+	if (dynamic_cast<const MPUNReachNLRIAttribute<IPv4>*>(this)) {
+	    ((const MPUNReachNLRIAttribute<IPv4>*)this)
+		->encode(mybuf, mybuflen, NULL);
+	    ((const MPUNReachNLRIAttribute<IPv4>&)him)
+		.encode(hisbuf, hisbuflen, NULL);
+	} else {
+	    ((const MPUNReachNLRIAttribute<IPv6>*)this)
+		->encode(mybuf, mybuflen, NULL);
+	    ((const MPUNReachNLRIAttribute<IPv6>&)him)
+		.encode(hisbuf, hisbuflen, NULL);
+	}
+	if (mybuflen != hisbuflen)
+	    return false;
+	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+
+    default:
+	/* this must be an unknown attribute */
+	XLOG_ASSERT(dynamic_cast<const UnknownAttribute*>(this) != 0);
+	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
+	((const UnknownAttribute*)this)->encode(mybuf, mybuflen, NULL);
+	((const UnknownAttribute&)him).encode(hisbuf, hisbuflen, NULL);
+	if (mybuflen != hisbuflen) {
+	    return false;
+	}
+	return memcmp(mybuf, hisbuf, mybuflen) == 0;
+    }
+    XLOG_UNREACHABLE();
 }
 
 uint8_t *
-PathAttribute::set_header(size_t payload_size)
+PathAttribute::set_header(uint8_t *data, size_t payload_size, size_t &wire_size)
+    const
 {
-    _size = payload_size;
+    uint8_t final_flags = _flags;
     if (payload_size > 255)
-	_flags |= Extended;
+	final_flags |= Extended;
     else
-	_flags &= ~Extended;
-	
-    _data = new uint8_t[wire_size()];	// allocate buffer
-    _data[0] = flags() & ValidFlags;
-    _data[1] = type();
-    if (extended()) {
-	_data[2] = (_size>>8) & 0xff;
-	_data[3] = _size & 0xff;
-	return _data + 4;
+	final_flags &= ~Extended;
+
+    data[0] = final_flags & ValidFlags;
+    data[1] = type();
+    if (final_flags & Extended) {
+	data[2] = (payload_size>>8) & 0xff;
+	data[3] = payload_size & 0xff;
+	wire_size = payload_size + 4;
+	return data + 4;
     } else {
-	_data[2] = _size & 0xff;
-	return _data + 3;
+	data[2] = payload_size & 0xff;
+	wire_size = payload_size + 3;
+	return data + 3;
     }
 }
 
-/*
- * PathAttributeList
- */
+/**************************************************************************
+ **** 
+ **** PathAttributeList
+ **** 
+ **************************************************************************/ 
 
 //#define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1693,8 +2289,9 @@ PathAttributeList<A>::rehash()
 {
     MD5_CTX context;
     MD5_Init(&context);
-    for (const_iterator i = begin(); i != end(); i++)
+    for (const_iterator i = begin(); i != end(); i++) {
 	(*i)->add_hash(&context);
+    }
     MD5_Final(_hash, &context);
 }
 
@@ -1804,7 +2401,7 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 
 template<class A>
 void
-PathAttributeList<A>::replace_AS_path(const AsPath& new_as_path)
+PathAttributeList<A>::replace_AS_path(const ASPath& new_as_path)
 {
     debug_msg("%p\n", this);
 
@@ -1871,7 +2468,7 @@ void
 PathAttributeList<A>::process_unknown_attributes()
 {
     debug_msg("%p\n", this);
-
+    debug_msg("process_unknown_attributes\n");
     iterator i;
     for (i = begin(); i != end();) {
 	iterator tmp = i++;
@@ -1950,22 +2547,22 @@ PathAttributeList<A>::community_att() const
 }
 
 template<class A>
-const ORIGINATOR_IDAttribute*
+const OriginatorIDAttribute*
 PathAttributeList<A>::originator_id() const 
 {
     debug_msg("%p\n", this);
 
-    return dynamic_cast<const ORIGINATOR_IDAttribute*>(
+    return dynamic_cast<const OriginatorIDAttribute*>(
 	find_attribute_by_type(ORIGINATOR_ID));
 }
 
 template<class A>
-const CLUSTER_LISTAttribute*
+const ClusterListAttribute*
 PathAttributeList<A>::cluster_list() const 
 {
     debug_msg("%p\n", this);
 
-    return dynamic_cast<const CLUSTER_LISTAttribute*>(
+    return dynamic_cast<const ClusterListAttribute*>(
 	find_attribute_by_type(CLUSTER_LIST));
 }
 
@@ -1988,6 +2585,58 @@ PathAttributeList<A>::assert_rehash() const
 	       "without first calling rehash()");
 #endif
 }
+
+
+/*
+ * encode the PA list for transmission to this specific peer.
+ */
+template<class A>
+bool
+PathAttributeList<A>::encode(uint8_t* buf, size_t &wire_size,
+			     const BGPPeerData* peerdata) const
+{
+    list <PathAttribute*>::const_iterator pai;
+    size_t len_so_far = 0;
+    size_t attr_len;
+
+    // fill path attribute list
+    for (pai = begin() ; pai != end(); ++pai) {
+	attr_len = wire_size - len_so_far;
+	if ((*pai)->encode(buf + len_so_far, attr_len, peerdata) ) {
+	    len_so_far += attr_len;
+	    XLOG_ASSERT(len_so_far <= wire_size);
+	} else {
+	    // not enough space to encode the PA list.
+	    return false;
+	}
+    }
+    if (peerdata->we_use_4byte_asnums() && !peerdata->use_4byte_asnums()) {
+
+	// we're using 4byte AS nums, but our peer isn't so we need to
+	// add an AS4Path attribute
+
+	if (!_aspath_att->as_path().two_byte_compatible()) {
+	    // only add the AS4Path if we can't code the ASPath without losing information
+
+	    attr_len = wire_size - len_so_far;
+	    AS4PathAttribute as4path_att(_aspath_att->as4_path());
+	    if (as4path_att.encode(buf + len_so_far, attr_len, peerdata) ) {
+		len_so_far += attr_len;
+		XLOG_ASSERT(len_so_far <= wire_size);
+	    } else {
+		// not enough space to encode the PA list.
+		return false;
+	    }
+	}
+
+	// XXXXX we should do something here for AS4Aggregator if
+	// we're aggregating
+    }
+    wire_size = len_so_far;
+    
+    return true;
+}
+
 
 template class PathAttributeList<IPv4>;
 template class PathAttributeList<IPv6>;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.15 2006/08/10 21:07:13 pavlin Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.16 2007/02/16 22:45:26 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -30,6 +30,7 @@ public:
     void register_coordinator(const string& name);
     void register_genid(const uint32_t& genid);
     bool packetisation(const string& protocol);
+    void use_4byte_asnums(bool use);
     bool connect(const string& host, const uint32_t& port, 
 		 string& error_string);
     bool listen(const string& host, const uint32_t& port,
@@ -64,6 +65,11 @@ private:
 private:
     EventLoop& _eventloop;
     XrlRouter& _xrlrouter;
+
+    /* these are needed so we know how to decode ASnums (4-byte or 2-byte); */
+    LocalData* _localdata;
+    BGPPeerData* _peerdata;
+
     const char *_server;
     const bool _verbose;
 
@@ -76,6 +82,7 @@ private:
     uint32_t _genid;
 
     bool _bgp;	// Perform BGP packetisation
+    bool _use_4byte_asnums; // Assume AS numbers from peer are 4-byte.
 
     struct Queued {
 	uint32_t secs;
@@ -139,6 +146,13 @@ public:
     XrlCmdError test_peer_0_1_packetisation(
 	// Input values, 
 	const string&	protocol);
+
+    /**
+     *  Use 4byte asnums.
+     */
+    XrlCmdError test_peer_0_1_use_4byte_asnums(
+	// Input values, 
+	const bool& use);
 
     /**
      *  Make a tcp connection to the specified host and port.

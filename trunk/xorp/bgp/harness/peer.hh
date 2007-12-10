@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.19 2006/03/16 00:03:42 pavlin Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.20 2007/02/16 22:45:26 pavlin Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -20,6 +20,7 @@
 #include "trie.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/tokenize.hh"
+#include "bgp/peer.hh"
 
 class EventLoop;
 class TimeVal;
@@ -113,6 +114,10 @@ protected:
 private:
     EventLoop   *_eventloop;
     XrlStdRouter *_xrlrouter;
+
+    /* we need these because the attribute encode methods reference them */
+    LocalData *_localdata;
+    BGPPeerData *_peerdata;
 
     string _peername;
     uint32_t _genid;

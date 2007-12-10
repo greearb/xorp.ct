@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.22 2006/03/16 00:03:30 pavlin Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.23 2007/02/16 22:45:13 pavlin Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -92,6 +92,7 @@ public:
 #include <sys/types.h>
 #include "libxorp/debug.h"
 #include "libxorp/ref_ptr.hh"
+#include "libxorp/asnum.hh"
 #include <string>
 #include <list>
 #include "exceptions.hh"
@@ -274,6 +275,7 @@ public:
     BGP4ByteASCapability();
     BGP4ByteASCapability(uint8_t l, const uint8_t* d);
     BGP4ByteASCapability(const BGP4ByteASCapability& cap);
+    BGP4ByteASCapability(const AsNum& as);
     void decode();
     void encode() const;
     uint32_t as() const { return _as4; }

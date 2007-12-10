@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.28 2007/02/16 22:45:10 pavlin Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.29 2007/04/05 02:02:48 zec Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -29,6 +29,8 @@
 #include "libxorp/asnum.hh"
 #include "libxorp/exceptions.hh"
 #include "exceptions.hh"
+
+class AS4Path;
 
 /**
  * This file contains the classes to manipulate AS segments/lists/paths
@@ -64,6 +66,39 @@
  * AS_CONFED_SET: unordered set of Member AS Numbers in
  * the local confederation that the UPDATE message has traversed
  *  
+ *
+ * 4-byte AS numbers need to be handled carefully.  There are two main
+ * cases to consider: when we are configured to do 4-byte AS numbers,
+ * and when we are not.
+ *
+ * When we are not configured to do 4-byte AS numbers all AS path
+ * information received from peers will be 2-byte AS numbers.  If
+ * they're configured to do 4-byte AS numbers, they will send us an
+ * AS_PATH and an AS4_PATH, but if we're not configured to do 4-byte
+ * AS numbers, we shouldn't care.  We don't merge the two; we
+ * propagate AS4_PATH unchanged, and do the normal stuff with the
+ * regular AS_PATH.  The AS4_PATH is actually stored internally in an
+ * UnknownAttribute, as we don't need to know anything about it.
+ *
+ * When we are configured to do 4-byte AS numbers, we can tell from
+ * the negotiated capabilities whether a peer is sending 4-byte AS
+ * numbers or 2-byte AS numbers.  If a peer is sending 4-byte AS
+ * numbers, these arrive in the AS_PATH attribute, and we store them
+ * internally in an AS4Path, but stored in the ASPathAttribute, NOT in
+ * the AS4PathAttribute.  If a peer is sending 2-byte AS numbers in
+ * AS_PATH, he may also propagate an AS4_PATH.  We merge these on
+ * input, cross-validate the two, and store the results just like we
+ * would if we'd received a 4-byte AS_PATH.  So, whatever our peer
+ * does, the only place we have AS path information that we use for
+ * the decision process is in the ASPathAttribute.
+ *
+ * If we're doing 4-byte AS numbers and our peer is doing 4-byte AS
+ * numbers, then all routes we send him will contain 4-byte AS_PATH
+ * attributes.  We just need to make sure we use the right encode()
+ * method.  If our peer is not doing 4-byte AS numbers, then we send a
+ * 2-byte AS_PATH, substituting AS_TRANS for any AS numbers that can't
+ * be represented in 2 bytes.  We also construct an AS4_PATH from our
+ * ASPathAttribute, and send that too.
  */
 
 // AS Path Values
@@ -76,18 +111,18 @@ enum ASPathSegType {
 };
 
 /**
- * Parent class for AsPath elements, which can be either AsSet or AsSequence.
+ * Parent class for ASPath elements, which can be either ASSet or ASSequence.
  */
-class AsSegment {
+class ASSegment {
 public:
     typedef vector <AsNum>::iterator iterator;
     typedef vector <AsNum>::const_iterator const_iterator;
     typedef vector <AsNum>::const_reverse_iterator const_reverse_iterator;
 
     /**
-     * Constructor of an empty AsSegment
+     * Constructor of an empty ASSegment
      */
-    AsSegment(ASPathSegType t = AS_NONE) : _type(t)	{
+    ASSegment(ASPathSegType t = AS_NONE) : _type(t)	{
 	_aslist.reserve(16);
     }
 
@@ -98,7 +133,7 @@ public:
      *
      * _type is d[0], l is d[1], entries follow.
      */
-    AsSegment(const uint8_t* d) throw(CorruptMessage)	{
+    ASSegment(const uint8_t* d) throw(CorruptMessage)	{
 	_aslist.reserve(16);
 	decode(d);
     }
@@ -106,14 +141,14 @@ public:
     /**
      * Copy constructor
      */
-    AsSegment(const AsSegment& a) :
+    ASSegment(const ASSegment& a) :
 	_type(a._type), _aslist(a._aslist)		{}
 
     /**
      * The destructor has nothing to do, the underlying container will
      * take care of the thing.
      */
-    ~AsSegment()					{}
+    ~ASSegment()					{}
 
     /**
      * reset whatever is currently contained in the object.
@@ -216,12 +251,12 @@ public:
     /**
      * compares internal representations for equality.
      */
-    bool operator==(const AsSegment& him) const;
+    bool operator==(const ASSegment& him) const;
 
     /**
      * Compares internal representations for <.
      */
-    bool operator<(const AsSegment& him) const;
+    bool operator<(const ASSegment& him) const;
 
     ASPathSegType type() const			{ return _type; }
     void set_type(ASPathSegType t)		{ _type = t; }
@@ -240,11 +275,11 @@ protected:
 };
 
 
-/* subsclass of AsSegment to handle encoding and decoding of 4-byte AS
+/* subsclass of ASSegment to handle encoding and decoding of 4-byte AS
    numbers from a AS4_PATH attribute */
-class As4Segment : public AsSegment {
+class AS4Segment : public ASSegment {
 public:
-    As4Segment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
+    AS4Segment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
     /**
      * Convert the external representation into the internal one.
      * _type is d[0], _entries is d[1], entries follow.
@@ -267,48 +302,48 @@ public:
 	return 2 + 4 * _aslist.size();
     }
 private:
-    /* no storage, as this is handled by the underlying AsSegment */
+    /* no storage, as this is handled by the underlying ASSegment */
 };
 
 /**
- * An AsPath is a list of AsSegments, each of which can be an AS_SET,
+ * An ASPath is a list of ASSegments, each of which can be an AS_SET,
  * AS_CONFED_SET, AS_SEQUENCE, or an AS_CONFED_SEQUENCE.
  */
-class AsPath {
+class ASPath {
 public:
-    typedef list <AsSegment>::const_iterator const_iterator;
-    typedef list <AsSegment>::iterator iterator;
+    typedef list <ASSegment>::const_iterator const_iterator;
+    typedef list <ASSegment>::iterator iterator;
 
-    AsPath() : _num_segments(0), _path_len(0)		{}
+    ASPath() : _num_segments(0), _path_len(0)		{}
 
     /**
      * Initialize from a string in the format
      *		1,2,(3,4,5),6,7,8,(9,10,11),12,13
      */
-    AsPath(const char *as_path) throw(InvalidString);
+    ASPath(const char *as_path) throw(InvalidString);
 
     /**
      * construct from received data
      */
-    AsPath(const uint8_t* d, size_t len) throw(CorruptMessage) {
+    ASPath(const uint8_t* d, size_t len) throw(CorruptMessage) {
 	decode(d, len); 
     }
 
     /**
-     * construct an aggregate from two AsPaths
+     * construct an aggregate from two ASPaths
      */
-    AsPath(const AsPath &asp1, const AsPath &asp2);
+    ASPath(const ASPath &asp1, const ASPath &asp2);
 
     /**
      * Copy constructor
      */
-    AsPath(const AsPath &a) : _segments(a._segments), 
+    ASPath(const ASPath &a) : _segments(a._segments), 
 	_num_segments(a._num_segments), _path_len(a._path_len) {}
 
-    ~AsPath()						{}
+    ~ASPath()						{}
 
-    void add_segment(const AsSegment& s);
-    void prepend_segment(const AsSegment& s);
+    void add_segment(const ASSegment& s);
+    void prepend_segment(const ASSegment& s);
 
     size_t path_length() const				{ return _path_len; }
 
@@ -328,14 +363,14 @@ public:
     string str() const;
     string short_str() const;
 
-    const AsSegment& segment(size_t n) const		{
+    const ASSegment& segment(size_t n) const		{
 	if (n < _num_segments) {
 	    const_iterator iter = _segments.begin();
 	    for (u_int i = 0; i<n; i++)
 		++iter;
 	    return (*iter);
         }
-	XLOG_FATAL("Segment doesn't exist.");
+	XLOG_FATAL("Segment %u doesn't exist.", (uint32_t)n);
 	xorp_throw(InvalidString, "segment invalid n\n");
     }
 
@@ -362,16 +397,16 @@ public:
 
     /**
      * Add the As number to the begining of the AS_SEQUENCE that starts
-     * the As path, or if the AsPath starts with an AS_SET, then add a
-     * new AS_SEQUENCE with the new AsNum to the start of the AsPath
+     * the As path, or if the ASPath starts with an AS_SET, then add a
+     * new AS_SEQUENCE with the new AsNum to the start of the ASPath
      */
     void prepend_as(const AsNum &asn);
 
     /**
      * Add the As number to the begining of the AS_CONFED_SEQUENCE
-     * that starts the As path, or if the AsPath does not start with
+     * that starts the As path, or if the ASPath does not start with
      * an AS_CONFED_SEQUENCE, then add a new AS_CONFED_SEQUENCE with
-     * the new AsNum to the start of the AsPath
+     * the new AsNum to the start of the ASPath
      */
     void prepend_confed_as(const AsNum &asn);
 
@@ -385,9 +420,11 @@ public:
      */
     bool contains_confed_segments() const;
 
-    bool operator==(const AsPath& him) const;
+    ASPath& operator=(const ASPath& him);
 
-    bool operator<(const AsPath& him) const;
+    bool operator==(const ASPath& him) const;
+
+    bool operator<(const ASPath& him) const;
 
     void encode_for_mib(vector<uint8_t>& aspath) const;
 
@@ -396,31 +433,55 @@ public:
      * represented entirely as two-byte AS numbers */
     bool two_byte_compatible() const;
 
+    /**
+     * Merge an AS4Path into a 2-byte AS Path.  Both paths will end up
+     * containing the same data
+     *
+     * param as4path the AS4_PATH to be merged.  
+     */
+    void merge_as4_path(AS4Path& as4_path);
+
 protected:
     /**
      * internal representation
      */
-    list <AsSegment>	_segments;
+    list <ASSegment>	_segments;
     size_t		_num_segments;
     size_t		_path_len;
 
 private:
     /**
-     * populate an AsPath from received data. Only used in the constructor.
+     * populate an ASPath from received data. Only used in the constructor.
      */
     void decode(const uint8_t *d, size_t len) throw(CorruptMessage);
 };
 
 /* subclass to handle 4-byte AS encoding and decoding */
-class As4Path : public AsPath {
+class AS4Path : public ASPath {
 public:
     /**
-     * construct from received data.  This needs to take the regular
-     * AsPath in addition to the AS4_PATH data, because it needs to
-     * cross-validate the two.
+     * Construct from received data from 4-byte peer.
      */
-    As4Path(const uint8_t* d, size_t len, const AsPath& as_path)
+    AS4Path(const uint8_t* d, size_t len) throw(CorruptMessage);
+
+    /**
+     * Initialize from a string in the format
+     *		3.1,2,(3,10.4,5),6,7,8,(9,10,11),12,13
+     */
+    AS4Path(const char *as_path) throw(InvalidString) 
+	: ASPath(as_path)
+    {};
+
+#if 0
+    /**
+     * Construct from received data from 2-byte peer.  This needs to
+     * take the regular ASPath in addition to the AS4_PATH data,
+     * because it needs to cross-validate the two.
+     */
+    AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
 	throw(CorruptMessage);
+
+#endif
 
     /**
      * Convert from internal to external representation, with the
@@ -435,14 +496,15 @@ public:
 
     size_t wire_size() const;
 
+    void cross_validate(const ASPath& as_path);
+
 private:
     /**
-     * populate an AsPath from received data. Only used in the constructor.
+     * populate an ASPath from received data. Only used in the constructor.
      */
     void decode(const uint8_t *d, size_t len) throw(CorruptMessage);
-    void cross_validate(const AsPath& as_path);
-    void pad_segment(const AsSegment& old_seg, AsSegment& new_seg);
-    void do_patchup(const AsPath& as_path);
+    void pad_segment(const ASSegment& old_seg, ASSegment& new_seg);
+    void do_patchup(const ASPath& as_path);
 };
 
 #endif // __BGP_ASPATH_HH__

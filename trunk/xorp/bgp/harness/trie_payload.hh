@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.9 2006/03/16 00:03:42 pavlin Exp $
+// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.10 2007/02/16 22:45:26 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
 #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
@@ -26,10 +26,11 @@
 class TrieData {
 public:
     TrieData(const TimeVal& tv, const uint8_t *buf, size_t len,
+	     const BGPPeerData *peerdata,
 	     TrieData* &first, TrieData* &last) : _tv(tv),
 						  _first(first),
 						  _last(last) {
-	_packet = new UpdatePacket(buf, len);
+	_packet = new UpdatePacket(buf, len, peerdata);
 	_refcnt = 1;
 
 	_next = 0;
@@ -103,8 +104,9 @@ public:
     TriePayload() : _data(0) {}
 
     TriePayload(const TimeVal& tv, const uint8_t *buf, size_t len,
-	    TrieData* &first, TrieData* &last) {
-	_data = new TrieData(tv, buf, len, first, last);
+		const BGPPeerData *peerdata,
+		TrieData* &first, TrieData* &last) {
+	_data = new TrieData(tv, buf, len, peerdata, first, last);
     }
 
     ~TriePayload() {

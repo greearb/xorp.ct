@@ -10,7 +10,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -20,7 +20,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D2 **]
@@ -31,7 +31,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -41,7 +41,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -61,7 +61,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -73,7 +73,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -87,7 +87,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -99,7 +99,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -113,7 +113,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -123,7 +123,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -135,7 +135,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -145,7 +145,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -165,7 +165,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -177,7 +177,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -189,7 +189,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -201,7 +201,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -215,7 +215,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -227,7 +227,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -239,7 +239,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -251,7 +251,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -265,7 +265,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -275,7 +275,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -287,7 +287,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -297,7 +297,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -309,7 +309,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -319,7 +319,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -331,7 +331,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -341,7 +341,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -361,7 +361,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -373,7 +373,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -385,7 +385,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -397,7 +397,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -418,7 +418,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -430,7 +430,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -441,7 +441,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [DELETE]
@@ -450,7 +450,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -466,7 +466,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -478,7 +478,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 2 UP
@@ -501,7 +501,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -514,7 +514,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -527,7 +527,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -543,7 +543,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -555,7 +555,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -567,7 +567,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -589,7 +589,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -598,7 +598,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -611,7 +611,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -620,7 +620,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -637,7 +637,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 2 UP
@@ -661,7 +661,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -674,7 +674,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -698,7 +698,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -709,7 +709,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D2 **]
 [PUSH]
@@ -726,7 +726,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 1 UP
@@ -750,7 +750,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -763,7 +763,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -776,7 +776,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -791,7 +791,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -803,7 +803,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -815,7 +815,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -836,7 +836,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -845,7 +845,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -858,7 +858,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -867,7 +867,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -884,7 +884,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 2 UP
@@ -908,7 +908,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -921,7 +921,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -934,7 +934,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -957,7 +957,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -968,7 +968,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -981,7 +981,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -998,7 +998,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 2 UP
@@ -1022,7 +1022,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1035,7 +1035,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1048,7 +1048,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -1096,7 +1096,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1109,7 +1109,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1122,7 +1122,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -1137,7 +1137,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
@@ -1152,7 +1152,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1164,7 +1164,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1176,7 +1176,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1188,7 +1188,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1204,7 +1204,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -1214,7 +1214,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1227,7 +1227,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -1237,7 +1237,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
@@ -1255,7 +1255,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1265,7 +1265,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -1279,7 +1279,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1289,7 +1289,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1303,7 +1303,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1313,7 +1313,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1327,7 +1327,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1337,7 +1337,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1351,7 +1351,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1361,7 +1361,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1375,7 +1375,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1385,7 +1385,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -1406,7 +1406,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1419,7 +1419,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1432,7 +1432,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -1446,7 +1446,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
@@ -1454,7 +1454,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
@@ -1468,7 +1468,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1480,7 +1480,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1492,7 +1492,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1507,7 +1507,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
@@ -1515,7 +1515,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [REPLACE]
@@ -1524,7 +1524,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
@@ -1532,7 +1532,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1544,7 +1544,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
@@ -1552,7 +1552,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [REPLACE]
@@ -1561,7 +1561,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 PUSH flag is set
 SubnetRoute:
@@ -1569,7 +1569,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] LET EVENT QUEUE DRAIN
@@ -1587,7 +1587,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1597,7 +1597,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1611,7 +1611,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1621,7 +1621,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1635,7 +1635,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1645,7 +1645,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -1666,7 +1666,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -1679,7 +1679,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1692,7 +1692,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TAKE PEER 1 DOWN
@@ -1713,7 +1713,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1724,7 +1724,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D2 **]
 [PUSH]
@@ -1737,7 +1737,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D2 **]
 [PUSH]
@@ -1755,7 +1755,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 1 UP
@@ -1779,7 +1779,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1792,7 +1792,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -1808,7 +1808,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RUN EVENT LOOP TO COMPLETION
@@ -1823,7 +1823,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1835,7 +1835,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1847,7 +1847,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -1864,7 +1864,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1874,7 +1874,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -1887,7 +1887,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1897,7 +1897,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -1910,7 +1910,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -1920,7 +1920,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [separator]-------------------------------------
@@ -1943,7 +1943,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -1956,7 +1956,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -1969,7 +1969,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TAKE PEER 1 DOWN
@@ -1995,7 +1995,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RUN EVENT LOOP TO COMPLETION
@@ -2012,7 +2012,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2024,7 +2024,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2035,7 +2035,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2050,7 +2050,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2070,7 +2070,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2080,7 +2080,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -2093,7 +2093,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2103,7 +2103,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2124,7 +2124,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -2137,7 +2137,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -2154,7 +2154,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2166,7 +2166,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2182,7 +2182,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -2192,7 +2192,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RUN EVENT LOOP TO COMPLETION
@@ -2209,7 +2209,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2219,7 +2219,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -2232,7 +2232,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2242,7 +2242,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -2255,7 +2255,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2265,7 +2265,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2286,7 +2286,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -2302,7 +2302,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2318,7 +2318,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -2328,7 +2328,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RUN EVENT LOOP TO COMPLETION
@@ -2345,7 +2345,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2355,7 +2355,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -2368,7 +2368,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2378,7 +2378,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2411,7 +2411,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -2421,7 +2421,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RUN EVENT LOOP TO COMPLETION
@@ -2435,7 +2435,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2450,7 +2450,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2460,7 +2460,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 2
@@ -2473,7 +2473,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2483,7 +2483,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2505,7 +2505,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -2518,7 +2518,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TAKE PEER 1 DOWN
@@ -2544,7 +2544,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2555,7 +2555,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2574,7 +2574,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2584,7 +2584,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2605,7 +2605,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -2618,7 +2618,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -2631,7 +2631,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TAKE PEER 1 DOWN
@@ -2659,7 +2659,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2670,7 +2670,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2685,7 +2685,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2704,7 +2704,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2714,7 +2714,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2735,7 +2735,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -2748,7 +2748,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -2761,7 +2761,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -2774,7 +2774,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TAKE PEER 1 DOWN
@@ -2795,7 +2795,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -2818,7 +2818,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2830,7 +2830,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2841,7 +2841,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2856,7 +2856,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2871,7 +2871,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -2890,7 +2890,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2900,7 +2900,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -2913,7 +2913,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -2923,7 +2923,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -2944,7 +2944,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 1
@@ -2957,7 +2957,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -2970,7 +2970,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] BRING PEER 3 UP
@@ -2986,7 +2986,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -2998,7 +2998,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -3010,7 +3010,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -3035,7 +3035,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -3045,7 +3045,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RUN EVENT LOOP TO COMPLETION
@@ -3060,7 +3060,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -3069,7 +3069,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -3084,7 +3084,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -3093,7 +3093,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -3112,7 +3112,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -3122,7 +3122,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] DELETING FROM PEER 1
@@ -3135,7 +3135,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -3145,7 +3145,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.5
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [** TABLE DebugTable-D1 **]
@@ -3166,7 +3166,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SENDING FROM PEER 2
@@ -3183,7 +3183,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [PUSH]
@@ -3199,7 +3199,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -3208,7 +3208,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [ADD]
@@ -3217,7 +3217,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [ADD]
@@ -3226,7 +3226,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D1 **]
 [PUSH]
@@ -3245,7 +3245,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [** TABLE DebugTable-D3 **]
 [DELETE]
@@ -3255,7 +3255,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.2
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/6, AS/6, AS/5, AS/4]
+	AS Path Attribute ASPath: [AS/6, AS/6, AS/5, AS/4]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP

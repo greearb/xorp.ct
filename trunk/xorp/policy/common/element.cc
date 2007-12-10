@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.9 2007/02/16 22:47:02 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.10 2007/04/20 20:29:02 pavlin Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
@@ -59,8 +59,8 @@ template<> Element::Hash ElemIPv6Net::_hash = 0;
 template<> const char* ElemU32Range::id = "u32range";
 template<> Element::Hash ElemU32Range::_hash = 0;
 
-template<> const char* ElemAsPath::id = "aspath";
-template<> Element::Hash ElemAsPath::_hash = 0;
+template<> const char* ElemASPath::id = "aspath";
+template<> Element::Hash ElemASPath::_hash = 0;
 
 const char* ElemNull::id = "null";
 Element::Hash ElemNull::_hash = 1;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.18 2006/09/28 15:19:45 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.19 2007/02/16 22:45:21 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -23,11 +23,14 @@
 
 #include "libproto/packet.hh"
 
+#include "bgp.hh"
+#include "local_data.hh"
 #include "packet.hh"
 #include "path_attribute.hh"
 
+
 bool
-test_multprotocol(TestInfo& /*info*/)
+test_multprotocol(TestInfo& /*info*/, BGPPeerData* /*peerdata*/)
 {
     BGPMultiProtocolCapability multi(AFI_IPV6, SAFI_UNICAST);
 
@@ -44,15 +47,18 @@ test_multprotocol(TestInfo& /*info*/)
 }
 
 bool
-test_multiprotocol_reach_ipv4(TestInfo& /*info*/)
+test_multiprotocol_reach_ipv4(TestInfo& /*info*/, BGPPeerData *peerdata)
 {
+    uint8_t buf[BGPPacket::MAXPACKETSIZE], buf2[BGPPacket::MAXPACKETSIZE];
+    size_t enc_len = BGPPacket::MAXPACKETSIZE,  recv_len = BGPPacket::MAXPACKETSIZE;
+
     MPReachNLRIAttribute<IPv4> mpreach(SAFI_MULTICAST);
 
     assert(mpreach.optional());
     assert(!mpreach.transitive());
 
-    mpreach.encode();
-    assert(12 == mpreach.wire_size());
+    assert(mpreach.encode(buf, enc_len, peerdata));
+    assert(12 == enc_len);
 
     mpreach.set_nexthop(IPv4("128.16.0.0"));
 
@@ -72,46 +78,52 @@ test_multiprotocol_reach_ipv4(TestInfo& /*info*/)
     mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/14"));
     mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/15"));
     mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/16"));
-    mpreach.encode();
 
-    assert(52 == mpreach.wire_size());
+    enc_len = BGPPacket::MAXPACKETSIZE;
+    assert(mpreach.encode(buf, enc_len, peerdata));
+    assert(52 == enc_len);
 
-    MPReachNLRIAttribute<IPv4> recv(mpreach.data());
+    MPReachNLRIAttribute<IPv4> recv(buf);
+    // we need to re-encode to get the received data as a buffer
+    recv.encode(buf2, recv_len, peerdata);
 
-    assert(mpreach.wire_size() == recv.wire_size());
-
-    assert(memcmp(mpreach.data(), recv.data(), recv.wire_size()) == 0);
+    assert(enc_len == recv_len);
+    assert(memcmp(buf, buf2, recv_len) == 0);
 
     return true;
 }
 
 bool
-test_multiprotocol_unreach(TestInfo& /*info*/)
+test_multiprotocol_unreach(TestInfo& /*info*/, BGPPeerData* peerdata)
 {
     MPUNReachNLRIAttribute<IPv6> mpunreach(SAFI_UNICAST);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE], buf2[BGPPacket::MAXPACKETSIZE];
+    size_t enc_len = BGPPacket::MAXPACKETSIZE, recv_len = BGPPacket::MAXPACKETSIZE;
 
     assert(mpunreach.optional());
     assert(!mpunreach.transitive());
 
-    mpunreach.encode();
-    assert(6 == mpunreach.wire_size());
+    assert(mpunreach.encode(buf, enc_len, peerdata));
+    assert(6 == enc_len);
 
     mpunreach.add_withdrawn(IPNet<IPv6>("2000::/3"));
-    mpunreach.encode();
+    enc_len = BGPPacket::MAXPACKETSIZE;
+    mpunreach.encode(buf, enc_len, peerdata);
 
-    assert(8 == mpunreach.wire_size());
+    assert(8 == enc_len);
 
-    MPUNReachNLRIAttribute<IPv6> recv(mpunreach.data());
+    MPUNReachNLRIAttribute<IPv6> recv(buf);
+    // we need to re-encode to get the received data as a buffer
+    assert(recv.encode(buf2, recv_len, peerdata));
 
-    assert(mpunreach.wire_size() == recv.wire_size());
-
-    assert(memcmp(mpunreach.data(), recv.data(), recv.wire_size()) == 0);
+    assert(enc_len == recv_len);
+    assert(memcmp(buf, buf2, recv_len) == 0);
 
     return true;
 }
 
 bool
-test_refresh(TestInfo& /*info*/)
+test_refresh(TestInfo& /*info*/, BGPPeerData* /*peerdata*/)
 {
     BGPRefreshCapability refresh;
 
@@ -128,16 +140,16 @@ test_refresh(TestInfo& /*info*/)
 }
 
 bool
-test_simple_open_packet(TestInfo& /*info*/) 
+test_simple_open_packet(TestInfo& /*info*/, BGPPeerData* peerdata) 
 {
     /* In this test we create an Open Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
     OpenPacket openpacket(AsNum(666), IPv4("1.2.3.4"), 1234);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
 
-    const uint8_t *buf;
-    size_t len;
-    buf = openpacket.encode(len);
+    assert(openpacket.encode(buf, len, peerdata));
 
     //open packets with no parameters have a fixed length of 29 bytes
     assert(len == BGPPacket::MINOPENPACKET);
@@ -169,18 +181,16 @@ test_simple_open_packet(TestInfo& /*info*/)
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+    assert(receivedpacket.encode(buf2, len2, peerdata));
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
-    delete[] buf;
-    delete[] buf2;
     return true;
 }
 
 bool
-test_open_packet_with_capabilities(TestInfo& /*info*/) 
+test_open_packet_with_capabilities(TestInfo& /*info*/, BGPPeerData* peerdata) 
 {
     /* In this test we create an Open Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -193,9 +203,10 @@ test_open_packet_with_capabilities(TestInfo& /*info*/)
     openpacket.add_parameter(
 	     new BGPRefreshCapability());
     
-    const uint8_t *buf;
-    size_t len;
-    buf = openpacket.encode(len);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
+
+    assert(openpacket.encode(buf, len, peerdata));
 
     //open packets with no parameters have a fixed length of 29 bytes
     // +8 for the multiprotocol parameter.
@@ -224,27 +235,28 @@ test_open_packet_with_capabilities(TestInfo& /*info*/)
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+
+    assert(receivedpacket.encode(buf2, len2, peerdata));
+
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
-    delete[] buf;
-    delete[] buf2;
     return true;
 }
 
 bool
-test_keepalive_packet(TestInfo& /*info*/)
+test_keepalive_packet(TestInfo& /*info*/, BGPPeerData* peerdata)
 {
     /* In this test we create an Keepalive Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
        received */
     KeepAlivePacket keepalivepacket;
     
-    const uint8_t *buf;
-    size_t len;
-    buf = keepalivepacket.encode(len);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
+
+    assert(keepalivepacket.encode(buf, len, peerdata));
 
     //keepalive packets with no parameters have a fixed length of 19 bytes
     assert(len == BGPPacket::COMMON_HEADER_LEN);
@@ -263,19 +275,17 @@ test_keepalive_packet(TestInfo& /*info*/)
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+    assert(receivedpacket.encode(buf2, len2, peerdata));
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
-    delete[] buf;
-    delete[] buf2;
     return true;
 }
 
 bool
 test_notification_packets(TestInfo& info, const uint8_t *d, uint8_t ec, 
-			      uint8_t esc, uint16_t l) 
+			      uint8_t esc, uint16_t l, BGPPeerData *peerdata) 
 {
     DOUT(info) << "test_notification_packets\n";
 
@@ -287,9 +297,9 @@ test_notification_packets(TestInfo& info, const uint8_t *d, uint8_t ec,
     NotificationPacket *notificationpacket;
     notificationpacket = new NotificationPacket(ec, esc, d, l);
     
-    const uint8_t *buf;
-    size_t len;
-    buf = notificationpacket->encode(len);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    assert(notificationpacket->encode(buf, len, peerdata));
 
     //notification packets have a length of 21 bytes plus the length
     //of the error data
@@ -320,20 +330,18 @@ test_notification_packets(TestInfo& info, const uint8_t *d, uint8_t ec,
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+    assert(receivedpacket.encode(buf2, len2, peerdata));
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
 
     delete notificationpacket;
-    delete[] buf;
-    delete[] buf2;
     return true;
 }
 
 bool
-test_withdraw_packet(TestInfo& info)
+test_withdraw_packet(TestInfo& info, BGPPeerData* peerdata)
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -349,9 +357,9 @@ test_withdraw_packet(TestInfo& info)
     updatepacket.add_withdrawn(r1);
     updatepacket.add_withdrawn(r2);
     
-    const uint8_t *buf;
-    size_t len;
-    buf = updatepacket.encode(len);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    assert(updatepacket.encode(buf, len, peerdata));
 
     //update packets with have a minumum length of 23 bytes, plus all
     //the routing information
@@ -366,7 +374,7 @@ test_withdraw_packet(TestInfo& info)
     assert(type == MESSAGETYPEUPDATE);
     skip++;
 
-    UpdatePacket receivedpacket(buf, plen);
+    UpdatePacket receivedpacket(buf, plen, peerdata);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
     BGPUpdateAttribList::const_iterator iter;
     iter = receivedpacket.wr_list().begin();
@@ -384,18 +392,18 @@ test_withdraw_packet(TestInfo& info)
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+    assert(receivedpacket.encode(buf2, len2, peerdata));
+
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
-    delete[] buf;
-    delete[] buf2;
+
     return true;
 }
 
 bool
-test_announce_packet1(TestInfo& info)
+test_announce_packet1(TestInfo& info, BGPPeerData* peerdata)
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -418,22 +426,22 @@ test_announce_packet1(TestInfo& info)
     for (i=0;i<=9;i++) {
 	as[i] = new AsNum(i);
     }
-    AsSegment seq1 = AsSegment(AS_SEQUENCE);
+    ASSegment seq1 = ASSegment(AS_SEQUENCE);
     seq1.add_as(*(as[1]));
     seq1.add_as(*(as[2]));
     seq1.add_as(*(as[3]));
 
-    AsSegment seq2 = AsSegment(AS_SEQUENCE);
+    ASSegment seq2 = ASSegment(AS_SEQUENCE);
     seq2.add_as(*(as[7]));
     seq2.add_as(*(as[8]));
     seq2.add_as(*(as[9]));
 
-    AsSegment set1 = AsSegment(AS_SET);
+    ASSegment set1 = ASSegment(AS_SET);
     set1.add_as(*(as[4]));
     set1.add_as(*(as[5]));
     set1.add_as(*(as[6]));
 
-    AsPath aspath;
+    ASPath aspath;
     aspath.add_segment(seq1);
     aspath.add_segment(set1);
     aspath.add_segment(seq2);
@@ -471,9 +479,9 @@ test_announce_packet1(TestInfo& info)
 	++iter;
     }
     
-    const uint8_t *buf;
-    size_t len;
-    buf = updatepacket.encode(len);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    assert(updatepacket.encode(buf, len, peerdata));
 
     //update packets with have a minumum length of 23 bytes, plus all
     //the routing information
@@ -499,7 +507,7 @@ test_announce_packet1(TestInfo& info)
     assert(type == MESSAGETYPEUPDATE);
     skip++;
 
-    UpdatePacket receivedpacket(buf, plen);
+    UpdatePacket receivedpacket(buf, plen, peerdata);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
@@ -592,15 +600,14 @@ test_announce_packet1(TestInfo& info)
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+    assert(receivedpacket.encode(buf2, len2, peerdata));
+
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
 
     // clean up
-    delete[] buf;
-    delete[] buf2;
     for (i=0;i<=9;i++) {
 	delete as[i];
     }
@@ -608,7 +615,7 @@ test_announce_packet1(TestInfo& info)
 }
 
 bool
-test_announce_packet2(TestInfo& info)
+test_announce_packet2(TestInfo& info, BGPPeerData* peerdata)
 {
     /* In this test we create an Update Packet, pretend to send it,
        pretend to receive it, and check that what we sent is what we
@@ -631,22 +638,22 @@ test_announce_packet2(TestInfo& info)
     for (i=0;i<=9;i++) {
 	as[i] = new AsNum(i);
     }
-    AsSegment seq1 = AsSegment(AS_SEQUENCE);
+    ASSegment seq1 = ASSegment(AS_SEQUENCE);
     seq1.add_as(*(as[1]));
     seq1.add_as(*(as[2]));
     seq1.add_as(*(as[3]));
 
-    AsSegment seq2 = AsSegment(AS_SEQUENCE);
+    ASSegment seq2 = ASSegment(AS_SEQUENCE);
     seq2.add_as(*(as[7]));
     seq2.add_as(*(as[8]));
     seq2.add_as(*(as[9]));
 
-    AsSegment set1 = AsSegment(AS_SET);
+    ASSegment set1 = ASSegment(AS_SET);
     set1.add_as(*(as[4]));
     set1.add_as(*(as[5]));
     set1.add_as(*(as[6]));
 
-    AsPath aspath;
+    ASPath aspath;
     aspath.add_segment(seq1);
     aspath.add_segment(set1);
     aspath.add_segment(seq2);
@@ -684,9 +691,9 @@ test_announce_packet2(TestInfo& info)
 	++iter;
     }
     
-    const uint8_t *buf;
-    size_t len;
-    buf = updatepacket.encode(len);
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    assert(updatepacket.encode(buf, len, peerdata));
 
     //update packets with have a minumum length of 23 bytes, plus all
     //the routing information
@@ -712,7 +719,7 @@ test_announce_packet2(TestInfo& info)
     assert(type == MESSAGETYPEUPDATE);
     skip++;
 
-    UpdatePacket receivedpacket(buf, plen);
+    UpdatePacket receivedpacket(buf, plen, peerdata);
     assert(receivedpacket.type()==MESSAGETYPEUPDATE);
 
     //check there are no withdrawn routes
@@ -805,15 +812,13 @@ test_announce_packet2(TestInfo& info)
 
     //try encoding the received packet, and check we get the same
     //encoded packet as when we encoded the constructed packet
-    const uint8_t *buf2;
-    size_t len2;
-    buf2 = receivedpacket.encode(len2);
+    uint8_t buf2[BGPPacket::MAXPACKETSIZE];
+    size_t len2 = BGPPacket::MAXPACKETSIZE;
+    assert(receivedpacket.encode(buf2, len2, peerdata));
     assert(len == len2);
     assert(memcmp(buf, buf2, len2) == 0);
 
     // clean up
-    delete[] buf;
-    delete[] buf2;
     for (i=0;i<=9;i++) {
 	delete as[i];
     }
@@ -832,6 +837,11 @@ main(int argc, char** argv)
 
     TestMain t(argc, argv);
 
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+
     string test_name =
 	t.get_optional_args("-t", "--test", "run only the specified test");
     t.complete_args_parsing();
@@ -845,35 +855,38 @@ main(int argc, char** argv)
 	    string test_name;
 	    XorpCallback1<bool, TestInfo&>::RefPtr cb;
 	} tests[] = {
-	    {"multiprotocol", callback(test_multprotocol)},
+	    {"multiprotocol", callback(test_multprotocol, &pd)},
 	    {"multiprotocol_reach_ipv4",
-	     callback(test_multiprotocol_reach_ipv4)},
-	    {"multiprotocol_unreach", callback(test_multiprotocol_unreach)},
-	    {"refresh", callback(test_refresh)},
-	    {"simple_open_packet", callback(test_simple_open_packet)},
-	    {"open_packet", callback(test_open_packet_with_capabilities)},
-	    {"keepalive_packet", callback(test_keepalive_packet)},
+	     callback(test_multiprotocol_reach_ipv4, &pd)},
+	    {"multiprotocol_unreach", callback(test_multiprotocol_unreach, &pd)},
+	    {"refresh", callback(test_refresh, &pd)},
+	    {"simple_open_packet", callback(test_simple_open_packet, &pd)},
+	    {"open_packet", callback(test_open_packet_with_capabilities, &pd)},
+	    {"keepalive_packet", callback(test_keepalive_packet, &pd)},
 	    {"notification_packets1",
 	     callback(test_notification_packets,
 		      reinterpret_cast<const uint8_t *>(0),
  		      static_cast<uint8_t>(CEASE),
 		      static_cast<uint8_t>(0),
-		      static_cast<uint16_t>(0))},
+		      static_cast<uint16_t>(0),
+		      &pd)},
 	    {"notification_packets2",
 	     callback(test_notification_packets,
 		      reinterpret_cast<const uint8_t *>(0),
  		      static_cast<uint8_t>(CEASE),
 		      static_cast<uint8_t>(1),
-		      static_cast<uint16_t>(0))},
+		      static_cast<uint16_t>(0),
+		      &pd)},
  	    {"notification_packets3",
  	     callback(test_notification_packets,
 		      reinterpret_cast<const uint8_t *>(edata),
  		      static_cast<uint8_t>(MSGHEADERERR),
 		      static_cast<uint8_t>(2),
-		      static_cast<uint16_t>(2))},
-	    {"withdraw_packet", callback(test_withdraw_packet)},
-	    {"announce_packet1", callback(test_announce_packet1)},
-	    {"announce_packet2", callback(test_announce_packet2)},
+		      static_cast<uint16_t>(2),
+		      &pd)},
+	    {"withdraw_packet", callback(test_withdraw_packet, &pd)},
+	    {"announce_packet1", callback(test_announce_packet1, &pd)},
+	    {"announce_packet2", callback(test_announce_packet2, &pd)},
 	};
 
 	if("" == test_name) {

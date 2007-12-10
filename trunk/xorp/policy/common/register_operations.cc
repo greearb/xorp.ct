@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.19 2006/11/14 03:22:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.20 2007/02/16 22:47:04 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -256,20 +256,20 @@ str_setregex(const ElemStr& left, const ElemSetStr& right)
 }
 
 Element*
-aspath_prepend(const ElemU32& left, const ElemAsPath& right)
+aspath_prepend(const ElemU32& left, const ElemASPath& right)
 {
-    AsPath* path = new AsPath(right.val());
+    ASPath* path = new ASPath(right.val());
     path->prepend_as(AsNum(left.val()));
 
-    ElemAsPath* ret = new ElemAsPath(*path, true);
+    ElemASPath* ret = new ElemASPath(*path, true);
 
     return ret;
 }
 
 Element*
-aspath_expand(const ElemU32& left, const ElemAsPath& right)
+aspath_expand(const ElemU32& left, const ElemASPath& right)
 {
-    AsPath* path = new AsPath(right.val());
+    ASPath* path = new ASPath(right.val());
 
     if (path->path_length()) {
         const AsNum& head = path->first_asnum();
@@ -279,24 +279,24 @@ aspath_expand(const ElemU32& left, const ElemAsPath& right)
 	   path->prepend_as(head);
     }	   
 
-    ElemAsPath* ret = new ElemAsPath(*path, true);
+    ElemASPath* ret = new ElemASPath(*path, true);
     return ret;
 }
 
 Element*
-aspath_contains(const ElemAsPath& left, const ElemU32& right)
+aspath_contains(const ElemASPath& left, const ElemU32& right)
 {
     return new ElemBool(left.val().contains(AsNum(right.val())));
 }
 
 Element*
-aspath_regex(const ElemAsPath& left, const ElemStr& right)
+aspath_regex(const ElemASPath& left, const ElemStr& right)
 {
     return new ElemBool(policy_utils::regex(left.val().short_str(), right.val()));
 }
 
 Element*
-aspath_regex(const ElemAsPath& left, const ElemSetStr& right)
+aspath_regex(const ElemASPath& left, const ElemSetStr& right)
 {
     string str = left.val().short_str();
 
@@ -415,11 +415,11 @@ do {									\
     disp.add<ElemStr, ElemU32Range, operations::ctr>(OpCtr());
 
     // ASPATH operations
-    disp.add<ElemU32, ElemAsPath, operations::aspath_prepend>(OpAdd());
-    disp.add<ElemU32, ElemAsPath, operations::aspath_expand>(OpMul());
-    disp.add<ElemAsPath, ElemU32, operations::aspath_contains>(OpNEInt());
-    disp.add<ElemAsPath, ElemStr, operations::aspath_regex>(OpRegex());
-    disp.add<ElemAsPath, ElemSetStr, operations::aspath_regex>(OpRegex());
+    disp.add<ElemU32, ElemASPath, operations::aspath_prepend>(OpAdd());
+    disp.add<ElemU32, ElemASPath, operations::aspath_expand>(OpMul());
+    disp.add<ElemASPath, ElemU32, operations::aspath_contains>(OpNEInt());
+    disp.add<ElemASPath, ElemStr, operations::aspath_regex>(OpRegex());
+    disp.add<ElemASPath, ElemSetStr, operations::aspath_regex>(OpRegex());
 
 
 #define ADD_LSETBINOP(set, arg)						\

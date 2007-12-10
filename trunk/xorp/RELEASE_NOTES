@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.192 2007/11/22 06:41:59 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.193 2007/11/29 01:52:35 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -138,7 +138,12 @@ Release 1.5-WIP (2007/??/??)
     - Added a clear database command.
 
   BGP:
-    - 
+    - Added support for 4-byte AS numbers, as detailed in RFC 4893.
+      From 1st Jan 2009 4-byte AS numbers will be allocated by default
+      by RIPE, so it is desirable that all BGP implementations support
+      four-byte AS numbers by that time.  Currently 4-byte support is
+      not enabled in XORP by default, but can be enabled using the
+      "4-byte-as-support" configuration option.
 
   STATIC_ROUTES:
     - Bug fix that prevented the deletion of interface-specific routes

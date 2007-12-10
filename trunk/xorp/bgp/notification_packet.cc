@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.30 2006/10/12 01:24:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.31 2007/02/16 22:45:13 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -82,13 +82,16 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
     return;
 }
 
-const uint8_t *
-NotificationPacket::encode(size_t& len, uint8_t *buf) const
+bool
+NotificationPacket::encode(uint8_t *buf, size_t& len, const BGPPeerData *peerdata) const
 {
+    UNUSED(peerdata);
+    XLOG_ASSERT(buf != 0);
     debug_msg("Encode in NotificationPacket called (%u)\n",
 	      XORP_UINT_CAST(_Length));
-    if (buf != 0)		// have a buffer, check length
-	assert(len >= _Length);	// XXX should become an exception
+
+    if (len < _Length)
+	return false;
 
     len = _Length;
 
@@ -99,7 +102,7 @@ NotificationPacket::encode(size_t& len, uint8_t *buf) const
     if (_error_data != 0)
 	memcpy(buf + BGPPacket::MINNOTIFICATIONPACKET, _error_data,
 		len - BGPPacket::MINNOTIFICATIONPACKET);
-    return buf;
+    return true;
 }
 
 bool

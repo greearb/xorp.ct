@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.51 2006/04/14 18:49:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.52 2007/02/16 22:45:17 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -126,7 +126,7 @@ SimpleASFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			  bool &modified) const 
 {
     const PathAttributeList<A> *attributes = rtmsg->route()->attributes();
-    const AsPath &as_path = attributes->aspath();
+    const ASPath &as_path = attributes->aspath();
     debug_msg("Filter: AS_Path filter for >%s< checking >%s<\n",
 	   _as_num.str().c_str(), as_path.str().c_str());
     if (as_path.contains(_as_num)) {
@@ -150,12 +150,12 @@ RRInputFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			 bool &modified) const 
 {
     const PathAttributeList<A> *attributes = rtmsg->route()->attributes();
-    const ORIGINATOR_IDAttribute *oid = attributes->originator_id();
+    const OriginatorIDAttribute *oid = attributes->originator_id();
     if (0 != oid && oid->originator_id() == _bgp_id) {
 	drop_message(rtmsg, modified);
 	return NULL;
     }
-    const CLUSTER_LISTAttribute *cl = attributes->cluster_list();
+    const ClusterListAttribute *cl = attributes->cluster_list();
     if (0 != cl && cl->contains(_cluster_id)) {
 	drop_message(rtmsg, modified);
 	return NULL;
@@ -179,7 +179,7 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			   bool &modified) const
 {
     //Create a new AS path with our AS number prepended to it.
-    AsPath new_as_path(rtmsg->route()->attributes()->aspath());
+    ASPath new_as_path(rtmsg->route()->attributes()->aspath());
 
     if (_is_confederation_peer) { 
 	new_as_path.prepend_confed_as(_as_num);
@@ -392,10 +392,10 @@ RRIBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
     if (0 == palist.originator_id()) {
 	if (rtmsg->origin_peer()->get_peer_type() == PEER_TYPE_INTERNAL) {
-	    ORIGINATOR_IDAttribute originator_id_att(_bgp_id);
+	    OriginatorIDAttribute originator_id_att(_bgp_id);
 	    palist.add_path_attribute(originator_id_att);
 	} else {
-	    ORIGINATOR_IDAttribute
+	    OriginatorIDAttribute
 		originator_id_att(rtmsg->origin_peer()->id());
 	    palist.add_path_attribute(originator_id_att);
 	}
@@ -403,12 +403,12 @@ RRIBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
 
     // Prepend the CLUSTER_ID to the CLUSTER_LIST, if the CLUSTER_LIST
     // does not exist add one.
-    const CLUSTER_LISTAttribute *cla = palist.cluster_list();
-    CLUSTER_LISTAttribute *ncla = 0;
+    const ClusterListAttribute *cla = palist.cluster_list();
+    ClusterListAttribute *ncla = 0;
     if (0 == cla) {
-	ncla = new CLUSTER_LISTAttribute;
+	ncla = new ClusterListAttribute;
     } else {
-	ncla = dynamic_cast<CLUSTER_LISTAttribute *>(cla->clone());
+	ncla = dynamic_cast<ClusterListAttribute *>(cla->clone());
 	palist.remove_attribute_by_type(CLUSTER_LIST);
     }
     ncla->prepend_cluster_id(_cluster_id);
@@ -770,6 +770,8 @@ UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			     rtmsg->route()->original_route(), 
 			     rtmsg->route()->igp_metric());
 
+    debug_msg("PA list from new route: %s\n", new_route->attributes()->str().c_str());
+
     // policy needs this
     propagate_flags(*(rtmsg->route()),*new_route);
     
@@ -817,7 +819,7 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	return rtmsg;
 
     //Create a new AS path with our AS number prepended to it.
-    AsPath new_as_path(rtmsg->route()->attributes()->aspath());
+    ASPath new_as_path(rtmsg->route()->attributes()->aspath());
     new_as_path.prepend_as(_as_num);
 
     //Form a new path attribute list containing the new AS path

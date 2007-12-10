@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/bgp.tex,v 1.21 2006/04/15 07:10:36 atanu Exp $
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.22 2007/03/02 19:56:05 atanu Exp $
 %
 
 \chapter{BGP}
@@ -93,6 +93,7 @@ XORP BGP complies with the following standards:
      IBGP.
 \item{\bf RFC 3065}: Autonomous System Confederations for BGP.
 \item{\bf RFC 2439}: BGP Route Flap Damping.
+\item{\bf RFC 4893}: BGP Support for Four-octet AS Number Space.
 \item{\bf RFC 1657}: Definitions of Managed Objects for the Fourth Version
      of the Border Gateway Protocol (BGP-4) using SMIv2.
 \end{description}
@@ -114,15 +115,38 @@ protocols \{\\
 \>bgp \{\\
 \>\>targetname: {\it text}\\
 \>\>bgp-id: {\it IPv4}\\
+\>\>enable-4byte-as-numbers: {\it bool}\\
 \>\>local-as: {\it int(1..65535)}\\
+\\
+\>\>route-reflector {\it text} \{\\
+\>\>\>cluster-id: {\it IPv4}\\
+\>\>\>disable: {\it bool}\\
+\>\>\}\\
+\\
+\>\>confederation \{\\
+\>\>\>identifier: {\it int}\\
+\>\>\>disable: {\it bool}\\
+\>\>\}\\
+\\
+\>\>damping \{\\
+\>\>\>half-life: {\it int}\\
+\>\>\>max-suppress: {\it int}\\
+\>\>\>reuse: {\it int}\\
+\>\>\>suppress: {\it int}\\
+\>\>\>disable: {\it bool}\\
+\>\>\}\\
 \\
 \>\>peer {\it text} \{\\
 \>\>\>local-ip: {\it IPv4}\\
 \>\>\>as: {\it int(1..65535)}\\
 \>\>\>next-hop: {\it IPv4}\\
+\>\>\>next-hop6: {\it IPv6}\\
 \>\>\>local-port: {\it int(1..65535)}\\
 \>\>\>peer-port: {\it int(1..65535)}\\
 \>\>\>holdtime: {\it uint}\\
+\>\>\>delay-open-time: {\it uint}\\
+\>\>\>client: {\it bool}\\
+\>\>\>confederation-member: {\it bool}\\
 \>\>\>prefix-limit \{\\
 \>\>\>\>maximum: {\it uint}\\
 \>\>\>\>disable:  {\it bool}\\
@@ -158,16 +182,28 @@ The configuration parameters are used as follows:
   The required format of the BGP ID is a dotted-decimal IPv4 address,
   as mandated by the BGP specification.  This is required even if the
   router only supports IPv6 forwarding.
+\item{\tt enable-4byte-as-numbers}: by default AS numbers are 16-bit
+  integers (0..65535).  Enabling four-byte AS numbers (RFC 4893) allows BGP to
+  negotiate the use of four-byte AS numbers with its peers.  This
+  should only be enabled on a router if {\em all} the other routers in the
+  same AS also enable it.  Peers in {\em other} ASs do not need to support
+  this, as BGP negotiates the representation with each peer and uses a
+  backwards compatible format when it encounters an old peer.
 \item{\tt local-as}: this is the autonomous system number for the AS
   in which this router resides.  Any peers of this router must be
   configured to know this AS number - if there is a mismatch, a
-  peering will not be established.  It is a 16-bit integer.
+  peering will not be established.  By default, it is a 16-bit integer.
+
+  If four-byte AS numbers have been configured by setting {\tt
+  enable-4byte-as-numbers}, then the local AS number can be a four-byte AS
+  number.  The canonical form for four-byte AS numbers is $x.y$ where $x$
+  and $y$ are both integers in the range 0..65535.
 \item{\tt route-reflector}: this allows BGP to be configured as a
 Route Reflector. A peer can be configured as a client in the peer
 configuration.
 \begin{description}
 \item{\tt cluster-id}: All Route Reflectors in the same cluster should
-have the same 4-byte cluster id. The required format is dotted-decimal
+have the same four-byte cluster id. The required format is dotted-decimal
 IPv4 address.
 \item{\tt disable}: This takes the value {\stt true} or {\stt
 false}. The default state is {\stt false}, it allows Route Reflection
@@ -211,8 +247,13 @@ to be disabled without removing the configuration.
   peer router for this peering.
 \item{\tt as}: this gives the AS number of this peer.  This must match
   the AS number that the peer itself advertises to us, or the BGP
-  peering will not be established.  It is a 16-bit integer, and is
+  peering will not be established.  By default it is a 16-bit integer, and it is
   mandatory to specify.
+
+  If four-byte AS numbers have been configured by setting {\tt
+  enable-4byte-as-numbers}, then the peer AS number can be a four byte AS
+  number.  The canonical form for four-byte AS numbers is $x.y$ where $x$
+  and $y$ are both integers in the range 0..65535.
 \item{\tt next-hop}: this is the IPv4 address that will be sent as the
   nexthop router address in routes that we send to this peer.
   Typically this is only specified for EBGP peerings.

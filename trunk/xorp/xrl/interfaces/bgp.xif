@@ -1,9 +1,9 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.33 2006/07/05 22:46:57 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.34 2007/07/12 21:35:26 pavlin Exp $ */
 
 /*
 ** BGP protocol XRL interface.
 */
-interface bgp/0.2 {
+interface bgp/0.3 {
 	/**
 	 *  Get the BGP version currently running.
 	 */
@@ -18,8 +18,9 @@ interface bgp/0.2 {
 
 	local_config \
 		? \
-		as:u32 \
-		& id:ipv4
+		as:txt \
+		& id:ipv4 \
+		& use_4byte_asnums:bool
 
 	/**
 	 * Set the local AS number.
@@ -27,12 +28,20 @@ interface bgp/0.2 {
 	 * @param as our AS number.
 	 */
 	
-	set_local_as ? as:u32
+	set_local_as ? as:txt
+
+	/**
+	 * Allow 4-byte AS numbers.
+	 *
+	 * @param enable whether this is enabled.
+	 */
+	
+	set_4byte_as_support ? enable:bool
 
 	/**
 	 *  Get the local AS number.
 	 */
-	get_local_as -> as:u32
+	get_local_as -> as:txt
 
 	/**
          * Set the BGP id.
@@ -55,7 +64,7 @@ interface bgp/0.2 {
 	 */
 	set_confederation_identifier \
 		? \
-		as:u32 \
+		as:txt \
 		& disable:bool
 
 	/**
@@ -104,7 +113,7 @@ interface bgp/0.2 {
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32 \
-		& as:u32 \
+		& as:txt \
 		& next_hop:ipv4 \
 	        & holdtime:u32
 
@@ -219,7 +228,7 @@ interface bgp/0.2 {
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32 \
-		& peer_as:u32
+		& peer_as:txt
 
 	/**
 	 * Set the holdtime
@@ -574,7 +583,7 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		-> \
-		peer_as:u32 
+		peer_as:txt 
 
 	get_peer_msg_stats \
 		? \

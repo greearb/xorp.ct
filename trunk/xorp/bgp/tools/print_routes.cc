@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.19 2006/07/12 00:22:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.20 2007/02/16 22:45:27 pavlin Exp $"
 
 #include "print_routes.hh"
 
@@ -61,7 +61,7 @@ PrintRoutes<IPv6>::get_route_list_next()
 template <typename A>
 PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
 			    bool unicast, bool multicast, int lines)
-    : XrlBgpV0p2Client(&_xrl_rtr),
+    : XrlBgpV0p3Client(&_xrl_rtr),
       _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose),
       _unicast(unicast), _multicast(multicast), _lines(lines)
 {
@@ -178,7 +178,7 @@ PrintRoutes<A>::get_route_list_next_done(const XrlError& e,
     uint8_t best = (*best_and_origin)>>16;
     uint8_t origin = (*best_and_origin)&255;
 
-    AsPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size());
+    ASPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size());
 
     switch(_verbose) {
     case SUMMARY:

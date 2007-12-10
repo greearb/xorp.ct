@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/test1.sh,v 1.9 2002/12/09 10:59:37 pavlin Exp $
+# $XORP: xorp/bgp/harness/test1.sh,v 1.1.1.1 2002/12/11 23:55:51 hodson Exp $
 #
 
 #
@@ -30,9 +30,10 @@ configure_bgp()
 {
     LOCALHOST=tigger.icir.org
     AS=65008
+    USE4BYTEAS=false
     ID=192.150.187.78
     HOLDTIME=60
-    local_config $AS $ID
+    local_config $AS $ID $USE4BYTEAS
     register_rib rib
 
     PEER=xorp-c4000.icir.org

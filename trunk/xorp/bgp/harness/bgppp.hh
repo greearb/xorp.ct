@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/bgppp.hh,v 1.5 2006/03/16 00:03:41 pavlin Exp $
+// $XORP: xorp/bgp/harness/bgppp.hh,v 1.6 2007/02/16 22:45:25 pavlin Exp $
 
 #ifndef __BGP_HARNESS_BGPPP_HH__
 #define __BGP_HARNESS_BGPPP_HH__
 
-string bgppp(const uint8_t *buf, const size_t len);
+class BGPPeerData;
+string bgppp(const uint8_t *buf, const size_t len, const BGPPeerData* peerdata);
 
 #endif // __BGP_HARNESS_BGPPP_HH__

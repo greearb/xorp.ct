@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.42 2006/11/07 18:55:38 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.43 2007/02/16 22:45:13 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -39,6 +39,7 @@
 #include "path_attribute.hh"
 #include "update_attrib.hh"
 
+class BGPPeerData;
 
 enum BgpPacketType {
     MESSAGETYPEOPEN =		1,
@@ -58,7 +59,7 @@ enum Notify {
 #define		BADMESSTYPE  3		// Bad Message Type
     OPENMSGERROR = 2,		// OPEN Message Error
 #define		UNSUPVERNUM  1		// Unsupported Version Number
-#define		BADASPEER    2		// Bad Peer AS
+#define		BADASPEER    2		// Bad BGPPeer AS
 #define		BADBGPIDENT  3		// Bad BGP Identifier
 #define		UNSUPOPTPAR  4		// Unsupported Optional Parameter
 #define		AUTHFAIL     5		// Authentication Failure
@@ -136,7 +137,7 @@ public:
     uint8_t type() const			{ return _Type; }
     virtual string str() const = 0;
 
-    virtual const uint8_t *encode(size_t &len, uint8_t *buf = 0) const = 0;
+    virtual bool encode(uint8_t *buf, size_t &len, const BGPPeerData *peerdata) const = 0;
 protected:
     /*
      * Return the external representation of the packet into a buffer.
@@ -164,7 +165,7 @@ public:
 		throw(CorruptMessage);
     OpenPacket(const AsNum& as, const IPv4& bgpid, const uint16_t holdtime);
     ~OpenPacket()				{}
-    const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
+    bool encode(uint8_t *buf, size_t& len, const BGPPeerData *peerdata) const;
     string str() const;
 
     uint8_t Version() const			{ return _Version; }
@@ -198,7 +199,7 @@ private:
 class UpdatePacket : public BGPPacket {
 public:
     UpdatePacket();
-    UpdatePacket(const uint8_t *d, uint16_t l)
+    UpdatePacket(const uint8_t *d, uint16_t l, const BGPPeerData *peerdata)
 	throw(CorruptMessage);
 
     ~UpdatePacket();
@@ -214,7 +215,7 @@ public:
     template <typename A> MPReachNLRIAttribute<A> *mpreach(Safi) const;
     template <typename A> MPUNReachNLRIAttribute<A> *mpunreach(Safi) const;
 
-    const uint8_t *encode(size_t& len, uint8_t *buf = 0) const;
+    bool encode(uint8_t *buf, size_t& len, const BGPPeerData *peerdata) const;
 
     bool big_enough() const;
 
@@ -289,7 +290,7 @@ public:
 					  const uint8_t* error_data = 0,
 					  const size_t len = 0);
     const uint8_t* error_data() const 		{ return _error_data; }
-    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
+    bool encode(uint8_t *buf, size_t &len, const BGPPeerData *peerdata) const;
     string str() const;
     bool operator==(const NotificationPacket& him) const;
 protected:
@@ -329,7 +330,8 @@ public:
 	_Type = MESSAGETYPEKEEPALIVE;
     }
     ~KeepAlivePacket()					{}
-    const uint8_t *encode(size_t &len, uint8_t *buf = 0) const {
+    bool encode(uint8_t *buf, size_t &len, const BGPPeerData *peerdata) const {
+	UNUSED(peerdata);
 	len = BGPPacket::MINKEEPALIVEPACKET;
 	return basic_encode(len, buf);
     }

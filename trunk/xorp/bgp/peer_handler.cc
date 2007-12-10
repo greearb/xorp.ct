@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.44 2006/08/01 22:21:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.45 2007/02/16 22:45:14 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -295,10 +295,43 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
     bool ipv6_unicast = false;
     bool ipv6_multicast = false;
 
+    ASPath* as_path = NULL;  
+
     list <PathAttribute*>::const_iterator pai;
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
 	pa = *pai;
+
+	if (dynamic_cast<ASPathAttribute*>(*pai)) {
+	    // store the ASPath here temporarily, as we may
+	    // need to mess with it before passing it to the final PA
+	    // lists
+	    as_path = &(((ASPathAttribute*)(*pai))->as_path());
+	    continue;
+	}
+
+	if (dynamic_cast<AS4PathAttribute*>(*pai)) {
+	    if (_peer->use_4byte_asnums()) {
+		// we got an AS4_PATH from a peer that shouldn't send
+		// us one because it speaks native 4-byte AS numbers.
+		// The spec says to silently discard the attribute.
+		continue;
+	    } else if (_peer->localdata()->use_4byte_asnums()) {
+		// We got an AS4_PATH, but we're configured to use
+		// 4-byte AS numbers.  We need to merge this into the
+		// AS_PATH we've already decoded, then discard the
+		// AS4_PATH as we don't need both.
+		const AS4PathAttribute* as4attr = (const AS4PathAttribute*)pa;
+		XLOG_ASSERT(as_path);
+		as_path->merge_as4_path(as4attr->as4_path());
+		continue;
+	    } else {
+		// We got an AS4_PATH, but we're not configured to use
+		// 4-byte AS numbers.  We just propagate this
+		// unchanged, so fall through and add it to the
+		// pa_list in the normal way.
+	    }
+	}
 	
 	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
   	    MPReachNLRIAttribute<IPv6>* mpreach =
@@ -355,6 +388,16 @@ PeerHandler::process_update_packet(const UpdatePacket *p)
 	    pa_ipv6_multicast.add_path_attribute(*pa);
 	}
     }
+
+    /* finally store the ASPath attribute, now we know we're done messing with it */
+    if (as_path) {
+	ASPathAttribute as_path_attr(*as_path);
+	pa_ipv4_unicast.add_path_attribute(as_path_attr);
+	pa_ipv4_multicast.add_path_attribute(as_path_attr);
+	pa_ipv6_unicast.add_path_attribute(as_path_attr);
+	pa_ipv6_multicast.add_path_attribute(as_path_attr);
+    }
+
 
     // IPv4 Unicast Withdraws
     set_if_true(ipv4_unicast, withdraw<IPv4>(p, SAFI_UNICAST));

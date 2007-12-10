@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.6 2007/05/31 19:02:25 pavlin Exp $ */
+/* $XORP: xorp/xrl/targets/bgp.tgt,v 1.7 2007/07/12 21:39:27 pavlin Exp $ */
 
 #include "common.xif"
 #include "bgp.xif"
@@ -10,7 +10,7 @@
 #include "profile.xif"
 
 target bgp implements		common/0.1,				\
-				bgp/0.2,				\
+				bgp/0.3,				\
 				finder_event_observer/0.1,		\
 				policy_backend/0.1,			\
 				policy_redist4/0.1,			\

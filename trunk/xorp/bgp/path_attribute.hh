@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.47 2007/02/16 16:07:04 mjh Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.48 2007/02/16 22:45:13 pavlin Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -31,6 +31,8 @@
 #include "exceptions.hh"	// for CorruptMessage exception
 #include "aspath.hh"
 #include "parameter.hh"
+class BGPPeerData;
+
 
 
 /**
@@ -94,7 +96,9 @@ public:
      * Throws an exception on error.
      */
     static PathAttribute *create(const uint8_t* d, uint16_t max_len,
-                size_t& actual_length) throw(CorruptMessage);
+				 size_t& actual_length, 
+				 const BGPPeerData* peerdata) 
+	throw(CorruptMessage);
 
     /**
      * Make a copy of the current attribute.
@@ -108,22 +112,10 @@ public:
      * The destructor, invoked after the derived class' destructors,
      * frees the internal representation of the object.
      */
-    virtual ~PathAttribute()			{ delete[] _data; }
+    virtual ~PathAttribute()			{ }
 
-    /*@
-     * @return a pointer to the wire representation of the packet.
-     */
-    const uint8_t *data() const			{
-	assert( _data != 0 );
-	return _data;
-    }
+    virtual bool encode(uint8_t* buf, size_t &length, const BGPPeerData* peerdata) const = 0;
 
-    /**
-     * @return the size of the wire representation.
-     */
-    size_t wire_size() const			{
-	return _size + header_size();
-    }
 
     /**
      * @return the size of the header.
@@ -144,7 +136,7 @@ public:
     /**
      * Set the partial flag
      */
-    void set_partial() { _data[0] |= Partial;_flags |= Partial; }
+    void set_partial() { _flags |= Partial; }
 
     /**
      * comparison operators are used to sort attributes.
@@ -158,7 +150,13 @@ public:
      * compute the hash for this object.
      */
     void add_hash(MD5_CTX *context) const	{
-	MD5_Update(context, data(), wire_size());
+	size_t length = 4096;
+	uint8_t buf[4096];
+	// XXX should probably do something more efficient here
+	if (!encode(buf, length, NULL)) {
+	    XLOG_WARNING("Insufficient space to encode PA list for MD5 hash\n");
+	}
+	MD5_Update(context, buf, length);
     }
 
     virtual string str() const;
@@ -185,27 +183,24 @@ protected:
 
     /**
      * helper constructor used when creating an object from a derived class.
-     * NOTE: it does not provide a usable object as _data is invalid.
      */
     PathAttribute(Flags f, PathAttType t)
-	    : _size(0), _data(0),
-		_flags(f & ValidFlags), _type(t)	{}
+	    : _flags(f & ValidFlags), _type(t)	{}
 
     /**
      * basic constructor from data, assumes that the block has at least the
      * required size.
-     * NOTE: it does not provide a usable object as _data is invalid.
      */
     PathAttribute(const uint8_t *d)
-	    : _size(length(d)), _data(0),
-		_flags(d[0] & ValidFlags), _type(d[1])	{}
+	    : _flags(d[0] & ValidFlags), _type(d[1])	{}
 
     /**
      * helper function to fill the header. Needs _flags and _type
-     * properly initialized, overwrites _size and _data by allocating a
-     * new block of appropriate size (payload_size + 3 or 4 header bytes).
+     * properly initialized. Writes into data buffer, and returns
+     * pointer to first byte of buffer after the header.
      */
-    uint8_t *set_header(size_t payload_size);
+    uint8_t *set_header(uint8_t *data, size_t payload_size, size_t &wire_size) 
+	const;
 
     /**
      * fetch the length from the header. Assume the header is there.
@@ -228,10 +223,12 @@ protected:
 	return d + ((d[0] & Extended) ? 4 : 3);
     }
 
+#if 0
     // storage for information in the attribute.
 
     size_t	_size;	// this is only the size of the payload.
     uint8_t *	_data;	// wire representation
+#endif
     uint8_t	_flags;
     uint8_t	_type;
 
@@ -264,9 +261,11 @@ public:
 
     OriginType origin() const			{ return _origin; }
 
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
+
 protected:
 private:
-    void encode();
     OriginType	_origin;
 };
 
@@ -279,20 +278,51 @@ class ASPathAttribute : public PathAttribute
 public:
     ~ASPathAttribute()				{ delete _as_path; }
 
-    ASPathAttribute(const AsPath& p);
-    ASPathAttribute(const uint8_t* d) throw(CorruptMessage);
+    ASPathAttribute(const ASPath& p);
+    ASPathAttribute(const uint8_t* d, bool use_4byte_asnums) 
+	throw(CorruptMessage);
     PathAttribute *clone() const;
 
     string str() const				{
 	return "AS Path Attribute " + as_path().str();
     }
 
-    const AsPath &as_path() const		{ return (AsPath &)*_as_path; }
+    ASPath &as_path() const		{ return (ASPath &)*_as_path; }
+    AS4Path &as4_path() const		{ return (AS4Path &)*_as_path;}
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 
 protected:
 private:
-    void encode();
-    AsPath *_as_path;
+    ASPath *_as_path;
+};
+
+/**
+ * AS4PathAttribute contain an AS4Path, whose structure is documented
+ * in aspath.hh.  See comment there for usage.
+ */
+class AS4PathAttribute : public PathAttribute
+{
+public:
+    ~AS4PathAttribute()				{ delete _as_path; }
+
+    AS4PathAttribute(const AS4Path& p);
+    AS4PathAttribute(const uint8_t* d) throw(CorruptMessage);
+    PathAttribute *clone() const;
+
+    string str() const				{
+	return "AS4 Path Attribute " + as_path().str();
+    }
+
+    ASPath &as_path() const		{ return (ASPath &)*_as_path; }
+    AS4Path &as4_path() const		{ return (AS4Path &)*_as_path;}
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
+protected:
+private:
+    AS4Path *_as_path;
 };
 
 /**
@@ -313,9 +343,11 @@ public:
     const A& nexthop() const			{ return _next_hop; }
     // This method is for use in MPReachNLRIAttribute only.
     void set_nexthop(const A& n) 		{ _next_hop = n; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
     A _next_hop;
 };
 
@@ -336,9 +368,11 @@ public:
     string str() const;
 
     uint32_t med() const			{ return _med; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
     uint32_t _med;	// XXX stored in host format!
 };
 
@@ -361,9 +395,11 @@ public:
 	// This should probably be a configuration option.
 	return 100;
     }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
     uint32_t _localpref;
 
 };
@@ -378,6 +414,9 @@ public:
     string str() const				{
 	return "Atomic Aggregate Attribute";
     }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
 };
@@ -386,16 +425,38 @@ class AggregatorAttribute : public PathAttribute
 {
 public:
     AggregatorAttribute(const IPv4& speaker, const AsNum& as);
-    AggregatorAttribute(const uint8_t* d) throw(CorruptMessage);
+    AggregatorAttribute(const uint8_t* d, bool use_4byte_asnums) throw(CorruptMessage);
     PathAttribute *clone() const;
 
     string str() const;
 
     const IPv4& route_aggregator() const	{ return _speaker; }
     const AsNum& aggregator_as() const		{ return _as; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
+    IPv4 _speaker;
+    AsNum _as;
+};
+
+class AS4AggregatorAttribute : public PathAttribute
+{
+public:
+    AS4AggregatorAttribute(const IPv4& speaker, const AsNum& as);
+    AS4AggregatorAttribute(const uint8_t* d) throw(CorruptMessage);
+    PathAttribute *clone() const;
+
+    string str() const;
+
+    const IPv4& route_aggregator() const	{ return _speaker; }
+    const AsNum& aggregator_as() const		{ return _as; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
+protected:
+private:
     IPv4 _speaker;
     AsNum _as;
 };
@@ -417,37 +478,41 @@ public:
     const set <uint32_t>& community_set() const { return _communities; }
     void add_community(uint32_t community);
     bool contains(uint32_t community) const;
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
     set <uint32_t> _communities;
 };
 
 /**
- * ORIGINATOR_IDAttribute is an optional non-transitive uint32
+ * OriginatorIDAttribute is an optional non-transitive uint32
  */
-class ORIGINATOR_IDAttribute : public PathAttribute
+class OriginatorIDAttribute : public PathAttribute
 {
 public:
-    ORIGINATOR_IDAttribute(const IPv4 originator_id);
-    ORIGINATOR_IDAttribute(const uint8_t* d) throw(CorruptMessage);
+    OriginatorIDAttribute(const IPv4 originator_id);
+    OriginatorIDAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
 
     string str() const;
 
     IPv4 originator_id() const     { return _originator_id; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
     IPv4 _originator_id;	
 };
 
-class CLUSTER_LISTAttribute : public PathAttribute
+class ClusterListAttribute : public PathAttribute
 {
 public:
     typedef list <IPv4>::const_iterator const_iterator;
-    CLUSTER_LISTAttribute();
-    CLUSTER_LISTAttribute(const uint8_t* d) throw(CorruptMessage);
+    ClusterListAttribute();
+    ClusterListAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
 
     string str() const;
@@ -455,9 +520,11 @@ public:
     const list <IPv4>& cluster_list() const { return _cluster_list; }
     void prepend_cluster_id(IPv4 cluster_id);
     bool contains(IPv4 cluster_id) const;
+
+    bool encode(uint8_t* buf, size_t &wire_size, const BGPPeerData* peerdata) const;
+
 protected:
 private:
-    void encode();
     list <IPv4> _cluster_list;
 };
 
@@ -478,9 +545,9 @@ public:
     string str() const;
 
     const A& nexthop() const		{ return _nexthop; }
-    void set_nexthop(const A& nexthop)	{ _nexthop = nexthop; encode(); }
+    void set_nexthop(const A& nexthop)	{ _nexthop = nexthop; }
 
-    void add_nlri(const IPNet<A>& nlri) {_nlri.push_back(nlri);encode(); }
+    void add_nlri(const IPNet<A>& nlri) {_nlri.push_back(nlri);}
     const list<IPNet<A> >& nlri_list() const { return _nlri;}
 
     // IPv6 specific
@@ -489,9 +556,11 @@ public:
 
     // SNPA - Don't deal. (ATM, FRAME RELAY, SMDS)
 
-    void encode();
-
     Safi safi()				{ return _safi; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, 
+		const BGPPeerData* peerdata) const;
+
 protected:
 private:
 
@@ -520,13 +589,14 @@ public:
 
     string str() const;
 
-    void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.push_back(nlri);
-    encode();}
+    void add_withdrawn(const IPNet<A>& nlri) {_withdrawn.push_back(nlri);}
     const list<IPNet<A> >& wr_list() const { return _withdrawn;}
 
-    void encode();
-
     Safi safi()				{ return _safi; }
+
+    bool encode(uint8_t* buf, size_t &wire_size, 
+		const BGPPeerData* peerdata) const;
+
 protected:
 private:
 
@@ -540,11 +610,20 @@ class UnknownAttribute : public PathAttribute
 {
 public:
     UnknownAttribute(const uint8_t* d) throw(CorruptMessage);
+    UnknownAttribute(uint8_t *data, size_t size, uint8_t flags);
     PathAttribute *clone() const;
 
     string str() const;
+
+    bool encode(uint8_t* buf, size_t &wire_size, 
+		const BGPPeerData* peerdata) const;
+
 protected:
 private:
+    // storage for information in the attribute.
+
+    size_t	_size;	// this is only the size of the payload.
+    uint8_t *	_data;	// wire representation
 };
 
 /**
@@ -577,7 +656,7 @@ public:
      */
     void add_path_attribute(PathAttribute *att);
     const A& nexthop() const		{ return _nexthop_att->nexthop(); }
-    const AsPath& aspath() const	{ return _aspath_att->as_path(); }
+    const ASPath& aspath() const	{ return _aspath_att->as_path(); }
     uint8_t origin() const		{ return _origin_att->origin(); }
 
     const MEDAttribute* med_att() const;
@@ -585,8 +664,8 @@ public:
     const AtomicAggAttribute* atomic_aggregate_att() const;
     const AggregatorAttribute* aggregator_att() const;
     const CommunityAttribute* community_att() const;
-    const ORIGINATOR_IDAttribute* originator_id() const;
-    const CLUSTER_LISTAttribute* cluster_list() const;
+    const OriginatorIDAttribute* originator_id() const;
+    const ClusterListAttribute* cluster_list() const;
 
     void rehash();
     const uint8_t* hash() const			{
@@ -601,7 +680,7 @@ public:
     }
 
     void replace_nexthop(const A& nexthop);
-    void replace_AS_path(const AsPath& as_path);
+    void replace_AS_path(const ASPath& as_path);
     void replace_origin(const OriginType& origin);
     void remove_attribute_by_type(PathAttType type);
     void remove_attribute_by_pointer(PathAttribute*);
@@ -612,6 +691,26 @@ public:
      *  2) If not transitive remove.
      */
     void process_unknown_attributes();
+
+    /**
+     * Encode the PA List for transmission to the specified peer.
+     * Note that as Some peers speak 4-byte AS numbers and some don't,
+     * the encoding is peer-specific.
+     *
+     * @return true if the data was successfully encoded; false if
+     * there wasn't enough space in the buffer for the data.
+     *
+     * @param buf is the buffer to encode into.
+     *
+     * @param wire_size is given the size of the buffer to encode
+     * into, and returns the amount of data placed in the buffer.
+     *
+     * @param peer is the peer to encode this for.  Some peers want
+     * 4-byte AS numbers and some don't.
+     *
+     */
+    bool encode(uint8_t* buf, size_t &wire_size, 
+		const BGPPeerData* peerdata) const;
 
     string str() const;
 

@@ -6,7 +6,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [DELETE]
 SubnetRoute:
@@ -14,7 +14,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 1a
 [comment] ADD AND DELETE FILTERING
@@ -30,13 +30,13 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.3
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/9, AS/8, AS/7]
+	AS Path Attribute ASPath: [AS/9, AS/8, AS/7]
 [separator]-------------------------------------
 [comment] TEST 2a
 [comment] REPLACE ROUTE, OLD ROUTE FILTERED
@@ -46,7 +46,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 2b
 [comment] REPLACE ROUTE, NEW ROUTE FILTERED
@@ -56,7 +56,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 2c
 [comment] REPLACE ROUTE, BOTH ROUTES FILTERED
@@ -69,7 +69,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 3a
 [comment] ROUTE_DUMP, FILTERED
@@ -82,7 +82,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] LOOKUP ROUTE
 [comment] TEST SUCCESSFUL
@@ -93,7 +93,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 4a
 [comment] ADD, LOOKUP AND DELETE FILTERED
@@ -113,7 +113,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [DELETE]
@@ -123,7 +123,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TEST 6
@@ -135,7 +135,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 128.16.64.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [DELETE]
@@ -145,7 +145,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 128.16.64.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TEST 7
@@ -158,7 +158,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 128.16.64.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [DELETE]
@@ -168,7 +168,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 128.16.64.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] TEST 7b
@@ -186,7 +186,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 128.16.64.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] RECONFIGURE FILTER
@@ -199,7 +199,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [DELETE]
 SubnetRoute:
@@ -207,7 +207,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 8c
 [comment] DELETE
@@ -219,7 +219,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 128.16.64.4
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 100
 [separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP

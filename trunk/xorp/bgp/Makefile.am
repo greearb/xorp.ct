@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.45 2006/09/08 18:45:58 mjh Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.46 2007/08/29 19:03:03 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -54,7 +54,9 @@ xorp_bgp_SOURCES		 = bgp.cc
 xorp_bgp_SOURCES		+= bgp.hh
 xorp_bgp_SOURCES		+= main.cc
 
-test_packet_SOURCES		 = test_test.hh test_packet.cc
+test_packet_SOURCES		 = test_test.hh
+test_packet_SOURCES		+= test_packet.cc
+test_packet_SOURCES		+= dummy_main.cc
 
 test_plumbing_SOURCES		 = test_plumbing.hh
 test_plumbing_SOURCES		+= test_plumbing.cc
@@ -64,6 +66,7 @@ test_plumbing_DEPENDENCIES	 = libbgp.la
 
 aspath_test_SOURCES		 = aspath_test.cc
 test_packet_coding_SOURCES	 = test_packet_coding.cc
+test_packet_coding_SOURCES	+= dummy_main.cc
 update_test_SOURCES		 = update_test.cc
 
 isolation_tests_SOURCES		= test_main.cc

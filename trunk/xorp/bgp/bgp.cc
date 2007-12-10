@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.88 2007/09/11 08:06:19 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.89 2007/10/13 01:49:57 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -45,7 +45,6 @@
 BGPMain::BGPMain(EventLoop& eventloop)
     : _eventloop(eventloop),
       _exit_loop(false),
-      _local_data(_eventloop),
       _component_count(0),
       _ifmgr(NULL),
       _is_ifmgr_ready(false),
@@ -56,6 +55,7 @@ BGPMain::BGPMain(EventLoop& eventloop)
     ** Ideally these data structures should be created inline. However
     ** we need to finely control the order of destruction.
     */
+    _local_data = new LocalData(_eventloop),
     _peerlist = new BGPPeerList();
     _deleted_peerlist = new BGPPeerList();
     _xrl_router = new XrlStdRouter(_eventloop, "bgp");
@@ -190,6 +190,10 @@ BGPMain::~BGPMain()
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting peerlist\n");
     delete _peerlist;
+
+    debug_msg("-------------------------------------------\n");
+    debug_msg("Deleting localdata\n");
+    delete _local_data;
 
     debug_msg("-------------------------------------------\n");
     debug_msg("Deleting plumbing unicast\n");
@@ -801,12 +805,14 @@ BGPMain::main_loop()
 }
 
 void
-BGPMain::local_config(const uint32_t& as, const IPv4& id)
+BGPMain::local_config(const uint32_t& as, const IPv4& id,
+		      bool use_4byte_asnums)
 {
     LocalData *local = get_local_data();
 
     local->set_as(AsNum(as));
     local->set_id(id);
+    local->set_use_4byte_asnums(use_4byte_asnums);
 
 //     _plumbing_unicast->set_my_as_number(local->as());
 //     _plumbing_multicast->set_my_as_number(local->as());
@@ -1037,7 +1043,7 @@ BGPMain::create_peer(BGPPeerData *pd)
 
     SocketClient *sock = new SocketClient(pd->iptuple(), eventloop(), md5sig);
 
-    p = new BGPPeer(&_local_data, pd, sock, this);
+    p = new BGPPeer(_local_data, pd, sock, this);
     //    sock->set_eventloop(eventloop());
     sock->set_callback(callback(p, &BGPPeer::get_message));
 
@@ -1172,7 +1178,7 @@ BGPMain::change_tuple(const Iptuple& iptuple, const Iptuple& nptuple)
 	return true;
 
     BGPPeerData *pd = new 
-	BGPPeerData(_local_data, nptuple,
+	BGPPeerData(*_local_data, nptuple,
 		    peer->peerdata()->as(),
 		    peer->peerdata()->get_v4_local_addr(),
 		    peer->peerdata()->get_configured_hold_time());
@@ -1722,7 +1728,7 @@ BGPMain::create_listener(const Iptuple& iptuple)
 LocalData*
 BGPMain::get_local_data()
 {
-    return &_local_data;
+    return _local_data;
 }
 
 void
@@ -1818,7 +1824,7 @@ BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    AsPath aspath;
+    ASPath aspath;
 
     return _rib_ipc_handler->originate_route(IGP, aspath, nlri,
 					     next_hop, unicast,
@@ -1833,7 +1839,7 @@ BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
     debug_msg("nlri %s next hop %s unicast %d multicast %d\n",
 	      nlri.str().c_str(), next_hop.str().c_str(), unicast, multicast);
 
-    AsPath aspath;
+    ASPath aspath;
 
     return _rib_ipc_handler->originate_route(IGP, aspath, nlri,
 					      next_hop, unicast,

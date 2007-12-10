@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.64 2007/02/16 22:45:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.65 2007/05/23 04:08:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -26,6 +26,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
+#include "libxorp/asnum.hh"
 
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_error.hh"
@@ -43,7 +44,10 @@ XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	  _bgp(bgp),
 	  _awaiting_config(true),
 	  _awaiting_as(true),
+	  _as(AsNum::AS_INVALID),
 	  _awaiting_bgp_id(true),
+	  _awaiting_4byte_asnums(true),
+	  _use_4byte_asnums(false),
 	  _done(false)
 {
 }
@@ -85,7 +89,7 @@ XrlBgpTarget::common_0_1_shutdown()
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_bgp_version(
+XrlBgpTarget::bgp_0_3_get_bgp_version(
 				      // Output values, 
 				      uint32_t&	version)
 {
@@ -94,12 +98,13 @@ XrlBgpTarget::bgp_0_2_get_bgp_version(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_local_config(
+XrlBgpTarget::bgp_0_3_local_config(
 				   // Input values, 
-				   const uint32_t&	as, 
-				   const IPv4&		id)
+				   const string&	as, 
+				   const IPv4&		id,
+				   const bool&          use_4byte_asnums)
 {
-    debug_msg("as %u id %s\n", XORP_UINT_CAST(as), id.str().c_str());
+    debug_msg("as %s id %s\n", as.c_str(), id.str().c_str());
 
     /*
     ** We may already be configured so don't allow a reconfiguration.
@@ -107,7 +112,13 @@ XrlBgpTarget::bgp_0_2_local_config(
     if(!_awaiting_config)
 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP");
 
-    _bgp.local_config(as, id);
+    _use_4byte_asnums = use_4byte_asnums;
+    try {
+	_as = AsNum(as);
+    } catch(InvalidString &e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    _bgp.local_config(_as.as4(), id, use_4byte_asnums);
 
     _awaiting_config = false;
 
@@ -115,11 +126,11 @@ XrlBgpTarget::bgp_0_2_local_config(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_local_as(
+XrlBgpTarget::bgp_0_3_set_local_as(
 				   // Input values, 
-				   const uint32_t&	as)
+				   const string&	as)
 {
-    debug_msg("as %u\n", XORP_UINT_CAST(as));
+    debug_msg("as %s\n", as.c_str());
 
     /*
     ** We may already be configured so don't allow a reconfiguration.
@@ -127,10 +138,14 @@ XrlBgpTarget::bgp_0_2_set_local_as(
 //     if(!_awaiting_as)
 // 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP AS");
 
-    _as = as;
+    try {
+	_as = AsNum(as);
+    } catch(InvalidString &e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
     _awaiting_as = false;
-    if(!_awaiting_as && !_awaiting_bgp_id) {
-	_bgp.local_config(_as, _id);
+    if(!_awaiting_as && !_awaiting_bgp_id && !_awaiting_4byte_asnums) {
+	_bgp.local_config(_as.as4(), _id, _use_4byte_asnums);
 	_awaiting_config = false;	
     }
 
@@ -138,18 +153,34 @@ XrlBgpTarget::bgp_0_2_set_local_as(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_local_as(
+XrlBgpTarget::bgp_0_3_get_local_as(
 				   // Output values, 
-				   uint32_t& as) 
+				   string& as) 
 {
     if(_awaiting_as)
 	return XrlCmdError::COMMAND_FAILED("BGP AS not yet configured");
-    as = _as;
+    as = _as.short_str();
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlBgpTarget::bgp_0_3_set_4byte_as_support(
+					   // Input values,
+					   const bool&	enabled)
+{
+    _use_4byte_asnums = enabled;
+    _awaiting_4byte_asnums = false;
+
+    if(!_awaiting_as && !_awaiting_bgp_id && !_awaiting_4byte_asnums) {
+	_bgp.local_config(_as.as4(), _id, _use_4byte_asnums);
+	_awaiting_config = false;	
+    }
+    return XrlCmdError::OKAY();
+}
+
+
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_bgp_id(
+XrlBgpTarget::bgp_0_3_set_bgp_id(
 				 // Input values, 
 				 const IPv4&	id)
 {
@@ -163,8 +194,8 @@ XrlBgpTarget::bgp_0_2_set_bgp_id(
 
     _id = id;
     _awaiting_bgp_id = false;
-    if(!_awaiting_as && !_awaiting_bgp_id) {
-	_bgp.local_config(_as, _id);
+    if(!_awaiting_as && !_awaiting_bgp_id && !_awaiting_4byte_asnums) {
+	_bgp.local_config(_as.as4(), _id, _use_4byte_asnums);
 	_awaiting_config = false;	
     }
 
@@ -172,7 +203,7 @@ XrlBgpTarget::bgp_0_2_set_bgp_id(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_bgp_id(
+XrlBgpTarget::bgp_0_3_get_bgp_id(
 				 // Output values, 
 				 IPv4& id) 
 {
@@ -183,18 +214,22 @@ XrlBgpTarget::bgp_0_2_get_bgp_id(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_confederation_identifier(const uint32_t& as,
+XrlBgpTarget::bgp_0_3_set_confederation_identifier(const string& as,
 						   const bool& disable)
 {
-    debug_msg("as %u disable %s\n", as, bool_c_str(disable));
+    debug_msg("as %s disable %s\n", as.c_str(), bool_c_str(disable));
 
-    _bgp.set_confederation_identifier(as, disable);
+    try {
+	_bgp.set_confederation_identifier(AsNum(as).as4(), disable);
+    } catch(InvalidString &e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_cluster_id(const IPv4& cluster_id,
+XrlBgpTarget::bgp_0_3_set_cluster_id(const IPv4& cluster_id,
 				     const bool& disable)
 {
     debug_msg("Cluster ID %s disable %s\n", cstring(cluster_id),
@@ -206,7 +241,7 @@ XrlBgpTarget::bgp_0_2_set_cluster_id(const IPv4& cluster_id,
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_damping(const uint32_t& half_life,
+XrlBgpTarget::bgp_0_3_set_damping(const uint32_t& half_life,
 				  const uint32_t& max_suppress,
 				  const uint32_t& reuse,
 				  const uint32_t& suppress,
@@ -239,21 +274,21 @@ XrlBgpTarget::bgp_0_2_set_damping(const uint32_t& half_life,
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_add_peer(
+XrlBgpTarget::bgp_0_3_add_peer(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
 	const string&	peer_ip, 
 	const uint32_t&	peer_port, 
-	const uint32_t&	as, 
+	const string&	as, 
 	const IPv4&	next_hop,
 	const uint32_t&	holdtime)
 {
-    debug_msg("local ip %s local port %u peer ip %s peer port %u as %u"
+    debug_msg("local ip %s local port %u peer ip %s peer port %u as %s"
 	      " next_hop %s holdtime %u\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      XORP_UINT_CAST(as), next_hop.str().c_str(),
+	      as.c_str(), next_hop.str().c_str(),
 	      XORP_UINT_CAST(holdtime));
 
     if(_awaiting_config)
@@ -267,7 +302,7 @@ XrlBgpTarget::bgp_0_2_add_peer(
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
-        AsNum asn(static_cast<uint16_t>(as)); 
+        AsNum asn(as); 
 	pd = new BGPPeerData(*_bgp.get_local_data(), iptuple, asn, next_hop,
 			     holdtime);
 
@@ -285,7 +320,7 @@ XrlBgpTarget::bgp_0_2_add_peer(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_delete_peer(
+XrlBgpTarget::bgp_0_3_delete_peer(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -310,7 +345,7 @@ XrlBgpTarget::bgp_0_2_delete_peer(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_enable_peer(
+XrlBgpTarget::bgp_0_3_enable_peer(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -335,7 +370,7 @@ XrlBgpTarget::bgp_0_2_enable_peer(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_disable_peer(
+XrlBgpTarget::bgp_0_3_disable_peer(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -360,7 +395,7 @@ XrlBgpTarget::bgp_0_2_disable_peer(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_change_local_ip(
+XrlBgpTarget::bgp_0_3_change_local_ip(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -388,7 +423,7 @@ XrlBgpTarget::bgp_0_2_change_local_ip(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_change_local_port(
+XrlBgpTarget::bgp_0_3_change_local_port(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -416,7 +451,7 @@ XrlBgpTarget::bgp_0_2_change_local_port(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_change_peer_port(
+XrlBgpTarget::bgp_0_3_change_peer_port(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -444,25 +479,25 @@ XrlBgpTarget::bgp_0_2_change_peer_port(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_peer_as(
+XrlBgpTarget::bgp_0_3_set_peer_as(
 				  // Input values,
 				  const string&	local_ip,
 				  const uint32_t& local_port,
 				  const string&	peer_ip,
 				  const uint32_t& peer_port,
-				  const uint32_t& peer_as)
+				  const string& peer_as)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      " peer as %u\n",
+	      " peer as %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      peer_as);
+	      peer_as.c_str());
 
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
-
-	if(!_bgp.set_peer_as(iptuple, peer_as))
+	AsNum peer_asn(peer_as);
+	if(!_bgp.set_peer_as(iptuple, peer_asn.as4()))
 	    return XrlCmdError::COMMAND_FAILED();
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
@@ -472,7 +507,7 @@ XrlBgpTarget::bgp_0_2_set_peer_as(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_holdtime(
+XrlBgpTarget::bgp_0_3_set_holdtime(
 				   // Input values,
 				   const string&  local_ip,
 				   const uint32_t& local_port,
@@ -500,7 +535,7 @@ XrlBgpTarget::bgp_0_2_set_holdtime(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_delay_open_time(
+XrlBgpTarget::bgp_0_3_set_delay_open_time(
 				   // Input values,
 				   const string&  local_ip,
 				   const uint32_t& local_port,
@@ -528,7 +563,7 @@ XrlBgpTarget::bgp_0_2_set_delay_open_time(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_route_reflector_client(
+XrlBgpTarget::bgp_0_3_set_route_reflector_client(
 						 // Input values,
 						 const string&	local_ip,
 						 const uint32_t& local_port,
@@ -556,7 +591,7 @@ XrlBgpTarget::bgp_0_2_set_route_reflector_client(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_confederation_member(
+XrlBgpTarget::bgp_0_3_set_confederation_member(
 					       // Input values,
 					       const string& local_ip,
 					       const uint32_t& local_port,
@@ -584,7 +619,7 @@ XrlBgpTarget::bgp_0_2_set_confederation_member(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_prefix_limit(
+XrlBgpTarget::bgp_0_3_set_prefix_limit(
 				       // Input values,
 				       const string& local_ip,
 				       const uint32_t& local_port,
@@ -613,7 +648,7 @@ XrlBgpTarget::bgp_0_2_set_prefix_limit(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_set_nexthop4(
+XrlBgpTarget::bgp_0_3_set_nexthop4(
 				   // Input values,
 				   const string& local_ip,
 				   const uint32_t& local_port,
@@ -641,7 +676,7 @@ XrlBgpTarget::bgp_0_2_set_nexthop4(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_nexthop6(
+XrlBgpTarget::bgp_0_3_set_nexthop6(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -669,7 +704,7 @@ XrlBgpTarget::bgp_0_2_set_nexthop6(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_nexthop6(
+XrlBgpTarget::bgp_0_3_get_nexthop6(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -695,7 +730,7 @@ XrlBgpTarget::bgp_0_2_get_nexthop6(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_peer_state(
+XrlBgpTarget::bgp_0_3_set_peer_state(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -721,7 +756,7 @@ XrlBgpTarget::bgp_0_2_set_peer_state(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_set_peer_md5_password(
+XrlBgpTarget::bgp_0_3_set_peer_md5_password(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -748,7 +783,7 @@ XrlBgpTarget::bgp_0_2_set_peer_md5_password(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_activate(
+XrlBgpTarget::bgp_0_3_activate(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -773,7 +808,7 @@ XrlBgpTarget::bgp_0_2_activate(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
+XrlBgpTarget::bgp_0_3_next_hop_rewrite_filter(
 	// Input values, 
 	const string&	local_ip, 
 	const uint32_t&	local_port, 
@@ -801,7 +836,7 @@ XrlBgpTarget::bgp_0_2_next_hop_rewrite_filter(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_originate_route4(
+XrlBgpTarget::bgp_0_3_originate_route4(
 	// Input values,
 	const IPv4Net&	nlri,
 	const IPv4&	next_hop,
@@ -818,7 +853,7 @@ XrlBgpTarget::bgp_0_2_originate_route4(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_originate_route6(
+XrlBgpTarget::bgp_0_3_originate_route6(
 	// Input values,
 	const IPv6Net&	nlri,
 	const IPv6&	next_hop,
@@ -835,7 +870,7 @@ XrlBgpTarget::bgp_0_2_originate_route6(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_withdraw_route4(
+XrlBgpTarget::bgp_0_3_withdraw_route4(
 	// Input values,
 	const IPv4Net&	nlri,
 	const bool&	unicast,
@@ -851,7 +886,7 @@ XrlBgpTarget::bgp_0_2_withdraw_route4(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_withdraw_route6(
+XrlBgpTarget::bgp_0_3_withdraw_route6(
 	// Input values,
 	const IPv6Net&	nlri,
 	const bool&	unicast,
@@ -867,7 +902,7 @@ XrlBgpTarget::bgp_0_2_withdraw_route6(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_trace(const string& tvar,
+XrlBgpTarget::bgp_0_3_trace(const string& tvar,
 			    const bool&	enable)
 {
     debug_msg("trace variable %s %s\n", tvar.c_str(),
@@ -896,7 +931,7 @@ XrlBgpTarget::bgp_0_2_trace(const string& tvar,
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_list_start(
+XrlBgpTarget::bgp_0_3_get_peer_list_start(
 					  // Output values, 
 					  uint32_t& token,
 					  bool&	more)
@@ -906,7 +941,7 @@ XrlBgpTarget::bgp_0_2_get_peer_list_start(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_list_next(
+XrlBgpTarget::bgp_0_3_get_peer_list_next(
 					 // Input values, 
 					 const uint32_t&	token, 
 					 // Output values, 
@@ -930,7 +965,7 @@ XrlBgpTarget::bgp_0_2_get_peer_list_next(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_id(
+XrlBgpTarget::bgp_0_3_get_peer_id(
 				  // Input values, 
 				  const string&	local_ip, 
 				  const uint32_t&	local_port, 
@@ -958,7 +993,7 @@ XrlBgpTarget::bgp_0_2_get_peer_id(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_status(
+XrlBgpTarget::bgp_0_3_get_peer_status(
 				      // Input values, 
 				      const string&	local_ip, 
 				      const uint32_t&	local_port, 
@@ -984,7 +1019,7 @@ XrlBgpTarget::bgp_0_2_get_peer_status(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_negotiated_version(
+XrlBgpTarget::bgp_0_3_get_peer_negotiated_version(
 						  // Input values, 
 						  const string& local_ip, 
 						  const uint32_t& local_port, 
@@ -1008,22 +1043,23 @@ XrlBgpTarget::bgp_0_2_get_peer_negotiated_version(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_as(
+XrlBgpTarget::bgp_0_3_get_peer_as(
 				  // Input values, 
 				  const string& local_ip, 
 				  const uint32_t& local_port, 
 				  const string&	peer_ip, 
 				  const uint32_t& peer_port, 
 				  // Output values, 
-				  uint32_t& peer_as)
+				  string& peer_as)
 {
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
-
-	if (!_bgp.get_peer_as(iptuple, peer_as)) {
+	uint32_t peer_asn;
+	if (!_bgp.get_peer_as(iptuple, peer_asn)) {
 	    return XrlCmdError::COMMAND_FAILED();
 	}
+	peer_as = AsNum(peer_asn).short_str();
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
@@ -1032,7 +1068,7 @@ XrlBgpTarget::bgp_0_2_get_peer_as(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
+XrlBgpTarget::bgp_0_3_get_peer_msg_stats(
 					 // Input values, 
 					 const string& local_ip, 
 					 const uint32_t& local_port, 
@@ -1065,7 +1101,7 @@ XrlBgpTarget::bgp_0_2_get_peer_msg_stats(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_established_stats(
+XrlBgpTarget::bgp_0_3_get_peer_established_stats(
 						 // Input values, 
 						 const string& local_ip, 
 						 const uint32_t& local_port, 
@@ -1090,7 +1126,7 @@ XrlBgpTarget::bgp_0_2_get_peer_established_stats(
 }
 
 XrlCmdError 
-XrlBgpTarget::bgp_0_2_get_peer_timer_config(
+XrlBgpTarget::bgp_0_3_get_peer_timer_config(
 					    // Input values, 
 					    const string&	local_ip, 
 					    const uint32_t&	local_port, 
@@ -1122,7 +1158,7 @@ XrlBgpTarget::bgp_0_2_get_peer_timer_config(
 
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_register_rib(
+XrlBgpTarget::bgp_0_3_register_rib(
 				   // Input values, 
 				   const string&	name)
 {
@@ -1138,7 +1174,7 @@ XrlBgpTarget::bgp_0_2_register_rib(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
+XrlBgpTarget::bgp_0_3_get_v4_route_list_start(
 	// Input values,
 	const IPv4Net& prefix,
 	const bool&	unicast,
@@ -1156,7 +1192,7 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_get_v6_route_list_start(
+XrlBgpTarget::bgp_0_3_get_v6_route_list_start(
 	// Input values,
         const IPv6Net& prefix,
 	const bool&	unicast,
@@ -1172,7 +1208,7 @@ XrlBgpTarget::bgp_0_2_get_v6_route_list_start(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_get_v4_route_list_next(
+XrlBgpTarget::bgp_0_3_get_v4_route_list_next(
 	// Input values, 
 	const uint32_t&	token, 
 	// Output values, 
@@ -1215,7 +1251,7 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_next(
 }
 
 XrlCmdError
-XrlBgpTarget::bgp_0_2_get_v6_route_list_next(
+XrlBgpTarget::bgp_0_3_get_v6_route_list_next(
 	// Input values, 
 	const uint32_t&	token, 
 	// Output values, 
@@ -1328,7 +1364,7 @@ XrlCmdError XrlBgpTarget::rib_client_0_1_route_info_invalid6(
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError XrlBgpTarget::bgp_0_2_set_parameter(
+XrlCmdError XrlBgpTarget::bgp_0_3_set_parameter(
 				  // Input values,
 				  const string&	local_ip, 
 				  const uint32_t&	local_port, 

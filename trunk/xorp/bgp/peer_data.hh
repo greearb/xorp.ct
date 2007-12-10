@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.22 2006/10/12 01:24:38 pavlin Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.23 2007/02/16 22:45:14 pavlin Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -86,6 +86,9 @@ public:
 
     const AsNum& as() const			{ return _as; }
     void set_as(const AsNum& a)			{ _as = a; }
+    bool use_4byte_asnums() const               { return _use_4byte_asnums; }
+    void set_use_4byte_asnums(bool use)         { _use_4byte_asnums = use; }
+    bool we_use_4byte_asnums() const            { return _local_data.use_4byte_asnums(); }
 
     uint32_t get_hold_duration() const;
     void set_hold_duration(uint32_t d);
@@ -326,6 +329,7 @@ private:
     const Iptuple _iptuple;
 
     AsNum _as;			// Peer's AS number.
+    bool _use_4byte_asnums;      // True if we negotiated to use 4byte ASnums.
     bool _route_reflector;	// True if this is a route reflector client.
     bool _confederation;	// True if this is a confederation peer.
 

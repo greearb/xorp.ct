@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.19 2007/02/16 22:45:12 pavlin Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.20 2007/05/23 12:12:32 pavlin Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -36,6 +36,7 @@
 class LocalData {
 public:
     LocalData(EventLoop& eventloop) : _as(AsNum::AS_INVALID), 
+				      _use_4byte_asnums(false),
 				      _confed_id(AsNum::AS_INVALID),
 				      _route_reflector(false),
 				      _damping(eventloop),
@@ -55,6 +56,22 @@ public:
      * Set this routers AS number.
      */
     void set_as(const AsNum& a) { _as = a; }
+
+    /**
+     * @return true if we use 4 byte AS numbers.
+     */
+    inline const bool use_4byte_asnums() const {
+	return _use_4byte_asnums;
+    }
+
+
+    /**
+     * Set whether to send 2 or 4 byte AS numbers 
+     */
+    inline void set_use_4byte_asnums(bool use_4byte_asnums) {
+	_use_4byte_asnums = use_4byte_asnums;
+    }
+
 
     /**
      * @return This routers ID.
@@ -120,6 +137,7 @@ public:
 
 private:
     AsNum	_as;	                // This routers AS number.
+    bool        _use_4byte_asnums;      // Indicates to use 4byte AS numbers.
     IPv4	_id;	                // This routers ID.
     AsNum	_confed_id;		// Confederation identifier.
     IPv4	_cluster_id;		// Router reflector cluster ID

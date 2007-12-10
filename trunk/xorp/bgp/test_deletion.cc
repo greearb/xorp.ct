@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.31 2007/02/16 22:45:20 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.32 2007/09/11 08:06:20 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -86,19 +86,19 @@ test_deletion(TestInfo& /*info*/)
 
     OriginAttribute igp_origin_att(IGP);
 
-    AsPath aspath1;
+    ASPath aspath1;
     aspath1.prepend_as(AsNum(1));
     aspath1.prepend_as(AsNum(2));
     aspath1.prepend_as(AsNum(3));
     ASPathAttribute aspathatt1(aspath1);
 
-    AsPath aspath2;
+    ASPath aspath2;
     aspath2.prepend_as(AsNum(3));
     aspath2.prepend_as(AsNum(4));
     aspath2.prepend_as(AsNum(5));
     ASPathAttribute aspathatt2(aspath2);
 
-    AsPath aspath3;
+    ASPath aspath3;
     aspath3.prepend_as(AsNum(6));
     aspath3.prepend_as(AsNum(6));
     aspath3.prepend_as(AsNum(7));

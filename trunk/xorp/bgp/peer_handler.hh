@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.25 2006/11/07 18:55:39 pavlin Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.26 2007/02/16 22:45:14 pavlin Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -110,6 +110,14 @@ public:
      * The AS number of the peer router.
      */
     AsNum AS_number() const		{ return _peer->peerdata()->as(); }
+
+
+    /**
+     * Do we use 4-byte AS numbers with this peer?
+     */
+    bool use_4byte_asnums() const {
+	return _peer->peerdata()->use_4byte_asnums();
+    }
 
     virtual PeerType get_peer_type() const { 
 	return _peer->peerdata()->get_peer_type(); 

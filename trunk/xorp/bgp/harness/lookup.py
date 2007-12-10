@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# $XORP: xorp/bgp/harness/lookup.py,v 1.1 2005/03/18 03:46:09 atanu Exp $
+# $XORP: xorp/bgp/harness/lookup.py,v 1.2 2005/03/18 18:41:21 atanu Exp $
 
 # On standard input take a list of update packets in XORP text format
 # On standard output generate a list of lookup xrls that can be passed to
@@ -9,7 +9,7 @@
 import sys
 import getopt
 
-AS_PREFIX_STRING = ' - AS Path Attribute AsPath: '
+AS_PREFIX_STRING = ' - AS Path Attribute ASPath: '
 
 def coord(command):
     """

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.33 2006/10/12 01:24:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.34 2007/02/16 22:45:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -416,6 +416,15 @@ BGP4ByteASCapability(const BGP4ByteASCapability& param)
     }
 }
 
+BGP4ByteASCapability::
+BGP4ByteASCapability(const AsNum& as)
+{
+    _as4 = as.as4();
+    _length = 8;
+    _data = new uint8_t[_length];
+    encode();
+}
+
 void
 BGP4ByteASCapability::decode()
 {
@@ -529,8 +538,6 @@ BGPParameter *
 BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 	throw(CorruptMessage)
 {
-    debug_msg("max_len %u\n", max_len);
-
     XLOG_ASSERT(d != 0);	// this is a programming error
     if (max_len < 2)
 	xorp_throw(CorruptMessage, "Short block to BGPParameter::create\n",
@@ -540,6 +547,8 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
     len = d[1] + 2;	// count the header too
 
     if (len == 2 || len > max_len ) {
+	XLOG_WARNING("Create: max_len %u len %u type: %u\n", max_len, 
+		     (uint32_t)len, (uint32_t)param_type);
 	debug_msg("Badly constructed Parameters\n");
 	debug_msg("Throw exception\n");
 	debug_msg("Send bad packet\n");

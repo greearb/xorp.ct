@@ -95,8 +95,8 @@ am_isolation_tests_OBJECTS = test_main.$(OBJEXT) test_ribin.$(OBJEXT) \
 	test_nhlookup.$(OBJEXT) test_decision.$(OBJEXT) \
 	test_fanout.$(OBJEXT) test_dump.$(OBJEXT) \
 	test_ribout.$(OBJEXT) test_next_hop_resolver.$(OBJEXT) \
-	route_table_debug.$(OBJEXT) dummy_main.$(OBJEXT) \
-	dummy_next_hop_resolver.$(OBJEXT) peer_handler_debug.$(OBJEXT) \
+	route_table_debug.$(OBJEXT)  \
+	dummy_main.$(OBJEXT) dummy_next_hop_resolver.$(OBJEXT) peer_handler_debug.$(OBJEXT) \
 	test_subnet_route.$(OBJEXT)
 isolation_tests_OBJECTS = $(am_isolation_tests_OBJECTS)
 isolation_tests_LDADD = $(LDADD)
@@ -114,7 +114,7 @@ isolation_tests_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
-am_test_packet_OBJECTS = test_packet.$(OBJEXT)
+am_test_packet_OBJECTS = test_packet.$(OBJEXT) 
 test_packet_OBJECTS = $(am_test_packet_OBJECTS)
 test_packet_LDADD = $(LDADD)
 test_packet_DEPENDENCIES = libbgp.la \
@@ -131,7 +131,7 @@ test_packet_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
-am_test_packet_coding_OBJECTS = test_packet_coding.$(OBJEXT)
+am_test_packet_coding_OBJECTS = test_packet_coding.$(OBJEXT) 
 test_packet_coding_OBJECTS = $(am_test_packet_coding_OBJECTS)
 test_packet_coding_LDADD = $(LDADD)
 test_packet_coding_DEPENDENCIES = libbgp.la \
@@ -408,7 +408,7 @@ LDADD = libbgp.la $(top_builddir)/xrl/targets/libbgpbase.la \
 
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
-test_packet_SOURCES = test_test.hh test_packet.cc
+test_packet_SOURCES = test_test.hh test_packet.cc 
 test_plumbing_SOURCES = test_plumbing.hh test_plumbing.cc bgp.hh \
 	bgp.cc
 test_plumbing_DEPENDENCIES = libbgp.la
@@ -419,8 +419,8 @@ isolation_tests_SOURCES = test_main.cc test_ribin.cc test_deletion.cc \
 	test_filter.cc test_policy.cc test_cache.cc test_nhlookup.cc \
 	test_decision.cc test_fanout.cc test_dump.cc test_ribout.cc \
 	test_next_hop_resolver.cc route_table_debug.hh \
-	route_table_debug.cc dummy_main.cc dummy_next_hop_resolver.cc \
-	dummy_next_hop_resolver.hh peer_handler_debug.hh \
+	route_table_debug.cc dummy_next_hop_resolver.cc \
+	dummy_main.cc dummy_next_hop_resolver.hh peer_handler_debug.hh \
 	peer_handler_debug.cc test_subnet_route.cc
 test_peer_data_SOURCES = test_peer_data.cc
 

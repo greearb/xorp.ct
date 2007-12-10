@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.46 2007/03/28 13:49:33 schooley Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.47 2007/05/23 12:12:32 pavlin Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -219,11 +219,17 @@ public:
     string str() const			{ return _peername; }
     bool is_connected() const		{ return _SocketClient->is_connected(); }
     bool still_reading() const		{ return _SocketClient->still_reading(); }
-    LocalData* _localdata;
+    LocalData* localdata()              { return _localdata; }
     IPv4 id() const		        { return _localdata->get_id(); }
     BGPMain* main()			{ return _mainprocess; }
     const BGPPeerData* peerdata() const	{ return _peerdata; }
     bool ibgp() const			{ return peerdata()->ibgp(); }
+    bool use_4byte_asnums() const { 
+	return _peerdata->use_4byte_asnums(); 
+    }
+    bool we_use_4byte_asnums() const { 
+	return _localdata->use_4byte_asnums(); 
+    }
 
     /**
      * send the netreachability message, return send result.
@@ -246,6 +252,8 @@ public:
 		       uint32_t& in_update_elapsed) const;
 protected:
 private:
+    LocalData* _localdata;
+
     /**
      * For the processing in decision every peer requires a unique ID.
      */

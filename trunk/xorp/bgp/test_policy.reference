@@ -6,14 +6,14 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [DELETE]
 SubnetRoute:
   Net: 1.0.1.0/24
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
 [comment] TEST 2
 [comment] ADD, CONFIG, DELETE
@@ -23,7 +23,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [comment] CONFIGURE EXPORT FILTER
 [comment] DO DUMP
 [comment] EXPECT DELETE TO *NOT* HAVE LOCALPREF
@@ -34,7 +34,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 [ADD]
 CHANGED flag is set
 SubnetRoute:
@@ -42,7 +42,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [comment] EXPECT DELETE TO HAVE LOCALPREF OF 200
 [DELETE]
@@ -52,7 +52,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] TEST 3
@@ -65,7 +65,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [DELETE]
 CHANGED flag is set
@@ -74,7 +74,7 @@ SubnetRoute:
   PAList: 
 	Next Hop Attribute 2.0.0.1
 	Origin Path Attribute - IGP
-	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	AS Path Attribute ASPath: [AS/3, AS/2, AS/1]
 	Local Preference Attribute - 200
 [separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP

@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.9 2005/03/18 01:44:48 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.10 2005/04/15 03:38:44 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../../libxipc/call_xrl -w 10}
@@ -61,6 +61,12 @@ packetisation()
 {
     echo "Packetisation $* "
     $CALLXRL "finder://$BASE/test_peer/0.1/packetisation?protocol:txt=$1"
+}
+
+use_4byte_asnums()
+{
+    echo "Packetisation $* "
+    $CALLXRL "finder://$BASE/test_peer/0.1/use_4byte_asnums?use:bool=$1"
 }
 
 connect()

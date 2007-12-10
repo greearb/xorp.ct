@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.42 2006/10/12 01:24:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.43 2007/02/16 22:45:22 pavlin Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+//#define DEBUG_LOGGING
+//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -92,10 +92,13 @@ UpdatePacket::big_enough() const
     return false;
 }
 
-const uint8_t *
-UpdatePacket::encode(size_t &len, uint8_t *d) const
+bool
+UpdatePacket::encode(uint8_t *d, size_t &len, const BGPPeerData *peerdata) const
 {
     XLOG_ASSERT( _nlri_list.empty() ||  ! pa_list().empty());
+    XLOG_ASSERT(d != 0);
+    XLOG_ASSERT(len != 0);
+    debug_msg("UpdatePacket::encode: len=%u\n", (uint32_t)len);
 
     list <PathAttribute*>::const_iterator pai;
     size_t i, pa_len = 0;
@@ -103,14 +106,27 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     size_t nlri_len = nlri_list().wire_size();
 
     // compute packet length
+    pa_len = BGPPacket::MAXPACKETSIZE;
+    uint8_t pa_list_buf[pa_len];
+    if (pa_list().encode(pa_list_buf, pa_len, peerdata) == false) {
+	XLOG_WARNING("failed to encode update - no space for pa list\n");
+	return false;
+    }
 
+#if 0
     for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai)
 	pa_len += (*pai)->wire_size();
+#endif
 
     size_t desired_len = BGPPacket::MINUPDATEPACKET + wr_len + pa_len
 	+ nlri_len;
-    if (d != 0)		// XXX have a buffer, check length
-	assert(len >= desired_len);	// XXX should throw an exception
+    if (len < desired_len) {
+	XLOG_WARNING("failed to encode update, desired_len=%u, len=%u, wr=%u, pa=%u, nlri=%u\n",
+		     (uint32_t)desired_len, (uint32_t)len, 
+		     (uint32_t)wr_len, (uint32_t)pa_len, (uint32_t)nlri_len);
+	return false;
+    }
+
     len = desired_len;
 
     if (len > BGPPacket::MAXPACKETSIZE)		// XXX
@@ -136,20 +152,24 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     d[i++] = (pa_len >> 8) & 0xff;
     d[i++] = pa_len & 0xff;
 
+#if 0
     // fill path attribute list
     for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai) {
         memcpy(d+i, (*pai)->data(), (*pai)->wire_size());
 	i += (*pai)->wire_size();
-    }	
+    }
+#endif
+    memcpy(d+i, pa_list_buf, pa_len);
+    i += pa_len;
 
     // fill NLRI list
     nlri_list().encode(nlri_len, d+i);
     i += nlri_len;
-    return d;
+    return true;
 }
 
-UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l) 
-    throw(CorruptMessage)
+UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l, 
+			   const BGPPeerData* peerdata) throw(CorruptMessage)
 {
     debug_msg("UpdatePacket constructor called\n");
     _Type = MESSAGETYPEUPDATE;
@@ -159,7 +179,6 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
     d += BGPPacket::COMMON_HEADER_LEN;		// move past header
     size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
-
     if (BGPPacket::MINUPDATEPACKET + wr_len > l)
 	xorp_throw(CorruptMessage,
 		   c_format("Unreachable routes length is bogus %u > %u",
@@ -187,13 +206,13 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 	
     while (pa_len > 0) {
 	size_t used = 0;
-        PathAttribute *pa = PathAttribute::create(d, pa_len, used);
+        PathAttribute *pa = PathAttribute::create(d, pa_len, used, peerdata);
 	debug_msg("attribute size %u\n", XORP_UINT_CAST(used));
-	if (used == 0)
+	if (used == 0) {
 	    xorp_throw(CorruptMessage,
 		   c_format("failed to read path attribute"),
 		   UPDATEMSGERR, ATTRLEN);
-
+	}
 	add_pathatt(pa);
 // 	_pa_list.push_back(pa);
 	d += used;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.41 2006/07/05 22:46:56 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.42 2007/02/16 22:45:23 pavlin Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -42,42 +42,47 @@ public:
      */
     XrlCmdError common_0_1_shutdown();
 
-    XrlCmdError bgp_0_2_get_bgp_version(
+    XrlCmdError bgp_0_3_get_bgp_version(
 					// Output values,
 					uint32_t& version);
 
-    XrlCmdError bgp_0_2_local_config(
+    XrlCmdError bgp_0_3_local_config(
 	// Input values,
-	const uint32_t&	as_num,
-	const IPv4&	id);
+	const string&	as_num,
+	const IPv4&	id,
+	const bool&     use_4byte_asnums);
 
-    XrlCmdError bgp_0_2_set_local_as(
+    XrlCmdError bgp_0_3_set_local_as(
 	// Input values,
-	const uint32_t&	as);
+	const string&	as);
 
-    XrlCmdError bgp_0_2_get_local_as(
+    XrlCmdError bgp_0_3_get_local_as(
 				     // Output values,
-				     uint32_t& as);
+				     string& as);
 
-    XrlCmdError bgp_0_2_set_bgp_id(
+    XrlCmdError bgp_0_3_set_4byte_as_support(
+	// Input values,
+	const bool&	enabled);
+
+    XrlCmdError bgp_0_3_set_bgp_id(
 	// Input values,
 	const IPv4&	id);
 
-    XrlCmdError bgp_0_2_get_bgp_id(
+    XrlCmdError bgp_0_3_get_bgp_id(
 				   // Output values,
 				   IPv4& id);
 
-    XrlCmdError bgp_0_2_set_confederation_identifier(
+    XrlCmdError bgp_0_3_set_confederation_identifier(
         // Input values,
-	const uint32_t&	as,
+	const string&	as,
 	const bool& disable);
 
-    XrlCmdError bgp_0_2_set_cluster_id(
+    XrlCmdError bgp_0_3_set_cluster_id(
 	// Input values,
 	const IPv4&	cluster_id,
 	const bool&	disable);
 
-    XrlCmdError bgp_0_2_set_damping(
+    XrlCmdError bgp_0_3_set_damping(
 	// Input values,
 	const uint32_t&	half_life,
 	const uint32_t&	max_suppress,
@@ -85,38 +90,38 @@ public:
 	const uint32_t&	suppress,
 	const bool&	disable);
 
-    XrlCmdError bgp_0_2_add_peer(
+    XrlCmdError bgp_0_3_add_peer(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
-	const uint32_t&	as,
+	const string&	as,
 	const IPv4&	next_hop,
 	const uint32_t&	holdtime);
 
-    XrlCmdError bgp_0_2_delete_peer(
+    XrlCmdError bgp_0_3_delete_peer(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port);
 
-    XrlCmdError bgp_0_2_enable_peer(
+    XrlCmdError bgp_0_3_enable_peer(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port);
 
-    XrlCmdError bgp_0_2_disable_peer(
+    XrlCmdError bgp_0_3_disable_peer(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port);
 
-    XrlCmdError bgp_0_2_change_local_ip(
+    XrlCmdError bgp_0_3_change_local_ip(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -124,7 +129,7 @@ public:
 	const uint32_t&	peer_port,
 	const string&	new_local_ip);
 
-    XrlCmdError bgp_0_2_change_local_port(
+    XrlCmdError bgp_0_3_change_local_port(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -132,7 +137,7 @@ public:
 	const uint32_t&	peer_port,
 	const uint32_t&	new_local_port);
 
-    XrlCmdError bgp_0_2_change_peer_port(
+    XrlCmdError bgp_0_3_change_peer_port(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -140,15 +145,15 @@ public:
 	const uint32_t&	peer_port,
 	const uint32_t&	new_peer_port);
 
-    XrlCmdError bgp_0_2_set_peer_as(
+    XrlCmdError bgp_0_3_set_peer_as(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
-	const uint32_t&	peer_as);
+	const string&	peer_as);
 
-    XrlCmdError bgp_0_2_set_holdtime(
+    XrlCmdError bgp_0_3_set_holdtime(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -156,7 +161,7 @@ public:
 	const uint32_t&	peer_port,
 	const uint32_t&	holdtime);
 
-    XrlCmdError bgp_0_2_set_delay_open_time(
+    XrlCmdError bgp_0_3_set_delay_open_time(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -164,7 +169,7 @@ public:
 	const uint32_t&	peer_port,
 	const uint32_t&	delay_open_time);
 
-    XrlCmdError bgp_0_2_set_route_reflector_client(
+    XrlCmdError bgp_0_3_set_route_reflector_client(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -172,7 +177,7 @@ public:
 	const uint32_t&	peer_port,
 	const bool&	state);
 
-    XrlCmdError bgp_0_2_set_confederation_member(
+    XrlCmdError bgp_0_3_set_confederation_member(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -180,7 +185,7 @@ public:
 	const uint32_t&	peer_port,
 	const bool&	state);
 
-    XrlCmdError bgp_0_2_set_prefix_limit(
+    XrlCmdError bgp_0_3_set_prefix_limit(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -189,7 +194,7 @@ public:
 	const uint32_t&	maximum,
 	const bool&	state);
 
-    XrlCmdError bgp_0_2_set_nexthop4(
+    XrlCmdError bgp_0_3_set_nexthop4(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -197,7 +202,7 @@ public:
 	const uint32_t&	peer_port,
 	const IPv4&	next_hop);
 
-    XrlCmdError bgp_0_2_set_nexthop6(
+    XrlCmdError bgp_0_3_set_nexthop6(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -205,7 +210,7 @@ public:
 	const uint32_t&	peer_port,
 	const IPv6&	next_hop);
 
-    XrlCmdError bgp_0_2_get_nexthop6(
+    XrlCmdError bgp_0_3_get_nexthop6(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -214,7 +219,7 @@ public:
 	// Output values,
 	IPv6&	next_hop);
 
-    XrlCmdError bgp_0_2_set_peer_state(
+    XrlCmdError bgp_0_3_set_peer_state(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -222,7 +227,7 @@ public:
 	const uint32_t&	peer_port,
 	const bool&	state);
 
-    XrlCmdError bgp_0_2_set_peer_md5_password(
+    XrlCmdError bgp_0_3_set_peer_md5_password(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -230,14 +235,14 @@ public:
 	const uint32_t&	peer_port,
 	const string&	password);
 
-    XrlCmdError bgp_0_2_activate(
+    XrlCmdError bgp_0_3_activate(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port);
 
-    XrlCmdError bgp_0_2_next_hop_rewrite_filter(
+    XrlCmdError bgp_0_3_next_hop_rewrite_filter(
 	// Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -245,43 +250,43 @@ public:
 	const uint32_t&	peer_port,
 	const IPv4&	next_hop);
 
-    XrlCmdError bgp_0_2_originate_route4(
+    XrlCmdError bgp_0_3_originate_route4(
 	// Input values,
 	const IPv4Net&	nlri,
 	const IPv4&	next_hop,
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError bgp_0_2_originate_route6(
+    XrlCmdError bgp_0_3_originate_route6(
 	// Input values,
 	const IPv6Net&	nlri,
 	const IPv6&	next_hop,
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError bgp_0_2_withdraw_route4(
+    XrlCmdError bgp_0_3_withdraw_route4(
 	// Input values,
 	const IPv4Net&	nlri,
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError bgp_0_2_withdraw_route6(
+    XrlCmdError bgp_0_3_withdraw_route6(
 	// Input values,
 	const IPv6Net&	nlri,
 	const bool&	unicast,
 	const bool&	multicast);
 
-    XrlCmdError bgp_0_2_trace(
+    XrlCmdError bgp_0_3_trace(
 	// Input values,
 	const string&	tvar,
 	const bool&	enable);
 
-    XrlCmdError bgp_0_2_get_peer_list_start(
+    XrlCmdError bgp_0_3_get_peer_list_start(
         // Output values,
         uint32_t& token,
 	bool& more);
 
-    XrlCmdError bgp_0_2_get_peer_list_next(
+    XrlCmdError bgp_0_3_get_peer_list_next(
         // Input values,
         const uint32_t&	token,
 	// Output values,
@@ -291,7 +296,7 @@ public:
 	uint32_t&	peer_port,
 	bool&	more);
 
-    XrlCmdError bgp_0_2_get_peer_id(
+    XrlCmdError bgp_0_3_get_peer_id(
         // Input values,
         const string&	local_ip,
 	const uint32_t&	local_port,
@@ -300,7 +305,7 @@ public:
 	// Output values,
 	IPv4&	peer_id);
 
-    XrlCmdError bgp_0_2_get_peer_status(
+    XrlCmdError bgp_0_3_get_peer_status(
         // Input values,
         const string&	local_ip,
 	const uint32_t&	local_port,
@@ -310,7 +315,7 @@ public:
 	uint32_t&	peer_state,
 	uint32_t&	admin_status);
 
-    XrlCmdError bgp_0_2_get_peer_negotiated_version(
+    XrlCmdError bgp_0_3_get_peer_negotiated_version(
         // Input values,
         const string& local_ip,
 	const uint32_t& local_port,
@@ -319,16 +324,16 @@ public:
 	// Output values,
 	int32_t& neg_version);
 
-    XrlCmdError bgp_0_2_get_peer_as(
+    XrlCmdError bgp_0_3_get_peer_as(
         // Input values,
         const string& local_ip,
 	const uint32_t& local_port,
 	const string&	peer_ip,
 	const uint32_t& peer_port,
 	// Output values,
-	uint32_t& peer_as);
+	string& peer_as);
 
-    XrlCmdError bgp_0_2_get_peer_msg_stats(
+    XrlCmdError bgp_0_3_get_peer_msg_stats(
         // Input values,
         const string& local_ip,
 	const uint32_t& local_port,
@@ -342,7 +347,7 @@ public:
 	uint32_t&	last_error,
 	uint32_t&	in_update_elapsed);
 
-    XrlCmdError bgp_0_2_get_peer_established_stats(
+    XrlCmdError bgp_0_3_get_peer_established_stats(
         // Input values,
         const string& local_ip,
 	const uint32_t& local_port,
@@ -352,7 +357,7 @@ public:
 	uint32_t& transitions,
 	uint32_t& established_time);
 
-    XrlCmdError bgp_0_2_get_peer_timer_config(
+    XrlCmdError bgp_0_3_get_peer_timer_config(
         // Input values,
         const string&	local_ip,
 	const uint32_t& local_port,
@@ -367,11 +372,11 @@ public:
 	uint32_t& min_as_origin_interval,
 	uint32_t& min_route_adv_interval);
 
-    XrlCmdError bgp_0_2_register_rib(
+    XrlCmdError bgp_0_3_register_rib(
 	// Input values,
 	const string&	name);
 
-    XrlCmdError bgp_0_2_get_v4_route_list_start(
+    XrlCmdError bgp_0_3_get_v4_route_list_start(
 	// Input values,
 	const IPv4Net&	net,
 	const bool&	unicast,
@@ -379,7 +384,7 @@ public:
 	// Output values,
 	uint32_t& token);
 
-    XrlCmdError bgp_0_2_get_v6_route_list_start(
+    XrlCmdError bgp_0_3_get_v6_route_list_start(
 	// Input values,
 	const IPv6Net&	net,
 	const bool&	unicast,
@@ -387,7 +392,7 @@ public:
 	// Output values,
 	uint32_t& token);
 
-    XrlCmdError bgp_0_2_get_v4_route_list_next(
+    XrlCmdError bgp_0_3_get_v4_route_list_next(
 	// Input values,
 	const uint32_t&	token,
 	// Output values,
@@ -406,7 +411,7 @@ public:
 	bool& unicast,
 	bool& multicast);
 
-    XrlCmdError bgp_0_2_get_v6_route_list_next(
+    XrlCmdError bgp_0_3_get_v6_route_list_next(
 	// Input values,
 	const uint32_t&	token,
 	// Output values,
@@ -453,7 +458,7 @@ public:
 	const IPv6&	addr,
 	const uint32_t&	prefix_len);
 
-    XrlCmdError bgp_0_2_set_parameter(
+    XrlCmdError bgp_0_3_set_parameter(
         // Input values,
 	const string&	local_ip,
 	const uint32_t&	local_port,
@@ -553,7 +558,7 @@ private:
     /**
      * Local AS number.
      */
-    uint32_t _as;
+    AsNum _as;
     /**
      * Waiting for BGP id
      */
@@ -562,6 +567,14 @@ private:
      * BGP id.
      */
     IPv4 _id;
+    /**
+     * Waiting for info on using 4-byte AS numbers.
+     */
+    bool _awaiting_4byte_asnums;
+    /**
+     * Do we use 4byte AS numbers?
+     */
+    bool _use_4byte_asnums;
     /**
      * Set to true if we should be exiting.
      */

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_test.cc,v 1.16 2006/10/12 01:24:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_test.cc,v 1.17 2007/02/16 22:45:23 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -53,7 +53,7 @@ uint8_t buffer[] = {
 void
 test1(unsigned int as_size)
 {
-    AsSegment seq1 = AsSegment(AS_SEQUENCE);
+    ASSegment seq1 = ASSegment(AS_SEQUENCE);
     for (unsigned int i = 0; i < as_size; i++)
 	seq1.add_as(AsNum(10));
 
@@ -61,10 +61,10 @@ test1(unsigned int as_size)
     fprintf(stderr, "trying size %u wire_size %u\n",
 	    as_size, XORP_UINT_CAST(seq1.wire_size()));
     const uint8_t *d = seq1.encode(len, NULL);
-    AsSegment *seq2 = new AsSegment(d);
+    ASSegment *seq2 = new ASSegment(d);
     delete[] d;
 
-    AsSegment seq3(*seq2);
+    ASSegment seq3(*seq2);
     delete seq2;
 }
 
@@ -82,8 +82,13 @@ main(int, char **argv)
     xlog_add_default_output();
     xlog_start();
 
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+
     try {
- 	UpdatePacket pac(&buffer[0], sizeof(buffer));
+ 	UpdatePacket pac(&buffer[0], sizeof(buffer), &pd);
 	
 	for(int i = 0; i < 2048; i++)
 	    test1(i);

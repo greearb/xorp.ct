@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/inject.sh,v 1.2 2003/07/17 00:28:32 pavlin Exp $
+# $XORP: xorp/bgp/harness/inject.sh,v 1.3 2006/11/03 23:32:24 pavlin Exp $
 #
 
 # Inject a saved conversation in mrtd format to our BGP process using
@@ -99,8 +99,9 @@ bgp()
     PORT=$MY_PORT
     AS=$MY_AS
     ID=$MY_ID
+    USE4BYTEAS=false
     HOLDTIME=0
-    $BGP_FUNCS local_config $AS $ID
+    $BGP_FUNCS local_config $AS $ID $USE4BYTEAS
 #   register_rib "rib"
 	
     # Test peer used for route injection

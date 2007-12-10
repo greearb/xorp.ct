@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.20 2006/10/12 01:24:43 pavlin Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.21 2007/02/16 22:45:27 pavlin Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -32,7 +32,7 @@
 
 
 template <typename A>
-class PrintRoutes : public XrlBgpV0p2Client {
+class PrintRoutes : public XrlBgpV0p3Client {
 public:
     static const uint32_t MAX_REQUESTS = 100;
     static const int32_t INVALID = -1;

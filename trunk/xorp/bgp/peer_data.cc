@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.32 2006/10/12 01:24:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.33 2007/02/16 22:45:14 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,6 +31,7 @@ BGPPeerData::BGPPeerData(const LocalData& local_data, const Iptuple& iptuple,
 			 AsNum as,
 			 const IPv4& next_hop, const uint16_t holdtime)
     : _local_data(local_data), _iptuple(iptuple), _as(as),
+      _use_4byte_asnums(false),
       _route_reflector(false), _confederation(false),
       _prefix_limit(0, false),
       _delay_open_time(0),
@@ -41,6 +42,12 @@ BGPPeerData::BGPPeerData(const LocalData& local_data, const Iptuple& iptuple,
     set_configured_hold_time(holdtime);
 
     set_retry_duration(2 * 60);	// Connect retry time.
+
+    // if we're configured to use 4byte AS numbers, make sure we send
+    // the relevant capability.
+    if (_local_data.use_4byte_asnums()) {
+	add_sent_parameter( new BGP4ByteASCapability(as) );
+    }
 
     // we support route refresh
     // add_sent_parameter( new BGPRefreshCapability() );
@@ -389,6 +396,20 @@ BGPPeerData::open_negotiation()
 		    break;
 		}
 		break;
+	    }
+	}
+    }
+
+    // if we are configured for 4 byte AS numbers, and the other side
+    // sent this capability too, then extract their AS number from it.
+    if (_local_data.use_4byte_asnums()) {
+	for(iter_recv = _recv_parameters.begin(); 
+	    iter_recv != _recv_parameters.end(); iter_recv++) {
+	    ParameterNode& pn = *iter_recv;
+	    if(const BGP4ByteASCapability *cap4byte = 
+	       dynamic_cast<const BGP4ByteASCapability *>(pn.get())) {
+		_use_4byte_asnums = true;
+		_as = AsNum(cap4byte->as());
 	    }
 	}
     }

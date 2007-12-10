@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.19 2006/10/12 01:24:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/trie.cc,v 1.20 2007/02/16 22:45:26 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -126,11 +126,12 @@ Trie::lookup(const IPv6Net& n) const
 }
 
 void
-Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len)
+Trie::process_update_packet(const TimeVal& tv, const uint8_t *buf, size_t len,
+			    const BGPPeerData *peerdata)
 {
     _update_cnt++;
 
-    TriePayload payload(tv, buf, len, _first, _last);
+    TriePayload payload(tv, buf, len, peerdata, _first, _last);
     const UpdatePacket *p = payload.get();
 
     debug_msg("%s\n", p->str().c_str());
@@ -207,7 +208,7 @@ Trie::tree_walk_table(const TreeWalker_ipv6& tw) const
 }
 
 void
-Trie::replay_walk(const ReplayWalker uw) const
+Trie::replay_walk(const ReplayWalker uw, const BGPPeerData *peerdata) const
 {
     /*
     ** It should be sufficient to just walk the list of stored
@@ -222,11 +223,12 @@ Trie::replay_walk(const ReplayWalker uw) const
 
     for(const TrieData *p = _first; p; p = p->next()) {
 	changes = trie.changes();
-	size_t len;
 	UpdatePacket *packet = const_cast<UpdatePacket *>(p->data());
-	const uint8_t *data = packet->encode(len);
-	trie.process_update_packet(p->tv(), data, len);
-	delete [] data;
+	uint8_t data[BGPPacket::MAXPACKETSIZE];
+	size_t len = BGPPacket::MAXPACKETSIZE;
+	debug_msg("Trie::replay_walk\n");
+	packet->encode(data, len, peerdata);
+	trie.process_update_packet(p->tv(), data, len, peerdata);
 	if(trie.changes() != changes)
 	    uw->dispatch(p->data(), p->tv());
     }

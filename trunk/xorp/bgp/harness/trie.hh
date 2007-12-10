@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie.hh,v 1.14 2006/03/16 00:03:42 pavlin Exp $
+// $XORP: xorp/bgp/harness/trie.hh,v 1.15 2007/02/16 22:45:26 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TRIE_HH__
 #define __BGP_HARNESS_TRIE_HH__
@@ -23,6 +23,7 @@
 #include "bgp/packet.hh"
 #include "trie_payload.hh"
 #include "real_trie.hh"
+class BGPPeerData;
 
 /**
  * The trie stores BGP update packets the trie index is the
@@ -47,7 +48,7 @@ public:
     const UpdatePacket *lookup(const IPv4Net& net) const;
     const UpdatePacket *lookup(const IPv6Net& net) const;
     void process_update_packet(const TimeVal& tv, const uint8_t *buf,
-			       size_t len);
+			       size_t len, const BGPPeerData *peerdata);
 
     typedef RealTrie<IPv4>::TreeWalker TreeWalker_ipv4;
     typedef RealTrie<IPv6>::TreeWalker TreeWalker_ipv6;
@@ -64,7 +65,7 @@ public:
      *
      * @param uw The callback function that is called.
      */
-    void replay_walk(const ReplayWalker uw) const;
+    void replay_walk(const ReplayWalker uw, const BGPPeerData *peerdata) const;
 
     uint32_t update_count() {
 	return _update_cnt;

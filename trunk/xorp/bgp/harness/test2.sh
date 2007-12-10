@@ -2,7 +2,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/test2.sh,v 1.3 2003/05/29 23:42:31 pavlin Exp $
+# $XORP: xorp/bgp/harness/test2.sh,v 1.4 2003/07/17 00:28:32 pavlin Exp $
 #
 
 #
@@ -44,9 +44,10 @@ configure_bgp()
     BGP=../xrl_shell_funcs.sh
     LOCALHOST=tigger.icir.org
     AS=65008
+    USE4BYTEAS=false
     ID=192.150.187.78
     HOLDTIME=60
-    $BGP local_config $AS $ID
+    $BGP local_config $AS $ID $USE4BYTEAS
     $BGP register_rib rib
 
     PEER=xorp0

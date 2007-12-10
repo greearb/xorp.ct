@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.22 2007/02/16 22:45:21 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.23 2007/09/11 08:06:21 pavlin Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -83,8 +83,8 @@ PlumbingTest::test1()
     printf("ADD A ROUTE\n");
     IPv4 nhaddr("20.20.20.1");
     NextHopAttribute<IPv4> nexthop(nhaddr);
-    AsPath as_path;
-    AsSegment as_seq;
+    ASPath as_path;
+    ASSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
     as_seq.add_as(AsNum(666));
     as_path.add_segment(as_seq);
@@ -285,8 +285,8 @@ PlumbingTest::test2()
     printf("ADD A ROUTE\n");
     IPv4 nhaddr("20.20.20.1");
     NextHopAttribute<IPv4> nexthop(nhaddr);
-    AsPath as_path;
-    AsSegment as_seq;
+    ASPath as_path;
+    ASSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
     as_seq.add_as(AsNum(666));
     as_path.add_segment(as_seq);

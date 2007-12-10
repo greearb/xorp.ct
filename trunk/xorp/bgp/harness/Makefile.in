@@ -247,7 +247,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 check_SCRIPTS = test_peering1.sh test_peering2.sh test_routing1.sh \
 	test_routing2.sh test_rib1.sh test_rib_fea1.sh \
-	test_path_attribute1.sh test_route_reflection1.sh \
+	test_path_attribute1.sh test_path_attribute2.sh test_path_attribute3.sh \
+	test_route_reflection1.sh \
 	test_route_reflection2.sh test_route_flap_damping1.sh \
 	test_terminate.sh
 TESTS = $(check_SCRIPTS) test_trie$(EXEEXT)

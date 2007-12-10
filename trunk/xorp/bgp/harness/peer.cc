@@ -12,11 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.80 2007/02/16 22:45:25 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.81 2007/05/23 04:08:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-
 #include "bgp/bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -67,6 +66,10 @@ Peer::Peer(EventLoop    *eventloop,
       _ipv6(false)
 {
     debug_msg("XXX Creating peer %p\n", this);
+    Iptuple iptuple;
+    _localdata = new LocalData(*eventloop);
+    _localdata->set_use_4byte_asnums(false);
+    _peerdata = new BGPPeerData(*_localdata, iptuple, AsNum(0), IPv4(),0);
 }
 
 Peer::Peer(const Peer& rhs)
@@ -114,6 +117,8 @@ Peer::copy(const Peer& rhs)
     _holdtime = rhs._holdtime;
     _ipv6 = rhs._ipv6;
     _id = rhs._id;
+    _peerdata = rhs._peerdata;
+    _localdata = rhs._localdata;
 }
 
 Peer::PeerState
@@ -217,7 +222,7 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
 {
     /* Connect the test peer to the target BGP */
     debug_msg("About to listen on: %s\n", _peername.c_str());
-    _busy += 3;
+    _busy += 4;
     XrlTestPeerV0p1Client test_peer(_xrlrouter);
     if(!test_peer.send_register(_peername.c_str(), _xrlrouter->name(), _genid,
 			callback(this, &Peer::xrl_callback, "register")))
@@ -226,6 +231,10 @@ Peer::listen(const string& /*line*/, const vector<string>& /*words*/)
 			   callback(this, &Peer::xrl_callback,
 				    "packetisation")))
 	XLOG_FATAL("send_packetisation");
+    if(!test_peer.send_use_4byte_asnums(_peername.c_str(), _localdata->use_4byte_asnums(),
+					callback(this, &Peer::xrl_callback,
+						 "use_4byte_asnums")))
+	XLOG_FATAL("send_use_4byte_asnums");
     if(!test_peer.send_listen(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
 			      callback(this, &Peer::xrl_callback, "listen")))
@@ -238,7 +247,7 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
 {
     /* Connect the test peer to the target BGP */
     debug_msg("About to connect to: %s\n", _peername.c_str());
-    _busy += 3;
+    _busy += 4;
     XrlTestPeerV0p1Client test_peer(_xrlrouter);
     if(!test_peer.send_register(_peername.c_str(), _xrlrouter->name(), _genid,
 			callback(this, &Peer::xrl_callback, "register")))
@@ -246,6 +255,10 @@ Peer::connect(const string& /*line*/, const vector<string>& /*words*/)
     if(!test_peer.send_packetisation(_peername.c_str(), "bgp",
 		     callback(this, &Peer::xrl_callback, "packetisation")))
 	XLOG_FATAL("send_packetisation failed");
+    if(!test_peer.send_use_4byte_asnums(_peername.c_str(), _localdata->use_4byte_asnums(),
+					callback(this, &Peer::xrl_callback,
+						 "use_4byte_asnums")))
+	XLOG_FATAL("send_use_4byte_asnums");
     if(!test_peer.send_connect(_peername.c_str(),
 			   _target_hostname, atoi(_target_port.c_str()),
 			       callback(this, &Peer::xrl_callback_connected,
@@ -287,7 +300,7 @@ Peer::establish(const string& line, const vector<string>& words)
     ** The arguments for this command come in pairs:
     ** name value
     */
-    uint16_t as = 0;
+    string as = "";
     size_t size = words.size();
     if(0 != (size % 2))
 	xorp_throw(InvalidString,
@@ -309,7 +322,7 @@ Peer::establish(const string& line, const vector<string>& words)
 			   c_format("Illegal argument to active: <%s>\n[%s]",
 				    aarg.c_str(), line.c_str()));
 	} else if("AS" == words[i]) {
-	    as = atoi(words[i + 1].c_str());
+	    as = words[i + 1];
 	} else if("keepalive" == words[i]) {
 	    string kaarg = words[i+1];
 	    if("true" == kaarg)
@@ -334,17 +347,29 @@ Peer::establish(const string& line, const vector<string>& words)
 		xorp_throw(InvalidString, 
 			   c_format("Illegal argument to ipv6: <%s>\n[%s]",
 				    ipv6arg.c_str(), line.c_str()));
+	} else if("use_4byte_asnums" == words[i]) {
+	    string use4bytearg = words[i+1];
+	    if("true" == use4bytearg) {
+		_localdata->set_use_4byte_asnums(true);
+		_peerdata->set_use_4byte_asnums(true);
+	    } else if("false" == use4bytearg) {
+		_localdata->set_use_4byte_asnums(false);
+		_peerdata->set_use_4byte_asnums(true);
+	    } else
+		xorp_throw(InvalidString, 
+			   c_format("Illegal argument to use_4byte_asnums: <%s>\n[%s]",
+				    use4bytearg.c_str(), line.c_str()));
 	} else
 	    xorp_throw(InvalidString, 
 		       c_format("Illegal argument to establish: <%s>\n[%s]",
 				words[i].c_str(), line.c_str()));
     }
 
-    if(0 == as)
+    if("" == as)
 	xorp_throw(InvalidString,
 		   c_format("No AS number specified:\n[%s]", line.c_str()));
 
-    _as = AsNum(static_cast<uint16_t>(as));
+    _as = AsNum(as);
 
     if(!active) {
 	_passive = true;
@@ -446,8 +471,10 @@ Peer::send_packet(const string& line, const vector<string>& words)
 
     const BGPPacket *pkt = Peer::packet(line, words, word);
 
-    size_t len;
-    uint8_t *buf = const_cast<uint8_t *>(pkt->encode(len));
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+
+    XLOG_ASSERT(pkt->encode(buf, len, _peerdata));
     delete pkt;
 
     if (!_corrupt.empty()) {
@@ -470,7 +497,7 @@ Peer::send_packet(const string& line, const vector<string>& words)
 	TimeVal tv;
 	_eventloop->current_time(tv);
 	try {
-	    _trie_sent.process_update_packet(tv, buf, len);
+	    _trie_sent.process_update_packet(tv, buf, len, _peerdata);
 	} catch(CorruptMessage& c) {
 	    /*
 	    ** A corrupt message is being sent so catch the decode exception.
@@ -732,7 +759,7 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
 	    */
 	    TimeVal tv;
 	    _eventloop->current_time(tv);
-	    _trie_sent.process_update_packet(tv, buf, len);
+	    _trie_sent.process_update_packet(tv, buf, len, _peerdata);
 
 	    _smcb = callback(this, &Peer::send_dump_callback,
 			     fp, 
@@ -815,7 +842,7 @@ Peer::trie(const string& line, const vector<string>& words)
 	    const list<PathAttribute*>& palist = bgpupdate->pa_list();
 
 	    list<PathAttribute*>::const_iterator pai;
-	    const AsPath *aspath = 0;
+	    const ASPath *aspath = 0;
 	    for(pai = palist.begin(); pai != palist.end(); pai++) {
 		if(AS_PATH == (*pai)->type())
 		    aspath = &((static_cast<ASPathAttribute *>(*pai))->
@@ -830,7 +857,7 @@ Peer::trie(const string& line, const vector<string>& words)
 	    if("empty" != words[i + 1])
 		aspath_search = words[i + 1];
 
-	    if(*aspath != AsPath(aspath_search.c_str()))
+	    if(*aspath != ASPath(aspath_search.c_str()))
 		xorp_throw(InvalidString, 
 			   c_format("Looking for Path: <%s> Found: <%s>\n[%s]",
 				    words[i + 1].c_str(),
@@ -963,7 +990,8 @@ mrtd_traffic_dump(const uint8_t *buf, const size_t len , const TimeVal tv,
 template <class A>
 void
 mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
-		   const TimeVal tv, const string fname, const int sequence)
+		   const TimeVal tv, const string fname, const int sequence,
+		   const BGPPeerData *peerdata)
 {
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
@@ -978,8 +1006,10 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     for (pai = p->pa_list().begin(); pai != p->pa_list().end(); pai++) {
 	const PathAttribute* pa;
 	pa = *pai;
-
-	length += pa->wire_size();
+	uint8_t buf[BGPPacket::MAXPACKETSIZE];
+	size_t pa_len = BGPPacket::MAXPACKETSIZE;
+	XLOG_ASSERT(pa->encode(buf, pa_len, peerdata));
+	length += pa_len;
     }
 
     /*
@@ -1050,7 +1080,11 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
 	const PathAttribute* pa;
 	pa = *pai;
 
-	if(fwrite(pa->data(), pa->wire_size(), 1, fp) != 1)
+	uint8_t buf[BGPPacket::MAXPACKETSIZE];
+	size_t pa_len = BGPPacket::MAXPACKETSIZE;
+	XLOG_ASSERT(pa->encode(buf, pa_len, peerdata));
+	
+	if(fwrite(buf, pa_len, 1, fp) != 1)
 	    XLOG_FATAL("fwrite of %s failed: %s", fname.c_str(),
 		       strerror(errno));
     }
@@ -1059,24 +1093,26 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
 }
 
 void
-text_traffic_dump(const uint8_t *buf, const size_t len, const TimeVal, 
-	  const string fname)
+text_traffic_dump(const uint8_t *buf, const size_t len, 
+		  const TimeVal, 
+		  const string fname, const BGPPeerData *peerdata) 
 {
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
 	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
 
-    fprintf(fp, bgppp(buf, len).c_str());
+    fprintf(fp, bgppp(buf, len, peerdata).c_str());
     fclose(fp);
 }
 
 template <class A>
 void
 mrtd_routeview_dump(const UpdatePacket* p, const IPNet<A>& net,
-		const TimeVal& tv,
-		const string fname, int *sequence)
+		    const TimeVal& tv,
+		    const string fname, int *sequence,
+		    const BGPPeerData *peerdata)
 {
-    mrtd_routview_dump<A>(p, net, tv, fname, *sequence);
+    mrtd_routview_dump<A>(p, net, tv, fname, *sequence, peerdata);
     (*sequence)++;
 }
 
@@ -1084,12 +1120,13 @@ template <class A>
 void
 mrtd_debug_dump(const UpdatePacket* p, const IPNet<A>& /*net*/,
 		const TimeVal& tv,
-		const string fname)
+		const string fname,
+		const BGPPeerData *peerdata)
 {
-    size_t len;
-    const uint8_t *buf = p->encode(len);
+    size_t len = 4096;
+    uint8_t buf[4096]; 
+    assert(p->encode(buf, len, peerdata));
     mrtd_traffic_dump(buf, len , tv, fname);
-    delete [] buf;
 }
 
 template <class A>
@@ -1110,12 +1147,13 @@ text_debug_dump(const UpdatePacket* p, const IPNet<A>& net,
 void
 mrtd_replay_dump(const UpdatePacket* p,
 		const TimeVal& tv,
-		const string fname)
+		const string fname,
+		const BGPPeerData *peerdata)
 {
-    size_t len;
-    const uint8_t *buf = p->encode(len);
-    mrtd_traffic_dump(buf, len , tv, fname);
-    delete [] buf;
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    XLOG_ASSERT(p->encode(buf, len, peerdata));
+    mrtd_traffic_dump(buf, len, tv, fname);
 }
 
 void
@@ -1216,7 +1254,8 @@ Peer::dump(const string& line, const vector<string>& words)
  	if(mrtd)
  	    *dumper = callback(mrtd_traffic_dump, filename);
  	else
-	    *dumper = callback(text_traffic_dump, filename);
+	    *dumper = callback(text_traffic_dump, filename,
+			       (const BGPPeerData*)_peerdata);
     } else if("routeview" == words[5]) {
 	if("" == filename) {
 	    xorp_throw(InvalidString,
@@ -1227,7 +1266,7 @@ Peer::dump(const string& line, const vector<string>& words)
 	    Trie::TreeWalker_ipv4 tw_ipv4;
 	    if(mrtd)
 		tw_ipv4 = callback(mrtd_routeview_dump<IPv4>, filename,
-				   &sequence);
+				   &sequence, (const BGPPeerData*)_peerdata);
 	    else
 		tw_ipv4 = callback(text_debug_dump<IPv4>, filename);
 	    op->tree_walk_table(tw_ipv4);
@@ -1235,7 +1274,7 @@ Peer::dump(const string& line, const vector<string>& words)
 	    Trie::TreeWalker_ipv6 tw_ipv6;
 	    if(mrtd)
 		tw_ipv6 = callback(mrtd_routeview_dump<IPv6>, filename,
-				   &sequence);
+				   &sequence, (const BGPPeerData*)_peerdata);
 	    else
 		tw_ipv6 = callback(text_debug_dump<IPv6>, filename);
 	    op->tree_walk_table(tw_ipv6);
@@ -1247,10 +1286,10 @@ Peer::dump(const string& line, const vector<string>& words)
 	}
 	Trie::ReplayWalker rw;
 	if(mrtd)
-	    rw = callback(mrtd_replay_dump, filename);
+	    rw = callback(mrtd_replay_dump, filename, (const BGPPeerData*)_peerdata);
 	else
 	    rw = callback(text_replay_dump, filename);
-	op->replay_walk(rw);
+	op->replay_walk(rw, _peerdata);
     } else if("debug" == words[5]) {
 	if("" == filename) {
 	    xorp_throw(InvalidString,
@@ -1259,14 +1298,16 @@ Peer::dump(const string& line, const vector<string>& words)
 	if(ipv4) {
 	    Trie::TreeWalker_ipv4 tw_ipv4;
 	    if(mrtd)
-		tw_ipv4 = callback(mrtd_debug_dump<IPv4>, filename);
+		tw_ipv4 = callback(mrtd_debug_dump<IPv4>, filename, 
+				   (const BGPPeerData*)_peerdata);
 	    else
 		tw_ipv4 = callback(text_debug_dump<IPv4>, filename);
 	    op->tree_walk_table(tw_ipv4);
 	} else {
 	    Trie::TreeWalker_ipv6 tw_ipv6;
 	    if(mrtd)
-		tw_ipv6 = callback(mrtd_debug_dump<IPv6>, filename);
+		tw_ipv6 = callback(mrtd_debug_dump<IPv6>, filename, 
+				   (const BGPPeerData*)_peerdata);
 	    else
 		tw_ipv6 = callback(text_debug_dump<IPv6>, filename);
 	    op->tree_walk_table(tw_ipv6);
@@ -1359,8 +1400,9 @@ Peer::check_expect(BGPPacket *rec)
 	** Need to go through this performance in order to copy a
 	** packet.
 	*/
-	size_t rec_len;
-	const uint8_t *rec_buf = rec->encode(rec_len);
+	size_t rec_len = BGPPacket::MAXPACKETSIZE;
+	uint8_t *rec_buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+	XLOG_ASSERT(rec->encode(rec_buf, rec_len, _peerdata));
 
 	switch(rec->type()) {
 	case MESSAGETYPEOPEN:
@@ -1371,7 +1413,7 @@ Peer::check_expect(BGPPacket *rec)
 	    break;
 	case MESSAGETYPEUPDATE:
 	    {
-	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len);
+	    UpdatePacket *pac = new UpdatePacket(rec_buf, rec_len, _peerdata);
 	    _expect._bad = pac;
 	    }
 	    break;
@@ -1503,12 +1545,12 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    break;
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
-	    UpdatePacket pac(buf, length);
+	    UpdatePacket pac(buf, length, _peerdata);
 	    debug_msg(pac.str().c_str());
 	    /*
 	    ** Save the update message in the receive trie.
 	    */
-	    _trie_recv.process_update_packet(tv, buf, length);
+	    _trie_recv.process_update_packet(tv, buf, length, _peerdata);
 	    check_expect(&pac);
 	}
 	    break;
@@ -1568,7 +1610,6 @@ Peer::send_message(const uint8_t *buf, const size_t len, SMCB cb)
 
     for(size_t i = 0; i < len; i++)
 	v[i] = buf[i];
-    delete [] buf;
     
     XrlTestPeerV0p1Client test_peer(_xrlrouter);
     if(!test_peer.send_send(_peername.c_str(), v, cb))
@@ -1585,9 +1626,13 @@ Peer::send_open()
     if(_ipv6)
 	bgpopen.add_parameter(
 		new BGPMultiProtocolCapability(AFI_IPV6, SAFI_UNICAST));
-    size_t len;
-    const uint8_t *buf = bgpopen.encode(len);
-    debug_msg("OPEN Packet SENT\n%s", bgpopen.str().c_str());
+    if(_localdata->use_4byte_asnums())
+	bgpopen.add_parameter(new BGP4ByteASCapability(_as));
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+    
+    XLOG_ASSERT(bgpopen.encode(buf, len, _peerdata));
+    debug_msg("OPEN Packet SENT len:%u\n%s", (uint32_t)len, bgpopen.str().c_str());
     _busy++;
     send_message(buf, len, callback(this, &Peer::xrl_callback, "open"));
 }
@@ -1624,13 +1669,34 @@ public:
 	}
 // 	fprintf(stderr, "\n");
 	_size = length(_data);
-
+	if (_data[0] & Extended) {
+	    _wire_size = 4 + _size;
+	} else {
+	    _wire_size = 3 + _size;
+	}
     };
     
     PathAttribute *clone() const { 
 	return new AnyAttribute(_init_string.c_str());
     }
+
+    bool
+    encode(uint8_t *buf, size_t &wire_size, const BGPPeerData* peerdata) const
+    {
+	debug_msg("AnyAttribute::encode\n");
+	UNUSED(peerdata);
+	// check it will fit in the buffer
+	if (wire_size < _wire_size)
+	    return false;
+	memcpy(buf, _data, _wire_size);
+	wire_size = _wire_size;
+	return true;
+    }
+
 private:
+    uint8_t *_data;
+    size_t _size;
+    size_t _wire_size;
     static const uint8_t _valid[];
     string _init_string;
 };
@@ -1642,13 +1708,14 @@ const uint8_t AnyAttribute::_valid[] = {0x80|0x40, 255, 1, 1};
 ** an array.
 */
 PathAttribute *
-Peer::path_attribute(const char *) const throw(InvalidString)
+Peer::path_attribute(const char *) 
+    const throw(InvalidString)
 {
     const uint8_t path[] = {0x80|0x40, 255, 1, 1};
     uint16_t max_len = sizeof(path);
     size_t actual_length;
 
-    return PathAttribute::create(&path[0], max_len, actual_length);
+    return PathAttribute::create(&path[0], max_len, actual_length, _peerdata);
 }
 
 /**
@@ -1729,7 +1796,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	UpdatePacket *bgpupdate = new UpdatePacket();
 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);
-	CLUSTER_LISTAttribute cl;
+	ClusterListAttribute cl;
 	CommunityAttribute community;	
 
 	for(size_t i = index + 1; i < size; i += 2) {
@@ -1744,10 +1811,18 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		string aspath = words[i+1];
 		if ("empty" == aspath)
 		    aspath = "";
-		ASPathAttribute aspa(AsPath(aspath.c_str()));
+		ASPathAttribute aspa(ASPath(aspath.c_str()));
 		bgpupdate->add_pathatt(aspa);
 		debug_msg("aspath: %s\n", 
-			  AsPath(aspath.c_str()).str().c_str());
+			  ASPath(aspath.c_str()).str().c_str());
+	    } else if("as4path" == words[i]) {
+		string as4path = words[i+1];
+		if ("empty" == as4path)
+		    as4path = "";
+		AS4PathAttribute aspa(AS4Path(as4path.c_str()));
+		bgpupdate->add_pathatt(aspa);
+		debug_msg("as4path: %s\n", 
+			  AS4Path(as4path.c_str()).str().c_str());
 	    } else if("nexthop" == words[i]) {
 		IPv4NextHopAttribute nha(IPv4((const char*)
 					      (words[i+1].c_str())));
@@ -1774,7 +1849,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 		MEDAttribute ma(atoi(words[i+1].c_str()));
 		bgpupdate->add_pathatt(ma);
 	    } else if("originatorid" == words[i]) {
-		ORIGINATOR_IDAttribute oid(IPv4((const char *)
+		OriginatorIDAttribute oid(IPv4((const char *)
 						(words[i+1].c_str())));
 		bgpupdate->add_pathatt(oid);
 	    } else if("clusterlist" == words[i]) {
@@ -1791,11 +1866,11 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 				words[i].c_str(), line.c_str()));
 	}
 	if(!mpipv6_nlri.nlri_list().empty()) {
- 	    mpipv6_nlri.encode();
+ 	    //XXX mpipv6_nlri.encode(); //don't think we still need this
 	    bgpupdate->add_pathatt(mpipv6_nlri);
 	}
 	if(!mpipv6_withdraw.wr_list().empty()) {
-	    mpipv6_withdraw.encode();
+	    //XXX mpipv6_withdraw.encode();//don't think we still need this
 	    bgpupdate->add_pathatt(mpipv6_withdraw);
 	}
 	if(!cl.cluster_list().empty()) {

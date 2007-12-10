@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.67 2007/09/11 08:06:19 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.68 2007/10/13 01:49:58 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -245,8 +245,12 @@ public:
      * @param as as number.
      *
      * @param id router id.
+     *
+     * @param use_4byte_asnums indicates we should send 4 byte AS
+     * numbers to all peers that are 4byte capable.
      */
-    void local_config(const uint32_t& as, const IPv4& id);
+    void local_config(const uint32_t& as, const IPv4& id, 
+		      bool use_4byte_asnums);
 
     /**
      * Set or disable the confederation identifier.
@@ -1026,7 +1030,7 @@ private:
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
     AggregationHandler *_aggregation_handler;
-    LocalData _local_data;
+    LocalData *_local_data;
     XrlStdRouter *_xrl_router;
     ProcessWatch *_process_watch;
     VersionFilters _policy_filters;

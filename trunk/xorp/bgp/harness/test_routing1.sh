@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.24 2006/08/16 22:10:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.25 2007/12/07 20:42:04 atanu Exp $
 #
 
 #
@@ -59,6 +59,7 @@ PEER_PORT1_IPV6=20004
 PEER_PORT2_IPV6=20005
 PEER_PORT3_IPV6=20006
 AS=65008
+USE4BYTEAS=false 
 PEER1_AS=64001
 PEER2_AS=64002
 PEER3_AS=$AS
@@ -91,7 +92,8 @@ configure_bgp()
     LOCALHOST=$HOST
     AS=65008
     ID=192.150.187.78
-    local_config $AS $ID
+    USE4BYTEAS=false 
+    local_config $AS $ID $USE4BYTEAS
 
     # EBGP - IPV4
     PEER=$HOST

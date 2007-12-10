@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.15 2007/02/16 16:07:03 mjh Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.16 2007/02/16 22:46:15 pavlin Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
 
 #include "libxorp/xorp.h"
+#include "libxorp/exceptions.hh"
 
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
@@ -100,6 +101,60 @@ public:
     }
 
     /**
+     * construct from a string, either as a decimal number in the
+     * range 1-65535, or as two decimal numbers x.y, where x and y are
+     * in the range 0-65535 
+     */
+    explicit AsNum(const string& as_str) throw(InvalidString) {
+	bool four_byte = false;
+	bool seen_digit = false;
+	for (uint32_t i = 0; i < as_str.size(); i++) {
+	    if (as_str[i] == '.') {
+		if (four_byte || seen_digit == false) {
+		    // more than one dot, or no number before the first dot.
+		    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+						       as_str.c_str()));
+		} else {
+		    four_byte = true;
+		    seen_digit = false;
+		}
+	    } else if (!isdigit(as_str[i])) {
+		// got some disallowed character
+		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+						   as_str.c_str()));
+	    } else {
+		seen_digit = true;
+	    }
+	}
+	if (seen_digit == false) {
+	    // either no digit here, or no digit after the dot
+	    xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+					       as_str.c_str()));
+	}
+	
+	// got here, so the text is in the right format
+	if (!four_byte) {
+	    _as = atoi(as_str.c_str());
+	    if (_as < 1 || _as > 65535) {
+		// out of range
+		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+					       as_str.c_str()));
+	    }
+	} else {
+	    uint32_t upper = strtoul(as_str.c_str(), NULL, 10);
+	    uint32_t lower = strtoul(strchr(as_str.c_str(), '.') + 1, 
+				     NULL, 10);
+	    if  (upper > 65535 || lower > 65535) {
+		// out of range
+		xorp_throw(InvalidString, c_format("Bad AS number \"%s\"",
+					       as_str.c_str()));
+	    }
+	    _as = (upper << 16) | lower;
+	}
+    }
+
+
+    /**
      * Get the non-extended AS number value.
      * 
      * @return the non-extended AS number value.
@@ -164,21 +219,21 @@ public:
      */
     string str() const					{
 	if (extended())
-	    return c_format("AS/%u.%u", (_as >> 16)&&0xffff, _as&&0xff);
+	    return c_format("AS/%u.%u", (_as >> 16)&0xffff, _as&0xffff);
 	else 
 	    return c_format("AS/%u", XORP_UINT_CAST(_as));
     }
 
     string short_str() const					{
 	if (extended())
-	    return c_format("%u.%u", (_as >> 16)&&0xffff, _as&&0xff);
+	    return c_format("%u.%u", (_as >> 16)&0xffff, _as&0xffff);
 	else
 	    return c_format("%u", XORP_UINT_CAST(_as));
     }
 
     string fourbyte_str() const {
 	// this version forces the long canonical format
-	return c_format("%u.%u", (_as >> 16)&&0xffff, _as&&0xff);
+	return c_format("%u.%u", (_as >> 16)&0xffff, _as&0xffff);
     }
     
 private:

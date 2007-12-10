@@ -1,10 +1,11 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.93 2006/05/01 16:49:06 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.94 2007/03/28 00:37:09 pavlin Exp $ */
 
 protocols {
     bgp {
 	targetname: txt = "bgp";
 	bgp-id: ipv4;
-	local-as: u32;
+	local-as: txt;
+	enable-4byte-as-numbers: bool = false;
 
 	route-reflector {
 	    cluster-id: ipv4;
@@ -28,7 +29,7 @@ protocols {
 	    peer-port: u32 = 179;
 	    local-port: u32 = 179;
 	    local-ip: txt;
-	    as: u32;
+	    as: txt;
 	    next-hop: ipv4;
 	    next-hop6: ipv6;
 	    holdtime: u32 = 90;
@@ -194,22 +195,30 @@ protocols {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=was_aggregated&type:txt=bool&access:txt=r&id:u32=23";
 
 	bgp-id {
-	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_bgp_id?id:ipv4=$(@)";
-	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_bgp_id->id:ipv4";
+	    %set: xrl "$(bgp.targetname)/bgp/0.3/set_bgp_id?id:ipv4=$(@)";
+	    %get: xrl "$(bgp.targetname)/bgp/0.3/get_bgp_id->id:ipv4";
 	}
 
 	local-as {
-	    %allow-range: $(@) "1" "65535" %help: "Local AS number";
-	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
-	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
+	    /* we'd like to specify this as an int, but 4 byte AS
+               numbers are specified as <int>.<int> so this has to be text */
+	    /* %allow-range: $(@) "1" "65535" ; */
+            %help: short "Local AS number: <int> or <int>.<int>";
+	    %set: xrl "$(bgp.targetname)/bgp/0.3/set_local_as?as:txt=$(@)";
+	    %get: xrl "$(bgp.targetname)/bgp/0.3/get_local_as->as:txt";
+	}
+	
+	enable-4byte-as-numbers {
+            %help: short "Enable extended AS numbers";
+            %set: xrl "$(bgp.targetname)/bgp/0.3/set_4byte_as_support?enable:bool=$(@)";
 	}
 
 	route-reflector {
 	    %mandatory: $(@.cluster-id);
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
-	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=`~$(@.disable.DEFAULT)`";
+	    %create: xrl "$(bgp.targetname)/bgp/0.3/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.3/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.3/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=`~$(@.disable.DEFAULT)`";
 
 	    cluster-id {
 		%set:;
@@ -223,9 +232,9 @@ protocols {
 	confederation {
 	    %mandatory: $(@.identifier);
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
-	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=`~$(@.disable.DEFAULT)`";
+	    %create: xrl "$(bgp.targetname)/bgp/0.3/set_confederation_identifier?as:txt=$(@.identifier)&disable:bool=$(@.disable)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.3/set_confederation_identifier?as:txt=$(@.identifier)&disable:bool=$(@.disable)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.3/set_confederation_identifier?as:txt=$(@.identifier)&disable:bool=`~$(@.disable.DEFAULT)`";
 
 	    identifier {
 		%set:;
@@ -238,9 +247,9 @@ protocols {
 
 	damping {
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
-	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=`~$(@.disable.DEFAULT)`";
+	    %create: xrl "$(bgp.targetname)/bgp/0.3/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.3/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.3/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=`~$(@.disable.DEFAULT)`";
 
 	    half-life {
 		%set:;
@@ -266,21 +275,21 @@ protocols {
 	    %mandatory: $(@.peer-port);
 	    %mandatory: $(@.local-ip);
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
-	    %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+	    %create: xrl "$(bgp.targetname)/bgp/0.3/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:txt=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.3/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.3/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 /*
 	    peer-port {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/change_peer_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_peer_port:u32=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/change_peer_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_peer_port:u32=$(@)";
 	    }
 */
 /*
 	    local-port {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_port:u32=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/change_local_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_port:u32=$(@)";
 	    }
 */
 	    local-ip {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)";
 	    }
 
 /*
@@ -292,32 +301,32 @@ protocols {
 	    as {
 		%allow-range: $(@) "1" "65535" %help: "The peer AS number";
 
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_as?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&peer_as:u32=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_peer_as?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&peer_as:txt=$(@)";
 	    }
 
 	    holdtime {
 		%allow-range: $(@) "0" "0" %help: "Disable holdtime";
 		%allow-range: $(@) "3" "65535" %help: "Time to wait for peer";
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_holdtime?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&holdtime:u32=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_holdtime?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&holdtime:u32=$(@)";
 	    }
 
 	    delay-open-time {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_delay_open_time?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&delay_open_time:u32=$(@)";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_delay_open_time?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&delay_open_time:u32=$(DEFAULT)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_delay_open_time?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&delay_open_time:u32=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_delay_open_time?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&delay_open_time:u32=$(DEFAULT)";
 	    }
 
 	    client {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_route_reflector_client?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_route_reflector_client?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
 	    }
 
 	    confederation-member {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_member?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_confederation_member?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
 	    }
 
 	    prefix-limit {
-		%create: xrl "$(bgp.targetname)/bgp/0.2/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=`~$(@.disable)`";
-		%activate: xrl "$(bgp.targetname)/bgp/0.2/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=`~$(@.disable)`";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=$(@.disable.DEFAULT)";
+		%create: xrl "$(bgp.targetname)/bgp/0.3/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=`~$(@.disable)`";
+		%activate: xrl "$(bgp.targetname)/bgp/0.3/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=`~$(@.disable)`";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=$(@.disable.DEFAULT)";
 
 		maximum {
 		    %set:;
@@ -329,41 +338,41 @@ protocols {
 	    }
 
 	    next-hop {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_nexthop4?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv4=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_nexthop4?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv4=$(@)";
 	    }
 
 	    next-hop6 {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_nexthop6?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv6=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_nexthop6?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv6=$(@)";
 	    }
 
 	    disable {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(DEFAULT)`";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(DEFAULT)`";
 	    }
 
 	    enabled {
 		%deprecated: "Statement 'enabled: true/false' is replaced with 'disable: false/true'";
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=$(@)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=$(@)";
 	    }
 
 	    ipv4-unicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Unicast&toggle:bool=$(@)";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Unicast&toggle:bool=$(DEFAULT)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Unicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Unicast&toggle:bool=$(DEFAULT)";
 	    }
 
 	    ipv4-multicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast&toggle:bool=$(@)";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast&toggle:bool=$(DEFAULT)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv4.Multicast&toggle:bool=$(DEFAULT)";
 	    }
 
 	    ipv6-unicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast&toggle:bool=$(@)";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast&toggle:bool=$(DEFAULT)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Unicast&toggle:bool=$(DEFAULT)";
 	    }
 
 	    ipv6-multicast {
-		%set: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(@)";
-		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(DEFAULT)";
+		%set: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(@)";
+		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(DEFAULT)";
 	    }
 	}
 
@@ -371,8 +380,8 @@ protocols {
 	network4 @: ipv4net {
 	    %mandatory: $(@.next-hop);
 
-	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route4?nlri:ipv4net=$(@)&next_hop:ipv4=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route4?nlri:ipv4net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.3/originate_route4?nlri:ipv4net=$(@)&next_hop:ipv4=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.3/withdraw_route4?nlri:ipv4net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
 
 	    next-hop {
 		%set:;
@@ -390,8 +399,8 @@ protocols {
 	network6 @: ipv6net {
 	    %mandatory: $(@.next-hop);
 
-	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route6?nlri:ipv6net=$(@)&next_hop:ipv6=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route6?nlri:ipv6net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.3/originate_route6?nlri:ipv6net=$(@)&next_hop:ipv6=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.3/withdraw_route6?nlri:ipv6net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
 
 	    next-hop {
 		%set:;
@@ -412,50 +421,50 @@ protocols {
 		/* Deliberately not included in all */
 		verbose {
 		    disable {
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=xlog_verbose&enable:bool=`~$(@)`";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=xlog_verbose&enable:bool=$(DEFAULT)";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=xlog_verbose&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=xlog_verbose&enable:bool=$(DEFAULT)";
 		    }
 		}
 
 		all {
 		    disable {
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=`~$(@)`";
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=`~$(@)`";
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=`~$(@)`";
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_in&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_out&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_state_change&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_policy_configure&enable:bool=`~$(@)`";
 
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=$(DEFAULT)";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=$(DEFAULT)";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=$(DEFAULT)";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_in&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_out&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_state_change&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_policy_configure&enable:bool=$(DEFAULT)";
 		    }
 		}
 
 		message-in {
 		    disable {
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=`~$(@)`";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=$(DEFAULT)";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_in&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_in&enable:bool=$(DEFAULT)";
 		    }
 		}
 
 		message-out {
 		    disable {
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=`~$(@)`";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=$(DEFAULT)";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_out&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_message_out&enable:bool=$(DEFAULT)";
 		    }
 		}
 
 		state-change {
 		    disable {
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=`~$(@)`";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=$(DEFAULT)";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_state_change&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_state_change&enable:bool=$(DEFAULT)";
 		    }
 		}
 
 		policy-configuration {
 		    disable {
-			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=`~$(@)`";
-			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=$(DEFAULT)";
+			%set: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_policy_configure&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.3/trace?tvar:txt=trace_policy_configure&enable:bool=$(DEFAULT)";
 		    }
 		}
 	    }

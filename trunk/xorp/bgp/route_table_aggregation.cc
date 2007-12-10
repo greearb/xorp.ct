@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.23 2006/05/01 16:49:05 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.24 2007/02/16 22:45:16 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -292,7 +292,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     _is_suppressed = false;
     const PathAttributeList<A> *old_pa_list = _pa_list;
     NextHopAttribute<A> nhatt(A::ZERO());
-    AsPath aspath;
+    ASPath aspath;
     OriginAttribute igp_origin_att(IGP);
     _pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
 
@@ -337,7 +337,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 		 * case we also must set the ATOMIC AGGREGATE attribute.
 		 */
 		if (_pa_list->aspath() != comp_pa_list->aspath()) {
-		    _pa_list->replace_AS_path(AsPath());
+		    _pa_list->replace_AS_path(ASPath());
 		    _pa_list->rehash();
 		    must_set_atomic_aggr = true;
 		}
@@ -346,7 +346,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 		 * Merge the current AS path with the component route's one
 		 * by creating an AS SET for non-matching ASNs.
 		 */
-		_pa_list->replace_AS_path(AsPath(_pa_list->aspath(),
+		_pa_list->replace_AS_path(ASPath(_pa_list->aspath(),
 						 comp_pa_list->aspath()));
 		_pa_list->rehash();
 	    }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.48 2007/03/28 13:49:36 schooley Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.49 2007/03/28 19:31:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -127,6 +127,22 @@ XrlTestPeerTarget::test_peer_0_1_packetisation(const string& protocol)
     if(!_test_peer.packetisation(protocol))
 	return XrlCmdError::COMMAND_FAILED(c_format("Unsupported protocol %s",
 					     protocol.c_str()));
+
+    return XrlCmdError::OKAY();
+}
+
+/* test peer needs to know whether to assume ASPaths are 2-byte or
+   4-byte encoded */
+
+XrlCmdError
+XrlTestPeerTarget::test_peer_0_1_use_4byte_asnums(const bool& use)
+{
+    debug_msg("\n");
+
+    if(_trace)
+	printf("use_4byte_asnums(%d)\n", use);
+
+    _test_peer.use_4byte_asnums(use);
 
     return XrlCmdError::OKAY();
 }
@@ -249,7 +265,8 @@ XrlTestPeerTarget::test_peer_0_1_terminate()
 */
 TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
 		   const char *server, bool verbose)
-    : _eventloop(eventloop), _xrlrouter(xrlrouter), _server(server),
+    : _eventloop(eventloop), _xrlrouter(xrlrouter), 
+      _server(server),
       _verbose(verbose),
      _done(false),
       _async_writer(0),
@@ -257,10 +274,14 @@ TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
       _flying(0),
      _bgp_bytes(0)
 {
+    _localdata = new LocalData(eventloop);
+    _peerdata = new BGPPeerData(*_localdata, Iptuple(), AsNum(0), IPv4(), 0);
 }
 
 TestPeer::~TestPeer()
 {
+    delete _peerdata;
+    delete _localdata;
     delete _async_writer;
 }
 
@@ -301,6 +322,16 @@ TestPeer::packetisation(const string& protocol)
     _bgp = true;
     _bgp_bytes = 0;
     return true;
+}
+
+void
+TestPeer::use_4byte_asnums(bool use)
+{
+    _localdata->set_use_4byte_asnums(use);
+
+    // normally this is negotiated, but this is a test peer so we want
+    // to be able to force the parsing of ASnums either way.
+    _peerdata->set_use_4byte_asnums(use);
 }
 
 bool
@@ -505,7 +536,7 @@ TestPeer::send(const vector<uint8_t>& data, string& error_string)
     _async_writer->start();
 
     if(_verbose && _bgp)
-	printf("Sending: %s", bgppp(buf, len).c_str());
+	printf("Sending: %s", bgppp(buf, len, _peerdata).c_str());
 
     return true;
 }
@@ -754,7 +785,7 @@ TestPeer::datain(status st, uint8_t *ptr, size_t len, string error)
 	switch(st) {
 	case GOOD:
 	    if(_bgp)
-		printf("Received: %s", bgppp(ptr, len).c_str());
+		printf("Received: %s", bgppp(ptr, len, _peerdata).c_str());
 	    break;
 	case CLOSED:
 	    printf("Connection closed by peer\n");

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.74 2007/02/16 22:45:15 pavlin Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.75 2007/03/06 23:44:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -290,7 +290,7 @@ RibIpcHandler::push_packet()
 }
 
 bool 
-RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
+RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
 			       const IPv4Net& nlri, const IPv4& next_hop,
 			       const bool& unicast, const bool& multicast, 
 			       const PolicyTags& policytags)
@@ -343,7 +343,7 @@ RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
 }
 
 bool 
-RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
+RibIpcHandler::originate_route(const OriginType origin, const ASPath& aspath,
 			       const IPv6Net& nlri, const IPv6& next_hop,
 			       const bool& unicast, const bool& multicast,
 			       const PolicyTags& policytags)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.20 2007/09/11 08:06:19 pavlin Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.21 2007/10/13 01:49:58 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -27,9 +27,9 @@
 
 
 BGPMain::BGPMain(EventLoop& eventloop)
-    : _eventloop(eventloop),
-      _local_data(_eventloop)
+    : _eventloop(eventloop)
 {
+    _local_data = new LocalData(_eventloop);
     _xrl_router = NULL;
 }
 
@@ -41,7 +41,7 @@ BGPMain::~BGPMain() {
     if (_xrl_router != NULL)
 	while(_xrl_router->pending())
 	    eventloop().run();
-    
+    delete _local_data;
 }
 
 int
@@ -108,7 +108,7 @@ BGPMain::main_loop()
 }	
 
 void 
-BGPMain::local_config(const uint32_t&, const IPv4&)
+BGPMain::local_config(const uint32_t&, const IPv4&, bool)
 {
 }
 

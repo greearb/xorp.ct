@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.12 2006/11/08 20:02:48 pavlin Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.13 2007/02/16 22:45:10 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -45,8 +45,6 @@ AttributeManager<A>::add_attribute_list(
     if (i == _attribute_lists.end()) {
 	new_att->clone_data();
 	_attribute_lists.insert(new_att);
-	debug_msg("ATMgr: Inserting new attribute %p\n",
-		  new_att->attribute());
 	return new_att->attribute();
     }
 

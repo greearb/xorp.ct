@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.39 2007/02/16 22:45:10 pavlin Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.40 2007/04/05 02:02:48 zec Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+//#define DEBUG_LOGGING
+//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 
@@ -42,14 +42,14 @@
 
 extern void dump_bytes(const uint8_t *d, uint8_t l);
 
-/* *************** AsSegment ********************** */
+/* *************** ASSegment ********************** */
 
 /**
  * Convert the external representation into the internal one. 
  * _type is d[0], _entries is d[1], entries follow.
  */
 void
-AsSegment::decode(const uint8_t *d) throw(CorruptMessage)
+ASSegment::decode(const uint8_t *d) throw(CorruptMessage)
 {
     size_t n = d[1];
     clear();
@@ -76,7 +76,7 @@ AsSegment::decode(const uint8_t *d) throw(CorruptMessage)
  * Convert from internal to external representation.
  */
 const uint8_t *
-AsSegment::encode(size_t &len, uint8_t *data) const
+ASSegment::encode(size_t &len, uint8_t *data) const
 {
     debug_msg("AsSegment encode\n");
     XLOG_ASSERT(_aslist.size() <= 255);
@@ -102,7 +102,7 @@ AsSegment::encode(size_t &len, uint8_t *data) const
 }
 
 const AsNum&
-AsSegment::first_asnum() const
+ASSegment::first_asnum() const
 {
     if (_type == AS_SET || _type == AS_CONFED_SET) {
 	// This shouldn't be possible.  The spec doesn't explicitly
@@ -118,7 +118,7 @@ AsSegment::first_asnum() const
 }
 
 /**
- * prints AsSegments as 
+ * prints ASSegments as 
  *
  *  AS_SEQUENCE:         [comma-separated-asn-list]  
  *  AS_SET:              {comma-separated-asn-list}
@@ -126,7 +126,7 @@ AsSegment::first_asnum() const
  *  AS_CONFED_SET:       <comma-separated-asn-list> 
  */
 string
-AsSegment::str() const
+ASSegment::str() const
 {
     string s;
     string sep; 
@@ -174,7 +174,7 @@ AsSegment::str() const
 }
 
 /**
- * prints AsSegments as 
+ * prints ASSegments as 
  *
  *  AS_SEQUENCE:         comma-separated-asn-list
  *  AS_SET:              {comma-separated-asn-list}
@@ -182,7 +182,7 @@ AsSegment::str() const
  *  AS_CONFED_SET:       <comma-separated-asn-list> 
  */
 string
-AsSegment::short_str() const
+ASSegment::short_str() const
 {
     string s;
     string sep; 
@@ -234,7 +234,7 @@ AsSegment::short_str() const
  * compares internal representations for equality.
  */
 bool
-AsSegment::operator==(const AsSegment& him) const
+ASSegment::operator==(const ASSegment& him) const
 {
     return (_aslist == him._aslist);
 }
@@ -243,7 +243,7 @@ AsSegment::operator==(const AsSegment& him) const
  * Compares internal representations for <.
  */
 bool
-AsSegment::operator<(const AsSegment& him) const
+ASSegment::operator<(const ASSegment& him) const
 {
     int mysize = _aslist.size();
     int hissize = him._aslist.size();
@@ -257,7 +257,7 @@ AsSegment::operator<(const AsSegment& him) const
 // XXX isn't this the same format as on the wire ???
 
 size_t
-AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
+ASSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
 {
     //See RFC 1657, Page 15 for the encoding
     XLOG_ASSERT(buf_size >= (2 + _aslist.size() * 2));
@@ -272,7 +272,7 @@ AsSegment::encode_for_mib(uint8_t* buf, size_t buf_size) const
 }
 
 bool
-AsSegment::two_byte_compatible() const
+ASSegment::two_byte_compatible() const
 {
     const_iterator i;
     for (i = _aslist.begin(); i != _aslist.end(); i++) {
@@ -282,7 +282,7 @@ AsSegment::two_byte_compatible() const
     return true;
 }
 
-/* *************** As4Segment ***************** */
+/* *************** AS4Segment ***************** */
 
 
 /**
@@ -292,7 +292,7 @@ AsSegment::two_byte_compatible() const
  * _type is d[0], _entries is d[1], entries follow.
  */
 void
-As4Segment::decode(const uint8_t *d) throw(CorruptMessage)
+AS4Segment::decode(const uint8_t *d) throw(CorruptMessage)
 {
     size_t n = d[1];
     clear();
@@ -326,9 +326,9 @@ As4Segment::decode(const uint8_t *d) throw(CorruptMessage)
  * Convert from internal to external AS4_PATH representation.
  */
 const uint8_t *
-As4Segment::encode(size_t &len, uint8_t *data) const
+AS4Segment::encode(size_t &len, uint8_t *data) const
 {
-    debug_msg("AsSegment encode\n");
+    debug_msg("AS4Segment encode\n");
     XLOG_ASSERT(_aslist.size() <= 255);
 
     size_t i = wire_size();
@@ -353,10 +353,10 @@ As4Segment::encode(size_t &len, uint8_t *data) const
 }
 
 
-/* *************** AsPath *********************** */
+/* *************** ASPath *********************** */
 
 /**
- * AsPath constructor by parsing strings.  Input strings 
+ * ASPath constructor by parsing strings.  Input strings 
  * should have the form 
  * 
  *         "segment, segment, segment, ... ,segment"  
@@ -371,9 +371,9 @@ As4Segment::encode(size_t &len, uint8_t *data) const
  *  blank spaces " " can appear at any point in the string. 
  */
 
-AsPath::AsPath(const char *as_path) throw(InvalidString)
+ASPath::ASPath(const char *as_path) throw(InvalidString)
 {
-    debug_msg("AsPath(%s) constructor called\n", as_path);
+    debug_msg("ASPath(%s) constructor called\n", as_path);
     _num_segments = 0;
     _path_len = 0;
 
@@ -385,7 +385,7 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
 	path = path.substr(0, pos) + path.substr(pos + 1);
     }
 
-    AsSegment seg;
+    ASSegment seg;
     for (size_t i = 0; i < path.length(); i++) {
 	char c = path[i];
 
@@ -396,13 +396,14 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
 	    if (seg.type() == AS_NONE)	// possibly start new segment
 		seg.set_type(AS_SEQUENCE);
 
-	    while (i < path.length() && xorp_isdigit(path[i]))
+	    while (i < path.length() && (xorp_isdigit(path[i]) || path[i]=='.')) {
 		i++;
+	    }
         
-	    uint16_t num = atoi(path.substr(start, i).c_str());
+	    string asnum = path.substr(start, i-start);
 	    i--; // back to last valid character
-	    debug_msg("asnum = %d\n", num);
-	    seg.add_as(AsNum(num));
+	    debug_msg("asnum = %s\n", asnum.c_str());
+	    seg.add_as(AsNum(asnum));
 	} else if (c == '[') {
 	    if (seg.type() == AS_SEQUENCE) {
 		// push previous thing and start a new one
@@ -490,15 +491,15 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
 	add_segment(seg);
     else if (seg.type() == AS_SET)
 	xorp_throw(InvalidString,
-		       c_format("Unterminated AsSet: %s", path.c_str()));
-    debug_msg("end of AsPath()\n");
+		       c_format("Unterminated ASSet: %s", path.c_str()));
+    debug_msg("end of ASPath()\n");
 }
 
 /**
- * populate an AsPath from the received data representation
+ * populate an ASPath from the received data representation
  */
 void
-AsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
+ASPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 {
     _num_segments = 0;
     _path_len = 0;
@@ -510,7 +511,7 @@ AsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 				XORP_UINT_CAST(len), XORP_UINT_CAST(l)),
 		       UPDATEMSGERR, MALASPATH);
 
-	AsSegment s(d);
+	ASSegment s(d);
 	add_segment(s);
 	d += len;
 	l -= len;
@@ -518,9 +519,9 @@ AsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 }
 
 /**
- * construct a new aggregate AsPath from two AsPaths
+ * construct a new aggregate ASPath from two ASPaths
  */
-AsPath::AsPath(const AsPath &asp1, const AsPath &asp2)
+ASPath::ASPath(const ASPath &asp1, const ASPath &asp2)
 {
     _num_segments = 0;
     _path_len = 0;
@@ -544,7 +545,7 @@ AsPath::AsPath(const AsPath &asp1, const AsPath &asp2)
 		break;
 
 	if (matchelem) {
-	    AsSegment newseg(asp1.segment(curseg).type());
+	    ASSegment newseg(asp1.segment(curseg).type());
 	    for (size_t elem = 0; elem < matchelem; elem++)
 		newseg.add_as(asp1.segment(curseg).as_num(elem));
 	    this->add_segment(newseg);
@@ -558,7 +559,7 @@ AsPath::AsPath(const AsPath &asp1, const AsPath &asp2)
     }
 
     if (!fullmatch) {
-	AsSegment new_asset(AS_SET);
+	ASSegment new_asset(AS_SET);
 	size_t startelem = matchelem;
 	for (size_t curseg1 = curseg; curseg1 < asp1.num_segments();
 	     curseg1++) {
@@ -586,7 +587,7 @@ AsPath::AsPath(const AsPath &asp1, const AsPath &asp2)
 }
 
 void
-AsPath::add_segment(const AsSegment& s)
+ASPath::add_segment(const ASSegment& s)
 {
     debug_msg("Adding As Segment\n");
     _segments.push_back(s);
@@ -599,7 +600,7 @@ AsPath::add_segment(const AsSegment& s)
 }
 
 void
-AsPath::prepend_segment(const AsSegment& s)
+ASPath::prepend_segment(const ASSegment& s)
 {
     debug_msg("Prepending As Segment\n");
     _segments.push_front(s);
@@ -612,9 +613,9 @@ AsPath::prepend_segment(const AsSegment& s)
 }
 
 string
-AsPath::str() const
+ASPath::str() const
 {
-    string s = "AsPath:";
+    string s = "ASPath:";
     const_iterator iter = _segments.begin();
     while(iter != _segments.end()) {
 	s.append(" ");
@@ -625,7 +626,7 @@ AsPath::str() const
 }
 
 string
-AsPath::short_str() const
+ASPath::short_str() const
 {
     string s;
     const_iterator iter = _segments.begin();
@@ -639,7 +640,7 @@ AsPath::short_str() const
 }
 
 size_t
-AsPath::wire_size() const
+ASPath::wire_size() const
 {
     size_t l = 0;
     const_iterator iter = _segments.begin();
@@ -650,7 +651,7 @@ AsPath::wire_size() const
 }
 
 const uint8_t *
-AsPath::encode(size_t &len, uint8_t *buf) const
+ASPath::encode(size_t &len, uint8_t *buf) const
 {
     XLOG_ASSERT(_num_segments == _segments.size());	// XXX expensive
     const_iterator i;
@@ -673,10 +674,10 @@ AsPath::encode(size_t &len, uint8_t *buf) const
 }
 
 void
-AsPath::prepend_as(const AsNum &asn)
+ASPath::prepend_as(const AsNum &asn)
 {
     if (_segments.empty() || _segments.front().type() == AS_SET) {
-	AsSegment seg = AsSegment(AS_SEQUENCE);
+	ASSegment seg = ASSegment(AS_SEQUENCE);
 
 	seg.add_as(asn);
 	_segments.push_front(seg);
@@ -689,11 +690,11 @@ AsPath::prepend_as(const AsNum &asn)
 }
 
 void
-AsPath::prepend_confed_as(const AsNum &asn)
+ASPath::prepend_confed_as(const AsNum &asn)
 {
     if (_segments.empty() || _segments.front().type() == AS_SET 
 	|| _segments.front().type() == AS_SEQUENCE) {
-	AsSegment seg = AsSegment(AS_CONFED_SEQUENCE);
+	ASSegment seg = ASSegment(AS_CONFED_SEQUENCE);
 
 	seg.add_as(asn);
 	_segments.push_front(seg);
@@ -706,7 +707,7 @@ AsPath::prepend_confed_as(const AsNum &asn)
 }
 
 void
-AsPath::remove_confed_segments()
+ASPath::remove_confed_segments()
 {
         debug_msg("Deleting all CONFED Segments\n");
 	const_iterator iter = _segments.begin();
@@ -725,7 +726,7 @@ AsPath::remove_confed_segments()
 }
 
 bool
-AsPath::contains_confed_segments() const
+ASPath::contains_confed_segments() const
 {
     for (const_iterator i = _segments.begin(); i != _segments.end(); i++) {
 	ASPathSegType type = (*i).type();
@@ -736,8 +737,24 @@ AsPath::contains_confed_segments() const
     return false;
 }
 
+ASPath&
+ASPath::operator=(const ASPath& him)
+{
+    // clear out my list
+    while (!_segments.empty()) {
+	_segments.pop_front();
+    }
+
+    // copy in from his
+    const_iterator i;
+    for (i = him._segments.begin() ;i != him._segments.end(); i++) {
+	_segments.push_back(*i);
+    }
+    return *this;
+}
+
 bool
-AsPath::operator==(const AsPath& him) const
+ASPath::operator==(const ASPath& him) const
 {
     if (_num_segments != him._num_segments) 
 	return false;
@@ -750,7 +767,7 @@ AsPath::operator==(const AsPath& him) const
 }
 
 bool
-AsPath::operator<(const AsPath& him) const
+ASPath::operator<(const ASPath& him) const
 {
     if (_num_segments < him._num_segments)
 	return true;
@@ -768,7 +785,7 @@ AsPath::operator<(const AsPath& him) const
 }
 
 void
-AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
+ASPath::encode_for_mib(vector<uint8_t>& encode_buf) const
 {
     //See RFC 1657, Page 15 for the encoding.
     size_t buf_size = wire_size();
@@ -793,7 +810,7 @@ AsPath::encode_for_mib(vector<uint8_t>& encode_buf) const
 }
 
 bool
-AsPath::two_byte_compatible() const
+ASPath::two_byte_compatible() const
 {
     const_iterator i = _segments.begin();
     for(i = _segments.begin(); i != _segments.end(); i++) {
@@ -803,20 +820,35 @@ AsPath::two_byte_compatible() const
     return true;
 }
 
+void 
+ASPath::merge_as4_path(AS4Path& as4_path)
+{
+    as4_path.cross_validate(*this);
+    (*this) = as4_path;
+}
 
-As4Path::As4Path(const uint8_t* d, size_t len, const AsPath& as_path)
+#if 0
+AS4Path::AS4Path(const uint8_t* d, size_t len, const ASPath& as_path)
      throw(CorruptMessage)
 {
     decode(d, len);
     cross_validate(as_path);
 }
+#endif
+
+
+AS4Path::AS4Path(const uint8_t* d, size_t len)
+     throw(CorruptMessage)
+{
+    decode(d, len);
+}
 
 /**
- * populate a AsPath from the received data representation from a
+ * populate a ASPath from the received data representation from a
  * AS4_PATH attribute.
  */
 void
-As4Path::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
+AS4Path::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 {
     _num_segments = 0;
     _path_len = 0;
@@ -824,7 +856,7 @@ As4Path::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 	size_t len = 2 + d[1]*4;	// XXX length in bytes for 32bit AS's
 	XLOG_ASSERT(len <= l);
 
-	As4Segment s(d);
+	AS4Segment s(d);
 	add_segment(s);
 	d += len;
 	l -= len;
@@ -837,9 +869,12 @@ As4Path::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
  * is missing 
  */
 
-void As4Path::cross_validate(const AsPath& as_path)
+void AS4Path::cross_validate(const ASPath& as_path)
 {
+    debug_msg("cross validate\n%s\n%s\n", str().c_str(), as_path.str().c_str());
+	      
     if (as_path.path_length() < path_length() ) {
+	debug_msg("as_path.path_length() < path_length()\n");
 	// This is illegal.  The spec says to ignore the AS4_PATH
 	// attribute and use the data from the AS_PATH attribute throw
 	// away the data we had.
@@ -847,7 +882,8 @@ void As4Path::cross_validate(const AsPath& as_path)
 	    _segments.pop_front();
 	}
 	// copy in from the AS_PATH version 
-	for (uint32_t i = 0; i < as_path.path_length(); i++) {
+	for (uint32_t i = 0; i < as_path.num_segments(); i++) {
+	    debug_msg("adding %u %s\n", i, as_path.segment(i).str().c_str()); 
 	    add_segment(as_path.segment(i));
 	}
 	return;
@@ -867,22 +903,30 @@ void As4Path::cross_validate(const AsPath& as_path)
 	// The AS_PATH has at least as many segments as the
 	// AS4_PATH find where they differ, and copy across.
 	for (uint32_t i = 1; i <= num_segments(); i++) {
-	    const AsSegment *old_seg;
-	    AsSegment *new_seg;
+	    const ASSegment *old_seg;
+	    ASSegment *new_seg;
 	    old_seg = &(as_path.segment(as_path.num_segments() - i));
-	    new_seg = const_cast<AsSegment*>(&(segment(num_segments() - i)));
+	    new_seg = const_cast<ASSegment*>(&(segment(num_segments() - i)));
+	    printf("old seg: %s\n", old_seg->str().c_str());
+	    printf("new seg: %s\n", new_seg->str().c_str());
 	    if (old_seg->path_length() == new_seg->path_length()) 
 		continue;
 	    if (old_seg->path_length() < new_seg->path_length()) {
 		// ooops - WTF happened here
+		debug_msg("do patchup\n");
 		do_patchup(as_path);
 	    }
 	    if (old_seg->path_length() > new_seg->path_length()) {
 		// found a segment that needs data copying over
+		debug_msg("pad segment\n");
+		printf("new_seg type: %u\n", new_seg->type());
 		pad_segment(*old_seg, *new_seg);
 	    }
 	}
-	
+
+	debug_msg("after patching: \n");
+	debug_msg("old as_path (len %u): %s\n", (uint32_t)as_path.path_length(), as_path.str().c_str());
+	debug_msg("new as_path (len %u): %s\n", (uint32_t)path_length(), str().c_str());
 	if (as_path.path_length() == path_length()) {
 	    return;
 	}
@@ -899,9 +943,11 @@ void As4Path::cross_validate(const AsPath& as_path)
     }
 }
 
-void As4Path::pad_segment(const AsSegment& old_seg, AsSegment& new_seg) 
+void AS4Path::pad_segment(const ASSegment& old_seg, ASSegment& new_seg) 
 {
+    debug_msg("pad: new type: %u\n", new_seg.type());
     if (new_seg.type() == AS_SET) {
+	debug_msg("new == AS_SET\n");
 	// find everything in the old seg that's not in the new seg,
 	// and add it.
 	for (int i = old_seg.as_size()-1; i >= 0; i--) {
@@ -920,6 +966,7 @@ void As4Path::pad_segment(const AsSegment& old_seg, AsSegment& new_seg)
     }
 
     if (old_seg.type() == AS_SET) {
+	debug_msg("old == AS_SET\n");
 	// The old segment was an AS_SET, but the new isn't.  Looks
 	// like some old BGP speaker did some form of aggregation.
 	// Convert the new one to an AS_SET too.
@@ -928,12 +975,16 @@ void As4Path::pad_segment(const AsSegment& old_seg, AsSegment& new_seg)
 	return;
     }
 
+    debug_msg("both are sequences\n");
     // They're both AS_SEQUENCES, so we need to preserve sequence.
     // First validate that new_seg is a sub-sequence of old_seg
     for (uint32_t i = 1; i <= new_seg.as_size(); i++) {
 	const AsNum *old_asn = &(old_seg.as_num(old_seg.as_size()-i));
 	const AsNum *new_asn = &(new_seg.as_num(new_seg.as_size()-i));
-	if (*old_asn != *new_asn) {
+	debug_msg("old_asn: %s, new_asn: %s\n", old_asn->str().c_str(), new_asn->str().c_str());
+	// do a compare on the 16-bit compat versions of the numbers
+	if (old_asn->as() != new_asn->as()) {
+	    debug_msg("Mismatch\n");
 	    // We've got a mismatch - make it into an AS_SET.  This is
 	    // a pretty arbitrary decision, but this shouldn't happen
 	    // in reality.  At least it should be safe.
@@ -946,11 +997,12 @@ void As4Path::pad_segment(const AsSegment& old_seg, AsSegment& new_seg)
     // now we can simply copy across the missing AS numbers
     for (int i = old_seg.as_size() - new_seg.as_size() - 1; i >= 0; i--) {
 	new_seg.prepend_as(old_seg.as_num(i));
+	_path_len++;
     }
     return;
 }
 
-void As4Path::do_patchup(const AsPath& as_path)
+void AS4Path::do_patchup(const ASPath& as_path)
 {
     // we get here when the cross validation fails, and we need to do
     // something that isn't actually illegal.
@@ -960,9 +1012,9 @@ void As4Path::do_patchup(const AsPath& as_path)
     // previously in the AS4_PATH.  This at least should prevent
     // loops forming, but it's really ugly.
 
-    AsSegment new_set(AS_SET);
+    ASSegment new_set(AS_SET);
     for (uint32_t i = 0; i < as_path.path_length(); i++) {
-	const AsSegment *s = &(as_path.segment(i));
+	const ASSegment *s = &(as_path.segment(i));
 	for (uint32_t j = 0; j < s->path_length(); j++) {
 	    const AsNum *asn = &(s->as_num(j));
 	    if (asn->as() == AsNum::AS_TRAN)
@@ -996,8 +1048,9 @@ void As4Path::do_patchup(const AsPath& as_path)
 }
 
 const uint8_t *
-As4Path::encode(size_t &len, uint8_t *buf) const
+AS4Path::encode(size_t &len, uint8_t *buf) const
 {
+    debug_msg("AS4Path::encode\n");
     XLOG_ASSERT(_num_segments == _segments.size());	// XXX expensive
     const_iterator i;
     size_t pos, l = wire_size();
@@ -1011,7 +1064,7 @@ As4Path::encode(size_t &len, uint8_t *buf) const
 
     // encode into the buffer
     for (pos = 0, i = _segments.begin(); i != _segments.end(); ++i) {
-	const As4Segment *new_seg = (const As4Segment*)(&(*i));
+	const AS4Segment *new_seg = (const AS4Segment*)(&(*i));
 	l = new_seg->wire_size();
 	new_seg->encode(l, buf + pos);
 	pos += l;
@@ -1021,13 +1074,13 @@ As4Path::encode(size_t &len, uint8_t *buf) const
 
 
 size_t
-As4Path::wire_size() const
+AS4Path::wire_size() const
 {
     size_t l = 0;
     const_iterator i;
 
     for (i = _segments.begin(); i != _segments.end(); ++i) {
-	const As4Segment *new_seg = (const As4Segment*)(&(*i));
+	const AS4Segment *new_seg = (const AS4Segment*)(&(*i));
 	l += new_seg->wire_size();
     }
     return l;

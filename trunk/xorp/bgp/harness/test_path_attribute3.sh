@@ -17,7 +17,6 @@
 # 4) Run xorp "../xorp_bgp"
 # 5) Run "./test_peer -s peer1"
 # 6) Run "./test_peer -s peer2"
-# 7) Run "./test_peer -s peer3"
 # 8) Run "./coord"
 #
 set -e
@@ -45,8 +44,9 @@ trap onexit 0 2
 HOST=127.0.0.1
 LOCALHOST=$HOST
 ID=192.150.187.78
-AS=65008
-USE4BYTEAS=false
+AS=2.65008
+ASTRAN=23456
+USE4BYTEAS=true
 NEXT_HOP=192.150.187.78
 
 # EBGP
@@ -54,15 +54,10 @@ PORT1=10001
 PEER1_PORT=20001
 PEER1_AS=65001
 
-# IBGP
+# EBGP
 PORT2=10002
 PEER2_PORT=20002
-PEER2_AS=$AS
-
-# EBGP
-PORT3=10003
-PEER3_PORT=20002
-PEER3_AS=65003
+PEER2_AS=65002
 
 HOLDTIME=5
 
@@ -84,12 +79,6 @@ configure_bgp()
     add_peer $IPTUPLE $PEER2_AS $NEXT_HOP $HOLDTIME
     set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
-
-    PEER=$HOST
-    IPTUPLE="$LOCALHOST $PORT3 $PEER $PEER3_PORT"
-    add_peer $IPTUPLE $PEER3_AS $NEXT_HOP $HOLDTIME
-    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
-    enable_peer $IPTUPLE
 }
 
 reset()
@@ -101,17 +90,13 @@ reset()
 
     coord target $HOST $PORT2
     coord initialise attach peer2
-
-    coord target $HOST $PORT3
-    coord initialise attach peer3
 }
 
 test1()
 {
     echo "TEST1:"
-    echo "	1) Send an update packet with an optional nontransitive path"
-    echo "	   attribute. This path attribute should not be propogated"
-    echo "         by the BGP process"
+    echo "	1) Send an update packet to BGP with a 4-byte ASnum and check that"
+    echo "	   it forwards an ASpath including AS_TRAN to its peers."
 
     # Reset the peers
     reset
@@ -123,57 +108,43 @@ test1()
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
-    coord peer3 assert established
-
     ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
+    ASTRANPATH="23456,$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0x80,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     PACKET2="packet update
 	origin 2
-	aspath $ASPATH
-	nexthop $NEXTHOP
-	localpref 100
-	nlri 10.10.10.0/24
-	nlri 20.20.20.20/24"
-
-    PACKET3="packet update
-	origin 2
-	aspath $AS,$ASPATH
+	aspath $ASTRANPATH
 	nexthop $NEXT_HOP
 	med 1
+	as4path $AS,$ASPATH
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     coord peer2 expect $PACKET2
-    coord peer3 expect $PACKET3
 
     coord peer1 send $PACKET1
 
     sleep 2
     coord peer2 assert queue 0
-    coord peer3 assert queue 0
 
     # Verify that the peers are still connected.
     coord peer1 assert established
     coord peer2 assert established
-    coord peer3 assert established
 }
 
 test2()
 {
     echo "TEST2:"
-    echo "	1) Send an update packet with an optional transitive path"
-    echo "	   attribute. This path attribute should be propogated"
-    echo "         by the BGP process with the partial bit set."
+    echo "	1) Send an update packet to BGP with a 4-byte ASnum and check that"
+    echo "	   it forwards a 4byte ASpath to its peers."
 
     # Reset the peers
     reset
@@ -182,64 +153,45 @@ test2()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101 use_4byte_asnums true
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
-    coord peer3 assert established
-
     ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
+    RECVASPATH="$AS,$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0xc0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     PACKET2="packet update
 	origin 2
-	aspath $ASPATH
-	nexthop $NEXTHOP
-	localpref 100
-	pathattr 0xe0,0xff,1,1
-	nlri 10.10.10.0/24
-	nlri 20.20.20.20/24"
-
-    PACKET3="packet update
-	origin 2
-	aspath $AS,$ASPATH
+	aspath $RECVASPATH
 	nexthop $NEXT_HOP
 	med 1
-	pathattr 0xe0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     coord peer2 expect $PACKET2
-    coord peer3 expect $PACKET3
 
     coord peer1 send $PACKET1
 
     sleep 2
     coord peer2 assert queue 0
-    coord peer3 assert queue 0
 
     # Verify that the peers are still connected.
     coord peer1 assert established
     coord peer2 assert established
-    coord peer3 assert established
 }
 
 test3()
 {
     echo "TEST3:"
-    echo "	1) Send an update packet with two optional path"
-    echo "	   attributes. One has the transitive bit set the other"
-    echo "         doesn't. Only the path attribute with the transitive bit"
-    echo "         set should be propogated by the BGP process, with the"
-    echo "         partial bit set."
+    echo "	1) Send an update packet to BGP with a 4-byte ASnum and check that"
+    echo "	   it can merge AS4Path and ASPath information."
 
     # Reset the peers
     reset
@@ -248,63 +200,48 @@ test3()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101 use_4byte_asnums true
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
-    coord peer3 assert established
-
-    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
+    ASPATH="$PEER1_AS,1,$ASTRAN,[3,4,5],6,[7,8],9"
+    AS4PATH="$PEER1_AS,1,2.2,[3,4,5],6,[7,8],9"
+    RECVASPATH="$AS,$PEER1_AS,1,2.2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	pathattr 0xc0,0xff,1,1
-	pathattr 0x80,0xfe,1,1
+	as4path $AS4PATH
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     PACKET2="packet update
 	origin 2
-	aspath $ASPATH
-	nexthop $NEXTHOP
-	localpref 100
-	pathattr 0xe0,0xff,1,1
-	nlri 10.10.10.0/24
-	nlri 20.20.20.20/24"
-
-    PACKET3="packet update
-	origin 2
-	aspath $AS,$ASPATH
+	aspath $RECVASPATH
 	nexthop $NEXT_HOP
 	med 1
-	pathattr 0xe0,0xff,1,1
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     coord peer2 expect $PACKET2
-    coord peer3 expect $PACKET3
 
     coord peer1 send $PACKET1
 
     sleep 2
     coord peer2 assert queue 0
-    coord peer3 assert queue 0
 
     # Verify that the peers are still connected.
     coord peer1 assert established
     coord peer2 assert established
-    coord peer3 assert established
 }
 
-# http://www.xorp.org/bugzilla/show_bug.cgi?id=717
 test4()
 {
     echo "TEST4:"
-    echo "	1) Send an update packet with a community"
-    echo "	   attribute of more than 256 bytes"
+    echo "	1) Send an update packet to BGP with a 4-byte ASnum and check that"
+    echo "	   it can merge AS4Path and ASPath information.  "
+    echo "         In this case the 2-byte ASes have added data that isn't in the AS4Path."
 
     # Reset the peers
     reset
@@ -313,70 +250,100 @@ test4()
     coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
     coord peer1 assert established
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101 use_4byte_asnums true
     coord peer2 assert established
 
-    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
-    coord peer3 assert established
-
-    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
+    ASPATH="$PEER1_AS,1,2,$ASTRAN,[3,4,5],6,[7,8],9"
+    AS4PATH="10.10,[3,4,5],6,[7,8],9"
+    RECVASPATH="$AS,$PEER1_AS,1,2,10.10,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
-
-    set +e
-    let i=0
-    while ((i++ < 256))
-    do
-      COMMUNITY=$COMMUNITY" community $i"
-    done
-    set -e
 
     PACKET1="packet update
 	origin 2
 	aspath $ASPATH
 	nexthop $NEXTHOP
-	$COMMUNITY
+	as4path $AS4PATH
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     PACKET2="packet update
 	origin 2
-	aspath $ASPATH
-	nexthop $NEXTHOP
-	localpref 100
-        $COMMUNITY
-	nlri 10.10.10.0/24
-	nlri 20.20.20.20/24"
-
-    PACKET3="packet update
-	origin 2
-	aspath $AS,$ASPATH
+	aspath $RECVASPATH
 	nexthop $NEXT_HOP
 	med 1
-	$COMMUNITY
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24"
 
     coord peer2 expect $PACKET2
-    coord peer3 expect $PACKET3
 
     coord peer1 send $PACKET1
 
     sleep 2
     coord peer2 assert queue 0
-    coord peer3 assert queue 0
 
     # Verify that the peers are still connected.
     coord peer1 assert established
     coord peer2 assert established
-    coord peer3 assert established
 }
 
+test5()
+{
+    echo "TEST5:"
+    echo "	1) Send an update packet to BGP with a 4-byte ASnum and check that"
+    echo "	   it can merge AS4Path and ASPath information.  "
+    echo "         In this case the 2-byte ASes have added data that isn't in the AS4Path."
+
+    # Reset the peers
+    reset
+
+    # Establish a connection
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101 use_4byte_asnums true
+    coord peer2 assert established
+
+    ASPATH="$PEER1_AS,1,2,$ASTRAN,$ASTRAN,[3,4,$ASTRAN],6,[$ASTRAN,8],$ASTRAN"
+    AS4PATH="11.11,10.10,[3,4,5.5],6,[7.7,8],9.9"
+    RECVASPATH="$AS,$PEER1_AS,1,2,11.11,10.10,[3,4,5.5],6,[7.7,8],9.9"
+    NEXTHOP="20.20.20.20"
+
+    PACKET1="packet update
+	origin 2
+	aspath $ASPATH
+	nexthop $NEXTHOP
+	as4path $AS4PATH
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    PACKET2="packet update
+	origin 2
+	aspath $RECVASPATH
+	nexthop $NEXT_HOP
+	med 1
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    coord peer2 expect $PACKET2
+
+    coord peer1 send $PACKET1
+
+    sleep 2
+    coord peer2 assert queue 0
+
+    # Verify that the peers are still connected.
+    coord peer1 assert established
+    coord peer2 assert established
+}
+
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3 test4'
+TESTS='test1 test2 test3 test4 test5'
 
 # Include command line
 . ${srcdir}/args.sh
 
+#START_PROGRAMS="no"
 if [ $START_PROGRAMS = "yes" ]
 then
     CXRL="$CALLXRL -r 10"
@@ -387,7 +354,6 @@ then
     ../xorp_bgp               = $CXRL finder://bgp/common/0.1/get_target_name
     ./test_peer -s peer1      = $CXRL finder://peer1/common/0.1/get_target_name
     ./test_peer -s peer2      = $CXRL finder://peer1/common/0.1/get_target_name
-    ./test_peer -s peer3      = $CXRL finder://peer1/common/0.1/get_target_name
     ./coord                   = $CXRL finder://coord/common/0.1/get_target_name
 EOF
     trap '' 0

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.45 2007/06/18 23:30:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.46 2007/07/06 19:58:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -685,7 +685,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
     */
     typename list <RouteData<A> >::iterator j;
     for (i=alternatives.begin(); i!=alternatives.end();) {
-	AsPath aspath1 = i->route()->attributes()->aspath();
+	ASPath aspath1 = i->route()->attributes()->aspath();
  	AsNum asnum1 = (0 == aspath1.path_length()) ? 
  	    AsNum(AsNum::AS_INVALID) : aspath1.first_asnum();
 	int med1 = med(i->route());
@@ -693,7 +693,7 @@ DecisionTable<A>::find_winner(list<RouteData<A> >& alternatives) const
 	for (j=alternatives.begin(); j!=alternatives.end();) {
 	    bool del_j = false;
 	    if (i != j) {
-		AsPath aspath2 = j->route()->attributes()->aspath();
+		ASPath aspath2 = j->route()->attributes()->aspath();
 		AsNum asnum2 = (0 == aspath2.path_length()) ? 
 		    AsNum(AsNum::AS_INVALID) : aspath2.first_asnum();
 		int med2 = med(j->route());

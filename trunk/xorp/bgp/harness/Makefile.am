@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/harness/Makefile.am,v 1.20 2006/03/02 02:08:47 atanu Exp $
+## $XORP: xorp/bgp/harness/Makefile.am,v 1.21 2006/03/06 02:27:53 atanu Exp $
 ##
 
 # -- Real Programs
@@ -18,6 +18,8 @@ check_SCRIPTS	+= test_routing2.sh
 check_SCRIPTS	+= test_rib1.sh
 check_SCRIPTS	+= test_rib_fea1.sh
 check_SCRIPTS	+= test_path_attribute1.sh
+check_SCRIPTS	+= test_path_attribute2.sh
+check_SCRIPTS	+= test_path_attribute3.sh
 check_SCRIPTS	+= test_route_reflection1.sh
 check_SCRIPTS	+= test_route_reflection2.sh
 check_SCRIPTS	+= test_route_flap_damping1.sh

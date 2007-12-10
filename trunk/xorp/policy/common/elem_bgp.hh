@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_bgp.hh,v 1.2 2006/03/16 00:05:15 pavlin Exp $
+// $XORP: xorp/policy/common/elem_bgp.hh,v 1.3 2007/02/16 22:47:01 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEM_BGP_HH__
 #define __POLICY_COMMON_ELEM_BGP_HH__
@@ -21,6 +21,6 @@
 #include "element.hh"
 #include "bgp/aspath.hh"
 
-typedef ElemRefAny<AsPath>	ElemAsPath;
+typedef ElemRefAny<ASPath>	ElemASPath;
 
 #endif // __POLICY_COMMON_ELEM_BGP_HH__

@@ -12,8 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.14 2006/10/12 01:24:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.15 2007/02/16 22:45:21 pavlin Exp $"
 
+//#define DEBUG_LOGGING
 #include "bgp_module.h"
 
 #include "libxorp/xorp.h"
@@ -28,6 +29,7 @@
 #include <sys/stat.h>
 #endif
 
+#include "bgp.hh"
 #include "test_packet.hh"
 #include "socket.hh"
 
@@ -99,13 +101,19 @@ bool BGPTestPacket::test_keepalive()
     // create a KeepAlive packet and then read it back.
     bool result;
 
+    // dummy stuff, because encode needs a peer
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
     
     debug_msg("Starting test of KeepAlivePacket\n\n");
     debug_msg("Encoding KeepAlivePacket\n\n");
     
     KeepAlivePacket *ka = create_keepalive();
-    size_t len;
-    const uint8_t *buf = ka->encode(len);
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    assert(ka->encode(buf, len, &pd));
 
     debug_msg("Decoding KeepAlivePacket\n\n");
     KeepAlivePacket* keepalivepacket = new KeepAlivePacket(buf,len);
@@ -116,7 +124,6 @@ bool BGPTestPacket::test_keepalive()
 
     delete keepalivepacket;
     delete ka;
-    delete[] buf;
     
     return result;
 }
@@ -128,12 +135,20 @@ bool BGPTestPacket::test_open()
     // create a Open packet and then read it back.
     bool result;
 
+    // dummy stuff, because encode needs a peer
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+
+    
     debug_msg("Starting test of OpenPacket\n\n");
     debug_msg("Encoding OpenPacket\n\n");
     
     OpenPacket *op = create_open();
-    size_t len;
-    const uint8_t *buf = op->encode(len);
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    assert(op->encode(buf, len, &pd));
     
     debug_msg("Decoding OpenPacket\n\n");
     
@@ -143,7 +158,6 @@ bool BGPTestPacket::test_open()
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket from buffer failed\n");
 	delete op;
-	delete[] buf;
 	return false;
     }
     
@@ -153,7 +167,6 @@ bool BGPTestPacket::test_open()
 
     delete openpacket;
     delete op;
-    delete[] buf;
     
     return result;
 }
@@ -164,22 +177,29 @@ bool BGPTestPacket::test_update()
     // create a Update packet and then read it back.
     bool result;
 
+    // dummy stuff, because encode needs a peer
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+
+    
     debug_msg("Starting test of UpdatePacket\n\n");
     debug_msg("Encoding UpdatePacket\n\n");
     
     UpdatePacket *up = create_update();
-    size_t len;
-    const uint8_t *buf = up->encode(len);
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    assert(up->encode(buf, len, &pd));
     
     debug_msg("Decoding UpdatePacket\n\n");
     
     UpdatePacket *updatepacket;
     try {
-	updatepacket = new UpdatePacket(buf,len);
+	updatepacket = new UpdatePacket(buf,len, &pd);
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket from buffer failed\n");
 	delete up;
-	delete[] buf;
 	return false;
     }
     
@@ -189,7 +209,6 @@ bool BGPTestPacket::test_update()
 
     delete updatepacket;
     delete up;
-    delete[] buf;
 
     return result;
 }
@@ -200,22 +219,29 @@ bool BGPTestPacket::test_update_ipv6()
     // create a Update packet and then read it back.
     bool result;
 
+    // dummy stuff, because encode needs a peer
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+
+    
     debug_msg("Starting test of UpdatePacket IPv6\n\n");
     debug_msg("Encoding UpdatePacket IPv6\n\n");
     
     UpdatePacket *up = create_update_ipv6();
-    size_t len;
-    const uint8_t *buf = up->encode(len);
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    assert(up->encode(buf, len, &pd));
     
     debug_msg("Decoding UpdatePacket IPv6\n\n");
     
     UpdatePacket *updatepacket;
     try {
-	updatepacket = new UpdatePacket(buf,len);
+	updatepacket = new UpdatePacket(buf,len, &pd);
     } catch (CorruptMessage &err) {
 	debug_msg("Construction of UpdatePacket IPv6 from buffer failed\n");
 	delete up;
-	delete[] buf;
 	return false;
     }
     
@@ -225,7 +251,6 @@ bool BGPTestPacket::test_update_ipv6()
 
     delete updatepacket;
     delete up;
-    delete[] buf;
 
     return result;
 }
@@ -236,12 +261,20 @@ bool BGPTestPacket::test_notification()
     // create a Notification packet and then read it back.
     bool result;
 
+    // dummy stuff, because encode needs a peer
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
+    Iptuple iptuple;
+    BGPPeerData pd(localdata, iptuple, AsNum(0), IPv4(),0);
+
+    
     debug_msg("Starting test of NotificationPacket\n\n");
     debug_msg("Encoding NotificationPacket\n\n");
     
     NotificationPacket *np = create_notification();
-    size_t len;
-    const uint8_t *buf = np->encode(len);
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t buf[BGPPacket::MAXPACKETSIZE];
+    assert(np->encode(buf, len, &pd));
     
     debug_msg("Decoding NotificationPacket\n\n");
     NotificationPacket *notificationpacket;
@@ -250,7 +283,6 @@ bool BGPTestPacket::test_notification()
     } catch (InvalidPacket& err) {
 	debug_msg("Construction of NotificationPacket from buffer failed\n");
 	delete np;
-	delete[] buf;
 	return false;
     }
 
@@ -260,7 +292,6 @@ bool BGPTestPacket::test_notification()
 
     delete notificationpacket;
     delete np;
-    delete[] buf;
     
     return result;
 }
@@ -281,7 +312,7 @@ UpdatePacket* BGPTestPacket::create_update()
     net[2] = IPv4Net("1.2.3.4/32");
     BGPUpdateAttrib wdr(net[2]);
 	
-    AsSegment as_seq;
+    ASSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(12));
@@ -289,7 +320,7 @@ UpdatePacket* BGPTestPacket::create_update()
     as_seq.add_as(AsNum(13));
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(14));
-    AsPath p;
+    ASPath p;
     p.add_segment(as_seq);
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     BGPUpdateAttrib nlr_0(net[0]);
@@ -297,13 +328,15 @@ UpdatePacket* BGPTestPacket::create_update()
     // nlr_0.dump();
     // nlr_1.dump();
     // wdr.dump();
+    OriginAttribute origin_att(IGP);
     ASPathAttribute path_att(p);
-    ORIGINATOR_IDAttribute originator_id(IPv4("1.2.3.4"));
-    CLUSTER_LISTAttribute cluster_list;
+    OriginatorIDAttribute originator_id(IPv4("1.2.3.4"));
+    ClusterListAttribute cluster_list;
     cluster_list.prepend_cluster_id(IPv4("4.3.2.1"));
     cluster_list.prepend_cluster_id(IPv4("5.6.7.8"));
     UpdatePacket *bup = new UpdatePacket();
     bup->add_withdrawn(wdr);
+    bup->add_pathatt(origin_att);
     bup->add_pathatt(path_att);
     bup->add_pathatt(originator_id);
     bup->add_nlri(nlr_0);
@@ -319,7 +352,7 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     net[2] = IPv4Net("1.2.3.4/32");
     BGPUpdateAttrib wdr(net[2]);
 	
-    AsSegment as_seq;
+    ASSegment as_seq;
     as_seq.set_type(AS_SEQUENCE);
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(12));
@@ -327,7 +360,7 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     as_seq.add_as(AsNum(13));
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     as_seq.add_as(AsNum(14));
-    AsPath p;
+    ASPath p;
     p.add_segment(as_seq);
     debug_msg("sequence length : %u\n", XORP_UINT_CAST(as_seq.as_size()));
     BGPUpdateAttrib nlr_0(net[0]);
@@ -345,14 +378,14 @@ UpdatePacket* BGPTestPacket::create_update_ipv6()
     MPReachNLRIAttribute<IPv6> mpreach(SAFI_UNICAST);
     mpreach.set_nexthop("20:20:20:20:20:20:20:20");
     mpreach.add_nlri("2000::/3");
-    mpreach.encode();
+    //    mpreach.encode();
     debug_msg("%s\n", mpreach.str().c_str());
     bup->add_pathatt(mpreach);
     debug_msg("%s\n", bup->str().c_str());
 
     MPUNReachNLRIAttribute<IPv6> mpunreach(SAFI_UNICAST);
     mpunreach.add_withdrawn("2000::/3");
-    mpunreach.encode();
+    //    mpunreach.encode();
     bup->add_pathatt(mpunreach);
 
     return bup;

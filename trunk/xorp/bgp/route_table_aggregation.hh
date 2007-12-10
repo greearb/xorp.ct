@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.13 2007/02/16 22:45:16 pavlin Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.14 2007/05/23 12:12:32 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -114,7 +114,7 @@ public:
         : _net(net), _brief_mode(brief_mode),
 	  _was_announced(0), _is_suppressed(0) {
 	    NextHopAttribute<A> nhatt(A::ZERO());
-	    AsPath aspath;
+	    ASPath aspath;
 	    OriginAttribute igp_origin_att(IGP);
 	_pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
 	_pa_list->rehash();

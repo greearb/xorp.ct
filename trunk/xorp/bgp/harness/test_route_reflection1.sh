@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.5 2006/04/04 12:07:45 bms Exp $
+# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.6 2006/08/16 22:10:14 atanu Exp $
 #
 
 #
@@ -60,6 +60,7 @@ PEER_PORT1_IPV6=20004
 PEER_PORT2_IPV6=20005
 PEER_PORT3_IPV6=20006
 AS=65008
+USE4BYTEAS=false
 PEER1_AS=$AS
 PEER2_AS=$AS
 PEER3_AS=$AS
@@ -85,7 +86,7 @@ configure_bgp()
 {
     LOCALHOST=$HOST
     AS=65008
-    local_config $AS $ID
+    local_config $AS $ID $USE4BYTEAS
     route_reflector $CLUSTER_ID false
 
     # Don't try and talk to the rib.

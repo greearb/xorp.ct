@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.27 2007/02/16 22:45:25 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/coord.cc,v 1.28 2007/05/23 04:08:22 pavlin Exp $"
 
 #include "bgp/bgp_module.h"
 
@@ -32,7 +32,6 @@
 
 #include "coord.hh"
 #include "command.hh"
-
 
 static const char SERVER[] = "coord";/* This servers name */
 static const char SERVER_VERSION[] = "0.1";

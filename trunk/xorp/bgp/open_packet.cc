@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.28 2006/10/12 01:24:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.29 2007/02/16 22:45:13 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -37,13 +37,15 @@ OpenPacket::OpenPacket(const AsNum& as, const IPv4& id,
     _OptParmLen = 0;
 }
 
-const uint8_t *
-OpenPacket::encode(size_t& len, uint8_t *d) const
+bool
+OpenPacket::encode(uint8_t *d, size_t& len, const BGPPeerData *peerdata) const
 {
-    if (d != 0) {	// have a buffer, check length
-	// XXX this should become an exception
-        XLOG_ASSERT(len >= BGPPacket::MINOPENPACKET + _OptParmLen);
-    }
+    UNUSED(peerdata);
+    XLOG_ASSERT(d != 0);
+
+    if (len < BGPPacket::MINOPENPACKET + _OptParmLen)
+	return false;
+
     len = BGPPacket::MINOPENPACKET + _OptParmLen;
     d = basic_encode(len, d);
 
@@ -54,6 +56,7 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
     d[BGPPacket::COMMON_HEADER_LEN + 4] = _HoldTime & 0xff;
     _id.copy_out(d + BGPPacket::COMMON_HEADER_LEN + 5);
     d[BGPPacket::COMMON_HEADER_LEN + 9] = _OptParmLen;
+    debug_msg("encoding Open, optparmlen = %u\n", (uint32_t)_OptParmLen);
 
     if (!_parameter_list.empty())  {
 	size_t i = BGPPacket::MINOPENPACKET;
@@ -66,14 +69,15 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
 	}
     }
 
-    return d;
+    return true;
 }
 
 OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 	throw(CorruptMessage)
     : _as(AsNum::AS_INVALID)
 {
-    debug_msg("OpenPacket(const uint8_t *, uint16_t) constructor called\n");
+    debug_msg("OpenPacket(const uint8_t *, uint16_t %u) constructor called\n",
+	      (uint32_t)l);
     _Type = MESSAGETYPEOPEN;
 
     _OptParmLen = 0;

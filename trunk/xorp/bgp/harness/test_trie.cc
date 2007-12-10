@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.23 2006/11/06 19:33:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.24 2007/02/16 22:45:26 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -171,7 +171,7 @@ add_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
  	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
 	    mpreach->add_nlri(net);
-	    mpreach->encode();
+	    //mpreach->encode();
 
 	    debug_msg("%s\n", p->str().c_str());
 	    return;
@@ -207,7 +207,7 @@ withdraw_nlri<IPv6>(UpdatePacket *p, IPNet<IPv6> net)
 	if (dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai)) {
  	    mpunreach = dynamic_cast<MPUNReachNLRIAttribute<IPv6>*>(*pai);
 	    mpunreach->add_withdrawn(net);
-	    mpunreach->encode();
+	    //mpunreach->encode();
 
 	    debug_msg("%s\n", p->str().c_str());
 	    return;
@@ -241,7 +241,7 @@ add_nexthop<IPv6>(UpdatePacket *p, IPv6 nexthop)
 	if (dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai)) {
  	    mpreach = dynamic_cast<MPReachNLRIAttribute<IPv6>*>(*pai);
 	    mpreach->set_nexthop(nexthop);
-	    mpreach->encode();
+	    //mpreach->encode();
 
 	    debug_msg("%s\n", p->str().c_str());
 	    return;
@@ -262,6 +262,13 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     DOUT(info) << info.test_name() << endl;
 
     Trie trie;
+
+    /* need peer data to be able to encode */
+    EventLoop eventloop;
+    Iptuple iptuple;
+    LocalData localdata(eventloop);
+    localdata.set_use_4byte_asnums(false);
+    BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);
 
     /*
     ** Verify that the trie is empty.
@@ -290,7 +297,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     OriginAttribute oa(IGP);
     bgpupdate->add_pathatt(oa);
 
-    ASPathAttribute aspa(AsPath("1,2,3"));
+    ASPathAttribute aspa(ASPath("1,2,3"));
     bgpupdate->add_pathatt(aspa);
 
     add_nexthop<A>(bgpupdate, nexthop);
@@ -299,9 +306,10 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     ** Pass to the trie.
     */
     TimeVal tv;
-    size_t len;
-    const uint8_t *data = bgpupdate->encode(len);
-    trie.process_update_packet(tv, data, len);
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t *data = new uint8_t[BGPPacket::MAXPACKETSIZE];
+    assert(bgpupdate->encode(data, len, &peerdata));
+    trie.process_update_packet(tv, data, len, &peerdata);
 
     /*
     ** Verify that this net is in the trie.
@@ -334,8 +342,10 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     delete bgpupdate;
     bgpupdate = new UpdatePacket();
     withdraw_nlri<A>(bgpupdate, net);
-    data = bgpupdate->encode(len);
-    trie.process_update_packet(tv, data, len);
+    len = BGPPacket::MAXPACKETSIZE;
+    data = new uint8_t[BGPPacket::MAXPACKETSIZE];
+    assert(bgpupdate->encode(data, len, &peerdata));
+    trie.process_update_packet(tv, data, len, &peerdata);
 
     /*
     ** Check that the net has been removed from the trie.
@@ -365,6 +375,13 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
 
     Trie trie;
 
+    /* need peer data to be able to encode */
+    EventLoop eventloop;
+    Iptuple iptuple;
+    LocalData localdata(eventloop);
+    localdata.set_use_4byte_asnums(false);
+    BGPPeerData peerdata(localdata, iptuple, AsNum(0), IPv4(),0);
+
     /*
     ** Verify that the trie is empty.
     */
@@ -380,7 +397,9 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     }
 
     UpdatePacket *packet_nlri, *packet_w1, *packet_w2;
-    const uint8_t *data_nlri, *data_w1, *data_w2;
+    uint8_t data_nlri[BGPPacket::MAXPACKETSIZE];
+    uint8_t data_w1[BGPPacket::MAXPACKETSIZE];
+    uint8_t data_w2[BGPPacket::MAXPACKETSIZE];
     size_t len_nlri, len_w1, len_w2;
 
     /*
@@ -397,7 +416,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     OriginAttribute oa(IGP);
     packet_nlri->add_pathatt(oa);
 
-    ASPathAttribute aspa(AsPath("1,2,3"));
+    ASPathAttribute aspa(ASPath("1,2,3"));
     packet_nlri->add_pathatt(aspa);
 
     add_nexthop<A>(packet_nlri, nexthop);
@@ -406,8 +425,9 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     ** Pass to the trie.
     */
     TimeVal tv;
-    data_nlri = packet_nlri->encode(len_nlri);
-    trie.process_update_packet(tv, data_nlri, len_nlri);
+    len_nlri = BGPPacket::MAXPACKETSIZE;
+    assert(packet_nlri->encode(data_nlri, len_nlri, &peerdata));
+    trie.process_update_packet(tv, data_nlri, len_nlri, &peerdata);
 
     /*
     ** Verify that net is in the trie.
@@ -454,8 +474,9 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     */
     packet_w1 = new UpdatePacket();
     withdraw_nlri<A>(packet_w1, net);
-    data_w1 = packet_w1->encode(len_w1);
-    trie.process_update_packet(tv, data_w1, len_w1);
+    len_w1 = BGPPacket::MAXPACKETSIZE;
+    assert(packet_w1->encode(data_w1, len_w1, &peerdata));
+    trie.process_update_packet(tv, data_w1, len_w1, &peerdata);
 
     /*
     ** Check that net is no longer in the trie.
@@ -475,7 +496,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     ulist.push_back(packet_w1);
     DOUT(info) << "0\t" << ulist[0]->str() << endl;
     DOUT(info) << "1\t" << ulist[1]->str() << endl;
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()), &peerdata);
 
     /*
     ** Build another withdraw to remove the net2. This should empty
@@ -483,20 +504,21 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     */
     packet_w2 = new UpdatePacket();
     withdraw_nlri<A>(packet_w2, net2);
-    data_w2 = packet_w2->encode(len_w2);
-    trie.process_update_packet(tv, data_w2, len_w2);
+    len_w2 = BGPPacket::MAXPACKETSIZE;
+    assert(packet_w2->encode(data_w2, len_w2, &peerdata));
+    trie.process_update_packet(tv, data_w2, len_w2, &peerdata);
 
     /* 
     ** The replay list should be empty.
     */
     pos = 0;
     ulist.clear();
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()), &peerdata);
 
     /*
     ** Push the update packet with the two nlris back in.
     */
-    trie.process_update_packet(tv, data_nlri, len_nlri);
+    trie.process_update_packet(tv, data_nlri, len_nlri, &peerdata);
 
     /*
     ** Check the replay code. It should now only contain the most
@@ -506,31 +528,28 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     ulist.clear();
     ulist.push_back(packet_nlri);
     DOUT(info) << "0\t" << ulist[0]->str() << endl;
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()), &peerdata);
 
     /*
     ** Empty out the trie.
     */
-    trie.process_update_packet(tv, data_w1, len_w1);
-    trie.process_update_packet(tv, data_w2, len_w2);
+    trie.process_update_packet(tv, data_w1, len_w1, &peerdata);
+    trie.process_update_packet(tv, data_w2, len_w2, &peerdata);
 
     /*
     ** The replay list should be empty.
     */
     pos = 0;
     ulist.clear();
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()), &peerdata);
 
     /*
     ** Verify that the trie is empty.
     */
     trie.tree_walk_table(callback(tree_walker_empty<A>, info, A::ZERO()));
 
-    delete [] data_nlri;
     delete packet_nlri;
-    delete [] data_w1;
     delete packet_w1;
-    delete [] data_w2;
     delete packet_w2;
 
     return true;

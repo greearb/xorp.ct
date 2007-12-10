@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.143 2006/10/10 22:33:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.144 2007/02/16 22:45:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -273,7 +273,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    _in_updates++;
 	    _mainprocess->eventloop().current_time(_in_update_time);
-	    UpdatePacket pac(buf, length);
+	    UpdatePacket pac(buf, length, peerdata());
 
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
 		       "Peer %s: Receive: %s",
@@ -366,13 +366,13 @@ BGPPeer::send_message(const BGPPacket& p)
     if (packet_type == MESSAGETYPEUPDATE)
 	_out_updates++;
 
-    const uint8_t *buf;
-    size_t ccnt;
+    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+    size_t ccnt = BGPPacket::MAXPACKETSIZE;
 
     /*
     ** This buffer is dynamically allocated and should be freed.
     */
-    buf = (const uint8_t *)p.encode(ccnt);
+    XLOG_ASSERT(p.encode(buf, ccnt, _peerdata));
     debug_msg("Buffer for sent packet is %p\n", buf);
 
 
@@ -469,11 +469,13 @@ BGPPeer::send_notification(const NotificationPacket& p, bool restart,
     */
     stop_reader();
 
-    size_t ccnt;
     /*
      * This buffer is dynamically allocated and should be freed.
      */
-    const uint8_t *buf = (const uint8_t *)p.encode(ccnt);
+    size_t ccnt = BGPPacket::MAXPACKETSIZE;
+    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+
+    XLOG_ASSERT(p.encode(buf, ccnt, _peerdata));
     debug_msg("Buffer for sent packet is %p\n", buf);
 
     /*
@@ -1523,8 +1525,11 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	    default:
 		if ((*i)->well_known()) {
 		    // unrecognized well_known attribute.
+		    uint8_t buf[8192];
+		    size_t wire_size = 8192;
+		    (*i)->encode(buf, wire_size, _peerdata);
 		    return new NotificationPacket(UPDATEMSGERR, UNRECOGWATTR,
-					(*i)->data(), (*i)->wire_size());
+						  buf, wire_size);
 		}
 	    }
 	}
@@ -2311,9 +2316,11 @@ AcceptSession::send_notification_accept(const NotificationPacket& np)
     }
     _socket_client->stop_reader();
 
-    size_t ccnt;
     // This buffer is dynamically allocated and needs to be freed.
-    const uint8_t *buf = np.encode(ccnt);
+    size_t ccnt = BGPPacket::MAXPACKETSIZE;
+    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+
+    XLOG_ASSERT(np.encode(buf, ccnt, _peer.peerdata()));
     debug_msg("Buffer for sent packet is %p\n", buf);
 
     XLOG_INFO("Sending: %s", cstring(np));
@@ -2480,9 +2487,10 @@ AcceptSession::swap_sockets(const OpenPacket& p)
 #ifdef	NO_STATS
     _peer.event_openmess(p);
 #else
-    size_t ccnt;
     // This buffer is dynamically allocated and needs to be freed.
-    const uint8_t *buf = p.encode(ccnt);
+    size_t ccnt = BGPPacket::MAXPACKETSIZE;
+    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+    XLOG_ASSERT(p.encode(buf, ccnt, NULL));
     _peer.get_message(BGPPacket::GOOD_MESSAGE, buf, ccnt, 0);
     delete buf;
 #endif
@@ -2633,7 +2641,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    debug_msg("UPDATE Packet RECEIVED\n");
 // 	    _in_updates++;
 // 	    main()->eventloop().current_time(_in_update_time);
-	    UpdatePacket pac(buf, length);
+	    UpdatePacket pac(buf, length, peerdata());
  	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
 		       "Peer %s: Receive: %s",
 		       peerdata()->iptuple().str().c_str(),

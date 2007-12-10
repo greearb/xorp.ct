@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.64 2006/04/04 12:07:44 bms Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.65 2006/08/16 22:10:14 atanu Exp $
 #
 
 #
@@ -46,6 +46,7 @@ HOST=127.0.0.1
 LOCALHOST=$HOST
 ID=192.150.187.78
 AS=65008
+USE4BYTEAS=false
 
 # IBGP - IPV4
 PEER1=$HOST
@@ -75,7 +76,7 @@ HOLDTIME=30
 
 configure_bgp()
 {
-    local_config $AS $ID
+    local_config $AS $ID $USE4BYTEAS
 
     # Don't try and talk to the rib.
     register_rib ""

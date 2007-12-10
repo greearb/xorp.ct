@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_peer.hh,v 1.14 2006/10/12 01:24:43 pavlin Exp $
+// $XORP: xorp/bgp/tools/print_peer.hh,v 1.15 2007/02/16 22:45:27 pavlin Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -28,7 +28,7 @@
 #include "xrl/interfaces/bgp_xif.hh"
 
 
-class PrintPeers : public XrlBgpV0p2Client {
+class PrintPeers : public XrlBgpV0p3Client {
 public:
     PrintPeers(bool verbose, int interval);
     void get_peer_list_start();
@@ -54,7 +54,7 @@ public:
     void get_peer_negotiated_version_done(const XrlError&, 
 					  const int32_t* neg_version);
     void get_peer_as_done(const XrlError& e, 
-			  const uint32_t* peer_as);
+			  const string* peer_as);
     void get_peer_msg_stats_done(const XrlError& e, 
 				 const uint32_t* in_updates, 
 				 const uint32_t* out_updates, 

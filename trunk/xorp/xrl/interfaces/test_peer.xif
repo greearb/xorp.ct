@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/test_peer.xif,v 1.3 2004/06/01 19:37:28 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/test_peer.xif,v 1.4 2007/07/12 21:35:32 pavlin Exp $ */
 
 /*
  * Test Peer Interface. Simple endpoint to interact with protocols under
@@ -23,6 +23,13 @@ interface test_peer/0.1 {
 	 * @param protocol. Protocol that is being handled.
 	 */
 	packetisation ? protocol:txt
+
+	/**
+         * Set whether to assume 2 or 4 byte AS numbers when decoding.
+	 *
+	 * @param use.  True if 4 byte asnums
+	 */
+	use_4byte_asnums ? use:bool
 
 	/**
 	 * Make a tcp connection to the specified host and port.

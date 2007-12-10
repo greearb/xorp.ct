@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.37 2007/02/16 22:45:22 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.38 2007/09/11 08:06:21 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -78,7 +78,7 @@ test_ribin_dump(TestInfo& /*info*/)
     IPv4 nexthop1("2.0.0.1");
     NextHopAttribute<IPv4> nhatt1(nexthop1);
     OriginAttribute igp_origin_att(IGP);
-    AsPath aspath1("3,2,1");
+    ASPath aspath1("3,2,1");
     ASPathAttribute aspathatt1(aspath1);
     PathAttributeList<IPv4>* palist1 =
 	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
@@ -231,15 +231,15 @@ test_ribin(TestInfo& /*info*/)
 
     OriginAttribute igp_origin_att(IGP);
 
-    AsPath aspath1;
+    ASPath aspath1;
     aspath1.prepend_as(AsNum(1));
     aspath1.prepend_as(AsNum(2));
     aspath1.prepend_as(AsNum(3));
-    AsPath foo("3,2,1");
+    ASPath foo("3,2,1");
     assert (foo == aspath1);
     ASPathAttribute aspathatt1(aspath1);
 
-    AsPath aspath2;
+    ASPath aspath2;
     aspath2.prepend_as(AsNum(3));
     aspath2.prepend_as(AsNum(4));
     aspath2.prepend_as(AsNum(5));

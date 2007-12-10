@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.21 2006/08/16 22:10:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.22 2006/09/28 15:52:26 zec Exp $
 #
 
 #
@@ -45,6 +45,7 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 
 HOST=127.0.0.1
 AS=65008
+USE4BYTEAS=false
 
 # IBGP - IPV4
 PORT1=10000
@@ -72,7 +73,7 @@ configure_bgp()
 {
     LOCALHOST=$HOST
     ID=192.150.187.78
-    local_config $AS $ID
+    local_config $AS $ID $USE4BYTEAS
 
     # IBGP - IPV4
     PEER=$HOST

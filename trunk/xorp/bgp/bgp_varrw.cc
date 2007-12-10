@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.30 2006/10/31 22:23:53 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.31 2007/02/16 22:45:10 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -186,7 +186,7 @@ template <class A>
 Element*
 BGPVarRW<A>::read_aspath()
 {
-    return new ElemAsPath(_orig_rtmsg->route()->attributes()->aspath());
+    return new ElemASPath(_orig_rtmsg->route()->attributes()->aspath());
 }
 
 template <class A>
@@ -429,7 +429,7 @@ BGPVarRW<A>::write_aspath(const Element& e)
 {
     _route_modify = true;
 
-    const ElemAsPath& aspath = dynamic_cast<const ElemAsPath&>(e);
+    const ElemASPath& aspath = dynamic_cast<const ElemASPath&>(e);
 
     if (!_palist)
 	clone_palist();

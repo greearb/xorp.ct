@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.45 2007/02/16 22:45:15 pavlin Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.46 2007/05/23 12:12:32 pavlin Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -159,7 +159,7 @@ public:
      * @return true on success
      */
     bool originate_route(const OriginType origin,
-			 const AsPath& aspath,
+			 const ASPath& aspath,
 			 const IPv4Net& nlri,
 			 const IPv4& next_hop,
 			 const bool& unicast,
@@ -180,7 +180,7 @@ public:
      * @return true on success
      */
     bool originate_route(const OriginType origin,
-			 const AsPath& aspath,
+			 const ASPath& aspath,
 			 const IPv6Net& nlri,
 			 const IPv6& next_hop,
 			 const bool& unicast,
