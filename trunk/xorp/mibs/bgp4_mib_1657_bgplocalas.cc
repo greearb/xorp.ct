@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgplocalas.cc,v 1.6 2006/03/16 00:04:41 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgplocalas.cc,v 1.7 2007/02/16 22:46:33 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -95,7 +95,7 @@ get_bgpLocalAs(netsnmp_mib_handler * handler,
 {
     DEBUGMSGTL((BgpMib::the_instance().name(), "get_bgpLocalAs called\n"));
     BgpMib& bgp_mib = BgpMib::the_instance();
-    BgpMib::GetBgpVersionCB cb_localas;
+    BgpMib::GetLocalAsCB cb_localas;
     netsnmp_delegated_cache* req_cache = netsnmp_create_delegated_cache
 	(handler, reginfo, reqinfo, requests, NULL);
     cb_localas = callback(get_local_as_done, req_cache);
