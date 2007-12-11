@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgplocalas.cc,v 1.7 2007/02/16 22:46:33 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgplocalas.cc,v 1.8 2007/12/11 00:16:03 atanu Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -22,6 +22,7 @@
 
 #include "bgp4_mib_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/asnum.hh"
 
 #include "xorpevents.hh"
 #include "bgp4_mib_1657.hh"
@@ -43,7 +44,7 @@ init_bgp4_mib_1657_bgplocalas (void)
                                          HANDLER_CAN_RONLY));
 }
 
-void get_local_as_done(const XrlError& e, const uint32_t* as, 
+void get_local_as_done(const XrlError& e, const string* as, 
 			       netsnmp_delegated_cache* cache)
 {
 
@@ -78,7 +79,8 @@ void get_local_as_done(const XrlError& e, const uint32_t* as,
     // no longer delegated since we'll answer down below
 
     requests->delegated = 0;
-    uint32_t local_as = *as;
+    AsNum asnum(*as);
+    uint32_t local_as = asnum.as4();
 
     snmp_set_var_typed_value(requests->requestvb, ASN_INTEGER,
 	reinterpret_cast<unsigned char *>(&local_as), sizeof(uint32_t));
