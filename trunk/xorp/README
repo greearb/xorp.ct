@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.51 2007/03/14 18:52:14 pavlin Exp $
+# $XORP: xorp/README,v 1.52 2007/03/21 19:16:13 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -91,13 +91,15 @@ Currently, XORP implements the following protocols:
 
   * BGP4:
    - RFC 4271 (A Border Gateway Protocol 4 (BGP-4))
-   - draft-ietf-idr-rfc2858bis-03.txt (Multiprotocol Extensions for BGP-4)
-   - RFC 2545 (Use of Multiprotocol Extensions for IPv6 Inter-Domain Routing)
    - RFC 3392 (Capabilities Advertisement with BGP-4)
+   - draft-ietf-idr-rfc2858bis-03.txt (Multiprotocol Extensions for BGP-4)
+   - RFC 2545 (Use of BGP-4 Multiprotocol Extensions for IPv6 Inter-Domain
+              Routing)
    - RFC 1997 (BGP Communities Attribute)
    - RFC 2796 (BGP Route Reflection - An Alternative to Full Mesh IBGP)
    - RFC 3065 (Autonomous System Confederations for BGP)
    - RFC 2439 (BGP Route Flap Damping)
+   - RFC 4893 (BGP Support for Four-octet AS Number Space)
    - RFC 1657 (Definitions of Managed Objects for the Fourth Version
 	      of the Border Gateway Protocol (BGP-4) using SMIv2)
 
