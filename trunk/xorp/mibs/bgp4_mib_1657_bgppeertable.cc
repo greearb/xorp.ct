@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgppeertable.cc,v 1.19 2006/10/13 02:00:40 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgppeertable.cc,v 1.20 2007/02/16 22:46:33 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -22,6 +22,7 @@
 
 #include "bgp4_mib_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/asnum.hh"
 
 #include "xorpevents.hh"
 #include "libxorp/callback.hh"
@@ -53,7 +54,7 @@ void get_peer_status_done(const XrlError&, const uint32_t*, const uint32_t*,
     netsnmp_delegated_cache *);
 void get_peer_negotiated_version_done(const XrlError&, const int32_t *, 
     netsnmp_delegated_cache *);
-void get_peer_as_done(const XrlError&, const uint32_t *, 
+void get_peer_as_done(const XrlError&, const string *, 
     netsnmp_delegated_cache *);
 void get_peer_msg_stats_done(const XrlError&, const uint32_t *, 
     const uint32_t *, const uint32_t *, const uint32_t *, const uint32_t *,
@@ -672,14 +673,15 @@ get_peer_negotiated_version_done(const XrlError& e, const int32_t * negver,
     return;
 }
 
-void get_peer_as_done(const XrlError& e, const uint32_t * asnum, 
+void get_peer_as_done(const XrlError& e, const string* as, 
     netsnmp_delegated_cache * cache)
 {
     if (e != XrlError::OKAY()) {
         // XXX: deal with retries
     }
 
-    DEBUGMSGTL((BgpMib::the_instance().name(), "as number %d\n", * asnum));
+    uint32_t asnum = AsNum(*as).as4();
+    DEBUGMSGTL((BgpMib::the_instance().name(), "as number %u\n", asnum));
 
     netsnmp_request_info *request;
     netsnmp_agent_request_info *reqinfo;
@@ -704,7 +706,7 @@ void get_peer_as_done(const XrlError& e, const uint32_t * asnum,
     switch(table_info->colnum) {
 	case COLUMN_BGPPEERREMOTEAS:       
             snmp_set_var_typed_value(request->requestvb, ASN_INTEGER, 
-		reinterpret_cast<const u_char *>(asnum), sizeof(uint32_t));
+		reinterpret_cast<const u_char *>(&asnum), sizeof(uint32_t));
 	    break;
 	default:
             // we should never get here, so this is a really bad error 
