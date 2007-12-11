@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.87 2007/07/03 20:36:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.88 2007/12/10 23:26:26 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -607,7 +607,8 @@ AS4AggregatorAttribute::encode(uint8_t *buf, size_t &wire_size,
     if (wire_size < 11) 
 	return false;
 
-    if (peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
+    if (peerdata && 
+	peerdata->use_4byte_asnums() && peerdata->we_use_4byte_asnums()) {
 	// we're configured to do 4-byte AS numbers and our peer is
 	// also configured to do them.  We should not be encoding 4
 	// byte AS numbers in an AS4AggregatorAttribute, but rather
