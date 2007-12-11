@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/bgp4_mib_1657.hh,v 1.13 2006/03/16 00:04:41 pavlin Exp $
+// $XORP: xorp/mibs/bgp4_mib_1657.hh,v 1.14 2007/02/16 22:46:32 pavlin Exp $
 
 
 #ifndef __MIBS_BGP4_MIB_1657_HH__
@@ -61,7 +61,7 @@ void          deinit_bgp4_mib_1657 (void);
  * @short Top level class for the BGP MIB tree 
  *
  */
-class BgpMib : public XrlBgpV0p2Client
+class BgpMib : public XrlBgpV0p3Client
 {
 public:
     /**

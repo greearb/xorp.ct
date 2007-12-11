@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657.cc,v 1.18 2006/03/16 00:04:41 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657.cc,v 1.19 2007/02/16 22:46:32 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -76,7 +76,7 @@ BgpMib::the_instance()
 }
 
 BgpMib::BgpMib() 
-    : XrlBgpV0p2Client(&_xrl_router), 
+    : XrlBgpV0p3Client(&_xrl_router), 
       _xrl_router(SnmpEventLoop::the_instance(),"bgp4_mib"),
       _xrl_target(&_xrl_router, *this), _name(XORP_MODULE_NAME) 
 {
