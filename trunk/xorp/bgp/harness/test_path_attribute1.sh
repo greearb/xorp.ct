@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.9 2007/07/03 20:36:13 atanu Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.10 2007/12/10 23:26:32 mjh Exp $
 #
 
 #
@@ -371,8 +371,70 @@ test4()
     coord peer3 assert established
 }
 
+test5()
+{
+    echo "TEST5:"
+    echo "	1) Check BGP handles AS4Aggregator correctly."
+
+    # Reset the peers
+    reset
+
+    # Establish a connection
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+    coord peer1 assert established
+
+    coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.101
+    coord peer2 assert established
+
+    coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
+    coord peer3 assert established
+
+    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
+    NEXTHOP="20.20.20.20"
+
+    PACKET1="packet update
+	origin 2
+	aspath $ASPATH
+	nexthop $NEXTHOP
+	as4aggregator 30.30.30.30 10.10000
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    PACKET2="packet update
+	origin 2
+	aspath $ASPATH
+	nexthop $NEXTHOP
+	localpref 100
+	as4aggregator 30.30.30.30 10.10000
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    PACKET3="packet update
+	origin 2
+	aspath $AS,$ASPATH
+	nexthop $NEXT_HOP
+	med 1
+	as4aggregator 30.30.30.30 10.10000
+	nlri 10.10.10.0/24
+	nlri 20.20.20.20/24"
+
+    coord peer2 expect $PACKET2
+    coord peer3 expect $PACKET3
+
+    coord peer1 send $PACKET1
+
+    sleep 2
+    coord peer2 assert queue 0
+    coord peer3 assert queue 0
+
+    # Verify that the peers are still connected.
+    coord peer1 assert established
+    coord peer2 assert established
+    coord peer3 assert established
+}
+
 TESTS_NOT_FIXED=''
-TESTS='test1 test2 test3 test4'
+TESTS='test1 test2 test3 test4 test5'
 
 # Include command line
 . ${srcdir}/args.sh

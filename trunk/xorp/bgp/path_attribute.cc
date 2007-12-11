@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.88 2007/12/10 23:26:26 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.89 2007/12/11 00:39:50 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -569,7 +569,7 @@ string AggregatorAttribute::str() const
 
 AS4AggregatorAttribute::AS4AggregatorAttribute(const IPv4& speaker,
 			const AsNum& as)
-	: PathAttribute((Flags)(Optional|Transitive), AGGREGATOR),
+	: PathAttribute((Flags)(Optional|Transitive), AS4_AGGREGATOR),
 		_speaker(speaker), _as(as)            
 {
 }
@@ -1782,6 +1782,10 @@ PathAttribute::str() const
 	s += "AS_PATH";
 	break;
 
+    case AS4_PATH:
+	s += "AS4_PATH";
+	break;
+
     case NEXT_HOP:
 	s += "NEXT_HOP";
 	break;
@@ -1800,6 +1804,10 @@ PathAttribute::str() const
 
     case AGGREGATOR:
 	s += "AGGREGATOR";
+	break;
+
+    case AS4_AGGREGATOR:
+	s += "AS4_AGGREGATOR";
 	break;
 
     case COMMUNITY:

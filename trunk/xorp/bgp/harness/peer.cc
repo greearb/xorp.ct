@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.81 2007/05/23 04:08:22 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.82 2007/12/10 23:26:32 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1788,11 +1788,12 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	}
     } else if("update" == words[index]) {
 	size_t size = words.size();
+#if 0
 	if(0 != ((size - (index + 1)) % 2))
 	    xorp_throw(InvalidString,
 	       c_format("Incorrect number of arguments to update:\n[%s]",
 				line.c_str()));
-
+#endif
 	UpdatePacket *bgpupdate = new UpdatePacket();
 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);
@@ -1857,6 +1858,14 @@ Peer::packet(const string& line, const vector<string>& words, int index)
  					   (words[i+1].c_str())));
 	    } else if("community" == words[i]) {
 		community.add_community(community_interpret(words[i+1]));
+	    } else if("as4aggregator" == words[i]) {
+		IPv4 as4aggid(words[i+1].c_str());
+		AsNum as4agg(words[i+2]);
+		AS4AggregatorAttribute asaggatt(as4aggid, as4agg);
+		bgpupdate->add_pathatt(asaggatt);
+		debug_msg("as4aggregator: %s %s\n", 
+			  as4aggid.str().c_str(), as4agg.str().c_str());
+		i++;
 	    } else if("pathattr" == words[i]) {
 		AnyAttribute aa(words[i+1].c_str());
 		bgpupdate->add_pathatt(aa);
