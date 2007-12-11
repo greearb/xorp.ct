@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.193 2007/11/29 01:52:35 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.194 2007/12/10 23:26:24 mjh Exp $
 #
 
 		XORP RELEASE NOTES
@@ -143,7 +143,7 @@ Release 1.5-WIP (2007/??/??)
       by RIPE, so it is desirable that all BGP implementations support
       four-byte AS numbers by that time.  Currently 4-byte support is
       not enabled in XORP by default, but can be enabled using the
-      "4-byte-as-support" configuration option.
+      "enable-4byte-as-numbers" configuration option.
 
   STATIC_ROUTES:
     - Bug fix that prevented the deletion of interface-specific routes
