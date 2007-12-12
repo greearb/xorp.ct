@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_io.hh,v 1.2 2007/08/15 18:55:16 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_io.hh,v 1.3 2007/10/11 07:12:56 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_IO_HH__
@@ -40,10 +40,9 @@ public:
      * @param eventloop the event loop to use.
      * @param xrl_router the XRL transmission and reception point.
      * @param xrl_finder_targetname the XRL targetname of the Finder.
-     * @param xrl_fea_node the XRL FEA node instance to use (@ref XrlFeaNode).
      */
     XrlFeaIo(EventLoop& eventloop, XrlRouter& xrl_router,
-	     const string& xrl_finder_targetname, XrlFeaNode& xrl_fea_node);
+	     const string& xrl_finder_targetname);
 
     /**
      * Destructor
@@ -70,13 +69,6 @@ public:
      * @return true if the service is still running, otherwise false.
      */
     bool	is_running() const;
-
-    /**
-     * Get the FEA node instance.
-     *
-     * @return a reference to the FEA node instance (@ref FeaNode).
-     */
-    FeaNode& fea_node();
 
     /**
      * Register interest in events relating to a particular instance.
@@ -108,8 +100,6 @@ private:
 
     XrlRouter&		_xrl_router;	// The standard XRL send/recv point
     const string	_xrl_finder_targetname;	// The Finder target name
-
-    XrlFeaNode&		_xrl_fea_node;	// The XRL FEA node instance
 };
 
 #endif // __FEA_XRL_FEA_IO_HH__

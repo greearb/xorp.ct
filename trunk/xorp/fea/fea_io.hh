@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_io.hh,v 1.2 2007/08/15 18:55:16 pavlin Exp $
+// $XORP: xorp/fea/fea_io.hh,v 1.3 2007/10/11 07:12:55 pavlin Exp $
 
 
 #ifndef __FEA_FEA_IO_HH__
@@ -73,13 +73,6 @@ public:
      * @return the event loop this service is added to.
      */
     EventLoop& eventloop() { return (_eventloop); }
-
-    /**
-     * Get the FEA node instance.
-     *
-     * @return a reference to the FEA node instance (@ref FeaNode).
-     */
-    virtual FeaNode& fea_node() = 0;
 
     /**
      * Add a watcher for the status of a component instance.

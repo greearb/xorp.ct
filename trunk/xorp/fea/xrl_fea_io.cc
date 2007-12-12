@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_io.cc,v 1.2 2007/08/15 18:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_io.cc,v 1.3 2007/10/11 07:12:56 pavlin Exp $"
 
 
 //
@@ -31,16 +31,13 @@
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 
 #include "xrl_fea_io.hh"
-#include "xrl_fea_node.hh"
 
 
 XrlFeaIo::XrlFeaIo(EventLoop& eventloop, XrlRouter& xrl_router,
-		   const string& xrl_finder_targetname,
-		   XrlFeaNode& xrl_fea_node)
+		   const string& xrl_finder_targetname)
     : FeaIo(eventloop),
       _xrl_router(xrl_router),
-      _xrl_finder_targetname(xrl_finder_targetname),
-      _xrl_fea_node(xrl_fea_node)
+      _xrl_finder_targetname(xrl_finder_targetname)
 {
 }
 
@@ -65,12 +62,6 @@ bool
 XrlFeaIo::is_running() const
 {
     return (FeaIo::is_running());
-}
-
-FeaNode&
-XrlFeaIo::fea_node()
-{
-    return (_xrl_fea_node.fea_node());
 }
 
 int
