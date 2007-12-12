@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.82 2007/12/10 23:26:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.83 2007/12/11 01:21:43 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,7 +63,9 @@ Peer::Peer(EventLoop    *eventloop,
       _keepalive(false),
       _as(AsNum::AS_INVALID), // XXX
       _holdtime(0),
-      _ipv6(false)
+      _ipv6(false),
+      _last_recv(0),
+      _last_sent(0)
 {
     debug_msg("XXX Creating peer %p\n", this);
     Iptuple iptuple;
@@ -117,6 +119,8 @@ Peer::copy(const Peer& rhs)
     _holdtime = rhs._holdtime;
     _ipv6 = rhs._ipv6;
     _id = rhs._id;
+    _last_recv = rhs._last_recv;
+    _last_sent = rhs._last_sent;
     _peerdata = rhs._peerdata;
     _localdata = rhs._localdata;
 }
@@ -192,8 +196,20 @@ Peer::status(string& status)
     status = _peername + " ";
     status += _established ? "established" : "";
     status += " ";
-    status += "sent: " + c_format("%u", XORP_UINT_CAST(_trie_sent.update_count())) + " ";
-    status += "received: " + c_format("%u", XORP_UINT_CAST(_trie_recv.update_count())) + " ";
+    status += "sent: ";
+    uint32_t sent = _trie_sent.update_count();
+    if (0 == _last_sent) {
+	status += c_format("%u", sent) + " ";
+    } else {
+	status += c_format("%u(%u)", sent, sent - _last_sent) +  " ";
+    }
+    status += "received: ";
+    uint32_t recv = _trie_recv.update_count();
+    if (0 == _last_recv) {
+	status += c_format("%u", recv) + " ";
+    } else {
+	status += c_format("%u(%u)", recv, recv - _last_recv) +  " ";
+    }
 }
 
 bool
@@ -276,6 +292,8 @@ Peer::disconnect(const string& /*line*/, const vector<string>& /*words*/)
     XrlTestPeerV0p1Client test_peer(_xrlrouter);
     _session = false;
     _established = false;
+    _last_sent = _trie_sent.update_count();
+    _last_recv = _trie_recv.update_count();
     if(!test_peer.send_disconnect(_peername.c_str(),
 			  callback(this, &Peer::xrl_callback, "disconnect")))
 	XLOG_FATAL("send_disconnect failed");

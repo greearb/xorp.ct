@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.20 2007/02/16 22:45:26 pavlin Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.21 2007/12/10 23:26:32 mjh Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -143,6 +143,12 @@ private:
 
     Trie _trie_recv;	// Update messages received.
     Trie _trie_sent;	// Update messages sent.
+
+    // Number of update messages received or sent since last
+    // disconnect, used to compute the number of messages in the
+    // current session.
+    uint32_t _last_recv;
+    uint32_t _last_sent;
 
     typedef XorpCallback3<void, const uint8_t*, size_t, TimeVal>::RefPtr Dumper;
     Dumper _traffic_recv;
