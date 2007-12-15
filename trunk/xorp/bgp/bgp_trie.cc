@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.20 2007/12/11 01:47:23 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp_trie.cc,v 1.21 2007/12/15 00:54:26 mjh Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -111,8 +111,14 @@ BgpTrie<A>::erase(const IPNet& net)
 	   found->attributes());
     typename PathmapType::iterator pmi = _pathmap.find(found->attributes());
     if (pmi == _pathmap.end()) {
-	XLOG_FATAL("Error deleting route for %s with attributes %s", 
-		   net.str().c_str(), found->attributes()->str().c_str());
+	XLOG_ERROR("Error deleting route for %s with attributes %p %s", 
+		   net.str().c_str(), found->attributes(), 
+		   found->attributes()->str().c_str());
+	XLOG_INFO("Pathmap dump follows: \n");
+	for (pmi == _pathmap.begin(); pmi != _pathmap.end(); pmi++) {
+	    XLOG_INFO("%p %s\n\n", pmi->first, pmi->second->str().c_str());
+	}
+	XLOG_FATAL("Exiting\n");
     }
     if (pmi->second == found) {		// this was the head node
 	if (found->next() == found) {	 // it's the only node in the chain
