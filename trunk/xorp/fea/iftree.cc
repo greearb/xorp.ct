@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.51 2007/09/27 00:33:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.52 2007/11/29 01:52:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -135,6 +135,40 @@ IfTree::find_vif(const string& ifname, const string& vifname) const
 	return (NULL);
 
     return (ifp->find_vif(vifname));
+}
+
+IfTreeVif*
+IfTree::find_vif(uint32_t pif_index)
+{
+    IfTree::IfMap::iterator iter;
+
+    //
+    // XXX: Find the first vif that matches the physical index
+    //
+    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
+	IfTreeVif* vifp = iter->second.find_vif(pif_index);
+	if (vifp != NULL)
+	    return (vifp);
+    }
+
+    return (NULL);
+}
+
+const IfTreeVif*
+IfTree::find_vif(uint32_t pif_index) const
+{
+    IfTree::IfMap::const_iterator iter;
+
+    //
+    // XXX: Find the first vif that matches the physical index
+    //
+    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
+	const IfTreeVif* vifp = iter->second.find_vif(pif_index);
+	if (vifp != NULL)
+	    return (vifp);
+    }
+
+    return (NULL);
 }
 
 IfTreeAddr4 *

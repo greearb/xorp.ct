@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.53 2007/09/27 00:33:34 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.54 2007/11/29 01:52:36 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -197,6 +197,23 @@ public:
      */
     const IfTreeVif* find_vif(const string& ifname,
 			      const string& vifname) const;
+
+    /**
+     * Find a vif for a given physical index.
+     *
+     * @param pif_index the physical interface index to search for.
+     * @return a pointer to the vif (@see IfTreeVif) or NULL if not found.
+     */
+    IfTreeVif* find_vif(uint32_t pif_index);
+
+    /**
+     * Find a const vif for a given physical index.
+     *
+     * @param pif_index the physical interface index to search for.
+     * @return a const pointer to the vif (@see IfTreeVif) or NULL
+     * if not found.
+     */
+    const IfTreeVif* find_vif(uint32_t pif_index) const;
 
     /**
      * Find an IPv4 address.
