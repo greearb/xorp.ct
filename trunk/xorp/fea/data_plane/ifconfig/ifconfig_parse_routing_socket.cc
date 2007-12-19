@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.14 2007/09/25 23:00:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.15 2007/12/19 04:57:33 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -591,8 +591,6 @@ rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	XLOG_FATAL("Could not add or delete address for interface "
 		   "with unknown index");
     }
-    debug_msg("Address on interface %s with interface index %d\n",
-	      if_name.c_str(), if_index);
     
     //
     // Locate the vif to pin data on
