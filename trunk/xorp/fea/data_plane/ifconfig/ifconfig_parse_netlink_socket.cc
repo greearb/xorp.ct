@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.10 2007/09/15 19:52:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.11 2007/09/25 23:00:29 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -54,13 +54,13 @@
 
 #ifdef HAVE_NETLINK_SOCKETS
 
-static void nlm_newlink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
+static void nlm_newlink_to_fea_cfg(IfTree& iftree,
 				   const struct ifinfomsg* ifinfomsg,
 				   int rta_len);
-static void nlm_dellink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
+static void nlm_dellink_to_fea_cfg(IfTree& iftree,
 				   const struct ifinfomsg* ifinfomsg,
 				   int rta_len);
-static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
+static void nlm_newdeladdr_to_fea_cfg(IfTree& iftree,
 				      const struct ifaddrmsg* ifaddrmsg,
 				      int rta_len, bool is_deleted);
 
@@ -73,7 +73,9 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
     AlignData<struct nlmsghdr> align_data(buffer);
     const struct nlmsghdr* nlh;
     bool recognized = false;
-    
+
+    UNUSED(ifconfig);
+
     for (nlh = align_data.payload();
 	 NLMSG_OK(nlh, buffer_bytes);
 	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
@@ -117,9 +119,9 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    }
 	    ifinfomsg = reinterpret_cast<const struct ifinfomsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWLINK)
-		nlm_newlink_to_fea_cfg(ifconfig, iftree, ifinfomsg, rta_len);
+		nlm_newlink_to_fea_cfg(iftree, ifinfomsg, rta_len);
 	    else
-		nlm_dellink_to_fea_cfg(ifconfig, iftree, ifinfomsg, rta_len);
+		nlm_dellink_to_fea_cfg(iftree, ifinfomsg, rta_len);
 	    recognized = true;
 	}
 	break;
@@ -136,11 +138,9 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 	    }
 	    ifaddrmsg = reinterpret_cast<const struct ifaddrmsg*>(nlmsg_data);
 	    if (nlh->nlmsg_type == RTM_NEWADDR) {
-		nlm_newdeladdr_to_fea_cfg(ifconfig, iftree, ifaddrmsg, rta_len,
-					  false);
+		nlm_newdeladdr_to_fea_cfg(iftree, ifaddrmsg, rta_len, false);
 	    } else {
-		nlm_newdeladdr_to_fea_cfg(ifconfig, iftree, ifaddrmsg, rta_len,
-					  true);
+		nlm_newdeladdr_to_fea_cfg(iftree, ifaddrmsg, rta_len, true);
 	    }
 	    recognized = true;
 	}
@@ -161,8 +161,8 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
 }
 
 static void
-nlm_newlink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
-		       const struct ifinfomsg* ifinfomsg, int rta_len)
+nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+		       int rta_len)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFLA_MAX + 1];
@@ -211,7 +211,6 @@ nlm_newlink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
     //
     // Add the interface (if a new one)
     //
-    ifconfig.map_ifindex(if_index, if_name);
     IfTreeInterface* ifp = iftree.find_interface(if_name);
     if (ifp == NULL) {
 	iftree.add_interface(if_name);
@@ -308,8 +307,8 @@ nlm_newlink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
 }
 
 static void
-nlm_dellink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
-		       const struct ifinfomsg* ifinfomsg, int rta_len)
+nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
+		       int rta_len)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFLA_MAX + 1];
@@ -363,18 +362,15 @@ nlm_dellink_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
 	debug_msg("Attempted to delete missing interface: %s\n",
 		  if_name.c_str());
     }
-    ifconfig.unmap_ifindex(if_index);
 }
 
 static void
-nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
-			  const struct ifaddrmsg* ifaddrmsg, int rta_len,
-			  bool is_deleted)
+nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
+			  int rta_len, bool is_deleted)
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFA_MAX + 1];
     u_short if_index = 0;
-    string if_name;
     int family = ifaddrmsg->ifa_family;
     
     //
@@ -408,13 +404,13 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
     }
     
     //
-    // Get the interface name
+    // Locate the vif to pin data on
     //
-    const char* name = ifconfig.get_insert_ifname(if_index);
-    if (name == NULL) {
+    IfTreeVif* vifp = iftree.find_vif(if_index);
+    if (vifp == NULL) {
 	if (is_deleted) {
 	    //
-	    // XXX: in case of Linux kernel we may receive first
+	    // XXX: In case of Linux kernel we may receive first
 	    // a message to delete the interface and then a message to
 	    // delete an address on that interface.
 	    // However, the first message would remove all state about
@@ -424,32 +420,12 @@ nlm_newdeladdr_to_fea_cfg(IfConfig& ifconfig, IfTree& iftree,
 	    //
 	    return;
 	}
+	XLOG_FATAL("Could not find vif with index %u in IfTree", if_index);
+    }
+    debug_msg("Address event on interface %s vif %s with interface index %u\n",
+	      vifp->ifname().c_str(), vifp->vifname().c_str(),
+	      vifp->pif_index());
 
-#ifdef HAVE_IF_INDEXTONAME
-	char name_buf[IF_NAMESIZE];
-	name = if_indextoname(if_index, name_buf);
-#endif
-	if (name != NULL)
-	    ifconfig.map_ifindex(if_index, name);
-    }
-    if (name == NULL) {
-	XLOG_FATAL("Could not find interface corresponding to index %d",
-		   if_index);
-    }
-    if_name = string(name);
-    
-    debug_msg("Address on interface %s with interface index %d\n",
-	      if_name.c_str(), if_index);
-
-    //
-    // Locate the vif to pin data on
-    //
-    // XXX: vifname == ifname on this platform
-    IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
-    if (vifp == NULL) {
-	XLOG_FATAL("Could not find vif named %s in IfTree", if_name.c_str());
-    }
-    
     //
     // Get the IP address, netmask, broadcast address, P2P destination
     //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.11 2007/09/15 19:52:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.12 2007/09/25 23:00:29 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -72,6 +72,8 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
     u_short if_index = 0;
     string if_name, alias_if_name;
     size_t offset;
+
+    UNUSED(ifconfig);
 
     s = socket(family, SOCK_DGRAM, 0);
     if (s < 0) {
@@ -169,7 +171,6 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 	//
 	// Add the interface (if a new one)
 	//
-	ifconfig.map_ifindex(if_index, alias_if_name);
 	IfTreeInterface* ifp = iftree.find_interface(alias_if_name);
 	if (ifp == NULL) {
 	    iftree.add_interface(alias_if_name);

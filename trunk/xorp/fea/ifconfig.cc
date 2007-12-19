@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.74 2007/09/29 00:23:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.75 2007/10/12 07:53:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -854,95 +854,14 @@ IfConfig::push_error() const
     return _ifconfig_error_reporter.first_error();
 }
 
-void
-IfConfig::map_ifindex(uint32_t ifindex, const string& ifname)
-{
-    _ifnames[ifindex] = ifname;
-}
-
-void
-IfConfig::unmap_ifindex(uint32_t ifindex)
-{
-    IfIndex2NameMap::iterator i = _ifnames.find(ifindex);
-    if (_ifnames.end() != i)
-	_ifnames.erase(i);
-}
-
-void
-IfConfig::unmap_ifname(const string& ifname)
-{
-    IfIndex2NameMap::iterator i;
-
-    // Erase all entries for the ifname
-    for (i = _ifnames.begin(); i != _ifnames.end(); ) {
-	IfIndex2NameMap::iterator tmp_iter = i;
-	++i;
-	if (tmp_iter->second == ifname)
-	    _ifnames.erase(tmp_iter);
-    }
-}
-
-const char *
-IfConfig::find_ifname(uint32_t ifindex) const
-{
-    IfIndex2NameMap::const_iterator i = _ifnames.find(ifindex);
-
-    if (_ifnames.end() == i)
-	return NULL;
-
-    return i->second.c_str();
-}
-
-uint32_t
-IfConfig::find_ifindex(const string& ifname) const
-{
-    IfIndex2NameMap::const_iterator i;
-
-    for (i = _ifnames.begin(); i != _ifnames.end(); ++i) {
-	if (i->second == ifname)
-	    return i->first;
-    }
-
-    return 0;
-}
-
-const char *
-IfConfig::get_insert_ifname(uint32_t ifindex)
-{
-    IfIndex2NameMap::const_iterator i = _ifnames.find(ifindex);
-
-    if (_ifnames.end() == i) {
-#ifdef HAVE_IF_INDEXTONAME
-	char name_buf[IF_NAMESIZE];
-	const char* ifname = if_indextoname(ifindex, name_buf);
-
-	if (ifname != NULL)
-	    map_ifindex(ifindex, ifname);
-
-	return ifname;
-#else
-	return NULL;
-#endif // ! HAVE_IF_INDEXTONAME
-    }
-    return i->second.c_str();
-}
-
 uint32_t
 IfConfig::get_insert_ifindex(const string& ifname)
 {
-    IfIndex2NameMap::const_iterator i;
-
-    for (i = _ifnames.begin(); i != _ifnames.end(); ++i) {
-	if (i->second == ifname)
-	    return i->first;
-    }
+    uint32_t ifindex = 0;
 
 #ifdef HAVE_IF_NAMETOINDEX
-    uint32_t ifindex = if_nametoindex(ifname.c_str());
-    if (ifindex > 0)
-	map_ifindex(ifindex, ifname);
-    return ifindex;
-#else
-    return 0;
-#endif // ! HAVE_IF_NAMETOINDEX
+    ifindex = if_nametoindex(ifname.c_str());
+#endif
+
+    return (ifindex);
 }

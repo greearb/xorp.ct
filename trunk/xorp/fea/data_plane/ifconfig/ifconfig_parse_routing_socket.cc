@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.13 2007/09/15 05:10:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.14 2007/09/25 23:00:29 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -67,15 +67,12 @@
 
 #ifdef HAVE_ROUTING_SOCKETS
 
-static void rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig,
-				  const struct if_msghdr* ifm, IfTree& iftree,
+static void rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 				  u_short& if_index_hint);
-static void rtm_addr_to_fea_cfg(IfConfig& ifconfig,
-				const struct if_msghdr* ifm, IfTree& iftree,
+static void rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 				u_short if_index_hint);
 #ifdef RTM_IFANNOUNCE
-static void rtm_announce_to_fea_cfg(IfConfig& ifconfig,
-				    const struct if_msghdr* ifm,
+static void rtm_announce_to_fea_cfg(const struct if_msghdr* ifm,
 				    IfTree& iftree);
 #endif
 
@@ -209,6 +206,8 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
     const struct if_msghdr* ifm;
     size_t offset;
 
+    UNUSED(ifconfig);
+
     ifm = align_data.payload();
     for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
 	ifm = align_data.payload_by_offset(offset);
@@ -222,18 +221,18 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 	switch (ifm->ifm_type) {
 	case RTM_IFINFO:
 	    if_index_hint = 0;
-	    rtm_ifinfo_to_fea_cfg(ifconfig, ifm, iftree, if_index_hint);
+	    rtm_ifinfo_to_fea_cfg(ifm, iftree, if_index_hint);
 	    recognized = true;
 	    break;
 	case RTM_NEWADDR:
 	case RTM_DELADDR:
-	    rtm_addr_to_fea_cfg(ifconfig, ifm, iftree, if_index_hint);
+	    rtm_addr_to_fea_cfg(ifm, iftree, if_index_hint);
 	    recognized = true;
 	    break;
 #ifdef RTM_IFANNOUNCE
 	case RTM_IFANNOUNCE:
 	    if_index_hint = 0;
-	    rtm_announce_to_fea_cfg(ifconfig, ifm, iftree);
+	    rtm_announce_to_fea_cfg(ifm, iftree);
 	    recognized = true;
 	    break;
 #endif // RTM_IFANNOUNCE
@@ -261,14 +260,13 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 }
 
 static void
-rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
-		      IfTree& iftree, u_short& if_index_hint)
+rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
+		      u_short& if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFINFO);
     
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = ifm->ifm_index;
-    string if_name;
     bool is_newlink = false;	// True if really a new link
     string error_msg;
     
@@ -281,34 +279,20 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     if_index_hint = if_index;
     
     if (rti_info[RTAX_IFP] == NULL) {
+	//
 	// Probably an interface being disabled or coming up
-	// following RTM_IFANNOUNCE
-	
+	// following RTM_IFANNOUNCE.
+	//
+
 	if (if_index == 0) {
 	    debug_msg("Ignoring interface with unknown index\n");
 	    return;
 	}
-	
-	const char* name = ifconfig.get_insert_ifname(if_index);
-	if (name == NULL) {
-	    char name_buf[IF_NAMESIZE];
-#ifdef HAVE_IF_INDEXTONAME
-	    name = if_indextoname(if_index, name_buf);
-#endif
-	    if (name != NULL)
-		ifconfig.map_ifindex(if_index, name);
-	}
-	if (name == NULL) {
-	    XLOG_FATAL("Could not find interface corresponding to index %d",
-		       if_index);
-	}
-	if_name = string(name);
-	debug_msg("interface: %s\n", if_name.c_str());
 	debug_msg("interface index: %d\n", if_index);
 	
-	IfTreeInterface* ifp = iftree.find_interface(if_name);
+	IfTreeInterface* ifp = iftree.find_interface(if_index);
 	if (ifp == NULL) {
-	    XLOG_FATAL("Could not find interface named %s", if_name.c_str());
+	    XLOG_FATAL("Could not find interface with index %u", if_index);
 	}
 	if (ifp->is_marked(IfTreeItem::CREATED))
 	    is_newlink = true;
@@ -330,10 +314,10 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 	
 	// XXX: vifname == ifname on this platform
-	IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
+	IfTreeVif* vifp = ifp->find_vif(ifp->ifname());
 	if (vifp == NULL) {
-	    XLOG_FATAL("Could not find IfTreeVif on %s named %s",
-		       if_name.c_str(), if_name.c_str());
+	    XLOG_FATAL("Could not find vif on %s named %s",
+		       ifp->ifname().c_str(), ifp->ifname().c_str());
 	}
 	
 	//
@@ -347,7 +331,7 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	//
 	bool no_carrier = false;
 
-	if (ifm_get_link_status(ifm, if_name, no_carrier, error_msg)
+	if (ifm_get_link_status(ifm, ifp->ifname(), no_carrier, error_msg)
 	    != XORP_OK) {
 	    XLOG_ERROR("%s", error_msg.c_str());
 	} else {
@@ -374,7 +358,11 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
 	return;
     }
-    
+
+    //
+    // Get the interface name
+    //
+    string if_name;
     sa = rti_info[RTAX_IFP];
     if (sa->sa_family != AF_LINK) {
 	// TODO: verify whether this is really an error.
@@ -450,7 +438,6 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
     //
     // Add the interface (if a new one)
     //
-    ifconfig.map_ifindex(if_index, if_name);
     IfTreeInterface* ifp = iftree.find_interface(if_name);
     if (ifp == NULL) {
 	iftree.add_interface(if_name);
@@ -578,15 +565,14 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 }
 
 static void
-rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
-		    IfTree& iftree, u_short if_index_hint)
+rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
+		    u_short if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_NEWADDR || ifm->ifm_type == RTM_DELADDR);
     
     const ifa_msghdr* ifa = reinterpret_cast<const ifa_msghdr*>(ifm);
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = ifa->ifam_index;
-    string if_name;
     
     debug_msg_indent(4);
     if (ifm->ifm_type == RTM_NEWADDR)
@@ -605,34 +591,20 @@ rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	XLOG_FATAL("Could not add or delete address for interface "
 		   "with unknown index");
     }
-    
-    const char* name = ifconfig.get_insert_ifname(if_index);
-    if (name == NULL) {
-#ifdef HAVE_IF_INDEXTONAME
-	char name_buf[IF_NAMESIZE];
-	name = if_indextoname(if_index, name_buf);
-#endif
-	if (name != NULL)
-	    ifconfig.map_ifindex(if_index, name);
-    }
-    if (name == NULL) {
-	XLOG_FATAL("Could not find interface corresponding to index %d",
-		   if_index);
-    }
-    if_name = string(name);
-    
     debug_msg("Address on interface %s with interface index %d\n",
 	      if_name.c_str(), if_index);
     
     //
     // Locate the vif to pin data on
     //
-    // XXX: vifname == ifname on this platform
-    IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
+    IfTreeVif* vifp = iftree.find_vif(if_index);
     if (vifp == NULL) {
-	XLOG_FATAL("Could not find vif named %s in IfTree", if_name.c_str());
+	XLOG_FATAL("Could not find vif with index %u in IfTree", if_index);
     }
-    
+    debug_msg("Address event on interface %s vif %s with interface index %u\n",
+	      vifp->ifname().c_str(), vifp->vifname().c_str(),
+	      vifp->pif_index());
+
     if (rti_info[RTAX_IFA] == NULL) {
 	debug_msg("Ignoring addr info with null RTAX_IFA entry");
 	return;
@@ -740,12 +712,12 @@ rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 		XLOG_FATAL("Could not initialize IPv6 ioctl() socket");
 	    }
 	    memset(&ifrcopy6, 0, sizeof(ifrcopy6));
-	    strncpy(ifrcopy6.ifr_name, if_name.c_str(),
+	    strncpy(ifrcopy6.ifr_name, vifp->vifname().c_str(),
 		    sizeof(ifrcopy6.ifr_name) - 1);
 	    a.copy_out(ifrcopy6.ifr_addr);
 	    if (ioctl(s, SIOCGIFAFLAG_IN6, &ifrcopy6) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFAFLAG_IN6) for interface %s failed: %s",
-			   if_name.c_str(), strerror(errno));
+			   vifp->vif_name().c_str(), strerror(errno));
 	    }
 	    close (s);
 	    //
@@ -769,8 +741,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 
 #ifdef RTM_IFANNOUNCE
 static void
-rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
-			IfTree& iftree)
+rtm_announce_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFANNOUNCE);
     
@@ -788,17 +759,19 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	//
 	// Add interface
 	//
-	debug_msg("Mapping %d -> %s\n", if_index, if_name.c_str());
-	ifconfig.map_ifindex(if_index, if_name);
-	
+	debug_msg("Adding interface/vif %s\n", if_name.c_str());
+
 	iftree.add_interface(if_name);
 	IfTreeInterface* ifp = iftree.find_interface(if_name);
+	XLOG_ASSERT(ifp != NULL);
+	ifp->set_pif_index(if_index);
+
 	// XXX: vifname == ifname on this platform
-	if (ifp != NULL) {
-	    ifp->add_vif(if_name);
-	} else {
-	    debug_msg("Could not add interface/vif %s\n", if_name.c_str());
-	}
+	ifp->add_vif(if_name);
+	IfTreeVif* vifp = ifp->find_vif(if_name);
+	XLOG_ASSERT(vifp != NULL);
+	vifp->set_pif_index(if_index);
+
 	break;
     }
 	
@@ -807,7 +780,8 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	//
 	// Delete interface
 	//
-	debug_msg("Deleting interface and vif named: %s\n", if_name.c_str());
+	debug_msg("Deleting interface/vif %s\n", if_name.c_str());
+
 	IfTreeInterface* ifp = iftree.find_interface(if_name);
 	if (ifp != NULL) {
 	    ifp->mark(IfTree::DELETED);
@@ -815,15 +789,16 @@ rtm_announce_to_fea_cfg(IfConfig& ifconfig, const struct if_msghdr* ifm,
 	    debug_msg("Attempted to delete missing interface: %s\n",
 		      if_name.c_str());
 	}
+
 	// XXX: vifname == ifname on this platform
 	IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
 	if (vifp != NULL) {
 	    vifp->mark(IfTree::DELETED);
 	} else {
-	    debug_msg("Attempted to delete missing interface: %s\n",
+	    debug_msg("Attempted to delete missing vif: %s\n",
 		      if_name.c_str());
 	}
-	ifconfig.unmap_ifindex(if_index);
+
 	break;
     }
     

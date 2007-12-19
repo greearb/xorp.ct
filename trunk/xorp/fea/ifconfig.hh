@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.71 2007/09/15 01:22:35 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.72 2007/09/25 22:45:52 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -342,32 +342,13 @@ public:
      */
     void   report_updates(IfTree& iftree, bool is_system_interfaces_reportee);
 
-    void	map_ifindex(uint32_t if_index, const string& ifname);
-    void	unmap_ifindex(uint32_t if_index);
-    void	unmap_ifname(const string& ifname);
-    const char*	find_ifname(uint32_t if_index) const;
-    uint32_t	find_ifindex(const string& ifname) const;
-
-    const char*	get_insert_ifname(uint32_t if_index);
     uint32_t	get_insert_ifindex(const string& ifname);
 
 private:
     FeaNode&			_fea_node;
     EventLoop&			_eventloop;
     NexthopPortMapper&		_nexthop_port_mapper;
-
-    //
-    // The interface transaction manager
-    //
-    IfConfigTransactionManager* _itm;
-
-    //
-    // A cache of associative array of interface names to interface index.
-    // Needed because the RTM_IFANNOUNCE upcall is called after the interface
-    // name is deleted from the kernel.
-    //
-    typedef map<uint32_t, string> IfIndex2NameMap;
-    IfIndex2NameMap	_ifnames;
+    IfConfigTransactionManager* _itm;	// The interface transaction manager
 
     IfTree		_live_config;	// The IfTree with live config
     IfTree		_pulled_config;	// The IfTree when we pull the config

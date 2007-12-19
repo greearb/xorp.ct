@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.13 2007/09/26 07:01:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.14 2007/09/27 00:33:36 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -386,7 +386,6 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
     // of the push_config() method should eliminate those excessive calls.
     //
     if (is_vif_obsoleted) {
-	ifconfig().unmap_ifname(v.vifname());
 	ifconfig().pull_config();
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.17 2007/09/25 23:00:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.18 2007/10/12 07:53:49 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -349,7 +349,9 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
     int plen, scope, dad_status, if_idx;
     struct ifreq ifreq;
     XorpFd sock;
-    
+
+    UNUSED(ifconfig);
+
     fh = fopen(proc_linux_net_device_file.c_str(), "r");
     if (fh == NULL) {
 	XLOG_FATAL("Cannot open file %s for reading: %s",
@@ -402,7 +404,6 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 	//
 	// Add the interface (if a new one)
 	//
-	ifconfig.map_ifindex(if_index, alias_if_name);
 	iftree.add_interface(alias_if_name);
 	IfTreeInterface* ifp = iftree.find_interface(alias_if_name);
 	XLOG_ASSERT(ifp != NULL);
