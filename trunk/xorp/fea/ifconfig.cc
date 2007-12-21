@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.75 2007/10/12 07:53:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.76 2007/12/19 04:57:32 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -858,6 +858,8 @@ uint32_t
 IfConfig::get_insert_ifindex(const string& ifname)
 {
     uint32_t ifindex = 0;
+
+    UNUSED(ifname);
 
 #ifdef HAVE_IF_NAMETOINDEX
     ifindex = if_nametoindex(ifname.c_str());
