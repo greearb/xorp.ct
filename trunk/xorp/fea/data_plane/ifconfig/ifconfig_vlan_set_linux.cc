@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.4 2007/09/27 10:11:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.5 2007/10/12 07:53:50 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -130,8 +130,6 @@ IfConfigVlanSetLinux::config_vlan(const IfTreeInterface* pulled_ifp,
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
-	set_vif_obsoleted(true);
-
 	return (XORP_OK);
     }
 
@@ -157,7 +155,6 @@ IfConfigVlanSetLinux::config_vlan(const IfTreeInterface* pulled_ifp,
 				 error_msg.c_str());
 	    return (XORP_ERROR);
 	}
-	set_vif_obsoleted(true);
     }
 
     //
@@ -173,7 +170,6 @@ IfConfigVlanSetLinux::config_vlan(const IfTreeInterface* pulled_ifp,
 			     error_msg.c_str());
 	return (XORP_ERROR);
     }
-    set_vif_obsoleted(true);
 
     return (XORP_OK);
 }

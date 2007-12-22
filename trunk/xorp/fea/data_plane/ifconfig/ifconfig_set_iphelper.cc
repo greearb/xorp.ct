@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.12 2007/09/27 00:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.13 2007/09/28 05:25:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -126,10 +126,10 @@ IfConfigSetIPHelper::config_end(string& error_msg)
 
 int
 IfConfigSetIPHelper::config_interface_begin(const IfTreeInterface* pulled_ifp,
-					    const IfTreeInterface& config_iface,
+					    IfTreeInterface& config_iface,
 					    string& error_msg)
 {
-    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_ifp == NULL) {
 	// Nothing to do: the interface has been deleted from the system
 	return (XORP_OK);
     }
@@ -137,40 +137,22 @@ IfConfigSetIPHelper::config_interface_begin(const IfTreeInterface* pulled_ifp,
     //
     // Set the MTU
     //
-    do {
-	uint32_t mtu = config_iface.mtu();
-	if ((mtu == 0) && (pulled_ifp != NULL))
-	    mtu = pulled_ifp->mtu();
-	if (mtu == 0)
-	    break;
-	if ((pulled_ifp == NULL) || (mtu != pulled_ifp->mtu())) {
-	    error_msg = c_format("Cannot set the MTU to %u on "
-				 "interface %s: method not supported",
-				 mtu,
-				 config_iface.ifname().c_str());
-	    return (XORP_ERROR);
-	}
-	break;
-    } while (false);
+    if (config_iface.mtu() != pulled_ifp->mtu()) {
+	error_msg = c_format("Cannot set the MTU to %u on "
+			     "interface %s: method not supported",
+			     mtu, config_iface.ifname().c_str());
+	return (XORP_ERROR);
+    }
 
     //
     // Set the MAC address
     //
-    do {
-	Mac mac = config_iface.mac();
-	if (mac.empty() && (pulled_ifp != NULL))
-	    mac = pulled_ifp->mac();
-	if (mac.empty())
-	    break;
-	if ((pulled_ifp == NULL) || (mac != pulled_ifp->mac())) {
-	    error_msg = c_format("Cannot set the MAC address to %s "
-				 "on interface %s: method not supported",
-				 mac.str().c_str(),
-				 config_iface.ifname().c_str());
-	    return (XORP_ERROR);
-	}
-	break;
-    } while (false);
+    if (mac != pulled_ifp->mac()) {
+	error_msg = c_format("Cannot set the MAC address to %s "
+			     "on interface %s: method not supported",
+			     mac.str().c_str(), config_iface.ifname().c_str());
+	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
@@ -180,23 +162,20 @@ IfConfigSetIPHelper::config_interface_end(const IfTreeInterface* pulled_ifp,
 					  const IfTreeInterface& config_iface,
 					  string& error_msg)
 {
-    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_ifp == NULL) {
 	// Nothing to do: the interface has been deleted from the system
 	return (XORP_OK);
     }
 
     //
-    // Set the interface flags
+    // Set the interface status
     //
-    uint32_t interface_flags = config_iface.interface_flags();
-    if (pulled_ifp != NULL)
-	interface_flags = pulled_ifp->interface_flags();
-    if ((pulled_ifp == NULL)
-	|| (interface_flags != pulled_ifp->interface_flags())
-	|| (config_iface.enabled() != pulled_ifp->enabled())) {
+    if (config_iface.enabled() != pulled_ifp->enabled()) {
 	if (set_interface_status(config_iface.ifname(),
-				 config_iface.pif_index(), interface_flags,
-				 config_iface.enabled(), error_msg)
+				 config_iface.pif_index(),
+				 config_iface.interface_flags(),
+				 config_iface.enabled(),
+				 error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -216,7 +195,7 @@ IfConfigSetIPHelper::config_vif_begin(const IfTreeInterface* pulled_ifp,
     UNUSED(config_iface);
     UNUSED(error_msg);
 
-    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_vifp == NULL) {
 	// Nothing to do: the vif has been deleted from the system
 	return (XORP_OK);
     }
@@ -235,7 +214,7 @@ IfConfigSetIPHelper::config_vif_end(const IfTreeInterface* pulled_ifp,
 {
     UNUSED(pulled_ifp);
 
-    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_vifp == NULL) {
 	// Nothing to do: the vif has been deleted from the system
 	return (XORP_OK);
     }
@@ -247,21 +226,18 @@ IfConfigSetIPHelper::config_vif_end(const IfTreeInterface* pulled_ifp,
     //
     if (config_iface.ifname() != config_vif.vifname()) {
 	//
-	// Set the vif flags
+	// Set the vif status
 	//
-	uint32_t vif_flags = config_vif.vif_flags();
-	if (pulled_vifp != NULL)
-	    vif_flags = pulled_vifp->vif_flags();
-	if ((pulled_vifp == NULL)
-	    || (vif_flags != pulled_vifp->vif_flags())
-	    || (config_vif.enabled() != pulled_vifp->enabled())) {
+	if (config_vif.enabled() != pulled_vifp->enabled()) {
 	    //
 	    // XXX: The interface and vif status setting mechanism is
 	    // equivalent for this platform.
 	    //
 	    if (set_interface_status(config_vif.vifname(),
-				     config_vif.pif_index(), vif_flags,
-				     config_vif.enabled(), error_msg)
+				     config_vif.pif_index(),
+				     config_vif.vif_flags(),
+				     config_vif.enabled(),
+				     error_msg)
 		!= XORP_OK) {
 		return (XORP_ERROR);
 	    }
@@ -272,13 +248,13 @@ IfConfigSetIPHelper::config_vif_end(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetIPHelper::config_addr(const IfTreeInterface* pulled_ifp,
-				 const IfTreeVif* pulled_vifp,
-				 const IfTreeAddr4* pulled_addrp,
-				 const IfTreeInterface& config_iface,
-				 const IfTreeVif& config_vif,
-				 const IfTreeAddr4& config_addr,
-				 string& error_msg)
+IfConfigSetIPHelper::config_address(const IfTreeInterface* pulled_ifp,
+				    const IfTreeVif* pulled_vifp,
+				    const IfTreeAddr4* pulled_addrp,
+				    const IfTreeInterface& config_iface,
+				    const IfTreeVif& config_vif,
+				    const IfTreeAddr4& config_addr,
+				    string& error_msg)
 {
     bool is_deleted = false;
 
@@ -369,13 +345,13 @@ IfConfigSetIPHelper::config_addr(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetIPHelper::config_addr(const IfTreeInterface* pulled_ifp,
-				 const IfTreeVif* pulled_vifp,
-				 const IfTreeAddr6* pulled_addrp,
-				 const IfTreeInterface& config_iface,
-				 const IfTreeVif& config_vif,
-				 const IfTreeAddr6& config_addr,
-				 string& error_msg)
+IfConfigSetIPHelper::config_address(const IfTreeInterface* pulled_ifp,
+				    const IfTreeVif* pulled_vifp,
+				    const IfTreeAddr6* pulled_addrp,
+				    const IfTreeInterface& config_iface,
+				    const IfTreeVif& config_vif,
+				    const IfTreeAddr6& config_addr,
+				    string& error_msg)
 {
     bool is_deleted = false;
 

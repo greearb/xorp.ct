@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.56 2007/09/25 23:00:28 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.57 2007/09/27 00:33:33 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -35,8 +35,7 @@ public:
     IfConfigSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _ifconfig(fea_data_plane_manager.ifconfig()),
-	  _fea_data_plane_manager(fea_data_plane_manager),
-	  _is_interface_flipped(false)
+	  _fea_data_plane_manager(fea_data_plane_manager)
     {}
 
     /**
@@ -138,7 +137,7 @@ protected:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_interface_begin(const IfTreeInterface* pulled_ifp,
-				       const IfTreeInterface& config_iface,
+				       IfTreeInterface& config_iface,
 				       string& error_msg) = 0;
 
     /**
@@ -170,7 +169,7 @@ protected:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_vif_begin(const IfTreeInterface* pulled_ifp,
-				 const IfTreeVif* pulled_vif,
+				 const IfTreeVif* pulled_vifp,
 				 const IfTreeInterface& config_iface,
 				 const IfTreeVif& config_vif,
 				 string& error_msg) = 0;
@@ -190,7 +189,7 @@ protected:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_vif_end(const IfTreeInterface* pulled_ifp,
-			       const IfTreeVif* pulled_vif,
+			       const IfTreeVif* pulled_vifp,
 			       const IfTreeInterface& config_iface,
 			       const IfTreeVif& config_vif,
 			       string& error_msg) = 0;
@@ -213,13 +212,13 @@ protected:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_addr(const IfTreeInterface* pulled_ifp,
-			    const IfTreeVif* pulled_vif,
-			    const IfTreeAddr4* pulled_addr,
-			    const IfTreeInterface& config_iface,
-			    const IfTreeVif& config_vif,
-			    const IfTreeAddr4& config_addr,
-			    string& error_msg) = 0;
+    virtual int config_address(const IfTreeInterface* pulled_ifp,
+			       const IfTreeVif* pulled_vifp,
+			       const IfTreeAddr4* pulled_addrp,
+			       const IfTreeInterface& config_iface,
+			       const IfTreeVif& config_vif,
+			       const IfTreeAddr4& config_addr,
+			       string& error_msg) = 0;
 
     /**
      * Configure IPv6 address information.
@@ -239,36 +238,48 @@ protected:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_addr(const IfTreeInterface* pulled_ifp,
-			    const IfTreeVif* pulled_vif,
-			    const IfTreeAddr6* pulled_addr,
-			    const IfTreeInterface& config_iface,
-			    const IfTreeVif& config_vif,
-			    const IfTreeAddr6& config_addr,
-			    string& error_msg) = 0;
+    virtual int config_address(const IfTreeInterface* pulled_ifp,
+			       const IfTreeVif* pulled_vifp,
+			       const IfTreeAddr6* pulled_addrp,
+			       const IfTreeInterface& config_iface,
+			       const IfTreeVif& config_vif,
+			       const IfTreeAddr6& config_addr,
+			       string& error_msg) = 0;
 
 protected:
-    // Test whether the status of an interface was flipped
-    bool is_interface_flipped() const { return (_is_interface_flipped); }
-    void set_interface_flipped(bool v) { _is_interface_flipped = v; }
-
     // Misc other state
     bool	_is_running;
 
 private:
     void push_iftree_begin(IfTree& iftree);
     void push_iftree_end(IfTree& iftree);
-    void push_interface_begin(IfTreeInterface& i);
-    void push_interface_end(IfTreeInterface& i);
-    void push_vif_begin(IfTreeInterface& i, IfTreeVif& v);
-    void push_vif_end(IfTreeInterface& i, IfTreeVif& v);
-    void push_vif_address(IfTreeInterface& i, IfTreeVif& v, IfTreeAddr4& a);
-    void push_vif_address(IfTreeInterface& i, IfTreeVif& v, IfTreeAddr6& a);
+    void push_interface_begin(const IfTreeInterface* pulled_ifp,
+			      IfTreeInterface& config_iface);
+    void push_interface_end(const IfTreeInterface* pulled_ifp,
+			    IfTreeInterface& config_iface);
+    void push_vif_begin(const IfTreeInterface* pulled_ifp,
+			const IfTreeVif* pulled_vifp,
+			IfTreeInterface& config_iface,
+			IfTreeVif& config_vif);
+    void push_vif_end(const IfTreeInterface* pulled_ifp,
+		      const IfTreeVif* pulled_vifp,
+		      IfTreeInterface& config_iface,
+		      IfTreeVif& config_vif);
+    void push_vif_address(const IfTreeInterface* pulled_ifp,
+			  const IfTreeVif* pulled_vifp,
+			  const IfTreeAddr4* pulled_addrp,
+			  IfTreeInterface& config_iface,
+			  IfTreeVif& config_vif,
+			  IfTreeAddr4& config_addr);
+    void push_vif_address(const IfTreeInterface* pulled_ifp,
+			  const IfTreeVif* pulled_vifp,
+			  const IfTreeAddr6* pulled_addrp,
+			  IfTreeInterface& config_iface,
+			  IfTreeVif& config_vif,
+			  IfTreeAddr6& config_addr);
 
     IfConfig&		_ifconfig;
     FeaDataPlaneManager& _fea_data_plane_manager;
-
-    bool _is_interface_flipped;		// If true, an interface was flipped
 };
 
 #endif // __FEA_IFCONFIG_SET_HH__

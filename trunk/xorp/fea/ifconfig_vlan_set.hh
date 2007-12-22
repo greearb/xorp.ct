@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.4 2007/09/25 23:00:28 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.5 2007/09/26 05:30:37 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_VLAN_SET_HH__
 #define __FEA_IFCONFIG_VLAN_SET_HH__
@@ -34,8 +34,7 @@ public:
     IfConfigVlanSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _ifconfig(fea_data_plane_manager.ifconfig()),
-	  _fea_data_plane_manager(fea_data_plane_manager),
-	  _is_vif_obsoleted(false)
+	  _fea_data_plane_manager(fea_data_plane_manager)
     {}
 
     /**
@@ -100,20 +99,6 @@ public:
 			    const IfTreeVif& config_vif,
 			    string& error_msg) = 0;
 
-    /**
-     * Test whether vif state was obsoleted (new vif added or old vif deleted).
-     *
-     * @return if true vif state was obsoleted.
-     */
-    bool is_vif_obsoleted() const { return (_is_vif_obsoleted); }
-
-    /**
-     * Set/reset the flag indicating that vif state was obsoleted.
-     *
-     * @param v if true the vif state has been obsoleted.
-     */
-    void set_vif_obsoleted(bool v) { _is_vif_obsoleted = v; }
-
 protected:
     // Misc other state
     bool	_is_running;
@@ -121,8 +106,6 @@ protected:
 private:
     IfConfig&		_ifconfig;
     FeaDataPlaneManager& _fea_data_plane_manager;
-
-    bool _is_vif_obsoleted;		// If true, vif state was obsoleted
 };
 
 #endif // __FEA_IFCONFIG_VLAN_SET_HH__

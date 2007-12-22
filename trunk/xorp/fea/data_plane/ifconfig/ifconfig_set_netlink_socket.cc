@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.15 2007/10/12 07:53:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.16 2007/10/12 17:54:45 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -149,101 +149,90 @@ IfConfigSetNetlinkSocket::config_end(string& error_msg)
 int
 IfConfigSetNetlinkSocket::config_interface_begin(
     const IfTreeInterface* pulled_ifp,
-    const IfTreeInterface& config_iface,
+    IfTreeInterface& config_iface,
     string& error_msg)
 {
     int ret_value = XORP_OK;
     bool was_disabled = false;
     bool should_disable = false;
 
-    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_ifp == NULL) {
 	// Nothing to do: the interface has been deleted from the system
 	return (XORP_OK);
     }
-
-    uint32_t interface_flags = 0;
-    if (pulled_ifp != NULL)
-	interface_flags = pulled_ifp->interface_flags();
 
 #ifdef HOST_OS_LINUX
     //
     // XXX: Set the interface DOWN otherwise we may not be able to
     // set the MAC address or the MTU (limitation imposed by the Linux kernel).
     //
-    if ((pulled_ifp != NULL) && pulled_ifp->enabled())
+    if (pulled_ifp->enabled())
 	should_disable = true;
 #endif
 
     //
     // Set the MTU
     //
-    do {
-	uint32_t mtu = config_iface.mtu();
-	if ((mtu == 0) && (pulled_ifp != NULL))
-	    mtu = pulled_ifp->mtu();
-	if (mtu == 0)
-	    break;
-	if ((pulled_ifp == NULL) || (mtu != pulled_ifp->mtu())) {
-	    if (should_disable && (! was_disabled)) {
-		if (set_interface_status(config_iface.ifname(),
-					 config_iface.pif_index(),
-					 interface_flags, false, error_msg)
-		    != XORP_OK) {
-		    ret_value = XORP_ERROR;
-		    goto done;
-		}
-		was_disabled = true;
-	    }
-	    if (set_interface_mtu(config_iface.ifname(),
-				  config_iface.pif_index(), mtu, error_msg)
+    if (config_iface.mtu() != pulled_ifp->mtu()) {
+	if (should_disable && (! was_disabled)) {
+	    if (set_interface_status(config_iface.ifname(),
+				     config_iface.pif_index(),
+				     config_iface.interface_flags(),
+				     false,
+				     error_msg)
 		!= XORP_OK) {
 		ret_value = XORP_ERROR;
 		goto done;
 	    }
+	    was_disabled = true;
 	}
-	break;
-    } while (false);
+	if (set_interface_mtu(config_iface.ifname(),
+			      config_iface.pif_index(),
+			      config_iface.mtu(),
+			      error_msg)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    goto done;
+	}
+    }
 
     //
     // Set the MAC address
     //
-    do {
-	Mac mac = config_iface.mac();
-	if (mac.empty() && (pulled_ifp != NULL))
-	    mac = pulled_ifp->mac();
-	if (mac.empty())
-	    break;
-	if ((pulled_ifp == NULL) || (mac != pulled_ifp->mac())) {
-	    if (should_disable && (! was_disabled)) {
-		if (set_interface_status(config_iface.ifname(),
-					 config_iface.pif_index(),
-					 interface_flags, false, error_msg)
-		    != XORP_OK) {
-		    ret_value = XORP_ERROR;
-		    goto done;
-		}
-		was_disabled = true;
-	    }
-	    if (set_interface_mac_address(config_iface.ifname(),
-					  config_iface.pif_index(), mac,
-					  error_msg)
+    if (config_iface.mac() != pulled_ifp->mac()) {
+	if (should_disable && (! was_disabled)) {
+	    if (set_interface_status(config_iface.ifname(),
+				     config_iface.pif_index(),
+				     config_iface.interface_flags(),
+				     false,
+				     error_msg)
 		!= XORP_OK) {
 		ret_value = XORP_ERROR;
 		goto done;
 	    }
+	    was_disabled = true;
 	}
-	break;
-    } while (false);
+	if (set_interface_mac_address(config_iface.ifname(),
+				      config_iface.pif_index(),
+				      config_iface.mac(),
+				      error_msg)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    goto done;
+	}
+    }
 
  done:
     if (was_disabled) {
 	if (set_interface_status(config_iface.ifname(),
 				 config_iface.pif_index(),
-				 interface_flags, true, error_msg)
+				 config_iface.interface_flags(),
+				 true,
+				 error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
-	set_interface_flipped(true);
+	config_iface.set_flipped(true);
     }
 
     return (ret_value);
@@ -255,23 +244,20 @@ IfConfigSetNetlinkSocket::config_interface_end(
     const IfTreeInterface& config_iface,
     string& error_msg)
 {
-    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_ifp == NULL) {
 	// Nothing to do: the interface has been deleted from the system
 	return (XORP_OK);
     }
 
     //
-    // Set the interface flags
+    // Set the interface status
     //
-    uint32_t interface_flags = config_iface.interface_flags();
-    if (pulled_ifp != NULL)
-	interface_flags = pulled_ifp->interface_flags();
-    if ((pulled_ifp == NULL)
-	|| (interface_flags != pulled_ifp->interface_flags())
-	|| (config_iface.enabled() != pulled_ifp->enabled())) {
+    if (config_iface.enabled() != pulled_ifp->enabled()) {
 	if (set_interface_status(config_iface.ifname(),
-				 config_iface.pif_index(), interface_flags,
-				 config_iface.enabled(), error_msg)
+				 config_iface.pif_index(),
+				 config_iface.interface_flags(),
+				 config_iface.enabled(),
+				 error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -289,9 +275,10 @@ IfConfigSetNetlinkSocket::config_vif_begin(const IfTreeInterface* pulled_ifp,
 {
     UNUSED(pulled_ifp);
     UNUSED(config_iface);
+    UNUSED(config_vif);
     UNUSED(error_msg);
 
-    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_vifp == NULL) {
 	// Nothing to do: the vif has been deleted from the system
 	return (XORP_OK);
     }
@@ -310,7 +297,7 @@ IfConfigSetNetlinkSocket::config_vif_end(const IfTreeInterface* pulled_ifp,
 {
     UNUSED(pulled_ifp);
 
-    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+    if (pulled_vifp == NULL) {
 	// Nothing to do: the vif has been deleted from the system
 	return (XORP_OK);
     }
@@ -322,21 +309,18 @@ IfConfigSetNetlinkSocket::config_vif_end(const IfTreeInterface* pulled_ifp,
     //
     if (config_iface.ifname() != config_vif.vifname()) {
 	//
-	// Set the vif flags
+	// Set the vif status
 	//
-	uint32_t vif_flags = config_vif.vif_flags();
-	if (pulled_vifp != NULL)
-	    vif_flags = pulled_vifp->vif_flags();
-	if ((pulled_vifp == NULL)
-	    || (vif_flags != pulled_vifp->vif_flags())
-	    || (config_vif.enabled() != pulled_vifp->enabled())) {
+	if (config_vif.enabled() != pulled_vifp->enabled()) {
 	    //
 	    // XXX: The interface and vif status setting mechanism is
 	    // equivalent for this platform.
 	    //
 	    if (set_interface_status(config_vif.vifname(),
-				     config_vif.pif_index(), vif_flags,
-				     config_vif.enabled(), error_msg)
+				     config_vif.pif_index(),
+				     config_vif.vif_flags(),
+				     config_vif.enabled(),
+				     error_msg)
 		!= XORP_OK) {
 		return (XORP_ERROR);
 	    }
@@ -347,13 +331,13 @@ IfConfigSetNetlinkSocket::config_vif_end(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetNetlinkSocket::config_addr(const IfTreeInterface* pulled_ifp,
-				      const IfTreeVif* pulled_vifp,
-				      const IfTreeAddr4* pulled_addrp,
-				      const IfTreeInterface& config_iface,
-				      const IfTreeVif& config_vif,
-				      const IfTreeAddr4& config_addr,
-				      string& error_msg)
+IfConfigSetNetlinkSocket::config_address(const IfTreeInterface* pulled_ifp,
+					 const IfTreeVif* pulled_vifp,
+					 const IfTreeAddr4* pulled_addrp,
+					 const IfTreeInterface& config_iface,
+					 const IfTreeVif& config_vif,
+					 const IfTreeAddr4& config_addr,
+					 string& error_msg)
 {
     bool is_deleted = false;
 
@@ -444,13 +428,13 @@ IfConfigSetNetlinkSocket::config_addr(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetNetlinkSocket::config_addr(const IfTreeInterface* pulled_ifp,
-				      const IfTreeVif* pulled_vifp,
-				      const IfTreeAddr6* pulled_addrp,
-				      const IfTreeInterface& config_iface,
-				      const IfTreeVif& config_vif,
-				      const IfTreeAddr6& config_addr,
-				      string& error_msg)
+IfConfigSetNetlinkSocket::config_address(const IfTreeInterface* pulled_ifp,
+					 const IfTreeVif* pulled_vifp,
+					 const IfTreeAddr6* pulled_addrp,
+					 const IfTreeInterface& config_iface,
+					 const IfTreeVif& config_vif,
+					 const IfTreeAddr6& config_addr,
+					 string& error_msg)
 {
     bool is_deleted = false;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.13 2007/10/12 07:53:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.14 2007/11/29 01:52:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -142,10 +142,12 @@ IfConfigSetClick::config_end(string& error_msg)
 
 int
 IfConfigSetClick::config_interface_begin(const IfTreeInterface* pulled_ifp,
-					 const IfTreeInterface& config_iface,
+					 IfTreeInterface& config_iface,
 					 string& error_msg)
 {
     IfTreeInterface* ifp;
+
+    UNUSED(pulled_ifp);
 
     //
     // Find or add the interface
@@ -167,35 +169,13 @@ IfConfigSetClick::config_interface_begin(const IfTreeInterface* pulled_ifp,
     // Note that we postpone the setting of the "enabled" and interface flags
     // for the end of the vif configuration.
     //
-    uint32_t mtu = config_iface.mtu();
-    if ((mtu == 0) && (pulled_ifp != NULL))
-	mtu = pulled_ifp->mtu();
-    Mac mac = config_iface.mac();
-    if (mac.empty() && (pulled_ifp != NULL))
-	mac = pulled_ifp->mac();
-    //
-    // Set the state
-    //
-    if (ifp->pif_index() != config_iface.pif_index())
-	ifp->set_pif_index(config_iface.pif_index());
-    if (ifp->discard() != config_iface.discard())
-	ifp->set_discard(config_iface.discard());
-    if (ifp->unreachable() != config_iface.unreachable())
-	ifp->set_unreachable(config_iface.unreachable());
-    if (ifp->management() != config_iface.management())
-	ifp->set_management(config_iface.management());
-    if (mtu != 0) {
-	if (ifp->mtu() != mtu)
-	    ifp->set_mtu(mtu);
-    }
-    if (! mac.empty()) {
-	if (ifp->mac() != mac)
-	    ifp->set_mac(mac);
-    }
-    if (pulled_ifp != NULL) {
-	if (ifp->no_carrier() != pulled_ifp->no_carrier())
-	    ifp->set_no_carrier(pulled_ifp->no_carrier());
-    }
+    ifp->set_pif_index(config_iface.pif_index());
+    ifp->set_discard(config_iface.discard());
+    ifp->set_unreachable(config_iface.unreachable());
+    ifp->set_management(config_iface.management());
+    ifp->set_mtu(config_iface.mtu());
+    ifp->set_mac(config_iface.mac());
+    ifp->set_no_carrier(config_iface.no_carrier());
 
     return (XORP_OK);
 }
@@ -207,6 +187,8 @@ IfConfigSetClick::config_interface_end(const IfTreeInterface* pulled_ifp,
 {
     IfTreeInterface* ifp;
     bool is_deleted = false;
+
+    UNUSED(pulled_ifp);
 
     if (config_iface.is_marked(IfTreeItem::DELETED)) {
 	is_deleted = true;
@@ -234,12 +216,8 @@ IfConfigSetClick::config_interface_end(const IfTreeInterface* pulled_ifp,
     //
     // Update the remaining interface state
     //
-    if (pulled_ifp != NULL) {
-	if (ifp->interface_flags() != pulled_ifp->interface_flags())
-	    ifp->set_interface_flags(pulled_ifp->interface_flags());
-    }
-    if (ifp->enabled() != config_iface.enabled())
-	ifp->set_enabled(config_iface.enabled());
+    ifp->set_interface_flags(config_iface.interface_flags());
+    ifp->set_enabled(config_iface.enabled());
 
     return (XORP_OK);
 }
@@ -289,24 +267,14 @@ IfConfigSetClick::config_vif_begin(const IfTreeInterface* pulled_ifp,
     // Note that we postpone the setting of the "enabled" flag for the end
     // of the vif configuration.
     //
-    uint32_t pif_index = config_vif.pif_index();
-    if (pif_index == 0)
-	pif_index = config_iface.pif_index();
-    if (vifp->pif_index() != pif_index)
-	vifp->set_pif_index(pif_index);
     if (pulled_vifp != NULL) {
-	if (vifp->broadcast() != pulled_vifp->broadcast())
-	    vifp->set_broadcast(pulled_vifp->broadcast());
-	if (vifp->loopback() != pulled_vifp->loopback())
-	    vifp->set_loopback(pulled_vifp->loopback());
-	if (vifp->point_to_point() != pulled_vifp->point_to_point())
-	    vifp->set_point_to_point(pulled_vifp->point_to_point());
-	if (vifp->multicast() != pulled_vifp->multicast())
-	    vifp->set_multicast(pulled_vifp->multicast());
-	if (vifp->is_vlan() != pulled_vifp->is_vlan())
-	    vifp->set_vlan(pulled_vifp->is_vlan());
-	if (vifp->vlan_id() != pulled_vifp->vlan_id())
-	    vifp->set_vlan_id(pulled_vifp->vlan_id());
+	vifp->set_pif_index(pulled_vifp->pif_index());
+	vifp->set_broadcast(pulled_vifp->broadcast());
+	vifp->set_loopback(pulled_vifp->loopback());
+	vifp->set_point_to_point(pulled_vifp->point_to_point());
+	vifp->set_multicast(pulled_vifp->multicast());
+	vifp->set_vlan(pulled_vifp->is_vlan());
+	vifp->set_vlan_id(pulled_vifp->vlan_id());
     }
 
     return (XORP_OK);
@@ -324,6 +292,7 @@ IfConfigSetClick::config_vif_end(const IfTreeInterface* pulled_ifp,
     bool is_deleted = false;
 
     UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
 
     if (config_vif.is_marked(IfTreeItem::DELETED)) {
 	is_deleted = true;
@@ -366,24 +335,20 @@ IfConfigSetClick::config_vif_end(const IfTreeInterface* pulled_ifp,
     //
     // Update the remaining vif state
     //
-    if (pulled_vifp != NULL) {
-	if (vifp->vif_flags() != pulled_vifp->vif_flags())
-	    vifp->set_vif_flags(pulled_vifp->vif_flags());
-    }
-    if (vifp->enabled() != config_vif.enabled())
-	vifp->set_enabled(config_vif.enabled());
+    vifp->set_vif_flags(config_vif.vif_flags());
+    vifp->set_enabled(config_vif.enabled());
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetClick::config_addr(const IfTreeInterface* pulled_ifp,
-			      const IfTreeVif* pulled_vifp,
-			      const IfTreeAddr4* pulled_addrp,
-			      const IfTreeInterface& config_iface,
-			      const IfTreeVif& config_vif,
-			      const IfTreeAddr4& config_addr,
-			      string& error_msg)
+IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
+				 const IfTreeVif* pulled_vifp,
+				 const IfTreeAddr4* pulled_addrp,
+				 const IfTreeInterface& config_iface,
+				 const IfTreeVif& config_vif,
+				 const IfTreeAddr4& config_addr,
+				 string& error_msg)
 {
     IfTreeVif* vifp;
     IfTreeAddr4* ap;
@@ -448,38 +413,30 @@ IfConfigSetClick::config_addr(const IfTreeInterface* pulled_ifp,
     //
     // Update the address state
     //
-    if (ap->broadcast() != config_addr.broadcast())
-	ap->set_broadcast(config_addr.broadcast());
-    if (ap->loopback() != config_addr.loopback())
-	ap->set_loopback(config_addr.loopback());
-    if (ap->point_to_point() != config_addr.point_to_point())
-	ap->set_point_to_point(config_addr.point_to_point());
-    if (ap->multicast() != config_addr.multicast())
-	ap->set_multicast(config_addr.multicast());
+    ap->set_broadcast(config_addr.broadcast());
+    ap->set_loopback(config_addr.loopback());
+    ap->set_point_to_point(config_addr.point_to_point());
+    ap->set_multicast(config_addr.multicast());
     if (ap->broadcast()) {
-	if (ap->bcast() != config_addr.bcast())
-	    ap->set_bcast(config_addr.bcast());
+	ap->set_bcast(config_addr.bcast());
     }
     if (ap->point_to_point()) {
-	if (ap->endpoint() != config_addr.endpoint())
-	    ap->set_endpoint(config_addr.endpoint());
+	ap->set_endpoint(config_addr.endpoint());
     }
-    if (ap->prefix_len() != config_addr.prefix_len())
-	ap->set_prefix_len(config_addr.prefix_len());
-    if (ap->enabled() != config_addr.enabled())
-	ap->set_enabled(config_addr.enabled());
+    ap->set_prefix_len(config_addr.prefix_len());
+    ap->set_enabled(config_addr.enabled());
 
     return (XORP_OK);
 }
 
 int
-IfConfigSetClick::config_addr(const IfTreeInterface* pulled_ifp,
-			      const IfTreeVif* pulled_vifp,
-			      const IfTreeAddr6* pulled_addrp,
-			      const IfTreeInterface& config_iface,
-			      const IfTreeVif& config_vif,
-			      const IfTreeAddr6& config_addr,
-			      string& error_msg)
+IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
+				 const IfTreeVif* pulled_vifp,
+				 const IfTreeAddr6* pulled_addrp,
+				 const IfTreeInterface& config_iface,
+				 const IfTreeVif& config_vif,
+				 const IfTreeAddr6& config_addr,
+				 string& error_msg)
 {
     IfTreeVif* vifp;
     IfTreeAddr6* ap;
@@ -544,20 +501,14 @@ IfConfigSetClick::config_addr(const IfTreeInterface* pulled_ifp,
     //
     // Update the address state
     //
-    if (ap->loopback() != config_addr.loopback())
-	ap->set_loopback(config_addr.loopback());
-    if (ap->point_to_point() != config_addr.point_to_point())
-	ap->set_point_to_point(config_addr.point_to_point());
-    if (ap->multicast() != config_addr.multicast())
-	ap->set_multicast(config_addr.multicast());
+    ap->set_loopback(config_addr.loopback());
+    ap->set_point_to_point(config_addr.point_to_point());
+    ap->set_multicast(config_addr.multicast());
     if (ap->point_to_point()) {
-	if (ap->endpoint() != config_addr.endpoint())
-	    ap->set_endpoint(config_addr.endpoint());
+	ap->set_endpoint(config_addr.endpoint());
     }
-    if (ap->prefix_len() != config_addr.prefix_len())
-	ap->set_prefix_len(config_addr.prefix_len());
-    if (ap->enabled() != config_addr.enabled())
-	ap->set_enabled(config_addr.enabled());
+    ap->set_prefix_len(config_addr.prefix_len());
+    ap->set_enabled(config_addr.enabled());
 
     return (XORP_OK);
 }

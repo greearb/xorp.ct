@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.hh,v 1.6 2007/09/25 23:00:29 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.hh,v 1.7 2007/09/27 00:33:36 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_IOCTL_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_IOCTL_HH__
@@ -97,7 +97,7 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int config_interface_begin(const IfTreeInterface* pulled_ifp,
-				       const IfTreeInterface& config_iface,
+				       IfTreeInterface& config_iface,
 				       string& error_msg);
 
     /**
@@ -172,13 +172,13 @@ private:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_addr(const IfTreeInterface* pulled_ifp,
-			    const IfTreeVif* pulled_vifp,
-			    const IfTreeAddr4* pulled_addrp,
-			    const IfTreeInterface& config_iface,
-			    const IfTreeVif& config_vif,
-			    const IfTreeAddr4& config_addr,
-			    string& error_msg);
+    virtual int config_address(const IfTreeInterface* pulled_ifp,
+			       const IfTreeVif* pulled_vifp,
+			       const IfTreeAddr4* pulled_addrp,
+			       const IfTreeInterface& config_iface,
+			       const IfTreeVif& config_vif,
+			       const IfTreeAddr4& config_addr,
+			       string& error_msg);
 
     /**
      * Configure IPv6 address information.
@@ -198,13 +198,13 @@ private:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_addr(const IfTreeInterface* pulled_ifp,
-			    const IfTreeVif* pulled_vifp,
-			    const IfTreeAddr6* pulled_addrp,
-			    const IfTreeInterface& config_iface,
-			    const IfTreeVif& config_vif,
-			    const IfTreeAddr6& config_addr,
-			    string& error_msg);
+    virtual int config_address(const IfTreeInterface* pulled_ifp,
+			       const IfTreeVif* pulled_vifp,
+			       const IfTreeAddr6* pulled_addrp,
+			       const IfTreeInterface& config_iface,
+			       const IfTreeVif& config_vif,
+			       const IfTreeAddr6& config_addr,
+			       string& error_msg);
 
     /**
      * Set the interface status.

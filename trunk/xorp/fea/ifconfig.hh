@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.72 2007/09/25 22:45:52 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.73 2007/12/19 04:57:32 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -38,7 +38,7 @@ class NexthopPortMapper;
 
 /**
  * Base class for pushing and pulling interface configurations down to
- * the particular platform.
+ * the particular system.
  */
 class IfConfig {
 public:
@@ -113,7 +113,7 @@ public:
      *
      * @return a reference to the @ref NexthopPortMapper instance.
      */
-    NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
+    NexthopPortMapper& nexthop_port_mapper() { return (_nexthop_port_mapper); }
 
     /**
      * Get the IfConfigUpdateReplicator instance.
@@ -126,22 +126,79 @@ public:
     }
 
     /**
-     * Get error reporter associated with IfConfig.
+     * Get the error reporter associated with IfConfig.
+     *
+     * @return the error reporter associated with IfConfig.
      */
     IfConfigErrorReporterBase& ifconfig_error_reporter() {
-	return _ifconfig_error_reporter;
+	return (_ifconfig_error_reporter);
     }
 
+    /**
+     * Get a reference to the live interface configuration.
+     *
+     * @return a reference to the live interface configuration.
+     */
     IfTree& live_config() { return (_live_config); }
-    void    set_live_config(const IfTree& iftree) { _live_config = iftree; }
 
+    /**
+     * Set the live interface configuration.
+     *
+     * @param iftree the live interface configuration.
+     */
+    void set_live_config(const IfTree& iftree) { _live_config = iftree; }
+
+    /**
+     * Get a reference to the pulled interface configuration from the system.
+     *
+     * @return a reference to the pulled interface configuration from the
+     * system.
+     */
     const IfTree& pulled_config()	{ return (_pulled_config); }
+
+    /**
+     * Get a reference to the pushed interface configuration.
+     *
+     * @return a reference to the pushed interface configuration.
+     */
     IfTree& pushed_config()		{ return (_pushed_config); }
+
+    /**
+     * Get a reference to the original interface configuration on startup.
+     *
+     * @return a reference to the original interface configuration on startup.
+     */
     const IfTree& original_config()	{ return (_original_config); }
+
+    /**
+     * Get a reference to the local interface configuration.
+     *
+     * @return a reference to the local interface configuration.
+     */
     IfTree& local_config()		{ return (_local_config); }
+
+    /**
+     * Set the local interface configuration.
+     *
+     * @param iftree the local interface configuration.
+     */
     void set_local_config(const IfTree& iftree) { _local_config = iftree; }
+
+    /**
+     * Get a reference to the old local interface configuration.
+     *
+     * @return a reference to the old local interface configuration.
+     */
     IfTree& old_local_config()		{ return (_old_local_config); }
-    void set_old_local_config(const IfTree& iftree) { _old_local_config = iftree; }
+
+    /**
+     * Set the old local interface configuration.
+     *
+     * @param iftree the old local interface configuration.
+     */
+    void set_old_local_config(const IfTree& iftree) {
+	_old_local_config = iftree;
+    }
 
     /**
      * Test whether the original configuration should be restored on shutdown.
@@ -274,75 +331,91 @@ public:
     int stop(string& error_msg);
 
     /**
-     * Push IfTree structure down to platform.  Errors are reported
-     * via the constructor supplied ErrorReporter instance.
+     * Push interface configuration down to the system.
      *
-     * Note that on return some of the interface tree configuration state
+     * Errors are reported via the ifconfig_error_reporter() instance.
+     * Note that on return some of the interface configuration state
      * may be modified.
      *
-     * @param iftree the configuration to be pushed down.
+     * @param iftree the interface configuration to be pushed down.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int push_config(IfTree& iftree);
 
     /**
-     * Pull up current config from platform.
+     * Pull up current interface configuration from the system.
      *
-     * @return the platform IfTree.
+     * @return the current interface configuration from the system.
      */
     const IfTree& pull_config();
 
-    void flush_config() { _live_config = IfTree(); }
+    /**
+     * Flush the live interface configuration.
+     */
+    void flush_config() { _live_config.clear(); }
 
     /**
-     * Get error message associated with push operation.
+     * Get the error message associated with a push operation.
+     *
+     * @return the error message associated with a push operation.
      */
     const string& push_error() const;
 
     /**
      * Check IfTreeInterface and report updates to IfConfigUpdateReporter.
      *
+     * @param fi the @ref IfTreeInterface interface instance to check.
      * @return true if there were updates to report, otherwise false.
      */
-    bool   report_update(const IfTreeInterface& fi);
+    bool report_update(const IfTreeInterface& fi);
 
     /**
      * Check IfTreeVif and report updates to IfConfigUpdateReporter.
      *
+     * @param fi the @ref IfTreeInterface interface instance to check.
+     * @param fv the @ref IfTreeVif vif instance to check.
      * @return true if there were updates to report, otherwise false.
      */
-    bool   report_update(const IfTreeInterface& fi, const IfTreeVif& fv);
+    bool report_update(const IfTreeInterface& fi, const IfTreeVif& fv);
 
     /**
      * Check IfTreeAddr4 and report updates to IfConfigUpdateReporter.
      *
+     * @param fi the @ref IfTreeInterface interface instance to check.
+     * @param fv the @ref IfTreeVif vif instance to check.
+     * @param fa the @ref IfTreeAddr4 address instance to check.
      * @return true if there were updates to report, otherwise false.
      */
-    bool   report_update(const IfTreeInterface&	fi,
-			 const IfTreeVif&	fv,
-			 const IfTreeAddr4&     fa);
+    bool report_update(const IfTreeInterface&	fi,
+		       const IfTreeVif&		fv,
+		       const IfTreeAddr4&	fa);
 
     /**
      * Check IfTreeAddr6 and report updates to IfConfigUpdateReporter.
      *
+     * @param fi the @ref IfTreeInterface interface instance to check.
+     * @param fv the @ref IfTreeVif vif instance to check.
+     * @param fa the @ref IfTreeAddr6 address instance to check.
      * @return true if there were updates to report, otherwise false.
      */
-    bool   report_update(const IfTreeInterface&	fi,
-			 const IfTreeVif&	fv,
-			 const IfTreeAddr6&     fa);
+    bool report_update(const IfTreeInterface&	fi,
+		       const IfTreeVif&		fv,
+		       const IfTreeAddr6&	fa);
 
     /**
      * Report that updates were completed to IfConfigUpdateReporter.
      */
-    void   report_updates_completed();
+    void report_updates_completed();
 
     /**
      * Check every item within IfTree and report updates to
      * IfConfigUpdateReporter.
+     *
+     * @param iftree the interface tree instance to check.
+     * @param is_system_interfaces_reportee if true, the updates come from
+     * the underlying system.
      */
-    void   report_updates(IfTree& iftree, bool is_system_interfaces_reportee);
-
-    uint32_t	get_insert_ifindex(const string& ifname);
+    void report_updates(IfTree& iftree, bool is_system_interfaces_reportee);
 
 private:
     FeaNode&			_fea_node;

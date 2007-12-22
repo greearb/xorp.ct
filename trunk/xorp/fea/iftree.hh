@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.54 2007/11/29 01:52:36 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.55 2007/12/19 04:56:54 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -320,9 +320,8 @@ public:
      *   in the local tree.
      * - If an item from the local tree is in the other tree,
      *   its state is copied from the other tree to the local tree.
-     *   However, if an item from the local tree is marked as "flipped",
-     *   it will be set in the local tree even if it is not set in the other
-     *   tree.
+     *   However, the status of the "flipped" flag in the local tree is
+     *   preserved.
      * - If an item from the other tree is not in the local tree, we do NOT
      *   copy it to the local tree.
      *

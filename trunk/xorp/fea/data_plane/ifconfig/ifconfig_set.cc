@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.14 2007/09/27 00:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.15 2007/12/19 04:57:33 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -42,43 +42,48 @@ IfConfigSet::push_config(IfTree& iftree)
     IfTreeInterface::VifMap::iterator vi;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
+    const IfTree& pulled_iftree = ifconfig().pulled_config();
 
     // Clear errors associated with error reporter
     error_reporter.reset();
 
     //
-    // Sanity check config - bail on bad interface and bad vif names.
+    // Pre-configuration processing:
+    // - Sanity check config - bail on bad interface and bad vif names.
+    // - Set "soft" flag for interfaces.
+    // - Propagate "DELETED" status from interfaces to vifs.
+    // - Propagate "DELETED" status from vifs to addresses.
     //
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
-	IfTreeInterface& i = ii->second;
+	IfTreeInterface& config_iface = ii->second;
 
 	//
 	// Set the "soft" flag for interfaces that are emulated
 	//
-	if (i.discard() && is_discard_emulated(i))
-	    i.set_soft(true);
-	if (i.unreachable() && is_unreachable_emulated(i))
-	    i.set_soft(true);
+	if ((config_iface.discard() && is_discard_emulated(config_iface))
+	    || (config_iface.unreachable()
+		&& is_unreachable_emulated(config_iface))) {
+	    config_iface.set_soft(true);
+	}
 
 	//
-	// Skip the ifindex check if the interface has no mapping to
+	// Skip the rest of processing if the interface has no mapping to
 	// an existing interface in the system.
 	//
-	if (i.is_soft())
+	if (config_iface.is_soft())
 	    continue;
 
 	//
 	// Check that the interface is recognized by the system
 	//
-	uint32_t if_index = ifconfig().get_insert_ifindex(i.ifname());
-	if (if_index == 0) {
-	    if (i.state() == IfTreeItem::DELETED) {
+	if (pulled_iftree.find_interface(config_iface.ifname()) == NULL) {
+	    if (config_iface.state() == IfTreeItem::DELETED) {
 		// XXX: ignore deleted interfaces that are not recognized
 		continue;
 	    }
-	    error_reporter.interface_error(i.ifname(),
+	    error_reporter.interface_error(config_iface.ifname(),
 					   "interface not recognized");
 	    break;
 	}
@@ -86,18 +91,54 @@ IfConfigSet::push_config(IfTree& iftree)
 	//
 	// Check the interface and vif name
 	//
-	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
-	    IfTreeVif& v = vi->second;
-	    if (v.is_vlan())
+	for (vi = config_iface.vifs().begin();
+	     vi != config_iface.vifs().end();
+	     ++vi) {
+	    IfTreeVif& config_vif = vi->second;
+	    if (config_vif.is_vlan())
 		continue;
-	    if (v.vifname() != i.ifname()) {
-		error_reporter.vif_error(i.ifname(), v.vifname(),
+	    if (config_vif.vifname() != config_iface.ifname()) {
+		error_reporter.vif_error(config_iface.ifname(),
+					 config_vif.vifname(),
 					 "bad vif name");
 		break;
 	    }
 	}
 	if (error_reporter.error_count() > 0)
 	    break;
+
+	//
+	// Propagate the "DELETED" status from interfaces to vifs and addresses
+	//
+	for (vi = config_iface.vifs().begin();
+	     vi != config_iface.vifs().end();
+	     ++vi) {
+	    IfTreeVif& config_vif = vi->second;
+	    if (config_iface.state() == IfTreeItem::DELETED)
+		config_vif.mark(IfTreeItem::DELETED);
+
+	    // Propagate the "DELETE" status to the IPv4 addresses
+	    IfTreeVif::IPv4Map::iterator a4i;
+	    for (a4i = config_vif.ipv4addrs().begin();
+		 a4i != config_vif.ipv4addrs().end();
+		 ++a4i) {
+		IfTreeAddr4& config_addr = a4i->second;
+		if (config_vif.state() == IfTreeItem::DELETED)
+		    config_addr.mark(IfTreeItem::DELETED);
+	    }
+
+	    // Propagate the "DELETE" status to the IPv6 addresses
+#ifdef HAVE_IPV6
+	    IfTreeVif::IPv6Map::iterator a6i;
+	    for (a6i = config_vif.ipv6addrs().begin();
+		 a6i != config_vif.ipv6addrs().end();
+		 ++a6i) {
+		IfTreeAddr6& config_addr = a6i->second;
+		if (config_vif.state() == IfTreeItem::DELETED)
+		    config_addr.mark(IfTreeItem::DELETED);
+	    }
+#endif // HAVE_IPV6
+	}
     }
 
     if (error_reporter.error_count() > 0) {
@@ -106,72 +147,126 @@ IfConfigSet::push_config(IfTree& iftree)
     }
 
     //
-    // Walk config
+    // Push the config:
+    // 1. Push only the interface and vif information (in case vifs
+    //    such as VLANs need to be created).
+    // 2. Pull the config from the system (e.g., to obtain information
+    //    such as interface indexes for newly created interfaces/vifs).
+    // 3. Push the address information.
     //
     push_iftree_begin(iftree);
+
+    //
+    // 1. Push only the interface and vif information (in case vifs
+    //    such as VLANs need to be created).
+    //
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
-	IfTreeInterface& i = ii->second;
+	IfTreeInterface& config_iface = ii->second;
+	const IfTreeInterface* pulled_ifp = NULL;
 
-	//
-	// Set the "soft" flag for interfaces that are emulated
-	//
-	// XXX: We need to do it again in case some of the push_*() methods
-	// explicitly called pull_config() and destroyed the previously
-	// set "soft" flag.
-	//
-	if (i.discard() && is_discard_emulated(i))
-	    i.set_soft(true);
-	if (i.unreachable() && is_unreachable_emulated(i))
-	    i.set_soft(true);
+	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
 
 	// Soft interfaces and their child nodes should never be pushed
-	if (i.is_soft())
+	if (config_iface.is_soft())
 	    continue;
 
-	uint32_t if_index = ifconfig().get_insert_ifindex(i.ifname());
-	if ((if_index == 0) && (i.state() == IfTreeItem::DELETED)) {
-	    // XXX: ignore deleted interfaces that are not recognized
-	    continue;
+	if (pulled_ifp == NULL) {
+	    if (config_iface.state() == IfTreeItem::DELETED) {
+		// XXX: ignore deleted interfaces that are not recognized
+		continue;
+	    }
 	}
 
-	push_interface_begin(i);
+	push_interface_begin(pulled_ifp, config_iface);
 
-	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
-	    IfTreeVif& v = vi->second;
+	for (vi = config_iface.vifs().begin();
+	     vi != config_iface.vifs().end();
+	     ++vi) {
+	    IfTreeVif& config_vif = vi->second;
+	    const IfTreeVif* pulled_vifp = NULL;
 
-	    // XXX: delete the vif if the interface is deleted
-	    if (i.state() == IfTreeItem::DELETED)
-		v.mark(IfTreeItem::DELETED);
+	    if (pulled_ifp != NULL)
+		pulled_vifp = pulled_ifp->find_vif(config_vif.vifname());
 
-	    push_vif_begin(i, v);
+	    push_vif_begin(pulled_ifp, pulled_vifp, config_iface, config_vif);
+	    push_vif_end(pulled_ifp, pulled_vifp, config_iface, config_vif);
+	}
+
+	push_interface_end(pulled_ifp, config_iface);
+    }
+
+    //
+    // 2. Pull the config from the system (e.g., to obtain information
+    //    such as interface indexes for newly created interfaces/vifs).
+    //
+    ifconfig().pull_config();
+
+    //
+    // 3. Push the address information.
+    //
+    for (ii = iftree.interfaces().begin();
+	 ii != iftree.interfaces().end();
+	 ++ii) {
+	IfTreeInterface& config_iface = ii->second;
+	const IfTreeInterface* pulled_ifp = NULL;
+
+	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
+
+	// Soft interfaces and their child nodes should never be pushed
+	if (config_iface.is_soft())
+	    continue;
+
+	if (pulled_ifp == NULL) {
+	    if (config_iface.state() == IfTreeItem::DELETED) {
+		// XXX: ignore deleted interfaces that are not recognized
+		continue;
+	    }
+	}
+
+	for (vi = config_iface.vifs().begin();
+	     vi != config_iface.vifs().end();
+	     ++vi) {
+	    IfTreeVif& config_vif = vi->second;
+	    const IfTreeVif* pulled_vifp = NULL;
+
+	    if (pulled_ifp != NULL)
+		pulled_vifp = pulled_ifp->find_vif(config_vif.vifname());
 
 	    IfTreeVif::IPv4Map::iterator a4i;
-	    for (a4i = v.ipv4addrs().begin(); a4i != v.ipv4addrs().end(); ++a4i) {
-		IfTreeAddr4& a = a4i->second;
-		// XXX: delete the address if the vif is deleted
-		if (v.state() == IfTreeItem::DELETED)
-		    a.mark(IfTreeItem::DELETED);
-		push_vif_address(i, v, a);
+	    for (a4i = config_vif.ipv4addrs().begin();
+		 a4i != config_vif.ipv4addrs().end();
+		 ++a4i) {
+		IfTreeAddr4& config_addr = a4i->second;
+		const IfTreeAddr4* pulled_addrp = NULL;
+
+		if (pulled_vifp != NULL)
+		    pulled_addrp = pulled_vifp->find_addr(config_addr.addr());
+
+		push_vif_address(pulled_ifp, pulled_vifp, pulled_addrp,
+				 config_iface, config_vif, config_addr);
 	    }
 
 #ifdef HAVE_IPV6
 	    IfTreeVif::IPv6Map::iterator a6i;
-	    for (a6i = v.ipv6addrs().begin(); a6i != v.ipv6addrs().end(); ++a6i) {
-		IfTreeAddr6& a = a6i->second;
-		// XXX: delete the address if the vif is deleted
-		if (v.state() == IfTreeItem::DELETED)
-		    a.mark(IfTreeItem::DELETED);
-		push_vif_address(i, v, a);
+	    for (a6i = config_vif.ipv6addrs().begin();
+		 a6i != config_vif.ipv6addrs().end();
+		 ++a6i) {
+		IfTreeAddr6& config_addr = a6i->second;
+		const IfTreeAddr6* pulled_addrp = NULL;
+
+		if (pulled_vifp != NULL)
+		    pulled_addrp = pulled_vifp->find_addr(config_addr.addr());
+
+		push_vif_address(pulled_ifp, pulled_vifp, pulled_addrp,
+				 config_iface, config_vif, config_addr);
 	    }
 #endif // HAVE_IPV6
 
-	    push_vif_end(i, v);
 	}
-
-	push_interface_end(i);
     }
+
     push_iftree_end(iftree);
 
     if (error_reporter.error_count() != 0)
@@ -192,14 +287,10 @@ IfConfigSet::push_iftree_begin(IfTree& iftree)
     //
     // Begin the configuration
     //
-    do {
-	if (config_begin(error_msg) != XORP_OK) {
-	    error_msg = c_format("Failed to begin configuration: %s",
-				 error_msg.c_str());
-	    break;
-	}
-	break;
-    } while (false);
+    if (config_begin(error_msg) != XORP_OK) {
+	error_msg = c_format("Failed to begin configuration: %s",
+			     error_msg.c_str());
+    }
 
     if (! error_msg.empty()) {
 	error_reporter.config_error(error_msg);
@@ -220,14 +311,10 @@ IfConfigSet::push_iftree_end(IfTree& iftree)
     //
     // End the configuration
     //
-    do {
-	if (config_end(error_msg) != XORP_OK) {
-	    error_msg = c_format("Failed to end configuration: %s",
-				 error_msg.c_str());
-	    break;
-	}
-	break;
-    } while (false);
+    if (config_end(error_msg) != XORP_OK) {
+	error_msg = c_format("Failed to end configuration: %s",
+			     error_msg.c_str());
+    }
 
     if (! error_msg.empty()) {
 	error_reporter.config_error(error_msg);
@@ -237,106 +324,120 @@ IfConfigSet::push_iftree_end(IfTree& iftree)
 }
 
 void
-IfConfigSet::push_interface_begin(IfTreeInterface& i)
+IfConfigSet::push_interface_begin(const IfTreeInterface*	pulled_ifp,
+				  IfTreeInterface&		config_iface)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    uint32_t if_index = ifconfig().get_insert_ifindex(i.ifname());
-    const IfTreeInterface* pulled_ifp = NULL;
-
-    pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
-
-    XLOG_ASSERT(if_index > 0);
-    if (i.pif_index() != if_index)
-	i.set_pif_index(if_index);
 
     // Reset the flip flag for this interface
-    set_interface_flipped(false);
+    config_iface.set_flipped(false);
+
+    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the interface has been deleted from the system
+	return;
+    }
+
+    //
+    // Copy some of the state from the pulled configuration
+    //
+    if (pulled_ifp != NULL) {
+	if (config_iface.pif_index() != pulled_ifp->pif_index())
+	    config_iface.set_pif_index(pulled_ifp->pif_index());
+	if (config_iface.no_carrier() != pulled_ifp->no_carrier())
+	    config_iface.set_no_carrier(pulled_ifp->no_carrier());
+	if (config_iface.mtu() == 0) {
+	    if (config_iface.mtu() != pulled_ifp->mtu())
+		config_iface.set_mtu(pulled_ifp->mtu());
+	}
+	if (config_iface.mac().empty()) {
+	    if (config_iface.mac() != pulled_ifp->mac())
+		config_iface.set_mac(pulled_ifp->mac());
+	}
+	if (config_iface.interface_flags() != pulled_ifp->interface_flags())
+	    config_iface.set_interface_flags(pulled_ifp->interface_flags());
+    }
 
     //
     // Begin the interface configuration
     //
-    do {
-	if (config_interface_begin(pulled_ifp, i, error_msg) != XORP_OK) {
-	    error_msg = c_format("Failed to begin interface configuration: %s",
-				 error_msg.c_str());
-	    break;
-	}
-	break;
-    } while (false);
+    if (config_interface_begin(pulled_ifp, config_iface, error_msg)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to begin interface configuration: %s",
+			     error_msg.c_str());
+    }
 
     if (! error_msg.empty()) {
-	error_reporter.interface_error(i.ifname(), error_msg);
+	error_reporter.interface_error(config_iface.ifname(), error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;
     }
 }
 
 void
-IfConfigSet::push_interface_end(IfTreeInterface& i)
+IfConfigSet::push_interface_end(const IfTreeInterface*	pulled_ifp,
+				IfTreeInterface&	config_iface)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    const IfTreeInterface* pulled_ifp = NULL;
-
-    pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
 
     //
     // End the interface configuration
     //
-    do {
-	if (config_interface_end(pulled_ifp, i, error_msg) != XORP_OK) {
-	    error_msg = c_format("Failed to end interface configuration: %s",
-				 error_msg.c_str());
-	    break;
-	}
-	break;
-    } while (false);
-
-    // Set the flip flag for this interface
-    if (is_interface_flipped()) {
-	i.set_flipped(true);
-	set_interface_flipped(false);
+    if (config_interface_end(pulled_ifp, config_iface, error_msg)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to end interface configuration: %s",
+			     error_msg.c_str());
     }
 
     if (! error_msg.empty()) {
-	error_reporter.interface_error(i.ifname(), error_msg);
+	error_reporter.interface_error(config_iface.ifname(), error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;
     }
 }
 
 void
-IfConfigSet::push_vif_begin(IfTreeInterface&	i,
-			    IfTreeVif&		v)
+IfConfigSet::push_vif_begin(const IfTreeInterface*	pulled_ifp,
+			    const IfTreeVif*		pulled_vifp,
+			    IfTreeInterface&		config_iface,
+			    IfTreeVif&			config_vif)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    uint32_t if_index = ifconfig().get_insert_ifindex(v.vifname());
-    const IfTreeInterface* pulled_ifp = NULL;
-    const IfTreeVif* pulled_vifp = NULL;
-    bool is_vif_obsoleted = false;
 
-    pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
-    if (pulled_ifp != NULL)
-	pulled_vifp = pulled_ifp->find_vif(v.vifname());
+    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+	// Nothing to do: the vif has been deleted from the system
+	return;
+    }
 
     //
-    // XXX: The vif might not exist yet, hence if_index might not be found
+    // Copy some of the state from the pulled configuration
     //
-    if (if_index > 0) {
-	if (v.pif_index() != if_index)
-	    v.set_pif_index(if_index);
+    if (pulled_vifp != NULL) {
+	if (config_vif.pif_index() != pulled_vifp->pif_index())
+	    config_vif.set_pif_index(pulled_vifp->pif_index());
+	if (config_vif.broadcast() != pulled_vifp->broadcast())
+	    config_vif.set_broadcast(pulled_vifp->broadcast());
+	if (config_vif.loopback() != pulled_vifp->loopback())
+	    config_vif.set_loopback(pulled_vifp->loopback());
+	if (config_vif.point_to_point() != pulled_vifp->point_to_point())
+	    config_vif.set_point_to_point(pulled_vifp->point_to_point());
+	if (config_vif.multicast() != pulled_vifp->multicast())
+	    config_vif.set_multicast(pulled_vifp->multicast());
+	if (config_vif.vif_flags() != pulled_vifp->vif_flags())
+	    config_vif.set_vif_flags(pulled_vifp->vif_flags());
     }
 
     //
     // Begin the vif configuration
     //
     do {
-	if (config_vif_begin(pulled_ifp, pulled_vifp, i, v, error_msg)
+	if (config_vif_begin(pulled_ifp, pulled_vifp, config_iface, config_vif,
+			     error_msg)
 	    != XORP_OK) {
 	    error_msg = c_format("Failed to begin vif configuration: %s",
 				 error_msg.c_str());
@@ -344,7 +445,7 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
 	}
 
 	// Configure VLAN vif
-	if (v.is_vlan()) {
+	if (config_vif.is_vlan()) {
 	    IfConfigVlanSet* ifconfig_vlan_set;
 
 	    // Get the plugin for VLAN setup
@@ -352,111 +453,73 @@ IfConfigSet::push_vif_begin(IfTreeInterface&	i,
 	    if (ifconfig_vlan_set == NULL) {
 		error_msg = c_format("Failed to apply VLAN setup to "
 				     "interface %s vlan %s : no plugin found",
-				     i.ifname().c_str(), v.vifname().c_str());
+				     config_iface.ifname().c_str(),
+				     config_vif.vifname().c_str());
 		break;
 	    }
 
-	    // Reset the obsoleted flag for this vif
-	    ifconfig_vlan_set->set_vif_obsoleted(false);
-
-	    if (ifconfig_vlan_set->config_vlan(pulled_ifp, pulled_vifp, i, v,
+	    if (ifconfig_vlan_set->config_vlan(pulled_ifp, pulled_vifp,
+					       config_iface, config_vif,
 					       error_msg)
 		!= XORP_OK) {
 		error_msg = c_format("Failed to apply VLAN setup to "
 				     "interface %s vlan %s: %s",
-				     i.ifname().c_str(),
-				     v.vifname().c_str(),
+				     config_iface.ifname().c_str(),
+				     config_vif.vifname().c_str(),
 				     error_msg.c_str());
 		break;
-	    }
-
-	    if (ifconfig_vlan_set->is_vif_obsoleted()) {
-		is_vif_obsoleted = true;
-		ifconfig_vlan_set->set_vif_obsoleted(false);
 	    }
 	}
 
 	break;
     } while (false);
 
-    //
-    // Pull the new configuration if the vif was obsoleted (added or deleted)
-    //
-    // XXX: Calling pull_config() here is sub-optimal. Future refactoring
-    // of the push_config() method should eliminate those excessive calls.
-    //
-    if (is_vif_obsoleted) {
-	ifconfig().pull_config();
-    }
-
-    //
-    // Regenerate the if_index in case the vif was added or deleted
-    //
-    if_index = ifconfig().get_insert_ifindex(v.vifname());
-    if (if_index > 0) {
-	if (v.pif_index() != if_index)
-	    v.set_pif_index(if_index);
-    }
-
     if (! error_msg.empty()) {
-	error_reporter.vif_error(i.ifname(), v.vifname(), error_msg);
+	error_reporter.vif_error(config_iface.ifname(), config_vif.vifname(),
+				 error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;
     }
 }
 
 void
-IfConfigSet::push_vif_end(IfTreeInterface&	i,
-			  IfTreeVif&		v)
+IfConfigSet::push_vif_end(const IfTreeInterface*	pulled_ifp,
+			  const IfTreeVif*		pulled_vifp,
+			  IfTreeInterface&		config_iface,
+			  IfTreeVif&			config_vif)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    const IfTreeInterface* pulled_ifp = NULL;
-    const IfTreeVif* pulled_vifp = NULL;
-
-    pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
-    if (pulled_ifp != NULL)
-	pulled_vifp = pulled_ifp->find_vif(v.vifname());
 
     //
     // End the vif configuration
     //
-    do {
-	if (config_vif_end(pulled_ifp, pulled_vifp, i, v, error_msg)
-	    != XORP_OK) {
-	    error_msg = c_format("Failed to end vif configuration: %s",
-				 error_msg.c_str());
-	    break;
-	}
-	break;
-    } while (false);
+    if (config_vif_end(pulled_ifp, pulled_vifp, config_iface, config_vif,
+		       error_msg) != XORP_OK) {
+	error_msg = c_format("Failed to end vif configuration: %s",
+			     error_msg.c_str());
+    }
 
     if (! error_msg.empty()) {
-	error_reporter.vif_error(i.ifname(), v.vifname(), error_msg);
+	error_reporter.vif_error(config_iface.ifname(), config_vif.vifname(),
+				 error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;
     }
 }
 
 void
-IfConfigSet::push_vif_address(IfTreeInterface&	i,
-			      IfTreeVif&	v,
-			      IfTreeAddr4&	a)
+IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
+			      const IfTreeVif*		pulled_vifp,
+			      const IfTreeAddr4*	pulled_addrp,
+			      IfTreeInterface&		config_iface,
+			      IfTreeVif&		config_vif,
+			      IfTreeAddr4&		config_addr)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    const IfTreeInterface* pulled_ifp = NULL;
-    const IfTreeVif* pulled_vifp = NULL;
-    const IfTreeAddr4* pulled_addrp = NULL;
-
-    pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
-    if (pulled_ifp != NULL) {
-	pulled_vifp = pulled_ifp->find_vif(v.vifname());
-	if (pulled_vifp != NULL)
-	    pulled_addrp = pulled_vifp->find_addr(a.addr());
-    }
 
     //
     // XXX: If the broadcast address was omitted, recompute and set it here.
@@ -465,31 +528,28 @@ IfConfigSet::push_vif_address(IfTreeInterface&	i,
     //
     if ((pulled_vifp != NULL)
 	&& pulled_vifp->broadcast()
-	&& (a.prefix_len() > 0)
-	&& (! (a.broadcast() || a.point_to_point()))) {
-	IPv4 mask = IPv4::make_prefix(a.prefix_len());
-	IPv4 broadcast_addr = a.addr() | ~mask;
-	a.set_bcast(broadcast_addr);
-	a.set_broadcast(true);
+	&& (config_addr.prefix_len() > 0)
+	&& (! (config_addr.broadcast() || config_addr.point_to_point()))) {
+	IPv4 mask = IPv4::make_prefix(config_addr.prefix_len());
+	IPv4 broadcast_addr = config_addr.addr() | ~mask;
+	config_addr.set_bcast(broadcast_addr);
+	config_addr.set_broadcast(true);
     }
 
     //
     // Push the address configuration
     //
-    do {
-	if (config_addr(pulled_ifp, pulled_vifp, pulled_addrp, i, v, a,
-			error_msg)
-	    != XORP_OK) {
-	    error_msg = c_format("Failed to configure address: %s",
-				 error_msg.c_str());
-	    break;
-	}
-
-	break;
-    } while(false);
+    if (config_address(pulled_ifp, pulled_vifp, pulled_addrp, config_iface,
+		       config_vif, config_addr, error_msg)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to configure address: %s",
+			     error_msg.c_str());
+    }
 
     if (! error_msg.empty()) {
-	error_reporter.vifaddr_error(i.ifname(), v.vifname(), a.addr(),
+	error_reporter.vifaddr_error(config_iface.ifname(),
+				     config_vif.vifname(),
+				     config_addr.addr(),
 				     error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;
@@ -498,47 +558,38 @@ IfConfigSet::push_vif_address(IfTreeInterface&	i,
 
 #ifdef HAVE_IPV6
 void
-IfConfigSet::push_vif_address(IfTreeInterface&	i,
-			      IfTreeVif&	v,
-			      IfTreeAddr6&	a)
+IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
+			      const IfTreeVif*		pulled_vifp,
+			      const IfTreeAddr6*	pulled_addrp,
+			      IfTreeInterface&		config_iface,
+			      IfTreeVif&		config_vif,
+			      IfTreeAddr6&		config_addr)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    const IfTreeInterface* pulled_ifp = NULL;
-    const IfTreeVif* pulled_vifp = NULL;
-    const IfTreeAddr6* pulled_addrp = NULL;
-
-    pulled_ifp = ifconfig().pulled_config().find_interface(i.ifname());
-    if (pulled_ifp != NULL) {
-	pulled_vifp = pulled_ifp->find_vif(v.vifname());
-	if (pulled_vifp != NULL)
-	    pulled_addrp = pulled_vifp->find_addr(a.addr());
-    }
 
     //
     // XXX: For whatever reason a prefix length of zero does not cut it, so
-    // initialize prefix to 64.  This is exactly what ifconfig(8) does.
-    if (a.prefix_len() == 0)
-	a.set_prefix_len(64);
+    // initialize prefix to 64. This is exactly what ifconfig(8) does.
+    //
+    if (config_addr.prefix_len() == 0)
+	config_addr.set_prefix_len(64);
 
     //
     // Push the address configuration
     //
-    do {
-	if (config_addr(pulled_ifp, pulled_vifp, pulled_addrp, i, v, a,
-			error_msg)
-	    != XORP_OK) {
-	    error_msg = c_format("Failed to configure address: %s",
-				 error_msg.c_str());
-	    break;
-	}
-
-	break;
-    } while(false);
+    if (config_address(pulled_ifp, pulled_vifp, pulled_addrp, config_iface,
+		       config_vif, config_addr, error_msg)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to configure address: %s",
+			     error_msg.c_str());
+    }
 
     if (! error_msg.empty()) {
-	error_reporter.vifaddr_error(i.ifname(), v.vifname(), a.addr(),
+	error_reporter.vifaddr_error(config_iface.ifname(),
+				     config_vif.vifname(),
+				     config_addr.addr(),
 				     error_msg);
 	XLOG_ERROR("%s", error_reporter.last_error().c_str());
 	return;
