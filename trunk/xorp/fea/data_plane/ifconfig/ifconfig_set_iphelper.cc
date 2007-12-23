@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.13 2007/09/28 05:25:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.14 2007/12/22 21:23:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -248,46 +248,16 @@ IfConfigSetIPHelper::config_vif_end(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetIPHelper::config_address(const IfTreeInterface* pulled_ifp,
-				    const IfTreeVif* pulled_vifp,
-				    const IfTreeAddr4* pulled_addrp,
-				    const IfTreeInterface& config_iface,
-				    const IfTreeVif& config_vif,
-				    const IfTreeAddr4& config_addr,
-				    string& error_msg)
+IfConfigSetIPHelper::config_add_address(const IfTreeInterface* pulled_ifp,
+					const IfTreeVif* pulled_vifp,
+					const IfTreeAddr4* pulled_addrp,
+					const IfTreeInterface& config_iface,
+					const IfTreeVif& config_vif,
+					const IfTreeAddr4& config_addr,
+					string& error_msg)
 {
-    bool is_deleted = false;
-
     UNUSED(pulled_ifp);
     UNUSED(pulled_vifp);
-
-    if (! fea_data_plane_manager().have_ipv4()) {
-	error_msg = "IPv4 is not supported";
-	return (XORP_ERROR);
-    }
-
-    // XXX: Disabling an address is same as deleting it
-    if (config_addr.is_marked(IfTreeItem::DELETED)
-	|| (! config_addr.enabled())) {
-	is_deleted = true;
-    }
-
-    //
-    // Delete the address if marked for deletion
-    //
-    if (is_deleted) {
-	if (pulled_addrp == NULL)
-	    return (XORP_OK);		// XXX: nothing to delete
-
-	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
-			config_vif.pif_index(), config_addr.addr(),
-			config_addr.prefix_len(), error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
-	}
-
-	return (XORP_OK);
-    }
 
     //
     // Test whether a new address
@@ -345,46 +315,42 @@ IfConfigSetIPHelper::config_address(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetIPHelper::config_address(const IfTreeInterface* pulled_ifp,
-				    const IfTreeVif* pulled_vifp,
-				    const IfTreeAddr6* pulled_addrp,
-				    const IfTreeInterface& config_iface,
-				    const IfTreeVif& config_vif,
-				    const IfTreeAddr6& config_addr,
-				    string& error_msg)
+IfConfigSetIPHelper::config_delete_address(const IfTreeInterface* pulled_ifp,
+					   const IfTreeVif* pulled_vifp,
+					   const IfTreeAddr4* pulled_addrp,
+					   const IfTreeInterface& config_iface,
+					   const IfTreeVif& config_vif,
+					   const IfTreeAddr4& config_addr,
+					   string& error_msg)
 {
-    bool is_deleted = false;
-
     UNUSED(pulled_ifp);
     UNUSED(pulled_vifp);
+    UNUSED(pulled_addrp);
 
-    if (! fea_data_plane_manager().have_ipv6()) {
-	error_msg = "IPv6 is not supported";
+    //
+    // Delete the address
+    //
+    if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+		    config_vif.pif_index(), config_addr.addr(),
+		    config_addr.prefix_len(), error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
 
-    // XXX: Disabling an address is same as deleting it
-    if (config_addr.is_marked(IfTreeItem::DELETED)
-	|| (! config_addr.enabled())) {
-	is_deleted = true;
-    }
+    return (XORP_OK);
+}
 
-    //
-    // Delete the address if marked for deletion
-    //
-    if (is_deleted) {
-	if (pulled_addrp == NULL)
-	    return (XORP_OK);		// XXX: nothing to delete
-
-	if (delete_addr(config_iface.ifname(), config_vif.vifname(),
-			config_vif.pif_index(), config_addr.addr(),
-			config_addr.prefix_len(), error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
-	}
-
-	return (XORP_OK);
-    }
+int
+IfConfigSetIPHelper::config_add_address(const IfTreeInterface* pulled_ifp,
+					const IfTreeVif* pulled_vifp,
+					const IfTreeAddr6* pulled_addrp,
+					const IfTreeInterface& config_iface,
+					const IfTreeVif& config_vif,
+					const IfTreeAddr6& config_addr,
+					string& error_msg)
+{
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
 
     //
     // Test whether a new address
@@ -427,6 +393,32 @@ IfConfigSetIPHelper::config_address(const IfTreeInterface* pulled_ifp,
 		 config_addr.prefix_len(),
 		 config_addr.point_to_point(), config_addr.endpoint(),
 		 error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetIPHelper::config_delete_address(const IfTreeInterface* pulled_ifp,
+					   const IfTreeVif* pulled_vifp,
+					   const IfTreeAddr6* pulled_addrp,
+					   const IfTreeInterface& config_iface,
+					   const IfTreeVif& config_vif,
+					   const IfTreeAddr6& config_addr,
+					   string& error_msg)
+{
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(pulled_addrp);
+
+    //
+    // Delete the address
+    //
+    if (delete_addr(config_iface.ifname(), config_vif.vifname(),
+		    config_vif.pif_index(), config_addr.addr(),
+		    config_addr.prefix_len(), error_msg)
 	!= XORP_OK) {
 	return (XORP_ERROR);
     }

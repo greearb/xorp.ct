@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.57 2007/09/27 00:33:33 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.58 2007/12/22 21:23:41 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -195,7 +195,10 @@ protected:
 			       string& error_msg) = 0;
 
     /**
-     * Configure IPv4 address information.
+     * Add IPv4 address information.
+     *
+     * If an entry for the same address already exists, is is overwritten
+     * with the new information.
      *
      * @param pulled_ifp pointer to the interface information pulled from
      * the system.
@@ -212,16 +215,16 @@ protected:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_address(const IfTreeInterface* pulled_ifp,
-			       const IfTreeVif* pulled_vifp,
-			       const IfTreeAddr4* pulled_addrp,
-			       const IfTreeInterface& config_iface,
-			       const IfTreeVif& config_vif,
-			       const IfTreeAddr4& config_addr,
-			       string& error_msg) = 0;
+    virtual int config_add_address(const IfTreeInterface* pulled_ifp,
+				   const IfTreeVif* pulled_vifp,
+				   const IfTreeAddr4* pulled_addrp,
+				   const IfTreeInterface& config_iface,
+				   const IfTreeVif& config_vif,
+				   const IfTreeAddr4& config_addr,
+				   string& error_msg) = 0;
 
     /**
-     * Configure IPv6 address information.
+     * Delete IPv4 address information.
      *
      * @param pulled_ifp pointer to the interface information pulled from
      * the system.
@@ -238,13 +241,68 @@ protected:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int config_address(const IfTreeInterface* pulled_ifp,
-			       const IfTreeVif* pulled_vifp,
-			       const IfTreeAddr6* pulled_addrp,
-			       const IfTreeInterface& config_iface,
-			       const IfTreeVif& config_vif,
-			       const IfTreeAddr6& config_addr,
-			       string& error_msg) = 0;
+    virtual int config_delete_address(const IfTreeInterface* pulled_ifp,
+				      const IfTreeVif* pulled_vifp,
+				      const IfTreeAddr4* pulled_addrp,
+				      const IfTreeInterface& config_iface,
+				      const IfTreeVif& config_vif,
+				      const IfTreeAddr4& config_addr,
+				      string& error_msg) = 0;
+
+    /**
+     * Add IPv6 address information.
+     *
+     * If an entry for the same address already exists, is is overwritten
+     * with the new information.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param pulled_addrp pointer to the address information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param config_addr reference to the address with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_add_address(const IfTreeInterface* pulled_ifp,
+				   const IfTreeVif* pulled_vifp,
+				   const IfTreeAddr6* pulled_addrp,
+				   const IfTreeInterface& config_iface,
+				   const IfTreeVif& config_vif,
+				   const IfTreeAddr6& config_addr,
+				   string& error_msg) = 0;
+
+    /**
+     * Delete IPv6 address information.
+     *
+     * @param pulled_ifp pointer to the interface information pulled from
+     * the system.
+     * @param pulled_vifp pointer to the vif information pulled from
+     * the system.
+     * @param pulled_addrp pointer to the address information pulled from
+     * the system.
+     * @param config_iface reference to the interface with the information
+     * to configure.
+     * @param config_vif reference to the vif with the information
+     * to configure.
+     * @param config_addr reference to the address with the information
+     * to configure.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int config_delete_address(const IfTreeInterface* pulled_ifp,
+				      const IfTreeVif* pulled_vifp,
+				      const IfTreeAddr6* pulled_addrp,
+				      const IfTreeInterface& config_iface,
+				      const IfTreeVif& config_vif,
+				      const IfTreeAddr6& config_addr,
+				      string& error_msg) = 0;
 
 protected:
     // Misc other state
@@ -257,6 +315,10 @@ private:
 			      IfTreeInterface& config_iface);
     void push_interface_end(const IfTreeInterface* pulled_ifp,
 			    IfTreeInterface& config_iface);
+    void push_vif_creation(const IfTreeInterface* pulled_ifp,
+			   const IfTreeVif* pulled_vifp,
+			   IfTreeInterface& config_iface,
+			   IfTreeVif& config_vif);
     void push_vif_begin(const IfTreeInterface* pulled_ifp,
 			const IfTreeVif* pulled_vifp,
 			IfTreeInterface& config_iface,

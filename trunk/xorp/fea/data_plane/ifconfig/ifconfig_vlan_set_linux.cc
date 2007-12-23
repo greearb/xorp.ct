@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.5 2007/10/12 07:53:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_linux.cc,v 1.6 2007/12/22 21:23:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -114,24 +114,13 @@ IfConfigVlanSetLinux::stop(string& error_msg)
 }
 
 int
-IfConfigVlanSetLinux::config_vlan(const IfTreeInterface* pulled_ifp,
-				  const IfTreeVif* pulled_vifp,
-				  const IfTreeInterface& config_iface,
-				  const IfTreeVif& config_vif,
-				  string& error_msg)
+IfConfigVlanSetLinux::config_add_vlan(const IfTreeInterface* pulled_ifp,
+				      const IfTreeVif* pulled_vifp,
+				      const IfTreeInterface& config_iface,
+				      const IfTreeVif& config_vif,
+				      string& error_msg)
 {
     UNUSED(pulled_ifp);
-
-    //
-    // Delete the VLAN if marked for deletion
-    //
-    if (config_vif.state() == IfTreeItem::DELETED) {
-	if (delete_vlan(config_iface.ifname(), config_vif.vifname(), error_msg)
-	    != XORP_OK) {
-	    return (XORP_ERROR);
-	}
-	return (XORP_OK);
-    }
 
     //
     // Test whether the VLAN already exists
@@ -163,8 +152,32 @@ IfConfigVlanSetLinux::config_vlan(const IfTreeInterface* pulled_ifp,
     if (add_vlan(config_iface.ifname(), config_vif.vifname(),
 		 config_vif.vlan_id(), error_msg)
 	!= XORP_OK) {
-	error_msg = c_format("Failed to configure VLAN %s to "
-			     "interface %s: %s",
+	error_msg = c_format("Failed to add VLAN %s to interface %s: %s",
+			     config_vif.vifname().c_str(),
+			     config_iface.ifname().c_str(),
+			     error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfigVlanSetLinux::config_delete_vlan(const IfTreeInterface* pulled_ifp,
+					 const IfTreeVif* pulled_vifp,
+					 const IfTreeInterface& config_iface,
+					 const IfTreeVif& config_vif,
+					 string& error_msg)
+{
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+
+    //
+    // Delete the VLAN
+    //
+    if (delete_vlan(config_iface.ifname(), config_vif.vifname(), error_msg)
+	!= XORP_OK) {
+	error_msg = c_format("Failed to delete VLAN %s on interface %s: %s",
 			     config_vif.vifname().c_str(),
 			     config_iface.ifname().c_str(),
 			     error_msg.c_str());

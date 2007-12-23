@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.3 2007/09/15 01:22:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_set_dummy.cc,v 1.4 2007/09/25 23:00:30 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -79,11 +79,27 @@ IfConfigVlanSetDummy::stop(string& error_msg)
 }
 
 int
-IfConfigVlanSetDummy::config_vlan(const IfTreeInterface* pulled_ifp,
-				  const IfTreeVif* pulled_vifp,
-				  const IfTreeInterface& config_iface,
-				  const IfTreeVif& config_vif,
-				  string& error_msg)
+IfConfigVlanSetDummy::config_add_vlan(const IfTreeInterface* pulled_ifp,
+				      const IfTreeVif* pulled_vifp,
+				      const IfTreeInterface& config_iface,
+				      const IfTreeVif& config_vif,
+				      string& error_msg)
+{
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(config_iface);
+    UNUSED(config_vif);
+    UNUSED(error_msg);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigVlanSetDummy::config_delete_vlan(const IfTreeInterface* pulled_ifp,
+					 const IfTreeVif* pulled_vifp,
+					 const IfTreeInterface& config_iface,
+					 const IfTreeVif& config_vif,
+					 string& error_msg)
 {
     UNUSED(pulled_ifp);
     UNUSED(pulled_vifp);

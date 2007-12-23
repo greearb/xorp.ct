@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.14 2007/11/29 01:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.15 2007/12/22 21:23:42 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -342,27 +342,20 @@ IfConfigSetClick::config_vif_end(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
-				 const IfTreeVif* pulled_vifp,
-				 const IfTreeAddr4* pulled_addrp,
-				 const IfTreeInterface& config_iface,
-				 const IfTreeVif& config_vif,
-				 const IfTreeAddr4& config_addr,
-				 string& error_msg)
+IfConfigSetClick::config_add_address(const IfTreeInterface* pulled_ifp,
+				     const IfTreeVif* pulled_vifp,
+				     const IfTreeAddr4* pulled_addrp,
+				     const IfTreeInterface& config_iface,
+				     const IfTreeVif& config_vif,
+				     const IfTreeAddr4& config_addr,
+				     string& error_msg)
 {
     IfTreeVif* vifp;
     IfTreeAddr4* ap;
-    bool is_deleted = false;
 
     UNUSED(pulled_ifp);
     UNUSED(pulled_vifp);
     UNUSED(pulled_addrp);
-
-    // XXX: Disabling an address is same as deleting it
-    if (config_addr.is_marked(IfTreeItem::DELETED)
-	|| (! config_addr.enabled())) {
-	is_deleted = true;
-    }
 
     vifp = _iftree.find_vif(config_iface.ifname(), config_vif.vifname());
     if (vifp == NULL) {
@@ -371,26 +364,6 @@ IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
 			     config_iface.ifname().c_str(),
 			     config_vif.vifname().c_str());
 	return (XORP_ERROR);
-    }
-
-    //
-    // Delete the address if marked for deletion
-    //
-    if (is_deleted) {
-	const IPv4& addr = config_addr.addr();
-	IfTreeAddr4* ap = vifp->find_addr(addr);
-	if (ap == NULL) {
-	    error_msg = c_format("Cannot delete address '%s' "
-				 "on interface '%s' vif '%s': "
-				 "no such address",
-				 addr.str().c_str(),
-				 config_iface.ifname().c_str(),
-				 config_vif.vifname().c_str());
-	    return (XORP_ERROR);
-	}
-	vifp->remove_addr(addr);
-	ifconfig().nexthop_port_mapper().delete_ipv4(addr);
-	return (XORP_OK);
     }
 
     //
@@ -417,12 +390,10 @@ IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
     ap->set_loopback(config_addr.loopback());
     ap->set_point_to_point(config_addr.point_to_point());
     ap->set_multicast(config_addr.multicast());
-    if (ap->broadcast()) {
+    if (ap->broadcast())
 	ap->set_bcast(config_addr.bcast());
-    }
-    if (ap->point_to_point()) {
+    if (ap->point_to_point())
 	ap->set_endpoint(config_addr.endpoint());
-    }
     ap->set_prefix_len(config_addr.prefix_len());
     ap->set_enabled(config_addr.enabled());
 
@@ -430,27 +401,65 @@ IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
 }
 
 int
-IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
-				 const IfTreeVif* pulled_vifp,
-				 const IfTreeAddr6* pulled_addrp,
-				 const IfTreeInterface& config_iface,
-				 const IfTreeVif& config_vif,
-				 const IfTreeAddr6& config_addr,
-				 string& error_msg)
+IfConfigSetClick::config_delete_address(const IfTreeInterface* pulled_ifp,
+					const IfTreeVif* pulled_vifp,
+					const IfTreeAddr4* pulled_addrp,
+					const IfTreeInterface& config_iface,
+					const IfTreeVif& config_vif,
+					const IfTreeAddr4& config_addr,
+					string& error_msg)
 {
     IfTreeVif* vifp;
-    IfTreeAddr6* ap;
-    bool is_deleted = false;
+    IfTreeAddr4* ap;
 
     UNUSED(pulled_ifp);
     UNUSED(pulled_vifp);
     UNUSED(pulled_addrp);
 
-    // XXX: Disabling an address is same as deleting it
-    if (config_addr.is_marked(IfTreeItem::DELETED)
-	|| (! config_addr.enabled())) {
-	is_deleted = true;
+    vifp = _iftree.find_vif(config_iface.ifname(), config_vif.vifname());
+    if (vifp == NULL) {
+	error_msg = c_format("Cannot delete address on interface '%s' "
+			     "vif '%s': no such vif in the interface tree",
+			     config_iface.ifname().c_str(),
+			     config_vif.vifname().c_str());
+	return (XORP_ERROR);
     }
+
+    //
+    // Delete the address
+    //
+    const IPv4& addr = config_addr.addr();
+    ap = vifp->find_addr(addr);
+    if (ap == NULL) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': "
+			     "no such address",
+			     addr.str().c_str(),
+			     config_iface.ifname().c_str(),
+			     config_vif.vifname().c_str());
+	return (XORP_ERROR);
+    }
+    vifp->remove_addr(addr);
+    ifconfig().nexthop_port_mapper().delete_ipv4(addr);
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetClick::config_add_address(const IfTreeInterface* pulled_ifp,
+				     const IfTreeVif* pulled_vifp,
+				     const IfTreeAddr6* pulled_addrp,
+				     const IfTreeInterface& config_iface,
+				     const IfTreeVif& config_vif,
+				     const IfTreeAddr6& config_addr,
+				     string& error_msg)
+{
+    IfTreeVif* vifp;
+    IfTreeAddr6* ap;
+
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(pulled_addrp);
 
     vifp = _iftree.find_vif(config_iface.ifname(), config_vif.vifname());
     if (vifp == NULL) {
@@ -459,26 +468,6 @@ IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
 			     config_iface.ifname().c_str(),
 			     config_vif.vifname().c_str());
 	return (XORP_ERROR);
-    }
-
-    //
-    // Delete the address if marked for deletion
-    //
-    if (is_deleted) {
-	const IPv6& addr = config_addr.addr();
-	IfTreeAddr6* ap = vifp->find_addr(addr);
-	if (ap == NULL) {
-	    error_msg = c_format("Cannot delete address '%s' "
-				 "on interface '%s' vif '%s': "
-				 "no such address",
-				 addr.str().c_str(),
-				 config_iface.ifname().c_str(),
-				 config_vif.vifname().c_str());
-	    return (XORP_ERROR);
-	}
-	vifp->remove_addr(addr);
-	ifconfig().nexthop_port_mapper().delete_ipv6(addr);
-	return (XORP_OK);
     }
 
     //
@@ -504,11 +493,55 @@ IfConfigSetClick::config_address(const IfTreeInterface* pulled_ifp,
     ap->set_loopback(config_addr.loopback());
     ap->set_point_to_point(config_addr.point_to_point());
     ap->set_multicast(config_addr.multicast());
-    if (ap->point_to_point()) {
+    if (ap->point_to_point())
 	ap->set_endpoint(config_addr.endpoint());
-    }
     ap->set_prefix_len(config_addr.prefix_len());
     ap->set_enabled(config_addr.enabled());
+
+    return (XORP_OK);
+}
+
+int
+IfConfigSetClick::config_delete_address(const IfTreeInterface* pulled_ifp,
+					const IfTreeVif* pulled_vifp,
+					const IfTreeAddr6* pulled_addrp,
+					const IfTreeInterface& config_iface,
+					const IfTreeVif& config_vif,
+					const IfTreeAddr6& config_addr,
+					string& error_msg)
+{
+    IfTreeVif* vifp;
+    IfTreeAddr6* ap;
+ 
+    UNUSED(pulled_ifp);
+    UNUSED(pulled_vifp);
+    UNUSED(pulled_addrp);
+
+     vifp = _iftree.find_vif(config_iface.ifname(), config_vif.vifname());
+    if (vifp == NULL) {
+	error_msg = c_format("Cannot delete address on interface '%s' "
+			     "vif '%s': no such vif in the interface tree",
+			     config_iface.ifname().c_str(),
+			     config_vif.vifname().c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Delete the address
+    //
+    const IPv6& addr = config_addr.addr();
+    ap = vifp->find_addr(addr);
+    if (ap == NULL) {
+	error_msg = c_format("Cannot delete address '%s' "
+			     "on interface '%s' vif '%s': "
+			     "no such address",
+			     addr.str().c_str(),
+			     config_iface.ifname().c_str(),
+			     config_vif.vifname().c_str());
+	return (XORP_ERROR);
+    }
+    vifp->remove_addr(addr);
+    ifconfig().nexthop_port_mapper().delete_ipv6(addr);
 
     return (XORP_OK);
 }
