@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.7 2007/09/27 00:33:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.8 2007/12/23 08:22:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -333,12 +333,6 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	name = if_indextoname(if_index, name_buf);
 #endif
 	if (name == NULL) {
-	    const IfTreeVif* iftree_vifp = iftree.find_vif(if_index);
-	    if (iftree_vifp != NULL) {
-		XLOG_INFO("PAVPAVPAV: %s %s",
-			  iftree_vifp->ifname().c_str(),
-			  iftree_vifp->vifname().c_str());
-	    }
 	    XLOG_FATAL("Could not find interface corresponding to index %d",
 		       if_index);
 	}
