@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.14 2007/12/22 21:23:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_iphelper.cc,v 1.15 2007/12/23 08:22:18 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -140,17 +140,19 @@ IfConfigSetIPHelper::config_interface_begin(const IfTreeInterface* pulled_ifp,
     if (config_iface.mtu() != pulled_ifp->mtu()) {
 	error_msg = c_format("Cannot set the MTU to %u on "
 			     "interface %s: method not supported",
-			     mtu, config_iface.ifname().c_str());
+			     config_iface.mtu(),
+			     config_iface.ifname().c_str());
 	return (XORP_ERROR);
     }
 
     //
     // Set the MAC address
     //
-    if (mac != pulled_ifp->mac()) {
+    if (config_iface.mac() != pulled_ifp->mac()) {
 	error_msg = c_format("Cannot set the MAC address to %s "
 			     "on interface %s: method not supported",
-			     mac.str().c_str(), config_iface.ifname().c_str());
+			     config_iface.mac().str().c_str(),
+			     config_iface.ifname().c_str());
 	return (XORP_ERROR);
     }
 
@@ -193,6 +195,7 @@ IfConfigSetIPHelper::config_vif_begin(const IfTreeInterface* pulled_ifp,
 {
     UNUSED(pulled_ifp);
     UNUSED(config_iface);
+    UNUSED(config_vif);
     UNUSED(error_msg);
 
     if (pulled_vifp == NULL) {
