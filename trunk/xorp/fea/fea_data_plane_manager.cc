@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.5 2007/08/09 00:46:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.6 2007/09/15 00:32:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,6 +31,7 @@
 FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
 					 const string& manager_name)
     : _fea_node(fea_node),
+      _ifconfig_property(NULL),
       _ifconfig_get(NULL),
       _ifconfig_set(NULL),
       _ifconfig_observer(NULL),
@@ -120,6 +121,10 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
     //
     // Unload the plugins
     //
+    if (_ifconfig_property != NULL) {
+	delete _ifconfig_property;
+	_ifconfig_property = NULL;
+    }
     if (_ifconfig_get != NULL) {
 	delete _ifconfig_get;
 	_ifconfig_get = NULL;
@@ -214,6 +219,8 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
 	ifconfig().unregister_ifconfig_set(_ifconfig_set);
     if (_ifconfig_get != NULL)
 	ifconfig().unregister_ifconfig_get(_ifconfig_get);
+    if (_ifconfig_property != NULL)
+	ifconfig().unregister_ifconfig_property(_ifconfig_property);
 
     return (XORP_OK);
 }
@@ -243,17 +250,12 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	return (XORP_ERROR);
     }
 
-    //
-    // XXX: Start first the FibConfigForwarding so we can test whether
-    // the data plane supports IPv4 and IPv6.
-    //
-    if (_fibconfig_forwarding != NULL) {
-	if (_fibconfig_forwarding->start(error_msg) != XORP_OK)
+    if (_ifconfig_property != NULL) {
+	if (_ifconfig_property->start(error_msg) != XORP_OK)
 	    goto error_label;
-	_have_ipv4 = _fibconfig_forwarding->test_have_ipv4();
-	_have_ipv6 = _fibconfig_forwarding->test_have_ipv6();
+	_have_ipv4 = _ifconfig_property->test_have_ipv4();
+	_have_ipv6 = _ifconfig_property->test_have_ipv6();
     }
-
     if (_ifconfig_get != NULL) {
 	if (_ifconfig_get->start(error_msg) != XORP_OK)
 	    goto error_label;
@@ -272,6 +274,10 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     }
     if (_ifconfig_vlan_set != NULL) {
 	if (_ifconfig_vlan_set->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+    if (_fibconfig_forwarding != NULL) {
+	if (_fibconfig_forwarding->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
     if (_fibconfig_entry_get != NULL) {
@@ -369,6 +375,17 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 {
     string dummy_error_msg;
 
+    if (_ifconfig_property != NULL) {
+	if (ifconfig().register_ifconfig_property(_ifconfig_property,
+						  is_exclusive)
+	    != XORP_OK) {
+	    error_msg = c_format("Cannot register IfConfigProperty plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
     if (_ifconfig_get != NULL) {
 	if (ifconfig().register_ifconfig_get(_ifconfig_get, is_exclusive)
 	    != XORP_OK) {
@@ -645,6 +662,14 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
     }
     if (_ifconfig_get != NULL) {
 	if (_ifconfig_get->stop(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+    if (_ifconfig_property != NULL) {
+	if (_ifconfig_property->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";

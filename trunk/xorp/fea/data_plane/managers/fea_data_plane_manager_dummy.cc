@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.6 2007/08/20 19:12:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_dummy.cc,v 1.7 2007/09/15 02:09:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "fea/data_plane/ifconfig/ifconfig_property_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_dummy.hh"
@@ -73,6 +74,7 @@ FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
     if (_is_loaded_plugins)
 	return (XORP_OK);
 
+    XLOG_ASSERT(_ifconfig_property == NULL);
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
@@ -89,6 +91,7 @@ FeaDataPlaneManagerDummy::load_plugins(string& error_msg)
     //
     // Load the plugins
     //
+    _ifconfig_property = new IfConfigPropertyDummy(*this);
     _ifconfig_get = new IfConfigGetDummy(*this);
     _ifconfig_set = new IfConfigSetDummy(*this);
     _ifconfig_observer = new IfConfigObserverDummy(*this);

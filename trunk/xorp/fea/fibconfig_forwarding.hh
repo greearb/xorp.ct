@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/fibconfig_forwarding.hh,v 1.1 2007/07/17 22:53:55 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_FORWARDING_HH__
 #define __FEA_FIBCONFIG_FORWARDING_HH__
@@ -42,7 +42,7 @@ public:
      *
      * @return the @ref FibConfig instance.
      */
-    FibConfig&	fibconfig() { return _fibconfig; }
+    FibConfig& fibconfig() { return _fibconfig; }
 
     /**
      * Get the @ref FeaDataPlaneManager instance.
@@ -50,6 +50,13 @@ public:
      * @return the @ref FeaDataPlaneManager instance.
      */
     FeaDataPlaneManager& fea_data_plane_manager() { return _fea_data_plane_manager; }
+
+    /**
+     * Get the const @ref FeaDataPlaneManager instance.
+     *
+     * @return the const @ref FeaDataPlaneManager instance.
+     */
+    const FeaDataPlaneManager& fea_data_plane_manager() const { return _fea_data_plane_manager; }
 
     /**
      * Test whether this instance is running.
@@ -74,34 +81,6 @@ public:
      */
     virtual int stop(string& error_msg);
     
-    /**
-     * Return true if the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    virtual bool have_ipv4() const { return (_have_ipv4); }
-
-    /**
-     * Return true if the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    virtual bool have_ipv6() const { return (_have_ipv6); }
-
-    /**
-     * Test whether the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    virtual bool test_have_ipv4() const = 0;
-
-    /**
-     * Test whether the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    virtual bool test_have_ipv6() const = 0;
-
     /**
      * Test whether the IPv4 unicast forwarding engine is enabled or disabled
      * to forward packets.
@@ -183,10 +162,6 @@ private:
     bool	_orig_unicast_forwarding_enabled4;
     bool	_orig_unicast_forwarding_enabled6;
     bool	_orig_accept_rtadv_enabled6;
-
-    // Cached state whether the system has IPv4 or IPv6 support
-    bool	_have_ipv4;
-    bool	_have_ipv6;
 
     bool	_first_start;	// True if started for first time
 };

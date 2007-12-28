@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_proc_linux.cc,v 1.1 2007/07/17 22:53:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_proc_linux.cc,v 1.2 2007/07/17 23:07:39 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -24,7 +24,6 @@
 #include "libcomm/comm_api.h"
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_forwarding.hh"
 
 #include "fibconfig_forwarding_proc_linux.hh"
 
@@ -50,33 +49,6 @@ FibConfigForwardingProcLinux::~FibConfigForwardingProcLinux()
 {
 }
 
-bool
-FibConfigForwardingProcLinux::test_have_ipv4() const
-{
-    XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
-    if (!s.is_valid())
-	return (false);
-
-    comm_close(s);
-
-    return (true);
-}
-
-bool
-FibConfigForwardingProcLinux::test_have_ipv6() const
-{
-#ifndef HAVE_IPV6
-    return (false);
-#else
-    XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
-    if (!s.is_valid())
-	return (false);
-
-    comm_close(s);
-    return (true);
-#endif // HAVE_IPV6
-}
-
 int
 FibConfigForwardingProcLinux::unicast_forwarding_enabled4(bool& ret_value,
 							  string& error_msg) const
@@ -84,7 +56,7 @@ FibConfigForwardingProcLinux::unicast_forwarding_enabled4(bool& ret_value,
     int enabled = 0;
     FILE* fh;
     
-    if (! have_ipv4()) {
+    if (! fea_data_plane_manager().have_ipv4()) {
 	ret_value = false;
 	error_msg = c_format("Cannot test whether IPv4 unicast forwarding "
 			     "is enabled: IPv4 is not supported");
@@ -128,7 +100,7 @@ FibConfigForwardingProcLinux::unicast_forwarding_enabled6(bool& ret_value,
     int enabled = 0;
     FILE* fh;
     
-    if (! have_ipv6()) {
+    if (! fea_data_plane_manager().have_ipv6()) {
 	ret_value = false;
 	error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
 			     "is enabled: IPv6 is not supported");
@@ -171,7 +143,7 @@ FibConfigForwardingProcLinux::accept_rtadv_enabled6(bool& ret_value,
 {
     int enabled = 0;
     
-    if (! have_ipv6()) {
+    if (! fea_data_plane_manager().have_ipv6()) {
 	ret_value = false;
 	error_msg = c_format("Cannot test whether the acceptance of IPv6 "
 			     "Router Advertisement messages is enabled: "
@@ -198,7 +170,7 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled4(bool v,
     bool old_value;
     FILE* fh;
     
-    if (! have_ipv4()) {
+    if (! fea_data_plane_manager().have_ipv4()) {
 	if (! v) {
 	    //
 	    // XXX: we assume that "not supported" == "disable", hence
@@ -253,7 +225,7 @@ FibConfigForwardingProcLinux::set_unicast_forwarding_enabled6(bool v,
     bool old_value, old_value_accept_rtadv;
     FILE* fh;
     
-    if (! have_ipv6()) {
+    if (! fea_data_plane_manager().have_ipv6()) {
 	if (! v) {
 	    //
 	    // XXX: we assume that "not supported" == "disable", hence
@@ -322,7 +294,7 @@ FibConfigForwardingProcLinux::set_accept_rtadv_enabled6(bool v,
     int enable = (v) ? 1 : 0;
     bool old_value;
     
-    if (! have_ipv6()) {
+    if (! fea_data_plane_manager().have_ipv6()) {
 	if (! v) {
 	    //
 	    // XXX: we assume that "not supported" == "disable", hence

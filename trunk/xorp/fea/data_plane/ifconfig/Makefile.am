@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.4 2007/09/15 00:32:17 pavlin Exp $
+## $XORP: xorp/fea/data_plane/ifconfig/Makefile.am,v 1.5 2007/09/26 01:40:41 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -23,6 +23,11 @@ libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_dummy.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_iphelper.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_netlink_socket.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_observer_routing_socket.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_bsd.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_dummy.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_linux.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_solaris.hh
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_windows.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_click.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_dummy.hh
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_ioctl.hh
@@ -52,6 +57,11 @@ libxorp_ifconfig_la_SOURCES	+= ifconfig_parse_getifaddrs.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_parse_ioctl.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_parse_netlink_socket.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_parse_routing_socket.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_bsd.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_dummy.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_linux.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_solaris.cc
+libxorp_ifconfig_la_SOURCES	+= ifconfig_property_windows.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_click.cc
 libxorp_ifconfig_la_SOURCES	+= ifconfig_set_dummy.cc

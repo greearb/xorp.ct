@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.hh,v 1.5 2007/08/09 00:47:01 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.hh,v 1.6 2007/08/20 19:12:16 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
@@ -25,6 +25,7 @@ class FibConfigForwardingDummy;
 class FibConfigTableGetClick;
 class FibConfigTableSetClick;
 class IfConfigGetClick;
+class IfConfigPropertyDummy;
 class IfConfigSetClick;
 class IPv4;
 
@@ -274,6 +275,11 @@ private:
     //
     // The plugins
     //
+    //
+    // TODO: XXX: For the time being Click uses the
+    // IfConfigPropertyDummy plugin.
+    //
+    IfConfigPropertyDummy*	_ifconfig_property_dummy;
     IfConfigGetClick*		_ifconfig_get_click;
     IfConfigSetClick*		_ifconfig_set_click;
     //

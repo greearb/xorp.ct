@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.23 2007/09/10 13:48:46 bms Exp $
+# $XORP: xorp/fea/Jamfile,v 1.24 2007/10/04 20:46:14 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -19,6 +19,7 @@ SubDir TOP fea ;
 Library libfea_data_plane_base :
 	fea_data_plane_manager.cc
 	fibconfig_forwarding.cc
+	ifconfig_property.cc
 	io_ip.cc
 	io_link.cc
 	io_tcpudp.cc

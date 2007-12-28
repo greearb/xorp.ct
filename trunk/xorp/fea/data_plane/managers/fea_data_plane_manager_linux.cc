@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.cc,v 1.5 2007/08/20 19:12:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.cc,v 1.6 2007/09/26 01:40:41 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "fea/data_plane/ifconfig/ifconfig_property_linux.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_ioctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh"
@@ -78,6 +79,7 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
     if (_is_loaded_plugins)
 	return (XORP_OK);
 
+    XLOG_ASSERT(_ifconfig_property == NULL);
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
@@ -94,6 +96,10 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
     //
     // Load the plugins
     //
+#if defined(HOST_OS_LINUX)
+    _ifconfig_property = new IfConfigPropertyLinux(*this);
+#endif
+
 #if defined(HAVE_NETLINK_SOCKETS)
     _ifconfig_get = new IfConfigGetNetlinkSocket(*this);
 #elif defined(HAVE_PROC_LINUX) && defined(HAVE_IOCTL_SIOCGIFCONF)

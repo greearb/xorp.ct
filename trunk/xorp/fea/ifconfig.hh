@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.73 2007/12/19 04:57:32 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.74 2007/12/22 21:23:40 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -20,6 +20,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
 
+#include "ifconfig_property.hh"
 #include "ifconfig_get.hh"
 #include "ifconfig_set.hh"
 #include "ifconfig_observer.hh"
@@ -62,7 +63,7 @@ public:
     EventLoop& eventloop() { return _eventloop; }
 
     /**
-     * Get the status code
+     * Get the status code.
      *
      * @param reason the human-readable reason for any failure.
      * @return the status code.
@@ -220,6 +221,25 @@ public:
     void set_restore_original_config_on_shutdown(bool v) {
 	_restore_original_config_on_shutdown = v;
     }
+
+    /**
+     * Register @ref IfConfigProperty plugin.
+     *
+     * @param ifconfig_property the plugin to register.
+     * @param is_exclusive if true, the plugin is registered as the
+     * exclusive plugin, otherwise is added to the list of plugins.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int register_ifconfig_property(IfConfigProperty* ifconfig_property,
+				   bool is_exclusive);
+
+    /**
+     * Unregister @ref IfConfigProperty plugin.
+     *
+     * @param ifconfig_property the plugin to unregister.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int unregister_ifconfig_property(IfConfigProperty* ifconfig_property);
 
     /**
      * Register @ref IfConfigGet plugin.
@@ -435,6 +455,10 @@ private:
     IfConfigUpdateReplicator	_ifconfig_update_replicator;
     IfConfigErrorReporter	_ifconfig_error_reporter;
 
+    //
+    // The registered plugins
+    //
+    list<IfConfigProperty*>	_ifconfig_property_plugins;
     list<IfConfigGet*>		_ifconfig_gets;
     list<IfConfigSet*>		_ifconfig_sets;
     list<IfConfigObserver*>	_ifconfig_observers;

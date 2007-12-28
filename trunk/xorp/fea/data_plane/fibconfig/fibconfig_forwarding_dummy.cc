@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_dummy.cc,v 1.1 2007/07/17 22:53:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_dummy.cc,v 1.2 2007/07/17 23:24:24 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -24,7 +24,6 @@
 #include "libcomm/comm_api.h"
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_forwarding.hh"
 
 #include "fibconfig_forwarding_dummy.hh"
 
@@ -46,18 +45,6 @@ FibConfigForwardingDummy::FibConfigForwardingDummy(
 
 FibConfigForwardingDummy::~FibConfigForwardingDummy()
 {
-}
-
-bool
-FibConfigForwardingDummy::test_have_ipv4() const
-{
-    return (true);
-}
-
-bool
-FibConfigForwardingDummy::test_have_ipv6() const
-{
-    return (true);
 }
 
 int

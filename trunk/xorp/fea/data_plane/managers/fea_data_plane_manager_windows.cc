@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.5 2007/08/09 00:47:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_windows.cc,v 1.6 2007/08/20 19:12:16 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -23,6 +23,7 @@
 #ifdef HOST_OS_WINDOWS
 #include "fea/data_plane/control_socket/windows_rras_support.hh"
 #endif
+#include "fea/data_plane/ifconfig/ifconfig_property_windows.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_iphelper.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_iphelper.hh"
 #include "fea/data_plane/ifconfig/ifconfig_observer_iphelper.hh"
@@ -104,6 +105,7 @@ FeaDataPlaneManagerWindows::load_plugins(string& error_msg)
     if (_is_loaded_plugins)
 	return (XORP_OK);
 
+    XLOG_ASSERT(_ifconfig_property == NULL);
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
@@ -120,6 +122,8 @@ FeaDataPlaneManagerWindows::load_plugins(string& error_msg)
     //
 #if defined(HOST_OS_WINDOWS)
     bool is_rras_running = WinSupport::is_rras_running();
+
+    _ifconfig_property = new IfConfigPropertyWindows(*this);
     _ifconfig_get = new IfConfigGetIPHelper(*this);
     _ifconfig_set = new IfConfigSetIPHelper(*this);
     _ifconfig_observer = new IfConfigObserverIPHelper(*this);
@@ -141,7 +145,7 @@ FeaDataPlaneManagerWindows::load_plugins(string& error_msg)
     } else {
 	_fibconfig_table_observer = new FibConfigTableObserverIPHelper(*this);
     }
-#endif
+#endif // HOST_OS_WINDOWS
 
     _is_loaded_plugins = true;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.77 2007/12/21 03:05:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.78 2007/12/22 21:23:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -238,6 +238,41 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
 }
 
 int
+IfConfig::register_ifconfig_property(IfConfigProperty* ifconfig_property,
+				     bool is_exclusive)
+{
+    if (is_exclusive)
+	_ifconfig_property_plugins.clear();
+
+    if ((ifconfig_property != NULL)
+	&& (find(_ifconfig_property_plugins.begin(),
+		 _ifconfig_property_plugins.end(),
+		 ifconfig_property)
+	    == _ifconfig_property_plugins.end())) {
+	_ifconfig_property_plugins.push_back(ifconfig_property);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IfConfig::unregister_ifconfig_property(IfConfigProperty* ifconfig_property)
+{
+    if (ifconfig_property == NULL)
+	return (XORP_ERROR);
+
+    list<IfConfigProperty*>::iterator iter;
+    iter = find(_ifconfig_property_plugins.begin(),
+		_ifconfig_property_plugins.end(),
+		ifconfig_property);
+    if (iter == _ifconfig_property_plugins.end())
+	return (XORP_ERROR);
+    _ifconfig_property_plugins.erase(iter);
+
+    return (XORP_OK);
+}
+
+int
 IfConfig::register_ifconfig_get(IfConfigGet* ifconfig_get, bool is_exclusive)
 {
     if (is_exclusive)
@@ -420,6 +455,7 @@ IfConfig::unregister_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set)
 int
 IfConfig::start(string& error_msg)
 {
+    list<IfConfigProperty*>::iterator ifconfig_property_iter;
     list<IfConfigGet*>::iterator ifconfig_get_iter;
     list<IfConfigSet*>::iterator ifconfig_set_iter;
     list<IfConfigObserver*>::iterator ifconfig_observer_iter;
@@ -432,6 +468,10 @@ IfConfig::start(string& error_msg)
     //
     // Check whether all mechanisms are available
     //
+    if (_ifconfig_property_plugins.empty()) {
+	error_msg = c_format("No mechanism to test the data plane properties");
+	return (XORP_ERROR);
+    }
     if (_ifconfig_gets.empty()) {
 	error_msg = c_format("No mechanism to get the interface information");
 	return (XORP_ERROR);
@@ -448,6 +488,17 @@ IfConfig::start(string& error_msg)
     // XXX: Don't check the IfConfigVlanGet and IfConfigVlanSet mechanisms,
     // because they are optional.
     //
+
+    //
+    // Start the IfConfigProperty methods
+    //
+    for (ifconfig_property_iter = _ifconfig_property_plugins.begin();
+	 ifconfig_property_iter != _ifconfig_property_plugins.end();
+	 ++ifconfig_property_iter) {
+	IfConfigProperty* ifconfig_property = *ifconfig_property_iter;
+	if (ifconfig_property->start(error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
 
     //
     // Start the IfConfigGet methods
@@ -528,6 +579,7 @@ IfConfig::start(string& error_msg)
 int
 IfConfig::stop(string& error_msg)
 {
+    list<IfConfigProperty*>::iterator ifconfig_property_iter;
     list<IfConfigGet*>::iterator ifconfig_get_iter;
     list<IfConfigSet*>::iterator ifconfig_set_iter;
     list<IfConfigObserver*>::iterator ifconfig_observer_iter;
@@ -624,6 +676,21 @@ IfConfig::stop(string& error_msg)
 	 ++ifconfig_get_iter) {
 	IfConfigGet* ifconfig_get = *ifconfig_get_iter;
 	if (ifconfig_get->stop(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    //
+    // Stop the IfConfigProperty methods
+    //
+    for (ifconfig_property_iter = _ifconfig_property_plugins.begin();
+	 ifconfig_property_iter != _ifconfig_property_plugins.end();
+	 ++ifconfig_property_iter) {
+	IfConfigProperty* ifconfig_property = *ifconfig_property_iter;
+	if (ifconfig_property->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";

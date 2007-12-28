@@ -65,7 +65,8 @@ am_libfea_la_OBJECTS = fea_io.lo fea_node.lo fibconfig.lo \
 libfea_la_OBJECTS = $(am_libfea_la_OBJECTS)
 libfea_data_plane_base_la_LIBADD =
 am_libfea_data_plane_base_la_OBJECTS = fea_data_plane_manager.lo \
-	fibconfig_forwarding.lo io_ip.lo io_link.lo io_tcpudp.lo
+	fibconfig_forwarding.lo ifconfig_property.lo io_ip.lo \
+	io_link.lo io_tcpudp.lo
 libfea_data_plane_base_la_OBJECTS =  \
 	$(am_libfea_data_plane_base_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
@@ -398,8 +399,9 @@ xorp_fea_dummy_SOURCES = xorp_fea.cc
 
 # -- Library Sources
 libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
-	fibconfig_forwarding.hh io_ip.hh io_link.hh io_tcpudp.hh \
-	fea_data_plane_manager.cc fibconfig_forwarding.cc io_ip.cc \
+	fibconfig_forwarding.hh ifconfig_property.hh io_ip.hh \
+	io_link.hh io_tcpudp.hh fea_data_plane_manager.cc \
+	fibconfig_forwarding.cc ifconfig_property.cc io_ip.cc \
 	io_link.cc io_tcpudp.cc
 libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
 	fte.hh fibconfig.hh fibconfig_entry_get.hh \
@@ -587,6 +589,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_forwarding.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_reporter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iftree.Plo@am__quote@

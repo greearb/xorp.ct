@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_windows.hh,v 1.1 2007/07/17 22:53:56 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_FORWARDING_WINDOWS_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_FORWARDING_WINDOWS_HH__
@@ -51,20 +51,6 @@ public:
      */
     virtual int stop(string& error_msg);
     
-    /**
-     * Test whether the underlying system supports IPv4.
-     * 
-     * @return true if the underlying system supports IPv4, otherwise false.
-     */
-    virtual bool test_have_ipv4() const;
-
-    /**
-     * Test whether the underlying system supports IPv6.
-     * 
-     * @return true if the underlying system supports IPv6, otherwise false.
-     */
-    virtual bool test_have_ipv6() const;
-
     /**
      * Test whether the IPv4 unicast forwarding engine is enabled or disabled
      * to forward packets.

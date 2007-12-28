@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.cc,v 1.5 2007/08/20 19:12:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.cc,v 1.6 2007/09/15 02:09:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -20,6 +20,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "fea/data_plane/ifconfig/ifconfig_property_bsd.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_getifaddrs.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_ioctl.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_sysctl.hh"
@@ -75,6 +76,7 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
     if (_is_loaded_plugins)
 	return (XORP_OK);
 
+    XLOG_ASSERT(_ifconfig_property == NULL);
     XLOG_ASSERT(_ifconfig_get == NULL);
     XLOG_ASSERT(_ifconfig_set == NULL);
     XLOG_ASSERT(_ifconfig_observer == NULL);
@@ -91,6 +93,15 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
     //
     // Load the plugins
     //
+#if	defined(HOST_OS_BSDI)			\
+	|| defined(HOST_OS_DRAGONFLYBSD)	\
+	|| defined(HOST_OS_FREEBSD)		\
+	|| defined(HOST_OS_MACOSX)		\
+	|| defined(HOST_OS_NETBSD)		\
+	|| defined(HOST_OS_OPENBSD)
+    _ifconfig_property = new IfConfigPropertyBsd(*this);
+#endif
+
 #if defined(HAVE_GETIFADDRS)
     _ifconfig_get = new IfConfigGetGetifaddrs(*this);
 #elif defined(HAVE_SYSCTL_NET_RT_IFLIST)

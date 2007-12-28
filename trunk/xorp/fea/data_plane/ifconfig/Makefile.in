@@ -55,8 +55,10 @@ am_libxorp_ifconfig_la_OBJECTS = ifconfig_get_click.lo \
 	ifconfig_observer_routing_socket.lo \
 	ifconfig_parse_getifaddrs.lo ifconfig_parse_ioctl.lo \
 	ifconfig_parse_netlink_socket.lo \
-	ifconfig_parse_routing_socket.lo ifconfig_set.lo \
-	ifconfig_set_click.lo ifconfig_set_dummy.lo \
+	ifconfig_parse_routing_socket.lo ifconfig_property_bsd.lo \
+	ifconfig_property_dummy.lo ifconfig_property_linux.lo \
+	ifconfig_property_solaris.lo ifconfig_property_windows.lo \
+	ifconfig_set.lo ifconfig_set_click.lo ifconfig_set_dummy.lo \
 	ifconfig_set_ioctl.lo ifconfig_set_iphelper.lo \
 	ifconfig_set_netlink_socket.lo ifconfig_vlan_get_bsd.lo \
 	ifconfig_vlan_get_dummy.lo ifconfig_vlan_get_linux.lo \
@@ -233,24 +235,28 @@ libxorp_ifconfig_la_SOURCES = ifconfig_get_click.hh \
 	ifconfig_get_sysctl.hh ifconfig_media.hh \
 	ifconfig_observer_dummy.hh ifconfig_observer_iphelper.hh \
 	ifconfig_observer_netlink_socket.hh \
-	ifconfig_observer_routing_socket.hh ifconfig_set_click.hh \
-	ifconfig_set_dummy.hh ifconfig_set_ioctl.hh \
-	ifconfig_set_iphelper.hh ifconfig_set_netlink_socket.hh \
-	ifconfig_vlan_get_bsd.hh ifconfig_vlan_get_dummy.hh \
-	ifconfig_vlan_get_linux.hh ifconfig_vlan_set_bsd.hh \
-	ifconfig_vlan_set_dummy.hh ifconfig_vlan_set_linux.hh \
-	ifconfig_get_click.cc ifconfig_get_dummy.cc \
-	ifconfig_get_getifaddrs.cc ifconfig_get_ioctl.cc \
-	ifconfig_get_iphelper.cc ifconfig_get_netlink_socket.cc \
-	ifconfig_get_proc_linux.cc ifconfig_get_sysctl.cc \
-	ifconfig_media.cc ifconfig_observer_dummy.cc \
-	ifconfig_observer_iphelper.cc \
+	ifconfig_observer_routing_socket.hh ifconfig_property_bsd.hh \
+	ifconfig_property_dummy.hh ifconfig_property_linux.hh \
+	ifconfig_property_solaris.hh ifconfig_property_windows.hh \
+	ifconfig_set_click.hh ifconfig_set_dummy.hh \
+	ifconfig_set_ioctl.hh ifconfig_set_iphelper.hh \
+	ifconfig_set_netlink_socket.hh ifconfig_vlan_get_bsd.hh \
+	ifconfig_vlan_get_dummy.hh ifconfig_vlan_get_linux.hh \
+	ifconfig_vlan_set_bsd.hh ifconfig_vlan_set_dummy.hh \
+	ifconfig_vlan_set_linux.hh ifconfig_get_click.cc \
+	ifconfig_get_dummy.cc ifconfig_get_getifaddrs.cc \
+	ifconfig_get_ioctl.cc ifconfig_get_iphelper.cc \
+	ifconfig_get_netlink_socket.cc ifconfig_get_proc_linux.cc \
+	ifconfig_get_sysctl.cc ifconfig_media.cc \
+	ifconfig_observer_dummy.cc ifconfig_observer_iphelper.cc \
 	ifconfig_observer_netlink_socket.cc \
 	ifconfig_observer_routing_socket.cc \
 	ifconfig_parse_getifaddrs.cc ifconfig_parse_ioctl.cc \
 	ifconfig_parse_netlink_socket.cc \
-	ifconfig_parse_routing_socket.cc ifconfig_set.cc \
-	ifconfig_set_click.cc ifconfig_set_dummy.cc \
+	ifconfig_parse_routing_socket.cc ifconfig_property_bsd.cc \
+	ifconfig_property_dummy.cc ifconfig_property_linux.cc \
+	ifconfig_property_solaris.cc ifconfig_property_windows.cc \
+	ifconfig_set.cc ifconfig_set_click.cc ifconfig_set_dummy.cc \
 	ifconfig_set_ioctl.cc ifconfig_set_iphelper.cc \
 	ifconfig_set_netlink_socket.cc ifconfig_vlan_get_bsd.cc \
 	ifconfig_vlan_get_dummy.cc ifconfig_vlan_get_linux.cc \
@@ -327,6 +333,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_ioctl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_netlink_socket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_parse_routing_socket.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property_bsd.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property_dummy.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property_linux.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property_solaris.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property_windows.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_click.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_set_dummy.Plo@am__quote@

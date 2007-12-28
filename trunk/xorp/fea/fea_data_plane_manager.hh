@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.6 2007/08/20 19:12:14 pavlin Exp $
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.7 2007/09/15 00:32:16 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
@@ -32,6 +32,7 @@ class FibConfigTableSet;
 class IfConfig;
 class IfConfigGet;
 class IfConfigObserver;
+class IfConfigProperty;
 class IfConfigSet;
 class IfConfigVlanGet;
 class IfConfigVlanSet;
@@ -187,6 +188,13 @@ public:
      * @return the @ref IoTcpUdpManager instance.
      */
     IoTcpUdpManager& io_tcpudp_manager();
+
+    /**
+     * Get the IfConfigProperty plugin.
+     *
+     * @return the @ref IfConfigGet plugin.
+     */
+    IfConfigProperty* ifconfig_property() { return _ifconfig_property; }
 
     /**
      * Get the IfConfigGet plugin.
@@ -360,6 +368,7 @@ protected:
     //
     // The plugins
     //
+    IfConfigProperty*		_ifconfig_property;
     IfConfigGet*		_ifconfig_get;
     IfConfigSet*		_ifconfig_set;
     IfConfigObserver*		_ifconfig_observer;
