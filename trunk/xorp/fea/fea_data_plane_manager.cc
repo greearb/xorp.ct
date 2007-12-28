@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.6 2007/09/15 00:32:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.7 2007/12/28 05:12:34 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,8 +44,6 @@ FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
       _fibconfig_table_get(NULL),
       _fibconfig_table_set(NULL),
       _fibconfig_table_observer(NULL),
-      _have_ipv4(false),
-      _have_ipv6(false),
       _manager_name(manager_name),
       _is_loaded_plugins(false),
       _is_running_manager(false),
@@ -253,8 +251,6 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     if (_ifconfig_property != NULL) {
 	if (_ifconfig_property->start(error_msg) != XORP_OK)
 	    goto error_label;
-	_have_ipv4 = _ifconfig_property->test_have_ipv4();
-	_have_ipv6 = _ifconfig_property->test_have_ipv6();
     }
     if (_ifconfig_get != NULL) {
 	if (_ifconfig_get->start(error_msg) != XORP_OK)
@@ -363,8 +359,6 @@ FeaDataPlaneManager::stop_plugins(string& error_msg)
 
     unregister_plugins(error_msg2);
 
-    _have_ipv4 = false;
-    _have_ipv6 = false;
     _is_running_plugins = false;
 
     return (ret_value);
@@ -684,6 +678,24 @@ EventLoop&
 FeaDataPlaneManager::eventloop()
 {
     return (_fea_node.eventloop());
+}
+
+bool
+FeaDataPlaneManager::have_ipv4() const
+{
+    if (_ifconfig_property != NULL)
+	return (_ifconfig_property->have_ipv4());
+
+    return (false);
+}
+
+bool
+FeaDataPlaneManager::have_ipv6() const
+{
+    if (_ifconfig_property != NULL)
+	return (_ifconfig_property->have_ipv6());
+
+    return (false);
 }
 
 IfConfig&
