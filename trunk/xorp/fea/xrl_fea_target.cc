@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.33 2007/10/12 07:53:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.34 2007/11/29 01:52:36 pavlin Exp $"
 
 
 //
@@ -305,9 +305,6 @@ XrlFeaTarget::fea_click_0_1_start_click()
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (_fea_data_plane_manager_click->register_plugins(error_msg) != XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
     if (_fea_data_plane_manager_click->start_plugins(error_msg) != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
