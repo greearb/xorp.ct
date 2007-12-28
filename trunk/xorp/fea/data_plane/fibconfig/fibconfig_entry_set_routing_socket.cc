@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.14 2007/10/12 07:53:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.15 2007/11/07 19:42:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -202,7 +202,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = fibconfig().iftree();
+	const IfTree& iftree = fibconfig().local_config_iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -321,13 +321,15 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 
 	// Get the physical interface index
 	do {
-	    const IfTree& iftree = fibconfig().iftree();
-	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-	    if (ifp == NULL) {
-		XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
+	    const IfTree& iftree = fibconfig().local_config_iftree();
+	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
+						    fte.vifname());
+	    if (vifp == NULL) {
+		XLOG_ERROR("Invalid interface name %s vif name %s",
+			   fte.ifname().c_str(), fte.vifname().c_str());
 		return (XORP_ERROR);
 	    }
-	    pif_index = ifp->pif_index();
+	    pif_index = vifp->pif_index();
 	} while (false);
 
 	// Adjust the nexthop address (if necessary)
@@ -367,9 +369,9 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	sdl->sdl_len = sizeof(*sdl);
 #endif
 	sdl->sdl_index = pif_index;
-	strncpy(sdl->sdl_data, fte.ifname().c_str(), sizeof(sdl->sdl_data));
-	if (fte.ifname().size() < sizeof(sdl->sdl_data)) {
-	    sdl->sdl_nlen = fte.ifname().size();
+	strncpy(sdl->sdl_data, fte.vifname().c_str(), sizeof(sdl->sdl_data));
+	if (fte.vifname().size() < sizeof(sdl->sdl_data)) {
+	    sdl->sdl_nlen = fte.vifname().size();
 	    sdl->sdl_data[sizeof(sdl->sdl_data) - 1] = '\0';
 	} else {
 	    sdl->sdl_nlen = sizeof(sdl->sdl_data);
@@ -509,9 +511,10 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 	    // Check whether the interface is down
 	    if (fte.ifname().empty())
 		break;		// No interface to check
-	    const IfTree& iftree = fibconfig().iftree();
-	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-	    if ((ifp != NULL) && ifp->enabled())
+	    const IfTree& iftree = fibconfig().live_config_iftree();
+	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
+						    fte.vifname());
+	    if ((vifp != NULL) && vifp->enabled())
 		break;		// The interface is UP
 
 	    return (XORP_OK);

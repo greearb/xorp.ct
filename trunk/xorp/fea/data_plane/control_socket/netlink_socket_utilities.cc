@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.8 2007/12/23 08:22:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.9 2007/12/24 02:47:04 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -171,6 +171,7 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     int if_index = 0;		// XXX: initialized with an invalid value
     bool lookup_ifindex = true;
     string if_name;
+    string vif_name;
     int family = fte.nexthop().af();
     bool is_deleted = false;
     
@@ -217,7 +218,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    //
 	    return (XORP_ERROR);
 	}
-	if_name = pi->ifname();		// XXX: ifname == vifname
+	if_name = pi->ifname();
+	vif_name = if_name;		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
 	lookup_ifindex = false;
 	break;
@@ -246,7 +248,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    //
 	    return (XORP_ERROR);
 	}
-	if_name = pi->ifname();		// XXX: ifname == vifname
+	if_name = pi->ifname();
+	vif_name = if_name;		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
 	lookup_ifindex = false;
 	break;
@@ -312,11 +315,9 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	xorp_route = true;
 
     //
-    // Get the interface name and index
+    // Get the interface/vif name and index
     //
     if (lookup_ifindex) {
-	const char* name = NULL;
-
 	// Get the interface index
 	if (rta_array[RTA_OIF] != NULL) {
 	    const uint8_t* p = static_cast<const uint8_t *>(
@@ -327,16 +328,14 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    return (XORP_ERROR);
 	}
 
-	// Get the interface name
-#ifdef HAVE_IF_INDEXTONAME
-	char name_buf[IF_NAMESIZE];
-	name = if_indextoname(if_index, name_buf);
-#endif
-	if (name == NULL) {
-	    XLOG_FATAL("Could not find interface corresponding to index %d",
+	// Get the interface/vif name
+	const IfTreeVif* vifp = iftree.find_vif(if_index);
+	if (vifp == NULL) {
+	    XLOG_FATAL("Could not find interface and vif for index %d",
 		       if_index);
 	}
-	if_name = string(name);
+	if_name = vifp->ifname();
+	vif_name = vifp->vifname();
     }
 
     //
@@ -353,8 +352,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     //
     // TODO: define default admin distance instead of 0xffff
     //
-    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
-	       route_metric, 0xffff, xorp_route);
+    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr,
+	       if_name, vif_name, route_metric, 0xffff, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
     

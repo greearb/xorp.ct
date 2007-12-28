@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.19 2007/11/17 05:14:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.20 2007/11/18 02:32:13 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -70,8 +70,8 @@ find_pif_index_by_addr(const IfTree& iftree, const IPvX& local_addr,
 			     local_addr.str().c_str());
 	return (0);
     }
-    XLOG_ASSERT(ifp != NULL);
-    pif_index = ifp->pif_index();
+    XLOG_ASSERT(vifp != NULL);
+    pif_index = vifp->pif_index();
     if (pif_index == 0) {
 	error_msg = c_format("Could not find physical interface index for "
 			     "IP address %s",
@@ -81,7 +81,7 @@ find_pif_index_by_addr(const IfTree& iftree, const IPvX& local_addr,
 
     return (pif_index);
 }
-#endif
+#endif // HAVE_IPV6
 
 /**
  * Extract the port number from struct sockaddr_storage.
@@ -1524,14 +1524,10 @@ IoTcpUdpSocket::data_io_cb(XorpFd fd, IoEventType io_event_type)
     // Find the interface and the vif this message was received on.
     //
     if (pif_index != 0) {
-	const IfTreeInterface* ifp = NULL;
-	const IfTreeVif* vifp = NULL;
-	ifp = iftree().find_interface(pif_index);
-	if (ifp != NULL) {
-	    if_name = ifp->ifname();
-	    vifp = ifp->find_vif(pif_index);
-	    if (vifp != NULL)
-		vif_name = vifp->vifname();
+	const IfTreeVif* vifp = iftree().find_vif(pif_index);
+	if (vifp != NULL) {
+	    if_name = vifp->ifname();
+	    vif_name = vifp->vifname();
 	}
     }
 

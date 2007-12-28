@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.9 2007/09/04 16:40:10 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.10 2007/09/15 19:52:44 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -193,14 +193,14 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
     	memset(&ipfwdrow, 0, sizeof(ipfwdrow));
     }
 
-    const IfTree& iftree = fibconfig().iftree();
-    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-    XLOG_ASSERT(ifp != NULL);
+    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
+    XLOG_ASSERT(vifp != NULL);
 
     ipfwdrow.dwForwardDest = tmpdest;
     ipfwdrow.dwForwardMask = tmpmask;
     ipfwdrow.dwForwardNextHop = tmpnexthop;
-    ipfwdrow.dwForwardIfIndex = ifp->pif_index();
+    ipfwdrow.dwForwardIfIndex = vifp->pif_index();
     ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
     ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_OTHER;
     //
@@ -304,10 +304,10 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // If the FEA does not know about this interface, there is a
     // programming error.
     //
-    const IfTree& iftree = fibconfig().iftree();
-    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-    XLOG_ASSERT(ifp != NULL);
-    ipfwdrow.dwForwardIfIndex = ifp->pif_index();
+    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
+    XLOG_ASSERT(vifp != NULL);
+    ipfwdrow.dwForwardIfIndex = vifp->pif_index();
 
     //
     // The FIB fills out the dwForwardType field strictly according

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.10 2007/07/18 01:30:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc,v 1.11 2007/10/12 07:53:48 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -125,7 +125,7 @@ FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
     if (fea_data_plane_manager().have_ipv4()) {
 	FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	    AF_INET,
-	    fibconfig().iftree(),
+	    fibconfig().live_config_iftree(),
 	    fte_list,
 	    buffer,
 	    false);
@@ -142,7 +142,7 @@ FibConfigTableObserverNetlinkSocket::receive_data(const vector<uint8_t>& buffer)
     if (fea_data_plane_manager().have_ipv6()) {
 	FibConfigTableGetNetlinkSocket::parse_buffer_netlink_socket(
 	    AF_INET6,
-	    fibconfig().iftree(),
+	    fibconfig().live_config_iftree(),
 	    fte_list,
 	    buffer,
 	    false);

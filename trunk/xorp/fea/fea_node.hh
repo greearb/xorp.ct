@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.11 2007/08/15 18:55:16 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.12 2007/10/11 07:12:56 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -215,22 +215,6 @@ private:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int unload_data_plane_managers(string& error_msg);
-
-    /**
-     * Start the data plane managers plugins.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start_data_plane_managers_plugins(string& error_msg);
-
-    /**
-     * Stop the data plane managers plugins.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int stop_data_plane_managers_plugins(string& error_msg);
 
     EventLoop&	_eventloop;	// The event loop to use
     bool	_is_running;	// True if the service is running

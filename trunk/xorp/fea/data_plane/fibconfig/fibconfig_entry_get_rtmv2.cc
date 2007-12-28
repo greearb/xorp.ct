@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.13 2007/09/15 19:52:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_rtmv2.cc,v 1.14 2007/10/12 07:53:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -263,7 +263,7 @@ FibConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	XLOG_ERROR("Error reading from Rtmv2 pipe: %s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (parse_buffer_routing_socket(fibconfig().iftree(), fte,
+    if (parse_buffer_routing_socket(fibconfig().live_config_iftree(), fte,
 				    _rs_reader.buffer(), FibMsg::GETS)
 	!= XORP_OK) {
 	return (XORP_ERROR);
@@ -410,7 +410,7 @@ FibConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 	return (XORP_ERROR);
     }
 
-    if (parse_buffer_routing_socket(fibconfig().iftree(), fte,
+    if (parse_buffer_routing_socket(fibconfig().live_config_iftree(), fte,
 				    _rs_reader.buffer(), FibMsg::GETS)
 	!= XORP_OK) {
 	return (XORP_ERROR);

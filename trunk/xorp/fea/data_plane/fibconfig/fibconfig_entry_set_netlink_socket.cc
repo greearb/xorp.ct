@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.14 2007/09/27 00:33:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.15 2007/10/12 07:53:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -238,44 +238,52 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
 
-    // Get the interface index, if it exists.
-    if_index = 0;
-#ifdef HAVE_IF_NAMETOINDEX
-    if_index = if_nametoindex(fte.vifname().c_str());
-#endif // HAVE_IF_NAMETOINDEX
-    if (if_index == 0) {
-	do {
-	    //
-	    // Check for discard and unreachable routes.
-	    // The referenced ifname must have respectively the discard or the
-	    // unreachable property. These use a separate route type in netlink
-	    // land. Unlike BSD, it need not reference a loopback interface.
-	    // Because this interface exists only in the FEA, it has no index.
-	    //
-	    if (fte.ifname().empty())
-		break;
-	    const IfTree& iftree = fibconfig().iftree();
-	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-	    XLOG_ASSERT(ifp != NULL);
-
-	    if (ifp->discard()) {
-		rtmsg->rtm_type = RTN_BLACKHOLE;
-		break;
-	    }
-	    if (ifp->unreachable()) {
-		rtmsg->rtm_type = RTN_UNREACHABLE;
-		break;
-	    }
-
-	    // Catchall.
-	    XLOG_FATAL("Could not find interface index for name %s",
-		       fte.vifname().c_str());
+    // Get the interface index, if it exists
+    do {
+	//
+	// Check for discard and unreachable routes.
+	// The referenced ifname must have respectively the discard or the
+	// unreachable property. These use a separate route type in netlink
+	// land. Unlike BSD, it need not reference a loopback interface.
+	// Because this interface exists only in the FEA, it has no index.
+	//
+	if (fte.ifname().empty())
 	    break;
-	} while (false);
-    }
+	const IfTree& iftree = fibconfig().local_config_iftree();
+	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
+	if (ifp == NULL) {
+	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
+	    return (XORP_ERROR);
+	}
 
+	if (ifp->discard()) {
+	    rtmsg->rtm_type = RTN_BLACKHOLE;
+	    break;
+	}
+	if (ifp->unreachable()) {
+	    rtmsg->rtm_type = RTN_UNREACHABLE;
+	    break;
+	}
+
+	const IfTreeVif* vifp = ifp->find_vif(fte.vifname());
+	if (vifp == NULL) {
+	    XLOG_ERROR("Invalid interface name %s vif name: %s",
+		       fte.ifname().c_str(), fte.vifname().c_str());
+	    return (XORP_ERROR);
+	}
+	if_index = vifp->pif_index();
+	if (if_index != NULL)
+	    break;
+
+	XLOG_FATAL("Could not find interface index for interface %s vif %s",
+		   fte.ifname().c_str(), fte.vifname().c_str());
+	break;
+    } while (false);
+
+    //
     // If the interface has an index in the host stack, add it
     // as an attribute.
+    //
     if (if_index != 0) {
 	int int_if_index = if_index;
 	rta_len = RTA_LENGTH(sizeof(int_if_index));
@@ -480,7 +488,7 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = fibconfig().iftree();
+	const IfTree& iftree = fibconfig().local_config_iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	//
 	// XXX: unlike adding a route, we don't use XLOG_ASSERT()
@@ -543,9 +551,10 @@ FibConfigEntrySetNetlinkSocket::delete_entry(const FteX& fte)
 	    // Check whether the interface is down
 	    if (fte.ifname().empty())
 		break;		// No interface to check
-	    const IfTree& iftree = fibconfig().iftree();
-	    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-	    if ((ifp != NULL) && ifp->enabled())
+	    const IfTree& iftree = fibconfig().live_config_iftree();
+	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
+						    fte.vifname());
+	    if ((vifp != NULL) && vifp->enabled())
 		break;		// The interface is UP
 
 	    return (XORP_OK);

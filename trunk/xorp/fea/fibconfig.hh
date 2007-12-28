@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.13 2007/09/15 19:52:38 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.14 2007/12/28 04:51:49 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -57,9 +57,12 @@ public:
      * Constructor.
      * 
      * @param fea_node the FEA node.
-     * @param iftree the interface tree to use.
+     * @param live_config_iftree the live interface configuration tree to use.
+     * @param local_config_iftree the local interface configuration tree to
+     * use.
      */
-    FibConfig(FeaNode& fea_node, const IfTree& iftree);
+    FibConfig(FeaNode& fea_node, const IfTree& live_config_iftree,
+	      const IfTree& local_config_iftree);
 
     /**
      * Virtual destructor (in case this class is used as a base class).
@@ -81,11 +84,18 @@ public:
     NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
 
     /**
-     * Get a reference to the @ref IfTree instance.
+     * Get a reference to the live interface configuration.
      *
-     * @return a reference to the @ref IfTree instance.
+     * @return a reference to the live interface configuration.
      */
-    const IfTree& iftree() const { return _iftree; }
+    const IfTree& live_config_iftree() const { return _live_config_iftree; }
+
+    /**
+     * Get a reference to the local interface configuration.
+     *
+     * @return a reference to the local interface configuration.
+     */
+    const IfTree& local_config_iftree() const { return _local_config_iftree; }
 
     /**
      * Get the status code.
@@ -709,7 +719,8 @@ private:
     EventLoop&				_eventloop;
     Profile&				_profile;
     NexthopPortMapper&			_nexthop_port_mapper;
-    const IfTree&			_iftree;
+    const IfTree&			_live_config_iftree;
+    const IfTree&			_local_config_iftree;
 
     //
     // The FIB transaction manager

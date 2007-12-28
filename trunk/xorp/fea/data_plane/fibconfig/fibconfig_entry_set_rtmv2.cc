@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.15 2007/09/27 00:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.16 2007/10/12 07:53:48 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -212,7 +212,7 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = fibconfig().iftree();
+	const IfTree& iftree = fibconfig().local_config_iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -252,10 +252,10 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
     rtm->rtm_seq = ((family == AF_INET ? _rs4 : _rs6))->seqno();
 
     // Copy the interface index.
-    const IfTree& iftree = fibconfig().iftree();
-    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-    XLOG_ASSERT(ifp != NULL);
-    rtm->rtm_index = ifp->pif_index();
+    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
+    XLOG_ASSERT(vifp != NULL);
+    rtm->rtm_index = vifp->pif_index();
 
     // Copy the destination, the nexthop, and the netmask addresses
     fte.net().masked_addr().copy_out(*sin_dst);
@@ -338,10 +338,10 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     rtm->rtm_seq = ((family == AF_INET ? _rs4 : _rs6))->seqno();
 
     // Copy the interface index.
-    const IfTree& iftree = fibconfig().iftree();
-    const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
-    XLOG_ASSERT(ifp != NULL);
-    rtm->rtm_index = ifp->pif_index();
+    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
+    XLOG_ASSERT(vifp != NULL);
+    rtm->rtm_index = vifp->pif_index();
     
     // Copy the destination, and the netmask addresses (if needed)
     fte.net().masked_addr().copy_out(*sin_dst);

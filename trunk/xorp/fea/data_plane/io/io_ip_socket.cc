@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.14 2007/09/09 01:33:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.15 2007/11/17 04:00:04 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -1731,9 +1731,9 @@ IoIpSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// However, check first whether we can use 'pif_index' instead.
 	//
 	if (pif_index != 0) {
-	    ifp = iftree().find_interface(pif_index);
-	    if (ifp != NULL)
-		vifp = ifp->find_vif(pif_index);
+	    vifp = iftree().find_vif(pif_index);
+	    if (vifp != NULL)
+		ifp = iftree().find_interface(vifp->ifname());
 	    break;
 	}
 	
@@ -2209,7 +2209,7 @@ IoIpSocket::send_packet(const string& if_name,
 	    //
 	    sndpktinfo->ipi6_ifindex = 0;		// Let kernel fill in
 	} else {
-	    sndpktinfo->ipi6_ifindex = ifp->pif_index();
+	    sndpktinfo->ipi6_ifindex = vifp->pif_index();
 	}
 	src_address.copy_out(sndpktinfo->ipi6_addr);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
@@ -2432,7 +2432,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	dst_address.copy_out(_to6);
-	system_adjust_sockaddr_in6_send(_to6, ifp->pif_index());
+	system_adjust_sockaddr_in6_send(_to6, vifp->pif_index());
 	_sndmh.msg_namelen  = sizeof(_to6);
 	break;
 #endif // HAVE_IPV6

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.11 2007/09/15 19:52:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.cc,v 1.12 2007/10/12 07:53:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -256,7 +256,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_dest(const IPvX& dst,
 	XLOG_ERROR("Error reading from routing socket: %s", error_msg.c_str());
 	return (XORP_ERROR);
     }
-    if (parse_buffer_routing_socket(fibconfig().iftree(), fte,
+    if (parse_buffer_routing_socket(fibconfig().live_config_iftree(), fte,
 				    _rs_reader.buffer(), FibMsg::GETS)
 	!= XORP_OK) {
 	return (XORP_ERROR);
@@ -395,7 +395,7 @@ FibConfigEntryGetRoutingSocket::lookup_route_by_network(const IPvXNet& dst,
 	return (XORP_ERROR);
     }
 
-    if (parse_buffer_routing_socket(fibconfig().iftree(), fte,
+    if (parse_buffer_routing_socket(fibconfig().live_config_iftree(), fte,
 				    _rs_reader.buffer(), FibMsg::GETS)
 	!= XORP_OK) {
 	return (XORP_ERROR);

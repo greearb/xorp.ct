@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.12 2007/08/15 18:55:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.13 2007/10/11 07:12:55 pavlin Exp $"
 
 
 //
@@ -44,14 +44,7 @@ FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
       _is_running(false),
       _is_dummy(is_dummy),
       _ifconfig(*this),
-      _fibconfig(*this,
-#ifdef HOST_OS_WINDOWS
-		 // XXX: Windows FibConfig needs to see the live ifconfig tree
-		 _ifconfig.live_config()
-#else
-		 _ifconfig.local_config()
-#endif
-	  ),
+      _fibconfig(*this, _ifconfig.live_config(), _ifconfig.local_config()),
       _io_link_manager(*this, ifconfig().local_config()),
       _io_ip_manager(*this, ifconfig().local_config()),
       _io_tcpudp_manager(*this, ifconfig().local_config()),
@@ -77,11 +70,6 @@ FeaNode::startup()
 
     if (load_data_plane_managers(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot load the data plane manager(s): %s",
-		   error_msg.c_str());
-    }
-
-    if (start_data_plane_managers_plugins(error_msg) != XORP_OK) {
-	XLOG_FATAL("Cannot start the data plane manager(s) plugins: %s",
 		   error_msg.c_str());
     }
 
@@ -345,45 +333,4 @@ FeaNode::unload_data_plane_managers(string& error_msg)
     }
 
     return (XORP_OK);
-}
-
-int
-FeaNode::start_data_plane_managers_plugins(string& error_msg)
-{
-    list<FeaDataPlaneManager*>::iterator iter;
-
-    for (iter = _fea_data_plane_managers.begin();
-	 iter != _fea_data_plane_managers.end();
-	 ++iter) {
-	FeaDataPlaneManager* fea_data_plane_manager = *iter;
-	if (fea_data_plane_manager->start_plugins(error_msg) != XORP_OK) {
-	    return (XORP_ERROR);
-	}
-    }
-
-    return (XORP_OK);
-}
-
-int
-FeaNode::stop_data_plane_managers_plugins(string& error_msg)
-{
-    int ret_value = XORP_OK;
-    string error_msg2;
-    list<FeaDataPlaneManager*>::iterator iter;
-
-    error_msg.erase();
-
-    for (iter = _fea_data_plane_managers.begin();
-	 iter != _fea_data_plane_managers.end();
-	 ++iter) {
-	FeaDataPlaneManager* fea_data_plane_manager = *iter;
-	if (fea_data_plane_manager->stop_plugins(error_msg2) != XORP_OK) {
-	    ret_value = XORP_ERROR;
-	    if (! error_msg.empty())
-		error_msg += " ";
-	    error_msg += error_msg2;
-	}
-    }
-
-    return (ret_value);
 }

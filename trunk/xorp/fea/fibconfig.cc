@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.15 2007/10/12 07:53:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.16 2007/12/28 04:51:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,12 +33,14 @@
 //
 
 
-FibConfig::FibConfig(FeaNode& fea_node, const IfTree& iftree)
+FibConfig::FibConfig(FeaNode& fea_node, const IfTree& live_config_iftree,
+		     const IfTree& local_config_iftree)
     : _fea_node(fea_node),
       _eventloop(fea_node.eventloop()),
       _profile(fea_node.profile()),
       _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
-      _iftree(iftree),
+      _live_config_iftree(live_config_iftree),
+      _local_config_iftree(local_config_iftree),
       _ftm(NULL),
       _unicast_forwarding_entries_retain_on_startup4(false),
       _unicast_forwarding_entries_retain_on_shutdown4(false),

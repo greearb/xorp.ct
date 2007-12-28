@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.9 2007/09/15 19:52:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.10 2007/09/27 00:33:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -314,6 +314,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
     u_short if_index = rtm->rtm_index;
     string if_name;
+    string vif_name;
     int family = fte.nexthop().af();
     bool is_family_match = false;
     bool is_deleted = false;
@@ -387,6 +388,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	nexthop_addr = IPvX::ZERO(family);
 	dst_mask_len = IPvX::addr_bitlen(family);
 	if_name = "";
+	vif_name = "";
 	lookup_ifindex = false;
     }
 
@@ -467,7 +469,8 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    return (XORP_ERROR);
 	}
 
-	if_name = pi->ifname();		// XXX: ifname == vifname
+	if_name = pi->ifname();
+	vif_name = if_name;		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
 	lookup_ifindex = false;
     }
@@ -503,64 +506,53 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    return (XORP_ERROR);
 	}
 
-	if_name = pi->ifname();		// XXX: ifname == vifname
+	if_name = pi->ifname();
+	vif_name = if_name;		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
 	lookup_ifindex = false;
     }
 
     //
-    // Get the interface name and index
+    // Get the interface/vif name and index
     //
-#ifdef HOST_OS_WINDOWS
-    // XXX: TODO: Windows ifindex-to-friendlyname lookup.
-#else
     if (lookup_ifindex) {
-	const char* name = NULL;
+	if (if_index != 0) {
+	    const IfTreeVif* vifp = iftree.find_vif(if_index);
+	    if (vifp != NULL) {
+		if_name = vifp->ifname();
+		vif_name = vifp->vifname();
+	    }
+	}
 
-	do {
-	    sa = rti_info[RTAX_IFP];
-	    if (sa != NULL) {
-		// Use the RTAX_IFP info to get the interface name
-		if (sa->sa_family != AF_LINK) {
-		    // TODO: verify whether this is really an error.
-		    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
-			       sa->sa_family);
-		    return (XORP_ERROR);
-		}
-		const struct sockaddr_dl* sdl;
-		sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
-		if (sdl->sdl_nlen > 0) {
-		    if_name = string(sdl->sdl_data, sdl->sdl_nlen);
-		    break;
-		}
-		if (if_index == 0) {
-		    XLOG_FATAL("Interface with no name and index");
-		}
+#ifdef AF_LINK
+	sa = rti_info[RTAX_IFP];
+	if (sa != NULL) {
+	    // Use the RTAX_IFP info to get the interface name
+	    if (sa->sa_family != AF_LINK) {
+		// TODO: verify whether this is really an error.
+		XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
+			   sa->sa_family);
+		return (XORP_ERROR);
 	    }
+	    const struct sockaddr_dl* sdl;
+	    sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
+	    if (sdl->sdl_nlen > 0) {
+		if_name = string(sdl->sdl_data, sdl->sdl_nlen);
+		vif_name = if_name;		// TODO: XXX: not true for VLAN
+	    }
+	}
+#endif // AF_LINK
 
-	    // Use the interface index to get the interface name
-	    if (if_index == 0) {
-		break;		// XXX: no interface information is available
-	    }
-#ifdef HAVE_IF_INDEXTONAME
-	    char name_buf[IF_NAMESIZE];
-	    name = if_indextoname(if_index, name_buf);
-#endif
-	    if (name == NULL) {
-		XLOG_FATAL("Could not find interface corresponding to index %d",
-			   if_index);
-	    }
-	    if_name = string(name);
-	    break;
-	} while (false);
+	if (if_name.empty() || vif_name.empty()) {
+	    XLOG_FATAL("Could not find interface/vif for index %d", if_index);
+	}
     }
-#endif // ! HOST_OS_WINDOWS
 
     //
     // TODO: define default routing metric and admin distance instead of 0xffff
     //
-    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr, if_name, if_name,
-	       0xffff, 0xffff, xorp_route);
+    fte = FteX(IPvXNet(dst_addr, dst_mask_len), nexthop_addr,
+	       if_name, vif_name, 0xffff, 0xffff, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
     if (is_unresolved)

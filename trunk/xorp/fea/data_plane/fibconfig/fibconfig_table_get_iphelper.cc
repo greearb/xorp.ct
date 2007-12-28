@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.9 2007/09/04 16:40:10 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.10 2007/09/15 19:52:45 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -183,22 +183,24 @@ FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 	    xorp_route = true;
 
 	uint32_t ifindex = static_cast<uint32_t>(pFwdRow->dwForwardIfIndex);
-	const IfTree& iftree = fibconfig().iftree();
-	const IfTreeInterface* ifp = iftree.find_interface(ifindex);
+	const IfTree& iftree = fibconfig().lcoal_config_iftree();
+	const IfTreeVif* vifp = iftree.find_vif(ifindex);
 
 	string if_name;
-	if (ifp != NULL) {
-	    if_name = ifp->ifname();
+	string vif_name;
+	if (vifp != NULL) {
+	    if_name = vifp->ifname();
+	    vif_name = vifp->vifname();
 	} else {
 	    if_name = "unknown";
+	    vif_name = "unknown";
 	    XLOG_WARNING("Route via unknown interface index %u",
 			 XORP_UINT_CAST(ifindex));
 	}
 
 	// TODO: define default routing metric and admin distance.
 	Fte4 fte4 = Fte4(IPv4Net(dst_addr, dst_mask.mask_len()), nexthop_addr,
-			 if_name, if_name,
-		   	 0xffff, 0xffff, xorp_route);
+			 if_name, vif_name, 0xffff, 0xffff, xorp_route);
 
 	// If the next hop is the final destination, then consider
 	// the route to be a 'connected' route.
