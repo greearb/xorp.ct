@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.15 2007/12/19 04:57:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.16 2007/12/19 05:09:19 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -398,9 +398,10 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	    break;
 #ifdef HAVE_IF_NAMETOINDEX
 	if_index = if_nametoindex(if_name.c_str());
-#endif
 	if (if_index > 0)
 	    break;
+#endif
+
 #ifdef SIOCGIFINDEX
 	{
 	    int s;
