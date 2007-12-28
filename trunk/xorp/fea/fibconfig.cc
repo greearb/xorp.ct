@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig.cc,v 1.14 2007/09/15 19:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig.cc,v 1.15 2007/10/12 07:53:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1349,7 +1349,7 @@ FibConfig::add_fib_table_observer(FibTableObserverBase* fib_table_observer)
 int
 FibConfig::delete_fib_table_observer(FibTableObserverBase* fib_table_observer)
 {
-    list<FibTableObserverBase* >::iterator iter;
+    list<FibTableObserverBase*>::iterator iter;
 
     iter = find(_fib_table_observers.begin(),
 		_fib_table_observers.end(),
@@ -1403,7 +1403,7 @@ FibConfig::propagate_fib_changes(const list<FteX>& fte_list,
     }
 
     // Inform all observers about the changes
-    list<FibTableObserverBase* >::iterator iter;
+    list<FibTableObserverBase*>::iterator iter;
     for (iter = _fib_table_observers.begin();
 	 iter != _fib_table_observers.end();
 	 ++iter) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.12 2007/08/09 07:03:24 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.13 2007/09/15 19:52:38 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -53,7 +53,6 @@ typedef Trie<IPv6, Fte6> Trie6;
  */
 class FibConfig {
 public:
-
     /**
      * Constructor.
      * 
@@ -89,7 +88,7 @@ public:
     const IfTree& iftree() const { return _iftree; }
 
     /**
-     * Get the status code
+     * Get the status code.
      *
      * @param reason the human-readable reason for any failure.
      * @return the status code.
@@ -143,7 +142,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_forwarding(FibConfigForwarding *fibconfig_forwarding,
+    int register_fibconfig_forwarding(FibConfigForwarding* fibconfig_forwarding,
 				      bool is_exclusive);
 
     /**
@@ -162,7 +161,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_entry_get(FibConfigEntryGet *fibconfig_entry_get,
+    int register_fibconfig_entry_get(FibConfigEntryGet* fibconfig_entry_get,
 				     bool is_exclusive);
 
     /**
@@ -181,7 +180,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_entry_set(FibConfigEntrySet *fibconfig_entry_set,
+    int register_fibconfig_entry_set(FibConfigEntrySet* fibconfig_entry_set,
 				     bool is_exclusive);
 
     /**
@@ -200,7 +199,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_entry_observer(FibConfigEntryObserver *fibconfig_entry_observer,
+    int register_fibconfig_entry_observer(FibConfigEntryObserver* fibconfig_entry_observer,
 					  bool is_exclusive);
 
     /**
@@ -219,7 +218,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_table_get(FibConfigTableGet *fibconfig_table_get,
+    int register_fibconfig_table_get(FibConfigTableGet* fibconfig_table_get,
 				     bool is_exclusive);
 
     /**
@@ -238,7 +237,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_table_set(FibConfigTableSet *fibconfig_table_set,
+    int register_fibconfig_table_set(FibConfigTableSet* fibconfig_table_set,
 				     bool is_exclusive);
 
     /**
@@ -257,7 +256,7 @@ public:
      * exclusive plugin, otherwise is added to the list of plugins.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int register_fibconfig_table_observer(FibConfigTableObserver *fibconfig_table_observer,
+    int register_fibconfig_table_observer(FibConfigTableObserver* fibconfig_table_observer,
 					  bool is_exclusive);
 
     /**
@@ -717,6 +716,9 @@ private:
     //
     FibConfigTransactionManager*	_ftm;
 
+    //
+    // The registered plugins
+    //
     list<FibConfigForwarding*>		_fibconfig_forwarding_plugins;
     list<FibConfigEntryGet*>		_fibconfig_entry_gets;
     list<FibConfigEntrySet*>		_fibconfig_entry_sets;
@@ -741,7 +743,7 @@ private:
     // Misc other state
     //
     bool	_is_running;
-    list<FibTableObserverBase* > _fib_table_observers;
+    list<FibTableObserverBase*>	_fib_table_observers;
 };
 
 /**
