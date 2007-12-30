@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_property_windows.hh,v 1.1 2007/12/28 05:12:38 pavlin Exp $
 
-#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
-#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
+#ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_WINDOWS_HH__
+#define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_WINDOWS_HH__
 
 #include "fea/ifconfig_property.hh"
 
 
-class IfConfigPropertyBsd : public IfConfigProperty {
+class IfConfigPropertyWindows : public IfConfigProperty {
 public:
     /**
      * Constructor.
@@ -28,12 +28,12 @@ public:
      * @param fea_data_plane_manager the corresponding data plane manager
      * (@see FeaDataPlaneManager).
      */
-    IfConfigPropertyBsd(FeaDataPlaneManager& fea_data_plane_manager);
+    IfConfigPropertyWindows(FeaDataPlaneManager& fea_data_plane_manager);
 
     /**
      * Virtual destructor.
      */
-    virtual ~IfConfigPropertyBsd();
+    virtual ~IfConfigPropertyWindows();
 
 private:
     /**
@@ -51,4 +51,4 @@ private:
     virtual bool test_have_ipv6() const;
 };
 
-#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
+#endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_WINDOWS_HH__
