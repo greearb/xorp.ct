@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.10 2007/09/27 00:33:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.11 2007/12/28 09:13:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -524,27 +524,30 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	    }
 	}
 
+	if (if_name.empty()) {
 #ifdef AF_LINK
-	sa = rti_info[RTAX_IFP];
-	if (sa != NULL) {
-	    // Use the RTAX_IFP info to get the interface name
-	    if (sa->sa_family != AF_LINK) {
-		// TODO: verify whether this is really an error.
-		XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
-			   sa->sa_family);
-		return (XORP_ERROR);
+	    sa = rti_info[RTAX_IFP];
+	    if (sa != NULL) {
+		// Use the RTAX_IFP info to get the interface name
+		if (sa->sa_family != AF_LINK) {
+		    // TODO: verify whether this is really an error.
+		    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
+			       sa->sa_family);
+		    return (XORP_ERROR);
+		}
+		const struct sockaddr_dl* sdl;
+		sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
+		if (sdl->sdl_nlen > 0) {
+		    if_name = string(sdl->sdl_data, sdl->sdl_nlen);
+		    vif_name = if_name;		// TODO: XXX: not true for VLAN
+		}
 	    }
-	    const struct sockaddr_dl* sdl;
-	    sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
-	    if (sdl->sdl_nlen > 0) {
-		if_name = string(sdl->sdl_data, sdl->sdl_nlen);
-		vif_name = if_name;		// TODO: XXX: not true for VLAN
-	    }
-	}
 #endif // AF_LINK
 
-	if (if_name.empty() || vif_name.empty()) {
-	    XLOG_FATAL("Could not find interface/vif for index %d", if_index);
+	    if (if_name.empty() || vif_name.empty()) {
+		XLOG_FATAL("Could not find interface/vif for index %d",
+			   if_index);
+	    }
 	}
     }
 
