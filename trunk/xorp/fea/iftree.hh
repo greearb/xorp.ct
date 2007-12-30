@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.55 2007/12/19 04:56:54 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.56 2007/12/22 21:23:41 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -28,7 +28,7 @@ class IPvX;
 
 
 /**
- * Base class for Fea configurable items where the modifications need
+ * Base class for FEA configurable items where the modifications need
  * to be held over and propagated later, ie changes happen during a
  * transaction but are propagated during the commit.
  */
@@ -39,10 +39,10 @@ public:
 
 public:
     enum State {
-	NO_CHANGE = 0x00,
-	CREATED = 0x01,
-	DELETED = 0x02,
-	CHANGED = 0x04
+	NO_CHANGE	= 0x00,
+	CREATED		= 0x01,
+	DELETED		= 0x02,
+	CHANGED		= 0x04
     };
 
     int set_state(State st) {
@@ -106,7 +106,7 @@ class IfTreeAddr4;
 class IfTreeAddr6;
 
 /**
- * Container class for Fea Interface objects in a system.
+ * Container class for FEA Interface objects in a system.
  */
 class IfTree : public IfTreeItem {
 public:
@@ -135,7 +135,8 @@ public:
     int remove_interface(const string& ifname);
 
     /**
-     * Create a new interface or update its state if it already exists.
+     * Recursively create a new interface or update its state if it already
+     * exists.
      *
      * @param other_iface the interface with the state to copy from.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -309,21 +310,26 @@ public:
      * we need a method to update the user config from the h/w config that
      * exists after the config push.  We can't just copy the h/w config since
      * the user config is restricted to configuration set by the user.
+     *
      * The alignment works as follows:
-     * - If the item in the local tree is "disabled", then the state is copied
-     *   but the item is still marked as "disabled". Otherwise, the rules
-     *   below are applied.
-     * - If an item from the local tree is not in the other tree,
-     *   it is marked as deleted in the local tree.
-     *   However, if an interface from the local tree is marked as "soft"
-     *   and is not in the other tree, the interface is not marked as deleted
-     *   in the local tree.
-     * - If an item from the local tree is in the other tree,
-     *   its state is copied from the other tree to the local tree.
-     *   However, the status of the "flipped" flag in the local tree is
-     *   preserved.
-     * - If an item from the other tree is not in the local tree, we do NOT
-     *   copy it to the local tree.
+     * 1. If an interface in the local tree is marked as "soft", its
+     *    state is not modified.
+     * 2. If an interface in the local tree is marked as
+     *    "default_system_config", the rest of the processing is not
+     *    applied, and the following rules are used instead:
+     *    (a) If the interface is not in the other tree, it is marked
+     *        as "disabled" and its vifs are marked for deletion.
+     *    (b) Otherwise, its state (and the subtree below it) is copied
+     *        as-is from the other tree.
+     * 3. If an item in the local tree is not in the other tree, it is
+     *    marked as deleted in the local tree.
+     * 4. If an item in the local tree is in the other tree, its state
+     *    is copied from the other tree to the local tree by applying
+     *    the following rules:
+     *    (a) If an interface in the local tree is "flipped", then it
+     *        is still marked as "flipped".
+     *    (b) If the item in the local tree is not "enabled", then
+     *        the state is still marked as not "enabled".
      *
      * @param other the configuration tree to align state with.
      * @return modified configuration structure.
@@ -350,34 +356,13 @@ public:
     /**
      * Prune bogus deleted state.
      * 
-     * If an item from the local tree is marked as deleted, but is not
+     * If an item in the local tree is marked as deleted, but is not
      * in the other tree, then it is removed.
      * 
      * @param old_iftree the old tree with the state that is used as reference.
      * @return the modified configuration tree.
      */
     IfTree& prune_bogus_deleted_state(const IfTree& old_iftree);
-
-    /**
-     * Track modifications from the live config state as read from the kernel.
-     *
-     * All interface-related modifications as received by the observer
-     * mechanism are recorded in a local copy of the interface tree
-     * (the live configuration tree). Some of those modifications however
-     * should be propagated to the XORP local configuration tree.
-     * This method updates a local configuration tree with only the relevant
-     * modifications of the live configuration tree:
-     * - Only if an item is in the local configuration tree, its status
-     *   may be modified.
-     * - If the "no_carrier" flag of an interface is changed in the live
-     *   configuration tree, the corresponding flag in the local configuration
-     *   tree is updated.
-     * 
-     * @param other the live configuration tree whose modifications are
-     * tracked.
-     * @return modified configuration structure.
-     */
-    IfTree& track_live_config_state(const IfTree& other);
 
     /**
      * Delete interfaces labelled as ready for deletion, call finalize_state()
@@ -396,7 +381,7 @@ protected:
 
 
 /**
- * Fea class for holding physical interface state.
+ * FEA class for holding physical interface state.
  */
 class IfTreeInterface : public IfTreeItem {
 public:
@@ -429,6 +414,9 @@ public:
 
     bool management() const		{ return _management; }
     void set_management(bool v)		{ _management = v; mark(CHANGED); }
+
+    bool default_system_config() const	{ return _default_system_config; }
+    void set_default_system_config(bool v) { _default_system_config = v; mark(CHANGED); }
 
     /**
      * Get the flipped flag.
@@ -556,9 +544,9 @@ public:
      */
     void copy_state(const IfTreeInterface& o) {
 	//
-	// XXX: Explicitly don't consider the discard, unreachable and
-	// management flags, because they are always set from user's
-	// configuration.
+	// XXX: Explicitly don't consider the discard, unreachable,
+	// management, and default_system_config flags, because they
+	// are always set from user's configuration.
 	//
 	set_pif_index(o.pif_index());
 	set_enabled(o.enabled());
@@ -577,9 +565,9 @@ public:
      */
     bool is_same_state(const IfTreeInterface& o) {
 	//
-	// XXX: Explicitly don't consider the discard, unreachable and
-	// management flags, because they are always set from user's
-	// configuration.
+	// XXX: Explicitly don't consider the discard, unreachable,
+	// management, and default_system_config flags, because they
+	// are always set from user's configuration.
 	//
 	return ((pif_index() == o.pif_index())
 		&& (enabled() == o.enabled())
@@ -601,6 +589,7 @@ protected:
     bool	_discard;
     bool	_unreachable;
     bool	_management;
+    bool	_default_system_config;
     uint32_t 	_mtu;
     Mac 	_mac;
     bool	_no_carrier;
@@ -611,7 +600,7 @@ protected:
 
 
 /**
- * Fea class for virtual (logical) interface state.
+ * FEA class for virtual (logical) interface state.
  */
 class IfTreeVif : public IfTreeItem {
 public:

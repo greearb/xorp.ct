@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.13 2007/09/27 00:33:33 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.14 2007/11/29 01:52:36 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -115,32 +115,51 @@ public:
  */
 class ConfigureAllInterfacesFromSystem : public IfConfigTransactionOperation {
 public:
-    ConfigureAllInterfacesFromSystem(IfConfig& ifconfig, IfTree& iftree)
-	: IfConfigTransactionOperation(iftree, ""), _ifconfig(ifconfig) {}
+    ConfigureAllInterfacesFromSystem(IfConfig& ifconfig, IfTree& iftree,
+				     bool enable)
+	: IfConfigTransactionOperation(iftree, ""),
+	  _ifconfig(ifconfig),
+	  _enable(enable)
+    {}
 
     bool dispatch() {
-	const IfTree& dev_config = _ifconfig.pulled_config();
-	IfTree::IfMap::const_iterator iter;
-	bool success = true;
-
-	// Configure all interfaces
-	for (iter = dev_config.interfaces().begin();
-	     iter != dev_config.interfaces().end();
-	     ++iter) {
-	    const IfTreeInterface& iface = iter->second;
-	    if (iftree().update_interface(iface) != XORP_OK)
-		success = false;
+	if (_enable) {
+	    //
+	    // Configure all interfaces
+	    //
+	    const IfTree& dev_config = _ifconfig.pulled_config();
+	    IfTree::IfMap::const_iterator iter;
+	    for (iter = dev_config.interfaces().begin();
+		 iter != dev_config.interfaces().end();
+		 ++iter) {
+		const IfTreeInterface& iface = iter->second;
+		if (iftree().update_interface(iface) != XORP_OK)
+		    return (false);
+	    }
 	}
 
-	return (success);
+	//
+	// Set the "default_system_config" flag for all interfaces
+	//
+	IfTree::IfMap::iterator iter;
+	for (iter = iftree().interfaces().begin();
+	     iter != iftree().interfaces().end();
+	     ++iter) {
+	    IfTreeInterface& iface = iter->second;
+	    iface.set_default_system_config(_enable);
+	}
+
+	return (true);
     }
 
     string str() const {
-	return string("ConfigureAllInterfacesFromSystem");
+	return c_format("ConfigureAllInterfacesFromSystem: %s",
+			bool_c_str(_enable));
     }
 
 private:
-    IfConfig& _ifconfig;
+    IfConfig&	_ifconfig;
+    bool	_enable;
 };
 
 /**
@@ -150,26 +169,28 @@ private:
 class ConfigureInterfaceFromSystem : public IfConfigTransactionOperation {
 public:
     ConfigureInterfaceFromSystem(IfConfig& ifconfig, IfTree& iftree,
-				 const string& ifname)
-	: IfConfigTransactionOperation(iftree, ifname), _ifconfig(ifconfig) {}
+				 const string& ifname, bool enable)
+	: IfConfigTransactionOperation(iftree, ifname),
+	  _ifconfig(ifconfig),
+	  _enable(enable)
+    {}
 
     bool dispatch() {
-	const IfTree& dev_config = _ifconfig.pulled_config();
-	const IfTreeInterface* ifp = dev_config.find_interface(ifname());
+	IfTreeInterface* ifp = iftree().find_interface(ifname());
 	if (ifp == NULL)
 	    return (false);
-	
-	if (iftree().update_interface(*ifp) != XORP_OK)
-	    return (false);
+	ifp->set_default_system_config(_enable);
 	return (true);
     }
 
     string str() const {
-	return string("ConfigureInterfaceFromSystem: ") + ifname();
+	return c_format("ConfigureInterfaceFromSystem: %s %s",
+			ifname().c_str(), bool_c_str(_enable));
     }
 
 private:
-    IfConfig& _ifconfig;
+    IfConfig&	_ifconfig;
+    bool	_enable;
 };
 
 /**

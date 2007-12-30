@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.34 2007/11/29 01:52:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.35 2007/12/28 09:19:42 pavlin Exp $"
 
 
 //
@@ -1452,14 +1452,15 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_configure_all_interfaces_from_system(
     // Input values,
-    const uint32_t&	tid)
+    const uint32_t&	tid,
+    const bool&		enable)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
     if (ifconfig().add_transaction_operation(
 	    tid,
-	    new ConfigureAllInterfacesFromSystem(ifconfig(), iftree),
+	    new ConfigureAllInterfacesFromSystem(ifconfig(), iftree, enable),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1472,14 +1473,16 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
     // Input values,
     const uint32_t&	tid,
-    const string&	ifname)
+    const string&	ifname,
+    const bool&		enable)
 {
     IfTree& iftree = ifconfig().local_config();
     string error_msg;
 
     if (ifconfig().add_transaction_operation(
 	    tid,
-	    new ConfigureInterfaceFromSystem(ifconfig(), iftree, ifname),
+	    new ConfigureInterfaceFromSystem(ifconfig(), iftree, ifname,
+					     enable),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

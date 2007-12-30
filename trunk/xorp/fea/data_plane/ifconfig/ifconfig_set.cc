@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.16 2007/12/22 21:23:41 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.17 2007/12/23 08:22:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -125,6 +125,12 @@ IfConfigSet::push_config(IfTree& iftree)
 	    continue;
 
 	//
+	// Skip configuration for default system config interfaces
+	//
+	if (config_iface.default_system_config())
+	    continue;
+
+	//
 	// Check that the interface is recognized by the system
 	//
 	if (pulled_iftree.find_interface(config_iface.ifname()) == NULL) {
@@ -215,8 +221,14 @@ IfConfigSet::push_config(IfTree& iftree)
 
 	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
 
-	// Soft interfaces and their child nodes should never be pushed
+	//
+	// Skip interfaces that should never be pushed:
+	// - Soft interfaces
+	// - Default system config interfaces
+	//
 	if (config_iface.is_soft())
+	    continue;
+	if (config_iface.default_system_config())
 	    continue;
 
 	for (vi = config_iface.vifs().begin();
@@ -250,8 +262,14 @@ IfConfigSet::push_config(IfTree& iftree)
 
 	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
 
-	// Soft interfaces and their child nodes should never be pushed
+	//
+	// Skip interfaces that should never be pushed:
+	// - Soft interfaces
+	// - Default system config interfaces
+	//
 	if (config_iface.is_soft())
+	    continue;
+	if (config_iface.default_system_config())
 	    continue;
 
 	if ((pulled_ifp == NULL)

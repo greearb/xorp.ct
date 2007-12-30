@@ -83,13 +83,13 @@ disable_interface()
 configure_all_interfaces_from_system()
 {
     echo -n "configure_all_interfaces_from_system" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/configure_all_interfaces_from_system?tid:u32=$1"
+    $CALLXRL "finder://fea/ifmgr/0.1/configure_all_interfaces_from_system?tid:u32=$1&enable:bool=$2"
 }
 
 configure_interface_from_system()
 {
     echo -n "configure_interface_from_system" $*
-    $CALLXRL "finder://fea/ifmgr/0.1/configure_interface_from_system?tid:u32=$1&ifname:txt=$2"
+    $CALLXRL "finder://fea/ifmgr/0.1/configure_interface_from_system?tid:u32=$1&ifname:txt=$2&enable:bool=$3"
 }
 
 set_mac()

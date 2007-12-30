@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.33 2007/09/27 00:33:33 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.34 2007/11/29 01:52:36 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -117,7 +117,8 @@ interfaces {
 
 	default-system-config {
 	    %help:	short "Use default values from the system";
-	    %create:	xrl "$(interfaces.targetname)/ifmgr/0.1/configure_interface_from_system?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)";
+	    %create:	xrl "$(interfaces.targetname)/ifmgr/0.1/configure_interface_from_system?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&enable:bool=true";
+	    %delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/configure_interface_from_system?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&enable:bool=false";
 	}
 
 	mac {

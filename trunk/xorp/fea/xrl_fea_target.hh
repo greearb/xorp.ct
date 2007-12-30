@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.22 2007/11/12 21:03:20 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.23 2007/11/29 01:52:37 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -430,23 +430,28 @@ public:
      *  from the underlying system.
      *
      *  @param tid the transaction ID.
+     *  @param enable if true, then enable the implicit configuration,
+     *  otherwise disable it.
      */
     XrlCmdError ifmgr_0_1_configure_all_interfaces_from_system(
 	// Input values,
-	const uint32_t&	tid);
+	const uint32_t&	tid,
+	const bool&	enable);
 
     /**
      *  Implicitly configure an interface within the FEA by using information
      *  from the underlying system.
      *
      *  @param tid the transaction ID.
-     *
      *  @param ifname the name of the interface to configure.
+     *  @param enable if true, then enable the implicit configuration,
+     *  otherwise disable it.
      */
     XrlCmdError ifmgr_0_1_configure_interface_from_system(
 	// Input values,
 	const uint32_t&	tid,
-	const string&	ifname);
+	const string&	ifname,
+	const bool&	enable);
 
     XrlCmdError ifmgr_0_1_set_interface_enabled(
 	// Input values,

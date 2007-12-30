@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/fea/test_xrl_sockets4_tcp.sh,v 1.5 2007/08/10 01:59:33 pavlin Exp $
+# $XORP: xorp/fea/test_xrl_sockets4_tcp.sh,v 1.6 2007/08/11 01:06:10 pavlin Exp $
 #
 
 #
@@ -41,7 +41,7 @@ configure_fea()
     FEA_FUNCS=${srcdir}/xrl_shell_funcs.sh
     local tid=$($FEA_FUNCS start_fea_transaction)
 
-    $FEA_FUNCS configure_all_interfaces_from_system $tid
+    $FEA_FUNCS configure_all_interfaces_from_system $tid true
 
     $FEA_FUNCS commit_fea_transaction $tid
 }

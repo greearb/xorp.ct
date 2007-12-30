@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_iphelper.cc,v 1.6 2007/06/06 19:55:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_iphelper.cc,v 1.7 2007/07/11 22:18:14 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -62,15 +62,10 @@ IfConfigObserverIPHelper::start(string& error_msg)
 
     _is_running = true;
 
-    // XXX: Dummy.
-    ifconfig().report_updates(ifconfig().live_config(), true);
-
-    // Propagate the changes from the live config to the local config
-    IfTree& local_config = ifconfig().local_config();
-    local_config.track_live_config_state(ifconfig().live_config());
-    ifconfig().report_updates(local_config, false);
-    local_config.finalize_state();
-    ifconfig().live_config().finalize_state();
+    //
+    // TODO: XXX: Currently, the observer mechanism doesn't track
+    // the underlying changes.
+    //
 
     return (XORP_OK);
 }
@@ -91,7 +86,6 @@ IfConfigObserverIPHelper::stop(string& error_msg)
 void
 IfConfigObserverIPHelper::receive_data(const vector<uint8_t>& buffer)
 {
-    debug_msg("called\n");
     UNUSED(buffer);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.74 2007/12/22 21:23:40 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.75 2007/12/28 05:12:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -432,10 +432,8 @@ public:
      * IfConfigUpdateReporter.
      *
      * @param iftree the interface tree instance to check.
-     * @param is_system_interfaces_reportee if true, the updates come from
-     * the underlying system.
      */
-    void report_updates(IfTree& iftree, bool is_system_interfaces_reportee);
+    void report_updates(IfTree& iftree);
 
 private:
     FeaNode&			_fea_node;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.78 2007/12/22 21:23:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.79 2007/12/28 05:12:35 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -216,7 +216,7 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     // Propagate the configuration changes to all listeners.
     //
     if (! is_error)
-	report_updates(local_config(), false);
+	report_updates(local_config());
 
     //
     // Flush-out config state
@@ -818,18 +818,9 @@ IfConfig::report_updates_completed()
 }
 
 void
-IfConfig::report_updates(IfTree& iftree, bool is_system_interfaces_reportee)
+IfConfig::report_updates(IfTree& iftree)
 {
     bool updated = false;
-
-    //
-    // XXX: For now don't propagate any changes from from the kernel.
-    // TODO: We need to propagate the changes for interfaces that
-    // have been configured with the default-system-config configuration
-    // statemeent.
-    //
-    if (is_system_interfaces_reportee)
-	return;
 
     //
     // Walk config looking for changes to report
