@@ -8,7 +8,7 @@ XRLDIR=${XRLDIR:-${srcdir}/../xrl}
 
 get_configured_interface_names()
 {
-    echo -n "get_configured_interface_names"
+    echo "get_configured_interface_names" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_interface_names"
 }
 
@@ -30,7 +30,7 @@ EOF
 
 commit_fea_transaction()
 {
-    echo -n "commit_transaction"
+    echo "commit_transaction" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/ifmgr/0.1/commit_transaction?tid:u32=$1"
 	return $?
@@ -44,7 +44,7 @@ EOF
 
 abort_fea_transaction()
 {
-    echo -n "abort_transaction"
+    echo "abort_transaction" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/ifmgr/0.1/abort_transaction?tid:u32=$1"
 	return $?
@@ -58,187 +58,187 @@ EOF
 
 create_interface()
 {
-    echo -n "create_interface" $*
+    echo "create_interface" $*
     $CALLXRL "finder://fea/ifmgr/0.1/create_interface?tid:u32=$1&ifname:txt=$2"
 }
 
 delete_interface()
 {
-    echo -n "delete_interface" $*
+    echo "delete_interface" $*
     $CALLXRL "finder://fea/ifmgr/0.1/delete_interface?tid:u32=$1&ifname:txt=$2"
 }
 
 enable_interface()
 {
-    echo -n "enable_interface" $*
+    echo "enable_interface" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32=$1&ifname:txt=$2&enabled:bool=true"
 }
 
 disable_interface()
 {
-    echo -n "disable_interface" $*
+    echo "disable_interface" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_interface_enabled?tid:u32=$1&ifname:txt=$2&enabled:bool=false"
 }
 
 configure_all_interfaces_from_system()
 {
-    echo -n "configure_all_interfaces_from_system" $*
+    echo "configure_all_interfaces_from_system" $*
     $CALLXRL "finder://fea/ifmgr/0.1/configure_all_interfaces_from_system?tid:u32=$1&enable:bool=$2"
 }
 
 configure_interface_from_system()
 {
-    echo -n "configure_interface_from_system" $*
+    echo "configure_interface_from_system" $*
     $CALLXRL "finder://fea/ifmgr/0.1/configure_interface_from_system?tid:u32=$1&ifname:txt=$2&enable:bool=$3"
 }
 
 set_mac()
 {
-    echo -n "set_mac" $*
+    echo "set_mac" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_mac?tid:u32=$1&ifname:txt=$2&mac:mac=$3"
 }
 
 get_configured_mac()
 {
-    echo -n "get_configured_mac" $*
+    echo "get_configured_mac" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_mac?ifname:txt=$1"
 }
 
 set_mtu()
 {
-    echo -n "set_mtu" $*
+    echo "set_mtu" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_mtu?tid:u32=$1&ifname:txt=$2&mtu:u32=$3"
 }
 
 get_configured_mtu()
 {
-    echo -n "get_configured_mtu" $*
+    echo "get_configured_mtu" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_mtu?ifname:txt=$1"
 }
 
 get_configured_vif_names()
 {
-    echo -n "get_configured_vif_names" $*
+    echo "get_configured_vif_names" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_vif_names?ifname:txt=$1"
 }
 
 create_vif()
 {
-    echo -n "create_vif" $*
+    echo "create_vif" $*
     $CALLXRL "finder://fea/ifmgr/0.1/create_vif?tid:u32=$1&ifname:txt=$2&vif:txt=$3"
 }
 
 delete_vif()
 {
-    echo -n "delete_vif" $*
+    echo "delete_vif" $*
     $CALLXRL "finder://fea/ifmgr/0.1/delete_vif?tid:u32=$1&ifname:txt=$2&vif:txt=$3"
 }
 
 enable_vif()
 {
-    echo -n "enable_vif" $*
+    echo "enable_vif" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_vif_enabled?tid:u32=$1&ifname:txt=$2&vif:txt=$3&enabled:bool=true"
 }
 
 disable_vif()
 {
-    echo -n "disable_vif" $*
+    echo "disable_vif" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_vif_enabled?tid:u32=$1&ifname:txt=$2&vif:txt=$3&enabled:bool=false"
 }
 
 get_configured_vif_addresses4()
 {
-    echo -n "get_configured_vif_addresses4" $*
+    echo "get_configured_vif_addresses4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_vif_addresses4?ifname:txt=$1&vif:txt=$2"
 }
 
 create_address4()
 {
-    echo -n "create_address4" $*
+    echo "create_address4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/create_address4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4"
 }
 
 delete_address4()
 {
-    echo -n "delete_address4" $*
+    echo "delete_address4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/delete_address4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4"
 }
 
 enable_address4()
 {
-    echo -n "enable_address4" $*
+    echo "enable_address4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&enabled:bool=true"
 }
 
 disable_address4()
 {
-    echo -n "disable_address4" $*
+    echo "disable_address4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&enabled:bool=false"
 }
 
 set_prefix4()
 {
-    echo -n "set_prefix4" $*
+    echo "set_prefix4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_prefix4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&prefix_len:u32=$5"
 }
 
 get_configured_prefix4()
 {
-    echo -n "get_configured_prefix4" $*
+    echo "get_configured_prefix4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_prefix4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
 set_broadcast4()
 {
-    echo -n "set_broadcast4" $*
+    echo "set_broadcast4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_broadcast4?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv4=$4&broadcast:ipv4=$5"
 }
 
 get_configured_broadcast4()
 {
-    echo -n "get_configured_broadcast4" $*
+    echo "get_configured_broadcast4" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_broadcast4?ifname:txt=$1&vif:txt=$2&address:ipv4=$3"
 }
 
 get_configured_vif_addresses6()
 {
-    echo -n "get_configured_vif_addresses6" $*
+    echo "get_configured_vif_addresses6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$1&vif:txt=$2"
 }
 
 create_address6()
 {
-    echo -n "create_address6" $*
+    echo "create_address6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/create_address6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4"
 }
 
 delete_address6()
 {
-    echo -n "delete_address6" $*
+    echo "delete_address6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/delete_address6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4"
 }
 
 enable_address6()
 {
-    echo -n "enable_address6" $*
+    echo "enable_address6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&enabled:bool=true"
 }
 
 disable_address6()
 {
-    echo -n "disable_address6" $*
+    echo "disable_address6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_address_enabled6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&enabled:bool=false"
 }
 
 set_prefix6()
 {
-    echo -n "set_prefix6" $*
+    echo "set_prefix6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/set_prefix6?tid:u32=$1&ifname:txt=$2&vif:txt=$3&address:ipv6=$4&prefix_len:u32=$5"
 }
 
 get_configured_prefix6()
 {
-    echo -n "get_configured_prefix6" $*
+    echo "get_configured_prefix6" $*
     $CALLXRL "finder://fea/ifmgr/0.1/get_configured_prefix6?ifname:txt=$1&vif:txt=$2&address:ipv6=$3"
 }
 
@@ -276,7 +276,7 @@ EOF
 
 commit_redist_transaction4()
 {
-    echo -n "commit_redist_transaction4"
+    echo "commit_redist_transaction4" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/redist_transaction4/0.1/commit_transaction?tid:u32=$1"
 	return $?
@@ -290,7 +290,7 @@ EOF
 
 commit_redist_transaction6()
 {
-    echo -n "commit_redist_transaction6"
+    echo "commit_redist_transaction6" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/redist_transaction6/0.1/commit_transaction?tid:u32=$1"
 	return $?
@@ -304,7 +304,7 @@ EOF
 
 abort_redist_transaction4()
 {
-    echo -n "abort_redist_transaction4"
+    echo "abort_redist_transaction4" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/redist_transaction4/0.1/abort_transaction?tid:u32=$1"
 	return $?
@@ -318,7 +318,7 @@ EOF
 
 abort_redist_transaction6()
 {
-    echo -n "abort_redist_transaction6"
+    echo "abort_redist_transaction6" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/redist_transaction6/0.1/abort_transaction?tid:u32=$1"
 	return $?
@@ -370,31 +370,31 @@ lookup_route_by_network4()
 
 have_ipv4()
 {
-    echo -n "have_ipv4"
+    echo -n "have_ipv4" $* "-> "
     $CALLXRL "finder://fea/fti/0.2/have_ipv4"
 }
 
 have_ipv6()
 {
-    echo -n "have_ipv6"
+    echo -n "have_ipv6" $* "-> "
     $CALLXRL "finder://fea/fti/0.2/have_ipv6"
 }
 
 get_unicast_forwarding_enabled4()
 {
-    echo -n "get_unicast_forwarding_enabled4"
+    echo -n "get_unicast_forwarding_enabled4" $* "-> "
     $CALLXRL "finder://fea/fti/0.2/get_unicast_forwarding_enabled4"
 }
 
 get_unicast_forwarding_enabled6()
 {
-    echo -n "get_unicast_forwarding_enabled6"
+    echo -n "get_unicast_forwarding_enabled6" $* "-> "
     $CALLXRL "finder://fea/fti/0.2/get_unicast_forwarding_enabled6"
 }
 
 set_unicast_forwarding_enabled4()
 {
-    echo -n "set_unicast_forwarding_enabled4"
+    echo "set_unicast_forwarding_enabled4" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$1"
 	return $?
@@ -408,7 +408,7 @@ EOF
 
 set_unicast_forwarding_enabled6()
 {
-    echo -n "set_unicast_forwarding_enabled6"
+    echo "set_unicast_forwarding_enabled6" $*
     if [ $# -eq 1 ] ; then
 	$CALLXRL "finder://fea/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=$1"
 	return $?
@@ -422,7 +422,7 @@ EOF
 
 shutdown()
 {
-    echo -n "shutdown" $*
+    echo "shutdown" $*
     $CALLXRL "finder://fea/common/0.1/shutdown"
 }
 
