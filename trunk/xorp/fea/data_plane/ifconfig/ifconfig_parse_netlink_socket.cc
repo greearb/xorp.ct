@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.12 2007/12/19 04:57:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.13 2007/12/30 01:02:23 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -160,6 +160,94 @@ IfConfigGetNetlinkSocket::parse_buffer_netlink_socket(IfConfig& ifconfig,
     return (XORP_OK);
 }
 
+static int
+nlm_decode_ipvx_address(int family, const struct rtattr* rtattr,
+			IPvX& ipvx_addr, bool& is_set, string& error_msg)
+{
+    is_set = false;
+
+    if (rtattr == NULL) {
+	error_msg = c_format("Missing address attribute to decode");
+	return (XORP_ERROR);
+    }
+
+    //
+    // Get the attribute information
+    //
+    size_t addr_size = RTA_PAYLOAD(rtattr);
+    const uint8_t* addr_data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rtattr)));
+
+    //
+    // Test the address length
+    //
+    if (addr_size != IPvX::addr_bytelen(family)) {
+	error_msg = c_format("Invalid address size payload: %u instead of %u",
+			     XORP_UINT_CAST(addr_size),
+			     XORP_UINT_CAST(IPvX::addr_bytelen(family)));
+	return (XORP_ERROR);
+    }
+
+    //
+    // Decode the address
+    //
+    ipvx_addr.copy_in(family, addr_data);
+    is_set = true;
+
+    return (XORP_OK);
+}
+
+static int
+nlm_decode_ipvx_interface_address(const struct ifinfomsg* ifinfomsg,
+				  const struct rtattr* rtattr,
+				  IPvX& ipvx_addr, bool& is_set,
+				  string& error_msg)
+{
+    int family = AF_UNSPEC;
+
+    is_set = false;
+
+    XLOG_ASSERT(ifinfomsg != NULL);
+
+    if (rtattr == NULL) {
+	error_msg = c_format("Missing address attribute to decode");
+	return (XORP_ERROR);
+    }
+
+    // Decode the attribute type
+    switch (ifinfomsg->ifi_type) {
+    case ARPHRD_ETHER:
+    {
+	// MAC address: processed earlier when decoding the interface
+	return (XORP_OK);
+    }
+    case ARPHRD_TUNNEL:
+	// FALLTHROUGH
+    case ARPHRD_SIT:
+	// FALLTHROUGH
+    case ARPHRD_IPGRE:
+    {
+	// IPv4 address
+	family = IPv4::af();
+	break;
+    }
+#ifdef HAVE_IPV6
+    case ARPHRD_TUNNEL6:
+    {
+	// IPv6 address
+	family = IPv6::af();
+	break;
+    }
+#endif // HAVE_IPV6
+    default:
+	// Unknown address type: ignore
+	return (XORP_OK);
+    }
+
+    XLOG_ASSERT(family != AF_UNSPEC);
+    return (nlm_decode_ipvx_address(family, rtattr, ipvx_addr, is_set,
+				    error_msg));
+}
+
 static void
 nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 		       int rta_len)
@@ -229,14 +317,24 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     // Get the MAC address
     //
     if (rta_array[IFLA_ADDRESS] != NULL) {
-	if ((ifinfomsg->ifi_type == ARPHRD_ETHER)
-	    && (RTA_PAYLOAD(rta_array[IFLA_ADDRESS])
-		== sizeof(struct ether_addr))) {
+	size_t addr_size = RTA_PAYLOAD(rta_array[IFLA_ADDRESS]);
+	const uint8_t* addr_data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_ADDRESS])));
+	switch (ifinfomsg->ifi_type) {
+	case ARPHRD_ETHER:
+	{
+	    // MAC address
 	    struct ether_addr ea;
-	    memcpy(&ea, RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_ADDRESS])), sizeof(ea));
+	    if (addr_size != sizeof(ea))
+		break;
+	    memcpy(&ea, addr_data, sizeof(ea));
 	    EtherMac ether_mac(ea);
 	    if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
 		ifp->set_mac(ether_mac);
+	    break;
+	}
+	default:
+	    // Either unknown type or type that will be processed later
+	    break;
 	}
     }
     debug_msg("MAC address: %s\n", ifp->mac().str().c_str());
@@ -304,6 +402,99 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     debug_msg("vif loopback: %s\n", bool_c_str(vifp->loopback()));
     debug_msg("vif point_to_point: %s\n", bool_c_str(vifp->point_to_point()));
     debug_msg("vif multicast: %s\n", bool_c_str(vifp->multicast()));
+
+    //
+    // Add any interface-specific addresses
+    //
+    IPvX lcl_addr(AF_INET);
+    IPvX peer_addr(AF_INET);
+    bool has_lcl_addr = false;
+    bool has_peer_addr = false;
+    string error_msg;
+
+    // Get the local address
+    if (rta_array[IFLA_ADDRESS] != NULL) {
+	if (nlm_decode_ipvx_interface_address(ifinfomsg,
+					      rta_array[IFLA_ADDRESS],
+					      lcl_addr, has_lcl_addr,
+					      error_msg)
+	    != XORP_OK) {
+	    XLOG_WARNING("Error decoding address for interface %s vif %s: %s",
+			 vifp->ifname().c_str(), vifp->vifname().c_str(),
+			 error_msg.c_str());
+	}
+    }
+    if (! has_lcl_addr)
+	return;			// XXX: nothing more to do
+    lcl_addr = system_adjust_ipvx_recv(lcl_addr);
+    debug_msg("IP address: %s\n", lcl_addr.str().c_str());
+
+    // XXX: No info about the masklen: assume it is the address bitlen
+    size_t mask_len = IPvX::addr_bitlen(lcl_addr.af());
+
+    // Get the broadcast/peer address
+    if (rta_array[IFLA_BROADCAST] != NULL) {
+	if (nlm_decode_ipvx_interface_address(ifinfomsg,
+					      rta_array[IFLA_BROADCAST],
+					      peer_addr, has_peer_addr,
+					      error_msg)
+	    != XORP_OK) {
+	    XLOG_WARNING("Error decoding broadcast/peer address for "
+			 "interface %s vif %s: %s",
+			 vifp->ifname().c_str(), vifp->vifname().c_str(),
+			 error_msg.c_str());
+	}
+    }
+    if (has_peer_addr)
+	XLOG_ASSERT(lcl_addr.af() == peer_addr.af());
+
+    // Add the address
+    switch (lcl_addr.af()) {
+    case AF_INET:
+    {
+	vifp->add_addr(lcl_addr.get_ipv4());
+	IfTreeAddr4* ap = vifp->find_addr(lcl_addr.get_ipv4());
+	XLOG_ASSERT(ap != NULL);
+	ap->set_enabled(vifp->enabled());
+	ap->set_broadcast(vifp->broadcast() && has_peer_addr);
+	ap->set_loopback(vifp->loopback());
+	ap->set_point_to_point(vifp->point_to_point() && has_peer_addr);
+	ap->set_multicast(vifp->multicast());
+
+	if (has_peer_addr) {
+	    ap->set_prefix_len(mask_len);
+	    if (ap->broadcast())
+		ap->set_bcast(peer_addr.get_ipv4());
+	    if (ap->point_to_point())
+		ap->set_endpoint(peer_addr.get_ipv4());
+	}
+
+	break;
+    }
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	vifp->add_addr(lcl_addr.get_ipv6());
+	IfTreeAddr6* ap = vifp->find_addr(lcl_addr.get_ipv6());
+	XLOG_ASSERT(ap != NULL);
+	ap->set_enabled(vifp->enabled());
+	ap->set_loopback(vifp->loopback());
+	ap->set_point_to_point(vifp->point_to_point());
+	ap->set_multicast(vifp->multicast());
+
+	if (has_peer_addr) {
+	    ap->set_prefix_len(mask_len);
+	    if (ap->point_to_point())
+		ap->set_endpoint(peer_addr.get_ipv6());
+	}
+
+	break;
+    }
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
 }
 
 static void
@@ -426,9 +617,11 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
     IPvX subnet_mask = IPvX::ZERO(family);
     IPvX broadcast_addr = IPvX::ZERO(family);
     IPvX peer_addr = IPvX::ZERO(family);
+    bool has_lcl_addr = false;
     bool has_broadcast_addr = false;
     bool has_peer_addr = false;
     bool is_ifa_address_reassigned = false;
+    string error_msg;
 
     //
     // XXX: re-assign IFA_ADDRESS to IFA_LOCAL (and vice-versa).
@@ -444,14 +637,17 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
 
     // Get the IP address
     if (rta_array[IFA_LOCAL] != NULL) {
-	const uint8_t* data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFA_LOCAL])));
-	if (RTA_PAYLOAD(rta_array[IFA_LOCAL]) != IPvX::addr_bytelen(family)) {
-	    XLOG_FATAL("Invalid IFA_LOCAL address size payload: "
-		       "received %d expected %u",
-		       XORP_INT_CAST(RTA_PAYLOAD(rta_array[IFA_LOCAL])),
-		       XORP_UINT_CAST(IPvX::addr_bytelen(family)));
+	if (nlm_decode_ipvx_address(family, rta_array[IFA_LOCAL],
+				    lcl_addr, has_lcl_addr, error_msg)
+	    != XORP_OK) {
+	    XLOG_FATAL("Error decoding address for interface %s vif %s: %s",
+		       vifp->ifname().c_str(), vifp->vifname().c_str(),
+		       error_msg.c_str());
 	}
-	lcl_addr.copy_in(family, data);
+    }
+    if (! has_lcl_addr) {
+	XLOG_FATAL("Missing local address for interface %s vif %s",
+		   vifp->ifname().c_str(), vifp->vifname().c_str());
     }
     lcl_addr = system_adjust_ipvx_recv(lcl_addr);
     debug_msg("IP address: %s\n", lcl_addr.str().c_str());
@@ -465,16 +661,15 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
 	switch (family) {
 	case AF_INET:
 	    if (rta_array[IFA_BROADCAST] != NULL) {
-		const uint8_t* data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFA_BROADCAST])));
-		if (RTA_PAYLOAD(rta_array[IFA_BROADCAST])
-		    != IPvX::addr_bytelen(family)) {
-		    XLOG_FATAL("Invalid IFA_BROADCAST address size payload: "
-			       "received %d expected %u",
-			       XORP_INT_CAST(RTA_PAYLOAD(rta_array[IFA_BROADCAST])),
-			       XORP_UINT_CAST(IPvX::addr_bytelen(family)));
+		if (nlm_decode_ipvx_address(family, rta_array[IFA_BROADCAST],
+					    broadcast_addr, has_broadcast_addr,
+					    error_msg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Error decoding broadcast address for "
+			       "interface %s vif %s: %s",
+			       vifp->ifname().c_str(), vifp->vifname().c_str(),
+			       error_msg.c_str());
 		}
-		broadcast_addr.copy_in(family, data);
-		has_broadcast_addr = true;
 	    }
 	    break;
 #ifdef HAVE_IPV6
@@ -492,16 +687,17 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
     // Get the p2p address
     if (vifp->point_to_point()) {
 	if ((rta_array[IFA_ADDRESS] != NULL) && !is_ifa_address_reassigned) {
-	    const uint8_t* data = reinterpret_cast<const uint8_t*>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFA_ADDRESS])));
-	    if (RTA_PAYLOAD(rta_array[IFA_ADDRESS])
-		!= IPvX::addr_bytelen(family)) {
-		XLOG_FATAL("Invalid IFA_ADDRESS address size payload: "
-			   "received %d expected %u",
-			   XORP_INT_CAST(RTA_PAYLOAD(rta_array[IFA_ADDRESS])),
-			   XORP_UINT_CAST(IPvX::addr_bytelen(family)));
+	    if (rta_array[IFA_ADDRESS] != NULL) {
+		if (nlm_decode_ipvx_address(family, rta_array[IFA_BROADCAST],
+					    peer_addr, has_peer_addr,
+					    error_msg)
+		    != XORP_OK) {
+		    XLOG_FATAL("Error decoding peer address for "
+			       "interface %s vif %s: %s",
+			       vifp->ifname().c_str(), vifp->vifname().c_str(),
+			       error_msg.c_str());
+		}
 	    }
-	    peer_addr.copy_in(family, data);
-	    has_peer_addr = true;
 	}
 	debug_msg("Peer address: %s\n", peer_addr.str().c_str());
     }
