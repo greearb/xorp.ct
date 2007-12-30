@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.11 2007/09/25 23:00:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.12 2007/12/19 04:57:33 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -330,7 +330,7 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     }
     caddr_t rta_data = reinterpret_cast<caddr_t>(RTA_DATA(const_cast<struct rtattr*>(rta_array[IFLA_IFNAME])));
     if_name = string(reinterpret_cast<char*>(rta_data));
-    debug_msg("interface: %s\n", if_name.c_str());
+    debug_msg("Deleting interface name: %s\n", if_name.c_str());
     
     //
     // Get the interface index
@@ -341,26 +341,18 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 		   "for interface %s",
 		   if_name.c_str());
     }
-    debug_msg("interface index: %d\n", if_index);
+    debug_msg("Deleting interface index: %d\n", if_index);
     
     //
-    // Delete the interface
+    // Delete the interface and vif
     //
-    debug_msg("Deleting interface and vif named: %s\n", if_name.c_str());
-    IfTreeInterface* ifp = iftree.find_interface(if_name);
+    IfTreeInterface* ifp = iftree.find_interface(if_index);
     if (ifp != NULL) {
 	ifp->mark(IfTree::DELETED);
-    } else {
-	debug_msg("Attempted to delete missing interface: %s\n",
-		  if_name.c_str());
     }
-    // XXX: vifname == ifname on this platform
-    IfTreeVif* vifp = iftree.find_vif(if_name, if_name);
+    IfTreeVif* vifp = iftree.find_vif(if_index);
     if (vifp != NULL) {
 	vifp->mark(IfTree::DELETED);
-    } else {
-	debug_msg("Attempted to delete missing interface: %s\n",
-		  if_name.c_str());
     }
 }
 
