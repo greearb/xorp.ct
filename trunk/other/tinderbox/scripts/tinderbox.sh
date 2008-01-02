@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.16 2006/10/03 18:43:24 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.17 2007/08/03 22:21:26 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -95,6 +95,7 @@ run_tinderbox() {
 	eval cfg_env=\$env_$cfg
 	eval cfg_buildflags=\$buildflags_$cfg
 	eval cfg_sshflags=\$sshflags_$cfg
+	eval cfg_disable_check=\${disable_check}_$cfg
 
 	# Add the common environment
 	cfg_env="${cfg_env} ${COMMON_ENV}"
@@ -138,12 +139,14 @@ run_tinderbox() {
 	ssh ${cfg_sshflags} -n ${cfg_host}	"kill -- -1" 2>/dev/null
 
 	# Log into host and run regression tests
-	check_errfile="${errfile}-check"
-	cp ${header} ${check_errfile}
-	ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
-	if [ $? -ne 0 ] ; then
-	    harp "${cfg} remote check" "${check_errfile}"
-	    continue
+	if [ "x${cfg_disable_check}" != "xyes" ] ; then
+	    check_errfile="${errfile}-check"
+	    cp ${header} ${check_errfile}
+	    ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
+	    if [ $? -ne 0 ] ; then
+		harp "${cfg} remote check" "${check_errfile}"
+		continue
+	    fi
 	fi
 
 	cp ${header} ${errfile}
