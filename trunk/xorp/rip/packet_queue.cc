@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/packet_queue.cc,v 1.10 2006/10/12 01:25:10 pavlin Exp $"
+#ident "$XORP: xorp/rip/packet_queue.cc,v 1.11 2007/02/16 22:47:14 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -41,7 +41,9 @@ void
 PacketQueue<A>::enqueue_packet(const RipPacket<A>* pkt)
 {
     while (_buffered_bytes + pkt->data_bytes() >= _max_buffered_bytes
-	   && drop_old() == true);
+	   && drop_old() == true) {
+	// XXX: Empty body
+    }
     _buffered_bytes += pkt->data_bytes();
     _ready_packets.push_back(pkt);
 }
