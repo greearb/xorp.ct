@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.20 2007/05/23 12:12:32 pavlin Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.21 2007/12/10 23:26:25 mjh Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -60,7 +60,7 @@ public:
     /**
      * @return true if we use 4 byte AS numbers.
      */
-    inline const bool use_4byte_asnums() const {
+    inline bool use_4byte_asnums() const {
 	return _use_4byte_asnums;
     }
 
