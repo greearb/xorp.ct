@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.13 2006/04/26 03:20:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.14 2007/02/16 22:46:23 pavlin Exp $"
 
 
 /*
@@ -220,6 +220,8 @@ __RCSID("$NetBSD: strptime.c,v 1.25 2005/11/29 03:12:00 christos Exp $");
 #define ALT_O			0x02
 #define	LEGAL_ALT(x)		{ if (alt_format & ~(x)) return NULL; }
 
+
+#ifndef HAVE_STRPTIME
 
 static const unsigned char *conv_num(const unsigned char *, int *,
 	unsigned int, unsigned int);
@@ -521,6 +523,9 @@ find_string(const unsigned char *bp, int *tgt, const char * const *n1,
 	/* Nothing matched */
 	return NULL;
 }
+
+#endif /* HAVE_STRPTIME */
+
 
 char *
 xorp_strptime(const char *buf, const char *fmt, struct tm *tm)
