@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP$
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.19 2008/01/02 23:57:56 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -107,7 +107,20 @@ run_tinderbox() {
 	eval cfg_env=\$env_$cfg
 	eval cfg_buildflags=\$buildflags_$cfg
 	eval cfg_sshflags=\$sshflags_$cfg
-	eval cfg_disable_check=\${disable_check}_$cfg
+	eval cfg_cross_compile=\${cross_compile}_$cfg
+
+	# Add the cross-compilation environment
+	if [ "x${cfg_cross_compile}" = "xyes" ] ; then
+	    cfg_env="${cfg_env} CROSS_ROOT_ARCH=${CROSS_ROOT}/${CROSS_ARCH}"
+	    cfg_env="${cfg_env} CC=${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc"
+	    cfg_env="${cfg_env} CXX=${CROSS_ROOT}/bin/${CROSS_ARCH}-g++"
+	    cfg_env="${cfg_env} LD=${CROSS_ROOT}/bin/${CROSS_ARCH}-ld"
+	    cfg_env="${cfg_env} RANLIB=${CROSS_ROOT}/bin/${CROSS_ARCH}-ranlib"
+	    cfg_env="${cfg_env} NM=${CROSS_ROOT}/bin/${CROSS_ARCH}-nm"
+
+	    tmp_conf_args="--host=${CROSS_ARCH} --with-openssl=${CROSS_ROOT_ARCH}/usr/local/ssl"
+	    cfg_env="${cfg_env} CONFIGURE_ARGS=${tmp_conf_args}"
+	fi
 
 	# Add the common environment
 	cfg_env="${cfg_env} ${COMMON_ENV}"
@@ -150,8 +163,9 @@ run_tinderbox() {
 	# earlier runs (boo, hiss)
 	ssh ${cfg_sshflags} -n ${cfg_host}	"kill -- -1" 2>/dev/null
 
-	# Log into host and run regression tests
-	if [ "x${cfg_disable_check}" != "xyes" ] ; then
+	# Log into host and run regression tests only if this is not
+	# cross-compilation setup
+	if [ "x${cfg_cross_compile}" != "xyes" ] ; then
 	    check_errfile="${errfile}-check"
 	    cp ${header} ${check_errfile}
 	    ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
