@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.24 2006/02/23 02:18:44 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.25 2007/03/14 01:33:58 pavlin Exp $
 #
 
 #
@@ -455,7 +455,7 @@ kdoc_mld6igmp()
     html_start_page="index.html"
     files="mld6igmp/*.h mld6igmp/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea xrl-interfaces xrl-targets"
+    xref="libxorp libxorp-callback libcomm libxipc libproto mrt cli fea xrl-interfaces xrl-targets libfeaclient"
     kdocify
 }
 
@@ -469,7 +469,7 @@ kdoc_pim()
     html_start_page="index.html"
     files="pim/*.h pim/*.hh"
     excludes=""
-    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libproto mrt cli fea mld6igmp"
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libproto mrt cli fea mld6igmp"
     kdocify
 }
 
