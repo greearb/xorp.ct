@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.17 2007/05/23 12:12:49 pavlin Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.18 2007/11/21 08:29:39 pavlin Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -107,7 +107,7 @@ public:
     /**
      * Set the outgoing interface name.
      *
-     * @ifname the outgoing interface name.
+     * @param ifname the outgoing interface name.
      * @return true if the stored interface name changed, false otherwise.
      */
     bool set_ifname(const string& ifname);
@@ -122,7 +122,7 @@ public:
     /**
      * Set the outgoing vif name.
      *
-     * @ifname the outgoing vif name.
+     * @param vifname the outgoing vif name.
      * @return true if the stored vif name changed, false otherwise.
      */
     bool set_vifname(const string& vifname);
