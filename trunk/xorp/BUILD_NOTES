@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.96 2007/09/01 00:44:10 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.97 2007/11/07 08:23:27 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -759,27 +759,27 @@ make (e=3): The system cannot find the path specified.
        - IA-64
          setenv CROSS_ARCH ia64-unknown-linux-gnu
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+         setenv CROSS_ROOT_ARCH ${CROSS_ROOT}/${CROSS_ARCH}
 
        - MIPS (Broadcom for Linksys WRT54G)
          setenv CROSS_ARCH mipsel-unknown-linux-gnu
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+         setenv CROSS_ROOT_ARCH ${CROSS_ROOT}/${CROSS_ARCH}
 
        - PowerPC-603
          setenv CROSS_ARCH powerpc-603-linux-gnu
          setenv CROSS_ROOT /opt/crosstool/gcc-4.1.0-glibc-2.3.6/${CROSS_ARCH}
-         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+         setenv CROSS_ROOT_ARCH ${CROSS_ROOT}/${CROSS_ARCH}
 
        - Sparc64
          setenv CROSS_ARCH sparc64-unknown-linux-gnu
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+         setenv CROSS_ROOT_ARCH ${CROSS_ROOT}/${CROSS_ARCH}
 
        - XScale
          setenv CROSS_ARCH armv5b-softfloat-linux
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+         setenv CROSS_ROOT_ARCH ${CROSS_ROOT}/${CROSS_ARCH}
 
     e) Download openssl from http://www.openssl.org/ and untar it:
 
@@ -810,7 +810,7 @@ make (e=3): The system cannot find the path specified.
     g) Cross-compile openssl and install it:
 
        ./Configure $CROSS_ARCH
-       make INSTALL_PREFIX=$CROSS_LINUX_ROOT install
+       make INSTALL_PREFIX=$CROSS_ROOT_ARCH install
 
     h) Prepare the XORP cross-compilation environment.
        The first three commands can be skipped if they were done in
@@ -836,7 +836,7 @@ make (e=3): The system cannot find the path specified.
          setenv CROSS_ARCH armv5b-softfloat-linux
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
 
-       setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+       setenv CROSS_ROOT_ARCH ${CROSS_ROOT}/${CROSS_ARCH}
        setenv CC ${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc
        setenv CXX ${CROSS_ROOT}/bin/${CROSS_ARCH}-g++
        setenv LD ${CROSS_ROOT}/bin/${CROSS_ARCH}-ld
@@ -850,7 +850,7 @@ make (e=3): The system cannot find the path specified.
     i) Cross-compile XORP:
 
        cd /path/to/xorp/source/code
-       ./configure --host=$CROSS_ARCH --with-openssl=$CROSS_LINUX_ROOT/usr/local/ssl
+       ./configure --host=${CROSS_ARCH} --with-openssl=${CROSS_ROOT_ARCH}/usr/local/ssl
        gmake
 
 
