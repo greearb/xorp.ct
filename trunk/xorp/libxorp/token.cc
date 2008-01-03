@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/token.cc,v 1.10 2006/03/16 00:04:36 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/token.cc,v 1.11 2007/02/16 22:46:27 pavlin Exp $"
 
 
 //
@@ -79,7 +79,11 @@ pop_token(string& token_line)
     string token;
     bool is_escape_begin = false;	// True if reached quotation mark
     bool is_escape_end = false;
-    
+
+    // Check for empty token line
+    if (token_line.empty())
+	return (token);
+
     // Skip the spaces in front
     for (i = 0; i < token_line.length(); i++) {
 	if (xorp_isspace(token_line[i])) {
@@ -87,8 +91,14 @@ pop_token(string& token_line)
 	}
 	break;
     }
+
+    // Check if we reached the end of the token line
+    if (i == token_line.length()) {
+	token_line = token_line.erase(0, i);
+	return (token);
+    }
     
-    if (token_line.size() && (token_line[i] == '"')) {
+    if (token_line[i] == '"') {
 	is_escape_begin = true;
 	i++;
     }
