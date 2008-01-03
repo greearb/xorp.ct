@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.24 2007/05/23 12:12:37 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.25 2007/07/12 17:39:50 pavlin Exp $"
 
 #include <set>
 
@@ -518,10 +518,8 @@ Finder::active_messenger_represents_target(const string& tgt) const
 	    debug_msg("Target \"%s\"\n", ci->first.c_str());
 	}
 	return false;
-    } else {
-	return i->second.messenger() == _active_messenger;
     }
-    validate_finder_classes_and_instances(_classes, _targets);
+    return i->second.messenger() == _active_messenger;
 }
 
 void
