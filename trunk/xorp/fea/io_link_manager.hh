@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.5 2007/09/15 19:52:39 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.6 2007/11/17 04:00:03 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -212,7 +212,7 @@ public:
      * Constructor for IoLinkComm.
      *
      * @param io_link_manager the corresponding I/O Link manager
-     * (@see IoLinkManager).
+     * (@ref IoLinkManager).
      * @param iftree the interface tree to use.
      * @param if_name the interface name.
      * @param vif_name the vif name.
@@ -416,10 +416,10 @@ public:
  * @short A class that manages raw link-level I/O.
  *
  * The IoLinkManager has two containers: a container for link-level handlers
- * (@see IoLinkComm) indexed by the protocol associated with the handler, and
+ * (@ref IoLinkComm) indexed by the protocol associated with the handler, and
  * a container for the filters associated with each receiver_name.  When
  * a receiver registers for interest in a particular type of raw
- * packet a handler (@see IoLinkComm) is created if necessary, then the
+ * packet a handler (@ref IoLinkComm) is created if necessary, then the
  * relevent filter is created and associated with the IoLinkComm.
  */
 class IoLinkManager : public IoLinkManagerReceiver,
@@ -589,7 +589,7 @@ public:
     /**
      * Get a reference to the interface tree.
      *
-     * @return a reference to the interface tree (@see IfTree).
+     * @return a reference to the interface tree (@ref IfTree).
      */
     const IfTree&	iftree() const { return _iftree; }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.7 2007/08/21 00:10:37 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.8 2007/11/17 04:06:47 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -43,7 +43,7 @@ public:
      * Constructor for a given address family.
      * 
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      * @param iftree the interface tree to use.
      * @param family the address family (AF_INET or AF_INET6 for IPv4 and IPv6
      * respectively).
@@ -299,7 +299,7 @@ private:
      * I/O event callback: new connection is ready to be accepted.
      *
      * @param fd the file descriptor of the socket with the new connection.
-     * @param io_event_type the event type (@see IoEventType).
+     * @param io_event_type the event type (@ref IoEventType).
      */
     void accept_io_cb(XorpFd fd, IoEventType io_event_type);
 
@@ -307,7 +307,7 @@ private:
      * I/O event callback: connection opening to the peer has completed.
      *
      * @param fd the file descriptor of the socket with the new connection.
-     * @param io_event_type the event type (@see IoEventType).
+     * @param io_event_type the event type (@ref IoEventType).
      */
     void connect_io_cb(XorpFd fd, IoEventType io_event_type);
 
@@ -315,14 +315,14 @@ private:
      * I/O event callback: data is received.
      *
      * @param fd the file descriptor of the socket with the data.
-     * @param io_event_type the event type (@see IoEventType).
+     * @param io_event_type the event type (@ref IoEventType).
      */
     void data_io_cb(XorpFd fd, IoEventType io_event_type);
 
     /**
      * Data transmission completed callback.
      *
-     * @param event the event code (@see AsyncFileOperator::Event).
+     * @param event the event code (@ref AsyncFileOperator::Event).
      * @param buffer the buffer with the transmitted data.
      * @param buffer_bytes the size of the buffer with the data.
      * @param offset the offset of the last byte written (from the beginning
@@ -339,7 +339,7 @@ private:
      * This callback is used only for Windows, and only for TCP sockets.
      *
      * @param fd the file descriptor of the socket with the data.
-     * @param io_event_type the event type (@see IoEventType).
+     * @param io_event_type the event type (@ref IoEventType).
      */
     void disconnect_io_cb(XorpFd fd, IoEventType io_event_type);
 

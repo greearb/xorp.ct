@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.6 2007/12/22 21:23:41 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_vlan_set.hh,v 1.7 2007/12/23 08:22:17 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_VLAN_SET_HH__
 #define __FEA_IFCONFIG_VLAN_SET_HH__
@@ -29,7 +29,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigVlanSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),

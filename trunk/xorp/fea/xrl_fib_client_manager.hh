@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fib_client_manager.hh,v 1.2 2007/04/28 00:49:12 pavlin Exp $
+// $XORP: xorp/fea/xrl_fib_client_manager.hh,v 1.3 2007/04/28 00:51:40 pavlin Exp $
 
 #ifndef __FEA_XRL_FIB_CLIENT_MANAGER_HH__
 #define __FEA_XRL_FIB_CLIENT_MANAGER_HH__
@@ -33,7 +33,7 @@ public:
     /**
      * Constructor
      *
-     * @param fibconfig the FibConfig configuration object (@see FibConfig).
+     * @param fibconfig the FibConfig configuration object (@ref FibConfig).
      */
     XrlFibClientManager(FibConfig&	fibconfig,
 			XrlRouter&	xrl_router)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_property_bsd.hh,v 1.1 2007/12/28 05:12:37 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_PROPERTY_BSD_HH__
@@ -26,7 +26,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigPropertyBsd(FeaDataPlaneManager& fea_data_plane_manager);
 

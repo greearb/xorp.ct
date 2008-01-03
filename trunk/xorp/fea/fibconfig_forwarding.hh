@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_forwarding.hh,v 1.1 2007/07/17 22:53:55 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_forwarding.hh,v 1.2 2007/12/28 05:12:35 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_FORWARDING_HH__
 #define __FEA_FIBCONFIG_FORWARDING_HH__
@@ -28,7 +28,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     FibConfigForwarding(FeaDataPlaneManager& fea_data_plane_manager);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.46 2007/06/15 16:53:18 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.47 2007/07/18 01:30:23 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -68,7 +68,7 @@ public:
     /**
      * Constructor for a given address family, module ID, and event loop.
      * 
-     * @param fea_node the corresponding FeaNode (@see FeaNode).
+     * @param fea_node the corresponding FeaNode (@ref FeaNode).
      * @param family the address family (AF_INET or AF_INET6 for
      * IPv4 and IPv6 respectively).
      * @param module_id the module ID (@ref xorp_module_id). Should be

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/ifconfig_property.hh,v 1.1 2007/12/28 05:12:35 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_PROPERTY_HH__
 #define __FEA_IFCONFIG_PROPERTY_HH__
@@ -28,7 +28,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigProperty(FeaDataPlaneManager& fea_data_plane_manager);
 

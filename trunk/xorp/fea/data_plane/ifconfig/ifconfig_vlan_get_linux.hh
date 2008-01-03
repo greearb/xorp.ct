@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_linux.hh,v 1.1 2007/09/26 01:40:41 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_GET_LINUX_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_VLAN_GET_LINUX_HH__
@@ -26,7 +26,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigVlanGetLinux(FeaDataPlaneManager& fea_data_plane_manager);
 

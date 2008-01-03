@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.hh,v 1.8 2007/12/22 21:23:42 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_ioctl.hh,v 1.9 2007/12/23 08:22:18 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_IOCTL_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_IOCTL_HH__
@@ -26,7 +26,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigSetIoctl(FeaDataPlaneManager& fea_data_plane_manager);
 

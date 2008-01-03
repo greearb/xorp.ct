@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.4 2007/07/26 01:18:41 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.5 2007/10/19 01:12:28 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -50,7 +50,7 @@ public:
      * Constructor for link-level access for a given interface and vif.
      * 
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      * @param iftree the interface tree to use.
      * @param if_name the interface name.
      * @param vif_name the vif name.

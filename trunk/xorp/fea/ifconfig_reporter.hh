@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.4 2007/05/23 12:12:34 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_reporter.hh,v 1.5 2007/09/15 19:52:38 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_REPORTER_HH__
 #define __FEA_IFCONFIG_REPORTER_HH__
@@ -45,7 +45,7 @@ public:
      * Constructor for a given replicator.
      *
      * @param update_replicator the corresponding replicator
-     * (@see IfConfigUpdateReplicator).
+     * (@ref IfConfigUpdateReplicator).
      */
     IfConfigUpdateReporterBase(IfConfigUpdateReplicator& update_replicator);
 
@@ -53,8 +53,8 @@ public:
      * Constructor for a given replicator and observed tree.
      *
      * @param update_replicator the corresponding replicator
-     * (@see IfConfigUpdateReplicator).
-     * @param observed_iftree the corresponding interface tree (@see IfTree).
+     * (@ref IfConfigUpdateReplicator).
+     * @param observed_iftree the corresponding interface tree (@ref IfTree).
      */
     IfConfigUpdateReporterBase(IfConfigUpdateReplicator& update_replicator,
 			       const IfTree& observed_iftree);

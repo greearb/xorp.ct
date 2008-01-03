@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.6 2007/09/15 05:10:21 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.hh,v 1.7 2007/09/15 19:52:48 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_GET_NETLINK_SOCKET_HH__
@@ -28,7 +28,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigGetNetlinkSocket(FeaDataPlaneManager& fea_data_plane_manager);
 

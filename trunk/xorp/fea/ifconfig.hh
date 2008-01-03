@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.75 2007/12/28 05:12:35 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.76 2007/12/30 09:15:03 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -119,8 +119,8 @@ public:
     /**
      * Get the IfConfigUpdateReplicator instance.
      *
-     * @return a reference to the IfConfigUpdateReplicator instance.
-     * @see IfConfigUpdateReplicator.
+     * @return a reference to the IfConfigUpdateReplicator instance
+     * (@ref IfConfigUpdateReplicator).
      */
     IfConfigUpdateReplicator& ifconfig_update_replicator() {
 	return (_ifconfig_update_replicator);

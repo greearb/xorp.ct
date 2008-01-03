@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.27 2007/07/11 22:18:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.28 2007/07/16 23:54:06 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -29,7 +29,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     IfConfigObserver(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),

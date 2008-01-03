@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.11 2007/07/16 23:54:05 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_get.hh,v 1.12 2007/09/15 19:52:38 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_GET_HH__
 #define __FEA_FIBCONFIG_TABLE_GET_HH__
@@ -32,7 +32,7 @@ public:
      * Constructor.
      *
      * @param fea_data_plane_manager the corresponding data plane manager
-     * (@see FeaDataPlaneManager).
+     * (@ref FeaDataPlaneManager).
      */
     FibConfigTableGet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),

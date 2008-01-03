@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.56 2007/12/22 21:23:41 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.57 2007/12/30 09:15:03 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -147,7 +147,7 @@ public:
      * Find an interface.
      *
      * @param ifname the interface name to search for.
-     * @return a pointer to the interface (@see IfTreeInterface) or NULL
+     * @return a pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     IfTreeInterface* find_interface(const string& ifname);
@@ -156,7 +156,7 @@ public:
      * Find a const interface.
      *
      * @param ifname the interface name to search for.
-     * @return a const pointer to the interface (@see IfTreeInterface) or NULL
+     * @return a const pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     const IfTreeInterface* find_interface(const string& ifname) const;
@@ -165,7 +165,7 @@ public:
      * Find an interface for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a pointer to the interface (@see IfTreeInterface) or NULL
+     * @return a pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     IfTreeInterface* find_interface(uint32_t pif_index);
@@ -174,7 +174,7 @@ public:
      * Find a const interface for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a const pointer to the interface (@see IfTreeInterface) or NULL
+     * @return a const pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     const IfTreeInterface* find_interface(uint32_t pif_index) const;
@@ -184,7 +184,7 @@ public:
      *
      * @param ifname the interface name to search for.
      * @param vifname the vif name to search for.
-     * @return a pointer to the vif (@see IfTreeVif) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeVif) or NULL if not found.
      */
     IfTreeVif* find_vif(const string& ifname, const string& vifname);
 
@@ -193,7 +193,7 @@ public:
      *
      * @param ifname the interface name to search for.
      * @param vifname the vif name to search for.
-     * @return a const pointer to the vif (@see IfTreeVif) or NULL
+     * @return a const pointer to the vif (@ref IfTreeVif) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(const string& ifname,
@@ -203,7 +203,7 @@ public:
      * Find a vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a pointer to the vif (@see IfTreeVif) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeVif) or NULL if not found.
      */
     IfTreeVif* find_vif(uint32_t pif_index);
 
@@ -211,7 +211,7 @@ public:
      * Find a const vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a const pointer to the vif (@see IfTreeVif) or NULL
+     * @return a const pointer to the vif (@ref IfTreeVif) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(uint32_t pif_index) const;
@@ -222,7 +222,7 @@ public:
      * @param ifname the interface name to search for.
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr4) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr4) or NULL if not found.
      */
     IfTreeAddr4* find_addr(const string& ifname, const string& vifname,
 			   const IPv4& addr);
@@ -233,7 +233,7 @@ public:
      * @param ifname the interface name to search for.
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a const pointer to the vif (@see IfTreeAddr4) or NULL
+     * @return a const pointer to the vif (@ref IfTreeAddr4) or NULL
      * if not found.
      */
     const IfTreeAddr4* find_addr(const string& ifname, const string& vifname,
@@ -245,7 +245,7 @@ public:
      * @param ifname the interface name to search for.
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     IfTreeAddr6* find_addr(const string& ifname, const string& vifname,
 			   const IPv6& addr);
@@ -256,7 +256,7 @@ public:
      * @param ifname the interface name to search for.
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     const IfTreeAddr6* find_addr(const string& ifname, const string& vifname,
 				 const IPv6& addr) const;
@@ -469,7 +469,7 @@ public:
      * Find a vif.
      *
      * @param vifname the vif name to search for.
-     * @return a pointer to the vif (@see IfTreeVif) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeVif) or NULL if not found.
      */
     IfTreeVif* find_vif(const string& vifname);
 
@@ -477,7 +477,7 @@ public:
      * Find a const vif.
      *
      * @param vifname the vif name to search for.
-     * @return a const pointer to the vif (@see IfTreeVif) or NULL
+     * @return a const pointer to the vif (@ref IfTreeVif) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(const string& vifname) const;
@@ -486,7 +486,7 @@ public:
      * Find a vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a pointer to the interface (@see IfTreeInterface) or NULL
+     * @return a pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     IfTreeVif* find_vif(uint32_t pif_index);
@@ -495,7 +495,7 @@ public:
      * Find a const vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a const pointer to the interface (@see IfTreeInterface) or NULL
+     * @return a const pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(uint32_t pif_index) const;
@@ -505,7 +505,7 @@ public:
      *
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr4) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr4) or NULL if not found.
      */
     IfTreeAddr4* find_addr(const string& vifname, const IPv4& addr);
 
@@ -514,7 +514,7 @@ public:
      *
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a const pointer to the vif (@see IfTreeAddr4) or NULL
+     * @return a const pointer to the vif (@ref IfTreeAddr4) or NULL
      * if not found.
      */
     const IfTreeAddr4* find_addr(const string& vifname,
@@ -525,7 +525,7 @@ public:
      *
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     IfTreeAddr6* find_addr(const string& vifname, const IPv6& addr);
 
@@ -534,7 +534,7 @@ public:
      *
      * @param vifname the vif name to search for.
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     const IfTreeAddr6* find_addr(const string& vifname,
 				 const IPv6& addr) const;
@@ -705,7 +705,7 @@ public:
      * Find an IPv4 address.
      *
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr4) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr4) or NULL if not found.
      */
     IfTreeAddr4* find_addr(const IPv4& addr);
 
@@ -713,7 +713,7 @@ public:
      * Find a const IPv4 address.
      *
      * @param addr the address to search for.
-     * @return a const pointer to the vif (@see IfTreeAddr4) or NULL
+     * @return a const pointer to the vif (@ref IfTreeAddr4) or NULL
      * if not found.
      */
     const IfTreeAddr4* find_addr(const IPv4& addr) const;
@@ -722,7 +722,7 @@ public:
      * Find an IPv6 address.
      *
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     IfTreeAddr6* find_addr(const IPv6& addr);
 
@@ -730,7 +730,7 @@ public:
      * Find a const IPv6 address.
      *
      * @param addr the address to search for.
-     * @return a pointer to the vif (@see IfTreeAddr6) or NULL if not found.
+     * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     const IfTreeAddr6* find_addr(const IPv6& addr) const;
 
