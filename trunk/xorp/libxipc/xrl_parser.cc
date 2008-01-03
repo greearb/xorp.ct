@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.12 2006/03/16 00:04:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_parser.cc,v 1.13 2007/02/16 22:46:11 pavlin Exp $"
 
 #include <stdio.h>
 
@@ -129,7 +129,9 @@ static inline size_t
 skip_xrl_plain_chars(const string& input, string::const_iterator& sci)
 {
     string::const_iterator start = sci;
-    for (; sci != input.end() && isxrlplain(*sci); sci++);
+    for ( ; sci != input.end() && isxrlplain(*sci); sci++) {
+	// XXX: Empty body
+    }
     return sci - start;
 }
 
