@@ -1,10 +1,10 @@
 #!/bin/sh -
 
 #
-# $XORP: other/LiveCD/files/xorp-makeconfig.sh,v 1.10 2006/03/16 00:09:01 pavlin Exp $
+# $XORP: other/LiveCD/files/xorp-makeconfig.sh,v 1.11 2007/02/16 22:14:14 pavlin Exp $
 #
 
-# Copyright (c) 2004-2007 International Computer Science Institute
+# Copyright (c) 2004-2008 International Computer Science Institute
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
