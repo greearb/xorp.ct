@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/protocol.hh,v 1.10 2007/03/22 20:48:18 bms Exp $
+// $XORP: xorp/rib/protocol.hh,v 1.11 2008/01/04 03:17:23 pavlin Exp $
 
 #ifndef __RIB_PROTOCOL_HH__
 #define __RIB_PROTOCOL_HH__
@@ -28,7 +28,8 @@ enum ProtocolType {
 enum ProtocolAdminDistance {
     CONNECTED_ADMIN_DISTANCE	= 0,	// Only for connected routes.
     UNKNOWN_ADMIN_DISTANCE	= 255,
-    UNSET_ADMIN_DISTANCE	= 256
+    UNSET_ADMIN_DISTANCE	= 256,
+    MAX_ADMIN_DISTANCE		= 65535
 };
 
 /**
