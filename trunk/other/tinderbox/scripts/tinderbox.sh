@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.20 2008/01/03 00:35:02 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.21 2008/01/04 03:01:42 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -107,18 +107,21 @@ run_tinderbox() {
 	eval cfg_env=\$env_$cfg
 	eval cfg_buildflags=\$buildflags_$cfg
 	eval cfg_sshflags=\$sshflags_$cfg
-	eval cfg_cross_compile=\${cross_compile}_$cfg
+	eval cfg_cross_arch=\$cross_arch_$cfg
+	eval cfg_cross_root=\$cross_root_$cfg
 
 	# Add the cross-compilation environment
-	if [ "x${cfg_cross_compile}" = "xyes" ] ; then
-	    cfg_env="${cfg_env} CROSS_ROOT_ARCH=${CROSS_ROOT}/${CROSS_ARCH}"
-	    cfg_env="${cfg_env} CC=${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc"
-	    cfg_env="${cfg_env} CXX=${CROSS_ROOT}/bin/${CROSS_ARCH}-g++"
-	    cfg_env="${cfg_env} LD=${CROSS_ROOT}/bin/${CROSS_ARCH}-ld"
-	    cfg_env="${cfg_env} RANLIB=${CROSS_ROOT}/bin/${CROSS_ARCH}-ranlib"
-	    cfg_env="${cfg_env} NM=${CROSS_ROOT}/bin/${CROSS_ARCH}-nm"
+	if [ "${cfg_cross_arch}" ] ; then
+	    tmp_cross_root_arch="${cfg_cross_root}/${cfg_cross_arch}"
+	    tmp_cross_bin_prefix="${cfg_cross_root}/bin/${cfg_cross_arch}"
 
-	    tmp_conf_args="--host=${CROSS_ARCH} --with-openssl=${CROSS_ROOT_ARCH}/usr/local/ssl"
+	    cfg_env="${cfg_env} CC=${tmp_cross_bin_prefix}-gcc"
+	    cfg_env="${cfg_env} CXX=${tmp_cross_bin_prefix}-g++"
+	    cfg_env="${cfg_env} LD=${tmp_cross_bin_prefix}-ld"
+	    cfg_env="${cfg_env} RANLIB=${tmp_cross_bin_prefix}-ranlib"
+	    cfg_env="${cfg_env} NM=${tmp_cross_bin_prefix}-nm"
+
+	    tmp_conf_args="--host=${cfg_cross_arch} --with-openssl=${tmp_cross_root_arch}/usr/local/ssl"
 	    cfg_env="${cfg_env} CONFIGURE_ARGS=${tmp_conf_args}"
 	fi
 
@@ -165,7 +168,7 @@ run_tinderbox() {
 
 	# Log into host and run regression tests only if this is not
 	# cross-compilation setup
-	if [ "x${cfg_cross_compile}" != "xyes" ] ; then
+	if [ "${cfg_cross_arch}" ] ; then
 	    check_errfile="${errfile}-check"
 	    cp ${header} ${check_errfile}
 	    ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
