@@ -1,6 +1,6 @@
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code.cc,v 1.8 2006/12/07 20:00:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/code.cc,v 1.9 2007/02/16 22:46:52 pavlin Exp $"
 
 #include "policy_module.h"
 

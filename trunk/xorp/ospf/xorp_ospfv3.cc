@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xorp_ospfv3.cc,v 1.14 2006/10/12 19:41:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/xorp_ospfv3.cc,v 1.15 2007/02/16 22:46:44 pavlin Exp $"
 
 #include "ospf_module.h"
 

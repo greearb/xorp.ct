@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2007 International Computer Science Institute
+ * Copyright (c) 2001-2008 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/netstream_access.h,v 1.6 2006/04/02 22:25:48 pavlin Exp $
+ * $XORP: xorp/mrt/netstream_access.h,v 1.7 2007/02/16 22:46:39 pavlin Exp $
  */
 
 

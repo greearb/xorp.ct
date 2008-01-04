@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_policy.hh,v 1.3 2006/03/16 00:05:29 pavlin Exp $
+// $XORP: xorp/rib/redist_policy.hh,v 1.4 2007/02/16 22:47:07 pavlin Exp $
 
 #ifndef __RIB_REDIST_POLICY_HH__
 #define __RIB_REDIST_POLICY_HH__

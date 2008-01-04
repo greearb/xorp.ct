@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.20 2007/02/16 22:45:58 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.21 2007/10/13 01:50:00 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__

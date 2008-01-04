@@ -1,6 +1,6 @@
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.8 2006/10/12 01:25:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.9 2007/02/16 22:47:02 pavlin Exp $"
 
 #include "policy/policy_module.h"
 

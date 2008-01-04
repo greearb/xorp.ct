@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2007 International Computer Science Institute
+# Copyright (c) 2001-2008 International Computer Science Institute
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_start.py,v 1.4 2007/07/06 00:02:44 atanu Exp $
+# $XORP: xorp/tests/test_start.py,v 1.5 2007/12/08 01:37:12 atanu Exp $
 
 import getopt,threading,time,sys
 from test_process import Process

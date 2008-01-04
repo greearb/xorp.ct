@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007 International Computer Science Institute
+// Copyright (c) 2007-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.3 2007/08/17 19:48:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_io_tcpudp_manager.cc,v 1.4 2007/11/17 04:06:46 pavlin Exp $"
 
 #include "fea_module.h"
 

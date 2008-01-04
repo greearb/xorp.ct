@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.14 2007/02/16 22:46:19 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.15 2007/10/13 01:23:08 pavlin Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__

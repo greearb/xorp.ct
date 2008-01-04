@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_log.hh,v 1.6 2006/03/16 00:05:37 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_log.hh,v 1.7 2007/02/16 22:47:10 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_LOG_HH__
 #define __RIB_RT_TAB_LOG_HH__

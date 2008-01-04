@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.32 2007/08/02 18:20:13 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.33 2007/08/17 22:10:36 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"

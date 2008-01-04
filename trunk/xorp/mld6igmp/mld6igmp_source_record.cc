@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.11 2006/07/10 08:51:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.12 2007/02/16 22:46:37 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and

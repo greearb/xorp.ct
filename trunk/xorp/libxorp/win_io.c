@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
  * vim:set sts=4 ts=8:
  *
- * Copyright (c) 2001-2007 International Computer Science Institute
+ * Copyright (c) 2001-2008 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  *
  */
 
-#ident "$XORP: xorp/libxorp/win_io.c,v 1.8 2006/10/12 01:24:56 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/win_io.c,v 1.9 2007/02/16 22:46:29 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 

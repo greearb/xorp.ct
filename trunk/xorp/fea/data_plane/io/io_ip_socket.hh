@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.8 2007/07/26 01:18:40 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.9 2008/01/03 22:59:44 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2007 International Computer Science Institute
+# Copyright (c) 2001-2008 International Computer Science Institute
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.22 2006/06/17 03:07:41 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.23 2007/02/16 22:47:32 pavlin Exp $
 
 #
 # The tests in this file are based on the:

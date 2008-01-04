@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2007 International Computer Science Institute
+ * Copyright (c) 2001-2008 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/utils/flower_malloc/test_flower_malloc.c,v 1.6 2007/02/16 22:47:33 pavlin Exp $"
+#ident "$XORP: xorp/utils/flower_malloc/test_flower_malloc.c,v 1.7 2007/04/20 19:06:21 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 

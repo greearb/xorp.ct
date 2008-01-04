@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007 International Computer Science Institute
+// Copyright (c) 2007-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.23 2007/11/29 01:52:37 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.24 2007/12/30 09:15:04 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__

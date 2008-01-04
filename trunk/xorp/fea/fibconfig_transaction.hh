@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.3 2007/04/27 23:48:56 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.4 2007/09/15 19:52:38 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TRANSACTION_HH__
 #define __FEA_FIBCONFIG_TRANSACTION_HH__

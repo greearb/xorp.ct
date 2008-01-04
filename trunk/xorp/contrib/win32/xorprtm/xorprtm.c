@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
  * vim:set sts=4 ts=8:
  *
- * Copyright (c) 2001-2007 International Computer Science Institute
+ * Copyright (c) 2001-2008 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
  * notice is a summary of the XORP LICENSE file; the license in that file is
  * legally binding.
  *
- * $XORP: xorp/contrib/win32/xorprtm/xorprtm.c,v 1.2 2006/07/07 10:59:38 bms Exp $
+ * $XORP: xorp/contrib/win32/xorprtm/xorprtm.c,v 1.3 2007/02/16 22:45:33 pavlin Exp $
  */
 
 /* XXX: SORT FUNCTIONS IN THIS FILE */

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007 International Computer Science Institute
+// Copyright (c) 2007-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.hh,v 1.6 2007/08/20 19:12:16 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.hh,v 1.7 2007/12/28 05:12:38 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__

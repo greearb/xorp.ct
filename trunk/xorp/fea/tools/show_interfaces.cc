@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.24 2007/10/13 01:49:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.25 2007/11/29 01:52:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 

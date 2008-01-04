@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007 International Computer Science Institute
+// Copyright (c) 2007-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_linux.cc,v 1.2 2007/09/26 01:45:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_linux.cc,v 1.3 2007/10/12 07:53:50 pavlin Exp $"
 
 #include "fea/fea_module.h"
 

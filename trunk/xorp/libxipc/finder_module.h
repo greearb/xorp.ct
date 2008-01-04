@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2007 International Computer Science Institute
+ * Copyright (c) 2001-2008 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxipc/finder_module.h,v 1.11 2006/03/16 00:04:15 pavlin Exp $
+ * $XORP: xorp/libxipc/finder_module.h,v 1.12 2007/02/16 22:46:05 pavlin Exp $
  */
 
 /*

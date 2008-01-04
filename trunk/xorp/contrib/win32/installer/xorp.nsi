@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.12 2007/03/14 22:21:34 pavlin Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.13 2007/03/21 19:16:15 pavlin Exp $
  */
 
 !include LogicLib.nsh
@@ -68,7 +68,7 @@ VIProductVersion "1.2.0.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Find more information about ${PRODUCT_NAME} at ${PRODUCT_URL}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PRODUCT_PUBLISHER}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(c) 2001-2007 International Computer Science Institute"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(c) 2001-2008 International Computer Science Institute"
 
 
 InstallDir ${DEFAULT_INSTALL_DIR}

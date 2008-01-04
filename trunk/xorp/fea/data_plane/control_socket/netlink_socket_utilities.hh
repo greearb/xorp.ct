@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.hh,v 1.3 2007/06/04 23:17:33 pavlin Exp $
+// $XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.hh,v 1.4 2007/09/15 19:52:42 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__
 #define __FEA_DATA_PLANE_CONTROL_SOCKET_NETLINK_SOCKET_UTILITIES_HH__

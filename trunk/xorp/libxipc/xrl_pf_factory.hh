@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.11 2006/03/16 00:04:22 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_factory.hh,v 1.12 2007/02/16 22:46:11 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_FACTORY_HH__
 #define __LIBXIPC_XRL_PF_FACTORY_HH__

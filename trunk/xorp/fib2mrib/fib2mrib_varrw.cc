@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2007 International Computer Science Institute
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.7 2006/03/16 00:04:09 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.8 2007/02/16 22:45:58 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 

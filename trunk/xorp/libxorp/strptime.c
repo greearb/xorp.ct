@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2007 International Computer Science Institute
+ * Copyright (c) 2001-2008 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.14 2007/02/16 22:46:23 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.15 2008/01/03 01:00:45 pavlin Exp $"
 
 
 /*
