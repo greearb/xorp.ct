@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/config,v 1.34 2008/01/04 03:01:42 pavlin Exp $
+# $XORP: other/tinderbox/scripts/config,v 1.35 2008/01/04 20:17:02 pavlin Exp $
 
 #
 # Tinderbox configurations
@@ -106,14 +106,14 @@ sshflags_vm_windows2003_gcc342="-i ${HOME}/.ssh/tinderbox -p 1128"
 cross_arch_vm_windows2003_gcc342=""
 cross_root_vm_windows2003_gcc342=""
 
-# Ubuntu-7.0.4 with gcc-4.1.2
-host_vm_ubuntu704_gcc412="xorpv-vm.icir.org"
-home_vm_ubuntu704_gcc412="tinderbox"
-env_vm_ubuntu704_gcc412="CC=gcc-4.1 CXX=g++-4.1"
-buildflags_vm_ubuntu704_gcc412="-j 2"
-sshflags_vm_ubuntu704_gcc412="-i ${HOME}/.ssh/tinderbox -p 49128"
-cross_arch_vm_ubuntu704_gcc412=""
-cross_root_vm_ubuntu704_gcc412=""
+# Ubuntu-7.10 with gcc-4.1.3
+host_vm_ubuntu710_gcc413="xorpv-vm.icir.org"
+home_vm_ubuntu710_gcc413="tinderbox"
+env_vm_ubuntu710_gcc413="CC=gcc-4.1 CXX=g++-4.1"
+buildflags_vm_ubuntu710_gcc413="-j 2"
+sshflags_vm_ubuntu710_gcc413="-i ${HOME}/.ssh/tinderbox -p 49128"
+cross_arch_vm_ubuntu710_gcc413=""
+cross_root_vm_ubuntu710_gcc413=""
 
 # Solaris-10 with gcc-3.4.3
 host_vm_solaris10_gcc343="xorpv-vm.icir.org"
@@ -142,23 +142,23 @@ sshflags_vm_freebsd62_gcc346="-i ${HOME}/.ssh/tinderbox -p 49131"
 cross_arch_vm_freebsd62_gcc346=""
 cross_root_vm_freebsd62_gcc346=""
 
-# Fedora-7 with gcc-4.1.2
-host_vm_fedora7_gcc412="xorpv-vm.icir.org"
-home_vm_fedora7_gcc412="tinderbox"
-env_vm_fedora7_gcc412=""
-buildflags_vm_fedora7_gcc412="-j 2"
-sshflags_vm_fedora7_gcc412="-i ${HOME}/.ssh/tinderbox -p 49132"
-cross_arch_vm_fedora7_gcc412=""
-cross_root_vm_fedora7_gcc412=""
+# Fedora-8 with gcc-4.1.2
+host_vm_fedora8_gcc412="xorpv-vm.icir.org"
+home_vm_fedora8_gcc412="tinderbox"
+env_vm_fedora8_gcc412=""
+buildflags_vm_fedora8_gcc412="-j 2"
+sshflags_vm_fedora8_gcc412="-i ${HOME}/.ssh/tinderbox -p 49132"
+cross_arch_vm_fedora8_gcc412=""
+cross_root_vm_fedora8_gcc412=""
 
-# DragonFlyBSD-1.8 with gcc-3.4.6
-host_vm_dragonflybsd18_gcc346="xorpv-vm.icir.org"
-home_vm_dragonflybsd18_gcc346="tinderbox"
-env_vm_dragonflybsd18_gcc346=""
-buildflags_vm_dragonflybsd18_gcc346="-j 2"
-sshflags_vm_dragonflybsd18_gcc346="-i ${HOME}/.ssh/tinderbox -p 49133"
-cross_arch_vm_dragonflybsd18_gcc346=""
-cross_root_vm_dragonflybsd18_gcc346=""
+# DragonFlyBSD-1.10.1 with gcc-3.4.6
+host_vm_dragonflybsd110_gcc346="xorpv-vm.icir.org"
+home_vm_dragonflybsd110_gcc346="tinderbox"
+env_vm_dragonflybsd110_gcc346=""
+buildflags_vm_dragonflybsd110_gcc346="-j 2"
+sshflags_vm_dragonflybsd110_gcc346="-i ${HOME}/.ssh/tinderbox -p 49133"
+cross_arch_vm_dragonflybsd110_gcc346=""
+cross_root_vm_dragonflybsd110_gcc346=""
 
 # Debian-4.0 with gcc-4.1.3
 host_vm_debian40_gcc413="xorpv-vm.icir.org"
@@ -187,7 +187,7 @@ sshflags_cc_ia64_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
 cross_arch_cc_ia64_gentoo20061_gcc345="ia64-unknown-linux-gnu"
 cross_root_cc_ia64_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu"
 
-TINDERBOX_CONFIGS="freebsd410_gcc295 freebsd410_gcc334 freebsd410_gcc346 freebsd410_gcc346_stldebug redhat73_gcc296 gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu704_gcc412 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora7_gcc412 vm_dragonflybsd18_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345"
+TINDERBOX_CONFIGS="freebsd410_gcc295 freebsd410_gcc334 freebsd410_gcc346 freebsd410_gcc346_stldebug redhat73_gcc296 gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu710_gcc413 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora8_gcc412 vm_dragonflybsd110_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345"
 
 TINDERBOX_CONFIG_UNUSED="vm_solaris10_gcc343"
 
