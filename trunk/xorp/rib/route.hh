@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.24 2007/10/03 00:05:48 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.25 2008/01/04 03:17:24 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -52,7 +52,7 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     RouteEntry(RibVif* vif, NextHop* nexthop, const Protocol& protocol,
-	       uint16_t metric);
+	       uint32_t metric);
 
     /**
      * Destructor
@@ -118,14 +118,14 @@ public:
      *
      * @param metric the routing protocol metric to be set on this route.
      */
-    void set_metric(uint16_t metric) { _metric = metric; }
+    void set_metric(uint32_t metric) { _metric = metric; }
 
     /**
      * Get the routing protocol metric.
      *
      * @return the routing protocol metric for this route.
      */
-    uint16_t metric() const { return _metric; }
+    uint32_t metric() const { return _metric; }
 
 protected:
     RibVif*		_vif;
@@ -133,7 +133,7 @@ protected:
     // The routing protocol that instantiated this route
     const Protocol&	_protocol;
     uint16_t		_admin_distance;	// Lower is better
-    uint16_t		_metric;		// Lower is better
+    uint32_t		_metric;		// Lower is better
 };
 
 /**
@@ -158,7 +158,7 @@ public:
      * @param metric the routing protocol metric for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
-		 const Protocol& protocol, uint16_t metric)
+		 const Protocol& protocol, uint32_t metric)
 	: RouteEntry(vif, nexthop, protocol, metric), _net(net) {}
 
     /**
@@ -174,7 +174,7 @@ public:
      * @param policytags the policy-tags for this route.
      */
     IPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
-		 const Protocol& protocol, uint16_t metric,
+		 const Protocol& protocol, uint32_t metric,
 		 const PolicyTags& policytags)
 	: RouteEntry(vif, nexthop, protocol, metric), _net(net),
 	  _policytags(policytags) {}
@@ -277,7 +277,7 @@ public:
      * @param egp_parent the orginal route entry with a non-local nexthop.
      */
     ResolvedIPRouteEntry(const IPNet<A>& net, RibVif* vif, NextHop* nexthop,
-			 const Protocol& protocol, uint16_t metric,
+			 const Protocol& protocol, uint32_t metric,
 			 const IPRouteEntry<A>* igp_parent,
 			 const IPRouteEntry<A>* egp_parent)
 	: IPRouteEntry<A>(net, vif, nexthop, protocol, metric, PolicyTags()),

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.69 2007/10/26 22:53:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.70 2008/01/04 03:17:24 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -858,20 +858,10 @@ RIB<A>::add_route(const string&		tablename,
     XLOG_ASSERT(nexthop->addr() == nexthop_addr);
 
     //
-    // Only accept the least significant 16 bits of metric.
-    //
-    if (metric > 0xffff) {
-	XLOG_WARNING("Protocol metric value %u is greater than 0xffff from "
-		     "table \"%s\"",  XORP_UINT_CAST(metric),
-		     tablename.c_str());
-	metric &= 0xffff;
-    }
-
-    //
     // Add the route
     //
-    ot->add_route(IPRouteEntry<A>(net, vif, nexthop,
-				  *protocol, metric, policytags));
+    ot->add_route(IPRouteEntry<A>(net, vif, nexthop, *protocol, metric,
+				  policytags));
     flush();
     return XORP_OK;
 }
