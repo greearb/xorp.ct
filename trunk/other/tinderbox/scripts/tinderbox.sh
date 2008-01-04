@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.21 2008/01/04 03:01:42 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.22 2008/01/04 20:17:02 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -168,7 +168,7 @@ run_tinderbox() {
 
 	# Log into host and run regression tests only if this is not
 	# cross-compilation setup
-	if [ "${cfg_cross_arch}" ] ; then
+	if [ ! "${cfg_cross_arch}" ] ; then
 	    check_errfile="${errfile}-check"
 	    cp ${header} ${check_errfile}
 	    ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
