@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.67 2007/09/14 01:52:22 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.68 2007/09/19 22:25:35 atanu Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -101,31 +101,30 @@ the login shell is csh or tcsh):
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co other
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co www
  cvs -d xorpc.icir.org:/usr/local/share/doc/apache/cvs co xorp
- # Prepare the script for updating the copyright message
- cp xorp/devnotes/update_copyright.sh .
 
- # Edit the update_copyright.sh script using the instructions inside
- # that script.
- vi update_copyright.sh
-
- # Run the modified update_copyright.sh script inside each of the
- # checked-out directory, check the modifications and then commit them.
+ # Run the xorp/devnotes/update_copyright.sh script using the old year
+ # as an argument. It should be run inside each of the checked-out
+ # directories. After that check the modifications and then commit them.
  # The CVS commit message should be something like:
- # "Update the ICSI copyright year to 2008."
+ #   "Update the ICSI copyright year to 2009."
  cd data
- ../update_copyright.sh
+ ../xorp/devnotes/update_copyright.sh 2008
  cvs diff -u -p | less
  cvs commit
  cd ../other
- ../update_copyright.sh
+ ../xorp/devnotes/update_copyright.sh 2008
  cvs diff -u -p | less
  cvs commit
  cd ../www
- ../update_copyright.sh
+ # Test whether any auto-generated files might be re-generated
+ gmake
+ # If any auto-generated files are re-generated, delete them
+ # and check-out another copy from CVS.
+ ../xorp/devnotes/update_copyright.sh 2008
  cvs diff -u -p | less
  cvs commit
  cd ../xorp
- ../update_copyright.sh
+ ../xorp/devnotes/update_copyright.sh 2008
  cvs diff -u -p | less
  cvs commit
 
