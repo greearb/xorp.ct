@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.6 2007/02/16 22:51:14 pavlin Exp $
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.7 2008/01/04 03:19:48 pavlin Exp $
 #
 
 #
@@ -9,11 +9,7 @@
 # It must be run in the top directory of a a fresh checked-out copy
 # of the source code, otherwise it may overwrite something else.
 #
-# Note1: Before running the script you must modify the OLD_YEAR and
-# NEW_YEAR variables below to match the particular replacement string
-# with the copyright message.
-#
-# Note2: You should give a heads up before commiting changes
+# Note: You should give a heads up before commiting changes
 # proposed by this script since it will modify almost all files in the
 # source tree and this may interfere with other people's pending commits.
 #
@@ -21,46 +17,168 @@
 #set -x
 
 #
-# XXX: MODIFY THESE AS APPROPRIATE!
+# XXX: MODIFY THE FOLLOWING PARAMETERS AS APPROPRIATE!
 #
-# Note that the string needs to be run twice with different pairs
-# of OLD_YEAR and NEW_YEAR: the first time to update the "X-Y" copyright years,
-# and second time to update the "(c) Y" copyright year.
+# COPYRIGHT_HOLDER: The name of the copyright holder
 #
-# Note the hack in defining the string so the script doesn't update itself.
-#
-#OLD_YEAR="(c) 2008"
-#NEW_YEAR="(c) 2008-2009"
-OLD_YEAR="-2008"
-NEW_YEAR="-2009"
-OLD_STRING="${OLD_YEAR} International Computer Science Institute"
-NEW_STRING="${NEW_YEAR} International Computer Science Institute"
+COPYRIGHT_HOLDER="International Computer Science Institute"
 
 #
-# Internal variables
+# Print usage and exit
 #
-SED_COMMAND="s/${OLD_STRING}/${NEW_STRING}/"
-TMP_SUFFIX="debog"
+usage()
+{
+    cat <<EOF
+Usage: $0 [-h] <old_year> [<new_year>]
+    <old_year>  The old year that was in the copyright messages
+    <new_year>  The new year. If it is not specified, it will be set to
+                the year after <old_year>.
+    -h          Print usage
+EOF
+    exit 1
+}
 
-find . -type f -print | 
-while read FILENAME
-do
-    grep -e "${OLD_STRING}" "${FILENAME}" > /dev/null
-    if [ $? -ne 0 ] ; then
-	# XXX: no match found
-	continue
-    fi
-
-    cat "${FILENAME}" | sed "${SED_COMMAND}" > "${FILENAME}"."${TMP_SUFFIX}"
-    if [ $? -ne 0 ] ; then
-	echo "Error updating ${FILENAME}"
+#
+# Update a single file
+#
+# $1 = Old string
+# $2 = New string
+# $3 = File name
+#
+update_file()
+{
+    if [ $# -ne 3 ] ; then
+	echo "$0: invalid number of arguments: expected 3, received $#"
 	exit 1
     fi
-    cmp "${FILENAME}" "${FILENAME}"."${TMP_SUFFIX}" >/dev/null
+    old_string="$1"
+    new_string="$2"
+    filename="$3"
+
+    #
+    # Internal variables
+    #
+    sed_cmd="s/${old_string}/${new_string}/"
+    tmp_suffix="debog"
+
+    grep -e "${old_string}" "${filename}" > /dev/null
     if [ $? -ne 0 ] ; then
-	mv "${FILENAME}"."${TMP_SUFFIX}" "${FILENAME}"
-	echo "Updating ${FILENAME}"
-    else
-	rm "${FILENAME}"."${TMP_SUFFIX}"
+	# OK: no match found
+	return
     fi
-done
+
+    cat "${filename}" | sed "${sed_cmd}" > "${filename}"."${tmp_suffix}"
+    if [ $? -ne 0 ] ; then
+	echo "Error updating ${filename}"
+	exit 1
+    fi
+    cmp "${filename}" "${filename}"."${tmp_suffix}" >/dev/null
+    if [ $? -ne 0 ] ; then
+	mv "${filename}"."${tmp_suffix}" "${filename}"
+	echo "Updating ${filename}"
+    else
+	rm "${filename}"."${tmp_suffix}"
+    fi
+}
+
+#
+# Update all files
+#
+# $1 = Old string
+# $2 = New string
+#
+update_all_files()
+{
+    if [ $# -ne 2 ] ; then
+	echo "$0: invalid number of arguments: expected 2, received $#"
+	exit 1
+    fi
+    old_string="$1"
+    new_string="$2"
+
+    # Update all files
+    find . -type f -print | 
+    while read FILENAME ; do
+	update_file "${old_string}" "${new_string}" "${FILENAME}"
+    done
+}
+
+#
+# Update the template files
+#
+# $1 = Old string
+# $2 = New string
+#
+update_template_files()
+{
+    if [ $# -ne 2 ] ; then
+	echo "$0: invalid number of arguments: expected 2, received $#"
+	exit 1
+    fi
+    old_string="$1"
+    new_string="$2"
+
+    # Template files directory name pattern
+    template_dir="devnotes"
+    template_files="template.*"
+
+    if [ ! -d "${template_dir}" ] ; then
+	# No sub-directory with the template files
+	return
+    fi
+
+    # Update only the template files
+    find "${template_dir}" -name "${template_files}" -type f -print | 
+    while read FILENAME ; do
+	update_file "${old_string}" "${new_string}" "${FILENAME}"
+    done
+}
+
+#
+# Extract the arguments
+#
+if [ $# -lt 1 -o $# -gt 2 ] ; then
+    echo "$0: invalid number of arguments: received $#"
+    usage
+fi
+
+if [ "$1" = "-h" ] ; then
+    usage
+fi
+
+old_year="$1"
+if [ $# -lt 2 ] ; then
+    new_year=$(($old_year+1))
+else
+    new_year="$2"
+fi
+
+#
+# Update the template files:
+#     change "(c) OLD" copyright year to "(c) NEW" copyright year.
+#
+OLD_YEAR_ID="(c) ${old_year}"
+NEW_YEAR_ID="(c) ${new_year}"
+OLD_STRING="${OLD_YEAR_ID} ${COPYRIGHT_HOLDER}"
+NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
+update_template_files "${OLD_STRING}" "${NEW_STRING}"
+
+#
+# Update all files:
+#     change "-OLD" copyright years to "-NEW" copyright years.
+#
+OLD_YEAR_ID="-${old_year}"
+NEW_YEAR_ID="-${new_year}"
+OLD_STRING="${OLD_YEAR_ID} ${COPYRIGHT_HOLDER}"
+NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
+update_all_files "${OLD_STRING}" "${NEW_STRING}"
+
+#
+# Update all files:
+#     change "(c) OLD" copyright year to "(c) OLD-NEW" copyright years.
+#
+OLD_YEAR_ID="(c) ${old_year}"
+NEW_YEAR_ID="(c) ${old_year}-${new_year}"
+OLD_STRING="${OLD_YEAR_ID} ${COPYRIGHT_HOLDER}"
+NEW_STRING="${NEW_YEAR_ID} ${COPYRIGHT_HOLDER}"
+update_all_files "${OLD_STRING}" "${NEW_STRING}"
