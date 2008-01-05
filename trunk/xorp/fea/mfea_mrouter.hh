@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.21 2007/10/12 07:53:46 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.22 2008/01/04 03:15:49 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -208,7 +208,7 @@ public:
     /**
      * Install/modify a Multicast Forwarding Cache (MFC) entry in the kernel.
      * 
-     * If the MFC entry specified by (@source, @group) pair was not
+     * If the MFC entry specified by (source, group) pair was not
      * installed before, a new MFC entry will be created in the kernel;
      * otherwise, the existing entry's fields will be modified.
      * 

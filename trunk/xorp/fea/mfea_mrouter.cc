@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.60 2007/10/12 07:53:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.61 2008/01/04 03:15:48 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1326,7 +1326,7 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
  * @rp_addr: The RP address.
  * 
  * Install/modify a Multicast Forwarding Cache (MFC) entry in the kernel.
- * If the MFC entry specified by (@source, @group) pair was not
+ * If the MFC entry specified by (source, group) pair was not
  * installed before, a new MFC entry will be created in the kernel;
  * otherwise, the existing entry's fields will be modified.
  * 
