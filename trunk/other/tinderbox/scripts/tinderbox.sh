@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.22 2008/01/04 20:17:02 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.23 2008/01/04 20:38:12 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -122,7 +122,7 @@ run_tinderbox() {
 	    cfg_env="${cfg_env} NM=${tmp_cross_bin_prefix}-nm"
 
 	    tmp_conf_args="--host=${cfg_cross_arch} --with-openssl=${tmp_cross_root_arch}/usr/local/ssl"
-	    cfg_env="${cfg_env} CONFIGURE_ARGS=${tmp_conf_args}"
+	    cfg_env="${cfg_env} CONFIGURE_ARGS='${tmp_conf_args}'"
 	fi
 
 	# Add the common environment
