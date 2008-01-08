@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.10 2007/12/28 09:13:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.11 2008/01/04 03:15:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -331,8 +331,10 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	// Get the interface/vif name
 	const IfTreeVif* vifp = iftree.find_vif(if_index);
 	if (vifp == NULL) {
-	    XLOG_FATAL("Could not find interface and vif for index %d",
-		       if_index);
+	    if (! is_deleted) {
+		XLOG_FATAL("Could not find interface and vif for index %d",
+			   if_index);
+	    }
 	}
 	if_name = vifp->ifname();
 	vif_name = vifp->vifname();

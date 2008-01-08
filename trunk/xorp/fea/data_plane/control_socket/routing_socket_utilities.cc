@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.12 2007/12/30 00:56:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.13 2008/01/04 03:15:55 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -545,8 +545,10 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 #endif // AF_LINK
 
 	    if (if_name.empty() || vif_name.empty()) {
-		XLOG_FATAL("Could not find interface/vif for index %d",
-			   if_index);
+		if (! is_deleted) {
+		    XLOG_FATAL("Could not find interface/vif for index %d",
+			       if_index);
+		}
 	    }
 	}
     }
