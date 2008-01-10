@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/config,v 1.35 2008/01/04 20:17:02 pavlin Exp $
+# $XORP: other/tinderbox/scripts/config,v 1.36 2008/01/04 21:38:43 pavlin Exp $
 
 #
 # Tinderbox configurations
@@ -187,9 +187,9 @@ sshflags_cc_ia64_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
 cross_arch_cc_ia64_gentoo20061_gcc345="ia64-unknown-linux-gnu"
 cross_root_cc_ia64_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu"
 
-TINDERBOX_CONFIGS="freebsd410_gcc295 freebsd410_gcc334 freebsd410_gcc346 freebsd410_gcc346_stldebug redhat73_gcc296 gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu710_gcc413 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora8_gcc412 vm_dragonflybsd110_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345"
+TINDERBOX_CONFIGS="gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu710_gcc413 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora8_gcc412 vm_dragonflybsd110_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345"
 
-TINDERBOX_CONFIG_UNUSED="vm_solaris10_gcc343"
+TINDERBOX_CONFIG_UNUSED="freebsd410_gcc295 freebsd410_gcc334 freebsd410_gcc346 freebsd410_gcc346_stldebug redhat73_gcc296 vm_solaris10_gcc343"
 
 #
 # Configuration variables for tinderbox
