@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/config,v 1.36 2008/01/04 21:38:43 pavlin Exp $
+# $XORP: other/tinderbox/scripts/config,v 1.37 2008/01/10 03:17:59 pavlin Exp $
 
 #
 # Tinderbox configurations
@@ -187,7 +187,43 @@ sshflags_cc_ia64_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
 cross_arch_cc_ia64_gentoo20061_gcc345="ia64-unknown-linux-gnu"
 cross_root_cc_ia64_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu"
 
-TINDERBOX_CONFIGS="gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu710_gcc413 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora8_gcc412 vm_dragonflybsd110_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345"
+# Cross-compilation MIPS (Broadcom for Linksys WRT54G) on Gentoo-2006.1 with gcc-3.4.5
+host_cc_mips_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_mips_gentoo20061_gcc345="tinderbox"
+env_cc_mips_gentoo20061_gcc345=""
+buildflags_cc_mips_gentoo20061_gcc345="-j 2"
+sshflags_cc_mips_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_mips_gentoo20061_gcc345="mipsel-unknown-linux-gnu"
+cross_root_cc_mips_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu"
+
+# Cross-compilation PowerPC-603 on Gentoo-2006.1 with gcc-4.1.0
+host_cc_powerpc603_gentoo20061_gcc410="xorpv.icir.org"
+home_cc_powerpc603_gentoo20061_gcc410="tinderbox"
+env_cc_powerpc603_gentoo20061_gcc410=""
+buildflags_cc_powerpc603_gentoo20061_gcc410="-j 2"
+sshflags_cc_powerpc603_gentoo20061_gcc410="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_powerpc603_gentoo20061_gcc410="powerpc-603-linux-gnu"
+cross_root_cc_powerpc603_gentoo20061_gcc410="/opt/crosstool/gcc-4.1.0-glibc-2.3.6/powerpc-603-linux-gnu"
+
+# Cross-compilation Sparc64 on Gentoo-2006.1 with gcc-3.4.5
+host_cc_sparc64_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_sparc64_gentoo20061_gcc345="tinderbox"
+env_cc_sparc64_gentoo20061_gcc345=""
+buildflags_cc_sparc64_gentoo20061_gcc345="-j 2"
+sshflags_cc_sparc64_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_sparc64_gentoo20061_gcc345="sparc64-unknown-linux-gnu"
+cross_root_cc_sparc64_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/sparc64-unknown-linux-gnu"
+
+# Cross-compilation XScale on Gentoo-2006.1 with gcc-3.4.5
+host_cc_xscale_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_xscale_gentoo20061_gcc345="tinderbox"
+env_cc_xscale_gentoo20061_gcc345=""
+buildflags_cc_xscale_gentoo20061_gcc345="-j 2"
+sshflags_cc_xscale_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_xscale_gentoo20061_gcc345="armv5b-softfloat-linux"
+cross_root_cc_xscale_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux"
+
+TINDERBOX_CONFIGS="gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu710_gcc413 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora8_gcc412 vm_dragonflybsd110_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345 cc_mips_gentoo20061_gcc345 cc_powerpc603_gentoo20061_gcc410 cc_sparc64_gentoo20061_gcc345 cc_xscale_gentoo20061_gcc345"
 
 TINDERBOX_CONFIG_UNUSED="freebsd410_gcc295 freebsd410_gcc334 freebsd410_gcc346 freebsd410_gcc346_stldebug redhat73_gcc296 vm_solaris10_gcc343"
 
