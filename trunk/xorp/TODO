@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.20 2007/04/20 19:06:19 pavlin Exp $
+# $XORP: xorp/TODO,v 1.21 2007/04/20 20:15:26 pavlin Exp $
 #
 
 * Add a list with acknowledgments for all people who have contributed:
@@ -15,9 +15,5 @@
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.
-
-* Consolidate the way we render bools as strings, i.e. make the use
-  of bool2str() vs truefalse() vs explicit tertiary operator consistent
-  and settle on one only if possible.
 
 * Libtoolize flower_malloc.
