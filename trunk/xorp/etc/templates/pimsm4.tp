@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.31 2006/04/19 19:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.32 2006/06/30 00:43:05 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -176,9 +176,10 @@ protocols {
 		%help:	short "Configure a static RP";
 		%delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_all_static_group_prefixes_rp4?rp_addr:ipv4=$(rp.@)";
 		%delete:	xrl "$(pimsm4.targetname)/pim/0.1/config_static_rp_done";
+
 		group-prefix @ {
 		    %help:	short "Configure the group prefix address covered by the RP";
-		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
+		    %create:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)&rp_priority:u32=$(@.rp-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_static_rp4?group_prefix:ipv4net=$(group-prefix.@)&rp_addr:ipv4=$(rp.@)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/config_static_rp_done";
 
@@ -205,7 +206,9 @@ protocols {
 
 	bootstrap {
 	    %help:	short "Configure the IPv4 Bootstrap mechanism";
+	    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/stop_bsr";
 	    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
+	    %update:	xrl "$(pimsm4.targetname)/pim/0.1/stop_bsr";
 	    %update:	xrl "$(pimsm4.targetname)/pim/0.1/start_bsr";
 	    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/stop_bsr";
 
@@ -229,8 +232,7 @@ protocols {
 		    %help:	short "Configure a scope zone in this Candidate-BSR";
 		    %mandatory: $(@.cand-bsr-by-vif-name);
 
-		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&vif_addr:ipv4=$(@.cand-bsr-by-vif-addr)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
-		    /* TODO: currently the %update below probably doesn't work */
+		    %create:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&vif_addr:ipv4=$(@.cand-bsr-by-vif-addr)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-bsr-by-vif-name)&vif_addr:ipv4=$(@.cand-bsr-by-vif-addr)&bsr_priority:u32=$(@.bsr-priority)&hash_mask_len:u32=$(@.hash-mask-len)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_cand_bsr4?scope_zone_id:ipv4net=$(scope-zone.@)&is_scope_zone:bool=$(@.is-scope-zone)";
 
@@ -269,7 +271,7 @@ protocols {
 		    %help:	short "Configure a scope zone in this Candidate-RP";
 		    %mandatory: $(@.cand-rp-by-vif-name);
 
-		    %activate:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
+		    %create:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
 		    %update:	xrl "$(pimsm4.targetname)/pim/0.1/add_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)&rp_priority:u32=$(@.rp-priority)&rp_holdtime:u32=$(@.rp-holdtime)";
 		    %delete:	xrl "$(pimsm4.targetname)/pim/0.1/delete_config_cand_rp4?group_prefix:ipv4net=$(group-prefix.@)&is_scope_zone:bool=$(@.is-scope-zone)&vif_name:txt=$(@.cand-rp-by-vif-name)&vif_addr:ipv4=$(@.cand-rp-by-vif-addr)";
 
