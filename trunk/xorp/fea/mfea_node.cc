@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.85 2007/10/12 07:53:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.86 2008/01/04 03:15:49 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -448,7 +448,7 @@ MfeaNode::vif_update(const string&	ifname,
 		     const Update&	update)
 {
     IfTreeInterface* mfea_ifp;
-    IfTreeVif* mfea_vifp;
+    IfTreeVif* mfea_vifp = NULL;
     const Vif* node_vif = NULL;
     bool is_up;
     uint32_t vif_index = Vif::VIF_INDEX_INVALID;
@@ -465,6 +465,8 @@ MfeaNode::vif_update(const string&	ifname,
 	    return;
 	}
 	mfea_ifp->add_vif(vifname);
+	mfea_vifp = mfea_ifp->find_vif(vifname);
+	XLOG_ASSERT(mfea_vifp != NULL);
 
 	node_vif = configured_vif_find_by_name(ifname);
 	if (node_vif == NULL) {
@@ -498,6 +500,13 @@ MfeaNode::vif_update(const string&	ifname,
 	return;
 
     case CHANGED:
+	mfea_vifp = _mfea_iftree.find_vif(ifname, vifname);
+	if (mfea_vifp == NULL) {
+	    XLOG_WARNING("Got update for vif not in the MFEA tree: %s/%s",
+			 ifname.c_str(), vifname.c_str());
+	    return;
+	}
+	vif_index = mfea_vifp->vif_index();
 	break;					// FALLTHROUGH
     }
 
@@ -521,12 +530,8 @@ MfeaNode::vif_update(const string&	ifname,
     //
     // Update the MFEA iftree
     //
-    mfea_vifp = _mfea_iftree.find_vif(ifname, vifname);
-    if (mfea_vifp == NULL) {
-	XLOG_WARNING("Got update for vif not in the MFEA tree: %s/%s",
-		     ifname.c_str(), vifname.c_str());
-	return;
-    }
+    XLOG_ASSERT(mfea_vifp != NULL);
+    XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
     mfea_vifp->copy_state(*vifp);
     mfea_vifp->set_vif_index(vif_index);
     _mfea_iftree_update_replicator.vif_update(ifname, vifname, update);
