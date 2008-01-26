@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/cfg_local.pm,v 1.3 2004/08/06 00:42:16 pavlin Exp $
+# $XORP: CVSROOT/cfg_local.pm,v 1.4 2007/08/29 18:19:51 pavlin Exp $
 # $FreeBSD: CVSROOT-src/cfg_local.pm,v 1.27 2004/06/05 10:47:00 des Exp $
 #
 
@@ -81,11 +81,11 @@ $COMMITCHECK_EXTRA = sub {
 my $hostname = `/bin/hostname`;
 die "Can't determine hostname!\n" if $? >> 8;
 chomp $hostname;
-if ($hostname =~ /^xorpc\.icir\.org$/i) {
+if ($hostname =~ /^chum\.icir\.org$/i) {
 	$MAILADDRS='xorp-cvs@icir.org';
 	$MAILADDRS = 'cvs-test@icir.org' if $DEBUG;
 
-	@COMMIT_HOSTS = qw(xorpc.icir.org);
+	@COMMIT_HOSTS = qw(chum.icir.org);
 }
 
 
