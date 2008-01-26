@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/co_xorp.sh,v 1.5 2008/01/04 03:01:42 pavlin Exp $
+# $XORP: other/tinderbox/scripts/co_xorp.sh,v 1.6 2008/01/26 06:17:27 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . $CONFIG
