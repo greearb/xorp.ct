@@ -12,13 +12,13 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/co_xorp.sh,v 1.4 2008/01/02 23:57:56 pavlin Exp $
+# $XORP: other/tinderbox/scripts/co_xorp.sh,v 1.5 2008/01/04 03:01:42 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . $CONFIG
 
 cd $ROOTDIR
-XCVS='cvs -d /usr/local/www/data/cvs'
+XCVS='cvs -d :pserver:xorpcvs@anoncvs.xorp.org:/cvs'
 
 rm -rf xorp
 $XCVS co xorp
