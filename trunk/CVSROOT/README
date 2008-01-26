@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/README,v 1.3 2004/08/02 06:08:41 pavlin Exp $
+# $XORP: CVSROOT/README,v 1.1 2004/08/02 07:06:52 pavlin Exp $
 #
 
 This is README file for the XORP CVS repository configuration.
@@ -28,8 +28,8 @@ If you make a mistake and as a result of that you cannot commit to
 the CVS repository, do not panic. Just login to the CVS server,
 and edit by hand the particular file.
 For example, if file "CVSROOT/avail" got corrupted, then do the following:
- 1. ssh xorpc.icir.org
- 2. cd /usr/local/share/doc/apache/cvs/CVSROOT
+ 1. ssh cvs.xorp.org
+ 2. cd /usr/local/www/data/cvs/CVSROOT
  3. Edit file "avail" and fix the problem.
 
 After the edit you can cvs commit as usual. Note that a cvs commit
