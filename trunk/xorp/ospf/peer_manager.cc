@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.155 2007/11/15 13:27:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.156 2008/01/04 03:16:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1685,14 +1685,14 @@ template <typename A>
 bool
 PeerManager<A>::set_passive(const OspfTypes::PeerID peerid,
 			    OspfTypes::AreaID area,
-			    bool passive)
+			    bool passive, bool host)
 {
     if (0 == _peers.count(peerid)) {
 	XLOG_ERROR("Unknown PeerID %u", peerid);
 	return false;
     }
 
-    return _peers[peerid]->set_passive(area, passive);
+    return _peers[peerid]->set_passive(area, passive, host);
 }
 
 template <typename A>

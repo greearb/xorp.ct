@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.147 2007/10/23 08:59:55 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.148 2008/01/04 03:16:57 pavlin Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -431,7 +431,7 @@ class PeerOut {
     /**
      * Toggle the passive status of an interface.
      */
-    bool set_passive(OspfTypes::AreaID area, bool passive);
+    bool set_passive(OspfTypes::AreaID area, bool passive, bool host);
 
     /**
      * Set the interface cost.
@@ -544,7 +544,7 @@ class Peer {
 	 OspfTypes::AreaType area_type)
 	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
 	  _area_type(area_type), _go_called(false),
-	  _enabled(false), _passive(false),
+	  _enabled(false), _passive(false), _passive_host(false),
 	  _auth_handler(_ospf.get_eventloop()),
 	  _interface_state(Down),
 	  _hello_packet(ospf.get_version())
@@ -1198,7 +1198,7 @@ class Peer {
     /**
      * Toggle the passive status of an interface.
      */
-    bool set_passive(bool passive);
+    bool set_passive(bool passive, bool passive);
 
     /**
      * Set RxmtInterval.
@@ -1276,6 +1276,9 @@ class Peer {
     bool _go_called;			// True if go() has been called.
     bool _enabled;			// True if the interface is enabled.
     bool _passive;			// True if the interface is in loopback
+    bool _passive_host;			// True for host, False for
+					// network when in loopback i.e.
+					// (_passive == True).
 
     Auth _auth_handler;			// The authentication handler.
 

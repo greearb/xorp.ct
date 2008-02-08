@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.59 2007/10/03 21:23:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.60 2008/01/04 03:17:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1335,14 +1335,15 @@ XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
 					const string& vifname,
 					const IPv4& a,
-					const bool& passive)
+					const bool& passive,
+					const bool& host)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("interface %s vif %s area %s passive %s\n",
+    debug_msg("interface %s vif %s area %s passive %s host %s\n",
 	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
-	      bool_c_str(passive));
+	      bool_c_str(passive), bool_c_str(host));
 
-    if (!_ospf.set_passive(ifname, vifname, area, passive))
+    if (!_ospf.set_passive(ifname, vifname, area, passive, host))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
 
     return XrlCmdError::OKAY();
@@ -1359,7 +1360,7 @@ XrlOspfV3Target::ospfv3_0_1_set_passive(const string& ifname,
 	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
 	      bool_c_str(passive));
 
-    if (!_ospf_ipv6.set_passive(ifname, vifname, area, passive))
+    if (!_ospf_ipv6.set_passive(ifname, vifname, area, passive, false))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
 
     return XrlCmdError::OKAY();

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.12 2007/03/20 21:44:33 atanu Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.13 2007/08/29 16:15:15 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -176,7 +176,11 @@ xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 \>\>\>\>\>\>\>\>max-time-drift: {\it uint(0..65535)}\\
 \>\>\>\>\>\>\>\}\\
 \>\>\>\>\>\>\}\\
-\>\>\>\>\>\>passive: {\it text}\\
+\\
+\>\>\>\>\>\>passive \{\\
+\>\>\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\>\>\>host: {\it bool}\\
+\>\>\>\>\>\>\}\\
 \\
 \>\>\>\>\>\>neighbor  {\it IPv4}\{\\
 \>\>\>\>\>\>\>router-id: {\it IPv4}\\
@@ -298,6 +302,10 @@ the following exceptions:
 \item OSPFv3 does not support authentication in the protocol itself.
 \item OSPFv2 supports a single address per interface/vif, therefore all
 parameters are set below the address node.
+\item OSPFv2 before release 1.5 the passive keyword was a bool, it is
+now a directive, previously this would set the interface into lookback
+and advertise a host route. Since release 1.5 the default behaviour is
+to advertise the network not the host route.
 \item OSPFv3 supports multiple addresses per interface/vif, therefore
 parameters are set below the vif node.
 \item OSPFv3 does not require any addresses to be configured in which
@@ -513,11 +521,21 @@ configuration statement above).
 
 %% \end{description}
 %% \end{description}
+\item{\tt passive}: This directive if present enables loopback mode
+(appeared in release 1.5). Can be explicitly disabled by setting {\tt
+disable} to {\tt true}. The default is to send a network not a host
+route, setting {\tt host} to {\tt true} will send a host route to
+reproduce the pre 1.5 release behaviour.
+% Nesting too deep:
+%\begin{description}
+%\item{\tt disable}: This takes the value {\stt true} or {\stt
+%false}. The default setting is {\stt false} it can be set to {\stt
+%true} to disable lookback mode.
+%\item{\tt host}: This takes the value {\stt true} or {\stt
+%false}. The default setting is {\stt false} it can be set to {\stt
+%true} to announce a host route instead of the default network.
+%\end{description}
 
-\item{\tt passive}: This takes the value {\stt true} or {\stt
-false}. The default setting is {\stt false} it can be set to {\stt
-true} to set the interface in loopback. The protocol is no longer run
-on this address and the Router-LSA contains a host route for this address.
 \item{\tt neighbor}: This allows neighbors to be configured for {\stt
 link-type}s of {\stt p2p} or {\stt p2m}. The parameter is the IPv4
 address of the neighbor. The {\stt router-id} of the neighbor must

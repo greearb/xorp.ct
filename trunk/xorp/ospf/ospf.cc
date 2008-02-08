@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.96 2007/10/23 22:48:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.97 2008/01/04 03:16:56 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -618,12 +618,12 @@ Ospf<A>::delete_md5_authentication_key(const string&		interface,
 template <typename A>
 bool
 Ospf<A>::set_passive(const string& interface, const string& vif,
-		     OspfTypes::AreaID area, bool passive)
+		     OspfTypes::AreaID area, bool passive, bool host)
 {
     try {
 	_peer_manager.set_passive(_peer_manager.
 				  get_peerid(interface,vif),
-				  area, passive);
+				  area, passive, host);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
 	return false;

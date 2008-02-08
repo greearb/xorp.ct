@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.52 2006/04/19 19:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.53 2006/10/13 20:26:51 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -75,7 +75,11 @@ protocols {
 				max-time-drift:	u32	= 3600;
 			    }
 			}
-			passive:		bool = false;
+
+			passive {
+			    disable: toggle = false;
+			    host: bool = false;
+			}
 
 			neighbor @: ipv4 {
 			    router-id:  ipv4;
@@ -446,8 +450,16 @@ transmitted packets";
 			passive {
 			    %help: short "Do not run OSPF, but advertise it";
 
-			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@)";
-			    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(DEFAULT)";
+			    %activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=`~$(@.disable)`&host:bool=$(@.host)";
+			    %update: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=`~$(@.disable)`&host:bool=$(@.host)";
+			    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@.disable.DEFAULT)&host:bool=$(@.host.DEFAULT)";			
+			    disable {
+				%help: short "Disable passive (loopback)";
+			    }
+
+		            host {
+				%help: short "Advertise host route";
+			    }
 			}
 
 			disable {

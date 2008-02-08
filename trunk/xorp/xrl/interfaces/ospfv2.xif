@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.24 2007/07/12 21:35:28 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.25 2007/08/15 19:33:41 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -247,7 +247,8 @@ interface ospfv2/0.1 {
     set_passive ? ifname:txt \
 		& vifname:txt \
 		& area:ipv4 \
-		& passive:bool
+		& passive:bool \
+		& host:bool
 	
     /**
      * If this is a "stub" or "nssa" area toggle the sending of a

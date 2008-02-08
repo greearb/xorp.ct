@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.195 2007/12/11 00:27:54 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.196 2008/01/04 21:31:56 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -137,6 +137,14 @@ Release 1.5-WIP (2007/??/??)
       short prefixes such as the default route would be rejected.
 
     - Added a clear database command.
+
+    - In the OSPFv2 configuration "passive" is no longer a bool but a
+      directive. Previously setting an interface to passive would set
+      the interface to loopback and announce a host route for the
+      interface. Using the passive keyword will still set the
+      interface to loopback but now the network will be announced. If
+      the previous behaviour of of announcing the host route is
+      required the host variable can be set to true.
 
   BGP:
     - Added support for 4-byte AS numbers, as detailed in RFC 4893.

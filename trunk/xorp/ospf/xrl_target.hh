@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.42 2007/08/15 19:33:41 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.43 2008/01/04 03:17:00 pavlin Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -450,7 +450,8 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	area,
-	const bool&	passive);
+	const bool&	passive,
+	const bool&	host);
 
     /**
      *  If this is a "stub" or "nssa" area toggle the sending of a default

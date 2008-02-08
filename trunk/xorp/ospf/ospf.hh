@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.110 2007/10/03 21:23:53 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.111 2008/01/04 03:16:56 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -744,7 +744,7 @@ class Ospf {
      */
     bool set_passive(const string& interface, const string& vif,
 		     OspfTypes::AreaID area,
-		     bool passive);
+		     bool passive, bool host);
 
     /**
      * If this is a "stub" or "nssa" area toggle the sending of a default

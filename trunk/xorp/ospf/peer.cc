@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.302 2007/12/05 08:23:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.303 2008/01/04 03:16:56 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -825,14 +825,14 @@ PeerOut<A>::delete_md5_authentication_key(OspfTypes::AreaID	area,
 
 template <typename A>
 bool
-PeerOut<A>::set_passive(OspfTypes::AreaID area, bool passive)
+PeerOut<A>::set_passive(OspfTypes::AreaID area, bool passive, bool host)
 {
     if (0 == _areas.count(area)) {
 	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
-    return _areas[area]->set_passive(passive);
+    return _areas[area]->set_passive(passive, host);
 }
 
 template <typename A>
@@ -2561,13 +2561,21 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 	// No links
 	return;
 	break;
-    case Loopback:
+    case Loopback: {
 	// XXX - We should be checking to see if this is p2p unnumbered.
+	uint16_t prefix_length;
+	if (_passive_host)
+	    prefix_length = IPv4::ADDR_BITLEN;
+	else {
+	    prefix_length = get_interface_prefix_length();
+	}
+	IPNet<IPv4> net(get_interface_address(), prefix_length);
 	router_link.set_type(RouterLink::stub);
-	router_link.set_link_id(ntohl(get_interface_address().addr()));
-	router_link.set_link_data(0xffffffff);
+	router_link.set_link_id(ntohl(net.masked_addr().addr()));
+	router_link.set_link_data(ntohl(net.netmask().addr()));
 	router_link.set_metric(0);
 	router_links.push_back(router_link);
+    }
 	return;
 	break;
     case Waiting:
@@ -3324,20 +3332,27 @@ Peer<A>::delete_md5_authentication_key(uint8_t		key_id,
 
 template <typename A>
 bool
-Peer<A>::set_passive(bool passive)
+Peer<A>::set_passive(bool passive, bool host)
 {
-    if (_passive == passive)
+    if (_passive == passive && _passive_host == host)
 	return true;
 
+    bool change_state = !(_passive == passive);
+
     _passive = passive;
+    _passive_host = host;
     if (!_enabled)
 	return true;
 
-    if (passive) {
-	event_loop_ind();
+    if (change_state) {
+	if (passive) {
+	    event_loop_ind();
+	} else {
+	    event_unloop_ind();	
+	    event_interface_up();
+	}
     } else {
-	event_unloop_ind();	
-	event_interface_up();
+	update_router_links();
     }
 
     return true;
