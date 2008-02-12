@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.303 2008/01/04 03:16:56 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.304 2008/02/08 23:05:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,7 +100,8 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
       _interface_mtu(0),
       _interface_cost(1), // Must be greater than 0.
       _inftransdelay(1),  // Must be greater than 0.
-      _linktype(linktype), _running(false), _link_status(false), _status(false)
+      _linktype(linktype), _running(false), _link_status(false),
+      _status(false), _receiving(false)
 {
     _areas[area] = new Peer<A>(ospf, *this, area, area_type);
 }
@@ -555,11 +556,7 @@ PeerOut<A>::bring_up_peering()
 	return false;
     }
 
-    // Start receiving packets on this peering.
-    _ospf.enable_interface_vif(_interface, _vif);
-
-    if (do_multicast(get_linktype()))
-	join_multicast_group(A::OSPFIGP_ROUTERS());
+    start_receiving_packets();
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
@@ -589,10 +586,63 @@ PeerOut<A>::take_down_peering()
 	area_router->peer_down(_peerid);
     }
 
+    stop_receiving_packets();
+}
+
+template <typename A>
+bool
+PeerOut<A>::get_passive()
+{
+    typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
+
+    // If all the peers are passive we will consider the peerout passive.
+    // This is used to determine if we should or should not receive packets. 
+    // If in the future we allow multiple peers to be configured then
+    // passive will have to be handled by dropping packets in software
+    // in the peer input routines.
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	if (!(*i).second->get_passive())
+	    return false;
+    }
+    
+    return true;
+}
+
+template <typename A>
+void
+PeerOut<A>::start_receiving_packets()
+{
+    if (_receiving)
+	return;
+	
+    if (!_running)
+	return;
+
+    if (get_passive())
+	return;
+
+    // Start receiving packets on this peering.
+    _ospf.enable_interface_vif(_interface, _vif);
+
+    if (do_multicast(get_linktype()))
+	join_multicast_group(A::OSPFIGP_ROUTERS());
+
+    _receiving = true;
+}
+
+template <typename A>
+void
+PeerOut<A>::stop_receiving_packets()
+{
+    if (!_receiving)
+	return;
+
     // Stop receiving packets on this peering.
     if (do_multicast(get_linktype()))
 	leave_multicast_group(A::OSPFIGP_ROUTERS());
     _ospf.disable_interface_vif(_interface, _vif);
+
+    _receiving = false;
 }
 
 template <typename A> 
@@ -1920,6 +1970,10 @@ Peer<A>::event_loop_ind()
 
     tear_down_state();
     update_router_links();
+
+    remove_neighbour_state();
+
+    _peerout.stop_receiving_packets();
 }
 
 template <typename A>
@@ -1951,6 +2005,8 @@ Peer<A>::event_unloop_ind()
     }
 
     update_router_links();
+
+    _peerout.start_receiving_packets();
 }
 
 template <typename A>
@@ -1967,20 +2023,7 @@ Peer<A>::event_interface_down()
     tear_down_state();
     update_router_links();
 
-    typename list<Neighbour<A> *>::iterator n = _neighbours.begin();
-    while (n != _neighbours.end()) {
-	(*n)->event_kill_neighbour();
-	// The assumption here is that only a linktype of BROADCAST
-	// can have been dynamically created. So its acceptable to
-	// delete it.
-	if (OspfTypes::BROADCAST == (*n)->get_linktype()) {
-	    delete (*n);
-	    _neighbours.erase(n++);
-	} else {
-	    n++;
-	}
-    }
-    _scheduled_events.clear();
+    remove_neighbour_state();
 }
 
 template <typename A>
@@ -3039,6 +3082,26 @@ Peer<A>::tear_down_state()
 }
 
 template <typename A>
+void
+Peer<A>::remove_neighbour_state()
+{
+    typename list<Neighbour<A> *>::iterator n = _neighbours.begin();
+    while (n != _neighbours.end()) {
+	(*n)->event_kill_neighbour();
+	// The assumption here is that only a linktype of BROADCAST
+	// can have been dynamically created. So its acceptable to
+	// delete it.
+	if (OspfTypes::BROADCAST == (*n)->get_linktype()) {
+	    delete (*n);
+	    _neighbours.erase(n++);
+	} else {
+	    n++;
+	}
+    }
+    _scheduled_events.clear();
+}
+
+template <typename A>
 string
 Peer<A>::pp_interface_state(InterfaceState is)
 {
@@ -3356,6 +3419,13 @@ Peer<A>::set_passive(bool passive, bool host)
     }
 
     return true;
+}
+
+template <typename A>
+bool
+Peer<A>::get_passive() const
+{
+    return _passive;
 }
 
 template <typename A>

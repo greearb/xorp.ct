@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.148 2008/01/04 03:16:57 pavlin Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.149 2008/02/08 23:05:11 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -472,6 +472,16 @@ class PeerOut {
      */
     set<AddressInfo<A> >& get_address_info(OspfTypes::AreaID area);
 
+    /**
+     * Enable receiving packets on this interface.
+     */
+    void start_receiving_packets();
+
+    /**
+     * Disable receiving packets on this interface.
+     */
+    void stop_receiving_packets();
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
@@ -504,6 +514,8 @@ class PeerOut {
     set<AddressInfo<A> > _dummy;	// If get_address_info fails
 					// return a reference to this
 					// dummy entry 
+    bool _receiving;			// Are we currently enabled
+					// for receiving packets.
 
     /**
      * If this IPv4 then set the mask in the hello packet.
@@ -517,6 +529,11 @@ class PeerOut {
 
     bool bring_up_peering();
     void take_down_peering();
+
+    /**
+     * Are all the peers in a passive state.
+     */
+    bool get_passive();
 };
 
 template <typename A> class Neighbour;
@@ -1198,7 +1215,12 @@ class Peer {
     /**
      * Toggle the passive status of an interface.
      */
-    bool set_passive(bool passive, bool passive);
+    bool set_passive(bool passive, bool host);
+
+    /**
+     * If all peers are in state passive then return passive.
+     */
+    bool get_passive() const;
 
     /**
      * Set RxmtInterval.
@@ -1408,6 +1430,11 @@ class Peer {
      * Typically called after a state transition.
      */
     void update_router_linksV3(list<RouterLink>& router_links);
+
+    /**
+     * Remove neighbour state.
+     */
+    void remove_neighbour_state();
 
     /**
      * Stop all timers.
