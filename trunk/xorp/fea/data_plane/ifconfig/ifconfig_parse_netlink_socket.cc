@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.14 2007/12/30 05:54:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.15 2008/01/04 03:16:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -688,7 +688,7 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
     if (vifp->point_to_point()) {
 	if ((rta_array[IFA_ADDRESS] != NULL) && !is_ifa_address_reassigned) {
 	    if (rta_array[IFA_ADDRESS] != NULL) {
-		if (nlm_decode_ipvx_address(family, rta_array[IFA_BROADCAST],
+		if (nlm_decode_ipvx_address(family, rta_array[IFA_ADDRESS],
 					    peer_addr, has_peer_addr,
 					    error_msg)
 		    != XORP_OK) {
