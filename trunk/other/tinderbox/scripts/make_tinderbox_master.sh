@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.4 2008/01/26 06:17:27 pavlin Exp $
+# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.5 2008/01/26 07:45:01 pavlin Exp $
 
 #
 # Script to create and populate the tinderbox directories on a host
@@ -28,7 +28,7 @@
 # TBOXHOME is inferred as the current user's home directory from ${HOME}.
 #  There is a sanity check for this directory.
 # TBOXMAILTO is used only as a guide.
-# TBOXPATH is inferred as ${TBOXHOME}/tinderbox, or the first
+# TBOXPATH is inferred as ${TBOXHOME}/tinderbox_master, or the first
 #  positional parameter to the script. It will be created if it does
 #  not already exist; if it cannot be created, a fatal error occurs.
 #  IT MUST BE AN ABSOLUTE PATH.
@@ -43,7 +43,7 @@ TBOXCVSROOT_DEFAULT=":pserver:xorpcvs@anoncvs.xorp.org:/cvs"
 
 TBOXUSER=${USER:?"No USER specified in environment."}
 TBOXHOME=${HOME:?"No HOME specified in environment."}
-TBOXPATH=${1:-${TBOXHOME}/tinderbox}
+TBOXPATH=${1:-${TBOXHOME}/tinderbox_master}
 TBOXMAILTO=${TBOXMAILTO:-"xorp-tinderbox@xorp.org"}
 TBOXCVSROOT=${TBOXCVSROOT:-${TBOXCVSROOT_DEFAULT}}
 
@@ -93,8 +93,8 @@ fi
 # they differ.
 #
 cd ${TBOXHOME}
-if [ "x${TBOXHOME}/tinderbox" != "x${TBOXPATH}" ] ; then
-	ln -sf ${TBOXPATH} tinderbox
+if [ "x${TBOXHOME}/tinderbox_master" != "x${TBOXPATH}" ] ; then
+	ln -sf ${TBOXPATH} tinderbox_master
 fi
 
 #
