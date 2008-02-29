@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.6 2008/02/29 00:44:50 pavlin Exp $
+# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.7 2008/02/29 00:54:49 pavlin Exp $
 
 #
 # Script to create and populate the tinderbox directories on a host
@@ -97,19 +97,12 @@ if [ "x${TBOXHOME}/tinderbox_master" != "x${TBOXPATH}" ] ; then
 fi
 
 #
-# Populate the tinderbox tree by checking out what it needs from CVS,
+# Populate the tinderbox tree by checking out what it needs from CVS
 # *in the right place*.
 #
-# Remove the CVS directory created by the second checkout and replace
-# it with the first, such that we can diff against the scripts, but
-# not the BGP data. This is icky.
-#
 cd ${TBOXPATH} && \
- cvs -d ${TBOXCVSROOT} checkout -d. other/tinderbox && \
- mv CVS CVSx && \
- cvs -d ${TBOXCVSROOT} checkout data/bgp && \
- rm -rf CVS &&
- mv CVSx CVS
+ cvs -d ${TBOXCVSROOT} checkout -d scripts other/tinderbox/scripts && \
+ cvs -d ${TBOXCVSROOT} checkout data/bgp
 
 # Fix script permissions after cvs checkout.
 find ${TBOXPATH} -type f -name '*.sh' | xargs chmod 0755
@@ -128,8 +121,9 @@ PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
 HOME=@TBOXPATH@
 MAILTO=@TBOXMAILTO@
 #
+# Run Mon, Wed, Fri if it takes > 24 hours to complete all tests
 #minute	hour	mday	month	wday	command
-0	20	*	*	*	@TBOXPATH@/scripts/tinderbox.sh
+0	22	*	*	1,3,5	@TBOXPATH@/scripts/tinderbox.sh
 
 The XORP Tinderbox should run using a strictly POSIX 1003.2 compliant
 Bourne shell. This includes the FreeBSD /bin/sh, GNU bash in POSIX
