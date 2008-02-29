@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.5 2008/01/26 07:45:01 pavlin Exp $
+# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.6 2008/02/29 00:44:50 pavlin Exp $
 
 #
 # Script to create and populate the tinderbox directories on a host
@@ -38,7 +38,6 @@
 ####################################################################
 
 MKDIR="/bin/mkdir -p"
-susr
 TBOXCVSROOT_DEFAULT=":pserver:xorpcvs@anoncvs.xorp.org:/cvs"
 
 TBOXUSER=${USER:?"No USER specified in environment."}
