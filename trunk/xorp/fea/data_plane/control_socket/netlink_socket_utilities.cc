@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.11 2008/01/04 03:15:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.12 2008/01/08 23:30:09 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -330,14 +330,47 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 
 	// Get the interface/vif name
 	const IfTreeVif* vifp = iftree.find_vif(if_index);
-	if (vifp == NULL) {
-	    if (! is_deleted) {
-		XLOG_FATAL("Could not find interface and vif for index %d",
+	if (vifp != NULL) {
+	    if_name = vifp->ifname();
+	    vif_name = vifp->vifname();
+	}
+
+	// Test whether the interface/vif name was found
+	if (if_name.empty() || vif_name.empty()) {
+	    if (is_deleted) {
+		//
+		// XXX: If the route is deleted and we cannot find
+		// the corresponding interface/vif, this could be because
+		// an interface/vif is deleted from the kernel, and
+		// the kernel might send first the upcall message
+		// that deletes the interface from user space.
+		// Hence the upcall message that followed to delete the
+		// corresponding route for the connected subnet
+		// won't find the interface/vif.
+		// Propagate the route deletion with empty interface
+		// and vif name.
+		//
+	    } else {
+		//
+		// XXX: A route was added, but we cannot find the corresponding
+		// interface/vif. This might happen because of a race
+		// condition. E.g., an interface was added and then
+		// immediately deleted, but the processing for the addition of
+		// the corresponding connected route was delayed.
+		// Note that the misorder in the processing might happen
+		// because the interface and routing control messages are
+		// received on different control sockets.
+		// For the time being make it a fatal error until there is
+		// enough evidence and the issue is understood.
+		//
+		IPvXNet dst_subnet(dst_addr, dst_mask_len);
+		XLOG_FATAL("Decoding for route %s next hop %s failed: "
+			   "could not find interface and vif for index %d",
+			   dst_subnet.str().c_str(),
+			   nexthop_addr.str().c_str(),
 			   if_index);
 	    }
 	}
-	if_name = vifp->ifname();
-	vif_name = vifp->vifname();
     }
 
     //
