@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.196 2008/01/04 21:31:56 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.197 2008/02/08 23:05:10 atanu Exp $
 #
 
 		XORP RELEASE NOTES
@@ -126,6 +126,10 @@ Release 1.5-WIP (2007/??/??)
 
     - Critical RIPng-related bug fix. Previously the RIPng installed
       routes had incorrect outgoing interface toward the destination.
+
+    - Bug fix related to the TTL for RIPng multicast packets: now it is
+      set to 255 as specified in the protocol specification (RFC 2080)
+      instead of 1.
 
   OSPF:
     - Bug fix related to OSPFv3 link-local scope LSAs. Previously the
