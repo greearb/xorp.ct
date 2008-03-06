@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.26 2007/11/12 21:03:20 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.27 2008/01/04 03:17:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -88,12 +88,12 @@ XrlPortIO<IPv4>::request_open_bind_socket()
 
 template <>
 bool
-XrlPortIO<IPv4>::request_ttl_one()
+XrlPortIO<IPv4>::request_ttl()
 {
     XrlSocket4V0p1Client cl(&_xr);
     return cl.send_set_socket_option(
-		_ss.c_str(), socket_id(), "multicast_ttl", 1,
-		callback(this, &XrlPortIO<IPv4>::ttl_one_cb));
+		_ss.c_str(), socket_id(), "multicast_ttl", RIP_TTL,
+		callback(this, &XrlPortIO<IPv4>::ttl_cb));
 }
 
 template <>
@@ -191,12 +191,12 @@ XrlPortIO<IPv6>::request_open_bind_socket()
 
 template <>
 bool
-XrlPortIO<IPv6>::request_ttl_one()
+XrlPortIO<IPv6>::request_ttl()
 {
     XrlSocket6V0p1Client cl(&_xr);
     return cl.send_set_socket_option(
-		_ss.c_str(), socket_id(), "multicast_ttl", 1,
-		callback(this, &XrlPortIO<IPv6>::ttl_one_cb));
+		_ss.c_str(), socket_id(), "multicast_ttl", RIP_NG_HOP_COUNT,
+		callback(this, &XrlPortIO<IPv6>::ttl_cb));
 }
 
 template <>
@@ -343,8 +343,8 @@ XrlPortIO<A>::startup_socket()
 	// If we succeed here the path is:
 	// request_open_bind_socket()
 	// -> open_bind_socket_cb()
-	//    -> request_ttl_one()
-	//	 -> ttl_one_cb()
+	//    -> request_ttl()
+	//	 -> ttl_cb()
 	//	     -> request_no_loop()
 	//		-> no_loop_cb()
 	//		   ->request_socket_join()
@@ -379,17 +379,17 @@ XrlPortIO<A>::open_bind_socket_cb(const XrlError& e, const string* psid)
     _sid = *psid;
     socket_manager.add_sockid(_ss, _sid);
 
-    if (request_ttl_one() == false) {
-	set_status(SERVICE_FAILED, "Failed requesting ttl/hops of 1.");
+    if (request_ttl() == false) {
+	set_status(SERVICE_FAILED, "Failed requesting ttl/hops.");
     }
 }
 
 template <typename A>
 void
-XrlPortIO<A>::ttl_one_cb(const XrlError& e)
+XrlPortIO<A>::ttl_cb(const XrlError& e)
 {
     if (e != XrlError::OKAY()) {
-	XLOG_WARNING("Failed to set ttl/hops to 1");
+	XLOG_WARNING("Failed to set ttl/hops.");
     }
     if (request_no_loop() == false) {
 	set_status(SERVICE_FAILED,

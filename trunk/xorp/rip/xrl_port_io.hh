@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.12 2007/10/13 01:50:07 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.13 2008/01/04 03:17:34 pavlin Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -94,8 +94,8 @@ private:
     bool request_open_bind_socket();
     void open_bind_socket_cb(const XrlError& xe, const string* psid);
 
-    bool request_ttl_one();
-    void ttl_one_cb(const XrlError& xe);
+    bool request_ttl();
+    void ttl_cb(const XrlError& xe);
 
     bool request_no_loop();
     void no_loop_cb(const XrlError& xe);
