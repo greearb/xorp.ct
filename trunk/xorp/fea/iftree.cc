@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.55 2007/12/30 09:15:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.56 2008/01/04 03:15:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -70,7 +70,8 @@ IfTree::add_interface(const string& ifname)
 	return (XORP_OK);
     }
 
-    _interfaces.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
+    _interfaces.insert(IfMap::value_type(ifname,
+					 IfTreeInterface(*this, ifname)));
 
     return (XORP_OK);
 }
@@ -1043,8 +1044,9 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 /* ------------------------------------------------------------------------- */
 /* IfTreeInterface code */
 
-IfTreeInterface::IfTreeInterface(const string& ifname)
+IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
     : IfTreeItem(),
+      _iftree(iftree),
       _ifname(ifname),
       _pif_index(0),
       _enabled(false),
@@ -1068,7 +1070,7 @@ IfTreeInterface::add_vif(const string& vifname)
 	return (XORP_OK);
     }
 
-    _vifs.insert(VifMap::value_type(vifname, IfTreeVif(ifname(), vifname)));
+    _vifs.insert(VifMap::value_type(vifname, IfTreeVif(*this, vifname)));
 
     return (XORP_OK);
 }
@@ -1230,9 +1232,9 @@ IfTreeInterface::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTreeVif code */
 
-IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
+IfTreeVif::IfTreeVif(IfTreeInterface& iface, const string& vifname)
     : IfTreeItem(),
-      _ifname(ifname),
+      _iface(iface),
       _vifname(vifname),
       _pif_index(0),
       _vif_index(Vif::VIF_INDEX_INVALID),

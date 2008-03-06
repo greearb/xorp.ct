@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.58 2008/01/03 22:59:34 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.59 2008/01/04 03:15:46 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -387,8 +387,9 @@ class IfTreeInterface : public IfTreeItem {
 public:
     typedef map<const string, IfTreeVif> VifMap;
 
-    IfTreeInterface(const string& ifname);
+    IfTreeInterface(IfTree& iftree, const string& ifname);
 
+    IfTree& iftree()			{ return _iftree; }
     const string& ifname() const	{ return _ifname; }
 
     uint32_t pif_index() const		{ return _pif_index; }
@@ -486,7 +487,7 @@ public:
      * Find a vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a pointer to the interface (@ref IfTreeInterface) or NULL
+     * @return a pointer to the interface (@ref IfTreeVif) or NULL
      * if not found.
      */
     IfTreeVif* find_vif(uint32_t pif_index);
@@ -495,7 +496,7 @@ public:
      * Find a const vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a const pointer to the interface (@ref IfTreeInterface) or NULL
+     * @return a const pointer to the interface (@ref IfTreeVif) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(uint32_t pif_index) const;
@@ -583,6 +584,7 @@ public:
     string str() const;
 
 protected:
+    IfTree&	_iftree;
     const string _ifname;
     uint32_t	_pif_index;
     bool 	_enabled;
@@ -607,10 +609,10 @@ public:
     typedef map<const IPv4, IfTreeAddr4> IPv4Map;
     typedef map<const IPv6, IfTreeAddr6> IPv6Map;
 
-    IfTreeVif(const string& ifname, const string& vifname);
+    IfTreeVif(IfTreeInterface& iface, const string& vifname);
 
-    const string& ifname() const	{ return _ifname; }
-
+    IfTree& iftree()			{ return _iface.iftree(); }
+    const string& ifname() const	{ return _iface.ifname(); }
     const string& vifname() const	{ return _vifname; }
 
     uint32_t pif_index() const		{ return _pif_index; }
@@ -776,7 +778,7 @@ public:
     string str() const;
 
 protected:
-    const string _ifname;
+    IfTreeInterface& _iface;
     const string _vifname;
 
     uint32_t	_pif_index;
