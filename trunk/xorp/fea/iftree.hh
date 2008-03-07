@@ -387,9 +387,8 @@ class IfTreeInterface : public IfTreeItem {
 public:
     typedef map<const string, IfTreeVif> VifMap;
 
-    IfTreeInterface(IfTree& iftree, const string& ifname);
+    IfTreeInterface(const string& ifname);
 
-    IfTree& iftree()			{ return _iftree; }
     const string& ifname() const	{ return _ifname; }
 
     uint32_t pif_index() const		{ return _pif_index; }
@@ -487,7 +486,7 @@ public:
      * Find a vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a pointer to the interface (@ref IfTreeVif) or NULL
+     * @return a pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     IfTreeVif* find_vif(uint32_t pif_index);
@@ -496,7 +495,7 @@ public:
      * Find a const vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a const pointer to the interface (@ref IfTreeVif) or NULL
+     * @return a const pointer to the interface (@ref IfTreeInterface) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(uint32_t pif_index) const;
@@ -584,7 +583,6 @@ public:
     string str() const;
 
 protected:
-    IfTree&	_iftree;
     const string _ifname;
     uint32_t	_pif_index;
     bool 	_enabled;
@@ -609,10 +607,10 @@ public:
     typedef map<const IPv4, IfTreeAddr4> IPv4Map;
     typedef map<const IPv6, IfTreeAddr6> IPv6Map;
 
-    IfTreeVif(IfTreeInterface& iface, const string& vifname);
+    IfTreeVif(const string& ifname, const string& vifname);
 
-    IfTree& iftree()			{ return _iface.iftree(); }
-    const string& ifname() const	{ return _iface.ifname(); }
+    const string& ifname() const	{ return _ifname; }
+
     const string& vifname() const	{ return _vifname; }
 
     uint32_t pif_index() const		{ return _pif_index; }
@@ -778,7 +776,7 @@ public:
     string str() const;
 
 protected:
-    IfTreeInterface& _iface;
+    const string _ifname;
     const string _vifname;
 
     uint32_t	_pif_index;

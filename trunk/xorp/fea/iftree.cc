@@ -70,8 +70,7 @@ IfTree::add_interface(const string& ifname)
 	return (XORP_OK);
     }
 
-    _interfaces.insert(IfMap::value_type(ifname,
-					 IfTreeInterface(*this, ifname)));
+    _interfaces.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
 
     return (XORP_OK);
 }
@@ -1044,9 +1043,8 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 /* ------------------------------------------------------------------------- */
 /* IfTreeInterface code */
 
-IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
+IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(),
-      _iftree(iftree),
       _ifname(ifname),
       _pif_index(0),
       _enabled(false),
@@ -1070,7 +1068,7 @@ IfTreeInterface::add_vif(const string& vifname)
 	return (XORP_OK);
     }
 
-    _vifs.insert(VifMap::value_type(vifname, IfTreeVif(*this, vifname)));
+    _vifs.insert(VifMap::value_type(vifname, IfTreeVif(ifname(), vifname)));
 
     return (XORP_OK);
 }
@@ -1232,9 +1230,9 @@ IfTreeInterface::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTreeVif code */
 
-IfTreeVif::IfTreeVif(IfTreeInterface& iface, const string& vifname)
+IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
     : IfTreeItem(),
-      _iface(iface),
+      _ifname(ifname),
       _vifname(vifname),
       _pif_index(0),
       _vif_index(Vif::VIF_INDEX_INVALID),
