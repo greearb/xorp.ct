@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.15 2007/10/12 07:53:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_netlink_socket.cc,v 1.16 2008/01/04 03:16:06 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -181,12 +181,12 @@ IfConfigGetNetlinkSocket::read_config(IfTree& iftree)
     for (if_iter = iftree.interfaces().begin();
 	 if_iter != iftree.interfaces().end();
 	 ++if_iter) {
-	const IfTreeInterface& iface = if_iter->second;
+	const IfTreeInterface& iface = *(if_iter->second);
 	IfTreeInterface::VifMap::const_iterator vif_iter;
 	for (vif_iter = iface.vifs().begin();
 	     vif_iter != iface.vifs().end();
 	     ++vif_iter) {
-	    const IfTreeVif& vif = vif_iter->second;
+	    const IfTreeVif& vif = *(vif_iter->second);
 	    if_index = vif.pif_index();
 	    if_index_list.push_back(if_index);
 	}

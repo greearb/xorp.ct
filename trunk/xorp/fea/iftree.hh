@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.59 2008/01/04 03:15:46 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.61 2008/03/07 12:09:27 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -110,7 +110,38 @@ class IfTreeAddr6;
  */
 class IfTree : public IfTreeItem {
 public:
-    typedef map<const string, IfTreeInterface> IfMap;
+    typedef map<const string, IfTreeInterface*> IfMap;
+    typedef map<uint32_t, IfTreeInterface*> IfIndexMap;
+    //
+    // XXX: We use a multimap for the index->vif mapping, because a VLAN
+    // vif could be listed in two places: with its parent physical interface,
+    // or along as its own parent interface.
+    //
+    typedef multimap<uint32_t, IfTreeVif*> VifIndexMap;
+
+    /**
+     * Default constructor.
+     */
+    IfTree();
+
+    /**
+     * Constructor from another IfTree.
+     *
+     * @param other the other IfTree.
+     */
+    IfTree(const IfTree& other);
+
+    /**
+     * Destructor.
+     */
+    ~IfTree();
+
+    /**
+     * Assignment operator.
+     *
+     * @param other the other IfTree.
+     */
+    IfTree& operator=(const IfTree& other);
 
     /**
      * Remove all interface state from the interface tree.
@@ -118,18 +149,25 @@ public:
     void clear();
 
     /**
+     * Add recursively a new interface.
+     *
+     * @param other_iface the interface to add recursively.
+     */
+    void add_recursive_interface(const IfTreeInterface& other_iface);
+
+    /**
      * Create a new interface.
      *
-     * @param ifname interface name.
+     * @param ifname the interface name.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_interface(const string& ifname);
 
     /**
-     * Label interface as ready for deletion.  Deletion does not occur
+     * Label interface as ready for deletion. Deletion does not occur
      * until finalize_state() is called.
      *
-     * @param ifname name of interface to be labelled.
+     * @param ifname the name of the interface to be labelled.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int remove_interface(const string& ifname);
@@ -308,7 +346,7 @@ public:
      * typically one the user modifies and one that mirrors the hardware.
      * Errors may occur pushing the user config down onto the hardware and
      * we need a method to update the user config from the h/w config that
-     * exists after the config push.  We can't just copy the h/w config since
+     * exists after the config push. We can't just copy the h/w config since
      * the user config is restricted to configuration set by the user.
      *
      * The alignment works as follows:
@@ -376,7 +414,18 @@ public:
     string str() const;
 
 protected:
+    friend class IfTreeInterface;
+    friend class IfTreeVif;
+
+    void insert_ifindex(IfTreeInterface* ifp);
+    void erase_ifindex(IfTreeInterface* ifp);
+    void insert_vifindex(IfTreeVif* vifp);
+    void erase_vifindex(IfTreeVif* vifp);
+
+private:
     IfMap	_interfaces;
+    IfIndexMap	_ifindex_map;		// Map of pif_index to interface
+    VifIndexMap	_vifindex_map;		// Map of pif_index to vif
 };
 
 
@@ -385,14 +434,21 @@ protected:
  */
 class IfTreeInterface : public IfTreeItem {
 public:
-    typedef map<const string, IfTreeVif> VifMap;
+    typedef map<const string, IfTreeVif*> VifMap;
 
-    IfTreeInterface(const string& ifname);
+    IfTreeInterface(IfTree& iftree, const string& ifname);
+    ~IfTreeInterface();
 
+    IfTree& iftree()			{ return _iftree; }
     const string& ifname() const	{ return _ifname; }
 
     uint32_t pif_index() const		{ return _pif_index; }
-    void set_pif_index(uint32_t v)	{ _pif_index = v; mark(CHANGED); }
+    void set_pif_index(uint32_t v)	{
+	iftree().erase_ifindex(this);
+	_pif_index = v;
+	mark(CHANGED);
+	iftree().insert_ifindex(this);
+    }
 
     bool enabled() const		{ return _enabled; }
     void set_enabled(bool en)		{ _enabled = en; mark(CHANGED); }
@@ -462,7 +518,28 @@ public:
     const VifMap& vifs() const		{ return _vifs; }
     VifMap& vifs()			{ return _vifs; }
 
+    /**
+     * Add recursively a new vif.
+     *
+     * @param other_vif the vif to add recursively.
+     */
+    void add_recursive_vif(const IfTreeVif& other_vif);
+
+    /**
+     * Create a new vif.
+     *
+     * @param vifname the vif name.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int add_vif(const string& vifname);
+
+    /**
+     * Label vif as ready for deletion. Deletion does not occur
+     * until finalize_state() is called.
+     *
+     * @param vifname the name of the vif to be labelled.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
     int remove_vif(const string& vifname);
 
     /**
@@ -486,7 +563,7 @@ public:
      * Find a vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a pointer to the interface (@ref IfTreeInterface) or NULL
+     * @return a pointer to the interface (@ref IfTreeVif) or NULL
      * if not found.
      */
     IfTreeVif* find_vif(uint32_t pif_index);
@@ -495,7 +572,7 @@ public:
      * Find a const vif for a given physical index.
      *
      * @param pif_index the physical interface index to search for.
-     * @return a const pointer to the interface (@ref IfTreeInterface) or NULL
+     * @return a const pointer to the interface (@ref IfTreeVif) or NULL
      * if not found.
      */
     const IfTreeVif* find_vif(uint32_t pif_index) const;
@@ -541,8 +618,12 @@ public:
 
     /**
      * Copy state of internal variables from another IfTreeInterface.
+     *
+     * @param o the interface to copy from.
+     * @param copy_user_config if true then copy the flags from the
+     * user's configuration.
      */
-    void copy_state(const IfTreeInterface& o) {
+    void copy_state(const IfTreeInterface& o, bool copy_user_config) {
 	//
 	// XXX: Explicitly don't consider the discard, unreachable,
 	// management, and default_system_config flags, because they
@@ -555,6 +636,14 @@ public:
 	set_no_carrier(o.no_carrier());
 	set_flipped(o.flipped());
 	set_interface_flags(o.interface_flags());
+
+	if (copy_user_config) {
+	    // Copy the flags from the user configuration
+	    set_discard(o.discard());
+	    set_unreachable(o.unreachable());
+	    set_management(o.management());
+	    set_default_system_config(o.default_system_config());
+	}
     }
 
     /**
@@ -582,7 +671,11 @@ public:
 
     string str() const;
 
-protected:
+private:
+    IfTreeInterface(const IfTreeInterface&);		  // Not implemented
+    IfTreeInterface& operator=(const IfTreeInterface&);	  // Not implemented
+
+    IfTree&	_iftree;
     const string _ifname;
     uint32_t	_pif_index;
     bool 	_enabled;
@@ -604,17 +697,23 @@ protected:
  */
 class IfTreeVif : public IfTreeItem {
 public:
-    typedef map<const IPv4, IfTreeAddr4> IPv4Map;
-    typedef map<const IPv6, IfTreeAddr6> IPv6Map;
+    typedef map<const IPv4, IfTreeAddr4*> IPv4Map;
+    typedef map<const IPv6, IfTreeAddr6*> IPv6Map;
 
-    IfTreeVif(const string& ifname, const string& vifname);
+    IfTreeVif(IfTreeInterface& iface, const string& vifname);
+    ~IfTreeVif();
 
-    const string& ifname() const	{ return _ifname; }
-
+    IfTree& iftree()			{ return _iface.iftree(); }
+    const string& ifname() const	{ return _iface.ifname(); }
     const string& vifname() const	{ return _vifname; }
 
     uint32_t pif_index() const		{ return _pif_index; }
-    void set_pif_index(uint32_t v)	{ _pif_index = v; mark(CHANGED); }
+    void set_pif_index(uint32_t v)	{
+	iftree().erase_vifindex(this);
+	_pif_index = v;
+	mark(CHANGED);
+	iftree().insert_vifindex(this);
+    }
 
     uint32_t vif_index() const		{ return _vif_index; }
     void set_vif_index(uint32_t v)	{ _vif_index = v; mark(CHANGED); }
@@ -664,6 +763,27 @@ public:
 
     const IPv6Map& ipv6addrs() const	{ return _ipv6addrs; }
     IPv6Map& ipv6addrs()		{ return _ipv6addrs; }
+
+    /**
+     * Copy recursively from another vif.
+     *
+     * @param other_vif the vif to copy recursively from.
+     */
+    void copy_recursive_vif(const IfTreeVif& other_vif);
+
+    /**
+     * Add recursively a new IPv4 address.
+     *
+     * @param other_addr the address to add recursively.
+     */
+    void add_recursive_addr(const IfTreeAddr4& other_addr);
+
+    /**
+     * Add recursively a new IPv6 address.
+     *
+     * @param other_addr the address to add recursively.
+     */
+    void add_recursive_addr(const IfTreeAddr6& other_addr);
 
     /**
      * Add IPv4 address.
@@ -775,8 +895,11 @@ public:
 
     string str() const;
 
-protected:
-    const string _ifname;
+private:
+    IfTreeVif(const IfTreeVif&);		// Not implemented
+    IfTreeVif& operator=(const IfTreeVif&);	// Not implemented
+
+    IfTreeInterface& _iface;
     const string _vifname;
 
     uint32_t	_pif_index;
@@ -902,7 +1025,10 @@ public:
 
     string str() const;
 
-protected:
+private:
+    IfTreeAddr4(const IfTreeAddr4&);		// Not implemented
+    IfTreeAddr4& operator=(const IfTreeAddr4&);	// Not implemented
+
     IPv4	_addr;
 
     bool 	_enabled;
@@ -992,7 +1118,10 @@ public:
 
     string str() const;
 
-protected:
+private:
+    IfTreeAddr6(const IfTreeAddr6&);		// Not implemented
+    IfTreeAddr6& operator=(const IfTreeAddr6&);	// Not implemented
+
     IPv6	_addr;
 
     bool 	_enabled;

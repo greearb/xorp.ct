@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.36 2007/12/30 09:15:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.37 2008/01/04 03:15:51 pavlin Exp $"
 
 
 //
@@ -808,7 +808,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_names(
 
     for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end(); ++ii) {
-	ifnames.append(XrlAtom(ii->second.ifname()));
+	ifnames.append(XrlAtom(ii->second->ifname()));
     }
 
     return XrlCmdError::OKAY();
@@ -831,7 +831,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
 
     for (IfTreeInterface::VifMap::const_iterator vi = ifp->vifs().begin();
 	 vi != ifp->vifs().end(); ++vi) {
-	vifnames.append(XrlAtom(vi->second.vifname()));
+	vifnames.append(XrlAtom(vi->second->vifname()));
     }
 
     return  XrlCmdError::OKAY();
@@ -1168,7 +1168,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
 
     for (IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
 	 ai != vifp->ipv4addrs().end(); ++ai) {
-	addresses.append(XrlAtom(ai->second.addr()));
+	addresses.append(XrlAtom(ai->second->addr()));
     }
 
     return XrlCmdError::OKAY();
@@ -1252,7 +1252,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
 
     for (IfTreeVif::IPv6Map::const_iterator ai = vifp->ipv6addrs().begin();
 	 ai != vifp->ipv6addrs().end(); ++ai) {
-	addresses.append(XrlAtom(ai->second.addr()));
+	addresses.append(XrlAtom(ai->second->addr()));
     }
 
     return XrlCmdError::OKAY();

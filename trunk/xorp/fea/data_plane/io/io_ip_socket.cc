@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.16 2007/12/28 09:13:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.17 2008/01/04 03:16:14 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -466,7 +466,7 @@ IoIpSocket::set_default_multicast_interface(const string& if_name,
 				 if_name.c_str(), vif_name.c_str());
 	    return (XORP_ERROR);
 	}
-	const IfTreeAddr4& fa = ai->second;
+	const IfTreeAddr4& fa = *(ai->second);
 
 	fa.addr().copy_out(in_addr);
 	if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_MULTICAST_IF,
@@ -554,7 +554,7 @@ IoIpSocket::join_multicast_group(const string& if_name,
 				 vif_name.c_str());
 	    return (XORP_ERROR);
 	}
-	const IfTreeAddr4& fa = ai->second;
+	const IfTreeAddr4& fa = *(ai->second);
 	
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
@@ -653,7 +653,7 @@ IoIpSocket::leave_multicast_group(const string& if_name,
 				 vif_name.c_str());
 	    return (XORP_ERROR);
 	}
-	const IfTreeAddr4& fa = ai->second;
+	const IfTreeAddr4& fa = *(ai->second);
 
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.6 2007/10/12 07:53:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.cc,v 1.7 2008/01/04 03:16:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -143,7 +143,7 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
-	IfTreeInterface* ifp = &ii->second;
+	IfTreeInterface* ifp = ii->second;
 	// Ignore interfaces that are to be deleted
 	if (ifp->is_marked(IfTreeItem::DELETED))
 	    continue;
@@ -185,11 +185,8 @@ IfConfigVlanGetBsd::read_config(IfTree& iftree)
 
 	// Copy the vif state
 	IfTreeVif* vifp = ifp->find_vif(ifp->ifname());
-	if (vifp != NULL) {
-	    parent_vifp->copy_state(*vifp);
-	    parent_vifp->ipv4addrs() = vifp->ipv4addrs();
-	    parent_vifp->ipv6addrs() = vifp->ipv6addrs();
-	}
+	if (vifp != NULL)
+	    parent_vifp->copy_recursive_vif(*vifp);
 
 	// Set the VLAN vif info
 	parent_vifp->set_vlan(true);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.16 2007/12/23 08:22:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.17 2008/01/04 03:16:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -751,7 +751,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
     preamble = "";
     config += preamble + c_format("interfaces {\n");
     for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
+	const IfTreeInterface& fi = *(ii->second);
 	preamble = "    ";
 	config += preamble + c_format("interface %s {\n",
 				      fi.ifname().c_str());
@@ -767,14 +767,14 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
 	config += preamble + c_format("mtu: %u\n", XORP_UINT_CAST(fi.mtu()));
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
+	    const IfTreeVif& fv = *(vi->second);
 	    preamble = "\t";
 	    config += preamble + c_format("vif %s {\n", fv.vifname().c_str());
 	    preamble = "\t    ";
 	    config += preamble + c_format("disable: %s\n",
 					  bool_c_str(! fv.enabled()));
 	    for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
-		const IfTreeAddr4& fa4 = ai4->second;
+		const IfTreeAddr4& fa4 = *(ai4->second);
 		preamble = "\t    ";
 		config += preamble + c_format("address %s {\n",
 					      fa4.addr().str().c_str());
@@ -801,8 +801,8 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 		config += preamble + c_format("}\n");
 	    }
 	    for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
-		const IfTreeAddr6& fa6 = ai6->second
-;		preamble = "\t    ";
+		const IfTreeAddr6& fa6 = *(ai6->second);
+		preamble = "\t    ";
 		config += preamble + c_format("address %s {\n",
 					      fa6.addr().str().c_str());
 		preamble = "\t\t";
@@ -901,7 +901,7 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     //
     local_xorp_rt_port = 0;
     for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
+	const IfTreeInterface& fi = *(ii->second);
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    local_xorp_rt_port++;
 	}
@@ -915,14 +915,14 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
     ifconfig().nexthop_port_mapper().clear();
     xorp_rt_port = 0;
     for (ii = _iftree.interfaces().begin(); ii != _iftree.interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
+	const IfTreeInterface& fi = *(ii->second);
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
+	    const IfTreeVif& fv = *(vi->second);
 	    ifconfig().nexthop_port_mapper().add_interface(fi.ifname(),
 							   fv.vifname(),
 							   xorp_rt_port);
 	    for (ai4 = fv.ipv4addrs().begin(); ai4 != fv.ipv4addrs().end(); ++ai4) {
-		const IfTreeAddr4& fa4 = ai4->second;
+		const IfTreeAddr4& fa4 = *(ai4->second);
 		ifconfig().nexthop_port_mapper().add_ipv4(fa4.addr(),
 							  local_xorp_rt_port);
 		IPv4Net ipv4net(fa4.addr(), fa4.prefix_len());
@@ -933,7 +933,7 @@ IfConfigSetClick::generate_nexthop_to_port_mapping()
 							      xorp_rt_port);
 	    }
 	    for (ai6 = fv.ipv6addrs().begin(); ai6 != fv.ipv6addrs().end(); ++ai6) {
-		const IfTreeAddr6& fa6 = ai6->second;
+		const IfTreeAddr6& fa6 = *(ai6->second);
 		ifconfig().nexthop_port_mapper().add_ipv6(fa6.addr(),
 							  local_xorp_rt_port);
 		IPv6Net ipv6net(fa6.addr(), fa6.prefix_len());

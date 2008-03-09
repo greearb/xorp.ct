@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.18 2007/12/30 09:15:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.19 2008/01/04 03:16:09 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -106,7 +106,7 @@ IfConfigSet::push_config(IfTree& iftree)
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
-	IfTreeInterface& config_iface = ii->second;
+	IfTreeInterface& config_iface = *(ii->second);
 
 	//
 	// Set the "soft" flag for interfaces that are emulated
@@ -149,7 +149,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	for (vi = config_iface.vifs().begin();
 	     vi != config_iface.vifs().end();
 	     ++vi) {
-	    IfTreeVif& config_vif = vi->second;
+	    IfTreeVif& config_vif = *(vi->second);
 	    if (config_vif.is_vlan())
 		continue;
 	    if (config_vif.vifname() != config_iface.ifname()) {
@@ -168,7 +168,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	for (vi = config_iface.vifs().begin();
 	     vi != config_iface.vifs().end();
 	     ++vi) {
-	    IfTreeVif& config_vif = vi->second;
+	    IfTreeVif& config_vif = *(vi->second);
 	    if (config_iface.state() == IfTreeItem::DELETED)
 		config_vif.mark(IfTreeItem::DELETED);
 
@@ -177,7 +177,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	    for (a4i = config_vif.ipv4addrs().begin();
 		 a4i != config_vif.ipv4addrs().end();
 		 ++a4i) {
-		IfTreeAddr4& config_addr = a4i->second;
+		IfTreeAddr4& config_addr = *(a4i->second);
 		if (config_vif.state() == IfTreeItem::DELETED)
 		    config_addr.mark(IfTreeItem::DELETED);
 	    }
@@ -188,7 +188,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	    for (a6i = config_vif.ipv6addrs().begin();
 		 a6i != config_vif.ipv6addrs().end();
 		 ++a6i) {
-		IfTreeAddr6& config_addr = a6i->second;
+		IfTreeAddr6& config_addr = *(a6i->second);
 		if (config_vif.state() == IfTreeItem::DELETED)
 		    config_addr.mark(IfTreeItem::DELETED);
 	    }
@@ -216,7 +216,7 @@ IfConfigSet::push_config(IfTree& iftree)
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
-	IfTreeInterface& config_iface = ii->second;
+	IfTreeInterface& config_iface = *(ii->second);
 	const IfTreeInterface* pulled_ifp = NULL;
 
 	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
@@ -234,7 +234,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	for (vi = config_iface.vifs().begin();
 	     vi != config_iface.vifs().end();
 	     ++vi) {
-	    IfTreeVif& config_vif = vi->second;
+	    IfTreeVif& config_vif = *(vi->second);
 	    const IfTreeVif* pulled_vifp = NULL;
 
 	    if (pulled_ifp != NULL)
@@ -257,7 +257,7 @@ IfConfigSet::push_config(IfTree& iftree)
     for (ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end();
 	 ++ii) {
-	IfTreeInterface& config_iface = ii->second;
+	IfTreeInterface& config_iface = *(ii->second);
 	const IfTreeInterface* pulled_ifp = NULL;
 
 	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
@@ -283,7 +283,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	for (vi = config_iface.vifs().begin();
 	     vi != config_iface.vifs().end();
 	     ++vi) {
-	    IfTreeVif& config_vif = vi->second;
+	    IfTreeVif& config_vif = *(vi->second);
 	    const IfTreeVif* pulled_vifp = NULL;
 
 	    if (pulled_ifp != NULL)
@@ -298,7 +298,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	    for (a4i = config_vif.ipv4addrs().begin();
 		 a4i != config_vif.ipv4addrs().end();
 		 ++a4i) {
-		IfTreeAddr4& config_addr = a4i->second;
+		IfTreeAddr4& config_addr = *(a4i->second);
 		const IfTreeAddr4* pulled_addrp = NULL;
 
 		if (pulled_vifp != NULL)
@@ -316,7 +316,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	    for (a6i = config_vif.ipv6addrs().begin();
 		 a6i != config_vif.ipv6addrs().end();
 		 ++a6i) {
-		IfTreeAddr6& config_addr = a6i->second;
+		IfTreeAddr6& config_addr = *(a6i->second);
 		const IfTreeAddr6* pulled_addrp = NULL;
 
 		if (pulled_vifp != NULL)

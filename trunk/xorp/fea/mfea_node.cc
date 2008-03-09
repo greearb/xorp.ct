@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.86 2008/01/04 03:15:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.87 2008/01/22 10:56:20 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -413,7 +413,7 @@ MfeaNode::interface_update(const string&	ifname,
 		     ifname.c_str());
 	return;
     }
-    mfea_ifp->copy_state(*ifp);
+    mfea_ifp->copy_state(*ifp, false);
     _mfea_iftree_update_replicator.interface_update(ifname, update);
 
     //

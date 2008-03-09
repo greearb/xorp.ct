@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.80 2007/12/30 09:15:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.81 2008/01/04 03:15:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -828,25 +828,25 @@ IfConfig::report_updates(IfTree& iftree)
     for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end(); ++ii) {
 
-	const IfTreeInterface& interface = ii->second;
+	const IfTreeInterface& interface = *(ii->second);
 	updated |= report_update(interface);
 
 	IfTreeInterface::VifMap::const_iterator vi;
 	for (vi = interface.vifs().begin();
 	     vi != interface.vifs().end(); ++vi) {
 
-	    const IfTreeVif& vif = vi->second;
+	    const IfTreeVif& vif = *(vi->second);
 	    updated |= report_update(interface, vif);
 
 	    for (IfTreeVif::IPv4Map::const_iterator ai = vif.ipv4addrs().begin();
 		 ai != vif.ipv4addrs().end(); ai++) {
-		const IfTreeAddr4& addr = ai->second;
+		const IfTreeAddr4& addr = *(ai->second);
 		updated |= report_update(interface, vif, addr);
 	    }
 
 	    for (IfTreeVif::IPv6Map::const_iterator ai = vif.ipv6addrs().begin();
 		 ai != vif.ipv6addrs().end(); ai++) {
-		const IfTreeAddr6& addr = ai->second;
+		const IfTreeAddr6& addr = *(ai->second);
 		updated |= report_update(interface, vif, addr);
 	    }
 	}
@@ -870,7 +870,7 @@ IfConfig::report_updates(IfTree& iftree)
     updated = false;
     for (IfTree::IfMap::iterator ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end(); ++ii) {
-	IfTreeInterface& interface = ii->second;
+	IfTreeInterface& interface = *(ii->second);
 	if (! interface.flipped())
 	    continue;
 	if (! interface.enabled()) {
@@ -889,7 +889,7 @@ IfConfig::report_updates(IfTree& iftree)
     updated = false;
     for (IfTree::IfMap::iterator ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end(); ++ii) {
-	IfTreeInterface& interface = ii->second;
+	IfTreeInterface& interface = *(ii->second);
 
 	if (! interface.flipped())
 	    continue;

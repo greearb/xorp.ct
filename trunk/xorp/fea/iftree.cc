@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.56 2008/01/04 03:15:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.58 2008/03/07 12:09:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -54,10 +54,71 @@ IfTreeItem::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTree code */
 
+IfTree::IfTree()
+    : IfTreeItem()
+{
+}
+
+IfTree::IfTree(const IfTree& other)
+    : IfTreeItem()
+{
+    *this = other;
+}
+
+IfTree::~IfTree()
+{
+    clear();
+}
+
+IfTree&
+IfTree::operator=(const IfTree& other)
+{
+    clear();
+
+    // Add recursively all interfaces from the other tree
+    IfMap::const_iterator oi;
+    for (oi = other.interfaces().begin();
+	 oi != other.interfaces().end();
+	 ++oi) {
+	const IfTreeInterface& other_iface = *(oi->second);
+	add_recursive_interface(other_iface);
+    }
+
+    return (*this);
+}
+
 void
 IfTree::clear()
 {
-    _interfaces.clear();
+    while (! _interfaces.empty()) {
+	IfTreeInterface* ifp = _interfaces.begin()->second;
+	_interfaces.erase(_interfaces.begin());
+	delete ifp;
+    }
+
+    XLOG_ASSERT(_ifindex_map.empty());
+    XLOG_ASSERT(_vifindex_map.empty());
+}
+
+void
+IfTree::add_recursive_interface(const IfTreeInterface& other_iface)
+{
+    const string& ifname = other_iface.ifname();
+    IfTreeInterface* ifp;
+
+    // Add the interface
+    ifp = new IfTreeInterface(*this, ifname);
+    _interfaces.insert(IfMap::value_type(ifname, ifp));
+    ifp->copy_state(other_iface, true);
+
+    // Add recursively all vifs from the other interface
+    IfTreeInterface::VifMap::const_iterator ov;
+    for (ov = other_iface.vifs().begin();
+	 ov != other_iface.vifs().end();
+	 ++ov) {
+	const IfTreeVif& other_vif = *(ov->second);
+	ifp->add_recursive_vif(other_vif);
+    }
 }
 
 int
@@ -70,7 +131,8 @@ IfTree::add_interface(const string& ifname)
 	return (XORP_OK);
     }
 
-    _interfaces.insert(IfMap::value_type(ifname, IfTreeInterface(ifname)));
+    ifp = new IfTreeInterface(*this, ifname);
+    _interfaces.insert(IfMap::value_type(ifname, ifp));
 
     return (XORP_OK);
 }
@@ -83,7 +145,7 @@ IfTree::find_interface(const string& ifname)
     if (iter == interfaces().end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 const IfTreeInterface*
@@ -94,33 +156,29 @@ IfTree::find_interface(const string& ifname) const
     if (iter == interfaces().end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 IfTreeInterface*
 IfTree::find_interface(uint32_t pif_index)
 {
-    IfTree::IfMap::iterator iter;
+    IfTree::IfIndexMap::iterator iter = _ifindex_map.find(pif_index);
 
-    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
-	if (iter->second.pif_index() == pif_index)
-	    return (&iter->second);
-    }
+    if (iter == _ifindex_map.end())
+	return (NULL);
 
-    return (NULL);
+    return (iter->second);
 }
 
 const IfTreeInterface*
 IfTree::find_interface(uint32_t pif_index) const
 {
-    IfTree::IfMap::const_iterator iter;
+    IfTree::IfIndexMap::const_iterator iter = _ifindex_map.find(pif_index);
 
-    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
-	if (iter->second.pif_index() == pif_index)
-	    return (&iter->second);
-    }
+    if (iter == _ifindex_map.end())
+	return (NULL);
 
-    return (NULL);
+    return (iter->second);
 }
 
 IfTreeVif*
@@ -148,35 +206,23 @@ IfTree::find_vif(const string& ifname, const string& vifname) const
 IfTreeVif*
 IfTree::find_vif(uint32_t pif_index)
 {
-    IfTree::IfMap::iterator iter;
+    IfTree::VifIndexMap::iterator iter = _vifindex_map.find(pif_index);
 
-    //
-    // XXX: Find the first vif that matches the physical index
-    //
-    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
-	IfTreeVif* vifp = iter->second.find_vif(pif_index);
-	if (vifp != NULL)
-	    return (vifp);
-    }
+    if (iter == _vifindex_map.end())
+	return (NULL);
 
-    return (NULL);
+    return (iter->second);
 }
 
 const IfTreeVif*
 IfTree::find_vif(uint32_t pif_index) const
 {
-    IfTree::IfMap::const_iterator iter;
+    IfTree::VifIndexMap::const_iterator iter = _vifindex_map.find(pif_index);
 
-    //
-    // XXX: Find the first vif that matches the physical index
-    //
-    for (iter = _interfaces.begin(); iter != _interfaces.end(); ++iter) {
-	const IfTreeVif* vifp = iter->second.find_vif(pif_index);
-	if (vifp != NULL)
-	    return (vifp);
-    }
+    if (iter == _vifindex_map.end())
+	return (NULL);
 
-    return (NULL);
+    return (iter->second);
 }
 
 IfTreeAddr4*
@@ -244,9 +290,9 @@ IfTree::find_interface_vif_by_addr(const IPvX& addr,
     // Iterate through all interfaces and vifs
     //
     for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
+	const IfTreeInterface& fi = *(ii->second);
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
+	    const IfTreeVif& fv = *(vi->second);
 
 	    //
 	    // IPv4 address test
@@ -256,7 +302,7 @@ IfTree::find_interface_vif_by_addr(const IPvX& addr,
 		for (ai4 = fv.ipv4addrs().begin();
 		     ai4 != fv.ipv4addrs().end();
 		     ++ai4) {
-		    const IfTreeAddr4& a4 = ai4->second;
+		    const IfTreeAddr4& a4 = *(ai4->second);
 
 		    if (a4.addr() == addr4) {
 			// Found a match
@@ -276,7 +322,7 @@ IfTree::find_interface_vif_by_addr(const IPvX& addr,
 		for (ai6 = fv.ipv6addrs().begin();
 		     ai6 != fv.ipv6addrs().end();
 		     ++ai6) {
-		    const IfTreeAddr6& a6 = ai6->second;
+		    const IfTreeAddr6& a6 = *(ai6->second);
 
 		    if (a6.addr() == addr6) {
 			// Found a match
@@ -310,9 +356,9 @@ IfTree::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
     // Iterate through all interfaces and vifs
     //
     for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
+	const IfTreeInterface& fi = *(ii->second);
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    const IfTreeVif& fv = vi->second;
+	    const IfTreeVif& fv = *(vi->second);
 
 	    //
 	    // IPv4 address test
@@ -322,7 +368,7 @@ IfTree::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
 		for (ai4 = fv.ipv4addrs().begin();
 		     ai4 != fv.ipv4addrs().end();
 		     ++ai4) {
-		    const IfTreeAddr4& a4 = ai4->second;
+		    const IfTreeAddr4& a4 = *(ai4->second);
 
 		    // Test if same subnet
 		    IPv4Net subnet(a4.addr(), a4.prefix_len());
@@ -354,7 +400,7 @@ IfTree::find_interface_vif_same_subnet_or_p2p(const IPvX& addr,
 		for (ai6 = fv.ipv6addrs().begin();
 		     ai6 != fv.ipv6addrs().end();
 		     ++ai6) {
-		    const IfTreeAddr6& a6 = ai6->second;
+		    const IfTreeAddr6& a6 = *(ai6->second);
 
 		    // Test if same subnet
 		    IPv6Net subnet(a6.addr(), a6.prefix_len());
@@ -423,13 +469,13 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
     // Update the interface state
     //
     if (! this_ifp->is_same_state(other_iface))
-	this_ifp->copy_state(other_iface);
+	this_ifp->copy_state(other_iface, false);
 
     //
     // Update existing vifs and addresses
     //
     for (vi = this_ifp->vifs().begin(); vi != this_ifp->vifs().end(); ++vi) {
-	IfTreeVif& this_vif = vi->second;
+	IfTreeVif& this_vif = *(vi->second);
 	const IfTreeVif* other_vifp;
 
 	other_vifp = other_iface.find_vif(this_vif.vifname());
@@ -449,7 +495,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	for (ai4 = this_vif.ipv4addrs().begin();
 	     ai4 != this_vif.ipv4addrs().end();
 	     ++ai4) {
-	    IfTreeAddr4& this_addr = ai4->second;
+	    IfTreeAddr4& this_addr = *(ai4->second);
 	    const IfTreeAddr4* other_ap;
 	    other_ap = other_vif.find_addr(this_addr.addr());
 	    if (other_ap == NULL) {
@@ -467,7 +513,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	for (ai6 = this_vif.ipv6addrs().begin();
 	     ai6 != this_vif.ipv6addrs().end();
 	     ++ai6) {
-	    IfTreeAddr6& this_addr = ai6->second;
+	    IfTreeAddr6& this_addr = *(ai6->second);
 	    const IfTreeAddr6* other_ap;
 	    other_ap = other_vif.find_addr(this_addr.addr());
 	    if (other_ap == NULL) {
@@ -485,7 +531,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
     for (ov = other_iface.vifs().begin();
 	 ov != other_iface.vifs().end();
 	 ++ov) {
-	const IfTreeVif& other_vif = ov->second;
+	const IfTreeVif& other_vif = *(ov->second);
 	IfTreeVif* this_vifp;
 
 	if (this_ifp->find_vif(other_vif.vifname()) != NULL)
@@ -507,7 +553,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	for (oa4 = other_vif.ipv4addrs().begin();
 	     oa4 != other_vif.ipv4addrs().end();
 	     ++oa4) {
-	    const IfTreeAddr4& other_addr = oa4->second;
+	    const IfTreeAddr4& other_addr = *(oa4->second);
 	    IfTreeAddr4* this_ap;
 	    this_ap = this_vif.find_addr(other_addr.addr());
 	    if (this_ap != NULL)
@@ -527,7 +573,7 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	for (oa6 = other_vif.ipv6addrs().begin();
 	     oa6 != other_vif.ipv6addrs().end();
 	     ++oa6) {
-	    const IfTreeAddr6& other_addr = oa6->second;
+	    const IfTreeAddr6& other_addr = *(oa6->second);
 	    IfTreeAddr6* this_ap;
 	    this_ap = this_vif.find_addr(other_addr.addr());
 	    if (this_ap != NULL)
@@ -553,17 +599,16 @@ IfTree::finalize_state()
 {
     IfMap::iterator ii = _interfaces.begin();
     while (ii != _interfaces.end()) {
-	//
+	IfTreeInterface* ifp = ii->second;
+
 	// If interface is marked as deleted, delete it.
-	//
-	if (ii->second.is_marked(DELETED)) {
+	if (ifp->is_marked(DELETED)) {
 	    _interfaces.erase(ii++);
+	    delete ifp;
 	    continue;
 	}
-	//
 	// Call finalize_state on interfaces that remain
-	//
-	ii->second.finalize_state();
+	ifp->finalize_state();
 	++ii;
     }
     set_state(NO_CHANGE);
@@ -579,7 +624,7 @@ IfTree::str() const
     // Print the interfaces
     //
     for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
-	const IfTreeInterface& fi = ii->second;
+	const IfTreeInterface& fi = *(ii->second);
 	r += fi.str() + string("\n");
 
 	//
@@ -588,7 +633,7 @@ IfTree::str() const
 	for (IfTreeInterface::VifMap::const_iterator vi = fi.vifs().begin();
 	     vi != fi.vifs().end();
 	     ++vi) {
-	    const IfTreeVif& fv = vi->second;
+	    const IfTreeVif& fv = *(vi->second);
 	    r += string("  ") + fv.str() + string("\n");
 
 	    //
@@ -597,7 +642,7 @@ IfTree::str() const
 	    for (IfTreeVif::IPv4Map::const_iterator ai = fv.ipv4addrs().begin();
 		 ai != fv.ipv4addrs().end();
 		 ++ai) {
-		const IfTreeAddr4& a = ai->second;
+		const IfTreeAddr4& a = *(ai->second);
 		r += string("    ") + a.str() + string("\n");
 	    }
 
@@ -607,7 +652,7 @@ IfTree::str() const
 	    for (IfTreeVif::IPv6Map::const_iterator ai = fv.ipv6addrs().begin();
 		 ai != fv.ipv6addrs().end();
 		 ++ai) {
-		const IfTreeAddr6& a = ai->second;
+		const IfTreeAddr6& a = *(ai->second);
 		r += string("    ") + a.str() + string("\n");
 	    }
 	}
@@ -658,7 +703,7 @@ IfTree::align_with(const IfTree& other)
     // Iterate through all interfaces
     //
     for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
-	IfTreeInterface& fi = ii->second;
+	IfTreeInterface& fi = *(ii->second);
 	const string& ifname = fi.ifname();
 	bool fi_enabled = fi.enabled();
 	bool fi_flipped = fi.flipped();
@@ -680,7 +725,7 @@ IfTree::align_with(const IfTree& other)
 		fi.set_enabled(false);
 		IfTreeInterface::VifMap::iterator vi;
 		for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-		    IfTreeVif& fv = vi->second;
+		    IfTreeVif& fv = *(vi->second);
 		    fv.mark(DELETED);
 		}
 	    }
@@ -696,10 +741,10 @@ IfTree::align_with(const IfTree& other)
 	}
 
 	//
-	// Copy state from the other tree
+	// Copy state from the other interface
 	//
 	if (! fi.is_same_state(*other_ifp)) {
-	    fi.copy_state(*other_ifp);
+	    fi.copy_state(*other_ifp, false);
 	    if (! fi_enabled)
 		fi.set_enabled(fi_enabled);
 	    if (fi_flipped)
@@ -711,7 +756,7 @@ IfTree::align_with(const IfTree& other)
 	//
 	IfTreeInterface::VifMap::iterator vi;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    IfTreeVif& fv = vi->second;
+	    IfTreeVif& fv = *(vi->second);
 	    const string& vifname = fv.vifname();
 	    bool fv_enabled = fv.enabled();
 	    const IfTreeVif* other_vifp = other_ifp->find_vif(vifname);
@@ -725,7 +770,7 @@ IfTree::align_with(const IfTree& other)
 	    }
 
 	    //
-	    // Copy state from the other tree
+	    // Copy state from the other vif
 	    //
 	    if (! fv.is_same_state(*other_vifp)) {
 		fv.copy_state(*other_vifp);
@@ -740,7 +785,7 @@ IfTree::align_with(const IfTree& other)
 	    for (ai4 = fv.ipv4addrs().begin();
 		 ai4 != fv.ipv4addrs().end();
 		 ++ai4) {
-		IfTreeAddr4& fa = ai4->second;
+		IfTreeAddr4& fa = *(ai4->second);
 		bool fa_enabled = fa.enabled();
 		const IfTreeAddr4* other_ap = other_vifp->find_addr(fa.addr());
 
@@ -753,7 +798,7 @@ IfTree::align_with(const IfTree& other)
 		}
 
 		//
-		// Copy state from the other tree
+		// Copy state from the other address
 		//
 		if (! fa.is_same_state(*other_ap)) {
 		    fa.copy_state(*other_ap);
@@ -769,7 +814,7 @@ IfTree::align_with(const IfTree& other)
 	    for (ai6 = fv.ipv6addrs().begin();
 		 ai6 != fv.ipv6addrs().end();
 		 ++ai6) {
-		IfTreeAddr6& fa = ai6->second;
+		IfTreeAddr6& fa = *(ai6->second);
 		bool fa_enabled = fa.enabled();
 		const IfTreeAddr6* other_ap = other_vifp->find_addr(fa.addr());
 
@@ -782,7 +827,7 @@ IfTree::align_with(const IfTree& other)
 		}
 
 		//
-		// Copy state from the other tree
+		// Copy state from the other address
 		//
 		if (! fa.is_same_state(*other_ap)) {
 		    fa.copy_state(*other_ap);
@@ -821,13 +866,13 @@ IfTree::prepare_replacement_state(const IfTree& other)
     // Mark all entries in the local tree as created
     //
     for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
-	IfTreeInterface& fi = ii->second;
+	IfTreeInterface& fi = *(ii->second);
 	fi.mark(CREATED);
 
 	// Mark all vifs
 	IfTreeInterface::VifMap::iterator vi;
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    IfTreeVif& fv = vi->second;
+	    IfTreeVif& fv = *(vi->second);
 	    fv.mark(CREATED);
 
 	    // Mark all IPv4 addresses
@@ -835,7 +880,8 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    for (ai4 = fv.ipv4addrs().begin();
 		 ai4 != fv.ipv4addrs().end();
 		 ++ai4) {
-		ai4->second.mark(CREATED);
+		IfTreeAddr4& fa = *(ai4->second);
+		fa.mark(CREATED);
 	    }
 
 	    // Mark all IPv6 addresses
@@ -843,7 +889,8 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    for (ai6 = fv.ipv6addrs().begin();
 		 ai6 != fv.ipv6addrs().end();
 		 ++ai6) {
-		ai6->second.mark(CREATED);
+		IfTreeAddr6& fa = *(ai6->second);
+		fa.mark(CREATED);
 	    }
 	}
     }
@@ -854,7 +901,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
     for (oi = other.interfaces().begin();
 	 oi != other.interfaces().end();
 	 ++oi) {
-	const IfTreeInterface& other_iface = oi->second;
+	const IfTreeInterface& other_iface = *(oi->second);
 	const string& ifname = other_iface.ifname();
 	IfTreeInterface* ifp = find_interface(ifname);
 	if (ifp == NULL) {
@@ -866,7 +913,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    add_interface(ifname);
 	    ifp = find_interface(ifname);
 	    XLOG_ASSERT(ifp != NULL);
-	    ifp->copy_state(other_iface);
+	    ifp->copy_state(other_iface, false);
 	    ifp->mark(DELETED);
 	}
 
@@ -877,7 +924,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	for (ov = other_iface.vifs().begin();
 	     ov != other_iface.vifs().end();
 	     ++ov) {
-	    const IfTreeVif& other_vif = ov->second;
+	    const IfTreeVif& other_vif = *(ov->second);
 	    const string& vifname = other_vif.vifname();
 	    IfTreeVif* vifp = ifp->find_vif(vifname);
 	    if (vifp == NULL) {
@@ -898,7 +945,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    for (oa4 = other_vif.ipv4addrs().begin();
 		 oa4 != other_vif.ipv4addrs().end();
 		 ++oa4) {
-		const IfTreeAddr4& other_addr = oa4->second;
+		const IfTreeAddr4& other_addr = *(oa4->second);
 		IfTreeAddr4* ap = vifp->find_addr(other_addr.addr());
 		if (ap == NULL) {
 		    //
@@ -919,7 +966,7 @@ IfTree::prepare_replacement_state(const IfTree& other)
 	    for (oa6 = other_vif.ipv6addrs().begin();
 		 oa6 != other_vif.ipv6addrs().end();
 		 ++oa6) {
-		const IfTreeAddr6& other_addr = oa6->second;
+		const IfTreeAddr6& other_addr = *(oa6->second);
 		IfTreeAddr6* ap = vifp->find_addr(other_addr.addr());
 		if (ap == NULL) {
 		    //
@@ -957,9 +1004,9 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
     //
     ii = _interfaces.begin();
     while (ii != _interfaces.end()) {
-	IfTreeInterface& fi = ii->second;
-	const string& ifname = fi.ifname();
-	if (! fi.is_marked(DELETED)) {
+	IfTreeInterface* ifp = ii->second;
+	const string& ifname = ifp->ifname();
+	if (! ifp->is_marked(DELETED)) {
 	    ++ii;
 	    continue;
 	}
@@ -968,6 +1015,7 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	if (old_ifp == NULL) {
 	    // Remove this item from the local tree
 	    _interfaces.erase(ii++);
+	    delete ifp;
 	    continue;
 	}
 
@@ -975,11 +1023,11 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	// Iterate through all vifs
 	//
 	IfTreeInterface::VifMap::iterator vi;
-	vi = fi.vifs().begin();
-	while (vi != fi.vifs().end()) {
-	    IfTreeVif& fv = vi->second;
-	    const string& vifname = fv.vifname();
-	    if (! fv.is_marked(DELETED)) {
+	vi = ifp->vifs().begin();
+	while (vi != ifp->vifs().end()) {
+	    IfTreeVif* vifp = vi->second;
+	    const string& vifname = vifp->vifname();
+	    if (! vifp->is_marked(DELETED)) {
 		++vi;
 		continue;
 	    }
@@ -987,7 +1035,8 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	    old_vifp = old_ifp->find_vif(vifname);
 	    if (old_vifp == NULL) {
 		// Remove this item from the local tree
-		fi.vifs().erase(vi++);
+		ifp->vifs().erase(vi++);
+		delete vifp;
 		continue;
 	    }
 
@@ -995,18 +1044,19 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	    // Iterate through all IPv4 addresses
 	    //
 	    IfTreeVif::IPv4Map::iterator ai4;
-	    ai4 = fv.ipv4addrs().begin();
-	    while (ai4 != fv.ipv4addrs().end()) {
-		IfTreeAddr4& fa = ai4->second;
-		if (! fa.is_marked(DELETED)) {
+	    ai4 = vifp->ipv4addrs().begin();
+	    while (ai4 != vifp->ipv4addrs().end()) {
+		IfTreeAddr4* ap = ai4->second;
+		if (! ap->is_marked(DELETED)) {
 		    ++ai4;
 		    continue;
 		}
 		const IfTreeAddr4* old_ap;
-		old_ap = old_vifp->find_addr(fa.addr());
+		old_ap = old_vifp->find_addr(ap->addr());
 		if (old_ap == NULL) {
 		    // Remove this item from the local tree
-		    fv.ipv4addrs().erase(ai4++);
+		    vifp->ipv4addrs().erase(ai4++);
+		    delete ap;
 		    continue;
 		}
 		++ai4;
@@ -1016,18 +1066,19 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 	    // Iterate through all IPv6 addresses
 	    //
 	    IfTreeVif::IPv6Map::iterator ai6;
-	    ai6 = fv.ipv6addrs().begin();
-	    while (ai6 != fv.ipv6addrs().end()) {
-		IfTreeAddr6& fa = ai6->second;
-		if (! fa.is_marked(DELETED)) {
+	    ai6 = vifp->ipv6addrs().begin();
+	    while (ai6 != vifp->ipv6addrs().end()) {
+		IfTreeAddr6* ap = ai6->second;
+		if (! ap->is_marked(DELETED)) {
 		    ++ai6;
 		    continue;
 		}
 		const IfTreeAddr6* old_ap;
-		old_ap = old_vifp->find_addr(fa.addr());
+		old_ap = old_vifp->find_addr(ap->addr());
 		if (old_ap == NULL) {
 		    // Remove this item from the local tree
-		    fv.ipv6addrs().erase(ai6++);
+		    vifp->ipv6addrs().erase(ai6++);
+		    delete ap;
 		    continue;
 		}
 		++ai6;
@@ -1040,11 +1091,100 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
     return (*this);
 }
 
+void
+IfTree::insert_ifindex(IfTreeInterface* ifp)
+{
+    IfIndexMap::iterator iter;
+
+    XLOG_ASSERT(ifp != NULL);
+
+    if (ifp->pif_index() == 0)
+	return;		// Ignore: invalid pif_index
+
+    iter = _ifindex_map.find(ifp->pif_index());
+    if (iter != _ifindex_map.end()) {
+	XLOG_ASSERT(iter->second == ifp);
+	iter->second = ifp;
+	return;
+    }
+
+    _ifindex_map[ifp->pif_index()] = ifp;
+}
+
+void
+IfTree::erase_ifindex(IfTreeInterface* ifp)
+{
+    IfIndexMap::iterator iter;
+
+    XLOG_ASSERT(ifp != NULL);
+
+    if (ifp->pif_index() == 0)
+	return;		// Ignore: invalid pif_index
+
+    iter = _ifindex_map.find(ifp->pif_index());
+    XLOG_ASSERT(iter != _ifindex_map.end());
+    XLOG_ASSERT(iter->second == ifp);
+
+    _ifindex_map.erase(iter);
+}
+
+void
+IfTree::insert_vifindex(IfTreeVif* vifp)
+{
+    VifIndexMap::iterator iter;
+
+    XLOG_ASSERT(vifp != NULL);
+
+    if (vifp->pif_index() == 0)
+	return;		// Ignore: invalid pif_index
+
+    // XXX: Check all multimap entries that match to the same pif_index
+    iter = _vifindex_map.find(vifp->pif_index());
+    while (iter != _vifindex_map.end()) {
+	if (iter->first != vifp->pif_index())
+	    break;
+	if (iter->second == vifp)
+	    return;		// Entry has been added previously
+	++iter;
+    }
+
+    _vifindex_map.insert(make_pair(vifp->pif_index(), vifp));
+}
+
+void
+IfTree::erase_vifindex(IfTreeVif* vifp)
+{
+    VifIndexMap::iterator iter;
+
+    XLOG_ASSERT(vifp != NULL);
+
+    if (vifp->pif_index() == 0)
+	return;		// Ignore: invalid pif_index
+
+    iter = _vifindex_map.find(vifp->pif_index());
+    XLOG_ASSERT(iter != _vifindex_map.end());
+
+    // XXX: Check all multimap entries that match to the same pif_index
+    while (iter != _vifindex_map.end()) {
+	if (iter->first != vifp->pif_index())
+	    break;
+	if (iter->second == vifp) {
+	    // Entry found
+	    _vifindex_map.erase(iter);
+	    return;
+	}
+	++iter;
+    }
+
+    XLOG_UNREACHABLE();
+}
+
 /* ------------------------------------------------------------------------- */
 /* IfTreeInterface code */
 
-IfTreeInterface::IfTreeInterface(const string& ifname)
+IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
     : IfTreeItem(),
+      _iftree(iftree),
       _ifname(ifname),
       _pif_index(0),
       _enabled(false),
@@ -1058,6 +1198,47 @@ IfTreeInterface::IfTreeInterface(const string& ifname)
       _interface_flags(0)
 {}
 
+IfTreeInterface::~IfTreeInterface()
+{
+    while (! _vifs.empty()) {
+	IfTreeVif* vifp = _vifs.begin()->second;
+	_vifs.erase(_vifs.begin());
+	delete vifp;
+    }
+
+    iftree().erase_ifindex(this);
+}
+
+void
+IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif)
+{
+    const string& vifname = other_vif.vifname();
+    IfTreeVif* vifp;
+
+    // Add the vif
+    vifp = new IfTreeVif(*this, vifname);
+    _vifs.insert(IfTreeInterface::VifMap::value_type(vifname, vifp));
+    vifp->copy_state(other_vif);
+
+    // Add recursively all the IPv4 addresses from the other vif
+    IfTreeVif::IPv4Map::const_iterator oa4;
+    for (oa4 = other_vif.ipv4addrs().begin();
+	 oa4 != other_vif.ipv4addrs().end();
+	 ++oa4) {
+	const IfTreeAddr4& other_addr = *(oa4->second);
+	vifp->add_recursive_addr(other_addr);
+    }
+
+    // Add recursively all the IPv6 addresses from the other vif
+    IfTreeVif::IPv6Map::const_iterator oa6;
+    for (oa6 = other_vif.ipv6addrs().begin();
+	 oa6 != other_vif.ipv6addrs().end();
+	 ++oa6) {
+	const IfTreeAddr6& other_addr = *(oa6->second);
+	vifp->add_recursive_addr(other_addr);
+    }
+}
+
 int
 IfTreeInterface::add_vif(const string& vifname)
 {
@@ -1068,7 +1249,8 @@ IfTreeInterface::add_vif(const string& vifname)
 	return (XORP_OK);
     }
 
-    _vifs.insert(VifMap::value_type(vifname, IfTreeVif(ifname(), vifname)));
+    vifp = new IfTreeVif(*this, vifname);
+    _vifs.insert(IfTreeInterface::VifMap::value_type(vifname, vifp));
 
     return (XORP_OK);
 }
@@ -1094,7 +1276,7 @@ IfTreeInterface::find_vif(const string& vifname)
     if (iter == _vifs.end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 const IfTreeVif*
@@ -1105,7 +1287,7 @@ IfTreeInterface::find_vif(const string& vifname) const
     if (iter == _vifs.end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 IfTreeVif*
@@ -1114,8 +1296,8 @@ IfTreeInterface::find_vif(uint32_t pif_index)
     IfTreeInterface::VifMap::iterator iter;
 
     for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	if (iter->second.pif_index() == pif_index)
-	    return (&iter->second);
+	if (iter->second->pif_index() == pif_index)
+	    return (iter->second);
     }
 
     return (NULL);
@@ -1127,8 +1309,8 @@ IfTreeInterface::find_vif(uint32_t pif_index) const
     IfTreeInterface::VifMap::const_iterator iter;
 
     for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
-	if (iter->second.pif_index() == pif_index)
-	    return (&iter->second);
+	if (iter->second->pif_index() == pif_index)
+	    return (iter->second);
     }
 
     return (NULL);
@@ -1186,17 +1368,16 @@ IfTreeInterface::finalize_state()
     //
     VifMap::iterator vi = _vifs.begin();
     while (vi != _vifs.end()) {
-	//
+	IfTreeVif* vifp = vi->second;
+
 	// If interface is marked as deleted, delete it.
-	//
-	if (vi->second.is_marked(DELETED)) {
+	if (vifp->is_marked(DELETED)) {
 	    _vifs.erase(vi++);
+	    delete vifp;
 	    continue;
 	}
-	//
 	// Call finalize_state on vifs that remain
-	//
-	vi->second.finalize_state();
+	vifp->finalize_state();
 	++vi;
     }
     set_state(NO_CHANGE);
@@ -1230,9 +1411,9 @@ IfTreeInterface::str() const
 /* ------------------------------------------------------------------------- */
 /* IfTreeVif code */
 
-IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
+IfTreeVif::IfTreeVif(IfTreeInterface& iface, const string& vifname)
     : IfTreeItem(),
-      _ifname(ifname),
+      _iface(iface),
       _vifname(vifname),
       _pif_index(0),
       _vif_index(Vif::VIF_INDEX_INVALID),
@@ -1247,6 +1428,85 @@ IfTreeVif::IfTreeVif(const string& ifname, const string& vifname)
       _vlan_id(0)
 {}
 
+IfTreeVif::~IfTreeVif()
+{
+    while (! _ipv4addrs.empty()) {
+	IfTreeAddr4* ap = _ipv4addrs.begin()->second;
+	_ipv4addrs.erase(_ipv4addrs.begin());
+	delete ap;
+    }
+
+    while (! _ipv6addrs.empty()) {
+	IfTreeAddr6* ap = _ipv6addrs.begin()->second;
+	_ipv6addrs.erase(_ipv6addrs.begin());
+	delete ap;
+    }
+
+    iftree().erase_vifindex(this);
+}
+
+void
+IfTreeVif::copy_recursive_vif(const IfTreeVif& other_vif)
+{
+    // Remove the old IPv4 addresses
+    while (! _ipv4addrs.empty()) {
+	IfTreeAddr4* ap = _ipv4addrs.begin()->second;
+	_ipv4addrs.erase(_ipv4addrs.begin());
+	delete ap;
+    }
+
+    // Remove the old IPv4 addresses
+    while (! _ipv6addrs.empty()) {
+	IfTreeAddr6* ap = _ipv6addrs.begin()->second;
+	_ipv6addrs.erase(_ipv6addrs.begin());
+	delete ap;
+    }
+
+    copy_state(other_vif);
+
+    // Add recursively all the IPv4 addresses from the other vif
+    IfTreeVif::IPv4Map::const_iterator oa4;
+    for (oa4 = other_vif.ipv4addrs().begin();
+	 oa4 != other_vif.ipv4addrs().end();
+	 ++oa4) {
+	const IfTreeAddr4& other_addr = *(oa4->second);
+	add_recursive_addr(other_addr);
+    }
+
+    // Add recursively all the IPv6 addresses from the other vif
+    IfTreeVif::IPv6Map::const_iterator oa6;
+    for (oa6 = other_vif.ipv6addrs().begin();
+	 oa6 != other_vif.ipv6addrs().end();
+	 ++oa6) {
+	const IfTreeAddr6& other_addr = *(oa6->second);
+	add_recursive_addr(other_addr);
+    }
+}
+
+void
+IfTreeVif::add_recursive_addr(const IfTreeAddr4& other_addr)
+{
+    const IPv4& addr = other_addr.addr();
+    IfTreeAddr4* ap;
+
+    // Add the address
+    ap = new IfTreeAddr4(addr);
+    _ipv4addrs.insert(IfTreeVif::IPv4Map::value_type(addr, ap));
+    ap->copy_state(other_addr);
+}
+
+void
+IfTreeVif::add_recursive_addr(const IfTreeAddr6& other_addr)
+{
+    const IPv6& addr = other_addr.addr();
+    IfTreeAddr6* ap;
+
+    // Add the address
+    ap = new IfTreeAddr6(addr);
+    _ipv6addrs.insert(IfTreeVif::IPv6Map::value_type(addr, ap));
+    ap->copy_state(other_addr);
+}
+
 int
 IfTreeVif::add_addr(const IPv4& addr)
 {
@@ -1257,7 +1517,8 @@ IfTreeVif::add_addr(const IPv4& addr)
 	return (XORP_OK);
     }
 
-    _ipv4addrs.insert(IPv4Map::value_type(addr, IfTreeAddr4(addr)));
+    ap = new IfTreeAddr4(addr);
+    _ipv4addrs.insert(IPv4Map::value_type(addr, ap));
 
     return (XORP_OK);
 }
@@ -1285,7 +1546,8 @@ IfTreeVif::add_addr(const IPv6& addr)
 	return (XORP_OK);
     }
 
-    _ipv6addrs.insert(IPv6Map::value_type(addr, IfTreeAddr6(addr)));
+    ap = new IfTreeAddr6(addr);
+    _ipv6addrs.insert(IPv6Map::value_type(addr, ap));
 
     return (XORP_OK);
 }
@@ -1311,7 +1573,7 @@ IfTreeVif::find_addr(const IPv4& addr)
     if (iter == _ipv4addrs.end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 const IfTreeAddr4*
@@ -1322,7 +1584,7 @@ IfTreeVif::find_addr(const IPv4& addr) const
     if (iter == _ipv4addrs.end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 IfTreeAddr6*
@@ -1333,7 +1595,7 @@ IfTreeVif::find_addr(const IPv6& addr)
     if (iter == _ipv6addrs.end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 const IfTreeAddr6*
@@ -1344,7 +1606,7 @@ IfTreeVif::find_addr(const IPv6& addr) const
     if (iter == _ipv6addrs.end())
 	return (NULL);
 
-    return (&iter->second);
+    return (iter->second);
 }
 
 void
@@ -1354,17 +1616,16 @@ IfTreeVif::finalize_state()
     // Iterate through all IPv4 addresses
     //
     for (IPv4Map::iterator ai = _ipv4addrs.begin(); ai != _ipv4addrs.end(); ) {
-	//
+	IfTreeAddr4* ap = ai->second;
+
 	// If address is marked as deleted, delete it.
-	//
-	if (ai->second.is_marked(DELETED)) {
+	if (ap->is_marked(DELETED)) {
 	    _ipv4addrs.erase(ai++);
+	    delete ap;
 	    continue;
 	}
-	//
 	// Call finalize_state on addresses that remain
-	//
-	ai->second.finalize_state();
+	ap->finalize_state();
 	++ai;
     }
 
@@ -1372,17 +1633,16 @@ IfTreeVif::finalize_state()
     // Iterate through all IPv6 addresses
     //
     for (IPv6Map::iterator ai = _ipv6addrs.begin(); ai != _ipv6addrs.end(); ) {
-	//
+	IfTreeAddr6* ap = ai->second;
+
 	// If address is marked as deleted, delete it.
-	//
-	if (ai->second.is_marked(DELETED)) {
+	if (ap->is_marked(DELETED)) {
 	    _ipv6addrs.erase(ai++);
+	    delete ap;
 	    continue;
 	}
-	//
 	// Call finalize_state on interfaces that remain
-	//
-	ai->second.finalize_state();
+	ap->finalize_state();
 	++ai;
     }
     set_state(NO_CHANGE);

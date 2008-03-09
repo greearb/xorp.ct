@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.15 2007/12/30 09:15:03 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.16 2008/01/04 03:15:46 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -132,7 +132,7 @@ public:
 	    for (iter = dev_config.interfaces().begin();
 		 iter != dev_config.interfaces().end();
 		 ++iter) {
-		const IfTreeInterface& iface = iter->second;
+		const IfTreeInterface& iface = *(iter->second);
 		if (iftree().update_interface(iface) != XORP_OK)
 		    return (false);
 	    }
@@ -145,7 +145,7 @@ public:
 	for (iter = iftree().interfaces().begin();
 	     iter != iftree().interfaces().end();
 	     ++iter) {
-	    IfTreeInterface& iface = iter->second;
+	    IfTreeInterface& iface = *(iter->second);
 	    iface.set_default_system_config(_enable);
 	}
 

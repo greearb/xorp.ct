@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.12 2008/01/08 23:30:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/netlink_socket_utilities.cc,v 1.13 2008/03/05 06:23:30 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -206,8 +206,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	const IfTreeInterface* pi = NULL;
 	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	     ii != iftree.interfaces().end(); ++ii) {
-	    if (ii->second.discard()) {
-		pi = &ii->second;
+	    if (ii->second->discard()) {
+		pi = ii->second;
 		break;
 	    }
 	}
@@ -236,8 +236,8 @@ NlmUtils::nlm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 	const IfTreeInterface* pi = NULL;
 	for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	     ii != iftree.interfaces().end(); ++ii) {
-	    if (ii->second.unreachable()) {
-		pi = &ii->second;
+	    if (ii->second->unreachable()) {
+		pi = ii->second;
 		break;
 	    }
 	}
