@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.17 2008/01/04 03:16:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.18 2008/03/09 00:21:18 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -813,7 +813,7 @@ IoIpSocket::open_proto_sockets(string& error_msg)
 	return (XORP_ERROR);
     }
     // Lots of output buffering
-    if (comm_sock_set_rcvbuf(_proto_socket_out, SO_SND_BUF_SIZE_MAX,
+    if (comm_sock_set_sndbuf(_proto_socket_out, SO_SND_BUF_SIZE_MAX,
 			     SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
 	error_msg = c_format("Cannot set the sender buffer size: %s",
