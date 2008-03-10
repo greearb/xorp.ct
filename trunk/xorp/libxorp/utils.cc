@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.10 2007/02/16 22:46:28 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.11 2008/01/04 03:16:45 pavlin Exp $"
 
 #include "xorp.h"
 #include "c_format.hh"
@@ -206,7 +206,8 @@ xorp_make_temporary_file(const string& tmp_dir,
 
 #ifdef HOST_OS_WINDOWS
 	// Get the temporary filename and open the file
-	snprintf(dirname, sizeof(dirname)/sizeof(dirname[0]), tmp_dir.c_str());
+	snprintf(dirname, sizeof(dirname)/sizeof(dirname[0]), "%s",
+		 tmp_dir.c_str());
 	if (GetTempFileNameA(dirname, filename_template.c_str(), 0,
 	    filename) == 0)
 	    continue;
@@ -219,7 +220,7 @@ xorp_make_temporary_file(const string& tmp_dir,
 	// Compose the temporary file name and try to create the file
 	string tmp_filename = tmp_dir + PATH_DELIMITER_STRING +
 			      filename_template + ".XXXXXX";
-	snprintf(filename, sizeof(filename)/sizeof(filename[0]),
+	snprintf(filename, sizeof(filename)/sizeof(filename[0]), "%s",
 		 tmp_filename.c_str());
 
 	int fd = mkstemp(filename);
