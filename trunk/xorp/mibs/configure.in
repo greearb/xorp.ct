@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/mibs/configure.in,v 1.26 2007/04/14 01:35:07 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.27 2007/04/16 23:26:40 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.26 2007/04/14 01:35:07 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.27 2007/04/16 23:26:40 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -472,7 +472,9 @@ if test "${GCC}" = "yes" ; then
     fi
 
     dnl
-    dnl TODO: add -ansi -pedantic
+    dnl TODO: add the following flags to gcc/g++:
+    dnl       -ansi -pedantic -Wformat=2
+    dnl
     dnl XXX: Flag -Wtraditional is not recommended for C, because:
     dnl   - On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
     dnl     create a warning for gcc 2.95.3

@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.212 2007/09/04 16:40:08 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.213 2007/09/14 01:26:53 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.212 2007/09/04 16:40:08 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.213 2007/09/14 01:26:53 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -964,7 +964,9 @@ if test "${GCC}" = "yes" ; then
     fi
 
     dnl
-    dnl TODO: add -ansi -pedantic
+    dnl TODO: add the following flags to gcc/g++:
+    dnl       -ansi -pedantic -Wformat=2
+    dnl
     dnl XXX: Flag -Wtraditional is not recommended for C, because:
     dnl   - On FreeBSD-4.5 macros like IN_CLASSA(i) from netinet/in.h
     dnl     create a warning for gcc 2.95.3

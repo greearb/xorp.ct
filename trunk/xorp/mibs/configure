@@ -21740,7 +21740,7 @@ echo "${ECHO_T}no" >&6; }
 
     fi
 
-                                                                                                                    if test "${ICC}" = "yes" ; then
+                                                                                                                            if test "${ICC}" = "yes" ; then
 	CPARANOIDFLAGS="-Werror"
 	CXXPARANOIDFLAGS="-Werror"
     else
