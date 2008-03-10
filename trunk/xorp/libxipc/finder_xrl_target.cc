@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.28 2007/05/23 12:12:38 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_xrl_target.cc,v 1.29 2008/01/04 03:16:23 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
@@ -41,15 +41,16 @@ protected:
 
 #define finder_trace_init(x...) 					      \
 do {									      \
-    if (finder_tracer.on()) finder_tracer.set_context(c_format(x));	      \
+    if (finder_tracer.on()) {						      \
+	finder_tracer.set_context(c_format(x));				      \
+    }									      \
 } while (0)
 
 #define finder_trace_result(x...)					      \
 do {									      \
     if (finder_tracer.on()) {						      \
 	string r = c_format(x);						      \
-	XLOG_INFO(c_format("%s -> %s\n",				      \
-		  finder_tracer.context().c_str(), r.c_str()).c_str());	      \
+	XLOG_INFO("%s -> %s", finder_tracer.context().c_str(), r.c_str());    \
     }									      \
 } while (0)
 

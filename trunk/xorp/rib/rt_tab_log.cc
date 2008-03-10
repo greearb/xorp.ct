@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.11 2007/02/16 22:47:10 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_log.cc,v 1.12 2008/01/04 03:17:26 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -183,7 +183,7 @@ XLogTraceTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			  route.str().c_str());
     int s = LogTable<A>::add_route(route, caller);
     msg += c_format("%d\n", s);
-    XLOG_TRACE(true, msg.c_str());
+    XLOG_TRACE(true, "%s", msg.c_str());
 
     return s;
 }
@@ -205,7 +205,7 @@ XLogTraceTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 
     if (route != NULL) {
 	msg += c_format("%d\n", s);
-	XLOG_TRACE(true, msg.c_str());
+	XLOG_TRACE(true, "%s", msg.c_str());
     }
     return s;
 }
@@ -244,7 +244,7 @@ DebugMsgLogTable<A>::add_route(const IPRouteEntry<A>& 	route,
 			  route.str().c_str());
     int s = LogTable<A>::add_route(route, caller);
     msg += c_format("%d\n", s);
-    debug_msg(msg.c_str());
+    debug_msg("%s", msg.c_str());
 
     return s;
 }
@@ -266,7 +266,7 @@ DebugMsgLogTable<A>::delete_route(const IPRouteEntry<A>* 	route,
 
     if (route != NULL) {
 	msg += c_format("%d\n", s);
-	debug_msg(msg.c_str());
+	debug_msg("%s", msg.c_str());
     }
     return s;
 }
