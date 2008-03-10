@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.60 2007/02/16 22:47:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.61 2008/01/04 03:17:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1929,7 +1929,7 @@ Task::step5_done(bool success)
     if (success) {
 	step6_wait();
     } else {
-	XLOG_WARNING(("Can't subtly stop process " + _module_name).c_str());
+	XLOG_WARNING("Can't subtly stop process %s", _module_name.c_str());
 	_taskmgr.module_manager().kill_module(_module_name,
 					callback(this, &Task::step6_wait));
     }
