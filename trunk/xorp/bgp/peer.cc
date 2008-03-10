@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.145 2007/12/10 23:26:26 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.146 2008/01/04 03:15:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -248,7 +248,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		       peerdata()->iptuple().str().c_str(),
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
 	    _peerdata->dump_peer_data();
 	    event_openmess(pac);
@@ -264,7 +264,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		       "Peer %s: Receive: %s",
 		       peerdata()->iptuple().str().c_str(),
 		       cstring(pac));
-	    // debug_msg(pac.str().c_str());
+	    // debug_msg("%s", pac.str().c_str());
 	    event_keepmess();
 	    TIMESPENT_CHECK();
 	    break;
@@ -280,7 +280,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		       peerdata()->iptuple().str().c_str(),
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    event_recvupdate(pac);
 	    TIMESPENT_CHECK();
 	    if (TIMESPENT_OVERLIMIT()) {
@@ -298,7 +298,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 		       peerdata()->iptuple().str().c_str(),
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    event_recvnotify(pac);
 	    TIMESPENT_CHECK();
 	    break;
@@ -344,7 +344,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 PeerOutputState
 BGPPeer::send_message(const BGPPacket& p)
 {
-    debug_msg(p.str().c_str());
+    debug_msg("%s", p.str().c_str());
 
     XLOG_TRACE(main()->profile().enabled(trace_message_out),
 	       "Peer %s: Send: %s",
@@ -441,7 +441,7 @@ void
 BGPPeer::send_notification(const NotificationPacket& p, bool restart,
 			   bool automatic)
 {
-    debug_msg(p.str().c_str());
+    debug_msg("%s", p.str().c_str());
 
     XLOG_INFO("Sending: %s", cstring(p));
 
@@ -2616,7 +2616,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 		       peerdata()->iptuple().str().c_str(),
  		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    // want unified decode call. now need to get peerdata out.
 // 	    _peerdata->dump_peer_data();
 	    event_openmess_accept(pac);
@@ -2647,7 +2647,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 		       peerdata()->iptuple().str().c_str(),
  		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    event_recvupdate_accept(pac);
 	    TIMESPENT_CHECK();
 	    if (TIMESPENT_OVERLIMIT()) {
@@ -2665,7 +2665,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 		       peerdata()->iptuple().str().c_str(),
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    event_recvnotify_accept(pac);
 	    TIMESPENT_CHECK();
 	    break;

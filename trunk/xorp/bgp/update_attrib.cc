@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.20 2007/02/16 22:45:22 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.21 2008/01/04 03:15:30 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -138,9 +138,8 @@ BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
             push_back(wr);
             x_set.insert(wr.net());
         } else
-            XLOG_WARNING(("Received duplicate " +
-			  wr.str("nlri or withdraw") +
-			  " in update message\n").c_str());
+            XLOG_WARNING("Received duplicate %s in update message",
+			 wr.str("nlri or withdraw").c_str());
     }
     if (len != 0)
         xorp_throw(CorruptMessage,

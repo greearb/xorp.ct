@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/crash_dump.cc,v 1.4 2007/02/16 22:45:11 pavlin Exp $"
+#ident "$XORP: xorp/bgp/crash_dump.cc,v 1.5 2008/01/04 03:15:18 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -75,8 +75,7 @@ CrashDumpManager::crash_dump()
 
     dumpfile = fopen(filename.c_str(), "w");
     if (dumpfile == NULL) {
-	XLOG_WARNING(c_format("Failed to open dump file: %s\n",
-			      filename.c_str()).c_str());
+	XLOG_WARNING("Failed to open dump file: %s", filename.c_str());
 	return;
     }
 
