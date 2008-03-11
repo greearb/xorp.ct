@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.304 2008/02/08 23:05:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.305 2008/02/12 21:57:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3842,6 +3842,10 @@ Neighbour<A>::build_data_description_packet()
 	_database_handle = get_area_router()->open_database(_peer.get_peerid(),
 							    empty);
 	if (empty)
+	    goto out;
+    } else {
+	// Make sure there are LSAs left in the database.
+	if (!get_area_router()->subsequent(_database_handle))
 	    goto out;
     }
 
