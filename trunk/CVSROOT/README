@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/README,v 1.1 2004/08/02 07:06:52 pavlin Exp $
+# $XORP: CVSROOT/README,v 1.2 2008/01/26 06:47:34 pavlin Exp $
 #
 
 This is README file for the XORP CVS repository configuration.
@@ -35,7 +35,7 @@ For example, if file "CVSROOT/avail" got corrupted, then do the following:
 After the edit you can cvs commit as usual. Note that a cvs commit
 to any of the files in the CVSROOT directory automatically rebuilds the
 administrative file database. After the rebuild any files such as
-"CVSROOT/avail" in the above example ill be overwritten with their most
+"CVSROOT/avail" in the above example will be overwritten with their most
 recent checked-in version.
 
 
