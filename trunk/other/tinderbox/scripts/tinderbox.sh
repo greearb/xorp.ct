@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.23 2008/01/04 20:38:12 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.24 2008/01/07 03:53:53 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -162,9 +162,9 @@ run_tinderbox() {
 	    continue
 	fi
 
-	# Kill tinderbox user processes that may be lying around from
-	# earlier runs (boo, hiss)
-	ssh ${cfg_sshflags} -n ${cfg_host}	"kill -- -1" 2>/dev/null
+	# Kill tinderbox XORP processes that may be lying around from
+	# earlier runs.
+	ssh ${cfg_sshflags} -n ${cfg_host}	"killall -r 'xorp_*'" 2>/dev/null
 
 	# Log into host and run regression tests only if this is not
 	# cross-compilation setup
