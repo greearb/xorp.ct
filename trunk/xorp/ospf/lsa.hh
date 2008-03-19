@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.109 2007/11/07 01:11:32 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.110 2008/01/04 03:16:56 pavlin Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -381,9 +381,14 @@ class Lsa {
     bool valid() const { return _valid; }
 
     /**
-     * Mark this LSA as invalid and clear the timer.
+     * Unconditionally clear the timer and invalidate the LSA if
+     * required, the default is to invalidate the LSA.
      */
-    void invalidate() { _valid = false; _timer.clear();}
+    void invalidate(bool invalidate = true) {
+	if(invalidate)
+	    _valid = false;
+	_timer.clear();
+    }
 
     /**
      * @return true of this is a self originating LSA.

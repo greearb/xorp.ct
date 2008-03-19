@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.294 2007/11/16 17:09:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.295 2008/01/04 03:16:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2862,8 +2862,8 @@ AreaRouter<A>::delete_lsa(Lsa::LsaRef lsar, size_t index, bool invalidate)
     // This LSA is being deleted remove it from the routing computation.
     routing_delete(lsar);
 
-    if (invalidate)
-	_db[index]->invalidate();
+    _db[index]->invalidate(invalidate);
+
     _db[index] = _invalid_lsa;
     _empty_slots.push_back(index);
 
