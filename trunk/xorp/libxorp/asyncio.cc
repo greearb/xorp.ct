@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.39 2007/08/22 01:15:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.40 2008/01/04 03:16:32 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -505,6 +505,19 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     bool is_sendto = false;
     IPvX dst_addr;
     uint16_t dst_port = 0;
+    uint32_t iov_cnt = 0;
+    size_t total_bytes = 0;
+    ssize_t done = 0;
+    int flags = 0;
+    bool mod_signals = true;
+#ifndef HOST_OS_WINDOWS
+    sig_t saved_sigpipe = SIG_ERR;
+#endif
+
+#ifdef MSG_NOSIGNAL
+    flags |= MSG_NOSIGNAL;
+    mod_signals = false;
+#endif
 
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == false)
@@ -527,17 +540,11 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     assert(fd == _fd);
     assert(_buffers.empty() == false);
 
-    // Coalesce buffers into a group
-    uint32_t iov_cnt = 0;
-    size_t   total_bytes = 0;
-    ssize_t  done = 0;
-
-    list<BufferInfo *>::const_iterator i = _buffers.begin();
-
     //
     // Group together a number of buffers.
     // If the buffer is sendto()-type, then send that buffer on its own.
     //
+    list<BufferInfo *>::const_iterator i = _buffers.begin();
     while (i != _buffers.end()) {
 	const BufferInfo* bi = *i;
 	is_sendto = bi->is_sendto();
@@ -570,9 +577,11 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	//
 	XLOG_ASSERT(! dst_addr.is_zero());
 
+	if (mod_signals) {
 #ifndef HOST_OS_WINDOWS
-	sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+	    saved_sigpipe = signal(SIGPIPE, SIG_IGN);
 #endif
+	}
 
 	switch (dst_addr.af()) {
 	case AF_INET:
@@ -584,7 +593,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 
 	    done = ::sendto(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
 			    _iov[0].iov_len,
-			    0,
+			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin),
 			    sizeof(sin));
 	    break;
@@ -599,7 +608,7 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 
 	    done = ::sendto(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
 			    _iov[0].iov_len,
-			    0,
+			    flags,
 			    reinterpret_cast<const sockaddr*>(&sin6),
 			    sizeof(sin6));
 	    break;
@@ -619,9 +628,11 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 #endif
 	}
 
+	if (mod_signals) {
 #ifndef HOST_OS_WINDOWS
-	signal(SIGPIPE, saved_sigpipe);
+	    signal(SIGPIPE, saved_sigpipe);
 #endif
+	}
 
     } else {
 	//
@@ -654,16 +665,27 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    _last_error = (result == FALSE) ? GetLastError() : 0;
 	}
 #else // ! HOST_OS_WINDOWS
-	sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
 
 	errno = 0;
 	_last_error = 0;
-	done = ::writev(_fd, _iov, (int)iov_cnt);
-	if (done < 0)
-	    _last_error = errno;
-	errno = 0;
 
-	signal(SIGPIPE, saved_sigpipe);
+	if ((iov_cnt == 1) && (! mod_signals)) {
+	    //
+	    // No need for coalesce, so use send(2). This saves us
+	    // two sigaction calls since we can pass the MSG_NOSIGNAL flag.
+	    //
+	    done = ::send(_fd, XORP_CONST_BUF_CAST(_iov[0].iov_base),
+			  _iov[0].iov_len, flags);
+	    if (done < 0)
+		_last_error = errno;
+	} else {
+	    saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+	    done = ::writev(_fd, _iov, (int)iov_cnt);
+	    if (done < 0)
+		_last_error = errno;
+	    signal(SIGPIPE, saved_sigpipe);
+	}
+	errno = 0;
 #endif // ! HOST_OS_WINDOWS
     }
 
