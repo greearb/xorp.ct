@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.23 2006/11/22 01:07:53 zec Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.24 2006/11/22 01:19:11 pavlin Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -78,6 +78,7 @@ policy {
 		    %allow: $(@) "bgp" %help: "BGP routes";
 		    %allow: $(@) "connected" %help: "Directly connected sub-network routes";
 		    %allow: $(@) "ospf4" %help: "OSPF IPv4 routes";
+		    %allow: $(@) "ospf6" %help: "OSPF IPv6 routes";
 		    %allow: $(@) "rip" %help: "RIP routes";
 		    %allow: $(@) "ripng" %help: "RIPng routes";
 		    %allow: $(@) "static" %help: "Static routes";
