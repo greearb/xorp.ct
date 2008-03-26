@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.47 2007/08/16 01:05:51 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.48 2008/01/04 03:16:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -627,14 +627,14 @@ XrlIO<A>::join_multicast_group_cb(const XrlError& xrl_error, string interface,
 	break;
 
     case NO_FINDER:
-	// XXX - Temporarily code dump if this condition occurs.
+	// XXX - Temporarily core dump if this condition occurs.
 	XLOG_FATAL("NO FINDER");
 	break;
 
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-	XLOG_FATAL("Cannot join a multicast group on interface %s vif %s: %s",
+	XLOG_ERROR("Cannot join a multicast group on interface %s vif %s: %s",
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
     }
