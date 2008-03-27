@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.15 2008/03/05 06:21:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/control_socket/routing_socket_utilities.cc,v 1.16 2008/03/09 00:21:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -312,7 +312,7 @@ RtmUtils::rtm_get_to_fte_cfg(const IfTree& iftree, FteX& fte,
 			     const struct rt_msghdr* rtm)
 {
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
-    u_short if_index = rtm->rtm_index;
+    uint32_t if_index = rtm->rtm_index;
     string if_name;
     string vif_name;
     int family = fte.nexthop().af();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.14 2007/12/19 04:57:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.15 2008/01/04 03:16:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -68,7 +68,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 					       IfTree& iftree,
 					       const struct ifaddrs* ifap)
 {
-    u_short if_index = 0;
+    uint32_t if_index = 0;
     string if_name, alias_if_name;
     const struct ifaddrs* ifa;
 
@@ -156,7 +156,7 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		       "for interface %s",
 		       if_name.c_str());
 	}
-	debug_msg("interface index: %d\n", if_index);
+	debug_msg("interface index: %u\n", if_index);
 	
 	//
 	// Add the interface (if a new one)

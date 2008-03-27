@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.19 2007/12/30 01:04:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.20 2008/01/04 03:16:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -68,9 +68,9 @@
 #ifdef HAVE_ROUTING_SOCKETS
 
 static void rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
-				  u_short& if_index_hint);
+				  uint32_t& if_index_hint);
 static void rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
-				u_short if_index_hint);
+				uint32_t if_index_hint);
 #ifdef RTM_IFANNOUNCE
 static void rtm_announce_to_fea_cfg(const struct if_msghdr* ifm,
 				    IfTree& iftree);
@@ -202,7 +202,7 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 {
     AlignData<struct if_msghdr> align_data(buffer);
     bool recognized = false;
-    u_short if_index_hint = 0;
+    uint32_t if_index_hint = 0;
     const struct if_msghdr* ifm;
     size_t offset;
 
@@ -261,16 +261,16 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
 
 static void
 rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
-		      u_short& if_index_hint)
+		      uint32_t& if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_IFINFO);
     
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
-    u_short if_index = ifm->ifm_index;
+    uint32_t if_index = ifm->ifm_index;
     bool is_newlink = false;	// True if really a new link
     string error_msg;
     
-    debug_msg("%p index %d RTM_IFINFO\n", ifm, if_index);
+    debug_msg("%p index %u RTM_IFINFO\n", ifm, if_index);
     
     // Get the pointers to the corresponding data structures    
     sa = reinterpret_cast<const sockaddr*>(ifm + 1);
@@ -288,7 +288,7 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	    debug_msg("Ignoring interface with unknown index\n");
 	    return;
 	}
-	debug_msg("interface index: %d\n", if_index);
+	debug_msg("interface index: %u\n", if_index);
 	
 	IfTreeInterface* ifp = iftree.find_interface(if_index);
 	if (ifp == NULL) {
@@ -432,7 +432,7 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	XLOG_FATAL("Could not find index for interface %s", if_name.c_str());
     }
     if_index_hint = if_index;
-    debug_msg("interface index: %d\n", if_index);
+    debug_msg("interface index: %u\n", if_index);
     
     //
     // Add the interface (if a new one)
@@ -565,19 +565,19 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 
 static void
 rtm_addr_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
-		    u_short if_index_hint)
+		    uint32_t if_index_hint)
 {
     XLOG_ASSERT(ifm->ifm_type == RTM_NEWADDR || ifm->ifm_type == RTM_DELADDR);
     
     const ifa_msghdr* ifa = reinterpret_cast<const ifa_msghdr*>(ifm);
     const struct sockaddr *sa, *rti_info[RTAX_MAX];
-    u_short if_index = ifa->ifam_index;
+    uint32_t if_index = ifa->ifam_index;
     
     debug_msg_indent(4);
     if (ifm->ifm_type == RTM_NEWADDR)
-	debug_msg("%p index %d RTM_NEWADDR\n", ifm, if_index);
+	debug_msg("%p index %u RTM_NEWADDR\n", ifm, if_index);
     if (ifm->ifm_type == RTM_DELADDR)
-	debug_msg("%p index %d RTM_DELADDR\n", ifm, if_index);
+	debug_msg("%p index %u RTM_DELADDR\n", ifm, if_index);
     
     // Get the pointers to the corresponding data structures
     sa = reinterpret_cast<const sockaddr*>(ifa + 1);
@@ -743,10 +743,10 @@ rtm_announce_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree)
     XLOG_ASSERT(ifm->ifm_type == RTM_IFANNOUNCE);
     
     const if_announcemsghdr* ifan = reinterpret_cast<const if_announcemsghdr*>(ifm);
-    u_short if_index = ifan->ifan_index;
+    uint32_t if_index = ifan->ifan_index;
     string if_name = string(ifan->ifan_name);
     
-    debug_msg("RTM_IFANNOUNCE %s on interface %s with interface index %d\n",
+    debug_msg("RTM_IFANNOUNCE %s on interface %s with interface index %u\n",
 	      (ifan->ifan_what == IFAN_DEPARTURE) ? "DEPARTURE" : "ARRIVAL",
 	      if_name.c_str(), if_index);
     

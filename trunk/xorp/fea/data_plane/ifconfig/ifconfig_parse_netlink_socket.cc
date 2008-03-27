@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.16 2008/02/21 01:56:31 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.17 2008/02/21 02:02:33 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -254,7 +254,7 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFLA_MAX + 1];
-    u_short if_index = 0;
+    uint32_t if_index = 0;
     string if_name;
     bool is_newlink = false;	// True if really a new link
     
@@ -503,7 +503,7 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFLA_MAX + 1];
-    u_short if_index = 0;
+    uint32_t if_index = 0;
     string if_name;
     
     // The attributes
@@ -532,7 +532,7 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 		   "for interface %s",
 		   if_name.c_str());
     }
-    debug_msg("Deleting interface index: %d\n", if_index);
+    debug_msg("Deleting interface index: %u\n", if_index);
     
     //
     // Delete the interface and vif
@@ -553,7 +553,7 @@ nlm_newdeladdr_to_fea_cfg(IfTree& iftree, const struct ifaddrmsg* ifaddrmsg,
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[IFA_MAX + 1];
-    u_short if_index = 0;
+    uint32_t if_index = 0;
     int family = ifaddrmsg->ifa_family;
     
     //

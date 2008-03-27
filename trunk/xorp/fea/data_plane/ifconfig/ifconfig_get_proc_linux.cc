@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.19 2007/12/19 04:57:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.20 2008/01/04 03:16:06 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -370,7 +370,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 		  addr6p[0], addr6p[1], addr6p[2], addr6p[3],
 		  addr6p[4], addr6p[5], addr6p[6], addr6p[7],
 		  &if_idx, &plen, &scope, &dad_status, devname) != EOF) {
-	u_short if_index = 0;
+	uint32_t if_index = 0;
 	string if_name, alias_if_name;
 	
 	//
@@ -399,7 +399,7 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 		       "for interface %s",
 		       if_name.c_str());
 	}
-	debug_msg("interface index: %d\n", if_index);
+	debug_msg("interface index: %u\n", if_index);
 	
 	//
 	// Add the interface (if a new one)
