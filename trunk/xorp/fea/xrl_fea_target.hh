@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.24 2007/12/30 09:15:04 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.25 2008/01/04 03:15:52 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -32,7 +32,6 @@ class FeaDataPlaneManagerClick;
 class FeaNode;
 class FibConfig;
 class IfConfig;
-class InterfaceManager;
 class IoLinkManager;
 class IoIpManager;
 class IoTcpUdpManager;
@@ -55,9 +54,6 @@ public:
 		 XrlRouter&		xrl_router,
 		 Profile&		profile,
 		 XrlFibClientManager&	xrl_fib_client_manager,
-		 IoLinkManager&		io_link_manager,
-		 IoIpManager&		io_ip_manager,
-		 IoTcpUdpManager&	io_tcpudp_manager,
 		 LibFeaClientBridge&	lib_fea_client_bridge);
 
     /**
@@ -99,22 +95,6 @@ public:
      * @return the event loop this service is added to.
      */
     EventLoop&	eventloop() { return (_eventloop); }
-
-    /**
-     * Get the IfConfig instance.
-     *
-     * @return a reference to the IfConfig instance.
-     * @see IfConfig.
-     */
-    IfConfig& ifconfig();
-
-    /**
-     * Get the FibConfig instance.
-     *
-     * @return a reference to the FibConfig instance.
-     * @see FibConfig.
-     */
-    FibConfig& fibconfig();
 
     XrlCmdError common_0_1_get_target_name(
 	// Output values,
@@ -2158,6 +2138,8 @@ private:
     XrlRouter&		       	_xrl_router;
     Profile&			_profile;
     XrlFibClientManager&	_xrl_fib_client_manager;
+    IfConfig&			_ifconfig;
+    FibConfig&			_fibconfig;
     IoLinkManager&		_io_link_manager;
     IoIpManager&		_io_ip_manager;
     IoTcpUdpManager&		_io_tcpudp_manager;

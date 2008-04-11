@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.15 2007/12/12 03:50:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.16 2008/01/04 03:15:51 pavlin Exp $"
 
 
 //
@@ -75,9 +75,7 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
 		      xrl_finder_targetname),
 #endif
       _xrl_fea_target(_eventloop, _fea_node, _xrl_router, _fea_node.profile(),
-		      _xrl_fib_client_manager, _fea_node.io_link_manager(),
-		      _fea_node.io_ip_manager(), _fea_node.io_tcpudp_manager(),
-		      _lib_fea_client_bridge),
+		      _xrl_fib_client_manager, _lib_fea_client_bridge),
       _xrl_finder_targetname(xrl_finder_targetname)
 {
     _cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access
