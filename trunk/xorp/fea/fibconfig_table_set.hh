@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.12 2008/01/04 03:15:44 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.13 2008/04/11 02:36:01 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
 #define __FEA_FIBCONFIG_TABLE_SET_HH__
@@ -84,8 +84,9 @@ public:
     virtual int stop(string& error_msg) = 0;
     
     /**
-     * Start a configuration interval. All modifications to FibConfig
-     * state must be within a marked "configuration" interval.
+     * Start a configuration interval.
+     *
+     * All modifications to must be within a marked "configuration" interval.
      *
      * This method provides derived classes with a mechanism to perform
      * any actions necessary before forwarding table modifications can

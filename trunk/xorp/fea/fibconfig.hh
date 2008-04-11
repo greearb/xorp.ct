@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.16 2008/01/04 03:15:44 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.17 2008/04/11 02:36:01 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -294,8 +294,9 @@ public:
     int stop(string& error_msg);
 
     /**
-     * Start a configuration interval. All modifications must be
-     * within a marked "configuration" interval.
+     * Start a configuration interval.
+     *
+     * All modifications must be within a marked "configuration" interval.
      *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
