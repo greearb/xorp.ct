@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.hh,v 1.5 2008/01/03 22:59:38 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.hh,v 1.6 2008/01/04 03:16:02 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_SYSCTL_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_TABLE_GET_SYSCTL_HH__
@@ -52,19 +52,19 @@ public:
     virtual int stop(string& error_msg);
     
     /**
-     * Obtain the unicast forwarding table.
+     * Obtain the IPv4 unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
-     * the unicast forwarding table.
+     * the IPv4 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int get_table4(list<Fte4>& fte_list);
 
     /**
-     * Obtain the unicast forwarding table.
+     * Obtain the IPv6 unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
-     * the unicast forwarding table.
+     * the IPv6 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int get_table6(list<Fte6>& fte_list);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc,v 1.10 2007/09/15 19:52:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_parse_netlink_socket.cc,v 1.11 2008/01/04 03:15:59 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -35,7 +35,7 @@
 
 
 //
-// Parse information about routing entry information received from
+// Parse information about forwarding entry information received from
 // the underlying system.
 //
 // The information to parse is in NETLINK format

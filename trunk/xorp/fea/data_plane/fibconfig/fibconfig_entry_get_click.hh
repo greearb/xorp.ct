@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_click.hh,v 1.5 2008/01/03 22:59:36 pavlin Exp $
+// $XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_get_click.hh,v 1.6 2008/01/04 03:15:56 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_CLICK_HH__
 #define __FEA_DATA_PLANE_FIBCONFIG_FIBCONFIG_ENTRY_GET_CLICK_HH__
@@ -54,7 +54,7 @@ public:
     virtual int stop(string& error_msg);
 
     /**
-     * Lookup a route by destination address.
+     * Lookup an IPv4 route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -63,7 +63,7 @@ public:
     virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
-     * Lookup route by network address.
+     * Lookup an IPv4 route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -72,7 +72,7 @@ public:
     virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
-     * Lookup a route by destination address.
+     * Lookup an IPv6 route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -81,7 +81,7 @@ public:
     virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
-     * Lookup route by network address.
+     * Lookup an IPv6 route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.

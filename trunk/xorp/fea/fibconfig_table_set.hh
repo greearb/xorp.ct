@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.11 2008/01/03 22:59:33 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_table_set.hh,v 1.12 2008/01/04 03:15:44 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TABLE_SET_HH__
 #define __FEA_FIBCONFIG_TABLE_SET_HH__
@@ -115,34 +115,36 @@ public:
     }
 
     /**
-     * Set the unicast forwarding table.
+     * Set the IPv4 unicast forwarding table.
      *
      * @param fte_list the list with all entries to install into
-     * the unicast forwarding table.
+     * the IPv4 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_table4(const list<Fte4>& fte_list) = 0;
 
     /**
-     * Delete all entries in the routing table. Must be within a
-     * configuration interval.
+     * Delete all entries in the IPv4 unicast forwarding table.
+     *
+     * Must be within a configuration interval.
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_all_entries4() = 0;
 
     /**
-     * Set the unicast forwarding table.
+     * Set the IPv6 unicast forwarding table.
      *
      * @param fte_list the list with all entries to install into
-     * the unicast forwarding table.
+     * the IPv6 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_table6(const list<Fte6>& fte_list) = 0;
     
     /**
-     * Delete all entries in the routing table. Must be within a
-     * configuration interval.
+     * Delete all entries in the IPv6 unicast forwarding table.
+     *
+     * Must be within a configuration interval.
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */

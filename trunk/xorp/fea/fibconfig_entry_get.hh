@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.13 2008/01/03 22:59:33 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_get.hh,v 1.14 2008/01/04 03:15:44 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_GET_HH__
 #define __FEA_FIBCONFIG_ENTRY_GET_HH__
@@ -81,7 +81,7 @@ public:
     virtual int stop(string& error_msg) = 0;
     
     /**
-     * Lookup a route by destination address.
+     * Lookup an IPv4 route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -90,7 +90,7 @@ public:
     virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte) = 0;
 
     /**
-     * Lookup route by network address.
+     * Lookup an IPv4 route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -99,7 +99,7 @@ public:
     virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte) = 0;
 
     /**
-     * Lookup a route by destination address.
+     * Lookup an IPv6 route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -108,7 +108,7 @@ public:
     virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte) = 0;
 
     /**
-     * Lookup route by network address.
+     * Lookup an IPv6 route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.

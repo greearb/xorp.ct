@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.15 2007/12/28 09:13:35 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.16 2008/01/04 03:15:44 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -552,7 +552,9 @@ public:
     int set_accept_rtadv_enabled6(bool v, string& error_msg);
 
     /**
-     * Add a single routing entry. Must be within a configuration interval.
+     * Add a single IPv4 forwarding entry.
+     *
+     * Must be within a configuration interval.
      *
      * @param fte the entry to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -560,7 +562,9 @@ public:
     virtual int add_entry4(const Fte4& fte);
 
     /**
-     * Delete a single routing entry. Must be with a configuration interval.
+     * Delete a single IPv4 forwarding entry.
+     *
+     * Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -568,24 +572,25 @@ public:
     virtual int delete_entry4(const Fte4& fte);
 
     /**
-     * Set the unicast forwarding table.
+     * Set the IPv4 unicast forwarding table.
      *
      * @param fte_list the list with all entries to install into
-     * the unicast forwarding table.
+     * the IPv4 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_table4(const list<Fte4>& fte_list);
 
     /**
-     * Delete all entries in the routing table. Must be within a
-     * configuration interval.
+     * Delete all entries in the IPv4 unicast forwarding table.
+     *
+     * Must be within a configuration interval.
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_all_entries4();
 
     /**
-     * Lookup a route by destination address.
+     * Lookup an IPv4 route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -594,7 +599,7 @@ public:
     virtual int lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
 
     /**
-     * Lookup route by network address.
+     * Lookup an IPv4 route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -603,16 +608,18 @@ public:
     virtual int lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
 
     /**
-     * Obtain the unicast forwarding table.
+     * Obtain the IPv4 unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
-     * the unicast forwarding table.
+     * the IPv4 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int get_table4(list<Fte4>& fte_list);
 
     /**
-     * Add a single routing entry. Must be within a configuration interval.
+     * Add a single IPv6 forwarding entry.
+     *
+     * Must be within a configuration interval.
      *
      * @param fte the entry to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -620,16 +627,18 @@ public:
     virtual int add_entry6(const Fte6& fte);
 
     /**
-     * Set the unicast forwarding table.
+     * Set the IPv6 unicast forwarding table.
      *
      * @param fte_list the list with all entries to install into
-     * the unicast forwarding table.
+     * the IPv6 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_table6(const list<Fte6>& fte_list);
 
     /**
-     * Delete a single routing entry. Must be within a configuration interval.
+     * Delete a single IPv6 forwarding entry.
+     *
+     * Must be within a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -637,15 +646,16 @@ public:
     virtual int delete_entry6(const Fte6& fte);
 
     /**
-     * Delete all entries in the routing table. Must be within a
-     * configuration interval.
+     * Delete all entries in the IPv6 unicast forwarding table.
+     *
+     * Must be within a configuration interval.
      *
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_all_entries6();
 
     /**
-     * Lookup a route by destination address.
+     * Lookup an IPv6 route by destination address.
      *
      * @param dst host address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -654,7 +664,7 @@ public:
     virtual int lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
 
     /**
-     * Lookup route by network address.
+     * Lookup an IPv6 route by network address.
      *
      * @param dst network address to resolve.
      * @param fte return-by-reference forwarding table entry.
@@ -663,10 +673,10 @@ public:
     virtual int lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
 
     /**
-     * Obtain the unicast forwarding table.
+     * Obtain the IPv6 unicast forwarding table.
      *
      * @param fte_list the return-by-reference list with all entries in
-     * the unicast forwarding table.
+     * the IPv6 unicast forwarding table.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int get_table6(list<Fte6>& fte_list);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.12 2008/01/03 22:59:33 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_entry_set.hh,v 1.13 2008/01/04 03:15:44 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_ENTRY_SET_HH__
 #define __FEA_FIBCONFIG_ENTRY_SET_HH__
@@ -113,8 +113,9 @@ public:
     }
     
     /**
-     * Add a single routing entry.  Must be within a configuration
-     * interval.
+     * Add a single IPv4 forwarding entry.
+     *
+     * Must be within a configuration interval.
      *
      * @param fte the entry to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -122,7 +123,9 @@ public:
     virtual int add_entry4(const Fte4& fte) = 0;
 
     /**
-     * Delete a single routing entry. Must be with a configuration interval.
+     * Delete a single IPv4 forwarding entry.
+     *
+     * Must be with a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -130,8 +133,9 @@ public:
     virtual int delete_entry4(const Fte4& fte) = 0;
 
     /**
-     * Add a single routing entry. Must be within a configuration
-     * interval.
+     * Add a single IPv6 forwarding entry.
+     *
+     * Must be within a configuration interval.
      *
      * @param fte the entry to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -139,8 +143,9 @@ public:
     virtual int add_entry6(const Fte6& fte) = 0;
 
     /**
-     * Delete a single routing entry.  Must be within a configuration
-     * interval.
+     * Delete a single IPv6 forwarding entry.
+     *
+     * Must be within a configuration interval.
      *
      * @param fte the entry to delete. Only destination and netmask are used.
      * @return XORP_OK on success, otherwise XORP_ERROR.

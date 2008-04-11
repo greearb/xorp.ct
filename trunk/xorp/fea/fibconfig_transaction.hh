@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.4 2007/09/15 19:52:38 pavlin Exp $
+// $XORP: xorp/fea/fibconfig_transaction.hh,v 1.5 2008/01/04 03:15:45 pavlin Exp $
 
 #ifndef __FEA_FIBCONFIG_TRANSACTION_HH__
 #define __FEA_FIBCONFIG_TRANSACTION_HH__
@@ -87,7 +87,7 @@ private:
 };
 
 /**
- * Class to store request to add routing entry to FibConfig and
+ * Class to store request to add forwarding entry to FibConfig and
  * dispatch it later.
  */
 class FibAddEntry4 : public FibConfigTransactionOperation {
@@ -121,7 +121,7 @@ private:
 };
 
 /**
- * Class to store request to delete routing entry to FibConfig and
+ * Class to store request to delete forwarding entry to FibConfig and
  * dispatch it later.
  */
 class FibDeleteEntry4 : public FibConfigTransactionOperation {
@@ -155,7 +155,7 @@ private:
 };
 
 /**
- * Class to store request to delete all routing entries to FibConfig and
+ * Class to store request to delete all forwarding entries to FibConfig and
  * dispatch it later.
  */
 class FibDeleteAllEntries4 : public FibConfigTransactionOperation {
@@ -173,7 +173,7 @@ public:
 };
 
 /**
- * Class to store request to add routing entry to FibConfig and
+ * Class to store request to add forwarding entry to FibConfig and
  * dispatch it later.
  */
 class FibAddEntry6 : public FibConfigTransactionOperation {
@@ -207,7 +207,7 @@ private:
 };
 
 /**
- * Class to store request to delete routing entry to FibConfig
+ * Class to store request to delete forwarding entry to FibConfig
  * and dispatch it later.
  */
 class FibDeleteEntry6 : public FibConfigTransactionOperation {
@@ -241,7 +241,7 @@ private:
 };
 
 /**
- * Class to store request to delete all routing entries to FibConfig
+ * Class to store request to delete all forwarding entries to FibConfig
  * and dispatch it later.
  */
 class FibDeleteAllEntries6 : public FibConfigTransactionOperation {
