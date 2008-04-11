@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.4 2007/09/15 19:52:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/fibconfig_transaction.cc,v 1.5 2008/01/04 03:15:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -23,20 +23,14 @@
 #include "fibconfig_transaction.hh"
 
 
-void
-FibConfigTransactionManager::unset_error()
-{
-    _error.erase();
-}
-
 int
-FibConfigTransactionManager::set_unset_error(const string& error)
+FibConfigTransactionManager::set_error(const string& error)
 {
-    if (_error.empty()) {
-	_error = error;
-	return (XORP_OK);
-    }
-    return (XORP_ERROR);
+    if (! _first_error.empty())
+	return (XORP_ERROR);
+
+    _first_error = error;
+    return (XORP_OK);
 }
 
 void
@@ -44,10 +38,11 @@ FibConfigTransactionManager::pre_commit(uint32_t /* tid */)
 {
     string error_msg;
 
-    unset_error();
+    reset_error();
+
     if (fibconfig().start_configuration(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot start configuration: %s", error_msg.c_str());
-	set_unset_error(error_msg);
+	set_error(error_msg);
     }
 }
 
@@ -55,9 +50,10 @@ void
 FibConfigTransactionManager::post_commit(uint32_t /* tid */)
 {
     string error_msg;
+
     if (fibconfig().end_configuration(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot end configuration: %s", error_msg.c_str());
-	set_unset_error(error_msg);
+	set_error(error_msg);
     }
 }
 
@@ -65,27 +61,17 @@ void
 FibConfigTransactionManager::operation_result(bool success,
 					      const TransactionOperation& op)
 {
-    if (success) {
+    if (success)
 	return;
-    }
 
     const FibConfigTransactionOperation* fto;
     fto = dynamic_cast<const FibConfigTransactionOperation*>(&op);
-    if (fto == NULL) {
-	//
-	// Getting here is programmer error.
-	//
-	XLOG_ERROR("FIB transaction commit error, \"%s\" is not an FIB "
-		   "TransactionOperation",
-		   op.str().c_str());
-	return;
-    }
+    XLOG_ASSERT(fto != NULL);
 
     //
     // Record error and xlog first error only
     //
-    if (set_unset_error(fto->str()) == XORP_OK) {
-	XLOG_ERROR("FIB transaction commit failed on %s",
-		   fto->str().c_str());
+    if (set_error(fto->str()) == XORP_OK) {
+	XLOG_ERROR("FIB transaction commit failed on %s", fto->str().c_str());
     }
 }

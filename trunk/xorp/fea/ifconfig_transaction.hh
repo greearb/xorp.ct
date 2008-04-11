@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.16 2008/01/04 03:15:46 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.17 2008/03/09 00:21:16 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -26,24 +26,54 @@
 
 class IfConfigTransactionManager : public TransactionManager {
 public:
+    /**
+     * Constructor.
+     *
+     * @param eventloop the event loop to use.
+     */
     IfConfigTransactionManager(EventLoop& eventloop)
 	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
     {}
 
-    void reset_error()			{ _first_error.erase(); }
-
+    /**
+     * Get the string with the first error during commit.
+     *
+     * @return the string with the first error during commit or an empty
+     * string if no error.
+     */
     const string& error() const 	{ return _first_error; }
 
+protected:
+    /**
+     * Pre-commit method that is called before the first operation
+     * in a commit.
+     *
+     * This is an overriding method.
+     *
+     * @param tid the transaction ID.
+     */
     virtual void pre_commit(uint32_t tid);
 
+    /**
+     * Method that is called after each operation.
+     *
+     * This is an overriding method.
+     *
+     * @param success set to true if the operation succeeded, otherwise false.
+     * @param op the operation that has been just called.
+     */
     virtual void operation_result(bool success,
 				  const TransactionOperation& op);
 
-protected:
-    string   _first_error;
-    uint32_t _tid_exec;
-
 private:
+    /**
+     * Reset the string with the error.
+     */
+    void reset_error()			{ _first_error.erase(); }
+
+    string   _first_error;		// The string with the first error
+    uint32_t _tid_exec;			// The transaction ID
+
     enum { TIMEOUT_MS = 5000, MAX_PENDING = 10 };
 };
 
