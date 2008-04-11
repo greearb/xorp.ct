@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fte.hh,v 1.22 2007/06/07 01:23:02 pavlin Exp $
+// $XORP: xorp/fea/fte.hh,v 1.23 2008/01/04 03:15:45 pavlin Exp $
 
 #ifndef	__FEA_FTE_HH__
 #define __FEA_FTE_HH__
@@ -67,7 +67,7 @@ public:
     void	mark_connected_route()	{ _is_connected_route = true; }
 
     /**
-     * Reset all members
+     * Reset all members.
      */
     void zero() {
 	_net = N(A::ZERO(_net.af()), 0);
@@ -90,10 +90,7 @@ public:
     }
 
     /**
-     * @return A string representation of the entry.
-     *
-     * dst = 127.0.0.1 nexthop = 127.0.0.1 netmask = 255.255.255.255 if = lo0
-     * metric = 10 admin_distance = 20
+     * @return a string representation of the entry.
      */
     string str() const {
 	return c_format("net = %s nexthop = %s ifname = %s vifname = %s "
@@ -133,7 +130,7 @@ typedef Fte<IPvX, IPvXNet> BaseFteX;
 class FteX : public BaseFteX {
 public:
     /**
-     * Constructor
+     * Constructor.
      *
      * @param net the network address.
      * @param nexthop the next-hop router address.
