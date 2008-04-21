@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.52 2007/02/16 22:47:21 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.53 2008/01/04 03:17:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -316,6 +316,19 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 		}
 	    }
 	    break;
+	case NODE_INT:
+	{
+	    size_t i = 0;
+	    if (svalue[0] == '-')
+		i++;		// XXX: Allow the number to start with '-'
+
+	    for ( ; i < svalue.size(); i++) {
+		if ((svalue[i] < '0') || (svalue[i] > '9')) {
+		    goto parse_error;
+		}
+	    }
+	    break;
+	}
 	case NODE_BOOL:
 	    if (svalue == "true" || svalue == "false" || svalue == "")
 		break;
