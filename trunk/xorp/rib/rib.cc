@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.70 2008/01/04 03:17:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.71 2008/01/04 22:03:28 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -150,8 +150,8 @@ RIB<A>::get_protocol_admin_distance(const string& protocol_name)
 
     mi = _admin_distances.find(protocol_name);
     if (mi == _admin_distances.end()) {
-	XLOG_ERROR("Administrative distance of \"%s\" unknown.",
-		   protocol_name.c_str());
+	XLOG_WARNING("Administrative distance of \"%s\" unknown.",
+		     protocol_name.c_str());
 	return UNKNOWN_ADMIN_DISTANCE;
     }
     return mi->second;
