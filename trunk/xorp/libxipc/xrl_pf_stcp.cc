@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.58 2007/05/23 12:12:40 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.59 2008/01/04 03:16:28 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -923,6 +923,15 @@ XrlPFSTCPSender::defer_keepalives()
 bool
 XrlPFSTCPSender::send_keepalive()
 {
+    TimeVal now;
+
+    _eventloop.current_time(now);
+    if ((now - _keepalive_last_fired).to_ms() <
+	 static_cast<int32_t>(_keepalive_ms)) {
+	// This keepalive timer has fired too soon. Rate-limit it.
+	debug_msg("Dropping keepalive due to rate-limiting\n");
+	return true;
+    }
     if (_keepalive_sent == true) {
 	// There's an unack'ed keepalive message.
 	die("Keepalive timeout");
@@ -931,6 +940,10 @@ XrlPFSTCPSender::send_keepalive()
     debug_msg("Sending keepalive\n");
     _keepalive_sent = true;
     send_request(new RequestState(this, _current_seqno++));
+
+    // Record the relative timestamp of this keepalive timer firing
+    // so that we may rate-limit it above.
+    _keepalive_last_fired = now;
 
     return true;
 }

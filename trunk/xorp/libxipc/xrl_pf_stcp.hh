@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.27 2007/05/23 12:12:40 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.28 2008/01/04 03:16:29 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -129,6 +129,7 @@ private:
 
     // Keepalive related
     XorpTimer			 _keepalive_timer;
+    TimeVal			 _keepalive_last_fired;
     bool			 _keepalive_sent;
 
     // General stuff
