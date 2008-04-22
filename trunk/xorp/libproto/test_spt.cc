@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8 sw=4:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -12,12 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.16 2007/11/13 09:59:04 atanu Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.17 2008/01/04 03:16:20 pavlin Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
 
 #include <fstream>
+
+#ifndef	DEBUG_LOGGING
+#define DEBUG_LOGGING
+#endif /* DEBUG_LOGGING */
+#ifndef	DEBUG_PRINT_FUNCTION_NAME
+#define DEBUG_PRINT_FUNCTION_NAME
+#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
@@ -26,13 +34,6 @@
 #include "libxorp/tokenize.hh"
 
 #include "spt.hh"
-
-#ifndef	DEBUG_LOGGING
-#define DEBUG_LOGGING
-#endif /* DEBUG_LOGGING */
-#ifndef	DEBUG_PRINT_FUNCTION_NAME
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 template <>
 string

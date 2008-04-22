@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8 sw=4:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.18 2007/11/13 09:59:04 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.19 2008/01/04 03:16:20 pavlin Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -50,6 +51,11 @@ class Spt {
     {}
 
     ~Spt();
+
+    /**
+     * Clear all state from this Spt instance.
+     */
+    void clear();
 
     /**
      * Set the origin node.
@@ -182,6 +188,8 @@ class Node {
     typedef ref_ptr<Node<A> > NodeRef;
 
     Node(A a, bool trace = false);
+
+    ~Node();
 
     /**
      * @return nodename
@@ -508,8 +516,38 @@ class RouteCmd {
 template <typename A>
 Spt<A>::~Spt()
 {
-    for (typename Nodes::iterator i = _nodes.begin(); i != _nodes.end(); i++)
-	i->second->clear();
+    clear();
+}
+
+template <typename A>
+void
+Spt<A>::clear()
+{
+    //XLOG_TRACE(_trace, "Clearing spt %p.", this);
+
+    // Release the origin node by assigning an empty value to its ref_ptr.
+    _origin = typename Node<A>::NodeRef();
+
+    // Free all node state in the Spt.
+    // A depth first traversal might be more efficient, but we just want
+    // to free memory here. Container Nodes knows nothing about the
+    // degree of each Node.
+    // Because the last node reference is held in the container we must be
+    // careful not to introduce another one in this scope by using
+    // a reference to a Node ref_ptr.
+    while (! _nodes.empty()) {
+	typename Nodes::iterator ii;
+	for (ii = _nodes.begin(); ii != _nodes.end(); ) {
+	    typename Node<A>::NodeRef & rnr = (*ii).second;
+	    //XLOG_ASSERT(! rnr.is_empty());
+	    rnr->clear();
+	    if (rnr.is_only()) {
+		_nodes.erase(ii++);
+	    } else {
+		ii++;
+	    }
+	}
+    }
 }
 
 template <typename A>
@@ -549,6 +587,8 @@ Spt<A>::add_node(const A& node)
 
     Node<A> *n = new Node<A>(node, _trace);
     _nodes[node] = typename Node<A>::NodeRef(n);
+
+    //debug_msg("added node %p\n", n);
 
     return true;
 }
@@ -823,6 +863,12 @@ template <typename A>
 Node<A>::Node(A nodename, bool trace)
     :  _valid(true), _nodename(nodename), _trace(trace)
 {
+}
+
+template <typename A>
+Node<A>::~Node()
+{
+    clear();
 }
 
 template <typename A>
@@ -1109,8 +1155,9 @@ void
 Spt<A>::garbage_collect()
 {
     // Remove all the invalid nodes.
+    // Use a reference, no need to bump the ref_ptr in this scope.
     for(typename Nodes::iterator ni = _nodes.begin(); ni != _nodes.end();) {
-	typename Node<A>::NodeRef node = ni->second;
+	typename Node<A>::NodeRef & node = ni->second;
 	if (!node->valid()) {
 	    _nodes.erase(ni++);
 	} else {
