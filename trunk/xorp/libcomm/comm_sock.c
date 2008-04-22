@@ -1,5 +1,5 @@
 /* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
-/* vim:set sts=4 ts=8: */
+/* vim:set sts=4 ts=8 sw=4: */
 /*
  * Copyright (c) 2001
  * YOID Project.
@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.43 2007/08/22 01:10:02 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.44 2007/11/16 22:29:18 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -788,6 +788,49 @@ comm_sock_close(xsock_t sock)
 }
 
 int
+comm_set_send_broadcast(xsock_t sock, int val)
+{
+    if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST,
+		   XORP_SOCKOPT_CAST(&val), sizeof(val)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s SO_BROADCAST on socket %d: %s",
+		   (val)? "set": "reset",  sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+comm_set_receive_broadcast(xsock_t sock, int val)
+{
+#if defined(HOST_OS_WINDOWS) && defined(IP_RECEIVE_BROADCAST)
+    /*
+     * With Windows Server 2003 and later, you have to explicitly
+     * ask to receive broadcast packets.
+     */
+    DWORD ip_rx_bcast = (DWORD)val;
+
+    if (setsockopt(sock, IPPROTO_IP, IP_RECEIVE_BROADCAST,
+		   XORP_SOCKOPT_CAST(&ip_rx_bcast),
+		   sizeof(ip_rx_bcast)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error %s IP_RECEIVE_BROADCAST on socket %d: %s",
+		   (val)? "set": "reset",  sock,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+#else
+    UNUSED(sock);
+    UNUSED(val);
+    return (XORP_OK);
+#endif
+}
+
+int
 comm_set_nodelay(xsock_t sock, int val)
 {
     if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY,
@@ -920,19 +963,65 @@ comm_set_tcpmd5(xsock_t sock, int val)
 }
 
 int
-comm_set_ttl(xsock_t sock, int val)
+comm_set_tos(xsock_t sock, int val)
+{
+#ifdef IP_TOS
+    /*
+     * Most implementations use 'int' to represent the value of
+     * the IP_TOS option.
+     */
+    int family, ip_tos;
+
+    family = comm_sock_get_family(sock);
+    if (family != AF_INET) {
+	XLOG_FATAL("Error %s setsockopt IP_TOS on socket %d: "
+		   "invalid family = %d",
+		   (val)? "set": "reset", sock, family);
+	return (XORP_ERROR);
+    }
+
+    /*
+     * Note that it is not guaranteed that the TOS will be successfully
+     * set or indeed propagated where the host platform is running
+     * its own traffic classifier; the use of comm_set_tos() is
+     * intended for link-scoped traffic.
+     */
+    ip_tos = val;
+    if (setsockopt(sock, IPPROTO_IP, IP_TOS,
+		   XORP_SOCKOPT_CAST(&ip_tos), sizeof(ip_tos)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("setsockopt IP_TOS 0x%x: %s",
+	       ip_tos, comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+#else
+    UNUSED(sock);
+    UNUSED(val);
+    XLOG_WARNING("IP_TOS Undefined!");
+
+    return (XORP_ERROR);
+#endif /* ! IP_TOS */
+}
+
+int
+comm_set_unicast_ttl(xsock_t sock, int val)
 {
     int family = comm_sock_get_family(sock);
 
     switch (family) {
     case AF_INET:
     {
-	u_char ip_ttl = val;	/* XXX: In IPv4 the value arg is 'u_char' */
+	/* XXX: Most platforms now use int for this option;
+	 * legacy BSD specified u_char.
+	 */
+	int ip_ttl = val;
 
-	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
+	if (setsockopt(sock, IPPROTO_IP, IP_TTL,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    _comm_set_serrno();
-	    XLOG_ERROR("setsockopt IP_MULTICAST_TTL %u: %s",
+	    XLOG_ERROR("setsockopt IP_TTL %u: %s",
 		       ip_ttl, comm_get_error_str(comm_get_last_error()));
 	    return (XORP_ERROR);
 	}
@@ -943,11 +1032,62 @@ comm_set_ttl(xsock_t sock, int val)
     {
 	int ip_ttl = val;
 
-	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+	if (setsockopt(sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS,
 		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    _comm_set_serrno();
-	    XLOG_ERROR("setsockopt IPV6_MULTICAST_HOPS %u: %s",
+	    XLOG_ERROR("setsockopt IPV6_UNICAST_HOPS %u: %s",
 		       ip_ttl, comm_get_error_str(comm_get_last_error()));
+	    return (XORP_ERROR);
+	}
+	break;
+    }
+#endif /* HAVE_IPV6 */
+    default:
+	XLOG_FATAL("Error %s setsockopt IP_TTL/IPV6_UNICAST_HOPS "
+		   "on socket %d: invalid family = %d",
+		   (val)? "set": "reset", sock, family);
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+comm_set_ttl(xsock_t sock, int val)
+{
+    int family = comm_sock_get_family(sock);
+
+    switch (family) {
+    case AF_INET:
+    {
+	/* XXX: Most platforms now use int for this option;
+	 * legacy BSD specified u_char.
+	 */
+	u_char ip_multicast_ttl = val;
+
+	if (setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
+		       XORP_SOCKOPT_CAST(&ip_multicast_ttl),
+		       sizeof(ip_multicast_ttl)) < 0) {
+	    _comm_set_serrno();
+	    XLOG_ERROR("setsockopt IP_MULTICAST_TTL %u: %s",
+		       ip_multicast_ttl,
+		       comm_get_error_str(comm_get_last_error()));
+	    return (XORP_ERROR);
+	}
+	break;
+    }
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	int ip_multicast_ttl = val;
+
+	if (setsockopt(sock, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
+		       XORP_SOCKOPT_CAST(&ip_multicast_ttl),
+		       sizeof(ip_multicast_ttl)) < 0) {
+	    _comm_set_serrno();
+	    XLOG_ERROR("setsockopt IPV6_MULTICAST_HOPS %u: %s",
+		       ip_multicast_ttl,
+		       comm_get_error_str(comm_get_last_error()));
 	    return (XORP_ERROR);
 	}
 	break;
@@ -1017,6 +1157,76 @@ comm_set_iface6(xsock_t sock, unsigned int my_ifindex)
     comm_sock_no_ipv6("comm_set_iface6", sock, my_ifindex);
     return (XORP_ERROR);
 #endif /* ! HAVE_IPV6 */
+}
+
+int
+comm_set_onesbcast(xsock_t sock, int enabled)
+{
+#ifdef IP_ONESBCAST
+    int family = comm_sock_get_family(sock);
+
+    if (family != AF_INET) {
+	XLOG_ERROR("Invalid family of socket %d: family = %d (expected %d)",
+		   sock, family, AF_INET);
+	return (XORP_ERROR);
+    }
+
+    if (setsockopt(sock, IPPROTO_IP, IP_ONESBCAST,
+		   XORP_SOCKOPT_CAST(&enabled), sizeof(enabled)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("setsockopt IP_ONESBCAST %d: %s", enabled,
+		   comm_get_error_str(comm_get_last_error()));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+
+#else /* ! IP_ONESBCAST */
+    XLOG_ERROR("setsockopt IP_ONESBCAST %u: %s", enabled,
+	       "IP_ONESBCAST support not present.");
+    UNUSED(sock);
+    return (XORP_ERROR);
+#endif /* ! IP_ONESBCAST */
+}
+
+int
+comm_set_bindtodevice(xsock_t sock, const char * my_ifname)
+{
+#ifdef SO_BINDTODEVICE
+    char tmp_ifname[IFNAMSIZ];
+
+    /*
+     * Bind a socket to an interface by name.
+     *
+     * Under Linux, use of the undirected broadcast address
+     * 255.255.255.255 requires that the socket is bound to the
+     * underlying interface, as it is an implicitly scoped address
+     * with no meaning on its own. This is not architecturally OK,
+     * and requires additional support for SO_BINDTODEVICE.
+     * See socket(7) man page in Linux.
+     *
+     * Note: strlcpy() is not present in glibc; strncpy() is used
+     * instead to avoid introducing a circular dependency on the
+     * C++ library libxorp.
+     */
+    strncpy(tmp_ifname, my_ifname, IFNAMSIZ-1);
+    tmp_ifname[IFNAMSIZ-1] = '\0';
+    if (setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, tmp_ifname,
+		   sizeof(tmp_ifname)) < 0) {
+	_comm_set_serrno();
+	XLOG_ERROR("setsockopt SO_BINDTODEVICE %s: %s",
+		   tmp_ifname, comm_get_error_str(comm_get_last_error()));
+
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+#else
+    XLOG_ERROR("setsockopt SO_BINDTODEVICE %s: %s",
+	       my_ifname, "SO_BINDTODEVICE support not present.");
+    UNUSED(sock);
+    return (XORP_ERROR);
+#endif
 }
 
 int

@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.30 2007/11/16 22:29:18 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.31 2007/11/18 02:26:00 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -140,6 +140,46 @@ comm_ipv6_present(void)
 #else
     return XORP_ERROR;
 #endif /* HAVE_IPV6 */
+}
+
+int
+comm_bindtodevice_present(void)
+{
+#ifdef SO_BINDTODEVICE
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
+comm_onesbcast_present(void)
+{
+#ifdef IP_ONESBCAST
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
+comm_tos_present(void)
+{
+#ifdef IP_TOS
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
+}
+
+int
+comm_unicast_ttl_present(void)
+{
+#ifdef IP_TTL
+    return XORP_OK;
+#else
+    return XORP_ERROR;
+#endif
 }
 
 xsock_t

@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.29 2007/08/20 22:57:58 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.30 2007/11/16 22:29:18 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -151,6 +151,34 @@ extern int	comm_ipv4_present(void);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_ipv6_present(void);
+
+/**
+ * Test whether the underlying system has SO_BINDTODEVICE support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_bindtodevice_present(void);
+
+/**
+ * Test whether the underlying system has IP_ONESBCAST support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_onesbcast_present(void);
+
+/**
+ * Test whether the underlying system has IP_TOS support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_tos_present(void);
+
+/**
+ * Test whether the underlying system has IP_TTL support.
+ *
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_unicast_ttl_present(void);
 
 /**
  * Open a TCP socket.
@@ -728,6 +756,25 @@ extern int	comm_sock_listen(xsock_t sock, int backlog);
 extern int	comm_sock_close(xsock_t sock);
 
 /**
+ * Set/reset the SO_BROADCAST option on a socket.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_send_broadcast(xsock_t sock, int val);
+
+/**
+ * Set/reset the IP_RECEIVE_BROADCAST option on a socket.
+ * This option is specific to Windows Server 2003 and later.
+ *
+ * @param sock the socket whose option we want to set/reset.
+ * @param val if non-zero, the option will be set, otherwise will be reset.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_receive_broadcast(xsock_t sock, int val);
+
+/**
  * Set/reset the TCP_NODELAY option on a TCP socket.
  *
  * @param sock the socket whose option we want to set/reset.
@@ -779,6 +826,24 @@ extern int	comm_set_loopback(xsock_t sock, int val);
 extern int	comm_set_tcpmd5(xsock_t sock, int val);
 
 /**
+ * Set the ip_tos bits of the outgoing packets on a socket.
+ *
+ * @param sock the socket whose ip_tos we want to set.
+ * @param val the ip_tos of the outgoing packets.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_tos(xsock_t sock, int val);
+
+/**
+ * Set the TTL of the outgoing unicast/broadcast packets on a socket.
+ *
+ * @param sock the socket whose TTL we want to set.
+ * @param val the TTL of the outgoing unicast/broadcast packets.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_unicast_ttl(xsock_t sock, int val);
+
+/**
  * Set the TTL of the outgoing multicast packets on a socket.
  *
  * @param sock the socket whose TTL we want to set.
@@ -808,6 +873,34 @@ extern int	comm_set_iface4(xsock_t sock, const struct in_addr *in_addr);
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 extern int	comm_set_iface6(xsock_t sock, unsigned int my_ifindex);
+
+/**
+ * Set the interface to which a socket is bound.
+ *
+ * XXX: This exists to support XORP's use of the 255.255.255.255
+ * address in Linux for MANET protocols, as well as certain limited
+ * uses with raw IPv4 sockets, and SHOULD NOT be used in new code.
+ *
+ * @param sock the socket to be bound to @param my_ifname
+ * @param my_ifname the name of the local network interface to which the
+ *                  socket should be bound.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_bindtodevice(xsock_t sock, const char * my_ifname);
+
+/**
+ * Set the option which causes sends to directed IPv4 broadcast addresses 
+ * to go to 255.255.255.255 instead.
+ *
+ * XXX: This exists to support XORP's use of the 255.255.255.255
+ * address in BSD-derived systems for MANET protocols. It SHOULD NOT
+ * be used in new code.
+ *
+ * @param sock the socket to enable undirected broadcasts for.
+ * @param enabled zero to disable the option, non-zero to enable it.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+extern int	comm_set_onesbcast(xsock_t sock, int enabled);
 
 /**
  * Set the sending buffer size of a socket.
