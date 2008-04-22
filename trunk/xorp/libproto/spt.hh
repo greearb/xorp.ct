@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.19 2008/01/04 03:16:20 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.20 2008/04/22 12:49:49 bms Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -538,7 +538,7 @@ Spt<A>::clear()
     while (! _nodes.empty()) {
 	typename Nodes::iterator ii;
 	for (ii = _nodes.begin(); ii != _nodes.end(); ) {
-	    typename Node<A>::NodeRef & rnr = (*ii).second;
+	    typename Node<A>::NodeRef& rnr = (*ii).second;
 	    //XLOG_ASSERT(! rnr.is_empty());
 	    rnr->clear();
 	    if (rnr.is_only()) {
@@ -1157,7 +1157,7 @@ Spt<A>::garbage_collect()
     // Remove all the invalid nodes.
     // Use a reference, no need to bump the ref_ptr in this scope.
     for(typename Nodes::iterator ni = _nodes.begin(); ni != _nodes.end();) {
-	typename Node<A>::NodeRef & node = ni->second;
+	typename Node<A>::NodeRef& node = ni->second;
 	if (!node->valid()) {
 	    _nodes.erase(ni++);
 	} else {
