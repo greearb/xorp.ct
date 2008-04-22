@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.13 2007/04/20 20:29:01 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.14 2008/01/04 03:16:38 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -374,7 +374,7 @@ xorp_srandomdev()
 #else
 		struct timeval tv;
 		unsigned long junk = 0;
-		unsigned long junk_seed;
+		unsigned long junk_seed = 0;
 
 		/*
 		 * XXX: We need memcpy() to set the "junk" value to avoid
