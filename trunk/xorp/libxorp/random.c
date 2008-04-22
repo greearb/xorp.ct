@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.14 2008/01/04 03:16:38 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.15 2008/04/22 13:13:45 bms Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -374,13 +374,14 @@ xorp_srandomdev()
 #else
 		struct timeval tv;
 		unsigned long junk = 0;
-		unsigned long junk_seed = 0;
+		unsigned long junk_seed[2];
 
 		/*
-		 * XXX: We need memcpy() to set the "junk" value to avoid
+		 * XXX: We need "junk_seed" to set the "junk" value to avoid
 		 * compiler warning about using an uninitialized variable.
 		 */
-		memcpy(&junk, &junk_seed, sizeof(junk));
+		junk_seed[0] = 0;
+		junk = junk_seed[1];
 		gettimeofday(&tv, NULL);
 		xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
 #endif
