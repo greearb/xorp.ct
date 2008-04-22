@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.30 2007/11/16 22:29:18 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.31 2008/04/22 13:53:02 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -850,7 +850,7 @@ extern int	comm_set_unicast_ttl(xsock_t sock, int val);
  * @param val the TTL of the outgoing multicast packets.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern int	comm_set_ttl(xsock_t sock, int val);
+extern int	comm_set_multicast_ttl(xsock_t sock, int val);
 
 /**
  * Set default interface for IPv4 outgoing multicast on a socket.

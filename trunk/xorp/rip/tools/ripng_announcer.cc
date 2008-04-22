@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.12 2007/02/16 22:47:20 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.13 2008/01/04 03:17:37 pavlin Exp $"
 
 #include "rip/rip_module.h"
 
@@ -155,8 +155,8 @@ init_rip_socket(int if_num)
 	fd.clear();
 	return fd;
     }
-     if (comm_set_ttl(fd, 255) != XORP_OK) {
-	 cerr << "comm_set_ttl failed" << endl;
+     if (comm_set_multicast_ttl(fd, 255) != XORP_OK) {
+	 cerr << "comm_set_multicast_ttl failed" << endl;
 	 comm_close(fd);
 	 fd.clear();
 	 return fd;

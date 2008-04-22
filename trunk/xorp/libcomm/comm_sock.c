@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.44 2007/11/16 22:29:18 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.45 2008/04/22 13:53:02 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1053,7 +1053,7 @@ comm_set_unicast_ttl(xsock_t sock, int val)
 }
 
 int
-comm_set_ttl(xsock_t sock, int val)
+comm_set_multicast_ttl(xsock_t sock, int val)
 {
     int family = comm_sock_get_family(sock);
 

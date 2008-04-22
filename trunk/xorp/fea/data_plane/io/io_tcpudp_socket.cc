@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.21 2007/12/28 09:13:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.22 2008/01/04 03:16:14 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -478,7 +478,7 @@ IoTcpUdpSocket::udp_open_bind_join(const IPvX& local_addr, uint16_t local_port,
 	return (XORP_ERROR);
     }
 
-    if (comm_set_ttl(_socket_fd, ttl) != XORP_OK) {
+    if (comm_set_multicast_ttl(_socket_fd, ttl) != XORP_OK) {
 	error_msg = c_format("Cannot set the multicast TTL: %s",
 			     comm_get_last_error_str());
 	comm_close(_socket_fd);
@@ -1038,7 +1038,7 @@ IoTcpUdpSocket::set_socket_option(const string& optname, uint32_t optval,
 	    break;
 	}
 	if (strcasecmp(optname.c_str(), "multicast_ttl") == 0) {
-	    ret_value = comm_set_ttl(_socket_fd, optval);
+	    ret_value = comm_set_multicast_ttl(_socket_fd, optval);
 	    break;
 	}
 

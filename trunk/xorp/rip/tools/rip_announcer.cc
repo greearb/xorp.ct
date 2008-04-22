@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.13 2007/10/12 07:53:54 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.14 2008/01/04 03:17:37 pavlin Exp $"
 
 #include <vector>
 #include <fstream>
@@ -150,8 +150,8 @@ init_rip_socket(IPv4 if_addr)
 	cerr << "comm_set_iface4 failed" << endl;
 	comm_close(fd);
 	fd.clear();
-    } else if (comm_set_ttl(fd, 1) != XORP_OK) {
-	cerr << "comm_set_ttl failed" << endl;
+    } else if (comm_set_multicast_ttl(fd, 1) != XORP_OK) {
+	cerr << "comm_set_multicast_ttl failed" << endl;
 	comm_close(fd);
 	fd.clear();
     }
