@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.38 2008/03/09 00:21:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.39 2008/04/11 00:19:33 pavlin Exp $"
 
 
 //
@@ -3243,6 +3243,48 @@ XrlFeaTarget::socket4_0_1_udp_open_bind_connect(
 }
 
 XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_open_bind_broadcast(
+    // Input values,
+    const string&	creator,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	local_port,
+    const uint32_t&	remote_port,
+    const bool&	        reuse,
+    const bool&	        limited,
+    const bool&	        connected,
+    // Output values,
+    string&	sockid)
+{
+    string error_msg;
+
+    if (local_port > 0xffff) {
+	error_msg = c_format("Local port %u is out of range", local_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    if (remote_port > 0xffff) {
+	error_msg = c_format("Remote port %u is out of range", remote_port);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (_io_tcpudp_manager.udp_open_bind_broadcast(IPv4::af(), creator,
+						   ifname,
+						   vifname,
+						   local_port,
+						   remote_port,
+						   reuse,
+						   limited,
+						   connected,
+						   sockid,
+						   error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlFeaTarget::socket4_0_1_bind(
     // Input values,
     const string&	sockid,
@@ -3333,6 +3375,21 @@ XrlFeaTarget::socket4_0_1_tcp_listen(
 }
 
 XrlCmdError
+XrlFeaTarget::socket4_0_1_udp_enable_recv(
+    // Input values,
+    const string&	sockid)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.udp_enable_recv(IPv4::af(), sockid, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlFeaTarget::socket4_0_1_send(
     // Input values,
     const string&	sockid,
@@ -3405,6 +3462,24 @@ XrlFeaTarget::socket4_0_1_set_socket_option(
     const string&	sockid,
     const string&	optname,
     const uint32_t&	optval)
+{
+    string error_msg;
+
+    if (_io_tcpudp_manager.set_socket_option(IPv4::af(), sockid, optname,
+					     optval, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::socket4_0_1_set_socket_option_txt(
+    // Input values,
+    const string&	sockid,
+    const string&	optname,
+    const string&	optval)
 {
     string error_msg;
 

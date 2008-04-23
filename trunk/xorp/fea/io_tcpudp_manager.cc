@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.7 2007/11/17 04:06:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_tcpudp_manager.cc,v 1.8 2008/01/04 03:15:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -343,6 +343,52 @@ IoTcpUdpComm::udp_open_bind_connect(const IPvX& local_addr,
 }
 
 int
+IoTcpUdpComm::udp_open_bind_broadcast(const string& ifname,
+				      const string& vifname,
+				      uint16_t local_port,
+				      uint16_t remote_port,
+				      bool reuse,
+				      bool limited,
+				      bool connected,
+				      string& sockid,
+				      string& error_msg)
+{
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_tcpudp_plugins.empty()) {
+	error_msg = c_format("No I/O TCP/UDP plugin to open, bind and "
+			     "connect UDP broadcast socket on if/vif %s/%s"
+			     "with local port %u and remote port %u",
+			     ifname.c_str(), vifname.c_str(),
+			     local_port, remote_port);
+	return (XORP_ERROR);
+    }
+
+    IoTcpUdpPlugins::iterator iter;
+    for (iter = _io_tcpudp_plugins.begin();
+	 iter != _io_tcpudp_plugins.end();
+	 ++iter) {
+	IoTcpUdp* io_tcpudp = iter->second;
+	if (io_tcpudp->udp_open_bind_broadcast(ifname, vifname,
+					       local_port, remote_port,
+					       reuse, limited, connected,
+					       error_msg)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    if (ret_value == XORP_OK)
+	sockid = _sockid;
+
+    return (ret_value);
+}
+
+int
 IoTcpUdpComm::bind(const IPvX& local_addr, uint16_t local_port,
 		   string& error_msg)
 {
@@ -548,6 +594,34 @@ IoTcpUdpComm::tcp_listen(uint32_t backlog, string& error_msg)
 }
 
 int
+IoTcpUdpComm::udp_enable_recv(string& error_msg)
+{
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_tcpudp_plugins.empty()) {
+	error_msg = c_format("No I/O TCP/UDP plugin to enable reception on"
+                             "UDP socket");
+	return (XORP_ERROR);
+    }
+
+    IoTcpUdpPlugins::iterator iter;
+    for (iter = _io_tcpudp_plugins.begin();
+	 iter != _io_tcpudp_plugins.end();
+	 ++iter) {
+	IoTcpUdp* io_tcpudp = iter->second;
+	if (io_tcpudp->udp_enable_recv(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    return (ret_value);
+}
+
+int
 IoTcpUdpComm::send(const vector<uint8_t>& data, string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -644,6 +718,37 @@ IoTcpUdpComm::send_from_multicast_if(const IPvX& group_addr,
 
 int
 IoTcpUdpComm::set_socket_option(const string& optname, uint32_t optval,
+				string& error_msg)
+{
+    int ret_value = XORP_OK;
+    string error_msg2;
+
+    if (_io_tcpudp_plugins.empty()) {
+	error_msg = c_format("No I/O TCP/UDP plugin to set %s socket option",
+			     optname.c_str());
+	return (XORP_ERROR);
+    }
+
+    IoTcpUdpPlugins::iterator iter;
+    for (iter = _io_tcpudp_plugins.begin();
+	 iter != _io_tcpudp_plugins.end();
+	 ++iter) {
+	IoTcpUdp* io_tcpudp = iter->second;
+	if (io_tcpudp->set_socket_option(optname, optval, error_msg2)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    return (ret_value);
+}
+
+int
+IoTcpUdpComm::set_socket_option(const string& optname,
+                                const string& optval,
 				string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -1320,6 +1425,54 @@ IoTcpUdpManager::udp_open_bind_connect(int family, const string& creator,
 }
 
 int
+IoTcpUdpManager::udp_open_bind_broadcast(int family,
+				         const string& creator,
+				         const string& ifname,
+				         const string& vifname,
+				         uint16_t local_port,
+				         uint16_t remote_port,
+				         bool reuse,
+				         bool limited,
+				         bool connected,
+				         string& sockid,
+				         string& error_msg)
+{
+    IoTcpUdpComm* io_tcpudp_comm;
+
+    if (family != AF_INET) {
+	error_msg = c_format("Unsupported address family: %d", family);
+	return (XORP_ERROR);
+    }
+
+    if (0 == _iftree.find_vif(ifname, vifname)) {
+	error_msg = c_format("Cannot bind a broadcast socket "
+			     "to ifname/vifname %s/%s: vif not found",
+			     ifname.c_str(), vifname.c_str());
+	return (XORP_ERROR);
+    }
+
+    io_tcpudp_comm = open_io_tcpudp_comm(family, false, creator);
+    XLOG_ASSERT(io_tcpudp_comm != NULL);
+
+    if (io_tcpudp_comm->udp_open_bind_broadcast(ifname, vifname,
+					        local_port, remote_port,
+					        reuse, limited, connected,
+					        sockid, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
+    if (_fea_node.fea_io().add_instance_watch(creator, this, error_msg)
+	!= XORP_OK) {
+	delete_io_tcpudp_comm(family, io_tcpudp_comm->sockid());
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
 IoTcpUdpManager::bind(int family, const string& sockid, const IPvX& local_addr,
 		      uint16_t local_port, string& error_msg)
 {
@@ -1450,6 +1603,19 @@ IoTcpUdpManager::tcp_listen(int family, const string& sockid, uint32_t backlog,
 }
 
 int
+IoTcpUdpManager::udp_enable_recv(int family, const string& sockid,
+				 string& error_msg)
+    {
+    IoTcpUdpComm* io_tcpudp_comm;
+
+    io_tcpudp_comm = find_io_tcpudp_comm(family, sockid, error_msg);
+    if (io_tcpudp_comm == NULL)
+	return (XORP_ERROR);
+
+    return (io_tcpudp_comm->udp_enable_recv(error_msg));
+}
+
+int
 IoTcpUdpManager::send(int family, const string& sockid,
 		      const vector<uint8_t>& data, string& error_msg)
 {
@@ -1515,6 +1681,21 @@ IoTcpUdpManager::send_from_multicast_if(int family, const string& sockid,
 int
 IoTcpUdpManager::set_socket_option(int family, const string& sockid,
 				   const string& optname, uint32_t optval,
+				   string& error_msg)
+{
+    IoTcpUdpComm* io_tcpudp_comm;
+
+    io_tcpudp_comm = find_io_tcpudp_comm(family, sockid, error_msg);
+    if (io_tcpudp_comm == NULL)
+	return (XORP_ERROR);
+
+    return (io_tcpudp_comm->set_socket_option(optname, optval, error_msg));
+}
+
+int
+IoTcpUdpManager::set_socket_option(int family, const string& sockid,
+				   const string& optname,
+				   const string& optval,
 				   string& error_msg)
 {
     IoTcpUdpComm* io_tcpudp_comm;

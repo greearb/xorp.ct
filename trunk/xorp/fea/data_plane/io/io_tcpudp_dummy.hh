@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.hh,v 1.5 2008/01/03 22:59:44 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.hh,v 1.6 2008/01/04 03:16:14 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_DUMMY_HH__
@@ -147,6 +147,25 @@ public:
 			      string& error_msg);
 
     /**
+     * Create a bound, and optionally connected, UDP broadcast socket.
+     *
+     * @param ifname the interface name to bind socket to.
+     * @param vifname the vif to bind socket to.
+     * @param local_port the port to bind socket to.
+     * @param remote_port the remote port to connect to.
+     * @param reuse allow other sockets to bind to same port.
+     * @param limited set the socket up for transmission to the limited
+     * broadcast address 255.255.255.255.
+     * @param connected connect the socket for use with send() not sendto().
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int udp_open_bind_broadcast(const string& ifname, const string& vifname,
+			        uint16_t local_port, uint16_t remote_port,
+			        bool reuse, bool limited, bool connected,
+			        string& error_msg);
+
+    /**
      * Bind a socket.
      *
      * @param local_addr the interface address to bind socket to.
@@ -199,6 +218,14 @@ public:
     int tcp_listen(uint32_t backlog, string& error_msg);
 
     /**
+     * Enable a UDP socket for datagram reception.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int udp_enable_recv(string& error_msg);
+
+    /**
      * Send data on socket.
      *
      * @param data block of data to be sent.
@@ -236,16 +263,26 @@ public:
 			       string& error_msg);
 
     /**
-     * Set a named socket option.
+     * Set a named socket option with an integer value.
      *
-     * @param optname name of option to be set. Valid values are:
-     * "multicast_loopback" "multicast_ttl"
+     * @param optname name of option to be set. All values are ignored.
      * @param optval value of option to be set. If value is logically boolean
      * then zero represents false and any non-zero value true.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int set_socket_option(const string& optname, uint32_t optval,
+			  string& error_msg);
+
+    /**
+     * Set a named socket option with a text value.
+     *
+     * @param optname name of option to be set. All values are ignored.
+     * @param optval value of option to be set.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_socket_option(const string& optname, const string& optval,
 			  string& error_msg);
 
     /**

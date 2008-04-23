@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/socket4.xif,v 1.12 2007/08/17 19:48:08 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/socket4.xif,v 1.13 2007/08/21 00:10:38 pavlin Exp $ */
 
 /**
  * Interface implementing basic IPv4 socket functionality.  This interface
@@ -151,6 +151,46 @@ interface socket4/0.1 {
 				-> sockid:txt
 
     /**
+     * Create a bound, and optionally connected, UDP broadcast socket.
+     *
+     * This socket may be used for sending and receiving IPv4 broadcasts
+     * on a named if/vif. The TTL is always set to 1 on creation. The
+     * creator must specify if this socket is to be used for limited
+     * broadcasts (255.255.255.255) as this is a special case on many
+     * platforms.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param ifname the interface name to bind socket to.
+     *
+     * @param vifname the vif to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param remote_port the remote port to connect to.
+     *
+     * @param reuse allow other sockets to bind to same port.
+     *
+     * @param limited set the socket up for transmission to the limited
+     * broadcast address 255.255.255.255.
+     *
+     * @param connected connect the socket for use with send() not sendto().
+     *
+     * @param sockid return parameter that contains unique socket ID when
+     *        socket instantiation is successful.
+     */
+    udp_open_bind_broadcast	? creator:txt				\
+				& ifname:txt				\
+				& vifname:txt				\
+				& local_port:u32			\
+				& remote_port:u32			\
+				& reuse:bool				\
+				& limited:bool				\
+				& connected:bool			\
+				-> sockid:txt
+
+    /**
      * Bind a socket.
      *
      * @param sockid the socket ID of the socket to bind.
@@ -211,6 +251,19 @@ interface socket4/0.1 {
 				& backlog:u32
 
     /**
+     * Enable a UDP socket for datagram reception.
+     *
+     * If a UDP socket has been created without using the usual convenience
+     * XRLs, it is necessary to hook up its FEA internal input path by
+     * calling this XRL. It is similar in intent to tcp_listen, but named
+     * differently as it never uses the listen() socket API.
+     *
+     * @param sockid the unique socket ID of the socket to enable for
+     * datagram reception.
+     */
+    udp_enable_recv		? sockid:txt
+
+    /**
      * Send data on socket.
      *
      * @param sockid unique socket ID.
@@ -257,18 +310,46 @@ interface socket4/0.1 {
 				& data:binary
 
     /**
-     * Set a named socket option.
+     * Set a named socket option with an integer value.
+     *
+     * XXX: The "onesbcast" and "reuseport" options exist to work around
+     * an architectural issue in the BSD IPv4 stack. They SHOULD NOT be
+     * used for new code.
      *
      * @param sockid unique socket ID.
      *
      * @param optname name of option to be set.  Valid values are:
+     * 		"onesbcast"
+     * 		"receive_broadcast"
+     * 		"reuseport"
+     * 		"send_broadcast"
+     * 		"tos"
+     * 		"ttl"
      * 		"multicast_loopback"
      *		"multicast_ttl"
      *
-     * @param optval value of option to be set.  If value is logically boolean
-     *        then zero represents false and any non-zero value true.
+     * @param optval integer value of option to be set.
+     *               If value is logically boolean, then zero represents
+     *               'false', and any non-zero value represents 'true'.
      */
     set_socket_option		? sockid:txt				\
 				& optname:txt				\
 				& optval:u32
+
+    /**
+     * Set a named socket option with a string value.
+     *
+     * XXX: The "bindtodevice" option exists to workaround an architectural
+     * issue in the Linux IPv4 stack. It SHOULD NOT be used for new code.
+     *
+     * @param sockid unique socket ID.
+     *
+     * @param optname name of option to be set.  Valid values are:
+     * 		"bindtodevice"
+     *
+     * @param optval value of option to be set.
+     */
+    set_socket_option_txt	? sockid:txt				\
+				& optname:txt				\
+				& optval:txt
 }

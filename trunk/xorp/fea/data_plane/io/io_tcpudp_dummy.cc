@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.4 2007/08/21 00:10:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.cc,v 1.5 2008/01/04 03:16:14 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -172,6 +172,28 @@ IoTcpUdpDummy::udp_open_bind_connect(const IPvX& local_addr,
 }
 
 int
+IoTcpUdpDummy::udp_open_bind_broadcast(const string& ifname,
+				       const string& vifname,
+				       uint16_t local_port,
+				       uint16_t remote_port,
+				       bool reuse,
+				       bool limited,
+				       bool connected,
+				       string& error_msg)
+{
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(local_port);
+    UNUSED(remote_port);
+    UNUSED(reuse);
+    UNUSED(limited);
+    UNUSED(connected);
+    UNUSED(error_msg);
+
+    return (XORP_OK);
+}
+
+int
 IoTcpUdpDummy::bind(const IPvX& local_addr, uint16_t local_port,
 		    string& error_msg)
 {
@@ -232,6 +254,14 @@ IoTcpUdpDummy::tcp_listen(uint32_t backlog, string& error_msg)
 }
 
 int
+IoTcpUdpDummy::udp_enable_recv(string& error_msg)
+{
+    UNUSED(error_msg);
+
+    return (XORP_OK);
+}
+
+int
 IoTcpUdpDummy::send(const vector<uint8_t>& data, string& error_msg)
 {
     UNUSED(data);
@@ -275,6 +305,18 @@ IoTcpUdpDummy::send_from_multicast_if(const IPvX& group_addr,
 
 int
 IoTcpUdpDummy::set_socket_option(const string& optname, uint32_t optval,
+				 string& error_msg)
+{
+    UNUSED(optname);
+    UNUSED(optval);
+    UNUSED(error_msg);
+
+    return (XORP_OK);
+}
+
+int
+IoTcpUdpDummy::set_socket_option(const string& optname,
+				 const string& optval,
 				 string& error_msg)
 {
     UNUSED(optname);

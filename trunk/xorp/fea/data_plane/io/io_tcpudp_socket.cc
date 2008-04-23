@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8 sw=4:
 
 // Copyright (c) 2007-2008 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.22 2008/01/04 03:16:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_tcpudp_socket.cc,v 1.23 2008/04/22 16:03:42 pavlin Exp $"
 
 //
 // I/O TCP/UDP communication support.
@@ -645,6 +646,229 @@ IoTcpUdpSocket::udp_open_bind_connect(const IPvX& local_addr,
 }
 
 int
+IoTcpUdpSocket::udp_open_bind_broadcast(const string& ifname,
+				        const string& vifname,
+				        uint16_t local_port,
+				        uint16_t remote_port,
+				        bool reuse,
+				        bool limited,
+                                        bool connected,
+				        string& error_msg)
+{
+    int ret_value = XORP_OK;
+
+    if (_socket_fd.is_valid()) {
+	error_msg = c_format("The socket is already open");
+	return (XORP_ERROR);
+    }
+
+    // 0. Before doing anything else, we need to look up the first
+    //    configured network broadcast address on ifname/vifname.
+    //    If there is no IPv4 stack configured on that node, then
+    //    we need to reject this request outright.
+    const IfTreeInterface* ifp = NULL;
+    const IfTreeVif* vifp = NULL;
+
+    ifp = iftree().find_interface(ifname);
+    if (ifp == NULL) {
+	error_msg = c_format("No interface %s", ifname.c_str());
+	return (XORP_ERROR);
+    }
+    vifp = ifp->find_vif(vifname);
+    if (vifp == NULL) {
+	error_msg = c_format("No interface %s vif %s",
+			     ifname.c_str(), vifname.c_str());
+	return (XORP_ERROR);
+    }
+    if (! ifp->enabled()) {
+	error_msg = c_format("Interface %s is down",
+			     ifp->ifname().c_str());
+	return (XORP_ERROR);
+    }
+    if (! vifp->enabled()) {
+	error_msg = c_format("Interface %s vif %s is down",
+			     ifp->ifname().c_str(),
+			     vifp->vifname().c_str());
+	return (XORP_ERROR);
+    }
+    if (! vifp->broadcast()) {
+	error_msg = c_format("Interface %s vif %s is not broadcast capable",
+			     ifp->ifname().c_str(),
+			     vifp->vifname().c_str());
+	return (XORP_ERROR);
+    }
+
+    // Find the first IPv4 broadcast address configured on vif.
+    bool is_found = false;
+    for (IfTreeVif::IPv4Map::const_iterator ai = vifp->ipv4addrs().begin();
+	 ai != vifp->ipv4addrs().end();
+	 ++ai) {
+	IfTreeAddr4& ar = *(ai->second);
+	if (ar.enabled() && ar.broadcast()) {
+	    _network_broadcast_address = ar.bcast();
+	    is_found = true;
+	    break;
+        }
+    }
+    if (! is_found) {
+	error_msg = c_format("Interface %s vif %s has no configured "
+			     "IPv4 network broadcast address",
+			     ifp->ifname().c_str(),
+			     vifp->vifname().c_str());
+	return (XORP_ERROR);
+    }
+
+    // 1. Open a UDP socket.
+    _socket_fd = comm_open_udp(family(), COMM_SOCK_NONBLOCKING);
+    if (! _socket_fd.is_valid()) {
+	error_msg = c_format("Cannot open the socket: %s",
+			     comm_get_last_error_str());
+	return (XORP_ERROR);
+    }
+
+    // 2a. On BSD derived systems, request port re-use (SO_REUSEPORT).
+    //     This is a no-op on systems which do not have it,
+    //     and harmless on systems which do not require it.
+    if (reuse) {
+        ret_value = comm_set_reuseport(_socket_fd, 1);
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot enable port re-use: %s",
+				 comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+    // 2b. On Linux, bind socket to device (SO_BINDTODEVICE).
+    if (comm_bindtodevice_present() == XORP_OK) {
+        ret_value = comm_set_bindtodevice(_socket_fd,
+                                          vifp->vifname().c_str());
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot bind the broadcast socket to "
+				 "the underlying vif %s: %s",
+				 vifp->vifname().c_str(),
+				 comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+    // 3. Bind to address and port (bind()).
+    //    On BSD derived systems, if an interface address is specified
+    //    for the bind(), received broadcast datagrams will NOT be delivered
+    //    to the socket. This behaviour is so old, it's taken for granted,
+    //    although it could be argued it's buggy; therefore on such systems
+    //    INADDR_ANY is used.
+    struct in_addr local_in_addr;
+    local_in_addr.s_addr = INADDR_ANY;
+    ret_value = comm_sock_bind4(_socket_fd, &local_in_addr,
+			        htons(local_port));
+    if (ret_value != XORP_OK) {
+	error_msg = c_format("Cannot bind the broadcast socket: %s",
+			     comm_get_last_error_str());
+	return (XORP_ERROR);
+    }
+
+    //  4. Set outgoing ttl to 1 (IP_TTL).
+    //     This is the default in order to prevent packet storms.
+    if (comm_unicast_ttl_present() == XORP_OK) {
+	ret_value = comm_set_unicast_ttl(_socket_fd, 1);
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot set TTL: %s",
+				 comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+    //  5a. Enable socket for broadcast send (SO_BROADCAST).
+    //      Most implementations require this.
+    ret_value = comm_set_send_broadcast(_socket_fd, 1);
+    if (ret_value != XORP_OK) {
+	error_msg = c_format("Cannot enable broadcast sends: %s",
+		             comm_get_last_error_str());
+	return (XORP_ERROR);
+    }
+
+#ifdef notyet
+    //  5b. On Windows Server 2003 and up, IP_RECEIVE_BROADCAST also
+    //      needs to be set to receive broadcast datagrams.
+    if (comm_receive_broadcast_present() == XORP_OK) {
+	ret_value = comm_set_receive_broadcast(_socket_fd, 1);
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot enable broadcast receives: %s",
+				comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+    }
+#endif
+
+    //  6. On BSD derived systems, if we are going to send to
+    //     the limited broadcast address, request IP_ONESBCAST.
+    //     This rewrites the network broadcast address to the
+    //     limited broadcast address on each send.
+    //
+    //     However we need to record the network address in
+    //     use at the time of binding. This has the unfortunate
+    //     side-effect that if the configured network broadcast
+    //     address on the underlying ifnet changes, the mapping
+    //     will break.
+    //
+    //     [It also means that if we need to connect() the socket
+    //      to bind its faddr tuple in the inpcb, we need to specify
+    //      the network broadcast address, NOT the limited broadcast
+    //      address.]
+    if (limited) {
+        if (comm_onesbcast_present() == XORP_OK) {
+	    ret_value = comm_set_onesbcast(_socket_fd, 1);
+	    if (ret_value != XORP_OK) {
+		error_msg = c_format("Cannot enable IP_ONESBCAST: %s",
+				    comm_get_last_error_str());
+		return (XORP_ERROR);
+	    }
+	    _limited_broadcast_enabled = true;
+	    debug_msg("enabled onesbcast on fd %s\n",
+	    	      _socket_fd.str().c_str());
+	    //XLOG_WARNING("enabled onesbcast on fd %s\n",
+	    //	      _socket_fd.str().c_str());
+        }
+    }
+
+    // Finally, if the creator requested a connected broadcast socket,
+    // make sure the socket is connected to the appropriate address.
+    if (connected) {
+	struct in_addr remote_in_addr;
+	int in_progress = 0;
+        if (limited) {
+            if (comm_onesbcast_present() == XORP_OK &&
+                _limited_broadcast_enabled) {
+		// IP_ONESBCAST platform.
+		// connect() to network broadcast address, but ensure
+		// translation is performed for sendto().
+		_network_broadcast_address.copy_out(remote_in_addr);
+            } else {
+		// Not an IP_ONESBCAST platform.
+		// connect() to limited broadcast address.
+		// XXX This is untested on Windows.
+		IPv4::ALL_ONES().copy_out(remote_in_addr);
+            }
+        } else {
+	    // connect() to network broadcast address.
+	    _network_broadcast_address.copy_out(remote_in_addr);
+        }
+	ret_value = comm_sock_connect4(_socket_fd,
+				    &remote_in_addr,
+				    htons(remote_port),
+				    COMM_SOCK_NONBLOCKING,
+				    &in_progress);
+	if (ret_value != XORP_OK) {
+	    error_msg = c_format("Cannot connect the broadcast socket: %s",
+				comm_get_last_error_str());
+	    return (XORP_ERROR);
+	}
+    }
+
+    return (enable_data_recv(error_msg));
+}
+
+int
 IoTcpUdpSocket::bind(const IPvX& local_addr, uint16_t local_port,
 		     string& error_msg)
 {
@@ -870,6 +1094,12 @@ IoTcpUdpSocket::tcp_listen(uint32_t backlog, string& error_msg)
 }
 
 int
+IoTcpUdpSocket::udp_enable_recv(string& error_msg)
+{
+    return (enable_data_recv(error_msg));
+}
+
+int
 IoTcpUdpSocket::send(const vector<uint8_t>& data, string& error_msg)
 {
     if (! _socket_fd.is_valid()) {
@@ -923,9 +1153,32 @@ IoTcpUdpSocket::send_to(const IPvX& remote_addr, uint16_t remote_port,
 					    coalesce_buffers_n);
     }
 
-    // Queue the data for transmission
-    _async_writer->add_data_sendto(data, remote_addr, remote_port,
-				   callback(this, &IoTcpUdpSocket::send_completed_cb));
+    // Queue the data for transmission.
+    if (_limited_broadcast_enabled &&
+        comm_onesbcast_present() == XORP_OK &&
+        remote_addr == IPv4::ALL_ONES()) {
+	// If this is an IPv4 limited broadcast socket on a platform which
+	// uses the IP_ONESBCAST socket option, we must trap sends to
+	// the limited broadcast address, and rewrite them to use the
+	// network broadcast address.
+	debug_msg("onesbcast enabled on fd %s, rewriting %s to %s.\n",
+		  _socket_fd.str().c_str(),
+		  remote_addr.str().c_str(),
+                 _network_broadcast_address.str().c_str());
+	//XLOG_WARNING("onesbcast enabled on fd %s, rewriting %s to %s.\n",
+	//	  _socket_fd.str().c_str(),
+	//	  remote_addr.str().c_str(),
+        //          _network_broadcast_address.str().c_str());
+	_async_writer->add_data_sendto(data,
+                                       _network_broadcast_address,
+				       remote_port,
+				       callback(this, &IoTcpUdpSocket::send_completed_cb));
+    } else {
+	_async_writer->add_data_sendto(data,
+				       remote_addr,
+				       remote_port,
+				       callback(this, &IoTcpUdpSocket::send_completed_cb));
+    }
     _async_writer->start();
 
     return (XORP_OK);
@@ -1022,7 +1275,8 @@ IoTcpUdpSocket::send_from_multicast_if(const IPvX& group_addr,
 }
 
 int
-IoTcpUdpSocket::set_socket_option(const string& optname, uint32_t optval,
+IoTcpUdpSocket::set_socket_option(const string& optname,
+				  uint32_t optval,
 				  string& error_msg)
 {
     int ret_value = XORP_OK;
@@ -1033,6 +1287,36 @@ IoTcpUdpSocket::set_socket_option(const string& optname, uint32_t optval,
     }
 
     do {
+	if (strcasecmp(optname.c_str(), "onesbcast") == 0) {
+	    ret_value = comm_set_onesbcast(_socket_fd, optval);
+	    break;
+	}
+	if (strcasecmp(optname.c_str(), "receive_broadcast") == 0) {
+	    ret_value = comm_set_receive_broadcast(_socket_fd, optval);
+	    break;
+	}
+	if (strcasecmp(optname.c_str(), "reuseport") == 0) {
+	    ret_value = comm_set_reuseport(_socket_fd, optval);
+	    break;
+	}
+	if (strcasecmp(optname.c_str(), "send_broadcast") == 0) {
+	    ret_value = comm_set_send_broadcast(_socket_fd, optval);
+	    break;
+	}
+	if (strcasecmp(optname.c_str(), "tos") == 0) {
+	    // XXX: Do not return an error if setting the
+	    // type-of-service fields is not supported.
+	    if (comm_tos_present() == XORP_OK) {
+		ret_value = comm_set_tos(_socket_fd, optval);
+	    } else {
+		ret_value = XORP_OK;
+	    }
+	    break;
+	}
+	if (strcasecmp(optname.c_str(), "ttl") == 0) {
+	    ret_value = comm_set_unicast_ttl(_socket_fd, optval);
+	    break;
+	}
 	if (strcasecmp(optname.c_str(), "multicast_loopback") == 0) {
 	    ret_value = comm_set_loopback(_socket_fd, optval);
 	    break;
@@ -1041,7 +1325,42 @@ IoTcpUdpSocket::set_socket_option(const string& optname, uint32_t optval,
 	    ret_value = comm_set_multicast_ttl(_socket_fd, optval);
 	    break;
 	}
+	error_msg = c_format("Unknown socket option: %s", optname.c_str());
+	return (XORP_ERROR);
+    } while (false);
 
+    if (ret_value != XORP_OK) {
+	error_msg = c_format("Failed to set socket option %s: %s",
+			     optname.c_str(), comm_get_last_error_str());
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+IoTcpUdpSocket::set_socket_option(const string& optname,
+                                  const string& optval,
+				  string& error_msg)
+{
+    int ret_value = XORP_OK;
+
+    if (! _socket_fd.is_valid()) {
+	error_msg = c_format("The socket is not open");
+	return (XORP_ERROR);
+    }
+
+    do {
+	if (strcasecmp(optname.c_str(), "bindtodevice") == 0) {
+	    // XXX: Do not use this option for new code; see note in
+	    // comm_set_bindtodevice().
+	    if (comm_bindtodevice_present() == XORP_OK) {
+	       ret_value = comm_set_bindtodevice(_socket_fd, optval.c_str());
+	    } else {
+	       ret_value = XORP_OK;
+	    }
+	    break;
+	}
 	error_msg = c_format("Unknown socket option: %s", optname.c_str());
 	return (XORP_ERROR);
     } while (false);

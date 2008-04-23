@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8 sw=4:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.18 2008/03/09 00:21:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.19 2008/03/09 07:04:06 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -1986,32 +1987,20 @@ IoIpSocket::send_packet(const string& if_name,
 	    //
 	    // Set the TTL
 	    //
-#ifdef IP_TTL
-	    int_val = ip_ttl;
-	    if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_TTL,
-			   XORP_SOCKOPT_CAST(&int_val), sizeof(int_val))
-		< 0) {
-		error_msg = c_format("setsockopt(IP_TTL, %d) failed: %s",
-				     int_val, strerror(errno));
-		XLOG_ERROR("%s", error_msg.c_str());
-		return (XORP_ERROR);
+	    if (comm_unicast_ttl_present()) {
+		int result = comm_set_unicast_ttl(_proto_socket_out, ip_ttl);
+		if (XORP_OK != result)
+		    return (result);
 	    }
-#endif // IP_TTL
 
 	    //
 	    // Set the TOS
 	    //
-#ifdef IP_TOS
-	    int_val = ip_tos;
-	    if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_TOS,
-			   XORP_SOCKOPT_CAST(&int_val), sizeof(int_val))
-		< 0) {
-		error_msg = c_format("setsockopt(IP_TOS, 0x%x) failed: %s",
-				     int_val, strerror(errno));
-		XLOG_ERROR("%s", error_msg.c_str());
-		return (XORP_ERROR);
+	    if (comm_tos_present()) {
+		int result = comm_set_tos(_proto_socket_out, ip_tos);
+		if (XORP_OK != result)
+		    return (result);
 	    }
-#endif // IP_TOS
 
 	    //
 	    // XXX: Bind to the source address so the outgoing IP packet
@@ -2391,28 +2380,23 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	setloop = true;
     } else {
 	// Unicast-related setting
-#ifdef SO_BINDTODEVICE
 	//
-	// XXX: We need to bind to a network interface only if we might be
-	// running multiple XORP instances. The heuristic for that is to
-	// test whether the unicast forwarding table ID is configured.
-	// 
+	// XXX: We need to bind to a network interface under Linux, but
+	// only if we might be running multiple XORP instances.
+	// The heuristic for that is to test whether the unicast forwarding
+	// table ID is configured.
+	//
 	FibConfig& fibconfig = fea_data_plane_manager().fibconfig();
 	if (fibconfig.unicast_forwarding_table_id_is_configured(family())
 	    && (! vifp->vifname().empty())) {
-	    char ifname[IFNAMSIZ];
-	    strlcpy(ifname, vifp->vifname().c_str(), sizeof(ifname));
-	    if (setsockopt(_proto_socket_out, SOL_SOCKET, SO_BINDTODEVICE,
-			   ifname, sizeof(ifname))
-		!= 0) {
-		error_msg = c_format("setsockopt(SO_BINDTODEVICE, %s) failed: %s",
-				     vifp->vifname().c_str(), strerror(errno));
-		ret_value = XORP_ERROR;
-		goto ret_label;
+	    if (comm_bindtodevice_present() == XORP_OK) {
+		ret_value = comm_set_bindtodevice(_proto_socket_out,
+						  vifp->vifname().c_str());
+		if (ret_value == XORP_ERROR)
+		    goto ret_label;
+		setbind = true;
 	    }
-	    setbind = true;
 	}
-#endif // SO_BINDTODEVICE
     }
 
     //
@@ -2522,20 +2506,11 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	string dummy_error_msg;
 	enable_multicast_loopback(false, dummy_error_msg);
     }
-    if (setbind) {
-	// Unbind the interface
-#ifdef SO_BINDTODEVICE
-	string tmp_error_msg;
-	char empty_ifname[IFNAMSIZ];
-	empty_ifname[0] = '\0';
-	if (setsockopt(_proto_socket_out, SOL_SOCKET, SO_BINDTODEVICE,
-		       &empty_ifname, sizeof(empty_ifname))
-	    != 0) {
-	    tmp_error_msg = c_format("setsockopt(SO_BINDTODEVICE, NULL) failed: %s",
-				     strerror(errno));
-	    XLOG_ERROR("%s", tmp_error_msg.c_str());
+    if (comm_bindtodevice_present() == XORP_OK) {
+	if (setbind) {
+	    // Unbind the interface on Linux platforms.
+	    (void)comm_set_bindtodevice(_proto_socket_out, "");
 	}
-#endif // SO_BINDTODEVICE
     }
 
     return (ret_value);

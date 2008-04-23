@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.25 2008/01/04 03:15:52 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.26 2008/04/11 00:19:33 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1680,6 +1680,49 @@ public:
 	string&	sockid);
 
     /**
+     * Create a bound and connected UDP broadcast socket.
+     *
+     * This socket may be used for sending and receiving IPv4 broadcasts
+     * on a named if/vif. The TTL is always set to 1 on creation. The
+     * creator must specify if this socket is to be used for limited
+     * broadcasts (255.255.255.255) as this is a special case on many
+     * platforms.
+     *
+     * @param creator the Xrl Target instance name of the socket
+     *        creator.  The named target must implement socket4_user/0.1.
+     *
+     * @param ifname the interface name to bind socket to.
+     *
+     * @param vifname the vif to bind socket to.
+     *
+     * @param local_port the port to bind socket to.
+     *
+     * @param remote_port the remote port to connect to.
+     *
+     * @param reuse allow other sockets to bind to same port.
+     *
+     * @param limited set the socket up for transmission to the limited
+     * broadcast address 255.255.255.255.
+     *
+     * @param connected connect the socket for use with send() not sendto().
+     *
+     * @param sockid return parameter that contains unique socket ID when
+     *        socket instantiation is successful.
+     */
+    XrlCmdError socket4_0_1_udp_open_bind_broadcast(
+	// Input values,
+	const string&	creator,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	local_port,
+	const uint32_t&	remote_port,
+	const bool&	reuse,
+	const bool&	limited,
+	const bool&	connected,
+	// Output values,
+	string&	sockid);
+
+    /**
      *  Bind a socket.
      *
      *  @param sockid the socket ID of the socket to bind.
@@ -1748,6 +1791,21 @@ public:
 	const uint32_t&	backlog);
 
     /**
+     *  Enable a UDP socket for datagram reception.
+     *
+     *  If a UDP socket has been created without using the usual convenience
+     *  XRLs, it is necessary to hook up its FEA internal input path by
+     *  calling this XRL. It is similar in intent to tcp_listen, but named
+     *  differently as it never uses the listen() socket API.
+     *
+     *  @param sockid the unique socket ID of the socket to enable for
+     *  datagram reception.
+     */
+    XrlCmdError socket4_0_1_udp_enable_recv(
+	// Input values,
+	const string&	sockid);
+
+    /**
      *  Send data on socket.
      *
      *  @param sockid unique socket ID.
@@ -1799,12 +1857,19 @@ public:
 	const vector<uint8_t>&	data);
 
     /**
-     *  Set a named socket option.
+     *  Set a named socket option with an integer value.
      *
      *  @param sockid unique socket ID.
      *
      *  @param optname name of option to be set. Valid values are:
-     *  "multicast_loopback" "multicast_ttl"
+     *  "onesbcast"
+     *  "receive_broadcast"
+     *  "reuseport"
+     *  "send_broadcast"
+     *  "tos"
+     *  "ttl"
+     *  "multicast_loopback"
+     *  "multicast_ttl"
      *
      *  @param optval value of option to be set. If value is logically boolean
      *  then zero represents false and any non-zero value true.
@@ -1814,6 +1879,26 @@ public:
 	const string&	sockid,
 	const string&	optname,
 	const uint32_t&	optval);
+
+    /**
+     *  Set a named socket option with a text value.
+     *
+     * XXX: The "bindtodevice" option exists to workaround an architectural
+     * issue in the Linux Ipv4 stack. It SHOULD NOT be used for new code.
+     *
+     *  @param sockid unique socket ID.
+     *
+     *  @param optname name of option to be set. Valid values are:
+     *  "bindtodevice"
+     *
+     *  @param optval value of option to be set. If value is logically boolean
+     *  then zero represents false and any non-zero value true.
+     */
+    XrlCmdError socket4_0_1_set_socket_option_txt(
+	// Input values,
+	const string&	sockid,
+	const string&	optname,
+	const string&	optval);
 
     /**
      *  Open a TCP socket.
