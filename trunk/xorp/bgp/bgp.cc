@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.90 2007/12/10 23:26:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.91 2008/01/04 03:15:17 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1158,8 +1158,11 @@ BGPMain::local_ip_changed(string local_address)
 	const Iptuple& iptuple = (*i)->peerdata()->iptuple();
 	debug_msg("Trying: %s ", iptuple.str().c_str());
 
-	if (iptuple.get_local_addr() == local_address)
+	if (iptuple.get_local_addr() == local_address) {
+	    XLOG_INFO("Interface address %s changed bouncing peer",
+		      local_address.c_str());
 	    bounce_peer(iptuple);
+	}
     }
 }
 
