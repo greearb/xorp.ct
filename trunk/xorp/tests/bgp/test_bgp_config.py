@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.20 2007/12/12 02:03:54 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.21 2008/01/04 03:17:50 pavlin Exp $
 
 import sys
 sys.path.append("..")
@@ -207,6 +207,42 @@ set peer-port 20001
 set next-hop 127.0.0.1
 set local-ip 127.0.0.1
 set as 75
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_bug_740(builddir):
+    """
+    Configure an import and an export policy
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+
+create policy policy-statement out term a from protocol connected
+create policy policy-statement in term a from neighbor 10.1.2.18..10.1.2.18
+
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 65001
+set export "out"
+set import "in"
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 75
+
 commit
 """
 

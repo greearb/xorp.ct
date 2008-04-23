@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.7 2007/02/16 22:47:32 pavlin Exp $
+# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.8 2008/01/04 03:17:50 pavlin Exp $
 
 # Tests used to investigate bug reports.
 
@@ -40,6 +40,8 @@ TESTS=[
      ['conf_EBGP', 'conf_interfaces', 'conf_create_protocol_static']],
     ['test_bug_649', 'test_bug_649', True, '',
      ['conf_EBGP', 'conf_interfaces', 'conf_create_protocol_static']],
+    ['test_bug_740', 'test_bug_740', True, '',
+     ['conf_bug_740', 'conf_interfaces']],
     ]
 
 def test_bug_360():
@@ -229,6 +231,34 @@ def test_bug_649():
     # Send in a route that covers the nexthop and matches the next hop resolver
     # value.
     coord("peer1 send %s" % (packet % ("10.0.0.0/16")))
+
+    coord("peer1 assert established");
+
+    return True
+
+def test_bug_740():
+    """
+    http://www.xorp.org/bugzilla/show_bug.cgi?id=740
+
+    This test triggers a simple problem when there is both an import
+    and an export policy. If the import policy uses the neighbor
+    statement then BGP fails. The connection is established to verify
+    that BGP is still alive.
+    """
+
+    # Make a connection just to see if BGP is still alive
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    # Put an extra delay here so the TCP connection doesn't occur at the same
+    # time as the peer is bounced due to the interface address changing.
+    delay(2)
+
+    coord("peer1 establish AS 75 holdtime 0 id 75.75.75.75 keepalive false")
+    
+    delay(2)
 
     coord("peer1 assert established");
 

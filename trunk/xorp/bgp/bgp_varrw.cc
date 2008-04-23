@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.32 2007/12/10 23:26:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.33 2008/01/04 03:15:18 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -325,7 +325,7 @@ BGPVarRW<A>::read_neighbor()
 {
     Element* e = NULL;
     const PeerHandler* ph = _orig_rtmsg->origin_peer();
-    if (ph != NULL) {
+    if (ph != NULL && !ph->originate_route_handler()) {
 	e = _ef.create(ElemIPv4::id, ph->get_peer_addr().c_str());
     }
     return e;
