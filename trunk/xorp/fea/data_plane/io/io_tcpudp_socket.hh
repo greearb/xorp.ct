@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.10 2008/01/04 03:16:14 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_socket.hh,v 1.11 2008/04/23 15:22:40 bms Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_SOCKET_HH__
@@ -274,11 +274,11 @@ public:
      * Set a named socket option with an integer value.
      *
      * @param optname name of option to be set. Valid values are:
-     *  "onesbcast"
-     *  "receive_broadcast"
+     *  "onesbcast"		(IPv4 only)
+     *  "receive_broadcast"	(IPv4 only)
      *  "reuseport"
-     *  "send_broadcast"
-     *  "tos"
+     *  "send_broadcast"	(IPv4 only)
+     *  "tos"			(IPv4 only)
      *  "ttl"
      *  "multicast_loopback"
      *  "multicast_ttl"

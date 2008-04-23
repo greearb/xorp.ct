@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.9 2008/01/04 03:15:47 pavlin Exp $
+// $XORP: xorp/fea/io_tcpudp_manager.hh,v 1.10 2008/04/23 15:22:39 bms Exp $
 
 #ifndef __FEA_IO_TCPUDP_MANAGER_HH__
 #define __FEA_IO_TCPUDP_MANAGER_HH__
@@ -405,11 +405,11 @@ public:
      * respectively).
      * @param sockid unique socket ID.
      * @param optname name of option to be set. Valid values are:
-     *  "onesbcast"
-     *  "receive_broadcast"
+     *  "onesbcast"		(IPv4 only)
+     *  "receive_broadcast"	(IPv4 only)
      *  "reuseport"
-     *  "send_broadcast"
-     *  "tos"
+     *  "send_broadcast"	(IPv4 only)
+     *  "tos"			(IPv4 only)
      *  "ttl"
      *  "multicast_loopback"
      *  "multicast_ttl"
