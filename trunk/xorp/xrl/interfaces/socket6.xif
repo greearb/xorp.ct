@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.13 2007/11/12 21:03:21 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/socket6.xif,v 1.14 2008/04/23 15:22:41 bms Exp $ */
 
 /**
  * Interface implementing basic IPv6 socket functionality.  This interface
@@ -262,6 +262,7 @@ interface socket6/0.1 {
      * @param sockid unique socket ID.
      *
      * @param optname name of option to be set.  Valid values are:
+     * 		"reuseport"
      *		"ttl"
      * 		"multicast_loopback"
      *		"multicast_ttl"
