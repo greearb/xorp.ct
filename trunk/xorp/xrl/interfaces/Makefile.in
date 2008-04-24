@@ -145,6 +145,9 @@ libmld6igmpclientxif_la_OBJECTS =  \
 libmld6igmpxif_la_LIBADD =
 am_libmld6igmpxif_la_OBJECTS = mld6igmp_xif.lo
 libmld6igmpxif_la_OBJECTS = $(am_libmld6igmpxif_la_OBJECTS)
+libolsr4xif_la_LIBADD =
+am_libolsr4xif_la_OBJECTS = olsr4_xif.lo
+libolsr4xif_la_OBJECTS = $(am_libolsr4xif_la_OBJECTS)
 libospfv2xif_la_LIBADD =
 am_libospfv2xif_la_OBJECTS = ospfv2_xif.lo
 libospfv2xif_la_OBJECTS = $(am_libospfv2xif_la_OBJECTS)
@@ -275,9 +278,10 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfinderxif_la_SOURCES) $(libftixif_la_SOURCES) \
 	$(libmfeaclientxif_la_SOURCES) $(libmfeaxif_la_SOURCES) \
 	$(libmld6igmpclientxif_la_SOURCES) \
-	$(libmld6igmpxif_la_SOURCES) $(libospfv2xif_la_SOURCES) \
-	$(libospfv3xif_la_SOURCES) $(libpacketaclxif_la_SOURCES) \
-	$(libpimxif_la_SOURCES) $(libpolicybackendxif_la_SOURCES) \
+	$(libmld6igmpxif_la_SOURCES) $(libolsr4xif_la_SOURCES) \
+	$(libospfv2xif_la_SOURCES) $(libospfv3xif_la_SOURCES) \
+	$(libpacketaclxif_la_SOURCES) $(libpimxif_la_SOURCES) \
+	$(libpolicybackendxif_la_SOURCES) \
 	$(libpolicyredist4xif_la_SOURCES) \
 	$(libpolicyredist6xif_la_SOURCES) $(libpolicyxif_la_SOURCES) \
 	$(libprofileclientxif_la_SOURCES) $(libprofilexif_la_SOURCES) \
@@ -312,9 +316,10 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libfinderxif_la_SOURCES) $(libftixif_la_SOURCES) \
 	$(libmfeaclientxif_la_SOURCES) $(libmfeaxif_la_SOURCES) \
 	$(libmld6igmpclientxif_la_SOURCES) \
-	$(libmld6igmpxif_la_SOURCES) $(libospfv2xif_la_SOURCES) \
-	$(libospfv3xif_la_SOURCES) $(libpacketaclxif_la_SOURCES) \
-	$(libpimxif_la_SOURCES) $(libpolicybackendxif_la_SOURCES) \
+	$(libmld6igmpxif_la_SOURCES) $(libolsr4xif_la_SOURCES) \
+	$(libospfv2xif_la_SOURCES) $(libospfv3xif_la_SOURCES) \
+	$(libpacketaclxif_la_SOURCES) $(libpimxif_la_SOURCES) \
+	$(libpolicybackendxif_la_SOURCES) \
 	$(libpolicyredist4xif_la_SOURCES) \
 	$(libpolicyredist6xif_la_SOURCES) $(libpolicyxif_la_SOURCES) \
 	$(libprofileclientxif_la_SOURCES) $(libprofilexif_la_SOURCES) \
@@ -344,6 +349,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CONTRIB_SUBDIRS = @CONTRIB_SUBDIRS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -521,6 +527,8 @@ top_srcdir = @top_srcdir@
 
 # MLD6/IGMP Client Interface
 
+# OLSR V1 IPv4 Interface
+
 # OSPF V2 Interface
 
 # OSPF V3 Interface
@@ -587,17 +595,17 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libfearawpkt6clientxif.la libfinderxif.la \
 	libfindereventnotifierxif.la libfindereventobserverxif.la \
 	libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la \
-	libmld6igmpxif.la libmld6igmpclientxif.la libospfv2xif.la \
-	libospfv3xif.la libpacketaclxif.la libpimxif.la \
-	libpolicyxif.la libpolicybackendxif.la libpolicyredist4xif.la \
-	libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la \
-	libredist4xif.la libredist6xif.la libredisttransaction4xif.la \
-	libredisttransaction6xif.la libribxif.la libribclientxif.la \
-	libripxif.la libripngxif.la librtrmgrxif.la \
-	librtrmgr_clientxif.la libsocket4xif.la libsocket4userxif.la \
-	libsocket6xif.la libsocket6userxif.la libstaticroutesxif.la \
-	libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la \
-	libtestxif.la
+	libmld6igmpxif.la libmld6igmpclientxif.la libolsr4xif.la \
+	libospfv2xif.la libospfv3xif.la libpacketaclxif.la \
+	libpimxif.la libpolicyxif.la libpolicybackendxif.la \
+	libpolicyredist4xif.la libpolicyredist6xif.la libprofilexif.la \
+	libprofileclientxif.la libredist4xif.la libredist6xif.la \
+	libredisttransaction4xif.la libredisttransaction6xif.la \
+	libribxif.la libribclientxif.la libripxif.la libripngxif.la \
+	librtrmgrxif.la librtrmgr_clientxif.la libsocket4xif.la \
+	libsocket4userxif.la libsocket6xif.la libsocket6userxif.la \
+	libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la \
+	libxorpifmibxif.la libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -634,6 +642,7 @@ libmfeaxif_la_SOURCES = mfea_xif.hh mfea_xif.cc
 libmfeaclientxif_la_SOURCES = mfea_client_xif.hh mfea_client_xif.cc
 libmld6igmpxif_la_SOURCES = mld6igmp_xif.hh mld6igmp_xif.cc
 libmld6igmpclientxif_la_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
+libolsr4xif_la_SOURCES = olsr4_xif.hh olsr4_xif.cc
 libospfv2xif_la_SOURCES = ospfv2_xif.hh ospfv2_xif.cc
 libospfv3xif_la_SOURCES = ospfv3_xif.hh ospfv3_xif.cc
 libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
@@ -774,6 +783,8 @@ libmld6igmpclientxif.la: $(libmld6igmpclientxif_la_OBJECTS) $(libmld6igmpclientx
 	$(CXXLINK)  $(libmld6igmpclientxif_la_OBJECTS) $(libmld6igmpclientxif_la_LIBADD) $(LIBS)
 libmld6igmpxif.la: $(libmld6igmpxif_la_OBJECTS) $(libmld6igmpxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libmld6igmpxif_la_OBJECTS) $(libmld6igmpxif_la_LIBADD) $(LIBS)
+libolsr4xif.la: $(libolsr4xif_la_OBJECTS) $(libolsr4xif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libolsr4xif_la_OBJECTS) $(libolsr4xif_la_LIBADD) $(LIBS)
 libospfv2xif.la: $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_LIBADD) $(LIBS)
 libospfv3xif.la: $(libospfv3xif_la_OBJECTS) $(libospfv3xif_la_DEPENDENCIES) 
@@ -868,6 +879,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mld6igmp_client_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mld6igmp_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/olsr4_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ospfv2_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ospfv3_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet_acl_xif.Plo@am__quote@

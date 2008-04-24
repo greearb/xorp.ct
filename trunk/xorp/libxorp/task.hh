@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/task.hh,v 1.9 2007/02/16 22:46:23 pavlin Exp $
+// $XORP: xorp/libxorp/task.hh,v 1.10 2008/01/04 03:16:40 pavlin Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -99,6 +99,8 @@ private:
 
 class TaskList {
 public:
+    ~TaskList();
+
     /**
      * Expire all pending @ref XorpTask objects associated with @ref
      * TaskList.

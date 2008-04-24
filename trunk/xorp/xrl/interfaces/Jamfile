@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/interfaces/Jamfile,v 1.4 2007/09/07 12:48:57 bms Exp $
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.5 2007/10/04 20:46:17 pavlin Exp $
 #
 
 #
@@ -47,6 +47,7 @@ Library libmfeaxif : mfea_xif.cc ;
 Library libmfeaclientxif : mfea_client_xif.cc ;
 Library libmld6igmpxif : mld6igmp_xif.cc ;
 Library libmld6igmpclientxif : mld6igmp_client_xif.cc ;
+Library libolsr4xif : olsr4_xif.cc ;
 Library libospfv2xif : ospfv2_xif.cc ;
 Library libospfv3xif : ospfv3_xif.cc ;
 Library libpacketaclxif : packet_acl_xif.cc ;
@@ -107,6 +108,7 @@ XorpXrlXif <xrl!interfaces>mfea_xif.cc <xrl!interfaces>mfea_xif.hh : mfea.xif ;
 XorpXrlXif <xrl!interfaces>mfea_client_xif.cc <xrl!interfaces>mfea_client_xif.hh : mfea_client.xif ;
 XorpXrlXif <xrl!interfaces>mld6igmp_xif.cc <xrl!interfaces>mld6igmp_xif.hh : mld6igmp.xif ;
 XorpXrlXif <xrl!interfaces>mld6igmp_client_xif.cc <xrl!interfaces>mld6igmp_client_xif.hh : mld6igmp_client.xif ;
+XorpXrlXif <xrl!interfaces>olsr4_xif.cc <xrl!interfaces>olsr4_xif.hh : olsr4.xif ;
 XorpXrlXif <xrl!interfaces>ospfv2_xif.cc <xrl!interfaces>ospfv2_xif.hh : ospfv2.xif ;
 XorpXrlXif <xrl!interfaces>ospfv3_xif.cc <xrl!interfaces>ospfv3_xif.hh : ospfv3.xif ;
 XorpXrlXif <xrl!interfaces>packet_acl_xif.cc <xrl!interfaces>packet_acl_xif.hh : packet_acl.xif ;

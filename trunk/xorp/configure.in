@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.213 2007/09/14 01:26:53 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.214 2008/03/10 20:57:54 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.213 2007/09/14 01:26:53 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.214 2008/03/10 20:57:54 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -136,6 +136,9 @@ AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${prefix}",
 # We'd like to use ac_abs_srcdir, except it's not available just here.
 AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "${_REAL_SRC_ROOT}",
 		   [Define path to the top-level source directory])
+
+dnl Default to building no contrib components.
+CONTRIB_SUBDIRS=""
 
 dnl ---------------------------------------------------------------------------
 dnl Compiler probing and basic tools (libtool prerequisites)
@@ -316,6 +319,17 @@ AC_ARG_WITH([snmp],
 	     MIBS="";]
 )
 AC_SUBST(MIBS)
+
+dnl -----------------------------------------
+dnl --with-olsr
+dnl -----------------------------------------
+AC_ARG_WITH([olsr],
+	    AC_HELP_STRING([--with-olsr],
+			   [build XORP OLSRv1 implementation in contrib/olsr]),
+	    [olsr="yes";
+	     CONTRIB_SUBDIRS="$CONTRIB_SUBDIRS olsr";],
+	    [olsr="no";]
+)
 
 dnl -----------------------------------------
 dnl --with-path-to-snmpd
@@ -1075,11 +1089,39 @@ if test "${enable_debug_linker_maps}" = "yes" ; then
     LDFLAGS="--Wl,-M --Wl,--cref ${LDFLAGS}"
 fi
 
-dnl ---------------------------------------------------------------------------
-dnl Add files to under-go substitution here.
-dnl ---------------------------------------------------------------------------
+dnl -------------------------------------------------------------
+dnl Generate makefiles for optional components in contrib.
+dnl -------------------------------------------------------------
 
-AC_OUTPUT(
+dnl This is crude and tedious, but it's about as modular as
+dnl autoconf gets.  These are NOT separate autoconf packages
+dnl (more developer overhead), unlike snmp, which has to be
+dnl because it needs shared linkage.
+dnl
+dnl We need to make sure that we invoke AC_SUBST for CONTRIB_SUBDIRS
+dnl before AC_CONFIG_FILE is invoked to generate contrib/Makefile,
+dnl or they will not be built by a top level "gmake" command.
+dnl
+dnl Whilst this means CONTRIB_SUBDIRS is spammed to all the Makefiles,
+dnl that's the price of using an antiquitated build system.
+
+if test "x${CONTRIB_SUBDIRS}" != "x" ; then
+    for c in ${CONTRIB_SUBDIRS} ; do
+	case $c in
+	    olsr)
+		AC_CONFIG_FILES([contrib/olsr/Makefile])
+		AC_CONFIG_FILES([contrib/olsr/tools/Makefile])
+		;;
+        esac
+    done
+fi
+AC_SUBST(CONTRIB_SUBDIRS)
+
+dnl -------------------------------------------------------------
+dnl Generate makefiles for core XORP components.
+dnl -------------------------------------------------------------
+
+AC_CONFIG_FILES([
     Jamrules
     Makefile
     MakefileRootCheck
@@ -1098,6 +1140,7 @@ AC_OUTPUT(
     docs/mfea/Makefile
     docs/mld6igmp/Makefile
     docs/multicast/Makefile
+    docs/olsr/Makefile
     docs/pim/Makefile
     docs/pim_testsuite/Makefile
     docs/rib/Makefile
@@ -1147,10 +1190,14 @@ AC_OUTPUT(
     xrl/interfaces/Makefile
     xrl/targets/Makefile
     xrl/tests/Makefile
-,
-    echo timestamp > stamp-h
-)
+])
 
+
+dnl -------------------------------------------------------
+dnl Perform substitutions.
+dnl -------------------------------------------------------
+
+AC_OUTPUT
 
 dnl -----------------------------------------
 dnl Print the compiler flags

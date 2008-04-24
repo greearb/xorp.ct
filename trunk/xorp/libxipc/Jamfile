@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxipc/Jamfile,v 1.2 2007/04/17 21:40:48 pavlin Exp $
+# $XORP: xorp/libxipc/Jamfile,v 1.3 2007/04/20 07:17:43 pavlin Exp $
 #
 
 SubDir TOP libxipc ;
@@ -62,7 +62,7 @@ if $(MAKE_CHECK) {
  LINKLIBS_REGRESSION_COMMON =
 	libfinder
 	libxipc
-	libcomm	
+	libcomm
 	libxorp
 	;
  REGRESSION_TESTS =

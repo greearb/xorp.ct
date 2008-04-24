@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/etc/templates/rib.cmds,v 1.10 2007/03/22 20:48:18 bms Exp $ */
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.11 2007/03/22 22:11:17 pavlin Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -721,6 +721,59 @@ show route table ipv6 unicast ospf winners terse {
      %module: rib;
      %tag: HELP "Show OSPFv3 that reach forwarding engine (terse format)";
 }
+
+
+/*
+ * OLSRv1 IPv4 show route commands
+ */
+show route table ipv4 unicast olsr {
+     %command: "rib/tools/show_routes ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1";
+}
+
+show route table ipv4 unicast olsr winners {
+     %command: "rib/tools/show_routes ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine";
+}
+
+show route table ipv4 unicast olsr brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1 (brief format)";
+}
+
+show route table ipv4 unicast olsr winners brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine (brief format)";
+}
+
+show route table ipv4 unicast olsr detail {
+     %command: "rib/tools/show_routes -d ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1 (detailed format)";
+}
+
+show route table ipv4 unicast olsr winners detail {
+     %command: "rib/tools/show_routes -d ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine (detailed format)";
+}
+
+show route table ipv4 unicast olsr terse {
+     %command: "rib/tools/show_routes -t ribin $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes from OLSRv1 (terse format)";
+}
+
+show route table ipv4 unicast olsr winners terse {
+     %command: "rib/tools/show_routes -t ribout $4 $5 $6" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show OLSRv1 that reach forwarding engine (terse format)";
+}
+
 
 /*
  * Show winning routes (unfiltered output from "all" routing table).

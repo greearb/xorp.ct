@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.36 2007/08/09 00:47:04 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.37 2007/10/04 20:46:17 pavlin Exp $
 ##
 
 ###############################################################################
@@ -132,6 +132,10 @@ libmld6igmpxif_la_SOURCES = mld6igmp_xif.hh mld6igmp_xif.cc
 # MLD6/IGMP Client Interface
 noinst_LTLIBRARIES += libmld6igmpclientxif.la
 libmld6igmpclientxif_la_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
+
+# OLSR V1 IPv4 Interface
+noinst_LTLIBRARIES += libolsr4xif.la
+libolsr4xif_la_SOURCES = olsr4_xif.hh olsr4_xif.cc
 
 # OSPF V2 Interface
 noinst_LTLIBRARIES += libospfv2xif.la

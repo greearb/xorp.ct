@@ -1,0 +1,104 @@
+/* $XORP$ */
+/* vim:set sts=4 ts=8 sw=4 syntax=c: */
+
+/*
+** OLSRv1 for IPv4 -- operational commands.
+*/
+
+clear olsr4 database {
+    %command: "olsr/tools/clear_database" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Clear OLSRv1 databases";
+}
+
+show olsr4 {
+    %command: "" %help: "Display information about OLSRv1 for IPv4";
+    %module: olsr4;
+}
+
+
+/*
+ * Interfaces.
+ */
+
+show olsr4 interface {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 interface status";
+}
+
+
+/*
+ * Links.
+ */
+
+show olsr4 link {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 link status";
+}
+
+
+/*
+ * Neighbors.
+ */
+
+show olsr4 neighbor {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 one-hop neighbor status";
+}
+
+
+/*
+ * Two-hop links.
+ */
+
+show olsr4 twohop-link {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 two-hop link status";
+}
+
+
+/*
+ * Two-hop neighbors.
+ */
+
+show olsr4 twohop-neighbor {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 two-hop neighbor status";
+}
+
+/*
+ * MID entries.
+ */
+
+show olsr4 mid {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 Multiple Interface database";
+}
+
+
+/*
+ * TC entries.
+ */
+
+show olsr4 topology {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 Topology Control database";
+}
+
+
+/*
+ * HNA entries.
+ */
+
+show olsr4 external {
+    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %module: olsr4;
+    %tag: HELP "Show OLSRv1 external routes";
+}

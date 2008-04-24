@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8 sw=4:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -28,7 +29,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.39 2007/09/09 21:00:38 bms Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.40 2008/01/04 03:16:44 pavlin Exp $"
 
 
 #include "libxorp_module.h"
@@ -225,6 +226,13 @@ TimerList::TimerList(ClockBase* clock)
 
 TimerList::~TimerList()
 {
+#ifdef notyet
+    // Attempting to plug the leak causes problems elsewhere.
+    map<int, Heap*>::iterator ii;
+    for (ii = _heaplist.begin(); ii != _heaplist.end(); ii++)
+	delete (*ii).second;
+#endif
+
 #ifdef HOST_OS_WINDOWS
     if (_hirestimer != NULL)
 	CloseHandle(_hirestimer);

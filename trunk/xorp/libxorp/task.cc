@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8 sw=4:
 
 // Copyright (c) 2006-2008 International Computer Science Institute
 //
@@ -13,7 +14,7 @@
 // legally binding.
 //
 
-#ident "$XORP: xorp/libxorp/task.cc,v 1.7 2007/02/16 22:46:23 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.8 2008/01/04 03:16:40 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -144,6 +145,18 @@ XorpTask::scheduled() const
 
 // ----------------------------------------------------------------------------
 // TaskList
+
+TaskList::~TaskList()
+{
+#ifdef notyet
+    // Attempting to plug the leak causes problems elsewhere.
+    while (! _rr_list.empty()) {
+	map<int, RoundRobinQueue*>::iterator ii = _rr_list.begin();
+	delete (*ii).second;
+	_rr_list.erase(ii);
+    }
+#endif
+}
 
 XorpTask
 TaskList::new_oneoff_task(const OneoffTaskCallback& cb,

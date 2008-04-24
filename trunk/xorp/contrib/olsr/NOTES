@@ -1,0 +1,353 @@
+NOTES
+-----
+
+
+Process and XRL naming conventions
+==================================
+
+The XORP OLSR v1 routing processes are named "olsr" and suffixed with the
+protocol version in use, e.g. "olsr4" and "olsr6", or "raolsr" for example.
+If OLSR v2 is implemented in future, it will be named "olsrv2" and
+suffixed differently, e.g. "olsrv2_4", "olsrv2_6".
+
+Whilst XORP's configuration template syntax supports the notion of the
+same protocol supporting multiple address families, OLSRv1 must be
+considered a separate protocol when run for each address family.
+
+
+Platform issues
+===============
+
+ * XORP/OLSR currently depends upon the FEA's ability to determine
+   the name of the interface where a datagram was received on this
+   socket. This capability is known to work under FreeBSD and Linux.
+   It is not guaranteed to work on all Windows versions.
+
+   Specifically, the 'sockid' field is ignored by low level I/O in
+   the OLSR routing process -- it can be used to map an FEA socket to
+   an OLSR interface, however this mapping is not currently implemented.
+
+ * Windows has had a new socket option to explicitly request the reception
+   of IPv4 broadcast traffic since Windows XP was released, named
+   IP_RECEIVE_BROADCAST. XORP does not currently support this option.
+   It is likely that this breaks XORP/OLSR on newer Windows releases.
+
+
+Protocol Simulator
+==================
+
+XORP/OLSR incorporates a command-driven OLSR network simulator. This
+is not intended to be a complete network simulator; it is intended for
+exercising the XORP implementation, and implementing regression tests for
+expected behaviour. As such, the functions it offers are geared towards
+verification and validation of the OLSR protocol.
+
+If a more complete network simulation is required, i.e. with flexible
+path characteristics, please consider using OpNet or NS-2.
+
+test_simulator makes use of XORP's event loop library to operate. Separate
+Olsr class instances are created for each node. A simple command language
+is used to configure the simulation, and it runs in the user process time
+domain; there are no soft/hard real-time capabilities.
+
+Normally the protocol simulator is invoked from a set of Python scripts,
+neither they nor the simulator are required for actual deployment of
+XORP/OLSR.
+
+
+Neighbor Lookups
+================
+
+Most components which process OLSR protocol messages have to check if
+the containing packet originated from a symmetric one-hop neighbor to
+comply with the RFC.
+
+There is scope for further optimization if needed -- the local link database
+contains a composite index of both addresses uniquely identifying a link pair.
+
+We use NeighborIDs as a unique key within the code, because whilst an
+OLSR neighbor is uniquely keyed by its protocol address, those addresses
+may be bigger than 32 bits when running OLSRv1-IPv6 or RA-OLSR in 802.11s,
+making key comparison more expensive.
+
+
+Incremental SPT
+===============
+
+This is an optional future feature of XORP's Shortest Path Tree (SPT)
+implementation, intended to be used by link-state routing protocols such
+as OSPF and OLSR. It is not yet supported.
+
+Currently, a run of the Dijkstra algorithm over the entire OLSR link-state
+database is triggered every time an OLSR topology change happens. This is
+a deferred computation; the process schedules it to take place after
+any other pending protocol state changes have been processed.
+
+Other known implementations of OLSR do this, and this is keeping in common
+with XORP's implementation of OSPF, where one instance of Dijkstra is run
+for each configured OSPF area.
+
+However, this may need to be revisited in future for deployment of OLSR
+in environments where the topology is large and also highly dynamic; the
+incremental implementation of SPT may yield faster forwarding plane
+convergence and route propagation in such cases.
+
+
+MID-derived Route Computation
+=============================
+
+In Section 10, step 4, the OLSR RFC specifies that additional host routes
+MUST be pushed to the local node's forwarding plane for each MID entry
+which corresponds to a remote node anywhere in the known OLSR topology.
+
+In the XORP implementation, MID-derived routes are created directly from
+the output of the Spt class. This simplifies the implementation, by
+completely avoiding the possibility of adding duplicate MID-derived routes;
+and should perform acceptably well for most general uses of OLSR.
+
+This simplicity, however, comes at the expense of triggering an SPT
+calculation whenever the contents of the MID database change, even if there
+was no change in the SPT.
+
+Additionally, OLSR protocol routes are tagged with VT_MID as they flow into
+the policy engine, allowing them to be manipulated by network engineers.
+
+The reasoning behind this approach is as follows: If the MID database has
+changed, the OLSR topology has probably changed too, as MIDs are not
+originated by a node until its OLSR configuration includes more than one
+interface.
+
+Furthermore, OLSR must add host routes to a node's main address, even if it
+has not yet received a MID message from the node. This is particularly
+important for TC entries where no link state is known for interfaces on
+the remote node which do not point towards the local node; that is, the TC
+and MID databases are out of phase. The RFC covers this specific case at
+the end of Section 10, Step 2.
+
+This implementation choice for MID needs to be revisited in future if
+Incremental SPT is implemented. In this case, there is scope for moving 
+the MID processing into the RouteManager class, and triggering recomputation
+of MID-derived host routes separately from the SPT.
+
+
+MPR Selection
+=============
+
+The reason for the existence in MPRs is clear, it is an attempt to optimize
+the flooding of messages whilst eliminating loops, in the absence of
+opportunities to build shortest-path trees where the topology of the
+net is changing rapidly. As such it is an essential part of the OLSR
+protocol, it is not optional.
+
+The definition of the MPR set in English is: select the minimal subset
+of N such that all N2 are covered, where N is the set of reachable
+forwarding one-hop neighbors, and where N2 are reachable strict two-hop
+neighbors.
+
+The RFC specifies a heuristic for MPR selection. This heuristic is
+specified to run per interface. However, this heuristic can be
+resource intensive to implement. It may only offer real performance
+benefits in situations where there is more than one OLSR interface,
+each using a directional or steerable antenna, with a non-overlapping
+two-hop neighborhood which changes rapidly.
+
+One approach towards implementing the above heuristic is to use a
+per-interface candidate MPR set. This however may only be worth the
+time/space tradeoff in the case where the two-hop nodes tend to be
+clustered around particular one-hop neighbors for large sizes of N.
+
+The implementation of MPR selection in xorp_olsr has more in common
+with the implementation in olsrd, in which the space of all reachable
+strict 2-hop neighbors is enumerated. This is not what is specified
+in the OLSR RFC however it is far simpler to implement.
+
+Whenever the neighborhood changes in a way which would affect MPR selection,
+the full MPR computation is rescheduled as all members of N and N2 must be
+considered together when computing the global MPR set.
+
+To avoid using secondary classes for storage, we keep state in the
+instances of Neighbor and TwoHopNeighbor which shouldn't really be
+exposed to other parts of the system other than MPR selection.
+
+In particular the coverage() count on a TwoHopNeighbor may be out of
+sync with the is_mpr() flag on individual Neighbor objects, as may
+the global set, until we atomically swap the new set with the old set
+at the end of this function.
+
+As such, the MPR computation state is a good candidate for a Memento
+pattern, particularly so if interested parties wish to implement the
+per-interface heuristic described in the RFC.
+
+
+Distributed MPR Selection
+=========================
+
+As with other XORP routing processes, distributed computation of certain
+protocol variables is possible, but may not be desirable in all situations,
+therefore the implementation is aimed at the general case.
+
+To perform incremental, interface-based MPR set computation in xorp_olsr
+one would typically introduce a class into Neighborhood to represent the
+changes in the MPR candidacy, per interface. Class Neighbor then becomes
+responsible for triggering the deferred MPR recomputation task, by pushing
+its state change to this per-Face class (let's call it FaceMprState).
+
+In this way, the MPR computation may only be recomputed for the whole
+set of N2 reachable from I whenever the neighborhood reachable from I alone
+changes, as documented in the RFC. However as explained above this may
+only be useful for large sizes of N2(per I) where there is no significant
+overlap between instances of N2(per I) -- that is to say, the 2-hop
+neighborhood tends not to be reachable from more than one interface,
+as would be the case with an OLSR node with directional antennae and
+multiple radios.
+
+
+Multiple instances
+==================
+
+Link state protocols, of any kind, have the advantage over distance vector
+protocols that they are quick to converge. However, they require the
+exchange of more information between peers.
+
+Despite this, all networks have the problem that eventually, the overhead
+of the low level reachability information will not scale. This can be seen
+in multicast networks (PIM-SM viz PIM-DM) and with IP over 802.3 Ethernet,
+where it becomes necessary to partition backbones using switches.
+
+OSPF has the concept of areas, which summarise routes automatically at
+area borders. OLSR might benefit from areas, although implemented somewhat
+differently -- and to truly implement roaming between OLSR areas,
+encapsulation may be desirable to overcome the same addressing problems
+seen with Mobile IP.
+
+XORP as a framework already has minimal support for the notion of multiple
+instances of the same routing protocol. The object model contained in
+xorp_olsr shall hopefully make this sort of work easier to implement.
+
+
+External Route Support (HNA)
+============================
+
+The mechanism for advertising, learning and redistributing external
+routes in OLSR is known as HNA (Host and Network Association), and is
+documented in Section 12 of RFC 3626.
+
+The RFC is is ambiguous about what the last hop for an HNA route
+actually is; it is sometimes referred to as the main address of a node,
+and sometimes referred to as the interface address of a node. XORP treats
+it as the main address, as there is no way, once an HNA message is forwarded,
+to determine the original sender interface address.
+
+HNA prefixes are advertised by an OLSR origin. If the network topology is
+changing rapidly, it is possible that OLSR at the local node will not have
+converged on a route to the advertised next-hop for the HNA prefix.
+
+Currently, XORP follows the RFC by adding routes, if and only if, the
+next-hop can be resolved within OLSR's internal routing trie. This
+behaviour is similar to that of an OSPF Type 1 AS-External-LSA, however,
+HNA, as specified in the RFC, contains no metric of its own.
+
+XORP's RIB has the capability to resolve the next-hop field for routes
+learned from a given protocol, using information from another protocol.
+This functionality is necessary to support BGP; OLSR does not currently
+use it, although it could do so optionally in future.
+
+In summary: The reachability of network prefixes, advertised using HNA
+in OLSR, is strictly affected by OLSR link state (including HELLO, MID
+and TC), and is not affected by other layer 3 routing protocols.
+
+In the future: As specified in the RFC, OLSR has no provision for
+originating external routes with metrics or tags. A future enhancement is
+planned whereby HNA may be extended to advertise routes with a metric, in a
+manner similar to that of both the OSPF Type 1 and Type 2 AS-External-LSA.
+
+
+Route redistribution
+====================
+
+The XORP implementation of OLSR exposes various OLSR protocol variables
+to the XORP redistribution process, xorp_policy. These variables are
+exposed via the OlsrVarRW structure in policy_varrw.hh.
+
+These are not fully documented herein as they are subject to change,
+however, the most interesting to developers and users will be the
+type and origin fields which allow for routes originating from different
+parts of the OLSR topology, or sub-protocols, to be selectively ignored
+or rewritten using XORP's policy syntax.
+
+
+RFC-compliant OLSR Route Metrics
+================================
+
+Currently the route metrics for XORP's implementation of OLSR use
+a simple scalar scheme.
+
+ * Links to one-hop neighbors are assigned a cost based on the
+   following, in decreasing order of precedence:
+   * The interface cost is the base cost of the first hop.
+   * If the next hop is not an MPR selector, add 1.
+   * Subtract the neighbor's willingness from WILL_ALWAYS, and add
+     to the cost of the first hop, therefore deriving the first hop's
+     cost using the following formula:
+
+ first-hop-cost = (interface-cost + !is_mpr_selector) * WILL_ALWAYS) /
+                  (WILL_ALWAYS - willingness)
+
+ * Each subsequent link in the shortest-path tree has a cost of 1;
+   this is because RFC-compliant TC contains no reachability information
+   other than the presence or absence of a link.
+
+ * Equal cost multi-path (ECMP) support is not yet implemented, pending
+   changes in XORP's spanning tree implementation to support this.
+   * Ties between equal-cost next-hops at each link are broken by selecting
+     the node with the numerically lower main address; see class Vertex.
+
+ * HNA routes get assigned the cost of the path to reach their origin.
+   This is similar to the behaviour of the OLSR Type 1 AS-External-LSA
+   metric, although no metrics are advertised in RFC compliant HNA.
+
+ * The metrics thus assigned to OLSR routes are the same as their cost
+   in the spanning tree after the Dijkstra computation.
+
+The metric scheme will be revised in future to incorporate ETX and
+advertised metrics for HNA routes.
+
+
+Composite OLSR Route Metrics
+============================
+
+[ PRELIMINARY AND SUBJECT TO CHANGE -- NOT YET IMPLEMENTED ]
+
+When using OLSR in conjunction with OSPF, or other routing protocols, it
+is necessary for redistributed OLSR routes to have a meaningful metric. This
+is particularly important if a second routing protocol is used to
+interconnect separate OLSR routing domains across a non-MANET LAN.
+
+The documents which specify OLSR do not specify a metric scheme at the
+time of writing, therefore it has been necessary to invent one.
+
+A functional syntax for setting the metric in XORP's policy statements MAY
+be added at a future date; currently, only simple assignment of a fixed
+value is possible.
+
+RFC 3626 compliant OLSR states in section 10 that next-hops should be
+preferred by their willingness and MPR selector status. Therefore, the
+criteria, in descending order of precedence, for an OLSR route metric
+are as follows:
+
+ * The interface cost, if applicable.
+ * MPR selector status of the immediate next-hop.
+ * Willingness of the immediate next-hop.
+ * EITHER:
+   * the ETX path metric, OR
+   * the hop count on the SPT path.
+ * A load sharing metric, if applicable, based on a histogram of interface
+   utilization and available link bandwidth.
+
+A composite metric scheme will be used which takes account of the above
+criteria.
+
+OSPF supports a 24-bit wide metric space for AS-External-LSAs. Recall that
+OSPF's Type 1 metric also adds the cost to the ASBR for the external path
+type. The metric scheme used for XORP/OLSR will in future allow for scaling
+or base costs to be added when redistributing the OLSR routes into OSPF.

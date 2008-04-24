@@ -1,0 +1,36 @@
+#
+# $XORP$
+#
+
+Optimized Link State Routing (OLSR) Implementation
+==================================================
+
+This directory contains the XORP implementation of the OLSR protocol,
+version 1, as specified in RFC 3626.
+
+Configuration
+=============
+
+Startup
+=======
+
+Documentation
+=============
+
+Please note: The use of the undirected broadcast address 255.255.255.255
+is inconsistent across host IPv4 stacks. Currently it is known to work
+only under Linux, using the SO_BINDTODEVICE option. Future revisions of
+this code will use the pcap facilities integrated into the FEA to support
+a wider variety of platforms.
+
+Testing
+=======
+
+To build and run regression tests, use "jam -dMAKE_CHECK=1".
+
+Status
+======
+
+September 2007: Initial development.
+December 2007: Interim code drop of RFC-compliant OLSR with no XRL support.
+January 2008: Preliminary release of RFC-compliant OLSR for IPv4.

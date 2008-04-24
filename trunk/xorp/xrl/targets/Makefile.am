@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.68 2007/08/09 00:47:07 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.69 2007/11/21 10:37:36 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -23,6 +23,7 @@ tgt_files		+= finder.tgt
 tgt_files		+= finder_client.tgt
 tgt_files		+= mfea.tgt
 tgt_files		+= mld6igmp.tgt
+tgt_files		+= olsr4.tgt
 tgt_files		+= ospfv2.tgt
 tgt_files		+= ospfv3.tgt
 tgt_files		+= packet_acl.tgt
@@ -68,6 +69,7 @@ noinst_LTLIBRARIES	+= libfinderbase.la
 noinst_LTLIBRARIES	+= libfinderclientbase.la
 noinst_LTLIBRARIES	+= libmfeabase.la
 noinst_LTLIBRARIES	+= libmld6igmpbase.la
+noinst_LTLIBRARIES	+= libolsr4base.la
 noinst_LTLIBRARIES	+= libospfv2base.la
 noinst_LTLIBRARIES	+= libospfv3base.la
 noinst_LTLIBRARIES	+= libpacketaclbase.la
@@ -199,6 +201,17 @@ $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
 		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/mld6igmp.xif
+
+# OLSR V1 IPv4
+libolsr4base_la_SOURCES = olsr4_base.hh olsr4_base.cc
+$(srcdir)/olsr4_base.hh $(srcdir)/olsr4_base.cc:			\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/finder_event_observer.xif		\
+		$(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_redist4.xif			\
+		$(INTERFACES_DIR)/profile.xif				\
+		$(INTERFACES_DIR)/socket4_user.xif			\
+		$(INTERFACES_DIR)/olsr4.xif
 
 # OSPF V2
 libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc

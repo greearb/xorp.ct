@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/Jamfile,v 1.4 2007/10/04 20:46:16 pavlin Exp $
+# $XORP: xorp/ospf/Jamfile,v 1.5 2007/11/14 03:01:24 atanu Exp $
 #
 
 SubDir TOP ospf ;
@@ -14,7 +14,7 @@ SubIncludeOnce TOP policy backend ;
 SubIncludeOnce TOP policy common ;
 SubDir TOP ospf ;
 
-Library libospf : 
+Library libospf :
 	auth.cc
 	area_router.cc
 	external.cc
@@ -31,7 +31,7 @@ Library libospf :
 	vlink.cc
 	;
 
-LINKLIBS_OSPF_COMMON = 
+LINKLIBS_OSPF_COMMON =
 	libospf
 	libospfv2base
 	libospfv3base
@@ -68,9 +68,18 @@ if $(MAKE_CHECK) {
  Main test_routing_table : test_routing.cc ;
  Main test_build_lsa_main : test_build_lsa.cc test_build_lsa_main.cc ;
  Main test_routing_interactive : test_routing_interactive.cc test_build_lsa.cc ;
- LinkLibraries	test_checksum test_packet test_peering test_routing
-		test_routing_table test_build_lsa_main
-		test_routing_interactive : $(LINKLIBS_OSPF_COMMON) ;
+
+ LinkLibraries
+	test_checksum
+	test_packet
+	test_peering
+	test_routing
+	test_routing_database
+	test_routing_table
+	test_build_lsa_main
+	test_routing_interactive :
+	$(LINKLIBS_OSPF_COMMON)
+	;
 } # MAKE_CHECK
 
 InstallBin $(PREFIX)/ospf : xorp_ospfv2 xorp_ospfv3 ;

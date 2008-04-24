@@ -1,0 +1,576 @@
+/* $XORP$ */
+/* vim:set sts=4 ts=8 sw=4 syntax=c: */
+
+/*
+** OLSR v1 for IPv4 -- protocol XRL interface.
+*/
+
+interface olsr4/0.1 {
+
+    /*
+     * Routing process variables.
+     */
+
+    /**
+     * Enable/Disable tracing.
+     *
+     * @param tvar trace variable.
+     * @param enable set to true to enable, false to disable.
+     */
+    trace ? tvar:txt \
+	    & enable:bool
+
+
+    /*
+     * Routing process commands.
+     */
+
+    /**
+     * Clear all OLSR protocol databases.
+     */
+    clear_database
+
+
+    /*
+     * Protocol variables.
+     */
+
+    /**
+     * Set the willingness-to-forward.
+     *
+     * @param willingness the new willingness-to-forward.
+     */
+    set_willingness ? willingness:u32
+
+    /**
+     * Get the willingness-to-forward.
+     */
+    get_willingness -> willingness:u32
+
+    /**
+     * Set the MPR_COVERAGE.
+     *
+     * @param coverage the new MPR_COVERAGE value.
+     */
+    set_mpr_coverage ? coverage:u32
+
+    /**
+     * Get the MPR_COVERAGE.
+     */
+    get_mpr_coverage -> coverage:u32
+
+    /**
+     * Set the TC_REDUNDANCY.
+     *
+     * @param coverage the new TC_REDUNDANCY value as follows:
+     *  "mprs" "mprs-and-selectors" "all"
+     */
+    set_tc_redundancy ? redundancy:txt
+
+    /**
+     * Get the TC_REDUNDANCY.
+     */
+    get_tc_redundancy -> redundancy:txt
+
+    /**
+     * Enable/disable TC fisheye mode.
+     *
+     * @param enabled true to enable fisheye, false to disable it.
+     */
+    set_tc_fisheye ? enabled:bool
+
+    /**
+     * Get the current TC fisheye mode.
+     */
+    get_tc_fisheye -> enabled:bool
+
+    /**
+     * Set the current HNA base cost metric.
+     */
+    set_hna_base_cost ? metric:u32
+
+    /**
+     * Get the current HNA base cost metric.
+     */
+    get_hna_base_cost -> metric:u32
+
+
+    /*
+     * Global protocol timers.
+     */
+
+    /**
+     * Set the HELLO_INTERVAL.
+     *
+     * @param interval the new HELLO_INTERVAL.
+     */
+    set_hello_interval ? interval:u32
+
+    /**
+     * Get the HELLO_INTERVAL.
+     */
+    get_hello_interval -> interval:u32
+
+    /**
+     * Set the REFRESH_INTERVAL.
+     *
+     * @param interval the new REFRESH_INTERVAL.
+     */
+    set_refresh_interval ? interval:u32
+
+    /**
+     * Get the REFRESH_INTERVAL.
+     */
+    get_refresh_interval -> interval:u32
+
+    /**
+     * Set the TC_INTERVAL.
+     *
+     * @param interval the new TC_INTERVAL.
+     */
+    set_tc_interval ? interval:u32
+
+    /**
+     * Get the TC_INTERVAL.
+     */
+    get_tc_interval -> interval:u32
+
+    /**
+     * Set the MID_INTERVAL.
+     *
+     * @param interval the new MID_INTERVAL.
+     */
+    set_mid_interval ? interval:u32
+
+    /**
+     * Get the MID_INTERVAL.
+     */
+    get_mid_interval -> interval:u32
+
+    /**
+     * Set the HNA_INTERVAL.
+     *
+     * @param interval the new HNA_INTERVAL.
+     */
+    set_hna_interval ? interval:u32
+
+    /**
+     * Get the HNA_INTERVAL.
+     */
+    get_hna_interval -> interval:u32
+
+    /**
+     * Set the DUP_HOLD_TIME.
+     *
+     * @param dup_hold_time the new DUP_HOLD_TIME.
+     */
+    set_dup_hold_time ? dup_hold_time:u32
+
+    /**
+     * Get the DUP_HOLD_TIME.
+     */
+    get_dup_hold_time -> dup_hold_time:u32
+
+    /**
+     * Set the main address.
+     *
+     * @param addr Our main IPv4 address which OLSR uses as a router ID.
+     */
+    set_main_address ? addr:ipv4
+
+    /**
+     * Get the main address.
+     */
+    get_main_address -> addr:ipv4
+
+
+    /*
+     * Interface bindings.
+     */
+
+    /**
+     * Create an IPv4 address binding for OLSR.
+     *
+     * OLSR must be bound to a given protocol address on each
+     * interface, which means interface bindings in OLSRv1 must
+     * be keyed by interface name as well as protocol address.
+     *
+     * Only a single IPv4 address may be thus bound, and the
+     * address must be supplied when the binding is created.
+     * This is to workaround the lack of RFC 3927 link-scoped IPv4
+     * capability in most IPv4 implementations.
+     *
+     * The addition of address is not instantaneous. OLSR has to
+     * instantiate state in the FEA to send and receive packets.
+     * Once instantiated, the address must be explicitly enabled
+     * with the set_binding_enabled XRL.
+     *
+     * @param ifname the interface that owns vif that has addr
+     * @param vifname virtual interface owning addr
+     * @param local_addr the address to be added.
+     * @param local_port the port to listen for control traffic on.
+     * @param all_nodes_addr the address to use for transmission.
+     * @param all_nodes_port the port to use for transmission.
+     */
+    bind_address ? ifname:txt			\
+		 & vifname:txt			\
+		 & local_addr:ipv4		\
+		 & local_port:u32		\
+		 & all_nodes_addr:ipv4		\
+		 & all_nodes_port:u32
+
+    /**
+     * Destroy an IPv4 address binding for OLSR.
+     *
+     * @param ifname the interface to unbind.
+     * @param vifname the vif to unbind.
+     */
+    unbind_address ? ifname:txt			\
+		   & vifname:txt
+
+    /**
+     * Set the enabled state of an IPv4 address binding for OLSR.
+     *
+     * @param ifname the interface to set enabled state for.
+     * @param vifname the vif to set enabled state for.
+     * @param enabled true if OLSR is to be configured administratively
+     *                up on the interface,
+     *                false if it is to be configured down.
+     */
+    set_binding_enabled ? ifname:txt		\
+		        & vifname:txt		\
+		        & enabled:bool
+
+    /**
+     * Get the state of an IPv4 address binding for OLSR.
+     *
+     * @param ifname the interface to query.
+     * @param vifname the vif to qurery
+     * @param enabled true if OLSR is configured administratively up
+     *                on the given interface.
+     */
+    get_binding_enabled ? ifname:txt		\
+		        & vifname:txt		\
+		        -> enabled:bool
+
+    /**
+     * Change the UDP address and port where OLSR listens for
+     * control traffic on this interface.
+     *
+     * In order to do this the process must tell the FEA to tear down
+     * and re-bind the control traffic socket.
+     *
+     * @param ifname the name of the interface.
+     * @param vifname the name of the vif.
+     * @param local_addr the new local IPv4 address.
+     * @param local_port the new local port number.
+     */
+    change_local_addr_port ? ifname:txt		\
+			   & vifname:txt	\
+			   & local_addr:ipv4	\
+			   & local_port:u32
+
+    /**
+     * Change the address where OLSR sends control traffic
+     * on the given interface.
+     *
+     * By default OLSR will attempt to use the all-ones
+     * broadcast address.
+     * Currently multicast addresses are NOT supported.
+     *
+     * @param ifname the name of the interface.
+     * @param vifname the name of the vif.
+     * @param all_nodes_addr the address to use.
+     * @param all_nodes_port the port to use.
+     */
+    change_all_nodes_addr_port ? ifname:txt		\
+			       & vifname:txt		\
+			       & all_nodes_addr:ipv4	\
+			       & all_nodes_port:u32
+
+    /*
+     * Interface properties.
+     */
+
+    /**
+     * Get the list of interfaces currently configured for OLSR.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_interface_info XRL.
+     */
+    get_interface_list -> interfaces:list
+
+    /**
+     * Get the per-interface information for the given interface.
+     *
+     * @param faceid interface ID returned by get_interface_list.
+     * @param ifname the name of the interface.
+     * @param vifname the name of the vif.
+     * @param local_addr the IPv4 address where OLSR is listening.
+     * @param local_port the UDP port where OLSR is listening.
+     * @param all_nodes_addr the IPv4 address where OLSR sends packets.
+     * @param all_nodes_port the UDP port where OLSR sends packets.
+     */
+    get_interface_info ? faceid:u32		\
+	->					\
+	ifname:txt				\
+	& vifname:txt				\
+	& local_addr:ipv4			\
+	& local_port:u32			\
+	& all_nodes_addr:ipv4			\
+	& all_nodes_port:u32
+
+    /**
+     * Set the edge cost of an interface/vif.
+     *
+     * @param ifname the name of the interface.
+     * @param vifname the name of the vif.
+     * @param cost the new edge cost of the interface.
+     */
+    set_interface_cost ? ifname:txt		\
+		       & vifname:txt		\
+		       & cost:u32
+
+    /**
+     * Get the per-interface statistics for the given interface.
+     *
+     * @param ifname the interface to query.
+     * @param vifname the vif to qurery
+     * @param bad_packets the number of bad packets received.
+     * @param bad_messages the number of bad messages received.
+     * @param messages_from_self the number of messages which appeared
+     *                           to be from our own main address.
+     * @param unknown_messages the number of messages which could not
+     *                         be decoded.
+     * @param duplicates the number of messages which appeared to be
+     *                   duplicates, according to histogram based
+     *                   duplicate detection.
+     * @param forwarded the number of messages which have been forwarded
+     *                  to the rest of the OLSR topology on this interface.
+     */
+    get_interface_stats ? ifname:txt		\
+			& vifname:txt		\
+			->			\
+			bad_packets:u32		\
+			& bad_messages:u32	\
+			& messages_from_self:u32 \
+			& unknown_messages:u32	\
+			& duplicates:u32	\
+			& forwarded:u32
+
+
+    /*
+     * Routing process database state.
+     */
+
+    /**
+     * Get the list of one-hop links.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_link_info XRL.
+     */
+    get_link_list -> links:list
+
+    /**
+     * Get the information for a one-hop link.
+     * TODO: Add ETX support.
+     *
+     * @param linkid Link entry ID returned by get_link_list.
+     * @param local_addr the interface address of the local end of
+     *                   this link.
+     * @param remote_addr the interface address of the remote end of
+     *                    this link.
+     * @param main_addr the main address of the neighbor at the
+     *                  remote end of this link.
+     * @param link_type the type of this link.
+     * @param sym_time the time in seconds for which this link will
+     *                 be considered symmetric.
+     * @param asym_time the time in seconds for which this link will
+     *                  be considered asymmetric.
+     * @param hold_time the time in seconds until this link expires.
+     */
+    get_link_info ? linkid:u32				\
+	->						\
+	local_addr:ipv4					\
+	& remote_addr:ipv4				\
+	& main_addr:ipv4				\
+	& link_type:u32					\
+	& sym_time:u32					\
+	& asym_time:u32					\
+	& hold_time:u32
+
+    /**
+     * Get the list of one-hop neighbors.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_neighbor_info XRL.
+     */
+    get_neighbor_list -> neighbors:list
+
+    /**
+     * Get the information for a one-hop neighbor.
+     *
+     * @param nid Neighbor entry ID returned by get_neighbor_list.
+     * @param main_addr the main address of this neighbor.
+     * @param willingness the willingness of this neighbor to forward.
+     * @param degree the number of symmetric strict neighbors of this
+     *               neighbor, excluding one-hop neighbors and this node.
+     * @param link_count the number of links to this neighbor.
+     * @param twohop_link_count the number of two-hop links which
+     *                          transit this neighbor as next-hop.
+     * @param is_advertised true if this neighbor is in the Advertised
+     *                      Neighbor Set of this node.
+     * @param is_sym true if this neighbor is symmetric.
+     * @param is_mpr true if this neighbor is selected as an MPR
+     *               by this node.
+     * @param is_mpr_selector true if this neighbor chooses this node
+     *                        as an MPR.
+     */
+    get_neighbor_info ? nid:u32				\
+	->						\
+	main_addr:ipv4					\
+	& willingness:u32				\
+	& degree:u32					\
+	& link_count:u32				\
+	& twohop_link_count:u32				\
+	& is_advertised:bool				\
+	& is_sym:bool					\
+	& is_mpr:bool					\
+	& is_mpr_selector:bool
+
+    /**
+     * Get the list of two-hop links.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_twohop_link_info XRL.
+     */
+    get_twohop_link_list -> twohop_links:list
+
+    /**
+     * Get the information for a two-hop link.
+     * TODO: Add ETX support.
+     *
+     * @param tlid two-hop link ID returned by get_twohop_link_list.
+     * @param last_face_id the internal interface ID where advertisement
+     *                     of this two-hop link was last seen.
+     * @param nexthop_addr the main address of the one-hop neighbor
+     *                     where this two-hop link exists.
+     * @param dest_addr the main address of the two-hop neighbor at
+     *                  the remote end of this link.
+     * @param hold_time the time in seconds until this two-hop link expires.
+     */
+    get_twohop_link_info ? tlid:u32			\
+	->						\
+	last_face_id:u32				\
+	& nexthop_addr:ipv4				\
+	& dest_addr:ipv4				\
+	& hold_time:u32
+
+    /**
+     * Get the list of two-hop neighbors.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_twohop_neighbor_info XRL.
+     */
+    get_twohop_neighbor_list -> twohop_neighbors:list
+
+    /**
+     * Get the information for a two-hop neighbor.
+     *
+     * @param tnid two-hop neighbor ID returned by get_twohop_neighbor_list.
+     * @param main_addr the main address of this two-hop neighbor.
+     * @param is_strict true if this two-hop neighbor is not also
+     *                  a two-hop neighbor.
+     * @param link_count the number of two-hop links that exist to
+     *                  this two-hop neighbor.
+     * @param reachability the number of MPR candidates which cover this
+     *                     two-hop neighbor.
+     * @param coverage the number of selected MPRs which cover this two-hop
+     *                 neighbor.
+     */
+    get_twohop_neighbor_info ? tnid:u32			\
+	->						\
+	main_addr:ipv4					\
+	& is_strict:bool				\
+	& link_count:u32				\
+	& reachability:u32				\
+	& coverage:u32
+
+    /**
+     * Get the list of learned Multiple Interface Declaration (MID)
+     * entries.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_mid_entry XRL.
+     */
+    get_mid_entry_list -> mid_entries:list
+
+    /**
+     * Get the information contained in a MID entry.
+     *
+     * @param midid MID entry ID returned by get_mid_entry_list.
+     * @param main_addr the main address of the OLSR node
+     * @param iface_addr the interface address being advertised.
+     * @param distance the distance measured between this node and
+     *                 the origin of the MID packet containing this entry.
+     * @param hold_time the time in seconds until this entry expires.
+     */
+    get_mid_entry ? midid:u32				\
+	->						\
+	main_addr:ipv4					\
+	& iface_addr:ipv4				\
+	& distance:u32					\
+	& hold_time:u32
+
+    /**
+     * Get the list of learned Topology Control (TC) entries.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_tc_entry XRL.
+     */
+    get_tc_entry_list -> tc_entries:list
+
+    /**
+     * Get the information contained in a TC entry.
+     *
+     * @param tcid TC entry ID returned by get_tc_entry_list.
+     * @param destination the main address of the advertised destination.
+     * @param lasthop the main address of the node advertising this entry.
+     * @param distance the distance measured between this node and
+     *                 the origin of the TC packet containing this entry.
+     * @param seqno the advertised sequence number of this entry.
+     * @param hold_time the time in seconds until this entry expires.
+     */
+    get_tc_entry ? tcid:u32				\
+	->						\
+	destination:ipv4				\
+	& lasthop:ipv4					\
+	& distance:u32					\
+	& seqno:u32					\
+	& hold_time:u32
+
+    /**
+     * Get the list of learned external route (HNA) entries.
+     *
+     * Return a list of u32 type values. Each value is an internal
+     * ID that can be used with the get_hna_entry XRL.
+     */
+    get_hna_entry_list -> hna_entries:list
+
+    /**
+     * Get the information contained in a HNA entry.
+     *
+     * @param hnaid HNA entry ID returned by get_hna_entry_list.
+     * @param destination the main address of the advertised destination.
+     * @param lasthop the main address of the node advertising this entry.
+     * @param distance the distance measured between this node and
+     *                 the origin of the TC packet containing this entry.
+     * @param hold_time the time in seconds until this entry expires.
+     */
+    get_hna_entry ? hnaid:u32				\
+	->						\
+	destination:ipv4net				\
+	& lasthop:ipv4					\
+	& distance:u32					\
+	& hold_time:u32
+}

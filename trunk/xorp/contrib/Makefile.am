@@ -1,7 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/contrib/Makefile.am,v 1.1 2004/06/10 16:14:42 hodson Exp $
+## $XORP: xorp/contrib/Makefile.am,v 1.2 2006/03/17 00:24:14 pavlin Exp $
 ##
+
+# Conditional applications
+SUBDIRS = @CONTRIB_SUBDIRS@
 
 ################################################################
 ##

@@ -69,6 +69,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CONTRIB_SUBDIRS = @CONTRIB_SUBDIRS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -188,7 +189,7 @@ target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = bgp design_arch fea libxipc libxorp mfea mld6igmp multicast \
-	pim pim_testsuite rib rtrmgr slides snmp test_harness \
+	olsr pim pim_testsuite rib rtrmgr slides snmp test_harness \
 	user_manual xorpdev_101
 
 # -- Extra files and directories to add to the distribution

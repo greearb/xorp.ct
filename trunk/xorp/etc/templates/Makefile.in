@@ -67,6 +67,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CLI_CURSES_LIB = @CLI_CURSES_LIB@
+CONTRIB_SUBDIRS = @CONTRIB_SUBDIRS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -191,11 +192,11 @@ top_srcdir = @top_srcdir@
 # -- Data
 data_DATA = host.cmds bgp.cmds bgp.tp fea.cmds fea.tp fib2mrib.tp \
 	igmp.cmds igmp.tp interfaces.tp mfea.cmds mfea4.tp mfea6.cmds \
-	mfea6.tp mld.cmds mld.tp ospfv2.cmds ospfv2.tp ospfv3.cmds \
-	ospfv3.tp pim.cmds pimsm4.tp pim6.cmds pimsm6.tp plumbing.tp \
-	policy.tp protocols.tp rib.cmds rib.tp rip.cmds rip.tp \
-	ripng.cmds ripng.tp rtrmgr.tp snmp.tp static_routes.tp \
-	xorpsh.cmds misc.cmds
+	mfea6.tp mld.cmds mld.tp olsr4.cmds olsr4.tp ospfv2.cmds \
+	ospfv2.tp ospfv3.cmds ospfv3.tp pim.cmds pimsm4.tp pim6.cmds \
+	pimsm6.tp plumbing.tp policy.tp protocols.tp rib.cmds rib.tp \
+	rip.cmds rip.tp ripng.cmds ripng.tp rtrmgr.tp snmp.tp \
+	static_routes.tp xorpsh.cmds misc.cmds
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(data_DATA)
