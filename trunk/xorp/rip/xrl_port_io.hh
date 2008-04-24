@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_port_io.hh,v 1.13 2008/01/04 03:17:34 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_io.hh,v 1.14 2008/03/06 04:53:29 pavlin Exp $
 
 #ifndef __XRL_PORT_IO_HH__
 #define __XRL_PORT_IO_HH__
@@ -26,7 +26,6 @@
 
 class XrlError;
 class XrlRouter;
-class SocketXrlQueue;
 
 template <typename A>
 class XrlPortIO
