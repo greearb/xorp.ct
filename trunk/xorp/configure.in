@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.214 2008/03/10 20:57:54 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.215 2008/04/24 15:19:45 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.214 2008/03/10 20:57:54 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.215 2008/04/24 15:19:45 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -1105,16 +1105,19 @@ dnl
 dnl Whilst this means CONTRIB_SUBDIRS is spammed to all the Makefiles,
 dnl that's the price of using an antiquitated build system.
 
+with_olsr=false
 if test "x${CONTRIB_SUBDIRS}" != "x" ; then
     for c in ${CONTRIB_SUBDIRS} ; do
 	case $c in
 	    olsr)
+		with_olsr=true
 		AC_CONFIG_FILES([contrib/olsr/Makefile])
 		AC_CONFIG_FILES([contrib/olsr/tools/Makefile])
 		;;
         esac
     done
 fi
+AM_CONDITIONAL(WITH_OLSR, $with_olsr)
 AC_SUBST(CONTRIB_SUBDIRS)
 
 dnl -------------------------------------------------------------

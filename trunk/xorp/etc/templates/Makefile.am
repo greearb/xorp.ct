@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/etc/templates/Makefile.am,v 1.20 2007/11/12 21:48:41 pavlin Exp $
+## $XORP: xorp/etc/templates/Makefile.am,v 1.21 2008/04/24 15:20:17 bms Exp $
 ##
 
 # Redefine the data installation directory
@@ -16,7 +16,6 @@ data_DATA	 += interfaces.tp
 data_DATA	 += mfea.cmds mfea4.tp
 data_DATA	 += mfea6.cmds mfea6.tp
 data_DATA	 += mld.cmds mld.tp
-data_DATA	 += olsr4.cmds olsr4.tp
 data_DATA	 += ospfv2.cmds ospfv2.tp
 data_DATA	 += ospfv3.cmds ospfv3.tp
 data_DATA	 += pim.cmds pimsm4.tp
@@ -32,6 +31,10 @@ data_DATA	 += snmp.tp
 data_DATA	 += static_routes.tp
 data_DATA	 += xorpsh.cmds
 data_DATA	 += misc.cmds
+
+if WITH_OLSR
+data_DATA	 += olsr4.cmds olsr4.tp
+endif
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	  = $(data_DATA)
