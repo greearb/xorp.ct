@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamrules.in,v 1.8 2007/09/04 16:40:08 bms Exp $
+# $XORP: xorp/Jamrules.in,v 1.9 2007/09/10 10:42:02 bms Exp $
 #
 
 # TODO: Obey LOCATE_TARGET for building XORP from a directory
@@ -41,12 +41,11 @@ PCAP_LIB	?= -lpcap ;
 # top level stuff
 HDRS		 = . $(SEARCH_SOURCE) $(TOP) ;
 EXEMODE		 = 755 ;
-LINKLIBS	+= $(CRYPTO_LIB) $(CLI_CURSES_LIB) ;
+LINKLIBS	+= $(CRYPTO_LIB) $(CLI_CURSES_LIB) @LIBS@ ;
 
 # If GNU C++ is used, it must be used as the linker.
-if $(C++) = "g++"
-{
- LINK = $(C++) ;
+switch $(C++) {
+ case "g++*" : LINK = $(C++) ;
 }
 
 #
