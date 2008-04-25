@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.60 2007/12/07 20:50:16 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.61 2007/12/10 23:26:33 mjh Exp $
 #
 
 #
@@ -50,20 +50,35 @@ ID=192.150.187.78
 AS=65008
 USE4BYTEAS=false
 
-# IBGP
+# IBGP - IPV4
 PORT1=10001
 PEER1_PORT=20001
 PEER1_AS=$AS
 
-# EBGP
+# EBGP - IPV4
 PORT2=10002
 PEER2_PORT=20002
 PEER2_AS=65000
 
-# EBGP
+# EBGP - IPV4
 PORT3=10003
 PEER3_PORT=20003
 PEER3_AS=65003
+
+# IBGP - IPV6
+PORT4=10004
+PEER4_PORT=20004
+PEER4_AS=$AS
+
+# EBGP - IPV6
+PORT5=10005
+PEER5_PORT=20005
+PEER5_AS=65000
+
+# EBGP - IPV6
+PORT6=10006
+PEER6_PORT=20006
+PEER6_AS=65003
 
 HOLDTIME=5
 
@@ -82,23 +97,47 @@ configure_bgp()
     # Don't try and talk to the rib.
     register_rib ""
 
+    # IBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT1 $PEER $PEER1_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
 
+    # EBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT2 $PEER $PEER2_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
 
+    # EBGP - IPV4
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
     set_parameter $LOCALHOST $PORT3 $PEER $PEER3_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
+
+    # IBGP - IPV6
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT $PEER4_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT4 $PEER $PEER4_PORT MultiProtocol.IPv6.Unicast true
+    enable_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT
+
+    # EBGP - IPV6
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT5 $PEER $PEER5_PORT $PEER5_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT5 $PEER $PEER5_PORT MultiProtocol.IPv6.Unicast true
+    enable_peer $LOCALHOST $PORT5 $PEER $PEER5_PORT
+
+    # EBGP - IPV6
+    PEER=$HOST
+    NEXT_HOP=192.150.187.78
+    add_peer $LOCALHOST $PORT6 $PEER $PEER6_PORT $PEER6_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT6 $PEER $PEER6_PORT MultiProtocol.IPv6.Unicast true
+    enable_peer $LOCALHOST $PORT6 $PEER $PEER6_PORT
 }
 
 wait_for_peerdown()
@@ -221,6 +260,29 @@ test1()
 
     # Establish the new connection.
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
+    coord peer2 assert established
+}
+
+# This function exists to test saved IPv6 feeds and is not normally run.
+test1_ipv6()
+{
+    TFILE=$TFILE
+
+    echo "TEST1 IPV6 - Inject a saved feed then drop peering - $TFILE"
+
+    # Reset the peers
+    coord reset
+    coord target $HOST $PORT5
+    coord initialise attach peer2
+
+    coord peer2 establish AS $PEER5_AS holdtime 0 id 192.150.187.102 ipv6 true
+    coord peer2 assert established
+
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE
+
+    # Wait for the file to be transmitted by the test peer.
+    bgp_peer_unchanged peer2
+
     coord peer2 assert established
 }
 
