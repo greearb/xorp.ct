@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# $XORP$
+# $XORP: xorp/bgp/harness/harness.py,v 1.1 2005/03/23 19:58:44 atanu Exp $
 
 # Use the test harness code to establish a BGP session.
 # This session can be used to inject updates or to log all data from the peer.
@@ -63,7 +63,7 @@ def pending():
     else:
         return 1
 
-def establish(host, myas, myid, logfile, remove_logfile):
+def establish(host, myas, myid, ipv4, logfile, remove_logfile):
     """
     Establish a session with host and conditionally log the whole session.
     """
@@ -78,8 +78,13 @@ def establish(host, myas, myid, logfile, remove_logfile):
         coord("peer1 dump sent mrtd ipv4 traffic %s" % logfile)
         coord("peer1 dump recv mrtd ipv4 traffic %s" % logfile)
     
-    coord("peer1 establish AS %s holdtime 0 id %s keepalive false" %
-          (myas, myid))
+    if ipv4:
+        family = ""
+    else:
+        family = "ipv6 true"
+        
+    coord("peer1 establish AS %s holdtime 0 id %s keepalive false %s" %
+          (myas, myid, family))
 
 def inject(injectfile, count):
     """
@@ -106,6 +111,8 @@ usage: %s [-h|--help]
 \t -e -p peer -a AS -b BGP-ID [-i injectfile] [-c route_count] [-l logfile]
 \t -r
 \t -s
+\t -4
+\t -6
 """
 
 def main():
@@ -114,7 +121,7 @@ def main():
         print us % sys.argv[0]
 
     try:
-	opts, args = getopt.getopt(sys.argv[1:], "hei:c:p:a:b:l:rs", \
+	opts, args = getopt.getopt(sys.argv[1:], "hei:c:p:a:b:l:rs46", \
 				   ["help", \
                                     "establish", \
                                     "inject=", \
@@ -125,6 +132,8 @@ def main():
                                     "logfile=", \
                                     "remove", \
                                     "stop", \
+                                    "ipv4", \
+                                    "ipv6", \
                                     ])
     except getopt.GetoptError:
 	usage()
@@ -133,6 +142,7 @@ def main():
     establishp = False
     injectp = False
     stopp = False
+    ipv4 = True
     peer = ""
     asnum = "0"
     router_id = "10.0.0.1"
@@ -163,9 +173,13 @@ def main():
 	    remove_logfile = True
 	if o in ("-s", "--stop"):
             stopp = True
+	if o in ("-4", "--ipv4"):
+            ipv4 = True
+	if o in ("-6", "--ipv6"):
+            ipv4 = False
         
     if establishp:
-        establish(peer, asnum, router_id, logfile, remove_logfile)
+        establish(peer, asnum, router_id, ipv4, logfile, remove_logfile)
 
     if injectp:
         inject(injectfile, route_count)
