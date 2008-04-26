@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.15 2008/04/22 13:13:45 bms Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.16 2008/04/22 19:38:39 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -380,7 +380,7 @@ xorp_srandomdev()
 		 * XXX: We need "junk_seed" to set the "junk" value to avoid
 		 * compiler warning about using an uninitialized variable.
 		 */
-		junk_seed[0] = 0;
+		memset(&junk_seed[0], 0, sizeof(junk_seed[0]));
 		junk = junk_seed[1];
 		gettimeofday(&tv, NULL);
 		xorp_srandom((getpid() << 16) ^ tv.tv_sec ^ tv.tv_usec ^ junk);
