@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.15 2008/01/04 03:15:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.16 2008/04/26 00:59:42 pavlin Exp $"
 
 
 //
@@ -80,7 +80,11 @@ FeaNode::startup()
 	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
     }
     if (_firewall_manager.start(error_msg) != XORP_OK) {
-	XLOG_FATAL("Cannot start FirewallManager: %s", error_msg.c_str());
+	//
+	// XXX: Just print an error in case the firewall support
+	// in the underlying system is not enabled.
+	//
+	XLOG_ERROR("Cannot start FirewallManager: %s", error_msg.c_str());
     }
     if (_fibconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start FibConfig: %s", error_msg.c_str());
