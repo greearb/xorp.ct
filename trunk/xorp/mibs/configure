@@ -22440,9 +22440,14 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile snmpdscripts/Makefile tests/Makefile tests/test_bgpmib.sh snmpdscripts/startsnmp"
+ac_config_files="$ac_config_files Makefile snmpdscripts/Makefile tests/Makefile"
 
-ac_config_commands="$ac_config_commands default"
+
+ac_config_files="$ac_config_files snmpdscripts/startsnmp"
+
+ac_config_files="$ac_config_files tests/test_bgpmib.sh"
+
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -23054,9 +23059,8 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "snmpdscripts/Makefile") CONFIG_FILES="$CONFIG_FILES snmpdscripts/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
-    "tests/test_bgpmib.sh") CONFIG_FILES="$CONFIG_FILES tests/test_bgpmib.sh" ;;
     "snmpdscripts/startsnmp") CONFIG_FILES="$CONFIG_FILES snmpdscripts/startsnmp" ;;
-    "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
+    "tests/test_bgpmib.sh") CONFIG_FILES="$CONFIG_FILES tests/test_bgpmib.sh" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -23713,10 +23717,8 @@ echo "$as_me: error: cannot create directory $as_dir" >&2;}
   done
 done
  ;;
-    "default":C) echo timestamp > stamp-h
-    chmod a+x tests/test_bgpmib.sh
-    chmod a+x snmpdscripts/startsnmp
- ;;
+    "snmpdscripts/startsnmp":F) chmod a+x snmpdscripts/startsnmp ;;
+    "tests/test_bgpmib.sh":F) chmod a+x tests/test_bgpmib.sh ;;
 
   esac
 done # for ac_tag

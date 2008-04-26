@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/mibs/configure.in,v 1.27 2007/04/16 23:26:40 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.28 2008/03/10 20:57:57 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.27 2007/04/16 23:26:40 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.28 2008/03/10 20:57:57 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -561,17 +561,20 @@ dnl ---------------------------------------------------------------------------
 dnl Add files to under-go substitution here.
 dnl ---------------------------------------------------------------------------
 
-AC_OUTPUT(
+AC_CONFIG_FILES([
     Makefile
     snmpdscripts/Makefile
     tests/Makefile
-    tests/test_bgpmib.sh
-    snmpdscripts/startsnmp
-,
-    echo timestamp > stamp-h
-    chmod a+x tests/test_bgpmib.sh
-    chmod a+x snmpdscripts/startsnmp
-)
+])
+
+AC_CONFIG_FILES([snmpdscripts/startsnmp], [chmod a+x snmpdscripts/startsnmp])
+AC_CONFIG_FILES([tests/test_bgpmib.sh], [chmod a+x tests/test_bgpmib.sh])
+
+dnl -------------------------------------------------------
+dnl Perform substitutions.
+dnl -------------------------------------------------------
+
+AC_OUTPUT
 
 dnl ------------------------
 dnl Print the compiler flags
