@@ -76,6 +76,21 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+/* Define to 1 if you have IPF firewall support */
+#undef HAVE_FIREWALL_IPF
+
+/* Define to 1 if you have IPFW2 firewall support with atomic set */
+#undef HAVE_FIREWALL_IPFW2
+
+/* Define to 1 if you have NETFILTER firewall support */
+#undef HAVE_FIREWALL_NETFILTER
+
+/* Define to 1 if you have NETFILTER for IPv6 firewall support */
+#undef HAVE_FIREWALL_NETFILTER_IPV6
+
+/* Define to 1 if you have PF firewall support */
+#undef HAVE_FIREWALL_PF
+
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
@@ -190,6 +205,14 @@
 /* Define to 1 if you have the <linux/mroute.h> header file. */
 #undef HAVE_LINUX_MROUTE_H
 
+/* Define to 1 if you have the <linux/netfilter_ipv4/ip_tables.h> header file.
+   */
+#undef HAVE_LINUX_NETFILTER_IPV4_IP_TABLES_H
+
+/* Define to 1 if you have the <linux/netfilter_ipv6/ip6_tables.h> header
+   file. */
+#undef HAVE_LINUX_NETFILTER_IPV6_IP6_TABLES_H
+
 /* Define to 1 if you have the <linux/netlink.h> header file. */
 #undef HAVE_LINUX_NETLINK_H
 
@@ -249,6 +272,15 @@
 
 /* Define to 1 if you have the <netinet/ip6.h> header file. */
 #undef HAVE_NETINET_IP6_H
+
+/* Define to 1 if you have the <netinet/ip_compat.h> header file. */
+#undef HAVE_NETINET_IP_COMPAT_H
+
+/* Define to 1 if you have the <netinet/ip_fil.h> header file. */
+#undef HAVE_NETINET_IP_FIL_H
+
+/* Define to 1 if you have the <netinet/ip_fw.h> header file. */
+#undef HAVE_NETINET_IP_FW_H
 
 /* Define to 1 if you have the <netinet/ip.h> header file. */
 #undef HAVE_NETINET_IP_H
@@ -312,23 +344,14 @@
 /* Define to 1 if you have the <net/pfkeyv2.h> header file. */
 #undef HAVE_NET_PFKEYV2_H
 
+/* Define to 1 if you have the <net/pfvar.h> header file. */
+#undef HAVE_NET_PFVAR_H
+
 /* Define to 1 if you have the <net/route.h> header file. */
 #undef HAVE_NET_ROUTE_H
 
 /* Define to 1 if you have the <net/vlan/if_vlan_var.h> header file. */
 #undef HAVE_NET_VLAN_IF_VLAN_VAR_H
-
-/* Define to 1 if the host has IPF support in the build environment */
-#undef HAVE_PACKETFILTER_IPF
-
-/* Define to 1 if the host has IPFW2 support in the build environment */
-#undef HAVE_PACKETFILTER_IPFW2
-
-/* Define to 1 if the host has IPTABLES support in the build environment */
-#undef HAVE_PACKETFILTER_IPTABLES
-
-/* Define to 1 if the host has PF support in the build environment */
-#undef HAVE_PACKETFILTER_PF
 
 /* Define to 1 if you have the <paths.h> header file. */
 #undef HAVE_PATHS_H

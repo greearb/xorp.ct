@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.6 2007/12/28 05:12:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.cc,v 1.7 2008/01/04 03:16:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -22,10 +22,13 @@
 
 #include "fea/ifconfig.hh"
 #include "fea/fibconfig.hh"
+#include "fea/firewall_manager.hh"
 
 #include "fea/data_plane/ifconfig/ifconfig_property_dummy.hh"
 #include "fea/data_plane/ifconfig/ifconfig_get_click.hh"
 #include "fea/data_plane/ifconfig/ifconfig_set_click.hh"
+#include "fea/data_plane/firewall/firewall_get_dummy.hh"
+#include "fea/data_plane/firewall/firewall_set_dummy.hh"
 #include "fea/data_plane/fibconfig/fibconfig_forwarding_dummy.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_click.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_click.hh"
@@ -61,6 +64,8 @@ FeaDataPlaneManagerClick::FeaDataPlaneManagerClick(FeaNode& fea_node)
       _ifconfig_property_dummy(NULL),
       _ifconfig_get_click(NULL),
       _ifconfig_set_click(NULL),
+      _firewall_get_dummy(NULL),
+      _firewall_set_dummy(NULL),
       _fibconfig_forwarding_dummy(NULL),
       _fibconfig_entry_get_click(NULL),
       _fibconfig_entry_set_click(NULL),
@@ -84,6 +89,8 @@ FeaDataPlaneManagerClick::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_property_dummy == NULL);
     XLOG_ASSERT(_ifconfig_get_click == NULL);
     XLOG_ASSERT(_ifconfig_set_click == NULL);
+    XLOG_ASSERT(_firewall_get_dummy == NULL);
+    XLOG_ASSERT(_firewall_set_dummy == NULL);
     XLOG_ASSERT(_fibconfig_forwarding_dummy == NULL);
     XLOG_ASSERT(_fibconfig_entry_get_click == NULL);
     XLOG_ASSERT(_fibconfig_entry_set_click == NULL);
@@ -94,24 +101,27 @@ FeaDataPlaneManagerClick::load_plugins(string& error_msg)
     // Load the plugins
     //
     //
-    // TODO: XXX: For the time being Click uses the
-    // IfConfigPropertyDummy plugin.
+    // TODO: XXX: For the time being some of the plugins
+    // used by Click are dummy.
     //
     _ifconfig_property_dummy = new IfConfigPropertyDummy(*this);
     _ifconfig_get_click = new IfConfigGetClick(*this);
     _ifconfig_set_click = new IfConfigSetClick(*this);
     //
-    // TODO: XXX: For the time being Click uses the
-    // FibConfigForwardingDummy plugin.
+    _firewall_get_dummy = new FirewallGetDummy(*this);
+    _firewall_set_dummy = new FirewallSetDummy(*this);
     //
     _fibconfig_forwarding_dummy = new FibConfigForwardingDummy(*this);
     _fibconfig_entry_get_click = new FibConfigEntryGetClick(*this);
     _fibconfig_entry_set_click = new FibConfigEntrySetClick(*this);
     _fibconfig_table_get_click = new FibConfigTableGetClick(*this);
     _fibconfig_table_set_click = new FibConfigTableSetClick(*this);
+    //
     _ifconfig_property = _ifconfig_property_dummy;
     _ifconfig_get = _ifconfig_get_click;
     _ifconfig_set = _ifconfig_set_click;
+    _firewall_get = _firewall_get_dummy;
+    _firewall_set = _firewall_set_dummy;
     _fibconfig_forwarding = _fibconfig_forwarding_dummy;
     _fibconfig_entry_get = _fibconfig_entry_get_click;
     _fibconfig_entry_set = _fibconfig_entry_set_click;
@@ -132,6 +142,8 @@ FeaDataPlaneManagerClick::unload_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_property_dummy != NULL);
     XLOG_ASSERT(_ifconfig_get_click != NULL);
     XLOG_ASSERT(_ifconfig_set_click != NULL);
+    XLOG_ASSERT(_firewall_get_dummy != NULL);
+    XLOG_ASSERT(_firewall_set_dummy != NULL);
     XLOG_ASSERT(_fibconfig_forwarding_dummy != NULL);
     XLOG_ASSERT(_fibconfig_entry_get_click != NULL);
     XLOG_ASSERT(_fibconfig_entry_set_click != NULL);
@@ -150,6 +162,8 @@ FeaDataPlaneManagerClick::unload_plugins(string& error_msg)
     _ifconfig_property_dummy = NULL;
     _ifconfig_get_click = NULL;
     _ifconfig_set_click = NULL;
+    _firewall_get_dummy = NULL;
+    _firewall_set_dummy = NULL;
     _fibconfig_forwarding_dummy = NULL;
     _fibconfig_entry_get_click = NULL;
     _fibconfig_entry_set_click = NULL;
@@ -186,6 +200,24 @@ FeaDataPlaneManagerClick::register_plugins(string& error_msg)
     if (_ifconfig_set != NULL) {
 	if (ifconfig().register_ifconfig_set(_ifconfig_set, false) != XORP_OK) {
 	    error_msg = c_format("Cannot register IfConfigSet plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+    if (_firewall_get != NULL) {
+	if (firewall_manager().register_firewall_get(_firewall_get, false) != XORP_OK) {
+	    error_msg = c_format("Cannot register FirewallGet plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+    if (_firewall_set != NULL) {
+	if (firewall_manager().register_firewall_set(_firewall_set, false) != XORP_OK) {
+	    error_msg = c_format("Cannot register FirewallSet plugin "
 				 "for data plane manager %s",
 				 manager_name().c_str());
 	    unregister_plugins(dummy_error_msg);

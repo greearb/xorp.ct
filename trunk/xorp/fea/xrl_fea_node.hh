@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_node.hh,v 1.11 2007/10/11 07:12:56 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_node.hh,v 1.12 2008/01/04 03:15:51 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_NODE_HH__
@@ -37,7 +37,6 @@
 #include "xrl_io_ip_manager.hh"
 #include "xrl_io_tcpudp_manager.hh"
 #include "xrl_mfea_node.hh"
-#include "xrl_packet_acl.hh"
 
 class EventLoop;
 
@@ -151,8 +150,6 @@ private:
     XrlIoLinkManager	_xrl_io_link_manager;	// Link raw I/O manager
     XrlIoIpManager	_xrl_io_ip_manager;	// IP raw I/O manager
     XrlIoTcpUdpManager	_xrl_io_tcpudp_manager;	// TCP/UDP I/O manager
-
-    XrlPacketAclTarget	_xrl_packet_acl_target;
 
     // MFEA-related stuff
     // TODO: XXX: This should be refactored and better integrated with the FEA.

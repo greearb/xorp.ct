@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.16 2008/01/04 03:15:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_node.cc,v 1.17 2008/04/11 00:19:33 pavlin Exp $"
 
 
 //
@@ -38,7 +38,6 @@
 #include "ifconfig.hh"
 #include "libfeaclient_bridge.hh"
 #include "xrl_mfea_node.hh"
-#include "xrl_packet_acl.hh"
 
 
 XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
@@ -55,10 +54,6 @@ XrlFeaNode::XrlFeaNode(EventLoop& eventloop, const string& xrl_fea_targetname,
       _xrl_io_link_manager(_fea_node.io_link_manager(), _xrl_router),
       _xrl_io_ip_manager(_fea_node.io_ip_manager(), _xrl_router),
       _xrl_io_tcpudp_manager(_fea_node.io_tcpudp_manager(), _xrl_router),
-      _xrl_packet_acl_target(_eventloop,
-			     "packet_acl",	// TODO: XXX: hardcoded name
-			     finder_hostname, finder_port,
-			     _fea_node.pa_transaction_manager()),
       _cli_node4(AF_INET, XORP_MODULE_CLI, _eventloop),
       _xrl_cli_node(_eventloop, _cli_node4.module_name(), finder_hostname,
 		    finder_port,
@@ -90,8 +85,6 @@ int
 XrlFeaNode::startup()
 {
     wait_until_xrl_router_is_ready(eventloop(), xrl_router());
-    wait_until_xrl_router_is_ready(eventloop(),
-				   _xrl_packet_acl_target.xrl_router());
 
     if (! fea_node().is_dummy()) {
 	// XXX: The multicast-related code doesn't have dummy mode (yet)
@@ -108,8 +101,6 @@ XrlFeaNode::startup()
     xrl_fea_io().startup();
     fea_node().startup();
     xrl_fea_target().startup();
-
-    _xrl_packet_acl_target.startup();
 
     if (! fea_node().is_dummy()) {
 	// XXX: temporary enable the built-in CLI access
@@ -144,8 +135,6 @@ XrlFeaNode::shutdown()
 #endif
     }
 
-    _xrl_packet_acl_target.shutdown();
-
     return (XORP_OK);
 }
 
@@ -168,9 +157,6 @@ XrlFeaNode::is_running() const
 #endif
     }
 
-    if (_xrl_packet_acl_target.is_running())
-	return (true);
-
     //
     // Test whether all XRL operations have completed
     //
@@ -185,10 +171,6 @@ XrlFeaNode::is_running() const
 	    return (true);
 #endif
     }
-
-
-    if (_xrl_packet_acl_target.xrl_router().pending())
-	return (true);
 
     if (_xrl_router.pending())
 	return (true);

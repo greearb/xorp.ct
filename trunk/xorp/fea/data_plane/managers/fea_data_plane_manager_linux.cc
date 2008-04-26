@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.cc,v 1.7 2007/12/28 05:12:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_linux.cc,v 1.8 2008/01/04 03:16:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -30,6 +30,8 @@
 #include "fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.hh"
 #include "fea/data_plane/ifconfig/ifconfig_vlan_get_linux.hh"
 #include "fea/data_plane/ifconfig/ifconfig_vlan_set_linux.hh"
+#include "fea/data_plane/firewall/firewall_get_netfilter.hh"
+#include "fea/data_plane/firewall/firewall_set_netfilter.hh"
 #include "fea/data_plane/fibconfig/fibconfig_forwarding_proc_linux.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_netlink_socket.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.hh"
@@ -85,6 +87,8 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_observer == NULL);
     XLOG_ASSERT(_ifconfig_vlan_get == NULL);
     XLOG_ASSERT(_ifconfig_vlan_set == NULL);
+    XLOG_ASSERT(_firewall_get == NULL);
+    XLOG_ASSERT(_firewall_set == NULL);
     XLOG_ASSERT(_fibconfig_forwarding == NULL);
     XLOG_ASSERT(_fibconfig_entry_get == NULL);
     XLOG_ASSERT(_fibconfig_entry_set == NULL);
@@ -125,6 +129,11 @@ FeaDataPlaneManagerLinux::load_plugins(string& error_msg)
 #if defined(HAVE_VLAN_LINUX)
     _ifconfig_vlan_get = new IfConfigVlanGetLinux(*this);
     _ifconfig_vlan_set = new IfConfigVlanSetLinux(*this);
+#endif
+
+#if defined(HAVE_FIREWALL_NETFILTER)
+    _firewall_get = new FirewallGetNetfilter(*this);
+    _firewall_set = new FirewallSetNetfilter(*this);
 #endif
 
 #if defined(HAVE_PROC_LINUX)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.27 2008/04/23 15:22:39 bms Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.28 2008/04/23 16:58:44 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -31,6 +31,7 @@ class EventLoop;
 class FeaDataPlaneManagerClick;
 class FeaNode;
 class FibConfig;
+class FirewallManager;
 class IfConfig;
 class IoLinkManager;
 class IoIpManager;
@@ -347,6 +348,341 @@ public:
     XrlCmdError fea_fib_0_1_delete_fib_client6(
 	// Input values,
 	const string&	client_target_name);
+
+    //
+    // FEA firewall interface
+    //
+
+    /**
+     *  Start firewall configuration transaction.
+     *
+     *  @param tid the transaction ID returned by this operation.
+     */
+    XrlCmdError fea_firewall_0_1_start_transaction(
+	// Output values,
+	uint32_t&	tid);
+
+    /**
+     *  Commit firewall configuration transaction.
+     *
+     *  @param tid the transaction ID for this operation.
+     */
+    XrlCmdError fea_firewall_0_1_commit_transaction(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Abort firewall configuration transaction.
+     *
+     *  @param tid the transaction ID for this operation.
+     */
+    XrlCmdError fea_firewall_0_1_abort_transaction(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Add an IPv4 firewall entry.
+     *
+     *  @param tid the transaction ID for this operation.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter is to be
+     *  applied.
+     *
+     *  @param vifname the name of the vif where this filter is to be applied.
+     *
+     *  @param src_network the source IPv4 network address prefix.
+     *
+     *  @param dst_network the destination IPv4 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     *
+     *  @param action the action to be taken when this filter is matched. It is
+     *  one of the following keywords: "none", "pass", "drop", "reject".
+     */
+    XrlCmdError fea_firewall_0_1_add_entry4(
+	// Input values,
+	const uint32_t&	tid,
+	const uint32_t&	rule_number,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4Net&	src_network,
+	const IPv4Net&	dst_network,
+	const uint32_t&	ip_protocol,
+	const uint32_t&	src_port_begin,
+	const uint32_t&	src_port_end,
+	const uint32_t&	dst_port_begin,
+	const uint32_t&	dst_port_end,
+	const string&	action);
+
+    /**
+     *  Delete an IPv4 firewall entry.
+     *
+     *  @param tid the transaction ID for this operation.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter is to be
+     *  deleted.
+     *
+     *  @param vifname the name of the vif where this filter is to be deleted.
+     *
+     *  @param src_network the source IPv4 network address prefix.
+     *
+     *  @param dst_network the destination IPv4 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     */
+    XrlCmdError fea_firewall_0_1_delete_entry4(
+	// Input values,
+	const uint32_t&	tid,
+	const uint32_t&	rule_number,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4Net&	src_network,
+	const IPv4Net&	dst_network,
+	const uint32_t&	ip_protocol,
+	const uint32_t&	src_port_begin,
+	const uint32_t&	src_port_end,
+	const uint32_t&	dst_port_begin,
+	const uint32_t&	dst_port_end);
+
+    /**
+     *  Delete all IPv4 firewall entries.
+     *
+     *  @param tid the transaction ID for this operation.
+     */
+    XrlCmdError fea_firewall_0_1_delete_all_entries4(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Get a token for a list of IPv4 firewall entries.
+     *
+     *  @param token to be provided when calling get_entry_list_next4.
+     *
+     *  @param more true if the list is not empty.
+     */
+    XrlCmdError fea_firewall_0_1_get_entry_list_start4(
+	// Output values,
+	uint32_t&	token,
+	bool&		more);
+
+    /**
+     *  Get the next item in a list of IPv4 firewall entries.
+     *
+     *  @param token returned by a previous call to get_entry_list_start4.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter exists.
+     *
+     *  @param vifname the name of the vif where this filter exists.
+     *
+     *  @param src_network the source IPv4 network address prefix.
+     *
+     *  @param dst_network the destination IPv4 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     *
+     *  @param action the action taken when this filter is matched. It is one
+     *  of the following keywords: "none", "pass", "drop", "reject".
+     *
+     *  @param more true if the list has more items remaining.
+     */
+    XrlCmdError fea_firewall_0_1_get_entry_list_next4(
+	// Input values,
+	const uint32_t&	token,
+	// Output values,
+	uint32_t&	rule_number,
+	string&		ifname,
+	string&		vifname,
+	IPv4Net&	src_network,
+	IPv4Net&	dst_network,
+	uint32_t&	ip_protocol,
+	uint32_t&	src_port_begin,
+	uint32_t&	src_port_end,
+	uint32_t&	dst_port_begin,
+	uint32_t&	dst_port_end,
+	string&		action,
+	bool&		more);
+
+    /**
+     *  Add an IPv6 firewall entry.
+     *
+     *  @param tid the transaction ID for this operation.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter is to be
+     *  applied.
+     *
+     *  @param vifname the name of the vif where this filter is to be applied.
+     *
+     *  @param src_network the source IPv6 network address prefix.
+     *
+     *  @param dst_network the destination IPv6 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     *
+     *  @param action the action to be taken when this filter is matched. It is
+     *  one of the following keywords: "none", "pass", "drop", "reject".
+     */
+    XrlCmdError fea_firewall_0_1_add_entry6(
+	// Input values,
+	const uint32_t&	tid,
+	const uint32_t&	rule_number,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv6Net&	src_network,
+	const IPv6Net&	dst_network,
+	const uint32_t&	ip_protocol,
+	const uint32_t&	src_port_begin,
+	const uint32_t&	src_port_end,
+	const uint32_t&	dst_port_begin,
+	const uint32_t&	dst_port_end,
+	const string&	action);
+
+    /**
+     *  Delete an IPv6 firewall entry.
+     *
+     *  @param tid the transaction ID for this operation.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter is to be
+     *  deleted.
+     *
+     *  @param vifname the name of the vif where this filter is to be deleted.
+     *
+     *  @param src_network the source IPv6 network address prefix.
+     *
+     *  @param dst_network the destination IPv6 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     */
+    XrlCmdError fea_firewall_0_1_delete_entry6(
+	// Input values,
+	const uint32_t&	tid,
+	const uint32_t&	rule_number,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv6Net&	src_network,
+	const IPv6Net&	dst_network,
+	const uint32_t&	ip_protocol,
+	const uint32_t&	src_port_begin,
+	const uint32_t&	src_port_end,
+	const uint32_t&	dst_port_begin,
+	const uint32_t&	dst_port_end);
+
+    /**
+     *  Delete all IPv6 firewall entries.
+     *
+     *  @param tid the transaction ID for this operation.
+     */
+    XrlCmdError fea_firewall_0_1_delete_all_entries6(
+	// Input values,
+	const uint32_t&	tid);
+
+    /**
+     *  Get a token for a list of IPv6 firewall entries.
+     *
+     *  @param token to be provided when calling get_entry_list_next6.
+     *
+     *  @param more true if the list is not empty.
+     */
+    XrlCmdError fea_firewall_0_1_get_entry_list_start6(
+	// Output values,
+	uint32_t&	token,
+	bool&		more);
+
+    /**
+     *  Get the next item in a list of IPv6 firewall entries.
+     *
+     *  @param token returned by a previous call to get_entry_list_start6.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter exists.
+     *
+     *  @param vifname the name of the vif where this filter exists.
+     *
+     *  @param src_network the source IPv6 network address prefix.
+     *
+     *  @param dst_network the destination IPv6 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     *
+     *  @param action the action taken when this filter is matched. It is one
+     *  of the following keywords: "none", "pass", "drop", "reject".
+     *
+     *  @param more true if the list has more items remaining.
+     */
+    XrlCmdError fea_firewall_0_1_get_entry_list_next6(
+	// Input values,
+	const uint32_t&	token,
+	// Output values,
+	uint32_t&	rule_number,
+	string&		ifname,
+	string&		vifname,
+	IPv6Net&	src_network,
+	IPv6Net&	dst_network,
+	uint32_t&	ip_protocol,
+	uint32_t&	src_port_begin,
+	uint32_t&	src_port_end,
+	uint32_t&	dst_port_begin,
+	uint32_t&	dst_port_end,
+	string&		action,
+	bool&		more);
 
     //
     // FEA network interface management interface
@@ -2227,6 +2563,7 @@ private:
     Profile&			_profile;
     XrlFibClientManager&	_xrl_fib_client_manager;
     IfConfig&			_ifconfig;
+    FirewallManager&		_firewall_manager;
     FibConfig&			_fibconfig;
     IoLinkManager&		_io_link_manager;
     IoIpManager&		_io_ip_manager;

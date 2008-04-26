@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.39 2008/04/11 00:19:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.40 2008/04/23 15:22:39 bms Exp $"
 
 
 //
@@ -40,6 +40,8 @@
 #include "libxorp/profile.hh"
 
 #include "fea_node.hh"
+#include "fibconfig_transaction.hh"
+#include "firewall_transaction.hh"
 #include "ifconfig_transaction.hh"
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
@@ -61,6 +63,7 @@ XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
       _profile(profile),
       _xrl_fib_client_manager(xrl_fib_client_manager),
       _ifconfig(fea_node.ifconfig()),
+      _firewall_manager(fea_node.firewall_manager()),
       _fibconfig(fea_node.fibconfig()),
       _io_link_manager(fea_node.io_link_manager()),
       _io_ip_manager(fea_node.io_ip_manager()),
@@ -774,6 +777,352 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
     const string&	client_target_name)
 {
     return _xrl_fib_client_manager.delete_fib_client6(client_target_name);
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_start_transaction(
+    // Output values,
+    uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_firewall_manager.start_transaction(tid, error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_commit_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_firewall_manager.commit_transaction(tid, error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_abort_transaction(
+    // Input values,
+    const uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_firewall_manager.abort_transaction(tid, error_msg) != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_add_entry4(
+    // Input values,
+    const uint32_t&	tid,
+    const uint32_t&	rule_number,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4Net&	src_network,
+    const IPv4Net&	dst_network,
+    const uint32_t&	ip_protocol,
+    const uint32_t&	src_port_begin,
+    const uint32_t&	src_port_end,
+    const uint32_t&	dst_port_begin,
+    const uint32_t&	dst_port_end,
+    const string&	action)
+{
+    FirewallEntry::Action action_value = FirewallEntry::str2action(action);
+    string error_msg;
+
+    if (action_value == FirewallEntry::ACTION_INVALID) {
+	error_msg = c_format("Invalid firewall action: %s", action.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    FirewallEntry firewall_entry(rule_number, ifname, vifname,
+				 IPvXNet(src_network), IPvXNet(dst_network),
+				 ip_protocol, src_port_begin, src_port_end,
+				 dst_port_begin, dst_port_end, action_value);
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallAddEntry4(_firewall_manager, firewall_entry),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_delete_entry4(
+    // Input values,
+    const uint32_t&	tid,
+    const uint32_t&	rule_number,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4Net&	src_network,
+    const IPv4Net&	dst_network,
+    const uint32_t&	ip_protocol,
+    const uint32_t&	src_port_begin,
+    const uint32_t&	src_port_end,
+    const uint32_t&	dst_port_begin,
+    const uint32_t&	dst_port_end)
+{
+    string error_msg;
+
+    FirewallEntry::Action action_value = FirewallEntry::ACTION_ANY;
+
+    FirewallEntry firewall_entry(rule_number, ifname, vifname,
+				 IPvXNet(src_network), IPvXNet(dst_network),
+				 ip_protocol, src_port_begin, src_port_end,
+				 dst_port_begin, dst_port_end, action_value);
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallDeleteEntry4(_firewall_manager, firewall_entry),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_delete_all_entries4(
+    // Input values,
+    const uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallDeleteAllEntries4(_firewall_manager),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_get_entry_list_start4(
+    // Output values,
+    uint32_t&	token,
+    bool&	more)
+{
+    string error_msg;
+
+    if (_firewall_manager.get_entry_list_start4(token, more, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_get_entry_list_next4(
+    // Input values,
+    const uint32_t&	token,
+    // Output values,
+    uint32_t&		rule_number,
+    string&		ifname,
+    string&		vifname,
+    IPv4Net&		src_network,
+    IPv4Net&		dst_network,
+    uint32_t&		ip_protocol,
+    uint32_t&		src_port_begin,
+    uint32_t&		src_port_end,
+    uint32_t&		dst_port_begin,
+    uint32_t&		dst_port_end,
+    string&		action,
+    bool&		more)
+{
+    string error_msg;
+    FirewallEntry firewall_entry(IPv4::af());
+
+    if (_firewall_manager.get_entry_list_next4(token, firewall_entry, more,
+					       error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    // Extract the fields
+    rule_number = firewall_entry.rule_number();
+    ifname = firewall_entry.ifname();
+    vifname = firewall_entry.vifname();
+    src_network = firewall_entry.src_network().get_ipv4net();
+    dst_network = firewall_entry.dst_network().get_ipv4net();
+    ip_protocol = firewall_entry.ip_protocol();
+    src_port_begin = firewall_entry.src_port_begin();
+    src_port_end = firewall_entry.src_port_end();
+    dst_port_begin = firewall_entry.dst_port_begin();
+    dst_port_end = firewall_entry.dst_port_end();
+    action = firewall_entry.action();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_add_entry6(
+    // Input values,
+    const uint32_t&	tid,
+    const uint32_t&	rule_number,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6Net&	src_network,
+    const IPv6Net&	dst_network,
+    const uint32_t&	ip_protocol,
+    const uint32_t&	src_port_begin,
+    const uint32_t&	src_port_end,
+    const uint32_t&	dst_port_begin,
+    const uint32_t&	dst_port_end,
+    const string&	action)
+{
+    FirewallEntry::Action action_value = FirewallEntry::str2action(action);
+    string error_msg;
+
+    if (action_value == FirewallEntry::ACTION_INVALID) {
+	error_msg = c_format("Invalid firewall action: %s", action.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    FirewallEntry firewall_entry(rule_number, ifname, vifname,
+				 IPvXNet(src_network), IPvXNet(dst_network),
+				 ip_protocol, src_port_begin, src_port_end,
+				 dst_port_begin, dst_port_end, action_value);
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallAddEntry6(_firewall_manager, firewall_entry),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_delete_entry6(
+    // Input values,
+    const uint32_t&	tid,
+    const uint32_t&	rule_number,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6Net&	src_network,
+    const IPv6Net&	dst_network,
+    const uint32_t&	ip_protocol,
+    const uint32_t&	src_port_begin,
+    const uint32_t&	src_port_end,
+    const uint32_t&	dst_port_begin,
+    const uint32_t&	dst_port_end)
+{
+    string error_msg;
+
+    FirewallEntry::Action action_value = FirewallEntry::ACTION_ANY;
+
+    FirewallEntry firewall_entry(rule_number, ifname, vifname,
+				 IPvXNet(src_network), IPvXNet(dst_network),
+				 ip_protocol, src_port_begin, src_port_end,
+				 dst_port_begin, dst_port_end, action_value);
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallDeleteEntry6(_firewall_manager, firewall_entry),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_delete_all_entries6(
+    // Input values,
+    const uint32_t&	tid)
+{
+    string error_msg;
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallDeleteAllEntries6(_firewall_manager),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_get_entry_list_start6(
+    // Output values,
+    uint32_t&	token,
+    bool&	more)
+{
+    string error_msg;
+
+    if (_firewall_manager.get_entry_list_start6(token, more, error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_get_entry_list_next6(
+    // Input values,
+    const uint32_t&	token,
+    // Output values,
+    uint32_t&		rule_number,
+    string&		ifname,
+    string&		vifname,
+    IPv6Net&		src_network,
+    IPv6Net&		dst_network,
+    uint32_t&		ip_protocol,
+    uint32_t&		src_port_begin,
+    uint32_t&		src_port_end,
+    uint32_t&		dst_port_begin,
+    uint32_t&		dst_port_end,
+    string&		action,
+    bool&		more)
+{
+    string error_msg;
+    FirewallEntry firewall_entry(IPv6::af());
+
+    if (_firewall_manager.get_entry_list_next6(token, firewall_entry, more,
+					       error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    // Extract the fields
+    rule_number = firewall_entry.rule_number();
+    ifname = firewall_entry.ifname();
+    vifname = firewall_entry.vifname();
+    src_network = firewall_entry.src_network().get_ipv6net();
+    dst_network = firewall_entry.dst_network().get_ipv6net();
+    ip_protocol = firewall_entry.ip_protocol();
+    src_port_begin = firewall_entry.src_port_begin();
+    src_port_end = firewall_entry.src_port_end();
+    dst_port_begin = firewall_entry.dst_port_begin();
+    dst_port_end = firewall_entry.dst_port_end();
+    action = firewall_entry.action();
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError

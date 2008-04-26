@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_node.hh,v 1.13 2007/12/28 09:13:35 pavlin Exp $
+// $XORP: xorp/fea/fea_node.hh,v 1.14 2008/01/04 03:15:43 pavlin Exp $
 
 
 #ifndef __FEA_FEA_NODE_HH__
@@ -26,13 +26,12 @@
 #include "libxorp/profile.hh"
 
 #include "fibconfig.hh"
+#include "firewall_manager.hh"
 #include "ifconfig.hh"
 #include "io_link_manager.hh"
 #include "io_ip_manager.hh"
 #include "io_tcpudp_manager.hh"
 #include "nexthop_port_mapper.hh"
-#include "pa_table.hh"
-#include "pa_transaction.hh"
 
 class EventLoop;
 class FeaIo;
@@ -134,6 +133,14 @@ public:
     IfConfig& ifconfig() { return (_ifconfig); }
 
     /**
+     * Get the FirewallManager instance.
+     *
+     * @return a reference to the FirewallManager instance.
+     * @see FirewallManager.
+     */
+    FirewallManager& firewall_manager() { return (_firewall_manager); }
+
+    /**
      * Get the FibConfig instance.
      *
      * @return a reference to the FibConfig instance.
@@ -164,14 +171,6 @@ public:
      * @see IoTcpUdpManager.
      */
     IoTcpUdpManager& io_tcpudp_manager() { return (_io_tcpudp_manager); }
-
-    /**
-     * Get the PaTransactionManager instance.
-     *
-     * @return a reference to the PaTransactionManager instance.
-     * @see PaTransactionManager.
-     */
-    PaTransactionManager& pa_transaction_manager() { return (_pa_transaction_manager); }
 
     /**
      * Register @ref FeaDataPlaneManager data plane manager.
@@ -223,14 +222,12 @@ private:
     NexthopPortMapper		_nexthop_port_mapper;	// Next-hop port mapper
 
     IfConfig			_ifconfig;
+    FirewallManager		_firewall_manager;
     FibConfig			_fibconfig;
 
     IoLinkManager		_io_link_manager;
     IoIpManager			_io_ip_manager;
     IoTcpUdpManager		_io_tcpudp_manager;
-
-    PaTableManager		_pa_table_manager;
-    PaTransactionManager	_pa_transaction_manager;
 
     list<FeaDataPlaneManager*>	_fea_data_plane_managers;
 

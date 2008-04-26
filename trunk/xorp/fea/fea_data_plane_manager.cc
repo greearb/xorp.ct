@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.8 2007/12/28 09:01:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_data_plane_manager.cc,v 1.9 2008/01/04 03:15:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -37,6 +37,8 @@ FeaDataPlaneManager::FeaDataPlaneManager(FeaNode& fea_node,
       _ifconfig_observer(NULL),
       _ifconfig_vlan_get(NULL),
       _ifconfig_vlan_set(NULL),
+      _firewall_get(NULL),
+      _firewall_set(NULL),
       _fibconfig_forwarding(NULL),
       _fibconfig_entry_get(NULL),
       _fibconfig_entry_set(NULL),
@@ -119,6 +121,10 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
     //
     // Unload the plugins
     //
+
+    //
+    // IfConfig plugins
+    //
     if (_ifconfig_property != NULL) {
 	delete _ifconfig_property;
 	_ifconfig_property = NULL;
@@ -143,6 +149,22 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	delete _ifconfig_vlan_set;
 	_ifconfig_vlan_set = NULL;
     }
+
+    //
+    // Firewall plugins
+    //
+    if (_firewall_get != NULL) {
+	delete _firewall_get;
+	_firewall_get = NULL;
+    }
+    if (_firewall_set != NULL) {
+	delete _firewall_set;
+	_firewall_set = NULL;
+    }
+
+    //
+    // FibConfig plugins
+    //
     if (_fibconfig_forwarding != NULL) {
 	delete _fibconfig_forwarding;
 	_fibconfig_forwarding = NULL;
@@ -171,6 +193,10 @@ FeaDataPlaneManager::unload_plugins(string& error_msg)
 	delete _fibconfig_table_observer;
 	_fibconfig_table_observer = NULL;
     }
+
+    //
+    // I/O plugins
+    //
     delete_pointers_list(_io_link_list);
     delete_pointers_list(_io_ip_list);
     delete_pointers_list(_io_tcpudp_list);
@@ -188,10 +214,17 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
     //
     // Unregister the plugins in the reverse order they were registered
     //
+
+    //
+    // I/O plugins
+    //
     io_link_manager().unregister_data_plane_manager(this);
     io_ip_manager().unregister_data_plane_manager(this);
     io_tcpudp_manager().unregister_data_plane_manager(this);
 
+    //
+    // FibConfig plugins
+    //
     if (_fibconfig_table_observer != NULL)
 	fibconfig().unregister_fibconfig_table_observer(_fibconfig_table_observer);
     if (_fibconfig_table_set != NULL)
@@ -207,6 +240,17 @@ FeaDataPlaneManager::unregister_plugins(string& error_msg)
     if (_fibconfig_forwarding != NULL)
 	fibconfig().unregister_fibconfig_forwarding(_fibconfig_forwarding);
 
+    //
+    // Firewall plugins
+    //
+    if (_firewall_set != NULL)
+	firewall_manager().unregister_firewall_set(_firewall_set);
+    if (_firewall_get != NULL)
+	firewall_manager().unregister_firewall_get(_firewall_get);
+
+    //
+    // IfConfig plugins
+    //
     if (_ifconfig_vlan_set != NULL)
 	ifconfig().unregister_ifconfig_vlan_set(_ifconfig_vlan_set);
     if (_ifconfig_vlan_get != NULL)
@@ -248,6 +292,9 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	return (XORP_ERROR);
     }
 
+    //
+    // IfConfig plugins
+    //
     if (_ifconfig_property != NULL) {
 	if (_ifconfig_property->start(error_msg) != XORP_OK)
 	    goto error_label;
@@ -272,6 +319,22 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
 	if (_ifconfig_vlan_set->start(error_msg) != XORP_OK)
 	    goto error_label;
     }
+
+    //
+    // Firewall plugins
+    //
+    if (_firewall_get != NULL) {
+	if (_firewall_get->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+    if (_firewall_set != NULL) {
+	if (_firewall_set->start(error_msg) != XORP_OK)
+	    goto error_label;
+    }
+
+    //
+    // FibConfig plugins
+    //
     if (_fibconfig_forwarding != NULL) {
 	if (_fibconfig_forwarding->start(error_msg) != XORP_OK)
 	    goto error_label;
@@ -302,7 +365,7 @@ FeaDataPlaneManager::start_plugins(string& error_msg)
     }
 
     //
-    // The I/O plugins
+    // I/O plugins
     //
     for (link_iter = _io_link_list.begin();
 	 link_iter != _io_link_list.end();
@@ -369,6 +432,9 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 {
     string dummy_error_msg;
 
+    //
+    // IfConfig plugins
+    //
     if (_ifconfig_property != NULL) {
 	if (ifconfig().register_ifconfig_property(_ifconfig_property,
 						  is_exclusive)
@@ -433,6 +499,36 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
+
+    //
+    // Firewall plugins
+    //
+    if (_firewall_get != NULL) {
+	if (firewall_manager().register_firewall_get(_firewall_get,
+						     is_exclusive)
+	    != XORP_OK) {
+	    error_msg = c_format("Cannot register FirewallGet plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+    if (_firewall_set != NULL) {
+	if (firewall_manager().register_firewall_set(_firewall_set,
+						     is_exclusive)
+	    != XORP_OK) {
+	    error_msg = c_format("Cannot register FirewallSet plugin "
+				 "for data plane manager %s",
+				 manager_name().c_str());
+	    unregister_plugins(dummy_error_msg);
+	    return (XORP_ERROR);
+	}
+    }
+
+    //
+    // FibConfig plugins
+    //
     if (_fibconfig_forwarding != NULL) {
 	if (fibconfig().register_fibconfig_forwarding(_fibconfig_forwarding,
 						      is_exclusive)
@@ -510,6 +606,7 @@ FeaDataPlaneManager::register_all_plugins(bool is_exclusive, string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
+
     //
     // XXX: The I/O plugins (IoLink, IoIp and IoTcpUdp) are registered
     // on-demand when a new client is registered.
@@ -531,6 +628,10 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 
     //
     // XXX: Stop the plugins in the reverse order they were started
+    //
+
+    //
+    // I/O plugins
     //
     for (tcpudp_iter = _io_tcpudp_list.begin();
 	 tcpudp_iter != _io_tcpudp_list.end();
@@ -566,6 +667,9 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 	}
     }
 
+    //
+    // FibConfig plugins
+    //
     if (_fibconfig_table_observer != NULL) {
 	if (_fibconfig_table_observer->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
@@ -622,6 +726,30 @@ FeaDataPlaneManager::stop_all_plugins(string& error_msg)
 	    error_msg += error_msg2;
 	}
     }
+
+    //
+    // Firewall plugins
+    //
+    if (_firewall_set != NULL) {
+	if (_firewall_set->stop(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+    if (_firewall_get != NULL) {
+	if (_firewall_get->stop(error_msg2) != XORP_OK) {
+	    ret_value = XORP_ERROR;
+	    if (! error_msg.empty())
+		error_msg += " ";
+	    error_msg += error_msg2;
+	}
+    }
+
+    //
+    // IfConfig plugins
+    //
     if (_ifconfig_vlan_set != NULL) {
 	if (_ifconfig_vlan_set->stop(error_msg2) != XORP_OK) {
 	    ret_value = XORP_ERROR;
@@ -702,6 +830,12 @@ IfConfig&
 FeaDataPlaneManager::ifconfig()
 {
     return (_fea_node.ifconfig());
+}
+
+FirewallManager&
+FeaDataPlaneManager::firewall_manager()
+{
+    return (_fea_node.firewall_manager());
 }
 
 FibConfig&

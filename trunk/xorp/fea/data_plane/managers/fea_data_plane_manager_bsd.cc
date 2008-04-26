@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.cc,v 1.7 2007/12/28 05:12:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_bsd.cc,v 1.8 2008/01/04 03:16:15 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -28,6 +28,10 @@
 #include "fea/data_plane/ifconfig/ifconfig_observer_routing_socket.hh"
 #include "fea/data_plane/ifconfig/ifconfig_vlan_get_bsd.hh"
 #include "fea/data_plane/ifconfig/ifconfig_vlan_set_bsd.hh"
+#include "fea/data_plane/firewall/firewall_get_ipfw2.hh"
+#include "fea/data_plane/firewall/firewall_get_pf.hh"
+#include "fea/data_plane/firewall/firewall_set_ipfw2.hh"
+#include "fea/data_plane/firewall/firewall_set_pf.hh"
 #include "fea/data_plane/fibconfig/fibconfig_forwarding_sysctl.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_get_routing_socket.hh"
 #include "fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.hh"
@@ -82,6 +86,8 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
     XLOG_ASSERT(_ifconfig_observer == NULL);
     XLOG_ASSERT(_ifconfig_vlan_get == NULL);
     XLOG_ASSERT(_ifconfig_vlan_set == NULL);
+    XLOG_ASSERT(_firewall_get == NULL);
+    XLOG_ASSERT(_firewall_set == NULL);
     XLOG_ASSERT(_fibconfig_forwarding == NULL);
     XLOG_ASSERT(_fibconfig_entry_get == NULL);
     XLOG_ASSERT(_fibconfig_entry_set == NULL);
@@ -121,6 +127,18 @@ FeaDataPlaneManagerBsd::load_plugins(string& error_msg)
 #if defined(HAVE_VLAN_BSD)
     _ifconfig_vlan_get = new IfConfigVlanGetBsd(*this);
     _ifconfig_vlan_set = new IfConfigVlanSetBsd(*this);
+#endif
+
+    //
+    // XXX: FreeBSD provides both IPFW2 and PF.
+    // Currently the preferred one is IPFW2 (for no particular reason).
+    //
+#if defined(HAVE_FIREWALL_IPFW2)
+    _firewall_get = new FirewallGetIpfw2(*this);
+    _firewall_set = new FirewallSetIpfw2(*this);
+#elif defined(HAVE_FIREWALL_PF)
+    _firewall_get = new FirewallGetPf(*this);
+    _firewall_set = new FirewallSetPf(*this);
 #endif
 
 #if defined(HAVE_SYSCTL_IPCTL_FORWARDING) || defined(HAVE_SYSCTL_IPV6CTL_FORWARDING) || defined(HAVE_SYSCTL_IPV6CTL_ACCEPT_RTADV)

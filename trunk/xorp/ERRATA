@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.39 2007/03/23 18:47:39 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.40 2007/08/10 00:08:59 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -128,6 +128,41 @@
       If updating to a newer Linux kernel is not feasible, a possible
       work-around is to explicitly set the interface status to UP before
       adding/configuring IPv6 addresses to it. 
+
+    - On Linux systems up to year 2008 or so the following header files
+      are not C++ friendly:
+        <linux/netfilter_ipv4/ip_tables.h>
+        <linux/netfilter_ipv6/ip6_tables.h>
+      This prevents the compilation of the Linux Netfilter-based
+      firewall support. To enable the Linux firewall compilation
+      the following patches need should be applied to the above
+      two files. Note that the patches are for Ubuntu Server-7.10,
+      so they might need slight adjustment for other Linux distributions.
+      After applying the patch rerun "./configure; gmake".
+
+--- /usr/include/linux/netfilter_ipv4/ip_tables.h.org	2008-02-12 02:49:51.000000000 -0800
++++ /usr/include/linux/netfilter_ipv4/ip_tables.h	2008-04-19 22:09:22.000000000 -0700
+@@ -217,7 +217,7 @@
+ static __inline__ struct ipt_entry_target *
+ ipt_get_target(struct ipt_entry *e)
+ {
+-	return (void *)e + e->target_offset;
++	return (struct ipt_entry_target *)((char *)e + e->target_offset);
+ }
+ 
+ /* fn returns 0 to continue iteration */
+--- /usr/include/linux/netfilter_ipv6/ip6_tables.h.org	2008-02-12 02:49:51.000000000 -0800
++++ /usr/include/linux/netfilter_ipv6/ip6_tables.h	2008-04-25 16:43:05.000000000 -0700
+@@ -271,7 +271,7 @@
+ static __inline__ struct ip6t_entry_target *
+ ip6t_get_target(struct ip6t_entry *e)
+ {
+-	return (void *)e + e->target_offset;
++	return (struct ip6t_entry_target *)((char *)e + e->target_offset);
+ }
+ 
+ /* fn returns 0 to continue iteration */
+
 
   RIB:
     - In some rare cases, the RIB may fail to delete an existing route:

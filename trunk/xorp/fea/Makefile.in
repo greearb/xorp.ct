@@ -51,14 +51,13 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libfea_la_LIBADD =
 am_libfea_la_OBJECTS = fea_io.lo fea_node.lo fibconfig.lo \
-	fibconfig_transaction.lo ifconfig.lo ifconfig_reporter.lo \
+	fibconfig_transaction.lo firewall_entry.lo firewall_manager.lo \
+	firewall_transaction.lo ifconfig.lo ifconfig_reporter.lo \
 	ifconfig_transaction.lo iftree.lo io_ip_manager.lo \
 	io_link_manager.lo io_tcpudp_manager.lo libfeaclient_bridge.lo \
 	mfea_config.lo mfea_dataflow.lo mfea_mrouter.lo mfea_node.lo \
 	mfea_node_cli.lo mfea_vif.lo nexthop_port_mapper.lo \
-	pa_backend_dummy.lo pa_backend_ipfw2.lo pa_entry.lo \
-	pa_table.lo pa_transaction.lo profile_vars.lo \
-	xrl_packet_acl.lo xrl_fea_io.lo xrl_fea_node.lo \
+	profile_vars.lo xrl_fea_io.lo xrl_fea_node.lo \
 	xrl_fea_target.lo xrl_fib_client_manager.lo \
 	xrl_io_ip_manager.lo xrl_io_link_manager.lo \
 	xrl_io_tcpudp_manager.lo xrl_mfea_node.lo
@@ -100,6 +99,7 @@ xorp_fea_LDADD = $(LDADD)
 xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la \
 	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
@@ -121,7 +121,6 @@ xorp_fea_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/targets/libpacketaclbase.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -133,6 +132,7 @@ xorp_fea_dummy_LDADD = $(LDADD)
 xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la \
 	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
@@ -154,7 +154,6 @@ xorp_fea_dummy_DEPENDENCIES = libfea.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/targets/libpacketaclbase.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -359,12 +358,12 @@ noinst_LTLIBRARIES = libfea.la libfea_data_plane_base.la
 ### MRT libraries
 ### CLI libraries
 ### libfeaclient libraries
-### Packet ACL front-end XRL libraries
 ### XRL client for Profile
 ### XORP misc libraries
 LDADD = libfea.la \
 	$(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la \
 	$(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la \
+	$(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la \
 	$(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la \
 	$(top_builddir)/fea/data_plane/io/libxorp_io.la \
 	$(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la \
@@ -386,7 +385,6 @@ LDADD = libfea.la \
 	$(top_builddir)/xrl/targets/libclibase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
-	$(top_builddir)/xrl/targets/libpacketaclbase.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
 	$(top_builddir)/libproto/libproto.la \
 	$(top_builddir)/libxipc/libxipc.la \
@@ -405,33 +403,33 @@ libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
 	fibconfig_forwarding.cc ifconfig_property.cc io_ip.cc \
 	io_link.cc io_tcpudp.cc
 libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
-	fte.hh fibconfig.hh fibconfig_entry_get.hh \
+	fibconfig.hh fibconfig_entry_get.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
 	fibconfig_table_get.hh fibconfig_table_observer.hh \
-	fibconfig_table_set.hh fibconfig_transaction.hh ifconfig.hh \
+	fibconfig_table_set.hh fibconfig_transaction.hh \
+	firewall_entry.hh firewall_get.hh firewall_manager.hh \
+	firewall_set.hh firewall_transaction.hh fte.hh ifconfig.hh \
 	ifconfig_get.hh ifconfig_observer.hh ifconfig_reporter.hh \
 	ifconfig_set.hh ifconfig_vlan_get.hh ifconfig_vlan_set.hh \
 	ifconfig_transaction.hh iftree.hh io_ip_manager.hh \
 	io_link_manager.hh io_tcpudp_manager.hh libfeaclient_bridge.hh \
 	mfea_dataflow.hh mfea_kernel_messages.hh mfea_mrouter.hh \
 	mfea_node.hh mfea_node_cli.hh mfea_osdep.hh mfea_vif.hh \
-	nexthop_port_mapper.hh pa_backend.hh pa_backend_dummy.hh \
-	pa_backend_ipfw2.hh pa_entry.hh pa_table.hh pa_transaction.hh \
-	profile_vars.hh xrl_fea_io.hh xrl_fea_node.hh \
-	xrl_fea_target.hh xrl_fib_client_manager.hh \
+	nexthop_port_mapper.hh profile_vars.hh xrl_fea_io.hh \
+	xrl_fea_node.hh xrl_fea_target.hh xrl_fib_client_manager.hh \
 	xrl_io_ip_manager.hh xrl_io_link_manager.hh \
-	xrl_io_tcpudp_manager.hh xrl_mfea_node.hh xrl_packet_acl.hh \
-	fea_io.cc fea_node.cc fibconfig.cc fibconfig_transaction.cc \
+	xrl_io_tcpudp_manager.hh xrl_mfea_node.hh fea_io.cc \
+	fea_node.cc fibconfig.cc fibconfig_transaction.cc \
+	firewall_entry.cc firewall_manager.cc firewall_transaction.cc \
 	ifconfig.cc ifconfig_reporter.cc ifconfig_transaction.cc \
 	iftree.cc io_ip_manager.cc io_link_manager.cc \
 	io_tcpudp_manager.cc libfeaclient_bridge.cc mfea_config.cc \
 	mfea_dataflow.cc mfea_mrouter.cc mfea_node.cc mfea_node_cli.cc \
-	mfea_vif.cc nexthop_port_mapper.cc pa_backend_dummy.cc \
-	pa_backend_ipfw2.cc pa_entry.cc pa_table.cc pa_transaction.cc \
-	profile_vars.cc xrl_packet_acl.cc xrl_fea_io.cc \
-	xrl_fea_node.cc xrl_fea_target.cc xrl_fib_client_manager.cc \
-	xrl_io_ip_manager.cc xrl_io_link_manager.cc \
-	xrl_io_tcpudp_manager.cc xrl_mfea_node.cc
+	mfea_vif.cc nexthop_port_mapper.cc profile_vars.cc \
+	xrl_fea_io.cc xrl_fea_node.cc xrl_fea_target.cc \
+	xrl_fib_client_manager.cc xrl_io_ip_manager.cc \
+	xrl_io_link_manager.cc xrl_io_tcpudp_manager.cc \
+	xrl_mfea_node.cc
 
 # -- Sources and Linkage for test_xrl_sockets4_tcp
 test_xrl_sockets4_tcp_SOURCES = test_xrl_sockets4_tcp.cc
@@ -589,6 +587,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_forwarding.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fibconfig_transaction.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/firewall_entry.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/firewall_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/firewall_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_property.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ifconfig_reporter.Plo@am__quote@
@@ -608,11 +609,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_node_cli.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nexthop_port_mapper.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_backend_dummy.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_backend_ipfw2.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_entry.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_table.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pa_transaction.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/profile_vars.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
@@ -626,7 +622,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_io_link_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_io_tcpudp_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_mfea_node.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_packet_acl.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

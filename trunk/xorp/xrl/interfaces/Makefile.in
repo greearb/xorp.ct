@@ -78,6 +78,9 @@ libfeafibclientxif_la_OBJECTS = $(am_libfeafibclientxif_la_OBJECTS)
 libfeafibxif_la_LIBADD =
 am_libfeafibxif_la_OBJECTS = fea_fib_xif.lo
 libfeafibxif_la_OBJECTS = $(am_libfeafibxif_la_OBJECTS)
+libfeafirewallxif_la_LIBADD =
+am_libfeafirewallxif_la_OBJECTS = fea_firewall_xif.lo
+libfeafirewallxif_la_OBJECTS = $(am_libfeafirewallxif_la_OBJECTS)
 libfeaifmgrmirrorxif_la_LIBADD =
 am_libfeaifmgrmirrorxif_la_OBJECTS = fea_ifmgr_mirror_xif.lo
 libfeaifmgrmirrorxif_la_OBJECTS =  \
@@ -154,9 +157,6 @@ libospfv2xif_la_OBJECTS = $(am_libospfv2xif_la_OBJECTS)
 libospfv3xif_la_LIBADD =
 am_libospfv3xif_la_OBJECTS = ospfv3_xif.lo
 libospfv3xif_la_OBJECTS = $(am_libospfv3xif_la_OBJECTS)
-libpacketaclxif_la_LIBADD =
-am_libpacketaclxif_la_OBJECTS = packet_acl_xif.lo
-libpacketaclxif_la_OBJECTS = $(am_libpacketaclxif_la_OBJECTS)
 libpimxif_la_LIBADD =
 am_libpimxif_la_OBJECTS = pim_xif.lo
 libpimxif_la_OBJECTS = $(am_libpimxif_la_OBJECTS)
@@ -263,7 +263,8 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libcliprocessorxif_la_SOURCES) $(libcommonxif_la_SOURCES) \
 	$(libcoordxif_la_SOURCES) $(libdatainxif_la_SOURCES) \
 	$(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) \
-	$(libfeafibxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) \
+	$(libfeafibxif_la_SOURCES) $(libfeafirewallxif_la_SOURCES) \
+	$(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
 	$(libfeaifmgrxif_la_SOURCES) \
 	$(libfearawlinkclientxif_la_SOURCES) \
@@ -280,8 +281,7 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libmld6igmpclientxif_la_SOURCES) \
 	$(libmld6igmpxif_la_SOURCES) $(libolsr4xif_la_SOURCES) \
 	$(libospfv2xif_la_SOURCES) $(libospfv3xif_la_SOURCES) \
-	$(libpacketaclxif_la_SOURCES) $(libpimxif_la_SOURCES) \
-	$(libpolicybackendxif_la_SOURCES) \
+	$(libpimxif_la_SOURCES) $(libpolicybackendxif_la_SOURCES) \
 	$(libpolicyredist4xif_la_SOURCES) \
 	$(libpolicyredist6xif_la_SOURCES) $(libpolicyxif_la_SOURCES) \
 	$(libprofileclientxif_la_SOURCES) $(libprofilexif_la_SOURCES) \
@@ -301,7 +301,8 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libcliprocessorxif_la_SOURCES) $(libcommonxif_la_SOURCES) \
 	$(libcoordxif_la_SOURCES) $(libdatainxif_la_SOURCES) \
 	$(libfeaclickxif_la_SOURCES) $(libfeafibclientxif_la_SOURCES) \
-	$(libfeafibxif_la_SOURCES) $(libfeaifmgrmirrorxif_la_SOURCES) \
+	$(libfeafibxif_la_SOURCES) $(libfeafirewallxif_la_SOURCES) \
+	$(libfeaifmgrmirrorxif_la_SOURCES) \
 	$(libfeaifmgrreplicatorxif_la_SOURCES) \
 	$(libfeaifmgrxif_la_SOURCES) \
 	$(libfearawlinkclientxif_la_SOURCES) \
@@ -318,8 +319,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libmld6igmpclientxif_la_SOURCES) \
 	$(libmld6igmpxif_la_SOURCES) $(libolsr4xif_la_SOURCES) \
 	$(libospfv2xif_la_SOURCES) $(libospfv3xif_la_SOURCES) \
-	$(libpacketaclxif_la_SOURCES) $(libpimxif_la_SOURCES) \
-	$(libpolicybackendxif_la_SOURCES) \
+	$(libpimxif_la_SOURCES) $(libpolicybackendxif_la_SOURCES) \
 	$(libpolicyredist4xif_la_SOURCES) \
 	$(libpolicyredist6xif_la_SOURCES) $(libpolicyxif_la_SOURCES) \
 	$(libprofileclientxif_la_SOURCES) $(libprofilexif_la_SOURCES) \
@@ -491,6 +491,8 @@ top_srcdir = @top_srcdir@
 
 # FEA FIB Client Interface
 
+# FEA Firewall Interface
+
 # FEA Interface Manager Mirror Interface
 
 # FEA Interface Manager Replicator Interface
@@ -532,8 +534,6 @@ top_srcdir = @top_srcdir@
 # OSPF V2 Interface
 
 # OSPF V3 Interface
-
-# FEA Packet ACL (formerly Firewall) Interface
 
 # PIM Interface
 
@@ -588,24 +588,24 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libclimanagerxif.la libcliprocessorxif.la libcommonxif.la \
 	libcoordxif.la libdatainxif.la libfeaclickxif.la \
 	libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la \
-	libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la \
-	libfib2mribxif.la libftixif.la libfearawlinkxif.la \
-	libfearawlinkclientxif.la libfearawpkt4xif.la \
-	libfearawpkt4clientxif.la libfearawpkt6xif.la \
-	libfearawpkt6clientxif.la libfinderxif.la \
+	libfeafirewallxif.la libfeaifmgrmirrorxif.la \
+	libfeaifmgrreplicatorxif.la libfib2mribxif.la libftixif.la \
+	libfearawlinkxif.la libfearawlinkclientxif.la \
+	libfearawpkt4xif.la libfearawpkt4clientxif.la \
+	libfearawpkt6xif.la libfearawpkt6clientxif.la libfinderxif.la \
 	libfindereventnotifierxif.la libfindereventobserverxif.la \
 	libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la \
 	libmld6igmpxif.la libmld6igmpclientxif.la libolsr4xif.la \
-	libospfv2xif.la libospfv3xif.la libpacketaclxif.la \
-	libpimxif.la libpolicyxif.la libpolicybackendxif.la \
-	libpolicyredist4xif.la libpolicyredist6xif.la libprofilexif.la \
-	libprofileclientxif.la libredist4xif.la libredist6xif.la \
-	libredisttransaction4xif.la libredisttransaction6xif.la \
-	libribxif.la libribclientxif.la libripxif.la libripngxif.la \
-	librtrmgrxif.la librtrmgr_clientxif.la libsocket4xif.la \
-	libsocket4userxif.la libsocket6xif.la libsocket6userxif.la \
-	libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la \
-	libxorpifmibxif.la libtestxif.la
+	libospfv2xif.la libospfv3xif.la libpimxif.la libpolicyxif.la \
+	libpolicybackendxif.la libpolicyredist4xif.la \
+	libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la \
+	libredist4xif.la libredist6xif.la libredisttransaction4xif.la \
+	libredisttransaction6xif.la libribxif.la libribclientxif.la \
+	libripxif.la libripngxif.la librtrmgrxif.la \
+	librtrmgr_clientxif.la libsocket4xif.la libsocket4userxif.la \
+	libsocket6xif.la libsocket6userxif.la libstaticroutesxif.la \
+	libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la \
+	libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -617,6 +617,7 @@ libfeaclickxif_la_SOURCES = fea_click_xif.hh fea_click_xif.cc
 libfeaifmgrxif_la_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
 libfeafibxif_la_SOURCES = fea_fib_xif.hh fea_fib_xif.cc
 libfeafibclientxif_la_SOURCES = fea_fib_client_xif.hh fea_fib_client_xif.cc
+libfeafirewallxif_la_SOURCES = fea_firewall_xif.hh fea_firewall_xif.cc
 libfeaifmgrmirrorxif_la_SOURCES = fea_ifmgr_mirror_xif.hh \
 	fea_ifmgr_mirror_xif.cc
 libfeaifmgrreplicatorxif_la_SOURCES = fea_ifmgr_replicator_xif.hh \
@@ -645,7 +646,6 @@ libmld6igmpclientxif_la_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
 libolsr4xif_la_SOURCES = olsr4_xif.hh olsr4_xif.cc
 libospfv2xif_la_SOURCES = ospfv2_xif.hh ospfv2_xif.cc
 libospfv3xif_la_SOURCES = ospfv3_xif.hh ospfv3_xif.cc
-libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
 libpimxif_la_SOURCES = pim_xif.hh pim_xif.cc
 libpolicyxif_la_SOURCES = policy_xif.hh policy_xif.cc
 libpolicybackendxif_la_SOURCES = policy_backend_xif.hh policy_backend_xif.cc
@@ -745,6 +745,8 @@ libfeafibclientxif.la: $(libfeafibclientxif_la_OBJECTS) $(libfeafibclientxif_la_
 	$(CXXLINK)  $(libfeafibclientxif_la_OBJECTS) $(libfeafibclientxif_la_LIBADD) $(LIBS)
 libfeafibxif.la: $(libfeafibxif_la_OBJECTS) $(libfeafibxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfeafibxif_la_OBJECTS) $(libfeafibxif_la_LIBADD) $(LIBS)
+libfeafirewallxif.la: $(libfeafirewallxif_la_OBJECTS) $(libfeafirewallxif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libfeafirewallxif_la_OBJECTS) $(libfeafirewallxif_la_LIBADD) $(LIBS)
 libfeaifmgrmirrorxif.la: $(libfeaifmgrmirrorxif_la_OBJECTS) $(libfeaifmgrmirrorxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libfeaifmgrmirrorxif_la_OBJECTS) $(libfeaifmgrmirrorxif_la_LIBADD) $(LIBS)
 libfeaifmgrreplicatorxif.la: $(libfeaifmgrreplicatorxif_la_OBJECTS) $(libfeaifmgrreplicatorxif_la_DEPENDENCIES) 
@@ -789,8 +791,6 @@ libospfv2xif.la: $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_DEPENDENCIES)
 	$(CXXLINK)  $(libospfv2xif_la_OBJECTS) $(libospfv2xif_la_LIBADD) $(LIBS)
 libospfv3xif.la: $(libospfv3xif_la_OBJECTS) $(libospfv3xif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libospfv3xif_la_OBJECTS) $(libospfv3xif_la_LIBADD) $(LIBS)
-libpacketaclxif.la: $(libpacketaclxif_la_OBJECTS) $(libpacketaclxif_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libpacketaclxif_la_OBJECTS) $(libpacketaclxif_la_LIBADD) $(LIBS)
 libpimxif.la: $(libpimxif_la_OBJECTS) $(libpimxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libpimxif_la_OBJECTS) $(libpimxif_la_LIBADD) $(LIBS)
 libpolicybackendxif.la: $(libpolicybackendxif_la_OBJECTS) $(libpolicybackendxif_la_DEPENDENCIES) 
@@ -860,6 +860,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_click_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_fib_client_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_fib_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_firewall_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_mirror_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_replicator_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fea_ifmgr_xif.Plo@am__quote@
@@ -882,7 +883,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/olsr4_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ospfv2_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ospfv3_xif.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packet_acl_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pim_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_backend_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_redist4_xif.Plo@am__quote@

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/targets/Jamfile,v 1.4 2007/08/09 00:47:07 pavlin Exp $
+# $XORP: xorp/xrl/targets/Jamfile,v 1.5 2008/04/24 15:20:36 bms Exp $
 #
 
 SubDir TOP xrl targets ;
@@ -26,7 +26,6 @@ XorpXrlTgt <xrl!targets>mld6igmp_base.cc <xrl!targets>mld6igmp_base.hh <xrl!targ
 XorpXrlTgt <xrl!targets>olsr4_base.cc <xrl!targets>olsr4_base.hh <xrl!targets>olsr4_base.xrls : olsr4.tgt ;
 XorpXrlTgt <xrl!targets>ospfv2_base.cc <xrl!targets>ospfv2_base.hh <xrl!targets>ospfv2_base.xrls : ospfv2.tgt ;
 XorpXrlTgt <xrl!targets>ospfv3_base.cc <xrl!targets>ospfv3_base.hh <xrl!targets>ospfv3_base.xrls : ospfv3.tgt ;
-XorpXrlTgt <xrl!targets>packet_acl_base.cc <xrl!targets>packet_acl_base.hh <xrl!targets>packet_acl_base.xrls : packet_acl.tgt ;
 XorpXrlTgt <xrl!targets>pim_base.cc <xrl!targets>pim_base.hh <xrl!targets>pim_base.xrls : pim.tgt ;
 XorpXrlTgt <xrl!targets>policy_base.cc <xrl!targets>policy_base.hh <xrl!targets>policy_base.xrls : policy.tgt ;
 XorpXrlTgt <xrl!targets>profiler_base.cc <xrl!targets>profiler_base.hh <xrl!targets>profiler_base.xrls : profiler.tgt ;
@@ -62,7 +61,6 @@ Library libmld6igmpbase : mld6igmp_base.cc ;
 Library libolsr4base : olsr4_base.cc ;
 Library libospfv2base : ospfv2_base.cc ;
 Library libospfv3base : ospfv3_base.cc ;
-Library libpacketaclbase : packet_acl_base.cc ;
 Library libpimbase : pim_base.cc ;
 Library libpolicybase : policy_base.cc ;
 Library libprofileclientbase : profiler_base.cc ;
@@ -101,7 +99,6 @@ INSTALLABLE_XRLS =
 	olsr4.xrls
 	ospfv2.xrls
 	ospfv3.xrls
-	packet_acl.xrls
 	pim.xrls
 	policy.xrls
 	profiler.xrls

@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.69 2007/11/21 10:37:36 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.70 2008/04/24 15:20:36 bms Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -26,7 +26,6 @@ tgt_files		+= mld6igmp.tgt
 tgt_files		+= olsr4.tgt
 tgt_files		+= ospfv2.tgt
 tgt_files		+= ospfv3.tgt
-tgt_files		+= packet_acl.tgt
 tgt_files		+= pim.tgt
 tgt_files		+= policy.tgt
 tgt_files		+= profiler.tgt
@@ -72,7 +71,6 @@ noinst_LTLIBRARIES	+= libmld6igmpbase.la
 noinst_LTLIBRARIES	+= libolsr4base.la
 noinst_LTLIBRARIES	+= libospfv2base.la
 noinst_LTLIBRARIES	+= libospfv3base.la
-noinst_LTLIBRARIES	+= libpacketaclbase.la
 noinst_LTLIBRARIES	+= libpimbase.la
 noinst_LTLIBRARIES	+= libpolicybase.la
 noinst_LTLIBRARIES	+= libprofileclientbase.la
@@ -132,6 +130,7 @@ $(srcdir)/fea_base.hh $(srcdir)/fea_base.cc: 				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/fea_click.xif				\
 		$(INTERFACES_DIR)/fea_fib.xif				\
+		$(INTERFACES_DIR)/fea_firewall.xif			\
 		$(INTERFACES_DIR)/fea_ifmgr.xif				\
 		$(INTERFACES_DIR)/fea_ifmgr_replicator.xif		\
 		$(INTERFACES_DIR)/fti.xif				\
@@ -229,12 +228,6 @@ $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
 		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/ospfv3.xif
-
-# FIREWALL (FEA)
-libpacketaclbase_la_SOURCES = packet_acl_base.hh packet_acl_base.cc
-$(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/packet_acl.xif
 
 # PIM
 libpimbase_la_SOURCES = pim_base.hh pim_base.cc

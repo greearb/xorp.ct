@@ -1,0 +1,24 @@
+#
+# $XORP$
+#
+
+SubDir TOP fea data_plane firewall ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libproto ;
+SubIncludeOnce TOP fea ;
+SubDir TOP fea data_plane firewall ;
+
+Library libxorp_firewall : 
+	firewall_get_dummy.cc
+	firewall_get_ipfw2.cc
+	firewall_get_netfilter.cc
+	firewall_get_pf.cc
+	firewall_set_dummy.cc
+	firewall_set_ipfw2.cc
+	firewall_set_netfilter.cc
+	firewall_set_pf.cc
+	;

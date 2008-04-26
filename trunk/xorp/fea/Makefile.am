@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.103 2007/10/04 20:46:14 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.104 2007/12/28 05:12:34 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -31,6 +31,7 @@ LDADD		 = libfea.la
 ### Data plane libraries
 LDADD		+= $(top_builddir)/fea/data_plane/managers/libxorp_data_plane_managers.la
 LDADD		+= $(top_builddir)/fea/data_plane/fibconfig/libxorp_fibconfig.la
+LDADD		+= $(top_builddir)/fea/data_plane/firewall/libxorp_firewall.la
 LDADD		+= $(top_builddir)/fea/data_plane/ifconfig/libxorp_ifconfig.la
 LDADD		+= $(top_builddir)/fea/data_plane/io/libxorp_io.la
 LDADD		+= $(top_builddir)/fea/data_plane/control_socket/libxorp_control_socket.la
@@ -59,8 +60,6 @@ LDADD		+= $(top_builddir)/xrl/targets/libclibase.la
 ### libfeaclient libraries
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
-### Packet ACL front-end XRL libraries
-LDADD		+= $(top_builddir)/xrl/targets/libpacketaclbase.la
 ### XRL client for Profile
 LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
 ### XORP misc libraries
@@ -93,7 +92,6 @@ libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
 libfea_la_SOURCES	+= fea_io.hh
 libfea_la_SOURCES	+= fea_node.hh
-libfea_la_SOURCES	+= fte.hh
 libfea_la_SOURCES	+= fibconfig.hh
 libfea_la_SOURCES	+= fibconfig_entry_get.hh
 libfea_la_SOURCES	+= fibconfig_entry_observer.hh
@@ -102,6 +100,12 @@ libfea_la_SOURCES	+= fibconfig_table_get.hh
 libfea_la_SOURCES	+= fibconfig_table_observer.hh
 libfea_la_SOURCES	+= fibconfig_table_set.hh
 libfea_la_SOURCES	+= fibconfig_transaction.hh
+libfea_la_SOURCES	+= firewall_entry.hh
+libfea_la_SOURCES	+= firewall_get.hh
+libfea_la_SOURCES	+= firewall_manager.hh
+libfea_la_SOURCES	+= firewall_set.hh
+libfea_la_SOURCES	+= firewall_transaction.hh
+libfea_la_SOURCES	+= fte.hh
 libfea_la_SOURCES	+= ifconfig.hh
 libfea_la_SOURCES	+= ifconfig_get.hh
 libfea_la_SOURCES	+= ifconfig_observer.hh
@@ -123,12 +127,6 @@ libfea_la_SOURCES	+= mfea_node_cli.hh
 libfea_la_SOURCES	+= mfea_osdep.hh
 libfea_la_SOURCES	+= mfea_vif.hh
 libfea_la_SOURCES	+= nexthop_port_mapper.hh
-libfea_la_SOURCES	+= pa_backend.hh
-libfea_la_SOURCES	+= pa_backend_dummy.hh
-libfea_la_SOURCES	+= pa_backend_ipfw2.hh
-libfea_la_SOURCES	+= pa_entry.hh
-libfea_la_SOURCES	+= pa_table.hh
-libfea_la_SOURCES	+= pa_transaction.hh
 libfea_la_SOURCES	+= profile_vars.hh
 libfea_la_SOURCES	+= xrl_fea_io.hh
 libfea_la_SOURCES	+= xrl_fea_node.hh
@@ -138,12 +136,14 @@ libfea_la_SOURCES	+= xrl_io_ip_manager.hh
 libfea_la_SOURCES	+= xrl_io_link_manager.hh
 libfea_la_SOURCES	+= xrl_io_tcpudp_manager.hh
 libfea_la_SOURCES	+= xrl_mfea_node.hh
-libfea_la_SOURCES	+= xrl_packet_acl.hh
 
 libfea_la_SOURCES	+= fea_io.cc
 libfea_la_SOURCES	+= fea_node.cc
 libfea_la_SOURCES	+= fibconfig.cc
 libfea_la_SOURCES	+= fibconfig_transaction.cc
+libfea_la_SOURCES	+= firewall_entry.cc
+libfea_la_SOURCES	+= firewall_manager.cc
+libfea_la_SOURCES	+= firewall_transaction.cc
 libfea_la_SOURCES	+= ifconfig.cc
 libfea_la_SOURCES	+= ifconfig_reporter.cc
 libfea_la_SOURCES	+= ifconfig_transaction.cc
@@ -159,13 +159,7 @@ libfea_la_SOURCES	+= mfea_node.cc
 libfea_la_SOURCES	+= mfea_node_cli.cc
 libfea_la_SOURCES	+= mfea_vif.cc
 libfea_la_SOURCES	+= nexthop_port_mapper.cc
-libfea_la_SOURCES	+= pa_backend_dummy.cc
-libfea_la_SOURCES	+= pa_backend_ipfw2.cc
-libfea_la_SOURCES	+= pa_entry.cc
-libfea_la_SOURCES	+= pa_table.cc
-libfea_la_SOURCES	+= pa_transaction.cc
 libfea_la_SOURCES	+= profile_vars.cc
-libfea_la_SOURCES	+= xrl_packet_acl.cc
 libfea_la_SOURCES	+= xrl_fea_io.cc
 libfea_la_SOURCES	+= xrl_fea_node.cc
 libfea_la_SOURCES	+= xrl_fea_target.cc

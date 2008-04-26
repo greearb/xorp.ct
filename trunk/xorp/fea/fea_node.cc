@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.14 2007/12/28 09:13:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.15 2008/01/04 03:15:43 pavlin Exp $"
 
 
 //
@@ -44,11 +44,11 @@ FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
       _is_running(false),
       _is_dummy(is_dummy),
       _ifconfig(*this),
+      _firewall_manager(*this, ifconfig().local_config()),
       _fibconfig(*this, _ifconfig.live_config(), _ifconfig.local_config()),
       _io_link_manager(*this, ifconfig().local_config()),
       _io_ip_manager(*this, ifconfig().local_config()),
       _io_tcpudp_manager(*this, ifconfig().local_config()),
-      _pa_transaction_manager(_eventloop, _pa_table_manager),
       _fea_io(fea_io)
 {
 }
@@ -74,10 +74,13 @@ FeaNode::startup()
     }
 
     //
-    // IfConfig and FibConfig
+    // Startup managers
     //
     if (_ifconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
+    }
+    if (_firewall_manager.start(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot start FirewallManager: %s", error_msg.c_str());
     }
     if (_fibconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start FibConfig: %s", error_msg.c_str());
@@ -102,6 +105,9 @@ FeaNode::shutdown()
     //
     if (_fibconfig.stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop FibConfig: %s", error_msg.c_str());
+    }
+    if (_firewall_manager.stop(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot stop FirewallManager: %s", error_msg.c_str());
     }
     if (_ifconfig.stop(error_msg) != XORP_OK) {
 	XLOG_ERROR("Cannot stop IfConfig: %s", error_msg.c_str());

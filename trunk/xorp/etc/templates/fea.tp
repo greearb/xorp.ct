@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.39 2007/07/11 22:18:01 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.40 2007/08/09 07:03:23 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -54,7 +54,7 @@ fea {
 fea {
     %help:	short		"Configure the Forwarding Engine Abstraction";
     %modinfo:	provides	fea;
-    %modinfo:	depends		interfaces;
+    %modinfo:	depends		firewall;
     %modinfo:	path		"fea/xorp_fea";
     %modinfo:	default_targetname "fea";
 

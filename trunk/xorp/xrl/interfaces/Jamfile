@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/interfaces/Jamfile,v 1.5 2007/10/04 20:46:17 pavlin Exp $
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.6 2008/04/24 15:20:35 bms Exp $
 #
 
 #
@@ -27,6 +27,7 @@ Library libdatainxif : datain_xif.cc ;
 Library libfeaclickxif : fea_click_xif.cc ;
 Library libfeafibxif : fea_fib_xif.cc ;
 Library libfeafibclientxif : fea_fib_client_xif.cc ;
+Library libfeafirewalllxif : fea_firewall_xif.cc ;
 Library libfeaifmgrxif : fea_ifmgr_xif.cc ;
 Library libfeaifmgrmirrorxif : fea_ifmgr_mirror_xif.cc ;
 Library libfeaifmgrreplicatorxif : fea_ifmgr_replicator_xif.cc ;
@@ -50,7 +51,6 @@ Library libmld6igmpclientxif : mld6igmp_client_xif.cc ;
 Library libolsr4xif : olsr4_xif.cc ;
 Library libospfv2xif : ospfv2_xif.cc ;
 Library libospfv3xif : ospfv3_xif.cc ;
-Library libpacketaclxif : packet_acl_xif.cc ;
 Library libpimxif : pim_xif.cc ;
 Library libpolicyxif : policy_xif.cc ;
 Library libpolicybackendxif : policy_backend_xif.cc ;
@@ -88,6 +88,7 @@ XorpXrlXif <xrl!interfaces>datain_xif.cc <xrl!interfaces>datain_xif.hh : datain.
 XorpXrlXif <xrl!interfaces>fea_click_xif.cc <xrl!interfaces>fea_click_xif.hh : fea_click.xif ;
 XorpXrlXif <xrl!interfaces>fea_fib_xif.cc <xrl!interfaces>fea_fib_xif.hh : fea_fib.xif ;
 XorpXrlXif <xrl!interfaces>fea_fib_client_xif.cc <xrl!interfaces>fea_fib_client_xif.hh : fea_fib_client.xif ;
+XorpXrlXif <xrl!interfaces>fea_firewall_xif.cc <xrl!interfaces>fea_firewall_xif.hh : fea_firewall.xif ;
 XorpXrlXif <xrl!interfaces>fea_ifmgr_xif.cc <xrl!interfaces>fea_ifmgr_xif.hh : fea_ifmgr.xif ;
 XorpXrlXif <xrl!interfaces>fea_ifmgr_mirror_xif.cc <xrl!interfaces>fea_ifmgr_mirror_xif.hh : fea_ifmgr_mirror.xif ;
 XorpXrlXif <xrl!interfaces>fea_ifmgr_replicator_xif.cc <xrl!interfaces>fea_ifmgr_replicator_xif.hh : fea_ifmgr_replicator.xif ;
@@ -111,7 +112,6 @@ XorpXrlXif <xrl!interfaces>mld6igmp_client_xif.cc <xrl!interfaces>mld6igmp_clien
 XorpXrlXif <xrl!interfaces>olsr4_xif.cc <xrl!interfaces>olsr4_xif.hh : olsr4.xif ;
 XorpXrlXif <xrl!interfaces>ospfv2_xif.cc <xrl!interfaces>ospfv2_xif.hh : ospfv2.xif ;
 XorpXrlXif <xrl!interfaces>ospfv3_xif.cc <xrl!interfaces>ospfv3_xif.hh : ospfv3.xif ;
-XorpXrlXif <xrl!interfaces>packet_acl_xif.cc <xrl!interfaces>packet_acl_xif.hh : packet_acl.xif ;
 XorpXrlXif <xrl!interfaces>pim_xif.cc <xrl!interfaces>pim_xif.hh : pim.xif ;
 XorpXrlXif <xrl!interfaces>policy_xif.cc <xrl!interfaces>policy_xif.hh : policy.xif ;
 XorpXrlXif <xrl!interfaces>policy_backend_xif.cc <xrl!interfaces>policy_backend_xif.hh : policy_backend.xif ;

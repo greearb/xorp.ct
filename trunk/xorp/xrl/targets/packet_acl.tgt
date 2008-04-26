@@ -1,7 +1,0 @@
-/* $XORP: xorp/xrl/targets/packet_acl.tgt,v 1.2 2007/05/31 19:02:26 pavlin Exp $ */
-
-#include "common.xif"
-#include "packet_acl.xif"
-
-target packet_acl implements	common/0.1,	\
-				packet_acl/0.1

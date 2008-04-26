@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.hh,v 1.7 2007/12/28 05:12:38 pavlin Exp $
+// $XORP: xorp/fea/data_plane/managers/fea_data_plane_manager_click.hh,v 1.8 2008/01/04 03:16:15 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
 #define __FEA_DATA_PLANE_MANAGERS_FEA_DATA_PLANE_MANAGER_CLICK_HH__
@@ -24,6 +24,8 @@ class FibConfigEntrySetClick;
 class FibConfigForwardingDummy;
 class FibConfigTableGetClick;
 class FibConfigTableSetClick;
+class FirewallGetDummy;
+class FirewallSetDummy;
 class IfConfigGetClick;
 class IfConfigPropertyDummy;
 class IfConfigSetClick;
@@ -276,16 +278,14 @@ private:
     // The plugins
     //
     //
-    // TODO: XXX: For the time being Click uses the
-    // IfConfigPropertyDummy plugin.
+    // TODO: XXX: For the time being some of the plugins
+    // used by Click are dummy.
     //
     IfConfigPropertyDummy*	_ifconfig_property_dummy;
     IfConfigGetClick*		_ifconfig_get_click;
     IfConfigSetClick*		_ifconfig_set_click;
-    //
-    // TODO: XXX: For the time being Click uses the
-    // FibConfigForwardingDummy plugin.
-    //
+    FirewallGetDummy*		_firewall_get_dummy;
+    FirewallSetDummy*		_firewall_set_dummy;
     FibConfigForwardingDummy*	_fibconfig_forwarding_dummy;
     FibConfigEntryGetClick*	_fibconfig_entry_get_click;
     FibConfigEntrySetClick*	_fibconfig_entry_set_click;

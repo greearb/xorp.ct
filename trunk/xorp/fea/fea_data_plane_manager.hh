@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.9 2007/12/28 09:01:13 pavlin Exp $
+// $XORP: xorp/fea/fea_data_plane_manager.hh,v 1.10 2008/01/04 03:15:43 pavlin Exp $
 
 #ifndef __FEA_FEA_DATA_PLANE_MANAGER_HH__
 #define __FEA_FEA_DATA_PLANE_MANAGER_HH__
@@ -29,6 +29,9 @@ class FibConfigForwarding;
 class FibConfigTableGet;
 class FibConfigTableObserver;
 class FibConfigTableSet;
+class FirewallGet;
+class FirewallManager;
+class FirewallSet;
 class IfConfig;
 class IfConfigGet;
 class IfConfigObserver;
@@ -162,6 +165,13 @@ public:
     IfConfig& ifconfig();
 
     /**
+     * Get the @ref FirewallManager instance.
+     *
+     * @return the @ref FirewallManager instance.
+     */
+    FirewallManager& firewall_manager();
+
+    /**
      * Get the @ref FibConfig instance.
      *
      * @return the @ref FibConfig instance.
@@ -230,6 +240,20 @@ public:
      * @return the @ref IfConfigVlanSet plugin.
      */
     IfConfigVlanSet* ifconfig_vlan_set() { return _ifconfig_vlan_set; }
+
+    /**
+     * Get the FirewallGet plugin.
+     *
+     * @return the @ref FirewallGet plugin.
+     */
+    FirewallGet* firewall_get() { return _firewall_get; }
+
+    /**
+     * Get the FirewallSet plugin.
+     *
+     * @return the @ref FirewallSet plugin.
+     */
+    FirewallSet* firewall_set() { return _firewall_set; }
 
     /**
      * Get the FibConfigForwarding plugin.
@@ -374,6 +398,8 @@ protected:
     IfConfigObserver*		_ifconfig_observer;
     IfConfigVlanGet*		_ifconfig_vlan_get;
     IfConfigVlanSet*		_ifconfig_vlan_set;
+    FirewallGet*		_firewall_get;
+    FirewallSet*		_firewall_set;
     FibConfigForwarding*	_fibconfig_forwarding;
     FibConfigEntryGet*		_fibconfig_entry_get;
     FibConfigEntrySet*		_fibconfig_entry_set;

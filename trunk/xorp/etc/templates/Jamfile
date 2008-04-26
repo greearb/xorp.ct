@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/etc/templates/Jamfile,v 1.2 2007/02/16 22:21:18 atanu Exp $
+# $XORP: xorp/etc/templates/Jamfile,v 1.3 2007/11/12 21:49:56 pavlin Exp $
 #
 
 SubDir TOP etc templates ;
@@ -9,6 +9,7 @@ TEMPLATE_FILES =
 	bgp.tp
 	fea.tp
 	fib2mrib.tp
+	firewall.tp
 	igmp.tp
 	interfaces.tp
 	mfea4.tp
