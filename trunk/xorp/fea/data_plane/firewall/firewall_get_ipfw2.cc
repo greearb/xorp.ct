@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_get_ipfw2.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_get_ipfw2.cc,v 1.2 2008/04/26 02:06:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -376,7 +376,7 @@ FirewallGetIpfw2::get_table(int family,
 	    if (have_ipv4)
 		accept_entry = true;
 	    break;
-#ifdef HAVE_INET6
+#ifdef HAVE_IPV6
 	case AF_INET6:
 	    if (have_ipv6)
 		accept_entry = true;
