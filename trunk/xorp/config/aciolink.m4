@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/aciolink.m4,v 1.4 2007/06/27 18:08:07 pavlin Exp $
+dnl $XORP: xorp/config/aciolink.m4,v 1.5 2007/06/28 23:09:31 pavlin Exp $
 dnl
 
 dnl
@@ -16,7 +16,7 @@ dnl Check for header files that might be used later
 dnl -----------------------------------------------
 
 dnl
-dnl XXX: On some systems (e.g., RedHat-7.3) <pcap.h> s not C++ friendly,
+dnl XXX: On some systems (e.g., RedHat-7.3) <pcap.h> is not C++ friendly,
 dnl hence we need to explicitly check it with the C++ compiler.
 dnl
 dnl Note that we could just use the following:
