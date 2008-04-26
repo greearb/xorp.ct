@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_get_ipfw2.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -41,11 +41,12 @@
 #include <netinet/ip.h>
 #endif
 
-#ifdef HAVE_FIREWALL_IPFW2
-#if __FreeBSD_version < 500000
-define IPFW2 1
-#endif
-#endif
+//
+// XXX: RELENG_4 branches of FreeBSD after RELENG_4_9_RELEASE require
+// that IPFW2 support be explicitly requested by defining the
+// preprocessor symbol IPFW2 to a non-zero value.
+//
+#define IPFW2 1
 #ifdef HAVE_NETINET_IP_FW_H
 #include <netinet/ip_fw.h>
 #endif
