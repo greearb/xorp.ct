@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.90 2007/12/11 01:21:42 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.91 2008/01/04 03:15:21 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -1979,7 +1979,7 @@ PathAttribute::operator<(const PathAttribute& him) const
 	    return true;
 	if (mybuflen > hisbuflen)
 	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen);
+	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
 
     case ORIGINATOR_ID:
 	return ( ((const OriginatorIDAttribute &)*this).originator_id()
@@ -1994,7 +1994,7 @@ PathAttribute::operator<(const PathAttribute& him) const
 	    return true;
 	if (mybuflen > hisbuflen)
 	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen);
+	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
 
     case MP_REACH_NLRI:
     case MP_UNREACH_NLRI:
@@ -2012,7 +2012,7 @@ PathAttribute::operator<(const PathAttribute& him) const
 	    return true;
 	if (mybuflen > hisbuflen)
 	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen);
+	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
 #endif
 	mybuflen = hisbuflen = BGPPacket::MAXPACKETSIZE;
 	this->encode(mybuf, mybuflen, NULL);
@@ -2021,7 +2021,7 @@ PathAttribute::operator<(const PathAttribute& him) const
 	    return true;
 	if (mybuflen > hisbuflen)
 	    return false;
-	return memcmp(mybuf, hisbuf, mybuflen);
+	return (memcmp(mybuf, hisbuf, mybuflen) < 0);
 	
     }
     XLOG_UNREACHABLE();
