@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.40 2008/04/23 15:22:39 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.41 2008/04/26 00:59:44 pavlin Exp $"
 
 
 //
@@ -862,6 +862,46 @@ XrlFeaTarget::fea_firewall_0_1_add_entry4(
 }
 
 XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_replace_entry4(
+    // Input values,
+    const uint32_t&	tid,
+    const uint32_t&	rule_number,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4Net&	src_network,
+    const IPv4Net&	dst_network,
+    const uint32_t&	ip_protocol,
+    const uint32_t&	src_port_begin,
+    const uint32_t&	src_port_end,
+    const uint32_t&	dst_port_begin,
+    const uint32_t&	dst_port_end,
+    const string&	action)
+{
+    FirewallEntry::Action action_value = FirewallEntry::str2action(action);
+    string error_msg;
+
+    if (action_value == FirewallEntry::ACTION_INVALID) {
+	error_msg = c_format("Invalid firewall action: %s", action.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    FirewallEntry firewall_entry(rule_number, ifname, vifname,
+				 IPvXNet(src_network), IPvXNet(dst_network),
+				 ip_protocol, src_port_begin, src_port_end,
+				 dst_port_begin, dst_port_end, action_value);
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallReplaceEntry4(_firewall_manager, firewall_entry),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlFeaTarget::fea_firewall_0_1_delete_entry4(
     // Input values,
     const uint32_t&	tid,
@@ -1005,6 +1045,46 @@ XrlFeaTarget::fea_firewall_0_1_add_entry6(
     if (_firewall_manager.add_transaction_operation(
 	    tid,
 	    new FirewallAddEntry6(_firewall_manager, firewall_entry),
+	    error_msg)
+	    != XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fea_firewall_0_1_replace_entry6(
+    // Input values,
+    const uint32_t&	tid,
+    const uint32_t&	rule_number,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv6Net&	src_network,
+    const IPv6Net&	dst_network,
+    const uint32_t&	ip_protocol,
+    const uint32_t&	src_port_begin,
+    const uint32_t&	src_port_end,
+    const uint32_t&	dst_port_begin,
+    const uint32_t&	dst_port_end,
+    const string&	action)
+{
+    FirewallEntry::Action action_value = FirewallEntry::str2action(action);
+    string error_msg;
+
+    if (action_value == FirewallEntry::ACTION_INVALID) {
+	error_msg = c_format("Invalid firewall action: %s", action.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    FirewallEntry firewall_entry(rule_number, ifname, vifname,
+				 IPvXNet(src_network), IPvXNet(dst_network),
+				 ip_protocol, src_port_begin, src_port_end,
+				 dst_port_begin, dst_port_end, action_value);
+
+    if (_firewall_manager.add_transaction_operation(
+	    tid,
+	    new FirewallReplaceEntry6(_firewall_manager, firewall_entry),
 	    error_msg)
 	    != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

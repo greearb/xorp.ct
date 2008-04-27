@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/firewall.tp,v 1.4 2008/04/26 00:59:41 pavlin Exp $ */
 
 firewall {
     targetname:			txt = "fea";
@@ -70,7 +70,7 @@ firewall {
 	%mandatory:	$(@.action);
 
 	%create:	xrl "$(interfaces.targetname)/fea_firewall/0.1/add_entry4?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv4net=$(@.source.network)&dst_network:ipv4net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)&action:txt=$(@.action)";
-	%update:	xrl "$(interfaces.targetname)/fea_firewall/0.1/add_entry4?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv4net=$(@.source.network)&dst_network:ipv4net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)&action:txt=$(@.action)";
+	%update:	xrl "$(interfaces.targetname)/fea_firewall/0.1/replace_entry4?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv4net=$(@.source.network)&dst_network:ipv4net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)&action:txt=$(@.action)";
 	%delete:	xrl "$(interfaces.targetname)/fea_firewall/0.1/delete_entry4?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv4net=$(@.source.network)&dst_network:ipv4net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)";
 
 	action {
@@ -129,7 +129,7 @@ firewall {
 	%mandatory:	$(@.action);
 
 	%create:	xrl "$(interfaces.targetname)/fea_firewall/0.1/add_entry6?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv6net=$(@.source.network)&dst_network:ipv6net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)&action:txt=$(@.action)";
-	%update:	xrl "$(interfaces.targetname)/fea_firewall/0.1/add_entry6?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv6net=$(@.source.network)&dst_network:ipv6net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)&action:txt=$(@.action)";
+	%update:	xrl "$(interfaces.targetname)/fea_firewall/0.1/replace_entry6?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv6net=$(@.source.network)&dst_network:ipv6net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)&action:txt=$(@.action)";
 	%delete:	xrl "$(interfaces.targetname)/fea_firewall/0.1/delete_entry6?tid:u32=$(firewall.TID)&rule_number:u32=$(@)&ifname:txt=$(@.source.interface)&vifname:txt=$(@.source.vif)&src_network:ipv6net=$(@.source.network)&dst_network:ipv6net=$(@.destination.network)&ip_protocol:u32=$(@.protocol)&src_port_begin:u32=$(@.source.port-begin)&src_port_end:u32=$(@.source.port-end)&dst_port_begin:u32=$(@.destination.port-begin)&dst_port_end:u32=$(@.destination.port-end)";
 
 	action {

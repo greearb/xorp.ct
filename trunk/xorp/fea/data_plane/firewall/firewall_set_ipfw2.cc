@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_ipfw2.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_ipfw2.cc,v 1.2 2008/04/26 02:06:35 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -365,6 +365,20 @@ FirewallSetIpfw2::add_entry(const FirewallEntry& firewall_entry,
     }
 
     return (XORP_OK);
+}
+
+int
+FirewallSetIpfw2::replace_entry(const FirewallEntry& firewall_entry,
+				string& error_msg)
+{
+    string dummy_error_msg;
+
+    //
+    // XXX: The replacement semantic is implemented by deleting and
+    // then adding the entry.
+    //
+    delete_entry(firewall_entry, dummy_error_msg);
+    return (add_entry(firewall_entry, error_msg));
 }
 
 int

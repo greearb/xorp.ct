@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.1 2008/04/26 00:59:42 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -439,6 +439,28 @@ FirewallManager::add_entry(const FirewallEntry& firewall_entry,
 	 ++firewall_set_iter) {
 	FirewallSet* firewall_set = *firewall_set_iter;
 	if (firewall_set->add_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FirewallManager::replace_entry(const FirewallEntry& firewall_entry,
+			       string& error_msg)
+{
+    list<FirewallSet*>::iterator firewall_set_iter;
+
+    if (_firewall_sets.empty()) {
+	error_msg = c_format("No firewall plugin to set the entries");
+	return (XORP_ERROR);
+    }
+
+    for (firewall_set_iter = _firewall_sets.begin();
+	 firewall_set_iter != _firewall_sets.end();
+	 ++firewall_set_iter) {
+	FirewallSet* firewall_set = *firewall_set_iter;
+	if (firewall_set->replace_entry(firewall_entry, error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 

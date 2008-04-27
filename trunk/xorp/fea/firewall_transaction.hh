@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_transaction.hh,v 1.1 2008/04/26 00:59:42 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_TRANSACTION_HH__
 #define __FEA_FIREWALL_TRANSACTION_HH__
@@ -150,6 +150,28 @@ private:
     FirewallEntry _entry;
 };
 
+class FirewallReplaceEntry4 : public FirewallTransactionOperation {
+public:
+    FirewallReplaceEntry4(FirewallManager&	firewall_manager,
+			  FirewallEntry&	firewall_entry)
+	: FirewallTransactionOperation(firewall_manager),
+	  _entry(firewall_entry)
+	  {}
+
+    bool dispatch() {
+	if (firewall_manager().replace_entry(_entry, _error_reason) != XORP_OK)
+	    return (false);
+	return (true);
+    }
+
+    string str() const {
+	return c_format("ReplaceEntry4: %s", _entry.str().c_str());
+    }
+
+private:
+    FirewallEntry _entry;
+};
+
 class FirewallDeleteEntry4 : public FirewallTransactionOperation {
 public:
     FirewallDeleteEntry4(FirewallManager&	firewall_manager,
@@ -203,6 +225,28 @@ public:
 
     string str() const {
 	return c_format("AddEntry6: %s", _entry.str().c_str());
+    }
+
+private:
+    FirewallEntry _entry;
+};
+
+class FirewallReplaceEntry6 : public FirewallTransactionOperation {
+public:
+    FirewallReplaceEntry6(FirewallManager&	firewall_manager,
+			  FirewallEntry&	firewall_entry)
+	: FirewallTransactionOperation(firewall_manager),
+	  _entry(firewall_entry)
+	  {}
+
+    bool dispatch() {
+	if (firewall_manager().replace_entry(_entry, _error_reason) != XORP_OK)
+	    return (false);
+	return (true);
+    }
+
+    string str() const {
+	return c_format("ReplaceEntry6: %s", _entry.str().c_str());
     }
 
 private:

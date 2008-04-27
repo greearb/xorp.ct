@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.28 2008/04/23 16:58:44 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.29 2008/04/26 00:59:45 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -425,6 +425,50 @@ public:
 	const string&	action);
 
     /**
+     *  Replace an IPv4 firewall entry.
+     *
+     *  @param tid the transaction ID for this operation.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter is to be
+     *  applied.
+     *
+     *  @param vifname the name of the vif where this filter is to be applied.
+     *
+     *  @param src_network the source IPv4 network address prefix.
+     *
+     *  @param dst_network the destination IPv4 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     *
+     *  @param action the action to be taken when this filter is matched. It is
+     *  one of the following keywords: "none", "pass", "drop", "reject".
+     */
+    XrlCmdError fea_firewall_0_1_replace_entry4(
+	// Input values,
+	const uint32_t&	tid,
+	const uint32_t&	rule_number,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4Net&	src_network,
+	const IPv4Net&	dst_network,
+	const uint32_t&	ip_protocol,
+	const uint32_t&	src_port_begin,
+	const uint32_t&	src_port_end,
+	const uint32_t&	dst_port_begin,
+	const uint32_t&	dst_port_end,
+	const string&	action);
+
+    /**
      *  Delete an IPv4 firewall entry.
      *
      *  @param tid the transaction ID for this operation.
@@ -562,6 +606,50 @@ public:
      *  one of the following keywords: "none", "pass", "drop", "reject".
      */
     XrlCmdError fea_firewall_0_1_add_entry6(
+	// Input values,
+	const uint32_t&	tid,
+	const uint32_t&	rule_number,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv6Net&	src_network,
+	const IPv6Net&	dst_network,
+	const uint32_t&	ip_protocol,
+	const uint32_t&	src_port_begin,
+	const uint32_t&	src_port_end,
+	const uint32_t&	dst_port_begin,
+	const uint32_t&	dst_port_end,
+	const string&	action);
+
+    /**
+     *  Replace an IPv6 firewall entry.
+     *
+     *  @param tid the transaction ID for this operation.
+     *
+     *  @param rule_number the rule number for this entry.
+     *
+     *  @param ifname the name of the interface where this filter is to be
+     *  applied.
+     *
+     *  @param vifname the name of the vif where this filter is to be applied.
+     *
+     *  @param src_network the source IPv6 network address prefix.
+     *
+     *  @param dst_network the destination IPv6 network address prefix.
+     *
+     *  @param ip_protocol the IP protocol number (1-255, or 0 if wildcard).
+     *
+     *  @param src_port_begin the source TCP/UDP begin port (0-65535).
+     *
+     *  @param src_port_end the source TCP/UDP end port (0-65535).
+     *
+     *  @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+     *
+     *  @param dst_port_end the destination TCP/UDP end port (0-65535).
+     *
+     *  @param action the action to be taken when this filter is matched. It is
+     *  one of the following keywords: "none", "pass", "drop", "reject".
+     */
+    XrlCmdError fea_firewall_0_1_replace_entry6(
 	// Input values,
 	const uint32_t&	tid,
 	const uint32_t&	rule_number,

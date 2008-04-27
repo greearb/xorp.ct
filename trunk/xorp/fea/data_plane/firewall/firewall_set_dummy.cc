@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_dummy.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -88,7 +88,10 @@ FirewallSetDummy::add_entry(const FirewallEntry& firewall_entry,
     else
 	ftp = &_firewall_entries6;
 
-    // XXX: If the entry already exists, then just update it
+    //
+    // XXX: If the entry already exists, then just update it.
+    // Note that the replace_entry() implementation relies on this.
+    //
     iter = ftp->find(key);
     if (iter == ftp->end()) {
 	ftp->insert(make_pair(key, firewall_entry));
@@ -98,6 +101,17 @@ FirewallSetDummy::add_entry(const FirewallEntry& firewall_entry,
     }
 
     return (XORP_OK);
+}
+
+int
+FirewallSetDummy::replace_entry(const FirewallEntry& firewall_entry,
+				string& error_msg)
+{
+    //
+    // XXX: The add_entry() method implementation covers the replace_entry()
+    // semantic as well.
+    //
+    return (add_entry(firewall_entry, error_msg));
 }
 
 int

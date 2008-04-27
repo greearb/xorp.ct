@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/firewall_set.hh,v 1.1 2008/04/26 00:59:42 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_SET_HH__
 #define __FEA_FIREWALL_SET_HH__
@@ -124,6 +124,18 @@ public:
      */
     virtual int add_entry(const FirewallEntry& firewall_entry,
 			  string& error_msg) = 0;
+
+    /**
+     * Replace a single firewall entry.
+     *
+     * Must be within a configuration interval.
+     *
+     * @param firewall_entry the replacement entry.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int replace_entry(const FirewallEntry& firewall_entry,
+			      string& error_msg) = 0;
 
     /**
      * Delete a single firewall entry.

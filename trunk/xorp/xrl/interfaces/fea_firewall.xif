@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/fea_firewall.xif,v 1.1 2008/04/26 00:59:49 pavlin Exp $ */
 
 /*
  * FEA Firewall interface.
@@ -48,6 +48,40 @@ interface fea_firewall/0.1 {
 	 * "none", "pass", "drop", "reject".
 	 */
 	add_entry4	? tid:u32					\
+			& rule_number:u32				\
+			& ifname:txt					\
+			& vifname:txt					\
+			& src_network:ipv4net				\
+			& dst_network:ipv4net				\
+			& ip_protocol:u32				\
+			& src_port_begin:u32				\
+			& src_port_end:u32				\
+			& dst_port_begin:u32				\
+			& dst_port_end:u32				\
+			& action:txt
+
+	/**
+	 * Replace an IPv4 firewall entry.
+	 *
+	 * @param tid the transaction ID for this operation.
+	 * @param rule_number the rule number for this entry.
+	 * @param ifname the name of the interface where this filter is
+	 * to be applied.
+	 * @param vifname the name of the vif where this filter is
+	 * to be applied.
+	 * @param src_network the source IPv4 network address prefix.
+	 * @param dst_network the destination IPv4 network address prefix.
+	 * @param ip_protocol the IP protocol number (1-255, or 0 if
+	 * wildcard).
+	 * @param src_port_begin the source TCP/UDP begin port (0-65535).
+	 * @param src_port_end the source TCP/UDP end port (0-65535).
+	 * @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+	 * @param dst_port_end the destination TCP/UDP end port (0-65535).
+	 * @param action the action to be taken when this filter is matched.
+	 * It is one of the following keywords:
+	 * "none", "pass", "drop", "reject".
+	 */
+	replace_entry4	? tid:u32					\
 			& rule_number:u32				\
 			& ifname:txt					\
 			& vifname:txt					\
@@ -173,6 +207,39 @@ interface fea_firewall/0.1 {
 			& dst_port_end:u32				\
 			& action:txt
 
+	/**
+	 * Replace an IPv6 firewall entry.
+	 *
+	 * @param tid the transaction ID for this operation.
+	 * @param rule_number the rule number for this entry.
+	 * @param ifname the name of the interface where this filter is
+	 * to be applied.
+	 * @param vifname the name of the vif where this filter is
+	 * to be applied.
+	 * @param src_network the source IPv6 network address prefix.
+	 * @param dst_network the destination IPv6 network address prefix.
+	 * @param ip_protocol the IP protocol number (1-255, or 0 if
+	 * wildcard).
+	 * @param src_port_begin the source TCP/UDP begin port (0-65535).
+	 * @param src_port_end the source TCP/UDP end port (0-65535).
+	 * @param dst_port_begin the destination TCP/UDP begin port (0-65535).
+	 * @param dst_port_end the destination TCP/UDP end port (0-65535).
+	 * @param action the action to be taken when this filter is matched.
+	 * It is one of the following keywords:
+	 * "none", "pass", "drop", "reject".
+	 */
+	replace_entry6	? tid:u32					\
+			& rule_number:u32				\
+			& ifname:txt					\
+			& vifname:txt					\
+			& src_network:ipv6net				\
+			& dst_network:ipv6net				\
+			& ip_protocol:u32				\
+			& src_port_begin:u32				\
+			& src_port_end:u32				\
+			& dst_port_begin:u32				\
+			& dst_port_end:u32				\
+			& action:txt
 
 	/**
 	 * Delete an IPv6 firewall entry.
