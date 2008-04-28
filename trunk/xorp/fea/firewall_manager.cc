@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.1 2008/04/26 00:59:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.2 2008/04/27 23:08:04 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -95,6 +95,11 @@ FirewallManager::abort_transaction(uint32_t tid, string& error_msg)
 	return (XORP_ERROR);
     }
 
+    // Cleanup state
+    _added_entries.clear();
+    _replaced_entries.clear();
+    _deleted_entries.clear();
+
     return (XORP_OK);
 }
 
@@ -127,6 +132,13 @@ FirewallManager::add_transaction_operation(
 int
 FirewallManager::commit_transaction(uint32_t tid, string& error_msg)
 {
+    int ret_value = XORP_OK;
+
+    // Cleanup leftover state
+    _added_entries.clear();
+    _replaced_entries.clear();
+    _deleted_entries.clear();
+
     if (_ftm->commit(tid) != true) {
 	error_msg = c_format("Expired or invalid transaction ID presented");
 	return (XORP_ERROR);
@@ -138,7 +150,14 @@ FirewallManager::commit_transaction(uint32_t tid, string& error_msg)
 	return (XORP_ERROR);
     }
 
-    return (XORP_OK);
+    ret_value = update_entries(error_msg);
+
+    // Cleanup state
+    _added_entries.clear();
+    _replaced_entries.clear();
+    _deleted_entries.clear();
+
+    return (ret_value);
 }
 
 int
@@ -336,54 +355,6 @@ FirewallManager::stop(string& error_msg)
 }
 
 int
-FirewallManager::start_configuration(string& error_msg)
-{
-    list<FirewallSet*>::iterator firewall_set_iter;
-    int ret_value = XORP_OK;
-    string error_msg2;
-
-    error_msg.erase();
-
-    for (firewall_set_iter = _firewall_sets.begin();
-	 firewall_set_iter != _firewall_sets.end();
-	 ++firewall_set_iter) {
-	FirewallSet* firewall_set = *firewall_set_iter;
-	if (firewall_set->start_configuration(error_msg2) != XORP_OK) {
-	    ret_value = XORP_ERROR;
-	    if (! error_msg.empty())
-		error_msg += " ";
-	    error_msg += error_msg2;
-	}
-    }
-    
-    return (ret_value);
-}
-
-int
-FirewallManager::end_configuration(string& error_msg)
-{
-    list<FirewallSet*>::iterator firewall_set_iter;
-    int ret_value = XORP_OK;
-    string error_msg2;
-
-    error_msg.erase();
-
-    for (firewall_set_iter = _firewall_sets.begin();
-	 firewall_set_iter != _firewall_sets.end();
-	 ++firewall_set_iter) {
-	FirewallSet* firewall_set = *firewall_set_iter;
-	if (firewall_set->end_configuration(error_msg2) != XORP_OK) {
-	    ret_value = XORP_ERROR;
-	    if (! error_msg.empty())
-		error_msg += " ";
-	    error_msg += error_msg2;
-	}
-    }
-    
-    return (ret_value);
-}
-
-int
 FirewallManager::set_firewall_entries_retain_on_startup4(bool retain,
 							 string& error_msg)
 {
@@ -424,8 +395,7 @@ FirewallManager::set_firewall_entries_retain_on_shutdown6(bool retain,
 }
 
 int
-FirewallManager::add_entry(const FirewallEntry& firewall_entry,
-			   string& error_msg)
+FirewallManager::update_entries(string& error_msg)
 {
     list<FirewallSet*>::iterator firewall_set_iter;
 
@@ -438,9 +408,22 @@ FirewallManager::add_entry(const FirewallEntry& firewall_entry,
 	 firewall_set_iter != _firewall_sets.end();
 	 ++firewall_set_iter) {
 	FirewallSet* firewall_set = *firewall_set_iter;
-	if (firewall_set->add_entry(firewall_entry, error_msg) != XORP_OK)
+	if (firewall_set->update_entries(_added_entries, _replaced_entries,
+					 _deleted_entries, error_msg)
+	    != XORP_OK)
 	    return (XORP_ERROR);
     }
+
+    return (XORP_OK);
+}
+
+int
+FirewallManager::add_entry(const FirewallEntry& firewall_entry,
+			   string& error_msg)
+{
+    UNUSED(error_msg);
+
+    _added_entries.push_back(firewall_entry);
 
     return (XORP_OK);
 }
@@ -449,20 +432,9 @@ int
 FirewallManager::replace_entry(const FirewallEntry& firewall_entry,
 			       string& error_msg)
 {
-    list<FirewallSet*>::iterator firewall_set_iter;
+    UNUSED(error_msg);
 
-    if (_firewall_sets.empty()) {
-	error_msg = c_format("No firewall plugin to set the entries");
-	return (XORP_ERROR);
-    }
-
-    for (firewall_set_iter = _firewall_sets.begin();
-	 firewall_set_iter != _firewall_sets.end();
-	 ++firewall_set_iter) {
-	FirewallSet* firewall_set = *firewall_set_iter;
-	if (firewall_set->replace_entry(firewall_entry, error_msg) != XORP_OK)
-	    return (XORP_ERROR);
-    }
+    _replaced_entries.push_back(firewall_entry);
 
     return (XORP_OK);
 }
@@ -471,20 +443,9 @@ int
 FirewallManager::delete_entry(const FirewallEntry& firewall_entry,
 			      string& error_msg)
 {
-    list<FirewallSet*>::iterator firewall_set_iter;
+    UNUSED(error_msg);
 
-    if (_firewall_sets.empty()) {
-	error_msg = c_format("No firewall plugin to set the entries");
-	return (XORP_ERROR);
-    }
-
-    for (firewall_set_iter = _firewall_sets.begin();
-	 firewall_set_iter != _firewall_sets.end();
-	 ++firewall_set_iter) {
-	FirewallSet* firewall_set = *firewall_set_iter;
-	if (firewall_set->delete_entry(firewall_entry, error_msg) != XORP_OK)
-	    return (XORP_ERROR);
-    }
+    _deleted_entries.push_back(firewall_entry);
 
     return (XORP_OK);
 }
@@ -738,7 +699,7 @@ FirewallManager::get_entry_list_next6(uint32_t	token,
 void
 FirewallManager::generate_token()
 {
-    // Find a token that is not used
+    // Generate a new token that is available
     do {
 	++_next_token;
 	if (_browse_db.find(_next_token) == _browse_db.end())

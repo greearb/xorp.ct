@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_ipfw2.cc,v 1.2 2008/04/26 02:06:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_ipfw2.cc,v 1.3 2008/04/27 23:08:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -153,6 +153,106 @@ FirewallSetIpfw2::stop(string& error_msg)
 
     _s4 = -1;
     _is_running = false;
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetIpfw2::update_entries(const list<FirewallEntry>& added_entries,
+				 const list<FirewallEntry>& replaced_entries,
+				 const list<FirewallEntry>& deleted_entries,
+				 string& error_msg)
+{
+    list<FirewallEntry>::const_iterator iter;
+
+    //
+    // The entries to add
+    //
+    for (iter = added_entries.begin();
+	 iter != added_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (add_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to replace
+    //
+    for (iter = replaced_entries.begin();
+	 iter != replaced_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (replace_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to delete
+    //
+    for (iter = deleted_entries.begin();
+	 iter != deleted_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (delete_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetIpfw2::set_table4(const list<FirewallEntry>& firewall_entry_list,
+			     string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    if (delete_all_entries4(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetIpfw2::delete_all_entries4(string& error_msg)
+{
+    //
+    // Delete all entries
+    //
+    if (setsockopt(_s4, IPPROTO_IP, IP_FW_FLUSH, NULL, 0) < 0) {
+	error_msg = c_format("Could not delete all IPFW2 firewall entries: %s",
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetIpfw2::set_table6(const list<FirewallEntry>& firewall_entry_list,
+			     string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    if (delete_all_entries6(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetIpfw2::delete_all_entries6(string& error_msg)
+{
+    //
+    // Delete all entries
+    //
+    if (setsockopt(_s4, IPPROTO_IP, IP_FW_FLUSH, NULL, 0) < 0) {
+	error_msg = c_format("Could not delete all IPFW2 firewall entries: %s",
+			     strerror(errno));
+	return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
@@ -393,78 +493,6 @@ FirewallSetIpfw2::delete_entry(const FirewallEntry& firewall_entry,
     if (setsockopt(_s4, IPPROTO_IP, IP_FW_DEL, &rulenum, sizeof(rulenum))
 	< 0) {
 	error_msg = c_format("Could not delete IPFW2 firewall entry: %s",
-			     strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetIpfw2::set_table4(const list<FirewallEntry>& firewall_entry_list,
-			     string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    if (delete_all_entries4(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-	 iter != firewall_entry_list.end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = *iter;
-	if (add_entry(firewall_entry, error_msg) != XORP_OK)
-	    return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetIpfw2::delete_all_entries4(string& error_msg)
-{
-    //
-    // Delete all entries
-    //
-    if (setsockopt(_s4, IPPROTO_IP, IP_FW_FLUSH, NULL, 0) < 0) {
-	error_msg = c_format("Could not delete all IPFW2 firewall entries: %s",
-			     strerror(errno));
-	return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetIpfw2::set_table6(const list<FirewallEntry>& firewall_entry_list,
-			     string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    if (delete_all_entries6(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-	 iter != firewall_entry_list.end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = *iter;
-	if (add_entry(firewall_entry, error_msg) != XORP_OK)
-	    return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetIpfw2::delete_all_entries6(string& error_msg)
-{
-    //
-    // Delete all entries
-    //
-    if (setsockopt(_s4, IPPROTO_IP, IP_FW_FLUSH, NULL, 0) < 0) {
-	error_msg = c_format("Could not delete all IPFW2 firewall entries: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_set.hh,v 1.1 2008/04/26 00:59:42 pavlin Exp $
+// $XORP: xorp/fea/firewall_set.hh,v 1.2 2008/04/27 23:08:04 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_SET_HH__
 #define __FEA_FIREWALL_SET_HH__
@@ -35,8 +35,7 @@ public:
     FirewallSet(FeaDataPlaneManager& fea_data_plane_manager)
 	: _is_running(false),
 	  _firewall_manager(fea_data_plane_manager.firewall_manager()),
-	  _fea_data_plane_manager(fea_data_plane_manager),
-	  _in_configuration(false)
+	  _fea_data_plane_manager(fea_data_plane_manager)
     {}
 
     /**
@@ -80,74 +79,20 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop(string& error_msg) = 0;
-    
-    /**
-     * Start a configuration interval.
-     *
-     * All modifications must be within a marked "configuration" interval.
-     *
-     * This method provides derived classes with a mechanism to perform
-     * any actions necessary before forwarding table modifications can
-     * be made.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int start_configuration(string& error_msg) {
-	// Nothing particular to do, just label start.
-	return mark_configuration_start(error_msg);
-    }
 
     /**
-     * End of configuration interval.
+     * Update the firewall entries by pushing them into the underlying system.
      *
-     * This method provides derived classes with a mechanism to
-     * perform any actions necessary at the end of a configuration, eg
-     * write a file.
-     *
+     * @param added_entries the entries to add.
+     * @param replaced_entries the entries to replace.
+     * @param deleted_entries the deleted entries.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int end_configuration(string& error_msg) {
-	// Nothing particular to do, just label start.
-	return mark_configuration_end(error_msg);
-    }
-    
-    /**
-     * Add a single firewall entry.
-     *
-     * Must be within a configuration interval.
-     *
-     * @param firewall_entry the entry to add.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int add_entry(const FirewallEntry& firewall_entry,
-			  string& error_msg) = 0;
-
-    /**
-     * Replace a single firewall entry.
-     *
-     * Must be within a configuration interval.
-     *
-     * @param firewall_entry the replacement entry.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int replace_entry(const FirewallEntry& firewall_entry,
-			      string& error_msg) = 0;
-
-    /**
-     * Delete a single firewall entry.
-     *
-     * Must be with a configuration interval.
-     *
-     * @param firewall_entry the entry to delete.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_entry(const FirewallEntry& firewall_entry,
-			     string& error_msg) = 0;
+    virtual int update_entries(const list<FirewallEntry>& added_entries,
+			       const list<FirewallEntry>& replaced_entries,
+			       const list<FirewallEntry>& deleted_entries,
+			       string& error_msg) = 0;
 
     /**
      * Set the IPv4 firewall table.
@@ -162,8 +107,6 @@ public:
 
     /**
      * Delete all entries in the IPv4 firewall table.
-     *
-     * Must be within a configuration interval.
      *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -184,55 +127,18 @@ public:
     /**
      * Delete all entries in the IPv6 firewall table.
      *
-     * Must be within a configuration interval.
-     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_all_entries6(string& error_msg) = 0;
 
 protected:
-    /**
-     * Mark start of a configuration.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int mark_configuration_start(string& error_msg) {
-	if (_in_configuration != true) {
-	    _in_configuration = true;
-	    return (XORP_OK);
-	}
-	error_msg = c_format("Cannot start configuration: "
-			     "configuration in progress");
-	return (XORP_ERROR);
-    }
-
-    /**
-     * Mark end of a configuration.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int mark_configuration_end(string& error_msg) {
-	if (_in_configuration != false) {
-	    _in_configuration = false;
-	    return (XORP_OK);
-	}
-	error_msg = c_format("Cannot end configuration: "
-			     "configuration not in progress");
-	return (XORP_ERROR);
-    }
-    
-    bool in_configuration() const { return _in_configuration; }
-
     // Misc other state
     bool	_is_running;
 
 private:
-    FirewallManager&	_firewall_manager;
-    FeaDataPlaneManager& _fea_data_plane_manager;
-    bool		_in_configuration;
+    FirewallManager&		_firewall_manager;
+    FeaDataPlaneManager&	_fea_data_plane_manager;
 };
 
 #endif // __FEA_FIREWALL_SET_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_manager.hh,v 1.1 2008/04/26 00:59:42 pavlin Exp $
+// $XORP: xorp/fea/firewall_manager.hh,v 1.2 2008/04/27 23:08:04 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_MANAGER_HH__
 #define __FEA_FIREWALL_MANAGER_HH__
@@ -165,23 +165,6 @@ public:
     int stop(string& error_msg);
 
     /**
-     * Start a configuration interval. All modifications must be
-     * within a marked "configuration" interval.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start_configuration(string& error_msg);
-    
-    /**
-     * End of configuration interval.
-     *
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int end_configuration(string& error_msg);
-
-    /**
      * Test whether the IPv4 firewall engine retains existing
      * firewall entries on startup.
      *
@@ -274,7 +257,8 @@ public:
 						 string& error_msg);
 
     /**
-     * Add a single firewall entry. Must be within a configuration interval.
+     * Add a single firewall entry that will be pushed into the underlying
+     * system.
      *
      * @param firewall_entry the entry to add.
      * @param error_msg the error message (if error).
@@ -283,8 +267,8 @@ public:
     int add_entry(const FirewallEntry& firewall_entry, string& error_msg);
 
     /**
-     * Replace a single firewall entry. Must be within a configuration
-     * interval.
+     * Replace a single firewall entry that will be pushed into the underlying
+     * system.
      *
      * @param firewall_entry the entry to replace.
      * @param error_msg the error message (if error).
@@ -293,7 +277,8 @@ public:
     int replace_entry(const FirewallEntry& firewall_entry, string& error_msg);
 
     /**
-     * Delete a single firewall entry. Must be with a configuration interval.
+     * Delete a single firewall entry that will be pushed into the underlying
+     * system.
      *
      * @param firewall_entry the entry to delete.
      * @param error_msg the error message (if error).
@@ -324,8 +309,7 @@ public:
 		   string& error_msg);
 
     /**
-     * Delete all entries in the IPv4 firewall table. Must be within a
-     * configuration interval.
+     * Delete all entries in the IPv4 firewall table.
      *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -333,8 +317,7 @@ public:
     int delete_all_entries4(string& error_msg);
 
     /**
-     * Delete all entries in the IPv6 firewall table. Must be within a
-     * configuration interval.
+     * Delete all entries in the IPv6 firewall table.
      *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -412,6 +395,14 @@ public:
 			     string&	error_msg);
 
 private:
+    /**
+     * Update the firewall entries by pushing them into the underlying system.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int update_entries(string& error_msg);
+
     class BrowseState {
     public:
 	BrowseState(FirewallManager& firewall_manager, uint32_t token)
@@ -450,7 +441,7 @@ private:
     };
 
     /**
-     * Generate a token that is not used.
+     * Generate a new token that is available.
      */
     void generate_token();
 
@@ -489,6 +480,13 @@ private:
     //
     uint32_t			_next_token;
     map<uint32_t, BrowseState *> _browse_db;
+
+    //
+    // State for collecting and updating the firewall entries
+    //
+    list<FirewallEntry>		_added_entries;
+    list<FirewallEntry>		_replaced_entries;
+    list<FirewallEntry>		_deleted_entries;
 
     //
     // Misc other state

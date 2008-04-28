@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/firewall/firewall_set_netfilter.hh,v 1.1 2008/04/26 00:59:47 pavlin Exp $
+// $XORP: xorp/fea/data_plane/firewall/firewall_set_netfilter.hh,v 1.2 2008/04/27 23:08:05 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_FIREWALL_FIREWALL_SET_NETFILTER_HH__
 #define __FEA_DATA_PLANE_FIREWALL_FIREWALL_SET_NETFILTER_HH__
@@ -57,40 +57,18 @@ public:
     virtual int stop(string& error_msg);
 
     /**
-     * Add a single firewall entry.
+     * Update the firewall entries by pushing them into the underlying system.
      *
-     * Must be within a configuration interval.
-     *
-     * @param firewall_entry the entry to add.
+     * @param added_entries the entries to add.
+     * @param replaced_entries the entries to replace.
+     * @param deleted_entries the deleted entries.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int add_entry(const FirewallEntry& firewall_entry,
-			  string& error_msg);
-
-    /**
-     * Replace a single firewall entry.
-     *
-     * Must be within a configuration interval.
-     *
-     * @param firewall_entry the replacement entry.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int replace_entry(const FirewallEntry& firewall_entry,
-			      string& error_msg);
-
-    /**
-     * Delete a single firewall entry.
-     *
-     * Must be with a configuration interval.
-     *
-     * @param firewall_entry the entry to delete.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    virtual int delete_entry(const FirewallEntry& firewall_entry,
-			     string& error_msg);
+    virtual int update_entries(const list<FirewallEntry>& added_entries,
+			       const list<FirewallEntry>& replaced_entries,
+			       const list<FirewallEntry>& deleted_entries,
+			       string& error_msg);
 
     /**
      * Set the IPv4 firewall table.
@@ -105,8 +83,6 @@ public:
 
     /**
      * Delete all entries in the IPv4 firewall table.
-     *
-     * Must be within a configuration interval.
      *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -127,14 +103,42 @@ public:
     /**
      * Delete all entries in the IPv6 firewall table.
      *
-     * Must be within a configuration interval.
-     *
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_all_entries6(string& error_msg);
 
 private:
+    /**
+     * Add a single firewall entry.
+     *
+     * @param firewall_entry the entry to add.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int add_entry(const FirewallEntry& firewall_entry,
+			  string& error_msg);
+
+    /**
+     * Replace a single firewall entry.
+     *
+     * @param firewall_entry the replacement entry.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int replace_entry(const FirewallEntry& firewall_entry,
+			      string& error_msg);
+
+    /**
+     * Delete a single firewall entry.
+     *
+     * @param firewall_entry the entry to delete.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int delete_entry(const FirewallEntry& firewall_entry,
+			     string& error_msg);
+
     /**
      * Encode a single IPv4 firewall chain.
      *

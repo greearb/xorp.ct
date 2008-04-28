@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_pf.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_pf.cc,v 1.2 2008/04/27 23:08:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -139,12 +139,129 @@ FirewallSetPf::stop(string& error_msg)
 }
 
 int
+FirewallSetPf::update_entries(const list<FirewallEntry>& added_entries,
+			      const list<FirewallEntry>& replaced_entries,
+			      const list<FirewallEntry>& deleted_entries,
+			      string& error_msg)
+{
+    list<FirewallEntry>::const_iterator iter;
+
+    //
+    // The entries to add
+    //
+    for (iter = added_entries.begin();
+	 iter != added_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (add_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to replace
+    //
+    for (iter = replaced_entries.begin();
+	 iter != replaced_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (replace_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to delete
+    //
+    for (iter = deleted_entries.begin();
+	 iter != deleted_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (delete_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // XXX: Push all entries, because the API for doing incremental changes
+    // adds more complexity.
+    //
+    // If this becomes an issue, then we need to:
+    // - Keep track of the kernel's rule numbers in user space
+    // - Use ioctl(DIOCCHANGERULE) with PF_CHANGE_GET_TICKET
+    //   to get the appropriate ticket.
+    // - Use ioctl(DIOCCHANGERULE) as appropriate with one of the
+    //   following actions and the appropriate kernel rule number:
+    //   PF_CHANGE_ADD_HEAD, PF_CHANGE_ADD_TAIL, F_CHANGE_ADD_BEFORE,
+    //   PF_CHANGE_ADD_AFTER, PF_CHANGE_REMOVE.
+    //
+    // XXX: If we need to use a single operation to delete an entry,
+    // the following code can do it.
+#if 0
+    //
+    // Use a single operation to delete the entry
+    //
+    bool is_add = false;
+    uint32_t ticket = 0;
+    if (add_delete_transaction_entry(is_add, ticket, firewall_entry, error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+#endif // 0
+
+    return (push_entries(error_msg));
+}
+
+int
+FirewallSetPf::set_table4(const list<FirewallEntry>& firewall_entry_list,
+			  string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    _firewall_entries4.clear();
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetPf::delete_all_entries4(string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    _firewall_entries4.clear();
+
+    return (update_entries(empty_list, empty_list, empty_list, error_msg));
+}
+
+int
+FirewallSetPf::set_table6(const list<FirewallEntry>& firewall_entry_list,
+			  string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    _firewall_entries6.clear();
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetPf::delete_all_entries6(string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    _firewall_entries6.clear();
+
+    return (update_entries(empty_list, empty_list, empty_list, error_msg));
+}
+
+int
 FirewallSetPf::add_entry(const FirewallEntry& firewall_entry,
 			 string& error_msg)
 {
     FirewallTrie::iterator iter;
     FirewallTrie* ftp = NULL;
     uint32_t key = firewall_entry.rule_number();	// XXX: the map key
+
+    UNUSED(error_msg);
 
     if (firewall_entry.is_ipv4())
 	ftp = &_firewall_entries4;
@@ -163,20 +280,7 @@ FirewallSetPf::add_entry(const FirewallEntry& firewall_entry,
 	fe_tmp = firewall_entry;
     }
 
-    //
-    // XXX: Push all entries, because the API for doing incremental changes
-    // adds more complexity.
-    //
-    // If this becomes an issue, then we need to:
-    // - Keep track of the kernel's rule numbers in user space
-    // - Use ioctl(DIOCCHANGERULE) with PF_CHANGE_GET_TICKET
-    //   to get the appropriate ticket.
-    // - Use ioctl(DIOCCHANGERULE) as appropriate with one of the
-    //   following actions and the appropriate kernel rule number:
-    //   PF_CHANGE_ADD_HEAD, PF_CHANGE_ADD_TAIL, F_CHANGE_ADD_BEFORE,
-    //   PF_CHANGE_ADD_AFTER
-    //
-    return (push_entries(error_msg));
+    return (XORP_OK);
 }
 
 int
@@ -211,30 +315,79 @@ FirewallSetPf::delete_entry(const FirewallEntry& firewall_entry,
     }
     ftp->erase(iter);
 
-    //
-    // XXX: Push all entries, because the API for doing incremental changes
-    // adds more complexity.
-    //
-    // If this becomes an issue, then we need to:
-    // - Keep track of the kernel's rule numbers in user space
-    // - Use ioctl(DIOCCHANGERULE) with PF_CHANGE_GET_TICKET
-    //   to get the appropriate ticket.
-    // - Use ioctl(DIOCCHANGERULE) with action PF_CHANGE_REMOVE
-    //   and the appropriate kernel rule number.
-    //
-    return (push_entries(error_msg));
+    return (XORP_OK);
+}
 
-#if 0
-    //
-    // Use a single operation to delete the entry
-    //
-    bool is_add = false;
-    uint32_t ticket = 0;
-    if (add_delete_transaction_entry(is_add, ticket, firewall_entry, error_msg)
-	!= XORP_OK) {
-	return (XORP_ERROR);
+int
+FirewallSetPf::start_transaction(uint32_t& ticket, string& error_msg)
+{
+    struct pfioc_trans trans;
+    struct pfioc_trans::pfioc_trans_e trans_e;
+
+    memset(&trans, 0, sizeof(trans));
+    memset(&trans_e, 0, sizeof(trans_e));
+
+    trans.size = 1;
+    trans.esize = sizeof(trans_e);
+    trans.array = &trans_e;
+    trans_e.rs_num = PF_RULESET_FILTER;
+
+    if (ioctl(_fd, DIOCXBEGIN, &trans) < 0) {
+	error_msg = c_format("Failed to begin transaction for adding rules "
+			     "to PF firewall: %s", strerror(errno));
+        return (XORP_ERROR);
     }
-#endif // 0
+    // TODO: Do we need a 'pool ticket'?
+
+    ticket = trans_e.ticket;
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetPf::commit_transaction(uint32_t ticket, string& error_msg)
+{
+    struct pfioc_trans trans;
+    struct pfioc_trans::pfioc_trans_e trans_e;
+
+    memset(&trans, 0, sizeof(trans));
+    memset(&trans_e, 0, sizeof(trans_e));
+
+    trans.size = 1;
+    trans.esize = sizeof(trans_e);
+    trans.array = &trans_e;
+    trans_e.rs_num = PF_RULESET_FILTER;
+    trans_e.ticket = ticket;
+
+    if (ioctl(_fd, DIOCXCOMMIT, &trans) < 0) {
+	error_msg = c_format("Failed to commit transaction for adding rules "
+			     "to PF firewall: %s", strerror(errno));
+        return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetPf::abort_transaction(uint32_t ticket, string& error_msg)
+{
+    struct pfioc_trans trans;
+    struct pfioc_trans::pfioc_trans_e trans_e;
+
+    memset(&trans, 0, sizeof(trans));
+    memset(&trans_e, 0, sizeof(trans_e));
+
+    trans.size = 1;
+    trans.esize = sizeof(trans_e);
+    trans.array = &trans_e;
+    trans_e.rs_num = PF_RULESET_FILTER;
+    trans_e.ticket = ticket;
+
+    if (ioctl(_fd, DIOCXROLLBACK, &trans) < 0) {
+        error_msg = c_format("Failed to abort transaction for adding rules "
+			     "to PF firewall: %s", strerror(errno));
+        return (XORP_ERROR);
+    }
 
     return (XORP_OK);
 }
@@ -434,136 +587,6 @@ FirewallSetPf::add_delete_transaction_entry(bool is_add, uint32_t ticket,
 				 "transaction: %s", strerror(errno));
 	    return (XORP_ERROR);
 	}
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetPf::set_table4(const list<FirewallEntry>& firewall_entry_list,
-			  string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    _firewall_entries4.clear();
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-	 iter != firewall_entry_list.end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = *iter;
-	_firewall_entries4.insert(make_pair(firewall_entry.rule_number(),
-					    firewall_entry));
-    }
-
-    return (push_entries(error_msg));
-}
-
-int
-FirewallSetPf::delete_all_entries4(string& error_msg)
-{
-    _firewall_entries4.clear();
-
-    return (push_entries(error_msg));
-}
-
-int
-FirewallSetPf::set_table6(const list<FirewallEntry>& firewall_entry_list,
-			  string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    _firewall_entries6.clear();
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-	 iter != firewall_entry_list.end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = *iter;
-	_firewall_entries6.insert(make_pair(firewall_entry.rule_number(),
-					    firewall_entry));
-    }
-
-    return (push_entries(error_msg));
-}
-
-int
-FirewallSetPf::delete_all_entries6(string& error_msg)
-{
-    _firewall_entries6.clear();
-
-    return (push_entries(error_msg));
-}
-
-int
-FirewallSetPf::start_transaction(uint32_t& ticket, string& error_msg)
-{
-    struct pfioc_trans trans;
-    struct pfioc_trans::pfioc_trans_e trans_e;
-
-    memset(&trans, 0, sizeof(trans));
-    memset(&trans_e, 0, sizeof(trans_e));
-
-    trans.size = 1;
-    trans.esize = sizeof(trans_e);
-    trans.array = &trans_e;
-    trans_e.rs_num = PF_RULESET_FILTER;
-
-    if (ioctl(_fd, DIOCXBEGIN, &trans) < 0) {
-	error_msg = c_format("Failed to begin transaction for adding rules "
-			     "to PF firewall: %s", strerror(errno));
-        return (XORP_ERROR);
-    }
-    // TODO: Do we need a 'pool ticket'?
-
-    ticket = trans_e.ticket;
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetPf::commit_transaction(uint32_t ticket, string& error_msg)
-{
-    struct pfioc_trans trans;
-    struct pfioc_trans::pfioc_trans_e trans_e;
-
-    memset(&trans, 0, sizeof(trans));
-    memset(&trans_e, 0, sizeof(trans_e));
-
-    trans.size = 1;
-    trans.esize = sizeof(trans_e);
-    trans.array = &trans_e;
-    trans_e.rs_num = PF_RULESET_FILTER;
-    trans_e.ticket = ticket;
-
-    if (ioctl(_fd, DIOCXCOMMIT, &trans) < 0) {
-	error_msg = c_format("Failed to commit transaction for adding rules "
-			     "to PF firewall: %s", strerror(errno));
-        return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetPf::abort_transaction(uint32_t ticket, string& error_msg)
-{
-    struct pfioc_trans trans;
-    struct pfioc_trans::pfioc_trans_e trans_e;
-
-    memset(&trans, 0, sizeof(trans));
-    memset(&trans_e, 0, sizeof(trans_e));
-
-    trans.size = 1;
-    trans.esize = sizeof(trans_e);
-    trans.array = &trans_e;
-    trans_e.rs_num = PF_RULESET_FILTER;
-    trans_e.ticket = ticket;
-
-    if (ioctl(_fd, DIOCXROLLBACK, &trans) < 0) {
-        error_msg = c_format("Failed to abort transaction for adding rules "
-			     "to PF firewall: %s", strerror(errno));
-        return (XORP_ERROR);
     }
 
     return (XORP_OK);

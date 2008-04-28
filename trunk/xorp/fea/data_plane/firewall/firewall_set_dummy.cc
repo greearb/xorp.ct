@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_dummy.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_dummy.cc,v 1.2 2008/04/27 23:08:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -69,6 +69,98 @@ FirewallSetDummy::stop(string& error_msg)
 	return (XORP_OK);
 
     _is_running = false;
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetDummy::update_entries(const list<FirewallEntry>& added_entries,
+				 const list<FirewallEntry>& replaced_entries,
+				 const list<FirewallEntry>& deleted_entries,
+				 string& error_msg)
+{
+    list<FirewallEntry>::const_iterator iter;
+
+    //
+    // The entries to add
+    //
+    for (iter = added_entries.begin();
+	 iter != added_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (add_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to replace
+    //
+    for (iter = replaced_entries.begin();
+	 iter != replaced_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (replace_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to delete
+    //
+    for (iter = deleted_entries.begin();
+	 iter != deleted_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (delete_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetDummy::set_table4(const list<FirewallEntry>& firewall_entry_list,
+			     string& error_msg)
+{
+    list<FirewallEntry>::const_iterator iter;
+    list<FirewallEntry> empty_list;
+
+    if (delete_all_entries4(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetDummy::delete_all_entries4(string& error_msg)
+{
+    UNUSED(error_msg);
+
+    _firewall_entries4.clear();
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetDummy::set_table6(const list<FirewallEntry>& firewall_entry_list,
+			     string& error_msg)
+{
+    list<FirewallEntry>::const_iterator iter;
+    list<FirewallEntry> empty_list;
+
+    if (delete_all_entries6(error_msg) != XORP_OK)
+	return (XORP_ERROR);
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetDummy::delete_all_entries6(string& error_msg)
+{
+    UNUSED(error_msg);
+
+    _firewall_entries6.clear();
 
     return (XORP_OK);
 }
@@ -134,68 +226,6 @@ FirewallSetDummy::delete_entry(const FirewallEntry& firewall_entry,
 	return (XORP_ERROR);
     }
     ftp->erase(iter);
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetDummy::set_table4(const list<FirewallEntry>& firewall_entry_list,
-			     string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    if (delete_all_entries4(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-	 iter != firewall_entry_list.end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = *iter;
-	_firewall_entries4.insert(make_pair(firewall_entry.rule_number(),
-					    firewall_entry));
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetDummy::delete_all_entries4(string& error_msg)
-{
-    UNUSED(error_msg);
-
-    _firewall_entries4.clear();
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetDummy::set_table6(const list<FirewallEntry>& firewall_entry_list,
-			     string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    if (delete_all_entries6(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-	 iter != firewall_entry_list.end();
-	 ++iter) {
-	const FirewallEntry& firewall_entry = *iter;
-	_firewall_entries6.insert(make_pair(firewall_entry.rule_number(),
-					    firewall_entry));
-    }
-
-    return (XORP_OK);
-}
-
-int
-FirewallSetDummy::delete_all_entries6(string& error_msg)
-{
-    UNUSED(error_msg);
-
-    _firewall_entries6.clear();
 
     return (XORP_OK);
 }

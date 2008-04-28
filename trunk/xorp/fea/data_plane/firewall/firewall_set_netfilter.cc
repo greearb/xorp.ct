@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_netfilter.cc,v 1.1 2008/04/26 00:59:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_netfilter.cc,v 1.2 2008/04/27 23:08:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -235,13 +235,125 @@ FirewallSetNetfilter::stop(string& error_msg)
 }
 
 int
+FirewallSetNetfilter::update_entries(
+    const list<FirewallEntry>& added_entries,
+    const list<FirewallEntry>& replaced_entries,
+    const list<FirewallEntry>& deleted_entries,
+    string& error_msg)
+{
+    list<FirewallEntry>::const_iterator iter;
+    bool has_ipv4 = false;
+    bool has_ipv6 = false;
+
+    //
+    // The entries to add
+    //
+    for (iter = added_entries.begin();
+	 iter != added_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (firewall_entry.is_ipv4())
+	    has_ipv4 = true;
+	if (firewall_entry.is_ipv6())
+	    has_ipv6 = true;
+	if (add_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to replace
+    //
+    for (iter = replaced_entries.begin();
+	 iter != replaced_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (firewall_entry.is_ipv4())
+	    has_ipv4 = true;
+	if (firewall_entry.is_ipv6())
+	    has_ipv6 = true;
+	if (replace_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // The entries to delete
+    //
+    for (iter = deleted_entries.begin();
+	 iter != deleted_entries.end();
+	 ++iter) {
+	const FirewallEntry& firewall_entry = *iter;
+	if (firewall_entry.is_ipv4())
+	    has_ipv4 = true;
+	if (firewall_entry.is_ipv6())
+	    has_ipv6 = true;
+	if (delete_entry(firewall_entry, error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    //
+    // Push the entries
+    //
+    if (has_ipv4) {
+	if (push_entries4(error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+    if (has_ipv6) {
+	if (push_entries6(error_msg) != XORP_OK)
+	    return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
+FirewallSetNetfilter::set_table4(const list<FirewallEntry>& firewall_entry_list,
+				 string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    _firewall_entries4.clear();
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetNetfilter::set_table6(const list<FirewallEntry>& firewall_entry_list,
+				 string& error_msg)
+{
+    list<FirewallEntry> empty_list;
+
+    _firewall_entries6.clear();
+
+    return (update_entries(firewall_entry_list, empty_list, empty_list,
+			   error_msg));
+}
+
+int
+FirewallSetNetfilter::delete_all_entries4(string& error_msg)
+{
+    _firewall_entries4.clear();
+
+    return (push_entries4(error_msg));
+}
+
+int
+FirewallSetNetfilter::delete_all_entries6(string& error_msg)
+{
+    _firewall_entries6.clear();
+
+    return (push_entries6(error_msg));
+}
+
+int
 FirewallSetNetfilter::add_entry(const FirewallEntry& firewall_entry,
 				string& error_msg)
 {
     FirewallTrie::iterator iter;
     FirewallTrie* ftp = NULL;
     uint32_t key = firewall_entry.rule_number();  // XXX: the map key
-    int ret_value = XORP_OK;
+
+    UNUSED(error_msg);
 
     if (firewall_entry.is_ipv4())
 	ftp = &_firewall_entries4;
@@ -260,16 +372,7 @@ FirewallSetNetfilter::add_entry(const FirewallEntry& firewall_entry,
 	fe_tmp = firewall_entry;
     }
 
-    //
-    // XXX: Push all entries, because NETFILTER doesn't support incremental
-    // changes.
-    //
-    if (firewall_entry.is_ipv4())
-	ret_value = push_entries4(error_msg);
-    else
-	ret_value = push_entries6(error_msg);
-
-    return (ret_value);
+    return (XORP_OK);
 }
 
 int
@@ -290,7 +393,6 @@ FirewallSetNetfilter::delete_entry(const FirewallEntry& firewall_entry,
     FirewallTrie::iterator iter;
     FirewallTrie* ftp = NULL;
     uint32_t key = firewall_entry.rule_number();  // XXX: the map key
-    int ret_value = XORP_OK;
 
     if (firewall_entry.is_ipv4())
 	ftp = &_firewall_entries4;
@@ -305,72 +407,7 @@ FirewallSetNetfilter::delete_entry(const FirewallEntry& firewall_entry,
     }
     ftp->erase(iter);
 
-    //
-    // XXX: Push all entries, because NETFILTER doesn't support incremental
-    // changes.
-    //
-    if (firewall_entry.is_ipv4())
-	ret_value = push_entries4(error_msg);
-    else
-	ret_value = push_entries6(error_msg);
-
-    return (ret_value);
-}
-
-int
-FirewallSetNetfilter::set_table4(const list<FirewallEntry>& firewall_entry_list,
-				 string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    _firewall_entries4.clear();
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-         iter != firewall_entry_list.end();
-         ++iter) {
-        const FirewallEntry& firewall_entry = *iter;
-        _firewall_entries4.insert(make_pair(firewall_entry.rule_number(),
-                                            firewall_entry));
-    }
-
-    return (push_entries4(error_msg));
-}
-
-int
-FirewallSetNetfilter::set_table6(const list<FirewallEntry>& firewall_entry_list,
-				 string& error_msg)
-{
-    list<FirewallEntry>::const_iterator iter;
-
-    _firewall_entries6.clear();
-
-    // Add all entries one-by-one
-    for (iter = firewall_entry_list.begin();
-         iter != firewall_entry_list.end();
-         ++iter) {
-        const FirewallEntry& firewall_entry = *iter;
-        _firewall_entries6.insert(make_pair(firewall_entry.rule_number(),
-                                            firewall_entry));
-    }
-
-    return (push_entries6(error_msg));
-}
-
-int
-FirewallSetNetfilter::delete_all_entries4(string& error_msg)
-{
-    _firewall_entries4.clear();
-
-    return (push_entries4(error_msg));
-}
-
-int
-FirewallSetNetfilter::delete_all_entries6(string& error_msg)
-{
-    _firewall_entries6.clear();
-
-    return (push_entries6(error_msg));
+    return (XORP_OK);
 }
 
 int
