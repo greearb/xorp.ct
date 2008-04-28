@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.2 2008/04/27 23:08:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.3 2008/04/28 05:21:06 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -35,10 +35,6 @@ FirewallManager::FirewallManager(FeaNode&	fea_node,
       _eventloop(fea_node.eventloop()),
       _iftree(iftree),
       _ftm(NULL),
-      _firewall_entries_retain_on_startup4(false),
-      _firewall_entries_retain_on_shutdown4(false),
-      _firewall_entries_retain_on_startup6(false),
-      _firewall_entries_retain_on_shutdown6(false),
       _next_token(0),
       _is_running(false)
 {
@@ -352,46 +348,6 @@ FirewallManager::stop(string& error_msg)
     _is_running = false;
 
     return (ret_value);
-}
-
-int
-FirewallManager::set_firewall_entries_retain_on_startup4(bool retain,
-							 string& error_msg)
-{
-    _firewall_entries_retain_on_startup4 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
-}
-
-int
-FirewallManager::set_firewall_entries_retain_on_shutdown4(bool retain,
-							  string& error_msg)
-{
-    _firewall_entries_retain_on_shutdown4 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
-}
-
-int
-FirewallManager::set_firewall_entries_retain_on_startup6(bool retain,
-							 string& error_msg)
-{
-    _firewall_entries_retain_on_startup6 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
-}
-
-int
-FirewallManager::set_firewall_entries_retain_on_shutdown6(bool retain,
-							  string& error_msg)
-{
-    _firewall_entries_retain_on_shutdown6 = retain;
-
-    error_msg = "";		// XXX: reset
-    return (XORP_OK);
 }
 
 int

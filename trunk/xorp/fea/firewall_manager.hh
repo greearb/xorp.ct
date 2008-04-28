@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_manager.hh,v 1.2 2008/04/27 23:08:04 pavlin Exp $
+// $XORP: xorp/fea/firewall_manager.hh,v 1.3 2008/04/28 05:21:06 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_MANAGER_HH__
 #define __FEA_FIREWALL_MANAGER_HH__
@@ -163,98 +163,6 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int stop(string& error_msg);
-
-    /**
-     * Test whether the IPv4 firewall engine retains existing
-     * firewall entries on startup.
-     *
-     * @return true if the XORP firewall entries are retained,
-     * otherwise false.
-     */
-    bool firewall_entries_retain_on_startup4() const {
-	return (_firewall_entries_retain_on_startup4);
-    }
-
-    /**
-     * Test whether the IPv4 firewall engine retains existing
-     * firewall entries on shutdown.
-     *
-     * @return true if the XORP firewall entries are retained,
-     * otherwise false.
-     */
-    bool firewall_entries_retain_on_shutdown4() const {
-	return (_firewall_entries_retain_on_shutdown4);
-    }
-
-    /**
-     * Test whether the IPv6 firewall engine retains existing
-     * firewall entries on startup.
-     *
-     * @return true if the XORP firewall entries are retained,
-     * otherwise false.
-     */
-    bool firewall_entries_retain_on_startup6() const {
-	return (_firewall_entries_retain_on_startup6);
-    }
-
-    /**
-     * Test whether the IPv6 firewall engine retains existing
-     * firewall entries on shutdown.
-     *
-     * @return true if the XORP firewall entries are retained,
-     * otherwise false.
-     */
-    bool firewall_entries_retain_on_shutdown6() const {
-	return (_firewall_entries_retain_on_shutdown6);
-    }
-
-    /**
-     * Set the IPv4 firewall engine whether to retain existing
-     * firewall entries on startup.
-     *
-     * @param retain if true, then retain the firewall entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_firewall_entries_retain_on_startup4(bool retain,
-						string& error_msg);
-
-    /**
-     * Set the IPv4 firewall engine whether to retain existing
-     * firewall entries on shutdown.
-     *
-     * @param retain if true, then retain the firewall entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_firewall_entries_retain_on_shutdown4(bool retain,
-						 string& error_msg);
-
-    /**
-     * Set the IPv6 firewall engine whether to retain existing
-     * firewall entries on startup.
-     *
-     * @param retain if true, then retain the firewall entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_firewall_entries_retain_on_startup6(bool retain,
-						string& error_msg);
-
-    /**
-     * Set the IPv6 firewall engine whether to retain existing
-     * firewall entries on shutdown.
-     *
-     * @param retain if true, then retain the firewall entries,
-     * otherwise delete them.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int set_firewall_entries_retain_on_shutdown6(bool retain,
-						 string& error_msg);
 
     /**
      * Add a single firewall entry that will be pushed into the underlying
@@ -466,14 +374,6 @@ private:
     //
     list<FirewallGet*>			_firewall_gets;
     list<FirewallSet*>			_firewall_sets;
-    
-    //
-    // Configured firewall entries properties
-    //
-    bool	_firewall_entries_retain_on_startup4;
-    bool	_firewall_entries_retain_on_shutdown4;
-    bool	_firewall_entries_retain_on_startup6;
-    bool	_firewall_entries_retain_on_shutdown6;
 
     //
     // State browsing information
