@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/contrib/olsr/Makefile.am,v 1.1 2008/04/24 15:19:50 bms Exp $
 ##
 
 # -- Subdirectories
 SUBDIRS = . tools
 
 # Redefine the bin installation directory
-bindir = $(prefix)/olsr
+bindir = $(prefix)/contrib/olsr
 
 # Point preprocessor at relocated olsr module
 AM_CPPFLAGS	 = -I$(top_srcdir)/contrib -I$(top_srcdir)/contrib/olsr

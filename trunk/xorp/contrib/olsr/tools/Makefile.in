@@ -165,7 +165,7 @@ am__tar = @am__tar@
 am__untar = @am__untar@
 
 # Redefine the bin installation directory
-bindir = $(prefix)/olsr/tools
+bindir = $(prefix)/contrib/olsr/tools
 build = @build@
 build_alias = @build_alias@
 build_cpu = @build_cpu@

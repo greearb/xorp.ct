@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.216 2008/04/24 17:48:21 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.217 2008/04/26 00:59:40 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.216 2008/04/24 17:48:21 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.217 2008/04/26 00:59:40 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -321,14 +321,14 @@ AC_ARG_WITH([snmp],
 AC_SUBST(MIBS)
 
 dnl -----------------------------------------
-dnl --with-olsr
+dnl --with-olsr (default yes)
 dnl -----------------------------------------
 AC_ARG_WITH([olsr],
-	    AC_HELP_STRING([--with-olsr],
-			   [build XORP OLSRv1 implementation in contrib/olsr]),
+	    AS_HELP_STRING([--with-olsr],
+			   [build OLSRv1 implementation in contrib/olsr]),
+	    [olsr=$withval;],
 	    [olsr="yes";
-	     CONTRIB_SUBDIRS="$CONTRIB_SUBDIRS olsr";],
-	    [olsr="no";]
+	     CONTRIB_SUBDIRS="$CONTRIB_SUBDIRS olsr";]
 )
 
 dnl -----------------------------------------

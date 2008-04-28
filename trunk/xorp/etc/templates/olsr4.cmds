@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/olsr4.cmds,v 1.1 2008/04/24 15:20:17 bms Exp $ */
 /* vim:set sts=4 ts=8 sw=4 syntax=c: */
 
 /*
@@ -6,7 +6,7 @@
 */
 
 clear olsr4 database {
-    %command: "olsr/tools/clear_database" %help: HELP;
+    %command: "contrib/olsr/tools/clear_database" %help: HELP;
     %module: olsr4;
     %tag: HELP "Clear OLSRv1 databases";
 }
@@ -22,7 +22,7 @@ show olsr4 {
  */
 
 show olsr4 interface {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 interface status";
 }
@@ -33,7 +33,7 @@ show olsr4 interface {
  */
 
 show olsr4 link {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 link status";
 }
@@ -44,7 +44,7 @@ show olsr4 link {
  */
 
 show olsr4 neighbor {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 one-hop neighbor status";
 }
@@ -55,7 +55,7 @@ show olsr4 neighbor {
  */
 
 show olsr4 twohop-link {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 two-hop link status";
 }
@@ -66,7 +66,7 @@ show olsr4 twohop-link {
  */
 
 show olsr4 twohop-neighbor {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 two-hop neighbor status";
 }
@@ -76,7 +76,7 @@ show olsr4 twohop-neighbor {
  */
 
 show olsr4 mid {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 Multiple Interface database";
 }
@@ -87,7 +87,7 @@ show olsr4 mid {
  */
 
 show olsr4 topology {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 Topology Control database";
 }
@@ -98,7 +98,7 @@ show olsr4 topology {
  */
 
 show olsr4 external {
-    %command: "olsr/tools/print_databases $3" %help: HELP;
+    %command: "contrib/olsr/tools/print_databases $3" %help: HELP;
     %module: olsr4;
     %tag: HELP "Show OLSRv1 external routes";
 }
