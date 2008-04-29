@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_cvsroot.sh,v 1.2 2007/03/02 02:31:21 pavlin Exp $
+# $XORP: xorp/devnotes/update_cvsroot.sh,v 1.3 2008/01/11 05:57:19 pavlin Exp $
 #
 
 #
@@ -92,7 +92,7 @@ trap "cleanup_atexit" 0 2 3 15
 #
 # Write a temporary copy of the new CVS Root file
 #
-echo -n "${NEW_CVS_ROOT}" > "${TMP_CVS_ROOT_FILENAME}"
+echo "${NEW_CVS_ROOT}" > "${TMP_CVS_ROOT_FILENAME}"
 
 #
 # Do the file update.
