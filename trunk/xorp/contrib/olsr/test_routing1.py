@@ -13,7 +13,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP$
+# $XORP: xorp/contrib/olsr/test_routing1.py,v 1.1 2008/04/24 15:19:55 bms Exp $
 
 import getopt
 import sys
