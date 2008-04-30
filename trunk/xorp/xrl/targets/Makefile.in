@@ -131,6 +131,9 @@ am_libtestfeaifmgrmirrorbase_la_OBJECTS =  \
 	test_fea_ifmgr_mirror_base.lo
 libtestfeaifmgrmirrorbase_la_OBJECTS =  \
 	$(am_libtestfeaifmgrmirrorbase_la_OBJECTS)
+libtestfearawlink_la_LIBADD =
+am_libtestfearawlink_la_OBJECTS = test_fea_rawlink_base.lo
+libtestfearawlink_la_OBJECTS = $(am_libtestfearawlink_la_OBJECTS)
 libtestfindereventsbase_la_LIBADD =
 am_libtestfindereventsbase_la_OBJECTS = test_finder_events_base.lo
 libtestfindereventsbase_la_OBJECTS =  \
@@ -189,6 +192,7 @@ SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libshowroutesbase_la_SOURCES) \
 	$(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) \
 	$(libtestfeaifmgrmirrorbase_la_SOURCES) \
+	$(libtestfearawlink_la_SOURCES) \
 	$(libtestfindereventsbase_la_SOURCES) \
 	$(libtestpeerbase_la_SOURCES) $(libtestsocket4_la_SOURCES) \
 	$(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) \
@@ -208,6 +212,7 @@ DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libshowroutesbase_la_SOURCES) \
 	$(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) \
 	$(libtestfeaifmgrmirrorbase_la_SOURCES) \
+	$(libtestfearawlink_la_SOURCES) \
 	$(libtestfindereventsbase_la_SOURCES) \
 	$(libtestpeerbase_la_SOURCES) $(libtestsocket4_la_SOURCES) \
 	$(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) \
@@ -371,8 +376,9 @@ tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt fea.tgt \
 	policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt \
 	ripng.tgt rtrmgr.tgt show_distances.tgt show_routes.tgt \
 	static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt \
-	test_finder_events.tgt test_peer.tgt test_socket4.tgt \
-	test_socket6.tgt test_xrls.tgt xorp_if_mib.tgt xorpsh.tgt
+	test_fea_rawlink.tgt test_finder_events.tgt test_peer.tgt \
+	test_socket4.tgt test_socket6.tgt test_xrls.tgt \
+	xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -391,8 +397,9 @@ noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la \
 	librtrmgrbase.la libshowdistancesbase.la libshowroutesbase.la \
 	libstaticroutesbase.la libtestbase.la \
 	libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la \
-	libtestpeerbase.la libtestsocket4.la libtestsocket6.la \
-	libtestxrlsbase.la libxorpifmibbase.la libxorpshbase.la
+	libtestpeerbase.la libtestfearawlink.la libtestsocket4.la \
+	libtestsocket6.la libtestxrlsbase.la libxorpifmibbase.la \
+	libxorpshbase.la
 
 # BGP
 libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
@@ -492,6 +499,10 @@ libtestfindereventsbase_la_SOURCES = test_finder_events_base.hh \
 
 # TEST PEER
 libtestpeerbase_la_SOURCES = test_peer_base.hh test_peer_base.cc
+
+# TEST RAWLINK
+libtestfearawlink_la_SOURCES = test_fea_rawlink_base.hh \
+	test_fea_rawlink_base.cc
 
 # TEST SOCKET4
 libtestsocket4_la_SOURCES = test_socket4_base.hh test_socket4_base.cc
@@ -621,6 +632,8 @@ libtestbase.la: $(libtestbase_la_OBJECTS) $(libtestbase_la_DEPENDENCIES)
 	$(CXXLINK)  $(libtestbase_la_OBJECTS) $(libtestbase_la_LIBADD) $(LIBS)
 libtestfeaifmgrmirrorbase.la: $(libtestfeaifmgrmirrorbase_la_OBJECTS) $(libtestfeaifmgrmirrorbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libtestfeaifmgrmirrorbase_la_OBJECTS) $(libtestfeaifmgrmirrorbase_la_LIBADD) $(LIBS)
+libtestfearawlink.la: $(libtestfearawlink_la_OBJECTS) $(libtestfearawlink_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libtestfearawlink_la_OBJECTS) $(libtestfearawlink_la_LIBADD) $(LIBS)
 libtestfindereventsbase.la: $(libtestfindereventsbase_la_OBJECTS) $(libtestfindereventsbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libtestfindereventsbase_la_OBJECTS) $(libtestfindereventsbase_la_LIBADD) $(LIBS)
 libtestpeerbase.la: $(libtestpeerbase_la_OBJECTS) $(libtestpeerbase_la_DEPENDENCIES) 
@@ -669,6 +682,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/static_routes_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_fea_ifmgr_mirror_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_fea_rawlink_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_finder_events_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_peer_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_socket4_base.Plo@am__quote@
@@ -1050,6 +1064,9 @@ $(srcdir)/test_finder_events_base.hh $(srcdir)/test_finder_events_base.hh: \
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
+$(srcdir)/test_fea_rawlink.hh $(srcdir)/test_fea_rawlink.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/fea_rawlink.xif
 $(srcdir)/test_socket4_base.hh $(srcdir)/test_socket4_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/socket4_user.xif

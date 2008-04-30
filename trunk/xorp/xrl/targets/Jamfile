@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/targets/Jamfile,v 1.5 2008/04/24 15:20:36 bms Exp $
+# $XORP: xorp/xrl/targets/Jamfile,v 1.6 2008/04/26 00:59:50 pavlin Exp $
 #
 
 SubDir TOP xrl targets ;
@@ -39,6 +39,7 @@ XorpXrlTgt <xrl!targets>show_routes_base.cc <xrl!targets>show_routes_base.hh <xr
 XorpXrlTgt <xrl!targets>static_routes_base.cc <xrl!targets>static_routes_base.hh <xrl!targets>static_routes_base.xrls : static_routes.tgt ;
 XorpXrlTgt <xrl!targets>test_base.cc <xrl!targets>test_base.hh <xrl!targets>test_base.xrls : test.tgt ;
 XorpXrlTgt <xrl!targets>test_fea_ifmgr_mirror_base.cc <xrl!targets>test_fea_ifmgr_mirror_base.hh <xrl!targets>test_fea_ifmgr_mirror_base.xrls : test_fea_ifmgr_mirror.tgt ;
+XorpXrlTgt <xrl!targets>test_fea_rawlink_base.cc <xrl!targets>test_fea_rawlink_base.hh <xrl!targets>test_fea_rawlink_base.xrls : test_fea_rawlink.tgt ;
 XorpXrlTgt <xrl!targets>test_finder_events_base.cc <xrl!targets>test_finder_events_base.hh <xrl!targets>test_finder_events_base.xrls : test_finder_events.tgt ;
 XorpXrlTgt <xrl!targets>test_peer_base.cc <xrl!targets>test_peer_base.hh <xrl!targets>test_peer_base.xrls : test_peer.tgt ;
 XorpXrlTgt <xrl!targets>test_socket4_base.cc <xrl!targets>test_socket4_base.hh <xrl!targets>test_socket4_base.xrls : test_socket4.tgt ;
@@ -74,6 +75,7 @@ Library libshowroutesbase : show_routes_base.cc ;
 Library libstaticroutesbase : static_routes_base.cc ;
 Library libtestbase : test_base.cc ;
 Library libtestfeaifmgrmirrorbase : test_fea_ifmgr_mirror_base.cc ;
+Library libtestfearawlinkbase : test_fea_rawlink_base.cc ;
 Library libtestfindereventsbase : test_finder_events_base.cc ;
 Library libtestpeerbase : test_peer_base.cc ;
 Library libtestsocket4 : test_socket4_base.cc ;
@@ -91,6 +93,7 @@ INSTALLABLE_XRLS =
 	coord.xrls
 	fea.xrls
 	fea_ifmgr_mirror.xrls
+	fea_rawlink.xrls
 	fib2mrib.xrls
 	finder.xrls
 	finder_client.xrls

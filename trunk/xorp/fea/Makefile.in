@@ -37,7 +37,7 @@ host_triplet = @host@
 target_triplet = @target@
 bin_PROGRAMS = xorp_fea$(EXEEXT) xorp_fea_dummy$(EXEEXT)
 check_PROGRAMS = test_xrl_sockets4_tcp$(EXEEXT) \
-	test_xrl_sockets4_udp$(EXEEXT)
+	test_xrl_sockets4_udp$(EXEEXT) test_fea_rawlink$(EXEEXT)
 subdir = fea
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -71,6 +71,19 @@ libfea_data_plane_base_la_OBJECTS =  \
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am_test_fea_rawlink_OBJECTS = test_fea_rawlink.$(OBJEXT)
+test_fea_rawlink_OBJECTS = $(am_test_fea_rawlink_OBJECTS)
+test_fea_rawlink_DEPENDENCIES = $(noinst_LTLIBRARIES) \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libtestfearawlink.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_sockets4_tcp_OBJECTS = test_xrl_sockets4_tcp.$(OBJEXT)
 test_xrl_sockets4_tcp_OBJECTS = $(am_test_xrl_sockets4_tcp_OBJECTS)
 test_xrl_sockets4_tcp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
@@ -187,12 +200,12 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libfea_la_SOURCES) $(libfea_data_plane_base_la_SOURCES) \
-	$(test_xrl_sockets4_tcp_SOURCES) \
+	$(test_fea_rawlink_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
 	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
 	$(xorp_fea_dummy_SOURCES)
 DIST_SOURCES = $(libfea_la_SOURCES) \
 	$(libfea_data_plane_base_la_SOURCES) \
-	$(test_xrl_sockets4_tcp_SOURCES) \
+	$(test_fea_rawlink_SOURCES) $(test_xrl_sockets4_tcp_SOURCES) \
 	$(test_xrl_sockets4_udp_SOURCES) $(xorp_fea_SOURCES) \
 	$(xorp_fea_dummy_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
@@ -345,8 +358,10 @@ top_srcdir = @top_srcdir@
 # -- Subdirectories
 SUBDIRS = data_plane . tools
 bin_SCRIPTS = xorp_fea_click_config_generator
-check_SCRIPTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
-TESTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh
+check_SCRIPTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh \
+	test_fea_rawlink.sh
+TESTS = test_xrl_sockets4_tcp.sh test_xrl_sockets4_udp.sh \
+	test_fea_rawlink.sh
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la libfea_data_plane_base.la
@@ -455,6 +470,20 @@ test_xrl_sockets4_udp_LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
+# -- Sources and Linkage for test_fea_rawlink
+test_fea_rawlink_SOURCES = test_fea_rawlink.cc
+test_fea_rawlink_LDADD = $(noinst_LTLIBRARIES) \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libtestfearawlink.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = DEVNOTES.mfea command_mfea \
 	xorp_fea_click_config_generator xrl_mfea_shell_funcs.sh \
@@ -543,6 +572,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+test_fea_rawlink$(EXEEXT): $(test_fea_rawlink_OBJECTS) $(test_fea_rawlink_DEPENDENCIES) 
+	@rm -f test_fea_rawlink$(EXEEXT)
+	$(CXXLINK) $(test_fea_rawlink_OBJECTS) $(test_fea_rawlink_LDADD) $(LIBS)
 test_xrl_sockets4_tcp$(EXEEXT): $(test_xrl_sockets4_tcp_OBJECTS) $(test_xrl_sockets4_tcp_DEPENDENCIES) 
 	@rm -f test_xrl_sockets4_tcp$(EXEEXT)
 	$(CXXLINK) $(test_xrl_sockets4_tcp_OBJECTS) $(test_xrl_sockets4_tcp_LDADD) $(LIBS)
@@ -610,6 +642,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfea_vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nexthop_port_mapper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/profile_vars.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_fea_rawlink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_tcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrl_sockets4_udp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_fea.Po@am__quote@

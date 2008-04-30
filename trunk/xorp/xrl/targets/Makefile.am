@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.70 2008/04/24 15:20:36 bms Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.71 2008/04/26 00:59:50 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -39,6 +39,7 @@ tgt_files		+= show_routes.tgt
 tgt_files		+= static_routes.tgt
 tgt_files		+= test.tgt
 tgt_files		+= test_fea_ifmgr_mirror.tgt
+tgt_files		+= test_fea_rawlink.tgt
 tgt_files		+= test_finder_events.tgt
 tgt_files		+= test_peer.tgt
 tgt_files		+= test_socket4.tgt
@@ -86,6 +87,7 @@ noinst_LTLIBRARIES	+= libtestbase.la
 noinst_LTLIBRARIES	+= libtestfeaifmgrmirrorbase.la
 noinst_LTLIBRARIES	+= libtestfindereventsbase.la
 noinst_LTLIBRARIES	+= libtestpeerbase.la
+noinst_LTLIBRARIES	+= libtestfearawlink.la
 noinst_LTLIBRARIES	+= libtestsocket4.la
 noinst_LTLIBRARIES	+= libtestsocket6.la
 noinst_LTLIBRARIES	+= libtestxrlsbase.la
@@ -340,6 +342,13 @@ libtestpeerbase_la_SOURCES = test_peer_base.hh test_peer_base.cc
 $(srcdir)/test_peer_base.hh $(srcdir)/test_peer_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_peer.xif
+
+# TEST RAWLINK
+libtestfearawlink_la_SOURCES  = test_fea_rawlink_base.hh
+libtestfearawlink_la_SOURCES += test_fea_rawlink_base.cc
+$(srcdir)/test_fea_rawlink.hh $(srcdir)/test_fea_rawlink.cc:		\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/fea_rawlink.xif
 
 # TEST SOCKET4
 libtestsocket4_la_SOURCES = test_socket4_base.hh test_socket4_base.cc

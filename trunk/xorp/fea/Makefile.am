@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.104 2007/12/28 05:12:34 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.105 2008/04/26 00:59:42 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,12 +16,15 @@ bin_SCRIPTS	 = xorp_fea_click_config_generator
 # -- Test Programs and Scripts
 check_PROGRAMS	 = test_xrl_sockets4_tcp
 check_PROGRAMS	+= test_xrl_sockets4_udp
+check_PROGRAMS	+= test_fea_rawlink
 
 check_SCRIPTS	 = test_xrl_sockets4_tcp.sh
 check_SCRIPTS	+= test_xrl_sockets4_udp.sh
+check_SCRIPTS	+= test_fea_rawlink.sh
 
 TESTS		 = test_xrl_sockets4_tcp.sh
 TESTS		+= test_xrl_sockets4_udp.sh
+TESTS		+= test_fea_rawlink.sh
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libfea.la libfea_data_plane_base.la
@@ -192,6 +195,20 @@ test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/xrl/targets/libtestsocket4.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxipc/libxipc.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libcomm/libcomm.la
 test_xrl_sockets4_udp_LDADD	+= $(top_builddir)/libxorp/libxorp.la
+
+# -- Sources and Linkage for test_fea_rawlink
+test_fea_rawlink_SOURCES	 = test_fea_rawlink.cc
+test_fea_rawlink_LDADD		 = $(noinst_LTLIBRARIES)
+test_fea_rawlink_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkxif.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkclientxif.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/targets/libtestfearawlink.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/libxipc/libxipc.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/libcomm/libcomm.la
+test_fea_rawlink_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 = DEVNOTES.mfea

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/Jamfile,v 1.25 2007/12/28 05:12:34 pavlin Exp $
+# $XORP: xorp/fea/Jamfile,v 1.26 2008/04/26 00:59:42 pavlin Exp $
 #
 
 SubDir TOP fea ;
@@ -110,6 +110,22 @@ Object <fea>fea_dummy$(SUFOBJ) : xorp_fea.cc ;
 C++FLAGS on <fea>fea_dummy$(SUFOBJ) += -DFEA_DUMMY ;
 
 if $(MAKE_CHECK) {
+
+ Main test_fea_rawlink : test_fea_rawlink.cc ;
+ LinkLibraries test_fea_rawlink :
+	libfea
+	libxorp_data_plane_managers
+	libxorp_fibconfig
+	libxorp_ifconfig
+	libxorp_control_socket
+	libfea_data_plane_base
+	libfearawlinkxif
+	libfearawlinkclientxif
+	libtestfearawlink
+	libxipc
+	libcomm
+	libxorp
+	;
 
  Main test_xrl_sockets4_udp : test_xrl_sockets4_udp.cc ;
  LinkLibraries test_xrl_sockets4_udp :
