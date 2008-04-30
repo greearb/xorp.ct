@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/fea/test_fea_rawlink.sh,v 1.1 2008/04/30 20:53:35 bms Exp $
 #
 
 #
