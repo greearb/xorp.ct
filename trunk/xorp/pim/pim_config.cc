@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.53 2007/10/12 07:53:52 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.54 2008/01/04 03:17:02 pavlin Exp $"
 
 
 //
@@ -234,81 +234,6 @@ PimNode::reset_vif_proto_version(const string& vif_name, string& error_msg)
     }
     
     pim_vif->set_proto_version(pim_vif->proto_version_default());
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::get_vif_ip_router_alert_option_check(const string& vif_name,
-					      bool& enabled,
-					      string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (pim_vif == NULL) {
-	error_msg = c_format("Cannot get 'IP Router Alert option check' "
-			     "flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	return (XORP_ERROR);
-    }
-    
-    enabled = pim_vif->ip_router_alert_option_check().get();
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::set_vif_ip_router_alert_option_check(const string& vif_name,
-					      bool enable,
-					      string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot set 'IP Router Alert option check' "
-			     "flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->ip_router_alert_option_check().set(enable);
-    
-    if (end_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    return (XORP_OK);
-}
-
-int
-PimNode::reset_vif_ip_router_alert_option_check(const string& vif_name,
-						string& error_msg)
-{
-    PimVif *pim_vif = vif_find_by_name(vif_name);
-    
-    if (start_config(error_msg) != XORP_OK)
-	return (XORP_ERROR);
-    
-    if (pim_vif == NULL) {
-	end_config(error_msg);
-	error_msg = c_format("Cannot reset 'IP Router Alert option check' "
-			     "flag for vif %s: "
-			     "no such vif",
-			     vif_name.c_str());
-	XLOG_ERROR("%s", error_msg.c_str());
-	return (XORP_ERROR);
-    }
-    
-    pim_vif->ip_router_alert_option_check().reset();
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);

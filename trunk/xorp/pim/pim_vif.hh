@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.44 2007/05/19 01:52:46 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.45 2008/01/04 03:17:07 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -140,19 +140,10 @@ public:
      * 
      * @param src the source address of the message.
      * @param dst the destination address of the message.
-     * @param ip_ttl the IP TTL of the message. If it has a negative value
-     * it should be ignored.
-     * @param ip_ttl the IP TOS of the message. If it has a negative value,
-     * it should be ignored.
-     * @param ip_router_alert if true, the IP Router Alert option in the IP
-     * packet was set (when applicable).
-     * @param ip_internet_control if true, then this is IP control traffic.
      * @param buffer the data buffer with the received message.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		pim_recv(const IPvX& src, const IPvX& dst,
-			 int ip_ttl, int ip_tos, bool ip_router_alert,
-			 bool ip_internet_control, buffer_t *buffer);
+    int		pim_recv(const IPvX& src, const IPvX& dst, buffer_t *buffer);
     
     /**
      * Get the string with the flags about the vif status.
@@ -257,13 +248,6 @@ public:
      */
     const IPvX&	dr_addr() const		{ return (_dr_addr);		}
 
-    /**
-     * Optain a reference to the "IP Router Alert option check" flag.
-     *
-     * @return a reference to the "IP Router Alert option check" flag.
-     */
-    ConfigParam<bool>& ip_router_alert_option_check() { return (_ip_router_alert_option_check); }
-    
     //
     // Hello-related configuration parameters
     //
@@ -550,7 +534,6 @@ private:
     //
     // Misc configuration parameters
     //
-    ConfigParam<bool> _ip_router_alert_option_check; // The IP Router Alert option check flag
 
     //
     // Hello-related configuration parameters
@@ -678,9 +661,7 @@ private:
 				     const IPvX& dst, buffer_t *buffer);
     
     // PIM control messages process functions
-    int		pim_process(const IPvX& src, const IPvX& dst,
-			    int ip_ttl, int ip_tos, bool ip_router_alert,
-			    bool ip_internet_control, buffer_t *buffer);
+    int		pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer);
     int		pim_assert_process(PimNbr *pim_nbr,
 				   const IPvX& src,
 				   const IPvX& dst,

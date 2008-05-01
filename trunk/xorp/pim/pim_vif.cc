@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.69 2007/10/12 07:53:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.70 2008/01/04 03:17:06 pavlin Exp $"
 
 
 //
@@ -68,7 +68,6 @@ PimVif::PimVif(PimNode& pim_node, const Vif& vif)
       _dr_addr(pim_node.family()),
       _pim_nbr_me(*this, IPvX::ZERO(pim_node.family()), PIM_VERSION_DEFAULT),
       _domain_wide_addr(IPvX::ZERO(pim_node.family())),
-      _ip_router_alert_option_check(false),
       _hello_triggered_delay(PIM_HELLO_HELLO_TRIGGERED_DELAY_DEFAULT),
       _hello_period(PIM_HELLO_HELLO_PERIOD_DEFAULT,
 		    callback(this, &PimVif::set_hello_period_callback)),
@@ -571,11 +570,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     int ret_value;
     size_t datalen;
     int ttl = MINTTL;
-    //
-    // XXX: According to newer revisions of the PIM-SM spec, the PIM-SM control
-    // messages don't include the IP Router Alert option.
-    //
-    bool ip_router_alert = false;
     bool ip_internet_control = true;	// XXX: might be overwritten below
 
     if (! (is_up() || is_pending_down()))
@@ -615,7 +609,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	case PIM_REGISTER_STOP:
 	case PIM_CAND_RP_ADV:
 	    ttl = IPDEFTTL;
-	    ip_router_alert = false;
 	    break;
 	default:
 	    break;
@@ -745,7 +738,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 				    src, dst,
 				    pim_node().ip_protocol_number(),
 				    ttl, ip_tos,
-				    ip_router_alert,
+				    false, // router alert is deprecated
 				    ip_internet_control,
 				    buffer, error_msg);
     
@@ -824,13 +817,6 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
  * PimVif::pim_recv:
  * @src: The message source address.
  * @dst: The message destination address.
- * @ip_ttl: The IP TTL of the message. If it has a negative value,
- * it should be ignored.
- * @ip_tos: The IP TOS of the message. If it has a negative value,
- * it should be ignored.
- * @ip_router_alert: True if the received IP packet had the Router Alert
- * IP option set.
- * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the received message.
  * 
  * Receive PIM message and pass it for processing.
@@ -838,13 +824,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::pim_recv(const IPvX& src,
-		 const IPvX& dst,
-		 int ip_ttl,
-		 int ip_tos,
-		 bool ip_router_alert,
-		 bool ip_internet_control,
-		 buffer_t *buffer)
+PimVif::pim_recv(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 {
     int ret_value = XORP_ERROR;
     
@@ -853,8 +833,7 @@ PimVif::pim_recv(const IPvX& src,
 	return (XORP_ERROR);
     }
     
-    ret_value = pim_process(src, dst, ip_ttl, ip_tos, ip_router_alert,
-			    ip_internet_control, buffer);
+    ret_value = pim_process(src, dst, buffer);
     
     return (ret_value);
 }
@@ -863,13 +842,6 @@ PimVif::pim_recv(const IPvX& src,
  * PimVif::pim_process:
  * @src: The message source address.
  * @dst: The message destination address.
- * @ip_ttl: The IP TTL of the message. If it has a negative value,
- * it should be ignored.
- * @ip_tos: The IP TOS of the message. If it has a negative value,
- * it should be ignored.
- * @ip_router_alert: True if the received IP packet had the Router Alert
- * IP option set.
- * @ip_internet_control: If true, then this is IP control traffic.
  * @buffer: The buffer with the message.
  * 
  * Process PIM message and pass the control to the type-specific functions.
@@ -877,12 +849,7 @@ PimVif::pim_recv(const IPvX& src,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimVif::pim_process(const IPvX& src, const IPvX& dst,
-		    int ip_ttl,
-		    int ip_tos,
-		    bool ip_router_alert,
-		    bool ip_internet_control,
-		    buffer_t *buffer)
+PimVif::pim_process(const IPvX& src, const IPvX& dst, buffer_t *buffer)
 {
     uint8_t pim_vt;
     uint16_t cksum;
@@ -1041,57 +1008,7 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 	++_pimstat_unknown_version_messages;
 	return (XORP_ERROR);
     }
-    
-    //
-    // IP Router Alert option check
-    //
-    if (_ip_router_alert_option_check.get()) {
-	switch (message_type) {
-	case PIM_HELLO:
-	case PIM_JOIN_PRUNE:
-	case PIM_ASSERT:
-	case PIM_GRAFT:
-	case PIM_GRAFT_ACK:
-	case PIM_BOOTSTRAP:
-	    if (! ip_router_alert) {
-		XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			     "missing IP Router Alert option",
-			     PIMTYPE2ASCII(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str());
-		ret_value = XORP_ERROR;
-		goto ret_label;
-	    }
-	    //
-	    // TODO: check the TTL, TOS and ip_internet_control flag if we are
-	    // running in secure mode.
-	    //
-	    UNUSED(ip_ttl);
-	    UNUSED(ip_tos);
-	    UNUSED(ip_internet_control);
-#if 0
-	    if (ip_ttl != MINTTL) {
-		XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			     "ip_ttl = %d instead of %d",
-			     PIMTYPE2ASCII(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str(),
-			     ip_ttl, MINTTL);
-		ret_value = XORP_ERROR;
-		goto ret_label;
-	    }
-#endif // 0
-	    break;
-	case PIM_REGISTER:
-	case PIM_REGISTER_STOP:
-	case PIM_CAND_RP_ADV:
-	    // Destination should be unicast. No TTL and RA check needed.
-	    break;
-	default:
-	    break;
-	}
-    }
-    
+
     //
     // Source address check.
     //

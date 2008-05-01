@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.66 2007/05/19 01:52:46 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.67 2008/01/04 03:17:04 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -914,44 +914,6 @@ public:
      */
     int		reset_vif_proto_version(const string& vif_name,
 					string& error_msg);
-
-    /**
-     * Get the value of the flag that enables/disables the IP Router Alert
-     * option check per interface for received packets.
-     * 
-     * @param vif_name the name of the vif to apply to.
-     * @param enabled the return-by-reference flag value.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		get_vif_ip_router_alert_option_check(const string& vif_name,
-						     bool& enabled,
-						     string& error_msg);
-    
-    /**
-     * Enable/disable the IP Router Alert option check per interface for
-     * received packets.
-     * 
-     * @param vif_name the name of the vif to apply to.
-     * @param enable if true, then enable the IP Router Alert option check,
-     * otherwise disable it.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		set_vif_ip_router_alert_option_check(const string& vif_name,
-						     bool enable,
-						     string& error_msg);
-    
-    /**
-     * Reset the value of the flag that enables/disables the IP Router Alert
-     * option check per interface for received packets to its default value.
-     * 
-     * @param vif_name the name of the vif to apply to.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		reset_vif_ip_router_alert_option_check(const string& vif_name,
-						       string& error_msg);
 
     //
     int		get_vif_hello_triggered_delay(const string& vif_name,

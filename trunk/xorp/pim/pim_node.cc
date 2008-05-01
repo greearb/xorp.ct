@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.87 2007/10/12 07:53:52 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.88 2008/01/04 03:17:04 pavlin Exp $"
 
 
 //
@@ -1458,12 +1458,16 @@ PimNode::proto_recv(const string& if_name,
 	      XORP_UINT_CAST(payload.size()));
 
     UNUSED(if_name);
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+    UNUSED(ip_router_alert);
+    UNUSED(ip_internet_control);
     //
     // XXX: We registered to receive only one protocol, hence we ignore
     // the ip_protocol value.
     //
     UNUSED(ip_protocol);
-    
+ 
     //
     // Check whether the node is up.
     //
@@ -1487,11 +1491,7 @@ PimNode::proto_recv(const string& if_name,
     BUFFER_PUT_DATA(&payload[0], _buffer_recv, payload.size());
     
     // Process the data by the vif
-    ret_value = pim_vif->pim_recv(src_address, dst_address,
-				  ip_ttl, ip_tos,
-				  ip_router_alert,
-				  ip_internet_control,
-				  _buffer_recv);
+    ret_value = pim_vif->pim_recv(src_address, dst_address, _buffer_recv);
     
     return (ret_value);
     

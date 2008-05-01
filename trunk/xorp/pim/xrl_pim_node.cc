@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.101 2007/10/12 07:53:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.102 2007/10/13 01:50:05 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -4706,16 +4706,10 @@ XrlPimNode::pim_0_1_get_vif_ip_router_alert_option_check(
     // Output values,
     bool&	enabled)
 {
-    string error_msg;
-    
-    bool v;
-    if (PimNode::get_vif_ip_router_alert_option_check(vif_name, v, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
-    enabled = v;
+    XLOG_INFO("Command deprecated; PIM no longer requires the IP Router Alert option.");
+    enabled = false;
     return XrlCmdError::OKAY();
+    UNUSED(vif_name);
 }
 
 XrlCmdError
@@ -4724,15 +4718,10 @@ XrlPimNode::pim_0_1_set_vif_ip_router_alert_option_check(
     const string&	vif_name,
     const bool&		enable)
 {
-    string error_msg;
-    
-    if (PimNode::set_vif_ip_router_alert_option_check(vif_name, enable,
-						      error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
+    XLOG_INFO("Command deprecated; PIM no longer requires the IP Router Alert option.");
     return XrlCmdError::OKAY();
+    UNUSED(vif_name);
+    UNUSED(enable);
 }
 
 XrlCmdError
@@ -4740,14 +4729,9 @@ XrlPimNode::pim_0_1_reset_vif_ip_router_alert_option_check(
     // Input values,
     const string&	vif_name)
 {
-    string error_msg;
-    
-    if (PimNode::reset_vif_ip_router_alert_option_check(vif_name, error_msg)
-	!= XORP_OK) {
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    
+    XLOG_INFO("Command deprecated; PIM no longer requires the IP Router Alert option.");
     return XrlCmdError::OKAY();
+    UNUSED(vif_name);
 }
 
 XrlCmdError
