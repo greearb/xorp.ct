@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/fea/test_fea_rawlink.sh,v 1.1 2008/04/30 20:53:35 bms Exp $
+# $XORP: xorp/fea/test_fea_rawlink.sh,v 1.2 2008/04/30 21:19:01 pavlin Exp $
 #
 
 #
@@ -67,6 +67,12 @@ setup_interfaces()
 		vifname=$ifname
 		;;
 	   Linux)
+		if [ "$(id -u)" != "0" ]
+		then
+		    echo "$0: Tests Skipped: Not running as root user."
+		    exit 0
+		fi
+
 		ifname="lo"
 		vifname=$ifname
 		;;
