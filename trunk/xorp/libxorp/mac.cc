@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.23 2007/11/01 00:04:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.24 2008/01/04 03:16:37 pavlin Exp $"
 
 #include <vector>
 
@@ -24,6 +24,11 @@
 
 /* ------------------------------------------------------------------------- */
 /* Base Mac methods */
+
+Mac::Mac()
+{
+    *this = Mac::ZERO();
+}
 
 Mac::Mac(const uint8_t* from_uint8, size_t len) throw (BadMac)
 {
@@ -38,9 +43,6 @@ Mac::Mac(const string& from_string) throw (InvalidString)
 size_t
 Mac::copy_out(uint8_t* to_uint8) const
 {
-    if (_srep.empty())
-	return (0);	// XXX: the empty string is valid, so don't copy it
-
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //
@@ -73,7 +75,7 @@ Mac::copy_in(const uint8_t* from_uint8, size_t len) throw (BadMac)
     do {
 	if (len == EtherMac::ADDR_BYTELEN) {
 	    EtherMac ether_mac(from_uint8);
-	    _srep = ether_mac.str();
+	    set_rep(ether_mac.str());
 	    ret_value = len;
 	    break;
 	}
@@ -100,11 +102,6 @@ Mac::copy_in(const string& from_string) throw (InvalidString)
     // Add new MyMac::valid() methods here
     // ------------------------------------------------------------------------
     do {
-	if (from_string.empty()) {
-	    // XXX: Always accept the empty string
-	    ret_value = 0;
-	    break;
-	}
 	if (EtherMac::valid(from_string)) {
 	    ret_value = EtherMac::ADDR_BYTELEN;
 	    break;
@@ -115,16 +112,13 @@ Mac::copy_in(const string& from_string) throw (InvalidString)
 	return (static_cast<size_t>(-1));
     } while (false);
 
-    _srep = from_string;
+    set_rep(from_string);
     return (ret_value);
 }
 
 string
 Mac::normalized_str() const
 {
-    if (_srep.empty())
-	return _srep;	// XXX: the empty string is valid, so just return it
-
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //
@@ -144,9 +138,6 @@ Mac::normalized_str() const
 size_t
 Mac::addr_bytelen() const
 {
-    if (_srep.empty())
-	return (0);	// XXX: the empty string is valid, so just return 0
-
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //
@@ -166,9 +157,6 @@ Mac::addr_bytelen() const
 uint32_t
 Mac::addr_bitlen() const
 {
-    if (_srep.empty())
-	return (0);	// XXX: the empty string is valid, so just return 0
-
     // ------------------------------------------------------------------------
     // I M P O R T A N T !
     //

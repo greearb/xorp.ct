@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.19 2008/01/04 03:16:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.20 2008/03/09 00:21:17 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -53,7 +53,7 @@ copy_interface_state(const IfTreeInterface* pulled_ifp,
 	if (config_iface.mtu() != pulled_ifp->mtu())
 	    config_iface.set_mtu(pulled_ifp->mtu());
     }
-    if (config_iface.mac().empty()) {
+    if (config_iface.mac().is_zero()) {
 	if (config_iface.mac() != pulled_ifp->mac())
 	    config_iface.set_mac(pulled_ifp->mac());
     }

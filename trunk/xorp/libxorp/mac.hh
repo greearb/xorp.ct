@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.25 2007/11/01 00:04:48 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.26 2008/01/04 03:16:37 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -45,9 +45,9 @@ public:
 class Mac {
 public:
     /**
-     * Default constructor
+     * Default constructor.
      */
-    Mac() {}
+    Mac();
 
     /**
      * Constructor from a (uint8_t *) memory pointer.
@@ -140,11 +140,6 @@ public:
     uint32_t addr_bitlen() const;
 
     /**
-     * @return true if MAC address value is unset.
-     */
-    bool empty() const { return _srep.empty(); }
-
-    /**
      * Test if this address is numerically zero.
      *
      * @return true if the address is numerically zero.
@@ -195,7 +190,7 @@ inline const Mac& Mac::LLDP_MULTICAST() {
 class EtherMac : public Mac {
 public:
     /**
-     * Default constructor
+     * Default constructor.
      */
     EtherMac() : Mac(Mac::ZERO()) {}
 

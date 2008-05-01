@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.1 2008/04/30 20:53:35 bms Exp $"
 
 #include "fea_module.h"
 
@@ -524,7 +524,7 @@ test_main(IPv4 finder_host, uint16_t finder_port,
 
     // For the Linux loopback interface the Mac is likely to be empty.
     mac = fi->mac();
-    if (mac.empty()) {
+    if (mac.is_zero()) {
 	verbose_log("%s has an empty MAC address.\n", ifname.c_str());
 	//ifmgr.shutdown();
 	//return -1;

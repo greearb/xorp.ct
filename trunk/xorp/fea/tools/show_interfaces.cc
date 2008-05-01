@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.25 2007/11/29 01:52:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.26 2008/01/04 03:16:16 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -352,7 +352,7 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    //
 	    fprintf(stdout, "        physical index %d\n",
 		    ifmgr_iface.pif_index());
-	    if (!ifmgr_iface.mac().empty())
+	    if (!ifmgr_iface.mac().is_zero())
 		fprintf(stdout, "        ether %s\n",
 			ifmgr_iface.mac().str().c_str());
 	}
@@ -481,7 +481,7 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    //
 	    fprintf(stdout, "        physical index %d\n",
 		    ifmgr_vif.pif_index());
-	    if (!ifmgr_iface.mac().empty()) {
+	    if (!ifmgr_iface.mac().is_zero()) {
 		fprintf(stdout, "        ether %s\n",
 			ifmgr_iface.mac().str().c_str());
 	    }
