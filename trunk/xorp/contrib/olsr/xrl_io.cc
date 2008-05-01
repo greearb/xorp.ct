@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/contrib/olsr/xrl_io.cc,v 1.1 2008/04/24 15:19:56 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -556,7 +556,6 @@ XrlIO::disable_address(const string& interface, const string& vif,
     }
 
     return true;
-    UNUSED(port);
 }
 
 bool

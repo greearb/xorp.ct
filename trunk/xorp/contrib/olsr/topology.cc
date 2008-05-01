@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/contrib/olsr/topology.cc,v 1.1 2008/04/24 15:19:56 bms Exp $"
 
 #include "olsr_module.h"
 
@@ -92,8 +92,7 @@ TopologyManager::update_tc_entry(const IPv4& dest_addr,
     OlsrTypes::TopologyID tcid;
     bool is_found = false;
 
-    map<IPv4, OlsrTypes::TopologyID>::iterator ii =
-	_tc_destinations.find(dest_addr);
+    TcDestMap::iterator ii = _tc_destinations.find(dest_addr);
     for (; ii != _tc_destinations.end(); ii++) {
 	tcid = (*ii).second;
 	if (_topology[tcid]->lasthop() == origin_addr) {
@@ -240,7 +239,7 @@ TopologyManager::apply_tc_ansn(const uint16_t ansn,
     bool is_valid = true;
 
     // Find the tuples, if any, recorded from the origin.
-    map<IPv4, OlsrTypes::TopologyID>::iterator ii, jj;
+    TcLasthopMap::iterator ii, jj;
     ii = _tc_lasthops.find(origin_addr);
     while (is_valid && ii != _tc_lasthops.end()) {
 	jj = ii++;
@@ -974,7 +973,6 @@ TopologyManager::event_receive_tc(
     _fm.forward_message(remote_addr, msg);
 
     return true;    // consumed
-    UNUSED(local_addr);
 }
 
 void
