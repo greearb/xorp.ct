@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.17 2007/02/16 22:46:35 pavlin Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.18 2008/01/04 03:16:50 pavlin Exp $
 
 #ifndef __MIBS_XORPEVENTS_HH__
 #define __MIBS_XORPEVENTS_HH__
@@ -104,5 +104,14 @@ private:
     static const char * _log_name;
     static SnmpEventLoop _sel;
 };
+
+//
+// run_fd_callbacks and run_timer_callbacks must be callable from C modules,
+// this is why they are not members of SnmpEventLoop.  In principle they are
+// only needed in this module, but not declared static so they can be invoked
+// from test programs.
+//
+extern void run_fd_callbacks(int, void *);
+extern void run_timer_callbacks(u_int, void *);
 
 #endif // __MIBS_XORPEVENTS_HH__

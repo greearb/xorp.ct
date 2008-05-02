@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/xorpevents.cc,v 1.17 2007/02/16 22:46:35 pavlin Exp $"
+#ident "$XORP: xorp/mibs/xorpevents.cc,v 1.18 2008/01/04 03:16:50 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -32,12 +32,6 @@
 const char * SnmpEventLoop::_log_name = "SnmpEventLoop";
 SnmpEventLoop SnmpEventLoop::_sel;
 
-//
-// run_fd_callbacks and run_timer_callbacks must be callable from C modules,
-// this is why they are not members of SnmpEventLoop.  In principle they are
-// only needed in this module, but not declared static so they can be invoked
-// from test programs
-//
 void
 run_fd_callbacks(int, void *)
 {
