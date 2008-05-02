@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.29 2007/04/02 21:53:23 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.30 2007/06/14 17:57:30 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -566,7 +566,6 @@ protocols \{\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
-\>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
 \>\>\>\>hello-period: {\it uint(1..18724)}\\
 \>\>\>\>hello-triggered-delay: {\it uint(1..255)}\\
@@ -644,7 +643,6 @@ protocols \{\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>disable: {\it bool}\\
-\>\>\>\>enable-ip-router-alert-option-check: {\it bool}\\
 \>\>\>\>dr-priority: {\it uint}\\
 \>\>\>\>hello-period: {\it uint(1..18724)}\\
 \>\>\>\>hello-triggered-delay: {\it uint(1..255)}\\
@@ -749,13 +747,6 @@ protocols \{\\
   disabled on this interface/vif~\footnote{Note
   that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
   {\tt disable}.}.
-\item{\tt enable-ip-router-alert-option-check}: this directive specifies
-  whether the router should check that the link-local protocol packets
-  received on this interface/vif have the IP Router Alert option (see
-  RFC-2213) in them~\footnote{Note that the {\tt
-  enable-ip-router-alert-option-check} statement appeared after XORP
-  Release-1.1.}. If it is enabled, all link-local protocol packets that
-  do not contain the IP Router Alert option will be dropped.
 \item{\tt dr-priority}: this directive takes a non-negative integer as
   its parameter giving this router's Designated Router (DR) priority
   for this interface/vif.  The default is 1.  The PIM router on this
@@ -790,6 +781,8 @@ protocols \{\\
   receiving traffic.  The {\stt alternative-subnet} directive should be
   used with extreme care, because it is possible to create forwarding
   loops.
+\item{\tt enable-ip-router-alert-option-check}: this directive has been
+  deprecated as of XORP Release-1.5.
 \end{description}
 \item{\tt static-rps}: this delimits the part of the PIM-SM
   configuration used to manually configure PIM RP router information.
@@ -1032,7 +1025,6 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
-\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* alternative-subnet 10.40.0.0/16 */\\
@@ -1111,7 +1103,6 @@ protocols \{\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>disable: false\\
-\>\>\>\>/* enable-ip-router-alert-option-check: false */\\
 \>\>\>\>/* dr-priority: 1 */\\
 \>\>\>\>/* hello-period: 30 */\\
 \>\>\>\>/* alternative-subnet 2001:DB8:40:40::/64 */\\

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.197 2008/02/08 23:05:10 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.198 2008/03/06 04:58:08 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -67,6 +67,29 @@ Release 1.5-WIP (2007/??/??)
       }
 
       The default value for the "management" statement is false.
+
+    - The following PIM-SM configuration statements have been deprecated,
+      because PIM-SM doesn't use Router Alert IP option anymore:
+
+      protocols {
+          pimsm4 {
+              interface foo {
+                  vif foo {
+                      enable-ip-router-alert-option-check: true
+                  }
+              }
+          }
+      }
+
+      protocols {
+          pimsm6 {
+              interface foo {
+                  vif foo {
+                      enable-ip-router-alert-option-check: true
+                  }
+              }
+          }
+      }
 
   LIBXORP:
     - The local system-independent xorp_random() implemenation is used
