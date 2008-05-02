@@ -201,8 +201,9 @@ TEXINPUTS_PATH = $(top_srcdir)/docs/tex:
 SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 
 # -- Document Names
-DOCS = olsr
-olsr_LATEX = ../tex/xorp.bib olsr.tex olsr_manual.tex preface.tex
+DOCS = olsr_manual
+olsr_manual_LATEX = ../tex/xorp.bib olsr.tex olsr_manual.tex \
+	preface.tex
 all: all-am
 
 .SUFFIXES:
