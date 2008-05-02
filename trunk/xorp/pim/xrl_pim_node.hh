@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.76 2007/10/13 01:50:05 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.77 2008/01/04 03:17:07 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -924,45 +924,6 @@ protected:
      */
     XrlCmdError pim_0_1_reset_vif_proto_version(
 	// Input values, 
-	const string&	vif_name);
-
-    /**
-     *  Get the IP Router Alert option check per interface for received
-     *  packets.
-     *
-     *  @param vif_name the name of the vif to apply to.
-     *
-     *  @param enabled if true, then the IP Router Alert option check was
-     *  enabled, otherwise it was disabled.
-     */
-    XrlCmdError pim_0_1_get_vif_ip_router_alert_option_check(
-	// Input values,
-	const string&	vif_name,
-	// Output values,
-	bool&	enabled);
-
-    /**
-     *  Set the IP Router Alert option check per interface for received
-     *  packets.
-     *
-     *  @param vif_name the name of the vif to apply to.
-     *
-     *  @param enable if true, then enable the IP Router Alert option check,
-     *  otherwise disable it.
-     */
-    XrlCmdError pim_0_1_set_vif_ip_router_alert_option_check(
-	// Input values,
-	const string&	vif_name,
-	const bool&	enable);
-
-    /**
-     *  Reset the IP Router Alert option check per interface for received
-     *  packets to its default value.
-     *
-     *  @param vif_name the name of the vif to apply to.
-     */
-    XrlCmdError pim_0_1_reset_vif_ip_router_alert_option_check(
-	// Input values,
 	const string&	vif_name);
 
     /**

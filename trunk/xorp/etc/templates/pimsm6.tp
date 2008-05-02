@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.33 2008/01/22 20:41:03 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.34 2008/05/01 22:49:50 bms Exp $ */
 
 protocols {
     pimsm6 {
@@ -10,7 +10,7 @@ protocols {
 	    vif @: txt {
 		disable:		toggle = false;
 		enabled:		bool;		/* %deprecated */
-		enable-ip-router-alert-option-check:	bool = false;	/* %deprecated */
+		enable-ip-router-alert-option-check:	bool; /* %deprecated */
 		dr-priority:		u32 = 1;
 		hello-period:		u32 = 30;
 		hello-triggered-delay:	u32 = 5;
@@ -131,9 +131,9 @@ protocols {
 		enable-ip-router-alert-option-check {
 		    %deprecated: "IP Router Alert is no longer required for PIM";
 		    %help:	short "Enable the IP Router Alert option check";
-		    %create:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
-		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(@)";
-		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_ip_router_alert_option_check?vif_name:txt=$(vif.@)&enable:bool=$(DEFAULT)";
+		    %create:;
+		    %set:;
+		    %delete:;
 		}
 
 		dr-priority {

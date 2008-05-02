@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.23 2005/06/01 00:37:01 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/pim.xif,v 1.24 2007/07/12 21:35:29 pavlin Exp $ */
 
 /*
  * Protocol Independent Multicast XRL interface.
@@ -195,34 +195,6 @@ interface pim/0.1 {
 	 * @param vif_name the name of the vif to apply to.
 	 */
 	reset_vif_proto_version		? vif_name:txt
-
-	/**
-	 * Get the IP Router Alert option check per interface for received
-	 * packets.
-	 *
-	 * @param vif_name the name of the vif to apply to.
-	 * @param enabled if true, then the IP Router Alert option check was
-	 * enabled, otherwise it was disabled.
-	 */
-	get_vif_ip_router_alert_option_check	? vif_name:txt -> enabled:bool
-
-	/**
-	 * Set the IP Router Alert option check per interface for received
-	 * packets.
-	 *
-	 * @param vif_name the name of the vif to apply to.
-	 * @param enable if true, then enable the IP Router Alert option check,
-	 * otherwise disable it.
-	 */
-	set_vif_ip_router_alert_option_check	? vif_name:txt & enable:bool
-
-	/**
-	 * Reset the IP Router Alert option check per interface for received
-	 * packets to its default value.
-	 *
-	 * @param vif_name the name of the vif to apply to.
-	 */
-	reset_vif_ip_router_alert_option_check	? vif_name:txt
 
 	/**
 	 * Configure PIM Hello-related metrics.
