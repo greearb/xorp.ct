@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/term_instr.hh,v 1.5 2007/02/16 22:47:00 pavlin Exp $
+// $XORP: xorp/policy/backend/term_instr.hh,v 1.6 2008/01/04 03:17:16 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_TERM_INSTR_HH__
 #define __POLICY_BACKEND_TERM_INSTR_HH__
@@ -54,7 +54,7 @@ public:
     ~TermInstr() {
 	for (int i = 0; i < _instrc; i++)
 	    delete _instructions[i];
-	delete _instructions;
+	delete [] _instructions;
     }
 
     /**
