@@ -1,0 +1,63 @@
+#!/bin/sh
+
+#
+# $XORP$
+#
+
+#
+# A shell script to run gdb and attach it to a running process.
+# Usage:
+#   attach_gdb <program_name> [optional_gdb_arguments]
+# Example:
+#   attach_gdb my_program b my_file.c:55
+# will attach gdb to a running binary named "my_program" and will
+# create a breakpoint in file my_file.c line 55
+#
+
+atexit()
+{
+        rm -f /tmp/attach_gdb.$$
+        rm -f /tmp/attach_gdb_ps.$$
+}
+
+interrupt()
+{
+        exit 1
+}
+
+GDB="gdb"
+
+if [ $# -lt 1 ] ; then
+	echo "Usage: $0 program_name [gdb-command]"
+        exit 1
+fi
+program_name=$1
+
+#
+# Get the PID for the program
+#
+ps -a | egrep -v $0 > /tmp/attach_gdb_ps.$$
+program_pid=`cat /tmp/attach_gdb_ps.$$ | awk -v PROGRAM_NAME=$program_name '{if ($NF == PROGRAM_NAME) print $1;}'`
+if [ "X${program_pid}" = "X" ] ; then
+	echo "Program $program_name not found"
+	exit 1
+fi
+shift
+
+#
+# Get the optional gdb command (e.g., where to place a breakpoint)
+#
+gdb_command=""
+if [ $# -gt 0 ] ; then
+	gdb_command=$@
+fi
+
+if [ "X${gdb_command}" = "X" ] ; then
+	$GDB $program_name $program_pid
+else
+	trap "atexit" 0
+	trap "interrupt" 2 3 15
+	shift
+	echo "$gdb_command" > /tmp/attach_gdb.$$
+	$GDB  -x /tmp/attach_gdb.$$ $program_name $program_pid
+fi
