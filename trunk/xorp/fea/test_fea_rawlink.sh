@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/fea/test_fea_rawlink.sh,v 1.2 2008/04/30 21:19:01 pavlin Exp $
+# $XORP: xorp/fea/test_fea_rawlink.sh,v 1.3 2008/05/01 03:10:42 pavlin Exp $
 #
 
 #
@@ -78,6 +78,7 @@ setup_interfaces()
 		;;
 	   *)
 		echo "$0: Tests Skipped: $UNAME is neither FreeBSD or Linux."
+		exit 0
 		;;
 	esac
 }
