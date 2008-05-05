@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.59 2008/01/04 03:16:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.60 2008/04/22 21:14:29 bms Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -201,10 +201,11 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	    buffer += sph.frame_bytes();
 	    buffer_bytes -= sph.frame_bytes();
 	} else {
-	    if (sph.frame_bytes() > _reader.reserve_bytes()) {
-		_reader.set_reserve_bytes(sph.frame_bytes());
+	    size_t frame_bytes = sph.frame_bytes();
+	    if (frame_bytes > _reader.reserve_bytes()) {
+		_reader.set_reserve_bytes(frame_bytes);
 	    }
-	    _reader.set_trigger_bytes(sph.frame_bytes());
+	    _reader.set_trigger_bytes(frame_bytes);
 	    return;
 	}
     }
