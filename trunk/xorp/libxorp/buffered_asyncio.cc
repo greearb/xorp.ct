@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.12 2007/02/16 22:46:15 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.13 2008/01/04 03:16:32 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -90,7 +90,10 @@ BufferedAsyncReader::set_reserve_bytes(size_t bytes)
     if (_config.reserve_bytes > bytes)
 	return false;
 
+    size_t head_off = _config.head - &_buffer[0];
     _buffer.resize(bytes);
+
+    _config.head = &_buffer[0] + head_off;
     _config.reserve_bytes = bytes;
 
     return true;
