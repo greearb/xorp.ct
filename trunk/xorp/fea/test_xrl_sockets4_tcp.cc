@@ -1059,7 +1059,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     // Create server and client again, and connect as before, and this time
     // use the wildcard port 0 for the client.
     //
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+    ev.push_back(e.new_oneoff_after_ms(stime.next(2000),
 			       callback(create_server,
 					&e, fea_target_name, finder_host,
 					finder_port, &server)));
