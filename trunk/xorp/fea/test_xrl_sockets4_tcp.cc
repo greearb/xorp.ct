@@ -61,6 +61,8 @@ do {                                                                          \
 } while(0)
 
 
+#define file_location() c_format("%s: %d", __FILE__, __LINE__)
+
 //
 // ----------------------------------------------------------------------------
 // Scheduling Time class
@@ -337,7 +339,7 @@ protected:
     {
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
-	    _x_err ++;
+	    _x_err++;
 	    return;
 	}
 	_server_sockid = *psockid;
@@ -349,7 +351,7 @@ protected:
     {
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
-	    _x_err ++;
+	    _x_err++;
 	    return;
 	}
     }
@@ -359,7 +361,7 @@ protected:
     {
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
-	    _x_err ++;
+	    _x_err++;
 	}
 	_server_sockid.erase();
 	_server_closed = true;
@@ -370,7 +372,7 @@ protected:
     {
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
-	    _x_err ++;
+	    _x_err++;
 	}
 	_client_sockid.erase();
 	_client_closed = true;
@@ -382,7 +384,7 @@ protected:
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
 	    stop_sending();
-	    _x_err ++;
+	    _x_err++;
 	}
     }
 
@@ -567,7 +569,7 @@ protected:
     {
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
-	    _x_err ++;
+	    _x_err++;
 	    return;
 	}
 	_sockid = *psockid;
@@ -579,7 +581,7 @@ protected:
     {
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
-	    _x_err ++;
+	    _x_err++;
 	}
 	_sockid.erase();
 	_closed = true;
@@ -592,7 +594,7 @@ protected:
 	if (e != XrlError::OKAY()) {
 	    verbose_err("Xrl Error: %s\n", e.str().c_str());
 	    stop_sending();
-	    _x_err ++;
+	    _x_err++;
 	}
     }
 
@@ -733,14 +735,16 @@ close_server_socket(TestSocket4TCP** ppu)
 }
 
 static void
-verify_server_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
+verify_server_closed(TestSocket4TCP** ppu, bool closed, bool* eflag,
+		     string location)
 {
     TestSocket4TCPServer* pu = dynamic_cast<TestSocket4TCPServer*>(*ppu);
     if (pu->server_closed() != closed) {
 	verbose_err("Server socket close state (%s) "
-		    "does not matched expected (%s)\n",
+		    "does not matched expected (%s) location %s\n",
 		    bool_c_str(pu->server_closed()),
-		    bool_c_str(closed));
+		    bool_c_str(closed),
+		    location.c_str());
 	*eflag = true;
     }
 }
@@ -756,14 +760,16 @@ close_server_client_socket(TestSocket4TCP** ppu)
 }
 
 static void
-verify_server_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
+verify_server_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag,
+			    string location)
 {
     TestSocket4TCPServer* pu = dynamic_cast<TestSocket4TCPServer*>(*ppu);
     if (pu->client_closed() != closed) {
 	verbose_err("Server client socket close state (%s) "
-		    "does not matched expected (%s)\n",
+		    "does not matched expected (%s) location %s\n",
 		    bool_c_str(pu->client_closed()),
-		    bool_c_str(closed));
+		    bool_c_str(closed),
+		    location.c_str());
 	*eflag = true;
     }
 }
@@ -808,27 +814,31 @@ close_client_socket(TestSocket4TCP** ppu)
 }
 
 static void
-verify_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag)
+verify_client_closed(TestSocket4TCP** ppu, bool closed, bool* eflag,
+		     string location)
 {
     TestSocket4TCPClient* pu = dynamic_cast<TestSocket4TCPClient*>(*ppu);
     if (pu->closed() != closed) {
 	verbose_err("Client socket close state (%s) "
-		    "does not matched expected (%s)\n",
+		    "does not matched expected (%s) location %s\n",
 		    bool_c_str(pu->closed()),
-		    bool_c_str(closed));
+		    bool_c_str(closed),
+		    location.c_str());
 	*eflag = true;
     }
 }
 
 static void
-verify_client_connected(TestSocket4TCP** ppu, bool connected, bool* eflag)
+verify_client_connected(TestSocket4TCP** ppu, bool connected, bool* eflag,
+			string location)
 {
     TestSocket4TCPClient* pu = dynamic_cast<TestSocket4TCPClient*>(*ppu);
     if (pu->connected() != connected) {
 	verbose_err("Client socket connected state (%s) "
-		    "does not matched expected (%s)\n",
+		    "does not matched expected (%s) location %s\n",
 		    bool_c_str(pu->connected()),
-		    bool_c_str(connected));
+		    bool_c_str(connected),
+		    location.c_str());
 	*eflag = true;
     }
 }
@@ -903,11 +913,11 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_client_closed, &server,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
@@ -920,13 +930,13 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					uint16_t(2),
 					&eflag)));
 
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+    ev.push_back(e.new_oneoff_after_ms(stime.next(2000),
 			       callback(verify_server_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_client_closed, &server,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     //
     // Create client and bind on port 5001, check state.
@@ -939,7 +949,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(bind_connect_client, &client,
@@ -947,13 +957,13 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 					IPv4::LOOPBACK(), uint16_t(5000),
 					&eflag)));
 
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+    ev.push_back(e.new_oneoff_after_ms(stime.next(2000),
 			       callback(verify_client_closed, &client,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_connected, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     //
     // Send packets from client to server, check bytes send/received and states
@@ -970,19 +980,19 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_connected, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_client_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     //
     // Send packets from server to client, check bytes send/received and states
@@ -999,19 +1009,19 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_connected, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_client_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     //
     // Close/disconnect client, verify states
@@ -1022,19 +1032,19 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_closed, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_client_connected, &client,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_client_closed, &server,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     //
     // Destroy client and server.
@@ -1078,21 +1088,21 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     //
     // Verify states, then close client socket on server
     //
-    ev.push_back(e.new_oneoff_after_ms(stime.next(),
+    ev.push_back(e.new_oneoff_after_ms(stime.next(2000),
     			       callback(verify_client_closed, &client,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_client_connected, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_server_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_server_client_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(close_server_client_socket,
@@ -1104,23 +1114,23 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_client_closed, &client,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_client_connected, &client,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_server_closed, &server,
-					false, &eflag)));
+					false, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
     			       callback(verify_server_client_closed, &server,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
-			       callback(close_server_socket,
-					&server)));
+				callback(close_server_socket,
+					 &server)));
 
     //
     // Verify states, then destroy server and client
@@ -1128,7 +1138,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
 
     ev.push_back(e.new_oneoff_after_ms(stime.next(),
 			       callback(verify_server_closed, &server,
-					true, &eflag)));
+					true, &eflag, file_location())));
 
     //
     // Destroy socket server.
