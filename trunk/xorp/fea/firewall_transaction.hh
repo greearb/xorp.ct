@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_transaction.hh,v 1.1 2008/04/26 00:59:42 pavlin Exp $
+// $XORP: xorp/fea/firewall_transaction.hh,v 1.2 2008/04/27 23:08:04 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_TRANSACTION_HH__
 #define __FEA_FIREWALL_TRANSACTION_HH__
@@ -42,22 +42,11 @@ public:
      * Constructor.
      *
      * @param eventloop the event loop to use.
-     * @param firewall_manager the FirewallManager to use.
      * @see FirewallManager.
      */
-    FirewallTransactionManager(EventLoop& eventloop,
-			       FirewallManager& firewall_manager)
-	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING),
-	  _firewall_manager(firewall_manager)
+    FirewallTransactionManager(EventLoop& eventloop)
+	: TransactionManager(eventloop, TIMEOUT_MS, MAX_PENDING)
     {}
-
-    /**
-     * Get a reference to the firewall manager.
-     *
-     * @return a reference to the firewall manager.
-     * @see FirewallManager.
-     */
-    FirewallManager& firewall_manager() { return _firewall_manager; }
 
     /**
      * Get the string with the first error during commit.
@@ -95,7 +84,6 @@ private:
      */
     void reset_error()			{ _first_error.erase(); }
 
-    FirewallManager _firewall_manager;	// The FirewallManager to use
     string	_first_error;		// The string with the first error
     uint32_t	_tid_exec;		// The transaction ID
 

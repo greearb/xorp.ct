@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.3 2008/04/28 05:21:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.4 2008/04/28 15:56:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -38,7 +38,7 @@ FirewallManager::FirewallManager(FeaNode&	fea_node,
       _next_token(0),
       _is_running(false)
 {
-    _ftm = new FirewallTransactionManager(_eventloop, *this);
+    _ftm = new FirewallTransactionManager(_eventloop);
 }
 
 FirewallManager::~FirewallManager()
@@ -140,9 +140,8 @@ FirewallManager::commit_transaction(uint32_t tid, string& error_msg)
 	return (XORP_ERROR);
     }
 
-    const string& ftm_error_msg = _ftm->error();
-    if (! ftm_error_msg.empty()) {
-	error_msg = ftm_error_msg;
+    if (_ftm->error().empty() != true) {
+	error_msg = _ftm->error();
 	return (XORP_ERROR);
     }
 
