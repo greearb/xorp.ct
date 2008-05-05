@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.41 2008/04/26 00:59:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.42 2008/04/27 23:08:04 pavlin Exp $"
 
 
 //
@@ -1831,12 +1831,11 @@ XrlFeaTarget::ifmgr_0_1_create_interface(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new AddInterface(iftree, ifname),
+	    new AddInterface(_ifconfig, ifname),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1851,12 +1850,11 @@ XrlFeaTarget::ifmgr_0_1_delete_interface(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new RemoveInterface(iftree, ifname),
+	    new RemoveInterface(_ifconfig, ifname),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1871,12 +1869,11 @@ XrlFeaTarget::ifmgr_0_1_configure_all_interfaces_from_system(
     const uint32_t&	tid,
     const bool&		enable)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new ConfigureAllInterfacesFromSystem(_ifconfig, iftree, enable),
+	    new ConfigureAllInterfacesFromSystem(_ifconfig, enable),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1892,13 +1889,11 @@ XrlFeaTarget::ifmgr_0_1_configure_interface_from_system(
     const string&	ifname,
     const bool&		enable)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new ConfigureInterfaceFromSystem(_ifconfig, iftree, ifname,
-					     enable),
+	    new ConfigureInterfaceFromSystem(_ifconfig, ifname, enable),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1914,12 +1909,11 @@ XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
     const string&	ifname,
     const bool&		enabled)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceEnabled(iftree, ifname, enabled),
+	    new SetInterfaceEnabled(_ifconfig, ifname, enabled),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1935,12 +1929,11 @@ XrlFeaTarget::ifmgr_0_1_set_interface_discard(
     const string&	ifname,
     const bool&		discard)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceDiscard(iftree, ifname, discard),
+	    new SetInterfaceDiscard(_ifconfig, ifname, discard),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1956,12 +1949,11 @@ XrlFeaTarget::ifmgr_0_1_set_interface_unreachable(
     const string&	ifname,
     const bool&		unreachable)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceUnreachable(iftree, ifname, unreachable),
+	    new SetInterfaceUnreachable(_ifconfig, ifname, unreachable),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1977,12 +1969,11 @@ XrlFeaTarget::ifmgr_0_1_set_interface_management(
     const string&	ifname,
     const bool&		management)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceManagement(iftree, ifname, management),
+	    new SetInterfaceManagement(_ifconfig, ifname, management),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1998,12 +1989,11 @@ XrlFeaTarget::ifmgr_0_1_set_mac(
     const string&	ifname,
     const Mac&		mac)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceMAC(iftree, ifname, mac),
+	    new SetInterfaceMac(_ifconfig, ifname, mac),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2018,22 +2008,11 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mac(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& iftree = _ifconfig.local_config();
-    const IfTree& original_iftree = _ifconfig.original_config();
-    const IfTreeInterface* ifp = NULL;
     string error_msg;
-
-    // Find the original MAC address
-    ifp = original_iftree.find_interface(ifname);
-    if (ifp == NULL) {
-	error_msg = c_format("Interface %s not found", ifname.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    const Mac& mac = ifp->mac();
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceMAC(iftree, ifname, mac),
+	    new RestoreInterfaceMac(_ifconfig, ifname),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2049,12 +2028,11 @@ XrlFeaTarget::ifmgr_0_1_set_mtu(
     const string&	ifname,
     const uint32_t&	mtu)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceMTU(iftree, ifname, mtu),
+	    new SetInterfaceMtu(_ifconfig, ifname, mtu),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2069,22 +2047,11 @@ XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
     const uint32_t&	tid,
     const string&	ifname)
 {
-    IfTree& iftree = _ifconfig.local_config();
-    const IfTree& original_iftree = _ifconfig.original_config();
-    const IfTreeInterface* ifp = NULL;
     string error_msg;
-
-    // Find the original MTU
-    ifp = original_iftree.find_interface(ifname);
-    if (ifp == NULL) {
-	error_msg = c_format("Interface %s not found", ifname.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    uint32_t mtu = ifp->mtu();
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetInterfaceMTU(iftree, ifname, mtu),
+	    new RestoreInterfaceMtu(_ifconfig, ifname),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2100,12 +2067,11 @@ XrlFeaTarget::ifmgr_0_1_create_vif(
     const string&	ifname,
     const string&	vifname)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new AddInterfaceVif(iftree, ifname, vifname),
+	    new AddInterfaceVif(_ifconfig, ifname, vifname),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2121,12 +2087,11 @@ XrlFeaTarget::ifmgr_0_1_delete_vif(
     const string&	ifname,
     const string&	vifname)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new RemoveInterfaceVif(iftree, ifname, vifname),
+	    new RemoveInterfaceVif(_ifconfig, ifname, vifname),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2143,12 +2108,11 @@ XrlFeaTarget::ifmgr_0_1_set_vif_enabled(
     const string&	vifname,
     const bool&		enabled)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetVifEnabled(iftree, ifname, vifname, enabled),
+	    new SetVifEnabled(_ifconfig, ifname, vifname, enabled),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2165,7 +2129,6 @@ XrlFeaTarget::ifmgr_0_1_set_vif_vlan(
     const string&	vif,
     const uint32_t&	vlan_id)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
     const uint32_t max_vlan_id = 4096;
 
@@ -2180,7 +2143,7 @@ XrlFeaTarget::ifmgr_0_1_set_vif_vlan(
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetVifVlan(iftree, ifname, vif, vlan_id),
+	    new SetVifVlan(_ifconfig, ifname, vif, vlan_id),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2197,12 +2160,11 @@ XrlFeaTarget::ifmgr_0_1_create_address4(
     const string&	vifname,
     const IPv4&		address)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new AddAddr4(iftree, ifname, vifname, address),
+	    new AddAddr4(_ifconfig, ifname, vifname, address),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2219,12 +2181,11 @@ XrlFeaTarget::ifmgr_0_1_delete_address4(
     const string&	vifname,
     const IPv4&		address)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new RemoveAddr4(iftree, ifname, vifname, address),
+	    new RemoveAddr4(_ifconfig, ifname, vifname, address),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2242,12 +2203,11 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled4(
     const IPv4&		address,
     const bool&		enabled)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr4Enabled(iftree, ifname, vifname, address, enabled),
+	    new SetAddr4Enabled(_ifconfig, ifname, vifname, address, enabled),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2265,12 +2225,11 @@ XrlFeaTarget::ifmgr_0_1_set_prefix4(
     const IPv4&		address,
     const uint32_t&	prefix_len)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr4Prefix(iftree, ifname, vifname, address, prefix_len),
+	    new SetAddr4Prefix(_ifconfig, ifname, vifname, address, prefix_len),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2288,12 +2247,11 @@ XrlFeaTarget::ifmgr_0_1_set_broadcast4(
     const IPv4&		address,
     const IPv4&		broadcast)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr4Broadcast(iftree, ifname, vifname, address, broadcast),
+	    new SetAddr4Broadcast(_ifconfig, ifname, vifname, address, broadcast),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2311,12 +2269,11 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint4(
     const IPv4&		address,
     const IPv4&		endpoint)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr4Endpoint(iftree, ifname, vifname, address, endpoint),
+	    new SetAddr4Endpoint(_ifconfig, ifname, vifname, address, endpoint),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2333,12 +2290,11 @@ XrlFeaTarget::ifmgr_0_1_create_address6(
     const string&	vifname,
     const IPv6&		address)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new AddAddr6(iftree, ifname, vifname, address),
+	    new AddAddr6(_ifconfig, ifname, vifname, address),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2355,12 +2311,11 @@ XrlFeaTarget::ifmgr_0_1_delete_address6(
     const string&	vifname,
     const IPv6&		address)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new RemoveAddr6(iftree, ifname, vifname, address),
+	    new RemoveAddr6(_ifconfig, ifname, vifname, address),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2378,12 +2333,11 @@ XrlFeaTarget::ifmgr_0_1_set_address_enabled6(
     const IPv6&		address,
     const bool&		enabled)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr6Enabled(iftree, ifname, vifname, address, enabled),
+	    new SetAddr6Enabled(_ifconfig, ifname, vifname, address, enabled),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2401,12 +2355,11 @@ XrlFeaTarget::ifmgr_0_1_set_prefix6(
     const IPv6&	  	address,
     const uint32_t&	prefix_len)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr6Prefix(iftree, ifname, vifname, address, prefix_len),
+	    new SetAddr6Prefix(_ifconfig, ifname, vifname, address, prefix_len),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -2424,12 +2377,11 @@ XrlFeaTarget::ifmgr_0_1_set_endpoint6(
     const IPv6&		address,
     const IPv6&		endpoint)
 {
-    IfTree& iftree = _ifconfig.local_config();
     string error_msg;
 
     if (_ifconfig.add_transaction_operation(
 	    tid,
-	    new SetAddr6Endpoint(iftree, ifname, vifname, address, endpoint),
+	    new SetAddr6Endpoint(_ifconfig, ifname, vifname, address, endpoint),
 	    error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);
