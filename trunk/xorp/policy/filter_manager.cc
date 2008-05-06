@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.15 2007/02/16 22:46:53 pavlin Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.16 2008/01/04 03:17:09 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,7 +119,8 @@ FilterManager::policy_backend_cb(const XrlError& e)
 	debug_msg("[POLICY] XRL exception: %s\n", e.str().c_str());
 	error_msg = c_format("XRL policy_backend_cb() error: %s",
 			     e.str().c_str());
-	xorp_throw(FMException, error_msg); // XXX: what else can we do ?
+	XLOG_ERROR(error_msg.c_str());
+//	xorp_throw(FMException, error_msg); // XXX: what else can we do ?
     }	
 }
 
