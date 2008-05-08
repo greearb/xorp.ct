@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.77 2008/01/03 22:59:34 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.78 2008/01/04 03:15:45 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -136,33 +136,46 @@ public:
     }
 
     /**
-     * Get a reference to the live interface configuration.
+     * Get a reference to the system interface configuration.
      *
-     * @return a reference to the live interface configuration.
+     * @return a reference to the system interface configuration.
      */
-    IfTree& live_config() { return (_live_config); }
+    IfTree& system_config() { return (_system_config); }
 
     /**
-     * Set the live interface configuration.
+     * Set the system interface configuration.
      *
-     * @param iftree the live interface configuration.
+     * @param iftree the system interface configuration.
      */
-    void set_live_config(const IfTree& iftree) { _live_config = iftree; }
+    void set_system_config(const IfTree& iftree) { _system_config = iftree; }
 
     /**
-     * Get a reference to the pulled interface configuration from the system.
+     * Get a reference to the user interface configuration.
      *
-     * @return a reference to the pulled interface configuration from the
-     * system.
+     * @return a reference to the user interface configuration.
      */
-    const IfTree& pulled_config()	{ return (_pulled_config); }
+    IfTree& user_config()		{ return (_user_config); }
 
     /**
-     * Get a reference to the pushed interface configuration.
+     * Set the user interface configuration.
      *
-     * @return a reference to the pushed interface configuration.
+     * @param iftree the user interface configuration.
      */
-    IfTree& pushed_config()		{ return (_pushed_config); }
+    void set_user_config(const IfTree& iftree) { _user_config = iftree; }
+
+    /**
+     * Get a reference to the merged system-user configuration.
+     *
+     * @return a reference to the merged system-user configuration.
+     */
+    IfTree& merged_config()		{ return (_merged_config); }
+
+    /**
+     * Set the merged system-user configuration.
+     *
+     * @param iftree the merged system-user configuration.
+     */
+    void set_merged_config(const IfTree& iftree) { _merged_config = iftree; }
 
     /**
      * Get a reference to the original interface configuration on startup.
@@ -170,36 +183,6 @@ public:
      * @return a reference to the original interface configuration on startup.
      */
     const IfTree& original_config()	{ return (_original_config); }
-
-    /**
-     * Get a reference to the local interface configuration.
-     *
-     * @return a reference to the local interface configuration.
-     */
-    IfTree& local_config()		{ return (_local_config); }
-
-    /**
-     * Set the local interface configuration.
-     *
-     * @param iftree the local interface configuration.
-     */
-    void set_local_config(const IfTree& iftree) { _local_config = iftree; }
-
-    /**
-     * Get a reference to the old local interface configuration.
-     *
-     * @return a reference to the old local interface configuration.
-     */
-    IfTree& old_local_config()		{ return (_old_local_config); }
-
-    /**
-     * Set the old local interface configuration.
-     *
-     * @param iftree the old local interface configuration.
-     */
-    void set_old_local_config(const IfTree& iftree) {
-	_old_local_config = iftree;
-    }
 
     /**
      * Test whether the original configuration should be restored on shutdown.
@@ -363,23 +346,18 @@ public:
     int push_config(IfTree& iftree);
 
     /**
-     * Pull up current interface configuration from the system.
-     *
-     * @return the current interface configuration from the system.
-     */
-    const IfTree& pull_config();
-
-    /**
-     * Flush the live interface configuration.
-     */
-    void flush_config() { _live_config.clear(); }
-
-    /**
      * Get the error message associated with a push operation.
      *
      * @return the error message associated with a push operation.
      */
     const string& push_error() const;
+
+    /**
+     * Pull up current interface configuration from the system.
+     *
+     * @return the current interface configuration from the system.
+     */
+    const IfTree& pull_config();
 
     /**
      * Check IfTreeInterface and report updates to IfConfigUpdateReporter.
@@ -436,19 +414,29 @@ public:
     void report_updates(IfTree& iftree);
 
 private:
+    /**
+     * Restore the interface configuration.
+     *
+     * @param old_user_config the old user configuration to restore.
+     * @param old_system_config the old system configuration to restore.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int restore_config(const IfTree& old_user_config,
+		       const IfTree& old_system_config,
+		       string& error_msg);
+
     FeaNode&			_fea_node;
     EventLoop&			_eventloop;
     NexthopPortMapper&		_nexthop_port_mapper;
     IfConfigTransactionManager* _itm;	// The interface transaction manager
 
-    IfTree		_live_config;	// The IfTree with live config
-    IfTree		_pulled_config;	// The IfTree when we pull the config
-    IfTree		_pushed_config;	// The IfTree when we push the config
+    IfTree		_user_config;	// The IfTree with the user config
+    IfTree		_system_config;	// The IfTree with the system config
+    IfTree		_merged_config; // The merged system-user config
     IfTree		_original_config; // The IfTree on startup
     bool		_restore_original_config_on_shutdown; // If true, then
 				//  restore the original config on shutdown
-    IfTree		_local_config;	// The IfTree with the local config
-    IfTree		_old_local_config; // The IfTree with the old local config
 
     IfConfigUpdateReplicator	_ifconfig_update_replicator;
     IfConfigErrorReporter	_ifconfig_error_reporter;

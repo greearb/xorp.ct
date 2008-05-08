@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.16 2007/12/28 09:13:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.17 2008/01/04 03:15:59 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -202,7 +202,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = fibconfig().local_config_iftree();
+	const IfTree& iftree = fibconfig().merged_config_iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -321,7 +321,7 @@ FibConfigEntrySetRoutingSocket::add_entry(const FteX& fte)
 
 	// Get the physical interface index
 	do {
-	    const IfTree& iftree = fibconfig().local_config_iftree();
+	    const IfTree& iftree = fibconfig().merged_config_iftree();
 	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
 						    fte.vifname());
 	    if (vifp == NULL) {
@@ -511,7 +511,7 @@ FibConfigEntrySetRoutingSocket::delete_entry(const FteX& fte)
 	    // Check whether the interface is down
 	    if (fte.ifname().empty())
 		break;		// No interface to check
-	    const IfTree& iftree = fibconfig().live_config_iftree();
+	    const IfTree& iftree = fibconfig().system_config_iftree();
 	    const IfTreeVif* vifp = iftree.find_vif(fte.ifname(),
 						    fte.vifname());
 	    if ((vifp != NULL) && vifp->enabled())

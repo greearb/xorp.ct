@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.17 2007/12/28 09:13:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.18 2008/01/04 03:16:00 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -212,7 +212,7 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	const IfTree& iftree = fibconfig().local_config_iftree();
+	const IfTree& iftree = fibconfig().merged_config_iftree();
 	const IfTreeInterface* ifp = iftree.find_interface(fte.ifname());
 	if (ifp == NULL) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
@@ -252,7 +252,7 @@ FibConfigEntrySetRtmV2::add_entry(const FteX& fte)
     rtm->rtm_seq = ((family == AF_INET ? _rs4 : _rs6))->seqno();
 
     // Copy the interface index.
-    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTree& iftree = fibconfig().merged_config_iftree();
     const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
     XLOG_ASSERT(vifp != NULL);
     rtm->rtm_index = vifp->pif_index();
@@ -338,7 +338,7 @@ FibConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     rtm->rtm_seq = ((family == AF_INET ? _rs4 : _rs6))->seqno();
 
     // Copy the interface index.
-    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTree& iftree = fibconfig().merged_config_iftree();
     const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
     XLOG_ASSERT(vifp != NULL);
     rtm->rtm_index = vifp->pif_index();

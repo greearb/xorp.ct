@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.58 2008/03/07 12:09:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.59 2008/03/09 00:21:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -81,8 +81,9 @@ IfTree::operator=(const IfTree& other)
 	 oi != other.interfaces().end();
 	 ++oi) {
 	const IfTreeInterface& other_iface = *(oi->second);
-	add_recursive_interface(other_iface);
+	add_recursive_interface(other_iface, true);
     }
+    set_state(other.state());
 
     return (*this);
 }
@@ -101,7 +102,8 @@ IfTree::clear()
 }
 
 void
-IfTree::add_recursive_interface(const IfTreeInterface& other_iface)
+IfTree::add_recursive_interface(const IfTreeInterface& other_iface,
+				bool mark_state)
 {
     const string& ifname = other_iface.ifname();
     IfTreeInterface* ifp;
@@ -110,6 +112,10 @@ IfTree::add_recursive_interface(const IfTreeInterface& other_iface)
     ifp = new IfTreeInterface(*this, ifname);
     _interfaces.insert(IfMap::value_type(ifname, ifp));
     ifp->copy_state(other_iface, true);
+    if (mark_state)
+	ifp->set_state(other_iface.state());
+    else
+	ifp->mark(CREATED);
 
     // Add recursively all vifs from the other interface
     IfTreeInterface::VifMap::const_iterator ov;
@@ -117,7 +123,7 @@ IfTree::add_recursive_interface(const IfTreeInterface& other_iface)
 	 ov != other_iface.vifs().end();
 	 ++ov) {
 	const IfTreeVif& other_vif = *(ov->second);
-	ifp->add_recursive_vif(other_vif);
+	ifp->add_recursive_vif(other_vif, mark_state);
     }
 }
 
@@ -472,56 +478,55 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
 	this_ifp->copy_state(other_iface, false);
 
     //
-    // Update existing vifs and addresses
+    // Update existing vifs and addresses, and delete those that don't exist
     //
     for (vi = this_ifp->vifs().begin(); vi != this_ifp->vifs().end(); ++vi) {
-	IfTreeVif& this_vif = *(vi->second);
+	IfTreeVif* this_vifp = vi->second;
 	const IfTreeVif* other_vifp;
 
-	other_vifp = other_iface.find_vif(this_vif.vifname());
-	if (other_vifp == NULL) {
-	    this_vif.mark(DELETED);
+	other_vifp = other_iface.find_vif(this_vifp->vifname());
+	if ((other_vifp == NULL) || (other_vifp->is_marked(DELETED))) {
+	    this_vifp->mark(DELETED);
 	    continue;
 	}
-	const IfTreeVif& other_vif = *other_vifp;
 
-	if (! this_vif.is_same_state(other_vif))
-	    this_vif.copy_state(other_vif);
+	if (! this_vifp->is_same_state(*other_vifp))
+	    this_vifp->copy_state(*other_vifp);
 
 	//
 	// Update the IPv4 addresses
 	//
 	IfTreeVif::IPv4Map::iterator ai4;
-	for (ai4 = this_vif.ipv4addrs().begin();
-	     ai4 != this_vif.ipv4addrs().end();
+	for (ai4 = this_vifp->ipv4addrs().begin();
+	     ai4 != this_vifp->ipv4addrs().end();
 	     ++ai4) {
-	    IfTreeAddr4& this_addr = *(ai4->second);
+	    IfTreeAddr4* this_ap = ai4->second;
 	    const IfTreeAddr4* other_ap;
-	    other_ap = other_vif.find_addr(this_addr.addr());
-	    if (other_ap == NULL) {
-		this_addr.mark(DELETED);
+	    other_ap = other_vifp->find_addr(this_ap->addr());
+	    if ((other_ap == NULL) || (other_ap->is_marked(DELETED))) {
+		this_ap->mark(DELETED);
 		continue;
 	    }
-	    if (! this_addr.is_same_state(*other_ap))
-		this_addr.copy_state(*other_ap);
+	    if (! this_ap->is_same_state(*other_ap))
+		this_ap->copy_state(*other_ap);
 	}
 
 	//
 	// Update the IPv6 addresses
 	//
 	IfTreeVif::IPv6Map::iterator ai6;
-	for (ai6 = this_vif.ipv6addrs().begin();
-	     ai6 != this_vif.ipv6addrs().end();
+	for (ai6 = this_vifp->ipv6addrs().begin();
+	     ai6 != this_vifp->ipv6addrs().end();
 	     ++ai6) {
-	    IfTreeAddr6& this_addr = *(ai6->second);
+	    IfTreeAddr6* this_ap = ai6->second;
 	    const IfTreeAddr6* other_ap;
-	    other_ap = other_vif.find_addr(this_addr.addr());
-	    if (other_ap == NULL) {
-		this_addr.mark(DELETED);
+	    other_ap = other_vifp->find_addr(this_ap->addr());
+	    if ((other_ap == NULL) || (other_ap->is_marked(DELETED))) {
+		this_ap->mark(DELETED);
 		continue;
 	    }
-	    if (! this_addr.is_same_state(*other_ap))
-		this_addr.copy_state(*other_ap);
+	    if (! this_ap->is_same_state(*other_ap))
+		this_ap->copy_state(*other_ap);
 	}
     }
 
@@ -531,59 +536,56 @@ IfTree::update_interface(const IfTreeInterface& other_iface)
     for (ov = other_iface.vifs().begin();
 	 ov != other_iface.vifs().end();
 	 ++ov) {
-	const IfTreeVif& other_vif = *(ov->second);
+	const IfTreeVif* other_vifp = ov->second;
 	IfTreeVif* this_vifp;
-
-	if (this_ifp->find_vif(other_vif.vifname()) != NULL)
-	    continue;		// The vif was already updated
 
 	//
 	// Add the vif
 	//
-	this_ifp->add_vif(other_vif.vifname());
-	this_vifp = this_ifp->find_vif(other_vif.vifname());
-	XLOG_ASSERT(this_vifp != NULL);
-	IfTreeVif& this_vif = *this_vifp;
-	this_vif.copy_state(other_vif);
+	this_vifp = this_ifp->find_vif(other_vifp->vifname());
+	if (this_vifp == NULL) {
+	    this_ifp->add_vif(other_vifp->vifname());
+	    this_vifp = this_ifp->find_vif(other_vifp->vifname());
+	    XLOG_ASSERT(this_vifp != NULL);
+	    this_vifp->copy_state(*other_vifp);
+	}
 
 	//
 	// Add the IPv4 addresses
 	//
 	IfTreeVif::IPv4Map::const_iterator oa4;
-	for (oa4 = other_vif.ipv4addrs().begin();
-	     oa4 != other_vif.ipv4addrs().end();
+	for (oa4 = other_vifp->ipv4addrs().begin();
+	     oa4 != other_vifp->ipv4addrs().end();
 	     ++oa4) {
-	    const IfTreeAddr4& other_addr = *(oa4->second);
+	    const IfTreeAddr4* other_ap = oa4->second;
 	    IfTreeAddr4* this_ap;
-	    this_ap = this_vif.find_addr(other_addr.addr());
-	    if (this_ap != NULL)
-		continue;	// The address was already updated
-
-	    // Add the address
-	    this_vif.add_addr(other_addr.addr());
-	    this_ap = this_vif.find_addr(other_addr.addr());
-	    XLOG_ASSERT(this_ap != NULL);
-	    this_ap->copy_state(other_addr);
+	    this_ap = this_vifp->find_addr(other_ap->addr());
+	    if (this_ap == NULL) {
+		// Add the address
+		this_vifp->add_addr(other_ap->addr());
+		this_ap = this_vifp->find_addr(other_ap->addr());
+		XLOG_ASSERT(this_ap != NULL);
+		this_ap->copy_state(*other_ap);
+	    }
 	}
 
 	//
 	// Add the IPv6 addresses
 	//
 	IfTreeVif::IPv6Map::const_iterator oa6;
-	for (oa6 = other_vif.ipv6addrs().begin();
-	     oa6 != other_vif.ipv6addrs().end();
+	for (oa6 = other_vifp->ipv6addrs().begin();
+	     oa6 != other_vifp->ipv6addrs().end();
 	     ++oa6) {
-	    const IfTreeAddr6& other_addr = *(oa6->second);
+	    const IfTreeAddr6* other_ap = oa6->second;
 	    IfTreeAddr6* this_ap;
-	    this_ap = this_vif.find_addr(other_addr.addr());
-	    if (this_ap != NULL)
-		continue;	// The address was already updated
-
-	    // Add the address
-	    this_vif.add_addr(other_addr.addr());
-	    this_ap = this_vif.find_addr(other_addr.addr());
-	    XLOG_ASSERT(this_ap != NULL);
-	    this_ap->copy_state(other_addr);
+	    this_ap = this_vifp->find_addr(other_ap->addr());
+	    if (this_ap == NULL) {
+		// Add the address
+		this_vifp->add_addr(other_ap->addr());
+		this_ap = this_vifp->find_addr(other_ap->addr());
+		XLOG_ASSERT(this_ap != NULL);
+		this_ap->copy_state(*other_ap);
+	    }
 	}
     }
 
@@ -662,18 +664,22 @@ IfTree::str() const
 }
 
 /**
- * Align user supplied configuration with the device configuration.
+ * Align system-user merged configuration with the pulled changes
+ * in the system configuration.
  *
  * Inside the FEA there may be multiple configuration representations,
- * typically one the user modifies and one that mirrors the hardware.
+ * typically one the user modifies, one that mirrors the hardware,
+ * and one that merges those two (e.g., some of the merged information
+ * comes from the user configuration while other might come
+ * from the underlying system).
  * Errors may occur pushing the user config down onto the hardware and
- * we need a method to update the user config from the h/w config that
- * exists after the config push.  We can't just copy the h/w config since
+ * we need a method to update the merged config from the h/w config that
+ * exists after the config push. We can't just copy the h/w config since
  * the user config is restricted to configuration set by the user.
  *
  * The alignment works as follows:
  * 1. If an interface in the local tree is marked as "soft", its
- *    state is not modified.
+ *    state is not modified and the rest of the processing is ignored.
  * 2. If an interface in the local tree is marked as
  *    "default_system_config", the rest of the processing is not
  *    applied, and the following rules are used instead:
@@ -682,20 +688,21 @@ IfTree::str() const
  *    (b) Otherwise, its state (and the subtree below it) is copied
  *        as-is from the other tree.
  * 3. If an item in the local tree is not in the other tree, it is
- *    marked as deleted in the local tree.
- * 4. If an item in the local tree is in the other tree, its state
- *    is copied from the other tree to the local tree by applying
- *    the following rules:
- *    (a) If an interface in the local tree is "flipped", then it
- *        is still marked as "flipped".
- *    (b) If the item in the local tree is not "enabled", then
- *        the state is still marked as not "enabled".
+ *    marked as "disabled" in the local tree.
+ * 4. If an item in the local tree is in the other tree, and its state
+ *    is different in the local and the other tree, the state
+ *    is copied from the other tree to the local tree.
+ *    Also, if the item is disabled in the user config tree, it is
+ *    marked as "disabled" in the local tree.
  *
  * @param other the configuration tree to align state with.
+ * @param user_config the user configuration tree to reference during
+ * the alignment.
  * @return modified configuration structure.
  */
 IfTree&
-IfTree::align_with(const IfTree& other)
+IfTree::align_with_pulled_changes(const IfTree& other,
+				  const IfTree& user_config)
 {
     IfTree::IfMap::iterator ii;
 
@@ -703,136 +710,656 @@ IfTree::align_with(const IfTree& other)
     // Iterate through all interfaces
     //
     for (ii = interfaces().begin(); ii != interfaces().end(); ++ii) {
-	IfTreeInterface& fi = *(ii->second);
-	const string& ifname = fi.ifname();
-	bool fi_enabled = fi.enabled();
-	bool fi_flipped = fi.flipped();
+	IfTreeInterface* this_ifp = ii->second;
+	const string& ifname = this_ifp->ifname();
 	const IfTreeInterface* other_ifp = other.find_interface(ifname);
+	const IfTreeInterface* user_ifp = user_config.find_interface(ifname);
 
 	//
 	// Ignore "soft" interfaces
 	//
-	if (fi.is_soft())
+	if (this_ifp->is_soft())
 	    continue;
 
 	//
 	// Special processing for "default_system_config" interfaces
 	//
-	if (fi.default_system_config()) {
+	if (this_ifp->default_system_config()) {
 	    if (other_ifp != NULL) {
 		update_interface(*other_ifp);
 	    } else {
-		fi.set_enabled(false);
+		this_ifp->set_enabled(false);
 		IfTreeInterface::VifMap::iterator vi;
-		for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-		    IfTreeVif& fv = *(vi->second);
-		    fv.mark(DELETED);
+		for (vi = this_ifp->vifs().begin();
+		     vi != this_ifp->vifs().end();
+		     ++vi) {
+		    IfTreeVif* this_vifp = vi->second;
+		    this_vifp->mark(DELETED);
 		}
 	    }
 	    continue;
 	}
 
 	//
-	// Mark for deletion if not in the other tree
+	// Disable if not in the other tree
 	//
 	if (other_ifp == NULL) {
-	    fi.mark(DELETED);
+	    this_ifp->set_enabled(false);
 	    continue;
 	}
 
 	//
 	// Copy state from the other interface
 	//
-	if (! fi.is_same_state(*other_ifp)) {
-	    fi.copy_state(*other_ifp, false);
-	    if (! fi_enabled)
-		fi.set_enabled(fi_enabled);
-	    if (fi_flipped)
-		fi.set_flipped(fi_flipped);
+	if (! this_ifp->is_same_state(*other_ifp)) {
+	    bool enabled = false;
+	    if ((user_ifp != NULL) && user_ifp->enabled())
+		enabled = true;
+	    this_ifp->copy_state(*other_ifp, false);
+	    if (! enabled)
+		this_ifp->set_enabled(enabled);
 	}
 
 	//
 	// Align the vif state
 	//
 	IfTreeInterface::VifMap::iterator vi;
-	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
-	    IfTreeVif& fv = *(vi->second);
-	    const string& vifname = fv.vifname();
-	    bool fv_enabled = fv.enabled();
+	for (vi = this_ifp->vifs().begin();
+	     vi != this_ifp->vifs().end();
+	     ++vi) {
+	    IfTreeVif* this_vifp = vi->second;
+	    const string& vifname = this_vifp->vifname();
 	    const IfTreeVif* other_vifp = other_ifp->find_vif(vifname);
+	    const IfTreeVif* user_vifp = NULL;
+
+	    if (user_ifp != NULL)
+		user_vifp = user_ifp->find_vif(vifname);
 
 	    //
-	    // Mark for deletion if not in the other tree
+	    // Disable if not in the other tree
 	    //
 	    if (other_vifp == NULL) {
-		fv.mark(DELETED);
+		this_vifp->set_enabled(false);
 		continue;
 	    }
 
 	    //
 	    // Copy state from the other vif
 	    //
-	    if (! fv.is_same_state(*other_vifp)) {
-		fv.copy_state(*other_vifp);
-		if (! fv_enabled)
-		    fv.set_enabled(fv_enabled);
+	    if (! this_vifp->is_same_state(*other_vifp)) {
+		bool enabled = false;
+		if ((user_vifp != NULL) && user_vifp->enabled())
+		    enabled = true;
+		this_vifp->copy_state(*other_vifp);
+		if (! enabled)
+		    this_vifp->set_enabled(enabled);
 	    }
 
 	    //
 	    // Align the IPv4 address state
 	    //
 	    IfTreeVif::IPv4Map::iterator ai4;
-	    for (ai4 = fv.ipv4addrs().begin();
-		 ai4 != fv.ipv4addrs().end();
+	    for (ai4 = this_vifp->ipv4addrs().begin();
+		 ai4 != this_vifp->ipv4addrs().end();
 		 ++ai4) {
-		IfTreeAddr4& fa = *(ai4->second);
-		bool fa_enabled = fa.enabled();
-		const IfTreeAddr4* other_ap = other_vifp->find_addr(fa.addr());
+		IfTreeAddr4* this_ap = ai4->second;
+		const IPv4& addr = this_ap->addr();
+		const IfTreeAddr4* other_ap = other_vifp->find_addr(addr);
+		const IfTreeAddr4* user_ap = NULL;
+
+		if (user_vifp != NULL)
+		    user_ap = user_vifp->find_addr(addr);
 
 		//
-		// Mark for deletion if not in the other tree
+		// Disable if not in the other tree
 		//
 		if (other_ap == NULL) {
-		    fa.mark(DELETED);
+		    this_ap->set_enabled(false);
 		    continue;
 		}
 
 		//
 		// Copy state from the other address
 		//
-		if (! fa.is_same_state(*other_ap)) {
-		    fa.copy_state(*other_ap);
-		    if (! fa_enabled)
-			fa.set_enabled(fa_enabled);
+		if (! this_ap->is_same_state(*other_ap)) {
+		    bool enabled = false;
+		    if ((user_ap != NULL) && user_ap->enabled())
+			enabled = true;
+		    this_ap->copy_state(*other_ap);
+		    if (! enabled)
+			this_ap->set_enabled(enabled);
+		}
+	    }
+
+	    //
+	    // Align the IPv6 address state
+	    //
+	    IfTreeVif::IPv6Map::iterator ai6;
+	    for (ai6 = this_vifp->ipv6addrs().begin();
+		 ai6 != this_vifp->ipv6addrs().end();
+		 ++ai6) {
+		IfTreeAddr6* this_ap = ai6->second;
+		const IPv6& addr = this_ap->addr();
+		const IfTreeAddr6* other_ap = other_vifp->find_addr(addr);
+		const IfTreeAddr6* user_ap = NULL;
+
+		if (user_vifp != NULL)
+		    user_ap = user_vifp->find_addr(addr);
+
+		//
+		// Disable if not in the other tree
+		//
+		if (other_ap == NULL) {
+		    this_ap->set_enabled(false);
+		    continue;
+		}
+
+		//
+		// Copy state from the other address
+		//
+		if (! this_ap->is_same_state(*other_ap)) {
+		    bool enabled = false;
+		    if ((user_ap != NULL) && user_ap->enabled())
+			enabled = true;
+		    this_ap->copy_state(*other_ap);
+		    if (! enabled)
+			this_ap->set_enabled(enabled);
+		}
+	    }
+	}
+    }
+
+    return (*this);
+}
+
+/**
+ * Align system-user merged configuration with the observed changes
+ * in the system configuration.
+ *
+ * Inside the FEA there may be multiple configuration representations,
+ * typically one the user modifies, one that mirrors the hardware,
+ * and one that merges those two (e.g., some of the merged information
+ * comes from the user configuration while other might come
+ * from the underlying system).
+ * On certain systems there could be asynchronous updates originated
+ * by the system that are captured by the FEA interface observer
+ * (e.g., a cable is unplugged, a tunnel interface is added/deleted, etc).
+ *
+ * This method is used to align those updates with the merged
+ * configuration.
+ *
+ * The alignment works as follows:
+ * 1. If an interface in the other tree is not in the local tree, it is
+ *    tested whether is in the user configuration tree. If not, the
+ *    rest of the processing is not applied and the interface is ignored.
+ *    Otherwise it is created, its state is merged from the user config
+ *    and other tree, and is marked as "CREATED".
+ * 2. If an interface in the local tree is marked as "soft", its
+ *    state is not modified and the rest of the processing is ignored.
+ * 3. If an interface in the local tree is marked as
+ *    "default_system_config", the rest of the processing is not
+ *    applied, and its state (and the subtree below it) is copied
+ *    as-is from the other tree.
+ * 4. If an item in the other tree is not in the local tree, it is
+ *    tested whether is in the user configuration tree. If not, the
+ *    rest of the processing is not applied and the item is ignored.
+ *    Otherwise it is created, its state is merged from the user config
+ *    and the other tree, and is marked as "CREATED".
+ * 5. If an item in the other tree is marked as:
+ *    (a) "NO_CHANGE": The state of the entry in the other tree is not
+ *        propagated to the local tree, but its subtree entries are
+ *        processed.
+ *    (b) "DELETED": The item in the local tree is disabled, and the
+ *        subtree entries are ignored.
+ *    (c) "CREATED" or "CHANGED": If the state of the entry is different
+ *        in the other and the local tree, it is copied to the local tree,
+ *        and the item in the local tree is marked as "CREATED" or
+ *        "CHANGED".
+ *        Also, if the item is disabled in the user config tree, it is
+ *        marked as "disabled" in the local tree.
+ *
+ * @param other the configuration tree to align state with.
+ * @param user_config the user configuration tree to reference during
+ * the alignment.
+ * @return modified configuration structure.
+ */
+IfTree&
+IfTree::align_with_observed_changes(const IfTree& other,
+				    const IfTree& user_config)
+{
+    IfTree::IfMap::const_iterator oi;
+
+    //
+    // Iterate through all interfaces in the other tree
+    //
+    for (oi = other.interfaces().begin();
+	 oi != other.interfaces().end(); ++oi) {
+	const IfTreeInterface* other_ifp = oi->second;
+	const string& ifname = other_ifp->ifname();
+	IfTreeInterface* this_ifp = find_interface(ifname);
+	const IfTreeInterface* user_ifp = user_config.find_interface(ifname);
+
+	//
+	// Ignore interfaces that are not in the local or user config tree
+	//
+	if (this_ifp == NULL) {
+	    if (user_ifp == NULL)
+		continue;
+	    // Create the interface
+	    add_interface(ifname);
+	    this_ifp = find_interface(ifname);
+	    XLOG_ASSERT(this_ifp != NULL);
+	    this_ifp->copy_state(*user_ifp, true);
+	    this_ifp->copy_state(*other_ifp, false);
+	    this_ifp->mark(CREATED);
+	}
+
+	//
+	// Ignore "soft" interfaces
+	//
+	if (this_ifp->is_soft())
+	    continue;
+
+	//
+	// Special processing for "default_system_config" interfaces
+	//
+	if (this_ifp->default_system_config()) {
+	    update_interface(*other_ifp);
+	    continue;
+	}
+
+	//
+	// Test for "DELETED" entries
+	//
+	if (other_ifp->is_marked(DELETED)) {
+	    this_ifp->set_enabled(false);
+	    continue;
+	}
+
+	//
+	// Test for "CREATED" or "CHANGED" entries
+	//
+	if (other_ifp->is_marked(CREATED) || other_ifp->is_marked(CHANGED)) {
+	    bool enabled = false;
+	    if ((user_ifp != NULL) && user_ifp->enabled())
+		enabled = true;
+	    //
+	    // Copy state from the other entry
+	    //
+	    if (! this_ifp->is_same_state(*other_ifp)) {
+		this_ifp->copy_state(*other_ifp, false);
+		if (! enabled)
+		    this_ifp->set_enabled(enabled);
+		this_ifp->mark(CHANGED);	// XXX: no-op if it was CREATED
+	    }
+	}
+
+	//
+	// Align the vif state
+	//
+	IfTreeInterface::VifMap::const_iterator ov;
+	for (ov = other_ifp->vifs().begin();
+	     ov != other_ifp->vifs().end();
+	     ++ov) {
+	    const IfTreeVif* other_vifp = ov->second;
+	    const string& vifname = other_vifp->vifname();
+	    IfTreeVif* this_vifp = this_ifp->find_vif(vifname);
+	    const IfTreeVif* user_vifp = NULL;
+
+	    if (user_ifp != NULL)
+		user_vifp = user_ifp->find_vif(vifname);
+
+	    //
+	    // Ignore entries that are not in the local or user config tree
+	    //
+	    if (this_vifp == NULL) {
+		if (user_vifp == NULL)
+		    continue;
+		// Create the vif
+		this_ifp->add_vif(vifname);
+		this_vifp = this_ifp->find_vif(vifname);
+		XLOG_ASSERT(this_vifp != NULL);
+		this_vifp->copy_state(*other_vifp);
+		this_vifp->mark(CREATED);
+	    }
+
+	    //
+	    // Test for "DELETED" entries
+	    //
+	    if (other_vifp->is_marked(DELETED)) {
+		this_vifp->set_enabled(false);
+		continue;
+	    }
+
+	    //
+	    // Test for "CREATED" or "CHANGED" entries
+	    //
+	    if (other_vifp->is_marked(CREATED)
+		|| other_vifp->is_marked(CHANGED)) {
+		bool enabled = false;
+		if ((user_vifp != NULL) && user_vifp->enabled())
+		    enabled = true;
+		//
+		// Copy state from the other entry
+		//
+		if (! this_vifp->is_same_state(*other_vifp)) {
+		    this_vifp->copy_state(*other_vifp);
+		    if (! enabled)
+			this_vifp->set_enabled(enabled);
+		    this_vifp->mark(CHANGED);	// XXX: no-op if it was CREATED
 		}
 	    }
 
 	    //
 	    // Align the IPv4 address state
 	    //
-	    IfTreeVif::IPv6Map::iterator ai6;
-	    for (ai6 = fv.ipv6addrs().begin();
-		 ai6 != fv.ipv6addrs().end();
-		 ++ai6) {
-		IfTreeAddr6& fa = *(ai6->second);
-		bool fa_enabled = fa.enabled();
-		const IfTreeAddr6* other_ap = other_vifp->find_addr(fa.addr());
+	    IfTreeVif::IPv4Map::const_iterator oa4;
+	    for (oa4 = other_vifp->ipv4addrs().begin();
+		 oa4 != other_vifp->ipv4addrs().end();
+		 ++oa4) {
+		const IfTreeAddr4* other_ap = oa4->second;
+		const IPv4& addr = other_ap->addr();
+		IfTreeAddr4* this_ap = this_vifp->find_addr(addr);
+		const IfTreeAddr4* user_ap = NULL;
+
+		if (user_vifp != NULL)
+		    user_ap = user_vifp->find_addr(addr);
 
 		//
-		// Mark for deletion if not in the other tree
+		// Ignore entries that are not in the local or user config tree
 		//
-		if (other_ap == NULL) {
-		    fa.mark(DELETED);
+		if (this_ap == NULL) {
+		    if (user_ap == NULL)
+			continue;
+		    // Create the address
+		    this_vifp->add_addr(addr);
+		    this_ap = this_vifp->find_addr(addr);
+		    XLOG_ASSERT(this_ap != NULL);
+		    this_ap->copy_state(*other_ap);
+		    this_ap->mark(CREATED);
+		}
+
+		//
+		// Test for "DELETED" entries
+		//
+		if (other_ap->is_marked(DELETED)) {
+		    this_ap->set_enabled(false);
 		    continue;
 		}
 
 		//
-		// Copy state from the other address
+		// Test for "CREATED" or "CHANGED" entries
 		//
-		if (! fa.is_same_state(*other_ap)) {
-		    fa.copy_state(*other_ap);
-		    if (! fa_enabled)
-			fa.set_enabled(fa_enabled);
+		if (other_ap->is_marked(CREATED)
+		    || other_ap->is_marked(CHANGED)) {
+		    bool enabled = false;
+		    if ((user_ap != NULL) && user_ap->enabled())
+			enabled = true;
+		    //
+		    // Copy state from the other entry
+		    //
+		    if (! this_ap->is_same_state(*other_ap)) {
+			this_ap->copy_state(*other_ap);
+			if (! enabled)
+			    this_ap->set_enabled(enabled);
+			this_ap->mark(CHANGED);	// XXX: no-op if it was CREATED
+		    }
+		}
+	    }
+
+	    //
+	    // Align the IPv6 address state
+	    //
+	    IfTreeVif::IPv6Map::const_iterator oa6;
+	    for (oa6 = other_vifp->ipv6addrs().begin();
+		 oa6 != other_vifp->ipv6addrs().end();
+		 ++oa6) {
+		const IfTreeAddr6* other_ap = oa6->second;
+		const IPv6& addr = other_ap->addr();
+		IfTreeAddr6* this_ap = this_vifp->find_addr(addr);
+		const IfTreeAddr6* user_ap = NULL;
+
+		if (user_vifp != NULL)
+		    user_ap = user_vifp->find_addr(addr);
+
+		//
+		// Ignore entries that are not in the local or user config tree
+		//
+		if (this_ap == NULL) {
+		    if (user_ap == NULL)
+			continue;
+		    // Create the address
+		    this_vifp->add_addr(addr);
+		    this_ap = this_vifp->find_addr(addr);
+		    XLOG_ASSERT(this_ap != NULL);
+		    this_ap->copy_state(*other_ap);
+		    this_ap->mark(CREATED);
+		}
+
+		//
+		// Test for "DELETED" entries
+		//
+		if (other_ap->is_marked(DELETED)) {
+		    this_ap->set_enabled(false);
+		    continue;
+		}
+
+		//
+		// Test for "CREATED" or "CHANGED" entries
+		//
+		if (other_ap->is_marked(CREATED)
+		    || other_ap->is_marked(CHANGED)) {
+		    bool enabled = false;
+		    if ((user_ap != NULL) && user_ap->enabled())
+			enabled = true;
+		    //
+		    // Copy state from the other entry
+		    //
+		    if (! this_ap->is_same_state(*other_ap)) {
+			if (! enabled)
+			    this_ap->set_enabled(enabled);
+			this_ap->mark(CHANGED);	// XXX: no-op if it was CREATED
+		    }
+		}
+	    }
+	}
+    }
+
+    return (*this);
+}
+
+/**
+ * Align system-user merged configuration with the user configuration
+ * changes.
+ *
+ * Inside the FEA there may be multiple configuration representations,
+ * typically one the user modifies, one that mirrors the hardware,
+ * and one that merges those two (e.g., some of the merged information
+ * comes from the user configuration while other might come
+ * from the underlying system).
+ *
+ * This method is used to align the user configuration changes with the
+ * merged configuration.
+ *
+ * The alignment works as follows:
+ * 1. If an item in the other tree is not in the local tree, it is
+ *    created in the local tree and its state (and the subtree below it)
+ *    is copied as-is from the other tree, and the rest of the processing
+ *    is ignored.
+ * 2. If an item in the other tree is marked as:
+ *    (a) "NO_CHANGE": The state of the entry in the other tree is not
+ *        propagated to the local tree, but its subtree entries are
+ *        processed.
+ *    (b) "DELETED": The item in the local tree is marked as "DELETED",
+ *        and the subtree entries are ignored.
+ *    (c) "CREATED" or "CHANGED": If the state of the entry is different
+ *        in the other and the local tree, it is copied to the local tree,
+ *        and the item in the local tree is marked as "CHANGED".
+ *
+ * @param other the configuration tree to align state with.
+ * @return modified configuration structure.
+ */
+IfTree&
+IfTree::align_with_user_config(const IfTree& other)
+{
+    IfTree::IfMap::const_iterator oi;
+
+    //
+    // Iterate through all interfaces in the other tree
+    //
+    for (oi = other.interfaces().begin();
+	 oi != other.interfaces().end(); ++oi) {
+	const IfTreeInterface* other_ifp = oi->second;
+	IfTreeInterface* this_ifp = find_interface(other_ifp->ifname());
+
+	//
+	// Recursively add entries that are not in the local tree
+	//
+	if (this_ifp == NULL) {
+	    add_recursive_interface(*other_ifp, false);
+	    continue;
+	}
+
+	//
+	// Test for "DELETED" entries
+	//
+	if (other_ifp->is_marked(DELETED)) {
+	    this_ifp->mark(DELETED);
+	    continue;
+	}
+
+	//
+	// Test for "CREATED" or "CHANGED" entries
+	//
+	if (other_ifp->is_marked(CREATED) || other_ifp->is_marked(CHANGED)) {
+	    //
+	    // Copy state from the other entry
+	    //
+	    if (! this_ifp->is_same_state(*other_ifp)) {
+		this_ifp->copy_state(*other_ifp, false);
+		this_ifp->mark(CHANGED);
+	    }
+	}
+
+	//
+	// Align the vif state
+	//
+	IfTreeInterface::VifMap::const_iterator ov;
+	for (ov = other_ifp->vifs().begin();
+	     ov != other_ifp->vifs().end();
+	     ++ov) {
+	    const IfTreeVif* other_vifp = ov->second;
+	    IfTreeVif* this_vifp = this_ifp->find_vif(other_vifp->vifname());
+
+	    //
+	    // Recursively add entries that are not in the local tree
+	    //
+	    if (this_vifp == NULL) {
+		this_ifp->add_recursive_vif(*other_vifp, false);
+		continue;
+	    }
+
+	    //
+	    // Test for "DELETED" entries
+	    //
+	    if (other_vifp->is_marked(DELETED)) {
+		this_vifp->mark(DELETED);
+		continue;
+	    }
+
+	    //
+	    // Test for "CREATED" or "CHANGED" entries
+	    //
+	    if (other_vifp->is_marked(CREATED)
+		|| other_vifp->is_marked(CHANGED)) {
+		//
+		// Copy state from the other entry
+		//
+		if (! this_vifp->is_same_state(*other_vifp)) {
+		    this_vifp->copy_state(*other_vifp);
+		    this_vifp->mark(CHANGED);
+		}
+	    }
+
+	    //
+	    // Align the IPv4 address state
+	    //
+	    IfTreeVif::IPv4Map::const_iterator oa4;
+	    for (oa4 = other_vifp->ipv4addrs().begin();
+		 oa4 != other_vifp->ipv4addrs().end();
+		 ++oa4) {
+		const IfTreeAddr4* other_ap = oa4->second;
+		IfTreeAddr4* this_ap = this_vifp->find_addr(other_ap->addr());
+
+		//
+		// Recursively add entries that are not in the local tree
+		//
+		if (this_ap == NULL) {
+		    this_vifp->add_recursive_addr(*other_ap, false);
+		    continue;
+		}
+
+		//
+		// Test for "DELETED" entries
+		//
+		if (other_ap->is_marked(DELETED)) {
+		    this_ap->mark(DELETED);
+		    continue;
+		}
+
+		//
+		// Test for "CREATED" or "CHANGED" entries
+		//
+		if (other_ap->is_marked(CREATED)
+		    || other_ap->is_marked(CHANGED)) {
+		    //
+		    // Copy state from the other entry
+		    //
+		    if (! this_ap->is_same_state(*other_ap)) {
+			this_ap->copy_state(*other_ap);
+			this_ap->mark(CHANGED);
+		    }
+		}
+	    }
+
+	    //
+	    // Align the IPv6 address state
+	    //
+	    IfTreeVif::IPv6Map::const_iterator oa6;
+	    for (oa6 = other_vifp->ipv6addrs().begin();
+		 oa6 != other_vifp->ipv6addrs().end();
+		 ++oa6) {
+		const IfTreeAddr6* other_ap = oa6->second;
+		IfTreeAddr6* this_ap = this_vifp->find_addr(other_ap->addr());
+
+		//
+		// Recursively add entries that are not in the local tree
+		//
+		if (this_ap == NULL) {
+		    this_vifp->add_recursive_addr(*other_ap, false);
+		    continue;
+		}
+
+		//
+		// Test for "DELETED" entries
+		//
+		if (other_ap->is_marked(DELETED)) {
+		    this_ap->mark(DELETED);
+		    continue;
+		}
+
+		//
+		// Test for "CREATED" or "CHANGED" entries
+		//
+		if (other_ap->is_marked(CREATED)
+		    || other_ap->is_marked(CHANGED)) {
+		    //
+		    // Copy state from the other entry
+		    //
+		    if (! this_ap->is_same_state(*other_ap)) {
+			this_ap->copy_state(*other_ap);
+			this_ap->mark(CHANGED);
+		    }
 		}
 	    }
 	}
@@ -1194,7 +1721,6 @@ IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
       _default_system_config(false),
       _mtu(0),
       _no_carrier(false),
-      _flipped(false),
       _interface_flags(0)
 {}
 
@@ -1210,7 +1736,7 @@ IfTreeInterface::~IfTreeInterface()
 }
 
 void
-IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif)
+IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif, bool mark_state)
 {
     const string& vifname = other_vif.vifname();
     IfTreeVif* vifp;
@@ -1219,6 +1745,10 @@ IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif)
     vifp = new IfTreeVif(*this, vifname);
     _vifs.insert(IfTreeInterface::VifMap::value_type(vifname, vifp));
     vifp->copy_state(other_vif);
+    if (mark_state)
+	vifp->set_state(other_vif.state());
+    else
+	vifp->mark(CREATED);
 
     // Add recursively all the IPv4 addresses from the other vif
     IfTreeVif::IPv4Map::const_iterator oa4;
@@ -1226,7 +1756,7 @@ IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif)
 	 oa4 != other_vif.ipv4addrs().end();
 	 ++oa4) {
 	const IfTreeAddr4& other_addr = *(oa4->second);
-	vifp->add_recursive_addr(other_addr);
+	vifp->add_recursive_addr(other_addr, mark_state);
     }
 
     // Add recursively all the IPv6 addresses from the other vif
@@ -1235,7 +1765,7 @@ IfTreeInterface::add_recursive_vif(const IfTreeVif& other_vif)
 	 oa6 != other_vif.ipv6addrs().end();
 	 ++oa6) {
 	const IfTreeAddr6& other_addr = *(oa6->second);
-	vifp->add_recursive_addr(other_addr);
+	vifp->add_recursive_addr(other_addr, mark_state);
     }
 }
 
@@ -1390,7 +1920,7 @@ IfTreeInterface::str() const
 			"{ discard := %s } { unreachable := %s } "
 			"{ management = %s } { default_system_config = %s }"
 			"{ mtu := %u } { mac := %s } { no_carrier = %s } "
-			"{ flipped := %s } { flags := %u }",
+			"{ flags := %u }",
 			_ifname.c_str(),
 			XORP_UINT_CAST(_pif_index),
 			bool_c_str(_enabled),
@@ -1401,7 +1931,6 @@ IfTreeInterface::str() const
 			XORP_UINT_CAST(_mtu),
 			_mac.str().c_str(),
 			bool_c_str(_no_carrier),
-			bool_c_str(_flipped),
 			XORP_UINT_CAST(_interface_flags));
     r += string(" ") + IfTreeItem::str();
 
@@ -1464,27 +1993,33 @@ IfTreeVif::copy_recursive_vif(const IfTreeVif& other_vif)
 
     copy_state(other_vif);
 
-    // Add recursively all the IPv4 addresses from the other vif
+    // Add all the IPv4 addresses from the other vif
     IfTreeVif::IPv4Map::const_iterator oa4;
     for (oa4 = other_vif.ipv4addrs().begin();
 	 oa4 != other_vif.ipv4addrs().end();
 	 ++oa4) {
 	const IfTreeAddr4& other_addr = *(oa4->second);
-	add_recursive_addr(other_addr);
+	const IPv4& addr = other_addr.addr();
+	IfTreeAddr4* ap = new IfTreeAddr4(addr);
+	_ipv4addrs.insert(IfTreeVif::IPv4Map::value_type(addr, ap));
+	ap->copy_state(other_addr);
     }
 
-    // Add recursively all the IPv6 addresses from the other vif
+    // Add all the IPv6 addresses from the other vif
     IfTreeVif::IPv6Map::const_iterator oa6;
     for (oa6 = other_vif.ipv6addrs().begin();
 	 oa6 != other_vif.ipv6addrs().end();
 	 ++oa6) {
 	const IfTreeAddr6& other_addr = *(oa6->second);
-	add_recursive_addr(other_addr);
+	const IPv6& addr = other_addr.addr();
+	IfTreeAddr6* ap = new IfTreeAddr6(addr);
+	_ipv6addrs.insert(IfTreeVif::IPv6Map::value_type(addr, ap));
+	ap->copy_state(other_addr);
     }
 }
 
 void
-IfTreeVif::add_recursive_addr(const IfTreeAddr4& other_addr)
+IfTreeVif::add_recursive_addr(const IfTreeAddr4& other_addr, bool mark_state)
 {
     const IPv4& addr = other_addr.addr();
     IfTreeAddr4* ap;
@@ -1493,10 +2028,14 @@ IfTreeVif::add_recursive_addr(const IfTreeAddr4& other_addr)
     ap = new IfTreeAddr4(addr);
     _ipv4addrs.insert(IfTreeVif::IPv4Map::value_type(addr, ap));
     ap->copy_state(other_addr);
+    if (mark_state)
+	ap->set_state(other_addr.state());
+    else
+	ap->mark(CREATED);
 }
 
 void
-IfTreeVif::add_recursive_addr(const IfTreeAddr6& other_addr)
+IfTreeVif::add_recursive_addr(const IfTreeAddr6& other_addr, bool mark_state)
 {
     const IPv6& addr = other_addr.addr();
     IfTreeAddr6* ap;
@@ -1505,6 +2044,10 @@ IfTreeVif::add_recursive_addr(const IfTreeAddr6& other_addr)
     ap = new IfTreeAddr6(addr);
     _ipv6addrs.insert(IfTreeVif::IPv6Map::value_type(addr, ap));
     ap->copy_state(other_addr);
+    if (mark_state)
+	ap->set_state(other_addr.state());
+    else
+	ap->mark(CREATED);
 }
 
 int

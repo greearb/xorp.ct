@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.16 2008/04/26 00:59:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.17 2008/04/26 01:51:00 pavlin Exp $"
 
 
 //
@@ -44,11 +44,11 @@ FeaNode::FeaNode(EventLoop& eventloop, FeaIo& fea_io, bool is_dummy)
       _is_running(false),
       _is_dummy(is_dummy),
       _ifconfig(*this),
-      _firewall_manager(*this, ifconfig().local_config()),
-      _fibconfig(*this, _ifconfig.live_config(), _ifconfig.local_config()),
-      _io_link_manager(*this, ifconfig().local_config()),
-      _io_ip_manager(*this, ifconfig().local_config()),
-      _io_tcpudp_manager(*this, ifconfig().local_config()),
+      _firewall_manager(*this, ifconfig().merged_config()),
+      _fibconfig(*this, _ifconfig.system_config(), _ifconfig.merged_config()),
+      _io_link_manager(*this, ifconfig().merged_config()),
+      _io_ip_manager(*this, ifconfig().merged_config()),
+      _io_tcpudp_manager(*this, ifconfig().merged_config()),
       _fea_io(fea_io)
 {
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.13 2007/12/30 09:15:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_routing_socket.cc,v 1.14 2008/01/04 03:16:08 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -85,8 +85,11 @@ IfConfigObserverRoutingSocket::stop(string& error_msg)
 void
 IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
 {
+    // Pre-processing cleanup
+    ifconfig().system_config().finalize_state();
+
     if (IfConfigGetSysctl::parse_buffer_routing_socket(
-	    ifconfig(), ifconfig().live_config(), buffer)
+	    ifconfig(), ifconfig().system_config(), buffer)
 	!= XORP_OK) {
 	return;
     }
@@ -97,20 +100,20 @@ IfConfigObserverRoutingSocket::receive_data(const vector<uint8_t>& buffer)
     IfConfigVlanGet* ifconfig_vlan_get;
     ifconfig_vlan_get = fea_data_plane_manager().ifconfig_vlan_get();
     if (ifconfig_vlan_get != NULL) {
-	if (ifconfig_vlan_get->pull_config(ifconfig().live_config())
+	if (ifconfig_vlan_get->pull_config(ifconfig().system_config())
 	    != XORP_OK) {
 	    XLOG_ERROR("Unknown error while pulling VLAN information");
 	}
     }
 
     //
-    // Propagate the changes from the live config to the local config
+    // Propagate the changes from the system config to the merged config
     //
-    ifconfig().live_config().finalize_state();
-    IfTree& local_config = ifconfig().local_config();
-    local_config.align_with(ifconfig().live_config());
-    ifconfig().report_updates(local_config);
-    local_config.finalize_state();
+    IfTree& merged_config = ifconfig().merged_config();
+    merged_config.align_with_observed_changes(ifconfig().system_config(),
+					      ifconfig().user_config());
+    ifconfig().report_updates(merged_config);
+    merged_config.finalize_state();
 }
 
 void

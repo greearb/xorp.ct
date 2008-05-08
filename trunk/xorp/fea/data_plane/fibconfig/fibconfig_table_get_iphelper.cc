@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.12 2007/12/30 03:03:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_iphelper.cc,v 1.13 2008/01/04 03:16:01 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -183,7 +183,7 @@ FibConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 	    xorp_route = true;
 
 	uint32_t ifindex = static_cast<uint32_t>(pFwdRow->dwForwardIfIndex);
-	const IfTree& iftree = fibconfig().local_config_iftree();
+	const IfTree& iftree = fibconfig().merged_config_iftree();
 	const IfTreeVif* vifp = iftree.find_vif(ifindex);
 
 	string if_name;

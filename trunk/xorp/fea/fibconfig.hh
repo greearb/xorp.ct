@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fibconfig.hh,v 1.17 2008/04/11 02:36:01 pavlin Exp $
+// $XORP: xorp/fea/fibconfig.hh,v 1.18 2008/04/11 02:52:15 pavlin Exp $
 
 #ifndef	__FEA_FIBCONFIG_HH__
 #define __FEA_FIBCONFIG_HH__
@@ -57,12 +57,13 @@ public:
      * Constructor.
      * 
      * @param fea_node the FEA node.
-     * @param live_config_iftree the live interface configuration tree to use.
-     * @param local_config_iftree the local interface configuration tree to
+     * @param system_config_iftree the system interface configuration tree to
      * use.
+     * @param merged_config_iftree the merged system-user interface
+     * configuration tree to use.
      */
-    FibConfig(FeaNode& fea_node, const IfTree& live_config_iftree,
-	      const IfTree& local_config_iftree);
+    FibConfig(FeaNode& fea_node, const IfTree& system_config_iftree,
+	      const IfTree& merged_config_iftree);
 
     /**
      * Virtual destructor (in case this class is used as a base class).
@@ -84,18 +85,18 @@ public:
     NexthopPortMapper& nexthop_port_mapper() { return _nexthop_port_mapper; }
 
     /**
-     * Get a reference to the live interface configuration.
+     * Get a reference to the system interface configuration.
      *
-     * @return a reference to the live interface configuration.
+     * @return a reference to the system interface configuration.
      */
-    const IfTree& live_config_iftree() const { return _live_config_iftree; }
+    const IfTree& system_config_iftree() const { return _system_config_iftree; }
 
     /**
-     * Get a reference to the local interface configuration.
+     * Get a reference to the merged system-user interface configuration.
      *
-     * @return a reference to the local interface configuration.
+     * @return a reference to the merged system-user interface configuration.
      */
-    const IfTree& local_config_iftree() const { return _local_config_iftree; }
+    const IfTree& merged_config_iftree() const { return _merged_config_iftree; }
 
     /**
      * Get the status code.
@@ -730,8 +731,8 @@ private:
     EventLoop&				_eventloop;
     Profile&				_profile;
     NexthopPortMapper&			_nexthop_port_mapper;
-    const IfTree&			_live_config_iftree;
-    const IfTree&			_local_config_iftree;
+    const IfTree&			_system_config_iftree;
+    const IfTree&			_merged_config_iftree;
 
     //
     // The FIB transaction manager

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.11 2007/12/28 09:13:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.12 2008/01/04 03:15:59 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -193,7 +193,7 @@ FibConfigEntrySetIPHelper::add_entry(const FteX& fte)
     	memset(&ipfwdrow, 0, sizeof(ipfwdrow));
     }
 
-    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTree& iftree = fibconfig().merged_config_iftree();
     const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
     XLOG_ASSERT(vifp != NULL);
 
@@ -304,7 +304,7 @@ FibConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // If the FEA does not know about this interface, there is a
     // programming error.
     //
-    const IfTree& iftree = fibconfig().local_config_iftree();
+    const IfTree& iftree = fibconfig().merged_config_iftree();
     const IfTreeVif* vifp = iftree.find_vif(fte.ifname(), fte.vifname());
     XLOG_ASSERT(vifp != NULL);
     ipfwdrow.dwForwardIfIndex = vifp->pif_index();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.61 2008/03/07 12:09:27 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.62 2008/03/09 00:21:16 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -152,8 +152,11 @@ public:
      * Add recursively a new interface.
      *
      * @param other_iface the interface to add recursively.
+     * @param mark_state if true, then mark the state same as the state
+     * from the other interface, otherwise the state will be CREATED.
      */
-    void add_recursive_interface(const IfTreeInterface& other_iface);
+    void add_recursive_interface(const IfTreeInterface& other_iface,
+				 bool mark_state);
 
     /**
      * Create a new interface.
@@ -340,18 +343,22 @@ public:
     const IfMap& interfaces() const { return _interfaces; }
 
     /**
-     * Align user supplied configuration with the device configuration.
+     * Align system-user merged configuration with the pulled changes
+     * in the system configuration.
      *
      * Inside the FEA there may be multiple configuration representations,
-     * typically one the user modifies and one that mirrors the hardware.
+     * typically one the user modifies, one that mirrors the hardware,
+     * and one that merges those two (e.g., some of the merged information
+     * comes from the user configuration while other might come
+     * from the underlying system).
      * Errors may occur pushing the user config down onto the hardware and
-     * we need a method to update the user config from the h/w config that
+     * we need a method to update the merged config from the h/w config that
      * exists after the config push. We can't just copy the h/w config since
      * the user config is restricted to configuration set by the user.
      *
      * The alignment works as follows:
      * 1. If an interface in the local tree is marked as "soft", its
-     *    state is not modified.
+     *    state is not modified and the rest of the processing is ignored.
      * 2. If an interface in the local tree is marked as
      *    "default_system_config", the rest of the processing is not
      *    applied, and the following rules are used instead:
@@ -360,19 +367,107 @@ public:
      *    (b) Otherwise, its state (and the subtree below it) is copied
      *        as-is from the other tree.
      * 3. If an item in the local tree is not in the other tree, it is
-     *    marked as deleted in the local tree.
-     * 4. If an item in the local tree is in the other tree, its state
-     *    is copied from the other tree to the local tree by applying
-     *    the following rules:
-     *    (a) If an interface in the local tree is "flipped", then it
-     *        is still marked as "flipped".
-     *    (b) If the item in the local tree is not "enabled", then
+     *    marked as "disabled" in the local tree.
+     * 4. If an item in the local tree is in the other tree, and its state
+     *    is different in the local and the other tree, the state
+     *    is copied from the other tree to the local tree.
+     *    Also, if the item is disabled in the user config tree, it is
+     *    marked as "disabled" in the local tree.
+     *
+     * @param other the configuration tree to align state with.
+     * @param user_config the user configuration tree to reference during
+     * the alignment.
+     * @return modified configuration structure.
+     */
+    IfTree& align_with_pulled_changes(const IfTree& other,
+				      const IfTree& user_config);
+
+    /**
+     * Align system-user merged configuration with the observed changes
+     * in the system configuration.
+     *
+     * Inside the FEA there may be multiple configuration representations,
+     * typically one the user modifies, one that mirrors the hardware,
+     * and one that merges those two (e.g., some of the merged information
+     * comes from the user configuration while other might come
+     * from the underlying system).
+     * On certain systems there could be asynchronous updates originated
+     * by the system that are captured by the FEA interface observer
+     * (e.g., a cable is unplugged, a tunnel interface is added/deleted, etc).
+     *
+     * This method is used to align those updates with the merged
+     * configuration.
+     *
+     * 1. If an interface in the other tree is not in the local tree, it is
+     *    tested whether is in the user configuration tree. If not, the
+     *    rest of the processing is not applied and the interface is ignored.
+     *    Otherwise it is created, its state is merged from the user config
+     *    and other tree, and is marked as "CREATED".
+     * 2. If an interface in the local tree is marked as "soft", its
+     *    state is not modified and the rest of the processing is ignored.
+     * 3. If an interface in the local tree is marked as
+     *    "default_system_config", the rest of the processing is not
+     *    applied, and its state (and the subtree below it) is copied
+     *    as-is from the other tree.
+     * 4. If an item in the other tree is not in the local tree, it is
+     *    tested whether is in the user configuration tree. If not, the
+     *    rest of the processing is not applied and the item is ignored.
+     *    Otherwise it is created, its state is merged from the user config
+     *    and the other tree, and is marked as "CREATED".
+     * 5. If an item in the other tree is marked as:
+     *    (a) "NO_CHANGE": The state of the entry in the other tree is not
+     *        propagated to the local tree, but its subtree entries are
+     *        processed.
+     *    (b) "DELETED": The item in the local tree is disabled, and the
+     *        subtree entries are ignored.
+     *    (c) "CREATED" or "CHANGED": If the state of the entry is different
+     *        in the other and the local tree, it is copied to the local tree,
+     *        and the item in the local tree is marked as "CREATED" or
+     *        "CHANGED".
+     *        unless it was marked earlier as "CREATED".
+     *        Also, if the item in the local tree is not "enabled", then
      *        the state is still marked as not "enabled".
+     *
+     * @param other the configuration tree to align state with.
+     * @param user_config the user configuration tree to reference during
+     * the alignment.
+     * @return modified configuration structure.
+     */
+    IfTree& align_with_observed_changes(const IfTree& other,
+					const IfTree& user_config);
+
+    /**
+     * Align system-user merged configuration with the user configuration
+     * changes.
+     *
+     * Inside the FEA there may be multiple configuration representations,
+     * typically one the user modifies, one that mirrors the hardware,
+     * and one that merges those two (e.g., some of the merged information
+     * comes from the user configuration while other might come
+     * from the underlying system).
+     *
+     * This method is used to align the user configuration changes with the
+     * merged configuration.
+     *
+     * The alignment works as follows:
+     * 1. If an item in the other tree is not in the local tree, it is
+     *    created in the local tree and its state (and the subtree below it)
+     *    is copied as-is from the other tree, and the rest of the processing
+     *    is ignored.
+     * 2. If an item in the other tree is marked as:
+     *    (a) "NO_CHANGE": The state of the entry in the other tree is not
+     *        propagated to the local tree, but its subtree entries are
+     *        processed.
+     *    (b) "DELETED": The item in the local tree is marked as "DELETED",
+     *        and the subtree entries are ignored.
+     *    (c) "CREATED" or "CHANGED": If the state of the entry is different
+     *        in the other and the local tree, it is copied to the local tree,
+     *        and the item in the local tree is marked as "CHANGED".
      *
      * @param other the configuration tree to align state with.
      * @return modified configuration structure.
      */
-    IfTree& align_with(const IfTree& other);
+    IfTree& align_with_user_config(const IfTree& other);
 
     /**
      * Prepare configuration for pushing and replacing previous configuration.
@@ -475,24 +570,6 @@ public:
     void set_default_system_config(bool v) { _default_system_config = v; mark(CHANGED); }
 
     /**
-     * Get the flipped flag.
-     *
-     * This flag indicates the interface's enable/disable status
-     * has been flipped (i.e., first disabled, and then enabled).
-     *
-     * @return true if the interface has been flipped, otherwise false.
-     */
-    bool flipped() const		{ return _flipped; }
-
-    /**
-     * Set the value of the flipped flag.
-     *
-     * @param v if true, then the flipped flag is enabled, otherwise is
-     * disabled.
-     */
-    void set_flipped(bool v)		{ _flipped = v; mark(CHANGED); }
-
-    /**
      * Get the system-specific interface flags.
      *
      * Typically, this value is read from the underlying system, and is
@@ -522,8 +599,10 @@ public:
      * Add recursively a new vif.
      *
      * @param other_vif the vif to add recursively.
+     * @param mark_state if true, then mark the state same as the state
+     * from the other vif, otherwise the state will be CREATED.
      */
-    void add_recursive_vif(const IfTreeVif& other_vif);
+    void add_recursive_vif(const IfTreeVif& other_vif, bool mark_state);
 
     /**
      * Create a new vif.
@@ -634,7 +713,6 @@ public:
 	set_mtu(o.mtu());
 	set_mac(o.mac());
 	set_no_carrier(o.no_carrier());
-	set_flipped(o.flipped());
 	set_interface_flags(o.interface_flags());
 
 	if (copy_user_config) {
@@ -663,7 +741,6 @@ public:
 		&& (mtu() == o.mtu())
 		&& (mac() == o.mac())
 		&& (no_carrier() == o.no_carrier())
-		&& (flipped() == o.flipped())
 		&& (interface_flags() == o.interface_flags()));
     }
 
@@ -686,7 +763,6 @@ private:
     uint32_t 	_mtu;
     Mac 	_mac;
     bool	_no_carrier;
-    bool	_flipped;	// If true, interface -> down, then -> up
     uint32_t	_interface_flags;	// The system-specific interface flags
     VifMap	_vifs;
 };
@@ -775,15 +851,19 @@ public:
      * Add recursively a new IPv4 address.
      *
      * @param other_addr the address to add recursively.
+     * @param mark_state if true, then mark the state same as the state
+     * from the other address, otherwise the state will be CREATED.
      */
-    void add_recursive_addr(const IfTreeAddr4& other_addr);
+    void add_recursive_addr(const IfTreeAddr4& other_addr, bool mark_state);
 
     /**
      * Add recursively a new IPv6 address.
      *
      * @param other_addr the address to add recursively.
+     * @param mark_state if true, then mark the state same as the state
+     * from the other address, otherwise the state will be CREATED.
      */
-    void add_recursive_addr(const IfTreeAddr6& other_addr);
+    void add_recursive_addr(const IfTreeAddr6& other_addr, bool mark_state);
 
     /**
      * Add IPv4 address.

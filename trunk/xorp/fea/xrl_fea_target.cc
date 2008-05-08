@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.42 2008/04/27 23:08:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.43 2008/05/05 21:02:01 pavlin Exp $"
 
 
 //
@@ -1220,7 +1220,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_names(
     // Output values,
     XrlAtomList&	ifnames)
 {
-    const IfTree& iftree = _ifconfig.local_config();
+    const IfTree& iftree = _ifconfig.merged_config();
 
     for (IfTree::IfMap::const_iterator ii = iftree.interfaces().begin();
 	 ii != iftree.interfaces().end(); ++ii) {
@@ -1239,7 +1239,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_names(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1268,7 +1268,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_flags(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = _ifconfig.local_config().find_vif(ifname, vifname);
+    vifp = _ifconfig.merged_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
 			     ifname.c_str(), vifname.c_str());
@@ -1295,7 +1295,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_pif_index(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = _ifconfig.local_config().find_vif(ifname, vifname);
+    vifp = _ifconfig.merged_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
 			     ifname.c_str(), vifname.c_str());
@@ -1317,7 +1317,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_enabled(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1338,7 +1338,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_discard(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1359,7 +1359,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_unreachable(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1380,7 +1380,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_interface_management(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1400,7 +1400,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mac(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1420,7 +1420,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1440,7 +1440,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_no_carrier(
     const IfTreeInterface* ifp = NULL;
     string error_msg;
 
-    ifp = _ifconfig.local_config().find_interface(ifname);
+    ifp = _ifconfig.merged_config().find_interface(ifname);
     if (ifp == NULL) {
 	error_msg = c_format("Interface %s not found", ifname.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -1462,7 +1462,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_enabled(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = _ifconfig.local_config().find_vif(ifname, vifname);
+    vifp = _ifconfig.merged_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
 			     ifname.c_str(), vifname.c_str());
@@ -1486,7 +1486,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1511,7 +1511,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_broadcast4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1543,7 +1543,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1575,7 +1575,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses4(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = _ifconfig.local_config().find_vif(ifname, vifname);
+    vifp = _ifconfig.merged_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
 			     ifname.c_str(), vifname.c_str());
@@ -1602,7 +1602,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_prefix6(
     const IfTreeAddr6* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1627,7 +1627,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_endpoint6(
     const IfTreeAddr6* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1659,7 +1659,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_vif_addresses6(
     const IfTreeVif* vifp = NULL;
     string error_msg;
 
-    vifp = _ifconfig.local_config().find_vif(ifname, vifname);
+    vifp = _ifconfig.merged_config().find_vif(ifname, vifname);
     if (vifp == NULL) {
 	error_msg = c_format("Interface %s vif %s not found",
 			     ifname.c_str(), vifname.c_str());
@@ -1690,7 +1690,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1722,7 +1722,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_flags6(
     const IfTreeAddr6* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1749,7 +1749,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled4(
     const IfTreeAddr4* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),
@@ -1773,7 +1773,7 @@ XrlFeaTarget::ifmgr_0_1_get_configured_address_enabled6(
     const IfTreeAddr6* ap = NULL;
     string error_msg;
 
-    ap = _ifconfig.local_config().find_addr(ifname, vifname, address);
+    ap = _ifconfig.merged_config().find_addr(ifname, vifname, address);
     if (ap == NULL) {
 	error_msg = c_format("Interface %s vif %s address %s not found",
 			     ifname.c_str(), vifname.c_str(),

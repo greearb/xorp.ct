@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.12 2007/12/28 09:13:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_netlink_socket.cc,v 1.13 2008/01/04 03:16:01 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -210,7 +210,7 @@ FibConfigTableGetNetlinkSocket::get_table(int family, list<FteX>& fte_list)
     }
     // XXX: reset the multipart message read hackish flag
     ns.set_multipart_message_read(false);
-    if (parse_buffer_netlink_socket(family, fibconfig().live_config_iftree(),
+    if (parse_buffer_netlink_socket(family, fibconfig().system_config_iftree(),
 				    fte_list, _ns_reader.buffer(), true)
 	!= XORP_OK) {
 	return (XORP_ERROR);

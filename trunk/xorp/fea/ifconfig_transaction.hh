@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.18 2008/04/11 18:38:08 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_transaction.hh,v 1.19 2008/05/05 21:02:01 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_TRANSACTION_HH__
 #define __FEA_IFCONFIG_TRANSACTION_HH__
@@ -85,7 +85,7 @@ class IfConfigTransactionOperation : public TransactionOperation {
 public:
     IfConfigTransactionOperation(IfConfig& ifconfig, const string& ifname)
 	: _ifconfig(ifconfig),
-	  _iftree(ifconfig.local_config()),	// XXX: The iftree to modify
+	  _iftree(ifconfig.user_config()),	// XXX: The iftree to modify
 	  _ifname(ifname) {}
 
     /**
@@ -173,7 +173,7 @@ public:
 	    //
 	    // Configure all interfaces
 	    //
-	    const IfTree& dev_config = ifconfig().pulled_config();
+	    const IfTree& dev_config = ifconfig().system_config();
 	    IfTree::IfMap::const_iterator iter;
 	    for (iter = dev_config.interfaces().begin();
 		 iter != dev_config.interfaces().end();

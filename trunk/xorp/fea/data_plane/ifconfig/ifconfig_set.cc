@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.20 2008/03/09 00:21:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set.cc,v 1.21 2008/05/01 03:30:04 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -91,7 +91,7 @@ IfConfigSet::push_config(IfTree& iftree)
     IfTreeInterface::VifMap::iterator vi;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
-    const IfTree& pulled_iftree = ifconfig().pulled_config();
+    const IfTree& system_iftree = ifconfig().system_config();
 
     // Clear errors associated with error reporter
     error_reporter.reset();
@@ -133,7 +133,7 @@ IfConfigSet::push_config(IfTree& iftree)
 	//
 	// Check that the interface is recognized by the system
 	//
-	if (pulled_iftree.find_interface(config_iface.ifname()) == NULL) {
+	if (system_iftree.find_interface(config_iface.ifname()) == NULL) {
 	    if (config_iface.state() == IfTreeItem::DELETED) {
 		// XXX: ignore deleted interfaces that are not recognized
 		continue;
@@ -217,9 +217,9 @@ IfConfigSet::push_config(IfTree& iftree)
 	 ii != iftree.interfaces().end();
 	 ++ii) {
 	IfTreeInterface& config_iface = *(ii->second);
-	const IfTreeInterface* pulled_ifp = NULL;
+	const IfTreeInterface* system_ifp = NULL;
 
-	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
+	system_ifp = system_iftree.find_interface(config_iface.ifname());
 
 	//
 	// Skip interfaces that should never be pushed:
@@ -235,12 +235,12 @@ IfConfigSet::push_config(IfTree& iftree)
 	     vi != config_iface.vifs().end();
 	     ++vi) {
 	    IfTreeVif& config_vif = *(vi->second);
-	    const IfTreeVif* pulled_vifp = NULL;
+	    const IfTreeVif* system_vifp = NULL;
 
-	    if (pulled_ifp != NULL)
-		pulled_vifp = pulled_ifp->find_vif(config_vif.vifname());
+	    if (system_ifp != NULL)
+		system_vifp = system_ifp->find_vif(config_vif.vifname());
 
-	    push_vif_creation(pulled_ifp, pulled_vifp, config_iface,
+	    push_vif_creation(system_ifp, system_vifp, config_iface,
 			      config_vif);
 	}
     }
@@ -258,9 +258,9 @@ IfConfigSet::push_config(IfTree& iftree)
 	 ii != iftree.interfaces().end();
 	 ++ii) {
 	IfTreeInterface& config_iface = *(ii->second);
-	const IfTreeInterface* pulled_ifp = NULL;
+	const IfTreeInterface* system_ifp = NULL;
 
-	pulled_ifp = pulled_iftree.find_interface(config_iface.ifname());
+	system_ifp = system_iftree.find_interface(config_iface.ifname());
 
 	//
 	// Skip interfaces that should never be pushed:
@@ -272,24 +272,24 @@ IfConfigSet::push_config(IfTree& iftree)
 	if (config_iface.default_system_config())
 	    continue;
 
-	if ((pulled_ifp == NULL)
+	if ((system_ifp == NULL)
 	    && (config_iface.state() == IfTreeItem::DELETED)) {
 	    // XXX: ignore deleted interfaces that are not recognized
 	    continue;
 	}
 
-	push_interface_begin(pulled_ifp, config_iface);
+	push_interface_begin(system_ifp, config_iface);
 
 	for (vi = config_iface.vifs().begin();
 	     vi != config_iface.vifs().end();
 	     ++vi) {
 	    IfTreeVif& config_vif = *(vi->second);
-	    const IfTreeVif* pulled_vifp = NULL;
+	    const IfTreeVif* system_vifp = NULL;
 
-	    if (pulled_ifp != NULL)
-		pulled_vifp = pulled_ifp->find_vif(config_vif.vifname());
+	    if (system_ifp != NULL)
+		system_vifp = system_ifp->find_vif(config_vif.vifname());
 
-	    push_vif_begin(pulled_ifp, pulled_vifp, config_iface, config_vif);
+	    push_vif_begin(system_ifp, system_vifp, config_iface, config_vif);
 
 	    //
 	    // Push the IPv4 addresses
@@ -299,12 +299,12 @@ IfConfigSet::push_config(IfTree& iftree)
 		 a4i != config_vif.ipv4addrs().end();
 		 ++a4i) {
 		IfTreeAddr4& config_addr = *(a4i->second);
-		const IfTreeAddr4* pulled_addrp = NULL;
+		const IfTreeAddr4* system_addrp = NULL;
 
-		if (pulled_vifp != NULL)
-		    pulled_addrp = pulled_vifp->find_addr(config_addr.addr());
+		if (system_vifp != NULL)
+		    system_addrp = system_vifp->find_addr(config_addr.addr());
 
-		push_vif_address(pulled_ifp, pulled_vifp, pulled_addrp,
+		push_vif_address(system_ifp, system_vifp, system_addrp,
 				 config_iface, config_vif, config_addr);
 	    }
 
@@ -317,20 +317,20 @@ IfConfigSet::push_config(IfTree& iftree)
 		 a6i != config_vif.ipv6addrs().end();
 		 ++a6i) {
 		IfTreeAddr6& config_addr = *(a6i->second);
-		const IfTreeAddr6* pulled_addrp = NULL;
+		const IfTreeAddr6* system_addrp = NULL;
 
-		if (pulled_vifp != NULL)
-		    pulled_addrp = pulled_vifp->find_addr(config_addr.addr());
+		if (system_vifp != NULL)
+		    system_addrp = system_vifp->find_addr(config_addr.addr());
 
-		push_vif_address(pulled_ifp, pulled_vifp, pulled_addrp,
+		push_vif_address(system_ifp, system_vifp, system_addrp,
 				 config_iface, config_vif, config_addr);
 	    }
 #endif // HAVE_IPV6
 
-	    push_vif_end(pulled_ifp, pulled_vifp, config_iface, config_vif);
+	    push_vif_end(system_ifp, system_vifp, config_iface, config_vif);
 	}
 
-	push_interface_end(pulled_ifp, config_iface);
+	push_interface_end(system_ifp, config_iface);
     }
 
     push_iftree_end(iftree);
@@ -390,28 +390,25 @@ IfConfigSet::push_iftree_end(IfTree& iftree)
 }
 
 void
-IfConfigSet::push_interface_begin(const IfTreeInterface*	pulled_ifp,
+IfConfigSet::push_interface_begin(const IfTreeInterface*	system_ifp,
 				  IfTreeInterface&		config_iface)
 {
     string error_msg;
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
 
-    // Reset the flip flag for this interface
-    config_iface.set_flipped(false);
-
-    if ((pulled_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
+    if ((system_ifp == NULL) && config_iface.is_marked(IfTreeItem::DELETED)) {
 	// Nothing to do: the interface has been deleted from the system
 	return;
     }
 
-    // Copy some of the state from the pulled configuration
-    copy_interface_state(pulled_ifp, config_iface);
+    // Copy some of the state from the system configuration
+    copy_interface_state(system_ifp, config_iface);
 
     //
     // Begin the interface configuration
     //
-    if (config_interface_begin(pulled_ifp, config_iface, error_msg)
+    if (config_interface_begin(system_ifp, config_iface, error_msg)
 	!= XORP_OK) {
 	error_msg = c_format("Failed to begin interface configuration: %s",
 			     error_msg.c_str());
@@ -425,7 +422,7 @@ IfConfigSet::push_interface_begin(const IfTreeInterface*	pulled_ifp,
 }
 
 void
-IfConfigSet::push_interface_end(const IfTreeInterface*	pulled_ifp,
+IfConfigSet::push_interface_end(const IfTreeInterface*	system_ifp,
 				IfTreeInterface&	config_iface)
 {
     string error_msg;
@@ -435,7 +432,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface*	pulled_ifp,
     //
     // End the interface configuration
     //
-    if (config_interface_end(pulled_ifp, config_iface, error_msg)
+    if (config_interface_end(system_ifp, config_iface, error_msg)
 	!= XORP_OK) {
 	error_msg = c_format("Failed to end interface configuration: %s",
 			     error_msg.c_str());
@@ -449,8 +446,8 @@ IfConfigSet::push_interface_end(const IfTreeInterface*	pulled_ifp,
 }
 
 void
-IfConfigSet::push_vif_creation(const IfTreeInterface*	pulled_ifp,
-			       const IfTreeVif*		pulled_vifp,
+IfConfigSet::push_vif_creation(const IfTreeInterface*	system_ifp,
+			       const IfTreeVif*		system_vifp,
 			       IfTreeInterface&		config_iface,
 			       IfTreeVif&		config_vif)
 {
@@ -458,14 +455,14 @@ IfConfigSet::push_vif_creation(const IfTreeInterface*	pulled_ifp,
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
 
-    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+    if ((system_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
 	// Nothing to do: the vif has been deleted from the system
 	return;
     }
 
-    // Copy some of the state from the pulled configuration
-    copy_interface_state(pulled_ifp, config_iface);
-    copy_vif_state(pulled_vifp, config_vif);
+    // Copy some of the state from the system configuration
+    copy_interface_state(system_ifp, config_iface);
+    copy_vif_state(system_vifp, config_vif);
 
     //
     // Configure VLAN vif
@@ -494,8 +491,8 @@ IfConfigSet::push_vif_creation(const IfTreeInterface*	pulled_ifp,
 	    //
 	    // Add/update the VLAN
 	    //
-	    if (ifconfig_vlan_set->config_add_vlan(pulled_ifp,
-						   pulled_vifp,
+	    if (ifconfig_vlan_set->config_add_vlan(system_ifp,
+						   system_vifp,
 						   config_iface,
 						   config_vif,
 						   error_msg)
@@ -510,8 +507,8 @@ IfConfigSet::push_vif_creation(const IfTreeInterface*	pulled_ifp,
 	    //
 	    // Delete the VLAN
 	    //
-	    if (ifconfig_vlan_set->config_delete_vlan(pulled_ifp,
-						      pulled_vifp,
+	    if (ifconfig_vlan_set->config_delete_vlan(system_ifp,
+						      system_vifp,
 						      config_iface,
 						      config_vif,
 						      error_msg)
@@ -536,8 +533,8 @@ done:
 }
 
 void
-IfConfigSet::push_vif_begin(const IfTreeInterface*	pulled_ifp,
-			    const IfTreeVif*		pulled_vifp,
+IfConfigSet::push_vif_begin(const IfTreeInterface*	system_ifp,
+			    const IfTreeVif*		system_vifp,
 			    IfTreeInterface&		config_iface,
 			    IfTreeVif&			config_vif)
 {
@@ -545,19 +542,19 @@ IfConfigSet::push_vif_begin(const IfTreeInterface*	pulled_ifp,
     IfConfigErrorReporterBase& error_reporter =
 	ifconfig().ifconfig_error_reporter();
 
-    if ((pulled_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
+    if ((system_vifp == NULL) && config_vif.is_marked(IfTreeItem::DELETED)) {
 	// Nothing to do: the vif has been deleted from the system
 	return;
     }
 
-    // Copy some of the state from the pulled configuration
-    copy_interface_state(pulled_ifp, config_iface);
-    copy_vif_state(pulled_vifp, config_vif);
+    // Copy some of the state from the system configuration
+    copy_interface_state(system_ifp, config_iface);
+    copy_vif_state(system_vifp, config_vif);
 
     //
     // Begin the vif configuration
     //
-    if (config_vif_begin(pulled_ifp, pulled_vifp, config_iface, config_vif,
+    if (config_vif_begin(system_ifp, system_vifp, config_iface, config_vif,
 			 error_msg)
 	!= XORP_OK) {
 	error_msg = c_format("Failed to begin vif configuration: %s",
@@ -573,8 +570,8 @@ IfConfigSet::push_vif_begin(const IfTreeInterface*	pulled_ifp,
 }
 
 void
-IfConfigSet::push_vif_end(const IfTreeInterface*	pulled_ifp,
-			  const IfTreeVif*		pulled_vifp,
+IfConfigSet::push_vif_end(const IfTreeInterface*	system_ifp,
+			  const IfTreeVif*		system_vifp,
 			  IfTreeInterface&		config_iface,
 			  IfTreeVif&			config_vif)
 {
@@ -585,7 +582,7 @@ IfConfigSet::push_vif_end(const IfTreeInterface*	pulled_ifp,
     //
     // End the vif configuration
     //
-    if (config_vif_end(pulled_ifp, pulled_vifp, config_iface, config_vif,
+    if (config_vif_end(system_ifp, system_vifp, config_iface, config_vif,
 		       error_msg) != XORP_OK) {
 	error_msg = c_format("Failed to end vif configuration: %s",
 			     error_msg.c_str());
@@ -600,9 +597,9 @@ IfConfigSet::push_vif_end(const IfTreeInterface*	pulled_ifp,
 }
 
 void
-IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
-			      const IfTreeVif*		pulled_vifp,
-			      const IfTreeAddr4*	pulled_addrp,
+IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
+			      const IfTreeVif*		system_vifp,
+			      const IfTreeAddr4*	system_addrp,
 			      IfTreeInterface&		config_iface,
 			      IfTreeVif&		config_vif,
 			      IfTreeAddr4&		config_addr)
@@ -628,8 +625,8 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
     // Note that we recompute it only if the underlying vif is
     // broadcast-capable.
     //
-    if ((pulled_vifp != NULL)
-	&& pulled_vifp->broadcast()
+    if ((system_vifp != NULL)
+	&& system_vifp->broadcast()
 	&& (config_addr.prefix_len() > 0)
 	&& (! (config_addr.broadcast() || config_addr.point_to_point()))) {
 	IPv4 mask = IPv4::make_prefix(config_addr.prefix_len());
@@ -645,7 +642,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
 	//
 	// Add/update the address
 	//
-	if (config_add_address(pulled_ifp, pulled_vifp, pulled_addrp,
+	if (config_add_address(system_ifp, system_vifp, system_addrp,
 			       config_iface, config_vif, config_addr,
 			       error_msg)
 	    != XORP_OK) {
@@ -656,9 +653,9 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
 	//
 	// Delete the address
 	//
-	if (pulled_addrp == NULL)
+	if (system_addrp == NULL)
 	    return;		// XXX: nothing to delete
-	if (config_delete_address(pulled_ifp, pulled_vifp, pulled_addrp,
+	if (config_delete_address(system_ifp, system_vifp, system_addrp,
 				  config_iface, config_vif, config_addr,
 				  error_msg)
 	    != XORP_OK) {
@@ -680,9 +677,9 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
 
 #ifdef HAVE_IPV6
 void
-IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
-			      const IfTreeVif*		pulled_vifp,
-			      const IfTreeAddr6*	pulled_addrp,
+IfConfigSet::push_vif_address(const IfTreeInterface*	system_ifp,
+			      const IfTreeVif*		system_vifp,
+			      const IfTreeAddr6*	system_addrp,
 			      IfTreeInterface&		config_iface,
 			      IfTreeVif&		config_vif,
 			      IfTreeAddr6&		config_addr)
@@ -717,7 +714,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
 	//
 	// Add/update the address
 	//
-	if (config_add_address(pulled_ifp, pulled_vifp, pulled_addrp,
+	if (config_add_address(system_ifp, system_vifp, system_addrp,
 			       config_iface, config_vif, config_addr,
 			       error_msg)
 	    != XORP_OK) {
@@ -728,9 +725,9 @@ IfConfigSet::push_vif_address(const IfTreeInterface*	pulled_ifp,
 	//
 	// Delete the address
 	//
-	if (pulled_addrp == NULL)
+	if (system_addrp == NULL)
 	    return;		// XXX: nothing to delete
-	if (config_delete_address(pulled_ifp, pulled_vifp, pulled_addrp,
+	if (config_delete_address(system_ifp, system_vifp, system_addrp,
 				  config_iface, config_vif, config_addr,
 				  error_msg)
 	    != XORP_OK) {

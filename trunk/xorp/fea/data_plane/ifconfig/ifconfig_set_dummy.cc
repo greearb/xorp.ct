@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.cc,v 1.15 2007/12/30 09:15:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.cc,v 1.16 2008/01/04 03:16:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -80,7 +80,7 @@ IfConfigSetDummy::stop(string& error_msg)
 int
 IfConfigSetDummy::push_config(IfTree& iftree)
 {
-    ifconfig().set_live_config(iftree);
+    ifconfig().set_system_config(iftree);
 
     return (XORP_OK);
 }

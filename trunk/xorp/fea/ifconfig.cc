@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.81 2008/01/04 03:15:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.82 2008/03/09 00:21:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -62,7 +62,7 @@ IfConfig::IfConfig(FeaNode& fea_node)
       _nexthop_port_mapper(fea_node.nexthop_port_mapper()),
       _itm(NULL),
       _restore_original_config_on_shutdown(false),
-      _ifconfig_update_replicator(_local_config),
+      _ifconfig_update_replicator(merged_config()),
       _is_running(false)
 {
     _itm = new IfConfigTransactionManager(_eventloop);
@@ -144,13 +144,14 @@ IfConfig::add_transaction_operation(uint32_t tid,
 int
 IfConfig::commit_transaction(uint32_t tid, string& error_msg)
 {
-    bool is_error = false;
+    IfTree old_user_config = user_config();	// Copy to restore config
+    IfTree old_merged_config = merged_config(); // Copy to compare changes
 
     //
-    // XXX: Pull in advance the current config, in case it is needed
+    // XXX: Pull in advance the current system config, in case it is needed
     // by some of the transaction operations.
     //
-    pull_config();
+    IfTree old_system_config = pull_config();
 
     if (_itm->commit(tid) != true) {
 	error_msg = c_format("Expired or invalid transaction ID presented");
@@ -163,76 +164,87 @@ IfConfig::commit_transaction(uint32_t tid, string& error_msg)
     }
 
     //
-    // If we get here we have updated the local copy of the config
-    // successfully.
+    // If we get here we have successfully updated the local copy of the config
     //
-
-    //
-    // Push the configuration
-    //
-    do {
-	if (push_config(local_config()) == XORP_OK)
-	    break;		// Success
-
-	error_msg = push_error();
-	is_error = true;
-
-	// Reverse-back to the previously working configuration
-	IfTree restore_config = old_local_config();
-	restore_config.prepare_replacement_state(pull_config());
-	set_local_config(restore_config);
-	if (push_config(local_config()) == XORP_OK)
-	    break;		// Continue with finalizing the reverse-back
-
-	// Failed to reverse back
-	string tmp_error_msg = push_error();
-	tmp_error_msg = c_format("[Also, failed to reverse-back to the "
-				 "previous config: %s]",
-				 tmp_error_msg.c_str());
-	error_msg = error_msg + " " + tmp_error_msg;
-	break;
-    } while (false);
-
-    //
-    // Pull the new device configuration
-    //
-    const IfTree& dev_config = pull_config();
-    debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
-    debug_msg("LOCAL CONFIG %s\n", local_config().str().c_str());
-
-    //
-    // Align with device configuration, so that any stuff that failed
-    // in push is not held over in config.
-    //
-    local_config().align_with(dev_config);
-    debug_msg("LOCAL CONFIG AFTER ALIGN %s\n", local_config().str().c_str());
 
     //
     // Prune deleted state that was never added earlier
     //
-    local_config().prune_bogus_deleted_state(old_local_config());
+    user_config().prune_bogus_deleted_state(old_user_config);
 
     //
-    // Propagate the configuration changes to all listeners.
+    // Push the configuration
     //
-    if (! is_error)
-	report_updates(local_config());
+    merged_config().align_with_user_config(user_config());
+    if (push_config(merged_config()) != XORP_OK) {
+	string error_msg2;
+	error_msg = push_error();
+
+	// Reverse-back to the previously working configuration
+	if (restore_config(old_user_config, old_system_config,
+			   error_msg2) != XORP_OK) {
+	    // Failed to reverse back
+	    error_msg = c_format("%s [Also, failed to reverse-back to the "
+				 "previous config: %s]",
+				 error_msg.c_str(), error_msg2.c_str());
+	}
+
+	return (XORP_ERROR);
+    }
+
+    //
+    // Pull the new device configuration
+    //
+    pull_config();
+    debug_msg("SYSTEM CONFIG %s\n", system_config().str().c_str());
+    debug_msg("USER CONFIG %s\n", user_config().str().c_str());
+    debug_msg("MERGED CONFIG %s\n", merged_config().str().c_str());
+
+    //
+    // Align with system configuration, so that any stuff that failed
+    // in push is not held over in merged config.
+    //
+    merged_config().align_with_pulled_changes(system_config(), user_config());
+    debug_msg("MERGED CONFIG AFTER ALIGN %s\n", merged_config().str().c_str());
+
+    //
+    // Propagate the configuration changes to all listeners
+    //
+    report_updates(merged_config());
 
     //
     // Flush-out config state
     //
-    local_config().finalize_state();
+    user_config().finalize_state();
+    merged_config().finalize_state();
 
-    //
-    // Save a backup copy of the configuration state
-    //
-    if (! is_error) {
-	set_old_local_config(local_config());
-	old_local_config().finalize_state();
+    return (XORP_OK);
+}
+
+int
+IfConfig::restore_config(const IfTree& old_user_config,
+			 const IfTree& old_system_config,
+			 string& error_msg)
+{
+    IfTree iftree = old_system_config;
+
+    // Restore the config
+    set_user_config(old_user_config);
+    set_merged_config(old_user_config);
+    pull_config();		// Get the current system config
+    iftree.prepare_replacement_state(system_config());
+
+    // Push the config
+    if (push_config(iftree) != XORP_OK) {
+	error_msg = push_error();
+	return (XORP_ERROR);
     }
 
-    if (is_error)
-	return (XORP_ERROR);
+    // Align the state
+    pull_config();
+    merged_config().align_with_pulled_changes(system_config(), user_config());
+    user_config().finalize_state();
+    merged_config().finalize_state();
 
     return (XORP_OK);
 }
@@ -317,7 +329,7 @@ IfConfig::register_ifconfig_set(IfConfigSet* ifconfig_set, bool is_exclusive)
 	// XXX: Push the current config into the new method
 	//
 	if (ifconfig_set->is_running())
-	    ifconfig_set->push_config(pushed_config());
+	    ifconfig_set->push_config(merged_config());
     }
 
     return (XORP_OK);
@@ -429,7 +441,7 @@ IfConfig::register_ifconfig_vlan_set(IfConfigVlanSet* ifconfig_vlan_set,
 	    FeaDataPlaneManager& m = ifconfig_vlan_set->fea_data_plane_manager();
 	    IfConfigSet* ifconfig_set = m.ifconfig_set();
 	    if (ifconfig_set->is_running())
-		ifconfig_set->push_config(pushed_config());
+		ifconfig_set->push_config(merged_config());
 	}
     }
 
@@ -555,20 +567,13 @@ IfConfig::start(string& error_msg)
 	    return (XORP_ERROR);
     }
 
-    _live_config = pull_config();
-    _live_config.finalize_state();
+    pull_config();
+    _system_config.finalize_state();
 
-    _original_config = _live_config;
+    _original_config = _system_config;
     _original_config.finalize_state();
 
-    //
-    // XXX: Start with the original system config in case the first
-    // configuration fails and tries to reverse to the old config.
-    //
-    _old_local_config = _original_config;
-    _old_local_config.finalize_state();
-
-    debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
+    debug_msg("Start configuration read: %s\n", _system_config.str().c_str());
     debug_msg("\nEnd configuration read.\n");
 
     _is_running = true;
@@ -597,11 +602,10 @@ IfConfig::stop(string& error_msg)
     // Restore the original config
     //
     if (restore_original_config_on_shutdown()) {
-	pull_config();
 	IfTree tmp_push_tree = _original_config;
-	tmp_push_tree.prepare_replacement_state(_pulled_config);
-	if (push_config(tmp_push_tree) != XORP_OK) {
-	    error_msg2 = push_error();
+	if (restore_config(tmp_push_tree, tmp_push_tree, error_msg2)
+	    != XORP_OK) {
+	    ret_value = XORP_ERROR;
 	    if (! error_msg.empty())
 		error_msg += " ";
 	    error_msg += error_msg2;
@@ -706,42 +710,27 @@ IfConfig::stop(string& error_msg)
 int
 IfConfig::push_config(IfTree& iftree)
 {
-    int ret_value = XORP_ERROR;
-    list<IfConfigSet*>::iterator ifconfig_set_iter;
+    list<IfConfigSet*>::const_iterator ifconfig_set_iter;
 
     if (_ifconfig_sets.empty())
-	goto ret_label;
-
-    //
-    // XXX: explicitly pull the current config so we can align
-    // the new config with the current config.
-    //
-    pull_config();
+	return (XORP_ERROR);		// XXX: No plugins
 
     for (ifconfig_set_iter = _ifconfig_sets.begin();
 	 ifconfig_set_iter != _ifconfig_sets.end();
 	 ++ifconfig_set_iter) {
 	IfConfigSet* ifconfig_set = *ifconfig_set_iter;
 	if (ifconfig_set->push_config(iftree) != XORP_OK)
-	    goto ret_label;
+	    return (XORP_ERROR);
     }
-    ret_value = XORP_OK;	// Success
 
- ret_label:
-    //
-    // Save a copy of the pushed config
-    //
-    if (ret_value == XORP_OK)
-	_pushed_config = iftree;
-
-    return ret_value;
+    return (XORP_OK);
 }
 
 const IfTree&
 IfConfig::pull_config()
 {
     // Clear the old state
-    _pulled_config.clear();
+    _system_config.clear();
 
     //
     // XXX: We pull the configuration by using only the first method.
@@ -749,10 +738,10 @@ IfConfig::pull_config()
     //
     if (! _ifconfig_gets.empty()) {
 	IfConfigGet* ifconfig_get = _ifconfig_gets.front();
-	ifconfig_get->pull_config(_pulled_config);
+	ifconfig_get->pull_config(_system_config);
     }
 
-    return _pulled_config;
+    return _system_config;
 }
 
 bool
@@ -850,55 +839,6 @@ IfConfig::report_updates(IfTree& iftree)
 		updated |= report_update(interface, vif, addr);
 	    }
 	}
-    }
-    if (updated) {
-	// Complete the update
-	report_updates_completed();
-    }
-
-    //
-    // Walk again and flip the enable flag for the corresponding interfaces.
-    //
-    // First, disable all interfaces that were flipped, and are still enabled,
-    // and report the changes.
-    // Then, enable those interfaces and report again the changes.
-    // The main idea is to inform all interested parties about the fact
-    // that an interface was disabled and enabled internally during the
-    // process of writing the information to the kernel.
-    //
-    // Disable all flipped interfaces
-    updated = false;
-    for (IfTree::IfMap::iterator ii = iftree.interfaces().begin();
-	 ii != iftree.interfaces().end(); ++ii) {
-	IfTreeInterface& interface = *(ii->second);
-	if (! interface.flipped())
-	    continue;
-	if (! interface.enabled()) {
-	    interface.set_flipped(false);
-	    continue;
-	}
-	interface.set_enabled(false);
-	updated |= report_update(interface);
-    }
-    if (updated) {
-	// Complete the update
-	report_updates_completed();
-    }
-
-    // Enable all flipped interfaces
-    updated = false;
-    for (IfTree::IfMap::iterator ii = iftree.interfaces().begin();
-	 ii != iftree.interfaces().end(); ++ii) {
-	IfTreeInterface& interface = *(ii->second);
-
-	if (! interface.flipped())
-	    continue;
-	interface.set_flipped(false);
-	if (interface.enabled()) {
-	    continue;
-	}
-	interface.set_enabled(true);
-	updated |= report_update(interface);
     }
     if (updated) {
 	// Complete the update

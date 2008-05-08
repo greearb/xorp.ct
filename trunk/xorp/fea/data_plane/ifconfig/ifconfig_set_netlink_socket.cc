@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.18 2007/12/23 08:22:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.19 2008/01/04 03:16:10 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -232,7 +232,6 @@ IfConfigSetNetlinkSocket::config_interface_begin(
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
-	config_iface.set_flipped(true);
     }
 
     return (ret_value);
