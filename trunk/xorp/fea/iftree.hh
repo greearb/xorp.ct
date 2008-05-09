@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.63 2008/05/08 22:46:35 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.64 2008/05/09 00:28:17 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -933,6 +933,11 @@ public:
      * @return a pointer to the vif (@ref IfTreeAddr6) or NULL if not found.
      */
     const IfTreeAddr6* find_addr(const IPv6& addr) const;
+
+    /**
+     * Propagate vif flags to the addresses.
+     */
+    void propagate_flags_to_addresses();
 
     /**
      * Copy state of internal variables from another IfTreeVif.

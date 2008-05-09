@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.20 2008/01/04 03:16:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.21 2008/03/27 21:09:51 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -348,6 +348,8 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	    vifp->set_loopback(flags & IFF_LOOPBACK);
 	    vifp->set_point_to_point(flags & IFF_POINTOPOINT);
 	    vifp->set_multicast(flags & IFF_MULTICAST);
+	    // Propagate the flags to the existing addresses
+	    vifp->propagate_flags_to_addresses();
 	}
 	debug_msg("vif enabled: %s\n", bool_c_str(vifp->enabled()));
 	debug_msg("vif broadcast: %s\n", bool_c_str(vifp->broadcast()));
@@ -555,6 +557,8 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	vifp->set_loopback(flags & IFF_LOOPBACK);
 	vifp->set_point_to_point(flags & IFF_POINTOPOINT);
 	vifp->set_multicast(flags & IFF_MULTICAST);
+	// Propagate the flags to the existing addresses
+	vifp->propagate_flags_to_addresses();
     }
     debug_msg("vif enabled: %s\n", bool_c_str(vifp->enabled()));
     debug_msg("vif broadcast: %s\n", bool_c_str(vifp->broadcast()));

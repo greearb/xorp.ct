@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.60 2008/05/08 22:46:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.61 2008/05/09 00:28:17 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -2119,6 +2119,32 @@ IfTreeVif::find_addr(const IPv6& addr) const
 	return (NULL);
 
     return (iter->second);
+}
+
+void
+IfTreeVif::propagate_flags_to_addresses()
+{
+    //
+    // XXX: For now we propagate only the "enabled" flag, because
+    // the rest of the address flags are not useful and should be deleted
+    // in the future.
+    //
+
+    // Propagate the flags to the IPv4 addresses
+    IfTreeVif::IPv4Map::iterator iter4;
+    for (iter4 = _ipv4addrs.begin(); iter4 != _ipv4addrs.end(); ++iter4) {
+	IfTreeAddr4* ap = iter4->second;
+	if (enabled() != ap->enabled())
+	    ap->set_enabled(enabled());
+    }
+
+    // Propagate the flags to the IPv6 addresses
+    IfTreeVif::IPv6Map::iterator iter6;
+    for (iter6 = _ipv6addrs.begin(); iter6 != _ipv6addrs.end(); ++iter6) {
+	IfTreeAddr6* ap = iter6->second;
+	if (enabled() != ap->enabled())
+	    ap->set_enabled(enabled());
+    }
 }
 
 void
