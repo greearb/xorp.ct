@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.62 2008/03/09 00:21:16 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.63 2008/05/08 22:46:35 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -455,14 +455,14 @@ public:
      *    is copied as-is from the other tree, and the rest of the processing
      *    is ignored.
      * 2. If an item in the other tree is marked as:
-     *    (a) "NO_CHANGE": The state of the entry in the other tree is not
-     *        propagated to the local tree, but its subtree entries are
-     *        processed.
-     *    (b) "DELETED": The item in the local tree is marked as "DELETED",
+     *    (a) "DELETED": The item in the local tree is marked as "DELETED",
      *        and the subtree entries are ignored.
-     *    (c) "CREATED" or "CHANGED": If the state of the entry is different
-     *        in the other and the local tree, it is copied to the local tree,
-     *        and the item in the local tree is marked as "CHANGED".
+     *    (b) All other: If the state of the item is different in the other
+     *        and the local tree, it is copied to the local tree.
+     *        Note that we compare the state even for "NO_CHANGE" items in
+     *        case a previous change to a parent item in the merged tree
+     *        has affected the entry (e.g., disabled interface would
+     *        disable the vifs and addresses as well).
      *
      * @param other the configuration tree to align state with.
      * @return modified configuration structure.

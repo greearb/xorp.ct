@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.59 2008/03/09 00:21:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.60 2008/05/08 22:46:35 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1187,14 +1187,14 @@ IfTree::align_with_observed_changes(const IfTree& other,
  *    is copied as-is from the other tree, and the rest of the processing
  *    is ignored.
  * 2. If an item in the other tree is marked as:
- *    (a) "NO_CHANGE": The state of the entry in the other tree is not
- *        propagated to the local tree, but its subtree entries are
- *        processed.
- *    (b) "DELETED": The item in the local tree is marked as "DELETED",
+ *    (a) "DELETED": The item in the local tree is marked as "DELETED",
  *        and the subtree entries are ignored.
- *    (c) "CREATED" or "CHANGED": If the state of the entry is different
- *        in the other and the local tree, it is copied to the local tree,
- *        and the item in the local tree is marked as "CHANGED".
+ *    (b) All other: If the state of the item is different in the other
+ *        and the local tree, it is copied to the local tree.
+ *        Note that we compare the state even for "NO_CHANGE" items in
+ *        case a previous change to a parent item in the merged tree
+ *        has affected the entry (e.g., disabled interface would
+ *        disable the vifs and addresses as well).
  *
  * @param other the configuration tree to align state with.
  * @return modified configuration structure.
@@ -1229,17 +1229,10 @@ IfTree::align_with_user_config(const IfTree& other)
 	}
 
 	//
-	// Test for "CREATED" or "CHANGED" entries
+	// Copy state from the other entry
 	//
-	if (other_ifp->is_marked(CREATED) || other_ifp->is_marked(CHANGED)) {
-	    //
-	    // Copy state from the other entry
-	    //
-	    if (! this_ifp->is_same_state(*other_ifp)) {
-		this_ifp->copy_state(*other_ifp, false);
-		this_ifp->mark(CHANGED);
-	    }
-	}
+	if (! this_ifp->is_same_state(*other_ifp))
+	    this_ifp->copy_state(*other_ifp, false);
 
 	//
 	// Align the vif state
@@ -1268,18 +1261,10 @@ IfTree::align_with_user_config(const IfTree& other)
 	    }
 
 	    //
-	    // Test for "CREATED" or "CHANGED" entries
+	    // Copy state from the other entry
 	    //
-	    if (other_vifp->is_marked(CREATED)
-		|| other_vifp->is_marked(CHANGED)) {
-		//
-		// Copy state from the other entry
-		//
-		if (! this_vifp->is_same_state(*other_vifp)) {
-		    this_vifp->copy_state(*other_vifp);
-		    this_vifp->mark(CHANGED);
-		}
-	    }
+	    if (! this_vifp->is_same_state(*other_vifp))
+		this_vifp->copy_state(*other_vifp);
 
 	    //
 	    // Align the IPv4 address state
@@ -1308,18 +1293,10 @@ IfTree::align_with_user_config(const IfTree& other)
 		}
 
 		//
-		// Test for "CREATED" or "CHANGED" entries
+		// Copy state from the other entry
 		//
-		if (other_ap->is_marked(CREATED)
-		    || other_ap->is_marked(CHANGED)) {
-		    //
-		    // Copy state from the other entry
-		    //
-		    if (! this_ap->is_same_state(*other_ap)) {
-			this_ap->copy_state(*other_ap);
-			this_ap->mark(CHANGED);
-		    }
-		}
+		if (! this_ap->is_same_state(*other_ap))
+		    this_ap->copy_state(*other_ap);
 	    }
 
 	    //
@@ -1349,18 +1326,10 @@ IfTree::align_with_user_config(const IfTree& other)
 		}
 
 		//
-		// Test for "CREATED" or "CHANGED" entries
+		// Copy state from the other entry
 		//
-		if (other_ap->is_marked(CREATED)
-		    || other_ap->is_marked(CHANGED)) {
-		    //
-		    // Copy state from the other entry
-		    //
-		    if (! this_ap->is_same_state(*other_ap)) {
-			this_ap->copy_state(*other_ap);
-			this_ap->mark(CHANGED);
-		    }
-		}
+		if (! this_ap->is_same_state(*other_ap))
+		    this_ap->copy_state(*other_ap);
 	    }
 	}
     }
