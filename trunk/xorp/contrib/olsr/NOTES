@@ -18,6 +18,9 @@ considered a separate protocol when run for each address family.
 Platform issues
 ===============
 
+ * Broadcast-capable sockets are now created using a separate FEA
+   command. All platform-specific issues are now dealt with by the FEA.
+
  * XORP/OLSR currently depends upon the FEA's ability to determine
    the name of the interface where a datagram was received on this
    socket. This capability is known to work under FreeBSD and Linux.
@@ -26,11 +29,6 @@ Platform issues
    Specifically, the 'sockid' field is ignored by low level I/O in
    the OLSR routing process -- it can be used to map an FEA socket to
    an OLSR interface, however this mapping is not currently implemented.
-
- * Windows has had a new socket option to explicitly request the reception
-   of IPv4 broadcast traffic since Windows XP was released, named
-   IP_RECEIVE_BROADCAST. XORP does not currently support this option.
-   It is likely that this breaks XORP/OLSR on newer Windows releases.
 
 
 Protocol Simulator

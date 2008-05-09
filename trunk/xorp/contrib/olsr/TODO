@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/contrib/olsr/TODO,v 1.1 2008/04/24 15:19:51 bms Exp $
 #
 
 TODO
@@ -12,7 +12,11 @@ TODO
 * Teach XrlIO about socket IDs. Currently it relies on if_name and vif_name
   being set to sane values by the FEA, which is not guaranteed.
 
-* Teach XrlIO to set the Router Alert option in OLSR control packets.
+* Teach XrlPort about link-scope multicast sockets. Production deployments
+  of OLSR are potentially using 255.255.255.255 instead of a 224.0.0.0/24
+  MANET prefix. There are platform issues with undirected broadcasts; some
+  implementations of the BSD socket API, which are strictly conformant to it,
+  may not support IP broadcasts correctly.
 
 * Rewrite the code in XrlIO which tracks service startup to be more
   coherent; in particular we should track service dependencies in
@@ -24,7 +28,7 @@ TODO
 
 * Fix policy route filtering. Basic redistribution of everything OLSR
   learns into RIP is known to work, but finer tuning of policy redist
-  needs to be debugged.
+  needs wider exposure and testing.
 
 * ETX metric support.
 * Add jitter to message transmission.
