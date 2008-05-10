@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.3 2007/06/11 17:57:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.4 2008/01/04 03:16:07 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -97,7 +97,9 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 
 	switch (IFM_TYPE(ifmr.ifm_active)) {
 	case IFM_ETHER:
+#ifdef IFM_FDDI
 	case IFM_FDDI:
+#endif
 #ifdef IFM_TOKEN
 	case IFM_TOKEN:
 #endif
