@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/contrib/olsr/debug_io.cc,v 1.1 2008/04/24 15:19:51 bms Exp $"
 
 #include "olsr_module.h"
 
@@ -352,4 +352,15 @@ DebugIO::routing_table_verify(IPv4Net net, IPv4 nexthop, uint32_t metric)
     }
 
     return true;
+}
+
+void
+DebugIO::routing_table_dump(ostream& o)
+{
+    map<IPv4Net, DebugRouteEntry>::iterator ii;
+    for (ii = _routing_table.begin(); ii != _routing_table.end(); ++ii) {
+	DebugRouteEntry& dre = (*ii).second;
+	o << (*ii).first.str() << ": " << dre._nexthop.str() <<
+	     " " << dre._metric << endl;
+    }
 }

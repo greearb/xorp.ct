@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/contrib/olsr/test_simulator.cc,v 1.1 2008/04/24 15:19:55 bms Exp $"
 
 #include "olsr_module.h"
 
@@ -274,6 +274,14 @@ public:
      * @return true if ok, false if any error occurred.
      */
     bool select_node(const IPv4& main_addr);
+
+    /**
+     * Dump a node's routing table to cout.
+     *
+     * @param main_addr the address of the node to dump routes for.
+     * @return true if ok, false if any error occurred.
+     */
+    bool dump_routing_table(const IPv4& main_addr);
 
     /*
      * Neighborhood verification
@@ -1090,6 +1098,24 @@ Nodes::select_node(const IPv4& main_addr)
 }
 
 bool
+Nodes::dump_routing_table(const IPv4& main_addr)
+{
+    map<IPv4, NodeTuple>::iterator ii = _nodes.find(main_addr);
+    if (ii == _nodes.end()) {
+	return false;
+    }
+
+    NodeTuple& nat = (*ii).second;
+    DebugIO* io = nat.io();
+
+    cout << "{{{ Routing table at " << main_addr.str() << ":" << endl;
+    io->routing_table_dump(cout);
+    cout << "}}}" << endl;
+
+    return true;
+}
+
+bool
 Nodes::verify_all_link_state_empty()
 {
     bool all_empty = true;
@@ -1837,6 +1863,17 @@ Simulator::cmd(Args& args)
 	} else if ("exit" == word) {
 	    // CMD: exit
 	    return false;
+
+	} else if ("dump_routing_table" == word) {
+	    // CMD: dump_routing_table <main-addr>
+	    IPv4 main_addr = get_next_ipv4(args, "dump_routing_table");
+
+	    if (! nodes().dump_routing_table(main_addr)) {
+		xorp_throw(InvalidString,
+			   c_format("Failed to dump table for node <%s> [%s]",
+				    cstring(main_addr),
+				    args.original_line().c_str()));
+	    }
 
 	} else if ("add_link" == word) {
 	    // CMD: add_link <link-addr-l> <link-addr-r>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/contrib/olsr/debug_io.hh,v 1.1 2008/04/24 15:19:51 bms Exp $
 
 #ifndef __OLSR_DEBUG_IO_HH__
 #define __OLSR_DEBUG_IO_HH__
@@ -180,6 +180,12 @@ class DebugIO : public IO {
      * Verify that this route is in the routing table.
      */
     bool routing_table_verify(IPv4Net net, IPv4 nexthop, uint32_t metric);
+
+    /**
+     * Dump the routing table contents to the given ostream (not necessarily
+     * what's in the TestInfo).
+     */
+    void routing_table_dump(ostream& o);
 
   private:
     TestInfo&		_info;
