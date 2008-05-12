@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.8 2007/10/19 01:12:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.9 2008/01/04 03:16:14 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -542,7 +542,7 @@ IoLinkPcap::recv_data()
 	    return;			// Error
 	}
 
-	ether_header_p = (const struct ether_header *)packet;
+	ether_header_p = reinterpret_cast<const struct ether_header *>(packet);
 
 	// Extract the MAC source and destination address
 	memcpy(&ether_addr_src, ether_header_p->ether_shost,
