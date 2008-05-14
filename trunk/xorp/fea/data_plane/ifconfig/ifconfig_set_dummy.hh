@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.hh,v 1.11 2008/01/03 22:59:42 pavlin Exp $
+// $XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_dummy.hh,v 1.12 2008/01/04 03:16:10 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__
 #define __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__
@@ -50,6 +50,13 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int stop(string& error_msg);
+
+    /**
+     * Get a reference to the @ref IfTree instance.
+     *
+     * @return a reference to the @ref IfTree instance.
+     */
+    const IfTree& iftree() const { return _iftree; }
 
     /**
      * Push the network interface configuration into the underlying system.
@@ -274,6 +281,8 @@ private:
 				      const IfTreeVif& config_vif,
 				      const IfTreeAddr6& config_addr,
 				      string& error_msg);
+
+    IfTree		_iftree;		// The configured IfTree
 };
 
 #endif // __FEA_DATA_PLANE_IFCONFIG_IFCONFIG_SET_DUMMY_HH__

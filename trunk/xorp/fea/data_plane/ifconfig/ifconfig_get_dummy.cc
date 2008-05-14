@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_dummy.cc,v 1.10 2008/01/04 03:16:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_dummy.cc,v 1.11 2008/05/08 22:46:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -22,6 +22,7 @@
 
 #include "fea/ifconfig.hh"
 
+#include "ifconfig_set_dummy.hh"
 #include "ifconfig_get_dummy.hh"
 
 
@@ -78,7 +79,24 @@ IfConfigGetDummy::stop(string& error_msg)
 int
 IfConfigGetDummy::pull_config(IfTree& iftree)
 {
-    iftree = ifconfig().system_config();
+    //
+    // XXX: Get the tree from the IfConfigSetDummy instance.
+    //
+    IfConfigSet* ifconfig_set = fea_data_plane_manager().ifconfig_set();
+    if ((ifconfig_set == NULL) || (! ifconfig_set->is_running()))
+	return (XORP_ERROR);
+
+    IfConfigSetDummy* ifconfig_set_dummy;
+    ifconfig_set_dummy = dynamic_cast<IfConfigSetDummy*>(ifconfig_set);
+    if (ifconfig_set_dummy == NULL) {
+	//
+	// XXX: The IfConfigSet plugin was probably changed to something else
+	// which we don't know how to deal with.
+	//
+	return (XORP_ERROR);
+    }
+
+    iftree = ifconfig_set_dummy->iftree();
 
     return (XORP_OK);
 }
