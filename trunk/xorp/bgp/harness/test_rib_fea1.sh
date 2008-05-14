@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.17 2006/08/16 22:10:14 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.18 2007/12/10 23:26:33 mjh Exp $
 #
 
 #
@@ -204,6 +204,12 @@ configure_fea()
 
     $FEA_FUNCS set_prefix6 $tid $VIF0_IPV6 $VIF0_IPV6 $NH1_IPV6 24
     $FEA_FUNCS set_prefix6 $tid $VIF1_IPV6 $VIF1_IPV6 $NH2_IPV6 24
+
+    $FEA_FUNCS enable_address4 $tid $VIF0 $VIF0 $NH1
+    $FEA_FUNCS enable_address4 $tid $VIF1 $VIF1 $NH2
+
+    $FEA_FUNCS enable_address6 $tid $VIF0_IPV6 $VIF0_IPV6 $NH1_IPV6
+    $FEA_FUNCS enable_address6 $tid $VIF1_IPV6 $VIF1_IPV6 $NH2_IPV6
 
     $FEA_FUNCS commit_fea_transaction $tid
 }
