@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.8 2007/02/16 22:46:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.9 2008/01/04 03:16:38 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -31,7 +31,7 @@ Profile::Profile()
 
 inline
 void
-zap(const pair<string, ref_ptr<Profile::ProfileState> >& p)
+zap(pair<const string, ref_ptr<Profile::ProfileState> >& p)
 {
     p.second->zap();
 }
@@ -198,11 +198,11 @@ Profile::clear(const string& pname) throw(PVariableUnknown,PVariableLocked)
     i->second->logptr()->clear();
 }
 
-class List: public unary_function<pair<string, 
+class List: public unary_function<pair<const string, 
 				       ref_ptr<Profile::ProfileState> >,
 				  void> {
  public:
-    void operator()(const pair<string, ref_ptr<Profile::ProfileState> >& p) {
+    void operator()(const pair<const string, ref_ptr<Profile::ProfileState> >& p) {
 	_result += p.first;
 	_result += "\t";
 	_result += c_format("%d", p.second->size());
