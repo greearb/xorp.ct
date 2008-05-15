@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.15 2008/01/03 01:00:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.16 2008/01/04 03:16:40 pavlin Exp $"
 
 
 /*
@@ -45,6 +45,8 @@
  *	  with "unsigned int".
  */
 
+#include "config.h"
+
 /*
  * XXX: Linux's glibc2 and NetBSD need to define _XOPEN_SOURCE for strptime(3).
  *
@@ -55,7 +57,9 @@
  */
 #define _XOPEN_SOURCE	500
 #include <time.h>
+#ifdef HAVE_STRINGS_H
 #include <strings.h>
+#endif
 #undef _XOPEN_SOURCE
 
 #include <string.h>
@@ -69,7 +73,6 @@
  */
 /* #include "libxorp/xorp.h" */
 
-#include "config.h"
 #include "libxorp/utility.h"
 
 #ifndef TM_YEAR_BASE
