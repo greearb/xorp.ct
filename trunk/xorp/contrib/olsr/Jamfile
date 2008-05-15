@@ -1,8 +1,8 @@
 #
-# $XORP$
+# $XORP: xorp/contrib/olsr/Jamfile,v 1.1 2008/04/24 15:19:50 bms Exp $
 #
 
-SubDir TOP olsr ;
+SubDir TOP contrib olsr ;
 SubIncludeOnce TOP libxorp ;
 SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
@@ -12,7 +12,7 @@ SubIncludeOnce TOP libfeaclient ;
 SubIncludeOnce TOP libproto ;
 SubIncludeOnce TOP policy backend ;
 SubIncludeOnce TOP policy common ;
-SubDir TOP olsr ;
+SubDir TOP contrib olsr ;
 
 SAVE_C++FLAGS = $(C++FLAGS) ;
 
@@ -99,6 +99,6 @@ LINKLIBS_OLSR_TEST =
 
 InstallBin $(PREFIX)/olsr : xorp_olsr4 ;
 
-SubIncludeOnce TOP olsr tools ;
+SubIncludeOnce TOP contrib olsr tools ;
 
 C++FLAGS = $(SAVE_C++FLAGS) ;
