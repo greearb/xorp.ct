@@ -2,7 +2,7 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl Autoheader definitions
 dnl
-dnl $XORP: xorp/config/ahxorp.m4,v 1.4 2007/04/11 18:26:47 pavlin Exp $
+dnl $XORP: xorp/config/ahxorp.m4,v 1.5 2007/09/01 01:16:52 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 
@@ -77,39 +77,6 @@ typedef int socklen_t;
 #ifndef WORDS_BIGENDIAN
 #define WORDS_SMALLENDIAN
 #endif
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-
-#ifdef HAVE_INTTYPES_H
-#include <inttypes.h>
-#endif
-
-#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
-using namespace std;
-#endif
-
-/*
- * Include sys/cdefs.h to define __BEGIN_DECLS and __END_DECLS.  Even if
- * this file exists, not all platforms define these macros.
- */
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#endif
-
-/*
- * Define C++ decls wrappers if not previously defined.
- */
-#ifndef __BEGIN_DECLS
-#  if defined(__cplusplus)
-#    define __BEGIN_DECLS	extern "C" {
-#    define __END_DECLS		};    
-#  else /* __BEGIN_DECLS */
-#    define __BEGIN_DECLS
-#    define __END_DECLS
-#  endif /* __BEGIN_DECLS */
-#endif /* __BEGIN_DECLS */
 
 #endif /* __XORP_CONFIG_H__ */
 ])

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.15 2007/02/16 22:46:29 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.16 2008/01/04 03:16:46 pavlin Exp $
  */
 
 
@@ -23,6 +23,39 @@
 #define __LIBXORP_XORP_H__
 
 #include "config.h"
+
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+
+#ifdef HAVE_INTTYPES_H
+#include <inttypes.h>
+#endif
+
+#if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
+using namespace std;
+#endif
+
+/*
+ * Include sys/cdefs.h to define __BEGIN_DECLS and __END_DECLS.  Even if
+ * this file exists, not all platforms define these macros.
+ */
+#ifdef HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#endif
+
+/*
+ * Define C++ decls wrappers if not previously defined.
+ */
+#ifndef __BEGIN_DECLS
+#  if defined(__cplusplus)
+#    define __BEGIN_DECLS	extern "C" {
+#    define __END_DECLS		};    
+#  else /* __BEGIN_DECLS */
+#    define __BEGIN_DECLS
+#    define __END_DECLS
+#  endif /* __BEGIN_DECLS */
+#endif /* __BEGIN_DECLS */
 
 #include "xorp_osdep_begin.h"
 
