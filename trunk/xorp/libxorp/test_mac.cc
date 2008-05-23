@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.17 2008/01/04 03:16:42 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.18 2008/05/01 03:30:05 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -399,8 +399,17 @@ test_mac_address_const(TestInfo& test_info)
 
     verbose_assert(Mac::ALL_ONES() == Mac("ff:ff:ff:ff:ff:ff"), "ALL_ONES()");
 
+    verbose_assert(Mac::STP_MULTICAST() == Mac("01:80:c2:00:00:00"),
+		   "STP_MULTICAST()");
+
     verbose_assert(Mac::LLDP_MULTICAST() == Mac("01:80:c2:00:00:0e"),
 		   "LLDP_MULTICAST()");
+
+    verbose_assert(Mac::GMRP_MULTICAST() == Mac("01:80:c2:00:00:20"),
+		   "GMRP_MULTICAST()");
+
+    verbose_assert(Mac::GVRP_MULTICAST() == Mac("01:80:c2:00:00:21"),
+		   "GVRP_MULTICAST()");
 
     return (! failures());
 }
@@ -753,9 +762,21 @@ test_ethermac_address_const(TestInfo& test_info)
     verbose_assert(EtherMac(Mac::ALL_ONES()) == EtherMac("ff:ff:ff:ff:ff:ff"),
 		   "ALL_ONES()");
 
+    verbose_assert(EtherMac(Mac::STP_MULTICAST())
+		   == EtherMac("01:80:c2:00:00:00"),
+		   "STP_MULTICAST()");
+
     verbose_assert(EtherMac(Mac::LLDP_MULTICAST())
 		   == EtherMac("01:80:c2:00:00:0e"),
 		   "LLDP_MULTICAST()");
+
+    verbose_assert(EtherMac(Mac::GMRP_MULTICAST())
+		   == EtherMac("01:80:c2:00:00:20"),
+		   "GMRP_MULTICAST()");
+
+    verbose_assert(EtherMac(Mac::GVRP_MULTICAST())
+		   == EtherMac("01:80:c2:00:00:21"),
+		   "GVRP_MULTICAST()");
 
     return (! failures());
 }

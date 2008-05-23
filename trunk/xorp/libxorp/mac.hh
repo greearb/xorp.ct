@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/mac.hh,v 1.26 2008/01/04 03:16:37 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.27 2008/05/01 03:30:05 pavlin Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -158,7 +158,10 @@ public:
      */
     static const Mac& ZERO();
     static const Mac& ALL_ONES();
+    static const Mac& STP_MULTICAST();
     static const Mac& LLDP_MULTICAST();
+    static const Mac& GMRP_MULTICAST();
+    static const Mac& GVRP_MULTICAST();
 
 protected:
     void set_rep(const string& s) { _srep = s; }
@@ -168,7 +171,10 @@ protected:
 struct MacConstants {
     static const Mac zero,
 	all_ones,
-	lldp_multicast;
+	stp_multicast,
+	lldp_multicast,
+	gmrp_multicast,
+	gvrp_multicast;
 };
 
 inline const Mac& Mac::ZERO() {
@@ -179,8 +185,20 @@ inline const Mac& Mac::ALL_ONES() {
     return MacConstants::all_ones;
 }
 
+inline const Mac& Mac::STP_MULTICAST() {
+    return MacConstants::stp_multicast;
+}
+
 inline const Mac& Mac::LLDP_MULTICAST() {
     return MacConstants::lldp_multicast;
+}
+
+inline const Mac& Mac::GMRP_MULTICAST() {
+    return MacConstants::gmrp_multicast;
+}
+
+inline const Mac& Mac::GVRP_MULTICAST() {
+    return MacConstants::gvrp_multicast;
 }
 
 
