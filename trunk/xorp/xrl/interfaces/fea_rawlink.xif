@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawlink.xif,v 1.2 2007/07/12 21:35:27 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawlink.xif,v 1.3 2007/08/16 01:02:01 pavlin Exp $ */
 
 /*
  * Interface for sending raw link-level packets on an interface.
@@ -13,8 +13,10 @@ interface raw_link/0.1 {
          * @param vif_name the vif to send the packet on.
 	 * @param src_address the MAC source address.
 	 * @param dst_address the MAC destination address.
-	 * @param ether_type the EtherType protocol type. It must be
-	 * between 1536 and 65535.
+	 * @param ether_type the EtherType protocol type or the
+	 * Destination SAP. It must be between 1536 and 65535 to specify the
+	 * EtherType, or between 1 and 255 to specify the Destination SAP
+	 * IEEE 802.2 LLC frames.
 	 * @param payload the payload, everything after the MAC header.
 	 */
 	send	? if_name:txt  						\
@@ -33,8 +35,11 @@ interface raw_link/0.1 {
          * @param if_name the interface through which packets should be
 	 * accepted.
          * @param vif_name the vif through which packets should be accepted.
-	 * @param ether_type the EtherType protocol number that the receiver is
-	 * interested in. It must be between 1536 and 65535.
+	 * @param ether_type the EtherType protocol number or the
+	 * Destination SAP that the receiver is interested in.
+	 * It must be between 1536 and 65535 to specify the EtherType,
+	 * or between 1 and 255 to specify the Destination SAP for
+	 * IEEE 802.2 LLC frames.
 	 * A protocol number of 0 is used to specify all protocols.
 	 * @param filter_program the optional filter program to be applied on
 	 * the received packets. The program uses tcpdump(1) style expression.
@@ -58,8 +63,11 @@ interface raw_link/0.1 {
 	 * be accepted.
          * @param vif_name the vif through which packets should not be
 	 * accepted.
-	 * @param ether_type the EtherType protocol number that the receiver is
-	 * not interested in anymore. It must be between 1536 and 65535.
+	 * @param ether_type the EtherType protocol number or the
+	 * Destination SAP that the receiver is not interested in anymore.
+	 * It must be between 1536 and 65535 to specify the EtherType,
+	 * or between 1 and 255 to specify the Destination SAP for
+	 * IEEE 802.2 LLC frames.
 	 * A protocol number of 0 is used to specify all protocols.
 	 * @param filter_program the filter program that was applied on the
 	 * received packets. The program uses tcpdump(1) style expression.
@@ -78,8 +86,11 @@ interface raw_link/0.1 {
          * @param if_name the interface through which packets should be
 	 * accepted.
          * @param vif_name the vif through which packets should be accepted.
-	 * @param ether_type the EtherType protocol number that the receiver is
-	 * interested in. It must be between 1536 and 65535.
+	 * @param ether_type the EtherType protocol number or the
+	 * Destination SAP that the receiver is interested in.
+	 * It must be between 1536 and 65535 to specify the EtherType,
+	 * or between 1 and 255 to specify the Destination SAP for
+	 * IEEE 802.2 LLC frames.
 	 * A protocol number of 0 is used to specify all protocols.
 	 * @param filter_program the optional filter program to be applied on
 	 * the received packets. The program uses tcpdump(1) style expression.
@@ -101,8 +112,11 @@ interface raw_link/0.1 {
 	 * accepted.
          * @param vif_name the vif through which packets should not be
 	 * accepted.
-	 * @param ether_type the EtherType protocol number that the receiver is
-	 * not interested in anymore. It must be between 1536 and 65535.
+	 * @param ether_type the EtherType protocol number or the
+	 * Destination SAP that the receiver is not interested in anymore.
+	 * It must be between 1536 and 65535 to specify the EtherType,
+	 * or between 1 and 255 to specify the Destination SAP for
+	 * IEEE 802.2 LLC frames.
 	 * A protocol number of 0 is used to specify all protocols.
 	 * @param filter_program the filter program that was applied on the
 	 * received packets. The program uses tcpdump(1) style expression.

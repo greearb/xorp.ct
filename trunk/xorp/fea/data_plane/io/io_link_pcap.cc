@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.9 2008/01/04 03:16:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.10 2008/05/12 18:08:27 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -26,6 +26,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/mac.hh"
+
+#include "libproto/packet.hh"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -527,40 +529,59 @@ IoLinkPcap::recv_data()
     switch (_datalink_type) {
     case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
     {
-	const struct ether_header* ether_header_p;
-	struct ether_addr ether_addr_src, ether_addr_dst;
+	const uint8_t* ptr = packet;
 
 	// Test the received packet size
-	if (pcap_pkthdr.caplen < sizeof(*ether_header_p)) {
+	if (pcap_pkthdr.caplen < ETHERNET_MIN_FRAME_SIZE) {
 	    XLOG_WARNING("Received packet on interface %s vif %s: "
 			 "data is too short "
 			 "(captured %u expecting at least %u octets)",
 			 if_name().c_str(),
 			 vif_name().c_str(),
 			 XORP_UINT_CAST(pcap_pkthdr.caplen),
-			 XORP_UINT_CAST(sizeof(*ether_header_p)));
+			 XORP_UINT_CAST(ETHERNET_MIN_FRAME_SIZE));
 	    return;			// Error
 	}
 
-	ether_header_p = reinterpret_cast<const struct ether_header *>(packet);
+	// Extract the MAC destination and source address
+	dst_address.copy_in(ptr, EtherMac::ADDR_BYTELEN);
+	ptr += EtherMac::ADDR_BYTELEN;
+	src_address.copy_in(ptr, EtherMac::ADDR_BYTELEN);
+	ptr += EtherMac::ADDR_BYTELEN;
 
-	// Extract the MAC source and destination address
-	memcpy(&ether_addr_src, ether_header_p->ether_shost,
-	       EtherMac::ADDR_BYTELEN);
-	memcpy(&ether_addr_dst, ether_header_p->ether_dhost,
-	       EtherMac::ADDR_BYTELEN);
-	EtherMac ether_src(ether_addr_src);
-	EtherMac ether_dst(ether_addr_dst);
-	src_address.copy_in(ether_src.str());
-	dst_address.copy_in(ether_dst.str());
-
+	//
 	// Extract the EtherType
-	ether_type = ntohs(ether_header_p->ether_type);
+	//
+	// XXX: The EtherType field could be either type or length
+	// for Ethernet II (DIX) and IEEE 802.2 LLC frames correspondingly.
+	//
+	ether_type = extract_16(ptr);
+	ptr += sizeof(uint16_t);
 
-	// Calcuate the payload offset and size
-	payload_offset = sizeof(*ether_header_p);
+	if (ether_type < ETHERNET_LENGTH_TYPE_THRESHOLD) {
+	    //
+	    // This is a IEEE 802.2 LLC frame
+	    //
+
+	    //
+	    // XXX: Return the DSAP from the LLC header as an EtherType value.
+	    // Note that there is no colusion, because the DSAP values are
+	    // in the range [0, 255], while the EtherType values are in
+	    // the range [1536, 65535].
+	    //
+	    uint8_t dsap = extract_8(ptr);
+	    ether_type = dsap;
+
+	    //
+	    // XXX: Don't move the ptr, because we only peek into the LLC
+	    // header to get the DSAP value, but keep the header as
+	    // part of the payload to the user.
+	    //
+	}
+
+	// Calculate the payload offset and size
+	payload_offset = ptr - packet;
 	payload_size = pcap_pkthdr.caplen - payload_offset;
-
 	break;
     }
 
@@ -643,34 +664,53 @@ IoLinkPcap::send_packet(const Mac& src_address,
     switch (_datalink_type) {
     case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
     {
-	struct ether_header ether_header;
-	EtherMac src_ether, dst_ether;
+	uint8_t* ptr = _databuf;
 
 	//
-	// Prepare the Ethernet header
+	// Prepare the Ethernet header.
+	// Note that we use the help of EtherMac to catch errors.
 	//
 	try {
-	    src_ether.copy_in(src_address);
-	} catch (BadMac& e) {
-	    error_msg = c_format("Invalid Ethernet source address: %s",
-				 e.str().c_str());
-	    return (XORP_ERROR);
-	}
-	try {
+	    EtherMac dst_ether;
 	    dst_ether.copy_in(dst_address);
+	    dst_ether.copy_out(ptr);
+	    ptr += EtherMac::ADDR_BYTELEN;
 	} catch (BadMac& e) {
 	    error_msg = c_format("Invalid Ethernet destination address: %s",
 				 e.str().c_str());
 	    return (XORP_ERROR);
 	}
-	src_ether.copy_out(reinterpret_cast<uint8_t *>(ether_header.ether_shost));
-	dst_ether.copy_out(reinterpret_cast<uint8_t *>(ether_header.ether_dhost));
-	ether_header.ether_type = htons(ether_type);
+	try {
+	    EtherMac src_ether;
+	    src_ether.copy_in(src_address);
+	    src_ether.copy_out(ptr);
+	    ptr += EtherMac::ADDR_BYTELEN;
+	} catch (BadMac& e) {
+	    error_msg = c_format("Invalid Ethernet source address: %s",
+				 e.str().c_str());
+	    return (XORP_ERROR);
+	}
+
+	//
+	// The EtherType
+	//
+	// XXX: The EtherType field could be either type or length
+	// for Ethernet II (DIX) and IEEE 802.2 LLC frames correspondingly.
+	//
+	if (ether_type < ETHERNET_LENGTH_TYPE_THRESHOLD) {
+	    // A IEEE 802.2 LLC frame, hence embed the length of the payload
+	    embed_16(ptr, payload.size());
+	    ptr += sizeof(uint16_t);
+	} else {
+	    // An Ethernet II (DIX frame), hence embed the EtherType itself
+	    embed_16(ptr, ether_type);
+	    ptr += sizeof(uint16_t);
+	}
 
 	//
 	// Calculate and test the packet size
 	//
-	packet_size = sizeof(ether_header) + payload.size();
+	packet_size = (ptr - _databuf) + payload.size();
 	if (packet_size > IO_BUF_SIZE) {
 	    error_msg = c_format("Sending packet from %s to %s EtherType %u"
 				 "on interface %s vif %s failed: "
@@ -686,10 +726,9 @@ IoLinkPcap::send_packet(const Mac& src_address,
 	}
 
 	//
-	// Copy the Ethernet header and the payload to the data buffer
+	// Copy the payload to the data buffer
 	//
-	memcpy(_databuf, &ether_header, sizeof(ether_header));
-	memcpy(_databuf + sizeof(ether_header), &payload[0], payload.size());
+	memcpy(ptr, &payload[0], payload.size());
 
 	break;
     }

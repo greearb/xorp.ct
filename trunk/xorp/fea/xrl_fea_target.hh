@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.29 2008/04/26 00:59:45 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.30 2008/04/27 23:08:04 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -1515,8 +1515,9 @@ public:
      *
      *  @param dst_address the MAC destination address.
      *
-     *  @param ether_type the EtherType protocol type. It must be between 1536
-     *  and 65535.
+     *  @param ether_type the EtherType protocol type or the Destination SAP.
+     *  It must be between 1536 and 65535 to specify the EtherType, or between
+     *  1 and 255 to specify the Destination SAP IEEE 802.2 LLC frames.
      *
      *  @param payload the payload, everything after the MAC header.
      */
@@ -1540,9 +1541,11 @@ public:
      *
      *  @param vif_name the vif through which packets should be accepted.
      *
-     *  @param ether_type the EtherType protocol number that the receiver is
-     *  interested in. It must be between 1536 and 65535. A protocol number of
-     *  0 is used to specify all protocols.
+     *  @param ether_type the EtherType protocol number or the Destination SAP
+     *  that the receiver is interested in. It must be between 1536 and 65535
+     *  to specify the EtherType, or between 1 and 255 to specify the
+     *  Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     *  used to specify all protocols.
      *
      *  @param filter_program the filter program to be applied on the received
      *  packets. The program uses tcpdump(1) style expression.
@@ -1571,9 +1574,11 @@ public:
      *
      *  @param vif_name the vif through which packets should not be accepted.
      *
-     *  @param ether_type the EtherType protocol number that the receiver is
-     *  not interested in anymore. It must be between 1536 and 65535. A
-     *  protocol number of 0 is used to specify all protocols.
+     *  @param ether_type the EtherType protocol number or the Destination SAP
+     *  that the receiver is not interested in anymore. It must be between 1536
+     *  and 65535 to specify the EtherType, or between 1 and 255 to specify the
+     *  Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     *  used to specify all protocols.
      *
      *  @param filter_program the filter program that was applied on the
      *  received packets. The program uses tcpdump(1) style expression.
@@ -1596,9 +1601,11 @@ public:
      *
      *  @param vif_name the vif through which packets should be accepted.
      *
-     *  @param ether_type the EtherType protocol number that the receiver is
-     *  interested in. It must be between 1536 and 65535. A protocol number of
-     *  0 is used to specify all protocols.
+     *  @param ether_type the EtherType protocol number or the Destination SAP
+     *  that the receiver is interested in. It must be between 1536 and 65535
+     *  to specify the EtherType, or between 1 and 255 to specify the
+     *  Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     *  used to specify all protocols.
      *
      *  @param filter_program the filter program to be applied on the received
      *  packets. The program uses tcpdump(1) style expression.
@@ -1625,9 +1632,11 @@ public:
      *
      *  @param vif_name the vif through which packets should not be accepted.
      *
-     *  @param ether_type the EtherType protocol number that the receiver is
-     *  not interested in anymore. It must be between 1536 and 65535. A
-     *  protocol number of 0 is used to specify all protocols.
+     *  @param ether_type the EtherType protocol number or the Destination SAP
+     *  that the receiver is not interested in anymore. It must be between 1536
+     *  and 65535 to specify the EtherType, or between 1 and 255 to specify the
+     *  Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     *  used to specify all protocols.
      *
      *  @param filter_program the filter program that was applied on the
      *  received packets. The program uses tcpdump(1) style expression.

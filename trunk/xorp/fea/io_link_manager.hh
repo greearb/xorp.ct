@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.7 2008/01/03 22:59:35 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.8 2008/01/04 03:15:47 pavlin Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -444,8 +444,9 @@ public:
      * @param vif_name the vif to send the packet on.
      * @param src_address the MAC source address.
      * @param dst_address the MAC destination address.
-     * @param ether_type the EtherType protocol number. It must be between
-     * 1536 and 65535.
+     * @param ether_type the EtherType protocol type or the Destination SAP.
+     * It must be between 1536 and 65535 to specify the EtherType, or between
+     * 1 and 255 to specify the Destination SAP IEEE 802.2 LLC frames.
      * @param payload the payload, everything after the MAC header.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -464,9 +465,11 @@ public:
      * @param receiver_name the name of the receiver.
      * @param if_name the interface through which packets should be accepted.
      * @param vif_name the vif through which packets should be accepted.
-     * @param ether_type the EtherType protocol number that the receiver is
-     * interested in. It must be between 1536 and 65535. A protocol number
-     * of 0 is used to specify all protocols.
+     * @param ether_type the EtherType protocol number or the Destination SAP
+     * that the receiver is interested in. It must be between 1536 and 65535
+     * to specify the EtherType, or between 1 and 255 to specify the
+     * Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     * used to specify all protocols.
      * @param filter_program the optional filter program to be applied on the
      * received packets. The program uses tcpdump(1) style expression.
      * @param enable_multicast_loopback if true then enable delivering of
@@ -490,9 +493,11 @@ public:
      * @param if_name the interface through which packets should not be
      * accepted.
      * @param vif_name the vif through which packets should not be accepted.
-     * @param ether_type the EtherType protocol number that the receiver is
-     * not interested in anymore. It must be between 1536 and 65535.
-     * A protocol number of 0 is used to specify all protocols.
+     * @param ether_type the EtherType protocol number or the Destination SAP
+     * that the receiver is not interested in anymore. It must be between 1536
+     * and 65535 to specify the EtherType, or between 1 and 255 to specify the
+     * Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     * used to specify all protocols.
      * @param filter_program the filter program that was applied on the
      * received packets. The program uses tcpdump(1) style expression.
      * @param error_msg the error message (if error).
@@ -511,9 +516,11 @@ public:
      * @param receiver_name the name of the receiver.
      * @param if_name the interface through which packets should be accepted.
      * @param vif_name the vif through which packets should be accepted.
-     * @param ether_type the EtherType protocol number that the receiver is
-     * interested in. It must be between 1536 and 65535. A protocol number
-     * of 0 is used to specify all protocols.
+     * @param ether_type the EtherType protocol number or the Destination SAP
+     * that the receiver is interested in. It must be between 1536 and 65535
+     * to specify the EtherType, or between 1 and 255 to specify the
+     * Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     * used to specify all protocols.
      * @param filter_program the optional filter program to be applied on the
      * received packets. The program uses tcpdump(1) style expression.
      * @param group_address the multicast group address to join.
@@ -535,9 +542,11 @@ public:
      * @param if_name the interface through which packets should not be
      * accepted.
      * @param vif_name the vif through which packets should not be accepted.
-     * @param ether_type the EtherType protocol number that the receiver is not
-     * interested in anymore. It must be between 1536 and 65535. A protocol
-     * number of 0 is used to specify all protocols.
+     * @param ether_type the EtherType protocol number or the Destination SAP
+     * that the receiver is not interested in anymore. It must be between 1536
+     * and 65535 to specify the EtherType, or between 1 and 255 to specify the
+     * Destination SAP for IEEE 802.2 LLC frames. A protocol number of 0 is
+     * used to specify all protocols.
      * @param filter_program the filter program that was applied on the
      * received packets. The program uses tcpdump(1) style expression.
      * @param group_address the multicast group address to leave.

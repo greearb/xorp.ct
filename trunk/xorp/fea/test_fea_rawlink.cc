@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.1 2008/04/30 20:53:35 bms Exp $"
+#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.2 2008/05/01 03:30:04 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -284,8 +284,9 @@ protected:
      *  @param vif_name the vif name the packet arrived on.
      *  @param src_address the MAC source address.
      *  @param dst_address the MAC destination address.
-     *  @param ether_type the EtherType protocol type. It must be between 1536
-     *  and 65535.
+     *  @param ether_type the EtherType protocol number or the Destination SAP.
+     *  It must be between 1536 and 65535 to specify the EtherType, or between
+     *  1 and 255 to specify the Destination SAP for IEEE 802.2 LLC frames.
      *  @param payload the payload, everything after the MAC header.
      */
     XrlCmdError raw_link_client_0_1_recv(
