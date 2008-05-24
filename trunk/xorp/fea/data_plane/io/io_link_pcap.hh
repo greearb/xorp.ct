@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.7 2008/01/04 03:16:14 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.8 2008/05/24 03:02:23 pavlin Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -175,8 +175,9 @@ private:
     XorpTask	_recv_data_task; // Task for receiving pending data
 
     // Misc. constants
-    static const uint16_t ETHERNET_LENGTH_TYPE_THRESHOLD = 0x0600;
-    static const uint16_t ETHERNET_MIN_FRAME_SIZE	= 0x3c;	// Excl. CRC
+    static const uint16_t ETHERNET_HEADER_SIZE		= 14;
+    static const uint16_t ETHERNET_LENGTH_TYPE_THRESHOLD = 1536;
+    static const uint16_t ETHERNET_MIN_FRAME_SIZE	= 60;	// Excl. CRC
 };
 
 #endif // __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__

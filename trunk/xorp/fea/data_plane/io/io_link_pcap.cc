@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.10 2008/05/12 18:08:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.11 2008/05/24 03:02:23 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -271,12 +271,20 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     //
     // Set the pcap filter
     //
-    // XXX: The filter is logical AND of the EtherType with the
+    // XXX: The filter is logical AND of the EtherType/DSAP with the
     // user's optional filter program.
     //
     string pcap_filter_program;
     if (ether_type() > 0) {
-	pcap_filter_program = c_format("(ether proto %u)", ether_type());
+	if (ether_type() < ETHERNET_LENGTH_TYPE_THRESHOLD) {
+	    // A filter using the DSAP in IEEE 802.2 LLC frame
+	    pcap_filter_program = c_format("(ether[%u] = %u)",
+					   ETHERNET_HEADER_SIZE,
+					   ether_type());
+	} else {
+	    // A filter using the EtherType
+	    pcap_filter_program = c_format("(ether proto %u)", ether_type());
+	}
     }
     if (! filter_program().empty()) {
 	if (! pcap_filter_program.empty())
