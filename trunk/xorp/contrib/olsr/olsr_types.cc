@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/contrib/olsr/olsr_types.cc,v 1.1 2008/04/24 15:19:54 bms Exp $"
 
 #include "olsr_module.h"
 
@@ -30,6 +30,8 @@
 
 #define NAME_CASE(x) case OlsrTypes:: x : return x##_NAME ;
 #define NUM_CASE(x) case x : return #x ;
+
+const double EightBitTime::_scaling_factor = 0.0625f;
 
 static const char* TCR_MPRS_IN_NAME = "mprs_in";
 static const char* TCR_MPRS_INOUT_NAME = "mprs_inout";

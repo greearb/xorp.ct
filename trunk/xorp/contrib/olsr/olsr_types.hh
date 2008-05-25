@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/contrib/olsr/olsr_types.hh,v 1.1 2008/04/24 15:19:54 bms Exp $
 
 #ifndef __OLSR_OLSR_TYPES_HH__
 #define __OLSR_OLSR_TYPES_HH__
@@ -343,7 +343,7 @@ public:
 
 private:
 	static const int	_mod = 16;
-	static const double	_scaling_factor = 0.0625f;
+	static const double	_scaling_factor;
 };
 
 /**
