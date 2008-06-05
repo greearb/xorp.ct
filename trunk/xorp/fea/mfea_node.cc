@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.87 2008/01/22 10:56:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.88 2008/03/09 00:21:16 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -978,7 +978,8 @@ MfeaNode::add_pim_register_vif()
 	// TODO: XXX: the Register vif name is hardcoded here!
 	MfeaVif register_vif(*this, Vif("register_vif"));
 	register_vif.set_vif_index(vif_index);
-	register_vif.set_pif_index(mfea_vif->pif_index());
+	// XXX: No physical interface index, hence set it to zero
+	register_vif.set_pif_index(0);
 	register_vif.set_underlying_vif_up(true); // XXX: 'true' to allow creation
 	register_vif.set_pim_register(true);
 	register_vif.set_mtu(mfea_vif->mtu());
