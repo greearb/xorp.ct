@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.15 2007/11/29 01:52:35 pavlin Exp $
+% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.16 2008/06/06 08:16:33 bms Exp $
 %
 
 \chapter{Network Interfaces}
@@ -80,6 +80,9 @@ interfaces \{\\
 \>\>management: {\it bool}\\
 \>\>vif {\it text} \{\\
 \>\>\>disable: {\it bool}\\
+\>\>\>vlan \{\\
+\>\>\>\>vlan-id: {\it int(0..4095)}\\
+\>\>\>\}\\
 \>\>\>address {\it IPv4-addr} \{\\
 \>\>\>\>prefix-length: {\it int(1..32)}\\
 \>\>\>\>broadcast: {\it IPv4-addr}\\
@@ -251,7 +254,7 @@ configuration.
 xx\=xx\=xx\=xx\=xx\=\kill
 interfaces \{\\
 \>interface dc0 \{\\
-\>\>description: "ethernet interface"\\
+\>\>description: "Ethernet interface"\\
 \>\>disable: false\\
 \>\>vif dc0 \{\\
 \>\>\>disable: false\\
@@ -319,6 +322,49 @@ interfaces \{\\
 \end{minipage}
 }
 \vspace{0.1in}
+
+
+\subsubsection{Configuring VLANs}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+interfaces \{\\
+\>interface dc0 \{\\
+\>\>description: "Ethernet interface with a VLAN"\\
+\>\>vif dc0 \{\\
+\>\>\>address 10.10.10.10 \{\\
+\>\>\>\>prefix-length: 24\\
+\>\>\>\}\\
+\>\>\}\\
+\>\>vif vlan1 \{\\
+\>\>\>vlan \{\\
+\>\>\>\>vlan-id: 1\\
+\>\>\>\}\\
+\>\>\>address 10.10.20.20 \{\\
+\>\>\>\>prefix-length: 24\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\vspace{0.1in}
+In the example above, the router has a VLAN configured on interface dc0.
+The vlan is called {\stt vlan1}, and has VLAN ID of 1.
+The IP address of interface dc0 is {\stt 10.10.10.10}, while
+the IP address of {\stt vlan1} is {\stt 10.10.20.20}.
+
+Note that some of the configuration statements such as
+{\stt disable:} and {\stt broadcast:} can be omitted:
+the former has default value of {\stt false} while the latter
+can be calculated internally by XORP from the prefix length.
 
 
 \newpage
