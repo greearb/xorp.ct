@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.198 2008/03/06 04:58:08 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.199 2008/05/02 00:40:03 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -67,6 +67,28 @@ Release 1.5-WIP (2007/??/??)
       }
 
       The default value for the "management" statement is false.
+
+    - Addition of support to configure VLANs on an interface.
+      A VLAN is configured by using a "vlan" block that includes
+      the VLAN ID:
+
+      interfaces {
+          interface fxp0 {
+              vif fxp0 {
+                  address 10.10.10.10 {
+                      prefix-length: 24
+                  }
+              }
+              vif vlan1 {
+                  vlan {
+                      vlan-id: 1
+                  }
+                  address 10.10.20.20 {
+                      prefix-length: 24
+                  }
+              }
+          }
+      }
 
     - The following PIM-SM configuration statements have been deprecated,
       because PIM-SM doesn't use Router Alert IP option anymore:
