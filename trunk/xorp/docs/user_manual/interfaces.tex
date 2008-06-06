@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.14 2007/09/27 01:01:08 pavlin Exp $
+% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.15 2007/11/29 01:52:35 pavlin Exp $
 %
 
 \chapter{Network Interfaces}
@@ -24,8 +24,7 @@ We choose to distinguish in a XORP router between physical interfaces
 (which we call {\it interfaces}, and logical interfaces, which we call
 virtual interfaces or {\it vifs}.  An example of a {\it interface}
 might be an Ethernet card.  An example of a {\it vif} might be one of
-many VLANs configured on that Ethernet\footnote{Currently (March 2007),
-VLANs are not supported in XORP.}.
+many VLANs configured on that Ethernet.
 
 Conceptually, XORP routes packets between vifs.  Thus it is also vifs
 that are given IP addresses.  Each interface may contain many vifs.
@@ -192,6 +191,13 @@ interfaces \{\\
   false}.  Configuring a vif to be disabled has the same effect
   as removing its configuration, but without losing what the
   configuration used to be.
+\item{\tt vlan}: this block specifies the VLAN ID for this vif. The
+  vif will be configured as a VLAN on its interface. It currently
+  contains a single term: {\stt vlan-id}, which specifies the 802.1Q
+  VLAN ID. Currently, Q-in-Q VLANs are not supported. ~\footnote{As of
+  XORP Release-1.5, VLANs are supported for FreeBSD and Linux.
+  Be sure to load any kernel modules required to support VLANs before
+  using this option.}
 \item{\tt address}: this specifies a new IP address for this vif.  A
   single vif might have multiple IP addresses, and might have both IPv4
   address and IPv6 addresses.  The parameter is either an IPv4 or IPv6
