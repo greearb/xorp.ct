@@ -1,9 +1,15 @@
-/* $XORP: xorp/etc/templates/rip.cmds,v 1.3 2004/06/03 00:41:33 hodson Exp $ */
+/* $XORP: xorp/etc/templates/rip.cmds,v 1.4 2004/06/06 02:12:25 hodson Exp $ */
 
 show rip {
      %command: "" %help: HELP;
      %module: rip;
      %tag: HELP "Display information about RIP";
+}
+
+show rip peers {
+     %command: "rip/tools/show_peer_stats -1 $2" %help: HELP;
+     %module: rip;
+     %tag: HELP "Show all RIP peers each on a single line";
 }
 
 show rip peer statistics $(protocols.rip.interface.*) $(protocols.rip.interface.*.vif.*) $(protocols.rip.interface.*.vif.*.address.*) {

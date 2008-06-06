@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.12 2007/02/16 22:47:20 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/show_peer_stats.cc,v 1.13 2008/01/04 03:17:37 pavlin Exp $"
 
 #include <iomanip>
 
@@ -50,6 +50,8 @@ usage()
     fprintf(stderr, "Usage: %s [options] (rip|ripng) [<interface> <vif> <addr> [<peer>]]\n",
 	    xlog_process_name());
     fprintf(stderr, "Options:\n");
+    fprintf(stderr, "\t -1 "
+	    "Single line output (used by 'show rip peer')\n");
     fprintf(stderr, "\t -F <finder_host>:<finder_port> "
 	    "Specify Finder host and port to use.\n");
     fprintf(stderr, "\t -T <targetname>                "
@@ -69,7 +71,6 @@ print_peer_header(const A& 	peer,
 	 << ifn << " " << vifn << " " << addr.str() << endl << endl;
 }
 
-
 static void
 pretty_print_counters(const XrlAtomList& descriptions,
 		      const XrlAtomList& values,
@@ -78,12 +79,15 @@ pretty_print_counters(const XrlAtomList& descriptions,
     static const uint32_t COL1 = 32;
     static const uint32_t COL2 = 16;
 
+    time_t when = static_cast<time_t>(last_active);
+    char whenbuf[12];
+    (void)strftime(&whenbuf[0], sizeof(whenbuf), "%H:%M:%S", gmtime(&when));
+
     // Save flags
     ios::fmtflags fl = cout.flags();
 
-    time_t when(last_active);
     cout << "  ";
-    cout << "Last Active at " << ctime(&when) << endl;
+    cout << "Last Active at " << whenbuf << endl;
 
     cout.flags(ios::left);
     cout << "  ";
@@ -118,6 +122,48 @@ pretty_print_counters(const XrlAtomList& descriptions,
     cout.flags(fl);
 }
 
+template <typename A>
+static void
+pretty_print_counters_single_line(const XrlAtomList& descriptions,
+				  const XrlAtomList& values,
+				  uint32_t	     last_active,
+				  const A& 	     peer,
+				  const string&      ifn,
+				  const string&      vifn)
+{
+    time_t when = static_cast<time_t>(last_active);
+    char whenbuf[12];
+    (void)strftime(&whenbuf[0], sizeof(whenbuf), "%H:%M:%S", gmtime(&when));
+
+    // RIP sends the descriptions of each counter back,
+    // we will need to scan the atom list for what we want.
+    uint32_t rxcount = 0;
+    for (size_t i = 0; i != descriptions.size(); ++i) {
+	const XrlAtom& d = descriptions.get(i);
+	const XrlAtom& v = values.get(i);
+	if (0 == strcasecmp(d.text().c_str(), "Request Packets Received")) {
+		rxcount = v.uint32();
+		break;
+	}
+    }
+
+    ios::fmtflags fl = cout.flags();
+    cout.flags(ios::left);
+
+    // XXX We are using C++ style formatting here. I would prefer to use
+    // fprintf because you can just bang that out. This is somewhat tedious.
+    cout << setw(17) << peer.str() <<
+            setw(4) << ifn << setw(1) << "/" <<
+            setw(12) << vifn <<
+            setw(8) << "Up" <<
+            setw(12) << rxcount <<	// receive count (not held)
+            setw(12) << 0 <<		// transmit count XXX notyet
+            setw(10) << (last_active == 0 ? "Never" : whenbuf) << endl;
+
+
+    cout.flags(fl);
+}
+
 
 /**
  * Invoke Xrl to get peer stats on RIP address and pretty print result.
@@ -129,9 +175,10 @@ public:
 		     const string&	vifname,
 		     IPv4		addr,
 		     IPv4		peer,
+		     bool		single_line = false,
 		     bool		hide_errors = false)
 	: XrlJobBase(jq), _ifn(ifname), _vifn(vifname), _a(addr), _p(peer),
-	  _hide_errs(hide_errors)
+	  _single_line(single_line), _hide_errs(hide_errors)
     {}
 
     bool
@@ -153,8 +200,14 @@ protected:
 		 const uint32_t*	peer_last_active)
     {
 	if (xe == XrlError::OKAY()) {
-	    print_peer_header(_p, _ifn, _vifn, _a);
-	    pretty_print_counters(*descriptions, *values, *peer_last_active);
+	    if (_single_line) {
+		pretty_print_counters_single_line(*descriptions, *values,
+		    *peer_last_active, _p, _ifn, _vifn);
+	    } else {
+		print_peer_header(_p, _ifn, _vifn, _a);
+		pretty_print_counters(*descriptions, *values,
+		    *peer_last_active);
+	    }
 	    queue().dispatch_complete(xe, this);
 	} else if (_hide_errs) {
 	    // When invoked by GetAllPeerStats4 or GetPortPeerStats4
@@ -173,6 +226,7 @@ protected:
     string 	_vifn;
     IPv4   	_a;
     IPv4 	_p;
+    bool	_single_line;
     bool	_hide_errs;
 };
 
@@ -182,8 +236,8 @@ protected:
  */
 class GetAllPeerStats4 : public XrlJobBase {
 public:
-    GetAllPeerStats4(XrlJobQueue& jq)
-	: XrlJobBase(jq)
+    GetAllPeerStats4(XrlJobQueue& jq, bool single_line = false)
+	: XrlJobBase(jq), _single_line(single_line)
     {
     }
 
@@ -216,7 +270,8 @@ protected:
 		    const IPv4& 	addr 	  = addrs->get(i).ipv4();
 		    queue().enqueue(
 				    new GetPeerStats4(queue(), ifn, vifn,
-						      addr, peer_addr, true)
+						      addr, peer_addr,
+						      _single_line, true)
 				    );
 		}
 	    }
@@ -225,6 +280,8 @@ protected:
 	}
 	queue().dispatch_complete(xe, this);
     }
+
+    bool	_single_line;
 };
 
 /**
@@ -271,7 +328,7 @@ protected:
 			queue().enqueue(
 					new GetPeerStats4(queue(), ifn, vifn,
 							  addr, peer_addr,
-							  true)
+							  false, true)
 					);
 		    }
 		}
@@ -296,9 +353,10 @@ public:
 		     const string&	vifname,
 		     IPv6		addr,
 		     IPv6		peer,
+		     bool		single_line = false,
 		     bool		hide_errors = false)
 	: XrlJobBase(jq), _ifn(ifname), _vifn(vifname), _a(addr), _p(peer),
-	  _hide_errs(hide_errors)
+	  _single_line(single_line), _hide_errs(hide_errors)
     {}
 
     bool
@@ -320,8 +378,14 @@ protected:
 		 const uint32_t*	peer_last_active)
     {
 	if (xe == XrlError::OKAY()) {
-	    print_peer_header(_p, _ifn, _vifn, _a);
-	    pretty_print_counters(*descriptions, *values, *peer_last_active);
+	    if (_single_line) {
+		pretty_print_counters_single_line(*descriptions, *values,
+		    *peer_last_active, _p, _ifn, _vifn);
+	    } else {
+		print_peer_header(_p, _ifn, _vifn, _a);
+		pretty_print_counters(*descriptions, *values,
+		    *peer_last_active);
+	    }
 	    queue().dispatch_complete(xe, this);
 	} else if (_hide_errs) {
 	    // When invoked by GetAllPeerStats6 or GetPortPeerStats6
@@ -340,6 +404,7 @@ protected:
     string 	_vifn;
     IPv6   	_a;
     IPv6 	_p;
+    bool	_single_line;
     bool	_hide_errs;
 };
 
@@ -349,8 +414,8 @@ protected:
  */
 class GetAllPeerStats6 : public XrlJobBase {
 public:
-    GetAllPeerStats6(XrlJobQueue& jq)
-	: XrlJobBase(jq)
+    GetAllPeerStats6(XrlJobQueue& jq, bool single_line = false)
+	: XrlJobBase(jq), _single_line(single_line)
     {}
 
     bool
@@ -382,13 +447,16 @@ protected:
 		    const IPv6& 	addr 	  = addrs->get(i).ipv6();
 		    queue().enqueue(
 				    new GetPeerStats6(queue(), ifn, vifn,
-						      addr, peer_addr, true)
+						      addr, peer_addr,
+						      _single_line, true)
 				    );
 		}
 	    }
 	}
 	queue().dispatch_complete(xe, this);
     }
+
+    bool	_single_line;
 };
 
 /**
@@ -435,7 +503,7 @@ protected:
 			queue().enqueue(
 					new GetPeerStats6(queue(), ifn, vifn,
 							  addr, peer_addr,
-							  true)
+							  false, true)
 					);
 		    }
 		}
@@ -467,14 +535,18 @@ main(int argc, char* const argv[])
     xlog_start();
 
     try {
+	bool		do_single_line = false;
 	bool		do_run 	    = true;
 	string          finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
         uint16_t        finder_port = FinderConstants::FINDER_DEFAULT_PORT();
 	string		xrl_target;
 
 	int ch;
-	while ((ch = getopt(argc, argv, "F:T:")) != -1) {
+	while ((ch = getopt(argc, argv, "1F:T:")) != -1) {
 	    switch (ch) {
+	    case '1':
+		do_single_line = true;
+		break;
 	    case 'F':
 		do_run = parse_finder_args(optarg, finder_host, finder_port);
 		break;
@@ -512,16 +584,32 @@ main(int argc, char* const argv[])
 	    EventLoop e;
 	    XrlJobQueue job_queue(e, finder_host, finder_port, xrl_target);
 
+	    if (do_single_line) {
+//  Address    Interface   State  Hello Rx  Hello Tx  Last Hello" << endl;
+		ios::fmtflags fl = cout.flags();
+		cout.flags(ios::left);
+	        cout << setw(17) << "  Address" <<
+		        setw(17) << "Interface" <<
+		        setw(8) << "State" <<
+		        setw(12) << "Hello Rx" <<
+		        setw(12) << "Hello Tx" <<
+		        setw(10) << "Last Hello" <<
+		        endl;
+		cout.flags(fl);
+	    }
+
 	    if (argc == 4) {
 		if (ip_version == 4) {
 		    job_queue.enqueue(
 			new GetPeerStats4(job_queue,
-					  argv[0], argv[1], argv[2], argv[3])
+					  argv[0], argv[1], argv[2], argv[3],
+					  do_single_line)
 			);
 		} else if (ip_version == 6) {
 		    job_queue.enqueue(
 			new GetPeerStats6(job_queue,
-					  argv[0], argv[1], argv[2], argv[3])
+					  argv[0], argv[1], argv[2], argv[3],
+					  do_single_line)
 			);
 		}
 	    } else if (argc == 3) {
@@ -538,9 +626,11 @@ main(int argc, char* const argv[])
 		}
 	    } else if (argc == 0) {
 		if (ip_version == 4) {
-		    job_queue.enqueue(new GetAllPeerStats4(job_queue));
+		    job_queue.enqueue(new GetAllPeerStats4(job_queue,
+							   do_single_line));
 		} else if (ip_version == 6) {
-		    job_queue.enqueue(new GetAllPeerStats6(job_queue));
+		    job_queue.enqueue(new GetAllPeerStats6(job_queue,
+							   do_single_line));
 		}
 	    } else {
 		usage();
