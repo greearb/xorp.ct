@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.26 2008/01/04 03:16:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.27 2008/05/01 03:30:05 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -345,7 +345,54 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		fprintf(stdout, "MANAGEMENT");
 		prev = true;
 	    }
-	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu());
+	    fprintf(stdout, "> mtu %d", ifmgr_iface.mtu());
+
+	    //
+	    // Print the baudrate in bps/Kbps/Mbps/Gbps/Tbps
+	    //
+	    fprintf(stdout, " speed ");
+	    if (ifmgr_iface.baudrate() == 0) {
+		fprintf(stdout, "unknown");
+	    } else {
+		do {
+		    uint64_t b = ifmgr_iface.baudrate();
+
+		    // Test if bps
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u bps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Kbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Kbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Mbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Mbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Gbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Gbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Tbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Tbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Default
+		    fprintf(stdout, "%u Tbps", XORP_UINT_CAST(b));
+
+		    break;
+		} while (false);
+	    }
+	    fprintf(stdout, "\n");
 
 	    //
 	    // Print the physical interface index and MAC address
@@ -431,7 +478,54 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		fprintf(stdout, "PIM-REGISTER");
 		prev = true;
 	    }
-	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu());
+	    fprintf(stdout, "> mtu %d", ifmgr_iface.mtu());
+
+	    //
+	    // Print the baudrate in bps/Kbps/Mbps/Gbps/Tbps
+	    //
+	    fprintf(stdout, " speed ");
+	    if (ifmgr_iface.baudrate() == 0) {
+		fprintf(stdout, "unknown");
+	    } else {
+		do {
+		    uint64_t b = ifmgr_iface.baudrate();
+
+		    // Test if bps
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u bps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Kbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Kbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Mbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Mbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Gbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Gbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Test if Tbps
+		    b /= 1000;
+		    if (b / 1000 == 0) {
+			fprintf(stdout, "%u Tbps", XORP_UINT_CAST(b));
+			break;
+		    }
+		    // Default
+		    fprintf(stdout, "%u Tbps", XORP_UINT_CAST(b));
+
+		    break;
+		} while (false);
+	    }
+	    fprintf(stdout, "\n");
 
 	    //
 	    // Print the IPv6 addresses

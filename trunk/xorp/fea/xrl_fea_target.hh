@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.30 2008/04/27 23:08:04 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.31 2008/05/24 03:02:23 pavlin Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -944,6 +944,12 @@ public:
 	const string&	ifname,
 	// Output values,
 	bool&		no_carrier);
+
+    XrlCmdError ifmgr_0_1_get_configured_baudrate(
+	// Input values,
+	const string&	ifname,
+	// Output values,
+	uint32_t&	baudrate);
 
     XrlCmdError ifmgr_0_1_get_configured_address_flags4(
 	// Input values,

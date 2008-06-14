@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.64 2008/05/09 00:28:17 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.65 2008/05/09 18:11:52 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -557,6 +557,9 @@ public:
     bool no_carrier() const		{ return _no_carrier; }
     void set_no_carrier(bool v)		{ _no_carrier = v; mark(CHANGED); }
 
+    uint64_t baudrate() const		{ return _baudrate; }
+    void set_baudrate(uint64_t v)	{ _baudrate = v; mark(CHANGED); }
+
     bool discard() const		{ return _discard; }
     void set_discard(bool discard)	{ _discard = discard; mark(CHANGED); }
 
@@ -713,6 +716,7 @@ public:
 	set_mtu(o.mtu());
 	set_mac(o.mac());
 	set_no_carrier(o.no_carrier());
+	set_baudrate(o.baudrate());
 	set_interface_flags(o.interface_flags());
 
 	if (copy_user_config) {
@@ -741,6 +745,7 @@ public:
 		&& (mtu() == o.mtu())
 		&& (mac() == o.mac())
 		&& (no_carrier() == o.no_carrier())
+		&& (baudrate() == o.baudrate())
 		&& (interface_flags() == o.interface_flags()));
     }
 
@@ -763,6 +768,7 @@ private:
     uint32_t 	_mtu;
     Mac 	_mac;
     bool	_no_carrier;
+    uint64_t	_baudrate;		// The link baudrate
     uint32_t	_interface_flags;	// The system-specific interface flags
     VifMap	_vifs;
 };

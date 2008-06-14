@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.18 2008/03/27 21:09:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.19 2008/05/09 18:11:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -373,6 +373,15 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     if (is_newlink || (no_carrier != ifp->no_carrier()))
 	ifp->set_no_carrier(no_carrier);
     debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
+
+    //
+    // Get the baudrate
+    //
+    uint64_t baudrate = 0;
+    // TODO: Get the baudrate
+    if (is_newlink || (baudrate != ifp->baudrate()))
+	ifp->set_baudrate(baudrate);
+    debug_msg("baudrate: %s\n", XORP_UINT_CAST(baudrate));
     
     // XXX: vifname == ifname on this platform
     if (is_newlink)

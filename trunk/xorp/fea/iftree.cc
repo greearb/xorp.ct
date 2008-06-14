@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.61 2008/05/09 00:28:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.62 2008/05/09 18:11:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1690,6 +1690,7 @@ IfTreeInterface::IfTreeInterface(IfTree& iftree, const string& ifname)
       _default_system_config(false),
       _mtu(0),
       _no_carrier(false),
+      _baudrate(0),
       _interface_flags(0)
 {}
 
@@ -1889,7 +1890,7 @@ IfTreeInterface::str() const
 			"{ discard := %s } { unreachable := %s } "
 			"{ management = %s } { default_system_config = %s }"
 			"{ mtu := %u } { mac := %s } { no_carrier = %s } "
-			"{ flags := %u }",
+			"{ baudrate := %u } { flags := %u }",
 			_ifname.c_str(),
 			XORP_UINT_CAST(_pif_index),
 			bool_c_str(_enabled),
@@ -1900,6 +1901,7 @@ IfTreeInterface::str() const
 			XORP_UINT_CAST(_mtu),
 			_mac.str().c_str(),
 			bool_c_str(_no_carrier),
+			XORP_UINT_CAST(_baudrate),
 			XORP_UINT_CAST(_interface_flags));
     r += string(" ") + IfTreeItem::str();
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.11 2007/12/19 04:57:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.12 2008/01/04 03:16:06 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -173,12 +173,16 @@ IfConfigGetIPHelper::read_config(IfTree& iftree)
 	if (is_newlink || (mtu != ifp->mtu()))
 	    ifp->set_mtu(mtu);
 
-	// Link status
+	// Link status and baudrate
 	bool no_carrier = true;
+	uint64_t baudrate = 0;
 	if (curAdapter->OperStatus == IfOperStatusUp)
 	    no_carrier = false;
+	// TODO: find the baudrate
 	if (is_newlink || no_carrier != ifp->no_carrier())
 	    ifp->set_no_carrier(no_carrier);
+	if (is_newlink || baudrate != ifp->baudrate())
+	    ifp->set_baudrate(baudrate);
 
 	ifp->set_enabled((curAdapter->OperStatus == IfOperStatusUp));
 

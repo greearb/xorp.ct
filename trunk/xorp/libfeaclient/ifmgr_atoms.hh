@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.35 2007/11/29 01:52:38 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.36 2008/01/04 03:16:18 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -293,6 +293,9 @@ public:
     bool	no_carrier() const		{ return _no_carrier; }
     void	set_no_carrier(bool v)		{ _no_carrier = v; }
 
+    uint64_t	baudrate() const		{ return _baudrate; }
+    void	set_baudrate(uint64_t v)	{ _baudrate = v; }
+
     const VifMap& vifs() const			{ return _vifs; }
     VifMap& vifs()				{ return _vifs; }
     const IfMgrVifAtom*	find_vif(const string& vifname) const;
@@ -314,6 +317,7 @@ protected:
     Mac		_mac;		// The interface MAC address
     uint32_t	_pif_index;	// Physical interface index
     bool	_no_carrier;	// True if no carrier
+    uint64_t	_baudrate;	// The link baudrate
 
     VifMap	_vifs;		// The vif configuration state
 };
@@ -554,7 +558,8 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
       _management(false),
       _mtu(0),
       _pif_index(0),
-      _no_carrier(false)
+      _no_carrier(false),
+      _baudrate(0)
 {
 }
 

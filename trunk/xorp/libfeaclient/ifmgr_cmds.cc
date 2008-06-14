@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.27 2007/11/29 01:52:38 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.28 2008/01/04 03:16:18 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -458,6 +458,41 @@ IfMgrIfSetNoCarrier::str() const
 {
     return if_str_begin(this, "NoCarrier") + ", " +
 	c_format("%s", bool_c_str(no_carrier())) + if_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrIfSetBaudrate
+
+bool
+IfMgrIfSetBaudrate::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& interfaces = t.interfaces();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = interfaces.find(n);
+    if (i == interfaces.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_baudrate(baudrate());
+    return true;
+}
+
+bool
+IfMgrIfSetBaudrate::forward(XrlSender&			sender,
+			    const string&		xrl_target,
+			    const IfMgrXrlSendCB&	xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_interface_set_baudrate(xt, ifname(), baudrate(), xcb);
+}
+
+string
+IfMgrIfSetBaudrate::str() const
+{
+    return if_str_begin(this, "Baudrate") + ", " +
+	c_format("%u", XORP_UINT_CAST(baudrate())) + if_str_end();
 }
 
 

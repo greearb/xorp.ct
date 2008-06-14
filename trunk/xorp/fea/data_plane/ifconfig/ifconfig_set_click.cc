@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.18 2008/03/09 00:21:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_click.cc,v 1.19 2008/05/08 22:46:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -176,6 +176,7 @@ IfConfigSetClick::config_interface_begin(const IfTreeInterface* pulled_ifp,
     ifp->set_mtu(config_iface.mtu());
     ifp->set_mac(config_iface.mac());
     ifp->set_no_carrier(config_iface.no_carrier());
+    ifp->set_baudrate(config_iface.baudrate());
 
     return (XORP_OK);
 }

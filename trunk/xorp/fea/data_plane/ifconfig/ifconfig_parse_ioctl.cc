@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.15 2008/03/27 21:09:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.16 2008/05/09 18:11:52 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -270,23 +270,28 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 
 	//
-	// Get the link status
+	// Get the link status and baudrate
 	//
 	do {
 	    bool no_carrier = false;
+	    uint64_t baudrate = 0;
 	    string error_msg;
 
-	    if (ifconfig_media_get_link_status(if_name, no_carrier, error_msg)
+	    if (ifconfig_media_get_link_status(if_name, no_carrier, baudrate,
+					       error_msg)
 		!= XORP_OK) {
 		XLOG_ERROR("%s", error_msg.c_str());
 		break;
 	    }
 	    if (is_newlink || (no_carrier != ifp->no_carrier()))
 		ifp->set_no_carrier(no_carrier);
+	    if (is_newlink || (baudrate != ifp->baudrate()))
+		ifp->set_baudrate(baudrate);
 	    break;
 	} while (false);
 	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
-	
+	debug_msg("baudrate: %u\n", XORP_UINT_CAST(ifp->baudrate()));
+
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)
 	    ifp->add_vif(alias_if_name);

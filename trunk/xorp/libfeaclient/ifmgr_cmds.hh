@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.22 2007/11/29 01:52:38 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.23 2008/01/04 03:16:18 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -263,6 +263,30 @@ public:
 
 protected:
     bool	_no_carrier;
+};
+
+/**
+ * @short Command to set the baudrate of interface.
+ */
+class IfMgrIfSetBaudrate : public IfMgrIfCommandBase {
+public:
+    IfMgrIfSetBaudrate(const string& ifname, uint64_t baudrate)
+	: IfMgrIfCommandBase(ifname),
+	  _baudrate(baudrate)
+    {}
+
+    uint64_t baudrate() const			{ return _baudrate; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    uint64_t	_baudrate;
 };
 
 

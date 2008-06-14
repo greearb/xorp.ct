@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.22 2007/11/29 01:52:38 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_remote_copy.cc,v 1.23 2008/01/04 03:16:19 pavlin Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -145,6 +145,10 @@ populate_iftree(IfMgrIfTree& t)
     }
     if (IfMgrIfSetNoCarrier("if0", true).execute(t) == false) {
 	verbose_log("Failed to set no_carrier\n");
+	return 1;
+    }
+    if (IfMgrIfSetBaudrate("if0", 1*000*000*000).execute(t) == false) {
+	verbose_log("Failed to set baudrate\n");
 	return 1;
     }
 

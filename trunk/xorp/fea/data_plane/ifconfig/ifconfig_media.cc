@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.4 2008/01/04 03:16:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.5 2008/05/10 21:38:43 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -71,8 +71,13 @@ typedef uint64_t u64;
 //
 int
 ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
-			       string& error_msg)
+			       uint64_t& baudrate, string& error_msg)
 {
+    UNUSED(if_name);
+
+    no_carrier = false;
+    baudrate = 0;
+
 #ifdef SIOCGIFMEDIA
     do {
 	int s;
@@ -94,6 +99,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    close(s);
 	    return (XORP_OK);
 	}
+	close(s);
 
 	switch (IFM_TYPE(ifmr.ifm_active)) {
 	case IFM_ETHER:
@@ -115,7 +121,22 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    no_carrier = false;
 	    break;
 	}
-	close(s);
+
+	//
+	// Get the link baudrate
+	//
+#ifdef IFM_BAUDRATE_DESCRIPTIONS
+	static const struct ifmedia_baudrate ifm[] = IFM_BAUDRATE_DESCRIPTIONS;
+	for (size_t i = 0; ifm[i].ifmb_word != 0; i++) {
+	    if ((ifmr.ifm_active & (IFM_NMASK | IFM_TMASK))
+		!= ifm[i].ifmb_word) {
+		continue;
+	    }
+	    baudrate = ifm[i].ifmb_baudrate;
+	    break;
+	}
+#endif // IFM_BAUDRATE_DESCRIPTIONS
+
 	return (XORP_OK);
     } while (false);
 #endif // SIOCGIFMEDIA
@@ -144,11 +165,12 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    close(s);
 	    return (XORP_ERROR);
 	}
+	close(s);
+
 	if (edata.data != 0)
 	    no_carrier = false;
 	else
 	    no_carrier = true;
-	close(s);
 	return (XORP_OK);
     } while (false);
 #endif // SIOCETHTOOL && ETHTOOL_GLINK
@@ -204,19 +226,17 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    close(s);
 	    return (XORP_ERROR);
 	}
+	close(s);
 
 	int bmsr = mii->val_out;
 	if (bmsr & MII_BMSR_LINK_VALID)
 	    no_carrier = false;
 	else
 	    no_carrier = true;
-	close(s);
 	return (XORP_OK);
     } while (false);
 #endif // SIOCGMIIREG
 
-    UNUSED(if_name);
-    no_carrier = false;
     error_msg = c_format("No mechanism to test the link status");
     return (XORP_ERROR);
 }

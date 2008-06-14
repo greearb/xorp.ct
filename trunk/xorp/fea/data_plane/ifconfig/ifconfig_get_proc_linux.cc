@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.20 2008/01/04 03:16:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.21 2008/03/27 21:09:51 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -478,6 +478,14 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 	    no_carrier = false;
 	ifp->set_no_carrier(no_carrier);
 	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
+
+	//
+	// Get the baudrate
+	//
+	uint64_t baudrate = 0;
+	// TODO: Get the baudrate
+	ifp->set_baudrate(baudrate);
+	debug_msg("baudrate: %u\n", XORP_UINT_CAST(baudrate));
 	
 	// XXX: vifname == ifname on this platform
 	ifp->add_vif(alias_if_name);

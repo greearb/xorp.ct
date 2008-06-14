@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.24 2007/11/29 01:52:40 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.25 2007/12/30 09:15:01 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -57,6 +57,8 @@ interface ifmgr/0.1 {
 	get_configured_mtu ? ifname:txt -> mtu:u32
 
 	get_configured_no_carrier ? ifname:txt -> no_carrier:bool
+
+	get_configured_baudrate ? ifname:txt -> baudrate:u32
 
 	get_configured_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 
