@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/README,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $
+# $XORP: xorp/xrl/README,v 1.2 2002/12/14 23:43:11 hodson Exp $
 #
 
 This directory contains code for automatically generating Xrl
@@ -87,4 +87,5 @@ mac		= "mac"
 text		= "txt"
 list		= "list"
 binary		= "binary"
-
+int64		= "i64"
+uint64		= "u64"

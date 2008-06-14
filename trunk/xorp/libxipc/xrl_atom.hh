@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.14 2007/07/12 21:23:23 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.15 2008/01/04 03:16:26 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -47,13 +47,15 @@ enum XrlAtomType {
     xrlatom_list,
     xrlatom_boolean,
     xrlatom_binary,
+    xrlatom_int64,
+    xrlatom_uint64,
     // ... Your type's unique enumerated name here ...
     // Changing order above will break binary compatibility
     // ...Don't forget to update xrlatom_start and xrlatom_end below...
 
     // Bounds for enumerations
     xrlatom_start = xrlatom_int32,	// First valid enumerated value
-    xrlatom_end   = xrlatom_binary	// Last valid enumerated value
+    xrlatom_end   = xrlatom_uint64	// Last valid enumerated value
 };
 
 inline XrlAtomType& operator++(XrlAtomType& t)
@@ -296,6 +298,25 @@ public:
 	: _type(xrlatom_binary), _have_data(true),
 	  _binary(new vector<uint8_t>(data, data + data_bytes)) {}
 
+    // int64 constructors
+    explicit XrlAtom(const int64_t& value)
+	: _type(xrlatom_int64), _have_data(true), _i64val(value) {}
+
+    XrlAtom(const char* name, int64_t value) throw (BadName)
+	: _type(xrlatom_int64), _have_data(true), _i64val(value) {
+	set_name(name);
+    }
+
+    // uint64 constructors
+    explicit XrlAtom(const uint64_t& value)
+	: _type(xrlatom_uint64), _have_data(true), _u64val(value) {}
+
+    XrlAtom(const char* name, uint64_t value) throw (BadName)
+	: _type(xrlatom_uint64), _have_data(true), _u64val(value) {
+	set_name(name);
+    }
+
+
     // ... Your type's constructors here ...
 
     // Copy operations
@@ -330,6 +351,8 @@ public:
     const string&	   text() const throw (NoData, WrongType);
     const XrlAtomList&	   list() const throw (NoData, WrongType);
     const vector<uint8_t>& binary() const throw (NoData, WrongType);
+    const int64_t&	   int64() const throw (NoData, WrongType);
+    const uint64_t&	   uint64() const throw (NoData, WrongType);
 
     // ... Your type's accessor method here ...
 
@@ -370,6 +393,7 @@ private:
     size_t pack_text(uint8_t* buffer) const;
     size_t pack_list(uint8_t* buffer, size_t buffer_bytes) const;
     size_t pack_binary(uint8_t* buffer) const;
+    size_t pack_uint64(uint8_t* buffer) const;
 
     size_t unpack_name(const uint8_t* buffer, size_t buffer_bytes)
 	throw (BadName);
@@ -383,6 +407,7 @@ private:
     size_t unpack_text(const uint8_t* buffer, size_t buffer_bytes);
     size_t unpack_list(const uint8_t* buffer, size_t buffer_bytes);
     size_t unpack_binary(const uint8_t* buffer, size_t buffer_bytes);
+    size_t unpack_uint64(const uint8_t* buffer);
 
 private:
     XrlAtomType	_type;
@@ -401,7 +426,11 @@ private:
         string*		 _text;
 	XrlAtomList*	 _list;
 	vector<uint8_t>* _binary;
-        // ... Your type here, if it's more than 4 bytes use a pointer ...
+        int64_t		 _i64val;
+        uint64_t	 _u64val;
+
+        // ... Your type here, if it's more than sizeof(uintptr_t) bytes,
+	// use a pointer ...
     } ;
 };
 

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.29 2008/01/04 03:16:26 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.30 2008/03/10 20:14:45 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -51,6 +52,23 @@ static const char* xrlatom_mac_name	= "mac";
 static const char* xrlatom_text_name	= "txt";
 static const char* xrlatom_list_name	= "list";
 static const char* xrlatom_binary_name	= "binary";
+static const char* xrlatom_int64_name	= "i64";
+static const char* xrlatom_uint64_name	= "u64";
+
+static inline void
+do_pack_uint32(const uint32_t u32val, uint8_t* buffer)
+{
+    buffer[0] = (uint8_t)(u32val >> 24);
+    buffer[1] = (uint8_t)(u32val >> 16);
+    buffer[2] = (uint8_t)(u32val >> 8);
+    buffer[3] = (uint8_t)(u32val);
+}
+
+static inline uint32_t
+do_unpack_uint32(const uint8_t* buf)
+{
+    return (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+}
 
 const char*
 xrlatom_type_name(const XrlAtomType& t)
@@ -69,6 +87,8 @@ xrlatom_type_name(const XrlAtomType& t)
 	NAME_CASE(xrlatom_text);
 	NAME_CASE(xrlatom_list);
 	NAME_CASE(xrlatom_binary);
+	NAME_CASE(xrlatom_int64);
+	NAME_CASE(xrlatom_uint64);
 	// ... Your type here ...
     }
     return xrlatom_no_type_name;
@@ -95,6 +115,8 @@ resolve_xrlatom_name(const char* name)
 	    CHECK_NAME(xrlatom_list);		/* FALLTHRU */
 	    CHECK_NAME(xrlatom_boolean);	/* FALLTHRU */
 	    CHECK_NAME(xrlatom_binary);		/* FALLTHRU */
+	    CHECK_NAME(xrlatom_int64);		/* FALLTHRU */
+	    CHECK_NAME(xrlatom_uint64);		/* FALLTHRU */
 	    // ... Your type here ...
 	case xrlatom_no_type:
 	    break;
@@ -166,6 +188,28 @@ XrlAtom::data_from_c_str(const char* c_str)
 	break;
     case xrlatom_binary:
 	abort(); // Binary is a special case and handled at start of routine
+	break;
+    case xrlatom_int64:
+#ifdef HOST_OS_WINDOWS
+ #ifdef __MINGW32__
+	_i64val = (int64_t)strtoimax(c_str, (char**)NULL, 10);
+ #else
+	_i64val = (int64_t)_strtoi64(c_str, (char**)NULL, 10);
+ #endif
+#else
+	_i64val = (int64_t)strtoll(c_str, (char**)NULL, 10);
+#endif
+	break;
+    case xrlatom_uint64:
+#ifdef HOST_OS_WINDOWS
+ #ifdef __MINGW32__
+	_u64val = (int64_t)strtoumax(c_str, (char**)NULL, 10);
+ #else
+	_u64val = (int64_t)_strtoui64(c_str, (char**)NULL, 10);
+ #endif
+#else
+	_u64val = (uint64_t)strtoull(c_str, (char**)NULL, 10);
+#endif
 	break;
 
 	// ... Your types instantiator here ...
@@ -289,6 +333,21 @@ XrlAtom::binary() const throw (NoData, WrongType)
     return *_binary;
 }
 
+const int64_t&
+XrlAtom::int64() const throw (NoData, WrongType)
+{
+    type_and_data_okay(xrlatom_int64);
+    return _i64val;
+}
+
+const uint64_t&
+XrlAtom::uint64() const throw (NoData, WrongType)
+{
+    type_and_data_okay(xrlatom_uint64);
+    return _u64val;
+}
+
+
 // ----------------------------------------------------------------------------
 // XrlAtom dynamic data management functions
 
@@ -340,6 +399,12 @@ XrlAtom::copy(const XrlAtom& xa)
 	case xrlatom_binary:
 	    _binary = new vector<uint8_t>(*xa._binary);
 	    break;
+        case xrlatom_int64:
+            _i64val = xa._i64val;
+            break;
+        case xrlatom_uint64:
+            _u64val = xa._u64val;
+            break;
 
             // ... Your type's copy operation here ...
         case xrlatom_no_type:
@@ -389,6 +454,9 @@ XrlAtom::discard_dynamic()
 	case xrlatom_binary:
 	    delete _binary;
 	    _binary = 0;
+	    break;
+        case xrlatom_int64:
+        case xrlatom_uint64:
 	    break;
 
             // ... Your type should free allocated memory here ...
@@ -512,6 +580,26 @@ XrlAtom::value() const
 	return _list->str();
     case xrlatom_binary:
 	return xrlatom_encode_value(*_binary);
+    case xrlatom_int64:
+#ifdef HOST_OS_WINDOWS
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%I64d",
+		 static_cast<__int64>(_i64val));
+#else
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%lld",
+		 static_cast<long long>(_i64val));
+#endif
+	return xrlatom_encode_value(tmp, strlen(tmp));
+	break;
+    case xrlatom_uint64:
+#ifdef HOST_OS_WINDOWS
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%I64u",
+		 static_cast<unsigned __int64>(_i64val));
+#else
+	snprintf(tmp, sizeof(tmp) / sizeof(tmp[0]), "%llu",
+		 static_cast<unsigned long long>(_u64val));
+#endif
+	return xrlatom_encode_value(tmp, strlen(tmp));
+	break;
 
 	// ... Your type's c_str equivalent here ...
     }
@@ -579,6 +667,12 @@ XrlAtom::operator==(const XrlAtom& other) const
 	    break;
 	case xrlatom_binary:
 	    mv = (*_binary == *other._binary);
+	    break;
+	case xrlatom_int64:
+	    mv = (_i64val == other._i64val);
+	    break;
+	case xrlatom_uint64:
+	    mv = (_u64val == other._u64val);
 	    break;
 
 	    // ... Your type's equality test here ...
@@ -661,6 +755,10 @@ XrlAtom::packed_bytes() const
 	assert(_binary != 0);
 	bytes += 4 + _binary->size();
 	break;
+    case xrlatom_int64:
+    case xrlatom_uint64:
+	bytes += 8;
+	break;
 
 	// ... Your type sizing operation here ...
     }
@@ -682,6 +780,8 @@ XrlAtom::packed_bytes_fixed() const
     case xrlatom_ipv6:
     case xrlatom_ipv6net:
     case xrlatom_boolean:
+    case xrlatom_int64:
+    case xrlatom_uint64:
 	return true;
     case xrlatom_mac:
     case xrlatom_text:
@@ -737,17 +837,14 @@ XrlAtom::unpack_boolean(const uint8_t* buf)
 size_t
 XrlAtom::pack_uint32(uint8_t* buffer) const
 {
-    buffer[0] = (uint8_t)(_u32val >> 24);
-    buffer[1] = (uint8_t)(_u32val >> 16);
-    buffer[2] = (uint8_t)(_u32val >> 8);
-    buffer[3] = (uint8_t)(_u32val);
+    do_pack_uint32(_u32val, buffer);
     return sizeof(_u32val);
 }
 
 size_t
 XrlAtom::unpack_uint32(const uint8_t* buf)
 {
-    _u32val = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+    _u32val = do_unpack_uint32(buf);
     return sizeof(_u32val);
 }
 
@@ -975,6 +1072,23 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
 }
 
 size_t
+XrlAtom::pack_uint64(uint8_t* buffer) const
+{
+    do_pack_uint32(_u64val >> 32, buffer);
+    do_pack_uint32(_u64val & 0xFFFFFFFF, &buffer[4]);
+    return sizeof(_u64val);
+}
+
+size_t
+XrlAtom::unpack_uint64(const uint8_t* buf)
+{
+    _u64val = do_unpack_uint32(buf);
+    _u64val <<= 32;
+    _u64val |= do_unpack_uint32(&buf[4]);
+    return sizeof(_u64val);
+}
+
+size_t
 XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
 {
     size_t pb = packed_bytes();
@@ -1030,6 +1144,10 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
 	    break;
 	case xrlatom_binary:
 	    packed_size += pack_binary(buffer + packed_size);
+	    break;
+	case xrlatom_int64:
+	case xrlatom_uint64:
+	    packed_size += pack_uint64(buffer + packed_size);
 	    break;
 
 	    // ... Your type here ...
@@ -1119,6 +1237,10 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	    break;
 	case xrlatom_binary:
 	    used = unpack_binary(buffer + unpacked, buffer_bytes - unpacked);
+	    break;
+	case xrlatom_int64:
+	case xrlatom_uint64:
+	    used = unpack_uint64(buffer + unpacked);
 	    break;
 
 	    // ... Your type here ...

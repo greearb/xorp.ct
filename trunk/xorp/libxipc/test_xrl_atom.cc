@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.15 2007/04/14 08:59:50 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.16 2008/01/04 03:16:25 pavlin Exp $"
 
 // test_xrl_atom: String Serialization Tests
 
@@ -226,6 +226,14 @@ test()
 		    test_atom(a);
 		}
 	    }
+	    break;
+	case xrlatom_int64:
+	    test_atom(XrlAtom("test_int64_value",
+		int64_t(-1234567890123456789LL)));
+	    break;
+	case xrlatom_uint64:
+	    test_atom(XrlAtom("test_uint64_value",
+		uint64_t(0xabadc0ffee123456ULL)));
 	    break;
 	}
     }

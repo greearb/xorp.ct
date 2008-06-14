@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.15 2007/07/16 22:13:43 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.16 2008/01/04 03:16:26 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -446,6 +446,61 @@ XrlArgs::remove_binary(const char* name) throw (XrlAtomNotFound)
 {
     remove(XrlAtom(name, xrlatom_binary));
 }
+
+// ----------------------------------------------------------------------------
+// XrlArgs add/get/remove int64
+
+XrlArgs&
+XrlArgs::add_int64(const char* name, int64_t val) throw (XrlAtomFound)
+{
+    return add(XrlAtom(name, val));
+}
+
+const int64_t&
+XrlArgs::get_int64(const char* name) const throw (BadArgs)
+{
+    try {
+	return get(XrlAtom(name, xrlatom_int64)).int64();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
+}
+
+void
+XrlArgs::remove_int64(const char* name) throw (XrlAtomNotFound)
+{
+    remove(XrlAtom(name, xrlatom_int64));
+}
+
+// ----------------------------------------------------------------------------
+// XrlArgs add/get/remove uint64
+
+XrlArgs&
+XrlArgs::add_uint64(const char* name, uint64_t val) throw (XrlAtomFound)
+{
+    return add(XrlAtom(name, val));
+}
+
+const uint64_t&
+XrlArgs::get_uint64(const char* name) const throw (BadArgs)
+{
+    try {
+	return get(XrlAtom(name, xrlatom_uint64)).uint64();
+    } catch (const XrlAtom::NoData& e) {
+        xorp_throw(BadArgs, e.why());
+    } catch (const XrlAtom::WrongType& e) {
+        xorp_throw(BadArgs, e.why());
+    }
+}
+
+void
+XrlArgs::remove_uint64(const char* name) throw (XrlAtomNotFound)
+{
+    remove(XrlAtom(name, xrlatom_uint64));
+}
+
 
 // ----------------------------------------------------------------------------
 // Append an existing XrlArgs

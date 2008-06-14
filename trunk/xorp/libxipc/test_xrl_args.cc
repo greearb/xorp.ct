@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.16 2007/08/30 06:02:27 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.17 2008/01/04 03:16:25 pavlin Exp $"
 
 // test_xrl_args: String Serialization Tests
 
@@ -159,7 +159,9 @@ run_serialization_test()
 	XrlAtom("a_mac_addr",	 EtherMac("00:ab:10:11:12:13")),
 	XrlAtom("string",	 string("hello world, kippers, yum")),
 	XrlAtom("binary_data",	 test_binary),
-	XrlAtom("a_list",	 test_list)
+	XrlAtom("a_list",	 test_list),
+	XrlAtom("integer64",	 int64_t(-1234567890123456789LL)),
+	XrlAtom("uinteger64",	 uint64_t(0xabadc0ffee123456ULL))
     };
     uint32_t n_test_args = sizeof(test_args) / sizeof(test_args[0]);
 
@@ -200,6 +202,8 @@ run_test()
     al.add_mac("a_named_mac", Mac("01:02:03:04:05:06"));
     al.add_string(0, "potentially hazardous null pointer named string object");
     al.add_string("bad_karma", "");
+    al.add_int64("a_named_int64", int64_t(-98765432101234LL));
+    al.add_uint64("a_named_uint64", uint64_t(123456789012345ULL));
 
     XrlAtomList xal;
     xal.append(XrlAtom("first", string("fooo")));
@@ -247,6 +251,8 @@ run_test()
 	al.get_string(0);
 	al.get_string("");
 	al.get_string("bad_karma");
+	al.get_int64("a_named_int64");
+	al.get_uint64("a_named_uint64");
     } catch (XrlArgs::BadArgs& e) {
 	verbose_log("Error decoding the argument: %s\n", e.str().c_str());
 	return 1;

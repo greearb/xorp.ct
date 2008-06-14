@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.26 2007/02/16 22:47:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.27 2008/01/04 03:17:45 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -136,6 +136,8 @@ XorpClient::fake_return_args(const string& xrl_return_spec)
 	case xrlatom_list:
 	case xrlatom_boolean:
 	case xrlatom_binary:
+	case xrlatom_uint64:
+	case xrlatom_int64:
 	    XLOG_UNFINISHED();
 	    break;
 	}

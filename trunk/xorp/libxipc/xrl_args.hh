@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.18 2007/07/12 21:23:23 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.19 2008/01/04 03:16:26 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -219,6 +219,31 @@ public:
     XrlArgs& add(const char* n, const vector<uint8_t>& a) throw (XrlAtomFound);
 
     void get(const char* n, vector<uint8_t>& a) const throw (BadArgs);
+
+    /* --- int64 accessors --- */
+
+    XrlArgs& add_int64(const char* name, int64_t v) throw (XrlAtomFound);
+
+    const int64_t& get_int64(const char* name) const throw (BadArgs);
+
+    void remove_int64(const char* name) throw (XrlAtomNotFound);
+
+    XrlArgs& add(const char* n, int64_t v) throw (XrlAtomFound);
+
+    void get(const char* n, int64_t& t) const throw (BadArgs);
+
+    /* --- uint64 accessors --- */
+
+    XrlArgs& add_uint64(const char* name, uint64_t v) throw (XrlAtomFound);
+
+    const uint64_t& get_uint64(const char* name) const throw (BadArgs);
+
+    void remove_uint64(const char* name) throw (XrlAtomNotFound);
+
+    XrlArgs& add(const char* n, uint64_t v) throw (XrlAtomFound);
+
+    void get(const char* n, uint64_t& t) const throw (BadArgs);
+
 
     // ... Add your type's add, get, remove functions here ...
 
