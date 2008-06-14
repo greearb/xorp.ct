@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.199 2008/05/02 00:40:03 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.200 2008/06/06 16:45:34 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -128,6 +128,9 @@ Release 1.5-WIP (2007/??/??)
 
   XRL:
     - Critical bug fix that can be triggered by malformatted XRLs.
+
+    - Addition of support for 64-bit integers: i64 and u64 for
+      signed and unsigned respectively.
 
   RTRMGR:
     - 
