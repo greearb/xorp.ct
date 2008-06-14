@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.17 2008/05/09 18:11:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.18 2008/06/14 02:59:22 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -296,41 +296,35 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 	    if (ifconfig_media_get_link_status(if_name, no_carrier, baudrate,
 					       error_msg)
 		!= XORP_OK) {
-		XLOG_ERROR("%s", error_msg.c_str());
-	    } else {
-		if (is_newlink || (no_carrier != ifp->no_carrier()))
-		    ifp->set_no_carrier(no_carrier);
-		if (is_newlink || (baudrate != ifp->baudrate()))
-		    ifp->set_baudrate(baudrate);
-		break;
-	    }
-
+		// XXX: Use the link-state information
 #if defined(AF_LINK) && defined(LINK_STATE_UP) && defined(LINK_STATE_DOWN)
-	    if ((ifa->ifa_addr != NULL)
-		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
-		// Link-level address
-		if (ifa->ifa_data != NULL) {
-		    const struct if_data* if_data = reinterpret_cast<const struct if_data*>(ifa->ifa_data);
-		    switch (if_data->ifi_link_state) {
-		    case LINK_STATE_UNKNOWN:
-			// XXX: link state unknown
-			break;
-		    case LINK_STATE_DOWN:
-			no_carrier = true;
-			break;
-		    case LINK_STATE_UP:
-			no_carrier = false;
-			break;
-		    default:
+		if ((ifa->ifa_addr != NULL)
+		    && (ifa->ifa_addr->sa_family == AF_LINK)) {
+		    // Link-level address
+		    if (ifa->ifa_data != NULL) {
+			const struct if_data* if_data = reinterpret_cast<const struct if_data*>(ifa->ifa_data);
+			switch (if_data->ifi_link_state) {
+			case LINK_STATE_UNKNOWN:
+			    // XXX: link state unknown
+			    break;
+			case LINK_STATE_DOWN:
+			    no_carrier = true;
+			    break;
+			case LINK_STATE_UP:
+			    no_carrier = false;
+			    break;
+			default:
+			    break;
+			}
 			break;
 		    }
-		    if (is_newlink || no_carrier != ifp->no_carrier())
-			ifp->set_no_carrier(no_carrier);
-		    break;
 		}
-	    }
 #endif // AF_LINK && LINK_STATE_UP && LINK_STATE_DOWN
-
+	    }
+	    if (is_newlink || (no_carrier != ifp->no_carrier()))
+		ifp->set_no_carrier(no_carrier);
+	    if (is_newlink || (baudrate != ifp->baudrate()))
+		ifp->set_baudrate(baudrate);
 	    break;
 	} while (false);
 	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));

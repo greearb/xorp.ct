@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.19 2008/05/09 18:11:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.20 2008/06/14 02:59:22 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -40,6 +40,7 @@
 #include "fea/data_plane/control_socket/netlink_socket_utilities.hh"
 
 #include "ifconfig_get_netlink_socket.hh"
+#include "ifconfig_media.hh"
 
 
 //
@@ -363,26 +364,31 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 
     //
-    // Get the link status
+    // Get the link status and baudrate
     //
-    bool no_carrier = false;
-    if ((flags & IFF_UP) && !(flags & IFF_RUNNING))
-	no_carrier = true;
-    else
-	no_carrier = false;
-    if (is_newlink || (no_carrier != ifp->no_carrier()))
-	ifp->set_no_carrier(no_carrier);
-    debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
+    do {
+	bool no_carrier = false;
+	uint64_t baudrate = 0;
+	string error_msg;
 
-    //
-    // Get the baudrate
-    //
-    uint64_t baudrate = 0;
-    // TODO: Get the baudrate
-    if (is_newlink || (baudrate != ifp->baudrate()))
-	ifp->set_baudrate(baudrate);
-    debug_msg("baudrate: %s\n", XORP_UINT_CAST(baudrate));
-    
+	if (ifconfig_media_get_link_status(if_name, no_carrier, baudrate,
+					   error_msg)
+	    != XORP_OK) {
+	    // XXX: Use the flags
+	    if ((flags & IFF_UP) && !(flags & IFF_RUNNING))
+		no_carrier = true;
+	    else
+		no_carrier = false;
+	}
+	if (is_newlink || (no_carrier != ifp->no_carrier()))
+	    ifp->set_no_carrier(no_carrier);
+	if (is_newlink || (baudrate != ifp->baudrate()))
+	    ifp->set_baudrate(baudrate);
+	break;
+    } while (false);
+    debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
+    debug_msg("baudrate: %u\n", XORP_UINT_CAST(ifp->baudrate()));
+
     // XXX: vifname == ifname on this platform
     if (is_newlink)
 	ifp->add_vif(if_name);

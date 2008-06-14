@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.21 2008/03/27 21:09:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_proc_linux.cc,v 1.22 2008/06/14 02:59:21 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -34,6 +34,7 @@
 
 #include "ifconfig_get_ioctl.hh"
 #include "ifconfig_get_proc_linux.hh"
+#include "ifconfig_media.hh"
 
 
 const string IfConfigGetProcLinux::PROC_LINUX_NET_DEVICES_FILE_V4 = "/proc/net/dev";
@@ -469,24 +470,29 @@ if_fetch_linux_v6(IfConfig& ifconfig, IfTree& iftree,
 	debug_msg("enabled: %s\n", bool_c_str(ifp->enabled()));
 
 	//
-	// Get the link status
+	// Get the link status and baudrate
 	//
-	bool no_carrier = false;
-	if ((flags & IFF_UP) && !(flags & IFF_RUNNING))
-	    no_carrier = true;
-	else
-	    no_carrier = false;
-	ifp->set_no_carrier(no_carrier);
-	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
+	do {
+	    bool no_carrier = false;
+	    uint64_t baudrate = 0;
+	    string error_msg;
 
-	//
-	// Get the baudrate
-	//
-	uint64_t baudrate = 0;
-	// TODO: Get the baudrate
-	ifp->set_baudrate(baudrate);
-	debug_msg("baudrate: %u\n", XORP_UINT_CAST(baudrate));
-	
+	    if (ifconfig_media_get_link_status(if_name, no_carrier, baudrate,
+					       error_msg)
+		!= XORP_OK) {
+		// XXX: Use the flags
+		if ((flags & IFF_UP) && !(flags & IFF_RUNNING))
+		    no_carrier = true;
+		else
+		    no_carrier = false;
+	    }
+	    ifp->set_no_carrier(no_carrier);
+	    ifp->set_baudrate(baudrate);
+	    break;
+	} while (false);
+	debug_msg("no_carrier: %s\n", bool_c_str(ifp->no_carrier()));
+	debug_msg("baudrate: %u\n", XORP_UINT_CAST(ifp->baudrate()));
+
 	// XXX: vifname == ifname on this platform
 	ifp->add_vif(alias_if_name);
 	IfTreeVif* vifp = ifp->find_vif(alias_if_name);

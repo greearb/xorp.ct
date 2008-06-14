@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.16 2008/05/09 18:11:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.17 2008/06/14 02:59:22 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -280,8 +280,7 @@ IfConfigGetIoctl::parse_buffer_ioctl(IfConfig& ifconfig, IfTree& iftree,
 	    if (ifconfig_media_get_link_status(if_name, no_carrier, baudrate,
 					       error_msg)
 		!= XORP_OK) {
-		XLOG_ERROR("%s", error_msg.c_str());
-		break;
+		// XXX: No other method to retrieve the information
 	    }
 	    if (is_newlink || (no_carrier != ifp->no_carrier()))
 		ifp->set_no_carrier(no_carrier);

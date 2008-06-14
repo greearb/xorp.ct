@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.5 2008/05/10 21:38:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_media.cc,v 1.6 2008/06/14 02:59:21 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -145,19 +145,28 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
     do {
 	int s;
 	struct ifreq ifreq;
-	struct ethtool_value edata;
+
+	//
+	// XXX: Do this only if we have the necessary permission
+	//
+	if (geteuid() != 0) {
+	    error_msg = c_format("Must be root to query the interface status");
+	    return (XORP_ERROR);
+	}
 
 	memset(&ifreq, 0, sizeof(ifreq));
 	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
-
-	memset(&edata, 0, sizeof(edata));
-	edata.cmd = ETHTOOL_GLINK;
-	ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
 
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
 	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
 	}
+
+	// Get the link status
+	struct ethtool_value edata;
+	memset(&edata, 0, sizeof(edata));
+	edata.cmd = ETHTOOL_GLINK;
+	ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
 	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
 	    error_msg = c_format("ioctl(SIOCETHTOOL) for interface %s "
 				 "failed: %s",
@@ -165,12 +174,32 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    close(s);
 	    return (XORP_ERROR);
 	}
-	close(s);
-
 	if (edata.data != 0)
 	    no_carrier = false;
 	else
 	    no_carrier = true;
+
+	//
+	// Get the link baudrate
+	//
+#ifdef ETHTOOL_GSET
+	struct ethtool_cmd ecmd;
+	memset(&ecmd, 0, sizeof(ecmd));
+	ecmd.cmd = ETHTOOL_GSET;
+	ifreq.ifr_data = reinterpret_cast<caddr_t>(&ecmd);
+	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
+	    //
+	    // XXX: ignore any errors, because the non-Ethernet
+	    // interfaces might not support this query.
+	    //
+	} else {
+	    // XXX: The ecmd.speed is returned in Mbps
+	    baudrate = ecmd.speed * 1000 * 1000;
+	}
+#endif // ETHTOOL_GSET
+
+	close(s);
+
 	return (XORP_OK);
     } while (false);
 #endif // SIOCETHTOOL && ETHTOOL_GLINK
