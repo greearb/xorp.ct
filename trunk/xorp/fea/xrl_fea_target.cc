@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.44 2008/05/08 22:46:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.45 2008/06/14 02:59:21 pavlin Exp $"
 
 
 //
@@ -1455,7 +1455,7 @@ XrlCmdError
 XrlFeaTarget::ifmgr_0_1_get_configured_baudrate(
     // Input values,
     const string&	ifname,
-    uint32_t&		baudrate)
+    uint64_t&		baudrate)
 {
     const IfTreeInterface* ifp = NULL;
     string error_msg;

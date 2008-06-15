@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.29 2008/01/04 03:16:18 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.30 2008/06/14 02:59:23 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -120,7 +120,7 @@ protected:
     XrlCmdError fea_ifmgr_mirror_0_1_interface_set_baudrate(
 	// Input values,
 	const string&	ifname,
-	const uint32_t&	baudrate);
+	const uint64_t&	baudrate);
 
     XrlCmdError fea_ifmgr_mirror_0_1_vif_add(
 	// Input values,
@@ -485,7 +485,7 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_no_carrier(
 XrlCmdError
 IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_baudrate(
 	const string&	ifname,
-	const uint32_t&	baudrate
+	const uint64_t&	baudrate
 	)
 {
     _dispatcher.push(new IfMgrIfSetBaudrate(ifname, baudrate));
