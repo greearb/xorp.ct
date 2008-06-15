@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.19 2008/01/04 03:16:26 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.20 2008/06/14 23:37:59 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -476,6 +476,30 @@ inline void
 XrlArgs::get(const char* n, vector<uint8_t>& a) const throw (BadArgs)
 {
     a = get_binary(n);
+}
+
+inline XrlArgs&
+XrlArgs::add(const char* n, int64_t v) throw (XrlAtomFound)
+{
+    return add_int64(n, v);
+}
+
+inline void
+XrlArgs::get(const char* n, int64_t& t) const throw (BadArgs)
+{
+    t = get_int64(n);
+}
+
+inline XrlArgs&
+XrlArgs::add(const char* n, uint64_t v) throw (XrlAtomFound)
+{
+    return add_uint64(n, v);
+}
+
+inline void
+XrlArgs::get(const char* n, uint64_t& t) const throw (BadArgs)
+{
+    t = get_uint64(n);
 }
 
 inline const XrlAtom&
