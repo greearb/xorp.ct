@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.77 2007/03/15 07:39:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.78 2008/01/04 03:17:39 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -463,10 +463,10 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 	    if (satisfied.find(curr_iter->second) != satisfied.end()) {
 		// Rule is now satisfied.
 		string module = curr_iter->first;
-		depends.erase(curr_iter);
-		progress_made = true;
 		debug_msg("dependency of %s on %s satisfied\n",
 		       module.c_str(), curr_iter->second.c_str());
+		depends.erase(curr_iter);
+		progress_made = true;
 		if (depends.find(module) == depends.end()) {
 		    // This was the last dependency
 		    satisfied.insert(module);
