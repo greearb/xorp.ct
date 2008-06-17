@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.39 2007/05/23 12:12:52 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.40 2008/01/04 03:17:40 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -34,6 +34,7 @@ class RouterCLI;
 class MasterTemplateTree;
 
 class MasterConfigTree : public ConfigTree {
+    typedef XorpCallback0<void>::RefPtr CallBack0;
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
     typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigChangeCallBack;
     typedef XorpCallback2<void, bool, string>::RefPtr ConfigSaveCallBack;
@@ -117,6 +118,12 @@ public:
 	return (MasterConfigTreeNode*)(ConfigTree::find_config_module(module_name));
     }
     
+    /**
+     * A callback to be called once when the initial config has been installed.
+     */
+    void set_task_completed(CallBack0 task_completed_cb) {
+	_task_completed_cb = task_completed_cb;
+    }
 
 private:
     string config_full_filename(const string& filename) const;
@@ -169,6 +176,7 @@ private:
 
     MasterConfigTreeNode _root_node;
     TaskManager*        _task_manager;
+    CallBack0 		_task_completed_cb;
     CallBack		_commit_cb;
     bool		_commit_in_progress;
     bool		_config_failed;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.72 2007/05/23 04:08:30 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.73 2008/01/04 03:17:39 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -78,6 +78,7 @@ static bool	verbose = default_verbose;
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
 int32_t		quit_time = -1;
+static bool	daemon_mode = false;
 
 static void cleanup_and_exit(int errcode);
 
@@ -104,6 +105,7 @@ usage(const char* argv0)
     fprintf(stderr, "  -q <secs> Set forced quit period\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
     fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
+    fprintf(stderr, "  -d        Daemon mode, run in the background\n");
 }
 
 static void
@@ -150,7 +152,8 @@ Rtrmgr::Rtrmgr(const string& template_dir,
 	       bool	do_exec,
 	       bool	do_restart,
 	       bool	verbose,
-	       int32_t quit_time)
+	       int32_t quit_time,
+	       bool daemon_mode)
     : _template_dir(template_dir),
       _xrl_targets_dir(xrl_targets_dir),
       _boot_file(boot_file),
@@ -160,6 +163,7 @@ Rtrmgr::Rtrmgr(const string& template_dir,
       _do_restart(do_restart),
       _verbose(verbose),
       _quit_time(quit_time),
+      _daemon_mode(daemon_mode),
       _ready(false),
       _mct(NULL)
 {
@@ -282,6 +286,9 @@ Rtrmgr::run()
 
 	_mct = new MasterConfigTree(boot_file, tt, mmgr, xclient, _do_exec,
 				    _verbose);
+	if (_daemon_mode) {
+	    _mct->set_task_completed(callback(this, &Rtrmgr::daemonize));
+	}
 	//
 	// XXX: note that theoretically we may receive an XRL before
 	// we call XrlRtrmgrInterface::set_master_config_tree()
@@ -368,6 +375,19 @@ Rtrmgr::module_status_changed(const string& module_name,
     _xrt->module_status_changed(module_name, status);
 }
 
+void
+Rtrmgr::daemonize()
+{
+#if	0
+    if(0 == fork()) {
+	return;
+    }
+    exit(0);
+#else
+    XLOG_UNFINISHED();
+#endif
+}
+
 int
 main(int argc, char* const argv[])
 {
@@ -399,8 +419,11 @@ main(int argc, char* const argv[])
     boot_file		= xorp_boot_file();
 
     int c;
-    while ((c = getopt(argc, argv, "a:n:t:b:x:i:p:q:Nrvh")) != EOF) {
+    while ((c = getopt(argc, argv, "da:n:t:b:x:i:p:q:Nrvh")) != EOF) {
 	switch(c) {
+	case 'd':
+	    daemon_mode = true;
+	    break;
 	case 'a':
 	    //
 	    // User is specifying an IPv4 address to accept finder
@@ -496,7 +519,8 @@ main(int argc, char* const argv[])
     // The main procedure
     //
     Rtrmgr rtrmgr(template_dir, xrl_targets_dir, boot_file, bind_addrs,
-		  bind_port, do_exec, do_restart, verbose, quit_time);
+		  bind_port, do_exec, do_restart, verbose, quit_time,
+		  daemon_mode);
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);

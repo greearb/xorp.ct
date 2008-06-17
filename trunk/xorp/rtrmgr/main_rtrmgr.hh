@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.14 2007/02/16 22:47:22 pavlin Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.15 2008/01/04 03:17:39 pavlin Exp $
 
 #ifndef __RTRMGR_MAIN_RTRMGR_HH__
 #define __RTRMGR_MAIN_RTRMGR_HH__
@@ -37,11 +37,13 @@ public:
 	   bool	do_exec,
 	   bool	do_restart,
 	   bool verbose,
-	   int32_t quit_time);
+	   int32_t quit_time,
+	   bool daemon_mode);
     int run();
     bool ready() const;
     void module_status_changed(const string& module_name,
 			       GenericModule::ModuleStatus status);
+    void daemonize();
     bool verbose() const { return _verbose; }
 
 private:
@@ -55,6 +57,7 @@ private:
     bool	_do_restart;
     bool	_verbose;		// Set to true if output is verbose
     int32_t	_quit_time;
+    bool 	_daemon_mode;
 
     bool	_ready;
     MasterConfigTree* _mct;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.78 2008/01/04 03:17:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.79 2008/06/17 02:50:03 atanu Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -265,6 +265,12 @@ MasterConfigTree::config_done(bool success, string error_msg)
 	_config_failed_msg = error_msg2;
 	return;
     }
+
+    if ( !_task_completed_cb.is_empty()) {
+	_task_completed_cb->dispatch();
+	_task_completed_cb.release();
+    }
+
     debug_msg("MasterConfigTree::config_done returning\n");
 }
 
