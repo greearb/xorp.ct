@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.52 2006/10/19 02:14:23 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.53 2007/04/22 01:57:09 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -104,6 +104,7 @@ test_vif_SOURCES	= test_vif.cc
 
 # -- Library Sources
 libxorp_la_SOURCES  = libxorp_module.h
+libxorp_la_SOURCES += daemon.h
 libxorp_la_SOURCES += debug.h
 libxorp_la_SOURCES += ether_compat.h
 libxorp_la_SOURCES += random.h
@@ -159,6 +160,7 @@ libxorp_la_SOURCES += utils.hh
 libxorp_la_SOURCES += vif.hh
 libxorp_la_SOURCES += win_dispatcher.hh
 
+libxorp_la_SOURCES += daemon.c
 libxorp_la_SOURCES += debug.c
 libxorp_la_SOURCES += ether_compat.c
 libxorp_la_SOURCES += gai_strerror.c

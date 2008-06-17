@@ -59,9 +59,9 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libxorp_la_LIBADD =
-am_libxorp_la_OBJECTS = debug.lo ether_compat.lo gai_strerror.lo \
-	getopt.lo inet_ntop.lo inet_pton.lo random.lo strlcpy.lo \
-	strptime.lo utility.lo win_io.lo xlog.lo asyncio.lo \
+am_libxorp_la_OBJECTS = daemon.lo debug.lo ether_compat.lo \
+	gai_strerror.lo getopt.lo inet_ntop.lo inet_pton.lo random.lo \
+	strlcpy.lo strptime.lo utility.lo win_io.lo xlog.lo asyncio.lo \
 	buffered_asyncio.lo c_format.lo callback.lo clock.lo \
 	eventloop.lo exceptions.lo heap.lo ipnet.lo ipv4.lo ipv6.lo \
 	ipvx.lo mac.lo nexthop.lo popen.lo profile.lo ref_ptr.lo \
@@ -415,9 +415,9 @@ test_utils_SOURCES = test_utils.cc
 test_vif_SOURCES = test_vif.cc
 
 # -- Library Sources
-libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h random.h \
-	xlog.h xorp.h utility.h win_io.h asnum.hh asyncio.hh buffer.hh \
-	buffered_asyncio.hh c_format.hh callback.hh \
+libxorp_la_SOURCES = libxorp_module.h daemon.h debug.h ether_compat.h \
+	random.h xlog.h xorp.h utility.h win_io.h asnum.hh asyncio.hh \
+	buffer.hh buffered_asyncio.hh c_format.hh callback.hh \
 	callback_nodebug.hh callback_debug.hh clock.hh config_param.hh \
 	eventloop.hh exceptions.hh heap.hh ioevents.hh ipnet.hh \
 	ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh \
@@ -425,7 +425,7 @@ libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h random.h \
 	ref_ptr.hh round_robin.hh run_command.hh safe_callback_obj.hh \
 	selector.hh service.hh task.hh time_slice.hh timespent.hh \
 	timer.hh timeval.hh tlv.hh token.hh tokenize.hh transaction.hh \
-	trie.hh utils.hh vif.hh win_dispatcher.hh debug.c \
+	trie.hh utils.hh vif.hh win_dispatcher.hh daemon.c debug.c \
 	ether_compat.c gai_strerror.c getopt.c inet_ntop.c inet_pton.c \
 	random.c strlcpy.c strptime.c utility.c win_io.c xlog.c \
 	asyncio.cc buffered_asyncio.cc c_format.cc callback.cc \
@@ -614,6 +614,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_format.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callback.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clock.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daemon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ether_compat.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eventloop.Plo@am__quote@

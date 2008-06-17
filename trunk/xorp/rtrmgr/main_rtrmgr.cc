@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -12,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.73 2008/01/04 03:17:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.74 2008/06/17 03:37:08 atanu Exp $"
 
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/daemon.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/utils.hh"
 
@@ -65,6 +67,7 @@ static bool default_do_exec = true;
 static bool default_do_restart = false;
 static bool default_verbose = false;
 
+
 //
 // Local state
 //
@@ -72,11 +75,15 @@ static volatile bool	running = false;
 static string	template_dir;
 static string	xrl_targets_dir;
 static string	boot_file;
+static bool     do_logfile = false;
+static bool     do_pidfile = false;
 static bool	do_exec = default_do_exec;
 static bool	do_restart = default_do_restart;
 static bool	verbose = default_verbose;
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
+static string	logfilename;
+static string	pidfilename;
 int32_t		quit_time = -1;
 static bool	daemon_mode = false;
 
@@ -94,7 +101,10 @@ usage(const char* argv0)
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -a <allowed host> Host allowed by the finder\n");
+    fprintf(stderr, "  -d        Run as a UNIX daemon (detach from tty)\n");
+    fprintf(stderr, "  -l <file> Log to file <file>\n");
     fprintf(stderr, "  -n <allowed net>  Subnet allowed by the finder\n");
+    fprintf(stderr, "  -P <pid>  Write process ID to file <pid>\n");
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
@@ -376,15 +386,68 @@ Rtrmgr::module_status_changed(const string& module_name,
 }
 
 void
-Rtrmgr::daemonize()
+open_logfile()
 {
-#if	0
-    if(0 == fork()) {
+    if (logfilename.empty()) {
+	fprintf(stderr, "Empty log filename specified\n");
 	return;
     }
-    exit(0);
-#else
-    XLOG_UNFINISHED();
+    FILE* logfile;
+    if ((logfile = fopen(logfilename.c_str(), "a")) != NULL) {
+       xlog_remove_default_output();
+       xlog_add_output(logfile);
+    } else {
+	fprintf(stderr, "Failed to open log file %s\n", logfilename.c_str());
+    }
+}
+
+void
+write_pidfile(pid_t thepid)
+{
+    if (pidfilename.empty()) {
+	fprintf(stderr, "Empty PID filename specified\n");
+	return;
+    }
+    FILE *pidfile;
+    if ((pidfile = fopen(pidfilename.c_str(), "w")) != NULL) {
+	fprintf(pidfile, "%u\n", thepid);
+	fclose(pidfile);
+    } else {
+	fprintf(stderr, "Failed to write pid file\n");
+    }
+}
+
+void
+Rtrmgr::daemonize()
+{
+    // If not daemonizing, do nothing.
+    if (! daemon_mode)
+	return;
+
+#ifndef HOST_OS_WINDOWS
+    // Daemonize the XORP process. Close open stdio descriptors,
+    // but don't chdir -- we need to stay where we're told to go.
+    int newpid = xorp_daemonize(DAEMON_NOCHDIR, DAEMON_CLOSE);
+    if (newpid == -1) {
+	fprintf(stderr, "Failed to start as a daemon process\n");
+	cleanup_and_exit(1);
+    }
+
+    // Make sure we open the pid file in the parent, and the
+    // log file in the child. Close fds but don't chdir.
+    if (newpid == 0) {
+	// We are now in the child.
+#if 0
+	if (do_logfile)
+	    open_logfile();
+#endif
+	return;
+    }
+
+    // We are in the parent. Write the PID file and exit.
+    if (do_pidfile)
+	write_pidfile(newpid);
+    _exit(0);
 #endif
 }
 
@@ -419,7 +482,7 @@ main(int argc, char* const argv[])
     boot_file		= xorp_boot_file();
 
     int c;
-    while ((c = getopt(argc, argv, "da:n:t:b:x:i:p:q:Nrvh")) != EOF) {
+    while ((c = getopt(argc, argv, "da:l:n:t:b:x:i:P:p:q:Nrvh")) != EOF) {
 	switch(c) {
 	case 'd':
 	    daemon_mode = true;
@@ -436,6 +499,10 @@ main(int argc, char* const argv[])
 		usage(argv[0]);
 		cleanup_and_exit(1);
 	    }
+	    break;
+	case 'l':
+	    do_logfile = true;
+	    logfilename = optarg;
 	    break;
 	case 'n':
 	    //
@@ -478,6 +545,10 @@ main(int argc, char* const argv[])
 	case 'v':
 	    verbose = true;
 	    break;
+	case 'P':
+	    do_pidfile = true;
+	    pidfilename = optarg;
+	    break;
 	case 'p':
 	    bind_port = static_cast<uint16_t>(atoi(optarg));
 	    if (bind_port == 0) {
@@ -514,6 +585,17 @@ main(int argc, char* const argv[])
 	    cleanup_and_exit(1);
 	}
     }
+
+    // If not daemonizing, open the pid file now.
+    if (! daemon_mode) {
+	if (do_pidfile)
+	    write_pidfile(getpid());
+    }
+
+    // Open the log file now so that all output, up to when we daemonize,
+    // will go to the specified log file.
+    if (do_logfile)
+	open_logfile();
 
     //
     // The main procedure
