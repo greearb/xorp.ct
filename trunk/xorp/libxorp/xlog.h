@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.16 2007/04/20 19:06:21 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.17 2008/01/04 03:16:46 pavlin Exp $
  */
 
 
@@ -79,7 +79,8 @@ typedef enum {
 /**
  * The type of add-on functions to process the log messages.
  */
-typedef int (*xlog_output_func_t)(void *obj, const char *msg);
+typedef int (*xlog_output_func_t)(void *obj, xlog_level_t level,
+    const char *msg);
 
 /**
  * A macro used for internal purpose to generate the appropriate xlog code
@@ -238,6 +239,15 @@ int	xlog_remove_output(FILE *fp);
  * @return 0 on success, otherwise -1.
  */
 int 	xlog_add_output_func(xlog_output_func_t func, void *obj);
+
+/**
+ * Add a channel which goes to the X/Open compatible system log aka syslog.
+ *
+ * @param syslogspec the syslog facility and priority as a string
+ *                   "facility.priority"
+ * @return 0 on success, otherwise -1.
+ */
+int	xlog_add_syslog_output(const char *syslogspec);
 
 /**
  * Remove a processing function and an object from the set of output streams.

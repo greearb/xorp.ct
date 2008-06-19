@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.31 2007/10/13 01:30:20 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.32 2008/01/04 03:15:36 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -164,11 +164,12 @@ public:
      * Output a log message to a @ref CliClient object.
      * 
      * @param obj the @ref CliClient object to apply this method to.
+     * @param level the XLOG level.
      * @param msg a C-style string with the message to output.
      * @return on success, the number of characters printed,
      * otherwise %XORP_ERROR.
      */
-    static int	xlog_output(void *obj, const char *msg);
+    static int	xlog_output(void *obj, xlog_level_t level, const char *msg);
     
     /**
      * Find a CLI client @ref CliClient for a given terminal name.

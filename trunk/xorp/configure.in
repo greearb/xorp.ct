@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.217 2008/04/26 00:59:40 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.218 2008/04/28 22:37:46 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.217 2008/04/26 00:59:40 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.218 2008/04/28 22:37:46 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -458,6 +458,11 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h])
 
 dnl
+dnl Check for X/Open Syslog header.
+dnl
+AC_CHECK_HEADERS([syslog.h])
+
+dnl
 dnl Check for POSIX 1003.1 headers.
 dnl
 AC_CHECK_HEADERS([glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/uio.h sys/un.h sys/utsname.h sys/wait.h])
@@ -749,6 +754,9 @@ AC_FUNC_FORK
 
 dnl XXX needed in router manager
 AC_CHECK_FUNCS([realpath])
+
+dnl For syslog support
+AC_CHECK_FUNCS([syslog])
 
 dnl XXX We have a library check but we need to know if the function exists.
 AC_CHECK_FUNCS([hstrerror])

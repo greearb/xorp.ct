@@ -1,4 +1,5 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
 
 /* Copyright (c) 2001-2008 International Computer Science Institute
  *
@@ -13,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.23 2007/04/20 19:06:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.24 2008/01/04 03:16:45 pavlin Exp $"
 
 /*
  * Message logging utility.
@@ -25,6 +26,9 @@
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef HAVE_SYSLOG_H
+#include <syslog.h>
 #endif
 
 #include "xlog.h"
@@ -63,6 +67,7 @@ static size_t		xlog_output_func_count = 0;
 static FILE		*fp_default = NULL;
 static int		xlog_level_enabled[XLOG_LEVEL_MAX];
 static xlog_verbose_t	xlog_verbose_level[XLOG_LEVEL_MAX];
+
 /*
  * XXX: the log level names below has to be consistent with the XLOG_LEVEL_*
  * values.
@@ -99,7 +104,6 @@ static int	xlog_write(FILE* fp, const char* fmt, ...);
 static int	xlog_write_va(FILE* fp, const char* fmt, va_list ap);
 static int	xlog_flush(FILE* fp);
 static const char* xlog_localtime2string_short(void);
-
 
 /*
  * ****************************************************************************
@@ -404,7 +408,7 @@ xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
  * Macro function to generate xlog_info, xlog_warning, etc...
  */
 #define xlog_fn(fn, log_level)					\
-void									\
+void								\
 xlog_##fn (const char *module_name, const char *where, const char *fmt, ...) \
 {									\
     va_list ap;								\
@@ -674,7 +678,7 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
     for (i = 0; i < xlog_output_func_count; ) {
 	xlog_output_func_t func = xlog_outputs_func[i];
 	void *obj = xlog_outputs_obj[i];
-	if (func(obj, buf_output_ptr) < 0) {
+	if (func(obj, log_level, buf_output_ptr) < 0) {
 	    xlog_remove_output_func(func, obj);
 	    continue;
 	}
@@ -1228,3 +1232,159 @@ x_asprintf(char **ret, const char *format, ...)
     return (ret_size);
 }
 
+/*
+ * ****************************************************************************
+ * Syslog interface functions, conforming to X/Open.
+ * ****************************************************************************
+ */
+
+#if defined(HAVE_SYSLOG_H) && defined(HAVE_SYSLOG)
+typedef struct _code {
+	const char	*c_name;
+	int		c_val;
+} SYSLOG_CODE;
+
+static SYSLOG_CODE prioritynames[] = {
+	{ "alert",	LOG_ALERT,	},
+	{ "crit",	LOG_CRIT,	},
+	{ "debug",	LOG_DEBUG,	},
+	{ "emerg",	LOG_EMERG,	},
+	{ "err",	LOG_ERR,	},
+	{ "info",	LOG_INFO,	},
+	{ "notice",	LOG_NOTICE,	},
+	{ "warning",	LOG_WARNING,	},
+	{ NULL,		-1,		}
+};
+
+static SYSLOG_CODE facilitynames[] = {
+	{ "auth",	LOG_AUTH,	},
+	{ "cron", 	LOG_CRON,	},
+	{ "daemon",	LOG_DAEMON,	},
+	{ "kern",	LOG_KERN,	},
+	{ "lpr",	LOG_LPR,	},
+	{ "mail",	LOG_MAIL,	},
+	{ "news",	LOG_NEWS,	},
+	{ "user",	LOG_USER,	},
+	{ "uucp",	LOG_UUCP,	},
+	{ "local0",	LOG_LOCAL0,	},
+	{ "local1",	LOG_LOCAL1,	},
+	{ "local2",	LOG_LOCAL2,	},
+	{ "local3",	LOG_LOCAL3,	},
+	{ "local4",	LOG_LOCAL4,	},
+	{ "local5",	LOG_LOCAL5,	},
+	{ "local6",	LOG_LOCAL6,	},
+	{ "local7",	LOG_LOCAL7,	},
+	{ NULL,		-1,		}
+};
+
+static int
+xlog_level_to_syslog_priority(xlog_level_t xloglevel)
+{
+
+    switch (xloglevel) {
+    case XLOG_LEVEL_FATAL:
+	return (LOG_CRIT);
+	break;
+    case XLOG_LEVEL_ERROR:
+	return (LOG_ERR);
+	break;
+    case XLOG_LEVEL_WARNING:
+	return (LOG_WARNING);
+	break;
+    case XLOG_LEVEL_INFO:
+	return (LOG_INFO);
+	break;
+    default:
+	XLOG_UNREACHABLE();
+    }
+    return (-1);
+}
+
+static int
+xlog_syslog_output_func(void *obj, xlog_level_t level, const char *msg)
+{
+    int priority = xlog_level_to_syslog_priority(level);
+
+    syslog(priority, "%s", msg);
+
+    return (0);
+    UNUSED(obj);
+}
+
+/*
+ * Parse <facility.priority>.
+ */
+static int
+xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
+{
+    int i, retval, xfacility, xpriority;
+    char *facname, *priname, *tmpspec;
+    SYSLOG_CODE* sc;
+
+    retval = 0;
+    facname = priname = tmpspec = NULL;
+
+    tmpspec = strdup(syslogspec);
+    if (tmpspec == NULL)
+	return (retval);
+
+    priname = strchr(tmpspec, '.');
+    if (priname != NULL)
+	*priname = '\0';
+
+    facname = tmpspec;
+    xfacility = -1;
+    for (i = 0, sc = &facilitynames[0]; sc->c_val != -1;  ++sc, ++i) {
+	if (0 == strcasecmp(sc->c_name, facname)) {
+	    xfacility = i;
+	    break;
+	}
+    }
+    if (xfacility == -1)
+	goto out;
+
+    *facility = xfacility;
+
+    if (priname != NULL && ++priname != '\0') {
+	    xpriority = -1;
+	    for (i = 0, sc = &prioritynames[0]; sc->c_val != -1; ++sc, ++i) {
+		if (0 == strcasecmp(sc->c_name, priname)) {
+		    xpriority = i;
+		    break;
+		}
+	    }
+	    if (xpriority == -1) {
+		goto out;
+	    }
+	    *priority = xpriority;
+    } else
+	*priority = LOG_WARNING;
+
+    retval = 0;
+out:
+    free(tmpspec);
+    return (retval);
+}
+
+int
+xlog_add_syslog_output(const char *syslogspec)
+{
+    int facility, priority;
+
+    if (-1 == xlog_parse_syslog_spec(syslogspec, &facility, &priority))
+	return (-1);
+
+    openlog("xorp", LOG_PID | LOG_NDELAY | LOG_CONS, facility);
+    xlog_add_output_func(xlog_syslog_output_func, NULL);
+
+    return (0);
+}
+
+#else /* !(HAVE_SYSLOG_H && HAVE_SYSLOG) */
+int
+xlog_add_syslog_output(const char *syslogspec)
+{
+    return (-1);
+    UNUSED(syslogspec);
+}
+#endif /* HAVE_SYSLOG_H && HAVE_SYSLOG */

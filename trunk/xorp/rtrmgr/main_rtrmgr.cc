@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.74 2008/06/17 03:37:08 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.75 2008/06/17 08:29:42 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -77,11 +77,13 @@ static string	xrl_targets_dir;
 static string	boot_file;
 static bool     do_logfile = false;
 static bool     do_pidfile = false;
+static bool     do_syslog = false;
 static bool	do_exec = default_do_exec;
 static bool	do_restart = default_do_restart;
 static bool	verbose = default_verbose;
 list<IPv4>	bind_addrs;
 uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
+static string	syslogspec;
 static string	logfilename;
 static string	pidfilename;
 int32_t		quit_time = -1;
@@ -103,6 +105,7 @@ usage(const char* argv0)
     fprintf(stderr, "  -a <allowed host> Host allowed by the finder\n");
     fprintf(stderr, "  -d        Run as a UNIX daemon (detach from tty)\n");
     fprintf(stderr, "  -l <file> Log to file <file>\n");
+    fprintf(stderr, "  -L <facility.priority> Log to syslog facility\n");
     fprintf(stderr, "  -n <allowed net>  Subnet allowed by the finder\n");
     fprintf(stderr, "  -P <pid>  Write process ID to file <pid>\n");
     fprintf(stderr, "  -h        Display this information\n");
@@ -394,11 +397,22 @@ open_logfile()
     }
     FILE* logfile;
     if ((logfile = fopen(logfilename.c_str(), "a")) != NULL) {
-       xlog_remove_default_output();
        xlog_add_output(logfile);
     } else {
 	fprintf(stderr, "Failed to open log file %s\n", logfilename.c_str());
     }
+}
+
+void
+open_syslog()
+{
+    if (syslogspec.empty()) {
+	fprintf(stderr, "Empty syslog spec\n");
+	return;
+    }
+    int retval = xlog_add_syslog_output(syslogspec.c_str());
+    if (retval == -1)
+	fprintf(stderr, "Failed to open syslog spec %s\n", logfilename.c_str());
 }
 
 void
@@ -482,7 +496,7 @@ main(int argc, char* const argv[])
     boot_file		= xorp_boot_file();
 
     int c;
-    while ((c = getopt(argc, argv, "da:l:n:t:b:x:i:P:p:q:Nrvh")) != EOF) {
+    while ((c = getopt(argc, argv, "da:l:L:n:t:b:x:i:P:p:q:Nrvh")) != EOF) {
 	switch(c) {
 	case 'd':
 	    daemon_mode = true;
@@ -503,6 +517,10 @@ main(int argc, char* const argv[])
 	case 'l':
 	    do_logfile = true;
 	    logfilename = optarg;
+	    break;
+	case 'L':
+	    do_syslog = true;
+	    syslogspec = optarg;
 	    break;
 	case 'n':
 	    //
@@ -592,10 +610,14 @@ main(int argc, char* const argv[])
 	    write_pidfile(getpid());
     }
 
-    // Open the log file now so that all output, up to when we daemonize,
-    // will go to the specified log file.
+    // Open the new log facility now so that all output, up to when we
+    // daemonize, will go to the specified log facility.
+    if (do_logfile || do_syslog)
+        xlog_remove_default_output();
     if (do_logfile)
 	open_logfile();
+    if (do_syslog)
+	open_syslog();
 
     //
     // The main procedure

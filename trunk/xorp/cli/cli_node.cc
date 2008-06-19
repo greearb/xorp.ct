@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.39 2007/10/13 01:30:20 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.40 2008/01/04 03:15:36 pavlin Exp $"
 
 
 //
@@ -427,7 +427,7 @@ CliNode::find_cli_by_session_id(uint32_t session_id) const
  * otherwise %XORP_ERROR.
  **/
 int
-CliNode::xlog_output(void *obj, const char *msg)
+CliNode::xlog_output(void *obj, xlog_level_t level, const char *msg)
 {
     CliClient *cli_client = static_cast<CliClient *>(obj);
 
@@ -437,6 +437,7 @@ CliNode::xlog_output(void *obj, const char *msg)
 	    return ret_value;
 	}
     return  XORP_ERROR;
+    UNUSED(level);
 }
 
 //
