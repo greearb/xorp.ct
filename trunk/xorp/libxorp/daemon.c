@@ -35,6 +35,10 @@ static char sccsid[] = "@(#)daemon.c	8.1 (Berkeley) 6/4/93";
 __FBSDID("$FreeBSD: src/lib/libc/gen/daemon.c,v 1.8 2007/01/09 00:27:53 imp Exp $");
 #endif
 
+#include "libxorp_module.h"
+
+#include "libxorp/xorp.h"
+
 #ifndef HOST_OS_WINDOWS
 #include <errno.h>
 #include <fcntl.h>
@@ -43,9 +47,8 @@ __FBSDID("$FreeBSD: src/lib/libc/gen/daemon.c,v 1.8 2007/01/09 00:27:53 imp Exp 
 #include <signal.h>
 #include <unistd.h>
 
-#include "xorp.h"
 #include "daemon.h"
-#endif
+#endif /* ! HOST_OS_WINDOWS */
 
 int
 xorp_daemonize(int nochdir, int noclose)
@@ -97,9 +100,11 @@ xorp_daemonize(int nochdir, int noclose)
 		if (fd > 2)
 			(void)close(fd);
 	}
-#else
+#else /* HOST_OS_WINDOWS */
+
 	UNUSED(nochdir);
 	UNUSED(noclose);
-#endif
+#endif /* HOST_OS_WINDOWS */
+
 	return (0);
 }
