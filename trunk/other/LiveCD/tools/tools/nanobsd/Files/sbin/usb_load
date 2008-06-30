@@ -1,0 +1,36 @@
+#!/bin/sh
+
+# Set up for reloading config on a retry
+
+CFG_MOUNTPOINT="/cfg"
+CFG_DIR="/cfg/xorp.cfg"
+ETC_SAVE="dhclient.conf group host.conf hostid hosts inetd.conf master.passwd networks ntp ntp.conf passwd pf.conf ppp pwd.db rc.conf resolv.conf spwd.db ssh ssl sysctl.conf syslog.conf ttys local/xorp.conf"
+
+set -e
+
+cfgslice=`grep $CFG_MOUNTPOINT /etc/fstab | cut -d \  -f 1`
+
+echo "Mounting USB disk..."
+mount $CFG_MOUNTPOINT
+# mount returns 0 even if device didn't exist; need to check w/df
+dfline=$(df $CFG_MOUNTPOINT | tail +2)
+if [ "$CFG_MOUNTPOINT" != "$(echo $dfline | awk '{print $NF}')" ]; then
+    echo "ERROR: Cannot mount $CFG_MOUNTPOINT partition."
+    exit 2
+fi
+trap "umount $CFG_MOUNTPOINT" 1 2 15 EXIT
+
+echo "Loading configuration..."
+if [ -d $CFG_DIR ]; then
+    ( cd $CFG_DIR && tar cf - ${ETC_SAVE} ) | \
+    ( cd /etc && tar xf - 2>/dev/null )
+    # XXX May need to fix permissions!
+else
+    echo "ERROR: Config directory $CFG_DIR does not exist."
+fi
+
+echo "Unmounting USB disk..."
+umount $CFG_MOUNTPOINT
+trap 1 2 15 EXIT
+
+echo "Done!"
