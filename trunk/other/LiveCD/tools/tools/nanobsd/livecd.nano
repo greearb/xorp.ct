@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: other/LiveCD/tools/tools/nanobsd/livecd.nano,v 1.1 2008/06/30 11:30:09 bms Exp $
 #
 
 # Notes:
@@ -15,7 +15,7 @@ NANO_ISONAME='XORP_LiveCD_1.5.iso'
 
 # Use our own FreeBSD 7.0-RELEASE checkout, as we need to apply
 # a patch to /etc/rc.initdiskless.
-NANO_SRC=/home/bms/cvs/RELENG_7_0/src
+NANO_SRC=${NANO_SRC:-"/home/bms/cvs/RELENG_7_0/src"}
 NANO_KERNEL=LIVECD
 NANO_IMAGES=1
 
@@ -30,8 +30,8 @@ NANO_CONF_FSOPTS=longnames
 NANO_CONF_SUBDIR='xorp.cfg'
 
 # Path to precompiled packages.
-XORP_PACKAGES_DIR="/usr/ports/packages/All"
-XORP_PACKAGES="xorp-1.4_1.tbz"
+XORP_PACKAGES_DIR=${XORP_PACKAGES_DIR:-"/usr/ports/packages/All"}
+XORP_PACKAGES=${XORP_PACKAGES:-"xorp-1.4_1.tbz"}
 
 #
 # World options.

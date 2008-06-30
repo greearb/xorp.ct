@@ -41,7 +41,7 @@ set -x
 NANO_NAME=full
 
 # Source tree directory
-NANO_SRC=/usr/src
+NANO_SRC=${NANO_SRC:-"/usr/src"}
 
 # Where nanobsd additional files live under the source tree
 NANO_TOOLS=tools/tools/nanobsd
