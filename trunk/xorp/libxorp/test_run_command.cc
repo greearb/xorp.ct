@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.18 2007/08/30 06:02:28 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.19 2008/01/04 03:16:43 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -35,8 +36,8 @@
 #define AWK_VIA_SHELL_PATH	"/bin/gawk"
 #else
 #define SLEEP_PATH		"/bin/sleep"
-#define AWK_PATH		"/usr/bin/awk"
-#define AWK_VIA_SHELL_PATH	AWK_PATH
+string  AWK_PATH("/usr/bin/awk");
+string& AWK_VIA_SHELL_PATH = AWK_PATH;
 #endif
 
 static string cmdroot = "";
@@ -917,6 +918,13 @@ main(int argc, char * const argv[])
 	    _cmdroot = const_cast<char *>(MSYS_DEFAULT_ROOT);
 	cmdroot = string(_cmdroot);
     }
+#else
+    struct stat st;
+
+    if (stat(AWK_PATH.c_str(), &st) == -1)
+	AWK_PATH = "/bin/awk";
+
+    XLOG_ASSERT(stat(AWK_PATH.c_str(), &st) == 0);
 #endif
 
     int ch;
