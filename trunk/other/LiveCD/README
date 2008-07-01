@@ -1,5 +1,5 @@
 #
-# $XORP: other/LiveCD/README,v 1.6 2008/06/30 11:18:57 bms Exp $
+# $XORP: other/LiveCD/README,v 1.7 2008/06/30 18:08:57 pavlin Exp $
 #
 
 XORP Live CD Creation Toolkit
@@ -140,6 +140,14 @@ Typically one would generate a XORP LiveCD using a command like this
 As refinements are made to the build, the kernel and world steps may
 even be omitted when rebuilding the ISO image:
   # sh nanobsd.sh -c livecd.nano -k -w
+
+The generated LiveCD would be in the /usr/obj/nanobsd.livecd
+directory and would be named XORP_LiveCD_X.Y.iso where X.Y
+is the release version. E.g.:
+  /usr/obj/nanobsd.livecd/XORP_LiveCD_1.5.iso
+
+On FreeBSD the LiveCD can be burned to a CD with the following command:
+  # burncd data XORP_LiveCD_1.5.iso fixate
 
 
 Notes
