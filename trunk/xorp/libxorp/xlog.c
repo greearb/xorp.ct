@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.24 2008/01/04 03:16:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.25 2008/06/19 09:56:05 bms Exp $"
 
 /*
  * Message logging utility.
@@ -1369,7 +1369,8 @@ out:
 int
 xlog_add_syslog_output(const char *syslogspec)
 {
-    int facility, priority;
+    int facility = -1;
+    int priority = -1;
 
     if (-1 == xlog_parse_syslog_spec(syslogspec, &facility, &priority))
 	return (-1);
