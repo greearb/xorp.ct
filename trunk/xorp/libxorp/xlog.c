@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.25 2008/06/19 09:56:05 bms Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.26 2008/07/01 18:22:27 pavlin Exp $"
 
 /*
  * Message logging utility.
@@ -1321,7 +1321,7 @@ xlog_parse_syslog_spec(const char *syslogspec, int *facility, int *priority)
     char *facname, *priname, *tmpspec;
     SYSLOG_CODE* sc;
 
-    retval = 0;
+    retval = -1;
     facname = priname = tmpspec = NULL;
 
     tmpspec = strdup(syslogspec);
