@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.88 2008/03/09 00:21:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.89 2008/06/05 21:28:16 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -978,8 +978,13 @@ MfeaNode::add_pim_register_vif()
 	// TODO: XXX: the Register vif name is hardcoded here!
 	MfeaVif register_vif(*this, Vif("register_vif"));
 	register_vif.set_vif_index(vif_index);
-	// XXX: No physical interface index, hence set it to zero
-	register_vif.set_pif_index(0);
+	//
+	// XXX: A hack to make it appear that the PIM Register vif
+	// has a valid physical interface index.
+	// This is needed to pass a requirement inside the KAME-derived
+	// IPv6 BSD kernel.
+	//
+	register_vif.set_pif_index(mfea_vif->pif_index());
 	register_vif.set_underlying_vif_up(true); // XXX: 'true' to allow creation
 	register_vif.set_pim_register(true);
 	register_vif.set_mtu(mfea_vif->mtu());
@@ -1012,7 +1017,7 @@ MfeaNode::add_pim_register_vif()
 	_mfea_iftree.add_interface(register_vif.name());
 	mfea_ifp = _mfea_iftree.find_interface(register_vif.name());
 	XLOG_ASSERT(mfea_ifp != NULL);
-	mfea_ifp->set_pif_index(register_vif.pif_index());
+	mfea_ifp->set_pif_index(0);		// XXX: invalid pif_index
 	mfea_ifp->set_enabled(register_vif.is_underlying_vif_up());
 	mfea_ifp->set_mtu(register_vif.mtu());
 	_mfea_iftree_update_replicator.interface_update(mfea_ifp->ifname(),
@@ -1021,7 +1026,7 @@ MfeaNode::add_pim_register_vif()
 	mfea_ifp->add_vif(register_vif.name());
 	mfea_vifp = mfea_ifp->find_vif(register_vif.name());
 	XLOG_ASSERT(mfea_vif != NULL);
-	mfea_vifp->set_pif_index(register_vif.pif_index());
+	mfea_vifp->set_pif_index(0);		// XXX: invalid pif_index
 	mfea_vifp->set_vif_index(register_vif.vif_index());
 	mfea_vifp->set_enabled(register_vif.is_underlying_vif_up());
 	mfea_vifp->set_pim_register(register_vif.is_pim_register());
