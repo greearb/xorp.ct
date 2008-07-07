@@ -1,9 +1,9 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/utils/Makefile.am,v 1.12 2005/04/29 21:44:10 pavlin Exp $
+## $XORP: xorp/utils/Makefile.am,v 1.13 2008/05/03 00:05:26 pavlin Exp $
 ##
 
-SUBDIRS = . @FLOWER_MALLOC@
+SUBDIRS = .
 
 # -- Real Programs
 bin_PROGRAMS	 =

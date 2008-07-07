@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.219 2008/06/19 09:56:02 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.220 2008/07/07 11:40:16 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-RC], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.219 2008/06/19 09:56:02 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.220 2008/07/07 11:40:16 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -917,28 +917,6 @@ dnl VLAN interface configuration method checks
 dnl
 builtin(include, config/acvlan.m4)
 
-
-dnl ---------------------------------------------------------------------------
-dnl utils/flower_malloc related
-dnl ---------------------------------------------------------------------------
-
-dnl flower_malloc in utils is an interposer and is only known to
-dnl work on systems supporting -shared.  AFAICT this needs some work for
-dnl a real test.  As a stop gap, we assume that if we are on *BSD or Linux
-dnl things work okay.  Only known failure case is OS X.
-
-case "${host_os}" in
-    *bsd* )
-	FLOWER_MALLOC=flower_malloc
-    ;;
-    linux* )
-	FLOWER_MALLOC=flower_malloc
-    ;;
-    *)
-    ;;
-esac
-AC_SUBST(FLOWER_MALLOC)
-
 dnl ---------------------------------------------------------------------------
 dnl Debug flags
 dnl ---------------------------------------------------------------------------
@@ -1197,7 +1175,6 @@ AC_CONFIG_FILES([
     rtrmgr/config/Makefile
     static_routes/Makefile
     utils/Makefile
-    utils/flower_malloc/Makefile
     xrl/Makefile
     xrl/interfaces/Makefile
     xrl/targets/Makefile

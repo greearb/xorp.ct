@@ -111,7 +111,6 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
-FLOWER_MALLOC = @FLOWER_MALLOC@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -211,7 +210,7 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = . @FLOWER_MALLOC@
+SUBDIRS = .
 
 # -- Libraries and library flags to link the binary programs
 LDADD = 
