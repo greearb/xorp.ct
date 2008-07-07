@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.31 2008/04/22 13:53:02 bms Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.32 2008/04/22 16:03:43 pavlin Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -145,7 +145,7 @@ extern char const *comm_get_last_error_str(void);
  */
 extern int	comm_ipv4_present(void);
 
-/*
+/**
  * Test whether the underlying system has IPv6 support.
  *
  * @return XORP_OK on success, otherwise XORP_ERROR.
