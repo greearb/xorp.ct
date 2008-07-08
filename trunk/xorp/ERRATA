@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.40 2007/08/10 00:08:59 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.41 2008/04/26 00:59:39 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -163,6 +163,9 @@
  
  /* fn returns 0 to continue iteration */
 
+    - On Linux systems up to year 2008 or so a VLAN can be configured
+      on a network interface only if the interface us UP.
+      Eventually this limitation would be fixed in Linux kernel 2.6.28.
 
   RIB:
     - In some rare cases, the RIB may fail to delete an existing route:
