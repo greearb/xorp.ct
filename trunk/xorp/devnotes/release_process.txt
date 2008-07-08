@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.68 2007/09/19 22:25:35 atanu Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.69 2008/01/05 00:41:30 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -247,7 +247,7 @@ the login shell is csh or tcsh):
 	WHEN: 1 day before the release date
 	COMMANDS:
  ssh www.xorp.org
- cd /home/www/u1/www/data/xorp-test
+ cd /usr/local/www/apache22/data/xorp-test
  cvs update -d -P
 
 ========================================================================
