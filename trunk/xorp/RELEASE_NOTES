@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.201 2008/06/14 23:55:11 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.202 2008/07/07 11:40:16 bms Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.5-RC (2007/07/08)
+Release 1.5-RC (2008/07/08)
 ===========================
   ALL:
     - XORP now builds on DragonFlyBSD-1.10.1, Linux Fedora 7,
@@ -90,6 +90,30 @@ Release 1.5-RC (2007/07/08)
           }
       }
 
+    - Addition of preliminary support to configure firewall rules.
+      Firewall rules are configured by using numbered entries:
+
+      firewall {
+          rule4 100 {
+              action: "drop"
+              protocol: 6		/* TCP */
+              source {
+                  interface: "fxp0"
+                  vif: "fxp0"
+                  network: 0.0.0.0/0
+                  port-begin: 0
+                  port-end: 65535
+              }
+              destination {
+                  network: 10.10.0.0/24
+                  port-begin: 0
+                  port-end: 1024
+              }
+          }
+      }
+      Note that compiling firewall support on Linux systems require
+      patching some of the system header files. See ERRATA for details.
+
     - The following PIM-SM configuration statements have been deprecated,
       because PIM-SM doesn't use Router Alert IP option anymore:
 
@@ -117,6 +141,11 @@ Release 1.5-RC (2007/07/08)
     - The local system-independent xorp_random() implemenation is used
       instead of the random(3) provided by the system.
 
+    - Improved MAC address support (classes Mac and EtherMac).
+
+    - More consistent usage of XORP_OK and XORP_ERROR to return error
+      codes.
+
   LIBXIPC:
     - Bug fix in the internal mechanism for obtaining the IPv4 addresses
       from the system. After the bug fix, a secondary (alias) IP address
@@ -124,7 +153,7 @@ Release 1.5-RC (2007/07/08)
       the xorp_rtrmgr or xorp_finder binaries.
 
   LIBFEACLIENT:
-    - 
+    - No significant changes.
 
   XRL:
     - Critical bug fix that can be triggered by malformatted XRLs.
@@ -133,7 +162,10 @@ Release 1.5-RC (2007/07/08)
       signed and unsigned respectively.
 
   RTRMGR:
-    - 
+    - Addition of preliminary mechanism to log events to a file or
+      to a syslog facility.
+
+    - Addition of support to run XORP in background (in daemon mode).
 
   XORPSH:
     - Bug fix related to assigning the node ID position in case the
@@ -152,9 +184,11 @@ Release 1.5-RC (2007/07/08)
       xorpsh to exit immediately if the connection to the Finder fails.
 
   POLICY:
-    - 
+    - No significant changes.
 
   FEA/MFEA:
+    - Major refactoring of the FEA/MFEA internals.
+
     - Critical bug fix that affects recent NetBSD and OpenBSD releases.
 
     - Critical IPv6-related bug fix when adding unicast forwarding
@@ -167,7 +201,7 @@ Release 1.5-RC (2007/07/08)
       net.inet6.ip6.mforwarding (for OpenBSD-4.0 and later).
 
   RIB:
-    - 
+    - No significant changes.
 
   RIP/RIPng:
     - Addition of support for "show ripng" xorpsh operational commands.
@@ -211,19 +245,19 @@ Release 1.5-RC (2007/07/08)
       using xorpsh.
 
   MLD/IGMP:
-    - 
+    - No significant changes.
 
   PIM-SM:
-    - 
+    - No significant changes.
 
   FIB2MRIB:
-    - 
+    - No significant changes.
 
   CLI:
-    - 
+    - No significant changes.
 
   SNMP:
-    - 
+    - No significant changes.
 
 Release 1.4 (2007/03/20)
 =========================
