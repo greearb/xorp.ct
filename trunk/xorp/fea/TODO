@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.35 2007/04/20 06:36:59 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.36 2008/05/08 22:46:34 pavlin Exp $
 #
 
 * Check ioctl(SIOCGETTUNNEL) usage from Linux net-tools from USAGI's
@@ -134,23 +134,3 @@
 ==== Packet ACL-specific TODO                                            =====
 
 * Regression test for top half.
-
-* Roll shell scripts for management (add, delete, dump contents).
-
-* Add a new packet ACL template for the router manager, based on the
-  now defunct etc/templates/firewall* files.
-
-* Optional items:
-
- - Paranoid checking for top-level snapshot state.
-
- - If we desire the ability to flush a transaction in progress, we
-   must add a back-reference to the transaction ID to each
-   operation because of how the base classes in libxorp are laid out.
-
- - Only snapshot a given table in pre_commit() if the operations in
-   the transaction would actually change such tables.
-
- - IPv6 support.
-
- - Fixup comments.
