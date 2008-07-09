@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.14 2008/01/04 03:15:38 pavlin Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.15 2008/07/07 11:40:17 bms Exp $
  */
 
 !include LogicLib.nsh
@@ -45,7 +45,7 @@
 !define DLLDIR		"C:\MinGW\bin"
 
 # XXX: Set this to the Windows-style path of your source build directory.
-!define SRCDIR		"U:\xorp"
+!define SRCDIR		"C:\release\xorp"
 
 # XXX
 !define TMPDIR		"C:\windows\temp"
@@ -283,6 +283,19 @@ Section /o "MLD6IGMP" 5
 !endif
 SectionEnd
 
+Section /o "OLSR" 6
+ SectionSetText 5 "OLSR: Optimized Link State Routing Protocol"
+!ifndef DEBUG
+  CreateDirectory $INSTDIR\contrib\olsr
+  SetOutPath $INSTDIR\contrib\olsr
+  File ${SRCDIR}\contrib\olsr\xorp_olsr4.exe
+  CreateDirectory $INSTDIR\contrib\olsr\tools
+  SetOutPath $INSTDIR\contrib\olsr\tools
+  File ${SRCDIR}\contrib\olsr\tools\clear_database.exe
+  File ${SRCDIR}\contrib\olsr\tools\print_databases.exe
+!endif
+SectionEnd
+
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
@@ -381,6 +394,13 @@ Section Uninstall
   RMDir "$INSTDIR\pim"
   Delete "$INSTDIR\mld6igmp\*.exe"
   RMDir "$INSTDIR\mld6igmp"
+
+  # Try removing everything else.
+  Delete "$INSTDIR\contrib\olsr\tools\*.exe"
+  RMDir "$INSTDIR\contrib\olsr\tools"
+  Delete "$INSTDIR\contrib\olsr\*.exe"
+  RMDir "$INSTDIR\contrib\olsr"
+  RMDir "$INSTDIR\contrib"
 
 !ifndef DEBUG
   Delete "$INSTDIR\cli\tools\*.exe"
