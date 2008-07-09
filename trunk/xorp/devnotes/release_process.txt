@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.69 2008/01/05 00:41:30 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.70 2008/07/08 15:45:13 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -246,7 +246,7 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: 1 day before the release date
 	COMMANDS:
- ssh www.xorp.org
+ ssh test.xorp.org
  cd /usr/local/www/apache22/data/xorp-test
  cvs update -d -P
 
@@ -433,7 +433,7 @@ the login shell is csh or tcsh):
  setenv ReleaseVersion `cat _XORP_VERSION`
  echo $ReleaseVersion
  rm _XORP_VERSION
- cd /home/www/u1/www/data/xorp-releases
+ cd /usr/local/www/apache22/data/xorp-releases
  mkdir $ReleaseVersion
  cd $ReleaseVersion
  mv ~/xorp-$ReleaseVersion.tar.gz .
@@ -503,7 +503,7 @@ the login shell is csh or tcsh):
 	WHEN: Right after the release
 	COMMANDS:
  ssh www.xorp.org
- cd /home/www/u1/www/data/xorp
+ cd /usr/local/www/apache22/data/xorp-www
  cvs update -d -P
 
 ========================================================================
@@ -673,7 +673,7 @@ the login shell is csh or tcsh):
 	MISC: Should be omitted for a release candidate.
 	COMMANDS:
  ssh www.xorp.org
- cd /home/www/u1/www/data/xorp-releases
+ cd /usr/local/www/apache22/data/xorp-releases
  # Remove the Release Candidate directory (e.g., 1.4-RC)
 
 ========================================================================
