@@ -1,0 +1,522 @@
+% ok this is heavily copied from juniper... i know =D
+\documentclass{article}
+\usepackage{url}
+\title{Routing policy filters\\requirements v0.03}
+\author{ab $<$a.bittau@cs.ucl.ac.uk$>$}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Routing protocols have the ability to import and export information to and from the RIB.
+What is allowed to enter and leave the RIB is regulated by policies. A policy is
+defined by a policy statement which consists of a route-matching section, and
+actions to be performed section. In the future, this route-matching facility may
+be used to perform other tasks such as load-balancing and logging, other than
+only the standard policy actions. The following text was heavily influenced by
+Juniper's
+manual\footnote{http://www.juniper.net/techpubs/software/junos/junos63/swconfig63-policy/toc/noframes-collapsedTOC.htm}.
+% logging may be implemented as an export protocol...
+
+\section{Protocols and policies}
+A protocol may {\em import} and {\em export} routes to and from the RIB, according to policy
+specifications. 
+\begin{description}
+\item[import] These are the routes learned by routing protocols, which are about
+to enter the RIB. 
+\item[export] These are routes in the RIB which will be advertised by
+the routing protocol.
+\end{description}
+
+Route redistribution is achieved by exporting routes which were imported by
+other protocols. Also, multiple policies may be specified per protocol.
+
+Here are some examples:
+\begin{verbatim}
+protocols {
+   rip {
+      /* route redistribution from BGP->RIP */
+      export BGP-to-RIP-policy;
+   }
+   
+   bgp {
+      /* allow routes that have specific AS paths */ 
+      import allowed-AS-policy;
+
+      /* route redistribution of OSPF area2 to BGP */
+      export OSPF-area2-policy;
+   }
+
+   ospf {
+      /* do not advertise default routes */
+      /* advertise only network X */
+      export no-default-policy allow-netowrkX-policy;
+   }
+}
+\end{verbatim}
+
+\section{Policy statements}
+A {\em policy-statement} is a chain of {\em terms} (rules). A term is an atomic
+policy unit which specifies how a route is matched and what action will be taken
+in the case of a match. All policies have default actions, indicating what is
+performed if no match occurs, or if no action is specified in the configuration.
+Terms are evaluated sequentially and in the order as they occur in the
+configuration. The same is true for multiple policies in import and export
+statements.
+
+Here are some examples:
+\begin{verbatim}
+policy-statement one {
+   /* single named term */
+   term a {
+      /* specify policy here */
+   }
+}
+policy-statement two {
+  /* chain of terms */
+  term a {}
+  term b {}
+  /* ... */
+}
+\end{verbatim}
+
+
+
+
+
+\subsection{Route matching}
+Routes are mainly matched according to their {\em source}, i.e. how they were
+learnt. Routes which are being exported may additionally be matched according to
+their {\em destination} (no destination matching for import policies however).
+Different routing protocols have different fields and parameters. This implies
+that specific fields by which routes are matched will vary according to the
+routing protocol which originated them. There are however generic criteria which
+may be used to match routes which came from any protocol.  These criteria are
+summarized in table~\ref{matchgen}. 
+In import policies, only the fields of the protocol which is doing the actual
+import may be matched. 
+Similarly, when matching according to destination, only the fields of the
+protocol used for the export may be used for matching. If no matching criteria
+are specified, by default, all routes are matched.
+
+\begin{table}
+\begin{tabular}{l l}
+protocol	     & Routing protocol that originated route. \\
+network4 / network6  & The IP network. \\
+nexthop4 / nexthop6  & The next-hop for the network. \\
+\end{tabular}
+\caption{\label{matchgen}Generic matching criteria}
+\end{table}
+
+Here are some examples:
+\begin{verbatim}
+term a {
+   /* match everything again */
+   source { }
+   /* ... */
+}
+term bad_adv {
+   /* match private IP class */
+   source {
+      protocol bgp;
+      network4 10.0.0.0/8;
+   }
+   /* ... */
+}
+term defaultroute_guard {
+   /* match all defaultroute advertisements */
+   dest {
+      network4 0.0.0.0/0;
+   }
+}
+\end{verbatim}
+
+Protocol specific matching criteria for RIP are summarized in
+table~\ref{matchrip} and BGP in~\ref{matchbgp}.
+
+\begin{table}
+\begin{tabular}{l l}
+metric		& RIP metric / cost. \\
+tag		& RIP Tag. \\
+\end{tabular}
+\caption{\label{matchrip}OSPF matching criteria}
+\end{table}
+
+\begin{table}
+\begin{tabular}{l l}
+origin		& BGP Origin. \\
+aspath		& BGP AS-Path. \\
+med		& BGP Multi-Exit Discriminator. \\
+localpref	& BGP LOCAL\_PREF. \\
+atomicagg	& BGP atomic aggregate. \\
+aggregator	& BGP aggregator. \\
+\end{tabular}
+\caption{\label{matchbgp}BGP matching criteria}
+\end{table}
+
+
+\subsubsection{Operators}
+All the criteria in a source block need to be satisfied for a match to occur
+(logical AND). The same is true for the criteria specified in the dest block, if
+present. Some boolean operators are provided to increase expressiveness.  These
+may be divided into two main categories:
+\begin{description}
+\item[logical] NOT, AND, OR, XOR
+\item[relational] $==$, $!=$, $<$, $>$, $<=$, $>=$
+\end{description}
+Predicates may be grouped in parenthesis in order to achieve the desired precedence.
+
+Additionally, two more advanced operators exist:
+\begin{description}
+\item[REGEX expression] Matches given the regular expression.
+\item[SET name] Matches according to the set specified by
+name. Sets are explained in section~\ref{sets}.
+\end{description}
+
+%
+% Regular expressions give great power... i did not include the juniper
+% longer,exact, lessthan, etc for route-filter matches such as this:
+% 192.168.0.0/16 orlonger;
+% it may be expressed via regex.
+%
+
+Here are some examples:
+\begin{verbatim}
+source {
+   metric < 9 and metric > 5;
+}
+
+/* equivalent to previous */
+source {
+   metric == REGEX "[5-9]";
+}
+
+source {
+   (network4 == 1.2.3.0/24 and metric == 10) or 
+   (network4 == 6.6.6.0/24 and metric == 5);
+}
+\end{verbatim}
+
+
+\subsubsection{\label{sets}Sets}
+Sometimes it is necessary to match a particular field against a set of values.
+For example, it is particularly useful when matching networks and AS numbers.
+This type of matching may be achieved via the SET operator. Care must be
+taken in order to make sure that the elements of the set are of the same type
+of the field being matching. Also, matching may be done in several ways as
+defined by the relational operator used: 
+% == exactly equal     eg. [a,b,c] VS [b,c,a]
+% != not exactly equal eg. [a,b,c] VS [d,e,f]   (no intersection)
+%  < all left matched  eg. [a,b] VS [a,b,c] (intersection subset of second)
+%  > all right matched eg. [a,b,c] VS [a,b] (intersection subset of first)
+% <= and >= defined similar...
+%  
+\begin{description}
+\item[$==$] All elements in set match
+\item[$!=$] No elements in set match (empty intersection).
+\item[$<=$] At least one element in the set is matched.
+\end{description}
+
+Consider the case in which the field being matched is itself a set of values,
+such as the BGP community field. In these cases the following operators may be
+useful:
+\begin{description}
+\item[$>=$] The set is a subset of the field elements.
+\item[$<$] All field elements are matched, but the set contains more elements.
+\item[$>$] All set elements are matched, but the field contains more elements.
+\end{description}
+Notice that $<=$, more specifically, means that the field is a subset of the
+set. Also, the elements in the set need not be in the same order of the
+elements in the field for a successful match.
+
+Here are some examples:
+\begin{verbatim}
+set net-good {
+   1.2.3.0/24;
+   2.0.0.0/8;
+   3.4.0.0/16;
+}
+
+source {
+   network4 <= SET net-good;
+}
+
+source {
+   /* will never match */
+   network4 == SET net-good;
+}
+
+set com-good {
+   666;
+   123; 
+}
+
+/* has to be in all communities 
+ * may be in more communities!
+ * communities not yet implemented!
+ */
+source {
+   protocol bgp;
+   community >= SET com-good;
+}
+\end{verbatim}
+
+
+
+\subsection{Actions}
+If a term is successfully matched then the appropriate {\em action} defined, or default
+action, must occur. Actions may be divided in two categories:
+
+\begin{description}
+\item[Acceptance] Determines whether a policy is accepted or rejected. The
+ability to control the default action is also given.
+\item[modification] Defines how route information should be altered. 
+\end{description}
+
+The route information which may be modified will reflect the fields previously
+mentioned for matching criteria. Again, most fields will be protocol specific.
+Also, only a subset of these fields will be allowed alteration.
+
+Common uses for route modification are changing metric values,
+prepending BGP AS numbers to make the path more expensive and so on.
+%
+% We may add "tag" here, i.e. allow administrator to tag routes
+% future uses:
+% using the matching engine of policy filters for other stuff:
+% load-balancing ?  logging ?
+
+Here are some examples:
+\begin{verbatim}
+policy-statement one {
+   term a {
+      /* match all */
+      source {}
+      dest {}
+      /* reject all */
+      action { reject; }
+   }
+   /* unreachable */
+   term b {}
+}
+
+/* accept all, but lower metric of 1.2.3.0/24 */
+policy-statement two {
+   term lowcost {
+      source { network4 1.2.3.0/24; }
+      action { modify metric=1; }
+   }
+   term default { 
+      action { accept; }
+   }
+}
+\end{verbatim}
+
+
+\subsubsection{Operators}
+The basic operator is assignment (=). Mathematical operators exist for numerical
+fields. These are +,-,*. Depending on the context, the + operator may indicate
+concatenation . This is true when the object being treated is not a numerical
+value, but some other identifier (such as AS paths). Parenthesis regulate
+operator priority.
+ 
+
+
+Here are some examples:
+\begin{verbatim}
+/* give a bonus to this route */
+action {
+   modify metric = metric + 2;
+}   
+
+/* prepend our as number */
+action {
+   modify aspath = 65000 + aspath;
+}
+\end{verbatim}
+
+
+
+\section{Example policy configuration}
+This section gives a practical illustration on how some of the examples in the Juniper
+manual\footnote{http://www.juniper.net/techpubs/software/junos/junos63/swconfig63-policy/html/policy-framework-config26.html\#1046741}
+may be realized with the proposed syntax.
+
+Example one: Advertise via BGP only static routes, excluding some specific ones.
+\begin{verbatim}
+policy-statement adv-static {
+   /* advertise only static */
+   term static {
+      source { protocol != static; }
+      action { reject; } 
+   }
+   /* do not advertise unwanted routes */
+   term reject-static {
+      source { 
+         network REGEX(192.168.16.[0,32,64,96,128,160,192]/27); 
+      }
+      action { reject; }
+      
+   }
+   term ok {
+      action { accept; }
+   }
+}
+
+protocol {
+   bgp {
+      export adv-static;
+   }
+}   
+
+\end{verbatim}
+
+Example two: Advertise some static routes, own BGP routes and nothing else (no
+transit). Import routes from AS 1000 and 8000, but treat them with a different
+preference.
+\begin{verbatim}
+policy-statement out {
+   /* advertise only some static routes */
+   term static-routes {
+      source {
+         protocol static;
+         not network4 REGEX "192.168.[64,65,66,67].[0,128]/25";
+      }
+      action { accept; }
+   }
+   /* advertise own routes */
+   term bgp-routes {
+      source {
+         protocol bgp;
+         /* empty path */
+         aspath == "";
+      }
+      action { accept; }
+   }
+   /* do not advertise anything else */
+   term no-transit {
+      action { reject; }
+   }
+}
+
+policy-statement in {
+   /* accept routes with higher preference (primary link) */
+   term AS1000-primary {
+      source {
+         protocol bgp;
+         aspath REGEX "1000 .*";
+      }
+      action { 
+         modify localpref=200;
+	 accept;
+      }	
+   }
+   /* accept routes but lower preference (backup link) */
+   term AS8000-backup {
+      source {
+         protocol bgp;
+         as-path REGEX "8000 .*";
+      }
+      action {
+         modify localpref=50;
+         accept;
+      }
+   }
+}
+
+protocol {
+   bgp {
+      export out;
+      import in;
+   }
+}   
+\end{verbatim}
+
+
+
+\section{Policy syntax}
+A protocol may import and/or export zero or more policy statements.
+\begin{verbatim}
+import policy-statement, policy-statement2, ...
+export policy-statement, policy-statement2, ...
+\end{verbatim}
+
+A policy statement is a list of zero or more terms. Each of which have a
+source match specification and action list. A destination match
+specification may be provided only for export policies.
+\begin{verbatim}
+policy-statement name {
+   term {
+      source {
+         match-conditions;
+      }
+      dest {
+         match-conditions;
+      }
+      action {
+         action-list;
+      }
+   }
+
+}
+\end{verbatim}
+
+A set is a list of zero or more set elements.
+\begin{verbatim}
+set name {
+   set-elements; 
+}
+\end{verbatim}
+
+\subsection{Match conditions}
+Match conditions are specified by a list of zero or more predicates where a
+field is an entity of the route information, and a literal a value specified in
+the configuration.
+\begin{verbatim}
+BIN_RELOP ::= == | != | < | > | <= | >=
+POST_UN_OP ::= REGEXP x
+
+ATOM ::= field BIN_RELOP ARG | field POST_UN_OP
+ARG ::= field | literal | SET x
+
+BIN_BOOLOP ::= or | and | xor
+PRE_UN_BOOLOP ::= not
+
+PREDICATE ::= ATOM | PRE_UN_BOOLOP PREDICATE | 
+              ( PREDICATE BIN_BOOLOP PREDICATE ) |
+              policy policy-name
+\end{verbatim}
+To relax the syntax slightly, parenthesis are not strictly necessary.
+
+
+\subsection{Action list}
+Action list is a list of zero or more actions.
+\begin{verbatim}
+ACCEPTANCE ::= accept | reject
+ACTION ::= ACCEPTANCE | 
+           modify MOD_EXPR
+
+ASSIGN_OP ::= =
+MOD_EXPR ::= field ASSIGN_OP ARG
+ARG ::= field | literal | EXPR
+
+BIN_OP ::= + | - | * 
+EXPR ::= ( ARG BIN_OP ARG )
+\end{verbatim}
+
+
+
+\section{Conclusion}
+The proposed syntax should allow the realization of most desired configurations.
+It should also be extensible by adding new operators and match fields. An aspect
+to consider is associating user defined tags to routes, i.e. having the ability
+to mark routes.  These tags may then be referenced by other units of the router
+to perform different actions, such as providing statistics or other facilities.
+
+Matching of routes, and thus policy decisions, may be made at various stages. A
+consideration to make is whether the user should have explicit control of where
+routes are matched.
+
+
+
+\end{document}

@@ -1,0 +1,28 @@
+#
+# $XORP: xorp/xrl/tests/Jamfile,v 1.1 2007/01/11 22:30:55 bms Exp $
+#
+
+# entire file conditional on MAKE_CHECK
+if $(MAKE_CHECK) {
+
+SubDir TOP xrl tests ;
+
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+
+SubDir TOP xrl tests ;
+
+Main test_generated : test_generated.cc test_tgt.cc test_xifs.cc ;
+LinkLibraries test_generated :
+	libcommonxif
+	libtestxif
+	libtestbase
+	libfinder
+	libxipc
+	libcomm
+	libxorp
+	;
+} # if

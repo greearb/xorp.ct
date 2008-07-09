@@ -1,0 +1,26 @@
+#
+# $XORP: xorp/contrib/olsr/tools/Jamfile,v 1.1 2008/04/24 15:20:01 bms Exp $
+#
+
+SubDir TOP contrib olsr tools ;
+
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+#SubIncludeOnce TOP contrib olsr ;
+
+SubDir TOP contrib olsr tools ;
+
+Main clear_database : clear_database.cc ;
+Main print_databases : print_databases.cc ;
+
+LinkLibraries clear_database print_databases :
+	libolsr4xif
+	libxipc
+	libcomm
+	libxorp
+	;
+
+InstallBin $(PREFIX)/olsr/tools : clear_database print_databases ;

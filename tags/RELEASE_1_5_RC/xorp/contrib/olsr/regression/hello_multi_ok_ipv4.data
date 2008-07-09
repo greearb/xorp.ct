@@ -1,0 +1,36 @@
+// $XORP$
+
+// Well-formed OLSR packet with a single HELLO message, with
+// two link tuples containing two neighbors each.
+
+/* Packet Header */
+/* Packet Length (44 bytes) */			0x00, 0x2c,
+/* Packet Sequence Number (58445) */		0xe4, 0x4d,
+
+/* Message Header */
+/* Message Type (HELLO) */			0x01,
+/* Validity Time (256s) */			0x0c,
+/* Message Size (40 bytes) */			0x00, 0x28,
+/* Originator Address (192.168.124.1) */	0xc0, 0xa8, 0x7c, 0x01,
+/* Time to Live (255) */			0xff,
+/* Hop Count (0) */				0x00,
+/* Message Sequence Number (38038) */		0x94, 0x96,
+
+/* HELLO Message Body */
+/* Reserved */					0x00, 0x00,
+/* Emission Interval (6s) */			0x86,
+/* Willingness (Low) */				0x01,
+
+/* Link Information Tuple */
+/* Link Code (NOT_NEIGH|ASYM_LINK) */		0x01,
+/* Reserved */					0x00,
+/* Link Message Size (12 bytes) */		0x00, 0x0c,
+/* Neighbor Address (192.168.122.22) */		0xc0, 0xa8, 0x7a, 0x16,
+/* Neighbor Address (192.168.122.23) */		0xc0, 0xa8, 0x7a, 0x17,
+
+/* Link Information Tuple */
+/* Link Code (SYM_NEIGH|SYM_LINK) */		0x06,
+/* Reserved */					0x00,
+/* Link Message Size (12 bytes) */		0x00, 0x0c,
+/* Neighbor Address (192.168.122.24) */		0xc0, 0xa8, 0x7a, 0x18,
+/* Neighbor Address (192.168.122.25) */		0xc0, 0xa8, 0x7a, 0x19

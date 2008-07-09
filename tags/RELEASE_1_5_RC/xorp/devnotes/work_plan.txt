@@ -1,0 +1,244 @@
+#
+# $XORP: xorp/devnotes/work_plan.txt,v 1.25 2003/08/21 21:34:02 pavlin Exp $
+#
+
+Priority:
+ - H (High)
+ - M (Medium)
+ - L (Low)
+ - Defer (Deferred)
+Who:
+ - AG (Atanu Ghosh)
+ - JC (Javier Cardona)
+ - LR (Luigi Rizzo)
+ - MH (Mark Handley)
+ - OH (Orion Hodson)
+ - PR (Pavlin Radoslavov)
+ - FB (Fred Bauer)
+
+================================ FEA =========================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* Complete Linux support.				M	FB+PR
+* UDP send/receive interface.				H	OH+PR
+
+For 0.x:
+* Use the library for monitoring the network		H	Everyone
+  interface state from the FEA
+* Equal-cost multipath					L	??
+* Add support for discard interface			H	FB
+  (pkts routed on that interface are discarded).
+
+Longer Term tasks
+-----------------
+* TCP connection relay.
+
+================================ RIB =========================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* Handle route process death				H	AG/MH/PR
+  - see the error-handling document (e.g., exit if the FEA is gone)
+  - Example: if BGP goes away, then the RIB should pull-out all
+    routing state that comes from BGP
+    Also, if the FEA goes away, then RIB should go away too.
+  - PR look into it, and if too compicated, then move it to 0.x
+* Change the RIB to use the RefTrie			L	AG
+
+For 0.x:
+* Support recursive BGP Lookups				L	MH
+* Add XRL interface to dump routing table state		M	MH
+  (for monitoring/informational purpose: xorpsh, etc).
+* Add support for discard interface			H	PR
+  (pkts routed on that interface are discarded).
+* Equal-cost multipath					M	MH
+  - add info when a set of routes should be together; propagate
+    that info down to the FEA
+* Add route tag support to routing->RIB interface 	M	MH
+  to support policy filtering
+  - ask Mark re. this (PR)
+
+
+Longer Term tasks
+-----------------
+
+================================ BGP =========================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* IPv6/multi-protocol support				H	AG
+* Finish Kdoc'ing BGP                                   L	as needed
+
+For 0.x:
+* Test harness vs Cisco and Zebra to validate tests     L	AG
+
+For 1.0:
+* Filters						M	??
+   - which user-specified filters?	
+   - how to do user configuration?
+   - how to handle filter changes?
+* Originating routes					M	AG
+* Handling routes redistributed from IGPs.		M	AG + MH
+* Implement MinRouteAdvertisementInterval		M	??
+
+Longer Term tasks
+-----------------
+* Communities
+* Route flap damping
+* Optionally not storing RIB-IN
+* Confederations
+* Route Reflector
+* Route Refresh
+* TCP MD5 (wait for FreeBSD-5.2(?))
+* TCP connection mediation through FEA
+
+================================ Multicast ===================================
+
+Immediate Tasks                                       Priority Who  Time
+---------------                                       -------- ---  ----
+For 0.5:
+* RIB<->PIM integration and testing (after PIM testing)	H	PR+MH 1-2 weeks
+* Integration of PIM/MLD/MFEA and RTRMGR		H	PR  2 weeks
+* Finish Kdoc'ing PIM, MLD6IGMP, MFEA			L	PR  background
+
+
+For 0.x:
+* IGMPv3 and MLDv2 implementation			L	PR+other 1-2m
+* PIM-SSM support					L	PR  1 week
+* Framework for regression tests for multicast		H-M	PR+other 1 m
+* IPv6 support and tests for PIM/MLD/MFEA		M	PR  1-1.5m
+  - Initial support: e.g. no scoping
+* Port the FreeBSD PIM kernel mods to NetBSD and	H	PR  1 week
+  OpenBSD
+
+Longer Term tasks
+-----------------
+* Bidir-PIM implementation				Wish	PR  1.5-3m
+* Implement multicast support for Click			Wish	PR  2-3 months
+
+================================ StaticRoutes ===============================
+
+Immediate Tasks                                       Priority Who  Time
+---------------                                       -------- ---  ----
+For 0.5:
+* Implement Static Routes				H	PR  2 weeks
+
+================================ Spoof IGP ===================================
+
+Immediate Tasks                                       Priority Who  Time
+---------------                                       -------- ---  ----
+For 0.5:
+* Come-up with a better name
+* Implement Spoof IGP					H	PR  2 weeks
+
+============================== RTRMGR ========================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* Isolation test suite				     PartlyDone	MH+AG
+
+For 0.x:
+* Add target name and instance				H	MH+PR
+
+Longer Term tasks
+-----------------
+* Proper authentication/ACL framework.
+
+================================ XORPSH =====================================
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* BGP user tutorial					H	Everyone
+* FEA user tutorial (vifs, etc)				H	Everyone
+* Make sure that XORPSH can be started via a shell script H	PR
+
+For 0.x:
+
+For 1.0:
+* Task interruption.
+  - make sure that the task is interrupted at the	H	MH+PR
+    server process. XXX: if we hit Ctrl-C in UNIX,
+    what is the expected result? Undetermined, hence
+    do we need to do anything in case of xorpsh?
+
+Longer Term tasks
+-----------------
+
+================================ XRL =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* Switch to reliable XRLs				Done	OH
+
+For 1.0:
+* Interface specification (reliable/non-reliable)	M	OH
+
+================================ RIP =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* Implementation or RIPv2				H	OH
+
+For 0.x:
+* Implementation of RIPng				M	OH
+
+================================ SNMP  =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.x:
+* Improve documentation					H	??
+* Fix the crash when unloading modules			H	??
+
+================================ TESTS =======================================
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+For 0.5:
+* Use BGP/RIB/FEA test-router on xorp8			H	Everyone
+  (think what exactly we want to happen)
+
+================================ Other =======================================
+For 1.0:
+
+Longer Term tasks
+-----------------
+* Implement Web manager					H	??
+* Simulation-like environment for running XORP		H Defer	PR  3-6 months
+* Rewrite CLI						L	PR  2-3 weeks
+
+================================ Next Release ================================
+* Next release (xorp-0.4): August 28, 2003
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+* Add multiprotocol support to BGP			M	AG
+
+================================ Next-Next Release ===========================
+* Next release (xorp-0.5): October 16, 2003
+
+Immediate Tasks                                       Priority Who
+---------------                                       -------- ---
+* Add automated process running for testing xorpsh on	M	FCFS
+  xorp8 (expect scripts, etc)
+* Finder notifications handling				H	Everyone
+  (handling death of processes you depend on)
+  BGP: done
+  RIB: todo (PR)
+  multicast: todo (PR)
+* Need to complete support for error handling as 	H	Everyone
+    specified in error doc (bgp: done; multicast, rib: todo(PR))
+* Work-out the conventions for command-line options	M	OH
+* Test programs infrastructure				L	OH+PR
+* Implement everywhere command-line option for the	H	PR+Everyone
+  finder: port number, and host name
+  (see xorp/docs/libxipc/finder_command_line.txt)
+* Add tasks/projects to the web page wishlist		L	Everyone
+  (for other people)
+
+================================ Next Stable Release =========================
+* Next stable release (xorp-1.0): ?? ??, 200?
+  - ??

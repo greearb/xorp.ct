@@ -1,0 +1,28 @@
+// $XORP$
+
+// Well-formed OLSR packet with a single HELLO message, with
+// a single link tuple containing a single neighbor.
+
+/* Packet Header */
+/* Packet Length (32 bytes) */			0x00, 0x20,
+/* Packet Sequence Number (58443) */		0xe4, 0x4b,
+
+/* Message Header */
+/* Message Type (HELLO) */			0x01,
+/* Validity Time (256s) */			0x0c,
+/* Message Size (28 bytes) */			0x00, 0x1c,
+/* Originator Address (192.168.124.1) */	0xc0, 0xa8, 0x7c, 0x01,
+/* Time to Live (255) */			0xff,
+/* Hop Count (0) */				0x00,
+/* Message Sequence Number (38015) */		0x94, 0x7f,
+
+/* HELLO Message Body */
+/* Reserved */					0x00, 0x00,
+/* Emission Interval (5s) */			0x46,
+/* Willingness (Default) */			0x03,
+
+/* Link Information Tuple */
+/* Link Code (SYM_NEIGH|SYM_LINK) */		0x06,
+/* Reserved */					0x00,
+/* Link Message Size (8 bytes) */		0x00, 0x08,
+/* Neighbor Address (192.168.122.25) */		0xc0, 0xa8, 0x7a, 0x19

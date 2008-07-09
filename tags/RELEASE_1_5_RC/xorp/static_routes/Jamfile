@@ -1,0 +1,39 @@
+#
+# $XORP: xorp/static_routes/Jamfile,v 1.1 2007/01/11 22:30:53 bms Exp $
+#
+
+SubDir TOP static_routes ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libfeaclient ;
+SubIncludeOnce TOP policy backend ;
+SubIncludeOnce TOP policy common ;
+SubDir TOP static_routes ;
+
+Library libstaticroutes :
+	static_routes_node.cc
+	static_routes_varrw.cc
+	xrl_static_routes_node.cc
+	;
+
+Main xorp_static_routes : xorp_static_routes.cc ;
+LinkLibraries xorp_static_routes :
+	libstaticroutes
+	libstaticroutesbase
+	libpolicybackend
+	libpolicycommon
+	libfeaclient
+	libfindereventnotifierxif
+	libfeaifmgrmirrorxif
+	libfeaifmgrreplicatorxif
+	libribxif
+	libfeaifmgrmirrorbase
+	libxipc
+	libcomm
+	libxorp
+	;
+
+InstallBin $(PREFIX)/static_routes : xorp_static_routes ;

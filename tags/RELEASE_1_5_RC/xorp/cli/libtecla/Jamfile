@@ -1,0 +1,85 @@
+#
+# $XORP$
+#
+
+# TODO: pick up CFLAGS from a configure substitution into Jamfile.in.
+
+SubDir TOP cli libtecla ;
+
+# This file used to consist of these two lines:
+#GMake libtecla.a : all ;
+#GMake clean : clean ;
+
+# We very daringly have to override the global CCFLAGS
+# and restore them to build correctly.
+
+SAVE_CCFLAGS = $(CCFLAGS) ;
+SAVE_DEFINES = $(DEFINES) ;
+SAVE_HDRS = $(HDRS) ;
+SAVE_OPTIM = $(OPTIM) ;
+
+NO_PACKAGE_CCFLAGS =
+	-DPACKAGE_NAME=\"\"
+	-DPACKAGE_TARNAME=\"\"
+	-DPACKAGE_VERSION=\"\"
+	-DPACKAGE_STRING=\"\"
+	-DPACKAGE_BUGREPORT=\"\"
+	;
+
+# Default UNIX-style cflags.
+LIBTECLA_COMMON_CCFLAGS = 
+	-DSTDC_HEADERS=1
+	-DHAVE_SYS_TYPES_H=1
+	-DHAVE_SYS_STAT_H=1
+	-DHAVE_STDLIB_H=1
+	-DHAVE_STRING_H=1
+	-DHAVE_MEMORY_H=1
+	-DHAVE_STRINGS_H=1
+	-DHAVE_INTTYPES_H=1
+	-DHAVE_STDINT_H=1
+	-DHAVE_UNISTD_H=1
+	;
+
+LIBTECLA_UNIX_CCFLAGS = 
+	-DHAVE_SYS_IOCTL_H=1
+	-DHAVE_TERMIOS_H=1
+	-DHAVE_SELECT=1
+	-DUSE_TERMINFO=1
+	;
+
+# Special cflags for this directory go here.
+if $(OS) = "NT" {
+ CCFLAGS = $(NO_PACKAGE_CCFLAGS) $(LIBTECLA_COMMON_CCFLAGS) ;
+ HDRS = ;
+ DEFINES = ;	# squelch NO_OLDNAMES from top level to build w/struct stat etc
+ OPTIM = -O ;
+} else {
+ CCFLAGS = $(LIBTECLA_COMMON_CCFLAGS) $(LIBTECLA_UNIX_CCFLAGS) ;
+ OPTIM = -O ;
+}
+
+Library libtecla :
+	cplfile.c
+	cplmatch.c
+	direader.c
+	expand.c
+	freelist.c
+	getline.c
+	hash.c
+	history.c
+	homedir.c
+	keytab.c
+	pathutil.c
+	pcache.c
+	stringrp.c
+	strngmem.c
+	version.c
+	;
+
+#
+# Restore global flags.
+#
+CCFLAGS = $(SAVE_CCFLAGS) ;
+DEFINES = $(SAVE_DEFINES) ;
+HDRS = $(SAVE_HDRS) ;
+OPTIM = $(SAVE_OPTIM) ;

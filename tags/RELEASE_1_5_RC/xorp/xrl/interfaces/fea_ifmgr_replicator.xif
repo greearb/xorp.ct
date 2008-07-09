@@ -1,0 +1,21 @@
+/*
+ * Interface implemented by FEA interface manager for registration of
+ * xrl targets wanting to maintain a mirror of the interface manager
+ * configuration state.
+ *
+ * Clients must implement fea_ifmgr_mirror/0.1 as presented in
+ * fea_ifmgr_mirror.xif
+ */
+
+interface ifmgr_replicator/0.1
+{
+	/**
+	 * Register remote mirror of interface state.
+	 */
+	register_ifmgr_mirror ? clientname:txt
+
+	/**
+	 * Register remote mirror of interface state.
+	 */
+	unregister_ifmgr_mirror ? clientname:txt
+}

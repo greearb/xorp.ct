@@ -1,0 +1,37 @@
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt4_client.xif,v 1.4 2007/05/10 22:56:59 pavlin Exp $ */
+
+/*
+ * Interface for receiving IPv4 packets on a raw socket. 
+ */
+
+interface raw_packet4_client/0.1 {
+	/**
+	 * Receive an IPv4 packet from a raw socket.
+	 * 
+	 * @param if_name the interface name the packet arrived on.
+	 * @param vif_name the vif name the packet arrived on.
+	 * @param src_address the IP source address.
+	 * @param dst_address the IP destination address.
+	 * @param ip_protocol the IP protocol number.
+	 * @param ip_ttl the IP TTL (hop-limit). If it has a negative value,
+	 *               then the received value is unknown.
+	 * @param ip_tos the Type of Service (Diffserv/ECN bits for IPv4). If
+	 *               it has a negative value, then the received value is
+	 *               unknown.
+	 * @param ip_router_alert if true, the IP Router Alert option was
+	 *                        included in the IP packet.
+	 * @param ip_internet_control if true, then this is IP control traffic.
+	 * @param payload the payload, everything after the IP header and
+	 *                options.
+	 */
+	recv	? if_name:txt						\
+		& vif_name:txt						\
+		& src_address:ipv4					\
+		& dst_address:ipv4					\
+		& ip_protocol:u32					\
+		& ip_ttl:i32						\
+		& ip_tos:i32						\
+		& ip_router_alert:bool					\
+		& ip_internet_control:bool				\
+		& payload:binary
+}

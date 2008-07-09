@@ -1,0 +1,15 @@
+# Simple graph
+
+s 10 t
+s 5 y
+
+t 1 x
+t 2 y
+
+y 3 t
+y 9 x
+y 2 z
+
+x 4 z
+
+z 6 x

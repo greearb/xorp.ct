@@ -1,0 +1,68 @@
+.TH "xorp" "1" 
+.SH "NAME" 
+xorpsh \(em XORP Command Shell 
+.SH "SYNOPSIS" 
+.PP 
+\fBxorpsh\fR [\fB-c \fIcommand\fR\fP]  [\fB-t \fIdirectory\fR\fP]  [\fB-x \fIdirectory\fR\fP]  [\fB-h\fP]  [\fB-v\fP]  
+.SH "DESCRIPTION" 
+.PP 
+This manual page documents briefly the 
+\fBxorpsh\fR command. 
+.PP 
+This manual page was written for the \fBDebian\fP distribution 
+because the original program does not have a manual page. 
+.PP 
+\fBxorpsh\fR is the command used to  
+interact with a eXtensible Open Router Platform (XORP) router. This command 
+starts up a command line interface (CLI), that allows the configuration of 
+the router and monitoring of the router state. 
+ 
+.PP 
+The \fBxorpsh\fR command provides an interactive 
+command shell to a XORP user, similar in many ways to the role played by a 
+Unix shell.  In a production router \fBxorpsh\fR might be set 
+up as an user's login shell \- they would login to the router via ssh and be 
+directly in the \fBxorpsh\fR. It can also be run 
+directly from the Unix command line. 
+ 
+.PP 
+\fBxorpsh\fR should normally be run as a regular user; 
+it is neither necessary or desirable to run it as root.  If an user is to 
+be permitted to make changes to the running router configuration, that user 
+needs to be in the Unix group \fBxorp\fR. 
+.PP 
+The Debian package installation automaticall sets up both a xorp user 
+and a xorp group to which this user belongs. However, any user can run the 
+\fBxorpsh\fR command unless locally restricted by the 
+administrator. 
+.SH "OPTIONS" 
+.PP 
+\fBxorpsh\fR allows the following options: 
+.IP "\fB-h\fP         " 10 
+Show summary of options. 
+.IP "\fB-v\fP         " 10 
+Print verbose information. 
+.IP "\fB-c \fIcommand\fR\fP         " 10 
+Specify command(s) to execute. 
+.IP "\fB-t \fIdirectory\fR\fP         " 10 
+Specify templates directory. 
+.IP "\fB-x \fIdirectory\fR\fP         " 10 
+Specify Xrl targets directory. 
+.SH "SEE ALSO" 
+.PP 
+xorp_rtrmgr (8) 
+.PP 
+This program is documented fully in the \fIXorp User 
+Manual\fP, chapter \fICommand Structure\fP, 
+available at \fB/usr/share/doc/xorp-doc/\fP in Debian 
+systems when the xorp-doc package is installed. 
+.SH "AUTHOR" 
+.PP 
+Xorp is Copyright: (c) 2001-2007 International Computer Science 
+Institute. 
+.PP 
+This manual page was written by Javier Fernandez-Sanguino jfs@debian.org for 
+the \fBDebian\fP system (but may be used by others). For licensing details 
+please see \fB/usr/share/doc/xorp/copyright\fP. 
+ 
+.\" created by instant / docbook-to-man, Sat 25 Aug 2007, 02:37 

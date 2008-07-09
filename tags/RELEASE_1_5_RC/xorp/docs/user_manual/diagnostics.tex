@@ -1,0 +1,115 @@
+%
+% $XORP: xorp/docs/user_manual/diagnostics.tex,v 1.4 2005/11/11 06:24:02 pavlin Exp $
+%
+
+\chapter{Diagnostics and Debugging}
+
+\section{Debugging and Diagnostic Commands}
+
+XORP supports several operational commands in \xorpsh
+that can be used for debugging or diagnostics purpose.
+
+The {\stt ping <host>} command can be used to test if a network host
+responds to ICMP ECHO\_REQUEST packets:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{ping 10.3.0.2}\\
+PING 10.3.0.2 (10.3.0.2): 56 data bytes\\
+64 bytes from 10.3.0.2: icmp\_seq=0 ttl=64 time=0.281 ms\\
+64 bytes from 10.3.0.2: icmp\_seq=1 ttl=64 time=0.244 ms\\
+64 bytes from 10.3.0.2: icmp\_seq=2 ttl=64 time=0.302 ms\\
+64 bytes from 10.3.0.2: icmp\_seq=3 ttl=64 time=0.275 ms\\
+user@hostname> ping 10.3.0.2\\
+Command interrupted!
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt ping} command can be interrupted by the {\stt Ctrl-C} key
+combination.
+
+The {\stt traceroute <host>} command can be used to print the route packets
+take to a network host:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+x\=xxx\=xxxxxxxxxxxxxxxxxxxxx\=xxxxxxxxxx\=xxxxxxxxxx\=\kill
+user@hostname> \textbf{traceroute 10.4.0.2}\\
+traceroute to 10.4.0.2 (10.4.0.2), 64 hops max, 44 byte packets\\
+ \>1  \>xorp3-t2 (10.3.0.2)  \>0.451 ms  \>0.366 ms  \>0.384 ms\\
+ \>2  \>xorp7-t0 (10.4.0.2)  \>0.596 ms  \>0.499 ms  \>0.527 ms
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt traceroute} command can be interrupted by the {\stt Ctrl-C} key
+combination.
+
+The {\stt show host} commands can be used to display various information
+about the host itself.
+
+The {\stt show host date} command can be used to show the host current date:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show host date}\\
+Mon Apr 11 15:01:35 PDT 2005
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt show host name} command can be used to show the host name:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show host name}\\
+xorp2
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The {\stt show host os} command can be used to show details about the host
+operating system:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxx\=\kill
+user@hostname> \textbf{show host os}\\
+FreeBSD xorp2 4.9-RELEASE FreeBSD 4.9-RELEASE \#0: Wed May 19 18:56:49 PDT 2004\\
+   \>atanu@xorpc.icir.org:/scratch/xorpc/u3/obj/home/xorpc/u2/freebsd4.9.usr/src/sys/XORP-4.9 i386
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+%% \section{Logging in to Unix}
+%%
+%% (regarding LiveCD)

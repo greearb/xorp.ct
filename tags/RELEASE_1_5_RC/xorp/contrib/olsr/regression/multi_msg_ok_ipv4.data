@@ -1,0 +1,34 @@
+// $XORP$
+
+// Well-formed OLSR packet with two messages: a MID message with
+// two interface addresses, and an HNA with a single network.
+
+/* Packet Header */
+/* Packet Length (44 bytes) */			0x00, 0x2c,
+/* Packet Sequence Number (58455) */		0xe4, 0x57,
+
+/* Message Header */
+/* Message Type (MID) */			0x03,
+/* Validity Time (256s) */			0x0c,
+/* Message Size (20 bytes) */			0x00, 0x14,
+/* Originator Address (192.168.122.1) */	0xc0, 0xa8, 0x7a, 0x01,
+/* Time to Live (255) */			0xff,
+/* Hop Count (0) */				0x00,
+/* Message Sequence Number (38025) */		0x94, 0x89,
+
+/* MID Message Body */
+/* Interface Address (192.168.125.1) */		0xc0, 0xa8, 0x7d, 0x01,
+/* Interface Address (192.168.126.1) */		0xc0, 0xa8, 0x7e, 0x01,
+
+/* Message Header */
+/* Message Type (HNA) */			0x04,
+/* Validity Time (256s) */			0x0c,
+/* Message Size (20 bytes) */			0x00, 0x14,
+/* Originator Address (192.168.122.1) */	0xc0, 0xa8, 0x7a, 0x01,
+/* Time to Live (255) */			0xff,
+/* Hop Count (0) */				0x00,
+/* Message Sequence Number (38026) */		0x94, 0x8a,
+
+/* HNA Message Body */
+/* Network Address (192.168.123.0) */		0xc0, 0xa8, 0x7b, 0x00,
+/* Network Mask (255.255.255.0) */		0xff, 0xff, 0xff, 0x00

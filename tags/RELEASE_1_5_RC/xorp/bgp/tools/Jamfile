@@ -1,0 +1,43 @@
+#
+# $XORP: xorp/bgp/tools/Jamfile,v 1.1 2007/01/11 22:30:44 bms Exp $
+#
+
+SubDir TOP bgp tools ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libfeaclient ;
+SubIncludeOnce TOP policy backend ;
+SubIncludeOnce TOP policy common ;
+SubIncludeOnce TOP bgp ;
+SubDir TOP bgp tools ;
+
+Library libbgptoolscommon :
+	print_peer.cc
+	print_routes.cc
+	;
+
+LINKLIBS_COMMON = 
+	libbgptoolscommon
+	libbgp
+	libxipc
+	libcomm
+	libxorp
+	libbgpxif
+	;
+
+Main print_peers : print_peers.cc ;
+Main xorpsh_print_peers : xorpsh_print_peers.cc ;
+LinkLibraries xorpsh_print_peers print_peers :
+	$(LINKLIBS_COMMON)
+	;
+
+Main print_routes : print_routes_main.cc ;
+Main xorpsh_print_routes : xorpsh_print_routes.cc ;
+LinkLibraries xorpsh_print_routes print_routes :
+	$(LINKLIBS_COMMON)
+	;
+
+InstallBin $(PREFIX)/bgp/tools : xorpsh_print_peers xorpsh_print_routes ;

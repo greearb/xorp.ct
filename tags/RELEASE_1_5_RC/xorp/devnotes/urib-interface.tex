@@ -1,0 +1,189 @@
+\documentclass[11pt]{article}
+\usepackage{times}
+\usepackage{psfig}
+\usepackage{amsmath}
+\textwidth 6.5in
+\topmargin 0.0in
+\textheight 8.5in
+\headheight 0in
+\headsep 0in
+\oddsidemargin 0in
+\date{}
+\title{URIB XRL Interface}
+\author{Mark Handley}
+%\twocolumn
+\begin{document}
+\parsep 0ex
+\parskip 1.0ex
+\parindent 0em
+\noindent
+\maketitle                            
+\section{Introduction}
+This document defines the URIB's external XRL interface.  Typically
+this interface will be called by routing protocols, and by the router
+manager to do initial configuration.  The URIB itself depends on the
+FEA to be running to allow it to instantiate routes in the kernel.
+
+NOTE: THIS DOCUMENT IS NOT GUARANTEED TO BE UP-TO-DATE.  
+\newline
+The
+implementation in xorp/urib/xrl\_interface.cc is the definitive
+specification.  
+\section{XRL Interface}
+The URIB provides the following XRLs which can be called by other modules:
+\begin{itemize}
+\item 
+{\tt urib/add\_igp\_table/protocol[txt]{\it protocol}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+This creates a new IGP routing table called {\it protocol} in the
+URIB.  The special routing table ``connected'' is reserved for
+directly connected interfaces, and should not be avoided.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/add\_egp\_table/protocol[txt]{\it protocol}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+This creates a new EGP routing table called {\it protocol} in the
+URIB. The difference between an EGP and an IGP is that routes in an
+IGP table MUST provide a nexthop that is on one of the directly
+connected interfaces.  Routes in an EGP table may include nexthops
+that are not immediate neighbors; the URIB will use the routes in the
+IGP tables to resolve non-neighbor nexthops.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/delete\_igp\_table/protocol[txt]{\it protocol}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+This deletes the pre-existing IGP routing table called {\it protocol}
+from the URIB.  Typically this should be called when a routing
+protocol instance exits.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/delete\_egp\_table/protocol[txt]{\it protocol}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+This deletes the pre-existing EGP routing table called {\it protocol}
+from the URIB.  Typically this should be called when a routing
+protocol instance exits.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/add\_route/protocol[txt]{\it protocol}\& netbase[ipv4]{\it net}\&
+\newline
+...\hspace{0.25in}mask_len[i32]{\it mask_len}\& nexthop[ipv4]{\it nexthop}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+{\tt add\_route} adds the specified route to the routing table called {\it
+protocol} in the URIB.  The routing table must already have been
+created, and the route must not be a duplicate of an existing route
+(although it may overlap existing routes with a different prefix
+length).  {\it netbase} is the base address of the route's subnet.
+{\it mask_len} is the prefix (mask) length in bits.  {\it nexthop} is
+the router via which packets to this subnet should be forwarded.  For
+example, protocol=''ospf'', netbase=10.1.2.0, mask_len=24 and
+nexthop=128.16.64.1 would add a route to subnet 10.1.2.0/24 via
+gateway 128.16.64.1 to the routing table associate with OSPF.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/delete\_route/protocol[txt]{\it protocol}\& netbase[ipv4]{\it net}\&
+\newline
+...\hspace{0.25in}mask_len[i32]{\it mask_len}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+{\tt delete\_route} deletes the specified route from the routing table
+called {\it protocol} in the URIB.  The routing table must already
+have been created, and the route must already exist.  {\it netbase} is
+the base address of the route's subnet.  {\it mask_len} is the prefix
+(mask) length in bits.  {\it nexthop} is the router via which packets
+to this subnet should be forwarded.  The route will only be deleted
+from the table specified by {\it protocol}, irrespective of whether or
+not it exists in other routing tables.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/lookup\_route/protocol[txt]{\it protocol}\& addr[ipv4]{\it addr}}
+\newline
+{\bf Success Returns:} {\tt result[i32]0\& nexthop[ipv4]{\it nexthop}}
+\newline
+{\bf Failure Returns:} {\tt result[i32]-1}
+\newline
+{\tt lookup\_route} performs a route lookup on the URIB's internal
+routing tables to determine how the URIB believes an IPv4 packet
+destined for {\it addr} would be routed.  If the route lookup was
+successful, result=0 is returned, along with the IPv4 address of the
+immediate neighbor that the packet would be forward to.  If no route
+exists, only result=-1 is returned.
+
+\item 
+{\tt urib/new\_vif/name[txt]{\it name}\& type[i32]{\it type}\& ipv4addr[ipv4]{\it addr}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+{\tt new\_vif} informs the URIB about a new virtual interface.  The
+``connected'' route table will contain routes for immediately
+connected interfaces, but the URIB needs to know about the router's
+own IP address on these interfaces.  {\tt new\_vif} is used to inform
+the URIB about an interface, and must be called before a route for
+that interface is added.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+
+\item 
+{\tt urib/redist\_enable/from[txt]{\it from}\& to[txt]{\it to}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+{\tt redist\_enable} enables restribution of routes from routing table
+{\it from} to routing table {\it to}.  Probably doesn't currently work
+properly.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+\item 
+{\tt urib/redist\_disable/from[txt]{\it from}\& to[txt]{\it to}}
+\newline
+{\bf Returns:} {\tt result[i32]{\it result}}
+\newline
+{\tt redist\_disable} disables restribution of routes from routing
+table {\it from} to routing table {\it to}.  Route redistribution must
+have previously been started with{\tt redist\_enable}.
+
+The URIB will return an XrlAtomList containing the result.  A result
+of zero indicates success.  Non-zero return codes are failures, but
+the precise values are not yet standardized.
+\end{itemize}
+\end{document}
+
+

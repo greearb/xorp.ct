@@ -1,0 +1,32 @@
+#
+# $XORP: xorp/bgp/harness/Jamfile,v 1.1 2007/01/11 22:30:43 bms Exp $
+#
+
+SubDir TOP bgp harness ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubIncludeOnce TOP libfeaclient ;
+SubIncludeOnce TOP policy backend ;
+SubIncludeOnce TOP policy common ;
+SubIncludeOnce TOP bgp ;
+SubDir TOP bgp harness ;
+
+if $(MAKE_CHECK) {
+ LINKLIBS_BGP_HARNESS_COMMON = 
+	libbgp
+	libxipc
+	libcomm
+	libxorp
+	libtestpeerbase
+	libcoordbase
+	libtestpeerxif
+	libdatainxif
+	;
+ Main coord : coord.cc bgppp.cc command.cc peer.cc trie.cc ;
+ Main test_peer : test_peer.cc bgppp.cc ;
+ Main test_trie : test_trie.cc trie.cc ;
+ LinkLibraries coord test_peer test_trie : $(LINKLIBS_BGP_HARNESS_COMMON) ;
+} # MAKE_CHECK

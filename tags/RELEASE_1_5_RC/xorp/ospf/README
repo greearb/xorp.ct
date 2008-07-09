@@ -1,0 +1,33 @@
+#
+# $XORP: xorp/ospf/README,v 1.5 2006/08/02 08:14:52 pavlin Exp $
+#
+
+Open Shortest Path First (OSPF) Implementation
+==============================================
+
+This directory contains the XORP implementation of the OSPF protocol.
+
+Configuration
+=============
+
+Startup
+=======
+
+Documentation
+=============
+
+The programming documentation is in:
+	${XORP}/docs/kdoc/html/ospf/
+
+Testing
+=======
+
+As with most XORP processes, running "gmake check" in the ospf
+directory will run a set of validation checks. Any new functionality
+committed to ospf must come with it's own set of validation checks.
+
+Status
+======
+
+March 2007: OSPFv2 and OSPFv3 are complete, the NSSA implementation does not
+support translator election.

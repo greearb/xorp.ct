@@ -1,0 +1,87 @@
+#
+# $XORP: xorp/pim/README,v 1.32 2007/03/14 02:10:39 pavlin Exp $
+#
+
+Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
+==================================================================
+
+This directory contains the XORP implementation of the PIM-SM protocol.
+
+Configuration
+=============
+
+PIM-SM like most XORP processes does not take its configuration
+parameters from the command line. Its parameters are provided via
+XRLs. At the very least a PIM-SM process must be provided with
+the set of network interfaces to enable for multicast.
+
+Startup
+=======
+
+In normal operation, PIM-SM would be started by the XORP router manager
+process, not directly from the command line.
+For information how to configure PIM-SM see
+http://www.xorp.org/getting_started.html
+or
+http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
+
+To use PIM-SM, you must have PIM-capable kernel. Currently, the
+following systems are known to have PIM-SM kernel support:
+
+ - IPv4: DragonFlyBSD, FreeBSD-4.9, FreeBSD-5.2 (and later),
+   NetBSD-3.0 (and later), OpenBSD-2.7 (and later), Linux:
+
+   For DragonFlyBSD or FreeBSD kernel, the following options are required:
+options		MROUTING		# Multicast routing
+options		PIM			# PIM multicast routing
+
+   For NetBSD kernel, the following options are required:
+options         MROUTING        # IP multicast routing
+options         PIM             # Protocol Independent Multicast
+
+   For OpenBSD kernel, the following options are required:
+option          MROUTING        # Multicast router
+option          PIM             # Protocol Independent Multicast
+
+   For Linux kernel, the following options are required:
+CONFIG_IP_MULTICAST=y
+CONFIG_IP_MROUTE=y
+CONFIG_IP_PIMSM_V2=y
+
+ - IPv6: DragonFlyBSD, FreeBSD, NetBSD, OpenBSD:
+   No kernel options are required.
+
+Documentation
+=============
+
+The PIM-SM design architecture and code structure are described in:
+	${XORP}/docs/pim/
+
+The programming documentation is in:
+	${XORP}/docs/kdoc/html/pim/
+
+Testing
+=======
+
+Currently, the PIM-SM testing is performed manually, by starting
+PIM-SM on a number of testbed machines. All tests performed so far are
+described in ${XORP}/docs/pim_testsuite/pim_testsuite.ps
+
+In the future, automated testing will be added, similar to
+the BGP testing framework.
+
+Status
+======
+
+Currently (March 2007), the PIM-SM implementation is based
+on the specification in the following documents:
+
+ * draft-ietf-pim-sm-v2-new-11.{ps,txt} (The core PIM-SM specification).
+ * draft-ietf-pim-sm-bsr-03.{ps,txt} (The Bootstrap mechanism).
+
+The only major features not implemented yet are SSM support and security.
+
+Many detailed tests have been performed so far
+(see the "XORP PIM-SM Test Suite" document in ${XORP}/docs/pim_testsute/ or
+http://www.xorp.org/design_docs.html), and the code appears
+to be spec-compliant and robust, but no guarantees it is bug-free of course.

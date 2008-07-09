@@ -1,0 +1,29 @@
+## Process this file with automake to produce Makefile.in.
+##
+## $XORP: xorp/Makefile.am,v 1.12 2003/08/22 23:28:55 hodson Exp $
+##
+
+#
+# This makefile contains information about tests that must be run as a root
+#
+
+# --- Options
+AUTOMAKE_OPTIONS	= foreign
+ETAGS_ARGS		= --c++
+
+# --- Directories that require "gmake check" as a root
+#     (directory ordering should not matter)
+SUBDIRS	 = fea
+
+################################################################
+##
+## Everything past here is useful to the maintainer, but probably not
+## to anybody else
+##
+
+# A hook to propagate the "-f filename" argument
+AM_MAKEFLAGS		= -f MakefileRootCheck
+
+# --- Stop compilation here if not using GNU make
+-include NON_EXISTANT_GNUMAKEFILE
+
