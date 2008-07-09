@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.25 2007/03/14 01:33:58 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.26 2008/01/03 23:08:50 pavlin Exp $
 #
 
 #
@@ -627,10 +627,29 @@ kdoc_static_routes()
     kdocify
 }
 
+#
+# contrib directories
+#
+
+#
+# olsr
+#
+kdoc_contrib_olsr()
+{
+    lib="olsr"
+    desc="OLSR daemon"
+    html_start_page="index.html"
+    files="contrib/olsr/*.h contrib/olsr/*.hh"
+    excludes=""
+    xref="libxorp libxorp-callback libcomm libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
+    kdocify
+}
 
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
 	       xrl_targets mrt cli libfeaclient fea mld6igmp pim policycommon \
-	       libpolicybackend policy bgp fib2mrib mibs ospf rib rip rtrmgr static_routes"
+	       libpolicybackend policy bgp fib2mrib mibs ospf rib rip rtrmgr \
+	       static_routes \
+	       contrib_olsr"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
     kdoc_$i
