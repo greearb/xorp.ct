@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.221 2008/07/07 12:29:46 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.222 2008/07/10 02:16:53 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-RC], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.221 2008/07/07 12:29:46 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.222 2008/07/10 02:16:53 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -319,6 +319,37 @@ AC_ARG_WITH([snmp],
 	     MIBS="";]
 )
 AC_SUBST(MIBS)
+
+dnl -----------------------------------------
+dnl --with-mld6igmp_lite (default no)
+dnl -----------------------------------------
+AC_ARG_WITH([mld6igmp_lite],
+	    AS_HELP_STRING([--with-mld6igmp_lite],
+			   [build LightWeightIGMPv3/MLDv2 implementation in contrib/mld6igmp_lite]),
+	    [mld6igmp_lite="yes";
+	     CONTRIB_SUBDIRS="$CONTRIB_SUBDIRS mld6igmp_lite";
+	     # Conditionally save the current templates and copy the new ones
+	     ( cd ${srcdir}/etc/templates
+	     if test ! -f igmp.tp.acsaved ; then
+	         cp -p igmp.tp igmp.tp.acsaved
+		 cp -p ${srcdir}/contrib/mld6igmp_lite/igmp.tp .
+	     fi
+	     if test ! -f mld.tp.acsaved ; then
+	         cp -p mld.tp mld.tp.acsaved
+		 cp -p ${srcdir}/contrib/mld6igmp_lite/mld.tp .
+	     fi )
+	    ],
+	    [mld6igmp_lite="no";
+	     # Conditionally restore the original templates
+	     ( cd ${srcdir}/etc/templates
+	     if test -f igmp.tp.acsaved ; then
+	         mv igmp.tp.acsaved igmp.tp
+	     fi
+	     if test -f mld.tp.acsaved ; then
+	         mv mld.tp.acsaved mld.tp
+	     fi )
+	    ]
+)
 
 dnl -----------------------------------------
 dnl --with-olsr (default yes)
@@ -1091,10 +1122,15 @@ dnl
 dnl Whilst this means CONTRIB_SUBDIRS is spammed to all the Makefiles,
 dnl that's the price of using an antiquitated build system.
 
+with_mld6igmp_lite=false
 with_olsr=false
 if test "x${CONTRIB_SUBDIRS}" != "x" ; then
     for c in ${CONTRIB_SUBDIRS} ; do
 	case $c in
+	    mld6igmp_lite)
+		with_mld6igmp_lite=true
+		AC_CONFIG_FILES([contrib/mld6igmp_lite/Makefile])
+		;;
 	    olsr)
 		with_olsr=true
 		AC_CONFIG_FILES([contrib/olsr/Makefile])
@@ -1103,6 +1139,7 @@ if test "x${CONTRIB_SUBDIRS}" != "x" ; then
         esac
     done
 fi
+AM_CONDITIONAL(WITH_MLD6IGMP_LITE, $with_mld6igmp_lite)
 AM_CONDITIONAL(WITH_OLSR, $with_olsr)
 AC_SUBST(CONTRIB_SUBDIRS)
 
