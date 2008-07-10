@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_group_record.cc,v 1.32 2008/07/02 03:16:51 BinLi $"
+#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_group_record.cc,v 1.1 2008/07/10 11:06:34 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -1244,8 +1244,9 @@ Mld6igmpGroupSet::process_mode_is_exclude(const IPvX& group,
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
-    UNUSED(sources);
     set<IPvX> nosources;
+
+    UNUSED(sources);
 
     iter = this->find(group);
     if (iter != this->end()) {
@@ -1325,6 +1326,7 @@ Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
+
     UNUSED(sources);
 
     iter = this->find(group);
