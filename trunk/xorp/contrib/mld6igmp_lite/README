@@ -1,12 +1,13 @@
 #
-# $XORP: xorp/contrib/mld6igmp_lite/README,v 1.19 2008/07/02 01:18:11 BinLi $
+# $XORP: xorp/contrib/mld6igmp_lite/README,v 1.1 2008/07/10 11:06:34 pavlin Exp $
 #
 
 LightWeight Multicast Listener Discovery/Internet Group Management Protocol
 (LW-MLD/IGMP) Implementation
 ===============================================================
 
-This directory contains the XORP implementation of the LightWeight MLD and IGMP protocols.
+This directory contains the XORP implementation of the LightWeight MLD and
+IGMP protocols.
 
 Configuration
 =============
@@ -59,4 +60,6 @@ following documents:
 Contact
 =======
 
-If you have any question or suggestion about LightWeight IGMPv3/MLDv2,please contact me,libin020989@gmail.com.I will deal with it as soon as possible.
+For any question or suggestion about the LightWeight IGMPv3/MLDv2
+implementation please contact the current maintainer:
+  libin020989 AT gmail.com
