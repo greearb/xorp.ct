@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.222 2008/07/10 02:16:53 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.223 2008/07/10 11:06:32 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.5-RC], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.222 2008/07/10 02:16:53 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.223 2008/07/10 11:06:32 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -332,11 +332,11 @@ AC_ARG_WITH([mld6igmp_lite],
 	     ( cd ${srcdir}/etc/templates
 	     if test ! -f igmp.tp.acsaved ; then
 	         cp -p igmp.tp igmp.tp.acsaved
-		 cp -p ${srcdir}/contrib/mld6igmp_lite/igmp.tp .
+		 cp -p ../../contrib/mld6igmp_lite/igmp.tp .
 	     fi
 	     if test ! -f mld.tp.acsaved ; then
 	         cp -p mld.tp mld.tp.acsaved
-		 cp -p ${srcdir}/contrib/mld6igmp_lite/mld.tp .
+		 cp -p ../../contrib/mld6igmp_lite/mld.tp .
 	     fi )
 	    ],
 	    [mld6igmp_lite="no";
