@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/contrib/olsr/README,v 1.1 2008/04/24 15:19:51 bms Exp $
+# $XORP: xorp/contrib/olsr/README,v 1.2 2008/05/09 16:09:38 bms Exp $
 #
 
 Optimized Link State Routing (OLSR) Implementation
@@ -34,4 +34,4 @@ Status
 September 2007: Initial development.
 December 2007: Interim code drop of RFC-compliant OLSR with no XRL support.
 January 2008: Preliminary release of RFC-compliant OLSR for IPv4.
-April 2008: Merge to XORP mainline cvs.
+April 2008: Merge to XORP mainline CVS repository.
