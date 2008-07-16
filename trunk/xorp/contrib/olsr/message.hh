@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/contrib/olsr/message.hh,v 1.1 2008/04/24 15:19:53 bms Exp $
 
 #ifndef __OLSR_MESSAGE_HH__
 #define __OLSR_MESSAGE_HH__
@@ -359,7 +359,7 @@ public:
     inline void set_htime(const TimeVal& htime)
 	{ _htime = htime; }
 
-    inline const OlsrTypes::WillType willingness() const
+    inline OlsrTypes::WillType willingness() const
 	{ return _willingness; }
 
     inline void set_willingness(OlsrTypes::WillType willingness)
@@ -512,7 +512,7 @@ public:
 		sizeof(uint16_t);	// Reserved
     }
 
-    inline const uint16_t	ansn() const { return _ansn; }
+    inline uint16_t	ansn() const { return _ansn; }
     inline const vector<LinkAddrInfo>&	neighbors() const {
 	return _neighbors;
     }

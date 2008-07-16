@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/contrib/olsr/neighbor.hh,v 1.1 2008/04/24 15:19:53 bms Exp $
 
 #ifndef __OLSR_NEIGHBOR_HH__
 #define __OLSR_NEIGHBOR_HH__
@@ -79,7 +79,7 @@ class Neighbor {
      *
      * @return the neighbor's willingness.
      */
-    inline const uint8_t willingness() const { return _willingness; }
+    inline uint8_t willingness() const { return _willingness; }
 
     /**
      * Set the willingness-to-forward for this neighbor.
