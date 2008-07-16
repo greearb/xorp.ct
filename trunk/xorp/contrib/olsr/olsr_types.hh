@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/contrib/olsr/olsr_types.hh,v 1.1 2008/04/24 15:19:54 bms Exp $
+// $XORP: xorp/contrib/olsr/olsr_types.hh,v 1.2 2008/05/25 22:38:33 pavlin Exp $
 
 #ifndef __OLSR_OLSR_TYPES_HH__
 #define __OLSR_OLSR_TYPES_HH__
@@ -360,8 +360,8 @@ is_seq_newer(const uint16_t seq1, const uint16_t seq2)
     // UINT16_MAX is defined in C99 stdint.h, however this is not
     // part of the C++ Standard yet.
     static const uint16_t uint16_max = 65535;
-    return  seq1 > seq2 && seq1 - seq2 <= uint16_max/2 ||
-	    seq2 > seq1 && seq2 - seq1 > uint16_max/2;
+    return  (seq1 > seq2 && seq1 - seq2 <= uint16_max/2) ||
+	    (seq2 > seq1 && seq2 - seq1 > uint16_max/2);
 }
 
 /**
