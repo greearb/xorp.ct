@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.202 2008/07/07 11:40:16 bms Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.203 2008/07/08 15:44:22 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,9 +9,12 @@ This file contains XORP release notes (most recent releases first).
 Release 1.5-RC (2008/07/08)
 ===========================
   ALL:
-    - XORP now builds on DragonFlyBSD-1.10.1, Linux Fedora 7,
-      Linux Fedora 8, Linux Debian-4.0 (etch), Linux Ubuntu-7.04,
-      Linux Ubuntu-7.10, NetBSD-4.0, OpenBSD-4.1, and OpenBSD-4.2.
+    - XORP now builds on DragonFlyBSD-1.10.1, DragonFlyBSD-1.12.2,
+      FreeBSD-7.0, Linux Debian-4.0 (etch), Linux Fedora 7,
+      Linux Fedora 8, Linux Fedora 9, Linux Gentoo 2008.0,
+      Linux Ubuntu-7.04, Linux Ubuntu-7.10, Linux Ubuntu-8.04.1,
+      NetBSD-4.0, OpenBSD-4.1, OpenBSD-4.2, OpenBSD-4.3, Mac OS X 10.5.2,
+      Mac OS 10.5.3, and Mac OS X 10.5.4.
 
   CONFIGURATION:
     - Addition of new FEA configuration statements to set the IPv4/IPv6
