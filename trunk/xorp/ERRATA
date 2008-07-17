@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.41 2008/04/26 00:59:39 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.42 2008/07/08 15:41:23 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -82,10 +82,10 @@
       IPv6 PIM-SM on Linux, and only if the unicast routes may be modified
       while XORP is running. In that case the fix would be to replace
       "RTMGRP_IPV6_IFADDR" with "(RTMGRP_IPV6_IFADDR >> 1)" inside
-      fea/ifconfig_observer_netlink.cc, and to replace "RTMGRP_IPV6_ROUTE"
-      with "(RTMGRP_IPV6_ROUTE >> 1)" inside
-      fticonfig_entry_observer_netlink.cc and
-      fticonfig_table_observer_netlink.cc.
+      fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc, and to
+      replace "RTMGRP_IPV6_ROUTE" with "(RTMGRP_IPV6_ROUTE >> 1)" inside
+      fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc
+      and fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc
 
     - On Linux, adding and deleting multiple IPv4 addresses per interface
       may trigger an error: typically, if the primary IPv4 address
@@ -103,8 +103,9 @@
 
       If it is not possible to update the kernel, the simplest
       work-around would be to replace "#ifdef RTM_SETLINK"
-      with "#if 0" inside file fea/ifconfig_set_netlink.cc, method
-      IfConfigSetNetlink::set_interface_mac_address().
+      with "#if 0" inside file
+      fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc, method
+      IfConfigSetNetlinkSocket::set_interface_mac_address().
 
     - The mechanism for tracking the network interface link status
       may not work for the following OS-es because the kernel for those
@@ -134,7 +135,10 @@
         <linux/netfilter_ipv4/ip_tables.h>
         <linux/netfilter_ipv6/ip6_tables.h>
       This prevents the compilation of the Linux Netfilter-based
-      firewall support. To enable the Linux firewall compilation
+      firewall support. See the following Bugzilla entry for details:
+        https://bugzilla.netfilter.org/cgi-bin/bugzilla/show_bug.cgi?id=536
+
+      To enable the Linux firewall compilation
       the following patches need should be applied to the above
       two files. Note that the patches are for Ubuntu Server-7.10,
       so they might need slight adjustment for other Linux distributions.
@@ -320,8 +324,8 @@
          http://www.xorp.org/snmp.html 
 
     - There might be a compilation error in the mibs directory on some
-      systems running on 64-bit machines (e.g., FreeBSD-6.1 or 6.2 on
-      AMD-64):
+      systems running on 64-bit machines (e.g., FreeBSD-6.x or FreeBSD-7.x on
+      amd64):
 
 g++ -shared   xorpevents.lo -Wl,--whole-archive ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -Wl,--no-whole-archive  ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -lcrypto  -Wl,-soname -Wl,libnetsnmpxorp.so -o .libs/libnetsnmpxorp.so
 /usr/bin/ld: ../libxipc/.libs/libxipc.a(hmac_md5.o): relocation R_X86_64_32S can not be used when making a shared object; recompile with -fPIC
