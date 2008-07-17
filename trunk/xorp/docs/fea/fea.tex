@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.21 2007/03/15 00:43:12 pavlin Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.22 2008/07/17 23:19:41 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -46,14 +46,14 @@
     FEA internals. Those changes will continue until XORP-1.6 or XORP-1.7.
     This document will be updated once the new design is finalized.} \\ 
 \vspace{1ex}
-Version 1.4}
+Version 1.5}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 20, 2007}
+\date{July 22, 2008}
 
 \maketitle
 
@@ -400,7 +400,7 @@ and filters attached to parse raw packets as they are received.  The
 associated with the active raw socket.  The filters are each notified
 when a raw packet is received on the raw socket.  The
 XrlRawSocket4Manager allows other XORP processes to receive packets
-via XRL on the basis on filter conditions.  Currently (August 2006),
+via XRL on the basis on filter conditions.  Currently (July 2008),
 the only implemented filter is the {\tt XrlVifInputFilter} which
 allows processes to receive raw packets on the basis of the receiving
 VIF.  In principle, filters could be written to match on any field
@@ -468,7 +468,7 @@ using the following mechanisms:
 
 \end{itemize}
 
-In other words, currently (March 2007) the {\tt fea} supports DragonFlyBSD,
+In other words, currently (July 2008) the {\tt fea} supports DragonFlyBSD,
 FreeBSD, NetBSD, OpenBSD, MacOS X, Linux, and Windows Server 2003 (see file
 {\tt  \$XORP/BUILD\_NOTES} about the specific OS versions the FEA has
 been tested on).
@@ -525,6 +525,9 @@ Any contributions or bug fixes are welcome.
   Added ``Modification History'' appendix.
 
   \item March 20, 2007: Updated the version to 1.4, and the date.
+
+  \item July 22, 2008: Updated the version to 1.5, the date, and added
+  a footnote that the description is actually for the FEA in XORP-1.4.
 
 \end{itemize}
 
