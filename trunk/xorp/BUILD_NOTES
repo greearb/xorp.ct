@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.102 2008/04/28 16:25:37 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.103 2008/07/07 12:29:45 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -110,6 +110,11 @@ gmake check
       appear to succeed:
       gcc (GCC) 3.4.6 [DragonFly] (propolice, visibility)
 
+  * DragonFlyBSD-1.12.2
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 4.1.2 (DragonFly)
+
 3.2. FreeBSD
 ============
 
@@ -176,6 +181,11 @@ gmake check
     - The code compiles with the default compiler, and the internal tests
       appear to succeed:
       gcc (GCC) 3.4.6 [FreeBSD] 20060305
+
+  * FreeBSD-7.0 on i386 and amd64
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 4.2.1 20070719  [FreeBSD]
 
 3.3. NetBSD
 ===========
@@ -248,7 +258,8 @@ gmake check
       "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
   * OpenBSD-3.6-current (as of February 2005) on i386 and amd64,
-    OpenBSD-3.8, OpenBSD-3.9, OpenBSD-4.0, OpenBSD-4.1, OpenBSD-4.2
+    OpenBSD-3.8, OpenBSD-3.9, OpenBSD-4.0, OpenBSD-4.1, OpenBSD-4.2,
+    OpenBSD-4.3
     - The default gcc/g++ compiler (version 3.3.5 (propolice)) has a bug
       in the propolice implementation:
           http://www.monkey.org/openbsd/archive2/tech/200503/msg00011.html
@@ -326,6 +337,14 @@ gmake check
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.2 20070925 (Red Hat 4.1.2-33)
 
+  * Linux Fedora 9 (2.6.25-14.fc9.i686):
+    - Optionally install the following packages:
+      - libpcap-devel
+        This package is needed for sending/receiving link layer data frames.
+    - The code compiles, and the internal tests appear to succeed
+      except test33 in "bgp/harness/test_peering1.sh"
+    - gcc (GCC) 4.3.0 20080428 (Red Hat 4.3.0-8)
+
   * Linux Debian-3.1 (sarge) (2.4.27-3-386):
     - You must install the following packages:
       - libssl (e.g., libssl0.9.7)
@@ -370,6 +389,10 @@ gmake check
       The solution is to use gcc-config and switch to a gcc profile that
       disables ssp, e.g., the "hardenednossp" profile.
 
+  * Linux Gentoo 2008.0 (kernel 2.6.24-gentoo-r7):
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.1.2 (Gentoo 4.1.2 p1.1)
+
   * Linux Ubuntu-7.04 (Server Edition, kernel 2.6.20-15-server):
     - You must install the following packages:
       - make
@@ -403,8 +426,27 @@ gmake check
       - iptables-dev
         This package is needed for configuring firewall rules using XORP.
     - The code compiles, and the internal tests appear to succeed.
-    - gcc (GCC) 4.1.3 20070929 (prerelease) (Ubuntu 4.1.2-16ubuntu2)
+    - gcc (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
     - Tested on the following architectures: i386, amd64
+
+  * Linux Ubuntu-8.04.1 (Server Edition, kernel 2.6.24-19-server):
+    - You must install the following packages:
+      - make
+        Note that the installed binary name is "make" so you need
+        to run "make" instead of "gmake" to compile the source code.
+        Alternatively, add "gmake" as a symbolic link to "make":
+        cd /usr/bin; ln -s make gmake
+      - libssl-dev (e.g., version 0.9.8g-4ubuntu3.3)
+      - gcc (e.g., gcc-4.2)
+      - g++ (e.g., g++-4.2)
+    - Optionally install the following packages:
+      - libpcap0.8-dev
+        This package is needed for sending/receiving link layer data frames.
+      - iptables-dev
+        This package is needed for configuring firewall rules using XORP.
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
+    - Tested on the following architectures: i386
 
   * There is a known problem with building XORP on Linux with gcc-4.0.x
     and optimization enabled. It is a bug in gcc, see XORP Bugzilla #435
@@ -443,7 +485,8 @@ gmake check
     - gcc version 4.0.1 (Apple Computer, Inc. build 5250)
     - The code compiles, and the internal tests appear to succeed.
 
-  * OS X 10.5.2 (Darwin 9.2.2) on i386:
+  * OS X 10.5.2 (Darwin 9.2.2), OS X 10.5.3 (Darwin 9.3.0),
+    OS X 10.5.4 (Darwin 9.4.0) on i386:
     - gcc version 4.0.1 (Apple Computer, Inc. build 5465)
     - The code compiles, and the internal tests appear to succeed.
 
