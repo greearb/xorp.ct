@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.204 2008/07/17 17:42:55 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.205 2008/07/18 11:32:50 bms Exp $
 #
 
 		XORP RELEASE NOTES
@@ -255,6 +255,13 @@ Release 1.5-RC (2008/07/08)
 
   MLD/IGMP:
     - No significant changes.
+
+  MLD/IGMP-Lite:
+    - An implementation of Lightweight IGMP/MLD is available in
+      directory ${XORP}/contrib/mld6igmp_lite. It can be used instead
+      of the existing MLD/IGMP vanilla implementation by using the
+      following command before compiling XORP:
+        ./configure --with-mld6igmp_lite
 
   PIM-SM:
     - No significant changes.
