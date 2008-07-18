@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.203 2008/07/08 15:44:22 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.204 2008/07/17 17:42:55 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -215,6 +215,12 @@ Release 1.5-RC (2008/07/08)
     - Bug fix related to the TTL for RIPng multicast packets: now it is
       set to 255 as specified in the protocol specification (RFC 2080)
       instead of 1.
+
+  OLSR:
+    - Added support for RFC 3626 Optimized Link State Routing Protocol.
+      This is a fully fledged XORP routing process with policy route
+      redistribution capability. The work was generously funded over
+      2007/2008 by CenGen, Inc.
 
   OSPF:
     - Bug fix related to OSPFv3 link-local scope LSAs. Previously the
