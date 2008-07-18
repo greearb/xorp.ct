@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.23 2007/04/02 21:53:23 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.24 2007/09/14 01:53:14 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -104,6 +104,60 @@ instructs the FEA that the interface should be configured by using
 the existing interface information from the underlying system.
 In that case, the {\tt vif} and {\tt address} sections must not be
 configured.
+
+\section{Firewall}
+\label{sec:firewall}
+
+Firewall rules are configured by using numbered entries~\footnote{Currently
+(July 2008) XORP has only preliminary support to configure firewall rules.}:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+firewall \{\\
+\>rule4 100 \{\\
+\>\>action: "drop"\\
+\>\>protocol: 6 /* TCP */\\
+\>\>source \{\\
+\>\>\>interface: "fxp0"\\
+\>\>\>vif: "fxp0"\\
+\>\>\>network: 0.0.0.0/0\\
+\>\>\>port-begin: 0\\
+\>\>\>port-end: 65535\\
+\>\>\}\\
+\>\>destination \{\\
+\>\>\>network: 10.10.0.0/24\\
+\>\>\>port-begin: 0\\
+\>\>\>port-end: 1024\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+Rules with smaller numbers are applied earlier.
+The rules allow matching based on protocol number, incoming interface
+and vif, source and destination network prefixes, and source and
+destination port ranges (for TCP and UDP only). The action can be one of
+the following:
+
+\begin{itemize}
+  \item {\tt none}: No action. Continue the evaluation with the next rule.
+  \item {\tt pass}: Pass matching packets
+  \item {\tt drop}: Drop matching packets
+  \item {\tt reject}: Reject matching packets
+\end{itemize}
+
+Currently (July 2008), firewall configuration is supported only for
+*BSD and Linux~\footnote{See file ERRATA from the XORP distribution for
+additional information how to compile XORP on Linux with firewall
+support enabled.}.
 
 \section{Forwarding Engine Abstraction}
 \label{sec:fea}

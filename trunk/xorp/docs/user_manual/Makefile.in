@@ -202,8 +202,8 @@ SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 # -- Document Names
 DOCS = user_manual
 user_manual_LATEX = ../tex/xorp.bib bgp.tex cli_intro.tex \
-	config_overview.tex diagnostics.tex forwarding.tex \
-	glossary.tex igmp.tex interfaces.tex livecd.tex \
+	config_overview.tex diagnostics.tex firewall.tex \
+	forwarding.tex glossary.tex igmp.tex interfaces.tex livecd.tex \
 	multicast_routing.tex multicast_topology.tex ospf.tex \
 	pimsm.tex policy.tex preface.tex rip.tex snmp.tex \
 	static_routes.tex unicast_routing.tex user_manual.tex \
