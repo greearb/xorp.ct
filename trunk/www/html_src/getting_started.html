@@ -158,8 +158,8 @@ will be in the rtrmgr subdirectory.
 <P>
 xorp_rtrmgr will expect to find a configuration file in the same
 directory it is started from.  By default this configuration file is
-called <B>config.boot</B>.  There's a sample config.boot.sample file in
-the rtrmgr directory - please <B>do not</B> use this without tailoring
+called <B>config.boot</B>.  There are several sample configuration files in
+the rtrmgr/config directory - please <B>do not</B> use these without tailoring
 the IP addresses, interfaces and routing protocols to match your local
 network environment.  You can specify a different filename for the
 configuration file using the -b command line flag.  The -N "no
@@ -204,10 +204,9 @@ The configuration information can be provided in one of the two ways:
     xorp_rtrmgr -b my_config.boot
 </PRE>
 
-    See <A href="releases/current/docs/config.boot.sample.txt">
-    rtrmgr/config.boot.sample</A> for an example of a
-    configuration file (note that this file MUST be modified
-    before using it).
+    See <A href="releases/current/docs/config/">
+    rtrmgr/config/</A> for a set of example configuration files.
+    Note that these files MUST be modified before use.
 
 <LI>Use the xorpsh command line interface after the rtrmgr is started.
     The xorpsh has to be in configurational mode:
