@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.30 2007/06/14 17:57:30 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.31 2008/05/02 00:40:04 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -298,10 +298,16 @@ options         PIM                     # PIM multicast routing
 
     \item {\tt FreeBSD}:
 
-    IPv4: enable the following options in the kernel:
+    IPv4: enable the following option in the kernel:
 
 \begin{verbatim}
 options         MROUTING                # Multicast routing
+\end{verbatim}
+
+    For releases older than FreeBSD-7.0, the following option is needed
+    as well:
+
+\begin{verbatim}
 options         PIM                     # PIM multicast routing
 \end{verbatim}
 
