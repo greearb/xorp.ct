@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/contrib/mld6igmp_lite/README,v 1.1 2008/07/10 11:06:34 pavlin Exp $
+# $XORP: xorp/contrib/mld6igmp_lite/README,v 1.2 2008/07/10 11:14:34 pavlin Exp $
 #
 
 LightWeight Multicast Listener Discovery/Internet Group Management Protocol
@@ -20,12 +20,20 @@ the set of network interfaces to enable for multicast.
 Startup
 =======
 
+LW-MLD/IGMP is disabled by default. It can be used instead of the
+existing MLD/IGMP vanilla implementation by using the following command
+before compiling XORP:
+  ./configure --with-mld6igmp_lite
+
 In normal operation, LW-MLD/IGMP would be started by the XORP router manager
 process, not directly from the command line.  
 For information how to configure LW-MLD/IGMP see
 http://www.xorp.org/getting_started.html
 or
 http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
+
+Currently, the LW-MLD/IGMP XORP configuration is exactly same as the
+configuration for the existing MLD/IGMP vanilla implementation.
 
 Documentation
 =============
