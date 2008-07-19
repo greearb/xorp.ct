@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.19 2008/03/09 07:04:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.20 2008/04/23 15:22:40 bms Exp $"
 
 //
 // I/O IP raw communication support.
@@ -2234,6 +2234,7 @@ IoIpSocket::send_packet(const string& if_name,
 				     currentlen);
 		return (XORP_ERROR);
 	    }
+	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	    
 #else  // ! HAVE_RFC3542 (i.e., the old advanced API)
 
@@ -2251,11 +2252,10 @@ IoIpSocket::send_packet(const string& if_name,
 		error_msg = c_format("inet6_option_append(Router Alert) failed");
 		return (XORP_ERROR);
 	    }
+	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 	    
 #endif // ! HAVE_RFC3542
-	    
-	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	}
 	
 	//
