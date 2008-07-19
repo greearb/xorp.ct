@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.205 2008/07/18 11:32:50 bms Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.206 2008/07/18 23:37:04 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -287,7 +287,7 @@ Release 1.4 (2007/03/20)
     - XORP now can be cross-compiled for IA-64, MIPS (Broadcom for
       Linksys WRT54G), PowerPC-603, Sparc64, and XScale processors.
 
-    - Implementation of OSPFv3 (draft-ietf-ospf-ospfv3-update-14.txt).
+    - Implementation of OSPFv3 (draft-ietf-ospf-ospfv3-update-23.txt).
 
     - Implementation of floating static routes (i.e., static routes
       for the same prefix with different next hop and metrics).
