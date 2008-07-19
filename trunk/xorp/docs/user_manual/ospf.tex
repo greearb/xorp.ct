@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.14 2008/02/08 23:05:10 atanu Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.15 2008/07/18 19:42:30 pavlin Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -12,7 +12,7 @@ is also an IGP however OSPF and IS-IS have better scaling properties.
 
 The initial OSPF specification is RFC 2328 OSPF Version 2 or
 OSPFv2. This specification is specific to IPv4. There is a later
-specification draft-ietf-ospf-ospfv3-update-14.txt OSPF for IPv6,
+specification draft-ietf-ospf-ospfv3-update-23.txt OSPF for IPv6,
 which happens to be Version 3 or OSPFv3.
 
 The specifications for OSPFv2 and OSPFv3 are fairly similar the
@@ -74,7 +74,7 @@ have a small number of internal routes and default routes to the
 XORP OSPF complies with the following standards:
 \begin{description}
 \item{\bf RFC 2328}: OSPF Version 2
-\item{\bf draft-ietf-ospf-ospfv3-update-14.txt} OSPF for IPv6
+\item{\bf draft-ietf-ospf-ospfv3-update-23.txt} OSPF for IPv6
 \item{\bf RFC 3101}: The OSPF Not-So-Stubby Area (NSSA) Option
 \end{description}
 
@@ -314,7 +314,7 @@ interface/vif. If any addresses are configured in OSPFv3 then only
 those addresses will be advertised. If it is required that no
 addresses should be advertised then configuring an address and
 disabling it, will stop any global addresses being advertised.
-\item OSPFv3 in release 1.4 requires that a link local address is
+\item OSPFv3 in release 1.4 required that a link local address is
 configured on any interface/vif on which it is configured to run.
 \end{itemize}
 
