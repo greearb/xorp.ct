@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.55 2008/07/07 11:40:16 bms Exp $
+# $XORP: xorp/README,v 1.56 2008/07/15 21:33:17 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,7 +49,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release-1.5-RC (Release Candidate).
+This is XORP Release-1.5.
 It is reasonably stable and can be used for routing, but there are known
 issues.
 

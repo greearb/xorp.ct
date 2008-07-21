@@ -2410,7 +2410,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=mibs
- VERSION=1.5-RC
+ VERSION=1.5
 
 
 cat >>confdefs.h <<_ACEOF
