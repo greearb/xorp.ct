@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.56 2008/07/15 21:33:17 pavlin Exp $
+# $XORP: xorp/README,v 1.57 2008/07/21 14:14:15 bms Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -246,12 +246,20 @@ The content of each of the directories is the following:
 
   * xrl : XRL (XORP Resource Locator) interface.
 
+The directories listed below contain third-party contributed code which
+is distributed with each XORP source release:
+
+  * contrib : various contributed code.
+
+    * olsr : RFC 3626 Optimized Link State Routing implementation.
+      Generously funded by CenGen, Inc.
+
+    * mld6igmp_lite : Implementation of the MAGMA MLD/IGMPv3-Lite drafts.
+
 The directories listed below contain various information that are of
 limited interest, or are not relevant to the current release:
 
   * config : autoconf/automake related files.
-
-  * contrib : various contributed code.
 
   * devnotes : various notes for the XORP core members.
 
@@ -304,6 +312,7 @@ The core team currently consists of:
 	necessarily reflect the views of the National Science Foundation.
     - Microsoft
     - Vyatta
+    - CenGen
 
   * Martin C. Shepherd for the libtecla library (used by the CLI).
 
