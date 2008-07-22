@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.57 2008/07/21 14:14:15 bms Exp $
+# $XORP: xorp/README,v 1.58 2008/07/22 09:27:21 bms Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -254,7 +254,9 @@ is distributed with each XORP source release:
     * olsr : RFC 3626 Optimized Link State Routing implementation.
       Generously funded by CenGen, Inc.
 
-    * mld6igmp_lite : Implementation of the MAGMA MLD/IGMPv3-Lite drafts.
+    * mld6igmp_lite : Implementation of the Lightweight IGMPv3/MLDv2
+      protocols:
+      - draft-ietf-mboned-lightweight-igmpv3-mldv2-02.txt
 
 The directories listed below contain various information that are of
 limited interest, or are not relevant to the current release:
