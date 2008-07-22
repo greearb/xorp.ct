@@ -12,12 +12,16 @@ compile anything or reformat the disk on your PC.
 <LI> It's a great tool for a student lab session, requiring no installation.
 </UL>
 
+As of release 1.5, the XORP Live CD no longer supports floppy disks. Instead,
+USB disks are used for configuration storage. The Live CD is now based on
+FreeBSD 7.0.
+
 <!--
-<P>FreeBSD boots off the CD into a memory filesystem, and then starts up
-XORP directly.  If there is a DOS floppy in the floppy drive, the XORP
-configuration file can be taken from the floppy and
-used for the router configuration.  If the PC has a hard
-disk, that disk will not be modified by running the Live CD.
+<P>FreeBSD boots off the CD, and then starts up XORP directly.
+If there is a USB disk connected, the XORP configuration file can be
+taken from the USB device and used for the router configuration.
+If the PC has a hard disk, that disk will not be modified by running
+the Live CD.
 -->
 
 <P>
@@ -35,24 +39,24 @@ This page provides the following information about the XORP Live CD:
 <P>
 XORP version: Release-1.5-RC (Release Candidate)
 <br>
-<a href="releases/1.5-RC/LiveCD.iso.gz">Download</a> the Live CD ISO
+<a href="releases/1.5-RC/XORP-1.5-RC-LiveCD.iso.gz">Download</a> the Live CD ISO
 compressed image (44 MB).
 <br>
 Or try the nearest <a href="mirrors.html">mirror site</a>.
 <br>
-MD5 (LiveCD.iso.gz) = db61cb2d43f74c5f995b14034917340d
+MD5 (XORP-1.5-RC-LiveCD.iso.gz) = db61cb2d43f74c5f995b14034917340d
 
 Release Candidate section END -->
 
 <P>
 XORP version: Release-1.5
 <br>
-<a href="releases/1.5/LiveCD.iso.gz">Download</a> the Live CD ISO compressed
+<a href="releases/1.5/XORP-1.5-LiveCD.iso.gz">Download</a> the Live CD ISO compressed
 image (109 MB).
 <br>
 Or try the nearest <a href="mirrors.html">mirror site</a>.
 <br>
-MD5 (LiveCD.iso.gz) = TO FOLLOW
+MD5 (XORP-1.5-LiveCD.iso.gz) = TO FOLLOW
 
 <P>
 Once you've downloaded the CD image, you will need to burn it using a
@@ -68,7 +72,7 @@ Mac OS X</a>.
 <br>
 <pre>
 
-burncd -f /dev/acd0c -e data LiveCD.iso fixate
+burncd -f /dev/acd0c -e data XORP-1.5-LiveCD.iso fixate
 
 </pre>
 </UL>
@@ -91,20 +95,20 @@ Typically to change BIOS settings, you hold down Delete or F2
 (depending on your PC) just after you restart your PC.
 <P>
 If you want the router to store any configuration changes you have made
-when it is rebooted, you'll also need a floppy disk, but you can try
+when it is rebooted, you'll also need a USB disk, but you can try
 the Live CD without this.
 <P>
 Then reboot the PC.  The PC should boot from the CD.  Normally it will
-display a low resolution XORP logo for 30 seconds to a minute while
+display the FreeBSD boot-time console for 30 seconds to a minute while
 booting completes.  Sorry - there's no progress bar to let you know
 anything is happening.
 <P>
-If you've got a floppy in the floppy drive, and you've done this
+If you've got a USB disk connected to the machine, and you've done this
 before, then the XORP configuration will be copied into the memory
 filesystem, along with passwords, sshd keys, etc.  Then the XORP
 routing protocols will be started.
 <P>
-If there's no floppy in the drive, or it doesn't have the files on it
+If there's no USB disk connected, or it doesn't have the files on it
 that XORP expects, then a simple interactive script will run to allow
 you to configure passwords and decide which network interfaces you
 want XORP to use.
@@ -112,8 +116,8 @@ want XORP to use.
 <a name="firsttime"></a><h2>Starting XORP the First Time</h2>
 <P>
 The startup script that runs the first time you run XORP is quite
-simple. If there's no floppy in the floppy drive, or it's not
-DOS-formatted, you'll be presented with a warning similar to this one:
+simple. If there's no USB disk connected, or it's not DOS-formatted,
+you'll be presented with a warning similar to this one:
 <P>
 <img src="images/livecd/cd1.gif" alt="screenshot1">
 <P>
@@ -123,17 +127,18 @@ Hit enter, and you'll be given the following choices:
 <P>
 Use the cursor keys to move up and down to choose an option, and hit enter.
 <P>
-If you hadn't got a floppy in the drive, you can add one now, and select 1.
+If no USB disk is connected, you can add one now, and select 1.
 <P>
-If your floppy is not DOS formatted, you can reformat it (erasing all the data on it) by selecting 3.
+If your USB disk is not DOS formatted, you can reformat it (erasing all the
+data on it) by selecting 3.
 <P>
-If you don't have a floppy to hand, you can continue by selecting 2,
+If you don't have a USB disk to hand, you can continue by selecting 2;
 but you won't be able to preserve any configuration changes you make
-later.
+later, unless you later connect a USB disk and use the <b>usb_save</b> command.
 
 <P>
-If you now have a blank writable DOS formatted floppy in the floppy
-drive, you'll get the following notice:
+If you now have a writable, DOS formatted USB device connected,
+you'll get the following notice:
 <P>
 <img src="images/livecd/cd3.gif" alt="screenshot3">
 <P>
@@ -177,24 +182,26 @@ complete the configuration, assign IP addresses, etc.
 The location of the router configuration file used by XORP can be set
 using command line parameters, so different XORP systems might choose
 to use a different location for this file.  On the Live CD, the
-configuration file is stored in <B>/etc/xorp.cfg</B>
+configuration file is stored in <B>/etc/local/xorp.conf</B>
 <P>
 If you change the router configuration using the XORP shell, and want
 to save it, you need to enter the following in configuration mode:
 <P>
-xorp@LiveCD# <B>save /etc/xorp.cfg</B>
+xorp@LiveCD# <B>save /etc/local/xorp.conf</B>
 <P>
-If you want to preserve the configuration on a floppy, you would
-have to explicitly specify a filename on the mounted floppy, or just
-copy (by using the <B>cp</B> program within the UNIX prompt) the saved
-configuration from the memory filesystem to the floppy.
+If you want to preserve the configuration on a USB disk, either use
+use the <b>usb_save</b> command from the UNIX shell, or use the following
+command in the XORP shell's operational mode:
+<P>
+xorp@LiveCD&gt; <B>usb save</B>
+<P>
 
 <!---
 XXX: text commented-out because currently the automatic saving to
      a floppy doesn't work (the rtrmgr doesn't support the -s flag anymore).
 
 If you save to any other location, the file will still be preserved on
-the floppy, but will not be loaded automatically the next time XORP reboots.
+the USB disk, but will not be loaded automatically the next time XORP reboots.
 -->
 
 
