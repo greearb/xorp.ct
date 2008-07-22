@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_proto.cc,v 1.48 2008/01/04 03:16:51 pavlin Exp $"
+#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_proto.cc,v 1.1 2008/07/10 11:06:35 pavlin Exp $"
 
 
 //
@@ -554,6 +554,7 @@ Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
     list<gs_record> allow_new_sources_groups;
     list<gs_record> block_old_sources_groups;
     list<gs_record>::iterator gs_iter;
+
     //
     // Decode the rest of the message header
     //
