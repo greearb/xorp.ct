@@ -512,11 +512,13 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: The 6 in "ospf6" refers to the IPv6 address family.
+<P><U>Note</U>: The 6 in "ospf6" refers to the IPv6 address family. OSPFv3
+may run multiple instances of OSPF in the same process, therefore the "ospf6"
+keyword must be followed by an integer instance ID.
 
 <PRE>
 protocols {
-    ospf6 {
+    ospf6 0 {
 	router-id: 10.10.10.10
 
 	area 0.0.0.0 {
@@ -1003,7 +1005,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.17 2008/01/30 05:35:54 atanu Exp $.
-<br>Generated on 18/Jul/2008 at 12:38:49.</em>
+<br>Generated on 22/Jul/2008 at 12:02:37.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->

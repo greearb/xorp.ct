@@ -453,11 +453,13 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: The 6 in "ospf6" refers to the IPv6 address family.
+<P><U>Note</U>: The 6 in "ospf6" refers to the IPv6 address family. OSPFv3
+may run multiple instances of OSPF in the same process, therefore the "ospf6"
+keyword must be followed by an integer instance ID.
 
 <PRE>
 protocols {
-    ospf6 {
+    ospf6 0 {
 	router-id: 10.10.10.10
 
 	area 0.0.0.0 {
