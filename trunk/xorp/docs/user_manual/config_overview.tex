@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.24 2007/09/14 01:53:14 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.25 2008/07/18 23:12:40 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -335,9 +335,9 @@ protocols \{\\
 \subsection{Open Shortest Path First}
 \label{sec:protocols:ospf}
 
-In order to run OSPF Version 2 the {\tt router-id} must be specified, it
-is a unique IPv4 address within the Autonomous System. The smallest IP
-address of an interface belonging to the router is a good choice.
+In order to run OSPF Version 2 the {\tt router-id} must be specified,
+the numerically smallest IP address of an interface belonging to the
+router is a good choice.
 
 OSPF splits networks into areas so an {\tt area} must be configured.
 

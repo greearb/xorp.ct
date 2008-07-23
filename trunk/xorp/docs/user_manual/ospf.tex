@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.15 2008/07/18 19:42:30 pavlin Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.16 2008/07/19 01:12:39 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -331,10 +331,10 @@ The configuration parameters are used as follows:
 \item{\tt targetname}: This is the name for this instance of OSPF.  It
   defaults to ``{\stt ospfv2}'', and it is not recommended that this
   default is overridden under normal usage scenarios.
-\item{\tt router-id}: This is a unique IPv4 address within the
-Autonomous System. The smallest IP address of an interface belonging
-to the router is a good choice. The required format of the {\stt
-router-id} is a dotted-decimal IPv4 address.
+\item{\tt router-id}: This is a unique four octet ID within the
+Autonomous System. The numerically smallest IP address of an interface
+belonging to the router is a good choice. The required format of the
+{\stt router-id} is a dotted-decimal IPv4 address.
 \item{\tt ip-router-alert}: This takes the value {\stt true} or {\stt
 false}. The default state is {\stt false}, if set to {\stt true} the
 IP router alert option will be placed in all transmitted packets.
