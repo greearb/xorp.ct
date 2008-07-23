@@ -12,7 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/contrib/mld6igmp_lite/mld6igmp_group_record.hh,v 1.21 2008/01/04 03:16:51 pavlin Exp $
+//
+// The Lightweight IGMP/MLD modifications to this file are copyrighted by:
+//
+// Copyright (c) 2008 Huawei Technologies Co. Ltd
+// Copyright (c) 2008 Beijing University of Posts and Telecommunications
+//
+
+// $XORP: xorp/contrib/mld6igmp_lite/mld6igmp_group_record.hh,v 1.1 2008/07/10 11:06:34 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
