@@ -1,0 +1,167 @@
+#
+# $XORP: other/LiveCD/README,v 1.7 2008/06/30 18:08:57 pavlin Exp $
+#
+
+XORP Live CD Creation Toolkit
+=============================
+
+The new XORP LiveCD is based on the NanoBSD scripts which ship with
+FreeBSD 7, modified to produce ISO images rather than the usual
+CompactFlash images.
+This builds on the existing work by Poul-Henning Kamp (phk@FreeBSD.org).
+
+
+Objective
+=========
+
+The XORP LiveCD Toolkit has the objective of allowing the generation of 
+bootable XORP CDs based on the FreeBSD operating system. 
+
+The goals of the LiveCD are to allow users to experiment with XORP
+without having to go through the process of installing FreeBSD or
+Linux and compiling and installing XORP.  A system running off a
+LiveCD also makes a great educational tool, and could even be used for
+production use.
+
+
+What is it?
+==========
+
+The XORP LiveCD Toolkit itself is a set of scripts that will prepare
+an ISO image of a working FreeBSD system and the XORP routing
+components, based on some questions asked to the user. A custom made
+kernel will allow this ISO to be bootable.  Access to the hard disks
+on the system the CD is running on has been disabled, so it's hard for
+the resulting Live CD to harm any pre-installed operating systems on
+the local disk.
+
+The XORP router components needs to have somewhere to save config
+files if the router configuration is to be preserved across reboots.
+If the system has a USB disk, XORP can use this to retain the
+configuration files.  Otherwise XORP will come up with an empty
+configuration every time it is booted.
+
+FreeBSD's rc.initdiskless functionality is used to implement the boot-time
+configuration load. Some general modifications have been made. If a USB
+disk is not plugged in during system boot, some warning messages will
+be printed about an optional remount failing; these may be ignored.
+
+
+Requirements
+============
+
+* To build the XORP LiveCD using NanoBSD:
+
+- Run it as ROOT! You must have write permission on several places.
+- A working FreeBSD machine running version 7.0-RELEASE or higher.
+- A checkout of the FreeBSD 7.0-RELEASE sources.
+  This can be your installed /usr/src sources, however it is recommended
+  that you keep a backup copy, as certain files need to be modified.
+  In the livecd.nano configuration file, the NANO_SRC variable must point
+  to the location of your sources. Its value can be overwritten by the
+  NANO_SRC environmental variable. In the instructions below it is assumed
+  the NANO_SRC environmental variable points to the sources location:
+
+  ### Set the system sources location in sh/bash:
+  export NANO_SRC=/usr/src
+  ### Set the system sources location in csh/tcsh:
+  setenv NANO_SRC /usr/src
+
+- In the XORP CVS repository, the files relative to the other/LiveCD
+  directory must be used to overwrite the FreeBSD sources you will be
+  building the system from.
+  It is hoped that such modification will not be required in future.
+
+  Please refer to http://www.xorp.org/cvs.html for instructions on checking
+  out from the XORP repository, before checking out other/LiveCD:
+    # cvs checkout other/LiveCD
+
+  Once the sources are checked out, use the following commands to copy
+  the LiveCD modifications on top of your FreeBSD sources:
+    # cd other/LiveCD
+    # tar cf - . | ( cd $NANO_SRC && tar xvf - )
+
+- A pre-built XORP package from the FreeBSD ports collection, net/xorp.
+  This may be built by cd'ing to /usr/ports/net/xorp and running
+  "make package", however, this will also install XORP on your build system.
+  This step is non-optional and is a limitation of the FreeBSD ports system.
+
+  The XORP_PACKAGES and XORP_PACKAGES_DIR variables must be set to point to
+  the name of the binary package, and its directory location, respectively.
+  Those values can be overwritten by setting the XORP_PACKAGES and
+  XORP_PACKAGES_DIR environmental variables.
+
+- Install mkisofs:
+    # cd /usr/ports/sysutils/cdrtools && make install
+
+- 2 GB of free disk space under /usr/obj (where NanoBSD builds by default).
+
+Of course you need a CD Recorder to burn the CD image, but it does not need 
+to be in the FreeBSD system.
+
+* To run the system based on a XORP LiveCD:
+
+An x86 based PC with at least 256MB memory, a CD-ROM drive, optionally
+a USB disk for saving configuration, and the BIOS configured to boot from
+CD first (ahead of floppy and hard drives).
+
+The LiveCD now uses a multiprocessor kernel; it is backwards compatible
+with uniprocessor machines. Most, but not all, network card drivers are
+present in the LiveCD kernel.
+
+
+How to use it
+=============
+
+XORP's LiveCD is delivered as a set of scripts which build on the existing
+NanoBSD framework in FreeBSD 7. In the near future it is hoped the changes
+can be pushed back to the FreeBSD Project.
+
+The nanobsd.sh script is the main tool, used to generate the ISO image.
+
+
+nanobsd.sh usage
+================
+
+Before using the nanobsd.sh script you should edit the livecd.nano
+config file and set some basic variables in there. Those variables will
+define paths, places and files that will be used and/or generated during
+the operation.
+
+For detailed usage instructions, please refer to FreeBSD's nanobsd(8)
+manual page ('man 8 nanobsd').
+
+Typically one would generate a XORP LiveCD using a command like this
+(from scratch):
+  # cd $NANO_SRC/tools/tools/nanobsd
+  ### If necessary, edit livecd.nano and set variable NANO_SRC as appropriate
+  # sh nanobsd.sh -c livecd.nano
+
+As refinements are made to the build, the kernel and world steps may
+even be omitted when rebuilding the ISO image:
+  # sh nanobsd.sh -c livecd.nano -k -w
+
+The generated LiveCD would be in the /usr/obj/nanobsd.livecd
+directory and would be named XORP_LiveCD_X.Y.iso where X.Y
+is the release version. E.g.:
+  /usr/obj/nanobsd.livecd/XORP_LiveCD_1.5.iso
+
+On FreeBSD the LiveCD can be burned to a CD with the following command:
+  # burncd data XORP_LiveCD_1.5.iso fixate
+
+
+Notes
+=====
+
+Due to the nature of a CDROM-based system, the system RAM is used
+heavily. This means that if, for some reason your system's hardware is
+not properly tuned or has bad quality memory, you may experience
+several problems like core dumps (with signals 10 and 11), computer
+freezing, etc. Most of the system will be running under MD (memory
+disk), therefore, bad memory behavior also means corrupted files.
+
+One major change from the old XORP LiveCD is that MD is no longer used
+for holding XORP program code. Instead, the FreeBSD virtual memory
+system is told to 'fault in' the program code from CDROM at boot time.
+This makes more optimal use of system memory -- however -- sufficient
+RAM must be present in the system, and a minimum of 256MB is recommended.

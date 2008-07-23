@@ -1,0 +1,17 @@
+#
+# $XORP: xorp/TODO,v 1.22 2008/01/13 06:01:45 pavlin Exp $
+#
+
+* Add a list with acknowledgments for all people who have contributed:
+  bug reports/fixes/etc. This list will go with the source code,
+  and a similar list should be on the Web page.
+
+* Modify all documents to contain a list of contributors.
+
+* Standardize the version string format return by the
+  common_0_1_get_version XRL across all targets.
+
+* Add "-ansi" and "-pedantic" flags to the gcc/g++ compilation flags
+
+* Fix all file names.
+  E.g. all names non-capital letters + numbers, and use underscores.

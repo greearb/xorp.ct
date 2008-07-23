@@ -1,0 +1,383 @@
+/* $XORP: xorp/etc/templates/olsr4.tp,v 1.1 2008/04/24 15:20:17 bms Exp $ */
+/* vim:set sts=4 ts=8 sw=4 syntax=c: */
+
+/*
+** OLSRv1 for IPv4 -- configuration commands.
+*/
+
+protocols {
+    olsr4 {
+	targetname: txt = "olsr4";
+
+	main-address:	ipv4;
+
+	willingness:	u32 = 3;
+	mpr-coverage:	u32 = 1;
+
+	/* notyet
+	etx:		bool = false;
+	 */
+
+	/* notyet
+	 mpr {
+	    mode:	txt = "rfc3626"; "classic" "default"
+	    coverage:	u32 = 1;
+	 }
+	 */
+
+	hello-interval:	    u32 = 2;
+	refresh-interval:   u32 = 2;
+	mid-interval:	    u32 = 5;
+
+	dup-hold-time:	    u32 = 30;
+
+	interface @: txt {
+	    vif @: txt {
+		address @: ipv4 {
+		    local-port:		u32 = 698;
+		    all-nodes-address:	ipv4 = 255.255.255.255;
+		    all-nodes-port:	u32 = 698;
+
+		    interface-cost:	u32 = 1;
+
+		    /* notyet
+		     auto-cost:		bool = false;
+		     */
+
+		    disable:		toggle = false;
+		}
+	    }
+	}
+
+	topology {
+	    interval:	u32 = 5;
+	    redundancy:	txt = "mprs";
+	    /*
+	    fisheye:	bool = false;
+	     */
+	}
+
+	external {
+	    interval:	    u32 = 5;
+	    /*
+	    base-cost:	    u32 = 0;
+	     */
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	    }
+	}
+
+	import: txt;
+	export: txt;
+    }
+}
+
+policy {
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		nexthop4:	    ipv4range;
+		metric:		    u32range;
+		vtype:		    u32;
+		originator:	    ipv4range;
+		dest-main-address:  ipv4range;
+	    }
+	    to {
+		nexthop4:	    ipv4range;
+		metric:		    u32range;
+		vtype:		    u32;
+		originator:	    ipv4range;
+		dest-main-address:  ipv4range;
+	    }
+	    then {
+		nexthop4:	    ipv4;
+		metric:		    u32;
+	    }
+	}
+    }
+}
+
+protocols {
+    olsr4 {
+	%modinfo: provides olsr4;
+	%modinfo: depends rib;
+	%modinfo: depends policy;
+	/* Valgrind debugging wrapper (comment out for production) */
+	/*%modinfo: path "contrib/olsr/xorp_olsr4_wrapper.sh";*/
+	%modinfo: path "contrib/olsr/xorp_olsr4";
+	%modinfo: default_targetname "olsr4";
+	%modinfo: status_method xrl "$(olsr4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method xrl "$(olsr4.targetname)/common/0.1/shutdown";
+	%help:	  short "Configure the OLSRv1 IPv4 protocol";
+
+	%mandatory: $(@.main-address);
+	%mandatory: $(@.targetname);
+
+	targetname {
+	    %user-hidden: "XRL target name";
+	    %help: short "XRL target name";
+	    %set:;
+	}
+
+	main-address {
+	    %help: short "A unique IPv4 address within the MANET";
+	    %help: long "This address uniquely identifies the router within an OLSRv1 MANET";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_main_address?addr:ipv4=$(@)";
+	    %get: xrl "$(olsr4.targetname)/olsr4/0.1/get_main_address->addr:ipv4";
+	}
+
+	/* etx
+	etx {
+	    %help: short "Use ETX metrics in this OLSRv1 domain";
+	    %help: long "This option enables the use of ETX metrics, which is not compatible with RFC 3626 compliant OLSR.";
+	}
+	 */
+
+	willingness {
+	    %help: short "Willingness-to-forward of this node";
+	    %allow-range: $(@) "0" "7" %help: "The willingness-to-forward of this node (0 means node will never forward)";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_willingness?willingness:u32=$(@)";
+	}
+
+	mpr-coverage {
+	    %help: short "Count of MPRs which must cover two-hop neighbors";
+	    %allow-range: $(@) "1" "32" %help: "The number of one-hop neighbors which must be selected to cover each two-hop neighbor";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_mpr_coverage?coverage:u32=$(@)";
+	}
+
+	hello-interval {
+	    %help: short "HELLO messages sent every interval seconds";
+	    %allow-range: $(@) "1" "128" %help: "The interval between HELLO message (in seconds)";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_hello_interval?interval:u32=$(@)";
+	}
+
+	refresh-interval {
+	    %help: short "HELLO messages expected from peers within interval seconds";
+	    %allow-range: $(@) "1" "128" %help: "The expected interval for the arrival of HELLO messages from peers in order to refresh link status (in seconds)";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_refresh_interval?interval:u32=$(@)";
+	}
+
+	mid-interval {
+	    %help: short "MID messages sent every interval seconds";
+	    %allow-range: $(@) "1" "128" %help: "The interval between Multiple Interface Declaration messages (in seconds)";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_mid_interval?interval:u32=$(@)";
+	}
+
+	dup-hold-time {
+	    %help: short "Duplicate messages ignored for interval seconds";
+	    %allow-range: $(@) "1" "128" %help: "The hold time for messages detected as duplicates (in seconds)";
+	    %set: xrl "$(olsr4.targetname)/olsr4/0.1/set_dup_hold_time?dup_hold_time:u32=$(@)";
+	}
+
+	interface @: txt {
+	    %help: short "Include an interface in this OLSRv1 MANET";
+
+	    vif @: txt {
+		%help: short "Include an vif in this OLSRv1 MANET";
+
+		address @ {
+		    %help: short "Address on vif used for OLSRv1";
+		    %create: xrl "$(olsr4.targetname)/olsr4/0.1/bind_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&local_addr:ipv4=$(@)&local_port:u32=$(@.local-port)&all_nodes_addr:ipv4=$(@.all-nodes-address)&all_nodes_port:u32=$(@.all-nodes-port)";
+		    %delete: xrl "$(olsr4.targetname)/olsr4/0.1/unbind_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
+
+		    %mandatory: $(@.local-port);
+		    %mandatory: $(@.all-nodes-address);
+		    %mandatory: $(@.all-nodes-port);
+
+		    local-port {
+			%help: short "Set the UDP port where OLSRv1 will listen on this interface";
+			%allow-range: $(@) "1" "65535" %help: "The listen port";
+			%set: xrl "$(olsr4.targetname)/olsr4/0.1/change_local_addr_port?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&local_addr:ipv4=$(address.@)&local_port:u32=$(@)";
+		    }
+
+		    all-nodes-address {
+			%help: short "Set the IPv4 address where OLSRv1 will send control traffic from this interface";
+			%set: xrl "$(olsr4.targetname)/olsr4/0.1/change_all_nodes_addr_port?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&all_nodes_addr:ipv4=$(@)&all_nodes_port:u32=$(address.@.all-nodes-port)";
+		    }
+
+		    all-nodes-port {
+			%help: short "Set the UDP port where OLSRv1 will send control traffic on this interface";
+			%allow-range: $(@) "1" "65535" %help: "The transmit port";
+			%set: xrl "$(olsr4.targetname)/olsr4/0.1/change_all_nodes_addr_port?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&all_nodes_addr:ipv4=$(address.@.all-nodes-address)&all_nodes_port:u32=$(@)";
+		    }
+
+		    disable {
+			%help: short "Disable OLSRv1 on interface";
+			%set: xrl "$(olsr4.targetname)/olsr4/0.1/set_binding_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enabled:bool=`~$(@)`";
+			%delete: xrl "$(olsr4.targetname)/olsr4/0.1/set_binding_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enabled:bool=`~$(DEFAULT)`";
+		    }
+		}
+	    }
+	}
+
+	topology {
+	    %help: short "Configure TC sub-protocol options";
+
+	    interval {
+		%help: short "TC messages sent every interval seconds";
+		%allow-range: $(@) "1" "128" %help: "The interval between Topology Control advertisement messages (in seconds)";
+		%set: xrl "$(olsr4.targetname)/olsr4/0.1/set_tc_interval?interval:u32=$(@)";
+	    }
+
+	    redundancy {
+		%help: short "Contents of Advertised Neighbor Set in transmitted TCs";
+
+		%allow: $(@) "mprs" %help: "MPRs only";
+		%allow: $(@) "mprs-and-selectors" %help: "MPRs and MPR selectors only";
+		%allow: $(@) "all" %help: "All neighbors";
+
+		%set: xrl "$(olsr4.targetname)/olsr4/0.1/set_tc_redundancy?redundancy:txt=$(@)";
+	    }
+
+	    /* notyet
+	    fisheye {
+		%help: short "Enable fish-eye topology broadcasts";
+		%set: xrl "$(olsr4.targetname)/olsr4/0.1/set_tc_fisheye?enabled:bool=$(@)";
+		%help: long "This option causes Topology Control messages to be more gradually diffused throughout the network.";
+	    }
+	     */
+	}
+
+	external {
+	    %help: short "Configure HNA sub-protocol options";
+
+	    interval {
+		%help: short "HNA messages sent every interval seconds";
+		%allow-range: $(@) "1" "128" %help: "The interval between Host and Network Association messages (in seconds)";
+		%set: xrl "$(olsr4.targetname)/olsr4/0.1/set_hna_interval?interval:u32=$(@)";
+	    }
+
+	    /*
+	    base-cost {
+		%help: short "Base cost of learned HNA routes";
+		%allow-range: $(@) "0" "65535" %help: "The base cost of learned HNA routes when redistributed to the RIB (and visible to other protocols)";
+		%set: xrl "$(olsr4.targetname)/olsr4/0.1/set_hna_base_cost?base_cost:u32=$(@)";
+	    }
+	     */
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short	"Configure all tracing operations";
+
+		    disable {
+			%help:	short	"Disable all tracing operations";
+			%set:	xrl "$(olsr4.targetname)/olsr4/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
+			%delete: xrl "$(olsr4.targetname)/olsr4/0.1/trace?tvar:txt=all&enable:bool=$(DEFAULT)";
+		    }
+		}
+	    }
+	}
+
+	import {
+	    %help: short "Import policy";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=olsr4&policies:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=olsr4&policies:txt=$(@)";
+	}
+
+	export {
+	    %help: short "Export policy";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=olsr4&policies:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=olsr4&policies:txt=$(@)";
+	}
+    }
+}
+
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=olsr4&target:txt=olsr4";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=olsr4&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=olsr4&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=olsr4&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=olsr4&variable:txt=vtype&type:txt=u32&access:txt=r&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=olsr4&variable:txt=originator&type:txt=ipv4&access:txt=r&id:u32=14";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=olsr4&variable:txt=dest-main-addr&type:txt=ipv4&access:txt=r&id:u32=15";
+
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		nexthop4 {
+		    %help: short "IPv4 nexthop";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %help: short "Metric value";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		vtype {
+		    %help: short "Type of OLSRv1 route";
+		    %allow-operator: ":" "==" "!=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=vtype $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		originator {
+		    %help: short "Originator of OLSRv1 route";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=originator $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		dest-main-address {
+		    %help: short "Main address of OLSRv1 destination";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=dest-main-address $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    to {
+		nexthop4 {
+		    %help: short "IPv4 nexthop";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %help: short "Metric value";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		vtype {
+		    %help: short "Type of OLSRv1 route";
+		    %allow-operator: ":" "==" "!=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=vtype $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		originator {
+		    %help: short "Originator of OLSRv1 route";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=originator $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		dest-main-address {
+		    %help: short "Main address of OLSRv1 destination";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=dest-main-address $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    then {
+		nexthop4 {
+		    %help: short "Set the IPv4 nexthop";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %help: short "Set the metric value";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	}
+    }
+}

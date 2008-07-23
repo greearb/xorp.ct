@@ -1,0 +1,518 @@
+/* $XORP: xorp/etc/templates/ospfv3.cmds,v 1.6 2007/02/26 11:08:37 atanu Exp $ */
+
+clear ospf6 database {
+    %command: "ospf/tools/clear_database -3" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Clear LSA database";
+}
+
+show ospf6 {
+    %command: "" %help: "Display information about OSPFv3";
+    %module: ospf6;
+}
+
+show ospf6 database {
+    %command: "ospf/tools/print_lsas -3 -b" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show LSA database";
+}
+
+show ospf6 database brief {
+    %command: "ospf/tools/print_lsas -3 -b" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database detail {
+    %command: "ospf/tools/print_lsas -3 -d" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Router-LSA */
+
+show ospf6 database router {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Router-LSA database";
+}
+
+show ospf6 database router brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database router detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Network-LSA */
+
+show ospf6 database network {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Network-LSA database";
+}
+
+show ospf6 database network brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database network detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Summary-LSA (network) */
+
+show ospf6 database netsummary {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (network) database";
+}
+
+show ospf6 database netsummary brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database netsummary detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Summary-LSA (AS boundary router) */
+
+show ospf6 database asbrsummary {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (AS boundary router) database";
+}
+
+show ospf6 database asbrsummary brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database asbrsummary detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* AS-External-LSA */
+
+show ospf6 database external {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show External-LSA database";
+}
+
+show ospf6 database external brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database external detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* NSSA-LSA */
+
+show ospf6 database nssa {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
+show ospf6 database nssa brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database nssa detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Link-LSA */
+
+show ospf6 database link {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Link-LSA database";
+}
+
+show ospf6 database link brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database link detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Intra-Area-Prefix-LSA */
+
+show ospf6 database intra-area-prefix {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
+show ospf6 database intra-area-prefix brief {
+    %command: "ospf/tools/print_lsas -3 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database intra-area-prefix detail {
+    %command: "ospf/tools/print_lsas -3 -d -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* AREA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Router-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) router {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Router-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) router brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) router detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Network-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) network {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Network-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) network brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) network detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Summary-LSA (network) */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) netsummary {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (network) database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) netsummary brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) netsummary detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Summary-LSA (AS boundary router) */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) asbrsummary {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (AS boundary router) database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) asbrsummary brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) asbrsummary detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* AS-External-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) external {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show External-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) external brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) external detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* NSSA-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) nssa {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) nssa brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) nssa detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Link-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) link {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Link-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) link brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) link detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* Intra-Area-Prefix-LSA */
+
+show ospf6 database area $(protocols.ospf6.*.area.*) intra-area-prefix {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) intra-area-prefix brief {
+    %command: "ospf/tools/print_lsas -3 -a $5 -b -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf6 database area $(protocols.ospf6.*.area.*) intra-area-prefix detail {
+    %command: "ospf/tools/print_lsas -3 -a $5 -d -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display detailed output";
+}
+
+/* SUMMARY */
+
+show ospf6 database summary {
+    %command: "ospf/tools/print_lsas -3 -s" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display summary output";
+}
+
+show ospf6 database summary router {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Router-LSA database";
+}
+
+show ospf6 database summary network {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Network-LSA database";
+}
+
+show ospf6 database summary netsummary {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (network) database";
+}
+
+show ospf6 database summary asbrsummary {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (AS boundary router) database";
+}
+
+show ospf6 database summary external {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show External-LSA database";
+}
+
+show ospf6 database summary nssa {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
+show ospf6 database summary link {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Link-LSA database";
+}
+
+show ospf6 database summary intra-area-prefix {
+    %command: "ospf/tools/print_lsas -3 -s -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Display summary output";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) router {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2001" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Router-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) network {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2002" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Network-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) netsummary {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2003" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (network) database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) asbrsummary {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2004" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Summary-LSA (AS boundary router) database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) external {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x4005" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show External-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) nssa {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2007" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) link {
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x0008" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Link-LSA database";
+}
+
+show ospf6 database summary area $(protocols.ospf6.*.area.*) intra-area-prefix{
+    %command: "ospf/tools/print_lsas -3 -a $6 -s -f 0x2009" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Intra-Area-Prefix-LSA database";
+}
+
+/* Neighbor commands */
+
+show ospf6 neighbor {
+    %command: "ospf/tools/print_neighbours -3" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Neighbors";
+}
+
+show ospf6 neighbor brief {
+    %command: "ospf/tools/print_neighbours -3 -b" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Neighbors";
+}
+
+show ospf6 neighbor detail {
+    %command: "ospf/tools/print_neighbours -3 -d" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Neighbors";
+}
+
+show ospf6 neighbor <neighbor> {
+    %command: "ospf/tools/print_neighbours -3 -f $4" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Neighbors";
+}
+
+show ospf6 neighbor <neighbor> brief {
+    %command: "ospf/tools/print_neighbours -3 -b -f $4" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Neighbors";
+}
+
+show ospf6 neighbor <neighbor> detail {
+    %command: "ospf/tools/print_neighbours -3 -d -f $4" %help: HELP;
+    %module: ospf6;
+    %tag: HELP "Show Neighbors";
+}

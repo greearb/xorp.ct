@@ -1,0 +1,27 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Related Work}
+
+Previous research has addressed some of the issues that XORP faces and
+provides useful reference points in understanding XORP.  Earlier
+projects such GateD~\cite{gated} and Zebra~\cite{zebra} provide user
+level routing protocol implementations.  GateD is a monolithic
+application, and whilst the distributions are stable, this structure
+means experimental work can interfere with existing stable protocols.
+Zebra is a more modular system, but provides a more rigid
+inter-process communication system with a lesser degree degree of
+access control on inter-process communication than we envisage for
+XORP.
+
+Forwarding plane projects, such as Click~\cite{click} and Scout, 
+provide a means
+for a XORP router to use a high performance forwarding plane on
+commodity PC hardware and provide a potential path for more customized
+forwarding planes in future.  At present XORP is targetting Click and
+native FreeBSD / Linux forwarding planes on PC's.
+
+The Multi-Threaded Routing Toolkit~\cite{mrt} (MRT) project provides
+analysis and simulation daemons for routers to use.  XORP is presently
+exploring the use of the MRT applications for testing and validation
+purposes.
+

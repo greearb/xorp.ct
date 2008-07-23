@@ -1,0 +1,4 @@
+Sources of Open-Source code we can reuse:
+
+ - COPS: http://www.intel.com/ial/cops/
+

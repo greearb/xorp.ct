@@ -1,0 +1,46 @@
+<!-- Created by xtconf.py from xorp.xml -->
+<!-- The default config with no test VLANS's -->
+<!-- Note that vlan order is critical CONTROL should be first to -->
+<!-- become the defautl vlan on the switch -->
+<testbed_config>
+<vlan name="CONTROL">
+	<host name="xorpc">
+		<ipv4 mac="CONTROL" port="a6">
+		</ipv4>
+	</host>
+	<host name="xorppwr1">
+		<ipv4 mac="CONTROL" port="a7">
+		</ipv4>
+	</host>
+</vlan>
+<vlan name="MAIN">
+	<host name="xorp0">
+		<ipv4 mac="00:02:B3:10:DF:4F" port="a1">
+		</ipv4>
+	</host>
+	<host name="xorp1">
+		<ipv4 mac="00:02:b3:10:e2:e4" port="a2">
+		</ipv4>
+	</host>
+	<host name="xorp2">
+		<ipv4 mac="00:02:b3:10:df:ac" port="a3">
+		</ipv4>
+	</host>
+	<host name="xorp3">
+		<ipv4 mac="00:02:b3:10:e2:ef" port="a4">
+		</ipv4>
+	</host>
+	<host name="xorp4">
+		<ipv4 mac="00:02:b3:10:e2:c5" port="a5">
+		</ipv4>
+	</host>
+	<host name="xorp5">
+		<ipv4 mac="00:00:24:c0:0e:dc" port="b6">
+		</ipv4>
+	</host>
+	<host name="MAIN_NET">
+		<ipv4 mac="MAIN" port="a8">
+		</ipv4>
+	</host>
+</vlan>
+</testbed_config>

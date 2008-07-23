@@ -1,0 +1,128 @@
+%
+% $XORP: xorp/docs/user_manual/multicast_routing.tex,v 1.5 2005/04/07 05:30:59 pavlin Exp $
+%
+
+\chapter{Multicast Routing}
+\label{multicast}
+\section{An Overview of Multicast Routing}
+
+IP Multicast is a technology that allows one-to-many and many-to-many
+distribution of data on the Internet.  Senders send their data to a
+multicast IP destination address, and receives express an interest in
+receiving traffic destined for such an address.  The network then
+figures out how to get the data from senders to receivers.  
+
+If both the sender and receiver for a multicast group are on the same
+local broadcast subnet, then the routers do not need to be involved in
+the process, and communication can take place directly.  If, however,
+the sender and receiver are on different subnets, then a multicast
+routing protocol needs to be involved in setting up multicast
+forwarding state on the tree between the sender and the receivers.
+
+\subsection{Multicast Routing}
+
+Broadly speaking, there are two different types of multicast routing
+protocols:
+\begin{itemize}
+\item Dense-mode protocols, where traffic from a new multicast source
+  is delivered to all possible receivers, and then subnets where there
+  are no members request to be pruned from the distribution tree.
+\item Sparse-mode protocols, where explicit control messages are used
+  to ensure that traffic is only delivered to the subnets where there
+  are receivers that requested to receive it.
+\end{itemize}
+Examples of dense-mode protocols are {\it DVMRP} and {\it PIM Dense
+Mode}.  Examples of sparse-mode protocols are PIM Sparse Mode, CBT,
+and MOSPF.  Most of these protocols are largely historic at this time,
+with the exception of PIM Sparse Mode (PIM-SM) and PIM Dense Mode
+(PIM-DM), and even PIM-DM is not very widely used.
+
+In addition to the routing protocols used to set up forwarding state
+between subnets, a way is needed for the routers to discover that
+there are local receivers on a directly attached subnet.  For IPv4
+this role is served by the Internet Group Management Protocol (IGMP)
+and for IPv6 this role is served by the Multicast Listener Discovery
+protocol (MLD).
+
+\subsection{Service Models: ASM vs SSM}
+
+There are two different models for IP multicast:
+\begin{itemize}
+\item Any Source Multicast (ASM), in which a receiver joins a
+  multicast group, and receives traffic from any senders that send to
+  that group.
+\item Source-Specific Multicast (SSM), in which a receiver explicitly
+  joins to a (source, group) pairing.
+\end{itemize}
+Traditionally IP multicast used the ASM model, but problems deploying
+inter-domain IP multicast resulted in the much simpler SSM model being
+proposed.  In the future it is likely that ASM will continue to be
+used within intranets and enterprises, but SSM will be used when
+multicast is used inter-domain.  The two models are compatible, and
+PIM-SM can be used as a multicast routing protocol for both.  The
+principal difference is that ASM only requires IGMPv2 or MLDv1,
+whereas SSM requires IGMPv3 or MLDv2 to permit the receivers to
+specify the address of the sending host.
+
+\subsection{Multicast Addresses}
+
+For IPv4, multicast addresses are in the range 224.0.0.0 to
+239.255.255.255 inclusive.  Addresses within 224.0.0.0/24 are
+considered link-local and should not be forwarded between subnets.
+Addresses within 232.0.0.0/8 are reserved for SSM usage.  Addresses in
+239.0.0.0/8 are ASM addresses defined for varying sizes of limited
+scope.
+
+IPv6 multicast addresses are a little more complex.  IPv6 multicast
+addresses start with the prefix {\stt ff}, and have the following
+format:
+\begin{verbatim}
+   |   8    |  4 |  4 |                  112 bits                   |
+   +------ -+----+----+---------------------------------------------+
+   |11111111|flgs|scop|                  group ID                   |
+   +--------+----+----+---------------------------------------------+
+\end{verbatim}
+\begin{itemize}
+\item {\stt 11111111} ({\stt ff} in hexadecimal) at the start of the address
+identifies the address as being a multicast address.
+
+\item {\it flgs} is a set of 4 flags: 
+\begin{verbatim}
+    +-+-+-+-+
+    |0|0|0|T|
+    +-+-+-+-+
+\end{verbatim}
+
+The high-order 3 flags are reserved, and must be initialized to 0.
+
+{\it T} = 0 indicates a permanently-assigned (``well-known'') multicast
+address, assigned by the global internet numbering authority.
+
+{\it T} = 1 indicates a non-permanently-assigned (``transient'')
+multicast address.
+
+\item {\it scop} is a 4-bit multicast scope value used to limit the scope of
+the multicast group.  The values in hex are:
+\begin{description}
+\item{\stt 1}  node-local scope
+\item{\stt 2}  link-local scope
+\item{\stt 5}  site-local scope
+\item{\stt 8}  organization-local scope
+\item{\stt E}  global scope
+\end{description}
+
+\item {\it group ID} identifies the multicast group, either permanent or
+transient, within the given scope.  
+\end{itemize}
+
+RFC 2373 gives more details about IPv6 multicast addresses.
+
+\section{Supported Protocols}
+
+XORP supports the following multicast protocols:
+\begin{itemize}
+\item PIM Sparse Mode for both ASM and SSM multicast routing for IPv4.
+\item PIM Sparse Mode for both ASM and SSM multicast routing for IPv6.
+\item IGMPv1, IGMPv2, and IGMPv3 for IPv4 local multicast membership. 
+\item MLDv1 and MLDv2 for IPv6 local multicast membership. 
+\end{itemize}

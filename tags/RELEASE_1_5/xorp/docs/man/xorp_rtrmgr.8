@@ -1,0 +1,74 @@
+.TH "xorp" "8" 
+.SH "NAME" 
+xorp_rtrmgr \(em XORP Router Manager 
+.SH "SYNOPSIS" 
+.PP 
+\fBxorp_rtrmgr\fR [\fB-a \fIallowed host\fR\fP]  [\fB-n \fIallowed net\fR\fP]  [\fB-b \fIfile\fR\fP]  [\fB-i \fIinterface\fR\fP]  [\fB-p \fIport\fR\fP]  [\fB-q \fIseconds\fR\fP]  [\fB-t \fIdirectory\fR\fP]  [\fB-x \fIdirectory\fR\fP]  [\fB-N\fP]  [\fB-h\fP]  [\fB-v\fP]  
+.SH "DESCRIPTION" 
+.PP 
+This manual page documents briefly the 
+\fBxorp_rtrmgr\fR command. 
+.PP 
+This manual page was written for the \fBDebian\fP distribution 
+because the original program does not have a manual page. 
+.PP 
+\fBxorp_rtrmgr\fR is the program that that manages the whole 
+eXtensible Open Router Platform (XORP) platform. The program loads its 
+configuration file (commonly named \fBconfig.boot\fP)  
+which will read from the current working directory You can specify a 
+different filename for the configuration file using the \fB-b\fP     command line flag. The \fB-N\fP "no execute" flag will cause 
+\fBxorp_rtrmgr\fR to startup and pretend the router is operating 
+normally, but to not actually start any processes. This can be used to 
+check configuration files. 
+ 
+.PP 
+Typically \fBxorp_rtrmgr\fR must be run as root. This is 
+because it starts up processes that need privileged access to insert routes 
+into the forwarding path in the kernel. 
+.PP 
+To interact with the router via the command line interface, the 
+operator should use the XORP command shell 
+\fBxorpsh\fR. 
+.SH "OPTIONS" 
+.PP 
+\fBxorp_rtrmgr\fR allows the following options: 
+.IP "\fB-h\fP         " 10 
+Show summary of options. 
+.IP "\fB-v\fP         " 10 
+Print verbose information. 
+.IP "\fB-a \fIallowed host\fR\fP         " 10 
+Host allowed by the finder. 
+.IP "\fB-n \fIallowed net\fR\fP         " 10 
+Subnet allowed by the finder. 
+.IP "\fB-b \fIfile\fR\fP         " 10 
+Boot configuration file to load. 
+.IP "\fB-N\fP         " 10 
+Load the configuration but do not execute XRLs and do not start 
+processes. 
+.IP "\fB-i \fIinterface\fR\fP         " 10 
+Set or add an interface run Finder on. 
+.IP "\fB-p \fIport\fR\fP         " 10 
+Set port to run Finder on. 
+.IP "\fB-q \fIseconds\fR\fP         " 10 
+Set forced quit period. 
+.IP "\fB-t \fIdirectory\fR\fP         " 10 
+Specify templates directory. 
+.IP "\fB-x \fIdirectory\fR\fP         " 10 
+Specify Xrl targets directory. 
+.SH "SEE ALSO" 
+.PP 
+xorpsh (1) 
+.PP 
+The programs are documented fully in the \fIXorp 
+User Manual\fP available at 
+\fB/usr/share/doc/xorp-doc/\fP in Debian systems when the 
+xorp-doc package is installed. 
+.SH "AUTHOR" 
+.PP 
+XORP is Copyright (c) 2001-2008 XORP, Inc.
+Institute. 
+.PP 
+This manual page was written by Javier Fernandez-Sanguino jfs@debian.org for the 
+\fBDebian\fP system (but may be used by others). For licensing details 
+please see \fB/usr/share/doc/xorp/copyright\fP. 
+.\" created by instant / docbook-to-man, Sat 25 Aug 2007, 02:37 

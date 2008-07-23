@@ -1,0 +1,20 @@
+--- container.h.orig	Mon Jul 21 16:27:29 2003
++++ container.h	Mon Jul 21 16:29:16 2003
+@@ -92,7 +92,7 @@
+        /*
+         * pointer for container
+         */
+-       void *         private;
++       void *         _private;
+ 
+        /*
+         * returns the number of items in a container
+@@ -151,7 +151,7 @@
+        /*
+         * function to return an iterator for the container
+         */
+-       struct netsnmp_container_it    *get_iterator;
++       struct netsnmp_iterator_s    *get_iterator;
+ 
+        /*
+         * function to call another function for each object in the container

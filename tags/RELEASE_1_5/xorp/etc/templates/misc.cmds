@@ -1,0 +1,41 @@
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.10 2006/01/18 21:58:00 pavlin Exp $ */
+
+ping {
+    %command: "" %help: "Ping a hostname or IP address";
+    %nomore_mode;
+}
+
+ping <host> {
+    %command: "ping $2" %help: "Give a hostname or IP address to ping.";
+    %nomore_mode;
+}
+
+ping6 {
+    %command: "" %help: "Ping an IPv6 hostname or IPv6 address";
+    %nomore_mode;
+}
+
+ping6 <host> {
+    %command: "ping6 $2" %help: "Give an IPv6 hostname or IPv6 address to ping.";
+    %nomore_mode;
+}
+
+traceroute {
+    %command: "" %help: "Trace the IP route to a hostname or IP address";
+    %nomore_mode;
+}
+
+traceroute <host> {
+    %command: "traceroute $2" %help: "Give a hostname or IP address to traceroute to.";
+    %nomore_mode;
+}
+
+traceroute6 {
+    %command: "" %help: "Trace the IPv6 route to a hostname or IPv6 address";
+    %nomore_mode;
+}
+
+traceroute6 <host> {
+    %command: "traceroute6 $2" %help: "Give an IPv6 hostname or IPv6 address to traceroute to.";
+    %nomore_mode;
+}

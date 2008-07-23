@@ -1,0 +1,188 @@
+%
+% $XORP: xorp/docs/user_manual/multicast_topology.tex,v 1.5 2005/11/11 06:24:02 pavlin Exp $
+%
+
+\chapter{Multicast Topology Discovery}
+
+\section{Terminology and Concepts}
+
+Multicast routing protocols such as PIM-SM (Protocol Independent
+Multicast Sparse-Mode) and PIM-DM (Protocol Independent Multicast
+Dense-Mode) build the multicast delivery tree by using the RPF
+(Reverse-Path Forwarding) information toward the root of the tree.
+The root could be the so-called Rendezvous Point (RP) (in case of
+PIM-SM) or the source itself (in case of PIM-SM or PIM-DM).
+
+The RPF information in each router is per multicast distribution tree
+and is basically the next-hop neighbor router information toward the
+root of the tree. In other words, the RPF router is the next-hop router
+toward the root. In case of PIM-SM, the RPF neighbor is typically the
+router that a Join message is sent to.
+
+Obviously, all multicast routers must have consistent RPF state,
+otherwise a Join message may never reach the root of the tree.
+Typically, the unicast path forwarding information is used to create the
+RPF information, because under normal circumstances the unicast routing
+provides the necessary information to all routers.
+
+Note that he unicast-based RPF creates multicast distribution trees
+where each branch of the tree follows the unicast path from each leaf of
+the tree toward the root. Usually this is the desired behavior, but
+occasionally someone may want the unicast and the multicast traffic to
+use different paths. For example, if a site has two links to its network
+provider, one of the links may be used for unicast only, and the other
+one only for multicast.
+
+To provide for such flexibility in the configuration, the PIM-SM and
+PIM-DM specifications use the so called Multicast Routing Information
+Base (MRIB) for obtaining the RPF information.
+Typically, the MRIB may be derived from the unicast routing table, but
+some protocols such as MBGP may carry multicast-specific topology
+information. Furthermore, the MRIB may be modified locally in each site
+by taking into account local configuration and preferences.
+A secondary function of the MRIB is to provide routing metrics for
+destination addresses. Those metrics are used by the PIM-SM and PIM-DM
+Assert mechanism.
+
+\section{Configuring the MRIB}
+
+The XORP RIB module contains a table with the MRIB. That table is
+propagated to the PIM-SM module and is used by PIM-SM in the RPF
+computation. The MRIB table inside the RIB module is completely
+independent from the Unicast Routing Information Base (URIB) table.
+The URIB table is created from the unicast routes calculated by unicast
+routing protocols such as BGP, OSPF and RIP.
+The MRIB table is created similarly, but only by those protocols that
+are explicitly configured to add their routes to the MRIB. For example,
+if Multi-protocol BGP is enabled, then the BGP module will add
+multicast-specific routes to the MRIB.
+
+Currently, XORP supports the following methods for adding routing
+entries to the MRIB:
+
+\begin{itemize}
+
+  \item {\tt Multi-protocol BGP:} The BGP module can be configured to
+  negotiate multiprotocol support with its peers. Then, the BGP
+  multicast routes will be installed in the MRIB. See
+  Chapter~\ref{bgp} for information how to configure BGP.
+
+  \item {\tt Static Routes:} The Static Routes module can be used to
+  configure static unicast and multicast routes. The unicast routes are
+  added to the Unicast RIB, while the multicast routes are added to the
+  MRIB. See Chapter~\ref{static_routes} for information how to configure
+  Static Routes.
+
+  \item {\tt FIB2MRIB:} If there are no unicast routing protocols
+  configured in XORP to supply the MRIB routes, then the FIB2MRIB module
+  can be used to populate the MRIB. If the FIB2MRIB module is enabled,
+  it will register with the FEA to read the whole unicast forwarding
+  table from the underlying system, and to receive notifications for all
+  future modifications of that table. In other words, the FIB2MRIB task
+  is to replicate the unicast forwarding information on that router into
+  the MRIB. The FIB2MRIB module can be enabled by the following
+  configuration statements:~\footnote{Note that prior to XORP
+  Release-1.1, the {\tt enable} flag was used instead of {\tt disable}
+  to enable or disable each part of the configuration.}
+
+\vspace{0.1in}
+%\noindent\framebox[\textwidth][l]{\scriptsize
+\noindent\framebox[6in][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>fib2mrib \{\\
+\>\>disable: false\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\end{itemize}
+
+
+\section{Monitoring the MRIB}
+
+All operational commands for monitoring MRIB begin with
+{\tt show route table}. This section describes those commands in details.
+
+All RIB commands to view the RIB's inner tables have the following form:
+
+{\stt show route table \{ipv4 | ipv6\} \{unicast | multicast\} <protocol>}
+
+The commands to view the MRIB have the following form:
+
+{\stt show route table \{ipv4 | ipv6\} multicast <protocol>}
+
+The value of {\stt <protocol>} has to be one of the following:
+
+\begin{itemize}
+
+  \item {\tt ebgp} to show eBGP MBGP routes.
+
+  \item {\tt fib2mrib} to show unicast routes for multicast extracted
+  from kernel.
+
+  \item {\tt final} to show MRIB winning routes.
+
+  \item {\tt ibgp} to show iBGP MBGP routes.
+
+  \item {\tt static} to show MRIB static routes.
+
+\end{itemize}
+
+For example, the following command can be used to show the IPv4 FIB2MRIB
+routes:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show route table ipv4 multicast fib2mrib}\\
+10.2.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 0.0.0.0 via dc2/dc2\\
+10.3.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 0.0.0.0 via dc1/dc1\\
+10.4.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.3.0.2 via dc1/dc1\\
+10.5.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.4 via dc2/dc2\\
+10.6.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.1 via dc2/dc2
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+The final MRIB table can be shown with the following command:
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxx\=\kill
+user@hostname> \textbf{show route table ipv4 multicast final}\\
+10.2.0.0/24    \>[connected(0)/0]\\
+               \>> to 0.0.0.0 via dc2/dc2\\
+10.3.0.0/24    \>[connected(0)/0]\\
+               \>> to 0.0.0.0 via dc1/dc1\\
+10.4.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.3.0.2 via dc1/dc1\\
+10.5.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.4 via dc2/dc2\\
+10.6.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.1 via dc2/dc2
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}

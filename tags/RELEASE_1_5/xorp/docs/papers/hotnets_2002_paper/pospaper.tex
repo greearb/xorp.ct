@@ -1,0 +1,83 @@
+\documentclass[9pt,faircopy]{sigcomm}
+\usepackage{graphics,mathptm,epsfig,amsmath,sped}
+\IfFileExists{./fonts.sty}{\input{fonts.sty}}{}
+
+\makeatletter
+
+\global\def\section{\@startsection {section}{1}{\z@}%
+                                   {2ex \@plus 1ex \@minus .1ex}%
+                                   {1ex \@plus.2ex}%
+                                   {\normalfont\bfseries\scshape\fontsize{11}{13}\selectfont}}
+\global\def\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {2ex\@plus 1ex \@minus .1ex}%
+                                     {1ex \@plus .2ex}%
+                                     {\normalfont\bfseries\fontsize{11}{13}\selectfont}}
+\global\def\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                     {2ex\@plus 1ex \@minus .1ex}%
+                                     {1ex \@plus .2ex}%
+                                     {\normalfont\itshape\fontsize{11}{13}\selectfont}}
+
+
+% \@maketitle fix -- less vertical space at top
+\global\def\@maketitle{%
+  \newpage
+  \begin{center}%
+  \let \footnote \thanks
+  \null
+    \vskip -.2em%
+    {\LARGE \@title \par}%
+    \vskip 1em%
+    {\large
+      \lineskip .4em%
+      \begin{tabular}[t]{c}%
+        \@author
+      \end{tabular}\par}%
+    \vskip 1em%
+    {\large \@date}%
+  \end{center}%
+  \par
+  \vskip 1em}
+
+% French people are nice
+\frenchspacing
+
+\makeatother
+
+\hyphenation{wide-spread}
+
+\begin{document}
+
+\title{{\sffamily\bfseries XORP: An Open Platform for Network Research}}
+
+\author{{\sffamily Mark Handley \qquad Orion Hodson \qquad Eddie Kohler} \\
+\noalign{\vskip4pt}
+{\sffamily\fontseries{l}\fontsize{10}{11}\selectfont
+ICSI Center for Internet Research, Berkeley, California}\\
+\noalign{\vskip.8\baselineskip}
+{\sffamily\fontsize{10}{11}\selectfont
+\{mjh, hodson, kohler\}@icir.org}}
+\date{}
+
+\toappear{First Workshop on Hot Topics in Networks, Princeton, New Jersey,
+October 28--29, 2002\hfill\break
+Permission to make digital or hard copies of all or part of this
+work for any purpose is granted without fee provided that copies bear this
+notice and the full citation on the first page.\hfill\break
+Copyright \copyright\ 2002 International Computer Science Institute}
+
+\maketitle
+
+\input{abstract}
+\input{intro}
+\input{wanted}
+\input{xorp}
+%\input{overview}
+%\input{xrl}
+%\input{platform}
+\input{summary}
+\input{acknowledgments}
+
+\bibliographystyle{abbrv}
+\bibliography{biblio}
+
+\end{document}

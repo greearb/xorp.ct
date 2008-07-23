@@ -1,0 +1,70 @@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+perl = @perl@
+install = @INSTALL@
+bin = kdoc qt2kdoc makekdedoc
+pm = kdocUtil.pm kdocAstUtil.pm kdocParseDoc.pm kdocCxxHTML.pm kdocLib.pm \
+	Ast.pm kdocHTMLutil.pm kdoctexi.pm kdocCxxLaTeX.pm \
+	kdocDocHelper.pm kdocCxxDocbook.pm Iter.pm kdocParser.pm kdocMan.pm \
+	kdocDocIter.pm kdocAstGen.pm kdocParseCxx.pm kdocParsePy.pm \
+	kdocAstSearch.pm
+
+pmextra = 
+bindir = ${exec_prefix}/bin
+pmdir = ${prefix}/share/kdoc
+srcdocdir= doc
+sources=@srcdir@/src
+VERSION=@Version@
+
+all: kdoc.local qt2kdoc.local makekdedoc.local
+	(cd doc; make)
+
+kdoc.local: ${sources}/kdoc
+	cp ${sources}/kdoc kdoc.local
+	perl -npi -e 's%^#\!.*$$%#!'${perl}' -I'${pmdir}'%g;' kdoc.local
+	perl -npi -e 's#\$$Version\\\$$#'"${VERSION}"'#g;' kdoc.local
+
+qt2kdoc.local: ${sources}/qt2kdoc
+	cp ${sources}/qt2kdoc qt2kdoc.local
+	perl -npi -e 's%^#\!.*$$%#!'${perl}' -I'${pmdir}'%g;' qt2kdoc.local
+
+makekdedoc.local: ${sources}/makekdedoc
+	cp ${sources}/makekdedoc makekdedoc.local
+	perl -npi -e 's%^#\!.*$$%#!'${perl}' -I'${pmdir}'%g;' makekdedoc.local
+
+install: all
+	${install} -d $(DESTDIR)${bindir}
+	${install} -m 755 kdoc.local $(DESTDIR)${bindir}/kdoc
+	${install} -m 755 qt2kdoc.local $(DESTDIR)${bindir}/qt2kdoc
+	${install} -m 755 makekdedoc.local $(DESTDIR)${bindir}/makekdedoc
+	${install} -d $(DESTDIR)${pmdir}
+	for file in ${pm} ${pmextra}; do \
+		${install} -m 644 ${sources}/$$file $(DESTDIR)${pmdir}; \
+	done
+	(cd doc; make install)
+
+uninstall:
+	(cd $(DESTDIR)${bindir} && rm -f ${bin})
+	(cd $(DESTDIR)${pmdir} && rm -f ${pm})
+	(cd $(DESTDIR)${mandir} && rm -f ${man})
+	-rmdir $(DESTDIR)${bindir}
+	-rmdir $(DESTDIR)${pmdir}
+	-rmdir $(DESTDIR)${mandir}
+
+clean:
+	(cd doc; make clean)
+	rm -f kdoc.local qt2kdoc.local makekdedoc.local
+
+distclean: clean
+	rm -f Makefile config.status config.log config.cache perlbin \
+		doc/Makefile
+
+srcdoc:
+	(cd ${sources}; pod2html --flush --title KDOC \
+					--outfile ../$(srcdocdir)/kdoc-doc.html \
+	$(bin) $(pm) )
+
+check:
+	(cd ${sources}; @for dir in $(bin) $(pm); do \
+		echo "** Checking: $$dir"; \
+		perl -wc $$dir; done)

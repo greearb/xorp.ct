@@ -1,0 +1,261 @@
+# -*- mode: shell-script -*-
+
+# Copyright (c) 2001-2008 XORP, Inc.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software")
+# to deal in the Software without restriction, subject to the conditions
+# listed in the XORP LICENSE file. These conditions include: you must
+# preserve this copyright notice, and you cannot mention the copyright
+# holders in advertising related to the Software without their permission.
+# The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+# notice is a summary of the XORP LICENSE file; the license in that file is
+# legally binding.
+
+# $XORP: other/tinderbox/scripts/config,v 1.40 2008/03/17 23:59:06 pavlin Exp $
+
+#
+# Tinderbox configurations
+#
+# A configuration consists of a set of configuration name postfixed variables:
+#
+# 	host_X       = host to run configuration on
+# 	home_X       = directory for the tinderbox build and execution
+# 	env_X        = environment variable to set when running the tinderbox
+#	buildflags_X = flags to pass to GNU Make during build phase
+#	sshflags_X   = flags to pass to SSH when login
+#	cross_arch_X = if cross-compilation, then the name of the target
+#                      architecture, otherwise an empty string
+#       cross_root_X = if cross-compilation, then the name of the directory
+#                      with the cross-compilation tools, otherwise an empty
+#                      string
+#
+# Configurations must be named in the variable TINDERBOX_CONFIGS in order
+# to become part of the tinderbox build.
+#
+
+# FreeBSD-4.10 with gcc-2.95.x
+host_freebsd410_gcc295="panther.icir.org"
+home_freebsd410_gcc295="tinderbox/gcc295"
+env_freebsd410_gcc295="MALLOC_OPTIONS=AJ CONFIGURE_ARGS=--with-snmp"
+buildflags_freebsd410_gcc295="-j 2"
+sshflags_freebsd410_gcc295="-i ${HOME}/.ssh/tinderbox"
+cross_arch_freebsd410_gcc295=""
+cross_root_freebsd410_gcc295=""
+
+# FreeBSD-4.10 with gcc-3.3.4
+host_freebsd410_gcc334="panther.icir.org"
+home_freebsd410_gcc334="tinderbox/gcc33"
+env_freebsd410_gcc334="CC=gcc33 CXX=g++33 MALLOC_OPTIONS=AJ"
+buildflags_freebsd410_gcc334="-j 2"
+sshflags_freebsd410_gcc334="-i ${HOME}/.ssh/tinderbox"
+cross_arch_freebsd410_gcc334=""
+cross_root_freebsd410_gcc334=""
+
+# FreeBSD-4.10 with gcc-3.4.6
+host_freebsd410_gcc346="panther.icir.org"
+home_freebsd410_gcc346="tinderbox/gcc34"
+env_freebsd410_gcc346="CC=gcc34 CXX=g++34 MALLOC_OPTIONS=AJ"
+buildflags_freebsd410_gcc346="-j 2"
+sshflags_freebsd410_gcc346="-i ${HOME}/.ssh/tinderbox"
+cross_arch_freebsd410_gcc346=""
+cross_root_freebsd410_gcc346=""
+
+# FreeBSD-4.10 with gcc-3.4.6 and STL debug
+host_freebsd410_gcc346_stldebug="panther.icir.org"
+home_freebsd410_gcc346_stldebug="tinderbox/gcc34"
+env_freebsd410_gcc346_stldebug="CC=gcc34 CXX=g++34 MALLOC_OPTIONS=AJ CXXFLAGS='-D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC'"
+buildflags_freebsd410_gcc346_stldebug="-j 2"
+sshflags_freebsd410_gcc346_stldebug="-i ${HOME}/.ssh/tinderbox"
+cross_arch_freebsd410_gcc346_stldebug=""
+cross_root_freebsd410_gcc346_stldebug=""
+
+# RedHat-7.3 with gcc-2.96
+host_redhat73_gcc296="koala.icir.org"
+home_redhat73_gcc296="tinderbox"
+env_redhat73_gcc296="MALLOC_CHECK_=2"
+buildflags_redhat73_gcc296="-j 4"
+sshflags_redhat73_gcc296="-i ${HOME}/.ssh/tinderbox"
+cross_arch_redhat73_gcc296=""
+cross_root_redhat73_gcc296=""
+
+# Gentoo-2006.1 with gcc-3.4.6
+host_gentoo20061_gcc346="xorpv.icir.org"
+home_gentoo20061_gcc346="tinderbox"
+env_gentoo20061_gcc346="MALLOC_CHECK_=2"
+buildflags_gentoo20061_gcc346="-j 2"
+sshflags_gentoo20061_gcc346="-i ${HOME}/.ssh/tinderbox"
+cross_arch_gentoo20061_gcc346=""
+cross_root_gentoo20061_gcc346=""
+
+# Gentoo-2006.1 with gcc-3.4.6 and optimization
+host_gentoo20061_gcc346_opt="xorpv.icir.org"
+home_gentoo20061_gcc346_opt="tinderbox"
+env_gentoo20061_gcc346_opt="CONFIGURE_ARGS='--disable-debug --enable-optimize'"
+buildflags_gentoo20061_gcc346_opt="-j 2"
+sshflags_gentoo20061_gcc346_opt="-i ${HOME}/.ssh/tinderbox"
+cross_arch_gentoo20061_gcc346_opt=""
+cross_root_gentoo20061_gcc346_opt=""
+
+# Windows-2003 with gcc-3.4.2
+host_vm_windows2003_gcc342="vm-windows"
+home_vm_windows2003_gcc342="tinderbox"
+env_vm_windows2003_gcc342=""
+buildflags_vm_windows2003_gcc342="-j 2"
+sshflags_vm_windows2003_gcc342="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_windows2003_gcc342=""
+cross_root_vm_windows2003_gcc342=""
+
+# Ubuntu-7.10 with gcc-4.1.3
+host_vm_ubuntu710_gcc413="vm-ubuntu"
+home_vm_ubuntu710_gcc413="tinderbox"
+env_vm_ubuntu710_gcc413="CC=gcc-4.1 CXX=g++-4.1"
+buildflags_vm_ubuntu710_gcc413="-j 2"
+sshflags_vm_ubuntu710_gcc413="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_ubuntu710_gcc413=""
+cross_root_vm_ubuntu710_gcc413=""
+
+# Solaris-10 with gcc-3.4.3
+host_vm_solaris10_gcc343="vm-solaris"
+home_vm_solaris10_gcc343="tinderbox"
+env_vm_solaris10_gcc343=""
+buildflags_vm_solaris10_gcc343="-j 2"
+sshflags_vm_solaris10_gcc343="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_solaris10_gcc343=""
+cross_root_vm_solaris10_gcc343=""
+
+# NetBSD-4.0 with gcc-4.1.2
+host_vm_netbsd40_gcc412="vm-netbsd"
+home_vm_netbsd40_gcc412="tinderbox"
+env_vm_netbsd40_gcc412=""
+buildflags_vm_netbsd40_gcc412="-j 2"
+sshflags_vm_netbsd40_gcc412="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_netbsd40_gcc412=""
+cross_root_vm_netbsd40_gcc412=""
+
+# FreeBSD-6.2 with gcc-3.4.6
+host_vm_freebsd62_gcc346="vm-freebsd"
+home_vm_freebsd62_gcc346="tinderbox"
+env_vm_freebsd62_gcc346=""
+buildflags_vm_freebsd62_gcc346="-j 2"
+sshflags_vm_freebsd62_gcc346="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_freebsd62_gcc346=""
+cross_root_vm_freebsd62_gcc346=""
+
+# Fedora-8 with gcc-4.1.2
+host_vm_fedora8_gcc412="vm-fedora"
+home_vm_fedora8_gcc412="tinderbox"
+env_vm_fedora8_gcc412=""
+buildflags_vm_fedora8_gcc412="-j 2"
+sshflags_vm_fedora8_gcc412="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_fedora8_gcc412=""
+cross_root_vm_fedora8_gcc412=""
+
+# DragonFlyBSD-1.10.1 with gcc-3.4.6
+host_vm_dragonflybsd110_gcc346="vm-dragonflybsd"
+home_vm_dragonflybsd110_gcc346="tinderbox"
+env_vm_dragonflybsd110_gcc346=""
+buildflags_vm_dragonflybsd110_gcc346="-j 2"
+sshflags_vm_dragonflybsd110_gcc346="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_dragonflybsd110_gcc346=""
+cross_root_vm_dragonflybsd110_gcc346=""
+
+# Debian-4.0 with gcc-4.1.3
+host_vm_debian40_gcc413="vm-debian"
+home_vm_debian40_gcc413="tinderbox"
+env_vm_debian40_gcc413="CC=gcc-4.1 CXX=g++-4.1"
+buildflags_vm_debian40_gcc413="-j 2"
+sshflags_vm_debian40_gcc413="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_debian40_gcc413=""
+cross_root_vm_debian40_gcc413=""
+
+# OpenBSD-4.2 with gcc-3.3.5
+host_vm_openbsd42_gcc335="vm-openbsd"
+home_vm_openbsd42_gcc335="tinderbox"
+env_vm_openbsd42_gcc335="CFLAGS=-fno-stack-protector CXXFLAGS=-fno-stack-protector"
+buildflags_vm_openbsd42_gcc335="-j 2"
+sshflags_vm_openbsd42_gcc335="-i ${HOME}/.ssh/tinderbox"
+cross_arch_vm_openbsd42_gcc335=""
+cross_root_vm_openbsd42_gcc335=""
+
+# Cross-compilation IA-64 on Gentoo-2006.1 with gcc-3.4.5
+host_cc_ia64_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_ia64_gentoo20061_gcc345="tinderbox"
+env_cc_ia64_gentoo20061_gcc345=""
+buildflags_cc_ia64_gentoo20061_gcc345="-j 2"
+sshflags_cc_ia64_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_ia64_gentoo20061_gcc345="ia64-unknown-linux-gnu"
+cross_root_cc_ia64_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu"
+
+# Cross-compilation MIPS (Broadcom for Linksys WRT54G) on Gentoo-2006.1 with gcc-3.4.5
+host_cc_mips_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_mips_gentoo20061_gcc345="tinderbox"
+env_cc_mips_gentoo20061_gcc345=""
+buildflags_cc_mips_gentoo20061_gcc345="-j 2"
+sshflags_cc_mips_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_mips_gentoo20061_gcc345="mipsel-unknown-linux-gnu"
+cross_root_cc_mips_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu"
+
+# Cross-compilation PowerPC-603 on Gentoo-2006.1 with gcc-4.1.0
+host_cc_powerpc603_gentoo20061_gcc410="xorpv.icir.org"
+home_cc_powerpc603_gentoo20061_gcc410="tinderbox"
+env_cc_powerpc603_gentoo20061_gcc410=""
+buildflags_cc_powerpc603_gentoo20061_gcc410="-j 2"
+sshflags_cc_powerpc603_gentoo20061_gcc410="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_powerpc603_gentoo20061_gcc410="powerpc-603-linux-gnu"
+cross_root_cc_powerpc603_gentoo20061_gcc410="/opt/crosstool/gcc-4.1.0-glibc-2.3.6/powerpc-603-linux-gnu"
+
+# Cross-compilation Sparc64 on Gentoo-2006.1 with gcc-3.4.5
+host_cc_sparc64_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_sparc64_gentoo20061_gcc345="tinderbox"
+env_cc_sparc64_gentoo20061_gcc345=""
+buildflags_cc_sparc64_gentoo20061_gcc345="-j 2"
+sshflags_cc_sparc64_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_sparc64_gentoo20061_gcc345="sparc64-unknown-linux-gnu"
+cross_root_cc_sparc64_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/sparc64-unknown-linux-gnu"
+
+# Cross-compilation XScale on Gentoo-2006.1 with gcc-3.4.5
+host_cc_xscale_gentoo20061_gcc345="xorpv.icir.org"
+home_cc_xscale_gentoo20061_gcc345="tinderbox"
+env_cc_xscale_gentoo20061_gcc345=""
+buildflags_cc_xscale_gentoo20061_gcc345="-j 2"
+sshflags_cc_xscale_gentoo20061_gcc345="-i ${HOME}/.ssh/tinderbox"
+cross_arch_cc_xscale_gentoo20061_gcc345="armv5b-softfloat-linux"
+cross_root_cc_xscale_gentoo20061_gcc345="/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux"
+
+TINDERBOX_CONFIGS="gentoo20061_gcc346 gentoo20061_gcc346_opt vm_windows2003_gcc342 vm_ubuntu710_gcc413 vm_netbsd40_gcc412 vm_freebsd62_gcc346 vm_fedora8_gcc412 vm_dragonflybsd110_gcc346 vm_debian40_gcc413 vm_openbsd42_gcc335 cc_ia64_gentoo20061_gcc345 cc_mips_gentoo20061_gcc345 cc_powerpc603_gentoo20061_gcc410 cc_sparc64_gentoo20061_gcc345 cc_xscale_gentoo20061_gcc345"
+
+TINDERBOX_CONFIG_UNUSED="freebsd410_gcc295 freebsd410_gcc334 freebsd410_gcc346 freebsd410_gcc346_stldebug redhat73_gcc296 vm_solaris10_gcc343"
+
+#
+# Configuration variables for tinderbox
+#
+
+SCRIPTSDIR=$(dirname $0)
+
+ROOTDIR=${SCRIPTSDIR}/..
+LOGDIR=${ROOTDIR}/log
+
+LOCALHOST=$(hostname)
+
+# Successful build mail address
+REPORTOKADDR="Xorp Tinderbox <xorp-tinderbox@xorp.org>"
+
+# Badness Reporting Address
+REPORTBADADDR="${REPORTOKADDR}"
+
+# Feedback address
+REPLYTOADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
+
+# From address
+FROMADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
+
+# Post command
+POST="/usr/bin/post"
+
+# make and make check timeout and timeout check interval, both in seconds
+TIMEOUT=21600
+TIMEOUT_CHECK=24
+
+# Common environment setup
+COMMON_ENV="XORP_FINDER_SERVER_PORT=19797"

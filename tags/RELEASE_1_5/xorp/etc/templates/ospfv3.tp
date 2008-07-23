@@ -1,0 +1,482 @@
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.9 2007/10/29 22:27:56 atanu Exp $ */
+
+protocols {
+    ospf6 @: u32 {
+	targetname: txt = "ospfv3";
+	router-id: ipv4;
+	ip-router-alert: bool = false;
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	    }
+	}
+
+	area @: ipv4 {
+	    area-type:		txt = "normal";
+
+	    default-lsa {
+		disable:	toggle = false;
+		metric:		u32 = 0;
+	    }
+
+	    summaries {
+		disable:	toggle = false;
+	    }
+
+	    area-range @: ipv6net {
+		advertise:	bool = true;
+	    }
+
+	    virtual-link @: ipv4 {
+		transit-area: 		ipv4;
+		hello-interval:		u32 = 10;
+		router-dead-interval:   u32 = 40;
+		retransmit-interval:	u32 = 5;
+		transit-delay:		u32 = 1;
+	    }
+
+	    interface @: txt {
+		link-type:	txt = "broadcast";
+
+		vif @: txt {
+	            address @: ipv6 {
+			disable:	    toggle = false;
+	            }
+
+    		    priority:		    u32 = 128;
+		    hello-interval:	    u32 = 10;
+		    router-dead-interval:   u32 = 40;
+		    interface-cost:	    u32 = 1;
+		    retransmit-interval:    u32 = 5;
+		    transit-delay:	    u32 = 1;
+		    passive:		    bool = false;
+
+		    neighbor @: ipv4 {
+		        router-id:  ipv4;
+		    }
+
+		    disable:		    toggle = false;
+		}
+	    }
+	}
+
+	import: txt;
+	export: txt;
+    }
+}
+
+policy {
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		nexthop6: ipv6range;
+		metric: u32range;
+		ebit: bool;
+		tag: u32range;
+	    }
+	    to {
+		nexthop6: ipv6range;
+		metric: u32range;
+		ebit: bool;
+		tag: u32range;
+	    }
+	    then {
+		nexthop6: ipv6;
+		metric: u32;
+		ebit: bool;
+		tag: u32;
+	    }
+	}
+    }
+}
+
+protocols {
+    ospf6 @: u32 {
+	%help:	  short "Configure the OSPF protocol";
+	%modinfo: provides ospf6;
+	%modinfo: depends rib;
+	%modinfo: depends policy;
+	%modinfo: path "ospf/xorp_ospfv3";
+	%modinfo: default_targetname "ospfv3";
+	%modinfo: status_method xrl "$(ospf6.@.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method xrl "$(ospf6.@.targetname)/common/0.1/shutdown";
+
+	%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_instance_id?id:u32=$(ospf6.@)";
+
+	%mandatory: $(@.router-id);
+	%mandatory: $(@.targetname);
+
+	targetname {
+	    %user-hidden: "XRL target name";
+	    %help:	short "XRL target name";
+	    %set:;
+	}
+
+	router-id {
+	    %help: short "A unique 32-bit identifier within this AS";
+	    %help: long
+"A 32-bit number assigned to each router running
+the OSPF protocol. This number uniquely identifies
+the router within an Autonomous System";
+
+	    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_id?id:ipv4=$(@)";
+	}
+
+	ip-router-alert {
+	    %help: short "Send the IP router alert option in packets";
+	    %help: long
+"If this option is true the IP router alert option will be set in all
+transmitted packets";
+
+	    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_ip_router_alert?ip_router_alert:bool=$(@)";
+	    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_ip_router_alert?ip_router_alert:bool=$(DEFAULT)";
+	}
+
+	area @: ipv4 {
+	    %help: short "The OSPF area to which the attached network belongs";
+
+	    area-type {
+		%help: short "Type of area";
+		%allow: $(@) "normal" %help: "OSPF normal area";
+		%allow: $(@) "stub" %help: "OSPF stubby area";
+		%allow: $(@) "nssa" %help: "OSPF not-so-stubby area";
+
+	        %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/change_area_router_type?area:ipv4=$(area.@)&type:txt=$(@)";
+	        %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/change_area_router_type?area:ipv4=$(area.@)&type:txt=$(DEFAULT)";
+	    }
+
+	    %create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
+	    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/destroy_area_router?area:ipv4=$(@)";
+
+	    default-lsa {
+		%help: short "Originate default route in stub or not-so-stubby areas";
+
+		disable {
+		    %help: short "disable the origination of the default route";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/originate_default_route?area:ipv4=$(area.@)&enable:bool=`~$(@)`";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/originate_default_route?area:ipv4=$(area.@)&enable:bool=$(DEFAULT)";
+		}
+
+		metric {
+		    %help: short "Metric of default route";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/stub_default_cost?area:ipv4=$(area.@)&cost:u32=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/stub_default_cost?area:ipv4=$(area.@)&cost:u32=$(DEFAULT)";
+		}
+	    }
+
+	    summaries {
+                %help: short "Generate summaries into stub or not-so-stubby areas";
+
+		disable {
+		    %help: short "disable summaries into stub or not-so-stubby areas";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/summaries?area:ipv4=$(area.@)&enable:bool=`~$(@)`";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/summaries?area:ipv4=$(area.@)&enable:bool=$(DEFAULT)";
+		}
+	    }
+
+	    area-range @: ipv6net {
+		%help: short "Area range for generating summaries";
+
+		%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/area_range_add?area:ipv4=$(area.@)&net:ipv6net=$(@)&advertise:bool=$(@.advertise)";
+		%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/area_range_delete?area:ipv4=$(area.@)&net:ipv6net=$(@)";
+
+		advertise {
+		    %help: short "Advertise or DoNotAdvertise";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv6net=$(area-range.@)&advertise:bool=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv6net=$(area-range.@)&advertise:bool=$(DEFAULT)";
+		}
+	    }
+
+	    virtual-link @: ipv4 {
+		%help: short "Virtual link";
+
+		%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/create_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&area:ipv4=$(area.@)";
+		%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/delete_virtual_link?neighbour_id:ipv4=$(virtual-link.@)";
+
+		transit-area {
+		    %help: short "Area through which to transit";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/transit_area_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&transit_area:ipv4=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/transit_area_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&transit_area:ipv4=$(DEFAULT)";
+		}
+
+		hello-interval {
+		    %help: short
+			"Hello packets sent every interval seconds";
+
+		    %allow-range: $(@) "1" "65535" %help: "The Hello packets interval (in seconds)";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		}
+
+		router-dead-interval {
+		    %help: short "Seconds to wait before considering a neighbor dead";
+
+		    %allow-range: $(@) "1" "4294967295" %help: "The neighbor router dead interval (in seconds)";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		}
+
+		retransmit-interval {
+		    %help: short "The retransmit interval (RxmtInterval)";
+
+		    %allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		}
+
+		transit-delay {
+		    %help: short "Add to age field of all transmitted LSAs";
+
+		    %allow-range: $(@) "0" "3600" %help: "The extra addition to age field of all transmitted LSAs";
+
+		    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&delay:u32=$(DEFAULT)";
+		}
+	    }
+
+	    interface @: txt {
+	    	%help: short "Include an interface in this area";
+
+		link-type {
+		    %help: short "broadcast or p2p or p2m";
+		    %allow: $(@) "broadcast" %help: "Broadcast link";
+		    %allow: $(@) "p2p" %help: "Point-to-point link";
+		    %allow: $(@) "p2m" %help: "Point-to-multipoint link";
+
+		    %set:;
+		}
+
+		vif @: txt {
+		    %help: short "Include an vif in this area";
+    		    %create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
+		    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
+		    %activate: xrl "$(ospf6.@.targetname)/ospfv3/0.1/activate_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)";
+		    %update: xrl "$(ospf6.@.targetname)/ospfv3/0.1/update_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)";
+
+		    address @ {
+		    	%help: short "Address on interface/vif";
+	    		%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/add_address_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(@)";
+	    		%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/remove_address_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(@)";
+
+		        disable {
+			    %help: short "Disable OSPF on interface/vif";
+
+			    %set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_address_state_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(address.@)&enable:bool=`~$(@)`";
+			    %delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_address_state_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&addr:ipv6=$(address.@)&enable:bool=`~$(DEFAULT)`";
+		        }
+		    }
+
+		    priority {
+			%help: short "Priority used in DR election";
+
+			%allow-range: $(@) "0" "255" %help: "The priority used in DR election";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(DEFAULT)";
+		    }
+
+		    hello-interval {
+			%help: short "Hello packets sent every interval seconds";
+
+			%allow-range: $(@) "1" "65535" %help: "The Hello packets interval (in seconds)";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+			}
+
+		    router-dead-interval {
+			%help: short "Seconds to wait before considering a neighbor dead";
+
+			%allow-range: $(@) "1" "4294967295" %help: "The neighbor router dead interval (in seconds)";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		    }
+
+		    interface-cost {
+			%help: short "Cost of this interface/vif";
+
+			%allow-range: $(@) "1" "65535" %help: "The cost of this address";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(DEFAULT)";
+		    }
+
+		    retransmit-interval {
+			%help: short "The retransmit interval (RxmtInterval)";
+
+			%allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
+		    }
+
+		    transit-delay {
+			%help: short "Add to age field of all transmitted LSAs";
+
+			%allow-range: $(@) "0" "3600" %help: "The extra addition to age field of all transmitted LSAs";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(DEFAULT)";
+		    }
+
+		    passive {
+			%help: short "Do not run OSPF, but advertise it";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(DEFAULT)";
+		    }
+
+		    disable {
+			%help: short "Disable OSPF on interface/vif";
+
+			%set: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
+		    }
+
+		    neighbor @: ipv4 {
+			%help: short "Neighbors address";
+
+			%mandatory: $(@.router-id);
+
+			router-id {
+			    %help: short "Neighbors router-id";
+
+			    %set:;
+			}
+
+			%create: xrl "$(ospf6.@.targetname)/ospfv3/0.1/add_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
+		   }
+		}
+	    }
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short	"Configure all tracing operations";
+
+		    disable {
+			%help:	short	"Disable all tracing operations";
+			%set:	xrl "$(ospf6.@.targetname)/ospfv3/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
+			%delete: xrl "$(ospf6.@.targetname)/ospfv3/0.1/trace?tvar:txt=all&enable:bool=$(DEFAULT)";
+		    }
+
+		}
+	    }
+	}
+
+	import {
+	    %help: short "Import policy";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf6&policies:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf6&policies:txt=$(@)";
+	}
+	export {
+	    %help: short "Export policy";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf6&policies:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf6&policies:txt=$(@)";
+	}
+    }
+}
+
+policy {
+    %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf6&target:txt=ospfv3";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=ebit&type:txt=bool&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
+
+    policy-statement @: txt {
+	term @: txt {
+	    from {
+		nexthop6 {
+		    %help: short "IPv6 nexthop";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %help: short "Metric value";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		ebit {
+		    %help: short "Type of external OSPF route";
+		    %allow-operator: ":" "==" "!=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=ebit $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		tag {
+		    %help: short "Route tag";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    to {
+		nexthop6 {
+		    %help: short "IPv6 nexthop";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %help: short "Metric value";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		ebit {
+		    %help: short "Type of external OSPF route";
+		    %allow-operator: ":" "==" "!=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=ebit $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		tag {
+		    %help: short "Route tag";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    then {
+		nexthop6 {
+		    %help: short "Set the IPv6 nexthop";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %help: short "Set the metric value";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		ebit {
+		    %help: short "Set the type of external OSPF route";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=ebit $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		tag {
+		    %help: short "Set the route tag";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	}
+    }
+}

@@ -1,0 +1,199 @@
+drawtool(
+    picture(
+        picture(
+            text(10,"Decision",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,312,553)
+            rectangle(687,704,767,768 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,8,0)
+        picture(
+            text(10,"Fanout",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,384,553)
+            rectangle(815,704,895,768 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+            )
+        picture(
+            picture(
+                text(10,"RibIn",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,24,595)
+                rectangle(95,784,175,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,72,0)
+            picture(
+                text(10,"Filter",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,96,595)
+                rectangle(239,784,319,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,56,0)
+            picture(
+                text(10,"Cache",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,168,595)
+                rectangle(383,784,463,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,40,0)
+            picture(
+                text(10,"NhLookup",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,240,593)
+                rectangle(543,784,639,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,16,0)
+            picture(
+                text(10,"Peer",
+                    "Handler" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,32,593)
+                rectangle(111,784,207,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                )
+            arrowline(207,816,239,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(319,816,351,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(431,816,463,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(543,816,575,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            )
+        arrowline(671,816,703,736 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(783,736,815,736 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(895,736,927,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        picture(
+            picture(
+                text(10,"RibIn",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,24,595)
+                rectangle(95,784,175,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,72,0)
+            picture(
+                text(10,"Filter",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,96,595)
+                rectangle(239,784,319,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,56,0)
+            picture(
+                text(10,"Cache",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,168,595)
+                rectangle(383,784,463,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,40,0)
+            picture(
+                text(10,"NhLookup",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,240,593)
+                rectangle(543,784,639,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,16,0)
+            picture(
+                text(10,"Peer",
+                    "Handler" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,32,593)
+                rectangle(111,784,207,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                )
+            arrowline(207,816,239,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(319,816,351,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(431,816,463,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(543,816,575,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,0,-40)
+        picture(
+            text(10,"RibIn",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,24,595)
+            rectangle(95,784,175,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,72,-88)
+        picture(
+            text(10,"Filter",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,96,595)
+            rectangle(239,784,319,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,56,-88)
+        picture(
+            text(10,"Cache",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,168,595)
+            rectangle(383,784,463,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,40,-88)
+        picture(
+            text(10,"NhLookup",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,240,593)
+            rectangle(543,784,639,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,16,-88)
+        rectangle(111,784,207,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(207,816,239,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(319,816,351,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(431,816,463,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(543,816,575,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        picture(
+            picture(
+                text(10,"Filter",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,448,593)
+                rectangle(943,784,1023,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,-8,0)
+            picture(
+                text(10,"Cache",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,512,593)
+                rectangle(1071,784,1151,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,-16,0)
+            picture(
+                text(10,"RibOut",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,576,593)
+                rectangle(1199,784,1295,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,-24,0)
+            picture(
+                text(10,"Peer",
+                    "Handler" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,32,593)
+                rectangle(111,784,207,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,584,0)
+            arrowline(1007,816,1039,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(1119,816,1151,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(1247,816,1279,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            )
+        picture(
+            picture(
+                text(10,"Filter",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,448,593)
+                rectangle(943,784,1023,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,-8,0)
+            picture(
+                text(10,"Cache",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,512,593)
+                rectangle(1071,784,1151,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,-16,0)
+            picture(
+                text(10,"RibOut",
+                    "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,576,593)
+                rectangle(1199,784,1295,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,-24,0)
+            picture(
+                text(10,"Peer",
+                    "Handler" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,32,593)
+                rectangle(111,784,207,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+                 :transform 1,0,0,1,584,0)
+            arrowline(1007,816,1039,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(1119,816,1151,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+            arrowline(1247,816,1279,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,0,-40)
+        picture(
+            text(10,"Filter",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,448,593)
+            rectangle(943,784,1023,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,-8,-88)
+        picture(
+            text(10,"Cache",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,512,593)
+            rectangle(1071,784,1151,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,-16,-88)
+        picture(
+            text(10,"RibOut",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,576,593)
+            rectangle(1199,784,1295,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+             :transform 1,0,0,1,-24,-88)
+        rectangle(111,784,207,848 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,0,0,0.5,552.5,88)
+        arrowline(1007,816,1039,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(1119,816,1151,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(1247,816,1279,816 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,0,0,0.5,-31.5,88)
+        arrowline(671,736,703,736 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(671,640,703,736 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(895,736,927,736 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(895,736,927,640 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,-31.5,176)
+        text(10,"IpcRib",
+            "Handler" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,32,505)
+        text(10,"IpcRib",
+            "Handler" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,616,505)
+        rectangle(223,464,1263,896 :fillbg -1 :brush 52428,1 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        text(10,"BGP Plumbing" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,88,617)
+        text(10,"NextHop",
+            "Resolver" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,328,449)
+        polygon((703,496),(815,496),(815,560),(703,560) :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(751,704,751,560 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(751,496,751,416 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(159,608,159,544 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(1327,608,1327,544 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        text(10,"XRLs to",
+            "RIB process" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,24,449)
+        text(10,"XRLs to",
+            "RIB process" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,320,385)
+        text(10,"XRLs to",
+            "RIB process" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,608,449)
+        arrowline(671,704,703,560 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(671,784,703,560 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+        arrowline(671,608,703,560 :arrowscale 2 :head :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,-31.5,176)
+         :transform 1,0,0,1,0,0)
+)

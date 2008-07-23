@@ -1,0 +1,267 @@
+%
+% $XORP: xorp/docs/user_manual/firewall.tex,v 1.1 2008/07/18 23:12:40 pavlin Exp $
+%
+
+\chapter{Firewall}
+\label{firewall}
+\section{Firewall Terminology and Concepts}
+
+For security purposes, a router can be configured to inspect the
+forwarded network traffic and take certain actions. Those actions are
+based on a set of rules called ``firewall rules''. Each firewall rule
+has a matching criteria (\eg source and destination address), and an
+action. Typical actions are to allow or deny the forwarding of the
+packets that match the rule.
+
+
+
+\newpage
+\section{Configuring Firewall Rules}
+
+Firewall configuration can contain many rules.
+The rules are evaluated in certain order for each incoming packet.
+In XORP the configuration rules are numbered, and rules with smaller
+number are evaluated first. On certain systems (\eg FreeBSD) the largest
+rule number is limited by the system to 65534~\footnote{On FreeBSD with
+{\tt ipfw} enabled, rule number 65535 is reserved by the system as the
+default rule that matches all packets and it cannot be modified or
+deleted.}, therefore the XORP  configuration shouldn't include rule
+numbers that are larger.
+
+Currently (July 2008), firewall configuration is supported only for
+*BSD and Linux~\footnote{See file ERRATA from the XORP distribution for
+additional information how to compile XORP on Linux with firewall
+support enabled.}.
+
+\subsection{Configuration Syntax}
+
+The available configuration syntax for firewall rules is as
+follows~\footnote{Currently (July 2008) XORP has only preliminary support to
+  configure firewall rules.}: 
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+firewall \{\\
+\>rule4 {\it int(1..65534)} \{\\
+\>\>action: {\it text}\\
+\>\>protocol: {\it int(0..255)}\\
+\>\>source \{\\
+\>\>\>interface: {\it text}\\
+\>\>\>vif: {\it text}\\
+\>\>\>network: {\it IPv4}/{\it int(0..32)}\\
+\>\>\>port-begin: {\it int(0..65535)}\\
+\>\>\>port-end: {\it int(0..65535)}\\
+\>\>\}\\
+\>\>destination \{\\
+\>\>\>network: {\it IPv4}/{\it int(0..32)}\\
+\>\>\>port-begin: {\it int(0..65535)}\\
+\>\>\>port-end: {\it int(0..65535)}\\
+\>\>\}\\
+\>\}\\
+\>rule6 {\it int(1..65534)} \{\\
+\>\>action: {\it text}\\
+\>\>protocol: {\it int(0..255)}\\
+\>\>source \{\\
+\>\>\>interface: {\it text}\\
+\>\>\>vif: {\it text}\\
+\>\>\>network: {\it IPv6}/{\it int(0..128)}\\
+\>\>\>port-begin: {\it int(0..65535)}\\
+\>\>\>port-end: {\it int(0..65535)}\\
+\>\>\}\\
+\>\>destination \{\\
+\>\>\>network: {\it IPv6}/{\it int(0..128)}\\
+\>\>\>port-begin: {\it int(0..65535)}\\
+\>\>\>port-end: {\it int(0..65535)}\\
+\>\>\}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\begin{description}
+\item{\tt firewall}: this delimits all the firewall configuration
+  information within the XORP configuration file.
+
+\item{\tt rule4}: this delimits the configuration of a particular
+  IPv4 firewall rule. The parameter is the rule number and must be
+  in the interval [1..65534].
+
+  For each IPv4 rule, the following configuration is possible:
+
+\begin{description}
+
+\item{\tt action}: this is the action that should be applied on packets
+  that match the rule. It is a string with one of the following values:
+\begin{itemize}
+  \item {\tt none}: No action. Continue the evaluation with the next
+  rule.
+  \item {\tt pass}: Pass the matching packets.
+  \item {\tt drop}: Drop the matching packets.
+  \item {\tt reject}: Reject the matching packets (\ie drop them and try
+  to send back the appropriate ICMP unreachable notice). Note that some
+  systems don't support this mechanism; on such systems {\tt reject} is
+  equivalent to {\tt drop}.
+\end{itemize}
+
+  This field is mandatory.
+
+\item{\tt protocol}: this field specifies the IP protocol number as
+  defined by IANA~\cite{IANA}, and is an integer value in the interval
+  [0..255]. For example, TCP protocol number is 6, and UDP protocol
+  number is 17. If it is set to 0 (the default value), all protocols are
+  matched.
+
+\item{\tt source}: this delimits the configuration of the matching
+  criteria the is related to the source of the packet:
+\begin{description}
+\item{\tt interface}: this parameter is the name of the interface
+  the packet arrives on. Only packets arriving on that interface will
+  pass this criteria. The value must be either the name of an interface
+  known to the router forwarding path or an empty string (\ie any
+  interface). The default value is an empty string.
+\item{\tt vif}: this parameter is the name of the vif on the
+  corresponding {\tt interface} the packet arrives on. Only packets
+  arriving on that vif will pass this criteria. The value must be either
+  the name of a vif that belongs to {\tt interface} and is known to the
+  router forwarding path or an empty string (\ie any interface). The
+  default value is an empty string.
+\item{\tt network}: this parameter specifies the source network address
+  prefix. The value is in the form of an IP address and prefix-length in
+  the {\it address/prefix-length} format. Only packets with source
+  address that belong to this address prefix will pass this criteria.
+  The default value is 0.0.0.0/0, \ie any source address.
+\item{\tt port-begin}: this parameter specifies the lower bound of the
+  source port number interval, and is an integer value in the interval
+  [0..65535]. It applies only for TCP and UDP packets.
+  Only packets with source port number that is equal or larger than
+  {\tt port-begin} will pass this criteria. In other words, the source
+  port number must be in the interval
+  [{\tt port-begin}..{\tt port-end}]. The default value is 0.
+\item{\tt port-end}: this parameter specifies the upper bound of the
+  source port number interval, and is an integer value in the interval
+  [0..65535]. It applies only for TCP and UDP packets.
+  Only packets with source port number that is equal or smaller than
+  {\tt port-end} will pass this criteria. In other words, the source
+  port number must be in the interval
+  [{\tt port-begin}..{\tt port-end}]. The default value is 65535.
+\end{description}
+
+\item{\tt destination}: this delimits the configuration of the matching
+  criteria the is related to the destination of the packet:
+\begin{description}
+\item{\tt network}: this parameter specifies the destination network address
+  prefix. The value is in the form of an IP address and prefix-length in
+  the {\it address/prefix-length} format. Only packets with destination
+  address that belong to this address prefix will pass this criteria.
+  The default value is 0.0.0.0/0, \ie any destination address.
+\item{\tt port-begin}: this parameter specifies the lower bound of the
+  destination port number interval, and is an integer value in the interval
+  [0..65535]. It applies only for TCP and UDP packets.
+  Only packets with destination port number that is equal or larger than
+  {\tt port-begin} will pass this criteria. In other words, the destination
+  port number must be in the interval
+  [{\tt port-begin}..{\tt port-end}]. The default value is 0.
+\item{\tt port-end}: this parameter specifies the upper bound of the
+  destination port number interval, and is an integer value in the interval
+  [0..65535]. It applies only for TCP and UDP packets.
+  Only packets with destination port number that is equal or smaller than
+  {\tt port-end} will pass this criteria. In other words, the destination
+  port number must be in the interval
+  [{\tt port-begin}..{\tt port-end}]. The default value is 65535.
+\end{description}
+
+\end{description}
+
+\item{\tt rule6}: this delimits the configuration of a particular
+  IPv6 firewall rule. The parameter is the rule number and must be
+  in the interval [1..65534].
+
+  The IPv6 rule configuration is similar to the IPv4 configuration,
+  except that IPv6 addresses are used instead of IPv4 addresses (where
+  applicable).
+
+  Note that on certain systems (\eg FreeBSD-7.0 with {\tt ipfw}) the
+  firewall rule numbers for IPv4 and IPv6 use same number
+  space. Therefore, the {\tt rule4} and {\tt rule6} rule numbers in the
+  XORP configuration should also be chosen from the same number space.
+
+\end{description}
+
+\newpage
+\subsection{Example Configurations}
+
+We recommend that the initial firewall configuration uses rule numbers
+with large interval between (\eg 100, 200, 300), such that other rules
+can be inserted later if necessary.
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+firewall \{\\
+\>rule4 100 \{\\
+\>\>action: "pass"\\
+\>\>protocol: 6 /* TCP */\\
+\>\>destination \{\\
+\>\>\>network: 10.10.10.10/32\\
+\>\>\>port-begin: 80\\
+\>\>\>port-end: 80\\
+\>\>\}\\
+\>\}\\
+\>rule4 200 \{\\
+\>\>action: "drop"\\
+\>\>protocol: 6 /* TCP */\\
+\>\>source \{\\
+\>\>\>interface: "fxp0"\\
+\>\>\>vif: "fxp0"\\
+\>\>\>network: 0.0.0.0/0\\
+\>\>\>port-begin: 0\\
+\>\>\>port-end: 65535\\
+\>\>\}\\
+\>\>destination \{\\
+\>\>\>network: 10.10.0.0/24\\
+\>\>\>port-begin: 0\\
+\>\>\>port-end: 1024\\
+\>\>\}\\
+\>\}\\
+\>rule4 65000 \{\\
+\>\>action: "pass"\\
+\>\>protocol: 6 /* TCP */\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+\vspace{0.1in}
+In the example above, the router has only three firewall rules
+configured. The first rule (rule 100) will allow all TCP traffic to IP
+address 10.10.10.10 and TCP port number 80 (\ie HTTP requests) to pass.
+The second rule (rule 200) will drop all TCP traffic arriving on
+interface/vif {\tt fxp0/fxp0} if the destination IP address belongs to
+subnet 10.10.0.0/24 and the destination TCP port number is in the
+interval [0..1024].
+The third rule (rule 65000) will allow all remaining TCP traffic.
+
+
+\newpage
+\section{Monitoring Firewall Rules}
+
+Examples of firewall monitoring include displaying the set of installed
+firewall rules in the data forwarding plane, or displaying information
+about the number of packets that have matched a particular firewall
+rule.
+
+Currently (July 2008) XORP doesn't support monitoring firewall rules.
+The commands that are provided with the underlying system should be used
+to monitor the firewall rules (\eg {\tt ipfw} for FreeBSD and
+{\tt iptables} for Linux).
