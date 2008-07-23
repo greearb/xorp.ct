@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.26 2008/01/03 23:08:50 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.27 2008/07/09 08:40:40 bms Exp $
 #
 
 #
@@ -38,7 +38,7 @@ HTML_CSS="--html-css http://www.xorp.org/xorp-kdoc.css"
 #
 # Misc. pre-defined variables
 #
-HTML_LOGO="http://www.xorp.org/images/xorp-logo-medium.jpg"
+HTML_LOGO="http://www.xorp.org/images/mad/logo-xorp_org.gif"
 HTML_LOGO_LINK="http://www.xorp.org/"
 
 #
