@@ -6,8 +6,8 @@
 <html>
 
 <head>
-<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
-<link rel="stylesheet" type="text/css" href="xorp.css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type"/>
+<link rel="stylesheet" type="text/css" href="xorp.css"/>
 
 <title>Welcome to XORP</title>
 </head>
@@ -15,53 +15,48 @@
 <body>
 
 <div id="container">
+<div id="left">
+<a href="http://xorp.org"><img src="images/mad/logo-xorp_org.gif" ALT="XORP Logo" border="0"/></a>
+</div> <!-- end of div id="left" -->
 <div id="header">
-<a href="http://www.xorp.org"><img src="images/xorp-logo-medium.jpg" ALT="XORP Logo" border=0></a>
+<dl>
+<dd  id="selected"><a href="index.html">Home<span class='separator'>&nbsp;|&nbsp;</span></a></dd>
+<dd ><a href="about.html">About</a></dd>
+</dl>
+<div id="net"><span class="selected">.ORG</span>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="http://xorp.net">.NET</a></div>
+<div id="open">eXtensible Open Router Platform</div>
 </div> <!-- end of div id="header" -->
-<div id="middle">
 <div id="navbar">
 <dl>
-<dt>XORP Project</dt>
-<dd  id="selected"><a href="index.html">Home</a></dd>
-<dd ><a href="about.html">About XORP</a></dd>
-<dd ><a href="roadmap.html">Roadmap</a></dd>
-<dd ><a href="news.html">News</a></dd>
-</dl>
-<dl>
-<dt>Getting XORP</dt>
+<dt>Get XORP</dt>
 <dd ><a href="livecd.html">Download Live CD</a></dd>
 <dd ><a href="downloads.html">Download Code</a></dd>
-<dd ><a href="mirrors.html">Mirror Sites</a></dd>
 <dd ><a href="http://cvsweb.xorp.org/cgi-bin/cvsweb.cgi/xorp/">Browse Code</a></dd>
-<dd ><a href="status.html">Software Status</a></dd>
+<dd ><a href="mirrors.html">Mirror Sites</a></dd>
 <dd ><a href="advisories.html">Security Advisories</a></dd>
 </dl>
 <dl>
 <dt>Documentation</dt>
 <dd ><a href="getting_started.html">Getting Started</a></dd>
 <dd ><a href="releases/current/docs/user_manual/user_manual.pdf">User Manual (PDF)</a></dd>
-<dd ><a href="faq.html">Frequently Asked Questions</a></dd>
 <dd ><a href="design_docs.html">Design Documentation</a></dd>
-<dd ><a href="papers.html">Papers</a></dd>
 <dd ><a href="releases/current/docs/kdoc/html/index.html">API Documentation</a></dd>
 <dd ><a href="porting.html">Porting Guide</a></dd>
+<dd ><a href="papers.html">Publications</a></dd>
 </dl>
 <dl>
 <dt>Community</dt>
-<dd ><a href="contributing.html">Contributing</a></dd>
-<dd ><a href="mirror_operation.html">Operating a mirror</a></dd>
-<dd ><a href="people.html">Developers</a></dd>
-<dd ><a href="cvs.html">Source Repository</a></dd>
 <dd ><a href="mailing_lists.html">Mailing Lists</a></dd>
+<dd ><a href="cvs.html">Source Repository</a></dd>
 <dd ><a href="http://bugzilla.xorp.org/bugzilla/index.cgi">Bug Reporting</a></dd>
+<dd ><a href="mirror_operation.html">Operating a mirror</a></dd>
+<dd ><a href="news.html">News</a></dd>
 </dl>
 </div> <!-- end of div id="navbar" -->
-<div id="main">
+<div id="main_index">
 <h1>Welcome to XORP</h1>
 
-<p>
-XORP is the eXtensible Open Router Platform.
-</p>
+<img width="376px" src="images/mad/network-art.gif">
 
 <p>
 XORP is the industry's only extensible open source routing platform.
@@ -76,45 +71,58 @@ features and functionality, including support for custom hardware and
 software forwarding.
 </p>
 
-<!--
-<p>Our <a href="xorp_vision.html">goal</a> is to develop an open
-source software router platform that is stable and fully featured
-enough for <a href="xorp_vision.html#operators">production use</a>,
-and flexible and extensible enough to enable <a
-href="xorp_vision.html#research">network research</a>.  <a
-href="status.html">Currently</a> XORP implements routing protocols for
-IPv4 and IPv6 and a unified means to configure them.  In future, we
-would also like to support <a href="xorp_vision.html#vendors">custom
-hardware</a> and software forwarding architectures.
--->
+<div class="message">
+<h2><a name="message">Message to the Community</a></h2>
 
 <p>
-XORP is available for free download under a BSD-style <a
-href="license.html">license</a>.
+Today is a big day for XORP. 
 </p>
-
-<!--
-<p>
-XORP is free. It is covered by a BSD-style <a
-href="license.html">license</a> and is publicly available for
-research, development, and use.
-</p>
--->
 
 <p>
-The core team is based at the <a
-href="http://www.icsi.berkeley.edu">International Computer Science
-Institute</a> in Berkeley, California.
+First off, we're announcing the XORP 1.5 Release and would like to
+extend our sincere thanks to the contributors and other community
+members who helped make it happen.  We hope you'll visit our site <a
+href="http://xorp.org">http://xorp.org</a>, download our code, play
+with it, challenge it, build on it, extend it ...  And, most
+importantly, send us feedback about your experience and what you'd
+like to see in XORP and do with XORP going forward.
 </p>
 
-<!--
-<p> The core team is based at the <a
-href="http://www.icsi.berkeley.edu">International Computer Science
-Institute</a> in Berkeley, California, but contributors come from
-around the world.
--->
+<p>
+We're also announcing today the formation of XORP, Inc. <a
+href="http://xorp.net">http://xorp.net</a>, a startup founded by the
+leaders of the XORP.org project, funded by two top-tier VC's, Onset
+Ventures and Highland Capital Partners, and led by network industry
+veteran and seasoned entrepreneur, Vivek Ragavan.  XORP, Inc. is
+committed both to supporting the XORP.org community and code base and
+to building a successful open source business.  XORP 1.5 is the first
+community release to be made under the auspices of XORP, Inc. and we
+will continue to release community versions of XORP on a regular
+basis.  You'll hear more about XORP, Inc.'s product plans in the
+months to come.
+</p>
 
-<!-- Release Candidate section BEGIN
+<p>
+Finally, we want to thank the International Computer Science Institute
+(ICSI) in Berkeley, CA which until now has hosted the XORP.org project
+and housed the core team of developers.  ICSI's support, together with
+that of XORP.org's industrial and government sponsors, has been
+essential in making this a big day.
+</p>
+
+<p>
+--The XORP Team
+<small>
+<br>July 2008
+</small>
+</p>
+</div><!-- end of div class="message"-->
+
+</div> <!-- end of div id="main_main" -->
+
+<div id="sidebar">
+<!-- Release Candidate section BEGIN -->
+<!--
 <h2>Release Candidate: 1.5-RC</h2>
 
 <p>A <I>release candidate</I> for the forthcoming 1.5 release is available
@@ -123,13 +131,12 @@ for download as a
 <a href="downloads.html">source code</a>.
 See the <a href="releases/1.5-RC/docs/RELEASE_NOTES">release notes</a>
 for information about changes after the latest release.
-
-Release Candidate section END -->
-
+-->
+<!-- Release Candidate section END -->
 <h2>Latest Release: 1.5</h2>
 
 <p>
-This release is available for download as a
+XORP is available for download as a
 <a href="livecd.html">Live CD</a> or as
 <a href="downloads.html">source code</a>.
 See the <a href="releases/current/docs/RELEASE_NOTES">release notes</a>
@@ -147,46 +154,10 @@ are you using XORP? Which protocols are you using? What applications has
 XORP enabled?  What new features would you like to see? Please email
 feedback&#64;xorp&#46;org.
 
-<h2>Acknowledgments</h2>
-
-<!--
-<p>
-The XORP team is grateful to its past and present sponsors the <a
-href="http://www.nsf.gov/">National Science Foundation</a>, <a
-href="http://www.google.com">Google</a>, <a
-href="http://www.intel.com">Intel</a>, <a
-href="http://www.microsoft.com">Microsoft</a> and <a
-href="http://www.vyatta.com">Vyatta</a> for their generous support.
-</p>
--->
-
-<p>
-The XORP team is grateful to its past and present sponsors.  Major
-contribution has been received from <a
-href="http://www.intel.com/">Intel</a> and the <a
-href="http://www.nsf.gov/">National Science Foundation</a> , as well
-as from <a href="http://www.google.com">Google</a> , <a
-href="http://www.microsoft.com">Microsoft</a> and <a
-href="http://www.vyatta.com">Vyatta</a> .  We thank them for their
-generous support.
-</p>
-
-<hr>
-<small>
-This material is based upon work supported by the National
-Science Foundation under Grant No. 0129541.
-Any opinions, findings, and conclusions or recommendations
-expressed in this material are those of the author(s) and do not
-necessarily reflect the views of the National Science Foundation.
-</small>
-<hr noshade>
-<div id="feedback">
-<p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.17 2008/01/30 05:35:54 atanu Exp $.
-<br>Generated on 21/Jul/2008 at 15:36:30.</em>
-<em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
-</div> <!-- end of div id="feedback" -->
-</div> <!-- end of div id="main" -->
-</div> <!-- end of div id="middle" -->
+</div> <!-- end of div id="sidebar" -->
+<div id="footer">
+&copy; 2008 XORP, Inc. All Rights Reserved
+</div> <!-- end of div id="footer" -->
 </div> <!-- end of div id="container" -->
 
 </body>

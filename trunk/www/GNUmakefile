@@ -11,7 +11,7 @@ $(DSTDIR)/%.html: $(SRCDIR)/%.html $(SCRIPTS) xorp.css
 	$(SCRIPTDIR)/XorpOrgGenerator.py -d $(SRCDIR) $@
 
 check: $(TARGETS)
-	@for i in $(TARGETS) ; do nsgmls -s $$i && echo $$i passed. ; done
+	@for i in $(TARGETS) ; do xmllint --valid --html --noout $$i && echo $$i passed. ; done
 
 clean:
 	rm -rf $(TARGETS)
