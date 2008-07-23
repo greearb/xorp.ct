@@ -4,6 +4,10 @@ body {
    background-repeat: repeat-x;
    font-size: 10pt;
    color: #636467; /* Match xorp.net */
+  /* Centre the page in the browser window */
+  width: 760px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Container for all boxes */
