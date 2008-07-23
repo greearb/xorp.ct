@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.70 2008/07/08 15:45:13 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.71 2008/07/09 16:26:55 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -106,7 +106,7 @@ the login shell is csh or tcsh):
  # as an argument. It should be run inside each of the checked-out
  # directories. After that check the modifications and then commit them.
  # The CVS commit message should be something like:
- #   "Update the ICSI copyright year to 2009."
+ #   "Update the XORP copyright year to 2009."
  cd data
  ../xorp/devnotes/update_copyright.sh 2008
  cvs diff -u -p | less

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 International Computer Science Institute
+// Copyright (c) 2001-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.12 2007/02/16 22:46:50 pavlin Exp $
+// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.13 2008/01/04 03:17:06 pavlin Exp $
 
 
 #ifndef __PIM_PIM_SCOPE_ZONE_TABLE_HH__

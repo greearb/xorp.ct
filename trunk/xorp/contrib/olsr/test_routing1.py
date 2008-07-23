@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim:set sts=4 ts=8 sw=4:
 
-# Copyright (c) 2001-2008 International Computer Science Institute
+# Copyright (c) 2001-2008 XORP, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/contrib/olsr/test_routing1.py,v 1.3 2008/05/11 06:36:38 bms Exp $
+# $XORP: xorp/contrib/olsr/test_routing1.py,v 1.4 2008/07/09 08:44:43 bms Exp $
 
 import getopt
 import sys

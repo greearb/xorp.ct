@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2007-2008 International Computer Science Institute
+// Copyright (c) 2007-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/io_link.cc,v 1.1 2007/07/26 01:18:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_link.cc,v 1.2 2008/01/04 03:15:47 pavlin Exp $"
 
 #include "fea_module.h"
 

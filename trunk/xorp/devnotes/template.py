@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2008 International Computer Science Institute
+# Copyright (c) 2008 XORP, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.4 2007/02/16 22:45:34 pavlin Exp $
+# $XORP: xorp/devnotes/template.py,v 1.5 2008/01/04 03:15:41 pavlin Exp $
 
 # Local Variables:
 # mode: python

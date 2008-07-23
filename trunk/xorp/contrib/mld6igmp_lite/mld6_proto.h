@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2008 International Computer Science Institute
+ * Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/contrib/mld6igmp_lite/mld6_proto.h,v 1.21 2008/01/04 03:16:51 pavlin Exp $
+ * $XORP: xorp/contrib/mld6igmp_lite/mld6_proto.h,v 1.1 2008/07/10 11:06:34 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__

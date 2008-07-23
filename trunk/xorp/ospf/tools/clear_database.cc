@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2007-2008 International Computer Science Institute
+// Copyright (c) 2007-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/clear_database.cc,v 1.1 2007/08/16 00:49:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/clear_database.cc,v 1.2 2008/01/04 03:17:01 pavlin Exp $"
 
 // Print information about OSPF neighbours
 

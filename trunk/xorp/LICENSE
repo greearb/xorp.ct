@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/LICENSE,v 1.8 2007/09/01 01:13:43 pavlin Exp $
+# $XORP: xorp/LICENSE,v 1.9 2008/01/04 03:15:17 pavlin Exp $
 #
 
 Portions of this software have one or more of the following copyrights, and
@@ -11,7 +11,7 @@ The files/directories with derived software and the corresponding
 copyright messages and licenses are listed in file "LICENSE.other".
 
 
-Copyright (c) 2001-2008 International Computer Science Institute
+Copyright (c) 2001-2008 XORP, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

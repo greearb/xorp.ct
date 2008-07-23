@@ -1,6 +1,6 @@
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 International Computer Science Institute
+// Copyright (c) 2001-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/pw_notifier.hh,v 1.4 2007/02/16 22:46:55 pavlin Exp $
+// $XORP: xorp/policy/pw_notifier.hh,v 1.5 2008/01/04 03:17:12 pavlin Exp $
 
 #ifndef __POLICY_PW_NOTIFIER_HH__
 #define __POLICY_PW_NOTIFIER_HH__

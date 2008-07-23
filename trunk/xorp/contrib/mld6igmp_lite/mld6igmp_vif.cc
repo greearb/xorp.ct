@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 International Computer Science Institute
+// Copyright (c) 2001-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -19,7 +19,7 @@
 // Copyright (c) 2008 Beijing University of Posts and Telecommunications
 //
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_vif.cc,v 1.1 2008/07/10 11:06:35 pavlin Exp $"
+#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_vif.cc,v 1.2 2008/07/23 02:38:59 pavlin Exp $"
 
 
 //

@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8 sw=4: */
 
 /*
- * Copyright (c) 2001-2004 International Computer Science Institute
+ * Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -16,7 +16,7 @@
  */
 
 /*
- * $XORP$
+ * $XORP: xorp/contrib/olsr/olsr_module.h,v 1.1 2008/04/24 15:19:54 bms Exp $
  */
 /*
  * Module definitions.

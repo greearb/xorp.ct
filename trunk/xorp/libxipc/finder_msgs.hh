@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 International Computer Science Institute
+// Copyright (c) 2001-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_msgs.hh,v 1.9 2007/05/23 12:12:38 pavlin Exp $
+// $XORP: xorp/libxipc/finder_msgs.hh,v 1.10 2008/01/04 03:16:22 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_MSGS_HH__
 #define __LIBXIPC_FINDER_MSGS_HH__

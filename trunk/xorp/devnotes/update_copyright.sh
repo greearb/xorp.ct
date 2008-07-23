@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.7 2008/01/04 03:19:48 pavlin Exp $
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.8 2008/01/05 00:34:12 pavlin Exp $
 #
 
 #
@@ -21,7 +21,7 @@
 #
 # COPYRIGHT_HOLDER: The name of the copyright holder
 #
-COPYRIGHT_HOLDER="International Computer Science Institute"
+COPYRIGHT_HOLDER="XORP, Inc."
 
 #
 # Print usage and exit

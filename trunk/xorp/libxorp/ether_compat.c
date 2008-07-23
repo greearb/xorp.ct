@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2008 International Computer Science Institute
+ * Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.12 2007/02/16 22:46:18 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.13 2008/01/04 03:16:35 pavlin Exp $"
 
 /*
  * Part of this software is derived from the following file(s):

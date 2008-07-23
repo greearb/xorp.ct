@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 International Computer Science Institute
+// Copyright (c) 2001-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/register_operations.hh,v 1.5 2007/02/16 22:47:04 pavlin Exp $
+// $XORP: xorp/policy/common/register_operations.hh,v 1.6 2008/01/04 03:17:20 pavlin Exp $
 
 #ifndef __POLICY_COMMON_REGISTER_OPERATIONS_HH__
 #define __POLICY_COMMON_REGISTER_OPERATIONS_HH__

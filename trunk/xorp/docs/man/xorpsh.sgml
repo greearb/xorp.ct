@@ -155,8 +155,7 @@
   <refsect1>
     <title>AUTHOR</title>
 
-    <para>Xorp is Copyright: (c) 2001-2007 International Computer Science
-    Institute.</para>
+    <para>XORP is Copyright (c) 2001-2008 XORP, Inc.</para>
 
     <para>This manual page was written by &dhusername; &dhemail; for
       the &debian; system (but may be used by others). For licensing details

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2008 International Computer Science Institute
+// Copyright (c) 2001-2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_ipfw2.cc,v 1.3 2008/04/27 23:08:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_ipfw2.cc,v 1.4 2008/04/28 05:21:07 pavlin Exp $"
 
 #include "fea/fea_module.h"
 

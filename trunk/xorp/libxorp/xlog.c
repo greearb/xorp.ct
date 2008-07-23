@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 /* vim:set sts=4 ts=8: */
 
-/* Copyright (c) 2001-2008 International Computer Science Institute
+/* Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.26 2008/07/01 18:22:27 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.27 2008/07/01 20:15:48 abittau Exp $"
 
 /*
  * Message logging utility.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2001-2008 International Computer Science Institute
+# Copyright (c) 2001-2008 XORP, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.21 2008/01/04 03:17:50 pavlin Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.22 2008/04/23 03:43:22 atanu Exp $
 
 import sys
 sys.path.append("..")
