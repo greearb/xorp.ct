@@ -1,10 +1,10 @@
 #!/bin/sh -
 
 #
-# $XORP$
+# $XORP: other/LiveCD/tools/tools/nanobsd/Files/usr/local/etc/xorp-makeconfig.sh,v 1.1 2008/06/30 11:30:11 bms Exp $
 #
 
-# Copyright (c) 2004-2008 International Computer Science Institute
+# Copyright (c) 2004-2008 XORP, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),

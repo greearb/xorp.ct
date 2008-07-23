@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2001-2008 International Computer Science Institute
+# Copyright (c) 2001-2008 XORP, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.7 2008/02/29 00:54:49 pavlin Exp $
+# $XORP: other/tinderbox/scripts/make_tinderbox_master.sh,v 1.8 2008/02/29 05:59:36 pavlin Exp $
 
 #
 # Script to create and populate the tinderbox directories on a host

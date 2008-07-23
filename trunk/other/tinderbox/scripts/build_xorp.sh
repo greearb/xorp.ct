@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright (c) 2001-2008 International Computer Science Institute
+# Copyright (c) 2001-2008 XORP, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.12 2008/01/02 23:57:56 pavlin Exp $
+# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.13 2008/01/04 03:01:42 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . $CONFIG
