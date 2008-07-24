@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.70 2008/01/04 03:17:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.71 2008/07/23 05:11:46 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -877,7 +877,7 @@ main(int argc, char *argv[])
 	case 'h':
 	    usage(argv[0]);
 	    display_defaults();
-	    errcode = 1;
+	    errcode = 0;
 	    goto cleanup;
 	}
     }
