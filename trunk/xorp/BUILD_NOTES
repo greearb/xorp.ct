@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.103 2008/07/07 12:29:45 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.104 2008/07/17 17:40:41 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -344,6 +344,17 @@ gmake check
     - The code compiles, and the internal tests appear to succeed
       except test33 in "bgp/harness/test_peering1.sh"
     - gcc (GCC) 4.3.0 20080428 (Red Hat 4.3.0-8)
+
+  * Linux CentOS 5.2 (2.6.18-92.el5):
+    - You must install the following packages:
+      - gcc
+      - gcc-c++
+      - openssl-devel
+    - Optionally install the following packages:
+      - libpcap-devel
+        This package is needed for sending/receiving link layer data frames.
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.1.2 20071124 (Red Hat 4.1.2-42)
 
   * Linux Debian-3.1 (sarge) (2.4.27-3-386):
     - You must install the following packages:
