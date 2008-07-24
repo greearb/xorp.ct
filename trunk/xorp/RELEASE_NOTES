@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.209 2008/07/23 15:15:20 bms Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.210 2008/07/24 01:59:59 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,7 @@ This file contains XORP release notes (most recent releases first).
 Release 1.6-WIP (2008/??/??)
 ============================
   ALL:
-    - 
+    - XORP now builds on Linux CentOS 5.2.
 
   CONFIGURATION:
     - 
