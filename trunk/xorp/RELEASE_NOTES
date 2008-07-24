@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.208 2008/07/21 14:14:15 bms Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.209 2008/07/23 15:15:20 bms Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,70 @@ This file contains XORP release notes (most recent releases first).
 Release 1.6-WIP (2008/??/??)
 ============================
   ALL:
-    - No significant changes.
+    - 
+
+  CONFIGURATION:
+    - 
+
+  LIBXORP:
+    - 
+
+  LIBXIPC:
+    - 
+
+  LIBFEACLIENT:
+    - 
+
+  XRL:
+    - 
+
+  RTRMGR:
+    - 
+
+  XORPSH:
+    - 
+
+  POLICY:
+    - 
+
+  FEA/MFEA:
+    - 
+
+  RIB:
+    - 
+
+  RIP/RIPng:
+    - 
+
+  OLSR:
+    - 
+
+  OSPF:
+    - 
+
+  BGP:
+    - 
+
+  STATIC_ROUTES:
+    - 
+
+  MLD/IGMP:
+    - 
+
+  MLD/IGMP-Lite:
+    - 
+
+  PIM-SM:
+    - 
+
+  FIB2MRIB:
+    - 
+
+  CLI:
+    - 
+
+  SNMP:
+    - 
 
 Release 1.5 (2008/07/22)
 ========================
