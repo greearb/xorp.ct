@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/LICENSE.other,v 1.4 2008/07/23 02:38:58 pavlin Exp $
+# $XORP: xorp/LICENSE.other,v 1.5 2008/07/23 05:09:30 pavlin Exp $
 #
 
 Portions of this software are derived from other sources.
@@ -345,7 +345,6 @@ contrib/mld6igmp_lite/mld6igmp_vif.cc :
 // The Lightweight IGMP/MLD modifications to this file are copyrighted by:
 //
 // Copyright (c) 2008 Huawei Technologies Co. Ltd
-// Copyright (c) 2008 Beijing University of Posts and Telecommunications
 //
 
 ========================================================================

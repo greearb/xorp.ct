@@ -16,10 +16,9 @@
 // The Lightweight IGMP/MLD modifications to this file are copyrighted by:
 //
 // Copyright (c) 2008 Huawei Technologies Co. Ltd
-// Copyright (c) 2008 Beijing University of Posts and Telecommunications
 //
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc,v 1.2 2008/07/23 02:38:59 pavlin Exp $"
+#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_node_cli.cc,v 1.3 2008/07/23 05:09:49 pavlin Exp $"
 
 
 //
