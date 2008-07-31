@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.71 2008/07/23 05:11:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.72 2008/07/24 06:12:19 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -92,8 +92,10 @@ wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router,
 	    return false;
 	    break;
 	}
-	if (xrl_router.connect_failed() && exit_on_error)
-	    return false;
+	if (exit_on_error) {
+	    if (!xrl_router.connected() || xrl_router.connect_failed())
+		return false;
+	}
     }
     return true;
 }
@@ -230,10 +232,8 @@ XorpShell::run(const string& commands, bool exit_on_error)
     }
 #endif // ! HOST_OS_WINDOWS
 
-    // Signal handlers so we can clean up when we're killed
-    signal(SIGTERM, signal_handler);
-    signal(SIGINT, signal_handler);
 #ifdef SIGPIPE
+    // Trap SIGPIPE while we bring up the connection to the Finder.
     signal(SIGPIPE, signal_handler);
 #endif
 
@@ -248,6 +248,10 @@ XorpShell::run(const string& commands, bool exit_on_error)
 	xorp_throw(InitError, error_msg);
     }
     _is_connected_to_finder = true;
+
+    // Signal handlers so we can clean up when we're killed.
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
 
 #ifdef HOST_OS_WINDOWS
     const uint32_t uid = 0;
