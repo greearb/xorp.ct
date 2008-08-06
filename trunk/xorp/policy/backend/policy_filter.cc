@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.13 2008/07/23 05:11:23 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.14 2008/08/06 08:05:45 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -39,7 +39,7 @@ void PolicyFilter::configure(const string& str)
     string err;
     
     // do the actual parsing
-    if(policy_backend_parse(*policies, *sets, str, err)) {
+    if (policy_backend_parse(*policies, *sets, str, err)) {
 	// get rid of temporary parse junk.
 	delete_vector(policies);
 	clear_map(*sets);
@@ -63,7 +63,7 @@ PolicyFilter::~PolicyFilter()
 
 void PolicyFilter::reset()
 {
-    if(_policies) {
+    if (_policies) {
 	delete_vector(_policies);
 	_policies = NULL;
 	_exec.set_policies(NULL);
@@ -76,7 +76,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     bool default_action = true;
 
     // no configuration done yet.
-    if(!_policies) {
+    if (!_policies) {
 	// need to sync.  Consider case where the parent [such as version policy
 	// filter] performed a write for some reason.  If we return without
 	// syncing, it might be a problem [i.e. when using singlevarrw which
@@ -129,10 +129,10 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     }
 
     // decide what to do
-    switch(fa) {
+    switch (fa) {
         case IvExec::REJ:
 	    return false;
-	    
+
         case IvExec::DEFAULT:
 	    return default_action;
 
@@ -140,7 +140,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 	    return true;
     }
 
-    // unreash [hopefully]
+    // unreach [hopefully]
     return default_action;
 }
 

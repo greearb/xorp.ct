@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/policybench.cc,v 1.1 2008/08/06 08:04:52 abittau Exp $"
+#ident "$XORP: xorp/policy/test/policybench.cc,v 1.2 2008/08/06 08:05:46 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "policy/common/policy_utils.hh"
@@ -33,6 +33,9 @@ static PolicyProfiler::TU get_time(void)
 {
     uint64_t tsc;
 
+    // Not always increment on my box.  I hit the assert in
+    // PolicyProfiler::stop() [and it's not because of wrapping].
+    // -sorbo
     __asm__ volatile (".byte 0x0f, 0x31" : "=A" (tsc));
 
     return tsc;

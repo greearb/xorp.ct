@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/backend/policy_profiler.hh,v 1.1 2008/08/06 08:05:45 abittau Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_PROFILER_HH__
 #define __POLICY_BACKEND_POLICY_PROFILER_HH__
@@ -38,6 +38,7 @@ private:
     TU		_samples[MAX_SAMPLES];
     unsigned	_samplec;
     static GT   _gt;
+    bool	_stopped;
 };
 
 #endif // __POLICY_BACKEND_POLICY_PROFILER_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/backend/policy_profiler.cc,v 1.1 2008/08/06 08:05:45 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -22,7 +22,7 @@
 
 PolicyProfiler::GT PolicyProfiler::_gt = NULL;
 
-PolicyProfiler::PolicyProfiler() : _samplec(0)
+PolicyProfiler::PolicyProfiler() : _samplec(0), _stopped(true)
 {
 }
 
@@ -32,8 +32,11 @@ PolicyProfiler::start()
     if (!_gt)
 	return;
 
+    XLOG_ASSERT(_stopped);
     XLOG_ASSERT(_samplec < MAX_SAMPLES);
+
     _samples[_samplec] = _gt();
+    _stopped = false;
 }
 
 void
@@ -44,9 +47,16 @@ PolicyProfiler::stop()
 
     TU now = _gt();
 
+    if (now < _samples[_samplec]) {
+	printf("%llu %llu\n", now, _samples[_samplec]);
+    }
+
+    XLOG_ASSERT(!_stopped);
     XLOG_ASSERT(now >= _samples[_samplec]);
+
     _samples[_samplec] = now - _samples[_samplec];
 
+    _stopped = true;
     _samplec++;
 }
 
@@ -68,6 +78,7 @@ void
 PolicyProfiler::clear()
 {
     _samplec = 0;
+    _stopped = true;
 }
 
 void
