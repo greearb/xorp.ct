@@ -13,9 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element_base.cc,v 1.2 2008/08/06 08:11:29 abittau Exp $"
+#ident "$XORP: xorp/policy/common/element_base.cc,v 1.3 2008/08/06 08:30:58 abittau Exp $"
 
 #include "policy/policy_module.h"
+#include "libxorp/xorp.h"
 #include "element_base.hh"
 #include "libxorp/xlog.h"
 #include "policy_exception.hh"
