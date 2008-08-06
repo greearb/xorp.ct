@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.15 2008/08/06 08:11:17 abittau Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.16 2008/08/06 08:11:28 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -64,7 +64,7 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	    xorp_throw(OpNotFound,
 		       "First argument of ctr must be txt type, but is: " 
 		       + arg1type);
-	
+
 	const ElemStr& es = dynamic_cast<const ElemStr&>(*argv[1]);
 
 	return operations::ctr(es, *(argv[0]));

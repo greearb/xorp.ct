@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_im.hh,v 1.6 2008/01/04 03:15:26 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy_im.hh,v 1.7 2008/07/23 05:09:37 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_IM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_IM_HH__
@@ -39,7 +39,9 @@ public:
     PolicyTableImport(const string& tablename, 
 		      const Safi& safi,
 		      BGPRouteTable<A>* parent,
-		      PolicyFilters& pfs);
+		      PolicyFilters& pfs,
+		      const A& peer,
+		      const A& self);
 
     /**
      * If dump_peer is null, then it is a policy route dump and we need to deal

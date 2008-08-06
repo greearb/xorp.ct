@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.6 2008/01/04 03:15:25 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.7 2008/07/23 05:09:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -27,7 +27,8 @@ PolicyTableExport<A>::PolicyTableExport(const string& tablename,
 					const Safi& safi,
 					BGPRouteTable<A>* parent,
 					PolicyFilters& pfs,
-					const string& neighbor)
+					const string& neighbor,
+					const A& self)
     : PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT),
       _neighbor(neighbor)
 {
@@ -40,6 +41,7 @@ PolicyTableExport<A>::PolicyTableExport(const string& tablename,
     // PolicyTable constructor.
     //
     init_varrw();
+    this->_varrw->set_self(self);
 }
 
 template <class A>

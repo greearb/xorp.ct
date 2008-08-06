@@ -13,23 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.17 2008/01/04 03:15:25 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.18 2008/07/23 05:09:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
-
 #include "route_table_policy_im.hh"
 
 template <class A>
 PolicyTableImport<A>::PolicyTableImport(const string& tablename, 
-						  const Safi& safi,
-						  BGPRouteTable<A>* parent,
-						  PolicyFilters& pfs)
+				        const Safi& safi,
+					BGPRouteTable<A>* parent,
+					PolicyFilters& pfs,
+					const A& peer,
+					const A& self)
     : PolicyTable<A>(tablename, safi, parent, pfs, filter::IMPORT)
 {
-    this->_parent = parent;		
+    this->_parent = parent;
+    this->_varrw->set_peer(peer);
+    this->_varrw->set_self(self);
 }
 
 

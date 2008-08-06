@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.105 2008/08/06 08:14:34 abittau Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.106 2008/08/06 08:14:50 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -364,7 +364,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 	new PolicyTableImport<A>(_ribname + "IpcChannelInputPolicyFilter",
 				 _master.safi(),
 				 filter_in,
-				 _master.policy_filters());
+				 _master.policy_filters(),
+				 A(), A());
     filter_in->set_next_table(policy_filter_in);
 
     // No policy import filters on routes coming from the RIB.
@@ -682,13 +683,26 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			   _next_hop_resolver);
     filter_in->do_versioning();
     damping_in->set_next_table(filter_in);
-    
+
+    A peer_addr;
+    peer_handler->get_peer_addr(peer_addr);
+
+    // XXX add get methods
+    // XXX what do we do with IPv6?
+    A self_addr;
+    try {
+	self_addr = A(peer_handler->get_local_addr().c_str()); 
+    } catch (...) {
+    }
+
     PolicyTableImport<A>* policy_filter_in =
 	new PolicyTableImport<A>(_ribname + "PeerInputPolicyFilter" + peername,
 				 _master.safi(),
 				 filter_in,
-				 _master.policy_filters());
-    filter_in->set_next_table(policy_filter_in);			   
+				 _master.policy_filters(),
+				 peer_addr,
+				 self_addr);
+    filter_in->set_next_table(policy_filter_in);
 
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "PeerInputCache" + peername,
@@ -738,9 +752,10 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			         _master.safi(),
 				 filter_out,
 				 _master.policy_filters(),
-				 peer_handler->get_peer_addr());
+				 peer_handler->get_peer_addr(),
+				 self_addr);
     filter_out->set_next_table(policy_filter_out);
-   
+
     CacheTable<A>* cache_out = 
 	new CacheTable<A>(_ribname + "PeerOutputCache" + peername,
 			  _master.safi(),

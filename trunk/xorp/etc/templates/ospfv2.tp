@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.57 2008/08/06 08:23:50 abittau Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.58 2008/08/06 08:24:08 abittau Exp $ */
 
 protocols {
     ospf4 {
@@ -100,17 +100,14 @@ policy {
     policy-statement @: txt {
 	term @: txt {
 	    from {
-		nexthop4: ipv4range;
 		metric: u32range;
 		external-type: u32;
 	    }
 	    to {
-		nexthop4: ipv4range;
 		metric: u32range;
 		external-type: u32;
 	    }
 	    then {
-		nexthop4: ipv4;
 		metric: u32;
 		external-type: u32;
 	    }
@@ -518,19 +515,13 @@ transmitted packets";
 policy {
     %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf4&target:txt=ospfv2";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=nexthop4&type:txt=ipv4nexthop&access:txt=rw&id:u32=11";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=etype&type:txt=u32&access:txt=rw&id:u32=13";
 
     policy-statement @: txt {
 	term @: txt {
 	    from {
-		nexthop4 {
-		    %help: short "IPv4 nexthop";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
-		}
 		metric {
 		    %help: short "Metric value";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
@@ -546,12 +537,6 @@ policy {
 		}
 	    }
 	    to {
-		nexthop4 {
-		    %help: short "IPv4 nexthop";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
 		metric {
 		    %help: short "Metric value";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
@@ -567,11 +552,6 @@ policy {
 		}
 	    }
 	    then {
-		nexthop4 {
-		    %help: short "Set the IPv4 nexthop";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
-		}
 		metric {
 		    %help: short "Set the metric value";
 		    %allow-operator: ":" "=" "sub" "add";

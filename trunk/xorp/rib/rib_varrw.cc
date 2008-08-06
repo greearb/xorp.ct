@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.13 2008/07/23 05:11:30 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.14 2008/08/06 08:24:12 abittau Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -48,8 +48,8 @@ RIBVarRW<IPv4>::read_route_nexthop(IPRouteEntry<IPv4>& route)
 {
     initialize(VAR_NETWORK4,
 	       _ef.create(ElemIPv4Net::id, route.net().str().c_str()));
-    initialize(VAR_NEXTHOP4,
-	       _ef.create(ElemIPv4::id, route.nexthop_addr().str().c_str()));
+    initialize(VAR_NEXTHOP4, _ef.create(ElemIPv4NextHop::id,
+               route.nexthop_addr().str().c_str()));
     initialize(VAR_NETWORK6, NULL);
     initialize(VAR_NEXTHOP6, NULL);
 }
@@ -60,8 +60,8 @@ RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route)
 {
     initialize(VAR_NETWORK6,
 	       _ef.create(ElemIPv6Net::id, route.net().str().c_str()));
-    initialize(VAR_NEXTHOP6,
-	       _ef.create(ElemIPv6::id, route.nexthop_addr().str().c_str()));
+    initialize(VAR_NEXTHOP6, _ef.create(ElemIPv6NextHop::id,
+               route.nexthop_addr().str().c_str()));
 
     initialize(VAR_NETWORK4, NULL);
     initialize(VAR_NEXTHOP4, NULL);

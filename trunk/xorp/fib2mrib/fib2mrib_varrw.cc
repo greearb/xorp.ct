@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.10 2008/07/23 05:10:35 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.11 2008/08/06 08:24:09 abittau Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -38,7 +38,7 @@ Fib2mribVarRW::start_read()
 		   _ef.create(ElemIPv4Net::id,
 			      _route.network().str().c_str()));
 	initialize(VAR_NEXTHOP4,
-		   _ef.create(ElemIPv4::id,
+		   _ef.create(ElemIPv4NextHop::id,
 			      _route.nexthop().str().c_str()));
 	
 	initialize(VAR_NETWORK6, NULL);
@@ -50,7 +50,7 @@ Fib2mribVarRW::start_read()
 		   _ef.create(ElemIPv6Net::id,
 			      _route.network().str().c_str()));
 	initialize(VAR_NEXTHOP6,
-		   _ef.create(ElemIPv6::id,
+		   _ef.create(ElemIPv6NextHop::id,
 			      _route.nexthop().str().c_str()));
 
 	initialize(VAR_NETWORK4, NULL);

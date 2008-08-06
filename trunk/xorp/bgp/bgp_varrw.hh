@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.22 2008/07/23 05:09:32 pavlin Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.23 2008/08/06 08:24:07 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -40,12 +40,12 @@ public:
         VAR_NETWORK6,
         VAR_NEXTHOP6,
         VAR_ASPATH,
-        VAR_ORIGIN,
+        VAR_ORIGIN,			// 15
         VAR_NEIGHBOR,
         VAR_LOCALPREF,
         VAR_COMMUNITY,
         VAR_MED,
-        VAR_MED_REMOVE,
+        VAR_MED_REMOVE,			// 20
         VAR_AGGREGATE_PREFIX_LEN,
         VAR_AGGREGATE_BRIEF_MODE,
         VAR_WAS_AGGREGATED,
@@ -65,6 +65,9 @@ public:
      */
     BGPVarRW(const string& name);
     virtual ~BGPVarRW();
+
+    void set_peer(const A& peer);
+    void set_self(const A& self);
 
     /**
      * Attach a route to the varrw.
@@ -159,6 +162,7 @@ protected:
 private:
     void clone_palist();
     void cleanup();
+    void write_nexthop(const Element& e);
 
     const InternalMessage<A>*	_orig_rtmsg;
     InternalMessage<A>*		_filtered_rtmsg;
@@ -171,6 +175,8 @@ private:
     RefPf			_pfilter[3];
     bool			_wrote_pfilter[3];
     bool			_route_modify;
+    A				_self;
+    A				_peer;
 
     // Aggregation -> we cannot write those directly into the subnet
     // route so must provide local volatile copies to be operated on

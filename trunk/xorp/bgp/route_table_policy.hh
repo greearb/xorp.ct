@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy.hh,v 1.11 2008/07/23 05:09:37 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.12 2008/08/06 08:14:50 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__
@@ -90,9 +90,9 @@ public:
     void enable_filtering(bool on);
 
 protected:
-    const filter::Filter	_filter_type;
-    
     virtual void init_varrw();
+
+    const filter::Filter	_filter_type;
     BGPVarRW<A>*		_varrw;
 
 private:

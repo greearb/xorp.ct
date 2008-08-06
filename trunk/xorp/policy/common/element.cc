@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.14 2008/08/06 08:11:29 abittau Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.15 2008/08/06 08:15:13 abittau Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
@@ -24,49 +24,40 @@
 
 // Initialization of static members.
 // Remember to be unique in id's.
-const char* ElemInt32::id = "i32";
-Element::Hash ElemInt32::_hash = HASH_ELEM_INT32;
+const char*            ElemInt32::id          = "i32";
+const char*            ElemU32::id	      = "u32";
+const char*            ElemCom32::id          = "com32";
+const char*            ElemStr::id	      = "txt";
+const char*            ElemBool::id	      = "bool";
+const char*	       ElemNull::id	      = "null";
+template<> const char* ElemIPv4::id	      = "ipv4";
+template<> const char* ElemIPv4Range::id      = "ipv4range";
+template<> const char* ElemIPv6::id	      = "ipv6";
+template<> const char* ElemIPv6Range::id      = "ipv6range";
+template<> const char* ElemIPv4Net::id	      = "ipv4net";
+template<> const char* ElemIPv6Net::id	      = "ipv6net";
+template<> const char* ElemU32Range::id	      = "u32range";
+template<> const char* ElemASPath::id	      = "aspath";
+template<> const char* ElemIPv4NextHop::id    = "ipv4nexthop";
+template<> const char* ElemIPv6NextHop::id    = "ipv6nexthop";
 
-const char* ElemU32::id = "u32";
-Element::Hash ElemU32::_hash = HASH_ELEM_U32;
-
-const char* ElemCom32::id = "com32";
-Element::Hash ElemCom32::_hash = HASH_ELEM_COM32;
-
-const char* ElemStr::id = "txt";
-Element::Hash ElemStr::_hash = HASH_ELEM_STR;
-
-const char* ElemBool::id = "bool";
-Element::Hash ElemBool::_hash = HASH_ELEM_BOOL;
-
-template<> const char* ElemIPv4::id = "ipv4";
-template<> Element::Hash ElemIPv4::_hash = HASH_ELEM_IPV4;
-
-template<> const char* ElemIPv4Range::id = "ipv4range";
-template<> Element::Hash ElemIPv4Range::_hash = HASH_ELEM_IPV4RANGE;
-
-template<> const char* ElemIPv6::id = "ipv6";
-template<> Element::Hash ElemIPv6::_hash = HASH_ELEM_IPV6;
-
-template<> const char* ElemIPv6Range::id = "ipv6range";
-template<> Element::Hash ElemIPv6Range::_hash = HASH_ELEM_IPV6RANGE;
-
-template<> const char* ElemIPv4Net::id = "ipv4net";
-template<> Element::Hash ElemIPv4Net::_hash = HASH_ELEM_IPV4NET;
-
-template<> const char* ElemIPv6Net::id = "ipv6net";
-template<> Element::Hash ElemIPv6Net::_hash = HASH_ELEM_IPV6NET;
-
-template<> const char* ElemU32Range::id = "u32range";
-template<> Element::Hash ElemU32Range::_hash = HASH_ELEM_U32RANGE;
-
-template<> const char* ElemASPath::id = "aspath";
-template<> Element::Hash ElemASPath::_hash = HASH_ELEM_ASPATH;
-
-const char* ElemNull::id = "null";
-Element::Hash ElemNull::_hash = HASH_ELEM_NULL;
-
-Element::Hash ElemFilter::_hash = HASH_ELEM_FILTER;
+Element::Hash		 ElemU32::_hash	        = HASH_ELEM_U32;
+Element::Hash		 ElemInt32::_hash       = HASH_ELEM_INT32;
+Element::Hash		 ElemCom32::_hash       = HASH_ELEM_COM32;
+Element::Hash		 ElemStr::_hash	        = HASH_ELEM_STR;
+Element::Hash		 ElemBool::_hash        = HASH_ELEM_BOOL;
+Element::Hash		 ElemNull::_hash        = HASH_ELEM_NULL;
+Element::Hash		 ElemFilter::_hash      = HASH_ELEM_FILTER;
+template<> Element::Hash ElemIPv4::_hash        = HASH_ELEM_IPV4;
+template<> Element::Hash ElemIPv4Range::_hash   = HASH_ELEM_IPV4RANGE;
+template<> Element::Hash ElemIPv6::_hash        = HASH_ELEM_IPV6;
+template<> Element::Hash ElemIPv6Range::_hash   = HASH_ELEM_IPV6RANGE;
+template<> Element::Hash ElemIPv4Net::_hash     = HASH_ELEM_IPV4NET;
+template<> Element::Hash ElemIPv6Net::_hash     = HASH_ELEM_IPV6NET;
+template<> Element::Hash ElemU32Range::_hash    = HASH_ELEM_U32RANGE;
+template<> Element::Hash ElemASPath::_hash      = HASH_ELEM_ASPATH;
+template<> Element::Hash ElemIPv4NextHop::_hash = HASH_ELEM_IPV4NEXTHOP;
+template<> Element::Hash ElemIPv6NextHop::_hash = HASH_ELEM_IPV6NEXTHOP;
 
 /**
  * @short Well-known communities per RFC1997
@@ -339,6 +330,107 @@ ElemNet<A>::op() const
     return op();
 }
 
+template <class A>
+ElemNextHop<A>::ElemNextHop() : Element(_hash), _var(VAR_NONE)
+{
+}
+
+template <class A>
+ElemNextHop<A>::ElemNextHop(const A& nh) : Element(_hash), _var(VAR_NONE),
+					   _addr(nh)
+{
+}
+
+template <class A>
+ElemNextHop<A>::ElemNextHop(const char* in) : Element(_hash), _var(VAR_NONE)
+{
+    if (!in)
+	return;
+
+    string s = in;
+
+    if (s.compare("discard") == 0)
+	_var = VAR_DISCARD;
+
+    else if (s.compare("next-table") == 0)
+	_var = VAR_NEXT_TABLE;
+
+    else if (s.compare("peer-address") == 0)
+	_var = VAR_PEER_ADDRESS;
+
+    else if (s.compare("reject") == 0)
+	_var = VAR_REJECT;
+
+    else if (s.compare("self") == 0)
+	_var = VAR_SELF;
+
+    else {
+	_var = VAR_NONE;
+	_addr = A(in);
+    }
+}
+
+template <class A>
+string
+ElemNextHop<A>::str() const
+{
+    switch (_var) {
+    case VAR_NONE:
+	return _addr.str();
+
+    case VAR_DISCARD:
+	return "discard";
+
+    case VAR_NEXT_TABLE:
+	return "next-table";
+
+    case VAR_PEER_ADDRESS:
+	return "peer-address";
+
+    case VAR_REJECT:
+	return "reject";
+    
+    case VAR_SELF:
+	return "self";
+    }
+
+    // unreach
+    XLOG_ASSERT(false);
+    abort();
+}
+
+template <class A>
+const char*
+ElemNextHop<A>::type() const
+{
+    return id;
+}
+
+template <class A>
+typename ElemNextHop<A>::Var
+ElemNextHop<A>::var() const
+{
+    return _var;
+}
+
+template <class A>
+const A&
+ElemNextHop<A>::addr() const
+{
+    XLOG_ASSERT(_var == VAR_NONE);
+
+    return _addr;
+}
+
+template <class A>
+const A&
+ElemNextHop<A>::val() const
+{
+    return addr();
+}
+
 // instantiate
 template class ElemNet<IPv4Net>;
 template class ElemNet<IPv6Net>;
+template class ElemNextHop<IPv4>;
+template class ElemNextHop<IPv6>;

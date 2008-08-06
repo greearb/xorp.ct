@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.98 2008/08/06 08:19:01 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.99 2008/08/06 08:23:24 abittau Exp $ */
 
 protocols {
     bgp {
@@ -101,54 +101,37 @@ policy {
     policy-statement @: txt {
 	term @: txt {
 	    from {
-		nexthop4: ipv4range;
-		nexthop6: ipv6range;
-
-		as-path: txt;
-		as-path-list: txt;
-		community: txt;
-		community-list: txt;
-
-		neighbor: ipv4range;
-
-		origin: u32;
-		med: u32range;
-		localpref: u32range;
+		as-path:		txt;
+		as-path-list:		txt;
+		community:		txt;
+		community-list:		txt;
+		neighbor:		ipv4range;
+		origin:			u32;
+		med:			u32range;
+		localpref:		u32range;
 	    }
 	    to {
-		nexthop4: ipv4range;
-		nexthop6: ipv6range;
-
-		as-path: txt;
-		as-path-list: txt;
-		community: txt;
-
-		neighbor: ipv4range;
-
-		origin: u32;
-		med: u32range;
-		localpref: u32range;
-
-		was-aggregated: bool;
+		as-path:		txt;
+		as-path-list:		txt;
+		community:		txt;
+		neighbor:		ipv4range;
+		origin:			u32;
+		med:			u32range;
+		localpref:		u32range;
+		was-aggregated:		bool;
 	    }
 	    then {
-		nexthop4: ipv4;
-		nexthop6: ipv6;
-
-		as-path-prepend: u32;
-		as-path-expand: u32;
-
-		community: txt;
-		community-add: txt;
-		community-del: txt;
-
-		origin: u32;
-		med: u32;
-		med-remove: bool;
-		localpref: u32;
-
-		aggregate-prefix-len: u32;
-		aggregate-brief-mode: bool;
+		as-path-prepend:	u32;
+		as-path-expand:		u32;
+		community:		txt;
+		community-add:		txt;
+		community-del:		txt;
+		origin:			u32;
+		med:			u32;
+		med-remove:		bool;
+		localpref:		u32;
+		aggregate-prefix-len:	u32;
+		aggregate-brief-mode:	bool;
 	    }
 	}
     }
@@ -184,8 +167,8 @@ protocols {
 
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4nexthop&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6nexthop&access:txt=rw&id:u32=13";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aspath&type:txt=aspath&access:txt=rw&id:u32=14";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_com32&access:txt=rw&id:u32=18";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r&id:u32=16";
@@ -716,18 +699,6 @@ policy {
 	term @: txt {
 
 	    from {
-		nexthop4 {
-		    %help: short "IPv4 nexthop";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
-		}
-		nexthop6 {
-		    %help: short "IPv6 nexthop";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
-		}
 		as-path {
 		    %help: short "BGP AS path";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=aspath REGEX '$(@)';";
@@ -776,16 +747,6 @@ policy {
 	    } /* from */
 
 	    to {
-		nexthop4 {
-		    %help: short "IPv4 nexthop";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
-		nexthop6 {
-		    %help: short "IPv6 nexthop";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
 		as-path {
 		    %help: short "BGP AS path";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aspath REGEX '$(@)';";
@@ -834,16 +795,6 @@ policy {
 	    } /* to */
 
 	    then {
-		nexthop4 {
-		    %help: short "Set the IPv4 nexthop";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
-		}
-		nexthop6 {
-		    %help: short "Set the IPv6 nexthop";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
-		}
 		as-path-prepend {
 		    %help: short "Prepend AS numbers to an AS path";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) + aspath;";

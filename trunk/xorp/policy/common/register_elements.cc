@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.13 2008/01/04 03:17:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.14 2008/07/23 05:11:27 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -39,14 +39,14 @@ RegisterElements::RegisterElements()
     register_element<ElemIPv6>();
     register_element<ElemIPv6Range>();
     register_element<ElemIPv6Net>();
-    
     register_element<ElemSetU32>();
     register_element<ElemSetCom32>();
     register_element<ElemSetIPv4Net>();
     register_element<ElemSetIPv6Net>();
     register_element<ElemSetStr>();
-    
     register_element<ElemASPath>();
+    register_element<ElemIPv4NextHop>();
+    register_element<ElemIPv6NextHop>();
 }
 
 // I love templates =D [and C++]

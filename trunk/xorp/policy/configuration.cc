@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.26 2008/08/06 08:22:57 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.27 2008/08/06 08:25:49 abittau Exp $"
 
 #include "libxorp/xorp.h"
 #include "policy_module.h"
@@ -303,11 +303,9 @@ Configuration::compile_policy(const string& name)
     _exports.compile(policy, _modified_targets, _currtag);
 
     // integer overflow
-    if (_currtag < old_currtag) {
+    if (_currtag < old_currtag)
 	// FIXME
 	XLOG_FATAL("The un-avoidable occurred: We ran out of policy tags");
-	abort(); // unreach [compile warning?]
-    }
 }
 
 void 

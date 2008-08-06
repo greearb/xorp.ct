@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.12 2008/07/23 05:11:36 pavlin Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.13 2008/08/06 08:24:12 abittau Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xorp.h"
@@ -95,8 +95,8 @@ template <>
 bool
 RIPVarRW<IPv4>::write_nexthop(const Id& id, const Element& e)
 {
-    if (id == VAR_NEXTHOP4 && e.type() == ElemIPv4::id) {
-	const ElemIPv4* v4 = dynamic_cast<const ElemIPv4*>(&e);
+    if (id == VAR_NEXTHOP4 && e.type() == ElemIPv4NextHop::id) {
+	const ElemIPv4NextHop* v4 = dynamic_cast<const ElemIPv4NextHop*>(&e);
 
 	XLOG_ASSERT(v4 != NULL);
 
@@ -113,7 +113,7 @@ void
 RIPVarRW<IPv4>::read_route_nexthop(RouteEntry<IPv4>& route)
 {
     initialize(VAR_NETWORK4, new ElemIPv4Net(route.net()));
-    initialize(VAR_NEXTHOP4, new ElemIPv4(route.nexthop()));
+    initialize(VAR_NEXTHOP4, new ElemIPv4NextHop(route.nexthop()));
     
     initialize(VAR_NETWORK6, NULL);
     initialize(VAR_NEXTHOP6, NULL);
@@ -127,8 +127,8 @@ template <>
 bool
 RIPVarRW<IPv6>::write_nexthop(const Id& id, const Element& e)
 {
-    if (id == VAR_NEXTHOP6 && e.type() == ElemIPv6::id) {
-	const ElemIPv6* v6 = dynamic_cast<const ElemIPv6*>(&e);
+    if (id == VAR_NEXTHOP6 && e.type() == ElemIPv6NextHop::id) {
+	const ElemIPv6NextHop* v6 = dynamic_cast<const ElemIPv6NextHop*>(&e);
 
 	XLOG_ASSERT(v6 != NULL);
 
@@ -145,7 +145,7 @@ void
 RIPVarRW<IPv6>::read_route_nexthop(RouteEntry<IPv6>& route)
 {
     initialize(VAR_NETWORK6, new ElemIPv6Net(route.net()));
-    initialize(VAR_NEXTHOP6, new ElemIPv6(route.nexthop()));
+    initialize(VAR_NEXTHOP6, new ElemIPv6NextHop(route.nexthop()));
     
     initialize(VAR_NETWORK4, NULL);
     initialize(VAR_NEXTHOP4, NULL);

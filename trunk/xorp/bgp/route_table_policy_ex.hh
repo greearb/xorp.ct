@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_ex.hh,v 1.5 2008/01/04 03:15:25 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy_ex.hh,v 1.6 2008/07/23 05:09:37 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_EX_HH__
 #define __BGP_ROUTE_TABLE_POLICY_EX_HH__
@@ -41,8 +41,9 @@ public:
 		      const Safi& safi,
 		      BGPRouteTable<A>* parent,
 		      PolicyFilters& pfs,
-		      const string& neighbor);
-		      
+		      const string& neighbor,
+		      const A& self);
+
 protected:
     void init_varrw();
 

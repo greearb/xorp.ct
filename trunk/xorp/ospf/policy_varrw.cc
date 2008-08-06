@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.16 2008/08/06 08:23:50 abittau Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.17 2008/08/06 08:24:09 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -53,7 +53,8 @@ OspfVarRW<IPv4>::start_read()
 {
     initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
 				       _network.str().c_str()));
-    initialize(VAR_NEXTHOP, _ef.create(ElemIPv4::id, _nexthop.str().c_str()));
+    initialize(VAR_NEXTHOP, _ef.create(ElemIPv4NextHop::id,
+	       _nexthop.str().c_str()));
 
     start_read_common();
 }
@@ -64,7 +65,8 @@ OspfVarRW<IPv6>::start_read()
 {
     initialize(VAR_NETWORK, _ef.create(ElemIPv6Net::id,
 				       _network.str().c_str()));
-    initialize(VAR_NEXTHOP, _ef.create(ElemIPv6::id, _nexthop.str().c_str()));
+    initialize(VAR_NEXTHOP, _ef.create(ElemIPv6NextHop::id,
+               _nexthop.str().c_str()));
 
     start_read_common();
 }
@@ -112,7 +114,7 @@ OspfVarRW<IPv4>::single_write(const Id& id, const Element& e)
 	break;
 
     case VAR_NEXTHOP: {
-	const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
+	const ElemIPv4NextHop* eip = dynamic_cast<const ElemIPv4NextHop*>(&e);
 	XLOG_ASSERT(eip != NULL);
 	_nexthop = IPv4(eip->val());
     }
@@ -171,7 +173,7 @@ OspfVarRW<IPv6>::single_write(const Id& id, const Element& e)
 	break;
 
     case VAR_NEXTHOP: {
-	const ElemIPv6* eip = dynamic_cast<const ElemIPv6*>(&e);
+	const ElemIPv6NextHop* eip = dynamic_cast<const ElemIPv6NextHop*>(&e);
 	XLOG_ASSERT(eip != NULL);
 	_nexthop = IPv6(eip->val());
     }

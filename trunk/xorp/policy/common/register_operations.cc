@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.27 2008/08/06 08:11:44 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.28 2008/08/06 08:15:13 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -440,6 +440,12 @@ do {									\
     ADD_BINOP(ElemBool,argl,argr,op_ge,Ge);				\
 } while (0)
 
+#define ADD_ALL_RELOP2(argl, argr)					\
+do {									\
+    ADD_RELOP2(argl, argr);						\
+    ADD_EQOP2(argl, argr);						\
+} while (0)
+
 // MATH OPERATORS
 #define ADD_MATHOP(arg)							\
 do {									\
@@ -552,16 +558,17 @@ do {                                                                    \
 
     // IPV4
     ADD_EQOP(ElemIPv4);
-    ADD_EQOP2(ElemIPv4,ElemIPv4Range);
+    ADD_EQOP2(ElemIPv4, ElemIPv4Range);
     ADD_RELOP(ElemIPv4);
-    ADD_RELOP2(ElemIPv4,ElemIPv4Range);
-//    ADD_SETBINOP(ElemIPv4);
-   
+    ADD_RELOP2(ElemIPv4, ElemIPv4Range);
+//  ADD_SETBINOP(ElemIPv4);
+    ADD_ALL_RELOP2(ElemIPv4NextHop, ElemIPv4Range);
+
     // IPV4NET
     ADD_EQOP(ElemIPv4Net);
-    ADD_EQOP2(ElemIPv4Net,ElemU32Range);
+    ADD_EQOP2(ElemIPv4Net, ElemU32Range);
     ADD_RELOP_SPECIALIZED(ElemIPv4Net, net);
-    ADD_RELOP2(ElemIPv4Net,ElemU32Range);
+    ADD_RELOP2(ElemIPv4Net, ElemU32Range);
     ADD_SETBINOP(ElemSetIPv4Net, ElemIPv4Net);
     // Special case set operation to make use of modifiers
     disp.add<ElemIPv4Net, ElemSetIPv4Net, operations::net_set_match>(OpLe());

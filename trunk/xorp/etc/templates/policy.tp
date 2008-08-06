@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.30 2008/08/06 08:24:35 abittau Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.31 2008/08/06 08:25:26 abittau Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -14,6 +14,8 @@ policy {
 		prefix-length6:	u32range;
 		policy:		txt;
 		tag:		u32range;
+		nexthop4:	ipv4range;
+		nexthop6:	ipv6range;
 	    }
 	    to {
 		network4:	ipv4net;
@@ -24,8 +26,14 @@ policy {
 		prefix-length6:	u32range;
 		policy:		txt;
 		tag:		u32range;
+		nexthop4:	ipv4range;
+		nexthop6:	ipv6range;
 	    }
 	    then {
+	    	nexthop4:	ipv4;
+		nexthop6:	ipv6;
+		nexthop4-var:	txt;
+		nexthop6-var:	txt;
 		trace:		u32;
 		tag:		u32;
 		next:		txt;
@@ -97,6 +105,20 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 
+                nexthop4 {
+                    %help: short "IPv4 nexthop";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+
+                nexthop6 {
+                    %help: short "IPv6 nexthop";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+                }
+
 		network4 {
 		    %help: short "IPv4 network";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=" "exact" "not" "shorter" "longer" "orshorter" "orlonger";
@@ -156,12 +178,27 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
+
 		network6 {
 		    %help: short "IPv6 network";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=" "exact" "not" "shorter" "longer" "orshorter" "orlonger";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
+
+                nexthop4 {
+                    %help: short "IPv4 nexthop";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
+
+                nexthop6 {
+                    %help: short "IPv6 nexthop";
+                    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+                }
 
 		network4-list {
 		    %help: short "Valid named set of IPv4 networks";
@@ -207,6 +244,33 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=trace = $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
+
+		nexthop4 {
+		    %help: short "Set the IPv4 nexthop";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) (ctr 'ipv4nexthop' '$(@)');";     
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+
+                nexthop6 {
+		    %help: short "Set the IPv6 nexthop";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) (ctr 'ipv6nexthop' '$(@)');";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+                }
+
+		nexthop4-var {
+                    %help: short "Set the IPv4 nexthop";                                                                 %allow: $(@) "peer-address" %help: "Peer address";
+                    %allow: $(@) "self" %help: "Self";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) (ctr 'ipv4nexthop' '$(@)');";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+                }
+
+                nexthop6-var {
+                    %help: short "Set the IPv6 nexthop";
+                    %allow: $(@) "peer-address" %help: "Peer address";
+                    %allow: $(@) "self" %help: "Self";
+                    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) (ctr 'ipv6nexthop' '$(@)');";
+                    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+                }
 
 		tag {
 		    %help: short "Tag value";

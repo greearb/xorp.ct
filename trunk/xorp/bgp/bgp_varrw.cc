@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.35 2008/07/23 05:09:31 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.36 2008/08/06 08:24:07 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -164,7 +164,7 @@ template <>
 Element*
 BGPVarRW<IPv6>::read_nexthop6()
 {
-    return _ef.create(ElemIPv6::id, 
+    return _ef.create(ElemIPv6NextHop::id, 
 		      _orig_rtmsg->route()->nexthop().str().c_str());
 }
 
@@ -179,7 +179,7 @@ template <>
 Element*
 BGPVarRW<IPv4>::read_nexthop4()
 {
-    return new ElemIPv4(_orig_rtmsg->route()->nexthop());
+    return new ElemIPv4NextHop(_orig_rtmsg->route()->nexthop());
 }
 
 template <>
@@ -406,14 +406,45 @@ template <>
 void
 BGPVarRW<IPv4>::write_nexthop4(const Element& e)
 {
+    write_nexthop(e);
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_nexthop(const Element& e)
+{
     _route_modify = true;
-    const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
+
+    const ElemNextHop<A>* eip = dynamic_cast<const ElemNextHop<A>*>(&e);
     XLOG_ASSERT(eip != NULL);
 
-    IPv4 nh(eip->val());
+    A nh;
+
+    switch (eip->var()) {
+    case ElemNextHop<A>::VAR_NONE:
+	nh = eip->addr();
+	break;
+
+    case ElemNextHop<A>::VAR_SELF:
+	XLOG_ASSERT(_self != nh);
+	nh = _self;
+	break;
+
+    case ElemNextHop<A>::VAR_PEER_ADDRESS:
+	XLOG_ASSERT(_peer != nh);
+	nh = _peer;
+	break;
+
+    case ElemNextHop<A>::VAR_DISCARD:
+    case ElemNextHop<A>::VAR_REJECT:
+    case ElemNextHop<A>::VAR_NEXT_TABLE:
+	XLOG_ASSERT(!"not implemented");
+	break;
+    }
 
     if (!_palist)
 	clone_palist();
+
     _palist->replace_nexthop(nh);
 }
 
@@ -427,15 +458,7 @@ template <>
 void
 BGPVarRW<IPv6>::write_nexthop6(const Element& e)
 {
-    _route_modify = true;
-    const ElemIPv6* eip = dynamic_cast<const ElemIPv6*>(&e);
-    XLOG_ASSERT(eip != NULL);
-
-    IPv6 nh(eip->val());
-
-    if (!_palist)
-	clone_palist();
-    _palist->replace_nexthop(nh);
+    write_nexthop(e);
 }
 
 template <>
@@ -681,6 +704,20 @@ BGPVarRW<A>::more_tracelog()
     }
 
     return x;
+}
+
+template <class A>
+void
+BGPVarRW<A>::set_peer(const A& peer)
+{
+    _peer = peer;
+}
+
+template <class A>
+void
+BGPVarRW<A>::set_self(const A& self)
+{
+    _self = self;
 }
 
 template <class A>

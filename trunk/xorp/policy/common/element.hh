@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.14 2008/08/06 08:11:29 abittau Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.15 2008/08/06 08:15:13 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -35,22 +35,25 @@ enum {
     HASH_ELEM_U32,
     HASH_ELEM_COM32,
     HASH_ELEM_STR,
-    HASH_ELEM_BOOL,
+    HASH_ELEM_BOOL,		// 5
     HASH_ELEM_IPV4,
     HASH_ELEM_IPV6,
     HASH_ELEM_IPV4RANGE,
     HASH_ELEM_IPV6RANGE,
-    HASH_ELEM_IPV4NET,
+    HASH_ELEM_IPV4NET,		// 10
     HASH_ELEM_IPV6NET,
     HASH_ELEM_U32RANGE,
     HASH_ELEM_SET_U32,
     HASH_ELEM_SET_COM32,
-    HASH_ELEM_SET_IPV4NET,
+    HASH_ELEM_SET_IPV4NET,	// 15
     HASH_ELEM_SET_IPV6NET,
     HASH_ELEM_SET_STR,
     HASH_ELEM_NULL,
     HASH_ELEM_FILTER,
-    HASH_ELEM_ASPATH,
+    HASH_ELEM_ASPATH,		// 20
+    HASH_ELEM_IPV4NEXTHOP,
+    HASH_ELEM_IPV6NEXTHOP,
+
     HASH_ELEM_MAX = 32 // must be last
 };
 
@@ -465,6 +468,36 @@ private:
     mutable BinOper*	_op;
 };
 
+template <class A>
+class ElemNextHop : public Element {
+public:
+    enum Var {
+	VAR_NONE,
+	VAR_DISCARD,
+	VAR_NEXT_TABLE,
+	VAR_PEER_ADDRESS,
+	VAR_REJECT,
+	VAR_SELF
+    };
+
+    static const char*	id;
+    static Hash		_hash;
+
+    ElemNextHop(const char*);
+    ElemNextHop();
+    ElemNextHop(const A& nh);
+
+    string	str() const;
+    const char*	type() const;
+    Var		var() const;
+    const A&	addr() const;
+    const A&	val() const; // for relop compatibility
+
+private:
+    Var	_var;
+    A	_addr;
+};
+
 // User defined types
 typedef ElemRefAny<IPv4>		ElemIPv4;
 typedef ElemAny<IPv6>			ElemIPv6;
@@ -473,5 +506,7 @@ typedef ElemAny<IPv6Range>		ElemIPv6Range;
 typedef ElemNet<IPv4Net>		ElemIPv4Net;
 typedef ElemNet<IPv6Net>		ElemIPv6Net;
 typedef ElemAny<U32Range>		ElemU32Range;
+typedef ElemNextHop<IPv4>		ElemIPv4NextHop;
+typedef ElemNextHop<IPv6>		ElemIPv6NextHop;
 
 #endif // __POLICY_COMMON_ELEMENT_HH__

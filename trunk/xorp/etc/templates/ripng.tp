@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.44 2008/08/06 08:23:24 abittau Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.45 2008/08/06 08:24:09 abittau Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -43,15 +43,12 @@ policy {
     policy-statement @: txt {
 	term @: txt {
 	    from {
-		nexthop6: ipv6range;
 		metric: u32range;
 	    }
 	    to {
-		nexthop6: ipv6range;
 		metric: u32range;
 	    }
 	    then {
-		nexthop6: ipv6;
 		metric: u32;
 	    }
 	}
@@ -243,18 +240,12 @@ protocols {
 
 policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=nexthop6&type:txt=ipv6nexthop&access:txt=rw&id:u32=13";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=14";
 
     policy-statement @: txt {
 	term @: txt {
 	    from {
-		nexthop6 {
-		    %help: short "IPv6 nexthop";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
-		}
 		metric {
 		    %help: short "Metric value";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
@@ -263,12 +254,6 @@ policy {
 		}
 	    }
 	    to {
-		nexthop6 {
-		    %help: short "IPv6 nexthop";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
 		metric {
 		    %help: short "Metric value";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
@@ -277,11 +262,6 @@ policy {
 		}
 	    }
 	    then {
-		nexthop6 {
-		    %help: short "Set the IPv6 nexthop";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
-		}
 		metric {
 		    %help: short "Set the metric value";
 		    %allow-operator: ":" "=" "sub" "add";
