@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.15 2008/01/04 03:17:13 pavlin Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.16 2008/07/23 05:11:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -127,11 +127,14 @@ VisitorSemantic::visit(NodeUn& node)
     // see if we may execute unary operation
     try {
 	res = _disp.run(node.op(),*arg);
-	_trash.insert(res);
+
+	if (res != arg)
+	    _trash.insert(res);
+
 	return res;
     } 
     // we can't
-    catch(const PolicyException& e) {
+    catch (const PolicyException& e) {
 	ostringstream error;
 
 	error << "Invalid unop " << e.str() << " at line " << node.line();
@@ -150,11 +153,14 @@ VisitorSemantic::visit(NodeBin& node)
     // see if we may execute bin operation.
     try {
 	res = _disp.run(node.op(),*left,*right);
-	_trash.insert(res);
+
+	if (res != left && res != right)
+	    _trash.insert(res);
+
 	return res;
     } 
     // nope
-    catch(const PolicyException& e) {
+    catch (const PolicyException& e) {
         ostringstream error;
 
         error << "Invalid binop " << e.str() << " at line " << node.line();

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.22 2008/01/04 03:17:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.23 2008/07/23 05:11:27 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -258,12 +258,12 @@ str_setregex(const ElemStr& left, const ElemSetStr& right)
 Element*
 aspath_prepend(const ElemU32& left, const ElemASPath& right)
 {
-    ASPath* path = new ASPath(right.val());
-    path->prepend_as(AsNum(left.val()));
+    ElemASPath& r = const_cast<ElemASPath&>(right);
+    ASPath& path  = const_cast<ASPath&>(r.val());
 
-    ElemASPath* ret = new ElemASPath(*path, true);
+    path.prepend_as(AsNum(left.val()));
 
-    return ret;
+    return &r;
 }
 
 Element*
