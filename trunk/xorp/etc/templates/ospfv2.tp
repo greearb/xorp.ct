@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.53 2006/10/13 20:26:51 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.54 2008/02/08 23:05:11 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -588,6 +588,7 @@ policy {
 		}
 		metric {
 		    %help: short "Set the metric value";
+		    %allow-operator: ":" "=" "sub" "add";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}

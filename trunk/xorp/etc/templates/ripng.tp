@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.41 2006/07/19 00:43:38 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.42 2007/11/21 10:37:33 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -300,6 +300,7 @@ policy {
 		}
 		metric {
 		    %help: short "Set the metric value";
+		    %allow-operator: ":" "=" "sub" "add";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
