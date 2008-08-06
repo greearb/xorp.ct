@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.15 2008/01/04 03:17:14 pavlin Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.16 2008/07/23 05:11:22 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -260,11 +260,12 @@ XrlPolicyTarget::policy_0_1_done_global_policy_conf()
 
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_import(const string&   protocol,
-				   const string&   policies) 
+				   const string&   policies,
+				   const string&   modifier) 
 {
     try {
-	_policy_target.update_import(protocol,policies);
-    } catch(const PolicyException& e) {
+	_policy_target.update_import(protocol, policies, modifier);
+    } catch (const PolicyException& e) {
         return XrlCmdError::COMMAND_FAILED("Import of " + protocol + 
 					   " failed: " + e.str());
     }
@@ -274,11 +275,12 @@ XrlPolicyTarget::policy_0_1_import(const string&   protocol,
  
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_export(const string&   protocol,
-				   const string&   policies)
+				   const string&   policies,
+				   const string&   modifier)
 {
     try {
-	_policy_target.update_export(protocol,policies);
-    } catch(const PolicyException& e) {
+	_policy_target.update_export(protocol, policies, modifier);
+    } catch (const PolicyException& e) {
         return XrlCmdError::COMMAND_FAILED("Export of " + protocol + 
 					   " failed: " + e.str());
     }

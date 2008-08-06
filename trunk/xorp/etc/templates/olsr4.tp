@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/olsr4.tp,v 1.1 2008/04/24 15:20:17 bms Exp $ */
+/* $XORP: xorp/etc/templates/olsr4.tp,v 1.2 2008/04/28 23:40:34 bms Exp $ */
 /* vim:set sts=4 ts=8 sw=4 syntax=c: */
 
 /*
@@ -279,14 +279,14 @@ protocols {
 
 	import {
 	    %help: short "Import policy";
-	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=olsr4&policies:txt=";
-	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=olsr4&policies:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=olsr4&policies:txt=&modifier:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=olsr4&policies:txt=$(@)&modifier:txt=";
 	}
 
 	export {
 	    %help: short "Export policy";
-	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=olsr4&policies:txt=";
-	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=olsr4&policies:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=olsr4&policies:txt=&modifier:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=olsr4&policies:txt=$(@)&modifier:txt=";
 	}
     }
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.14 2008/07/23 05:11:20 pavlin Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.15 2008/08/06 08:17:07 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -171,8 +171,9 @@ public:
      * @param protocol protocol for which to update imports.
      * @param policies comma separated policy list.
      */
-    void update_import(const string& protocol, const string& policies);
-    
+    void update_import(const string& protocol, const string& policies,
+		       const string& modifier);
+
     /**
      * Updates the export policy list for a protocol and triggers a delayed
      * commit.
@@ -180,7 +181,8 @@ public:
      * @param protocol protocol for which to update imports.
      * @param policies comma separated policy list.
      */
-    void update_export(const string& protocol, const string& policies);
+    void update_export(const string& protocol, const string& policies,
+		       const string& modifier);
 
     /* 
      * Configure the variable map used for semantic checking.
@@ -243,8 +245,6 @@ public:
     void set_proto_target(const string& protocol, const string& target);
 
 private:
-    void parse_policies(const string& polin, POLICIES& polout, string& mod);
-
     bool	    _running;
     uint32_t	    _commit_delay;
     ProtocolMap	    _pmap;

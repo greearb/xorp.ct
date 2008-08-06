@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/xrl_target.hh,v 1.12 2008/01/04 03:17:14 pavlin Exp $
+// $XORP: xorp/policy/xrl_target.hh,v 1.13 2008/07/23 05:11:22 pavlin Exp $
 
 #ifndef __POLICY_XRL_TARGET_HH__
 #define __POLICY_XRL_TARGET_HH__
@@ -108,12 +108,14 @@ public:
     XrlCmdError policy_0_1_import(
         // Input values,
         const string&   protocol,
-        const string&   policies);
+        const string&   policies,
+	const string&   modifier);
 	
     XrlCmdError policy_0_1_export(
         // Input values,
         const string&   protocol,
-        const string&   policies);
+        const string&   policies,
+	const string&   modifier);
    
     XrlCmdError policy_0_1_add_varmap(
         // Input values,

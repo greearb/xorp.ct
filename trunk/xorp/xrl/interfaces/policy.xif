@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.9 2006/10/31 05:26:27 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.10 2007/07/12 21:35:29 pavlin Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -105,9 +105,10 @@ interface policy/0.1 {
 	 *
 	 * @param protocol protocol for which policies must be replaced.
 	 * @param policies comma separated list of policies.
+	 * @param modifier a match statement to insert in each policy.
 	 */
-	import ? protocol:txt & policies:txt
-	export ? protocol:txt & policies:txt
+	import ? protocol:txt & policies:txt & modifier:txt
+	export ? protocol:txt & policies:txt & modifier:txt
 
 	/**
 	 * Add a variable to the varmap configuration.

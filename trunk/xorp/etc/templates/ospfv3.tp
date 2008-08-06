@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.10 2007/10/29 22:38:08 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.11 2008/08/06 08:19:14 abittau Exp $ */
 
 protocols {
     ospf6 @: u32 {
@@ -382,13 +382,13 @@ transmitted packets";
 
 	import {
 	    %help: short "Import policy";
-	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf6&policies:txt=";
-	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf6&policies:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf6&policies:txt=&modifier:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf6&policies:txt=$(@)&modifier:txt=";
 	}
 	export {
 	    %help: short "Export policy";
-	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf6&policies:txt=";
-	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf6&policies:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf6&policies:txt=&modifier:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf6&policies:txt=$(@)&modifier:txt=";
 	}
     }
 }

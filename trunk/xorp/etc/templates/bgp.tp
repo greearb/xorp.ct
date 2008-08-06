@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.97 2008/08/06 08:18:30 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.98 2008/08/06 08:19:01 abittau Exp $ */
 
 protocols {
     bgp {
@@ -380,14 +380,14 @@ protocols {
 
 	    import {
 	        %help: short "Import policy";
-	        %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#";
-	        %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#$(@)";
+	        %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=&modifier:txt=neighbor == $(peer.@);";
+	        %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)&modifier:txt=neighbor == $(peer.@);";
 	    }
 
 	    export {
 	        %help: short "Export policy";
-	        %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#";
-	        %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#$(@)";
+	        %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=&modifier:txt=neighbor == $(peer.@);";
+	        %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)&modifier:txt=neighbor == $(peer.@);";
 	    }
 	} /* peer */
 
@@ -487,18 +487,18 @@ protocols {
 
 	import {
 	    %help: short "Import policy";
-	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=&modifier:txt=";
 	    %create:;
-	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
+	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)&modifier:txt=";
 	}
 	export {
 	    %help: short "Export policy";
-	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=&modifier:txt=";
 	    %create:;
-	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
+	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)&modifier:txt=";
 	}
-	%activate: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@.import)";
-	%activate: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@.export)";
+	%activate: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@.import)&modifier:txt=";
+	%activate: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@.export)&modifier:txt=";
     }
 }
 
