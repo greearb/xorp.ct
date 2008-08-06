@@ -6,7 +6,7 @@
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
-#include "yacc.yy_policy_backend_parser.hh"
+#include "yacc.yy_policy_backend_parser.cc.h"
 
 #define yyparse yy_policy_backend_parserparse
 #define yyerror yy_policy_backend_parsererror

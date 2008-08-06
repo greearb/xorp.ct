@@ -8,7 +8,7 @@
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
 #include "policy_parser.hh"
-#include "yacc.yy_policy_parser.hh"
+#include "yacc.yy_policy_parser.cc.h"
 
 #define yylval yy_policy_parserlval
 #define yyerror yy_policy_parsererror

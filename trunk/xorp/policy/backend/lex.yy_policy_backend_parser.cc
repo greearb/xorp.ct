@@ -53,15 +53,32 @@
 
 #if __STDC__
 
+#define YY_USE_PROTOS
 #define YY_USE_CONST
 
 #endif	/* __STDC__ */
 #endif	/* ! __cplusplus */
 
+#ifdef __TURBOC__
+ #pragma warn -rch
+ #pragma warn -use
+#include <io.h>
+#include <stdlib.h>
+#define YY_USE_CONST
+#define YY_USE_PROTOS
+#endif
+
 #ifdef YY_USE_CONST
 #define yyconst const
 #else
 #define yyconst
+#endif
+
+
+#ifdef YY_USE_PROTOS
+#define YY_PROTO(proto) proto
+#else
+#define YY_PROTO(proto) ()
 #endif
 
 /* Returned upon end-of-file. */
@@ -78,75 +95,71 @@
  * but we do it the disgusting crufty way forced on us by the ()-less
  * definition of BEGIN.
  */
-#define BEGIN (yy_start) = 1 + 2 *
+#define BEGIN yy_start = 1 + 2 *
 
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
-#define YY_START (((yy_start) - 1) / 2)
+#define YY_START ((yy_start - 1) / 2)
 #define YYSTATE YY_START
 
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
 
 /* Special action meaning "start processing a new file". */
-#define YY_NEW_FILE yy_policy_backend_parserrestart(yy_policy_backend_parserin  )
+#define YY_NEW_FILE yyrestart( yyin )
 
 #define YY_END_OF_BUFFER_CHAR 0
 
 /* Size of default input buffer. */
-#ifndef YY_BUF_SIZE
 #define YY_BUF_SIZE 16384
-#endif
 
-/* The state buf must be large enough to hold one state per character in the main buffer.
- */
-#define YY_STATE_BUF_SIZE   ((YY_BUF_SIZE + 2) * sizeof(yy_state_type))
-
-#ifndef YY_TYPEDEF_YY_BUFFER_STATE
-#define YY_TYPEDEF_YY_BUFFER_STATE
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
-#endif
 
-extern int yy_policy_backend_parserleng;
-
-extern FILE *yy_policy_backend_parserin, *yy_policy_backend_parserout;
+extern int yyleng;
+extern FILE *yyin, *yyout;
 
 #define EOB_ACT_CONTINUE_SCAN 0
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
-    #define YY_LESS_LINENO(n)
-    
-/* Return all but the first "n" matched characters back to the input stream. */
+/* The funky do-while in the following #define is used to turn the definition
+ * int a single C statement (which needs a semi-colon terminator).  This
+ * avoids problems with code like:
+ *
+ * 	if ( condition_holds )
+ *		yyless( 5 );
+ *	else
+ *		do_something_else();
+ *
+ * Prior to using the do-while the compiler would get upset at the
+ * "else" because it interpreted the "if" statement as being all
+ * done when it reached the ';' after the yyless() call.
+ */
+
+/* Return all but the first 'n' matched characters back to the input stream. */
+
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up yy_policy_backend_parsertext. */ \
-        int yyless_macro_arg = (n); \
-        YY_LESS_LINENO(yyless_macro_arg);\
-		*yy_cp = (yy_hold_char); \
+		/* Undo effects of setting up yytext. */ \
+		*yy_cp = yy_hold_char; \
 		YY_RESTORE_YY_MORE_OFFSET \
-		(yy_c_buf_p) = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-		YY_DO_BEFORE_ACTION; /* set up yy_policy_backend_parsertext again */ \
+		yy_c_buf_p = yy_cp = yy_bp + n - YY_MORE_ADJ; \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
 		} \
 	while ( 0 )
 
-#define unput(c) yyunput( c, (yytext_ptr)  )
+#define unput(c) yyunput( c, yytext_ptr )
 
 /* The following is because we cannot portably get our hands on size_t
  * (without autoconf's help, which isn't available because we want
  * flex-generated scanners to compile on their own).
  */
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
 typedef unsigned int yy_size_t;
-#endif
 
-#ifndef YY_STRUCT_YY_BUFFER_STATE
-#define YY_STRUCT_YY_BUFFER_STATE
+
 struct yy_buffer_state
 	{
 	FILE *yy_input_file;
@@ -183,16 +196,12 @@ struct yy_buffer_state
 	 */
 	int yy_at_bol;
 
-    int yy_bs_lineno; /**< The line count. */
-    int yy_bs_column; /**< The column count. */
-    
 	/* Whether to try to fill the input buffer when we reach the
 	 * end of it.
 	 */
 	int yy_fill_buffer;
 
 	int yy_buffer_status;
-
 #define YY_BUFFER_NEW 0
 #define YY_BUFFER_NORMAL 1
 	/* When an EOF's been seen but there's still some text to process
@@ -202,138 +211,102 @@ struct yy_buffer_state
 	 * possible backing-up.
 	 *
 	 * When we actually see the EOF, we change the status to "new"
-	 * (via yy_policy_backend_parserrestart()), so that the user can continue scanning by
-	 * just pointing yy_policy_backend_parserin at a new input file.
+	 * (via yyrestart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
 	 */
 #define YY_BUFFER_EOF_PENDING 2
-
 	};
-#endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
-/* Stack of input buffers. */
-static size_t yy_buffer_stack_top = 0; /**< index of top of stack. */
-static size_t yy_buffer_stack_max = 0; /**< capacity of stack. */
-static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
+static YY_BUFFER_STATE yy_current_buffer = 0;
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
  * "scanner state".
- *
- * Returns the top of the stack, or NULL.
  */
-#define YY_CURRENT_BUFFER ( (yy_buffer_stack) \
-                          ? (yy_buffer_stack)[(yy_buffer_stack_top)] \
-                          : NULL)
+#define YY_CURRENT_BUFFER yy_current_buffer
 
-/* Same as previous macro, but useful when we know that the buffer stack is not
- * NULL or when we need an lvalue. For internal use only.
- */
-#define YY_CURRENT_BUFFER_LVALUE (yy_buffer_stack)[(yy_buffer_stack_top)]
 
-/* yy_hold_char holds the character lost when yy_policy_backend_parsertext is formed. */
+/* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
+
 static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int yy_policy_backend_parserleng;
+
+
+int yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = (char *) 0;
-static int yy_init = 0;		/* whether we need to initialize */
+static int yy_init = 1;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
-/* Flag which is used to allow yy_policy_backend_parserwrap()'s to do buffer switches
- * instead of setting up a fresh yy_policy_backend_parserin.  A bit of a hack ...
+/* Flag which is used to allow yywrap()'s to do buffer switches
+ * instead of setting up a fresh yyin.  A bit of a hack ...
  */
 static int yy_did_buffer_switch_on_eof;
 
-void yy_policy_backend_parserrestart (FILE *input_file  );
-void yy_policy_backend_parser_switch_to_buffer (YY_BUFFER_STATE new_buffer  );
-YY_BUFFER_STATE yy_policy_backend_parser_create_buffer (FILE *file,int size  );
-void yy_policy_backend_parser_delete_buffer (YY_BUFFER_STATE b  );
-void yy_policy_backend_parser_flush_buffer (YY_BUFFER_STATE b  );
-void yy_policy_backend_parserpush_buffer_state (YY_BUFFER_STATE new_buffer  );
-void yy_policy_backend_parserpop_buffer_state (void );
+void yyrestart YY_PROTO(( FILE *input_file ));
 
-static void yy_policy_backend_parserensure_buffer_stack (void );
-static void yy_policy_backend_parser_load_buffer_state (void );
-static void yy_policy_backend_parser_init_buffer (YY_BUFFER_STATE b,FILE *file  );
+void yy_switch_to_buffer YY_PROTO(( YY_BUFFER_STATE new_buffer ));
+void yy_load_buffer_state YY_PROTO(( void ));
+YY_BUFFER_STATE yy_create_buffer YY_PROTO(( FILE *file, int size ));
+void yy_delete_buffer YY_PROTO(( YY_BUFFER_STATE b ));
+void yy_init_buffer YY_PROTO(( YY_BUFFER_STATE b, FILE *file ));
+void yy_flush_buffer YY_PROTO(( YY_BUFFER_STATE b ));
+#define YY_FLUSH_BUFFER yy_flush_buffer( yy_current_buffer )
 
-#define YY_FLUSH_BUFFER yy_policy_backend_parser_flush_buffer(YY_CURRENT_BUFFER )
+YY_BUFFER_STATE yy_scan_buffer YY_PROTO(( char *base, yy_size_t size ));
+YY_BUFFER_STATE yy_scan_string YY_PROTO(( yyconst char *yy_str ));
+YY_BUFFER_STATE yy_scan_bytes YY_PROTO(( yyconst char *bytes, int len ));
 
-YY_BUFFER_STATE yy_policy_backend_parser_scan_buffer (char *base,yy_size_t size  );
-YY_BUFFER_STATE yy_policy_backend_parser_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE yy_policy_backend_parser_scan_bytes (yyconst char *bytes,int len  );
+static void *yy_flex_alloc YY_PROTO(( yy_size_t ));
+static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t )) __unused;
+static void yy_flex_free YY_PROTO(( void * ));
 
-void *yy_policy_backend_parseralloc (yy_size_t  );
-void *yy_policy_backend_parserrealloc (void *,yy_size_t  );
-void yy_policy_backend_parserfree (void *  );
-
-#define yy_new_buffer yy_policy_backend_parser_create_buffer
+#define yy_new_buffer yy_create_buffer
 
 #define yy_set_interactive(is_interactive) \
 	{ \
-	if ( ! YY_CURRENT_BUFFER ){ \
-        yy_policy_backend_parserensure_buffer_stack (); \
-		YY_CURRENT_BUFFER_LVALUE =    \
-            yy_policy_backend_parser_create_buffer(yy_policy_backend_parserin,YY_BUF_SIZE ); \
-	} \
-	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
+	if ( ! yy_current_buffer ) \
+		yy_current_buffer = yy_create_buffer( yyin, YY_BUF_SIZE ); \
+	yy_current_buffer->yy_is_interactive = is_interactive; \
 	}
 
 #define yy_set_bol(at_bol) \
 	{ \
-	if ( ! YY_CURRENT_BUFFER ){\
-        yy_policy_backend_parserensure_buffer_stack (); \
-		YY_CURRENT_BUFFER_LVALUE =    \
-            yy_policy_backend_parser_create_buffer(yy_policy_backend_parserin,YY_BUF_SIZE ); \
-	} \
-	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
+	if ( ! yy_current_buffer ) \
+		yy_current_buffer = yy_create_buffer( yyin, YY_BUF_SIZE ); \
+	yy_current_buffer->yy_at_bol = at_bol; \
 	}
 
-#define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
+#define YY_AT_BOL() (yy_current_buffer->yy_at_bol)
 
-/* Begin user sect3 */
 
-#define yy_policy_backend_parserwrap(n) 1
+#define yywrap() 1
 #define YY_SKIP_YYWRAP
-
 typedef unsigned char YY_CHAR;
-
-FILE *yy_policy_backend_parserin = (FILE *) 0, *yy_policy_backend_parserout = (FILE *) 0;
-
+FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
+extern char *yytext;
+#define yytext_ptr yytext
 
-extern int yy_policy_backend_parserlineno;
-
-int yy_policy_backend_parserlineno = 1;
-
-extern char *yy_policy_backend_parsertext;
-#define yytext_ptr yy_policy_backend_parsertext
-
-static yy_state_type yy_get_previous_state (void );
-static yy_state_type yy_try_NUL_trans (yy_state_type current_state  );
-static int yy_get_next_buffer (void );
-static void yy_fatal_error (yyconst char msg[]  );
+static yy_state_type yy_get_previous_state YY_PROTO(( void ));
+static yy_state_type yy_try_NUL_trans YY_PROTO(( yy_state_type current_state ));
+static int yy_get_next_buffer YY_PROTO(( void ));
+static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 
 /* Done after the current pattern has been matched and before the
- * corresponding action - sets up yy_policy_backend_parsertext.
+ * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
-	(yytext_ptr) = yy_bp; \
-	yy_policy_backend_parserleng = (size_t) (yy_cp - yy_bp); \
-	(yy_hold_char) = *yy_cp; \
+	yytext_ptr = yy_bp; \
+	yyleng = (int) (yy_cp - yy_bp); \
+	yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
-	(yy_c_buf_p) = yy_cp;
+	yy_c_buf_p = yy_cp;
 
 #define YY_NUM_RULES 38
 #define YY_END_OF_BUFFER 39
-/* This struct is not used in this scanner,
-   but its presence is necessary. */
-struct yy_trans_info
-	{
-	flex_int32_t yy_verify;
-	flex_int32_t yy_nxt;
-	};
-static yyconst flex_int16_t yy_accept[139] =
+static yyconst short int yy_accept[139] =
     {   0,
         0,    0,    0,    0,   39,   34,   33,   32,   34,   35,
        31,   29,   30,   25,   34,   26,   34,   34,   34,   34,
@@ -352,7 +325,7 @@ static yyconst flex_int16_t yy_accept[139] =
        34,   34,   34,   34,   34,   34,   20,    0
     } ;
 
-static yyconst flex_int32_t yy_ec[256] =
+static yyconst int yy_ec[256] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    3,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -384,7 +357,7 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[33] =
+static yyconst int yy_meta[33] =
     {   0,
         1,    2,    2,    1,    3,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -392,7 +365,7 @@ static yyconst flex_int32_t yy_meta[33] =
         1,    1
     } ;
 
-static yyconst flex_int16_t yy_base[142] =
+static yyconst short int yy_base[142] =
     {   0,
         0,    0,  143,  142,  146,    0,  143,  149,  134,  149,
         0,    0,    0,  133,  132,  131,   20,  112,  124,  114,
@@ -412,7 +385,7 @@ static yyconst flex_int16_t yy_base[142] =
        62
     } ;
 
-static yyconst flex_int16_t yy_def[142] =
+static yyconst short int yy_def[142] =
     {   0,
       138,    1,  139,  139,  138,  140,  138,  138,  140,  138,
       140,  140,  140,  140,  140,  140,  140,  140,  140,  140,
@@ -432,7 +405,7 @@ static yyconst flex_int16_t yy_def[142] =
       138
     } ;
 
-static yyconst flex_int16_t yy_nxt[182] =
+static yyconst short int yy_nxt[182] =
     {   0,
         6,    7,    8,    9,   10,   11,   12,   13,   14,   15,
        16,   17,   18,    6,    6,    6,    6,   19,    6,    6,
@@ -456,7 +429,7 @@ static yyconst flex_int16_t yy_nxt[182] =
       138
     } ;
 
-static yyconst flex_int16_t yy_chk[182] =
+static yyconst short int yy_chk[182] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -483,9 +456,6 @@ static yyconst flex_int16_t yy_chk[182] =
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
 
-extern int yy_policy_backend_parser_flex_debug;
-int yy_policy_backend_parser_flex_debug = 0;
-
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
  */
@@ -493,8 +463,9 @@ int yy_policy_backend_parser_flex_debug = 0;
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-char *yy_policy_backend_parsertext;
+char *yytext;
 #line 1 "backend.l"
+#define INITIAL 0
 #line 2 "backend.l"
 
 #include <assert.h>
@@ -503,7 +474,7 @@ char *yy_policy_backend_parsertext;
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
-#include "yacc.yy_policy_backend_parser.hh"
+#include "yacc.yy_policy_backend_parser.cc.h"
 
 #define yyparse yy_policy_backend_parserparse
 #define yyerror yy_policy_backend_parsererror
@@ -526,25 +497,11 @@ namespace {
 	unsigned _parser_lineno;
 }	
 
-
-#line 574 "lex.yy_policy_backend_parser.cc"
-
-#define INITIAL 0
+#define YY_NO_UNPUT 1
+#define YY_NEVER_INTERACTIVE 1
 #define STR 1
 
-#ifndef YY_NO_UNISTD_H
-/* Special case for "unistd.h", since it is non-ANSI. We include it way
- * down here because we want the user's section 1 to have been scanned first.
- * The user has a chance to override it with an option.
- */
-#include <unistd.h>
-#endif
-
-#ifndef YY_EXTRA_TYPE
-#define YY_EXTRA_TYPE void *
-#endif
-
-static int yy_init_globals (void );
+#line 511 "lex.yy_policy_backend_parser.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -552,28 +509,65 @@ static int yy_init_globals (void );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int yy_policy_backend_parserwrap (void );
+extern "C" int yywrap YY_PROTO(( void ));
 #else
-extern int yy_policy_backend_parserwrap (void );
+extern int yywrap YY_PROTO(( void ));
 #endif
+#endif
+
+#ifndef YY_NO_UNPUT
+static void yyunput YY_PROTO(( int c, char *buf_ptr ));
 #endif
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char *,yyconst char *,int );
+static void yy_flex_strncpy YY_PROTO(( char *, yyconst char *, int ));
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * );
+static int yy_flex_strlen YY_PROTO(( yyconst char * ));
 #endif
 
 #ifndef YY_NO_INPUT
-
 #ifdef __cplusplus
-static int yyinput (void );
+static int yyinput YY_PROTO(( void ));
 #else
-static int input (void );
+static int input YY_PROTO(( void ));
+#endif
 #endif
 
+#if YY_STACK_USED
+static int yy_start_stack_ptr = 0;
+static int yy_start_stack_depth = 0;
+static int *yy_start_stack = 0;
+#ifndef YY_NO_PUSH_STATE
+static void yy_push_state YY_PROTO(( int new_state ));
+#endif
+#ifndef YY_NO_POP_STATE
+static void yy_pop_state YY_PROTO(( void ));
+#endif
+#ifndef YY_NO_TOP_STATE
+static int yy_top_state YY_PROTO(( void ));
+#endif
+
+#else
+#define YY_NO_PUSH_STATE 1
+#define YY_NO_POP_STATE 1
+#define YY_NO_TOP_STATE 1
+#endif
+
+#ifdef YY_MALLOC_DECL
+YY_MALLOC_DECL
+#else
+#if __STDC__
+#ifndef __cplusplus
+#include <stdlib.h>
+#endif
+#else
+/* Just try to get by without declaring the routines.  This will fail
+ * miserably on non-ANSI systems for which sizeof(size_t) != sizeof(int)
+ * or sizeof(void*) != sizeof(int).
+ */
+#endif
 #endif
 
 /* Amount of stuff to slurp up with each read. */
@@ -582,11 +576,12 @@ static int input (void );
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
+
 #ifndef ECHO
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO (void) fwrite( yy_policy_backend_parsertext, yy_policy_backend_parserleng, 1, yy_policy_backend_parserout )
+#define ECHO (void) fwrite( yytext, yyleng, 1, yyout )
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -594,35 +589,21 @@ static int input (void );
  */
 #ifndef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
-	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
+	if ( yy_current_buffer->yy_is_interactive ) \
 		{ \
-		int c = '*'; \
-		int n; \
+		int c = '*', n; \
 		for ( n = 0; n < max_size && \
-			     (c = getc( yy_policy_backend_parserin )) != EOF && c != '\n'; ++n ) \
+			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
 		if ( c == '\n' ) \
 			buf[n++] = (char) c; \
-		if ( c == EOF && ferror( yy_policy_backend_parserin ) ) \
+		if ( c == EOF && ferror( yyin ) ) \
 			YY_FATAL_ERROR( "input in flex scanner failed" ); \
 		result = n; \
 		} \
-	else \
-		{ \
-		errno=0; \
-		while ( (result = fread(buf, 1, max_size, yy_policy_backend_parserin))==0 && ferror(yy_policy_backend_parserin)) \
-			{ \
-			if( errno != EINTR) \
-				{ \
-				YY_FATAL_ERROR( "input in flex scanner failed" ); \
-				break; \
-				} \
-			errno=0; \
-			clearerr(yy_policy_backend_parserin); \
-			} \
-		}\
-\
-
+	else if ( ((result = fread( buf, 1, max_size, yyin )) == 0) \
+		  && ferror( yyin ) ) \
+		YY_FATAL_ERROR( "input in flex scanner failed" );
 #endif
 
 /* No semi-colon after return; correct usage is to write "yyterminate();" -
@@ -643,20 +624,14 @@ static int input (void );
 #define YY_FATAL_ERROR(msg) yy_fatal_error( msg )
 #endif
 
-/* end tables serialization structures and prototypes */
-
 /* Default declaration of generated scanner - a define so the user can
  * easily add parameters.
  */
 #ifndef YY_DECL
-#define YY_DECL_IS_OURS 1
+#define YY_DECL int yylex YY_PROTO(( void ))
+#endif
 
-extern int yy_policy_backend_parserlex (void);
-
-#define YY_DECL int yy_policy_backend_parserlex (void)
-#endif /* !YY_DECL */
-
-/* Code executed at the beginning of each rule, after yy_policy_backend_parsertext and yy_policy_backend_parserleng
+/* Code executed at the beginning of each rule, after yytext and yyleng
  * have been set up.
  */
 #ifndef YY_USER_ACTION
@@ -671,66 +646,62 @@ extern int yy_policy_backend_parserlex (void);
 #define YY_RULE_SETUP \
 	YY_USER_ACTION
 
-/** The main scanner function which does all the work.
- */
 YY_DECL
-{
+	{
 	register yy_state_type yy_current_state;
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
-    
+
 #line 39 "backend.l"
 
 
-#line 729 "lex.yy_policy_backend_parser.cc"
+#line 665 "lex.yy_policy_backend_parser.cc"
 
-	if ( !(yy_init) )
+	if ( yy_init )
 		{
-		(yy_init) = 1;
+		yy_init = 0;
 
 #ifdef YY_USER_INIT
 		YY_USER_INIT;
 #endif
 
-		if ( ! (yy_start) )
-			(yy_start) = 1;	/* first start state */
+		if ( ! yy_start )
+			yy_start = 1;	/* first start state */
 
-		if ( ! yy_policy_backend_parserin )
-			yy_policy_backend_parserin = stdin;
+		if ( ! yyin )
+			yyin = stdin;
 
-		if ( ! yy_policy_backend_parserout )
-			yy_policy_backend_parserout = stdout;
+		if ( ! yyout )
+			yyout = stdout;
 
-		if ( ! YY_CURRENT_BUFFER ) {
-			yy_policy_backend_parserensure_buffer_stack ();
-			YY_CURRENT_BUFFER_LVALUE =
-				yy_policy_backend_parser_create_buffer(yy_policy_backend_parserin,YY_BUF_SIZE );
-		}
+		if ( ! yy_current_buffer )
+			yy_current_buffer =
+				yy_create_buffer( yyin, YY_BUF_SIZE );
 
-		yy_policy_backend_parser_load_buffer_state( );
+		yy_load_buffer_state();
 		}
 
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
-		yy_cp = (yy_c_buf_p);
+		yy_cp = yy_c_buf_p;
 
-		/* Support of yy_policy_backend_parsertext. */
-		*yy_cp = (yy_hold_char);
+		/* Support of yytext. */
+		*yy_cp = yy_hold_char;
 
 		/* yy_bp points to the position in yy_ch_buf of the start of
 		 * the current run.
 		 */
 		yy_bp = yy_cp;
 
-		yy_current_state = (yy_start);
+		yy_current_state = yy_start;
 yy_match:
 		do
 			{
 			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
-				(yy_last_accepting_state) = yy_current_state;
-				(yy_last_accepting_cpos) = yy_cp;
+				yy_last_accepting_state = yy_current_state;
+				yy_last_accepting_cpos = yy_cp;
 				}
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
@@ -741,24 +712,30 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_current_state != 138 );
-		yy_cp = (yy_last_accepting_cpos);
-		yy_current_state = (yy_last_accepting_state);
+		while ( yy_base[yy_current_state] != 149 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
+		if ( yy_act == 0 )
+			{ /* have to back up */
+			yy_cp = yy_last_accepting_cpos;
+			yy_current_state = yy_last_accepting_state;
+			yy_act = yy_accept[yy_current_state];
+			}
 
 		YY_DO_BEFORE_ACTION;
 
+
 do_action:	/* This label is used only to access EOF actions. */
+
 
 		switch ( yy_act )
 	{ /* beginning of action switch */
 			case 0: /* must back up */
 			/* undo the effects of YY_DO_BEFORE_ACTION */
-			*yy_cp = (yy_hold_char);
-			yy_cp = (yy_last_accepting_cpos);
-			yy_current_state = (yy_last_accepting_state);
+			*yy_cp = yy_hold_char;
+			yy_cp = yy_last_accepting_cpos;
+			yy_current_state = yy_last_accepting_state;
 			goto yy_find_action;
 
 case 1:
@@ -917,7 +894,6 @@ YY_RULE_SETUP
 { return YY_MUL; }
 	YY_BREAK
 case 32:
-/* rule 32 can match eol */
 YY_RULE_SETUP
 #line 74 "backend.l"
 { _parser_lineno++; return YY_NEWLINE; }
@@ -931,7 +907,7 @@ case 34:
 YY_RULE_SETUP
 #line 78 "backend.l"
 {	
-			yylval.c_str = strdup(yy_policy_backend_parsertext);
+			yylval.c_str = strdup(yytext);
 		  	return YY_ARG;
 			}  
 	YY_BREAK
@@ -946,11 +922,10 @@ YY_RULE_SETUP
 BEGIN(INITIAL);
 	YY_BREAK
 case 37:
-/* rule 37 can match eol */
 YY_RULE_SETUP
 #line 87 "backend.l"
-{ yylval.c_str = strdup(yy_policy_backend_parsertext);
-	 	  _parser_lineno += count_nl(yy_policy_backend_parsertext);	
+{ yylval.c_str = strdup(yytext);
+	 	  _parser_lineno += count_nl(yytext);	
 		  return YY_ARG;
 		}  
 	YY_BREAK
@@ -959,7 +934,7 @@ YY_RULE_SETUP
 #line 92 "backend.l"
 ECHO;
 	YY_BREAK
-#line 1006 "lex.yy_policy_backend_parser.cc"
+#line 944 "lex.yy_policy_backend_parser.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -967,26 +942,26 @@ case YY_STATE_EOF(STR):
 	case YY_END_OF_BUFFER:
 		{
 		/* Amount of text matched not including the EOB char. */
-		int yy_amount_of_matched_text = (int) (yy_cp - (yytext_ptr)) - 1;
+		int yy_amount_of_matched_text = (int) (yy_cp - yytext_ptr) - 1;
 
 		/* Undo the effects of YY_DO_BEFORE_ACTION. */
-		*yy_cp = (yy_hold_char);
+		*yy_cp = yy_hold_char;
 		YY_RESTORE_YY_MORE_OFFSET
 
-		if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW )
+		if ( yy_current_buffer->yy_buffer_status == YY_BUFFER_NEW )
 			{
 			/* We're scanning a new file or input source.  It's
 			 * possible that this happened because the user
-			 * just pointed yy_policy_backend_parserin at a new source and called
-			 * yy_policy_backend_parserlex().  If so, then we have to assure
-			 * consistency between YY_CURRENT_BUFFER and our
+			 * just pointed yyin at a new source and called
+			 * yylex().  If so, then we have to assure
+			 * consistency between yy_current_buffer and our
 			 * globals.  Here is the right place to do so, because
 			 * this is the first action (other than possibly a
 			 * back-up) that will match for the new input source.
 			 */
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yy_policy_backend_parserin;
-			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
+			yy_n_chars = yy_current_buffer->yy_n_chars;
+			yy_current_buffer->yy_input_file = yyin;
+			yy_current_buffer->yy_buffer_status = YY_BUFFER_NORMAL;
 			}
 
 		/* Note that here we test for yy_c_buf_p "<=" to the position
@@ -996,13 +971,13 @@ case YY_STATE_EOF(STR):
 		 * end-of-buffer state).  Contrast this with the test
 		 * in input().
 		 */
-		if ( (yy_c_buf_p) <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] )
+		if ( yy_c_buf_p <= &yy_current_buffer->yy_ch_buf[yy_n_chars] )
 			{ /* This was really a NUL. */
 			yy_state_type yy_next_state;
 
-			(yy_c_buf_p) = (yytext_ptr) + yy_amount_of_matched_text;
+			yy_c_buf_p = yytext_ptr + yy_amount_of_matched_text;
 
-			yy_current_state = yy_get_previous_state(  );
+			yy_current_state = yy_get_previous_state();
 
 			/* Okay, we're now positioned to make the NUL
 			 * transition.  We couldn't have
@@ -1015,42 +990,41 @@ case YY_STATE_EOF(STR):
 
 			yy_next_state = yy_try_NUL_trans( yy_current_state );
 
-			yy_bp = (yytext_ptr) + YY_MORE_ADJ;
+			yy_bp = yytext_ptr + YY_MORE_ADJ;
 
 			if ( yy_next_state )
 				{
 				/* Consume the NUL. */
-				yy_cp = ++(yy_c_buf_p);
+				yy_cp = ++yy_c_buf_p;
 				yy_current_state = yy_next_state;
 				goto yy_match;
 				}
 
 			else
 				{
-				yy_cp = (yy_last_accepting_cpos);
-				yy_current_state = (yy_last_accepting_state);
+				yy_cp = yy_c_buf_p;
 				goto yy_find_action;
 				}
 			}
 
-		else switch ( yy_get_next_buffer(  ) )
+		else switch ( yy_get_next_buffer() )
 			{
 			case EOB_ACT_END_OF_FILE:
 				{
-				(yy_did_buffer_switch_on_eof) = 0;
+				yy_did_buffer_switch_on_eof = 0;
 
-				if ( yy_policy_backend_parserwrap( ) )
+				if ( yywrap() )
 					{
 					/* Note: because we've taken care in
 					 * yy_get_next_buffer() to have set up
-					 * yy_policy_backend_parsertext, we can now set up
+					 * yytext, we can now set up
 					 * yy_c_buf_p so that if some total
 					 * hoser (like flex itself) wants to
 					 * call the scanner after we return the
 					 * YY_NULL, it'll still work - another
 					 * YY_NULL will get returned.
 					 */
-					(yy_c_buf_p) = (yytext_ptr) + YY_MORE_ADJ;
+					yy_c_buf_p = yytext_ptr + YY_MORE_ADJ;
 
 					yy_act = YY_STATE_EOF(YY_START);
 					goto do_action;
@@ -1058,30 +1032,30 @@ case YY_STATE_EOF(STR):
 
 				else
 					{
-					if ( ! (yy_did_buffer_switch_on_eof) )
+					if ( ! yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
 					}
 				break;
 				}
 
 			case EOB_ACT_CONTINUE_SCAN:
-				(yy_c_buf_p) =
-					(yytext_ptr) + yy_amount_of_matched_text;
+				yy_c_buf_p =
+					yytext_ptr + yy_amount_of_matched_text;
 
-				yy_current_state = yy_get_previous_state(  );
+				yy_current_state = yy_get_previous_state();
 
-				yy_cp = (yy_c_buf_p);
-				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
+				yy_cp = yy_c_buf_p;
+				yy_bp = yytext_ptr + YY_MORE_ADJ;
 				goto yy_match;
 
 			case EOB_ACT_LAST_MATCH:
-				(yy_c_buf_p) =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)];
+				yy_c_buf_p =
+				&yy_current_buffer->yy_ch_buf[yy_n_chars];
 
-				yy_current_state = yy_get_previous_state(  );
+				yy_current_state = yy_get_previous_state();
 
-				yy_cp = (yy_c_buf_p);
-				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
+				yy_cp = yy_c_buf_p;
+				yy_bp = yytext_ptr + YY_MORE_ADJ;
 				goto yy_find_action;
 			}
 		break;
@@ -1092,7 +1066,8 @@ case YY_STATE_EOF(STR):
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
-} /* end of yy_policy_backend_parserlex */
+	} /* end of yylex */
+
 
 /* yy_get_next_buffer - try to read in a new buffer
  *
@@ -1101,20 +1076,21 @@ case YY_STATE_EOF(STR):
  *	EOB_ACT_CONTINUE_SCAN - continue scanning from current position
  *	EOB_ACT_END_OF_FILE - end of file
  */
-static int yy_get_next_buffer (void)
-{
-    	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-	register char *source = (yytext_ptr);
+
+static int yy_get_next_buffer()
+	{
+	register char *dest = yy_current_buffer->yy_ch_buf;
+	register char *source = yytext_ptr;
 	register int number_to_move, i;
 	int ret_val;
 
-	if ( (yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] )
+	if ( yy_c_buf_p > &yy_current_buffer->yy_ch_buf[yy_n_chars + 1] )
 		YY_FATAL_ERROR(
 		"fatal flex scanner internal error--end of buffer missed" );
 
-	if ( YY_CURRENT_BUFFER_LVALUE->yy_fill_buffer == 0 )
+	if ( yy_current_buffer->yy_fill_buffer == 0 )
 		{ /* Don't try to fill the buffer, so this is an EOF. */
-		if ( (yy_c_buf_p) - (yytext_ptr) - YY_MORE_ADJ == 1 )
+		if ( yy_c_buf_p - yytext_ptr - YY_MORE_ADJ == 1 )
 			{
 			/* We matched a single character, the EOB, so
 			 * treat this as a final EOF.
@@ -1134,30 +1110,34 @@ static int yy_get_next_buffer (void)
 	/* Try to read more data. */
 
 	/* First move last chars to start of buffer. */
-	number_to_move = (int) ((yy_c_buf_p) - (yytext_ptr)) - 1;
+	number_to_move = (int) (yy_c_buf_p - yytext_ptr) - 1;
 
 	for ( i = 0; i < number_to_move; ++i )
 		*(dest++) = *(source++);
 
-	if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_EOF_PENDING )
+	if ( yy_current_buffer->yy_buffer_status == YY_BUFFER_EOF_PENDING )
 		/* don't do the read, it's not guaranteed to return an EOF,
 		 * just force an EOF
 		 */
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars) = 0;
+		yy_current_buffer->yy_n_chars = yy_n_chars = 0;
 
 	else
 		{
-			int num_to_read =
-			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
+		int num_to_read =
+			yy_current_buffer->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
 			{ /* Not enough room in the buffer - grow it. */
+#ifdef YY_USES_REJECT
+			YY_FATAL_ERROR(
+"input buffer overflow, can't enlarge buffer because scanner uses REJECT" );
+#else
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
+			YY_BUFFER_STATE b = yy_current_buffer;
 
 			int yy_c_buf_p_offset =
-				(int) ((yy_c_buf_p) - b->yy_ch_buf);
+				(int) (yy_c_buf_p - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
@@ -1170,7 +1150,8 @@ static int yy_get_next_buffer (void)
 
 				b->yy_ch_buf = (char *)
 					/* Include room in for 2 EOB chars. */
-					yy_policy_backend_parserrealloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+					yy_flex_realloc( (void *) b->yy_ch_buf,
+							 b->yy_buf_size + 2 );
 				}
 			else
 				/* Can't grow it, we don't own it. */
@@ -1180,35 +1161,35 @@ static int yy_get_next_buffer (void)
 				YY_FATAL_ERROR(
 				"fatal error - scanner input buffer overflow" );
 
-			(yy_c_buf_p) = &b->yy_ch_buf[yy_c_buf_p_offset];
+			yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
 
-			num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
+			num_to_read = yy_current_buffer->yy_buf_size -
 						number_to_move - 1;
-
+#endif
 			}
 
 		if ( num_to_read > YY_READ_BUF_SIZE )
 			num_to_read = YY_READ_BUF_SIZE;
 
 		/* Read in more data. */
-		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), num_to_read );
+		YY_INPUT( (&yy_current_buffer->yy_ch_buf[number_to_move]),
+			yy_n_chars, num_to_read );
 
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+		yy_current_buffer->yy_n_chars = yy_n_chars;
 		}
 
-	if ( (yy_n_chars) == 0 )
+	if ( yy_n_chars == 0 )
 		{
 		if ( number_to_move == YY_MORE_ADJ )
 			{
 			ret_val = EOB_ACT_END_OF_FILE;
-			yy_policy_backend_parserrestart(yy_policy_backend_parserin  );
+			yyrestart( yyin );
 			}
 
 		else
 			{
 			ret_val = EOB_ACT_LAST_MATCH;
-			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status =
+			yy_current_buffer->yy_buffer_status =
 				YY_BUFFER_EOF_PENDING;
 			}
 		}
@@ -1216,31 +1197,32 @@ static int yy_get_next_buffer (void)
 	else
 		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-	(yy_n_chars) += number_to_move;
-	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] = YY_END_OF_BUFFER_CHAR;
-	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] = YY_END_OF_BUFFER_CHAR;
+	yy_n_chars += number_to_move;
+	yy_current_buffer->yy_ch_buf[yy_n_chars] = YY_END_OF_BUFFER_CHAR;
+	yy_current_buffer->yy_ch_buf[yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
 
-	(yytext_ptr) = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
+	yytext_ptr = &yy_current_buffer->yy_ch_buf[0];
 
 	return ret_val;
-}
+	}
+
 
 /* yy_get_previous_state - get the state just before the EOB char was reached */
 
-    static yy_state_type yy_get_previous_state (void)
-{
+static yy_state_type yy_get_previous_state()
+	{
 	register yy_state_type yy_current_state;
 	register char *yy_cp;
-    
-	yy_current_state = (yy_start);
 
-	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
+	yy_current_state = yy_start;
+
+	for ( yy_cp = yytext_ptr + YY_MORE_ADJ; yy_cp < yy_c_buf_p; ++yy_cp )
 		{
 		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
 		if ( yy_accept[yy_current_state] )
 			{
-			(yy_last_accepting_state) = yy_current_state;
-			(yy_last_accepting_cpos) = yy_cp;
+			yy_last_accepting_state = yy_current_state;
+			yy_last_accepting_cpos = yy_cp;
 			}
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
@@ -1252,23 +1234,30 @@ static int yy_get_next_buffer (void)
 		}
 
 	return yy_current_state;
-}
+	}
+
 
 /* yy_try_NUL_trans - try to make a transition on the NUL character
  *
  * synopsis
  *	next_state = yy_try_NUL_trans( current_state );
  */
-    static yy_state_type yy_try_NUL_trans  (yy_state_type yy_current_state )
-{
+
+#ifdef YY_USE_PROTOS
+static yy_state_type yy_try_NUL_trans( yy_state_type yy_current_state )
+#else
+static yy_state_type yy_try_NUL_trans( yy_current_state )
+yy_state_type yy_current_state;
+#endif
+	{
 	register int yy_is_jam;
-    	register char *yy_cp = (yy_c_buf_p);
+	register char *yy_cp = yy_c_buf_p;
 
 	register YY_CHAR yy_c = 1;
 	if ( yy_accept[yy_current_state] )
 		{
-		(yy_last_accepting_state) = yy_current_state;
-		(yy_last_accepting_cpos) = yy_cp;
+		yy_last_accepting_state = yy_current_state;
+		yy_last_accepting_cpos = yy_cp;
 		}
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
@@ -1280,36 +1269,80 @@ static int yy_get_next_buffer (void)
 	yy_is_jam = (yy_current_state == 138);
 
 	return yy_is_jam ? 0 : yy_current_state;
-}
+	}
 
-#ifndef YY_NO_INPUT
-#ifdef __cplusplus
-    static int yyinput (void)
+
+#ifndef YY_NO_UNPUT
+#ifdef YY_USE_PROTOS
+static void yyunput( int c, register char *yy_bp )
 #else
-    static int input  (void)
+static void yyunput( c, yy_bp )
+int c;
+register char *yy_bp;
 #endif
+	{
+	register char *yy_cp = yy_c_buf_p;
 
-{
+	/* undo effects of setting up yytext */
+	*yy_cp = yy_hold_char;
+
+	if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
+		{ /* need to shift things up to make room */
+		/* +2 for EOB chars. */
+		register int number_to_move = yy_n_chars + 2;
+		register char *dest = &yy_current_buffer->yy_ch_buf[
+					yy_current_buffer->yy_buf_size + 2];
+		register char *source =
+				&yy_current_buffer->yy_ch_buf[number_to_move];
+
+		while ( source > yy_current_buffer->yy_ch_buf )
+			*--dest = *--source;
+
+		yy_cp += (int) (dest - source);
+		yy_bp += (int) (dest - source);
+		yy_current_buffer->yy_n_chars =
+			yy_n_chars = yy_current_buffer->yy_buf_size;
+
+		if ( yy_cp < yy_current_buffer->yy_ch_buf + 2 )
+			YY_FATAL_ERROR( "flex scanner push-back overflow" );
+		}
+
+	*--yy_cp = (char) c;
+
+
+	yytext_ptr = yy_bp;
+	yy_hold_char = *yy_cp;
+	yy_c_buf_p = yy_cp;
+	}
+#endif	/* ifndef YY_NO_UNPUT */
+
+
+#ifdef __cplusplus
+static int yyinput()
+#else
+static int input()
+#endif
+	{
 	int c;
-    
-	*(yy_c_buf_p) = (yy_hold_char);
 
-	if ( *(yy_c_buf_p) == YY_END_OF_BUFFER_CHAR )
+	*yy_c_buf_p = yy_hold_char;
+
+	if ( *yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
 		{
 		/* yy_c_buf_p now points to the character we want to return.
 		 * If this occurs *before* the EOB characters, then it's a
 		 * valid NUL; if not, then we've hit the end of the buffer.
 		 */
-		if ( (yy_c_buf_p) < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars)] )
+		if ( yy_c_buf_p < &yy_current_buffer->yy_ch_buf[yy_n_chars] )
 			/* This was really a NUL. */
-			*(yy_c_buf_p) = '\0';
+			*yy_c_buf_p = '\0';
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
-			++(yy_c_buf_p);
+			int offset = yy_c_buf_p - yytext_ptr;
+			++yy_c_buf_p;
 
-			switch ( yy_get_next_buffer(  ) )
+			switch ( yy_get_next_buffer() )
 				{
 				case EOB_ACT_LAST_MATCH:
 					/* This happens because yy_g_n_b()
@@ -1323,16 +1356,16 @@ static int yy_get_next_buffer (void)
 					 */
 
 					/* Reset buffer status. */
-					yy_policy_backend_parserrestart(yy_policy_backend_parserin );
+					yyrestart( yyin );
 
-					/*FALLTHROUGH*/
+					/* fall through */
 
 				case EOB_ACT_END_OF_FILE:
 					{
-					if ( yy_policy_backend_parserwrap( ) )
+					if ( yywrap() )
 						return EOF;
 
-					if ( ! (yy_did_buffer_switch_on_eof) )
+					if ( ! yy_did_buffer_switch_on_eof )
 						YY_NEW_FILE;
 #ifdef __cplusplus
 					return yyinput();
@@ -1342,165 +1375,172 @@ static int yy_get_next_buffer (void)
 					}
 
 				case EOB_ACT_CONTINUE_SCAN:
-					(yy_c_buf_p) = (yytext_ptr) + offset;
+					yy_c_buf_p = yytext_ptr + offset;
 					break;
 				}
 			}
 		}
 
-	c = *(unsigned char *) (yy_c_buf_p);	/* cast for 8-bit char's */
-	*(yy_c_buf_p) = '\0';	/* preserve yy_policy_backend_parsertext */
-	(yy_hold_char) = *++(yy_c_buf_p);
+	c = *(unsigned char *) yy_c_buf_p;	/* cast for 8-bit char's */
+	*yy_c_buf_p = '\0';	/* preserve yytext */
+	yy_hold_char = *++yy_c_buf_p;
+
 
 	return c;
-}
-#endif	/* ifndef YY_NO_INPUT */
-
-/** Immediately switch to a different input stream.
- * @param input_file A readable stream.
- * 
- * @note This function does not reset the start condition to @c INITIAL .
- */
-    void yy_policy_backend_parserrestart  (FILE * input_file )
-{
-    
-	if ( ! YY_CURRENT_BUFFER ){
-        yy_policy_backend_parserensure_buffer_stack ();
-		YY_CURRENT_BUFFER_LVALUE =
-            yy_policy_backend_parser_create_buffer(yy_policy_backend_parserin,YY_BUF_SIZE );
 	}
 
-	yy_policy_backend_parser_init_buffer(YY_CURRENT_BUFFER,input_file );
-	yy_policy_backend_parser_load_buffer_state( );
-}
 
-/** Switch to a different input buffer.
- * @param new_buffer The new input buffer.
- * 
- */
-    void yy_policy_backend_parser_switch_to_buffer  (YY_BUFFER_STATE  new_buffer )
-{
-    
-	/* TODO. We should be able to replace this entire function body
-	 * with
-	 *		yy_policy_backend_parserpop_buffer_state();
-	 *		yy_policy_backend_parserpush_buffer_state(new_buffer);
-     */
-	yy_policy_backend_parserensure_buffer_stack ();
-	if ( YY_CURRENT_BUFFER == new_buffer )
+#ifdef YY_USE_PROTOS
+void yyrestart( FILE *input_file )
+#else
+void yyrestart( input_file )
+FILE *input_file;
+#endif
+	{
+	if ( ! yy_current_buffer )
+		yy_current_buffer = yy_create_buffer( yyin, YY_BUF_SIZE );
+
+	yy_init_buffer( yy_current_buffer, input_file );
+	yy_load_buffer_state();
+	}
+
+
+#ifdef YY_USE_PROTOS
+void yy_switch_to_buffer( YY_BUFFER_STATE new_buffer )
+#else
+void yy_switch_to_buffer( new_buffer )
+YY_BUFFER_STATE new_buffer;
+#endif
+	{
+	if ( yy_current_buffer == new_buffer )
 		return;
 
-	if ( YY_CURRENT_BUFFER )
+	if ( yy_current_buffer )
 		{
 		/* Flush out information for old buffer. */
-		*(yy_c_buf_p) = (yy_hold_char);
-		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+		*yy_c_buf_p = yy_hold_char;
+		yy_current_buffer->yy_buf_pos = yy_c_buf_p;
+		yy_current_buffer->yy_n_chars = yy_n_chars;
 		}
 
-	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-	yy_policy_backend_parser_load_buffer_state( );
+	yy_current_buffer = new_buffer;
+	yy_load_buffer_state();
 
 	/* We don't actually know whether we did this switch during
-	 * EOF (yy_policy_backend_parserwrap()) processing, but the only time this flag
-	 * is looked at is after yy_policy_backend_parserwrap() is called, so it's safe
+	 * EOF (yywrap()) processing, but the only time this flag
+	 * is looked at is after yywrap() is called, so it's safe
 	 * to go ahead and always set it.
 	 */
-	(yy_did_buffer_switch_on_eof) = 1;
-}
+	yy_did_buffer_switch_on_eof = 1;
+	}
 
-static void yy_policy_backend_parser_load_buffer_state  (void)
-{
-    	(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-	(yytext_ptr) = (yy_c_buf_p) = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
-	yy_policy_backend_parserin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
-	(yy_hold_char) = *(yy_c_buf_p);
-}
 
-/** Allocate and initialize an input buffer state.
- * @param file A readable stream.
- * @param size The character buffer size in bytes. When in doubt, use @c YY_BUF_SIZE.
- * 
- * @return the allocated buffer state.
- */
-    YY_BUFFER_STATE yy_policy_backend_parser_create_buffer  (FILE * file, int  size )
-{
+#ifdef YY_USE_PROTOS
+void yy_load_buffer_state( void )
+#else
+void yy_load_buffer_state()
+#endif
+	{
+	yy_n_chars = yy_current_buffer->yy_n_chars;
+	yytext_ptr = yy_c_buf_p = yy_current_buffer->yy_buf_pos;
+	yyin = yy_current_buffer->yy_input_file;
+	yy_hold_char = *yy_c_buf_p;
+	}
+
+
+#ifdef YY_USE_PROTOS
+YY_BUFFER_STATE yy_create_buffer( FILE *file, int size )
+#else
+YY_BUFFER_STATE yy_create_buffer( file, size )
+FILE *file;
+int size;
+#endif
+	{
 	YY_BUFFER_STATE b;
-    
-	b = (YY_BUFFER_STATE) yy_policy_backend_parseralloc(sizeof( struct yy_buffer_state )  );
+
+	b = (YY_BUFFER_STATE) yy_flex_alloc( sizeof( struct yy_buffer_state ) );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in yy_policy_backend_parser_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_buf_size = size;
 
 	/* yy_ch_buf has to be 2 characters longer than the size given because
 	 * we need to put in 2 end-of-buffer characters.
 	 */
-	b->yy_ch_buf = (char *) yy_policy_backend_parseralloc(b->yy_buf_size + 2  );
+	b->yy_ch_buf = (char *) yy_flex_alloc( b->yy_buf_size + 2 );
 	if ( ! b->yy_ch_buf )
-		YY_FATAL_ERROR( "out of dynamic memory in yy_policy_backend_parser_create_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
 	b->yy_is_our_buffer = 1;
 
-	yy_policy_backend_parser_init_buffer(b,file );
+	yy_init_buffer( b, file );
 
 	return b;
-}
+	}
 
-/** Destroy the buffer.
- * @param b a buffer created with yy_policy_backend_parser_create_buffer()
- * 
- */
-    void yy_policy_backend_parser_delete_buffer (YY_BUFFER_STATE  b )
-{
-    
+
+#ifdef YY_USE_PROTOS
+void yy_delete_buffer( YY_BUFFER_STATE b )
+#else
+void yy_delete_buffer( b )
+YY_BUFFER_STATE b;
+#endif
+	{
 	if ( ! b )
 		return;
 
-	if ( b == YY_CURRENT_BUFFER ) /* Not sure if we should pop here. */
-		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
+	if ( b == yy_current_buffer )
+		yy_current_buffer = (YY_BUFFER_STATE) 0;
 
 	if ( b->yy_is_our_buffer )
-		yy_policy_backend_parserfree((void *) b->yy_ch_buf  );
+		yy_flex_free( (void *) b->yy_ch_buf );
 
-	yy_policy_backend_parserfree((void *) b  );
-}
+	yy_flex_free( (void *) b );
+	}
 
-/* Initializes or reinitializes a buffer.
- * This function is sometimes called more than once on the same buffer,
- * such as during a yy_policy_backend_parserrestart() or at EOF.
- */
-    static void yy_policy_backend_parser_init_buffer  (YY_BUFFER_STATE  b, FILE * file )
 
-{
-	int oerrno = errno;
-    
-	yy_policy_backend_parser_flush_buffer(b );
+#ifndef YY_ALWAYS_INTERACTIVE
+#ifndef YY_NEVER_INTERACTIVE
+extern int isatty YY_PROTO(( int ));
+#endif
+#endif
+
+#ifdef YY_USE_PROTOS
+void yy_init_buffer( YY_BUFFER_STATE b, FILE *file )
+#else
+void yy_init_buffer( b, file )
+YY_BUFFER_STATE b;
+FILE *file;
+#endif
+
+
+	{
+	yy_flush_buffer( b );
 
 	b->yy_input_file = file;
 	b->yy_fill_buffer = 1;
 
-    /* If b is the current buffer, then yy_policy_backend_parser_init_buffer was _probably_
-     * called from yy_policy_backend_parserrestart() or through yy_get_next_buffer.
-     * In that case, we don't want to reset the lineno or column.
-     */
-    if (b != YY_CURRENT_BUFFER){
-        b->yy_bs_lineno = 1;
-        b->yy_bs_column = 0;
-    }
+#if YY_ALWAYS_INTERACTIVE
+	b->yy_is_interactive = 1;
+#else
+#if YY_NEVER_INTERACTIVE
+	b->yy_is_interactive = 0;
+#else
+	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+#endif
+#endif
+	}
 
-        b->yy_is_interactive = 0;
-    
-	errno = oerrno;
-}
 
-/** Discard all buffered characters. On the next scan, YY_INPUT will be called.
- * @param b the buffer state to be flushed, usually @c YY_CURRENT_BUFFER.
- * 
- */
-    void yy_policy_backend_parser_flush_buffer (YY_BUFFER_STATE  b )
-{
-    	if ( ! b )
+#ifdef YY_USE_PROTOS
+void yy_flush_buffer( YY_BUFFER_STATE b )
+#else
+void yy_flush_buffer( b )
+YY_BUFFER_STATE b;
+#endif
+
+	{
+	if ( ! b )
 		return;
 
 	b->yy_n_chars = 0;
@@ -1517,123 +1557,31 @@ static void yy_policy_backend_parser_load_buffer_state  (void)
 	b->yy_at_bol = 1;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	if ( b == YY_CURRENT_BUFFER )
-		yy_policy_backend_parser_load_buffer_state( );
-}
-
-/** Pushes the new state onto the stack. The new state becomes
- *  the current state. This function will allocate the stack
- *  if necessary.
- *  @param new_buffer The new state.
- *  
- */
-void yy_policy_backend_parserpush_buffer_state (YY_BUFFER_STATE new_buffer )
-{
-    	if (new_buffer == NULL)
-		return;
-
-	yy_policy_backend_parserensure_buffer_stack();
-
-	/* This block is copied from yy_policy_backend_parser_switch_to_buffer. */
-	if ( YY_CURRENT_BUFFER )
-		{
-		/* Flush out information for old buffer. */
-		*(yy_c_buf_p) = (yy_hold_char);
-		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
-		}
-
-	/* Only push if top exists. Otherwise, replace top. */
-	if (YY_CURRENT_BUFFER)
-		(yy_buffer_stack_top)++;
-	YY_CURRENT_BUFFER_LVALUE = new_buffer;
-
-	/* copied from yy_policy_backend_parser_switch_to_buffer. */
-	yy_policy_backend_parser_load_buffer_state( );
-	(yy_did_buffer_switch_on_eof) = 1;
-}
-
-/** Removes and deletes the top of the stack, if present.
- *  The next element becomes the new top.
- *  
- */
-void yy_policy_backend_parserpop_buffer_state (void)
-{
-    	if (!YY_CURRENT_BUFFER)
-		return;
-
-	yy_policy_backend_parser_delete_buffer(YY_CURRENT_BUFFER );
-	YY_CURRENT_BUFFER_LVALUE = NULL;
-	if ((yy_buffer_stack_top) > 0)
-		--(yy_buffer_stack_top);
-
-	if (YY_CURRENT_BUFFER) {
-		yy_policy_backend_parser_load_buffer_state( );
-		(yy_did_buffer_switch_on_eof) = 1;
-	}
-}
-
-/* Allocates the stack if it does not exist.
- *  Guarantees space for at least one push.
- */
-static void yy_policy_backend_parserensure_buffer_stack (void)
-{
-	int num_to_alloc;
-    
-	if (!(yy_buffer_stack)) {
-
-		/* First allocation is just for 2 elements, since we don't know if this
-		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
-		 * immediate realloc on the next call.
-         */
-		num_to_alloc = 1;
-		(yy_buffer_stack) = (struct yy_buffer_state**)yy_policy_backend_parseralloc
-								(num_to_alloc * sizeof(struct yy_buffer_state*)
-								);
-		
-		memset((yy_buffer_stack), 0, num_to_alloc * sizeof(struct yy_buffer_state*));
-				
-		(yy_buffer_stack_max) = num_to_alloc;
-		(yy_buffer_stack_top) = 0;
-		return;
+	if ( b == yy_current_buffer )
+		yy_load_buffer_state();
 	}
 
-	if ((yy_buffer_stack_top) >= ((yy_buffer_stack_max)) - 1){
 
-		/* Increase the buffer to prepare for a possible push. */
-		int grow_size = 8 /* arbitrary grow size */;
-
-		num_to_alloc = (yy_buffer_stack_max) + grow_size;
-		(yy_buffer_stack) = (struct yy_buffer_state**)yy_policy_backend_parserrealloc
-								((yy_buffer_stack),
-								num_to_alloc * sizeof(struct yy_buffer_state*)
-								);
-
-		/* zero only the new slots.*/
-		memset((yy_buffer_stack) + (yy_buffer_stack_max), 0, grow_size * sizeof(struct yy_buffer_state*));
-		(yy_buffer_stack_max) = num_to_alloc;
-	}
-}
-
-/** Setup the input buffer state to scan directly from a user-specified character buffer.
- * @param base the character buffer
- * @param size the size in bytes of the character buffer
- * 
- * @return the newly allocated buffer state object. 
- */
-YY_BUFFER_STATE yy_policy_backend_parser_scan_buffer  (char * base, yy_size_t  size )
-{
+#ifndef YY_NO_SCAN_BUFFER
+#ifdef YY_USE_PROTOS
+YY_BUFFER_STATE yy_scan_buffer( char *base, yy_size_t size )
+#else
+YY_BUFFER_STATE yy_scan_buffer( base, size )
+char *base;
+yy_size_t size;
+#endif
+	{
 	YY_BUFFER_STATE b;
-    
+
 	if ( size < 2 ||
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
 		return 0;
 
-	b = (YY_BUFFER_STATE) yy_policy_backend_parseralloc(sizeof( struct yy_buffer_state )  );
+	b = (YY_BUFFER_STATE) yy_flex_alloc( sizeof( struct yy_buffer_state ) );
 	if ( ! b )
-		YY_FATAL_ERROR( "out of dynamic memory in yy_policy_backend_parser_scan_buffer()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_buffer()" );
 
 	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
@@ -1645,53 +1593,58 @@ YY_BUFFER_STATE yy_policy_backend_parser_scan_buffer  (char * base, yy_size_t  s
 	b->yy_fill_buffer = 0;
 	b->yy_buffer_status = YY_BUFFER_NEW;
 
-	yy_policy_backend_parser_switch_to_buffer(b  );
+	yy_switch_to_buffer( b );
 
 	return b;
-}
+	}
+#endif
 
-/** Setup the input buffer state to scan a string. The next call to yy_policy_backend_parserlex() will
- * scan from a @e copy of @a str.
- * @param str a NUL-terminated string to scan
- * 
- * @return the newly allocated buffer state object.
- * @note If you want to scan bytes that may contain NUL values, then use
- *       yy_policy_backend_parser_scan_bytes() instead.
- */
-YY_BUFFER_STATE yy_policy_backend_parser_scan_string (yyconst char * yystr )
-{
-    
-	return yy_policy_backend_parser_scan_bytes(yystr,strlen(yystr) );
-}
 
-/** Setup the input buffer state to scan the given bytes. The next call to yy_policy_backend_parserlex() will
- * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
- * 
- * @return the newly allocated buffer state object.
- */
-YY_BUFFER_STATE yy_policy_backend_parser_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
-{
+#ifndef YY_NO_SCAN_STRING
+#ifdef YY_USE_PROTOS
+YY_BUFFER_STATE yy_scan_string( yyconst char *yy_str )
+#else
+YY_BUFFER_STATE yy_scan_string( yy_str )
+yyconst char *yy_str;
+#endif
+	{
+	int len;
+	for ( len = 0; yy_str[len]; ++len )
+		;
+
+	return yy_scan_bytes( yy_str, len );
+	}
+#endif
+
+
+#ifndef YY_NO_SCAN_BYTES
+#ifdef YY_USE_PROTOS
+YY_BUFFER_STATE yy_scan_bytes( yyconst char *bytes, int len )
+#else
+YY_BUFFER_STATE yy_scan_bytes( bytes, len )
+yyconst char *bytes;
+int len;
+#endif
+	{
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
 	int i;
-    
+
 	/* Get memory for full buffer, including space for trailing EOB's. */
-	n = _yybytes_len + 2;
-	buf = (char *) yy_policy_backend_parseralloc(n  );
+	n = len + 2;
+	buf = (char *) yy_flex_alloc( n );
 	if ( ! buf )
-		YY_FATAL_ERROR( "out of dynamic memory in yy_policy_backend_parser_scan_bytes()" );
+		YY_FATAL_ERROR( "out of dynamic memory in yy_scan_bytes()" );
 
-	for ( i = 0; i < _yybytes_len; ++i )
-		buf[i] = yybytes[i];
+	for ( i = 0; i < len; ++i )
+		buf[i] = bytes[i];
 
-	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
+	buf[len] = buf[len+1] = YY_END_OF_BUFFER_CHAR;
 
-	b = yy_policy_backend_parser_scan_buffer(buf,n );
+	b = yy_scan_buffer( buf, n );
 	if ( ! b )
-		YY_FATAL_ERROR( "bad buffer in yy_policy_backend_parser_scan_bytes()" );
+		YY_FATAL_ERROR( "bad buffer in yy_scan_bytes()" );
 
 	/* It's okay to grow etc. this buffer, and we should throw it
 	 * away when we're done.
@@ -1699,17 +1652,78 @@ YY_BUFFER_STATE yy_policy_backend_parser_scan_bytes  (yyconst char * yybytes, in
 	b->yy_is_our_buffer = 1;
 
 	return b;
-}
+	}
+#endif
+
+
+#ifndef YY_NO_PUSH_STATE
+#ifdef YY_USE_PROTOS
+static void yy_push_state( int new_state )
+#else
+static void yy_push_state( new_state )
+int new_state;
+#endif
+	{
+	if ( yy_start_stack_ptr >= yy_start_stack_depth )
+		{
+		yy_size_t new_size;
+
+		yy_start_stack_depth += YY_START_STACK_INCR;
+		new_size = yy_start_stack_depth * sizeof( int );
+
+		if ( ! yy_start_stack )
+			yy_start_stack = (int *) yy_flex_alloc( new_size );
+
+		else
+			yy_start_stack = (int *) yy_flex_realloc(
+					(void *) yy_start_stack, new_size );
+
+		if ( ! yy_start_stack )
+			YY_FATAL_ERROR(
+			"out of memory expanding start-condition stack" );
+		}
+
+	yy_start_stack[yy_start_stack_ptr++] = YY_START;
+
+	BEGIN(new_state);
+	}
+#endif
+
+
+#ifndef YY_NO_POP_STATE
+static void yy_pop_state()
+	{
+	if ( --yy_start_stack_ptr < 0 )
+		YY_FATAL_ERROR( "start-condition stack underflow" );
+
+	BEGIN(yy_start_stack[yy_start_stack_ptr]);
+	}
+#endif
+
+
+#ifndef YY_NO_TOP_STATE
+static int yy_top_state()
+	{
+	return yy_start_stack[yy_start_stack_ptr - 1];
+	}
+#endif
 
 #ifndef YY_EXIT_FAILURE
 #define YY_EXIT_FAILURE 2
 #endif
 
-static void yy_fatal_error (yyconst char* msg )
-{
-    	(void) fprintf( stderr, "%s\n", msg );
+#ifdef YY_USE_PROTOS
+static void yy_fatal_error( yyconst char msg[] )
+#else
+static void yy_fatal_error( msg )
+char msg[];
+#endif
+	{
+	(void) fprintf( stderr, "%s\n", msg );
 	exit( YY_EXIT_FAILURE );
-}
+	}
+
+
 
 /* Redefine yyless() so it works in section 3 code. */
 
@@ -1717,178 +1731,69 @@ static void yy_fatal_error (yyconst char* msg )
 #define yyless(n) \
 	do \
 		{ \
-		/* Undo effects of setting up yy_policy_backend_parsertext. */ \
-        int yyless_macro_arg = (n); \
-        YY_LESS_LINENO(yyless_macro_arg);\
-		yy_policy_backend_parsertext[yy_policy_backend_parserleng] = (yy_hold_char); \
-		(yy_c_buf_p) = yy_policy_backend_parsertext + yyless_macro_arg; \
-		(yy_hold_char) = *(yy_c_buf_p); \
-		*(yy_c_buf_p) = '\0'; \
-		yy_policy_backend_parserleng = yyless_macro_arg; \
+		/* Undo effects of setting up yytext. */ \
+		yytext[yyleng] = yy_hold_char; \
+		yy_c_buf_p = yytext + n; \
+		yy_hold_char = *yy_c_buf_p; \
+		*yy_c_buf_p = '\0'; \
+		yyleng = n; \
 		} \
 	while ( 0 )
 
-/* Accessor  methods (get/set functions) to struct members. */
 
-/** Get the current line number.
- * 
- */
-int yy_policy_backend_parserget_lineno  (void)
-{
-        
-    return yy_policy_backend_parserlineno;
-}
-
-/** Get the input stream.
- * 
- */
-FILE *yy_policy_backend_parserget_in  (void)
-{
-        return yy_policy_backend_parserin;
-}
-
-/** Get the output stream.
- * 
- */
-FILE *yy_policy_backend_parserget_out  (void)
-{
-        return yy_policy_backend_parserout;
-}
-
-/** Get the length of the current token.
- * 
- */
-int yy_policy_backend_parserget_leng  (void)
-{
-        return yy_policy_backend_parserleng;
-}
-
-/** Get the current token.
- * 
- */
-
-char *yy_policy_backend_parserget_text  (void)
-{
-        return yy_policy_backend_parsertext;
-}
-
-/** Set the current line number.
- * @param line_number
- * 
- */
-void yy_policy_backend_parserset_lineno (int  line_number )
-{
-    
-    yy_policy_backend_parserlineno = line_number;
-}
-
-/** Set the input stream. This does not discard the current
- * input buffer.
- * @param in_str A readable stream.
- * 
- * @see yy_policy_backend_parser_switch_to_buffer
- */
-void yy_policy_backend_parserset_in (FILE *  in_str )
-{
-        yy_policy_backend_parserin = in_str ;
-}
-
-void yy_policy_backend_parserset_out (FILE *  out_str )
-{
-        yy_policy_backend_parserout = out_str ;
-}
-
-int yy_policy_backend_parserget_debug  (void)
-{
-        return yy_policy_backend_parser_flex_debug;
-}
-
-void yy_policy_backend_parserset_debug (int  bdebug )
-{
-        yy_policy_backend_parser_flex_debug = bdebug ;
-}
-
-static int yy_init_globals (void)
-{
-        /* Initialization is the same as for the non-reentrant scanner.
-     * This function is called from yy_policy_backend_parserlex_destroy(), so don't allocate here.
-     */
-
-    (yy_buffer_stack) = 0;
-    (yy_buffer_stack_top) = 0;
-    (yy_buffer_stack_max) = 0;
-    (yy_c_buf_p) = (char *) 0;
-    (yy_init) = 0;
-    (yy_start) = 0;
-
-/* Defined in main.c */
-#ifdef YY_STDINIT
-    yy_policy_backend_parserin = stdin;
-    yy_policy_backend_parserout = stdout;
-#else
-    yy_policy_backend_parserin = (FILE *) 0;
-    yy_policy_backend_parserout = (FILE *) 0;
-#endif
-
-    /* For future reference: Set errno on error, since we are called by
-     * yy_policy_backend_parserlex_init()
-     */
-    return 0;
-}
-
-/* yy_policy_backend_parserlex_destroy is for both reentrant and non-reentrant scanners. */
-int yy_policy_backend_parserlex_destroy  (void)
-{
-    
-    /* Pop the buffer stack, destroying each element. */
-	while(YY_CURRENT_BUFFER){
-		yy_policy_backend_parser_delete_buffer(YY_CURRENT_BUFFER  );
-		YY_CURRENT_BUFFER_LVALUE = NULL;
-		yy_policy_backend_parserpop_buffer_state();
-	}
-
-	/* Destroy the stack itself. */
-	yy_policy_backend_parserfree((yy_buffer_stack) );
-	(yy_buffer_stack) = NULL;
-
-    /* Reset the globals. This is important in a non-reentrant scanner so the next time
-     * yy_policy_backend_parserlex() is called, initialization will occur. */
-    yy_init_globals( );
-
-    return 0;
-}
-
-/*
- * Internal utility routines.
- */
+/* Internal utility routines. */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
-{
+#ifdef YY_USE_PROTOS
+static void yy_flex_strncpy( char *s1, yyconst char *s2, int n )
+#else
+static void yy_flex_strncpy( s1, s2, n )
+char *s1;
+yyconst char *s2;
+int n;
+#endif
+	{
 	register int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
-}
+	}
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (yyconst char * s )
-{
+#ifdef YY_USE_PROTOS
+static int yy_flex_strlen( yyconst char *s )
+#else
+static int yy_flex_strlen( s )
+yyconst char *s;
+#endif
+	{
 	register int n;
 	for ( n = 0; s[n]; ++n )
 		;
 
 	return n;
-}
+	}
 #endif
 
-void *yy_policy_backend_parseralloc (yy_size_t  size )
-{
-	return (void *) malloc( size );
-}
 
-void *yy_policy_backend_parserrealloc  (void * ptr, yy_size_t  size )
-{
+#ifdef YY_USE_PROTOS
+static void *yy_flex_alloc( yy_size_t size )
+#else
+static void *yy_flex_alloc( size )
+yy_size_t size;
+#endif
+	{
+	return (void *) malloc( size );
+	}
+
+#ifdef YY_USE_PROTOS
+static void *yy_flex_realloc( void *ptr, yy_size_t size )
+#else
+static void *yy_flex_realloc( ptr, size )
+void *ptr;
+yy_size_t size;
+#endif
+	{
 	/* The cast to (char *) in the following accommodates both
 	 * implementations that use char* generic pointers, and those
 	 * that use void* generic pointers.  It works with the latter
@@ -1897,17 +1802,26 @@ void *yy_policy_backend_parserrealloc  (void * ptr, yy_size_t  size )
 	 * as though doing an assignment.
 	 */
 	return (void *) realloc( (char *) ptr, size );
-}
+	}
 
-void yy_policy_backend_parserfree (void * ptr )
-{
-	free( (char *) ptr );	/* see yy_policy_backend_parserrealloc() for (char *) cast */
-}
+#ifdef YY_USE_PROTOS
+static void yy_flex_free( void *ptr )
+#else
+static void yy_flex_free( ptr )
+void *ptr;
+#endif
+	{
+	free( ptr );
+	}
 
-#define YYTABLES_NAME "yytables"
-
+#if YY_MAIN
+int main()
+	{
+	yylex();
+	return 0;
+	}
+#endif
 #line 92 "backend.l"
-
 
 
 void yyerror(const char *m)
@@ -1915,8 +1829,8 @@ void yyerror(const char *m)
         ostringstream oss;
 
         oss << "Error on line " <<  _parser_lineno << " near (";
-        for(int i = 0; i < yy_policy_backend_parserleng; i++)
-                oss << yy_policy_backend_parsertext[i];
+        for(int i = 0; i < yyleng; i++)
+                oss << yytext[i];
         oss << "): " << m;
 
         _last_error = oss.str();
@@ -1929,7 +1843,7 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 					    string& outerr)
 {
 
-	YY_BUFFER_STATE yybuffstate = yy_policy_backend_parser_scan_string(conf.c_str());
+	YY_BUFFER_STATE yybuffstate = yy_scan_string(conf.c_str());
 	
 	_last_error = "No error";
 	_parser_lineno = 1;
@@ -1942,7 +1856,7 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 
 	int res = yyparse();
 
-        yy_policy_backend_parser_delete_buffer(yybuffstate);
+        yy_delete_buffer(yybuffstate);
         outerr = _last_error;
 
 	// parse error
@@ -1964,4 +1878,3 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 
 	return res;
 } 
-
