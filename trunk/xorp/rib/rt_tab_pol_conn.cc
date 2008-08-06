@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.12 2008/01/04 03:17:26 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.13 2008/07/23 05:11:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -195,15 +195,15 @@ PolicyConnectedTable<A>::push_routes()
     // go through original routes and refilter them
     for (typename RouteContainer::iterator i = _route_table.begin();
 	i != _route_table.end(); ++i) {
-   
+
 	const IPRouteEntry<A>* prev = i.payload();
 
 	// make a copy so filter may [possibly] modify it
-	IPRouteEntry<A>* copy = new IPRouteEntry<A>(*prev);
+	const IPRouteEntry<A>* orig = _parent->lookup_route(prev->net());
+	IPRouteEntry<A>* copy = new IPRouteEntry<A>(*orig);
 
 	do_filtering(*copy);
-	
-	
+
 	// only policytags may change
 	next->replace_policytags(*copy, prev->policytags(), this);
 
@@ -233,12 +233,6 @@ PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route)
     try {
 	debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
 		  route.str().c_str());
-
-	//
-	// XXX: a hack to reset the policy tags in case the policies
-	// are removed.
-	//
-	route.set_policytags(PolicyTags());
 
 	RIBVarRW<A> varrw(route);
 
