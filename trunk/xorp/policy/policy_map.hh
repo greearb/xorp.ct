@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_map.hh,v 1.8 2008/01/04 03:17:10 pavlin Exp $
+// $XORP: xorp/policy/policy_map.hh,v 1.9 2008/07/23 05:11:19 pavlin Exp $
 
 #ifndef __POLICY_POLICY_MAP_HH__
 #define __POLICY_POLICY_MAP_HH__
@@ -21,12 +21,12 @@
 
 #include "policy/common/policy_exception.hh"
 #include "policy_statement.hh"
-#include "dependancy.hh"
+#include "dependency.hh"
 
 /**
  * @short Container of all policies.
  *
- * It relates policy names with actual policies and deals with dependancies.
+ * It relates policy names with actual policies and deals with dependencies.
  */
 class PolicyMap {
 public:
@@ -59,12 +59,12 @@ public:
     bool exists(const string& name);
 
     /**
-     * Attempts to create a policy and update depndancies.
+     * Attempts to create a policy and update depndencies.
      *
      * Throws an exception on error.
      *
      * @param name name of policy.
-     * @param smap SetMap used for updating dependancies.
+     * @param smap SetMap used for updating dependencies.
      */
     void create(const string& name,SetMap& smap);
 
@@ -83,7 +83,7 @@ public:
      * @param policyname policy name.
      * @param protocol name of protocol which uses policy.
      */
-    void add_dependancy(const string& policyname, const string& protocol);
+    void add_dependency(const string& policyname, const string& protocol);
 
     /**
      * Remove the use of a policy by a protocol.
@@ -91,7 +91,7 @@ public:
      * @param policyname policy name.
      * @param protocol name of protocol which no longer uses policy.
      */
-    void del_dependancy(const string& policyname, const string& protocol);
+    void del_dependency(const string& policyname, const string& protocol);
 
     /**
      * Dumps all policies in human readable format.
@@ -104,7 +104,7 @@ public:
 
 private:
     // internally, policystatements are held as pointers.
-    typedef Dependancy<PolicyStatement> Dep;
+    typedef Dependency<PolicyStatement> Dep;
 
     Dep _deps;
 };

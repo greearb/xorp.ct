@@ -67,13 +67,14 @@ extern void yyerror(const char*);
 
 using namespace policy_backend_parser;
 
-static ElementFactory _ef;
+static ElementFactory	_ef;
 
 #line 26 "backend.y"
 typedef union {
-	char* c_str;
+	char*		c_str;
+	PolicyInstr*	c_pi;
 } YYSTYPE;
-#line 77 "yacc.yy_policy_backend_parser.cc"
+#line 78 "yacc.yy_policy_backend_parser.cc"
 #define YYERRCODE 256
 #define YY_ARG 257
 #define YY_NEWLINE 258
@@ -109,36 +110,40 @@ typedef union {
 #define YY_SET 288
 #define YY_NEXT 289
 #define YY_POLICY 290
+#define YY_SUBR_START 291
+#define YY_SUBR_END 292
 const short yy_policy_backend_parserlhs[] = {                                        -1,
-    0,    0,    0,    2,    1,    3,    3,    4,    4,    5,
-    5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-    5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-    5,    5,    5,    5,
+    0,    0,    0,    0,    3,    2,    4,    4,    1,    5,
+    5,    6,    6,    7,    7,    7,    7,    7,    7,    7,
+    7,    7,    7,    7,    7,    7,    7,    7,    7,    7,
+    7,    7,    7,    7,    7,    7,    7,    7,    7,
 };
 const short yy_policy_backend_parserlen[] = {                                         2,
-    2,    2,    0,    5,    6,    7,    0,    3,    0,    3,
-    2,    1,    2,    2,    1,    1,    1,    1,    1,    1,
+    2,    2,    2,    0,    5,    5,    2,    0,    6,    7,
+    0,    3,    0,    3,    2,    1,    2,    2,    1,    1,
     1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-    1,    1,    1,    2,
+    1,    1,    1,    1,    1,    1,    1,    2,    2,
 };
-const short yy_policy_backend_parserdefred[] = {                                      3,
-    0,    0,    0,    1,    2,    0,    0,    7,    0,    0,
-    0,    0,    0,    4,    5,    0,    9,    0,    0,    0,
-    0,   17,   18,   19,   20,   21,   22,   23,   24,   26,
-   25,   30,   31,   32,   27,   28,   29,   12,   33,    0,
-    0,   15,   16,    0,    0,    6,    0,   11,   13,   14,
-   34,    8,   10,
+const short yy_policy_backend_parserdefred[] = {                                      4,
+    0,    0,    0,    0,    1,    2,    3,    0,    0,    8,
+   11,    0,    0,    0,    0,    0,    7,    0,    0,    5,
+    6,    9,    0,   13,    0,    0,    0,    0,   21,   22,
+   23,   24,   25,   26,   27,   28,   30,   29,   34,   35,
+   36,   31,   32,   33,   16,   37,    0,    0,   19,   20,
+    0,    0,    0,   10,    0,   15,   17,   18,   38,   39,
+   12,   14,
 };
 const short yy_policy_backend_parserdgoto[] = {                                       1,
-    4,    5,   10,   18,   45,
+    5,    6,    7,   13,   14,   25,   53,
 };
 const short yy_policy_backend_parsersindex[] = {                                      0,
- -260, -231, -226,    0,    0, -225, -223,    0, -222, -232,
- -221, -220, -218,    0,    0, -217,    0, -262, -216, -214,
- -213,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,    0,    0,    0,    0,    0,    0, -212,
- -211,    0,    0, -258, -210,    0, -208,    0,    0,    0,
-    0,    0,    0,
+ -258, -256, -254, -252,    0,    0,    0, -251, -249,    0,
+    0, -248, -260, -257, -247, -246,    0, -245, -243,    0,
+    0,    0, -242,    0, -229, -241, -239, -238,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,    0,    0,    0,    0, -237, -236,    0,    0,
+ -280, -235, -234,    0, -232,    0,    0,    0,    0,    0,
+    0,    0,
 };
 const short yy_policy_backend_parserrindex[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -146,31 +151,36 @@ const short yy_policy_backend_parserrindex[] = {                                
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-    0,    0,    0,
+    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+    0,    0,
 };
 const short yy_policy_backend_parsergindex[] = {                                      0,
-    0,    0,    0,    0,    0,
+    2,    0,    0,    0,    0,    0,    0,
 };
-#define YYTABLESIZE 49
+#define YYTABLESIZE 61
 const short yy_policy_backend_parsertable[] = {                                       2,
-   19,   20,   21,   22,   23,   24,   25,   26,   27,   28,
-   29,   30,   31,   32,   33,   34,   35,   36,   37,   38,
-   39,   40,   41,   42,   43,    6,   44,    3,   12,   13,
-    7,   51,    8,    9,   11,    0,   14,   15,   16,    0,
-   17,   46,   47,   48,   49,   50,    0,   52,   53,
+    8,    2,    9,   18,   19,   10,   11,   12,   15,   59,
+   20,   21,   22,   23,   17,   24,   54,   55,   56,   57,
+   58,   60,    0,   61,   62,    0,    0,    0,    0,    3,
+    0,   16,    4,   26,   27,   28,   29,   30,   31,   32,
+   33,   34,   35,   36,   37,   38,   39,   40,   41,   42,
+   43,   44,   45,   46,   47,   48,   49,   50,    0,   51,
+   52,
 };
 const short yy_policy_backend_parsercheck[] = {                                     260,
-  263,  264,  265,  266,  267,  268,  269,  270,  271,  272,
-  273,  274,  275,  276,  277,  278,  279,  280,  281,  282,
-  283,  284,  285,  286,  287,  257,  289,  288,  261,  262,
-  257,  290,  258,  257,  257,   -1,  258,  258,  257,   -1,
-  258,  258,  257,  257,  257,  257,   -1,  258,  257,
+  257,  260,  257,  261,  262,  258,  258,  257,  257,  290,
+  258,  258,  258,  257,   13,  258,  258,  257,  257,  257,
+  257,  257,   -1,  258,  257,   -1,   -1,   -1,   -1,  288,
+   -1,  292,  291,  263,  264,  265,  266,  267,  268,  269,
+  270,  271,  272,  273,  274,  275,  276,  277,  278,  279,
+  280,  281,  282,  283,  284,  285,  286,  287,   -1,  289,
+  290,
 };
 #define YYFINAL 1
 #ifndef YYDEBUG
 #define YYDEBUG 0
 #endif
-#define YYMAXTOKEN 290
+#define YYMAXTOKEN 292
 #if YYDEBUG
 const char * const yy_policy_backend_parsername[] = {
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -184,14 +194,18 @@ const char * const yy_policy_backend_parsername[] = {
 "YY_PUSH_SET","YY_EQ","YY_NE","YY_LT","YY_GT","YY_LE","YY_GE","YY_NOT","YY_AND",
 "YY_OR","YY_XOR","YY_HEAD","YY_CTR","YY_NE_INT","YY_ADD","YY_SUB","YY_MUL",
 "YY_ONFALSE_EXIT","YY_REGEX","YY_LOAD","YY_STORE","YY_ACCEPT","YY_REJECT",
-"YY_SET","YY_NEXT","YY_POLICY",
+"YY_SET","YY_NEXT","YY_POLICY","YY_SUBR_START","YY_SUBR_END",
 };
 const char * const yy_policy_backend_parserrule[] = {
 "$accept : program",
 "program : program policy",
+"program : program subroutine",
 "program : program set",
 "program :",
 "set : YY_SET YY_ARG YY_ARG YY_ARG YY_NEWLINE",
+"subroutine : YY_SUBR_START YY_NEWLINE policies YY_SUBR_END YY_NEWLINE",
+"policies : policies policy",
+"policies :",
 "policy : YY_POLICY_START YY_ARG YY_NEWLINE terms YY_POLICY_END YY_NEWLINE",
 "terms : terms YY_TERM_START YY_ARG YY_NEWLINE statements YY_TERM_END YY_NEWLINE",
 "terms :",
@@ -222,6 +236,7 @@ const char * const yy_policy_backend_parserrule[] = {
 "statement : YY_NE_INT",
 "statement : YY_REGEX",
 "statement : YY_NEXT YY_POLICY",
+"statement : YY_POLICY YY_ARG",
 };
 #endif
 #if YYDEBUG
@@ -445,30 +460,39 @@ yyreduce:
     yyval = yyvsp[1-yym];
     switch (yyn)
     {
-case 4:
-#line 52 "backend.y"
+case 1:
+#line 48 "backend.y"
+{ _yy_policies->push_back(yyvsp[0].c_pi); }
+break;
+case 5:
+#line 56 "backend.y"
 {
 	  	/* XXX: doesn't delete old*/
 		(*_yy_sets)[yyvsp[-2].c_str] = _ef.create(yyvsp[-3].c_str, yyvsp[-1].c_str);
 		free(yyvsp[-3].c_str); free(yyvsp[-2].c_str); free(yyvsp[-1].c_str);
 	  }
 break;
-case 5:
-#line 59 "backend.y"
-{
-			PolicyInstr* pi = new PolicyInstr(yyvsp[-4].c_str,_yy_terms);
-
-			pi->set_trace(_yy_trace);
-			_yy_trace = false;
-
-			_yy_terms = new vector<TermInstr*>();
-			_yy_policies->push_back(pi);
-
-			free(yyvsp[-4].c_str);
-			}
+case 7:
+#line 68 "backend.y"
+{ (*_yy_subr)[yyvsp[0].c_pi->name()] = yyvsp[0].c_pi; }
 break;
-case 6:
+case 9:
 #line 73 "backend.y"
+{
+		PolicyInstr* pi = new PolicyInstr(yyvsp[-4].c_str,_yy_terms);
+
+		pi->set_trace(_yy_trace);
+		_yy_trace = false;
+
+		_yy_terms = new vector<TermInstr*>();
+
+		free(yyvsp[-4].c_str);
+
+		yyval.c_pi = pi;
+	}
+break;
+case 10:
+#line 88 "backend.y"
 {
 	  
 			TermInstr* ti = new TermInstr(yyvsp[-4].c_str,_yy_instructions);
@@ -477,29 +501,29 @@ case 6:
 			free(yyvsp[-4].c_str);
 			}
 break;
-case 10:
-#line 90 "backend.y"
+case 14:
+#line 105 "backend.y"
 {
 	  			Instruction* i = new Push(_ef.create(yyvsp[-1].c_str,yyvsp[0].c_str));
 				_yy_instructions->push_back(i);
 	  			free(yyvsp[-1].c_str); free(yyvsp[0].c_str);
 	  			}
 break;
-case 11:
-#line 95 "backend.y"
+case 15:
+#line 110 "backend.y"
 {
 				_yy_instructions->push_back(new PushSet(yyvsp[0].c_str));
 				free(yyvsp[0].c_str);
 				}
 break;
-case 12:
-#line 100 "backend.y"
+case 16:
+#line 115 "backend.y"
 {
 				_yy_instructions->push_back(new OnFalseExit());
 				}
 break;
-case 13:
-#line 104 "backend.y"
+case 17:
+#line 119 "backend.y"
 {
 				char* err = NULL;
 				bool is_error = false;
@@ -514,8 +538,8 @@ case 13:
 				_yy_instructions->push_back(new Load(id));
 				}
 break;
-case 14:
-#line 118 "backend.y"
+case 18:
+#line 133 "backend.y"
 {
 				char* err = NULL;
 				bool is_error = false;
@@ -537,87 +561,91 @@ case 14:
 				_yy_instructions->push_back(new Store(id));
 				}
 break;
-case 15:
-#line 139 "backend.y"
+case 19:
+#line 154 "backend.y"
 { _yy_instructions->push_back(new Accept()); }
 break;
-case 16:
-#line 140 "backend.y"
+case 20:
+#line 155 "backend.y"
 { _yy_instructions->push_back(new Reject()); }
 break;
-case 17:
-#line 142 "backend.y"
+case 21:
+#line 157 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpEq)); }
 break;
-case 18:
-#line 143 "backend.y"
+case 22:
+#line 158 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNe)); }
 break;
-case 19:
-#line 144 "backend.y"
+case 23:
+#line 159 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLt)); }
 break;
-case 20:
-#line 145 "backend.y"
+case 24:
+#line 160 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGt)); }
 break;
-case 21:
-#line 146 "backend.y"
+case 25:
+#line 161 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLe)); }
 break;
-case 22:
-#line 147 "backend.y"
+case 26:
+#line 162 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGe)); }
 break;
-case 23:
-#line 149 "backend.y"
+case 27:
+#line 164 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNot)); }
 break;
-case 24:
-#line 150 "backend.y"
+case 28:
+#line 165 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAnd)); }
 break;
-case 25:
-#line 151 "backend.y"
+case 29:
+#line 166 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpXor)); }
 break;
-case 26:
-#line 152 "backend.y"
+case 30:
+#line 167 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpOr)); }
 break;
-case 27:
-#line 154 "backend.y"
+case 31:
+#line 169 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 break;
-case 28:
-#line 155 "backend.y"
+case 32:
+#line 170 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 break;
-case 29:
-#line 156 "backend.y"
+case 33:
+#line 171 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpMul)); }
 break;
-case 30:
-#line 157 "backend.y"
+case 34:
+#line 172 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpHead));}
 break;
-case 31:
-#line 158 "backend.y"
+case 35:
+#line 173 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 break;
-case 32:
-#line 159 "backend.y"
+case 36:
+#line 174 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
 break;
-case 33:
-#line 160 "backend.y"
+case 37:
+#line 175 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpRegex));}
 break;
-case 34:
-#line 162 "backend.y"
+case 38:
+#line 177 "backend.y"
 { _yy_instructions->push_back(new Next(Next::POLICY)); }
 break;
-#line 621 "yacc.yy_policy_backend_parser.cc"
+case 39:
+#line 179 "backend.y"
+{ _yy_instructions->push_back(new Subr(yyvsp[0].c_str)); free(yyvsp[0].c_str); }
+break;
+#line 649 "yacc.yy_policy_backend_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

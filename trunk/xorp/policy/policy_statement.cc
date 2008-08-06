@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,27 +13,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.14 2008/01/04 03:17:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.15 2008/07/23 05:11:19 pavlin Exp $"
 
 #include "policy_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include "policy_statement.hh"   
-
+#include "policy_map.hh"
 
 using namespace policy_utils;
 
-PolicyStatement::PolicyStatement(const string& name, SetMap& smap) : 
-    _name(name), _smap(smap)
+PolicyStatement::PolicyStatement(const string& name, SetMap& smap,
+				 PolicyMap& pmap) : 
+    _name(name), _smap(smap), _pmap(pmap)
 {
 }
 
 PolicyStatement::~PolicyStatement()
 {
-    del_dependancies();
+    del_dependencies();
     policy_utils::clear_map_container(_terms);
 
     list<pair<ConfigNodeId, Term*> >::iterator iter;
@@ -216,26 +215,31 @@ PolicyStatement::terms()
 }
 
 void 
-PolicyStatement::set_dependancy(const set<string>& sets)
+PolicyStatement::set_dependency(const DEPS& sets, const DEPS& policies)
 {
-    // replace all dependancies
+    // delete dependencies
+    del_dependencies();
 
-    // delete them all
-    del_dependancies();
+    // replace them
+    _sets     = sets;
+    _policies = policies;
 
-    // replace
-    _sets = sets;
+    // re-insert dependencies
+    for (DEPS::iterator i = _sets.begin(); i != _sets.end(); ++i)
+	_smap.add_dependency(*i, _name);
 
-    // re-insert dependancies
-    for(set<string>::iterator i = _sets.begin(); i != _sets.end(); ++i)
-	_smap.add_dependancy(*i,_name);
+    for (DEPS::iterator i = _policies.begin(); i != _policies.end(); ++i)
+	_pmap.add_dependency(*i, _name);
 }
 
 void 
-PolicyStatement::del_dependancies() {
-    // remove all dependancies
-    for(set<string>::iterator i = _sets.begin(); i != _sets.end(); ++i)
-	_smap.del_dependancy(*i,_name);
+PolicyStatement::del_dependencies() {
+    // remove all dependencies
+    for (DEPS::iterator i = _sets.begin(); i != _sets.end(); ++i)
+	_smap.del_dependency(*i, _name);
+
+    for (DEPS::iterator i = _policies.begin(); i != _policies.end(); ++i)
+	_pmap.del_dependency(*i, _name);
 
     _sets.clear();    
 }

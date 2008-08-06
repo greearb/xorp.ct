@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.17 2008/07/23 05:11:21 pavlin Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.18 2008/08/06 08:17:07 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -21,9 +21,9 @@
 #include "source_match_code_generator.hh"
 
 SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart,
-				const VarMap& varmap) : 
-				 CodeGenerator(varmap),
-				 _currtag(tagstart) 
+						   const VarMap& varmap,
+						   PolicyMap& pmap) 
+	   : CodeGenerator(varmap, pmap), _currtag(tagstart)
 {
 }
 
@@ -41,10 +41,29 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 	term->accept(*this);
     }
 
+    // Maybe we got called from subr.  If so, we're not a protocol statement
+    // (maybe one of our internal statements was though).  Reset it.
+    _protocol_statement = false;
+
+    if (_subr)
+	return NULL;
+
     // mark the end for all policies
     for (CodeMap::iterator i = _codes.begin(); i != _codes.end(); ++i) {
         Code* c = (*i).second;
         c->add_code("POLICY_END\n");
+
+	// for all subroutines too
+	for (SUBR::const_iterator j = c->subr().begin();
+	     j != c->subr().end();) {
+	    string x = j->second;
+
+	    x += "POLICY_END\n";
+
+	    string p = j->first;
+	    j++;
+	    c->add_subr(p, x);
+	}
 
         _codes_vect.push_back(c);
     }
@@ -70,7 +89,16 @@ SourceMatchCodeGenerator::addTerm()
 	Code* existing = (*i).second;
 
 	// link "raw" code
-	term->set_code(_os.str());
+	string s = _os.str();
+
+	if (_subr) {
+	    SUBR::const_iterator j = existing->subr().find(_policy);
+	    XLOG_ASSERT(j != existing->subr().end());
+
+	    term->add_subr(_policy, (j->second) + s);
+	} else
+	    term->set_code(s);
+
 	*existing += *term;
 
 	delete term;
@@ -80,7 +108,13 @@ SourceMatchCodeGenerator::addTerm()
     XLOG_ASSERT(!_policy.empty());
 
     // code for a new target, need to create policy start header.
-    term->set_code("POLICY_START " + _policy + "\n" + _os.str());
+    string s = "POLICY_START " + _policy + "\n" + _os.str();
+
+    if (_subr)
+	term->add_subr(_policy, s);
+    else
+	term->set_code(s);
+
     _codes[_protocol] = term;
 }
 
@@ -153,9 +187,18 @@ SourceMatchCodeGenerator::do_term(Term& term)
     // ignore any destination block [that is dealt with in the export code
     // generator]
 
+    // If subroutine, do actions.  Tags are set by caller.
+    if (_subr) {
+	for (Term::Nodes::iterator i = term.action_nodes().begin();
+	     i != term.action_nodes().end(); ++i) {
 
-    // ignore actions too...
+	    Node* n = i->second;
 
+	    n->accept(*this);
+	}
+
+	return;
+    }
 
     //
     // As an action, store policy tags...

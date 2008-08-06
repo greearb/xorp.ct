@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/export_code_generator.hh,v 1.7 2008/01/04 03:17:09 pavlin Exp $
+// $XORP: xorp/policy/export_code_generator.hh,v 1.8 2008/07/23 05:11:18 pavlin Exp $
 
 #ifndef __POLICY_EXPORT_CODE_GENERATOR_HH__
 #define __POLICY_EXPORT_CODE_GENERATOR_HH__
@@ -38,7 +38,8 @@ public:
      */
     ExportCodeGenerator(const string& proto, 
 			const SourceMatchCodeGenerator::Tags& t,
-			const VarMap& varmap);
+			const VarMap& varmap,
+			PolicyMap& pmap);
 
     const Element* visit_term(Term& term);
 

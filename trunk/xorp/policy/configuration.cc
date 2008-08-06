@@ -13,13 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.23 2008/07/23 05:11:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.24 2008/08/06 08:17:06 abittau Exp $"
 
 #include "libxorp/xorp.h"
-
 #include "policy_module.h"
 #include "configuration.hh"
-#include "visitor_setdep.hh"
+#include "visitor_dep.hh"
 #include "policy/common/policy_utils.hh"
 
 using namespace policy_utils;
@@ -274,17 +273,12 @@ return conf;
 }
 
 void 
-Configuration::update_set_dependancy(PolicyStatement& policy)
+Configuration::update_dependencies(PolicyStatement& policy)
 {
-    // check if sets exist and remeber which ones are used
-    VisitorSetDep setdep(_sets);
+    // check if used sets & policies exist, and mark dependencies.
+    VisitorDep dep(_sets, _policies);
 
-    policy.accept(setdep);
-
-    const set<string>& sets = setdep.sets();
-
-    // make the policy depend on these sets.
-    policy.set_dependancy(sets);
+    policy.accept(dep);
 }
 
 void 
@@ -295,8 +289,8 @@ Configuration::compile_policy(const string& name)
     // Mark the end of the policy
     policy.set_policy_end();
 
-    // probably is a fresh / modified policy, so update dependancies with sets.
-    update_set_dependancy(policy);
+    // probably is a fresh / modified policy, so update dependencies with sets.
+    update_dependencies(policy);
 
     // save old tag to check for integer overflow
     tag_t old_currtag = _currtag; 

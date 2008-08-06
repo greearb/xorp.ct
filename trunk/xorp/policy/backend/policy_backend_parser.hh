@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,18 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_backend_parser.hh,v 1.6 2008/07/23 05:11:23 pavlin Exp $
+// $XORP: xorp/policy/backend/policy_backend_parser.hh,v 1.7 2008/08/06 08:07:14 abittau Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_BACKEND_PARSER_HH__
 #define __POLICY_BACKEND_POLICY_BACKEND_PARSER_HH__
+
+#include <string>
+#include <vector>
 
 #include "policy/common/element_base.hh"
 #include "policy_instr.hh"
 #include "term_instr.hh"
 #include "instruction_base.hh"
 
-#include <string>
-#include <vector>
+typedef map<string, PolicyInstr*>   SUBR;
 
 /**
  * @short Minimises global namespace pollution of yacc/lex variables.
@@ -32,6 +35,8 @@
  * Here such methods and functions are grouped under one namespace.
  */
 namespace policy_backend_parser {
+
+typedef vector<PolicyInstr*>	    POLICIES;
 
 /**
  * Parses a backend policy configuration.
@@ -46,6 +51,7 @@ namespace policy_backend_parser {
  */
 int policy_backend_parse(vector<PolicyInstr*>& outpolicies,
                          map<string,Element*>& outsets,
+			 SUBR& outsubr,
                          const string& conf,
                          string& outerr);
 
@@ -54,6 +60,7 @@ extern map<string,Element*>*	_yy_sets;
 extern vector<TermInstr*>*	_yy_terms;
 extern vector<Instruction*>*	_yy_instructions;
 extern bool			_yy_trace;
+extern SUBR*			_yy_subr;
 
 } // namespace
 

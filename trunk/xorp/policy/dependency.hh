@@ -1,6 +1,6 @@
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -14,40 +14,40 @@
 
 // $XORP: xorp/policy/dependancy.hh,v 1.10 2008/01/04 03:17:09 pavlin Exp $
 
-#ifndef __POLICY_DEPENDANCY_HH__
-#define __POLICY_DEPENDANCY_HH__
-
-#include "policy/common/policy_exception.hh"
+#ifndef __POLICY_DEPENDENCY_HH__
+#define __POLICY_DEPENDENCY_HH__
 
 #include <list>
 #include <map>
 #include <string>
 #include <sstream>
 
+#include "policy/common/policy_exception.hh"
+
 /**
- * @short A class which relates objects and handles dependancies between them.
+ * @short A class which relates objects and handles dependencies between them.
  *
  * This class is a container of objects [pointers]. It relates string object
  * names to the actual objects. Also, it has the ability to add and remove
- * dependancies to that objects. A dependancy is some entity which is using a
- * specific object in the Dependancy container. This entity is string
+ * dependencies to that objects. A dependency is some entity which is using a
+ * specific object in the Dependency container. This entity is string
  * represented.
  *
  * For example, if a policy x uses set y, Set y will have x added in its
- * dependancies. This means that x depends on y.
+ * dependencies. This means that x depends on y.
  *
- * Having a consistent dependancy list allows objects to be deleted correctly.
+ * Having a consistent dependency list allows objects to be deleted correctly.
  */
 template <class T>
-class Dependancy {
+class Dependency {
 public:
     // things that depend on object
-    typedef list<string>	    DependancyList;
+    typedef list<string>	    DependencyList;
     
-    // object dependancy pair.
-    typedef pair<T*,DependancyList> Pair;
+    // object dependency pair.
+    typedef pair<T*,DependencyList> Pair;
     
-    // object of this name has these dependancies
+    // object of this name has these dependencies
     typedef map<string,Pair*>	    Map;
 
     struct ObjPair {
@@ -61,24 +61,23 @@ public:
     /**
      * @short Exception thrown if an illegal action is requested.
      *
-     * Such as deleting an object which has a non empty dependancy list.
+     * Such as deleting an object which has a non empty dependency list.
      */
-    class DependancyError : public PolicyException {
+    class DependencyError : public PolicyException {
     public:
-        DependancyError(const char* file, size_t line, 
+        DependencyError(const char* file, size_t line, 
 			const string& init_why = "")
-	: PolicyException("DependancyError", file, line, init_why) {} 
+	: PolicyException("DependencyError", file, line, init_why) {} 
     };
 
 
 
-    Dependancy(){}
+    Dependency() {}
 
-    ~Dependancy() {
-	clear();
-    }
+    ~Dependency() { clear(); }
 
-    void clear() {
+    void clear()
+    {
 	for (typename Map::iterator i = _map.begin(); i != _map.end(); ++i) {
 	    Pair* p = (*i).second;
 	    if (p->first != NULL) {
@@ -110,11 +109,12 @@ public:
      * @param objectname name of the object.
      * @param object the actual object.
      */
-    bool create(const string& objectname, T* object) {
-	if(exists(objectname))
+    bool create(const string& objectname, T* object)
+    {
+	if (exists(objectname))
 	    return false;
 	
-	Pair* p = new Pair(object,DependancyList());
+	Pair* p = new Pair(object, DependencyList());
 
 	_map[objectname] = p;
 	return true;
@@ -123,22 +123,23 @@ public:
 
     /**
      * Tries to remove and delete an object. Checks if object is in use [non
-     * empty dependancy list].
+     * empty dependency list].
      *
      * Throws an exception on failure.
      *
      * @param objectname object to remove and delete.
      */
-    void remove(const string& objectname) {
+    void remove(const string& objectname)
+    {
 	typename Map::iterator i = _map.find(objectname);
 
-	if(i == _map.end())
-	    xorp_throw(DependancyError,
-		       "Dependancy remove: Cannot find object " + objectname);
+	if (i == _map.end())
+	    xorp_throw(DependencyError,
+		       "Dependency remove: Cannot find object " + objectname);
 	
 	Pair* p = (*i).second;
 
-	DependancyList& s = (*p).second;
+	DependencyList& s = (*p).second;
 
 	// check if object is in use
 	if(!s.empty()) {
@@ -147,11 +148,10 @@ public:
 	    oss << "Dependency remove: Object " << objectname
 	        << " in use by: ";
 
-	    // XXX I need to learn how to spell...
-	    for (DependancyList::iterator j = s.begin(); j != s.end(); ++j)
+	    for (DependencyList::iterator j = s.begin(); j != s.end(); ++j)
 		oss << *j << " ";
 		
-	    xorp_throw(DependancyError, oss.str());
+	    xorp_throw(DependencyError, oss.str());
 	}
 
 	// delete object
@@ -163,34 +163,34 @@ public:
     }
 
     /**
-     * Adds dependancies to this object. A dependancy is another object which
+     * Adds dependencies to this object. A dependency is another object which
      * uses this object.
      *
      * Throws an exception if object does not exist.
      *
-     * @param objectname name of object to which dependancy should be added.
+     * @param objectname name of object to which dependency should be added.
      * @param dep name of object which depends on objectname.
      */
-    void add_dependancy(const string& objectname, const string& dep) {
+    void add_dependency(const string& objectname, const string& dep) {
 	Pair* p = findDepend(objectname);
 
-	DependancyList& s = (*p).second;
+	DependencyList& s = (*p).second;
 
 	s.push_back(dep);
     }
     
     /**
-     * Deletes a dependancy on an object.
+     * Deletes a dependency on an object.
      *
      * Throws an exception if object does not exist.
      *
-     * @param objectname name of object to which dependancy should be removed.
-     * @param dep name of dependancy to remove.
+     * @param objectname name of object to which dependency should be removed.
+     * @param dep name of dependency to remove.
      */
-    void del_dependancy(const string& objectname, const string& dep) {
+    void del_dependency(const string& objectname, const string& dep) {
 	Pair* p = findDepend(objectname);
 
-	DependancyList& s = (*p).second;
+	DependencyList& s = (*p).second;
 
 	s.remove(dep);
     }
@@ -228,18 +228,18 @@ public:
     }
 
     /**
-     * Obtains the dependancy list for an object.
+     * Obtains the dependency list for an object.
      *
      * Duplicates are removed, as it is a set.
      *
-     * @param objectname name of object for which dependancy list is requested.
-     * @param deps set of strings filled with dependancy list.
+     * @param objectname name of object for which dependency list is requested.
+     * @param deps set of strings filled with dependency list.
      */
     void get_deps(const string& objectname, set<string>& deps) const {
 	Pair* p = findDepend(objectname);
 
-	DependancyList& s = (*p).second;
-	for(typename DependancyList::iterator i = s.begin(); i != s.end(); ++i)
+	DependencyList& s = (*p).second;
+	for(typename DependencyList::iterator i = s.begin(); i != s.end(); ++i)
 	    deps.insert(*i); // duplicates are removed [set]
     }
 
@@ -259,7 +259,7 @@ public:
 	if(p->first)
 	    delete p->first;
 
-	// replace [dependancies are maintained]
+	// replace [dependencies are maintained]
 	p->first = obj;
     }
 
@@ -267,7 +267,7 @@ public:
     /**
      * Obtain an iterator for this container.
      *
-     * @return iterator for Dependancy container.
+     * @return iterator for Dependency container.
      */
     typename Map::const_iterator get_iterator() const {
 	return _map.begin();
@@ -293,7 +293,7 @@ public:
      */
     ObjPair next(typename Map::const_iterator& i) const {
 	if(i == _map.end())
-	    xorp_throw(DependancyError, "No more objects");
+	    xorp_throw(DependencyError, "No more objects");
 	
 
 	Pair* p = (*i).second;
@@ -315,18 +315,18 @@ private:
 	typename Map::const_iterator i = _map.find(objectname);
 
 	if(i == _map.end())
-	    xorp_throw(DependancyError,
-		       "Dependancy: Cannot find object of name " + objectname);
+	    xorp_throw(DependencyError,
+		       "Dependency: Cannot find object of name " + objectname);
 
 	return (*i).second;    
     }
 
 
     // not impl
-    Dependancy(const Dependancy&);
-    Dependancy& operator=(const Dependancy&);
+    Dependency(const Dependency&);
+    Dependency& operator=(const Dependency&);
 
 
 };
 
-#endif // __POLICY_DEPENDANCY_HH__
+#endif // __POLICY_DEPENDENCY_HH__

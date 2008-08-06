@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.19 2008/08/06 08:17:07 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.20 2008/08/06 08:18:31 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,13 +25,15 @@
 #include "libxorp/debug.h"
 #include "policy/common/elem_null.hh"
 #include "visitor_semantic.hh"
+#include "policy_map.hh"
 
 VisitorSemantic::VisitorSemantic(SemanticVarRW& varrw, 
 				 VarMap& varmap,
 				 SetMap& setmap,
+				 PolicyMap& pmap,
 				 const string& protocol, 
 				 PolicyType ptype) : 
-		_varrw(varrw), _varmap(varmap), _setmap(setmap), 
+		_varrw(varrw), _varmap(varmap), _setmap(setmap), _pmap(pmap),
 		_protocol(protocol), _ptype(ptype) 
 {
 }
@@ -39,18 +41,23 @@ VisitorSemantic::VisitorSemantic(SemanticVarRW& varrw,
 const Element* 
 VisitorSemantic::visit(PolicyStatement& policy)
 {
-    PolicyStatement::TermContainer& terms = policy.terms();
-
-    PolicyStatement::TermContainer::iterator i;
-
-    // go through all terms
-    for(i = terms.begin(); i != terms.end(); ++i) {
-	(i->second)->accept(*this);
-    }
+    do_policy_statement(policy);
 
     // helps for garbage gollection in varrw
     _varrw.sync();
+
     return NULL;
+}
+
+void
+VisitorSemantic::do_policy_statement(PolicyStatement& policy)
+{
+    PolicyStatement::TermContainer& terms = policy.terms();
+    PolicyStatement::TermContainer::iterator i;
+
+    // go through all terms
+    for (i = terms.begin(); i != terms.end(); ++i)
+	(i->second)->accept(*this);
 }
 
 const Element* 
@@ -296,5 +303,18 @@ VisitorSemantic::semantic_protocol()
 const Element*
 VisitorSemantic::visit(NodeNext& /* node */)
 {
+    return NULL;
+}
+
+const Element*
+VisitorSemantic::visit(NodeSubr& node)
+{
+    // XXX check for recursion.
+    PolicyStatement& policy = _pmap.find(node.policy());
+
+    string proto = _protocol;
+    do_policy_statement(policy);
+    change_protocol(proto);
+
     return NULL;
 }

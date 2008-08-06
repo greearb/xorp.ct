@@ -12,20 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_statement.hh,v 1.11 2008/01/04 03:17:10 pavlin Exp $
+// $XORP: xorp/policy/policy_statement.hh,v 1.12 2008/07/23 05:11:20 pavlin Exp $
 
 #ifndef __POLICY_POLICY_STATEMENT_HH__
 #define __POLICY_POLICY_STATEMENT_HH__
 
-#include "libproto/config_node_id.hh"
-#include "policy/common/policy_exception.hh"
-
-#include "set_map.hh"
-#include "term.hh"
 #include <map>
 #include <set>
 #include <string>
 
+#include "libproto/config_node_id.hh"
+#include "policy/common/policy_exception.hh"
+#include "set_map.hh"
+#include "term.hh"
+
+class PolicyMap;
+
+typedef set<string> DEPS;
 
 /**
  * @short A policy statement is a collection of terms.
@@ -48,9 +51,10 @@ public:
 
     /**
      * @param name the name of the policy.
-     * @param smap the SetMap. Used for dependancy tracking.
+     * @param smap the SetMap. Used for dependency tracking.
+     * @param pmap the PolicyMap.  Used for dependency tracking.
      */
-    PolicyStatement(const string& name, SetMap& smap);
+    PolicyStatement(const string& name, SetMap& smap, PolicyMap& pmap);
     ~PolicyStatement();
 
     /**
@@ -110,17 +114,17 @@ public:
     TermContainer& terms();
 
     /**
-     * Replace the set dependancies.
+     * Replace the set dependencies.
      *
-     * @param sets the new sets this policy is dependant on.
+     * @param sets the new sets this policy is dependent on.
      */
-    void set_dependancy(const set<string>& sets);
+    void set_dependency(const DEPS& sets, const DEPS& policies);
     
 private:
     /**
-     * Delete all set dependancies of this policy.
+     * Delete all set dependencies of this policy.
      */
-    void del_dependancies();
+    void del_dependencies();
 
     /**
      * Get the iterator for a specific term.
@@ -151,18 +155,17 @@ private:
     list<pair<ConfigNodeId, Term*> >::const_iterator find_out_of_order_term(
 	const string& name) const;
 
-    string _name;
-    TermContainer _terms;
-    list<pair<ConfigNodeId, Term*> > _out_of_order_terms;
-
-    set<string> _sets;
-
-    SetMap& _smap;
+    string				_name;
+    TermContainer			_terms;
+    list<pair<ConfigNodeId, Term*> >	_out_of_order_terms;
+    DEPS				_sets;
+    DEPS				_policies;
+    SetMap&				_smap;
+    PolicyMap&				_pmap;
 
     // not impl
     PolicyStatement(const PolicyStatement&);
     PolicyStatement& operator=(const PolicyStatement&);
-
 };
 
 #endif // __POLICY_POLICY_STATEMENT_HH__

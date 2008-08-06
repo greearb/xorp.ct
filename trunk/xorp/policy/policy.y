@@ -87,6 +87,7 @@ boolstatement:
 boolexpr:
 	  YY_PROTOCOL YY_EQ YY_ID { $$ = new NodeProto($3,_parser_lineno); free($3); }
 	| YY_NOT boolexpr { $$ = new NodeUn(new OpNot,$2,_parser_lineno); }
+	| YY_POLICY YY_ID { $$ = new NodeSubr(_parser_lineno, $2); free($2); }
 	| boolexpr YY_AND boolexpr { $$ = new NodeBin(new OpAnd,$1,$3,_parser_lineno); }
 	| boolexpr YY_XOR boolexpr { $$ = new NodeBin(new OpXor,$1,$3,_parser_lineno); }
 	| boolexpr YY_OR boolexpr { $$ = new NodeBin(new OpOr,$1,$3,_parser_lineno); }

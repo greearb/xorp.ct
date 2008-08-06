@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.14 2008/07/23 05:11:18 pavlin Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.15 2008/08/06 08:17:06 abittau Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -323,9 +323,9 @@ private:
      * Scans policy and checks which sets it uses. It also binds the policy to
      * those sets, so sets may not be deleted.
      *
-     * @param policy policy which should have set dependancies updated.
+     * @param policy policy which should have set dependencies updated.
      */
-    void update_set_dependancy(PolicyStatement& policy);
+    void update_dependencies(PolicyStatement& policy);
 
     /**
      * Generate code for a policy.

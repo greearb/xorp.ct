@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor.hh,v 1.9 2008/07/23 05:11:21 pavlin Exp $
+// $XORP: xorp/policy/visitor.hh,v 1.10 2008/08/06 08:17:07 abittau Exp $
 
 #ifndef __POLICY_VISITOR_HH__
 #define __POLICY_VISITOR_HH__
@@ -36,6 +36,7 @@ class NodeProto;
 class Term;
 class PolicyStatement;
 class NodeNext;
+class NodeSubr;
 
 /**
  * @short Visitor pattern interface.
@@ -58,6 +59,7 @@ public:
     virtual const Element* visit(NodeElem&) = 0;
     virtual const Element* visit(NodeProto&) = 0;
     virtual const Element* visit(NodeNext&) = 0;
+    virtual const Element* visit(NodeSubr&) = 0;
 };
 
 #endif // __POLICY_VISITOR_HH__

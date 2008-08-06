@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.24 2008/08/06 08:11:44 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.25 2008/08/06 08:17:08 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -414,4 +414,53 @@ string
 IvExec::tracelog()
 {
     return _os.str();
+}
+
+void
+IvExec::visit(Subr& sub)
+{
+    SUBR::iterator i = _subr->find(sub.target());
+    XLOG_ASSERT(i != _subr->end());
+
+    PolicyInstr* policy = i->second;
+
+    if (_do_trace)
+	_os << "POLICY " << policy->name() << endl;
+
+    FlowAction old_fa = _fa;
+    bool old_finished = _finished;
+
+    FlowAction fa = runPolicy(*policy);
+
+    _fa       = old_fa;
+    _finished = old_finished;
+
+    bool result = true;
+
+    switch (fa) {
+    case DEFAULT:
+    case ACCEPT:
+	result = true;
+	break;
+
+    case REJ:
+	result = false;
+	break;
+    }
+
+    Element* e = new ElemBool(result);
+
+    _stackptr++;
+    XLOG_ASSERT(_stackptr < _stackend);
+    *_stackptr = e;
+
+    _trash[_trashc] = e;
+    _trashc++;
+    XLOG_ASSERT(_trashc < _trashs);
+}
+
+void
+IvExec::set_subr(SUBR* subr)
+{
+    _subr = subr;
 }

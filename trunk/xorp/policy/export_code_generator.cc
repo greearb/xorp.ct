@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.13 2008/01/04 03:17:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.14 2008/07/23 05:11:18 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -26,8 +26,9 @@
 ExportCodeGenerator::ExportCodeGenerator(
 			const string& proto, 
 			const SourceMatchCodeGenerator::Tags& t,
-			const VarMap& varmap) : 
-	CodeGenerator(proto, filter::EXPORT, varmap), _tags(t)
+			const VarMap& varmap,
+			PolicyMap& pmap) : 
+	CodeGenerator(proto, filter::EXPORT, varmap, pmap), _tags(t)
 {
     _tags_iter = _tags.begin();
 }
@@ -38,6 +39,8 @@ ExportCodeGenerator::visit_term(Term& term)
     XLOG_ASSERT(_tags_iter != _tags.end());
 
     // ignore source [done by source match]
+    // XXX but there could be a from policy subroutine that has a dest block.
+    // Currently ignored.  -sorbo
     Term::Nodes& dest = term.dest_nodes();
     Term::Nodes& actions = term.action_nodes();
 

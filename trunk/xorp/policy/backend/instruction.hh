@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instruction.hh,v 1.11 2008/07/23 05:11:23 pavlin Exp $
+// $XORP: xorp/policy/backend/instruction.hh,v 1.12 2008/08/06 08:17:08 abittau Exp $
 
 #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
 #define __POLICY_BACKEND_INSTRUCTION_HH__
@@ -186,6 +186,18 @@ public:
 
 private:
     Flow    _flow;
+};
+
+class Subr : public Instruction {
+public:
+    Subr(string target) : _target(target) {}
+
+    string target() { return _target; }
+
+    INSTR_VISITABLE();
+
+private:
+    string  _target;
 };
 
 /**

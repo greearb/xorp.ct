@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code_generator.hh,v 1.9 2008/07/23 05:11:18 pavlin Exp $
+// $XORP: xorp/policy/code_generator.hh,v 1.10 2008/08/06 08:17:06 abittau Exp $
 
 #ifndef __POLICY_CODE_GENERATOR_HH__
 #define __POLICY_CODE_GENERATOR_HH__
@@ -49,27 +49,28 @@ public:
             : PolicyException("CodeGeneratorErr", file, line, init_why) {}   
     };
 
-    CodeGenerator(const VarMap& varmap); // used by source match code generator.
-    
+    // used by source match code generator.
+    CodeGenerator(const VarMap& varmap, PolicyMap& pmap);
+
     /**
-     * Generate code for a specific protocol and filter [target]/
+     * Generate code for a specific protocol and filter [target]
      *
-     * This construct is mainly used by derived classes to set the code target.a
+     * This construct is mainly used by derived classes to set the code target.
      *
      * @param proto target protocol.
      * @param filter target filter type.
      * @param varmap varmap.
      */
     CodeGenerator(const string& proto, const filter::Filter& filter,
-		  const VarMap& varmap);
-    
+		  const VarMap& varmap, PolicyMap& pmap);
+
     /**
      * Initialize code generation for an import of a specific protocol.
      *
      * @param proto target protocol.
      * @param varmap varmap.
      */
-    CodeGenerator(const string& proto, const VarMap& varmap);
+    CodeGenerator(const string& proto, const VarMap& varmap, PolicyMap& pmap);
 
     virtual ~CodeGenerator();
 
@@ -85,6 +86,7 @@ public:
     const Element* visit(Term& policy); 
     const Element* visit(NodeProto& policy); 
     const Element* visit(NodeNext& node);
+    const Element* visit(NodeSubr& node);
 
     /**
      * @return code generated.
@@ -97,15 +99,16 @@ protected:
     virtual const Element* visit_policy(PolicyStatement& policy);
     virtual const Element* visit_term(Term& term);
     virtual const Element* visit_proto(NodeProto& node);
+    virtual const string&  protocol();
 
-    virtual const string& protocol();
-
-    Code _code;
-    ostringstream _os;
-    const VarMap& _varmap;
+    Code	    _code;
+    ostringstream   _os;
+    const VarMap&   _varmap;
+    PolicyMap&	    _pmap;
+    bool	    _subr;
 
 private:
-    string _protocol;
+    string	    _protocol;
 };
 
 #endif // __POLICY_CODE_GENERATOR_HH__

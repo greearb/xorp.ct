@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.15 2008/08/06 08:10:43 abittau Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.16 2008/08/06 08:17:08 abittau Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -29,6 +29,7 @@
 #include "set_manager.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
+#include "policy_backend_parser.hh"
 
 /**
  * @short Visitor that executes instructions
@@ -126,6 +127,7 @@ public:
     void visit(NaryInstr& nary);
 
     void visit(Next& next);
+    void visit(Subr& sub);
 
     /**
      * @return String representation of flow action.
@@ -133,9 +135,9 @@ public:
      */
     static string fa2str(const FlowAction& fa);
 
-    void set_profiler(PolicyProfiler*);
-
-    string tracelog();
+    void    set_profiler(PolicyProfiler*);
+    string  tracelog();
+    void    set_subr(SUBR* subr);
 
 private:
     /**
@@ -161,6 +163,7 @@ private:
     bool	    _do_trace;
     bool	    _did_trace;
     Next::Flow	    _ctr_flow;
+    SUBR*	    _subr;
 
     // not impelmented
     IvExec(const IvExec&);

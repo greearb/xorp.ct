@@ -36,7 +36,10 @@
 #define YY_SET 288
 #define YY_NEXT 289
 #define YY_POLICY 290
+#define YY_SUBR_START 291
+#define YY_SUBR_END 292
 typedef union {
-	char* c_str;
+	char*		c_str;
+	PolicyInstr*	c_pi;
 } YYSTYPE;
 extern YYSTYPE yy_policy_backend_parserlval;

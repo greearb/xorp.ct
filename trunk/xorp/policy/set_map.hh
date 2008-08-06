@@ -13,21 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/set_map.hh,v 1.8 2008/01/04 03:17:12 pavlin Exp $
+// $XORP: xorp/policy/set_map.hh,v 1.9 2008/07/23 05:11:21 pavlin Exp $
 
 #ifndef __POLICY_SET_MAP_HH__
 #define __POLICY_SET_MAP_HH__
 
 #include "policy/common/element_factory.hh"
 #include "policy/common/policy_exception.hh"
-#include "dependancy.hh"
+#include "dependency.hh"
 #include <string>
 
 /**
  * @short Container of all sets.
  *
  * The SetMap owns all sets in the policy configuration. It also tracks
- * dependancies between sets and policies.
+ * dependencies between sets and policies.
  */
 class SetMap {
 public:
@@ -113,24 +113,24 @@ public:
 			 set<string>& modified);
 
     /**
-     * Add a dependancy of a policy using a set.
+     * Add a dependency of a policy using a set.
      *
      * Throws an exception if set is not found.
      *
-     * @param setname name of set in which dependancy should be added.
+     * @param setname name of set in which dependency should be added.
      * @param policyname name of policy which uses the set.
      */
-    void add_dependancy(const string& setname, const string& policyname);
+    void add_dependency(const string& setname, const string& policyname);
 
     /**
-     * Delete a dependancy of a policy using a set.
+     * Delete a dependency of a policy using a set.
      *
      * Throws an exception if set or policy is not found.
      *
-     * @param setname name of set in which dependancy should be removed.
+     * @param setname name of set in which dependency should be removed.
      * @param policyname name of policy which no longer uses the set.
      */
-    void del_dependancy(const string& setname, const string& policyname);
+    void del_dependency(const string& setname, const string& policyname);
 
     /**
      * @return string representation of all sets.
@@ -138,10 +138,10 @@ public:
     string str() const;
 
 private:
-    typedef Dependancy<Element> Dep;
-    Dep    _deps;
-    ElementFactory _ef;
+    typedef Dependency<Element> Dep;
 
+    Dep		    _deps;
+    ElementFactory  _ef;
 };
 
 #endif // __POLICY_SET_MAP_HH__

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.26 2008/04/24 15:20:18 bms Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.27 2008/08/06 08:15:12 abittau Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -15,6 +15,8 @@ policy {
 
 		prefix-length4: u32range;
 		prefix-length6: u32range;
+
+		policy: txt;
 	    }
 	    to {
 		network4: ipv4net;
@@ -25,6 +27,8 @@ policy {
 
 		prefix-length4: u32range;
 		prefix-length6: u32range;
+
+		policy: txt;
 	    }
 	    then {
 		trace: u32;
@@ -127,6 +131,12 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
+
+		policy {
+		    %help: short "Policy subroutine";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=policy $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
 	    }
 
 	    to {
@@ -165,6 +175,12 @@ policy {
 		    %help: short "IPv6 prefix length range";
 		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+
+		policy {
+		    %help: short "Policy subroutine";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=policy $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 	    }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.13 2008/07/23 05:11:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.14 2008/08/06 08:17:06 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -63,7 +63,7 @@ PolicyList::~PolicyList()
 
 	PolicyCode& pc = *i;
 
-	_pmap.del_dependancy(pc.first,_protocol);
+	_pmap.del_dependency(pc.first,_protocol);
 
 	delete (*i).second;
     }
@@ -76,7 +76,7 @@ void
 PolicyList::push_back(const string& policyname)
 {
     _policies.push_back(PolicyCode(policyname,NULL));
-    _pmap.add_dependancy(policyname,_protocol);
+    _pmap.add_dependency(policyname,_protocol);
 }
 
 void 
@@ -219,7 +219,7 @@ PolicyList::semantic_check(PolicyStatement& ps,
     // [i.e. protocol and import/export pair].
     SemanticVarRW varrw(_varmap);
 
-    VisitorSemantic sem_check(varrw, _varmap, _smap,_protocol,type);
+    VisitorSemantic sem_check(varrw, _varmap, _smap, _pmap, _protocol, type);
 
     // exception will be thrown if all goes wrong.
 
@@ -238,11 +238,11 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
     _mod_term = _mod_term_import;
 
     // check the policy
-    semantic_check(ps,VisitorSemantic::IMPORT);
+    semantic_check(ps, VisitorSemantic::IMPORT);
 
     // generate the code
-    CodeGenerator cg(_protocol, _varmap);
-   
+    CodeGenerator cg(_protocol, _varmap, _pmap);
+
     // check modifier [a bit of a hack]
     if (_mod_term)
 	_mod_term->accept(cg);
@@ -280,7 +280,7 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
     semantic_check(ps, VisitorSemantic::EXPORT);
 
     // generate source match code
-    SourceMatchCodeGenerator smcg(tagstart, _varmap);
+    SourceMatchCodeGenerator smcg(tagstart, _varmap, _pmap);
     
     // check modifier [a bit of a hack]
     if (_mod_term)
@@ -289,7 +289,7 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
     ps.accept(smcg);
 
     // generate Export code
-    ExportCodeGenerator ecg(_protocol, smcg.tags(), _varmap);
+    ExportCodeGenerator ecg(_protocol, smcg.tags(), _varmap, _pmap);
 
     // check modifier [a bit of a hack]
     if (_mod_term)

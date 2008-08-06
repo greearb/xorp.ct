@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.16 2008/08/06 08:07:14 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.17 2008/08/06 08:10:43 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -27,7 +27,8 @@
 using namespace policy_utils;
 using policy_backend_parser::policy_backend_parse;
 
-PolicyFilter::PolicyFilter() : _policies(NULL), _profiler_exec(NULL)
+PolicyFilter::PolicyFilter() : _policies(NULL), _profiler_exec(NULL),
+			       _subr(NULL)
 {
     _exec.set_set_manager(&_sman);
 }
@@ -36,14 +37,17 @@ void PolicyFilter::configure(const string& str)
 {
     vector<PolicyInstr*>* policies = new vector<PolicyInstr*>();
     map<string,Element*>* sets = new map<string,Element*>();
+    SUBR* subr = new SUBR;
     string err;
-    
+
     // do the actual parsing
-    if (policy_backend_parse(*policies, *sets, str, err)) {
+    if (policy_backend_parse(*policies, *sets, *subr, str, err)) {
 	// get rid of temporary parse junk.
 	delete_vector(policies);
 	clear_map(*sets);
+	clear_map(*subr);
 	delete sets;
+	delete subr;
 	xorp_throw(ConfError, err);
     }
 
@@ -52,8 +56,10 @@ void PolicyFilter::configure(const string& str)
 
     // replace with new conf
     _policies = policies;
+    _subr = subr;
     _sman.replace_sets(sets);
     _exec.set_policies(_policies);
+    _exec.set_subr(_subr);
 }
 
 PolicyFilter::~PolicyFilter()
@@ -68,6 +74,13 @@ void PolicyFilter::reset()
 	_policies = NULL;
 	_exec.set_policies(NULL);
     }
+
+    if (_subr) {
+	clear_map(*_subr);
+	delete _subr;
+	_subr = NULL;
+    }
+
     _sman.clear();
 }
 

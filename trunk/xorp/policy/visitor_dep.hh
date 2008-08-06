@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2008 XORP, Inc.
+// Copyright (c) 2001-2008 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,24 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_setdep.hh,v 1.8 2008/07/23 05:11:21 pavlin Exp $
+// $XORP: xorp/policy/visitor_setdep.hh,v 1.7 2008/01/04 03:17:13 pavlin Exp $
 
-#ifndef __POLICY_VISITOR_SETDEP_HH__
-#define __POLICY_VISITOR_SETDEP_HH__
+#ifndef __POLICY_VISITOR_DEP_HH__
+#define __POLICY_VISITOR_DEP_HH__
+
+#include <string>
 
 #include "policy/common/policy_exception.hh"
 #include "visitor.hh"
 #include "set_map.hh"
+#include "policy_map.hh"
 #include "policy_statement.hh"
 #include "node.hh"
-#include <string>
 
 /**
  * @short This visitor is used to check what sets a policy uses.
  *
  * This is useful for set dependancy tracking.
  */
-class VisitorSetDep : public Visitor {
+class VisitorDep : public Visitor {
 public:
     /**
      * @short Semantic error thrown if set is not found.
@@ -44,7 +46,7 @@ public:
     /**
      * @param setmap The setmap used.
      */
-    VisitorSetDep(SetMap& setmap);
+    VisitorDep(SetMap& setmap, PolicyMap& pmap);
 
     const Element* visit(PolicyStatement& policy);
     const Element* visit(Term& term);
@@ -58,17 +60,20 @@ public:
     const Element* visit(NodeReject& node);
     const Element* visit(NodeProto& node);
     const Element* visit(NodeNext& node);
+    const Element* visit(NodeSubr& node);
 
     /**
      * @return the sets used by the policy.
      */
-    const set<string>& sets() const {
-	return _sets;
-    }
+    const DEPS& sets() const;
 
 private:
-    SetMap& _setmap;
-    set<string> _sets;
+    void commit_deps(PolicyStatement& policy);
+
+    SetMap&		_setmap;
+    PolicyMap&		_pmap;
+    DEPS		_sets;
+    DEPS		_policies;
 };
 
-#endif // __POLICY_VISITOR_SETDEP_HH__
+#endif // __POLICY_VISITOR_DEP_HH__

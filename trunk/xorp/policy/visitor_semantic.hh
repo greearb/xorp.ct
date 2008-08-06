@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.13 2008/08/06 08:17:07 abittau Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.14 2008/08/06 08:18:31 abittau Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
@@ -54,12 +54,13 @@ public:
      * @param varrw semantic VarRW used to simulate a protocol.
      * @param varmap the varmap.
      * @param setmap the SetMap to check if sets exist.
+     * @param pmap the policy map to check subroutines.
      * @param protocol the protocol which instantiates the policy.
      * @param ptype the type of policy [import/export].
      */
     VisitorSemantic(SemanticVarRW& varrw, VarMap& varmap, SetMap& setmap,
-		    const string& protocol, PolicyType ptype);
-    
+		    PolicyMap& pmap, const string& protocol, PolicyType ptype);
+
     const Element* visit(PolicyStatement& policy);
     const Element* visit(Term& term);
     const Element* visit(NodeUn& node);
@@ -72,6 +73,7 @@ public:
     const Element* visit(NodeReject& node);
     const Element* visit(NodeProto& node);
     const Element* visit(NodeNext& node);
+    const Element* visit(NodeSubr& node);
 
     /**
      * @return sets used by the policy.
@@ -86,10 +88,12 @@ private:
     const string&   semantic_protocol();
     const Element*  do_bin(const Element& left, const Element& right,
 			   const BinOper& op, const Node& from);
+    void	    do_policy_statement(PolicyStatement& ps);
 
     SemanticVarRW&  _varrw;
     VarMap&	    _varmap;
     SetMap&	    _setmap;
+    PolicyMap&	    _pmap;
     Dispatcher	    _disp;
     set<string>	    _sets;
     string	    _protocol;

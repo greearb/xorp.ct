@@ -12,14 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code.hh,v 1.9 2008/01/04 03:17:08 pavlin Exp $
+// $XORP: xorp/policy/code.hh,v 1.10 2008/07/23 05:11:17 pavlin Exp $
 
 #ifndef __POLICY_CODE_HH__
 #define __POLICY_CODE_HH__
 
-#include "policy/common/filter.hh"
 #include <string>
 #include <set>
+#include <map>
+
+#include "policy/common/filter.hh"
+
+typedef map<string, string>    SUBR; // XXX string* would be better...
 
 /**
  * @short This class represents the intermediate language code.
@@ -229,6 +233,10 @@ public:
 	    _redist_tags.insert(tag);
     }
 
+    void add_subr(const string& policy, const string& code);
+
+    const SUBR& subr() const;
+
     /**
      * @return string representation of code.
      */
@@ -245,7 +253,6 @@ public:
 
 private:
     Target	_target;
-
     string	_code;
     set<string>	_referenced_set_names;
 
@@ -255,6 +262,7 @@ private:
 
     TagSet	_all_tags;
     TagSet	_redist_tags;	// The tags used for route redistribution
+    SUBR	_subr;
 };
 
 #endif // __POLICY_CODE_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/source_match_code_generator.hh,v 1.11 2008/07/23 05:11:21 pavlin Exp $
+// $XORP: xorp/policy/source_match_code_generator.hh,v 1.12 2008/08/06 08:17:07 abittau Exp $
 
 #ifndef __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 #define __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
@@ -62,7 +62,8 @@ public:
      * @param tagstart the first policy tag available.
      * @param varmap the varmap.
      */
-    SourceMatchCodeGenerator(uint32_t tagstart, const VarMap& varmap);
+    SourceMatchCodeGenerator(uint32_t tagstart, const VarMap& varmap,
+			     PolicyMap& pmap);
 
     const Element* visit_policy(PolicyStatement& policy);
     const Element* visit_term(Term& term);

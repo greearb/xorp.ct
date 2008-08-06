@@ -23,6 +23,7 @@ map<string,Element*>*	policy_backend_parser::_yy_sets;
 vector<TermInstr*>*	policy_backend_parser::_yy_terms;
 vector<Instruction*>*	policy_backend_parser::_yy_instructions;
 bool			policy_backend_parser::_yy_trace;
+SUBR*			policy_backend_parser::_yy_subr;
 
 namespace {
 	string _last_error;
@@ -60,6 +61,8 @@ namespace {
 "NON_EMPTY_INTERSECTION"	{ return YY_NE_INT; }
 "NEXT"				{ return YY_NEXT; }
 "POLICY"			{ return YY_POLICY; }
+"SUBR_START"			{ return YY_SUBR_START; }
+"SUBR_END"			{ return YY_SUBR_END; }
 
 "=="		{ return YY_EQ; }
 "!="		{ return YY_NE; }
@@ -106,17 +109,19 @@ void yyerror(const char *m)
 int
 policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 					    map<string,Element*>& outsets,
+					    SUBR& subr,
 					    const string& conf,
 					    string& outerr)
 {
 
 	YY_BUFFER_STATE yybuffstate = yy_scan_string(conf.c_str());
-	
+
 	_last_error = "No error";
 	_parser_lineno = 1;
 
 	_yy_policies	 = &outpolicies;
 	_yy_sets	 = &outsets;
+	_yy_subr	 = &subr;
 	_yy_terms	 = new vector<TermInstr*>();
 	_yy_instructions = new vector<Instruction*>();
 	_yy_trace	 = false;

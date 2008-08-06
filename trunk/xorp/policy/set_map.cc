@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.12 2008/07/23 05:11:21 pavlin Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.13 2008/08/06 08:15:12 abittau Exp $"
 
 #include "policy_module.h"
 
@@ -122,15 +122,15 @@ SetMap::delete_from_set(const string& type, const string& name,
 }
 
 void 
-SetMap::add_dependancy(const string& setname, const string& policyname)
+SetMap::add_dependency(const string& setname, const string& policyname)
 {
-    _deps.add_dependancy(setname,policyname);
+    _deps.add_dependency(setname,policyname);
 }
 
 void 
-SetMap::del_dependancy(const string& setname, const string& policyname)
+SetMap::del_dependency(const string& setname, const string& policyname)
 {
-    _deps.del_dependancy(setname,policyname);
+    _deps.del_dependency(setname,policyname);
 }
 
 string

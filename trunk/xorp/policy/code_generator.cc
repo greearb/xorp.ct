@@ -13,19 +13,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.16 2008/08/06 08:17:06 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.17 2008/08/06 08:18:30 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
-#include "code_generator.hh"    
+#include "code_generator.hh"
+#include "policy_map.hh"
 
-CodeGenerator::CodeGenerator(const VarMap& varmap) : _varmap(varmap)
+CodeGenerator::CodeGenerator(const VarMap& varmap, PolicyMap& pmap) 
+	: _varmap(varmap), _pmap(pmap), _subr(false)
 {
 }
 
-CodeGenerator::CodeGenerator(const string& proto, 
+CodeGenerator::CodeGenerator(const string& proto,
 			     const filter::Filter& filter,
-			     const VarMap& varmap) : _varmap(varmap)
+			     const VarMap& varmap,
+			     PolicyMap& pmap)
+	: _varmap(varmap), _pmap(pmap), _subr(false)
 {
     _protocol = proto;
     _code.set_target_protocol(proto);
@@ -33,8 +37,9 @@ CodeGenerator::CodeGenerator(const string& proto,
 }
 
 // constructor for import policies
-CodeGenerator::CodeGenerator(const string& proto, const VarMap& varmap) : 
-				_varmap(varmap)
+CodeGenerator::CodeGenerator(const string& proto, const VarMap& varmap,
+			     PolicyMap& pmap) : _varmap(varmap), _pmap(pmap),
+			     _subr(false)
 {
     _protocol = proto;
     _code.set_target_protocol(proto);
@@ -240,6 +245,33 @@ CodeGenerator::visit(NodeNext& next)
     }
 
     _os << endl;
+
+    return NULL;
+}
+
+const Element*
+CodeGenerator::visit(NodeSubr& node)
+{
+    string policy       = node.policy();
+    PolicyStatement& ps = _pmap.find(policy);
+
+    string tmp = _os.str();
+    _os.clear();
+    _os.str("");
+
+    bool subr = _subr;
+    _subr = true;
+    visit(ps);
+    _subr = subr;
+
+    string code = _code.code();
+    _code.add_subr(policy, code);
+
+    _os.clear();
+    _os.str("");
+
+    _os << tmp;
+    _os << "POLICY " << policy << endl;
 
     return NULL;
 }

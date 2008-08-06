@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,14 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code.cc,v 1.10 2008/01/04 03:17:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/code.cc,v 1.11 2008/07/23 05:11:17 pavlin Exp $"
 
 #include "policy_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include "code.hh"
 
 bool
@@ -132,5 +130,20 @@ Code::operator+=(const Code& rhs)
 	_source_protocols.insert(*i);
     }
 
-    return *this;	
+    // add subroutines
+    _subr.insert(rhs._subr.begin(), rhs._subr.end());
+
+    return *this;
+}
+
+void
+Code::add_subr(const string& policy, const string& code)
+{
+    _subr[policy] = code;
+}
+
+const SUBR&
+Code::subr() const
+{
+    return _subr;
 }

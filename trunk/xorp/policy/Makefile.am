@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.11 2005/10/23 20:41:38 abittau Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.12 2008/08/06 08:12:51 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -39,7 +39,7 @@ libpolicy_la_SOURCES		+= code.hh
 libpolicy_la_SOURCES		+= code_generator.hh
 libpolicy_la_SOURCES		+= code_list.hh
 libpolicy_la_SOURCES		+= configuration.hh
-libpolicy_la_SOURCES		+= dependancy.hh
+libpolicy_la_SOURCES		+= dependency.hh
 libpolicy_la_SOURCES		+= export_code_generator.hh
 libpolicy_la_SOURCES		+= filter_manager.hh
 libpolicy_la_SOURCES		+= filter_manager_base.hh
@@ -62,7 +62,7 @@ libpolicy_la_SOURCES		+= var_map.hh
 libpolicy_la_SOURCES		+= visitor.hh
 libpolicy_la_SOURCES		+= visitor_printer.hh
 libpolicy_la_SOURCES		+= visitor_semantic.hh
-libpolicy_la_SOURCES		+= visitor_setdep.hh
+libpolicy_la_SOURCES		+= visitor_dep.hh
 libpolicy_la_SOURCES		+= xrl_target.hh
 
 libpolicy_la_SOURCES		+= code.cc
@@ -84,7 +84,7 @@ libpolicy_la_SOURCES		+= term.cc
 libpolicy_la_SOURCES		+= var_map.cc
 libpolicy_la_SOURCES		+= visitor_printer.cc
 libpolicy_la_SOURCES		+= visitor_semantic.cc
-libpolicy_la_SOURCES		+= visitor_setdep.cc
+libpolicy_la_SOURCES		+= visitor_dep.cc
 libpolicy_la_SOURCES		+= xrl_target.cc
 
 

@@ -19,12 +19,13 @@ extern void yyerror(const char*);
 
 using namespace policy_backend_parser;
 
-static ElementFactory _ef;
+static ElementFactory	_ef;
 
 %}
 
 %union {
-	char* c_str;
+	char*		c_str;
+	PolicyInstr*	c_pi;
 };
 
 %token <c_str> YY_ARG
@@ -38,11 +39,14 @@ static ElementFactory _ef;
 %token YY_REGEX
 %token YY_LOAD YY_STORE
 %token YY_ACCEPT YY_REJECT
-%token YY_SET YY_NEXT YY_POLICY
+%token YY_SET YY_NEXT YY_POLICY YY_SUBR_START YY_SUBR_END
+
+%type <c_pi> policy
 %%
 
 program:
-	  program policy
+	  program policy { _yy_policies->push_back($2); }
+	| program subroutine
 	| program set  
 	| /* empty */
 	;
@@ -54,19 +58,30 @@ set:
 		(*_yy_sets)[$3] = _ef.create($2, $4);
 		free($2); free($3); free($4);
 	  }
-	;  
+	;
 
-policy:	  YY_POLICY_START YY_ARG YY_NEWLINE terms YY_POLICY_END YY_NEWLINE {
-			PolicyInstr* pi = new PolicyInstr($2,_yy_terms);
+subroutine:
+	  YY_SUBR_START YY_NEWLINE policies YY_SUBR_END YY_NEWLINE
+	;
 
-			pi->set_trace(_yy_trace);
-			_yy_trace = false;
+policies:
+	  policies policy { (*_yy_subr)[$2->name()] = $2; }
+	| /* empty */
+	;
 
-			_yy_terms = new vector<TermInstr*>();
-			_yy_policies->push_back(pi);
+policy:	  YY_POLICY_START YY_ARG YY_NEWLINE terms YY_POLICY_END YY_NEWLINE
+	{
+		PolicyInstr* pi = new PolicyInstr($2,_yy_terms);
 
-			free($2);
-			}
+		pi->set_trace(_yy_trace);
+		_yy_trace = false;
+
+		_yy_terms = new vector<TermInstr*>();
+
+		free($2);
+
+		$$ = pi;
+	}
 	;
 
 terms:
@@ -160,5 +175,7 @@ statement:
 	| YY_REGEX	{ _yy_instructions->push_back(new NaryInstr(new OpRegex));}
 	| YY_NEXT YY_POLICY
 	{ _yy_instructions->push_back(new Next(Next::POLICY)); }
-	;  
+	| YY_POLICY YY_ARG
+	{ _yy_instructions->push_back(new Subr($2)); free($2); }
+	;
 %%

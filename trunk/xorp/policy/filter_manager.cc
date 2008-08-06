@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.17 2008/05/06 18:07:13 atanu Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.18 2008/07/23 05:11:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -326,13 +326,13 @@ FilterManager::update_queue(const string& protocol,
     // if a process is dead, erase it from the queue if it is there, and then do
     // nothing.
     bool alive = _process_watch.alive(protocol);
-    if(!alive) {
+    if (!alive) {
 	debug_msg("[POLICY] clearing update queue for dead protocol: %s\n",
 		  protocol.c_str());
 
         ConfQueue::iterator i = queue.find(protocol);
 
-        if(i != queue.end())
+        if (i != queue.end())
 	   queue.erase(i);
 
         return;
@@ -341,9 +341,10 @@ FilterManager::update_queue(const string& protocol,
     // check if there is any code present for this protocol, if not reset
     // filter.
     CodeMap::const_iterator i = cm.find(protocol);
-    if(i == cm.end()) {
+    if (i == cm.end()) {
         // reset filter
         queue[protocol] = "";
+
         return;
     }
 
@@ -355,16 +356,28 @@ FilterManager::update_queue(const string& protocol,
     const set<string>& set_names = code->referenced_set_names();
 
     // expand the set names
-    for(set<string>::const_iterator iter = set_names.begin();
+    for (set<string>::const_iterator iter = set_names.begin();
         iter != set_names.end(); ++iter) {
 
 	const string& name = *iter;
         const Element& e = _sets.getSet(*iter);
-	
+
 	conf += string("SET ") + e.type() + " " + name + " \"";
         conf += e.str();
         conf += "\"\n";
     }
+
+    // add subroutines
+    const SUBR& subr = code->subr();
+
+    if (!subr.empty())
+	conf += "SUBR_START\n";
+
+    for (SUBR::const_iterator i = subr.begin(); i != subr.end(); ++i)
+	conf += i->second;
+
+    if (!subr.empty())
+	conf += "SUBR_END\n";
 
     // send it the complete configuration [code + sets]
     queue[protocol] = conf;

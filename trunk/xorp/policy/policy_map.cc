@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_map.cc,v 1.10 2008/01/04 03:17:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_map.cc,v 1.11 2008/07/23 05:11:19 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -37,7 +37,7 @@ PolicyMap::exists(const string& name)
 void 
 PolicyMap::create(const string& name,SetMap& smap)
 {
-    PolicyStatement* ps = new PolicyStatement(name,smap);
+    PolicyStatement* ps = new PolicyStatement(name, smap, *this);
 
     if (!_deps.create(name,ps)) {
 	delete ps;
@@ -53,15 +53,15 @@ PolicyMap::delete_policy(const string& name)
 }
 
 void 
-PolicyMap::add_dependancy(const string& policyname, const string& protocol)
+PolicyMap::add_dependency(const string& policyname, const string& protocol)
 {
-    _deps.add_dependancy(policyname,protocol);
+    _deps.add_dependency(policyname,protocol);
 }
 
 void 
-PolicyMap::del_dependancy(const string& policyname, const string& protocol)
+PolicyMap::del_dependency(const string& policyname, const string& protocol)
 {
-    _deps.del_dependancy(policyname,protocol);
+    _deps.del_dependency(policyname,protocol);
 }
 
 string
