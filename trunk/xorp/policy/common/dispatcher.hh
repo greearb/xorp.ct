@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.11 2008/01/04 03:17:18 pavlin Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.12 2008/07/23 05:11:25 pavlin Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
@@ -223,8 +223,6 @@ private:
     static Value _map[32768];
 
     // Do initial registration of callbacks.
-    static RegisterOperations _regops;
-
     static unsigned _ophash;
     static unsigned _elemhash;
 };

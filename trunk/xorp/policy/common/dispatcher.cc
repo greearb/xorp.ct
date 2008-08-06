@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.13 2008/01/04 03:17:17 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.14 2008/07/23 05:11:25 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -29,7 +29,6 @@
 
 // init static members
 Dispatcher::Value Dispatcher::_map[32768];
-RegisterOperations Dispatcher::_regops;
 unsigned Dispatcher::_ophash = 1;
 unsigned Dispatcher::_elemhash = 1;
 

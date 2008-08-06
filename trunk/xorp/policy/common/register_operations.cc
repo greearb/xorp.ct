@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.24 2008/08/06 08:08:31 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.25 2008/08/06 08:10:18 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -74,11 +74,12 @@ ElemBool _false(false);
 template<class Unused, class Left, class Right> \
 Element* name(const Left& x, const Right& y) \
 { \
-    bool val = x.val() op y.val(); \
-    if (val) \
-	return &_true; \
-    else \
-	return &_false; \
+    bool val   = x.val() op y.val(); \
+    Element* r = val ? &_true : &_false; \
+    \
+    XLOG_ASSERT(r->refcount() > 1); \
+    \
+    return r; \
 }
 
 DEFINE_BINOP_BOOL(op_and, &&)
@@ -333,6 +334,9 @@ aspath_regex(const ElemASPath& left, const ElemSetStr& right)
 
     return new ElemBool(false);
 }
+
+// register callbacks
+RegisterOperations _regops;
 
 } // namespace
 
