@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/parser.cc,v 1.18 2008/01/04 03:17:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/parser.cc,v 1.19 2008/07/23 05:11:29 pavlin Exp $"
 
 #include <stdexcept>
 
@@ -263,7 +263,7 @@ Parser::parse(const string& s) const
     debug_msg("Parser::parse: %s\n", s.c_str());
 
     string str = prepare_line(s);
-    if (str[0] == '#')
+    if (s.empty() || str[0] == '#')
 	return XORP_OK;
 
     typedef map<string, Command* >::const_iterator CI;
