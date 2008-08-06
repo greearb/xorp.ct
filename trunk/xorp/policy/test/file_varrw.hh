@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/test/file_varrw.hh,v 1.11 2008/08/06 08:04:52 abittau Exp $
+// $XORP: xorp/policy/test/file_varrw.hh,v 1.12 2008/08/06 08:09:42 abittau Exp $
 
 #ifndef __POLICY_TEST_FILE_VARRW_HH__
 #define __POLICY_TEST_FILE_VARRW_HH__
@@ -44,12 +44,15 @@ public:
     void	    set_verbose(bool);
 
 private:
+    static const int MAX_TRASH = 666;
+
     bool doLine(const string& line);
     void clear_trash();
 
     const Element*  _map[VAR_MAX];
     ElementFactory  _ef;
-    set<Element*>   _trash;
+    Element*	    _trash[MAX_TRASH];
+    int		    _trashc;
     bool	    _verbose;
 };
 

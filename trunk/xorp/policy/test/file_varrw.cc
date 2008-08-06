@@ -13,13 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.14 2008/08/06 08:04:52 abittau Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.15 2008/08/06 08:09:42 abittau Exp $"
 
+#include "policy/policy_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "policy/common/policy_utils.hh"
 #include "file_varrw.hh"
 
-FileVarRW::FileVarRW() : _verbose(true)
+FileVarRW::FileVarRW() : _trashc(0), _verbose(true)
 {
     memset(_map, 0, sizeof(_map));
 }
@@ -88,7 +90,8 @@ FileVarRW::doLine(const string& str) {
 
     Element* e = _ef.create(type, value.c_str());
 
-    _trash.insert(e);
+    XLOG_ASSERT(_trashc < MAX_TRASH);
+    _trash[_trashc++] = e;
 
     if (_verbose)
 	cout << "FileVarRW adding variable " << varname 
@@ -143,13 +146,14 @@ FileVarRW::sync() {
 		    cout << i << ": " << e->str() << endl;
 	    }
     }
-
-    clear_trash();
 }
 
 void
 FileVarRW::clear_trash() {
-    policy_utils::clear_container(_trash);
+    while (_trashc--)
+	delete _trash[_trashc];
+
+    _trashc = 0;
 }
 
 void
