@@ -13,17 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.16 2008/08/06 08:23:25 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.17 2008/08/06 08:27:11 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
+
+#include <string>
 
 #include "libxipc/xrl_std_router.hh"
 #include "process_watch.hh"
 #include "configuration.hh"
 #include "filter_manager.hh"
 #include "policy/common/varrw.hh"
-#include <string>
 
 /**
  * @short The XORP Policy target.
@@ -244,7 +245,10 @@ public:
      */
     void set_proto_target(const string& protocol, const string& target);
 
+    string cli_command(const string& command);
     string test_policy(const string& arg);
+    string show(const string& arg);
+    void   show(const string& type, const string& name, RESOURCES& res);
     bool   test_policy(const string& policy, const string& prefix,
 		       const string& attributes, string& mods);
     bool   test_policy(const string& policy, const RATTR& attrs, RATTR& mods);

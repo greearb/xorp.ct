@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_map.hh,v 1.11 2008/08/06 08:22:58 abittau Exp $
+// $XORP: xorp/policy/policy_map.hh,v 1.12 2008/08/06 08:25:49 abittau Exp $
 
 #ifndef __POLICY_POLICY_MAP_HH__
 #define __POLICY_POLICY_MAP_HH__
 
 #include <string>
+#include <vector>
 
 #include "policy/common/policy_exception.hh"
 #include "policy_statement.hh"
@@ -31,6 +32,8 @@
  */
 class PolicyMap {
 public:
+    typedef Dependency<PolicyStatement>::KEYS    KEYS;
+
     /**
      * @short Exception thrown on errors such as when a policy is not found.
      */
@@ -104,6 +107,7 @@ public:
     void clear() { _deps.clear(); }
 
     void policy_deps(const string& policy, DEPS& deps);
+    void policies(KEYS& out);
 
 private:
     // internally, policystatements are held as pointers.

@@ -13,14 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.13 2008/08/06 08:15:12 abittau Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.14 2008/08/06 08:22:18 abittau Exp $"
 
 #include "policy_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "set_map.hh"
-
 
 const Element&
 SetMap::getSet(const string& name) const
@@ -140,8 +137,7 @@ SetMap::str() const
 
     string ret;
 
-
-    while(_deps.has_next(i)) {
+    while (_deps.has_next(i)) {
 	Dep::ObjPair op(_deps.next(i));
 
 	ret += op.name + ": ";
@@ -150,4 +146,19 @@ SetMap::str() const
     }
 
     return ret;
+}
+
+void
+SetMap::sets_by_type(SETS& s, const string& type) const
+{
+    Dep::Map::const_iterator i = _deps.get_iterator();
+
+    while (_deps.has_next(i)) {
+	Dep::ObjPair op(_deps.next(i));
+
+	const Element* e = &op.object;
+
+	if (type.compare(e->type()) == 0)
+	    s.push_back(op.name);
+    }
 }

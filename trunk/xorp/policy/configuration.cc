@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.28 2008/08/06 08:26:15 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.29 2008/08/06 08:27:10 abittau Exp $"
 
 #include "libxorp/xorp.h"
 #include "policy_module.h"
@@ -21,6 +21,7 @@
 #include "visitor_dep.hh"
 #include "policy/common/policy_utils.hh"
 #include "visitor_test.hh"
+#include "visitor_printer.hh"
 
 using namespace policy_utils;
 
@@ -581,6 +582,58 @@ Configuration::test_policy(const string& policy, const RATTR& attr, RATTR& mods)
     ps.accept(test);
 
     return test.accepted();
+}
+
+void
+Configuration::show(const string& type, const string& name, RESOURCES& res)
+{
+    if (type == "policy-statement")
+	show_policies(name, res);
+    else
+	show_sets(type, name, res);
+}
+
+void
+Configuration::show_policies(const string& name, RESOURCES& res)
+{
+    PolicyMap::KEYS p;
+
+    _policies.policies(p);
+
+    for (PolicyMap::KEYS::iterator i = p.begin(); i != p.end(); ++i) {
+	string n = *i;
+
+	if (!name.empty() && name.compare(n) != 0)
+	    continue;
+
+	PolicyStatement& ps = _policies.find(n);
+
+	ostringstream oss;
+	VisitorPrinter printer(oss);
+
+	ps.accept(printer);
+
+	res[n] = oss.str();
+    }
+}
+
+void
+Configuration::show_sets(const string& type, const string& name, RESOURCES& res)
+{
+    SETS s;
+
+    _sets.sets_by_type(s, type);
+
+    for (SETS::iterator i = s.begin(); i != s.end(); ++i) {
+	string n = *i;
+
+	if (!name.empty() && name.compare(n) != 0)
+	    continue;
+
+	const Element& e = _sets.getSet(n);
+
+	res[n] = e.str();
+    }
 }
 
 IEMap::IEMap()

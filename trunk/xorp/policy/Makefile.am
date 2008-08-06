@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.14 2008/08/06 08:24:10 abittau Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.15 2008/08/06 08:27:10 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -72,6 +72,7 @@ libpolicy_la_SOURCES		+= code.cc
 libpolicy_la_SOURCES		+= code_generator.cc
 libpolicy_la_SOURCES		+= code_list.cc
 libpolicy_la_SOURCES		+= configuration.cc
+libpolicy_la_SOURCES		+= dependency.cc
 libpolicy_la_SOURCES		+= export_code_generator.cc
 libpolicy_la_SOURCES		+= filter_manager.cc
 libpolicy_la_SOURCES		+= parser.cc

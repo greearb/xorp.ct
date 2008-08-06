@@ -13,15 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/set_map.hh,v 1.9 2008/07/23 05:11:21 pavlin Exp $
+// $XORP: xorp/policy/set_map.hh,v 1.10 2008/08/06 08:22:18 abittau Exp $
 
 #ifndef __POLICY_SET_MAP_HH__
 #define __POLICY_SET_MAP_HH__
 
+#include <string>
+#include <vector>
+
 #include "policy/common/element_factory.hh"
 #include "policy/common/policy_exception.hh"
 #include "dependency.hh"
-#include <string>
+
+typedef vector<string>	SETS;
 
 /**
  * @short Container of all sets.
@@ -136,6 +140,8 @@ public:
      * @return string representation of all sets.
      */
     string str() const;
+
+    void sets_by_type(SETS& s, const string& type) const;
 
 private:
     typedef Dependency<Element> Dep;

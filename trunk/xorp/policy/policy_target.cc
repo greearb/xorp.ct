@@ -13,17 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.20 2008/08/06 08:23:25 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.21 2008/08/06 08:27:11 abittau Exp $"
 
 #include "policy_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "policy/common/policy_utils.hh"
 #include "policy/common/varrw.hh"
-
 #include "policy_target.hh"
-
 
 // static members
 string PolicyTarget::policy_target_name = "policy";
@@ -211,7 +207,6 @@ PolicyTarget::test_policy(const string& args)
 
     // We receive the following string:
     // policyname prefix [route attributes]
-    // If present, route attributes are enclosed in quotes.
 
     // parse policy
     string::size_type i = args.find(' ', 0);
@@ -229,15 +224,18 @@ PolicyTarget::test_policy(const string& args)
 	prefix = args.substr(i, j - i);
 
 	j += 1;
-	if (args.find('"') != j)
-	    xorp_throw(PolicyException, "Enclose args in quotes");
 
-	string::size_type k = args.find_last_of('"');
-	if (j == k || k != (args.length() - 1))
-	    xorp_throw(PolicyException, "Missing last quote");
+	// strip quotes if present
+	if (args.find('"') == j) {
 
-	j++;
-	attributes = args.substr(j, k - j);
+	    string::size_type k = args.find_last_of('"');
+	    if (j == k || k != (args.length() - 1))
+	        xorp_throw(PolicyException, "Missing last quote");
+
+	    j++;
+	    attributes = args.substr(j, k - j);
+	} else
+	    attributes = args.substr(j);
     }
 
     string route;
@@ -314,4 +312,62 @@ PolicyTarget::parse_attributes(const string& attr, RATTR& out)
 
 	out[name] = value;
     }
+}
+
+string
+PolicyTarget::cli_command(const string& cmd)
+{
+    string command;
+    string arg;
+    
+    string::size_type i = cmd.find(' ');
+    if (i == string::npos)
+	command = cmd;
+    else {
+	command = cmd.substr(0, i);
+	arg = cmd.substr(i + 1);
+    }
+
+    if (command.compare("test") == 0)
+	return test_policy(arg);
+    else if (command.compare("show") == 0)
+	return show(arg);
+    else
+	xorp_throw(PolicyException, "Unknown command");
+}
+
+string
+PolicyTarget::show(const string& arg)
+{
+    string type;
+    string name;
+
+    string::size_type i = arg.find(' ');
+    if (i == string::npos)
+	type = arg;
+    else {
+	type = arg.substr(0, i);
+	name = arg.substr(i + 1);
+    }
+
+    RESOURCES res;
+
+    show(type, name, res);
+
+    ostringstream oss;
+
+    for (RESOURCES::iterator i = res.begin(); i != res.end(); ++i) {
+	if (name.empty())
+	    oss << i->first << "\t";
+
+	oss << i->second << endl;
+    }
+
+    return oss.str();
+}
+
+void
+PolicyTarget::show(const string& type, const string& name, RESOURCES& res)
+{
+    _conf.show(type, name, res);
 }

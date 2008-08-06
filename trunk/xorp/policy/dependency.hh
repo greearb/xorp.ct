@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/dependancy.hh,v 1.10 2008/01/04 03:17:09 pavlin Exp $
+// $XORP: xorp/policy/dependency.hh,v 1.1 2008/08/06 08:22:17 abittau Exp $
 
 #ifndef __POLICY_DEPENDENCY_HH__
 #define __POLICY_DEPENDENCY_HH__
@@ -21,6 +22,7 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <set>
 
 #include "policy/common/policy_exception.hh"
 
@@ -43,12 +45,14 @@ class Dependency {
 public:
     // things that depend on object
     typedef list<string>	    DependencyList;
-    
+
     // object dependency pair.
     typedef pair<T*,DependencyList> Pair;
-    
+
     // object of this name has these dependencies
     typedef map<string,Pair*>	    Map;
+
+    typedef set<string>		    KEYS;
 
     struct ObjPair {
 	const string& name;
@@ -57,7 +61,6 @@ public:
 	ObjPair(const string& n, const T& o) : name(n), object(o) {}
     };
    
-
     /**
      * @short Exception thrown if an illegal action is requested.
      *
@@ -70,23 +73,10 @@ public:
 	: PolicyException("DependencyError", file, line, init_why) {} 
     };
 
+    Dependency();
+    ~Dependency();
 
-
-    Dependency() {}
-
-    ~Dependency() { clear(); }
-
-    void clear()
-    {
-	for (typename Map::iterator i = _map.begin(); i != _map.end(); ++i) {
-	    Pair* p = (*i).second;
-	    if (p->first != NULL) {
-		delete p->first;
-	    }
-	    delete p;
-	}
-	_map.clear();
-    }
+    void clear();
 
     /**
      * Checks if an object is present in the container.
@@ -94,9 +84,7 @@ public:
      * @return true if object is contained. False otherwise.
      * @param objectname name of the object.
      */
-    bool exists(const string& objectname) const {
-	return _map.find(objectname) != _map.end();
-    }
+    bool exists(const string& objectname) const;
 
     /**
      * Attempts to create an object. If creation is successfull, the object
@@ -109,17 +97,7 @@ public:
      * @param objectname name of the object.
      * @param object the actual object.
      */
-    bool create(const string& objectname, T* object)
-    {
-	if (exists(objectname))
-	    return false;
-	
-	Pair* p = new Pair(object, DependencyList());
-
-	_map[objectname] = p;
-	return true;
-	
-    }
+    bool create(const string& objectname, T* object);
 
     /**
      * Tries to remove and delete an object. Checks if object is in use [non
@@ -129,38 +107,7 @@ public:
      *
      * @param objectname object to remove and delete.
      */
-    void remove(const string& objectname)
-    {
-	typename Map::iterator i = _map.find(objectname);
-
-	if (i == _map.end())
-	    xorp_throw(DependencyError,
-		       "Dependency remove: Cannot find object " + objectname);
-	
-	Pair* p = (*i).second;
-
-	DependencyList& s = (*p).second;
-
-	// check if object is in use
-	if(!s.empty()) {
-	    ostringstream oss;
-
-	    oss << "Dependency remove: Object " << objectname
-	        << " in use by: ";
-
-	    for (DependencyList::iterator j = s.begin(); j != s.end(); ++j)
-		oss << *j << " ";
-		
-	    xorp_throw(DependencyError, oss.str());
-	}
-
-	// delete object
-	if(p->first)
-	    delete p->first;
-	delete p;
-
-	_map.erase(i);
-    }
+    void remove(const string& objectname);
 
     /**
      * Adds dependencies to this object. A dependency is another object which
@@ -171,14 +118,8 @@ public:
      * @param objectname name of object to which dependency should be added.
      * @param dep name of object which depends on objectname.
      */
-    void add_dependency(const string& objectname, const string& dep) {
-	Pair* p = findDepend(objectname);
+    void add_dependency(const string& objectname, const string& dep);
 
-	DependencyList& s = (*p).second;
-
-	s.push_back(dep);
-    }
-    
     /**
      * Deletes a dependency on an object.
      *
@@ -187,13 +128,7 @@ public:
      * @param objectname name of object to which dependency should be removed.
      * @param dep name of dependency to remove.
      */
-    void del_dependency(const string& objectname, const string& dep) {
-	Pair* p = findDepend(objectname);
-
-	DependencyList& s = (*p).second;
-
-	s.remove(dep);
-    }
+    void del_dependency(const string& objectname, const string& dep);
 
     /**
      * Returns the object being searched for.
@@ -201,13 +136,7 @@ public:
      * @param objectname name of object to return.
      * @return object requested.
      */
-    T& find(const string& objectname) const {
-	Pair* p = findDepend(objectname);
-
-	T* x = (*p).first;
-
-	return *x;
-    }
+    T& find(const string& objectname) const;
 
     /**
      * Returns a pointer the object being searched for.
@@ -215,17 +144,7 @@ public:
      * @param objectname name of object to return.
      * @return a pointer to the object requested if found, otherwise NULL.
      */
-    T* find_ptr(const string& objectname) const {
-	typename Map::const_iterator i = _map.find(objectname);
-
-	if (i == _map.end())
-	    return (NULL);
-
-	Pair* p = i->second;
-	T* x = (*p).first;
-
-	return x;
-    }
+    T* find_ptr(const string& objectname) const;
 
     /**
      * Obtains the dependency list for an object.
@@ -235,13 +154,7 @@ public:
      * @param objectname name of object for which dependency list is requested.
      * @param deps set of strings filled with dependency list.
      */
-    void get_deps(const string& objectname, set<string>& deps) const {
-	Pair* p = findDepend(objectname);
-
-	DependencyList& s = (*p).second;
-	for(typename DependencyList::iterator i = s.begin(); i != s.end(); ++i)
-	    deps.insert(*i); // duplicates are removed [set]
-    }
+    void get_deps(const string& objectname, set<string>& deps) const;
 
     /**
      * Replaces an object. The previous one is deleted.
@@ -252,16 +165,7 @@ public:
      * @param objectname name of object to replace.
      * @param obj the new object.
      */
-    void update_object(const string& objectname,T* obj) {
-	Pair* p = findDepend(objectname);
-
-	// delete old
-	if(p->first)
-	    delete p->first;
-
-	// replace [dependencies are maintained]
-	p->first = obj;
-    }
+    void update_object(const string& objectname,T* obj);
 
     // XXX: this interface has to be re-done...
     /**
@@ -269,9 +173,7 @@ public:
      *
      * @return iterator for Dependency container.
      */
-    typename Map::const_iterator get_iterator() const {
-	return _map.begin();
-    }
+    typename Map::const_iterator get_iterator() const;
 
     /**
      * Checks if more objects are available with this iterator.
@@ -279,9 +181,7 @@ public:
      * @return true if more objects are available. False otherwise.
      * @param i iterator to use.
      */
-    bool has_next(const typename Map::const_iterator& i) const {
-	return i != _map.end();
-    }
+    bool has_next(const typename Map::const_iterator& i) const;
 
     /**
      * Returns the next object pair and increments the iterator.
@@ -291,42 +191,18 @@ public:
      * @return the object pair associated with the iterator.
      * @param i iterator that points to object. Iterator is then incremented.
      */
-    ObjPair next(typename Map::const_iterator& i) const {
-	if(i == _map.end())
-	    xorp_throw(DependencyError, "No more objects");
-	
+    ObjPair next(typename Map::const_iterator& i) const;
 
-	Pair* p = (*i).second;
-	
-	const T* obj = p->first;
-
-	ObjPair ret((*i).first,*obj);
-
-	i++;
-
-	return ret;
-    }
+    void keys(KEYS& out) const;
 
 private:
     Map _map;
-    
-    
-    Pair* findDepend(const string& objectname) const {
-	typename Map::const_iterator i = _map.find(objectname);
 
-	if(i == _map.end())
-	    xorp_throw(DependencyError,
-		       "Dependency: Cannot find object of name " + objectname);
-
-	return (*i).second;    
-    }
-
+    Pair* findDepend(const string& objectname) const;
 
     // not impl
     Dependency(const Dependency&);
     Dependency& operator=(const Dependency&);
-
-
 };
 
 #endif // __POLICY_DEPENDENCY_HH__

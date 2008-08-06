@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,15 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_map.cc,v 1.12 2008/08/06 08:22:18 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_map.cc,v 1.13 2008/08/06 08:22:57 abittau Exp $"
 
 #include "policy_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "visitor_printer.hh"
 #include "policy_map.hh"
-
 
 PolicyStatement& 
 PolicyMap::find(const string& name) const
@@ -98,4 +96,10 @@ PolicyMap::policy_deps(const string& policy, DEPS& deps)
 	if (exists(name))
 	    deps.insert(name);
     }
+}
+
+void
+PolicyMap::policies(KEYS& out)
+{
+    _deps.keys(out);
 }

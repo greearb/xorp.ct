@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_printer.cc,v 1.11 2008/08/06 08:22:19 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_printer.cc,v 1.12 2008/08/06 08:24:58 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -47,31 +47,36 @@ VisitorPrinter::visit(Term& term)
     Term::Nodes& actions = term.action_nodes();
     Term::Nodes::iterator i;
 
-    _out << "term " << term.name() << " {" << endl;
+    _out << "\tterm " << term.name() << " {" << endl;
 
-    _out << "source {" << endl;
+    _out << "\t\tfrom {" << endl;
     // do source block
-    for(i = source.begin(); i != source.end(); ++i) {
+    for (i = source.begin(); i != source.end(); ++i) {
+	_out << "\t\t\t";
         (i->second)->accept(*this);
 	_out << ";" << endl;
     }
-    _out << "}" << endl;
+    _out << "\t\t}" << endl;
 
-    _out << "dest {" << endl;
+    _out << "\t\tto {" << endl;
     // do dest block
-    for(i = dest.begin(); i != dest.end(); ++i) {
+    for (i = dest.begin(); i != dest.end(); ++i) {
+	_out << "\t\t\t";
         (i->second)->accept(*this);
 	_out << ";" << endl;
     }
-    _out << "}" << endl;
+    _out << "\t\t}" << endl;
 
-    _out << "action {" << endl;
+    _out << "\t\tthen {" << endl;
     // do action block
-    for(i = actions.begin(); i != actions.end(); ++i) {
+    for (i = actions.begin(); i != actions.end(); ++i) {
+	_out << "\t\t\t";
         (i->second)->accept(*this);
 	_out << ";" << endl;
     }
-    _out << "}" << endl;
+    _out << "\t\t}" << endl;
+
+    _out << "\t}" << endl;
 
     return NULL;
 }

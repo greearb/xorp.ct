@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.17 2008/08/06 08:23:25 abittau Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.18 2008/08/06 08:27:11 abittau Exp $"
 
 #include "policy_module.h"
 
@@ -379,7 +379,7 @@ XrlPolicyTarget::cli_processor_0_1_process_command(
 	ret_cli_term_name  = cli_term_name;
 	ret_cli_session_id = cli_session_id;
 
-	ret_command_output = _policy_target.test_policy(command_name);
+	ret_command_output = _policy_target.cli_command(command_name);
 
     } catch (const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());

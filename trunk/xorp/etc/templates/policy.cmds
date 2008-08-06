@@ -6,13 +6,68 @@ test {
 }
 
 test policy $(policy.policy-statement.*) <prefix> {
-    %command: "cli/tools/send_cli_processor_xrl -t policy -- $3 $4" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- test $3 $4" %help: HELP;
     %module: policy;
     %tag: HELP "Test a routing policy";
 }
 
 test policy $(policy.policy-statement.*) <prefix> <route attributes> {
-    %command: "cli/tools/send_cli_processor_xrl -t policy -- $3 $4 $5" %help: HELP;
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- test $3 $4 $5" %help: HELP;
     %module: policy;
     %tag: HELP "Test a routing policy";
+}
+
+show policy {
+    %command: "" %help: HELP;
+    %tag: HELP "Show policy information";
+}
+
+show policy network4-list {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_ipv4net" %help: HELP;
+    %tag: HELP "Show network4 lists";
+}
+
+show policy network4-list $(policy.network4-list.*) {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_ipv4net $4" %help: HELP;
+    %tag: HELP "Show network4 list";
+}
+
+show policy network6-list {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_ipv6net" %help: HELP;
+    %tag: HELP "Show network6 lists";
+}
+
+show policy network6-list $(policy.network6-list.*) {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_ipv6net $4" %help: HELP;
+    %tag: HELP "Show network6 list";
+}
+
+show policy community-list {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_com32" %help: HELP;
+    %tag: HELP "Show community lists";
+}
+
+show policy community-list $(policy.community-list.*) {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_com32 $4" %help: HELP;
+    %tag: HELP "Show community list";
+}
+
+show policy as-path-list {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_str" %help: HELP;
+    %tag: HELP "Show AS path lists";
+}
+
+show policy as-path-list $(policy.as-path-list.*) {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show set_str $4" %help: HELP;
+    %tag: HELP "Show AS path list";
+}
+
+show policy policy-statement {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show policy-statement" %help: HELP;
+    %tag: HELP "Show policy statements";
+}
+
+show policy policy-statement $(policy.policy-statement.*) {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- show policy-statement $4" %help: HELP;
+    %tag: HELP "Show policy statement";
 }

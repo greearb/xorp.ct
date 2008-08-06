@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.17 2008/08/06 08:22:57 abittau Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.18 2008/08/06 08:27:11 abittau Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -31,6 +31,7 @@ typedef Code::TargetSet	    TARGETSET;
 typedef uint32_t	    tag_t;
 typedef set<tag_t>	    TagSet;
 typedef map<string, string> RATTR;
+typedef map<string, string> RESOURCES;
 
 // XXX we go reverse in order to make peer specific policies override global
 // ones.  Global is "" so it's always smallest (first).
@@ -310,6 +311,9 @@ public:
     void clear_imports(const string& protocol);
     void clear_exports(const string& protocol);
     bool test_policy(const string& policy, const RATTR& attrs, RATTR& mods);
+    void show(const string& type, const string& name, RESOURCES& res);
+    void show_sets(const string& type, const string& name, RESOURCES& res);
+    void show_policies(const string& name, RESOURCES& res);
 
 private:
     /**

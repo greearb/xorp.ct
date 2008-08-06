@@ -48,13 +48,13 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libpolicy_la_LIBADD =
 am_libpolicy_la_OBJECTS = code.lo code_generator.lo code_list.lo \
-	configuration.lo export_code_generator.lo filter_manager.lo \
-	parser.lo policy_list.lo policy_map.lo policy_statement.lo \
-	process_watch.lo protocol_map.lo semantic_varrw.lo set_map.lo \
-	source_match_code_generator.lo term.lo test_varrw.lo \
-	var_map.lo visitor_dep.lo visitor_printer.lo \
-	visitor_semantic.lo visitor_test.lo xrl_target.lo \
-	yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
+	configuration.lo dependency.lo export_code_generator.lo \
+	filter_manager.lo parser.lo policy_list.lo policy_map.lo \
+	policy_statement.lo process_watch.lo protocol_map.lo \
+	semantic_varrw.lo set_map.lo source_match_code_generator.lo \
+	term.lo test_varrw.lo var_map.lo visitor_dep.lo \
+	visitor_printer.lo visitor_semantic.lo visitor_test.lo \
+	xrl_target.lo yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
 libpolicy_la_OBJECTS = $(am_libpolicy_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -271,7 +271,7 @@ libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh \
 	source_match_code_generator.hh term.hh test_varrw.hh \
 	var_map.hh visitor.hh visitor_dep.hh visitor_printer.hh \
 	visitor_semantic.hh visitor_test.hh xrl_target.hh code.cc \
-	code_generator.cc code_list.cc configuration.cc \
+	code_generator.cc code_list.cc configuration.cc dependency.cc \
 	export_code_generator.cc filter_manager.cc parser.cc \
 	policy_list.cc policy_map.cc policy_statement.cc \
 	process_watch.cc protocol_map.cc semantic_varrw.cc set_map.cc \
@@ -369,6 +369,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/code_generator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/code_list.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/configuration.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dependency.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/export_code_generator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filter_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.yy_policy_parser.Plo@am__quote@
