@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/policybench.cc,v 1.5 2008/08/06 08:11:45 abittau Exp $"
+#ident "$XORP: xorp/policy/test/policybench.cc,v 1.6 2008/08/06 08:11:59 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "policy/common/policy_utils.hh"
@@ -77,6 +77,7 @@ struct conf {
     string	c_varrw_file;
     unsigned	c_iterations;
     int		c_type;
+    int		c_profiler;
 
     // stats
     TimeVal	    c_start;
@@ -115,6 +116,7 @@ usage(const string& progname)
 	 << "-v\t<varrw file>"	    << endl
 	 << "-i\t<iterations>"	    << endl
 	 << "-t\t<benchmark type>"  << endl
+	 << "-n\tdisable profiler"  << endl
          << "-h\thelp"		    << endl
 	 << endl
 	 << "Supported benchmark types:" << endl
@@ -289,9 +291,14 @@ main(int argc, char* argv[])
 
     _conf.c_iterations = 100000;
     _conf.c_type       = 0;
+    _conf.c_profiler   = 1;
 
-    while ((opt = getopt(argc, argv, "hp:v:i:t:")) != -1) {
+    while ((opt = getopt(argc, argv, "hp:v:i:t:n")) != -1) {
 	switch (opt) {
+	    case 'n':
+		_conf.c_profiler = 0;
+		break;
+
 	    case 't':
 		_conf.c_type = atoi(optarg);
 		break;
@@ -324,7 +331,8 @@ main(int argc, char* argv[])
     xlog_add_default_output();
     xlog_start();
 
-    PolicyProfiler::set_get_time(GET_TIME);
+    if (_conf.c_profiler)
+	PolicyProfiler::set_get_time(GET_TIME);
 
     try {
 	own();
