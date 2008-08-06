@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2008 International Computer Science Institute
+// Copyright (c) 2008 XORP, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_profiler.hh,v 1.1 2008/08/06 08:05:45 abittau Exp $
+// $XORP: xorp/policy/backend/policy_profiler.hh,v 1.2 2008/08/06 08:06:07 abittau Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_PROFILER_HH__
 #define __POLICY_BACKEND_POLICY_PROFILER_HH__
