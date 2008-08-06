@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.94 2007/03/28 00:37:09 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.95 2007/12/10 23:26:36 mjh Exp $ */
 
 protocols {
     bgp {
@@ -50,6 +50,9 @@ protocols {
 	    ipv6-multicast: bool = false;
 
 /*	    md5-password: txt = "";*/
+
+	    import: txt = "";
+	    export: txt = "";
 	}
 
 /*
@@ -374,7 +377,19 @@ protocols {
 		%set: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(@)";
 		%delete: xrl "$(bgp.targetname)/bgp/0.3/set_parameter?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&parameter:txt=MultiProtocol.IPv6.Multicast&toggle:bool=$(DEFAULT)";
 	    }
-	}
+
+	    import {
+	        %help: short "Import policy";
+	        %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#";
+	        %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#$(@)";
+	    }
+
+	    export {
+	        %help: short "Export policy";
+	        %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#";
+	        %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=#neighbor == $(peer.@);#$(@)";
+	    }
+	} /* peer */
 
 /*
 	network4 @: ipv4net {

@@ -5,7 +5,7 @@
 #include "libxorp/xorp.h"
 
 #include "policy/test/compilepolicy.hh"
-#include "yacc.yy_compile_policy.cc.h"
+#include "yacc.yy_compile_policy.hh"
 #include "policy/common/policy_utils.hh"
 #include <sstream>
 

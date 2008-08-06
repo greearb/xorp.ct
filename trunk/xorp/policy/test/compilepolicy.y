@@ -86,33 +86,35 @@ add_blocks(const string& pname, const string& tname, yy_tb& term)
 configuration:
 	  configuration policy_statement
 	| configuration set
-	| configuration YY_EXPORT YY_ID YY_STR YY_SEMICOLON {
-				list<string> tmp;
+	| configuration YY_EXPORT YY_ID YY_STR YY_SEMICOLON
+	{
+		list<string> tmp;
 
-				string proto = $3;
-				string pols = $4;
+		string proto = $3;
+		string pols = $4;
 
-				free($3);
-				free($4);
-			
-				policy_utils::str_to_list(pols,tmp);
+		free($3);
+		free($4);
+	
+		policy_utils::str_to_list(pols,tmp);
 
-				_yy_configuration.update_exports(proto,tmp);
-				}
+		_yy_configuration.update_exports(proto, tmp, "");
+	}
 
-	| configuration YY_IMPORT YY_ID YY_STR YY_SEMICOLON {
-				list<string> tmp;
+	| configuration YY_IMPORT YY_ID YY_STR YY_SEMICOLON
+	{
+		list<string> tmp;
 
-				string proto = $3;
-				string pols = $4;
+		string proto = $3;
+		string pols = $4;
 
-				free($3);
-				free($4);
-			
-				policy_utils::str_to_list(pols,tmp);
+		free($3);
+		free($4);
+	
+		policy_utils::str_to_list(pols,tmp);
 
-				_yy_configuration.update_imports(proto,tmp);
-				}
+		_yy_configuration.update_imports(proto, tmp, "");
+	}
 	| /* empty */
 	;
 

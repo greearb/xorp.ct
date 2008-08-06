@@ -11,21 +11,16 @@
  * yyrcsid
  */
 
-#include "policy_module.h"
-
-#include "libxorp/xorp.h"
-
 #include <vector>
 
+#include "policy_module.h"
+#include "libxorp/xorp.h"
 #include "policy/common/element.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
-
 #include "policy_parser.hh"
 
-
-extern int yylex(void);
-
+extern int  yylex(void);
 extern void yyerror(const char *m);
 
 using namespace policy_parser;
@@ -41,23 +36,16 @@ static ElementFactory _ef;
 
 %token <c_str> YY_BOOL YY_INT YY_UINT YY_UINTRANGE YY_STR YY_ID 
 %token <c_str> YY_IPV4 YY_IPV4RANGE YY_IPV4NET YY_IPV6 YY_IPV6RANGE YY_IPV6NET
+%token YY_SEMICOLON YY_LPAR YY_RPAR YY_ASSIGN YY_SET YY_REGEX
+%token YY_ACCEPT YY_REJECT YY_PROTOCOL YY_NEXT YY_POLICY
 
 %left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD YY_CTR YY_NE_INT
-%left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_LE YY_GE
-%left YY_IPNET_EQ YY_IPNET_LE YY_IPNET_GT YY_IPNET_LT YY_IPNET_LE YY_IPNET_GE
+%left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_GE
+%left YY_IPNET_EQ YY_IPNET_LE YY_IPNET_GT YY_IPNET_LT YY_IPNET_GE
 %left YY_ADD YY_SUB
 %left YY_MUL
 
-%token YY_SEMICOLON YY_LPAR YY_RPAR
-
-%token YY_ASSIGN
-%token YY_SET YY_REGEX
-
-%token YY_ACCEPT YY_REJECT
-
-%token YY_PROTOCOL
-
-%type <node> actionstatement boolstatement boolexpr expr
+%type <node> actionstatement action boolstatement boolexpr expr
 %%
 
 statement:
@@ -67,16 +55,21 @@ statement:
 	;
 
 actionstatement:
-	  YY_ID YY_ASSIGN expr YY_SEMICOLON 
-	  { $$ = new NodeAssign($1,$3,_parser_lineno); free($1); }
-	| YY_ACCEPT YY_SEMICOLON { $$ = new NodeAccept(_parser_lineno); }
-	| YY_REJECT YY_SEMICOLON { $$ = new NodeReject(_parser_lineno); }
+	  action YY_SEMICOLON { $$ = $1; }
 	; 
+
+action:
+	  YY_ID YY_ASSIGN expr
+	  { $$ = new NodeAssign($1,$3,_parser_lineno); free($1); }
+	| YY_ACCEPT { $$ = new NodeAccept(_parser_lineno); }
+	| YY_REJECT { $$ = new NodeReject(_parser_lineno); }
+	| YY_NEXT YY_POLICY
+	  { $$ = new NodeNext(_parser_lineno, NodeNext::POLICY); }
+	;
 
 boolstatement:
 	  boolexpr YY_SEMICOLON { $$ = $1; }
 	;
-
 
 boolexpr:
 	  YY_PROTOCOL YY_EQ YY_ID { $$ = new NodeProto($3,_parser_lineno); free($3); }
@@ -131,5 +124,4 @@ expr:
 	| YY_IPV4NET { $$ = new NodeElem(_ef.create(ElemIPv4Net::id,$1),_parser_lineno); free($1); }
 	| YY_IPV6NET { $$ = new NodeElem(_ef.create(ElemIPv6Net::id,$1),_parser_lineno); free($1); }
         ;
-
 %%

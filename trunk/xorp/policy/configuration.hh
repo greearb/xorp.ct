@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.13 2008/01/04 03:17:09 pavlin Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.14 2008/07/23 05:11:18 pavlin Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -26,6 +26,46 @@
 #include "filter_manager_base.hh"
 #include "var_map.hh"
 
+typedef list<string>	POLICIES;
+typedef Code::TargetSet	TARGETSET;
+typedef uint32_t	tag_t;
+typedef set<tag_t>	TagSet;
+
+// XXX we go reverse in order to make peer specific policies override global
+// ones.  Global is "" so it's always smallest (first).
+#define FOR_ALL_POLICIES(n) \
+    for (PROTOCOL::reverse_iterator i = _protocols.rbegin(); \
+	 i != _protocols.rend(); ++i) \
+	for (POLICY::reverse_iterator n = i->second->rbegin(); \
+	    n != i->second->rend(); ++n)
+
+class IEMap {
+public:
+    typedef map<string, PolicyList*>	POLICY; // modifier -> policy list
+    typedef map<string, POLICY*>	PROTOCOL; // protocol -> modifiers
+
+    IEMap();
+    ~IEMap();
+
+    PolicyList* find(const string& proto, const string& mod);
+    void	insert(const string& proto, const string& mod, PolicyList* pl);
+    void	clear();
+    void	clear(TARGETSET& ts);
+    void	get_targets(const string& proto, const string& mod,
+			    TARGETSET& targets);
+    void	compile(PolicyStatement& ps, TARGETSET& targets, tag_t& tag);
+    void	compile(TARGETSET& targets, tag_t& tag);
+    void	link_code(Code& code);
+    void	link_code(const string& proto, Code& code);
+    void	get_redist_tags(const string& proto, TagSet& ts);
+
+private:
+    POLICY*	find_policy(const string& proto);
+    void	clear(POLICY* p);
+
+    PROTOCOL	_protocols;
+};
+
 /**
  * @short Class that contains all configuration and generated code state.
  *
@@ -37,7 +77,6 @@
 class Configuration {
 public:
     typedef map<string,Code*> CodeMap;
-    typedef set<uint32_t> TagSet;
     typedef map<string,TagSet*> TagMap;
 
    
@@ -175,7 +214,8 @@ public:
      * @param protocol name of protocol which should have imports updated.
      * @param imports list of policy-names.
      */
-    void update_imports(const string& protocol, const list<string>& imports);
+    void update_imports(const string& protocol, const POLICIES& imports,
+		        const string& mod);
 
     /**
      * Throws an exception on failure.
@@ -184,7 +224,8 @@ public:
      * @param protocol name of protocol which should have exports updated.
      * @param exports list of policy-names.
      */
-    void update_exports(const string& protocol, const list<string>& exports);
+    void update_exports(const string& protocol, const POLICIES& exports,
+			const string& mod);
 
     /**
      * @return string representation of configuration
@@ -265,10 +306,10 @@ public:
      */
     string dump_state(uint32_t id);
 
+    void clear_imports(const string& protocol);
+    void clear_exports(const string& protocol);
+
 private:
-    typedef map<string,PolicyList*> IEMap;
-
-
     /**
      * Throws an exception if no term is found.
      *
@@ -321,39 +362,29 @@ private:
      */
     void link_code();
 
-    void update_ie(const string& protocol, const list<string>& policies, 
-		   IEMap& iemap, PolicyList::PolicyType pt);
+    void update_ie(const string& protocol, const POLICIES& policies, 
+		   IEMap& iemap, PolicyList::PolicyType pt, const string& mod);
 
     void link_code(const Code::Target& target, IEMap& iemap, CodeMap& codemap);
     
     string codemap_str(CodeMap& cm);
 
-    PolicyMap _policies;
-
-    IEMap _imports;
-    IEMap _exports;
-
-    SetMap _sets;
-
     typedef set<string> PolicySet;
-    PolicySet _modified_policies;
 
-    Code::TargetSet _modified_targets;
-
-    ElementFactory _ef;
-
-    CodeMap _import_filters;
-    CodeMap _sourcematch_filters;
-    CodeMap _export_filters;
-
-    uint32_t _currtag;
-
-    TagMap _tagmap;
-
-    VarMap _varmap;
-
-    // do not delete
-    FilterManagerBase* _filter_manager;
+    PolicyMap		    _policies;
+    IEMap		    _imports;
+    IEMap		    _exports;
+    SetMap		    _sets;
+    PolicySet		    _modified_policies;
+    TARGETSET		    _modified_targets;
+    ElementFactory	    _ef;
+    CodeMap		    _import_filters;
+    CodeMap		    _sourcematch_filters;
+    CodeMap		    _export_filters;
+    tag_t		    _currtag;
+    TagMap		    _tagmap;
+    VarMap		    _varmap;
+    FilterManagerBase*	    _filter_manager; // do not delete
 
     // not impl
     Configuration(const Configuration&);

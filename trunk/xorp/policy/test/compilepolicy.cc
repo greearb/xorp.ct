@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.13 2008/01/04 03:17:21 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.14 2008/07/23 05:11:28 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -56,7 +56,6 @@ Configuration _yy_configuration(pw);
 
 typedef Configuration::CodeMap CodeMap;
 typedef Configuration::TagMap TagMap;
-typedef Configuration::TagSet TagSet;
 
 ofstream* code_out = NULL;
 

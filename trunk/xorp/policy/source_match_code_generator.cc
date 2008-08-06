@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.16 2008/01/04 03:17:12 pavlin Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.17 2008/07/23 05:11:21 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -32,31 +32,17 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
 
-    PolicyStatement::TermContainer::iterator i;
+    _policy = policy.name();
 
     // go through all the terms
-    for (i = terms.begin(); i != terms.end(); ++i) {
-	// reset code and sets
-	_os.str("");
-	_code.clear_referenced_set_names();
-
+    for (PolicyStatement::TermContainer::iterator i = terms.begin();
+         i != terms.end(); ++i) {
 	Term* term = i->second;
-	// make sure the source of the term has something [non empty source]
-	if (term->source_nodes().size()) {
-	    term->accept(*this);
-
-	    // term may be for a new target, so deal with that.
-	    addTerm(policy.name());
-	}
-	else {
-	    _tags.push_back(Taginfo(false, _currtag));
-	}
+	term->accept(*this);
     }
 
     // mark the end for all policies
-    for (CodeMap::iterator i = _codes.begin();
- 	 i != _codes.end(); ++i) {
-
+    for (CodeMap::iterator i = _codes.begin(); i != _codes.end(); ++i) {
         Code* c = (*i).second;
         c->add_code("POLICY_END\n");
 
@@ -67,7 +53,7 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
 }
 
 void 
-SourceMatchCodeGenerator::addTerm(const string& pname)
+SourceMatchCodeGenerator::addTerm()
 {
     // copy the code for the term
     Code* term = new Code();
@@ -91,13 +77,34 @@ SourceMatchCodeGenerator::addTerm(const string& pname)
         return;
     }
 
+    XLOG_ASSERT(!_policy.empty());
+
     // code for a new target, need to create policy start header.
-    term->set_code("POLICY_START " + pname + "\n" + _os.str());
+    term->set_code("POLICY_START " + _policy + "\n" + _os.str());
     _codes[_protocol] = term;
 }
 
-const Element* 
+const Element*
 SourceMatchCodeGenerator::visit_term(Term& term)
+{
+    // reset code and sets
+    _os.str("");
+    _code.clear_referenced_set_names();
+
+    // make sure the source of the term has something [non empty source]
+    if (term.source_nodes().size()) {
+	do_term(term);
+
+	// term may be for a new target, so deal with that.
+	addTerm();
+    } else
+	_tags.push_back(Taginfo(false, _currtag));
+
+    return NULL;
+}
+
+void
+SourceMatchCodeGenerator::do_term(Term& term)
 {
     Term::Nodes& source = term.source_nodes();
 
@@ -185,8 +192,6 @@ SourceMatchCodeGenerator::visit_term(Term& term)
 
     // FIXME: integer overflow
     _currtag++;
-
-    return NULL;
 }
 
 const Element* 

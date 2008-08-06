@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instruction.hh,v 1.10 2008/01/04 03:17:15 pavlin Exp $
+// $XORP: xorp/policy/backend/instruction.hh,v 1.11 2008/07/23 05:11:23 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
 #define __POLICY_BACKEND_INSTRUCTION_HH__
@@ -171,6 +171,22 @@ public:
     INSTR_VISITABLE();
 };
 
+class Next : public Instruction {
+public:
+    enum Flow {
+	TERM,
+	POLICY
+    };
+
+    Next(Flow f) : _flow(f) {}
+
+    Flow flow() { return _flow; }
+
+    INSTR_VISITABLE();
+
+private:
+    Flow    _flow;
+};
 
 /**
  * @short An N-ary operation.

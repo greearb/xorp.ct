@@ -13,15 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/source_match_code_generator.hh,v 1.10 2008/01/04 03:17:12 pavlin Exp $
+// $XORP: xorp/policy/source_match_code_generator.hh,v 1.11 2008/07/23 05:11:21 pavlin Exp $
 
 #ifndef __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 #define __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 
-#include "policy/common/policy_exception.hh"
-#include "code_generator.hh"
 #include <vector>
 #include <string>
+
+#include "policy/common/policy_exception.hh"
+#include "code_generator.hh"
 
 /**
  * @short Code generator for source match filters.
@@ -62,11 +63,9 @@ public:
      * @param varmap the varmap.
      */
     SourceMatchCodeGenerator(uint32_t tagstart, const VarMap& varmap);
-    
+
     const Element* visit_policy(PolicyStatement& policy);
-
     const Element* visit_term(Term& term);
-
     const Element* visit_proto(NodeProto& node);
 
     /**
@@ -97,24 +96,23 @@ protected:
 
 private:
     typedef map<string,Code*> CodeMap;
-    
+
+    void do_term(Term& term);
+
     /**
      * Adds the the code of the current term being analyzed.
-     *
-     * @param pname name of the policy statement
      */
-    void addTerm(const string& pname);
+    void addTerm();
 
-    uint32_t _currtag;
-    string _protocol;
-    CodeMap _codes;
-    
+    uint32_t			_currtag;
+    string			_protocol;
+    CodeMap			_codes;
     // FIXME: who deletes these on exception ?
-    vector<Code*> _codes_vect; 
-    
-    Tags _tags;
-    map<string, set<uint32_t> > _protocol_tags;
-    bool _protocol_statement;
+    vector<Code*>		_codes_vect; 
+    Tags			_tags;
+    map<string, set<uint32_t> >	_protocol_tags;
+    bool			_protocol_statement;
+    string			_policy;
 
     // not impl
     SourceMatchCodeGenerator(const SourceMatchCodeGenerator&);

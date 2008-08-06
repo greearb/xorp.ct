@@ -1,12 +1,12 @@
 %{
 
-#include "libxorp/xorp.h"
-
-#include "policy/common/policy_utils.hh"
-#include "policy_backend_parser.hh"
-#include "yacc.yy_policy_backend_parser.cc.h"
 #include <assert.h>
 #include <sstream>
+
+#include "libxorp/xorp.h"
+#include "policy/common/policy_utils.hh"
+#include "policy_backend_parser.hh"
+#include "yacc.yy_policy_backend_parser.hh"
 
 #define yyparse yy_policy_backend_parserparse
 #define yyerror yy_policy_backend_parsererror
@@ -16,7 +16,7 @@ using namespace policy_utils;
 using namespace policy_backend_parser;
 
 void yyerror(const char*);
-int yyparse(void);
+int  yyparse(void);
 
 vector<PolicyInstr*>*	policy_backend_parser::_yy_policies;
 map<string,Element*>*	policy_backend_parser::_yy_sets;
@@ -38,24 +38,28 @@ namespace {
 %x STR
 %%
 
-"POLICY_START"	{ return YY_POLICY_START; }
-"POLICY_END"	{ return YY_POLICY_END; }
-
-"TERM_START"	{ return YY_TERM_START; }
-"TERM_END"	{ return YY_TERM_END; }
-
-"SET"		{ return YY_SET; }
-
-"PUSH"		{ return YY_PUSH; }
-"PUSH_SET"	{ return YY_PUSH_SET; }
-
-"REGEX"		{ return YY_REGEX; }
-
-"LOAD"		{ return YY_LOAD; }
-"STORE"		{ return YY_STORE; }
-
-"ACCEPT"	{ return YY_ACCEPT; }
-"REJECT"	{ return YY_REJECT; }
+"POLICY_START"			{ return YY_POLICY_START; }
+"POLICY_END"			{ return YY_POLICY_END; }
+"TERM_START"			{ return YY_TERM_START; }
+"TERM_END"			{ return YY_TERM_END; }
+"SET"				{ return YY_SET; }
+"PUSH"				{ return YY_PUSH; }
+"PUSH_SET"			{ return YY_PUSH_SET; }
+"REGEX"				{ return YY_REGEX; }
+"LOAD"				{ return YY_LOAD; }
+"STORE"				{ return YY_STORE; }
+"ACCEPT"			{ return YY_ACCEPT; }
+"REJECT"			{ return YY_REJECT; }
+"NOT"				{ return YY_NOT; }
+"AND"				{ return YY_AND; }
+"XOR"				{ return YY_XOR; }
+"OR"				{ return YY_OR; }
+"HEAD"				{ return YY_HEAD; }
+"CTR"				{ return YY_CTR; }
+"ONFALSE_EXIT"		 	{ return YY_ONFALSE_EXIT; }
+"NON_EMPTY_INTERSECTION"	{ return YY_NE_INT; }
+"NEXT"				{ return YY_NEXT; }
+"POLICY"			{ return YY_POLICY; }
 
 "=="		{ return YY_EQ; }
 "!="		{ return YY_NE; }
@@ -63,22 +67,9 @@ namespace {
 ">"		{ return YY_GT; }
 "<="		{ return YY_LE; }
 ">="		{ return YY_GE; }
-
-"NOT"		{ return YY_NOT; }
-"AND"		{ return YY_AND; }
-"XOR"		{ return YY_XOR; }
-"OR"		{ return YY_OR; }
-"HEAD"		{ return YY_HEAD; }
-
-"CTR"		{ return YY_CTR; }
-
 "+"		{ return YY_ADD; }
 "\-"		{ return YY_SUB; }
 "*"		{ return YY_MUL; }
-
-"ONFALSE_EXIT"	{ return YY_ONFALSE_EXIT; }
-
-"NON_EMPTY_INTERSECTION" { return YY_NE_INT; }
 
 "\n"		{ _parser_lineno++; return YY_NEWLINE; }
 

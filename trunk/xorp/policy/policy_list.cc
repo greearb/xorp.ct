@@ -13,23 +13,49 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.12 2008/01/04 03:17:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.13 2008/07/23 05:11:19 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
-
 #include "policy_list.hh"
 #include "visitor_semantic.hh"
 #include "export_code_generator.hh"
 #include "source_match_code_generator.hh"
 
 PolicyList::PolicyList(const string& p, PolicyType pt, 
-		       PolicyMap& pmap, SetMap& smap, VarMap& vmap) :
-	
-	_protocol(p), _type(pt), _pmap(pmap), _smap(smap), _varmap(vmap) 
+		       PolicyMap& pmap, SetMap& smap, VarMap& vmap,
+		       string mod)
+		       : _protocol(p), _type(pt), _pmap(pmap),
+		         _smap(smap), _varmap(vmap), _mod(mod),
+			 _mod_term(NULL), _mod_term_import(NULL),
+			 _mod_term_export(NULL)
 {
+    if (!_mod.empty()) {
+	    _mod_term_import = create_mod(Term::SOURCE);
+	    _mod_term_export = create_mod(Term::DEST);
+    }
 }
-    
+
+Term*
+PolicyList::create_mod(Term::BLOCKS block)
+{
+    // We add the modifier term at the beginning of each policy.  If it matches,
+    // we continue executing the policy, else we go to the next one.
+    Term* t  = new Term("__mod"); // XXX leak if exception is thrown below
+
+    ConfigNodeId nid(0, 0);
+
+    string statement = "not " + _mod;
+    t->set_block(block, nid, statement);
+    t->set_block_end(block);
+
+    statement = "next policy;";
+    t->set_block(Term::ACTION, nid, statement);
+    t->set_block_end(Term::ACTION);
+
+    return t;
+}
+
 PolicyList::~PolicyList()
 {
     for(PolicyCodeList::iterator i = _policies.begin(); 
@@ -41,6 +67,9 @@ PolicyList::~PolicyList()
 
 	delete (*i).second;
     }
+
+    delete _mod_term_import;
+    delete _mod_term_export;
 }
 
 void 
@@ -141,15 +170,15 @@ void
 PolicyList::link_code(Code& ret)
 {
     // go through all the policies, and link the code
-    for(PolicyCodeList::iterator i = _policies.begin();
-	i != _policies.end(); ++i) {
+    for (PolicyCodeList::iterator i = _policies.begin();
+	 i != _policies.end(); ++i) {
 
 	CodeList* cl = (*i).second;
 
 	// because of target set in ret, only relevant code will be linked.
 	cl->link_code(ret);
 
-    }    
+    }
 }
 
 void 
@@ -193,6 +222,11 @@ PolicyList::semantic_check(PolicyStatement& ps,
     VisitorSemantic sem_check(varrw, _varmap, _smap,_protocol,type);
 
     // exception will be thrown if all goes wrong.
+
+    // check modifier [a bit of a hack]
+    if (_mod_term)
+	_mod_term->accept(sem_check);
+
     ps.accept(sem_check);
 }
 
@@ -201,11 +235,18 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
 			   PolicyStatement& ps,
 			   Code::TargetSet& modified_targets)
 {
+    _mod_term = _mod_term_import;
+
     // check the policy
     semantic_check(ps,VisitorSemantic::IMPORT);
 
     // generate the code
     CodeGenerator cg(_protocol, _varmap);
+   
+    // check modifier [a bit of a hack]
+    if (_mod_term)
+	_mod_term->accept(cg);
+
     ps.accept(cg);
 
     // make a copy of the code
@@ -233,15 +274,27 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
 			   Code::TargetSet& modified_targets, 
 			   uint32_t& tagstart)
 {
+    _mod_term = _mod_term_export;
+
     // make sure policy makes sense
     semantic_check(ps, VisitorSemantic::EXPORT);
 
     // generate source match code
     SourceMatchCodeGenerator smcg(tagstart, _varmap);
+    
+    // check modifier [a bit of a hack]
+    if (_mod_term)
+	_mod_term->accept(smcg);
+
     ps.accept(smcg);
 
     // generate Export code
     ExportCodeGenerator ecg(_protocol, smcg.tags(), _varmap);
+
+    // check modifier [a bit of a hack]
+    if (_mod_term)
+	_mod_term->accept(ecg);
+
     ps.accept(ecg);
 
     // update the global tag start

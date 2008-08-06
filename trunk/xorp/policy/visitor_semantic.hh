@@ -13,22 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.11 2008/01/04 03:17:13 pavlin Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.12 2008/07/23 05:11:21 pavlin Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
 
 #include "libxorp/xorp.h"
-
 #include "policy/common/varrw.hh"
 #include "policy/common/dispatcher.hh"
-
 #include "visitor.hh"
 #include "semantic_varrw.hh"
 #include "set_map.hh"
 #include "policy_statement.hh"
 #include "node.hh"
-
 
 /**
  * @short A policy semantic checker.
@@ -74,6 +71,7 @@ public:
     const Element* visit(NodeAccept& node);
     const Element* visit(NodeReject& node);
     const Element* visit(NodeProto& node);
+    const Element* visit(NodeNext& node);
 
     /**
      * @return sets used by the policy.
@@ -87,20 +85,16 @@ private:
     void change_protocol(const string& proto);
     const string& semantic_protocol();
 
-    SemanticVarRW& _varrw;
-    VarMap& _varmap;
-    SetMap& _setmap;
-    Dispatcher _disp;
-
-    set<string> _sets;
-
-    string _protocol;
-    string _current_protocol;
-    string _semantic_protocol;
-
-    PolicyType _ptype;
-
-    set<Element*> _trash;
+    SemanticVarRW&  _varrw;
+    VarMap&	    _varmap;
+    SetMap&	    _setmap;
+    Dispatcher	    _disp;
+    set<string>	    _sets;
+    string	    _protocol;
+    string	    _current_protocol;
+    string	    _semantic_protocol;
+    PolicyType	    _ptype;
+    set<Element*>   _trash;
 
     // not impl
     VisitorSemantic(const VisitorSemantic&);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.17 2008/01/04 03:17:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.18 2008/07/23 05:11:20 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -128,14 +128,34 @@ PolicyTarget::delete_from_set(const string& type, const string& name,
 }
 
 void
+PolicyTarget::parse_policies(const string& polin, POLICIES& polout, string& mod)
+{
+    if (polin.length() == 0)
+	return;
+
+    string p; // policies
+
+    if (polin.at(0) == '#') {
+	int idx = polin.find_last_of('#');
+
+	p   = polin.substr(idx+1);
+	mod = polin.substr(1, idx-1);
+    } else
+	p = polin;
+
+    policy_utils::str_to_list(p, polout);
+}
+
+void
 PolicyTarget::update_import(const string& protocol,
 			    const string& policies)
 {
-    // convert the policies to a list
-    list<string> pols;
-    policy_utils::str_to_list(policies,pols);
+    string   mod;
+    POLICIES p;
 
-    _conf.update_imports(protocol,pols);
+    parse_policies(policies, p, mod);
+
+    _conf.update_imports(protocol, p, mod);
 
     // commit after a bit, as we may get conf changes... especially on "global
     // conf change" or at startup
@@ -146,11 +166,12 @@ void
 PolicyTarget::update_export(const string& protocol,
 			    const string& policies)
 {
-    // convert policies to a list
-    list<string> pols;
-    policy_utils::str_to_list(policies,pols);
+    string   mod;
+    POLICIES p;
 
-    _conf.update_exports(protocol,pols);
+    parse_policies(policies, p, mod);
+
+    _conf.update_exports(protocol, p, mod);
 
     // try to aggregate commits by delaying them
     _conf.commit(_commit_delay);
@@ -185,12 +206,11 @@ PolicyTarget::birth(const string& tclass, const string& /* tinstance */)
 void
 PolicyTarget::death(const string& tclass, const string& /* tinstance */)
 {
-    list<string> no_policy;
-
     // Remove the "import" and "export" dependencies for the protocol
     string protocol = _pmap.protocol(tclass);
-    _conf.update_imports(protocol, no_policy);
-    _conf.update_exports(protocol, no_policy);
+
+    _conf.clear_imports(protocol);
+    _conf.clear_exports(protocol);
 
     _process_watch.death(tclass);
 }

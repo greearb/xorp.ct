@@ -13,22 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.17 2008/08/06 08:08:30 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.18 2008/08/06 08:10:16 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "policy_module.h"
-
-#include "libxorp/xorp.h"
-#include "libxorp/debug.h"
-
 #include <sstream>
 
+#include "policy_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 #include "policy/common/elem_null.hh"
-
 #include "visitor_semantic.hh"
-
 
 VisitorSemantic::VisitorSemantic(SemanticVarRW& varrw, 
 				 VarMap& varmap,
@@ -281,4 +277,10 @@ const string&
 VisitorSemantic::semantic_protocol()
 {
     return _semantic_protocol;
+}
+
+const Element*
+VisitorSemantic::visit(NodeNext& /* node */)
+{
+    return NULL;
 }

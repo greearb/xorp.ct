@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instr_visitor.hh,v 1.6 2008/01/04 03:17:15 pavlin Exp $
+// $XORP: xorp/policy/backend/instr_visitor.hh,v 1.7 2008/07/23 05:11:23 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_INSTR_VISITOR_HH__
 #define __POLICY_BACKEND_INSTR_VISITOR_HH__
@@ -26,8 +26,8 @@ class Load;
 class Store;
 class Accept;
 class Reject;
-
 class NaryInstr;
+class Next;
 
 /**
  * @short Visitor pattern to traverse a structure of instructions.
@@ -46,6 +46,7 @@ public:
     virtual void visit(Accept&) = 0;
     virtual void visit(Reject&) = 0;
     virtual void visit(NaryInstr&) = 0;
+    virtual void visit(Next&) = 0;
 };
 
 #endif // __POLICY_BACKEND_INSTR_VISITOR_HH__

@@ -13,13 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.10 2008/01/04 03:17:13 pavlin Exp $"
-
-#include "policy_module.h"
-#include "libxorp/xorp.h"
+#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.11 2008/07/23 05:11:21 pavlin Exp $"
 
 #include <vector>
 
+#include "policy_module.h"
+#include "libxorp/xorp.h"
 #include "visitor_setdep.hh"
 
 VisitorSetDep::VisitorSetDep(SetMap& setmap) : _setmap(setmap) 
@@ -139,6 +138,12 @@ VisitorSetDep::visit(NodeReject& /* node */)
 
 const Element* 
 VisitorSetDep::visit(NodeProto& /* node */)
+{
+    return NULL;
+}
+
+const Element*
+VisitorSetDep::visit(NodeNext& /* node */)
 {
     return NULL;
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.13 2008/01/04 03:17:10 pavlin Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.14 2008/07/23 05:11:20 pavlin Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -243,14 +243,14 @@ public:
     void set_proto_target(const string& protocol, const string& target);
 
 private:
-    bool _running;
-    uint32_t _commit_delay;
+    void parse_policies(const string& polin, POLICIES& polout, string& mod);
 
+    bool	    _running;
+    uint32_t	    _commit_delay;
     ProtocolMap	    _pmap;
     ProcessWatch    _process_watch;
     Configuration   _conf;
     FilterManager   _filter_manager;
-
 };
 
 #endif // __POLICY_POLICY_TARGET_HH__

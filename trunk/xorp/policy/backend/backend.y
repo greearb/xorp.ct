@@ -3,21 +3,18 @@
  * yacc -d -p yy_policy_backend_parser -o yacc.yy_policy_backend_parser.cc backend.y
  */
 
-#include "libxorp/xorp.h"
-
 #include <vector>
 
+#include "libxorp/xorp.h"
 #include "policy/common/varrw.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
-
 #include "policy_backend_parser.hh"
 #include "instruction.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
 
-
-extern int yylex(void);
+extern int  yylex(void);
 extern void yyerror(const char*);
 
 using namespace policy_backend_parser;
@@ -41,7 +38,7 @@ static ElementFactory _ef;
 %token YY_REGEX
 %token YY_LOAD YY_STORE
 %token YY_ACCEPT YY_REJECT
-%token YY_SET
+%token YY_SET YY_NEXT YY_POLICY
 %%
 
 program:
@@ -161,6 +158,7 @@ statement:
 	| YY_CTR	{ _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 	| YY_NE_INT	{ _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
 	| YY_REGEX	{ _yy_instructions->push_back(new NaryInstr(new OpRegex));}
+	| YY_NEXT YY_POLICY
+	{ _yy_instructions->push_back(new Next(Next::POLICY)); }
 	;  
-
 %%

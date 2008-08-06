@@ -13,14 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.14 2008/01/04 03:17:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.15 2008/07/23 05:11:18 pavlin Exp $"
 
 #include "policy_module.h"
-
 #include "libxorp/xorp.h"
-
 #include "code_generator.hh"    
-
 
 CodeGenerator::CodeGenerator(const VarMap& varmap) : _varmap(varmap)
 {
@@ -51,20 +48,23 @@ CodeGenerator::~CodeGenerator()
 const Element* 
 CodeGenerator::visit_policy(PolicyStatement& policy)
 {
-    _os << "POLICY_START " << policy.name() << endl;
-
     PolicyStatement::TermContainer& terms = policy.terms();
 
     // go through all the terms
-    for(PolicyStatement::TermContainer::iterator i = terms.begin(); 
-	i != terms.end(); ++i) {
+    for (PolicyStatement::TermContainer::iterator i = terms.begin(); 
+	 i != terms.end(); ++i) {
 	
 	(i->second)->accept(*this);
     }	    
 
-    _os << "POLICY_END\n";
+    ostringstream oss;
 
-    _code.set_code(_os.str());
+    oss << "POLICY_START " << policy.name() << endl;
+    oss << _os.str();
+    oss << "POLICY_END" << endl;
+
+    _code.set_code(oss.str());
+
     return NULL;
 }
 
@@ -217,4 +217,20 @@ const string&
 CodeGenerator::protocol()
 {
     return _protocol;
+}
+
+const Element*
+CodeGenerator::visit(NodeNext& next)
+{
+    _os << "NEXT ";
+
+    switch (next.flow()) {
+    case NodeNext::POLICY:
+	_os << "POLICY";
+	break;
+    }
+
+    _os << endl;
+
+    return NULL;
 }

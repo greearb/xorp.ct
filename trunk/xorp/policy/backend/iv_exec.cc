@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.23 2008/08/06 08:10:43 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.24 2008/08/06 08:11:44 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -99,6 +99,9 @@ IvExec::runPolicy(PolicyInstr& pi)
     if (_do_trace)
 	_os << "Running policy: " << pi.name() << endl;
 
+    // execute terms sequentially
+    _ctr_flow = Next::TERM;
+
     // run all terms
     for (int i = 0; i < termc ; ++i) {
 	FlowAction fa = runTerm(*terms[i]);
@@ -107,7 +110,10 @@ IvExec::runPolicy(PolicyInstr& pi)
 	if (fa != DEFAULT) {
 	    outcome = fa;
 	    break;
-	}    
+	}
+
+	if (_ctr_flow == Next::POLICY)
+	    break;
     }
 
     if (_do_trace)
@@ -274,7 +280,28 @@ IvExec::visit(Accept& /* a */)
     if(_do_trace)
 	_os << "ACCEPT" << endl;
 }
-    
+
+void
+IvExec::visit(Next& next)
+{
+    _finished = true;
+    _ctr_flow = next.flow();
+
+    if (_do_trace) {
+	_os << "NEXT ";
+
+	switch (_ctr_flow) {
+	case Next::TERM:
+	    _os << "TERM";
+	    break;
+
+	case Next::POLICY:
+	    _os << "POLICY";
+	    break;
+	}
+    }
+}
+
 void 
 IvExec::visit(Reject& /* r */)
 {

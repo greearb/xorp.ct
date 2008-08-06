@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_list.hh,v 1.6 2008/01/04 03:17:10 pavlin Exp $
+// $XORP: xorp/policy/policy_list.hh,v 1.7 2008/07/23 05:11:19 pavlin Exp $
 
 #ifndef __POLICY_POLICY_LIST_HH__
 #define __POLICY_POLICY_LIST_HH__
@@ -53,7 +53,7 @@ public:
      */
     PolicyList(const string& p, PolicyType pt, 
 	       PolicyMap& pmap,
-	       SetMap& smap, VarMap& vmap);
+	       SetMap& smap, VarMap& vmap, string mod);
 
     ~PolicyList();
 
@@ -155,20 +155,18 @@ private:
     void compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
 			Code::TargetSet& modified_targets, uint32_t& tagstart);
 
+    Term* create_mod(Term::BLOCKS block);
 
-			
-    string _protocol;
-    PolicyType _type;
-
-    PolicyCodeList _policies;
-
-
-
-    PolicyMap& _pmap;
-
-    SetMap& _smap;
-    VarMap& _varmap;
-
+    string	    _protocol;
+    PolicyType	    _type;
+    PolicyCodeList  _policies;
+    PolicyMap&	    _pmap;
+    SetMap&	    _smap;
+    VarMap&	    _varmap;
+    string	    _mod;
+    Term*	    _mod_term;
+    Term*	    _mod_term_import;
+    Term*	    _mod_term_export;
 
     // not impl
     PolicyList(const PolicyList&);

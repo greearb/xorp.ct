@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.22 2008/01/04 03:17:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.23 2008/07/23 05:11:18 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -31,8 +31,8 @@ Configuration::Configuration(ProcessWatchBase& pw) :
 
 Configuration::~Configuration()
 {
-    clear_map(_imports);
-    clear_map(_exports);
+    _imports.clear();
+    _exports.clear();
 
     clear_map(_import_filters);
     clear_map(_sourcematch_filters);
@@ -158,21 +158,21 @@ Configuration::delete_from_set(const string& type, const string& set,
 }
 
 void 
-Configuration::update_imports(const string& protocol, 
-			      const list<string>& imports)
+Configuration::update_imports(const string& protocol, const POLICIES& imports,
+			      const string& mod)
 {
-   
     // check if protocol exists
-    if(!_varmap.protocol_known(protocol))
+    if (!_varmap.protocol_known(protocol))
 	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
 
-    update_ie(protocol,imports,_imports,PolicyList::IMPORT);
-    _modified_targets.insert(Code::Target(protocol,filter::IMPORT));
+    update_ie(protocol, imports, _imports, PolicyList::IMPORT, mod);
+    _modified_targets.insert(Code::Target(protocol, filter::IMPORT));
 }
 
 void 
 Configuration::update_exports(const string& protocol, 
-			      const list<string>& exports)
+			      const POLICIES& exports,
+			      const string& mod)
 {
     // check if protocol exists
     if(!_varmap.protocol_known(protocol))
@@ -188,11 +188,33 @@ Configuration::update_exports(const string& protocol,
 	_tagmap.erase(i);
     }
 
-    update_ie(protocol,exports,_exports,PolicyList::EXPORT);
+    update_ie(protocol, exports, _exports, PolicyList::EXPORT, mod);
 
     // other modified targets [such as sourcematch] will be added as compilation
     // proceeds.
     _modified_targets.insert(Code::Target(protocol,filter::EXPORT));
+}
+
+void
+Configuration::clear_imports(const string& protocol)
+{
+    // check if protocol exists
+    if (!_varmap.protocol_known(protocol))
+	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
+
+    _imports.clear(_modified_targets);
+    _modified_targets.insert(Code::Target(protocol, filter::IMPORT));
+}
+
+void
+Configuration::clear_exports(const string& protocol)
+{
+    // check if protocol exists
+    if (!_varmap.protocol_known(protocol))
+	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
+
+    _exports.clear(_modified_targets);
+    _modified_targets.insert(Code::Target(protocol, filter::EXPORT));
 }
 
 string 
@@ -277,28 +299,13 @@ Configuration::compile_policy(const string& name)
     update_set_dependancy(policy);
 
     // save old tag to check for integer overflow
-    uint32_t old_currtag = _currtag; 
-
+    tag_t old_currtag = _currtag; 
 
     // go through all the import statements
-    for(IEMap::iterator i = _imports.begin();
-	i != _imports.end(); ++i) {
-    
-        PolicyList* pl = (*i).second;
-
-	// compile the policy if it is used in this list.
-	pl->compile_policy(policy,_modified_targets,_currtag);
-    }    
+    _imports.compile(policy, _modified_targets, _currtag);
 
     // go through all export statements
-    for(IEMap::iterator i = _exports.begin();
-	i != _exports.end(); ++i) {
-    
-        PolicyList* pl = (*i).second;
-
-	// compile policy if it is used in this list.
-        pl->compile_policy(policy,_modified_targets,_currtag);
-    }
+    _exports.compile(policy, _modified_targets, _currtag);
 
     // integer overflow
     if(_currtag < old_currtag) {
@@ -312,38 +319,26 @@ void
 Configuration::compile_policies()
 {
     // integer overflow check
-    uint32_t old_currtag = _currtag; 
+    tag_t old_currtag = _currtag; 
 
     // compile all modified policies
-    for(PolicySet::iterator i = _modified_policies.begin();
+    for (PolicySet::iterator i = _modified_policies.begin();
 	i != _modified_policies.end(); ++i) {
 
         compile_policy(*i);
     }
     _modified_policies.clear();
 
-
-
     // compile any import policies that have not yet been compiled.
     // This is a case if a policy is not modified, but just added to a policy
     // list.
-    for(IEMap::iterator i = _imports.begin();
-        i != _imports.end(); ++i) {
-        
-        PolicyList* pl = (*i).second;
-        pl->compile(_modified_targets,_currtag);
-    }    
+    _imports.compile(_modified_targets, _currtag);
 
     // same for exports.
-    for(IEMap::iterator i = _exports.begin();
-        i != _exports.end(); ++i) {
-    
-        PolicyList* pl = (*i).second;
-        pl->compile(_modified_targets,_currtag);
-    }    
-   
+    _exports.compile(_modified_targets, _currtag);
+
     // integer overflow.
-    if(_currtag < old_currtag) {
+    if (_currtag < old_currtag) {
 	// FIXME
 	XLOG_FATAL("The un-avoidable occurred: We ran out of policy tags");
 	abort();
@@ -361,11 +356,7 @@ Configuration::link_sourcematch_code(const Code::Target& target)
 
     // only export statements have source match code.
     // go through all of them and link.
-    for(IEMap::iterator i = _exports.begin(); i != _exports.end(); ++i) {
-        PolicyList* pl = (*i).second;
-
-        pl->link_code(*code);
-    }
+    _exports.link_code(*code);
 
     // kill previous
     CodeMap::iterator i = _sourcematch_filters.find(target.protocol());
@@ -382,38 +373,30 @@ Configuration::link_sourcematch_code(const Code::Target& target)
         _sourcematch_filters[target.protocol()] = code;
     }	
 }
-   
+
 void 
 Configuration::update_tagmap(const string& protocol)
 {
     // delete previous tags if present
     TagMap::iterator tmi = _tagmap.find(protocol);
-    if(tmi != _tagmap.end()) {
+    if (tmi != _tagmap.end()) {
 	delete (*tmi).second;
 	_tagmap.erase(tmi);
     }
 
-    // only exports produce tags...
-    IEMap::iterator i = _exports.find(protocol);
-    // XXX: this shouldn't really happen... i think.
-    if(i == _exports.end()) {
-	return;
-    }
-
-    PolicyList* pl = (*i).second;
-
     // Get the redist policytags for the protocol
     TagSet* tagset = new TagSet();
-    pl->get_redist_tags(protocol, *tagset);
 
-    if(tagset->size()) {
+    _exports.get_redist_tags(protocol, *tagset);
+
+    if (tagset->size())
 	_tagmap[protocol] = tagset;
-    }
+
     // if empty, just don't keep anything [no entry at all].
     else
 	delete tagset;
 }
-   
+
 void 
 Configuration::link_code()
 {
@@ -497,54 +480,40 @@ Configuration::set_filter_manager(FilterManagerBase& fm)
 
 void 
 Configuration::update_ie(const string& protocol, 
-			 const list<string>& policies, 
+			 const POLICIES& policies, 
 			 IEMap& iemap, 
-			 PolicyList::PolicyType pt)
+			 PolicyList::PolicyType pt,
+			 const string& mod)
 {
     // create a new policy list
-    PolicyList* pl = new PolicyList(protocol,pt,_policies,_sets,_varmap);
+    PolicyList* pl = new PolicyList(protocol, pt, _policies, _sets, _varmap,
+				    mod);
 
     // add the policy names to the policy list
-    for(list<string>::const_iterator i = policies.begin();
-        i != policies.end(); ++i) {
+    for (POLICIES::const_iterator i = policies.begin();
+	i != policies.end(); ++i) {
 
         pl->push_back(*i);
     }	    
 
-    // delete old policy list
-    IEMap::iterator i = iemap.find(protocol);
-    if(i != iemap.end()) {
-        PolicyList* oldpl = (*i).second;
+    // if there were policies, get their targets [no longer have policies]
+    iemap.get_targets(protocol, mod, _modified_targets);
 
-	// targets are modified [they no longer have these policies]
-        oldpl->get_targets(_modified_targets);
-        delete oldpl;
-    }
-    
     // replace policy list
-    iemap[protocol] = pl;
-
+    iemap.insert(protocol, mod, pl);
 }	
-    
+
 void 
 Configuration::link_code(const Code::Target& target, 
 			 IEMap& iemap, 
 			 CodeMap& codemap)
 {
-    // find the policy list for the target
-    IEMap::iterator i = iemap.find(target.protocol());
-
-    XLOG_ASSERT(i != iemap.end());
-
-    PolicyList* pl = (*i).second;
-
     // create new code and set target, so code may be linked properly
     Code* code = new Code();
     code->set_target(target);
 
     // link the code
-    pl->link_code(*code);
-
+    iemap.link_code(target.protocol(), *code);
 
     // erase previous code
     CodeMap::iterator iter = codemap.find(target.protocol());
@@ -598,4 +567,163 @@ Configuration::dump_state(uint32_t id)
 	default:
 	    xorp_throw(PolicyException, "Unknown state id: " + to_str(id));
     }
+}
+
+IEMap::IEMap()
+{
+}
+
+IEMap::~IEMap()
+{
+    clear();
+}
+
+IEMap::POLICY*
+IEMap::find_policy(const string& protocol)
+{
+    PROTOCOL::iterator i = _protocols.find(protocol);
+
+    if (i == _protocols.end())
+	return NULL;
+
+    return i->second;
+}
+
+PolicyList*
+IEMap::find(const string& protocol, const string& mod)
+{
+    POLICY* p = find_policy(protocol);
+
+    if (!p)
+	return NULL;
+
+    POLICY::iterator i = p->find(mod);
+    if (i == p->end())
+	return NULL;
+
+    return i->second;
+}
+
+void
+IEMap::insert(const string& protocol, const string& mod, PolicyList* pl)
+{
+    POLICY* p = find_policy(protocol);
+
+    if (!p) {
+	p = new POLICY;
+
+	_protocols[protocol] = p;
+    }
+
+    // delete old if there
+    PolicyList* pol = find(protocol, mod);
+    if (pol)
+	delete pol;
+
+    (*p)[mod] = pl;
+}
+
+void
+IEMap::clear()
+{
+    for (PROTOCOL::iterator i = _protocols.begin();
+         i != _protocols.end(); ++i) {
+
+	POLICY* p = i->second;
+
+	clear(p);
+	delete p;
+    }
+
+    _protocols.clear();
+}
+
+void
+IEMap::clear(POLICY* p)
+{
+    for (POLICY::iterator i = p->begin(); i != p->end(); ++i)
+	delete i->second;
+
+    p->clear();
+}
+
+void
+IEMap::get_targets(const string& proto, const string& mod, TARGETSET& ts)
+{
+    PolicyList* pl = find(proto, mod);
+
+    if (!pl)
+	return;
+
+    pl->get_targets(ts);
+}
+
+void
+IEMap::compile(PolicyStatement& ps, TARGETSET& ts, tag_t& tag)
+{
+    FOR_ALL_POLICIES(j) {
+	PolicyList* p = j->second;
+
+	p->compile_policy(ps, ts, tag);
+    }
+}
+
+void
+IEMap::compile(TARGETSET& ts, tag_t& tag)
+{
+    FOR_ALL_POLICIES(j) {
+	PolicyList* p = j->second;
+
+	p->compile(ts, tag);
+    }
+}
+
+void
+IEMap::link_code(Code& code)
+{
+    FOR_ALL_POLICIES(j) {
+	PolicyList* p = j->second;
+
+	p->link_code(code);
+    }
+}
+
+void
+IEMap::link_code(const string& proto, Code& code)
+{
+    POLICY* p = find_policy(proto);
+    XLOG_ASSERT(p);
+
+    for (POLICY::reverse_iterator i = p->rbegin(); i != p->rend(); ++i) {
+	PolicyList* pl = i->second;
+
+	pl->link_code(code);
+    }
+}
+
+void
+IEMap::get_redist_tags(const string& proto, TagSet& ts)
+{
+    POLICY* p = find_policy(proto);
+
+    if (!p)
+	return;
+
+    for (POLICY::iterator i = p->begin(); i != p->end(); i++) {
+	PolicyList* pl = i->second;
+
+	pl->get_redist_tags(proto, ts);
+    }
+}
+
+void
+IEMap::clear(TARGETSET& ts)
+{
+    FOR_ALL_POLICIES(j) {
+	PolicyList* p = j->second;
+
+	p->get_targets(ts);
+    }
+
+    clear();
 }

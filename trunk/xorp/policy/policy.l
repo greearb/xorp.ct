@@ -1,14 +1,14 @@
 %{
 
-#include "policy_module.h"
-#include "libxorp/xorp.h"
-
-#include "policy/common/policy_utils.hh"
 #include <vector>
 #include <string>
 #include <sstream>
+
+#include "policy_module.h"
+#include "libxorp/xorp.h"
+#include "policy/common/policy_utils.hh"
 #include "policy_parser.hh"
-#include "yacc.yy_policy_parser.cc.h"
+#include "yacc.yy_policy_parser.hh"
 
 #define yylval yy_policy_parserlval
 #define yyerror yy_policy_parsererror
@@ -135,42 +135,37 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 "("		return YY_LPAR;
 ")"		return YY_RPAR;
-
 "=="		return YY_EQ; 
 "!="		return YY_NE;
 "<="		return YY_LE;
 ">="		return YY_GE;
 "<"		return YY_LT;
 ">"		return YY_GT;
+"+"		return YY_ADD;
+"*"		return YY_MUL;
+"\-"		return YY_SUB;
+"="		return YY_ASSIGN;
 
 "exact"		return YY_IPNET_EQ;
 "longer"	return YY_IPNET_LT;
 "shorter"	return YY_IPNET_GT;
 "orlonger"	return YY_IPNET_LE;
 "orshorter"	return YY_IPNET_GE;
-
 "and"		return YY_AND;
 "or"		return YY_OR;
 "xor"		return YY_XOR;
 "not"		return YY_NOT;
-
-"+"		return YY_ADD;
 "add"		return YY_ADD;
-"\-"		return YY_SUB;
-"*"		return YY_MUL;
-"="		return YY_ASSIGN;
-
 "head"		return YY_HEAD;
 "ctr"		return YY_CTR;
 "ne_int"	return YY_NE_INT;
-
 "accept"	return YY_ACCEPT;
 "reject"	return YY_REJECT;
-
 "SET"		return YY_SET;
 "REGEX"		return YY_REGEX;
-
 "protocol"	return YY_PROTOCOL;
+"next"		return YY_NEXT;
+"policy"	return YY_POLICY;
 
 [[:alpha:]][[:alnum:]_-]*		{ yylval.c_str = strdup(yytext);
 					  return YY_ID;

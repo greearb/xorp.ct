@@ -13,10 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code_generator.hh,v 1.8 2008/01/04 03:17:08 pavlin Exp $
+// $XORP: xorp/policy/code_generator.hh,v 1.9 2008/07/23 05:11:18 pavlin Exp $
 
 #ifndef __POLICY_CODE_GENERATOR_HH__
 #define __POLICY_CODE_GENERATOR_HH__
+
+#include <sstream>
+#include <string>
 
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
@@ -25,8 +28,6 @@
 #include "code.hh"
 #include "policy_statement.hh"
 #include "node.hh"
-#include <sstream>
-#include <string>
 
 /**
  * @short Generic code generator. It is suitable for import filters.
@@ -80,10 +81,10 @@ public:
     const Element* visit(NodeSet& node);
     const Element* visit(NodeAccept& node);
     const Element* visit(NodeReject& node);
-    
     const Element* visit(PolicyStatement& policy); 
     const Element* visit(Term& policy); 
     const Element* visit(NodeProto& policy); 
+    const Element* visit(NodeNext& node);
 
     /**
      * @return code generated.
