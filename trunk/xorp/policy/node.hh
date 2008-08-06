@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.12 2008/07/23 05:11:18 pavlin Exp $
+// $XORP: xorp/policy/node.hh,v 1.13 2008/08/06 08:17:06 abittau Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -210,12 +210,13 @@ public:
      * Caller must not delete / modify pointer.
      *
      * @param varid the name of the variable being assigned to.
+     * @param mod the modifier (e.g., += has a modifier OpAdd).
      * @param rvalue the expression being assigned to the variable.
      * @param line line of configuration where node was created.
      */
-    NodeAssign(const string& varid, Node* rvalue, unsigned line) : 
-		Node(line), _varid(varid), _rvalue(rvalue) {}
-    ~NodeAssign() { delete _rvalue; }
+    NodeAssign(const string& varid, BinOper* mod, Node* rvalue, unsigned line)
+	: Node(line), _varid(varid), _mod(mod), _rvalue(rvalue) {}
+    ~NodeAssign() { delete _rvalue; delete _mod; }
 
     DEFINE_VISITABLE();
 
@@ -229,9 +230,12 @@ public:
      */
     Node& rvalue() const { return *_rvalue; }
 
+    BinOper* mod() const { return _mod; }
+
 private:
-    string _varid;
-    Node* _rvalue;
+    string	_varid;
+    BinOper*	_mod;
+    Node*	_rvalue;
 
     // not impl
     NodeAssign(const NodeAssign&);

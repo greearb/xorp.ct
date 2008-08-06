@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.95 2007/12/10 23:26:36 mjh Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.96 2008/08/06 08:17:05 abittau Exp $ */
 
 protocols {
     bgp {
@@ -846,7 +846,7 @@ policy {
 		}
 		as-path-prepend {
 		    %help: short "Prepend AS numbers to an AS path";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) add aspath;";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) + aspath;";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		as-path-expand {
@@ -861,7 +861,7 @@ policy {
 		}
 		community-add {
 		    %help: short "Add BGP communities to the route";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community = community add (ctr 'set_com32' '$(@)');";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=community = community + (ctr 'set_com32' '$(@)');";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		community-del {
@@ -887,6 +887,7 @@ policy {
 		}
 		localpref {
 		    %help: short "Set the local preference";
+		    %allow-operator: ":" "=" "sub" "add";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}

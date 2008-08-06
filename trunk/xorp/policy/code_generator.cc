@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.15 2008/07/23 05:11:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.16 2008/08/06 08:17:06 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -135,6 +135,15 @@ CodeGenerator::visit(NodeAssign& node)
     node.rvalue().accept(*this);
 
     VarRW::Id id = _varmap.var2id(protocol(), node.varid());
+
+    // XXX backend should have specialized operators for performance reasons.
+    // For now we just expand expressions such as "a += b" into "a = a + b" in
+    // the frontend. 
+    //  -sorbo
+    if (node.mod()) {
+	_os << "LOAD " << id << endl;
+	_os << node.mod()->str() << endl;
+    }
 
     _os << "STORE " << id << endl;
     return NULL;

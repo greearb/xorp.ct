@@ -30,14 +30,16 @@ static ElementFactory _ef;
 %}
 
 %union {
-	char *c_str;
-	Node *node;
+	char*		c_str;
+	Node*		node;
+	BinOper*	op;
 };
 
 %token <c_str> YY_BOOL YY_INT YY_UINT YY_UINTRANGE YY_STR YY_ID 
 %token <c_str> YY_IPV4 YY_IPV4RANGE YY_IPV4NET YY_IPV6 YY_IPV6RANGE YY_IPV6NET
 %token YY_SEMICOLON YY_LPAR YY_RPAR YY_ASSIGN YY_SET YY_REGEX
-%token YY_ACCEPT YY_REJECT YY_PROTOCOL YY_NEXT YY_POLICY
+%token YY_ACCEPT YY_REJECT YY_PROTOCOL YY_NEXT YY_POLICY YY_PLUS_EQUALS
+%token YY_MINUS_EQUALS
 
 %left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD YY_CTR YY_NE_INT
 %left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_GE
@@ -45,7 +47,8 @@ static ElementFactory _ef;
 %left YY_ADD YY_SUB
 %left YY_MUL
 
-%type <node> actionstatement action boolstatement boolexpr expr
+%type <node> actionstatement action boolstatement boolexpr expr assignexpr
+%type <op>   assignop
 %%
 
 statement:
@@ -59,12 +62,22 @@ actionstatement:
 	; 
 
 action:
-	  YY_ID YY_ASSIGN expr
-	  { $$ = new NodeAssign($1,$3,_parser_lineno); free($1); }
+	  assignexpr
 	| YY_ACCEPT { $$ = new NodeAccept(_parser_lineno); }
 	| YY_REJECT { $$ = new NodeReject(_parser_lineno); }
 	| YY_NEXT YY_POLICY
 	  { $$ = new NodeNext(_parser_lineno, NodeNext::POLICY); }
+	;
+
+assignexpr:
+	  YY_ID assignop expr
+	  { $$ = new NodeAssign($1, $2, $3, _parser_lineno); free($1); }
+	;
+
+assignop:
+	  YY_ASSIGN		{ $$ = NULL; }
+	| YY_PLUS_EQUALS	{ $$ = new OpAdd; }
+	| YY_MINUS_EQUALS	{ $$ = new OpSub; }
 	;
 
 boolstatement:

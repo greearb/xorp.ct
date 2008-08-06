@@ -145,6 +145,8 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "*"		return YY_MUL;
 "\-"		return YY_SUB;
 "="		return YY_ASSIGN;
+"+="		return YY_PLUS_EQUALS;
+"-="		return YY_MINUS_EQUALS;
 
 "exact"		return YY_IPNET_EQ;
 "longer"	return YY_IPNET_LT;
@@ -155,7 +157,8 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "or"		return YY_OR;
 "xor"		return YY_XOR;
 "not"		return YY_NOT;
-"add"		return YY_ADD;
+"add"		return YY_PLUS_EQUALS;
+"sub"		return YY_MINUS_EQUALS;
 "head"		return YY_HEAD;
 "ctr"		return YY_CTR;
 "ne_int"	return YY_NE_INT;

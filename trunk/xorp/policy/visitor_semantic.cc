@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.18 2008/08/06 08:10:16 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.19 2008/08/06 08:17:07 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -145,16 +145,22 @@ VisitorSemantic::visit(NodeBin& node)
     const Element* left = node.left().accept(*this);
     const Element* right = node.right().accept(*this);
 
-    Element* res;
+    return do_bin(*left, *right, node.op(), node);
+}
+
+const Element*
+VisitorSemantic::do_bin(const Element& left, const Element& right,
+			const BinOper& op, const Node& node)
+{
     // see if we may execute bin operation.
     try {
-	res = _disp.run(node.op(),*left,*right);
+	Element* res = _disp.run(op, left, right);
 
 	if (res->refcount() == 1)
 	    _trash.insert(res);
 
 	return res;
-    } 
+    }
     // nope
     catch (const PolicyException& e) {
         ostringstream error;
@@ -174,8 +180,16 @@ VisitorSemantic::visit(NodeAssign& node)
     // try assignment
     try {
 	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.varid());
+
+	// see if there's a modifier to the assignment
+	if (node.mod()) {
+	    const Element* left = &_varrw.read(id);
+
+	    rvalue = do_bin(*left, *rvalue, *node.mod(), node);
+	}
+
 	_varrw.write(id, *rvalue);
-    } catch(SemanticVarRW::var_error e) {
+    } catch (SemanticVarRW::var_error e) {
         ostringstream error;
 
         error << e.str() << " at line " << node.line();
