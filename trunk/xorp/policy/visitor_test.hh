@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/visitor_test.hh,v 1.1 2008/08/06 08:27:11 abittau Exp $
 
 #ifndef __POLICY_VISITOR_TEST_HH__
 #define __POLICY_VISITOR_TEST_HH__
@@ -63,6 +63,7 @@ private:
     void	    change_protocol(const string& protocol);
     Id		    var2id(const string& var);
     const Variable& var2variable(const string& var);
+    bool	    match(const Element* e);
 
     SetMap&		_sm;
     PolicyMap&		_pm;

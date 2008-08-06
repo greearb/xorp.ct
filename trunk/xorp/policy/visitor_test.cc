@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/visitor_test.cc,v 1.1 2008/08/06 08:27:11 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -114,9 +114,12 @@ VisitorTest::visit(Term& term)
 
     // do source block
     for (i = source.begin(); i != source.end(); ++i) {
-        (i->second)->accept(*this);
+        const Element* e = (i->second)->accept(*this);
 
 	if (_finished)
+	    return NULL;
+
+	if (!match(e))
 	    return NULL;
     }
 
@@ -124,9 +127,12 @@ VisitorTest::visit(Term& term)
 
     // do dest block
     for (i = dest.begin(); i != dest.end(); ++i) {
-        (i->second)->accept(*this);
+        const Element* e = (i->second)->accept(*this);
 
 	if (_finished)
+	    return NULL;
+
+	if (!match(e))
 	    return NULL;
     }
 
@@ -346,4 +352,16 @@ VisitorTest::var2variable(const string& var)
     Id id = _vm.var2id(protocol, var);
 
     return _vm.variable(protocol, id);
+}
+
+bool
+VisitorTest::match(const Element* e)
+{
+    if (!e)
+	return true;
+
+    const ElemBool* b = dynamic_cast<const ElemBool*>(e);
+    XLOG_ASSERT(b);
+
+    return b->val();
 }
