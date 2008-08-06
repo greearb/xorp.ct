@@ -176,7 +176,7 @@ BGP origin attribute.  Can be EGP, IGP, or incomplete.
 
 119 &
 Policy to evaluate as a subroutine.
-& policy & match policy-list &  & 3 \\
+& policy & match policy-list & policy &   \\
 \hline
 
 120 &
@@ -245,6 +245,34 @@ link-state advertisement (LSA) packets.
 To base policy routing on the Level 3 length of a packet, use the match length
 command in route-map configuration mode.
 & ?? & match length &  & 3 \\
+\hline
+
+130 &
+Replace nexthop with discard interface.
+& nexthop discard & ?? & & 3 \\
+\hline
+
+131 &
+Replace nexthop with ``reject'' interface that returns ICMP unreachable messages.
+& nexthop reject & ?? & & 3 \\
+\hline
+
+132 &
+Replace nexthop to next routing table.
+& nexthop next-table & ?? & & ?? \\
+\hline
+
+133 &
+Match against a prefix list.  Prefix lists seem to be the ``dumb'' version of
+route lists, so having route lists probably implies having prefix lists.  XORP
+supports route lists.
+& prefix-list & ?? & & 3 \\
+\hline
+
+134 &
+Condition statement.  Match routes based on a condition in the router ({\em
+e.g.,} does route exist?).
+& condition & ?? & & 5 \\
 
 \end{supertabular}
 \end{center}
@@ -290,14 +318,14 @@ nonterminating policy action.
 Skip to and evaluate the next term in the same routing policy. Any accept or
 reject action specified in the then statement is skipped. Any actions in the
 then statement that manipulate route characteristics are applied to the route.
-& next term & ?? &  & 1 \\
+& next term & ?? & next term &   \\
 \hline
 
 205 &
 Skip to and evaluate the next routing policy. Any accept or reject action
 specified in the then statement is skipped. Any actions in the then statement
 that manipulate route characteristics are applied to the route.
-& next policy & ?? &  & 1 \\
+& next policy & ?? & next policy &   \\
 \hline
 
 206 &
@@ -366,7 +394,7 @@ Calculate a metric based on the current values of metric and metric2.
 
 218 &
 Set the external metric type for routes exported by OSPF. 
-& external type & set metric-type &  & 1 \\
+& external type & set metric-type & external-type & \\
 \hline
 
 219 &
@@ -394,7 +422,7 @@ Set the BGP local preference (LOCAL\_PREF) attribute.
 
 223 &
 Change the local preference value by the specified amount. 
-& local-preference add / subtract & ?? &  & 1 \\
+& local-preference add / subtract & ?? & localpref add / sub &   \\
 \hline
 
 224 &
@@ -404,17 +432,17 @@ Set the metric.
 
 225 &
 Change the metric value by the specified amount. 
-& metric add / subtract & ?? &  & 1 \\
+& metric add / subtract & ?? & metric add / sub &   \\
 \hline
 
 226 &
 Change the metric (MED) value by the specified negative or positive offset.
-& metric igp & set metric-type internal &  (can only set) & 1 \\
+& metric igp & set metric-type internal &  med add / sub &   \\
 \hline
 
 227 &
-Set the next hop (address, discard, next-table, peer-address, reject, self).
-& nexthop & set next-hop &  (only address) & 4 \\
+Set the next hop (address, peer-address, self).
+& nexthop & set next-hop &  nexthop &   \\
 \hline
 
 228 &
@@ -440,12 +468,12 @@ source address.
 
 232 &
 Set the tag value. 
-& tag & set tag & tag &\\
+& tag & set tag & tag & \\
 \hline
 
 233 &
 Change the tag value by the specified amount.
-& tag add / subtract & ?? &  & 1 \\
+& tag add / subtract & ?? & tag add / sub &   \\
 \hline
 
 234 &
@@ -462,7 +490,7 @@ configuration mode.
 \end{supertabular}
 \end{center}
 
-\section{Miscellaneous policy functionality}
+\section{Miscellaneous}
 \begin{center}
 \tablehead{
 \hline
@@ -474,11 +502,6 @@ Ref.	& Description	& Days \\
 \begin{supertabular}{|r |p{12cm} |r|}
 \hline
 
-300 &
-Named match conditions.  Essentially a macro for match conditions.
-& 4 \\
-\hline
-
 301 &
 Tracing policy execution in a file.
 & 3 \\
@@ -487,8 +510,8 @@ Tracing policy execution in a file.
 302 &
 Final action.  In addition to specifying an action using the then statement in a
 named term, you can also specify an action using the then statement in an
-unnamed term.  (A bit like ``finally'' in exception handling.)
-& 2 \\
+unnamed term.
+&   \\
 \hline
 
 303 &
@@ -496,7 +519,7 @@ Policy expressions.  Policy expressions give the policy framework software a
 different way to evaluate routing policies. A policy expression uses Boolean
 logical operators with policies. The logical operators establish rules by which
 the policies are evaluated.
-& 4 \\
+&   \\
 \hline
 
 304 &
@@ -516,7 +539,7 @@ of service'' and do load balancing.
 Testing routing policies.  Before applying a routing policy in a live
 environment, you can use the test policy command to ensure that the policy
 produces the results that you expect. 
-& 5 \\
+&   \\
 \hline
 
 307 &
@@ -530,7 +553,7 @@ commands matches that of Juniper.
 308 &
 Per peer BGP policies.  Ability to attach policies to specific BGP peers.
 &
-3 \\
+  \\
 \hline
 
 309 &
@@ -577,6 +600,40 @@ configuration parser.
 & 10 \\
 \hline
 
+316 &
+Design and implement route pushing.  Route pushing ({\em i.e.,} refiltering
+routes upon a policy change) is currently implemented in an ad-hoc manner in
+each protocol.  This code is very difficult to get right and it indeed causes
+many bugs.  It needs to be designed and implemented by the generic policy
+framework, and protocols should make use of this single implementation.
+& 10 \\
+\hline
+
+317 &
+Design and refactor the policy front-end.  The policy front-end was never
+designed properly but was instead just coded in an ad-hoc manner and very
+quickly.  As requirements increased with time, the current functionality of the
+policy manager is rather complicated.  It needs to deal with dependencies
+between policies, lists and policies, and special cases such as BGP per-peer
+policies.  The code is currently unmantinable and will be a major source of bugs
+and development slowdown.
+& 10 \\
+\hline
+
+318 &
+Semantic check in backend protocol filters.  Currently the policy manager does a
+generic semantic check for all policies.  Some backend policy implementations
+though ({\em i.e.,} VarRW) have further restrictions which the policy manager
+does not know.  Backend filters should therefore perform additional semantic
+checking with protcol VarRWs.
+& 5 \\
+\hline
+
+319 &
+Route lists can have an action attached ({\em i.e.,} accept / reject) to each
+route.
+& 3 \\
+
 \end{supertabular}
 \end{center}
 
@@ -596,7 +653,7 @@ Ref.	& Description	& Days \\
 Specialized types and operators.  The policy back-end supports very generic types
 ({\em e.g.} strings) and operations on these can be slow.  Creating specialized
 types and operators will speed up policy execution.
-& 4 \\
+&   \\
 \hline
 
 401 &
@@ -618,7 +675,7 @@ reduce this.
 General performance optimizations.  Various optimizations such as, where
 possible, using directly indexed arrays rather than (say) STL maps.  Any other
 general programming tricks.
-& 3 \\
+&   \\
 \hline
 
 404 &
@@ -643,7 +700,7 @@ Bugzilla ID	& Task ref.	& Description	& Days \\
 \hline
 
 245 &  
-& Show policy commands do not exist.
+& Show bytes / routes matched per policy.
 & 4 \\
 \hline
 
@@ -674,11 +731,6 @@ numbers.
 & 1 \\
 \hline
 
-567 & 
-& The policy tag per route is not reset in case the policies are removed.
-& 1 \\
-\hline
-
 568 & 314
 & The policy framework does not support filtering or selecting MRIB routes.
 & 5 \\
@@ -694,21 +746,6 @@ numbers.
 & 10 \\
 \hline
 
-667 & 308
-& Implement per-peer BGP import/export policies.
-& 3 \\
-\hline
-
-674 & 
-& Enhance policy network-lists to included prefix length modifiers.
-& 2 \\
-\hline
-
-699 & 
-& Import policy ``reject all'' statement rejects accept statements on export
-policy.
-& 2 \\
-
 \end{supertabular}
 \end{center}
 
@@ -718,13 +755,13 @@ policy.
 \hline
 Component	& Days \\
 \hline
-Route match criteria (current completion: 52\%)	& 19 \\
-Route actions (current completion: 40\%)	& 34 \\
+Route match criteria (current completion: 37\%)	& 27 \\
+Route actions (current completion: 52\%)	& 23 \\
 \hline
-Miscellaneous		& 51 \\
-Performance		& 32 \\
+Miscellaneous		& 61 \\
+Performance		& 25 \\
 \hline
-Bug fixing		& 24 (+8) \\
+Bug fixing		& 24 \\
 \hline
 Contingency (10\%)	& 16 \\
 \hline
@@ -733,40 +770,6 @@ Contingency (10\%)	& 16 \\
 \hline
 
 \end{tabular}
-\end{center}
-
-\section{New tasks}
-\begin{center}
-\tablehead{
-\hline
-Ref.	& Description	& Days \\
-}
-\tabletail{
-\hline
-}
-\begin{supertabular}{|r |p{12cm} |r|}
-\hline
-
-500 &
-Design and implement route pushing.  Route pushing ({\em i.e.,} refiltering
-routes upon a policy change) is currently implemented in an ad-hoc manner in
-each protocol.  This code is very difficult to get right and it indeed causes
-many bugs.  It needs to be designed and implemented by the generic policy
-framework, and protocols should make use of this single implementation.
-& 10 \\
-\hline
-
-501 &
-Design and refactor the policy front-end.  The policy front-end was never
-designed properly but was instead just coded in an ad-hoc manner and very
-quickly.  As requirements increased with time, the current functionality of the
-policy manager is rather complicated.  It needs to deal with dependencies
-between policies, lists and policies, and special cases such as BGP per-peer
-policies.  The code is currently unmantinable and will be a major source of bugs
-and development slowdown.
-& 10 \\
-
-\end{supertabular}
 \end{center}
 
 \end{document}
