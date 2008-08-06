@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.28 2008/08/06 08:22:16 abittau Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.29 2008/08/06 08:24:08 abittau Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -28,6 +28,7 @@ policy {
 	    then {
 		trace:		u32;
 		tag:		u32;
+		next:		txt;
 	    }
 	}
     }
@@ -205,6 +206,14 @@ policy {
 		    %help: short "Tag value";
 		    %allow-operator: ":" "=" "add" "sub";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		
+		next {
+		    %help: short "Change control flow to next term or policy";
+		    %allow: $(@) "policy" %help: "Skip to next policy";
+		    %allow: $(@) "term" %help: "Skip to next term";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=next $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 
