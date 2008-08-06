@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.92 2008/04/27 08:09:32 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.93 2008/07/23 05:09:34 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -2219,7 +2219,9 @@ PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
 
     for (const_iterator i = palist.begin(); i != palist.end() ; ++i)
 	add_path_attribute(**i);
-    rehash();
+
+    // hash must be the same---we're coping all attributes.
+    memcpy(_hash, palist._hash, sizeof(_hash));
 }
 
 template<class A>
