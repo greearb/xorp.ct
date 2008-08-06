@@ -13,18 +13,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.12 2008/01/04 03:17:21 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.13 2008/07/23 05:11:28 pavlin Exp $"
 
 #include "libxorp/xorp.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include "file_varrw.hh"
 
+FileVarRW::FileVarRW() : _verbose(true)
+{
+}
 
-FileVarRW::FileVarRW(const string& fname) {
-    FILE* f = fopen(fname.c_str(),"r");
-    if(!f) {
+void
+FileVarRW::load(const string& fname)
+{
+    FILE* f = fopen(fname.c_str(), "r");
+
+    if (!f) {
 	string err = "Can't open file " + fname;
 	err += ": ";
 	err += strerror(errno);
@@ -33,10 +37,10 @@ FileVarRW::FileVarRW(const string& fname) {
     }	
 
     char buff[1024];
+    int  lineno = 1;
 
-    int lineno = 1;
-    while(fgets(buff,sizeof(buff)-1,f)) {
-	if(doLine(buff))
+    while (fgets(buff, sizeof(buff)-1, f)) {
+	if (doLine(buff))
 	    continue;
 	
 	// parse error
@@ -62,16 +66,13 @@ FileVarRW::doLine(const string& str) {
     string type;
     string value;
    
-    if(iss.eof())
+    if (iss.eof())
 	return false;
     iss >> varname;
 
-
-
-    if(iss.eof())
+    if (iss.eof())
 	return false;
     iss >> type;
-
 
     if(iss.eof())
 	return false;
@@ -84,14 +85,14 @@ FileVarRW::doLine(const string& str) {
 	    value += " " + v;
     }
 
-    Element* e = _ef.create(type,value.c_str());
+    Element* e = _ef.create(type, value.c_str());
 
     _trash.insert(e);
 
-    cout << "FileVarRW adding variable " << varname 
-	 << " of type " << type << ": " << e->str() << endl;
+    if (_verbose)
+	cout << "FileVarRW adding variable " << varname 
+	     << " of type " << type << ": " << e->str() << endl;
 
-   
     char* err = 0;
     Id id = strtol(varname.c_str(), &err, 10);
     if (*err) {
@@ -107,30 +108,38 @@ const Element&
 FileVarRW::read(const Id& id) {
     Map::iterator i = _map.find(id);
 
-    if(i == _map.end())
-	xorp_throw(Error, "Cannot read variable: " + id);
+    if (i == _map.end()) {
+	ostringstream oss;
+
+	oss << "Cannot read variable: " << id;
+	xorp_throw(Error, oss.str());
+    }
 
     const Element* e = (*i).second;
 
-    cout << "FileVarRW READ " << id << ": " 
-	 << e->str() << endl;
+    if (_verbose)
+	cout << "FileVarRW READ " << id << ": " 
+	     << e->str() << endl;
 
     return *e;
 }
 
 void
 FileVarRW::write(const Id& id, const Element& e) {
-    cout << "FileVarRW WRITE " << id << ": " 
-	 << e.str() << endl;
+    if (_verbose)
+	cout << "FileVarRW WRITE " << id << ": " 
+	     << e.str() << endl;
 
     _map[id] = &e;
 }
 
 void
 FileVarRW::sync() {
-    cout << "FileVarRW SYNC" << endl;
-    for(Map::iterator i = _map.begin(); i != _map.end(); ++i)
-	cout << (*i).first << ": " << ((*i).second)->str() << endl;
+    if (_verbose ) {
+	    cout << "FileVarRW SYNC" << endl;
+	    for (Map::iterator i = _map.begin(); i != _map.end(); ++i)
+		cout << (*i).first << ": " << ((*i).second)->str() << endl;
+    }
 
     clear_trash();
 }
@@ -138,4 +147,10 @@ FileVarRW::sync() {
 void
 FileVarRW::clear_trash() {
     policy_utils::clear_container(_trash);
+}
+
+void
+FileVarRW::set_verbose(bool verb)
+{
+    _verbose = verb;
 }

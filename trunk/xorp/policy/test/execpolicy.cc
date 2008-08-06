@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.9 2008/01/04 03:17:21 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.10 2008/07/23 05:11:28 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -73,7 +73,9 @@ try {
 
 try {
     cout << "Configuring varrw..." << endl;
-    FileVarRW varrw(argv[2]);
+    FileVarRW varrw;
+    
+    varrw.load(argv[2]);
 
     PolicyFilter filter;
     cout << "Configuring filter..." << endl;

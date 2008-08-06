@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/test/file_varrw.hh,v 1.9 2008/01/04 03:17:21 pavlin Exp $
+// $XORP: xorp/policy/test/file_varrw.hh,v 1.10 2008/07/23 05:11:28 pavlin Exp $
 
 #ifndef __POLICY_TEST_FILE_VARRW_HH__
 #define __POLICY_TEST_FILE_VARRW_HH__
@@ -33,25 +33,26 @@ public:
             : PolicyException("Error", file, line, init_why) {}  
     };
 
-    FileVarRW(const string& fname);
+    FileVarRW();
     ~FileVarRW();
 
-    const Element& read(const Id&);
-    void write(const Id&, const Element&);
+    const Element&  read(const Id&);
+    void	    write(const Id&, const Element&);
+    void	    sync();
+    void	    printVars();
+    void	    load(const string& fname);
+    void	    set_verbose(bool);
 
-    void sync();
-
-    void printVars();
-    
 private:
+    typedef map<Id,const Element*> Map;
+
     bool doLine(const string& line);
     void clear_trash();
 
-    typedef map<Id,const Element*> Map;
-    Map _map;
-
-    ElementFactory _ef;
-    set<Element*> _trash;
+    Map		    _map;
+    ElementFactory  _ef;
+    set<Element*>   _trash;
+    bool	    _verbose;
 };
 
 #endif // __POLICY_TEST_FILE_VARRW_HH__

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/policy/test/Jamfile,v 1.1 2007/01/11 22:30:51 bms Exp $
+# $XORP: xorp/policy/test/Jamfile,v 1.2 2007/04/20 07:17:46 pavlin Exp $
 #
 
 SubDir TOP policy test ;
@@ -31,5 +31,12 @@ LinkLibraries execpolicy :
 	libpolicycommon
 	libxipc
 	libcomm
+	libxorp
+	;
+
+Main policybench : policybench.cc file_varrw.cc ;
+LinkLibraries policybench :
+	libpolicybackend
+	libpolicycommon
 	libxorp
 	;
