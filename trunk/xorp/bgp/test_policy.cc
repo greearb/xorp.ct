@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_policy.cc,v 1.10 2008/01/04 03:15:29 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_policy.cc,v 1.11 2008/07/23 05:09:39 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -71,7 +71,8 @@ test_policy_export(TestInfo& /*info*/)
 	= new RibInTable<IPv4>("RIB-in", SAFI_UNICAST, &handler1);
     PolicyTableExport<IPv4> *policy_table
 	= new PolicyTableExport<IPv4>("POLICY", SAFI_UNICAST, ribin_table,
-				      policy_filters, "test_neighbour");
+				      policy_filters, "test_neighbour", 
+				      IPv4("1.2.3.4"));
 
     ribin_table->set_next_table(policy_table);
     DebugTable<IPv4>* debug_table
@@ -302,7 +303,9 @@ test_policy(TestInfo& /*info*/)
 	= new RibInTable<IPv4>("RIB-in", SAFI_UNICAST, &handler1);
     PolicyTableImport<IPv4> *policy_table_import
 	= new PolicyTableImport<IPv4>("POLICY", SAFI_UNICAST, ribin_table,
-				      policy_filters);
+				      policy_filters, 
+				      IPv4("1.2.3.4"),  // peer
+				      IPv4("1.2.3.5")); // self
     ribin_table->set_next_table(policy_table_import);
 
     FanoutTable<IPv4> *fanout_table
@@ -313,7 +316,8 @@ test_policy(TestInfo& /*info*/)
     PolicyTableExport<IPv4> *policy_table_export
 	= new PolicyTableExport<IPv4>("POLICY", SAFI_UNICAST, 
 				      fanout_table,
-				      policy_filters, "test_neighbour");
+				      policy_filters, "test_neighbour",
+				      IPv4("1.2.3.4"));
 
     DebugTable<IPv4>* debug_table
        = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)policy_table_export);
@@ -582,7 +586,9 @@ test_policy_dump(TestInfo& /*info*/)
 
     PolicyTableImport<IPv4> *policy_table_import
 	= new PolicyTableImport<IPv4>("POLICY", SAFI_UNICAST, filter_table,
-				      policy_filters);
+				      policy_filters,
+				      IPv4("1.2.3.4"),  // peer
+				      IPv4("1.2.3.5")); // self
     filter_table->set_next_table(policy_table_import);
 
     CacheTable<IPv4> *cache_table
@@ -620,7 +626,8 @@ test_policy_dump(TestInfo& /*info*/)
     PolicyTableExport<IPv4> *policy_table_export
 	= new PolicyTableExport<IPv4>("POLICY", SAFI_UNICAST, 
 				      fanout_table,
-				      policy_filters, "test_neighbour");
+				      policy_filters, "test_neighbour",
+				      IPv4("1.2.3.4"));
 
     DebugTable<IPv4>* debug_table
        = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)policy_table_export);
