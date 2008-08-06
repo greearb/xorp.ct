@@ -1,0 +1,761 @@
+\documentclass[letterpaper]{article}
+\usepackage{supertabular}
+\usepackage[left=1in,top=1in,bottom=2in,right=1in]{geometry}
+
+\author{Andrea Bittau}
+\title{XORP Policy Tasks}
+\date{June 18, 2008}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document lists tasks that need to be completed in order to bring XORP's
+policy framework to a more mature state.  Both functional aspects, such as the
+completeness of the framework compared to Juniper's and Cisco's, and non
+functional aspects ({\em i.e.,} performance) are enumerated.  They are listed in
+the following order / categories:
+\begin{enumerate}
+\item Route matching.  What are the criteria for identifying particular routes
+in policies?
+
+\item Route actions.  Once a route is matched, what actions and modifications
+can be done on it?
+
+\item Other policy aspects.  Miscellaneous functionality such as how policies
+are attached to protocols and so on.
+
+\item Performance.  What can be done to improve XORP's performance with regards
+to policy?
+\end{enumerate}
+
+An attempt has been made to capture Juniper's functionality exhaustively.
+Regarding Cisco, only a best effort has been made to map its functionality to
+that of Juniper, and no real attempt has been made to verify whether Cisco
+supports functionality that Juniper does not.  It probably is the case though
+that all that can be done with Cisco can also be done with Juniper, and hence
+using Juniper as a reference for XORP will most likely yield a satisfactory
+policy implementation.
+
+The indication of working days needed per task is very approximate.  Integral
+numbers are used throughout and many one day tasks indeed can take less time,
+especially when tasks are correlated or similar in nature.  If all tasks need to
+be completed, the total day count is probably over-estimated by 50\%.  However,
+individual tasks longer than a day have a more optimistic rather than
+conservative estimate.  Once the necessary tasks for completion have been
+selected, a feasibility study with a more accurate day count will follow.  Tasks
+without a day count are already completed, and for those with question marks it
+is uncertain what the requirement actually is and whether it is of interest for
+XORP in the near future.
+
+\section{Route matching}
+\begin{center}
+\tablehead{
+\hline
+Ref.	& Description	& Juniper	& Cisco	& XORP	& Days \\
+}
+\tabletail{
+\hline
+}
+\begin{supertabular}{|r |p{6cm} |p{2cm} |p{2cm} |p{2cm} |r|}
+\hline
+
+100 &
+Aggregate contributor.  Match routes that are contributing to a configured
+aggregate. This match condition can be used to suppress a contributor in an
+aggregate route.
+& aggregate-contributor & ?? & ?? & ?? \\
+\hline
+
+101 &
+OSPF area identifier.  Match a route learned from the specified OSPF area.
+& area & match route-type? &  & 1 \\
+\hline
+
+102 &
+BGP AS path regular expression.
+& as-path & match as-path & as-path &\\
+\hline
+
+103 &
+BGP AS path group regular expression.
+& as-path-group & match as-path &  & 1 \\
+\hline
+
+104 &
+Color values.  The color value can be a number in the range from 0 through
+4,294,967,295. A lower number indicates a more preferred route.
+& color, color2 & match metric? &  & 1 \\
+\hline
+
+105 &
+Community.  Name of one or more communities. If you list more than one name,
+only one name needs to match for a match to occur (the matching is effectively a
+logical OR operation).
+& community & match community & community &\\
+\hline
+
+106 &
+OSPF external.  Match external routes, including routes exported from one level
+to another.  When you specify type, this condition matches only OSPF routes with
+the specified OSPF metric type.
+& external $[$type$]$ & match route-type & ebit? &\\
+\hline
+
+107 &
+IP family.  Match the address family IP version 4 (IPv4) or IP version 6 (IPv6)
+of the route. 
+& family & match ip-address? & network4/6 &\\
+\hline
+
+108 &
+Instance.  Match a route learned from one of the specified instances.
+& instance & ?? & ?? & ?? \\
+\hline
+
+109 &
+Interface.  Match a route learned from one of the specified interfaces (IP
+addresses or names).
+& interface & match interface &  & 2 \\
+\hline
+
+110 &
+Internal.  Match a routing policy against the internal flag for simplified
+next-hop self policies.
+& internal & match route-type &  & 1 \\
+\hline
+
+111 &
+IS-IS level.  Match a route learned from a specified level.
+& level & match route-type & no IS-IS in XORP & ?? \\
+\hline
+
+112 &
+BGP local preference.  BGP local preference (LOCAL\_PREF) attribute. 
+& local-preference & match local-preference & localpref &\\
+\hline
+
+113 &
+Metric values (1--4).  (BGP only) metric corresponds to the multiple exit
+discriminator (MED), and metric2 corresponds to the interior gateway protocol
+(IGP) metric if the BGP next hop runs back through another route.
+& metric$[$1--4$]$ & match metric & med/metric &\\
+\hline
+
+114 &
+Multicast scope value of IPv4 or IPv6 multicast group address. The
+multicast-scoping name corresponds to an IPv4 prefix. You can match on a
+specific multicast-scoping prefix or on a range of prefixes.
+& multicast-scoping & match ip address? & ?? & ?? \\
+\hline
+
+115 &
+Neighbor addresses.  For BGP, the address can be a directly connected or
+indirectly connected peer.  For all other protocols, the address is the neighbor
+from which the advertisement is received.
+& neighbor & match ip route-source & neighbor (BGP-only) & 2 \\
+\hline
+
+116 &
+Next-hop address or addresses specified in the routing information for a
+particular route. For BGP routes, matches are performed against each protocol
+next hop.
+& next-hop & match next-hop & nexthop4/6 &\\
+\hline
+
+117 &
+LDP generates next hop based on RSVP and IP next hops available to use combined
+with the forwarding-class mapping.
+& next-hop-type & ?? & ?? & ?? \\
+\hline
+
+118 &
+BGP origin attribute.  Can be EGP, IGP, or incomplete.
+& origin & match route-type? & origin &\\
+\hline
+
+119 &
+Policy to evaluate as a subroutine.
+& policy & match policy-list &  & 3 \\
+\hline
+
+120 &
+Preference value. You can specify a primary preference value (preference) and a
+secondary preference value (preference2). The preference value can be a number
+from 0 through 4,294,967,295 (232 – 1). A lower number indicates a more
+preferred route.
+& preference$[$1--2$]$ & match metric &  & 1 \\
+\hline
+
+121 &
+Named list of IP addresses. You can specify an exact match with incoming routes.
+& prefix-list & match ip address & network / prefix-length &\\
+\hline
+
+122 &
+Named prefix list. You can specify prefix length qualifiers for the list of
+prefixes in the prefix list.
+& prefix-list-filter & match ip address & network-list &\\
+\hline
+
+123 &
+Name of the protocol from which the route was learned or to which the route is
+being advertised. It can be one of the following: access, access-internal,
+aggregate, bgp, direct, dvmrp, isis, local, ospf, pim-dense, pim-sparse, rip,
+ripng, or static.
+& protocol & match source-protocol & protocol &\\
+\hline
+
+124 &
+Name of a routing table.  Can be unicast/multicast IPv4/6, MPLS, particular
+unicast IPv4 routing instance.
+& rib & ?? &  & 1 \\
+\hline
+
+125 &
+List of destination prefixes. When specifying a destination prefix, you can
+specify an exact match with a specific route or a less precise match using match
+types. 
+& route-filter & match ip address & network / prefix-length &\\
+\hline
+
+126 &
+Type of route (internal or external).
+& route-type & match route-type &  & 1 \\
+\hline
+
+127 &
+List of multicast source addresses. When specifying a source address, you can
+specify an exact match with a specific route or a less precise match using match
+types.
+& source-address-filter & match ip address? & ?? & ?? \\
+\hline
+
+128 &
+Tag value. You can specify two tag strings: tag (for the first string) and
+tag2. These values are local to the router and can be set on configured routes
+or by using an import routing policy.  You can specify multiple tags under one
+match condition by including the tags within a bracketed list.  For OSPF and
+IS-IS, the tag and tag2 match conditions match the 32-bit tag field in external
+link-state advertisement (LSA) packets. 
+& tag$[$2$]$ & match tag &  & 2 \\
+\hline
+
+129 &
+To base policy routing on the Level 3 length of a packet, use the match length
+command in route-map configuration mode.
+& ?? & match length &  & 3 \\
+
+\end{supertabular}
+\end{center}
+
+\section{Route actions}
+\begin{center}
+\tablehead{
+\hline
+Ref.	& Description	& Juniper	& Cisco	& XORP	& Days \\
+}
+\tabletail{
+\hline
+}
+\begin{supertabular}{|r |p{6cm} |p{2cm} |p{2cm} |p{2cm} |r|}
+\hline
+
+200 &
+Accept the route and propagate it. After a route is accepted, no other
+terms in the routing policy and no other routing policies are evaluated.
+& accept & permit &  accept &\\
+\hline
+
+201 &
+Accept and override any action intrinsic to the protocol. This is a
+nonterminating policy action.
+& default-action-accept & ?? &  & 2 \\
+\hline
+
+202 &
+Reject the route and do not propagate it. After a route is rejected, no
+other terms in the routing policy and no other routing policies are
+evaluated.
+& reject & deny & reject &\\
+\hline
+
+203 &
+Reject and override any action intrinsic to the protocol. This is a
+nonterminating policy action.
+& default-action-reject & ?? &  & 2 \\
+\hline
+
+204 &
+Skip to and evaluate the next term in the same routing policy. Any accept or
+reject action specified in the then statement is skipped. Any actions in the
+then statement that manipulate route characteristics are applied to the route.
+& next term & ?? &  & 1 \\
+\hline
+
+205 &
+Skip to and evaluate the next routing policy. Any accept or reject action
+specified in the then statement is skipped. Any actions in the then statement
+that manipulate route characteristics are applied to the route.
+& next policy & ?? &  & 1 \\
+\hline
+
+206 &
+Affix one or more AS numbers at the beginning of the AS path.
+& as-path-prepend & set as-path prepend & as-path-prepend &\\
+\hline
+
+207 &
+Extract the last AS number in the existing AS path and affix that AS number to
+the beginning of the AS path n times, where n is a number from 1 through 32. 
+& as-path-expand & ?? & as-path-append &\\
+\hline
+
+208 &
+Apply the specified class-of-service parameters to routes installed into the
+routing table. 
+& class & ?? & ?? & ?? \\
+\hline
+
+209 &
+Set the color.
+& color & set tag &  & 1 \\
+\hline
+
+210 &
+Change the color.
+& color add / subtract & ?? &  & 1 \\
+\hline
+
+211 &
+Add the specified communities to the set of communities in the route. 
+& community add & set community additive & community-add &\\
+\hline
+
+212 &
+Delete the specified communities from the set of communities in the route.
+& community delete & set comm-list delete & community-del &\\
+\hline
+
+213 &
+Replace any communities that were in the route in with the specified
+communities. 
+& community set & set community & community-set &\\
+\hline
+
+214 &
+Set CoS-based next-hop map in forwarding table.
+& cos-next-hop-map & ?? & ?? & ?? \\
+\hline
+
+215 &
+Apply the specified route-damping parameters to the route.
+& damping & set dampening &  & 5 \\
+\hline
+
+216 &
+Maintain packet counts for a route passing through your network, based on the
+destination address in the packet.
+& destination-class & set traffic-index? & ?? & ?? \\
+\hline
+
+217 &
+Calculate a metric based on the current values of metric and metric2.
+& metric & set metric &  & 2 \\
+\hline
+
+218 &
+Set the external metric type for routes exported by OSPF. 
+& external type & set metric-type &  & 1 \\
+\hline
+
+219 &
+Create the forwarding class that includes packets based on both the destination
+address and the source address in the packet. 
+& forwarding-class & ?? & ?? & ?? \\
+\hline
+
+220 & 
+Choose which next hops, among a set of equal LSP next hops, are installed in the
+forwarding table. 
+& install-nexthop & ?? & ?? & ?? \\
+\hline
+
+221 &
+Install all next-hop addresses in the forwarding table and have the forwarding
+table perform per-packet load balancing.
+& load-balance per-packet & ?? & ?? & ?? \\
+\hline
+
+222 &
+Set the BGP local preference (LOCAL\_PREF) attribute. 
+& local-preference & set local-preference & localpref &\\
+\hline
+
+223 &
+Change the local preference value by the specified amount. 
+& local-preference add / subtract & ?? &  & 1 \\
+\hline
+
+224 &
+Set the metric.
+& metric & set metric & metric &\\
+\hline
+
+225 &
+Change the metric value by the specified amount. 
+& metric add / subtract & ?? &  & 1 \\
+\hline
+
+226 &
+Change the metric (MED) value by the specified negative or positive offset.
+& metric igp & set metric-type internal &  (can only set) & 1 \\
+\hline
+
+227 &
+Set the next hop (address, discard, next-table, peer-address, reject, self).
+& nexthop & set next-hop &  (only address) & 4 \\
+\hline
+
+228 &
+Set the BGP origin attribute.
+& origin & set origin & origin &\\
+\hline
+
+229 &
+Set the preference value. 
+& preference & set weight? &  & 3 \\
+\hline
+
+230 &
+Change the preference value by the specified amount. 
+& preference add / subtract & ?? &  & 3 \\
+\hline
+
+231 &
+Maintain packet counts for a route passing through your network, based on the
+source address.
+& source-class & set-traffic index? & ?? & ?? \\
+\hline
+
+232 &
+Set the tag value. 
+& tag & set tag & tag &\\
+\hline
+
+233 &
+Change the tag value by the specified amount.
+& tag add / subtract & ?? &  & 1 \\
+\hline
+
+234 &
+To indicate where to forward packets that pass a match clause of a route map for
+policy routing.
+& ?? & set interface &  & 4 \\
+\hline
+
+235 &
+To indicate where to import routes, use the set level command in route-map
+configuration mode.
+& ?? & set level & ?? & ?? \\
+
+\end{supertabular}
+\end{center}
+
+\section{Miscellaneous policy functionality}
+\begin{center}
+\tablehead{
+\hline
+Ref.	& Description	& Days \\
+}
+\tabletail{
+\hline
+}
+\begin{supertabular}{|r |p{12cm} |r|}
+\hline
+
+300 &
+Named match conditions.  Essentially a macro for match conditions.
+& 4 \\
+\hline
+
+301 &
+Tracing policy execution in a file.
+& 3 \\
+\hline
+
+302 &
+Final action.  In addition to specifying an action using the then statement in a
+named term, you can also specify an action using the then statement in an
+unnamed term.  (A bit like ``finally'' in exception handling.)
+& 2 \\
+\hline
+
+303 &
+Policy expressions.  Policy expressions give the policy framework software a
+different way to evaluate routing policies. A policy expression uses Boolean
+logical operators with policies. The logical operators establish rules by which
+the policies are evaluated.
+& 4 \\
+\hline
+
+304 &
+Route list actions.  If you specify route lists in the from statement, for each
+route in the list, you can specify an action to take on that individual route
+directly, without including a then statement.
+& 5 \\
+\hline
+
+305 &
+Routing policies and forwarding table interactions.  Allows you to set ``class
+of service'' and do load balancing.
+& ?? \\
+\hline
+
+306 &
+Testing routing policies.  Before applying a routing policy in a live
+environment, you can use the test policy command to ensure that the policy
+produces the results that you expect. 
+& 5 \\
+\hline
+
+307 &
+Ensuring consistency and compatibility with Juniper.  Ensure that commands
+match, {\em e.g.}, localpref $\to$ local-preference.  Ensure that syntax
+matches, {\em e.g.,} BGP AS-path regular expressions.  Ensure that outcome of
+commands matches that of Juniper.
+& 5 \\
+\hline
+
+308 &
+Per peer BGP policies.  Ability to attach policies to specific BGP peers.
+&
+3 \\
+\hline
+
+309 &
+Per group BGP policies.  Attach policies at a group granularity.  XORP currently
+does not support groups.
+&
+?? \\
+\hline
+
+310 &
+Per area OSPF policies.
+&
+5 \\
+\hline
+
+311 &
+Per group RIP policies.  XORP does not support RIP groups.
+&
+?? \\
+\hline
+
+312 &
+Aggregate route policies.  XORP does not support route aggregation.
+&
+?? \\
+\hline
+
+313 &
+Policies on generated routes.  XORP does not support route generation.
+&
+?? \\
+\hline
+
+314 &
+Policies on a routing table / instance (RIB) granularity.
+&
+5 \\
+\hline
+
+315 &
+Make the front-end policy configuration syntax more natural.  Currently the
+syntax for configuring policies is at times awkward due to limitations in XORP's
+configuration parser.
+& 10 \\
+\hline
+
+\end{supertabular}
+\end{center}
+
+\section{Performance}
+\begin{center}
+\tablehead{
+\hline
+Ref.	& Description	& Days \\
+}
+\tabletail{
+\hline
+}
+\begin{supertabular}{|r |p{12cm} |r|}
+\hline
+
+400 &
+Specialized types and operators.  The policy back-end supports very generic types
+({\em e.g.} strings) and operations on these can be slow.  Creating specialized
+types and operators will speed up policy execution.
+& 4 \\
+\hline
+
+401 &
+Bytecode / machine representation for running the policy.  Currently policies
+are represented as a parse-tree.  It may be more efficient to represent them as
+bytecode or indeed native code that can be quickly run.
+& 15 \\
+\hline
+
+402 &
+Avoid route copying.  In some cases ({\em e.g.} BGP), the only way to modify a
+route is create a new one and modify it.  Given that policies often modify
+routes this incurs both a time and memory overhead.  It may be possible to
+reduce this.
+& 5 \\
+\hline
+
+403 &
+General performance optimizations.  Various optimizations such as, where
+possible, using directly indexed arrays rather than (say) STL maps.  Any other
+general programming tricks.
+& 3 \\
+\hline
+
+404 &
+Profiling and optimizing specific cases.  This will involve taking individual
+protocols and studying their overhead at a more microscopic scale in order to
+eliminate inefficiencies.  The policy back-end will be scrutinized too.
+& 5  \\
+
+\end{supertabular}
+\end{center}
+
+\section{Current policy-related bugs}
+\begin{center}
+\tablehead{
+\hline
+Bugzilla ID	& Task ref.	& Description	& Days \\
+}
+\tabletail{
+\hline
+}
+\begin{supertabular}{|r |r |p{10cm} |r|}
+\hline
+
+245 &  
+& Show policy commands do not exist.
+& 4 \\
+\hline
+
+252 &  
+& Creating different policy lists with same name results in commit
+error. 
+& 1 \\
+\hline
+
+307 &  
+& Policy prefix-length4 is a range rather than single instance.
+& 1 \\
+\hline
+
+312 & 
+& Policy node "origin" should use ``igp/egp/incomplete'' values instead of
+numbers.
+& 1 \\
+\hline
+
+357 & 
+& policy statement accepts non-integer ``term'' values.
+& 1 \\
+\hline
+
+373 & 
+& Load configuration fails if policy is applied as import or export.
+& 1 \\
+\hline
+
+567 & 
+& The policy tag per route is not reset in case the policies are removed.
+& 1 \\
+\hline
+
+568 & 314
+& The policy framework does not support filtering or selecting MRIB routes.
+& 5 \\
+\hline
+
+628 & 312
+&   	Add a mechanism to export aggregated routes into routing protocols.
+& ?? \\
+\hline
+
+652 & 
+& Implement something along the lines of Cisco RPL (Routing Policy Language).
+& 10 \\
+\hline
+
+667 & 308
+& Implement per-peer BGP import/export policies.
+& 3 \\
+\hline
+
+674 & 
+& Enhance policy network-lists to included prefix length modifiers.
+& 2 \\
+\hline
+
+699 & 
+& Import policy ``reject all'' statement rejects accept statements on export
+policy.
+& 2 \\
+
+\end{supertabular}
+\end{center}
+
+\section{Summary}
+\begin{center}
+\begin{tabular}{|l |r|}
+\hline
+Component	& Days \\
+\hline
+Route match criteria (current completion: 52\%)	& 19 \\
+Route actions (current completion: 40\%)	& 34 \\
+\hline
+Miscellaneous		& 51 \\
+Performance		& 32 \\
+\hline
+Bug fixing		& 24 (+8) \\
+\hline
+Contingency (10\%)	& 16 \\
+\hline
+\hline
+{\bf Total}		& {\bf 176} \\
+\hline
+
+\end{tabular}
+\end{center}
+
+\section{New tasks}
+\begin{center}
+\tablehead{
+\hline
+Ref.	& Description	& Days \\
+}
+\tabletail{
+\hline
+}
+\begin{supertabular}{|r |p{12cm} |r|}
+\hline
+
+500 &
+Design and implement route pushing.  Route pushing ({\em i.e.,} refiltering
+routes upon a policy change) is currently implemented in an ad-hoc manner in
+each protocol.  This code is very difficult to get right and it indeed causes
+many bugs.  It needs to be designed and implemented by the generic policy
+framework, and protocols should make use of this single implementation.
+& 10 \\
+
+\end{supertabular}
+\end{center}
+
+\end{document}
