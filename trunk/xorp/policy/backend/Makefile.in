@@ -46,9 +46,10 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libpolicybackend_la_DEPENDENCIES = ../common/aspath.lo \
 	../common/dispatcher.lo ../common/elem_set.lo \
-	../common/element.lo ../common/element_factory.lo \
-	../common/filter.lo ../common/operator.lo \
-	../common/policy_utils.lo ../common/register_elements.lo \
+	../common/element.lo ../common/element_base.lo \
+	../common/element_factory.lo ../common/filter.lo \
+	../common/operator.lo ../common/policy_utils.lo \
+	../common/register_elements.lo \
 	../common/register_operations.lo ../common/varrw.lo
 am_libpolicybackend_la_OBJECTS = iv_exec.lo policy_filter.lo \
 	policy_filters.lo policy_profiler.lo policy_redist_map.lo \
@@ -233,9 +234,10 @@ libpolicybackend_la_SOURCES = filter_base.hh instr_visitor.hh \
 # XXX find a way to link libpolicycommon
 libpolicybackend_la_LIBADD = ../common/aspath.lo \
 	../common/dispatcher.lo ../common/elem_set.lo \
-	../common/element.lo ../common/element_factory.lo \
-	../common/filter.lo ../common/operator.lo \
-	../common/policy_utils.lo ../common/register_elements.lo \
+	../common/element.lo ../common/element_base.lo \
+	../common/element_factory.lo ../common/filter.lo \
+	../common/operator.lo ../common/policy_utils.lo \
+	../common/register_elements.lo \
 	../common/register_operations.lo ../common/varrw.lo
 
 ################################################################

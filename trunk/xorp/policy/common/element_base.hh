@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element_base.hh,v 1.6 2008/01/04 03:17:18 pavlin Exp $
+// $XORP: xorp/policy/common/element_base.hh,v 1.7 2008/07/23 05:11:26 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_BASE_HH__
 #define __POLICY_COMMON_ELEMENT_BASE_HH__
@@ -30,7 +30,8 @@ class Element {
 public:
     typedef unsigned char Hash;
 
-    virtual ~Element() {}
+    virtual ~Element();
+    Element();
 
     /**
      * Every element must be representable by a string. This is a requirement
@@ -48,6 +49,14 @@ public:
 
     virtual Hash hash() const = 0;
     virtual void set_hash(const Hash&) = 0;
+
+    // XXX don't use for now... not implemented
+    void	ref() const;
+    void	unref();
+    uint32_t	refcount() const;
+
+private:
+    mutable uint32_t	_refcount;
 };
 
 #endif // __POLICY_COMMON_ELEMENT_BASE_HH__

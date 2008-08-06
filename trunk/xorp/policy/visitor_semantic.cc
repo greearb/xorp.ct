@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.16 2008/07/23 05:11:21 pavlin Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.17 2008/08/06 08:08:30 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -128,7 +128,7 @@ VisitorSemantic::visit(NodeUn& node)
     try {
 	res = _disp.run(node.op(),*arg);
 
-	if (res != arg)
+	if (res->refcount() == 1)
 	    _trash.insert(res);
 
 	return res;
@@ -154,7 +154,7 @@ VisitorSemantic::visit(NodeBin& node)
     try {
 	res = _disp.run(node.op(),*left,*right);
 
-	if (res != left && res != right)
+	if (res->refcount() == 1)
 	    _trash.insert(res);
 
 	return res;

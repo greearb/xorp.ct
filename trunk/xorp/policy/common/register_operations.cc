@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.23 2008/07/23 05:11:27 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.24 2008/08/06 08:08:31 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -63,17 +63,35 @@ Element* name(const Left& x, const Right& y) \
     return new Result(x.val() op y.val()); \
 }
 
-DEFINE_BINOP(op_and,&&)
-DEFINE_BINOP(op_or,||)
-DEFINE_BINOP(op_xor,^)
+// We'd like partial template specialization for functions, but it's not
+// standard.  We special case when a bool is returned and optimize returning
+// true / false.  We return one of these global objects rather than creating a
+// new one each time.
+ElemBool _true(true);
+ElemBool _false(false);
 
-DEFINE_BINOP(op_eq,==)
-DEFINE_BINOP(op_ne,!=)
+#define DEFINE_BINOP_BOOL(name, op) \
+template<class Unused, class Left, class Right> \
+Element* name(const Left& x, const Right& y) \
+{ \
+    bool val = x.val() op y.val(); \
+    if (val) \
+	return &_true; \
+    else \
+	return &_false; \
+}
 
-DEFINE_BINOP(op_lt,<)
-DEFINE_BINOP(op_gt,>)
-DEFINE_BINOP(op_le,<=)
-DEFINE_BINOP(op_ge,>=)
+DEFINE_BINOP_BOOL(op_and, &&)
+DEFINE_BINOP_BOOL(op_or, ||)
+DEFINE_BINOP_BOOL(op_xor, ^)
+
+DEFINE_BINOP_BOOL(op_eq, ==)
+DEFINE_BINOP_BOOL(op_ne, !=)
+
+DEFINE_BINOP_BOOL(op_lt, <)
+DEFINE_BINOP_BOOL(op_gt, >)
+DEFINE_BINOP_BOOL(op_le, <=)
+DEFINE_BINOP_BOOL(op_ge, >=)
 
 DEFINE_BINOP(op_add,+)
 DEFINE_BINOP(op_sub,-)
@@ -263,6 +281,10 @@ aspath_prepend(const ElemU32& left, const ElemASPath& right)
 
     path.prepend_as(AsNum(left.val()));
 
+    // caller must not delete - we're recycling arg.
+    if (r.refcount() == 1)
+	r.ref();
+
     return &r;
 }
 
@@ -322,6 +344,10 @@ using namespace operations;
 RegisterOperations::RegisterOperations()
 {
     Dispatcher disp;
+
+    // prevent these from being deleted
+    _true.ref();
+    _false.ref();
 
 #define ADD_BINOP(result,left,right,funct,oper)				\
 do {									\

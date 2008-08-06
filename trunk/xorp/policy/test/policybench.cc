@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/policybench.cc,v 1.2 2008/08/06 08:05:46 abittau Exp $"
+#ident "$XORP: xorp/policy/test/policybench.cc,v 1.3 2008/08/06 08:06:07 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "policy/common/policy_utils.hh"
@@ -182,7 +182,7 @@ main(int argc, char* argv[])
 {
     int opt;
 
-    _conf.c_iterations = 10000;
+    _conf.c_iterations = 100000;
 
     while ((opt = getopt(argc, argv, "hp:v:i:")) != -1) {
 	switch (opt) {

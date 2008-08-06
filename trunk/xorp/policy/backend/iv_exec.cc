@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.20 2008/08/06 08:08:31 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.21 2008/08/06 08:09:41 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -298,21 +298,13 @@ IvExec::visit(NaryInstr& nary)
 	_stackptr++;
 
     // trash the result.
-    // XXX only if it is not one of the args.
-    bool isarg = false;
-    for (unsigned i = 0; i < arity; i++) {
-	if (_stackptr[i] == r) {
-	    isarg = true;
-	    break;
-	}
-    }
-
-    if (!isarg) {
+    // XXX only if it's a new element.
+    if (r->refcount() == 1) {
 	_trash[_trashc] = r;
 	_trashc++;
-    }
 
-    XLOG_ASSERT(_trashc < _trashs);
+	XLOG_ASSERT(_trashc < _trashs);
+    }
 
     // store result on stack
     XLOG_ASSERT(_stackptr < _stackend && _stackptr >= _stack);

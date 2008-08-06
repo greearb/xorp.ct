@@ -46,9 +46,9 @@ CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libpolicycommon_la_LIBADD =
 am_libpolicycommon_la_OBJECTS = aspath.lo dispatcher.lo elem_set.lo \
-	element.lo element_factory.lo filter.lo operator.lo \
-	policy_utils.lo register_elements.lo register_operations.lo \
-	varrw.lo
+	element.lo element_base.lo element_factory.lo filter.lo \
+	operator.lo policy_utils.lo register_elements.lo \
+	register_operations.lo varrw.lo
 libpolicycommon_la_OBJECTS = $(am_libpolicycommon_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -217,8 +217,9 @@ libpolicycommon_la_SOURCES = ../../bgp/aspath.hh dispatcher.hh \
 	operator_base.hh policy_exception.hh policy_utils.hh \
 	register_elements.hh register_operations.hh varrw.hh \
 	../../bgp/aspath.cc dispatcher.cc elem_set.cc element.cc \
-	element_factory.cc filter.cc operator.cc policy_utils.cc \
-	register_elements.cc register_operations.cc varrw.cc
+	element_base.cc element_factory.cc filter.cc operator.cc \
+	policy_utils.cc register_elements.cc register_operations.cc \
+	varrw.cc
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -277,6 +278,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dispatcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elem_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/element.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/element_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/element_factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/operator.Plo@am__quote@
