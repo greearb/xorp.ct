@@ -64,8 +64,19 @@ execpolicy_DEPENDENCIES = ../backend/libpolicybackend.la \
 	$(top_builddir)/libxorp/libxorp.la
 am_policybench_OBJECTS = policybench.$(OBJEXT) file_varrw.$(OBJEXT)
 policybench_OBJECTS = $(am_policybench_OBJECTS)
-policybench_DEPENDENCIES = ../backend/libpolicybackend.la \
-	../common/libpolicycommon.la \
+policybench_DEPENDENCIES = $(top_builddir)/bgp/libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 DEFAULT_INCLUDES = -I. -I$(top_builddir)@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -248,8 +259,19 @@ execpolicy_LDADD = ../backend/libpolicybackend.la \
 
 # policybench
 policybench_SOURCES = policybench.cc file_varrw.cc
-policybench_LDADD = ../backend/libpolicybackend.la \
-	../common/libpolicycommon.la \
+policybench_LDADD = $(top_builddir)/bgp/libbgp.la \
+	$(top_builddir)/xrl/targets/libbgpbase.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 
 ################################################################

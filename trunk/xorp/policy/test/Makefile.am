@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/test/Makefile.am,v 1.5 2005/07/08 02:06:23 abittau Exp $
+## $XORP: xorp/policy/test/Makefile.am,v 1.6 2008/08/06 08:04:51 abittau Exp $
 ##
 
 # -- Test Programs
@@ -42,9 +42,20 @@ execpolicy_LDADD		+= $(top_builddir)/libxorp/libxorp.la
 policybench_SOURCES		 = policybench.cc
 policybench_SOURCES		+= file_varrw.cc
 
-policybench_LDADD		 = ../backend/libpolicybackend.la
-policybench_LDADD		+= ../common/libpolicycommon.la 
-policybench_LDADD		+= $(top_builddir)/libxorp/libxorp.la
+policybench_LDADD		 = $(top_builddir)/bgp/libbgp.la
+policybench_LDADD               += $(top_builddir)/xrl/targets/libbgpbase.la
+policybench_LDADD        	+= $(top_builddir)/policy/backend/libpolicybackend.la
+policybench_LDADD               += $(top_builddir)/libfeaclient/libfeaclient.la
+policybench_LDADD               += $(top_builddir)/xrl/interfaces/libribxif.la
+policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
+policybench_LDADD               += $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la
+policybench_LDADD               += $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+policybench_LDADD               += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+policybench_LDADD               += $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
+policybench_LDADD               += $(top_builddir)/libxipc/libxipc.la
+policybench_LDADD               += $(top_builddir)/libcomm/libcomm.la
+policybench_LDADD               += $(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 ##

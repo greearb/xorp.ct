@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.22 2008/08/06 08:10:17 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.23 2008/08/06 08:10:43 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -229,8 +229,9 @@ IvExec::visit(Load& l)
 {
     const Element& x = _varrw->read_trace(l.var());
 
-    if(_do_trace)
+    if (_do_trace)
 	_os << "LOAD " << l.var() << ": " << x.str() << endl;
+
     // varrw owns element [do not trash]
     _stackptr++;
     XLOG_ASSERT(_stackptr < _stackend);
