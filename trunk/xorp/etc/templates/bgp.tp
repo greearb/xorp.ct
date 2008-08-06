@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.96 2008/08/06 08:17:05 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.97 2008/08/06 08:18:30 abittau Exp $ */
 
 protocols {
     bgp {
@@ -877,6 +877,7 @@ policy {
 		}
 		med {
 		    %help: short "Set the BGP MED attribute";
+		    %allow-operator: ":" "=" "sub" "add";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=med $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
