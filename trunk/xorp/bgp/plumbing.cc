@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.103 2008/07/23 05:09:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.104 2008/08/06 08:14:11 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -397,21 +397,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 
     XLOG_ASSERT(_master.rib_handler());
 
-#if 0
-    //
-    // XXX: don't plug a policy table on the RIB output branch, because
-    // the routes send to the RIB shouldn't be modified by the export
-    // policy rules.
-    //
-    PolicyTable<A>* policy_filter_out =
-	new PolicyTableExport<A>(ribname + "IpcChannelOutputPolicyFilter",
-			         _master.safi(),
-				 filter_out,
-				 _master.policy_filters(),
-				 _master.rib_handler()->id().str());
-    filter_out->set_next_table(policy_filter_out);
-    _tables.insert(policy_filter_out);
-#endif // 0
+    // No policy export filters on routes destined to the RIB.
 
     // Drop in an aggregation filter - beheave like an IBGP peering
     filter_out->add_aggregation_filter(true);
