@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.31 2008/01/04 03:15:17 pavlin Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.32 2008/07/23 05:09:31 pavlin Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -115,15 +116,15 @@ enum ASPathSegType {
  */
 class ASSegment {
 public:
-    typedef vector <AsNum>::iterator iterator;
-    typedef vector <AsNum>::const_iterator const_iterator;
-    typedef vector <AsNum>::const_reverse_iterator const_reverse_iterator;
+    typedef list<AsNum> ASLIST;
+    typedef ASLIST::iterator iterator;
+    typedef ASLIST::const_iterator const_iterator;
+    typedef ASLIST::const_reverse_iterator const_reverse_iterator;
 
     /**
      * Constructor of an empty ASSegment
      */
     ASSegment(ASPathSegType t = AS_NONE) : _type(t)	{
-	_aslist.reserve(16);
     }
 
     /**
@@ -134,7 +135,6 @@ public:
      * _type is d[0], l is d[1], entries follow.
      */
     ASSegment(const uint8_t* d) throw(CorruptMessage)	{
-	_aslist.reserve(16);
 	decode(d);
     }
 
@@ -192,7 +192,7 @@ public:
      */
     void prepend_as(const AsNum& n)			{
 	debug_msg("Number of As entries %u\n", XORP_UINT_CAST(_aslist.size()));
-	_aslist.insert(_aslist.begin(), n);
+	_aslist.push_front(n);
     }
 
     /**
@@ -213,7 +213,12 @@ public:
      * find the n'th AS number in the segment 
      */
     const AsNum& as_num(int n) const			{
-	return _aslist[n];
+	const_iterator i = _aslist.begin();
+
+	while (n--)
+	    i++;
+
+	return *i;
     }
 
     /**
@@ -271,7 +276,7 @@ public:
 
 protected:
     ASPathSegType	_type;
-    vector <AsNum>	_aslist;
+    ASLIST		_aslist;
 };
 
 
