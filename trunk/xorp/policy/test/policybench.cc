@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/policybench.cc,v 1.4 2008/08/06 08:10:18 abittau Exp $"
+#ident "$XORP: xorp/policy/test/policybench.cc,v 1.5 2008/08/06 08:11:45 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "policy/common/policy_utils.hh"
@@ -169,18 +169,33 @@ stats()
 }
 
 void
+do_iter_bgp(PolicyFilter& filter, VarRW& varrw, int i)
+{
+    BGP_VARRW& v = static_cast<BGP_VARRW&>(varrw);
+
+    v.attach_route(*_conf.c_bgp_routes[i]->bgp_message, false);
+
+    filter.acceptRoute(v);
+
+    if (v.modified()) {
+	v.filtered_message(); // XXX leak
+    }
+}
+
+void
 do_iter(PolicyFilter& filter, VarRW& varrw, int i)
 {
     _conf.c_exec.clear();
 
     switch (_conf.c_type) {
     case BTYPE_BGP:
-	static_cast<BGP_VARRW&>(varrw)
-	    .attach_route(*_conf.c_bgp_routes[i]->bgp_message, false);
+	do_iter_bgp(filter, varrw, i);
+	break;
+
+    case BTYPE_FILE:
+	filter.acceptRoute(varrw);
 	break;
     }
-
-    filter.acceptRoute(varrw);
 
     for (unsigned i = 0; i < _conf.c_exec.count(); i++)
 	_conf.c_exec_total[i] += _conf.c_exec.sample(i);
