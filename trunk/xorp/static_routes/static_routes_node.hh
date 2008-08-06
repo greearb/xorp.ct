@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.29 2008/01/04 03:17:48 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.30 2008/07/23 05:11:48 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -297,14 +297,7 @@ public:
     /**
      * @return policy-tags for this route.
      */
-    const PolicyTags& policytags() const { return _policytags; }
-    
-    /**
-     * Set policy-tags for route.
-     *
-     * @param tags the new policy-tags for this route.
-     */
-    void set_policytags(const PolicyTags& tags) { _policytags = tags; }
+    PolicyTags& policytags() { return _policytags; }
 
     /**
      * Test whether the route has been rejected by a policy filter.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.21 2008/01/04 03:15:18 pavlin Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.22 2008/07/23 05:09:32 pavlin Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -116,47 +116,41 @@ public:
      * @return the neighbor variable.
      */
     Element* read_neighbor_base_cb()	{ return read_neighbor(); }
-
     Element* read_policytags();
     Element* read_filter_im();
     Element* read_filter_sm();
     Element* read_filter_ex();
-
     Element* read_network4();
     Element* read_network6();
-
     Element* read_nexthop4();
     Element* read_nexthop6();
     Element* read_aspath();
     Element* read_origin();
-
     Element* read_localpref();
     Element* read_community();
     Element* read_med();
     Element* read_med_remove();
-
     Element* read_aggregate_prefix_len();
     Element* read_aggregate_brief_mode();
     Element* read_was_aggregated();
+    Element* read_tag();
 
     void write_filter_im(const Element& e);
     void write_filter_sm(const Element& e);
     void write_filter_ex(const Element& e);
     void write_policytags(const Element& e);
-
     void write_nexthop4(const Element& e);
     void write_nexthop6(const Element& e);
     void write_aspath(const Element& e);
     void write_origin(const Element& e);
-
     void write_aggregate_prefix_len(const Element& e);
     void write_aggregate_brief_mode(const Element& e);
     void write_was_aggregated(const Element& e);
-
     void write_localpref(const Element& e);
     void write_community(const Element& e);
     void write_med(const Element& e);
     void write_med_remove(const Element& e);
+    void write_tag(const Element& e);
 
 protected:
     ElementFactory		_ef;

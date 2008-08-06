@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/policy_varrw.hh,v 1.12 2008/07/23 05:11:09 pavlin Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.13 2008/08/06 08:23:50 abittau Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
@@ -31,32 +31,28 @@ class OspfVarRW : public SingleVarRW {
 	VAR_NEXTHOP,
 	VAR_METRIC,
 	VAR_EBIT,
-	VAR_TAG
     };
 
     OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric, bool& e_bit,
 	      uint32_t& tag, bool& tag_set, PolicyTags& policytags);
 
-    void null();
-
     // SingleVarRW inteface:
-    void start_read();
-    Element* single_read(const Id& id);
-    void single_write(const Id& id, const Element& e);
+    void	start_read();
+    Element*	single_read(const Id& id);
+    void	single_write(const Id& id, const Element& e);
 
  private:
     void start_read_common();
+    void single_write_common(const Id& id, const Element& e);
 
-    IPNet<A>& _network;
-    A& _nexthop;
-    uint32_t& _metric;
-    bool& _e_bit;
-    uint32_t& _tag;
-    bool& _tag_set;
-
-    PolicyTags& _policytags;
-
-    ElementFactory _ef;
+    IPNet<A>&	    _network;
+    A&		    _nexthop;
+    uint32_t&	    _metric;
+    bool&	    _e_bit;
+    uint32_t&	    _tag;
+    bool&	    _tag_set;
+    PolicyTags&	    _policytags;
+    ElementFactory  _ef;
 };
 
 #endif // __OSPF_POLICY_VARRRW_HH__

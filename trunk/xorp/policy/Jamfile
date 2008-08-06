@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/policy/Jamfile,v 1.3 2008/08/06 08:12:51 abittau Exp $
+# $XORP: xorp/policy/Jamfile,v 1.4 2008/08/06 08:22:17 abittau Exp $
 #
 
 SubDir TOP policy ;
@@ -25,6 +25,7 @@ Library libpolicy :
 Main xorp_policy : xorp_policy.cc policy_target.cc ;
 LinkLibraries xorp_policy : 
 	libpolicy
+	libpolicybackend
 	libpolicycommon
 	libpolicybase
 	libpolicybackendxif

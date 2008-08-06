@@ -62,7 +62,7 @@ am_xorp_policy_OBJECTS = xorp_policy.$(OBJEXT) policy_target.$(OBJEXT)
 xorp_policy_OBJECTS = $(am_xorp_policy_OBJECTS)
 xorp_policy_LDADD = $(LDADD)
 xorp_policy_DEPENDENCIES = $(noinst_LTLIBRARIES) \
-	./common/libpolicycommon.la \
+	./backend/libpolicybackend.la ./common/libpolicycommon.la \
 	$(top_builddir)/xrl/targets/libpolicybase.la \
 	$(top_builddir)/xrl/interfaces/libpolicybackendxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
@@ -246,7 +246,8 @@ SUBDIRS = common backend .
 noinst_LTLIBRARIES = libpolicy.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = $(noinst_LTLIBRARIES) ./common/libpolicycommon.la \
+LDADD = $(noinst_LTLIBRARIES) ./backend/libpolicybackend.la \
+	./common/libpolicycommon.la \
 	$(top_builddir)/xrl/targets/libpolicybase.la \
 	$(top_builddir)/xrl/interfaces/libpolicybackendxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \

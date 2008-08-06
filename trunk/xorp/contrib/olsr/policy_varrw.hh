@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/contrib/olsr/policy_varrw.hh,v 1.1 2008/04/24 15:19:54 bms Exp $
+// $XORP: xorp/contrib/olsr/policy_varrw.hh,v 1.2 2008/07/23 05:09:52 pavlin Exp $
 
 #ifndef __OLSR_POLICY_VARRRW_HH__
 #define __OLSR_POLICY_VARRRW_HH__
@@ -42,8 +42,6 @@ class OlsrVarRW : public SingleVarRW {
     OlsrVarRW(IPv4Net& network, IPv4& nexthop, uint32_t& metric,
 	      IPv4& originator, IPv4& main_addr, uint32_t vtype,
 	      PolicyTags& policytags);
-
-    void null();
 
     // SingleVarRW inteface:
     void start_read();

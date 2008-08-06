@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.12 2008/08/06 08:12:51 abittau Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.13 2008/08/06 08:22:17 abittau Exp $
 ##
 
 # -- Subdirectories
@@ -17,6 +17,7 @@ noinst_LTLIBRARIES = libpolicy.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD            = $(noinst_LTLIBRARIES)
+LDADD           += ./backend/libpolicybackend.la
 LDADD           += ./common/libpolicycommon.la
 LDADD           += $(top_builddir)/xrl/targets/libpolicybase.la
 LDADD           += $(top_builddir)/xrl/interfaces/libpolicybackendxif.la

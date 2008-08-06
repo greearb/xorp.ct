@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/rip_varrw.hh,v 1.10 2008/01/04 03:17:32 pavlin Exp $
+// $XORP: xorp/rip/rip_varrw.hh,v 1.11 2008/07/23 05:11:36 pavlin Exp $
 
 #ifndef __RIP_RIP_VARRW_HH__
 #define __RIP_RIP_VARRW_HH__
@@ -33,8 +33,7 @@ public:
 	VAR_NEXTHOP4,
 	VAR_NETWORK6,
 	VAR_NEXTHOP6,
-	VAR_METRIC,
-	VAR_TAG
+	VAR_METRIC
     };
     
     /**

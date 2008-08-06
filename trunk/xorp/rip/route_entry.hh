@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.20 2008/01/04 03:17:32 pavlin Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.21 2008/07/23 05:11:36 pavlin Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -199,13 +199,15 @@ public:
      */
     const PolicyTags& policytags() const	{ return _policytags; }
 
+    PolicyTags& policytags()			{ return _policytags; }
+
     /**
      * Replace policy-tags of route
      * @return true if tags were modified.
      * @param tags new policy-tags.
      */
     bool set_policytags(const PolicyTags& tags);
-  
+
     /**
      * @return true if route was rejected by policy filter.
      */

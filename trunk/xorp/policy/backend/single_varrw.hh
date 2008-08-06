@@ -13,15 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/single_varrw.hh,v 1.12 2008/01/04 03:17:16 pavlin Exp $
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.13 2008/07/23 05:11:24 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
 
+#include <list>
+
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_utils.hh"
 #include "policy/common/element_base.hh"
-#include <list>
+#include "policytags.hh"
 
 /**
  * @short An interface to VarRW which deals with memory management.
@@ -87,6 +89,8 @@ public:
      * @param e value of variable.
      */
     void initialize(const Id& id, Element* e);
+    
+    void initialize(PolicyTags& pt);
 
     /**
      * If any reads are performed, this is a marker which informs the derived
@@ -126,16 +130,12 @@ public:
     virtual void end_write() {}
 
 private:
-    Element* _trash[16];
-    unsigned _trashc;
-
-    // Map that caches element read/write's 
-    const Element* _elems[VAR_MAX];
-
-    // variable id's that changed
-    bool _modified[VAR_MAX];
-
-    bool _did_first_read;
+    Element*	    _trash[16];
+    unsigned	    _trashc;
+    const Element*  _elems[VAR_MAX];    // Map that caches element read/writes 
+    bool	    _modified[VAR_MAX]; // variable id's that changed
+    bool	    _did_first_read;
+    PolicyTags*	    _pt;
 
     // not impl
     SingleVarRW(const SingleVarRW&);

@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,16 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policytags.hh,v 1.6 2008/01/04 03:17:16 pavlin Exp $
+// $XORP: xorp/policy/backend/policytags.hh,v 1.7 2008/07/23 05:11:24 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICYTAGS_HH__
 #define __POLICY_BACKEND_POLICYTAGS_HH__
 
+#include <set>
+
 #include "policy/common/policy_exception.hh"
 #include "policy/common/element_base.hh"
-
 #include "libxipc/xrl_atom_list.hh"
-#include <set>
 
 /**
  * @short A set of policy tags. A policytag is a marker for a route.
@@ -43,7 +44,7 @@ public:
 			const string& init_why = "")   
 	: PolicyException("PolicyTagsError", file, line, init_why) {} 
     };
-    
+
     /**
      * Empty policytags may be safely created. No exception thrown
      */
@@ -56,13 +57,6 @@ public:
      * @param xrlatoms list of xrlatom_uint32 atoms to initialize from.
      */
     PolicyTags(const XrlAtomList& xrlatoms);
-
-    /**
-     * Attempt to create policy tags from ElemSet.
-     *
-     * @param e ElemSet to initialize from.
-     */
-    PolicyTags(const Element& e);
 
     /**
      * @return string representation of policytags.
@@ -81,7 +75,11 @@ public:
      * @return ElemSet representation. Caller is responsible for delete.
      */
     Element* element() const;
-   
+
+    Element* element_tag() const;
+    void     set_tag(const Element& e);
+    void     set_ptags(const Element& e);
+
     /**
      * Convert to XrlAtomList of xrlatom_uint32's
      *
@@ -96,6 +94,8 @@ public:
      */
     void insert(const PolicyTags& pt);
 
+    void insert(uint32_t tag);
+
     /**
      * Check if intersection is not empty. 
      *
@@ -107,7 +107,8 @@ public:
 private:
     typedef set<uint32_t> Set;
 
-    Set _tags;
+    Set		_tags;
+    uint32_t	_tag;
 };
 
 #endif // __POLICY_BACKEND_POLICYTAGS_HH__

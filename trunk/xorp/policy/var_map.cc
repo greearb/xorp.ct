@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.13 2008/01/04 03:17:13 pavlin Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.14 2008/07/23 05:11:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,6 +64,7 @@ VarMap::variable(const string& protocol, const VarRW::Id& varname) const
 VarMap::VarMap(ProcessWatchBase& pw) : _process_watch(pw) 
 {
     add_metavariable(new Variable("trace", "u32", WRITE, VarRW::VAR_TRACE));
+    add_metavariable(new Variable("tag", "u32", READ_WRITE, VarRW::VAR_TAG));
 }
 
 VarMap::~VarMap()

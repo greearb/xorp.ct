@@ -13,44 +13,57 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.13 2008/01/04 03:17:16 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.14 2008/07/23 05:11:24 pavlin Exp $"
+
+#include <sstream>
 
 #include "libxorp/xorp.h"
-
 #include "policytags.hh"
 #include "policy/common/elem_set.hh"
 #include "libxipc/xrl_atom.hh"
-#include <sstream>
 
-PolicyTags::PolicyTags()
+PolicyTags::PolicyTags() : _tag(0)
 {
 }
 
-PolicyTags::PolicyTags(const XrlAtomList& alist)
+PolicyTags::PolicyTags(const XrlAtomList& alist) : _tag(0)
 {
+    // first is always tag
+    XLOG_ASSERT(alist.size() > 0);
+
     // go through all the atoms in the list
-    for(unsigned i = 0; i < alist.size(); ++i) {
+    for (unsigned i = 0; i < alist.size(); ++i) {
 	const XrlAtom& atom = alist.get(i);
 
 	// only support u32's
-	if(atom.type() != xrlatom_uint32)
+	if (atom.type() != xrlatom_uint32)
 	    xorp_throw(PolicyTagsError, "XrlAtomList does not contain uint32's");
 
+	uint32_t val = atom.uint32();
+
+	if (i == 0) {
+	    _tag = val;
+	    continue;
+	}
+
 	// it's good, insert it
-	_tags.insert(atom.uint32());    
+	_tags.insert(val);
     }
 }
 
-PolicyTags::PolicyTags(const Element& element)
+void
+PolicyTags::set_ptags(const Element& element)
 {
     // we only support set elements
     const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
-    if(!es)
+    if (!es)
 	xorp_throw(PolicyTagsError, 
 		   string("Element is not a set: ") + element.type());
 
+    _tags.clear();
+
     // go through all the set elements.
-    for(ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) {
+    for (ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) {
 	const ElemU32& x = *i;
 
 	// all ElemSet elements are represented as string, so convert and
@@ -81,14 +94,15 @@ PolicyTags::str() const
 bool
 PolicyTags::operator==(const PolicyTags& rhs) const
 {
-    // just check if the set of tags is equal.
-    return _tags == rhs._tags;
+    return (_tags == rhs._tags) && (_tag == rhs._tag);
 }
 
 XrlAtomList
 PolicyTags::xrl_atomlist() const
 {
     XrlAtomList alist;
+
+    alist.append(XrlAtom(_tag));
 
     for(Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) {
 	uint32_t tag = *i;
@@ -108,6 +122,20 @@ PolicyTags::element() const
 	s->insert(e);
     }
     return s;
+}
+
+Element*
+PolicyTags::element_tag() const
+{
+    return new ElemU32(_tag);
+}
+
+void
+PolicyTags::set_tag(const Element& e)
+{
+    uint32_t val = dynamic_cast<const ElemU32&>(e).val();
+
+    _tag = val;
 }
 
 void
@@ -132,4 +160,10 @@ PolicyTags::contains_atleast_one(const PolicyTags& tags) const
 		     insert_iterator<Set>(output,output.begin()));
 	
     return !output.empty();
+}
+
+void
+PolicyTags::insert(uint32_t tag)
+{
+    _tags.insert(tag);
 }

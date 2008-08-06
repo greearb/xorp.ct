@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.18 2008/07/23 05:11:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.19 2008/08/06 08:22:18 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -21,7 +21,7 @@
 #include "policy_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
-
+#include "backend/policytags.hh"
 #include "filter_manager.hh"
 
 FilterManager::FilterManager(const CodeMap& imp, 
@@ -92,14 +92,13 @@ FilterManager::update_tagmap(const string& protocol)
 
     const TagSet* ts = (*i).second;
 
-    // convert tags to xrlatomlist
-    XrlAtomList al;
+    // convert tags to PolicyTags
+    PolicyTags pt;
 
-    for(TagSet::const_iterator iter = ts->begin();
-	iter != ts->end(); ++iter) {
-   
-        al.append(XrlAtom(*iter));	    
-    }
+    for (TagSet::const_iterator iter = ts->begin(); iter != ts->end(); ++iter)
+	pt.insert(*iter);	
+
+    XrlAtomList al = pt.xrl_atomlist();
 
     debug_msg("[POLICY] Updating tagmap proto: %s, tags: %s\n",
 	      protocol.c_str(),al.str().c_str());

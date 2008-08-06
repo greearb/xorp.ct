@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.10 2008/01/04 03:17:48 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.11 2008/07/23 05:11:48 pavlin Exp $"
 
 #include "static_routes_module.h"
 #include "libxorp/xorp.h"
@@ -29,7 +29,7 @@ StaticRoutesVarRW::StaticRoutesVarRW(StaticRoute& route)
 void
 StaticRoutesVarRW::start_read()
 {
-    initialize(VAR_POLICYTAGS, _route.policytags().element());
+    initialize(_route.policytags());
 
     if (_is_ipv4) {
 	initialize(VAR_NETWORK4,
@@ -63,11 +63,8 @@ StaticRoutesVarRW::start_read()
 }
 
 void
-StaticRoutesVarRW::single_write(const Id& id, const Element& e)
+StaticRoutesVarRW::single_write(const Id& /* id */, const Element& /* e */)
 {
-    if (id == VAR_POLICYTAGS) {
-	_route.set_policytags(e);
-    }
 }
 
 Element*

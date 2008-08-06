@@ -1,37 +1,33 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.27 2008/08/06 08:15:12 abittau Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.28 2008/08/06 08:22:16 abittau Exp $ */
 
 policy {
     targetname: txt = "policy";
     policy-statement @: txt {
 	term @: txt {
 	    from {
-		protocol: txt;
-
-		network4: ipv4net;
-		network6: ipv6net;
-
-		network4-list: txt;
-		network6-list: txt;
-
-		prefix-length4: u32range;
-		prefix-length6: u32range;
-
-		policy: txt;
+		protocol:	txt;
+		network4:	ipv4net;
+		network6:	ipv6net;
+		network4-list:	txt;
+		network6-list:	txt;
+		prefix-length4:	u32range;
+		prefix-length6:	u32range;
+		policy:		txt;
+		tag:		u32range;
 	    }
 	    to {
-		network4: ipv4net;
-		network6: ipv6net;
-
-		network4-list: txt;
-		network6-list: txt;
-
-		prefix-length4: u32range;
-		prefix-length6: u32range;
-
-		policy: txt;
+		network4:	ipv4net;
+		network6:	ipv6net;
+		network4-list:	txt;
+		network6-list:	txt;
+		prefix-length4:	u32range;
+		prefix-length6:	u32range;
+		policy:		txt;
+		tag:		u32range;
 	    }
 	    then {
-		trace: u32;
+		trace:		u32;
+		tag:		u32;
 	    }
 	}
     }
@@ -137,6 +133,12 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=policy $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
+
+		tag {
+		    %help: short "Tag value";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
 	    }
 
 	    to {
@@ -183,6 +185,12 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=policy $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
+
+		tag {
+		    %help: short "Tag value";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
 	    }
 
 	    then {
@@ -190,6 +198,13 @@ policy {
 		trace {
 		    %help: short "Set the tracing";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=trace = $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+
+		tag {
+		    %help: short "Tag value";
+		    %allow-operator: ":" "=" "add" "sub";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 

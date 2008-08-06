@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.12 2008/08/06 08:23:24 abittau Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.13 2008/08/06 08:23:50 abittau Exp $ */
 
 protocols {
     ospf6 @: u32 {
@@ -75,19 +75,16 @@ policy {
 		nexthop6: ipv6range;
 		metric: u32range;
 		external-type: u32;
-		tag: u32range;
 	    }
 	    to {
 		nexthop6: ipv6range;
 		metric: u32range;
 		external-type: u32;
-		tag: u32range;
 	    }
 	    then {
 		nexthop6: ipv6;
 		metric: u32;
 		external-type: u32;
-		tag: u32;
 	    }
 	}
     }
@@ -399,7 +396,6 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=11";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=etype&type:txt=u32&access:txt=rw&id:u32=13";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
 
     policy-statement @: txt {
 	term @: txt {
@@ -423,12 +419,6 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=etype $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
-		tag {
-		    %help: short "Route tag";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
-		}
 	    }
 	    to {
 		nexthop6 {
@@ -450,12 +440,6 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=etype $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
-		tag {
-		    %help: short "Route tag";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
 	    }
 	    then {
 		nexthop6 {
@@ -473,11 +457,6 @@ policy {
 		    %help: short "Set the type of external OSPF route";
 		    %allow-range: $(@) "1" "2" %help: "Either type 1 or type 2";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=etype $(<>) $(@);";
-		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
-		}
-		tag {
-		    %help: short "Set the route tag";
-		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 	    }

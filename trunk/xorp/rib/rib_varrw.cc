@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.12 2008/01/04 03:17:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_varrw.cc,v 1.13 2008/07/23 05:11:30 pavlin Exp $"
 
 #include "rib_module.h"
 #include "libxorp/xorp.h"
@@ -31,7 +31,7 @@ template <class A>
 void
 RIBVarRW<A>::start_read()
 {
-    initialize(VAR_POLICYTAGS, _route.policytags().element());
+    initialize(_route.policytags());
 
     read_route_nexthop(_route);
 
@@ -69,12 +69,8 @@ RIBVarRW<IPv6>::read_route_nexthop(IPRouteEntry<IPv6>& route)
 
 template <class A>
 void
-RIBVarRW<A>::single_write(const Id& id, const Element& e)
+RIBVarRW<A>::single_write(const Id& /* id */, const Element& /* e */)
 {
-    if (id == VAR_POLICYTAGS) {
-	debug_msg("RIBVarRW writing policytags %s\n", e.str().c_str());
-	_route.set_policytags(e);
-    }
 }
 
 template <class A>

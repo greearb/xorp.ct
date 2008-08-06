@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.34 2008/04/23 03:43:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.35 2008/07/23 05:09:31 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -101,6 +101,13 @@ Element*
 BGPVarRW<A>::read_policytags()
 {
     return _orig_rtmsg->route()->policytags().element();
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_tag()
+{
+    return _orig_rtmsg->route()->policytags().element_tag();
 }
 
 template <class A>
@@ -371,13 +378,27 @@ template <class A>
 void
 BGPVarRW<A>::write_policytags(const Element& e)
 {
-    XLOG_ASSERT(!_ptags);
+    if (!_ptags)
+	_ptags = new PolicyTags(_orig_rtmsg->route()->policytags());
 
-    _ptags = new PolicyTags(e);
+    _ptags->set_ptags(e);
     _wrote_ptags = true;
-    
+
     // XXX: maybe we should make policytags be like filter pointers... i.e. meta
     // information, rather than real route information...
+    _route_modify = true;
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_tag(const Element& e)
+{
+    if (!_ptags)
+	_ptags = new PolicyTags(_orig_rtmsg->route()->policytags());
+
+    _ptags->set_tag(e);
+    _wrote_ptags = true;
+
     _route_modify = true;
 }
 
@@ -667,7 +688,10 @@ BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
 {
     init_rw(VarRW::VAR_POLICYTAGS, 
 	    &BGPVarRW<A>::read_policytags, &BGPVarRW<A>::write_policytags);
-    
+
+    init_rw(VarRW::VAR_TAG,
+	    &BGPVarRW<A>::read_tag, &BGPVarRW<A>::write_tag);
+
     init_rw(VarRW::VAR_FILTER_IM, 
 	    &BGPVarRW<A>::read_filter_im, &BGPVarRW<A>::write_filter_im);
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.22 2008/01/04 03:16:16 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.23 2008/07/23 05:10:35 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -279,15 +279,8 @@ public:
     /**
      * @return policy-tags for this route.
      */
-    const PolicyTags& policytags() const { return _policytags; }
+    PolicyTags& policytags() { return _policytags; }
     
-    /**
-     * Set policy-tags for route.
-     *
-     * @param tags the new policy-tags for this route.
-     */
-    void set_policytags(const PolicyTags& tags) { _policytags = tags; }
-
     /**
      * @return whether route has been rejected by policy filter.
      *

@@ -13,33 +13,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.17 2008/01/04 03:17:16 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.18 2008/07/23 05:11:24 pavlin Exp $"
 
 #include "policy/policy_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-
 #include "policy/common/elem_null.hh"
-
 #include "single_varrw.hh"
 
-
-SingleVarRW::SingleVarRW() : _trashc(0), _did_first_read(false) 
+SingleVarRW::SingleVarRW() : _trashc(0), _did_first_read(false), _pt(NULL)
 {
     memset(&_elems, 0, sizeof(_elems));
     memset(&_modified, 0, sizeof(_modified));
 }
 
-
-SingleVarRW::~SingleVarRW() {
+SingleVarRW::~SingleVarRW()
+{
     for (unsigned i = 0; i < _trashc; i++)
         delete _trash[i];
 }
 
 const Element&
-SingleVarRW::read(const Id& id) {
-
+SingleVarRW::read(const Id& id)
+{
     // Maybe there was a write before a read for this variable, if so, just
     // return the value... no need to bother the client.
     const Element* e = _elems[id];
@@ -76,7 +72,8 @@ SingleVarRW::read(const Id& id) {
 }
 
 void
-SingleVarRW::write(const Id& id, const Element& e) {
+SingleVarRW::write(const Id& id, const Element& e)
+{
     // XXX no paranoid checks on what we write
 
     _elems[id] = &e;
@@ -84,7 +81,8 @@ SingleVarRW::write(const Id& id, const Element& e) {
 }
 
 void
-SingleVarRW::sync() {
+SingleVarRW::sync()
+{
     bool first = true;
 
     // it's faster doing it this way rather than STL set if VAR_MAX is small...
@@ -92,18 +90,31 @@ SingleVarRW::sync() {
 	if (!_modified[i])
 	    continue;
 
+	const Element* e = _elems[i];
+	XLOG_ASSERT(e);
+	_modified[i] = false;
+
 	if (first) {
 	    // alert derived class we are committing
 	    start_write();
 	    first = false;
-	}    
-	const Element* e = _elems[i];
+	}
 
-	XLOG_ASSERT(e);
-	single_write(i,*e);
-	_modified[i] = false;
+	if (_pt) {
+	    switch (i) {
+	    case VAR_POLICYTAGS:
+		_pt->set_ptags(*e);
+		continue;
+
+	    case VAR_TAG:
+		_pt->set_tag(*e);
+		continue;
+	    }
+	}
+
+	single_write(i, *e);
     }
-    
+
     // done commiting [so the derived class may sync]
     end_write();
 
@@ -117,8 +128,8 @@ SingleVarRW::sync() {
 }
 
 void
-SingleVarRW::initialize(const Id& id, Element* e) {
-
+SingleVarRW::initialize(const Id& id, Element* e)
+{
     // check if we already have a value for a variable.
     // if so, do nothing.
     //
@@ -143,4 +154,13 @@ SingleVarRW::initialize(const Id& id, Element* e) {
     XLOG_ASSERT(_trashc < sizeof(_trash)/sizeof(Element*));
     _trash[_trashc] = e;
     _trashc++;
+}
+
+void
+SingleVarRW::initialize(PolicyTags& pt)
+{
+    _pt = &pt;
+
+    initialize(VAR_POLICYTAGS, _pt->element());
+    initialize(VAR_TAG, _pt->element_tag());
 }

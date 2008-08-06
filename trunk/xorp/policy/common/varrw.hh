@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.15 2008/07/23 05:11:27 pavlin Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.16 2008/08/06 08:07:15 abittau Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
@@ -36,19 +36,19 @@ class VarRW {
 public:
     typedef int Id;
     enum {
-        VAR_TRACE = 0,
+        VAR_TRACE	= 0,
         VAR_POLICYTAGS,
         VAR_FILTER_IM,
         VAR_FILTER_SM,
         VAR_FILTER_EX,
-
-        VAR_PROTOCOL = 10,  // protocol specific vars start here
-        VAR_MAX = 32 // must be last
+	VAR_TAG		= 5,
+        VAR_PROTOCOL	= 10, // protocol specific vars start here
+        VAR_MAX		= 32  // must be last
     };
 
     VarRW();
     virtual ~VarRW();
-   
+
     /**
      * Read a variable from a route [such as nexthop].
      *

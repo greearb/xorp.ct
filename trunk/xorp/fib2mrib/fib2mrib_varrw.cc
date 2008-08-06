@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.9 2008/01/04 03:16:16 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.10 2008/07/23 05:10:35 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -31,7 +31,7 @@ Fib2mribVarRW::Fib2mribVarRW(Fib2mribRoute& route)
 void
 Fib2mribVarRW::start_read()
 {
-    initialize(VAR_POLICYTAGS, _route.policytags().element());
+    initialize(_route.policytags());
 
     if (_is_ipv4) {
 	initialize(VAR_NETWORK4,
@@ -65,11 +65,8 @@ Fib2mribVarRW::start_read()
 }
 
 void
-Fib2mribVarRW::single_write(const Id& id, const Element& e)
+Fib2mribVarRW::single_write(const Id& /* id */, const Element& /* e */)
 {
-    if (id == VAR_POLICYTAGS) {
-	_route.set_policytags(e);
-    }
 }
 
 Element*

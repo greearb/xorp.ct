@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.11 2008/01/04 03:17:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.12 2008/07/23 05:11:36 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xorp.h"
@@ -36,6 +36,14 @@ RIPVarRW<A>::start_read()
     read_route_nexthop(_route);
 
     initialize(VAR_METRIC, new ElemU32(_route.cost()));
+
+    // XXX which tag wins?
+    ElemU32* e = dynamic_cast<ElemU32*>(_route.policytags().element_tag());
+    if (e->val())
+	_route.set_tag(e->val());
+
+    delete e;
+
     initialize(VAR_TAG, new ElemU32(_route.tag()));
 }
 
@@ -53,7 +61,7 @@ void
 RIPVarRW<A>::single_write(const Id& id, const Element& e)
 {
     if (id == VAR_POLICYTAGS) {
-	_route.set_policytags(e);
+	_route.policytags().set_ptags(e);
 	return;
     }
 
@@ -76,6 +84,7 @@ RIPVarRW<A>::single_write(const Id& id, const Element& e)
 	XLOG_ASSERT(u32 != NULL);
 
 	_route.set_tag(u32->val());
+	_route.policytags().set_tag(e);
 	return;
     }
 }

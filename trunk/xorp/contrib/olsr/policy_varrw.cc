@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/contrib/olsr/policy_varrw.cc,v 1.1 2008/04/24 15:19:54 bms Exp $"
+#ident "$XORP: xorp/contrib/olsr/policy_varrw.cc,v 1.2 2008/07/23 05:09:52 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,20 +43,10 @@ OlsrVarRW::OlsrVarRW(IPv4Net& network, IPv4& nexthop, uint32_t& metric,
 }
 
 void
-OlsrVarRW::null()
-{
-    initialize(VAR_NETWORK, NULL);
-    initialize(VAR_NEXTHOP, NULL);
-    initialize(VAR_METRIC, NULL);
-    initialize(VAR_ORIGINATOR, NULL);
-    initialize(VAR_MAINADDR, NULL);
-    initialize(VAR_VTYPE, NULL);
-}
-
-void
 OlsrVarRW::start_read()
 {
-    initialize(VAR_POLICYTAGS, _policytags.element());
+    initialize(_policytags);
+
     initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
 				       cstring(_network)));
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv4::id, cstring(_nexthop)));
@@ -81,9 +71,6 @@ void
 OlsrVarRW::single_write(const Id& id, const Element& e)
 {
     switch(id) {
-    case VAR_POLICYTAGS:
-	_policytags = e;
-	break;
     case VAR_NETWORK: {
 	const ElemIPv4Net* eip = dynamic_cast<const ElemIPv4Net*>(&e);
 	XLOG_ASSERT(eip != NULL);
