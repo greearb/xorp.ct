@@ -7,7 +7,7 @@ policy-statement accepted {
 		}
 		action {
 			trace: 1;
-			aspath = "6234" + aspath;
+			aspath = 6234 + aspath;
 		}
 	}
 }
