@@ -13,24 +13,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.11 2008/01/04 03:17:15 pavlin Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.12 2008/07/23 05:11:23 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
 
 #include "libxorp/xorp.h"
-
-#include <stack>
-
 #include "policy/common/dispatcher.hh"
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
-
+#include "policy_profiler.hh"
 #include "instruction.hh"
 #include "set_manager.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
 
+#include <stack>
 
 /**
  * @short Visitor that executes instructions
@@ -133,29 +131,29 @@ public:
      */
     static string fa2str(const FlowAction& fa);
 
+    void set_profiler(PolicyProfiler*);
+
 private:
     /**
      * Do garbage collection.
      */
     void clear_trash();
 
-    PolicyInstr** _policies;
-    unsigned _policy_count;
-
+    PolicyInstr**   _policies;
+    unsigned	    _policy_count;
     const Element** _stack;
-    const Element**  _stackend;
-    const Element**  _stackptr;
-
-    SetManager* _sman;
-    VarRW* _varrw;
-    bool _finished;
-    Dispatcher _disp;
-    FlowAction _fa;
-
-    Element** _trash;
-    unsigned _trashc;
-    unsigned _trashs;
-    ostream* _os;
+    const Element** _stackend;
+    const Element** _stackptr;
+    SetManager*	    _sman;
+    VarRW*	    _varrw;
+    bool	    _finished;
+    Dispatcher	    _disp;
+    FlowAction	    _fa;
+    Element**	    _trash;
+    unsigned	    _trashc;
+    unsigned	    _trashs;
+    ostream*	    _os;
+    PolicyProfiler* _profiler;
 
     // not impelmented
     IvExec(const IvExec&);

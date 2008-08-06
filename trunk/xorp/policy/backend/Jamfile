@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/policy/backend/Jamfile,v 1.1 2007/01/11 22:30:50 bms Exp $
 #
 
 SubDir TOP policy backend ;
@@ -9,7 +9,8 @@ SubDir TOP policy backend ;
 # link against libpolicycommon explicitly.
 Library libpolicybackend : 
 	iv_exec.cc
-	policy_filter.cc policy_filters.cc policy_redist_map.cc policytags.cc
+	policy_filter.cc policy_filters.cc policy_profiler.cc
+	policy_redist_map.cc policytags.cc
 	set_manager.cc single_varrw.cc
 	version_filter.cc version_filters.cc
 	lex.yy_policy_backend_parser.cc yacc.yy_policy_backend_parser.cc

@@ -13,21 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.16 2008/05/03 00:37:29 bms Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.17 2008/07/23 05:11:23 pavlin Exp $"
 
+#include "policy/policy_module.h"
 #include "libxorp/xorp.h"
-
 #include "policy/common/policy_utils.hh"
 #include "policy/common/elem_null.hh"
 #include "policy/common/element.hh"
-
 #include "iv_exec.hh"
-
 
 IvExec::IvExec() : 
 	       _policies(NULL), _policy_count(0), _sman(NULL), _varrw(NULL),
 	       _finished(false), _fa(DEFAULT), _trash(NULL), _trashc(0),
-	       _trashs(2000), _os(NULL) 
+	       _trashs(2000), _os(NULL), _profiler(NULL)
 {
     unsigned ss = 128;
     _trash = new Element*[_trashs];
@@ -64,24 +62,23 @@ IvExec::run(VarRW* varrw, ostream* os)
     FlowAction ret = DEFAULT;
 
     // execute all policies
-    for(unsigned i = 0; i < _policy_count; ++i) {
+    for (unsigned i = 0; i < _policy_count; ++i) {
 	FlowAction fa = runPolicy(*_policies[i]);
 
 	// if a policy rejected/accepted a route then terminate.
-	if(fa != DEFAULT) {
+	if (fa != DEFAULT) {
 	    ret = fa;
 	    break;
 	}
     }
     
-    if(_os)
+    if (_os)
 	*_os << "Outcome of whole filter: " << fa2str(ret) << endl;
 
     // important because varrw may hold pointers to trash elements
     _varrw->sync();
     clear_trash();
 
-    
     return ret;
 }
 
@@ -93,21 +90,21 @@ IvExec::runPolicy(PolicyInstr& pi)
    
     FlowAction outcome = DEFAULT;
 
-    if(_os)
+    if (_os)
 	*_os << "Running policy: " << pi.name() << endl;
 
     // run all terms
-    for(int i = 0; i < termc ; ++i) {
+    for (int i = 0; i < termc ; ++i) {
 	FlowAction fa = runTerm(*terms[i]);
 
 	// if term accepted/rejected route, then terminate.
-	if(fa != DEFAULT) {
+	if (fa != DEFAULT) {
 	    outcome = fa;
 	    break;
 	}    
     }
 
-    if(_os)
+    if (_os)
 	*_os << "Outcome of policy: " << fa2str(outcome) << endl;
 
     return outcome;
@@ -128,19 +125,25 @@ IvExec::runTerm(TermInstr& ti)
     int instrc = ti.instrc();
     Instruction** instr = ti.instructions();
 
-    if(_os)
+    if (_os)
 	*_os << "Running term: " << ti.name() << endl;
 
     // run all instructions
-    for(int i = 0; i < instrc; ++i) {
+    for (int i = 0; i < instrc; ++i) {
+	if (_profiler)
+	    _profiler->start();
+
 	(instr[i])->accept(*this);
 
+	if (_profiler)
+	    _profiler->stop();
+
 	// a flow action occured [accept/reject/default -- exit]
-	if(_finished)
+	if (_finished)
 	    break;
     }
 
-    if(_os)
+    if (_os)
 	*_os << "Outcome of term: " << fa2str(_fa) << endl;
 
     return _fa;
@@ -360,4 +363,10 @@ void
 IvExec::set_set_manager(SetManager* sman)
 {
     _sman = sman;
+}
+
+void
+IvExec::set_profiler(PolicyProfiler* pp)
+{
+    _profiler = pp;
 }

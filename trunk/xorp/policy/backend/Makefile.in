@@ -51,8 +51,8 @@ libpolicybackend_la_DEPENDENCIES = ../common/aspath.lo \
 	../common/policy_utils.lo ../common/register_elements.lo \
 	../common/register_operations.lo ../common/varrw.lo
 am_libpolicybackend_la_OBJECTS = iv_exec.lo policy_filter.lo \
-	policy_filters.lo policy_redist_map.lo policytags.lo \
-	set_manager.lo single_varrw.lo version_filter.lo \
+	policy_filters.lo policy_profiler.lo policy_redist_map.lo \
+	policytags.lo set_manager.lo single_varrw.lo version_filter.lo \
 	version_filters.lo lex.yy_policy_backend_parser.lo \
 	yacc.yy_policy_backend_parser.lo
 libpolicybackend_la_OBJECTS = $(am_libpolicybackend_la_OBJECTS)
@@ -220,12 +220,13 @@ noinst_LTLIBRARIES = libpolicybackend.la
 libpolicybackend_la_SOURCES = filter_base.hh instr_visitor.hh \
 	instruction.hh instruction_base.hh iv_exec.hh \
 	policy_backend_parser.hh policy_filter.hh policy_filters.hh \
-	policy_instr.hh policy_redist_map.hh policytags.hh \
-	set_manager.hh single_varrw.hh term_instr.hh version_filter.hh \
-	version_filters.hh iv_exec.cc policy_filter.cc \
-	policy_filters.cc policy_redist_map.cc policytags.cc \
-	set_manager.cc single_varrw.cc version_filter.cc \
-	version_filters.cc lex.yy_policy_backend_parser.cc \
+	policy_instr.hh policy_profiler.hh policy_redist_map.hh \
+	policytags.hh set_manager.hh single_varrw.hh term_instr.hh \
+	version_filter.hh version_filters.hh iv_exec.cc \
+	policy_filter.cc policy_filters.cc policy_profiler.cc \
+	policy_redist_map.cc policytags.cc set_manager.cc \
+	single_varrw.cc version_filter.cc version_filters.cc \
+	lex.yy_policy_backend_parser.cc \
 	yacc.yy_policy_backend_parser.cc \
 	yacc.yy_policy_backend_parser.h
 
@@ -294,6 +295,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lex.yy_policy_backend_parser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_filter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_filters.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_profiler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policy_redist_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/policytags.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_manager.Plo@am__quote@

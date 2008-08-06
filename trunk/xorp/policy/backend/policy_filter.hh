@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filter.hh,v 1.9 2008/01/04 03:17:16 pavlin Exp $
+// $XORP: xorp/policy/backend/policy_filter.hh,v 1.10 2008/07/23 05:11:23 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_FILTER_HH__
 #define __POLICY_BACKEND_POLICY_FILTER_HH__
@@ -71,10 +71,13 @@ public:
      */
     bool acceptRoute(VarRW& varrw);
 
+    void set_profiler_exec(PolicyProfiler* profiler);
+
 private:
-    vector<PolicyInstr*>* _policies;
-    SetManager _sman;
-    IvExec _exec;
+    vector<PolicyInstr*>*   _policies;
+    SetManager		    _sman;
+    IvExec		    _exec;
+    PolicyProfiler*	    _profiler_exec;
 
     // not impl
     PolicyFilter(const PolicyFilter&);

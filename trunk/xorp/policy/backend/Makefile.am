@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/backend/Makefile.am,v 1.5 2005/07/20 01:29:23 abittau Exp $
+## $XORP: xorp/policy/backend/Makefile.am,v 1.6 2005/10/02 22:21:52 abittau Exp $
 ##
 
 # -- No-install Libraries
@@ -16,6 +16,7 @@ libpolicybackend_la_SOURCES		+= policy_backend_parser.hh
 libpolicybackend_la_SOURCES		+= policy_filter.hh
 libpolicybackend_la_SOURCES		+= policy_filters.hh
 libpolicybackend_la_SOURCES		+= policy_instr.hh
+libpolicybackend_la_SOURCES		+= policy_profiler.hh
 libpolicybackend_la_SOURCES		+= policy_redist_map.hh
 libpolicybackend_la_SOURCES		+= policytags.hh
 libpolicybackend_la_SOURCES		+= set_manager.hh
@@ -27,6 +28,7 @@ libpolicybackend_la_SOURCES		+= version_filters.hh
 libpolicybackend_la_SOURCES		+= iv_exec.cc
 libpolicybackend_la_SOURCES		+= policy_filter.cc
 libpolicybackend_la_SOURCES		+= policy_filters.cc
+libpolicybackend_la_SOURCES		+= policy_profiler.cc
 libpolicybackend_la_SOURCES		+= policy_redist_map.cc
 libpolicybackend_la_SOURCES		+= policytags.cc
 libpolicybackend_la_SOURCES		+= set_manager.cc

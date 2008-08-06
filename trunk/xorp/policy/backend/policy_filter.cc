@@ -13,25 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.12 2008/01/04 03:17:15 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.13 2008/07/23 05:11:23 pavlin Exp $"
 
 #include "policy/policy_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include "policy_filter.hh"
 #include "policy_backend_parser.hh"
 #include "set_manager.hh"
 #include "iv_exec.hh"
 
-
 using namespace policy_utils;
 using policy_backend_parser::policy_backend_parse;
 
-PolicyFilter::PolicyFilter() : _policies(NULL) 
+PolicyFilter::PolicyFilter() : _policies(NULL), _profiler_exec(NULL)
 {
     _exec.set_set_manager(&_sman);
 }
@@ -89,6 +85,9 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 	return default_action;
     }	
 
+    // setup profiling
+    _exec.set_profiler(_profiler_exec);
+
     // run policies
     ostringstream os;
     IvExec::FlowAction fa = _exec.run(&varrw, &os);
@@ -143,4 +142,10 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 
     // unreash [hopefully]
     return default_action;
+}
+
+void
+PolicyFilter::set_profiler_exec(PolicyProfiler* profiler)
+{
+    _profiler_exec = profiler;
 }
