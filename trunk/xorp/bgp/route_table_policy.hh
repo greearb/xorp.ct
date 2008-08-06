@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy.hh,v 1.10 2008/01/04 03:15:25 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.11 2008/07/23 05:09:37 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__
@@ -87,6 +87,8 @@ public:
     const InternalMessage<A>* do_filtering(const InternalMessage<A>& rtmsg, 
 					   bool no_modify) const;
 
+    void enable_filtering(bool on);
+
 protected:
     const filter::Filter	_filter_type;
     
@@ -95,6 +97,7 @@ protected:
 
 private:
     PolicyFilters&		_policy_filters;
+    bool			_enable_filtering;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_HH__

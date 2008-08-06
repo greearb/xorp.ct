@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.25 2008/07/23 05:09:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.26 2008/08/06 08:07:13 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -36,7 +36,8 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
     : BGPRouteTable<A>(tablename, safi),
       _filter_type(type),
       _varrw(NULL),
-      _policy_filters(pfs)
+      _policy_filters(pfs),
+      _enable_filtering(true)
 {
     this->_parent = parent;
     // XXX: For clarity, explicitly call the local virtual init_varrw()
@@ -51,10 +52,20 @@ PolicyTable<A>::~PolicyTable()
 }
 
 template <class A>
+void
+PolicyTable<A>::enable_filtering(bool on)
+{
+    _enable_filtering = on;
+}
+
+template <class A>
 const InternalMessage<A>*
 PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg, 
 			     bool no_modify) const
 {
+    if (!_enable_filtering)
+	return &rtmsg;
+
     _varrw->attach_route(rtmsg, no_modify);
 
     try {

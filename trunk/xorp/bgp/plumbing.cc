@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.104 2008/08/06 08:14:11 abittau Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.105 2008/08/06 08:14:34 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -360,14 +360,24 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     filter_in->do_versioning();
     _ipc_rib_in_table->set_next_table(filter_in);
 
+    PolicyTableImport<A>* policy_filter_in =
+	new PolicyTableImport<A>(_ribname + "IpcChannelInputPolicyFilter",
+				 _master.safi(),
+				 filter_in,
+				 _master.policy_filters());
+    filter_in->set_next_table(policy_filter_in);
+
     // No policy import filters on routes coming from the RIB.
+    // XXX We still need the table to do the necessary policy route dump voodoo
+    // though.
+    policy_filter_in->enable_filtering(false);
 
     CacheTable<A>* cache_in = 
 	new CacheTable<A>(_ribname + "IpcChannelInputCache",
 			  _master.safi(),
-			  filter_in,
+			  policy_filter_in,
 			  _master.rib_handler());
-    filter_in->set_next_table(cache_in);
+    policy_filter_in->set_next_table(cache_in);
 
     NhLookupTable<A> *nexthop_in =
 	new NhLookupTable<A>(_ribname + "IpcChannelNhLookup",
@@ -381,6 +391,7 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				_ipc_rib_in_table->genid());
 
     _tables.insert(filter_in);
+    _tables.insert(policy_filter_in);
     _tables.insert(cache_in);
     _tables.insert(nexthop_in);
 
