@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.94 2008/08/06 08:12:08 abittau Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.95 2008/08/06 08:12:20 abittau Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -2241,7 +2241,21 @@ PathAttributeList<A>::PathAttributeList(const PathAttributeList<A>& palist)
     }
 
     // hash must be the same---we're coping all attributes.
-    memcpy(_hash, palist._hash, sizeof(_hash));
+    // If hash wasn't computed though, compute it here.  This improves
+    // compatibility (e.g., test_filter.cc Test 7b invalidates the hash and
+    // constructs a new palist via subnetroute constructor).
+    bool zero = true;
+    const uint8_t *hashp = palist._hash;
+
+    for (unsigned i = 0; i < sizeof(_hash); i++) {
+	_hash[i] = *hashp++;
+
+	if (_hash[i])
+	    zero = false;
+    }
+
+    if (zero)
+	rehash();
 }
 
 template<class A>
