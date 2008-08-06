@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/policy_varrw.hh,v 1.11 2008/01/04 03:16:57 pavlin Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.12 2008/07/23 05:11:09 pavlin Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
@@ -45,6 +45,8 @@ class OspfVarRW : public SingleVarRW {
     void single_write(const Id& id, const Element& e);
 
  private:
+    void start_read_common();
+
     IPNet<A>& _network;
     A& _nexthop;
     uint32_t& _metric;

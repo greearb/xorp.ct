@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.14 2008/01/04 03:16:57 pavlin Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.15 2008/07/23 05:11:09 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -62,28 +62,33 @@ template <>
 void
 OspfVarRW<IPv4>::start_read()
 {
-    initialize(VAR_POLICYTAGS, _policytags.element());
     initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
 				       _network.str().c_str()));
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv4::id, _nexthop.str().c_str()));
-    initialize(VAR_METRIC, _ef.create(ElemU32::id,
-				      c_format("%u", _metric).c_str()));
-    initialize(VAR_EBIT, _ef.create(ElemBool::id, bool_c_str(_e_bit)));
-    initialize(VAR_TAG, _ef.create(ElemU32::id,
-				   c_format("%u", _tag).c_str()));
+
+    start_read_common();
 }
 
 template <>
 void
 OspfVarRW<IPv6>::start_read()
 {
-    initialize(VAR_POLICYTAGS, _policytags.element());
     initialize(VAR_NETWORK, _ef.create(ElemIPv6Net::id,
 				       _network.str().c_str()));
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv6::id, _nexthop.str().c_str()));
+
+    start_read_common();
+}
+
+template <typename A>
+void
+OspfVarRW<A>::start_read_common()
+{
+    initialize(VAR_POLICYTAGS, _policytags.element());
     initialize(VAR_METRIC, _ef.create(ElemU32::id,
 				      c_format("%u", _metric).c_str()));
-    initialize(VAR_EBIT, _ef.create(ElemBool::id, bool_c_str(_e_bit)));
+    initialize(VAR_EBIT, _ef.create(ElemU32::id,
+				    c_format("%u", _e_bit ? 2 : 1).c_str()));
     initialize(VAR_TAG, _ef.create(ElemU32::id,
 				   c_format("%u", _tag).c_str()));
 }
@@ -123,8 +128,8 @@ OspfVarRW<IPv4>::single_write(const Id& id, const Element& e)
     }
 	break;
     case VAR_EBIT: {
-	const ElemBool& b = dynamic_cast<const ElemBool&>(e);
-	_e_bit = b.val();
+	const ElemU32& b = dynamic_cast<const ElemU32&>(e);
+	_e_bit = b.val() == 2 ? true : false;
     }
 	break;
     case VAR_TAG: {
@@ -163,8 +168,8 @@ OspfVarRW<IPv6>::single_write(const Id& id, const Element& e)
     }
 	break;
     case VAR_EBIT: {
-	const ElemBool& b = dynamic_cast<const ElemBool&>(e);
-	_e_bit = b.val();
+	const ElemU32& b = dynamic_cast<const ElemU32&>(e);
+	_e_bit = b.val() == 2 ? true : false;
     }
 	break;
     case VAR_TAG: {
