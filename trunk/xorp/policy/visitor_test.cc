@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_test.cc,v 1.2 2008/08/06 08:28:17 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_test.cc,v 1.3 2008/08/06 08:30:57 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -73,7 +73,6 @@ const Element*
 VisitorTest::do_policy_statement(PolicyStatement& ps)
 {
     PolicyStatement::TermContainer& terms = ps.terms();
-    PolicyStatement::TermContainer::iterator i;
 
     _outcome = DEFAULT;
 
