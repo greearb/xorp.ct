@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.17 2008/01/04 03:17:23 pavlin Exp $
+// $XORP: xorp/rib/parser_xrl_cmds.hh,v 1.18 2008/07/23 05:11:29 pavlin Exp $
 
 #ifndef __RIB_PARSER_XRL_CMDS_HH__
 #define __RIB_PARSER_XRL_CMDS_HH__
@@ -60,9 +60,11 @@ public:
 	_completion = XRL_PENDING;
 	bool unicast = true, multicast = false;
 
+	PolicyTags pt;
+
 	_xrl_client.send_add_route4(
 	    "rib", _tablename, unicast, multicast, _net, _nexthop, _metric,
-	    XrlAtomList(),	// XXX: no policy
+	    pt.xrl_atomlist(),	// XXX: no policy
 	    callback(&pass_fail_handler, &_completion));
 
 	return _completion;
