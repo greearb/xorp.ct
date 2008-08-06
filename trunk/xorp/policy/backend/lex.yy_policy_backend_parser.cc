@@ -324,8 +324,8 @@ static void yy_fatal_error (yyconst char msg[]  );
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
 
-#define YY_NUM_RULES 40
-#define YY_END_OF_BUFFER 41
+#define YY_NUM_RULES 41
+#define YY_END_OF_BUFFER 42
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -335,22 +335,22 @@ struct yy_trans_info
 	};
 static yyconst flex_int16_t yy_accept[151] =
     {   0,
-        0,    0,    0,    0,   41,   36,   35,   34,   36,   37,
-       33,   31,   32,   27,   36,   28,   36,   36,   36,   36,
-       36,   36,   36,   36,   36,   36,   36,   39,   38,   36,
-       35,   26,   29,   25,   30,   36,   36,   36,   36,   36,
-       36,   36,   36,   16,   36,   36,   36,   36,   36,   36,
-       36,   36,   39,   36,   14,   18,   36,   36,   36,   36,
-       13,   36,   36,   36,   36,   36,    5,   36,   36,   36,
-       15,   36,   17,    9,   21,   36,   36,   36,    6,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   36,    8,
-       36,   10,   36,   36,   11,   36,   36,   22,   36,   12,
+        0,    0,    0,    0,   42,   37,   36,   35,   37,   38,
+       34,   32,   33,   28,   37,   29,   37,   37,   37,   37,
+       37,   37,   37,   37,   37,   37,   37,   40,   39,   37,
+       36,   27,   30,   26,   31,   37,   37,   37,   37,   37,
+       37,   37,   37,   16,   37,   37,   37,   37,   37,   37,
+       37,   37,   40,   37,   14,   18,   37,   37,   37,   37,
+       13,   37,   37,   37,   37,   37,    5,   37,   37,   37,
+       15,   37,   17,    9,   21,   37,   37,   37,    6,   37,
+       37,   37,   37,   23,   37,   37,   37,   37,   37,    8,
+       37,   10,   37,   37,   11,   37,   37,   22,   37,   12,
 
-       36,   36,   36,   36,   36,   36,   36,   36,   36,   36,
-       36,   36,   36,   36,   36,   36,    7,   24,   36,    4,
-       36,   36,   36,   36,   36,   36,   36,   36,   36,    2,
-       36,   23,    3,   36,   36,   36,   36,   19,    1,   36,
-       36,   36,   36,   36,   36,   36,   36,   36,   20,    0
+       37,   37,   37,   37,   37,   37,   37,   37,   37,   37,
+       37,   37,   37,   37,   37,   37,    7,   25,   37,    4,
+       37,   37,   37,   37,   37,   37,   37,   37,   37,    2,
+       37,   24,    3,   37,   37,   37,   37,   19,    1,   37,
+       37,   37,   37,   37,   37,   37,   37,   37,   20,    0
     } ;
 
 static yyconst flex_int32_t yy_ec[256] =
@@ -882,102 +882,107 @@ YY_RULE_SETUP
 case 23:
 YY_RULE_SETUP
 #line 64 "backend.l"
-{ return YY_SUBR_START; }
+{ return YY_TERM; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 #line 65 "backend.l"
-{ return YY_SUBR_END; }
+{ return YY_SUBR_START; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 67 "backend.l"
-{ return YY_EQ; }
+#line 66 "backend.l"
+{ return YY_SUBR_END; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 68 "backend.l"
-{ return YY_NE; }
+{ return YY_EQ; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 69 "backend.l"
-{ return YY_LT; }
+{ return YY_NE; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 70 "backend.l"
-{ return YY_GT; }
+{ return YY_LT; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 71 "backend.l"
-{ return YY_LE; }
+{ return YY_GT; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 72 "backend.l"
-{ return YY_GE; }
+{ return YY_LE; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
 #line 73 "backend.l"
-{ return YY_ADD; }
+{ return YY_GE; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
 #line 74 "backend.l"
-{ return YY_SUB; }
+{ return YY_ADD; }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 75 "backend.l"
-{ return YY_MUL; }
+{ return YY_SUB; }
 	YY_BREAK
 case 34:
-/* rule 34 can match eol */
 YY_RULE_SETUP
-#line 77 "backend.l"
-{ _parser_lineno++; return YY_NEWLINE; }
+#line 76 "backend.l"
+{ return YY_MUL; }
 	YY_BREAK
 case 35:
+/* rule 35 can match eol */
 YY_RULE_SETUP
-#line 79 "backend.l"
-/* eat blanks */
+#line 78 "backend.l"
+{ _parser_lineno++; return YY_NEWLINE; }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 81 "backend.l"
+#line 80 "backend.l"
+/* eat blanks */
+	YY_BREAK
+case 37:
+YY_RULE_SETUP
+#line 82 "backend.l"
 {	
 			yylval.c_str = strdup(yy_policy_backend_parsertext);
 		  	return YY_ARG;
 			}  
 	YY_BREAK
-case 37:
-YY_RULE_SETUP
-#line 86 "backend.l"
-BEGIN(STR);
-	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 88 "backend.l"
-BEGIN(INITIAL);
+#line 87 "backend.l"
+BEGIN(STR);
 	YY_BREAK
 case 39:
-/* rule 39 can match eol */
 YY_RULE_SETUP
-#line 90 "backend.l"
+#line 89 "backend.l"
+BEGIN(INITIAL);
+	YY_BREAK
+case 40:
+/* rule 40 can match eol */
+YY_RULE_SETUP
+#line 91 "backend.l"
 { yylval.c_str = strdup(yy_policy_backend_parsertext);
 	 	  _parser_lineno += count_nl(yy_policy_backend_parsertext);	
 		  return YY_ARG;
 		}  
 	YY_BREAK
-case 40:
+case 41:
 YY_RULE_SETUP
-#line 95 "backend.l"
+#line 96 "backend.l"
 ECHO;
 	YY_BREAK
-#line 1024 "lex.yy_policy_backend_parser.cc"
+#line 1029 "lex.yy_policy_backend_parser.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -1924,7 +1929,7 @@ void yy_policy_backend_parserfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 95 "backend.l"
+#line 96 "backend.l"
 
 
 

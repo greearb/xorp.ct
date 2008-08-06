@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_printer.cc,v 1.10 2008/08/06 08:18:31 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_printer.cc,v 1.11 2008/08/06 08:22:19 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -158,6 +158,10 @@ VisitorPrinter::visit(NodeNext& node)
     switch (node.flow()) {
     case NodeNext::POLICY:
 	_out << "policy ";
+	break;
+
+    case NodeNext::TERM:
+	_out << "term ";
 	break;
     }
 

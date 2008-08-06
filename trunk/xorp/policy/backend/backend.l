@@ -61,6 +61,7 @@ namespace {
 "NON_EMPTY_INTERSECTION"	{ return YY_NE_INT; }
 "NEXT"				{ return YY_NEXT; }
 "POLICY"			{ return YY_POLICY; }
+"TERM"				{ return YY_TERM; }
 "SUBR_START"			{ return YY_SUBR_START; }
 "SUBR_END"			{ return YY_SUBR_END; }
 

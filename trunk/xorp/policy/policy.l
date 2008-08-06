@@ -169,6 +169,7 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "protocol"	return YY_PROTOCOL;
 "next"		return YY_NEXT;
 "policy"	return YY_POLICY;
+"term"		return YY_TERM;
 
 [[:alpha:]][[:alnum:]_-]*		{ yylval.c_str = strdup(yytext);
 					  return YY_ID;

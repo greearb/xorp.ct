@@ -38,6 +38,7 @@
 #define YY_POLICY 290
 #define YY_SUBR_START 291
 #define YY_SUBR_END 292
+#define YY_TERM 293
 typedef union {
 	char*		c_str;
 	PolicyInstr*	c_pi;

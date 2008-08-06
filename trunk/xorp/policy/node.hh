@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.14 2008/08/06 08:18:30 abittau Exp $
+// $XORP: xorp/policy/node.hh,v 1.15 2008/08/06 08:22:18 abittau Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -314,7 +314,8 @@ private:
 class NodeNext : public Node {
 public:
     enum Flow {
-	POLICY = 0
+	POLICY = 0,
+	TERM
     };
 
     NodeNext(unsigned line, Flow f) : Node(line), _flow(f) {}

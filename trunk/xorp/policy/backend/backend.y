@@ -39,7 +39,7 @@ static ElementFactory	_ef;
 %token YY_REGEX
 %token YY_LOAD YY_STORE
 %token YY_ACCEPT YY_REJECT
-%token YY_SET YY_NEXT YY_POLICY YY_SUBR_START YY_SUBR_END
+%token YY_SET YY_NEXT YY_POLICY YY_SUBR_START YY_SUBR_END YY_TERM
 
 %type <c_pi> policy
 %%
@@ -175,6 +175,8 @@ statement:
 	| YY_REGEX	{ _yy_instructions->push_back(new NaryInstr(new OpRegex));}
 	| YY_NEXT YY_POLICY
 	{ _yy_instructions->push_back(new Next(Next::POLICY)); }
+	| YY_NEXT YY_TERM
+	{ _yy_instructions->push_back(new Next(Next::TERM)); }
 	| YY_POLICY YY_ARG
 	{ _yy_instructions->push_back(new Subr($2)); free($2); }
 	;

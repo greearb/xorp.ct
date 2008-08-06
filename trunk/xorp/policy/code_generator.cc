@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.17 2008/08/06 08:18:30 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.18 2008/08/06 08:22:17 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -241,6 +241,10 @@ CodeGenerator::visit(NodeNext& next)
     switch (next.flow()) {
     case NodeNext::POLICY:
 	_os << "POLICY";
+	break;
+
+    case NodeNext::TERM:
+	_os << "TERM";
 	break;
     }
 

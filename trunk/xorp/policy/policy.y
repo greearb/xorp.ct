@@ -39,7 +39,7 @@ static ElementFactory _ef;
 %token <c_str> YY_IPV4 YY_IPV4RANGE YY_IPV4NET YY_IPV6 YY_IPV6RANGE YY_IPV6NET
 %token YY_SEMICOLON YY_LPAR YY_RPAR YY_ASSIGN YY_SET YY_REGEX
 %token YY_ACCEPT YY_REJECT YY_PROTOCOL YY_NEXT YY_POLICY YY_PLUS_EQUALS
-%token YY_MINUS_EQUALS
+%token YY_MINUS_EQUALS YY_TERM
 
 %left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD YY_CTR YY_NE_INT
 %left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_GE
@@ -67,6 +67,8 @@ action:
 	| YY_REJECT { $$ = new NodeReject(_parser_lineno); }
 	| YY_NEXT YY_POLICY
 	  { $$ = new NodeNext(_parser_lineno, NodeNext::POLICY); }
+	| YY_NEXT YY_TERM
+	  { $$ = new NodeNext(_parser_lineno, NodeNext::TERM); }
 	;
 
 assignexpr:
