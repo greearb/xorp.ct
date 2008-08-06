@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.15 2008/08/06 08:17:06 abittau Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.16 2008/08/06 08:22:17 abittau Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -366,8 +366,9 @@ private:
 		   IEMap& iemap, PolicyList::PolicyType pt, const string& mod);
 
     void link_code(const Code::Target& target, IEMap& iemap, CodeMap& codemap);
-    
+
     string codemap_str(CodeMap& cm);
+    void   policy_modified(const string& policy);
 
     typedef set<string> PolicySet;
 

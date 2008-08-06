@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_map.hh,v 1.9 2008/07/23 05:11:19 pavlin Exp $
+// $XORP: xorp/policy/policy_map.hh,v 1.10 2008/08/06 08:22:18 abittau Exp $
 
 #ifndef __POLICY_POLICY_MAP_HH__
 #define __POLICY_POLICY_MAP_HH__
@@ -101,6 +101,8 @@ public:
     string str();
 
     void clear() { _deps.clear(); }
+
+    void policy_deps(const string& policy, DEPS& deps);
 
 private:
     // internally, policystatements are held as pointers.

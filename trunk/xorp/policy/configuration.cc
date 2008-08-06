@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.24 2008/08/06 08:17:06 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.25 2008/08/06 08:22:17 abittau Exp $"
 
 #include "libxorp/xorp.h"
 #include "policy_module.h"
@@ -59,10 +59,11 @@ Configuration::delete_term(const string& policy, const string& term)
 {
     PolicyStatement& ps = _policies.find(policy);
 
-    if(ps.delete_term(term)) {
+    if (ps.delete_term(term)) {
 	// policy needs to be re-compiled [will do so on commit]
-	_modified_policies.insert(policy);
-       return;
+	policy_modified(policy);
+
+        return;
     }   
 
     xorp_throw(ConfError, "TERM NOT FOUND " + policy + " " + term);
@@ -78,8 +79,8 @@ Configuration::update_term_block(const string& policy,
     Term& t = find_term(policy,term);
     try {
 	t.set_block(block, order, statement);
-        _modified_policies.insert(policy); // recompile on commit.
-    } catch(const Term::term_syntax_error& e) {
+	policy_modified(policy);
+    } catch (const Term::term_syntax_error& e) {
         string err = "In policy " + policy + ": " + e.why();
         xorp_throw(ConfError, err);
     }
@@ -91,7 +92,7 @@ Configuration::create_term(const string& policy, const ConfigNodeId& order,
 {
     PolicyStatement& ps = _policies.find(policy);
 
-    if(ps.term_exists(term)) {
+    if (ps.term_exists(term)) {
 	xorp_throw(ConfError,
 		   "Term " + term + " exists already in policy " + policy);
     }
@@ -99,7 +100,7 @@ Configuration::create_term(const string& policy, const ConfigNodeId& order,
     Term* t = new Term(term);
 
     ps.add_term(order, t);
-    _modified_policies.insert(policy);
+    policy_modified(policy);
 }
    
 void 
@@ -561,6 +562,14 @@ Configuration::dump_state(uint32_t id)
 	default:
 	    xorp_throw(PolicyException, "Unknown state id: " + to_str(id));
     }
+}
+
+void
+Configuration::policy_modified(const string& policy)
+{
+    _modified_policies.insert(policy);
+
+    _policies.policy_deps(policy, _modified_policies);
 }
 
 IEMap::IEMap()

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_map.cc,v 1.11 2008/07/23 05:11:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_map.cc,v 1.12 2008/08/06 08:22:18 abittau Exp $"
 
 #include "policy_module.h"
 
@@ -82,4 +82,20 @@ PolicyMap::str()
     }
 
     return out.str();
+}
+
+void
+PolicyMap::policy_deps(const string& policy, DEPS& deps)
+{
+    // XXX we mix protocol names and policy names =(
+    DEPS tmp;
+
+    _deps.get_deps(policy, tmp);
+
+    for (DEPS::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+	const string& name = *i;
+
+	if (exists(name))
+	    deps.insert(name);
+    }
 }
