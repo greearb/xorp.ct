@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.19 2008/08/06 08:07:13 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.20 2008/08/06 08:08:31 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -245,9 +245,10 @@ IvExec::visit(Store& s)
     _stackptr--;
     XLOG_ASSERT( _stackptr >= (_stack-1));
 
-    if(arg->hash() == ElemNull::_hash) {
-	if(_do_trace)
+    if (arg->hash() == ElemNull::_hash) {
+	if (_do_trace)
 	    *_os << "STORE NULL [treated as NOP]" << endl;
+
 	return;
     }
 
@@ -255,8 +256,9 @@ IvExec::visit(Store& s)
     // if it had to be trashed, it would have been trashed on creation, so do
     // NOT trash now. And yes, it likely is an element we do not have to
     // trash anyway.
-    _varrw->write_trace(s.var(),*arg);
-    if(_do_trace)
+    _varrw->write_trace(s.var(), *arg);
+
+    if (_do_trace)
 	*_os << "STORE " << s.var() << ": " << arg->str() << endl;
 }
 

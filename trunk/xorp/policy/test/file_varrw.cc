@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.13 2008/07/23 05:11:28 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.14 2008/08/06 08:04:52 abittau Exp $"
 
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
@@ -21,6 +21,7 @@
 
 FileVarRW::FileVarRW() : _verbose(true)
 {
+    memset(_map, 0, sizeof(_map));
 }
 
 void
@@ -106,16 +107,14 @@ FileVarRW::doLine(const string& str) {
 
 const Element&
 FileVarRW::read(const Id& id) {
-    Map::iterator i = _map.find(id);
+    const Element* e = _map[id];
 
-    if (i == _map.end()) {
+    if (!e) {
 	ostringstream oss;
 
 	oss << "Cannot read variable: " << id;
 	xorp_throw(Error, oss.str());
     }
-
-    const Element* e = (*i).second;
 
     if (_verbose)
 	cout << "FileVarRW READ " << id << ": " 
@@ -137,8 +136,12 @@ void
 FileVarRW::sync() {
     if (_verbose ) {
 	    cout << "FileVarRW SYNC" << endl;
-	    for (Map::iterator i = _map.begin(); i != _map.end(); ++i)
-		cout << (*i).first << ": " << ((*i).second)->str() << endl;
+	    for (unsigned i = 0; i < VAR_MAX; i++) {
+		const Element* e = _map[i];
+
+		if (e)
+		    cout << i << ": " << e->str() << endl;
+	    }
     }
 
     clear_trash();

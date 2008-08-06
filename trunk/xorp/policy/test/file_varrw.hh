@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/test/file_varrw.hh,v 1.10 2008/07/23 05:11:28 pavlin Exp $
+// $XORP: xorp/policy/test/file_varrw.hh,v 1.11 2008/08/06 08:04:52 abittau Exp $
 
 #ifndef __POLICY_TEST_FILE_VARRW_HH__
 #define __POLICY_TEST_FILE_VARRW_HH__
@@ -44,12 +44,10 @@ public:
     void	    set_verbose(bool);
 
 private:
-    typedef map<Id,const Element*> Map;
-
     bool doLine(const string& line);
     void clear_trash();
 
-    Map		    _map;
+    const Element*  _map[VAR_MAX];
     ElementFactory  _ef;
     set<Element*>   _trash;
     bool	    _verbose;
