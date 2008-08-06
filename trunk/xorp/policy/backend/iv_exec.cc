@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.21 2008/08/06 08:09:41 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.22 2008/08/06 08:10:17 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -25,7 +25,7 @@
 IvExec::IvExec() : 
 	       _policies(NULL), _policy_count(0), _sman(NULL), _varrw(NULL),
 	       _finished(false), _fa(DEFAULT), _trash(NULL), _trashc(0),
-	       _trashs(2000), _os(NULL), _profiler(NULL)
+	       _trashs(2000), _profiler(NULL)
 {
     unsigned ss = 128;
     _trash = new Element*[_trashs];
@@ -47,11 +47,12 @@ IvExec::~IvExec()
 }
 
 IvExec::FlowAction 
-IvExec::run(VarRW* varrw, ostream* os)
+IvExec::run(VarRW* varrw)
 {
     _varrw     = varrw;
-    _os	       = os;
     _did_trace = false;
+
+    _os.clear();
 
     XLOG_ASSERT(_policies);
     XLOG_ASSERT(_sman);
@@ -71,10 +72,11 @@ IvExec::run(VarRW* varrw, ostream* os)
     }
 
     if (_did_trace)
-	*_os << "Outcome of whole filter: " << fa2str(ret) << endl;
+	_os << "Outcome of whole filter: " << fa2str(ret) << endl;
 
     // important because varrw may hold pointers to trash elements
     _varrw->sync();
+
     clear_trash();
 
     return ret;
@@ -87,7 +89,7 @@ IvExec::runPolicy(PolicyInstr& pi)
     int termc	       = pi.termc();
     FlowAction outcome = DEFAULT;
 
-    _do_trace = pi.trace() && _os;
+    _do_trace = pi.trace();
 
     _varrw->enable_trace(_do_trace);
 
@@ -95,7 +97,7 @@ IvExec::runPolicy(PolicyInstr& pi)
 	_did_trace = true;
 
     if (_do_trace)
-	*_os << "Running policy: " << pi.name() << endl;
+	_os << "Running policy: " << pi.name() << endl;
 
     // run all terms
     for (int i = 0; i < termc ; ++i) {
@@ -109,7 +111,7 @@ IvExec::runPolicy(PolicyInstr& pi)
     }
 
     if (_do_trace)
-	*_os << "Outcome of policy: " << fa2str(outcome) << endl;
+	_os << "Outcome of policy: " << fa2str(outcome) << endl;
 
     return outcome;
 }
@@ -130,7 +132,7 @@ IvExec::runTerm(TermInstr& ti)
     Instruction** instr = ti.instructions();
 
     if (_do_trace)
-	*_os << "Running term: " << ti.name() << endl;
+	_os << "Running term: " << ti.name() << endl;
 
     // run all instructions
     for (int i = 0; i < instrc; ++i) {
@@ -148,7 +150,7 @@ IvExec::runTerm(TermInstr& ti)
     }
 
     if (_do_trace)
-	*_os << "Outcome of term: " << fa2str(_fa) << endl;
+	_os << "Outcome of term: " << fa2str(_fa) << endl;
 
     return _fa;
 }
@@ -163,7 +165,7 @@ IvExec::visit(Push& p)
     *_stackptr = &e;
     
     if(_do_trace)
-	*_os << "PUSH " << e.type() << " " << e.str() << endl;
+	_os << "PUSH " << e.type() << " " << e.str() << endl;
 }
 
 void 
@@ -178,7 +180,7 @@ IvExec::visit(PushSet& ps)
     *_stackptr = &s;
 
     if(_do_trace)
-	*_os << "PUSH_SET " << s.type() << " " << name
+	_os << "PUSH_SET " << s.type() << " " << name
 	     << ": " << s.str() << endl;
 }
 
@@ -195,7 +197,7 @@ IvExec::visit(OnFalseExit& /* x */)
 	const Element* e = *_stackptr;
 	if(e->hash() == ElemNull::_hash) {
 	    if(_do_trace)
-		*_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
+		_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
 	    _finished = true;
 	    return;
         }
@@ -219,7 +221,7 @@ IvExec::visit(OnFalseExit& /* x */)
 	_finished = true;
 
     if(_do_trace)
-	*_os << "ONFALSE_EXIT: " << t->str() << endl;
+	_os << "ONFALSE_EXIT: " << t->str() << endl;
 }
 
 void 
@@ -228,7 +230,7 @@ IvExec::visit(Load& l)
     const Element& x = _varrw->read_trace(l.var());
 
     if(_do_trace)
-	*_os << "LOAD " << l.var() << ": " << x.str() << endl;
+	_os << "LOAD " << l.var() << ": " << x.str() << endl;
     // varrw owns element [do not trash]
     _stackptr++;
     XLOG_ASSERT(_stackptr < _stackend);
@@ -247,7 +249,7 @@ IvExec::visit(Store& s)
 
     if (arg->hash() == ElemNull::_hash) {
 	if (_do_trace)
-	    *_os << "STORE NULL [treated as NOP]" << endl;
+	    _os << "STORE NULL [treated as NOP]" << endl;
 
 	return;
     }
@@ -259,7 +261,7 @@ IvExec::visit(Store& s)
     _varrw->write_trace(s.var(), *arg);
 
     if (_do_trace)
-	*_os << "STORE " << s.var() << ": " << arg->str() << endl;
+	_os << "STORE " << s.var() << ": " << arg->str() << endl;
 }
 
 void 
@@ -269,7 +271,7 @@ IvExec::visit(Accept& /* a */)
     _finished = true;
     _fa = ACCEPT;
     if(_do_trace)
-	*_os << "ACCEPT" << endl;
+	_os << "ACCEPT" << endl;
 }
     
 void 
@@ -280,7 +282,7 @@ IvExec::visit(Reject& /* r */)
     _fa = REJ;
 
     if(_do_trace)
-	*_os << "REJECT" << endl;
+	_os << "REJECT" << endl;
 }
 
 void
@@ -312,7 +314,7 @@ IvExec::visit(NaryInstr& nary)
 
     // output trace
     if (_do_trace)
-	*_os << nary.op().str() << endl;
+	_os << nary.op().str() << endl;
 }
 
 void
@@ -378,4 +380,10 @@ void
 IvExec::set_profiler(PolicyProfiler* pp)
 {
     _profiler = pp;
+}
+
+string
+IvExec::tracelog()
+{
+    return _os.str();
 }

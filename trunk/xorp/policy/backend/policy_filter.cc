@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.15 2008/08/06 08:06:07 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.16 2008/08/06 08:07:14 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -89,8 +89,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
     _exec.set_profiler(_profiler_exec);
 
     // run policies
-    ostringstream os;
-    IvExec::FlowAction fa = _exec.run(&varrw, &os);
+    IvExec::FlowAction fa = _exec.run(&varrw);
 
     // print any trace data...
     uint32_t level = varrw.trace();
@@ -119,12 +118,14 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 	if (level > 1) {
 	    trace += "\nBasic VarRW trace:\n";
 	    trace += varrw.tracelog();
-	}    
+	}
+
 	if (level > 2) {
 	    trace += "Execution trace:\n";
-	    trace += os.str();
+	    trace += _exec.tracelog();
 	    trace += "End of trace\n";
 	}
+
 	XLOG_TRACE(true, "Policy filter result: %s", trace.c_str());
     }
 

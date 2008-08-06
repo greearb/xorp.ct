@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.13 2008/08/06 08:05:45 abittau Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.14 2008/08/06 08:07:14 abittau Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -69,7 +69,7 @@ public:
     /**
      * Execute the policies.
      */
-    FlowAction run(VarRW* varrw, ostream* os);
+    FlowAction run(VarRW* varrw);
 
     /**
      * Execute a policy.
@@ -133,6 +133,8 @@ public:
 
     void set_profiler(PolicyProfiler*);
 
+    string tracelog();
+
 private:
     /**
      * Do garbage collection.
@@ -152,7 +154,7 @@ private:
     Element**	    _trash;
     unsigned	    _trashc;
     unsigned	    _trashs;
-    ostream*	    _os;
+    ostringstream   _os;
     PolicyProfiler* _profiler;
     bool	    _do_trace;
     bool	    _did_trace;
