@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/varrw.cc,v 1.9 2008/01/04 03:17:20 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/varrw.cc,v 1.10 2008/07/23 05:11:27 pavlin Exp $"
 
 #include "policy/policy_module.h"
 
@@ -24,7 +24,7 @@
 #include "element.hh"
 
 
-VarRW::VarRW() : _allow_trace(true), _trace(0)
+VarRW::VarRW() : _do_trace(false), _trace(0)
 {
 }
 
@@ -36,27 +36,29 @@ const Element&
 VarRW::read_trace(const Id& id)
 {
     const Element& e = read(id);
-    if (_allow_trace)
+
+    if (_do_trace)
 	_tracelog << "Read " << id << ": " << e.str() << endl;
+
     return e;
 }
 
 void
 VarRW::write_trace(const Id& id, const Element& e)
 {
+    if (_do_trace)
+	_tracelog << "Write " << id << ": " << e.str() << endl;
+
     // trace is a special variable, not to be implemented by upper layers...
     if (id == VAR_TRACE) {
 	XLOG_ASSERT(e.type() == ElemU32::id);
-	
+
 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
 	_trace = u32.val();
-	if (_allow_trace)
-	    _tracelog << "Write " << id << ": " << _trace << endl;
+
 	return;
     }
 
-    if (_allow_trace)
-	_tracelog << "Write " << id << ": " << e.str() << endl;
     write(id, e);
 }
 
@@ -82,4 +84,10 @@ void
 VarRW::reset_trace()
 {
     _trace = 0;
+}
+
+void
+VarRW::enable_trace(bool on)
+{
+    _do_trace = on;
 }

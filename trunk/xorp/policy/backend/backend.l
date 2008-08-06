@@ -18,11 +18,11 @@ using namespace policy_backend_parser;
 void yyerror(const char*);
 int yyparse(void);
 
-vector<PolicyInstr*>* policy_backend_parser::_yy_policies;
-map<string,Element*>* policy_backend_parser::_yy_sets;
-
-vector<TermInstr*>* policy_backend_parser::_yy_terms;
-vector<Instruction*>* policy_backend_parser::_yy_instructions;
+vector<PolicyInstr*>*	policy_backend_parser::_yy_policies;
+map<string,Element*>*	policy_backend_parser::_yy_sets;
+vector<TermInstr*>*	policy_backend_parser::_yy_terms;
+vector<Instruction*>*	policy_backend_parser::_yy_instructions;
+bool			policy_backend_parser::_yy_trace;
 
 namespace {
 	string _last_error;
@@ -124,19 +124,19 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 	_last_error = "No error";
 	_parser_lineno = 1;
 
-	_yy_policies = &outpolicies;
-	_yy_sets = &outsets;
-
-	_yy_terms = new vector<TermInstr*>();
+	_yy_policies	 = &outpolicies;
+	_yy_sets	 = &outsets;
+	_yy_terms	 = new vector<TermInstr*>();
 	_yy_instructions = new vector<Instruction*>();
-	
+	_yy_trace	 = false;
+
 	int res = yyparse();
 
         yy_delete_buffer(yybuffstate);
         outerr = _last_error;
 
 	// parse error
-	if(res) {
+	if (res) {
 		// get rid of temporary parse object not yet bound to policies
 		delete_vector(_yy_terms);
 	        delete_vector(_yy_instructions);

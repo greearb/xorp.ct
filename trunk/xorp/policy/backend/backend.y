@@ -61,8 +61,13 @@ set:
 
 policy:	  YY_POLICY_START YY_ARG YY_NEWLINE terms YY_POLICY_END YY_NEWLINE {
 			PolicyInstr* pi = new PolicyInstr($2,_yy_terms);
+
+			pi->set_trace(_yy_trace);
+			_yy_trace = false;
+
 			_yy_terms = new vector<TermInstr*>();
 			_yy_policies->push_back(pi);
+
 			free($2);
 			}
 	;
@@ -117,13 +122,20 @@ statement:
 				char* err = NULL;
 				bool is_error = false;
 				VarRW::Id id = strtoul($2, &err, 10);
+
 				if ((err != NULL) && (*err != '\0'))
 				    is_error = true;
+
 				free($2);
+
 				if (is_error) {
 					yyerror("Need numeric var ID");
 					YYERROR;
 				}
+
+				if (id == VarRW::VAR_TRACE)
+					_yy_trace = true;
+
 				_yy_instructions->push_back(new Store(id));
 				}
 

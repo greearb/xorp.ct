@@ -12,21 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_backend_parser.hh,v 1.5 2008/01/04 03:17:15 pavlin Exp $
+// $XORP: xorp/policy/backend/policy_backend_parser.hh,v 1.6 2008/07/23 05:11:23 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_BACKEND_PARSER_HH__
 #define __POLICY_BACKEND_POLICY_BACKEND_PARSER_HH__
 
-
 #include "policy/common/element_base.hh"
-
 #include "policy_instr.hh"
 #include "term_instr.hh"
 #include "instruction_base.hh"
 
 #include <string>
 #include <vector>
-
 
 /**
  * @short Minimises global namespace pollution of yacc/lex variables.
@@ -35,7 +32,6 @@
  * Here such methods and functions are grouped under one namespace.
  */
 namespace policy_backend_parser {
-
 
 /**
  * Parses a backend policy configuration.
@@ -53,12 +49,11 @@ int policy_backend_parse(vector<PolicyInstr*>& outpolicies,
                          const string& conf,
                          string& outerr);
 
-// DO NOT TOUCH!
 extern vector<PolicyInstr*>*	_yy_policies;
 extern map<string,Element*>*	_yy_sets;
-
 extern vector<TermInstr*>*	_yy_terms;
 extern vector<Instruction*>*	_yy_instructions;
+extern bool			_yy_trace;
 
 } // namespace
 

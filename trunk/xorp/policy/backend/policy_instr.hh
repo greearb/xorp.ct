@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_instr.hh,v 1.7 2008/05/03 00:37:30 bms Exp $
+// $XORP: xorp/policy/backend/policy_instr.hh,v 1.8 2008/07/23 05:11:24 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_INSTR_HH__
 #define __POLICY_BACKEND_POLICY_INSTR_HH__
@@ -34,7 +34,7 @@ public:
      * @param terms terms of the policy. Caller must not delete terms.
      */
     PolicyInstr(const string& name, vector<TermInstr*>* terms) :
-        _name(name) { 
+        _name(name), _trace(false) { 
    
 	int i = 0;
 
@@ -69,10 +69,14 @@ public:
 
     int termc() const { return _termc; }
 
+    void set_trace(bool trace)	{ _trace = trace; }
+    bool trace() const		{ return _trace; }
+
 private:
-    string _name;
-    TermInstr** _terms;
-    int _termc;
+    string	_name;
+    TermInstr**	_terms;
+    int		_termc;
+    bool	_trace;
 
     // not impl
     PolicyInstr(const PolicyInstr&);

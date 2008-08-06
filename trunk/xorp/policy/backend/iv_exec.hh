@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.12 2008/07/23 05:11:23 pavlin Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.13 2008/08/06 08:05:45 abittau Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -154,6 +154,8 @@ private:
     unsigned	    _trashs;
     ostream*	    _os;
     PolicyProfiler* _profiler;
+    bool	    _do_trace;
+    bool	    _did_trace;
 
     // not impelmented
     IvExec(const IvExec&);

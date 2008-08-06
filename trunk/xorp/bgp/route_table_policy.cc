@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.24 2008/01/04 03:15:25 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.25 2008/07/23 05:09:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,9 +42,6 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
     // XXX: For clarity, explicitly call the local virtual init_varrw()
     PolicyTable<A>::init_varrw();
     XLOG_ASSERT(_varrw != NULL);
-	
-    // Performance optimization - suppress generation of trace strings
-    _varrw->suppress_trace();
 }
 
 template <class A>
@@ -84,14 +81,6 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
 		  rtmsg.str().c_str(), pf);
 
 	accepted = _policy_filters.run_filter(_filter_type, *_varrw);
-
-	if (_varrw->trace()) {
-	    // If requested by the filter simply rerun it to obtain a trace
-	    _varrw->attach_route(rtmsg, no_modify);
-	    _varrw->allow_trace();
-	    _policy_filters.run_filter(_filter_type, *_varrw);
-	    _varrw->suppress_trace();
-	};
 
 	pf = rtmsg.route()->policyfilter(pfi).get();
 	debug_msg("[BGP] filter after filtering=%p\n", pf);

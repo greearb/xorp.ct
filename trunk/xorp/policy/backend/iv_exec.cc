@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.17 2008/07/23 05:11:23 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.18 2008/08/06 08:05:45 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -49,15 +49,13 @@ IvExec::~IvExec()
 IvExec::FlowAction 
 IvExec::run(VarRW* varrw, ostream* os)
 {
-    _varrw = varrw;
-    _os = os;
+    _varrw     = varrw;
+    _os	       = os;
+    _did_trace = false;
 
     XLOG_ASSERT(_policies);
     XLOG_ASSERT(_sman);
     XLOG_ASSERT(_varrw);
-
-    if (!_varrw->trace_allowed())
-	_os = NULL;
 
     FlowAction ret = DEFAULT;
 
@@ -71,8 +69,8 @@ IvExec::run(VarRW* varrw, ostream* os)
 	    break;
 	}
     }
-    
-    if (_os)
+
+    if (_did_trace)
 	*_os << "Outcome of whole filter: " << fa2str(ret) << endl;
 
     // important because varrw may hold pointers to trash elements
@@ -85,12 +83,18 @@ IvExec::run(VarRW* varrw, ostream* os)
 IvExec::FlowAction 
 IvExec::runPolicy(PolicyInstr& pi)
 {
-    TermInstr** terms = pi.terms();
-    int termc = pi.termc();
-   
+    TermInstr** terms  = pi.terms();
+    int termc	       = pi.termc();
     FlowAction outcome = DEFAULT;
 
-    if (_os)
+    _do_trace = pi.trace() && _os;
+
+    _varrw->enable_trace(_do_trace);
+
+    if (_do_trace)
+	_did_trace = true;
+
+    if (_do_trace)
 	*_os << "Running policy: " << pi.name() << endl;
 
     // run all terms
@@ -104,7 +108,7 @@ IvExec::runPolicy(PolicyInstr& pi)
 	}    
     }
 
-    if (_os)
+    if (_do_trace)
 	*_os << "Outcome of policy: " << fa2str(outcome) << endl;
 
     return outcome;
@@ -125,7 +129,7 @@ IvExec::runTerm(TermInstr& ti)
     int instrc = ti.instrc();
     Instruction** instr = ti.instructions();
 
-    if (_os)
+    if (_do_trace)
 	*_os << "Running term: " << ti.name() << endl;
 
     // run all instructions
@@ -143,7 +147,7 @@ IvExec::runTerm(TermInstr& ti)
 	    break;
     }
 
-    if (_os)
+    if (_do_trace)
 	*_os << "Outcome of term: " << fa2str(_fa) << endl;
 
     return _fa;
@@ -158,7 +162,7 @@ IvExec::visit(Push& p)
     XLOG_ASSERT(_stackptr < _stackend);
     *_stackptr = &e;
     
-    if(_os)
+    if(_do_trace)
 	*_os << "PUSH " << e.type() << " " << e.str() << endl;
 }
 
@@ -173,7 +177,7 @@ IvExec::visit(PushSet& ps)
     XLOG_ASSERT(_stackptr < _stackend);
     *_stackptr = &s;
 
-    if(_os)
+    if(_do_trace)
 	*_os << "PUSH_SET " << s.type() << " " << name
 	     << ": " << s.str() << endl;
 }
@@ -190,7 +194,7 @@ IvExec::visit(OnFalseExit& /* x */)
 	// but maybe it is a ElemNull... in which case its a NOP
 	const Element* e = *_stackptr;
 	if(e->hash() == ElemNull::_hash) {
-	    if(_os)
+	    if(_do_trace)
 		*_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
 	    _finished = true;
 	    return;
@@ -214,7 +218,7 @@ IvExec::visit(OnFalseExit& /* x */)
     if(!t->val())
 	_finished = true;
 
-    if(_os)
+    if(_do_trace)
 	*_os << "ONFALSE_EXIT: " << t->str() << endl;
 }
 
@@ -223,7 +227,7 @@ IvExec::visit(Load& l)
 {
     const Element& x = _varrw->read_trace(l.var());
 
-    if(_os)
+    if(_do_trace)
 	*_os << "LOAD " << l.var() << ": " << x.str() << endl;
     // varrw owns element [do not trash]
     _stackptr++;
@@ -242,7 +246,7 @@ IvExec::visit(Store& s)
     XLOG_ASSERT( _stackptr >= (_stack-1));
 
     if(arg->hash() == ElemNull::_hash) {
-	if(_os)
+	if(_do_trace)
 	    *_os << "STORE NULL [treated as NOP]" << endl;
 	return;
     }
@@ -252,7 +256,7 @@ IvExec::visit(Store& s)
     // NOT trash now. And yes, it likely is an element we do not have to
     // trash anyway.
     _varrw->write_trace(s.var(),*arg);
-    if(_os)
+    if(_do_trace)
 	*_os << "STORE " << s.var() << ": " << arg->str() << endl;
 }
 
@@ -262,7 +266,7 @@ IvExec::visit(Accept& /* a */)
     // ok we like the route, so exit all execution
     _finished = true;
     _fa = ACCEPT;
-    if(_os)
+    if(_do_trace)
 	*_os << "ACCEPT" << endl;
 }
     
@@ -273,7 +277,7 @@ IvExec::visit(Reject& /* r */)
     _finished = true;
     _fa = REJ;
 
-    if(_os)
+    if(_do_trace)
 	*_os << "REJECT" << endl;
 }
 
@@ -302,7 +306,7 @@ IvExec::visit(NaryInstr& nary)
     *_stackptr = r;
 
     // output trace
-    if(_os)
+    if(_do_trace)
 	*_os << nary.op().str() << endl;
 }
 

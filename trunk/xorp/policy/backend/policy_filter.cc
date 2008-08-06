@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.14 2008/08/06 08:05:45 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.15 2008/08/06 08:06:07 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -94,7 +94,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 
     // print any trace data...
     uint32_t level = varrw.trace();
-    if (varrw.trace_allowed() && level) {
+    if (level) {
 	string trace = "";
 
 	// basic, one line [hopefully!] info...

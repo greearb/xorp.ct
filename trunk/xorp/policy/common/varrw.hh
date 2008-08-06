@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.14 2008/01/04 03:17:20 pavlin Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.15 2008/07/23 05:11:27 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
@@ -92,17 +92,10 @@ public:
     virtual void sync() = 0;
 
     /**
-     * Disable generating trace strings / output.
+     * Enable/disable generating trace strings / output.
      *
      */
-    void suppress_trace() { _allow_trace = false; }
-    void allow_trace() { _allow_trace = true; }
-
-    /**
-     * Return true if trace strings should be generated.
-     *
-     */
-    bool trace_allowed() const { return _allow_trace; }
+    void enable_trace(bool on);
 
     /**
      * Support for tracing reads.  Executor will call this.
@@ -148,9 +141,9 @@ public:
     void reset_trace();
 
 private:
-    bool _allow_trace;
-    uint32_t _trace;
-    ostringstream _tracelog;
+    bool	    _do_trace;
+    uint32_t	    _trace;
+    ostringstream   _tracelog;
 };
 
 #endif // __POLICY_BACKEND_VARRW_HH__

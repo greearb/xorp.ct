@@ -259,7 +259,7 @@ YY_BUFFER_STATE yy_scan_string YY_PROTO(( yyconst char *yy_str ));
 YY_BUFFER_STATE yy_scan_bytes YY_PROTO(( yyconst char *bytes, int len ));
 
 static void *yy_flex_alloc YY_PROTO(( yy_size_t ));
-static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t ));
+static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t )) __unused;
 static void yy_flex_free YY_PROTO(( void * ));
 
 #define yy_new_buffer yy_create_buffer
@@ -482,11 +482,11 @@ using namespace policy_backend_parser;
 void yyerror(const char*);
 int yyparse(void);
 
-vector<PolicyInstr*>* policy_backend_parser::_yy_policies;
-map<string,Element*>* policy_backend_parser::_yy_sets;
-
-vector<TermInstr*>* policy_backend_parser::_yy_terms;
-vector<Instruction*>* policy_backend_parser::_yy_instructions;
+vector<PolicyInstr*>*	policy_backend_parser::_yy_policies;
+map<string,Element*>*	policy_backend_parser::_yy_sets;
+vector<TermInstr*>*	policy_backend_parser::_yy_terms;
+vector<Instruction*>*	policy_backend_parser::_yy_instructions;
+bool			policy_backend_parser::_yy_trace;
 
 namespace {
 	string _last_error;
@@ -497,7 +497,7 @@ namespace {
 #define YY_NEVER_INTERACTIVE 1
 #define STR 1
 
-#line 501 "lex.yy_policy_backend_parser.cc"
+#line 507 "lex.yy_policy_backend_parser.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -651,7 +651,7 @@ YY_DECL
 #line 39 "backend.l"
 
 
-#line 655 "lex.yy_policy_backend_parser.cc"
+#line 661 "lex.yy_policy_backend_parser.cc"
 
 	if ( yy_init )
 		{
@@ -920,7 +920,7 @@ YY_RULE_SETUP
 #line 101 "backend.l"
 ECHO;
 	YY_BREAK
-#line 924 "lex.yy_policy_backend_parser.cc"
+#line 930 "lex.yy_policy_backend_parser.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -1834,19 +1834,19 @@ policy_backend_parser::policy_backend_parse(vector<PolicyInstr*>& outpolicies,
 	_last_error = "No error";
 	_parser_lineno = 1;
 
-	_yy_policies = &outpolicies;
-	_yy_sets = &outsets;
-
-	_yy_terms = new vector<TermInstr*>();
+	_yy_policies	 = &outpolicies;
+	_yy_sets	 = &outsets;
+	_yy_terms	 = new vector<TermInstr*>();
 	_yy_instructions = new vector<Instruction*>();
-	
+	_yy_trace	 = false;
+
 	int res = yyparse();
 
         yy_delete_buffer(yybuffstate);
         outerr = _last_error;
 
 	// parse error
-	if(res) {
+	if (res) {
 		// get rid of temporary parse object not yet bound to policies
 		delete_vector(_yy_terms);
 	        delete_vector(_yy_instructions);

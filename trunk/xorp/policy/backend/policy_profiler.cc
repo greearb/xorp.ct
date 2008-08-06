@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_profiler.cc,v 1.1 2008/08/06 08:05:45 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_profiler.cc,v 1.2 2008/08/06 08:06:07 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -46,10 +46,6 @@ PolicyProfiler::stop()
 	return;
 
     TU now = _gt();
-
-    if (now < _samples[_samplec]) {
-	printf("%llu %llu\n", now, _samples[_samplec]);
-    }
 
     XLOG_ASSERT(!_stopped);
     XLOG_ASSERT(now >= _samples[_samplec]);
