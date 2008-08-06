@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.25 2008/08/06 08:17:08 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.26 2008/08/06 08:22:20 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "libxorp/xorp.h"
@@ -23,14 +23,14 @@
 #include "iv_exec.hh"
 
 IvExec::IvExec() : 
-	       _policies(NULL), _policy_count(0), _sman(NULL), _varrw(NULL),
-	       _finished(false), _fa(DEFAULT), _trash(NULL), _trashc(0),
-	       _trashs(2000), _profiler(NULL)
+	       _policies(NULL), _policy_count(0), _stack_bottom(NULL), 
+	       _sman(NULL), _varrw(NULL), _finished(false), _fa(DEFAULT),
+	       _trash(NULL), _trashc(0), _trashs(2000), _profiler(NULL)
 {
     unsigned ss = 128;
     _trash = new Element*[_trashs];
 
-    _stack = new const Element*[ss];
+    _stack_bottom = _stack = new const Element*[ss];
     _stackptr = &_stack[0];
     _stackptr--;
     _stackend = &_stack[ss];
@@ -38,12 +38,11 @@ IvExec::IvExec() :
 
 IvExec::~IvExec()
 {
-    if (_policies)
-	delete [] _policies;
-    
+    delete [] _policies;
+
     clear_trash();
     delete [] _trash;
-    delete [] _stack;
+    delete [] _stack_bottom;
 }
 
 IvExec::FlowAction 
@@ -59,6 +58,10 @@ IvExec::run(VarRW* varrw)
     XLOG_ASSERT(_varrw);
 
     FlowAction ret = DEFAULT;
+
+    // clear stack
+    _stackptr = _stack = _stack_bottom;
+    _stackptr--;
 
     // execute all policies
     for (unsigned i = 0; i < _policy_count; ++i) {
@@ -88,6 +91,15 @@ IvExec::runPolicy(PolicyInstr& pi)
     TermInstr** terms  = pi.terms();
     int termc	       = pi.termc();
     FlowAction outcome = DEFAULT;
+
+    // create a "stack frame".  We do this just so we can "clear" the stack
+    // frame when running terms and keep the asserts.  In reality if we get rid
+    // of asserts and clearing of stack, we're fine, but we gotta be bug free.
+    //  -sorbo
+    const Element** stack_bottom = _stack;
+    const Element** stack_ptr    = _stackptr;
+    _stack = _stackptr + 1;
+    XLOG_ASSERT(_stack < _stackend && _stack >= _stack_bottom);
 
     _do_trace = pi.trace();
 
@@ -119,6 +131,10 @@ IvExec::runPolicy(PolicyInstr& pi)
     if (_do_trace)
 	_os << "Outcome of policy: " << fa2str(outcome) << endl;
 
+    // restore stack frame
+    _stack    = stack_bottom;
+    _stackptr = stack_ptr;
+
     return outcome;
 }
 
@@ -131,7 +147,7 @@ IvExec::runTerm(TermInstr& ti)
     _fa = DEFAULT;
 
     // clear stack
-    _stackptr = &_stack[0];
+    _stackptr = _stack;
     _stackptr--;
 
     int instrc = ti.instrc();
@@ -252,7 +268,7 @@ IvExec::visit(Store& s)
 
     const Element* arg = *_stackptr;
     _stackptr--;
-    XLOG_ASSERT( _stackptr >= (_stack-1));
+    XLOG_ASSERT(_stackptr >= (_stack-1));
 
     if (arg->hash() == ElemNull::_hash) {
 	if (_do_trace)
@@ -318,10 +334,10 @@ IvExec::visit(NaryInstr& nary)
 {
     unsigned arity = nary.op().arity();
 
-    XLOG_ASSERT(_stackptr-arity+1 >= _stack);
+    XLOG_ASSERT((_stackptr - arity + 1) >= _stack);
 
     // execute the operation
-    Element* r = _disp.run(nary.op(), arity, _stackptr-arity+1);
+    Element* r = _disp.run(nary.op(), arity, _stackptr - arity + 1);
     if (arity)
 	_stackptr -= arity -1;
     else

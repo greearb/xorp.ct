@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_list.hh,v 1.7 2008/07/23 05:11:19 pavlin Exp $
+// $XORP: xorp/policy/policy_list.hh,v 1.8 2008/08/06 08:17:06 abittau Exp $
 
 #ifndef __POLICY_POLICY_LIST_HH__
 #define __POLICY_POLICY_LIST_HH__
@@ -119,10 +120,9 @@ public:
     void get_redist_tags(const string& protocol, Code::TagSet& ts);
 
 private:
-    typedef pair<string,CodeList*> PolicyCode;
-
-    typedef list<PolicyCode> PolicyCodeList;
-
+    typedef pair<string,CodeList*>  PolicyCode;
+    typedef list<PolicyCode>	    PolicyCodeList;
+    typedef set<string>		    POLICIES;
 
     /**
      * Semantically check the policy for this instantiation.
@@ -156,6 +156,7 @@ private:
 			Code::TargetSet& modified_targets, uint32_t& tagstart);
 
     Term* create_mod(Term::BLOCKS block);
+    void  add_policy_expression(const string& exp);
 
     string	    _protocol;
     PolicyType	    _type;
@@ -167,6 +168,8 @@ private:
     Term*	    _mod_term;
     Term*	    _mod_term_import;
     Term*	    _mod_term_export;
+    static uint32_t _pe;
+    POLICIES	    _pe_policies;
 
     // not impl
     PolicyList(const PolicyList&);

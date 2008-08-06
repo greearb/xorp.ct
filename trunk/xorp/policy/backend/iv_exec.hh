@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.16 2008/08/06 08:17:08 abittau Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.17 2008/08/06 08:22:21 abittau Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -147,6 +147,7 @@ private:
 
     PolicyInstr**   _policies;
     unsigned	    _policy_count;
+    const Element** _stack_bottom;
     const Element** _stack;
     const Element** _stackend;
     const Element** _stackptr;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.20 2008/08/06 08:18:31 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.21 2008/08/06 08:22:19 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,6 +54,8 @@ VisitorSemantic::do_policy_statement(PolicyStatement& policy)
 {
     PolicyStatement::TermContainer& terms = policy.terms();
     PolicyStatement::TermContainer::iterator i;
+
+    _reject = false;
 
     // go through all terms
     for (i = terms.begin(); i != terms.end(); ++i)
@@ -253,6 +255,8 @@ VisitorSemantic::visit(NodeAccept& /* node */)
 const Element* 
 VisitorSemantic::visit(NodeReject& /* node */)
 {
+    _reject = true;
+
     return NULL;
 }
 
@@ -313,8 +317,15 @@ VisitorSemantic::visit(NodeSubr& node)
     PolicyStatement& policy = _pmap.find(node.policy());
 
     string proto = _protocol;
-    do_policy_statement(policy);
-    change_protocol(proto);
+    bool reject  = _reject;
 
-    return NULL;
+    do_policy_statement(policy);
+
+    Element* e = new ElemBool(!_reject);
+    _trash.insert(e);
+
+    change_protocol(proto);
+    _reject = reject;
+
+    return e;
 }

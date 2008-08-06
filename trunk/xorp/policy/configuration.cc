@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.25 2008/08/06 08:22:17 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.26 2008/08/06 08:22:57 abittau Exp $"
 
 #include "libxorp/xorp.h"
 #include "policy_module.h"
@@ -102,13 +102,13 @@ Configuration::create_term(const string& policy, const ConfigNodeId& order,
     ps.add_term(order, t);
     policy_modified(policy);
 }
-   
-void 
+
+void
 Configuration::create_policy(const string&   policy)
 {
     _policies.create(policy,_sets);
     _modified_policies.insert(policy);
-}  
+}
 
 void 
 Configuration::delete_policy(const string&   policy)
@@ -117,7 +117,7 @@ Configuration::delete_policy(const string&   policy)
     // if we manage to delete a policy, it means it is not in use... so we do
     // not need to send updates to filters.
     _modified_policies.erase(policy);
-}  
+}
 
 void 
 Configuration::create_set(const string& set)
@@ -303,7 +303,7 @@ Configuration::compile_policy(const string& name)
     _exports.compile(policy, _modified_targets, _currtag);
 
     // integer overflow
-    if(_currtag < old_currtag) {
+    if (_currtag < old_currtag) {
 	// FIXME
 	XLOG_FATAL("The un-avoidable occurred: We ran out of policy tags");
 	abort(); // unreach [compile warning?]
@@ -496,7 +496,7 @@ Configuration::update_ie(const string& protocol,
 
     // replace policy list
     iemap.insert(protocol, mod, pl);
-}	
+}
 
 void 
 Configuration::link_code(const Code::Target& target, 

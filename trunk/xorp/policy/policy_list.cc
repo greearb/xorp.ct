@@ -13,7 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.14 2008/08/06 08:17:06 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.15 2008/08/06 08:22:18 abittau Exp $"
+
+#include <sstream>
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -21,6 +23,9 @@
 #include "visitor_semantic.hh"
 #include "export_code_generator.hh"
 #include "source_match_code_generator.hh"
+#include "visitor_dep.hh"
+
+uint32_t PolicyList::_pe = 0;
 
 PolicyList::PolicyList(const string& p, PolicyType pt, 
 		       PolicyMap& pmap, SetMap& smap, VarMap& vmap,
@@ -58,8 +63,8 @@ PolicyList::create_mod(Term::BLOCKS block)
 
 PolicyList::~PolicyList()
 {
-    for(PolicyCodeList::iterator i = _policies.begin(); 
-	i != _policies.end(); ++i) {
+    for (PolicyCodeList::iterator i = _policies.begin(); 
+	 i != _policies.end(); ++i) {
 
 	PolicyCode& pc = *i;
 
@@ -68,6 +73,10 @@ PolicyList::~PolicyList()
 	delete (*i).second;
     }
 
+    for (POLICIES::iterator i = _pe_policies.begin();
+         i != _pe_policies.end(); ++i)
+	_pmap.delete_policy(*i);
+
     delete _mod_term_import;
     delete _mod_term_export;
 }
@@ -75,8 +84,74 @@ PolicyList::~PolicyList()
 void 
 PolicyList::push_back(const string& policyname)
 {
-    _policies.push_back(PolicyCode(policyname,NULL));
-    _pmap.add_dependency(policyname,_protocol);
+    if (!policyname.empty() && policyname.at(0) == '(') {
+	add_policy_expression(policyname);
+
+	return;
+    }
+
+    _policies.push_back(PolicyCode(policyname, NULL));
+    _pmap.add_dependency(policyname, _protocol);
+}
+
+void
+PolicyList::add_policy_expression(const string& exp)
+{
+    // We create an internal policy based on the expression, and execute that
+    // policy.
+    ostringstream oss;
+
+    oss << "PE_" << _pe++;
+
+    string name = oss.str();
+    _pmap.create(name, _smap);
+    _pe_policies.insert(name);
+
+    PolicyStatement& ps = _pmap.find(name);
+
+    // replace "string" into "policy string".  That is, execute policies as
+    // subroutines.
+    oss.str("");
+    int state = 0;
+
+    for (string::const_iterator i = exp.begin(); i != exp.end(); ++i) {
+	char x = *i;
+
+	if (isalnum(x)) {
+	    if (state == 0) {
+		oss << "policy ";
+		state = 1;
+	    }
+	} else
+	    state = 0;
+
+	oss << x;
+    }
+
+    string conf = oss.str();
+    ConfigNodeId order(1, 0);
+
+    // XXX how should this function with export policies?
+    Term* t = new Term("match");
+    t->set_block(_type == IMPORT ? Term::SOURCE : Term::DEST, order, conf);
+    t->set_block(Term::ACTION, order, "accept;");
+    ps.add_term(order, t);
+
+    // XXX handle next-policy too - how should it work?
+    t = new Term("nomatch");
+    t->set_block(Term::ACTION, order, "reject;");
+    ps.add_term(ConfigNodeId(2, 1), t);
+
+    ps.set_policy_end();
+
+    // update dependencies.
+    // XXX we shouldn't be doing this here.  We should have an encapsulated
+    // mechanism for adding "internal" policies and dealing with them correctly.
+    // It seems like a useful feature.
+    VisitorDep dep(_smap, _pmap);
+    ps.accept(dep);
+
+    push_back(name);
 }
 
 void 
@@ -105,27 +180,27 @@ void
 PolicyList::compile(Code::TargetSet& mod, uint32_t& tagstart)
 {
     // go throw all policies in the list
-    for(PolicyCodeList::iterator i = _policies.begin();
-	i != _policies.end(); ++i) {
+    for (PolicyCodeList::iterator i = _policies.begin();
+	 i != _policies.end(); ++i) {
 
 	PolicyCode& pc = *i;
 
 	// deal only with non compiled policies [i.e. policies without
 	// associated code].
-	if(pc.second) 
+	if (pc.second) 
 	    continue;
 
 	// find the policy statement and compile it.
 	PolicyStatement& ps = _pmap.find(pc.first);
     
 	switch(_type) {
-	    case IMPORT:
-		compile_import(i,ps,mod);
-		break;
+	case IMPORT:
+	    compile_import(i, ps, mod);
+	    break;
 	
-	    case EXPORT:
-		compile_export(i,ps,mod,tagstart);
-		break;
+	case EXPORT:
+	    compile_export(i, ps, mod, tagstart);
+	    break;
 	}
     }    
 }

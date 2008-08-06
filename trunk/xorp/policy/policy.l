@@ -147,6 +147,9 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "="		return YY_ASSIGN;
 "+="		return YY_PLUS_EQUALS;
 "-="		return YY_MINUS_EQUALS;
+"||"		return YY_OR;
+"&&"		return YY_AND;
+"!"		return YY_NOT;
 
 "exact"		return YY_IPNET_EQ;
 "longer"	return YY_IPNET_LT;
