@@ -240,7 +240,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- Subdirectories
-SUBDIRS = common backend . test
+SUBDIRS = common backend .
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libpolicy.la

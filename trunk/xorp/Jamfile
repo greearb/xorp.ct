@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/Jamfile,v 1.4 2007/04/20 07:17:40 pavlin Exp $
+# $XORP: xorp/Jamfile,v 1.5 2008/05/15 08:41:23 bms Exp $
 #
 
 # TODO: Fix building in a directory other than source tree. Make the rules
@@ -42,6 +42,8 @@ SubIncludeOnce TOP pim ;
 SubIncludeOnce TOP rip ;
 SubIncludeOnce TOP rtrmgr ;
 SubIncludeOnce TOP static_routes ;
+
+SubIncludeOnce TOP policy/test ;
 
 SubIncludeOnce TOP etc ;
 SubIncludeOnce TOP contrib ;

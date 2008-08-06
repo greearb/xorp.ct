@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/Makefile.am,v 1.10 2005/07/01 22:54:32 abittau Exp $
+## $XORP: xorp/policy/Makefile.am,v 1.11 2005/10/23 20:41:38 abittau Exp $
 ##
 
 # -- Subdirectories
-SUBDIRS = common backend . test
+SUBDIRS = common backend .
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
