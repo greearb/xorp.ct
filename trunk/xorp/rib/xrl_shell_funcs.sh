@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.9 2004/09/17 14:00:05 abittau Exp $
+# $XORP: xorp/rib/xrl_shell_funcs.sh,v 1.10 2004/09/28 00:31:46 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -61,13 +61,27 @@ add_vif_addr6()
 add_route4()
 {
     echo -n "add_route4" $*
-    $CALLXRL "finder://rib/rib/0.1/add_route4?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv4net=$4&nexthop:ipv4=$5&metric:u32=$6&policytags:list=$7"
+
+    PT=":u32=0";
+    if [ $# -ge 7 ]
+    then
+	PT=${PT},$7
+    fi
+
+    $CALLXRL "finder://rib/rib/0.1/add_route4?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv4net=$4&nexthop:ipv4=$5&metric:u32=$6&policytags:list=$PT"
 }
 
 add_route6()
 {
     echo -n "add_route6" $*
-    $CALLXRL "finder://rib/rib/0.1/add_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4&nexthop:ipv6=$5&metric:u32=$6&policytags:list=$7"
+
+    PT=":u32=0";
+    if [ $# -ge 7 ]
+    then
+	PT=${PT},$7
+    fi
+
+    $CALLXRL "finder://rib/rib/0.1/add_route6?protocol:txt=$1&unicast:bool=$2&multicast:bool=$3&network:ipv6net=$4&nexthop:ipv6=$5&metric:u32=$6&policytags:list=$PT"
 }
 
 delete_route4()
