@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_statement.hh,v 1.12 2008/07/23 05:11:20 pavlin Exp $
+// $XORP: xorp/policy/policy_statement.hh,v 1.13 2008/08/06 08:22:18 abittau Exp $
 
 #ifndef __POLICY_POLICY_STATEMENT_HH__
 #define __POLICY_POLICY_STATEMENT_HH__
@@ -121,6 +121,8 @@ public:
     void set_dependency(const DEPS& sets, const DEPS& policies);
     
 private:
+    typedef list<pair<ConfigNodeId, Term*> > OOL;
+
     /**
      * Delete all set dependencies of this policy.
      */
@@ -141,8 +143,7 @@ private:
      * @param order the order for the term.
      * @return iterator for term.
      */
-    list<pair<ConfigNodeId, Term*> >::iterator find_out_of_order_term(
-	const ConfigNodeId& order);
+    OOL::iterator find_out_of_order_term(const ConfigNodeId& order);
 
     /**
      * Get the iterator for a term that is out of order.
@@ -150,10 +151,8 @@ private:
      * @param name the name for the term.
      * @return iterator for term.
      */
-    list<pair<ConfigNodeId, Term*> >::iterator find_out_of_order_term(
-	const string& name);
-    list<pair<ConfigNodeId, Term*> >::const_iterator find_out_of_order_term(
-	const string& name) const;
+    OOL::iterator find_out_of_order_term(const string& name);
+    OOL::const_iterator find_out_of_order_term(const string& name) const;
 
     string				_name;
     TermContainer			_terms;

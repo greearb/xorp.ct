@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.15 2008/07/23 05:11:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.16 2008/08/06 08:22:18 abittau Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -45,8 +45,8 @@ PolicyStatement::~PolicyStatement()
 void 
 PolicyStatement::add_term(const ConfigNodeId& order, Term* term)
 {
-    if((_terms.find(order) != _terms.end())
-       || (find_out_of_order_term(order) != _out_of_order_terms.end())) {
+    if ((_terms.find(order) != _terms.end())
+        || (find_out_of_order_term(order) != _out_of_order_terms.end())) {
 	xorp_throw(PolicyException,
 		   "Term already present in position: " + order.str());
     }
@@ -167,6 +167,37 @@ PolicyStatement::delete_term(const string& name)
 void
 PolicyStatement::set_policy_end()
 {
+    // The final action lives in an internally created term named __final.
+    // This is a single node (i.e., unlike terms, there can be only one
+    // instance) so the ordering is messed up and we need to fix it.  This call
+    // though should be received after all terms have been added so it is safe
+    // to assume that we simply add the term at the end of the list.
+    for (OOL::iterator i = _out_of_order_terms.begin();
+	 i != _out_of_order_terms.end(); ++i) {
+	 Term* t = i->second;
+
+	 if (t->name().compare("__final") != 0)
+	    continue;
+
+	// find last position and compute next one
+	XLOG_ASSERT(!_terms.empty());
+	TermContainer::iterator j = _terms.end();
+	j--;
+
+	ConfigNodeId order = j->first;
+	ConfigNodeId::UniqueNodeId nid = order.unique_node_id();
+	
+	// XXX we really need operator++ in ConfigNodeId
+	order = ConfigNodeId(nid+1, nid);
+
+	// insert
+	bool res = _terms.insert(order, t).second;
+	XLOG_ASSERT(res);
+
+	_out_of_order_terms.erase(i);
+	break;
+    }
+
     TermContainer::iterator i;
 
     for (i = _terms.begin(); i != _terms.end(); ++i) {

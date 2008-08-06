@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.29 2008/08/06 08:24:08 abittau Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.30 2008/08/06 08:24:35 abittau Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -29,7 +29,13 @@ policy {
 		trace:		u32;
 		tag:		u32;
 		next:		txt;
+		accept {}
+		reject {}
 	    }
+	}
+	then {
+		accept {}
+		reject {}
 	}
     }
 
@@ -228,7 +234,26 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 	    }
-	}
+	} /* term */
+
+	/* unnamed term */
+        then {
+	    %help: short "Final action";
+	    %create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&order:txt=$(#)&term:txt=__final";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/delete_term?policy:txt=$(policy-statement.@)&term:txt=__final";
+
+	    accept {
+	        %help: short "Accept a route";
+		%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=__final&block:u32=2&order:txt=$(#)&statement:txt=accept;";
+		%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=__final&block:u32=2&order:txt=$(#)&statement:txt=";
+            }
+
+	    reject {
+	        %help: short "Reject a route";
+		%create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=__final&block:u32=2&order:txt=$(#)&statement:txt=reject;";
+		%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=__final&block:u32=2&order:txt=$(#)&statement:txt=";
+	    }
+        }
     }
 
     network4-list @: txt {
