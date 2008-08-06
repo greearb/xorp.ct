@@ -754,6 +754,17 @@ each protocol.  This code is very difficult to get right and it indeed causes
 many bugs.  It needs to be designed and implemented by the generic policy
 framework, and protocols should make use of this single implementation.
 & 10 \\
+\hline
+
+501 &
+Design and refactor the policy front-end.  The policy front-end was never
+designed properly but was instead just coded in an ad-hoc manner and very
+quickly.  As requirements increased with time, the current functionality of the
+policy manager is rather complicated.  It needs to deal with dependencies
+between policies, lists and policies, and special cases such as BGP per-peer
+policies.  The code is currently unmantinable and will be a major source of bugs
+and development slowdown.
+& 10 \\
 
 \end{supertabular}
 \end{center}
