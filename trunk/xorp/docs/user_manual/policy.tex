@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.21 2007/04/02 21:53:23 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.22 2008/08/06 08:28:39 abittau Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -225,8 +225,12 @@ subroutine and referring to them from multiple policies.  Policy subroutines can
 only be used as a match condition and hence be present only in {\em from} or
 {\em to} term blocks.  If the policy subroutine rejects the route, then false is
 returned and route matching fails; true is returned otherwise causing a match
-success.  Regardless of the subroutine outcome, any actions that modify the
-route (if present) will be applied.
+success.  Note that if any actions that modify the route are present in the
+subroutine, they will be executed even if the route is ultimately discarded by
+the calling policy.  That is, if the {\em to} and {\em from} block in the
+subroutine match the route, the subroutine {\em then} block will be executed and
+it may modify the route, even if the caller ultimately decides to reject the
+route.
 
 Here is an example of a policy subroutine:
 
@@ -247,7 +251,7 @@ policy \{\\
 \>\>\}\\
 \>\} \\
 \>policy-statement bgp \{ \\
-\>\>term a \{ \\
+\>\>term start \{ \\
 \>\>\>from \{\\
 \>\>\>\>policy: "drop-private" \\
 \>\>\>\>med: 1 \\
@@ -268,10 +272,10 @@ policy \{\\
 \end{minipage}
 }
 
-This BGP policy will only accept routes that match term {\em a}.  For that to
-occur, the {\em drop-private} policy must return ``true'', {\em i.e.,} it must
-accept the route.  This will only happen if the route is not ``private'' {\em
-i.e.,} not 10.0.0.0/8 in this case.  
+This BGP policy will only accept routes that match term {\em start}.  For that
+to occur, the {\em drop-private} policy must return ``true'', {\em i.e.,} it
+must accept the route.  This will only happen if the route is not ``private''
+{\em i.e.,} not 10.0.0.0/8 in this case.  
 
 \subsection{Applying policies to protocols}
 Once a policy is specified, it must be applied to a protocol.  This is achieved
@@ -1048,14 +1052,14 @@ configurations.
 \subsection{test policy}
 It is possible to test a routing policy against a route to determine whether it
 will be accepted and what route characteristics will be modified.  Here is an
-example of how one can test the policy {\em in} against the prefix 10.0.0.0/8.
+example of how one can test the policy {\em import} against the prefix 10.0.0.0/8.
 
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxx\=\kill
-user@hostname> {\bf test policy in 10.0.0.0/8}\\
+user@hostname> {\bf test policy import 10.0.0.0/8}\\
 Policy decision: rejected
 \end{tabbing}
 \end{alltt}
@@ -1072,7 +1076,7 @@ specify under which protocol to run the route.  Here is an example.
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxx\=\kill
-user@hostname> {\bf test policy in2 10.0.0.0/8 ``--protocol=ospf4''}\\
+user@hostname> {\bf test policy import2 10.0.0.0/8} "{\bf --protocol=ospf4}"\\
 Policy decision: accepted \\
 Route modifications: \\
 tag     123
@@ -1081,7 +1085,7 @@ tag     123
 \end{minipage}
 }
 
-In this case we ran the policy {\em in2} in the context of {\em ospf4}.  The
+In this case we ran the policy {\em import2} in the context of {\em ospf4}.  The
 route was accepted and the tag was modified to 123.
 
 If the policy matches protocol specific route attributes, we must supply their
@@ -1093,9 +1097,9 @@ directive, the whole argument must be enclosed by quotes.  Here is an example.
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxx\=\kill
-user@hostname> {\bf test policy med1 10.0.0.0/8 ``--protocol=bgp --med=1''}\\
+user@hostname> {\bf test policy med1 10.0.0.0/8} "{\bf --protocol=bgp --med=1}"\\
 Policy decision: accepted \\
-user@hostname> {\bf test policy med1 10.0.0.0/8 ``--protocol=bgp --med=2''}\\
+user@hostname> {\bf test policy med1 10.0.0.0/8} "{\bf --protocol=bgp --med=2}"\\
 Policy decision: rejected
 \end{tabbing}
 \end{alltt}
