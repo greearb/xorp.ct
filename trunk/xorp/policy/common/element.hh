@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.12 2008/01/04 03:17:18 pavlin Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.13 2008/07/23 05:11:26 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -27,6 +27,30 @@
 #include "policy_utils.hh"
 #include "policy/policy_module.h"
 
+enum {
+    HASH_ELEM_INT32 = 1,
+    HASH_ELEM_U32,
+    HASH_ELEM_COM32,
+    HASH_ELEM_STR,
+    HASH_ELEM_BOOL,
+    HASH_ELEM_IPV4,
+    HASH_ELEM_IPV6,
+    HASH_ELEM_IPV4RANGE,
+    HASH_ELEM_IPV6RANGE,
+    HASH_ELEM_IPV4NET,
+    HASH_ELEM_IPV6NET,
+    HASH_ELEM_U32RANGE,
+    HASH_ELEM_SET_U32,
+    HASH_ELEM_SET_COM32,
+    HASH_ELEM_SET_IPV4NET,
+    HASH_ELEM_SET_IPV6NET,
+    HASH_ELEM_SET_STR,
+    HASH_ELEM_NULL,
+    HASH_ELEM_FILTER,
+    HASH_ELEM_ASPATH,
+    HASH_ELEM_MAX = 32 // must be last
+};
+
 /**
  * @short 32bit signed integer.
  */
@@ -38,12 +62,7 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
-
-    ElemInt32() {}
+    ElemInt32() : Element(_hash) {}
 
     /**
      * Construct via c-style string.
@@ -55,13 +74,15 @@ public:
      *
      * @param c_str initialize via string, or assign default value if null.
      */
-    ElemInt32(const char* c_str) {
-	if(c_str)
+    ElemInt32(const char* c_str) : Element(_hash)
+    {
+	if (c_str)
 	    _val = strtol(c_str,NULL,10);
 	else
 	    _val = 0;
     }
-    ElemInt32(const int32_t val) : _val(val) {}
+
+    ElemInt32(const int32_t val) : Element(_hash), _val(val) {}
 
     /**
      * @return string representation of integer
@@ -89,21 +110,20 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
+    ElemU32() : Element(_hash) {}
 
-    ElemU32() {}
-    ElemU32(const char* c_str) {
-	if(c_str)
+    ElemU32(const char* c_str) : Element(_hash)
+    {
+	if (c_str)
 	    _val = strtoul(c_str,NULL,10); 
 	else
 	    _val = 0;
     }
-    ElemU32(const uint32_t val) : _val(val) {}
 
-    string str() const {
+    ElemU32(const uint32_t val) : Element(_hash), _val(val) {}
+
+    string str() const
+    {
 	return policy_utils::to_str(_val);
     }
 
@@ -129,14 +149,9 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
-
-    ElemCom32() {}
+    ElemCom32() : Element(_hash) {}
     ElemCom32(const char*);		// in element.cc
-    ElemCom32(const uint32_t val) : _val(val) {}
+    ElemCom32(const uint32_t val) : Element(_hash), _val(val) {}
 
     string str() const;			// in element.cc
     uint32_t val() const { return _val; }
@@ -158,21 +173,17 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
+    ElemStr() : Element(_hash) {}
 
-    ElemStr() {}
-
-    ElemStr(const char* val) {
-	if(val)
+    ElemStr(const char* val) : Element(_hash)
+    {
+	if (val)
 	    _val = val;
 	else
 	    _val = "";
     }
 
-    ElemStr(const string& str) : _val(str) {}
+    ElemStr(const string& str) : Element(_hash), _val(str) {}
 
     string str() const { return _val; }
     string val() const { return _val; }
@@ -193,23 +204,21 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
+    ElemBool() : Element(_hash) {}
 
-    ElemBool() {}
-    ~ElemBool() {}
-    ElemBool(const char* c_str) {
-	if(c_str && (strcmp(c_str,"true") == 0) )
+    ElemBool(const char* c_str) : Element(_hash)
+    {
+	if (c_str && (strcmp(c_str,"true") == 0) )
 	    _val = true;
 	else
 	    _val = false;
     }
-    ElemBool(const bool val) : _val(val) {}
 
-    string str() const {
-	if(_val)
+    ElemBool(const bool val) : Element(_hash), _val(val) {}
+
+    string str() const
+    {
+	if (_val)
 	    return "true";
 	else
 	    return "false";
@@ -249,24 +258,20 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
-
-    ElemAny() : _val() {}
-    ElemAny(const T& val) : _val(val) {}
+    ElemAny() : Element(_hash), _val() {}
+    ElemAny(const T& val) : Element(_hash), _val(val) {}
 
     /**
      * If the c-style constructor of the wrapped class throws and exception,
      * it is caught and an ElemInitError exception is thrown. The original
      * exception is lost.
      */
-    ElemAny(const char* c_str) : _val() {
-	if(c_str) {
+    ElemAny(const char* c_str) : Element(_hash), _val()
+    {
+	if (c_str) {
 	    try {
 		_val = T(c_str);
-	    } catch(...) {
+	    } catch (...) {
 		string err = "Unable to initialize element of type ";
 		err += id;
 		err += " with ";
@@ -334,14 +339,10 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x) {
-	_hash = x;
-    }
-    Hash hash() const { return _hash; }
-    
-    ElemRefAny() : _val(new T()), _free(true) {}
-    ElemRefAny(const T& val) : _val(&val), _free(false) {}
-    ElemRefAny(const T& val, bool f) : _val(&val), _free(f) {}
+    ElemRefAny() : Element(_hash), _val(new T()), _free(true) {}
+    ElemRefAny(const T& val) : Element(_hash), _val(&val), _free(false) {}
+    ElemRefAny(const T& val, bool f) : Element(_hash), _val(&val), _free(f) {}
+
     ~ElemRefAny() { if (_free) delete _val; }
 
     /**
@@ -349,8 +350,9 @@ public:
      * it is caught and an ElemInitError exception is thrown. The original
      * exception is lost.
      */
-    ElemRefAny(const char* c_str) : _val(NULL), _free(false) {
-        if(c_str) {
+    ElemRefAny(const char* c_str) : Element(_hash), _val(NULL), _free(false)
+    {
+        if (c_str) {
             try {
                 _val = new T(c_str);
                 _free = true;
@@ -406,7 +408,7 @@ public:
 
     const char* type() const { return id; }
 
-    ElemRefAny(const ElemRefAny<T>& copy) : Element() {
+    ElemRefAny(const ElemRefAny<T>& copy) : Element(_hash) {
 	_val = copy._val;
 	_free = copy._free;
 	copy._free = false;

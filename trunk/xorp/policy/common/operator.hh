@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/operator.hh,v 1.8 2008/01/04 03:17:19 pavlin Exp $
+// $XORP: xorp/policy/common/operator.hh,v 1.9 2008/07/23 05:11:26 pavlin Exp $
 
 #ifndef __POLICY_COMMON_OPERATOR_HH__
 #define __POLICY_COMMON_OPERATOR_HH__
@@ -24,6 +24,7 @@
 class name : public parent { \
 public: \
     static Hash _hash; \
+    name() : parent(_hash) {} \
     ~name() {} \
     string str() const { return #human; } \
     Hash hash() const { return _hash; } \

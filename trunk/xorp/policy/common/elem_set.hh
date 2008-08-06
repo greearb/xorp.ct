@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.10 2008/01/04 03:17:18 pavlin Exp $
+// $XORP: xorp/policy/common/elem_set.hh,v 1.11 2008/07/23 05:11:26 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
@@ -39,9 +39,6 @@ public:
     static const char* id;
     static Hash _hash;
 
-    void set_hash(const Hash& x);
-    Hash hash() const;
-    
     ElemSetAny(const Set& val);
 
     /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.12 2008/01/04 03:17:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.13 2008/07/23 05:11:26 pavlin Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
@@ -24,48 +24,48 @@
 // Initialization of static members.
 // Remember to be unique in id's.
 const char* ElemInt32::id = "i32";
-Element::Hash ElemInt32::_hash = 0;
+Element::Hash ElemInt32::_hash = HASH_ELEM_INT32;
 
 const char* ElemU32::id = "u32";
-Element::Hash ElemU32::_hash = 0;
+Element::Hash ElemU32::_hash = HASH_ELEM_U32;
 
 const char* ElemCom32::id = "com32";
-Element::Hash ElemCom32::_hash = 0;
+Element::Hash ElemCom32::_hash = HASH_ELEM_COM32;
 
 const char* ElemStr::id = "txt";
-Element::Hash ElemStr::_hash = 0;
+Element::Hash ElemStr::_hash = HASH_ELEM_STR;
 
 const char* ElemBool::id = "bool";
-Element::Hash ElemBool::_hash = 0;
+Element::Hash ElemBool::_hash = HASH_ELEM_BOOL;
 
 template<> const char* ElemIPv4::id = "ipv4";
-template<> Element::Hash ElemIPv4::_hash = 0;
+template<> Element::Hash ElemIPv4::_hash = HASH_ELEM_IPV4;
 
 template<> const char* ElemIPv4Range::id = "ipv4range";
-template<> Element::Hash ElemIPv4Range::_hash = 0;
+template<> Element::Hash ElemIPv4Range::_hash = HASH_ELEM_IPV4RANGE;
 
 template<> const char* ElemIPv6::id = "ipv6";
-template<> Element::Hash ElemIPv6::_hash = 0;
+template<> Element::Hash ElemIPv6::_hash = HASH_ELEM_IPV6;
 
 template<> const char* ElemIPv6Range::id = "ipv6range";
-template<> Element::Hash ElemIPv6Range::_hash = 0;
+template<> Element::Hash ElemIPv6Range::_hash = HASH_ELEM_IPV6RANGE;
 
 template<> const char* ElemIPv4Net::id = "ipv4net";
-template<> Element::Hash ElemIPv4Net::_hash = 0;
+template<> Element::Hash ElemIPv4Net::_hash = HASH_ELEM_IPV4NET;
 
 template<> const char* ElemIPv6Net::id = "ipv6net";
-template<> Element::Hash ElemIPv6Net::_hash = 0;
+template<> Element::Hash ElemIPv6Net::_hash = HASH_ELEM_IPV6NET;
 
 template<> const char* ElemU32Range::id = "u32range";
-template<> Element::Hash ElemU32Range::_hash = 0;
+template<> Element::Hash ElemU32Range::_hash = HASH_ELEM_U32RANGE;
 
 template<> const char* ElemASPath::id = "aspath";
-template<> Element::Hash ElemASPath::_hash = 0;
+template<> Element::Hash ElemASPath::_hash = HASH_ELEM_ASPATH;
 
 const char* ElemNull::id = "null";
-Element::Hash ElemNull::_hash = 1;
+Element::Hash ElemNull::_hash = HASH_ELEM_NULL;
 
-Element::Hash ElemFilter::_hash = 0;
+Element::Hash ElemFilter::_hash = HASH_ELEM_FILTER;
 
 /**
  * @short Well-known communities per RFC1997
@@ -84,7 +84,7 @@ static struct { string text; uint32_t value; } com_aliases[] = {
  *  "N:"  -> ((uint16_t) N) << 16
  *  "N:M" -> (((uint16_t) N) << 16) + (uint16_t) M
  */
-ElemCom32::ElemCom32(const char* c_str) {
+ElemCom32::ElemCom32(const char* c_str) : Element(_hash) {
     // Semantic checker needs this
     if(c_str == NULL) {
 	_val = 0;

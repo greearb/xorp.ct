@@ -13,31 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/operator.cc,v 1.5 2008/01/04 03:17:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/operator.cc,v 1.6 2008/07/23 05:11:26 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
 #include "operator.hh"
 
 // Initialization of static members.
-Oper::Hash OpAnd::_hash = 0;
-Oper::Hash OpOr::_hash = 0;
-Oper::Hash OpXor::_hash = 0;
-Oper::Hash OpNot::_hash = 0;
+Oper::Hash OpAnd::_hash	    = HASH_OP_AND;
+Oper::Hash OpOr::_hash	    = HASH_OP_OR;
+Oper::Hash OpXor::_hash	    = HASH_OP_XOR;
+Oper::Hash OpNot::_hash	    = HASH_OP_NOT;
 
-Oper::Hash OpEq::_hash = 0;
-Oper::Hash OpNe::_hash = 0;
-Oper::Hash OpLt::_hash = 0;
-Oper::Hash OpGt::_hash = 0;
-Oper::Hash OpLe::_hash = 0;
-Oper::Hash OpGe::_hash = 0;
+Oper::Hash OpEq::_hash	    = HASH_OP_EQ;
+Oper::Hash OpNe::_hash	    = HASH_OP_NE;
+Oper::Hash OpLt::_hash	    = HASH_OP_LT;
+Oper::Hash OpGt::_hash	    = HASH_OP_GT;
+Oper::Hash OpLe::_hash	    = HASH_OP_LE;
+Oper::Hash OpGe::_hash	    = HASH_OP_GE;
 
-Oper::Hash OpAdd::_hash = 0;
-Oper::Hash OpSub::_hash = 0;
-Oper::Hash OpMul::_hash = 0;
+Oper::Hash OpAdd::_hash	    = HASH_OP_ADD;
+Oper::Hash OpSub::_hash	    = HASH_OP_SUB;
+Oper::Hash OpMul::_hash	    = HASH_OP_MUL;
 
-Oper::Hash OpRegex::_hash = 0;
-Oper::Hash OpCtr::_hash = 0;
-Oper::Hash OpNEInt::_hash = 0;
-
-Oper::Hash OpHead::_hash = 0;
+Oper::Hash OpRegex::_hash   = HASH_OP_REGEX;
+Oper::Hash OpCtr::_hash	    = HASH_OP_CTR;
+Oper::Hash OpNEInt::_hash   = HASH_OP_NEINT;
+Oper::Hash OpHead::_hash    = HASH_OP_HEAD;

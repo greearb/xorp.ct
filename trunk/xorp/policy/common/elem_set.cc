@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.17 2008/01/04 03:17:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.18 2008/07/23 05:11:25 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -24,12 +24,12 @@
 
 
 template <class T>
-ElemSetAny<T>::ElemSetAny(const Set& val) : _val(val) 
+ElemSetAny<T>::ElemSetAny(const Set& val) : Element(_hash), _val(val) 
 {
 }
 
 template <class T>
-ElemSetAny<T>::ElemSetAny(const char* c_str)
+ElemSetAny<T>::ElemSetAny(const char* c_str) : Element(_hash)
 {
     if (!c_str)
 	return;
@@ -45,7 +45,7 @@ ElemSetAny<T>::ElemSetAny(const char* c_str)
 }
 
 template <class T>
-ElemSetAny<T>::ElemSetAny()
+ElemSetAny<T>::ElemSetAny() : Element(_hash)
 {
 }
 
@@ -255,20 +255,6 @@ ElemSetAny<T>::end() const
 }
 
 template <class T>
-void
-ElemSetAny<T>::set_hash(const Hash& x)
-{
-    _hash = x;
-}
-
-template <class T>
-Element::Hash
-ElemSetAny<T>::hash() const
-{
-    return _hash;
-}
-
-template <class T>
 const char*
 ElemSetAny<T>::type() const
 {
@@ -277,21 +263,21 @@ ElemSetAny<T>::type() const
 
 // define the various sets
 template <> const char* ElemSetU32::id = "set_u32";
-template <> Element::Hash ElemSetU32::_hash = 0;
+template <> Element::Hash ElemSetU32::_hash = HASH_ELEM_SET_U32;
 template class ElemSetAny<ElemU32>;
 
 template <> const char* ElemSetCom32::id = "set_com32";
-template <> Element::Hash ElemSetCom32::_hash = 0;
+template <> Element::Hash ElemSetCom32::_hash = HASH_ELEM_SET_COM32;
 template class ElemSetAny<ElemCom32>;
 
 template <> const char* ElemSetIPv4Net::id = "set_ipv4net";
-template <> Element::Hash ElemSetIPv4Net::_hash = 0;
+template <> Element::Hash ElemSetIPv4Net::_hash = HASH_ELEM_SET_IPV4NET;
 template class ElemSetAny<ElemIPv4Net>;
 
 template <> const char* ElemSetIPv6Net::id = "set_ipv6net";
-template <> Element::Hash ElemSetIPv6Net::_hash = 0;
+template <> Element::Hash ElemSetIPv6Net::_hash = HASH_ELEM_SET_IPV6NET;
 template class ElemSetAny<ElemIPv6Net>;
 
 template <> const char* ElemSetStr::id = "set_str";
-template <> Element::Hash ElemSetStr::_hash = 0;
+template <> Element::Hash ElemSetStr::_hash = HASH_ELEM_SET_STR;
 template class ElemSetAny<ElemStr>;

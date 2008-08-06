@@ -13,18 +13,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/common/element_base.cc,v 1.1 2008/08/06 08:10:18 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "element_base.hh"
 #include "libxorp/xlog.h"
+#include "policy_exception.hh"
+#include "element.hh"
 
 Element::~Element()
 {
 }
 
-Element::Element() : _refcount(1)
+Element::Element(Hash hash) : _refcount(1), _hash(hash)
 {
+    if (_hash >= HASH_ELEM_MAX)
+        xorp_throw(PolicyException,
+                   "Too many elems for dispatcher---find a better hashing mechanism\n");
 }
 
 // TODO do a proper refcount implementation, factory, object reuse, etc.
@@ -50,4 +55,10 @@ uint32_t
 Element::refcount() const
 {
     return _refcount;
+}
+
+Element::Hash
+Element::hash() const
+{
+    return _hash;
 }

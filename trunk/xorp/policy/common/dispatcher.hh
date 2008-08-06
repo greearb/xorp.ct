@@ -13,16 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.12 2008/07/23 05:11:25 pavlin Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.13 2008/08/06 08:11:17 abittau Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
 
-#include "policy/policy_module.h"
 #include <string>
 #include <sstream>
 #include <map>
 #include <vector>
+
+#include "policy/policy_module.h"
 #include "libxorp/xlog.h"
 #include "element_base.hh"
 #include "operator_base.hh"
@@ -66,28 +67,25 @@ public:
      * @param op binary operation to be registered.
      */
     template<class L, class R, Element* (*funct)(const L&,const R&)>
-    void add(const BinOper& op) {
+    void add(const BinOper& op)
+    {
         // XXX: do it in a better way
         L arg1;
         R arg2;
 
-	assign_op_hash(op);
-	assign_elem_hash(arg1);
-	assign_elem_hash(arg2);
-	
 	const Element* args[] = { &arg1, &arg2 };
 
         Key key = makeKey(op, 2, args);
 
         struct Local {
-            static Element* Trampoline(const Element& left, const Element& right) {
+            static Element* Trampoline(const Element& left, const Element& right)
+	    {
                 return funct(static_cast<const L&>(left),
                              static_cast<const R&>(right));
             }
         };
 
         _map[key].bin = &Local::Trampoline;
-
     }
 
     /**
@@ -98,16 +96,14 @@ public:
      * @param op unary operation to be registered.
      */
     template<class T, Element* (*funct)(const T&)>
-    void add(const UnOper& op) {
+    void add(const UnOper& op)
+    {
 	// XXX: ugly
 	T arg;
 
-	assign_op_hash(op);
-	assign_elem_hash(arg);
-
 	const Element* args[] = { &arg };
 
-        Key key = makeKey(op,1, args);
+        Key key = makeKey(op, 1, args);
 
         struct Local {
 	    static Element* Trampoline(const Element& arg) {
@@ -176,7 +172,8 @@ private:
      * @param op requested operation.
      * @param args the arguments for the operation.
      */
-    Key makeKey(const Oper& op, unsigned argc, const Element** argv) const {
+    Key makeKey(const Oper& op, unsigned argc, const Element** argv) const
+    {
 	XLOG_ASSERT(op.arity() == argc);
 	XLOG_ASSERT(argc <= 2);
 
@@ -184,7 +181,6 @@ private:
 
 	key |= op.hash();
 	XLOG_ASSERT(key);
-
 
 	for (unsigned i = 0; i < argc; i++) {
 	    const Element* arg = argv[i];
@@ -207,7 +203,8 @@ private:
      * @param op operation to perform.
      * @param args the arguments of the operation.
      */
-    Value lookup(const Oper& op, unsigned argc, const Element** argv) const {
+    Value lookup(const Oper& op, unsigned argc, const Element** argv) const
+    {
 	XLOG_ASSERT(op.arity() == argc);
 
         // find callback
@@ -215,16 +212,9 @@ private:
         return _map[key];
     }
 
-    void assign_op_hash(const Oper&);
-    void assign_elem_hash(Element&);
-
     // Only one global map. Creating multiple dispatcher is thus harmless.
     // However, we may not have different dispatchers.
     static Value _map[32768];
-
-    // Do initial registration of callbacks.
-    static unsigned _ophash;
-    static unsigned _elemhash;
 };
 
 #endif // __POLICY_COMMON_DISPATCHER_HH__

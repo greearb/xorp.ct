@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.14 2008/07/23 05:11:25 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.15 2008/08/06 08:11:17 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -26,11 +26,8 @@
 #include "element.hh"
 #include "register_operations.hh"
 
-
 // init static members
 Dispatcher::Value Dispatcher::_map[32768];
-unsigned Dispatcher::_ophash = 1;
-unsigned Dispatcher::_elemhash = 1;
 
 Dispatcher::Dispatcher()
 {
@@ -57,9 +54,8 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	    return new ElemNull();
 
 	key |= h << (5*(argc-i));
-	    
     }
-    
+
     // check for constructor
     if (argc == 2 && typeid(op) == typeid(OpCtr)) {
 	string arg1type = argv[1]->type();
@@ -73,7 +69,7 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 
 	return operations::ctr(es, *(argv[0]));
     }
-    
+
     // find function
     Value funct = _map[key];
 
@@ -119,39 +115,4 @@ Dispatcher::run(const BinOper& op,
     argv[1] = &left;
 
     return run(op, 2, argv);
-}
-
-void
-Dispatcher::assign_op_hash(const Oper& op)
-{
-    if (op.hash())
-	return;
-
-    // XXX
-    if (_ophash > 31) {
-	xorp_throw(PolicyException,
-		   "Too many operations for dispatcher---find a better hashing mechanism\n");
-    }
-
-    op.set_hash(_ophash);
-    _ophash++;
-}
-
-void
-Dispatcher::assign_elem_hash(Element& e)
-{
-    if (e.hash())
-	return;
-
-    if (_elemhash == ElemNull::_hash)
-	_elemhash++;
-
-    // XXX
-    if (_elemhash > 31) {
-	xorp_throw(PolicyException, 
-		   "Too many elems for dispatcher---find a better hashing mechanism\n");
-    }
-
-    e.set_hash(_elemhash);
-    _elemhash++;
 }

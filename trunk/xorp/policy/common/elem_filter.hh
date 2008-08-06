@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_filter.hh,v 1.4 2008/01/04 03:17:18 pavlin Exp $
+// $XORP: xorp/policy/common/elem_filter.hh,v 1.5 2008/07/23 05:11:25 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEM_FILTER_HH__
 #define __POLICY_COMMON_ELEM_FILTER_HH__
@@ -30,12 +30,10 @@ class ElemFilter : public Element {
 public:
     static Hash _hash;
     
-    ElemFilter(const RefPf& pf) : _pf(pf) {}
+    ElemFilter(const RefPf& pf) : Element(_hash), _pf(pf) {}
     string str() const { return "policy filter"; }
     const RefPf& val() const { return _pf; }
 
-    void set_hash(const Hash& x) { _hash = x; }
-    Hash hash() const { return _hash; }
     const char* type() const { return "filter"; }
 
 private:

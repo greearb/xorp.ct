@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_null.hh,v 1.7 2008/01/04 03:17:18 pavlin Exp $
+// $XORP: xorp/policy/common/elem_null.hh,v 1.8 2008/07/23 05:11:25 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEM_NULL_HH__
 #define __POLICY_COMMON_ELEM_NULL_HH__
@@ -36,15 +36,12 @@ public:
     static const char* id;
     static Hash _hash;
             
-    ElemNull() {}
-    ElemNull(const char* /* c_str */) {}
+    ElemNull() : Element(_hash) {}
+    ElemNull(const char* /* c_str */) : Element(_hash) {}
                 
     string str() const { return "null"; }
 
     const char* type() const { return id; }
-    Hash hash() const { return _hash; } 
-    void set_hash(const Hash& x) { _hash = x; }
-                
 };
 
 #endif // __POLICY_COMMON_ELEM_NULL_HH__
