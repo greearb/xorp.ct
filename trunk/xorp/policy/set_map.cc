@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.11 2008/01/04 03:17:12 pavlin Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.12 2008/07/23 05:11:21 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -112,22 +112,13 @@ SetMap::delete_from_set(const string& type, const string& name,
 	xorp_throw(SetMapError, error_msg);
     }
 
-    // Get a string with the existing elements and delete the element
-    string elements = e->str();
-    set<string> s;
-    policy_utils::str_to_set(elements.c_str(), s);
-    s.erase(element);
+    // Delete element
+    ElemSet* del = dynamic_cast<ElemSet*>(_ef.create(type, element.c_str()));
+    dynamic_cast<ElemSet*>(e)->erase(*del);
+    delete del;
 
-    // Recreate a string with the remaining elements
-    elements = "";
-    set<string>::iterator i;
-    for (i = s.begin(); i != s.end(); ++i) {
-	if (! elements.empty())
-	    elements += ",";
-	elements += *i;
-    }
-
-    update_set(type, name, elements, modified);
+    // sort out dependencies
+    _deps.get_deps(name, modified);
 }
 
 void 

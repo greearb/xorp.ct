@@ -13,19 +13,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.13 2008/07/23 05:11:26 pavlin Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.14 2008/08/06 08:11:29 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
 
 #include <string>
+
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
-#include "libxorp/ipnet.hh"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv6net.hh"
 #include "element_base.hh"
 #include "policy_exception.hh"
 #include "policy_utils.hh"
 #include "policy/policy_module.h"
+#include "operator_base.hh"
 
 enum {
     HASH_ELEM_INT32 = 1,
@@ -421,13 +424,54 @@ private:
     mutable bool _free;
 };
 
+template<class A>
+class ElemNet : public Element {
+public:
+    enum Mod {
+	MOD_NONE,
+	MOD_EXACT,
+	MOD_SHORTER,
+	MOD_ORSHORTER,
+	MOD_LONGER,
+	MOD_ORLONGER,
+	MOD_NOT
+    };
+
+    static const char*	id;
+    static Hash		_hash;
+
+    ElemNet();
+    ElemNet(const char*);
+    ElemNet(const A&);
+    ElemNet(const ElemNet<A>&);
+    ~ElemNet();
+
+    string	    str() const;
+    const char*	    type() const;
+    const A&	    val() const;
+    static Mod	    str_to_mod(const char* p);
+    static string   mod_to_str(Mod mod);
+    BinOper&	    op() const;
+
+    bool	operator<(const ElemNet<A>& rhs) const;
+    bool	operator==(const ElemNet<A>& rhs) const;
+
+private:
+    // not implemented
+    ElemNet& operator=(const ElemNet<A>&);
+
+    const A*		_net;
+    Mod			_mod;
+    mutable BinOper*	_op;
+};
+
 // User defined types
-typedef ElemRefAny<IPv4>	    ElemIPv4;
-typedef ElemAny<IPv6>		    ElemIPv6;
-typedef ElemAny<IPv4Range>	    ElemIPv4Range;
-typedef ElemAny<IPv6Range>	    ElemIPv6Range;
-typedef ElemRefAny<IPNet<IPv4> >    ElemIPv4Net;
-typedef ElemAny<IPNet<IPv6> >	    ElemIPv6Net;
-typedef ElemAny<U32Range>	    ElemU32Range;
+typedef ElemRefAny<IPv4>		ElemIPv4;
+typedef ElemAny<IPv6>			ElemIPv6;
+typedef ElemAny<IPv4Range>		ElemIPv4Range;
+typedef ElemAny<IPv6Range>		ElemIPv6Range;
+typedef ElemNet<IPv4Net>		ElemIPv4Net;
+typedef ElemNet<IPv6Net>		ElemIPv6Net;
+typedef ElemAny<U32Range>		ElemU32Range;
 
 #endif // __POLICY_COMMON_ELEMENT_HH__

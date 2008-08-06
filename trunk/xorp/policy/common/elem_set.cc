@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.18 2008/07/23 05:11:25 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.19 2008/08/06 08:11:29 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -24,12 +24,12 @@
 
 
 template <class T>
-ElemSetAny<T>::ElemSetAny(const Set& val) : Element(_hash), _val(val) 
+ElemSetAny<T>::ElemSetAny(const Set& val) : ElemSet(_hash), _val(val) 
 {
 }
 
 template <class T>
-ElemSetAny<T>::ElemSetAny(const char* c_str) : Element(_hash)
+ElemSetAny<T>::ElemSetAny(const char* c_str) : ElemSet(_hash)
 {
     if (!c_str)
 	return;
@@ -45,7 +45,7 @@ ElemSetAny<T>::ElemSetAny(const char* c_str) : Element(_hash)
 }
 
 template <class T>
-ElemSetAny<T>::ElemSetAny() : Element(_hash)
+ElemSetAny<T>::ElemSetAny() : ElemSet(_hash)
 {
 }
 
@@ -224,6 +224,13 @@ ElemSetAny<T>::erase(const ElemSetAny<T>& rhs)
 	if (j != _val.end())
 	    _val.erase(j);
     }
+}
+
+template <class T>
+void
+ElemSetAny<T>::erase(const ElemSet& rhs)
+{
+    erase(dynamic_cast<const ElemSetAny<T>&>(rhs));
 }
 
 template <class T>

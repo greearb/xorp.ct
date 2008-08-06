@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.13 2008/07/23 05:11:26 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.14 2008/08/06 08:11:29 abittau Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
 #include "elem_filter.hh"
 #include "elem_bgp.hh"
 #include "policy_exception.hh"
+#include "operator.hh"
 
 // Initialization of static members.
 // Remember to be unique in id's.
@@ -123,3 +124,221 @@ ElemCom32::str() const {
     oss << (_val >> 16) << ":" << (_val & 0xffff);
     return (oss.str());
 }
+
+template<class A>
+ElemNet<A>::ElemNet() : Element(_hash), _net(NULL), _mod(MOD_NONE), _op(NULL)
+{
+    _net = new A();
+}
+
+template<class A>
+ElemNet<A>::ElemNet(const char* str) : Element(_hash), _net(NULL),
+				       _mod(MOD_NONE), _op(NULL)
+{
+    if (!str) {
+	_net = new A();
+
+	return;
+    }
+
+    // parse modifier
+    string in = str;
+
+    const char* p = strchr(str, ' ');
+    if (p) {
+	in = in.substr(0, p - str);
+
+	_mod = str_to_mod(++p);
+    }
+
+    // parse net
+    try {
+	    _net = new A(in.c_str());
+    } catch(...) {
+	ostringstream oss;
+
+	oss << "Can't init " << id << " using " << in;
+
+	xorp_throw(PolicyException, oss.str());
+    }
+}
+
+template<class A>
+ElemNet<A>::ElemNet(const A& net) : Element(_hash), _net(NULL), _mod(MOD_NONE),
+				    _op(NULL)
+{
+    _net = new A(net);
+}
+
+template<class A>
+ElemNet<A>::ElemNet(const ElemNet<A>& net) : Element(_hash),
+					     _net(net._net),
+					     _mod(net._mod),
+					     _op(NULL)
+{
+    if (_net)
+	_net = new A(*_net);
+}
+
+template<class A>
+ElemNet<A>::~ElemNet()
+{
+    delete _net;
+}
+
+template<class A>
+string
+ElemNet<A>::str() const
+{
+    string str = _net->str();
+
+    if (_mod != MOD_NONE) {
+	str += " ";
+	str += mod_to_str(_mod);
+    }
+
+    return str;
+}
+
+template<class A>
+const char*
+ElemNet<A>::type() const
+{
+    return id;
+}
+
+template<class A>
+const A&
+ElemNet<A>::val() const
+{
+    return *_net;
+}
+
+template<class A>
+bool
+ElemNet<A>::operator<(const ElemNet<A>& rhs) const
+{
+    return *_net < *rhs._net;
+}
+
+template<class A>
+bool
+ElemNet<A>::operator==(const ElemNet<A>& rhs) const
+{
+    return *_net == *rhs._net;
+}
+
+template<class A>
+typename ElemNet<A>::Mod
+ElemNet<A>::str_to_mod(const char* p)
+{
+    string in = p;
+
+    if (!in.compare("<=") || !in.compare("orlonger")) {
+	return MOD_ORLONGER;
+
+    } else if (!in.compare("<") || !in.compare("longer")) {
+	return MOD_LONGER;
+
+    } else if (!in.compare(">") || !in.compare("shorter")) {
+	return MOD_SHORTER;
+
+    } else if (!in.compare(">=") || !in.compare("orshorter")) {
+	return MOD_ORSHORTER;
+
+    } else if (!in.compare("!=") || !in.compare("not")) {
+	return MOD_NOT;
+
+    } else if (!in.compare("==") || !in.compare(":") || !in.compare("exact")) {
+	return MOD_EXACT;
+    
+    } else {
+	string err = "Can't parse modifier: " + in;
+
+	xorp_throw(PolicyException, err);
+    }
+
+    // unreach
+    abort();
+}
+
+template<class A>
+string
+ElemNet<A>::mod_to_str(Mod mod)
+{
+    switch (mod) {
+    case MOD_NONE:
+	return "";
+
+    case MOD_EXACT:
+	return "==";
+
+    case MOD_SHORTER:
+	return ">";
+
+    case MOD_ORSHORTER:
+	return ">=";
+
+    case MOD_LONGER:
+	return "<";
+
+    case MOD_ORLONGER:
+	return "<=";
+
+    case MOD_NOT:
+	return "!=";
+    }
+
+    // unreach
+    abort();
+}
+
+template<class A>
+BinOper&
+ElemNet<A>::op() const
+{
+    static OpEq EQ;
+    static OpNe NE;
+    static OpLt LT;
+    static OpLe LE;
+    static OpGt GT;
+    static OpGe GE;
+
+    if (_op)
+	return *_op;
+
+    switch (_mod) {
+    case MOD_NONE:
+    case MOD_EXACT:
+	_op = &EQ;
+	break;
+
+    case MOD_NOT:
+	_op = &NE;
+	break;
+
+    case MOD_SHORTER:
+	_op = &GT;
+	break;
+
+    case MOD_ORSHORTER:
+	_op = &GE;
+	break;
+
+    case MOD_LONGER:
+	_op = &LT;
+	break;
+
+    case MOD_ORLONGER:
+	_op = &LE;
+	break;
+    }
+
+    XLOG_ASSERT(_op);
+
+    return op();
+}
+
+// instantiate
+template class ElemNet<IPv4Net>;
+template class ElemNet<IPv6Net>;

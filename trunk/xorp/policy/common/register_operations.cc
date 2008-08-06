@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.26 2008/08/06 08:11:17 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.27 2008/08/06 08:11:44 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -70,16 +70,23 @@ Element* name(const Left& x, const Right& y) \
 ElemBool _true(true);
 ElemBool _false(false);
 
+Element*
+return_bool(bool x)
+{
+    Element* r = x ? &_true : &_false;
+
+    XLOG_ASSERT(r->refcount() > 1);
+
+    return r;
+}
+
 #define DEFINE_BINOP_BOOL(name, op) \
 template<class Unused, class Left, class Right> \
 Element* name(const Left& x, const Right& y) \
 { \
-    bool val   = x.val() op y.val(); \
-    Element* r = val ? &_true : &_false; \
+    bool val = x.val() op y.val(); \
     \
-    XLOG_ASSERT(r->refcount() > 1); \
-    \
-    return r; \
+    return return_bool(val); \
 }
 
 DEFINE_BINOP_BOOL(op_and, &&)
@@ -148,7 +155,8 @@ op_lt_net(const Left& x, const Right& y)
     bool result;
 
     result = (y.val().contains(x.val()) && (y.val() != x.val()));
-    return new Result(result);
+
+    return return_bool(result);
 }
 
 template<class Result, class Left, class Right>
@@ -158,7 +166,8 @@ op_gt_net(const Left& x, const Right& y)
     bool result;
 
     result = (x.val().contains(y.val()) && (x.val() != y.val()));
-    return new Result(result);
+
+    return return_bool(result);
 }
 
 template<class Result, class Left, class Right>
@@ -168,7 +177,8 @@ op_le_net(const Left& x, const Right& y)
     bool result;
 
     result = y.val().contains(x.val());
-    return new Result(result);
+
+    return return_bool(result);
 }
 
 template<class Result, class Left, class Right>
@@ -178,7 +188,8 @@ op_ge_net(const Left& x, const Right& y)
     bool result;
 
     result = x.val().contains(y.val());
-    return new Result(result);
+
+    return return_bool(result);
 }
 
 // 2 template parameters because U can be T or ElemSetAny<T>
@@ -329,6 +340,43 @@ aspath_regex(const ElemASPath& left, const ElemSetStr& right)
     }
 
     return new ElemBool(false);
+}
+
+template<class A>
+bool
+net_match(const ElemNet<A>& left, const ElemNet<A>& right)
+{
+    static Dispatcher d;
+    Element* r;
+
+    r = d.run(right.op(), left, right);
+
+    if (r == &_true)
+	return true;
+    else if (r == &_false)
+	return false;
+    else
+	abort();
+}
+
+template<class A>
+Element*
+net_set_match(const ElemNet<A>& left, const ElemSetAny<ElemNet<A> >& right)
+{
+    bool ret = false;
+
+    for (typename ElemSetAny<ElemNet<A> >::const_iterator i = right.begin();
+         i != right.end(); ++i) {
+
+	const ElemNet<A>& r = *i;
+
+	if (net_match(left, r)) {
+	    ret = true;
+	    break;
+	}
+    }
+
+    return return_bool(ret);
 }
 
 // register callbacks
@@ -515,7 +563,9 @@ do {                                                                    \
     ADD_RELOP_SPECIALIZED(ElemIPv4Net, net);
     ADD_RELOP2(ElemIPv4Net,ElemU32Range);
     ADD_SETBINOP(ElemSetIPv4Net, ElemIPv4Net);
-   
+    // Special case set operation to make use of modifiers
+    disp.add<ElemIPv4Net, ElemSetIPv4Net, operations::net_set_match>(OpLe());
+
     // IPV6
     ADD_EQOP(ElemIPv6);
     ADD_EQOP2(ElemIPv6,ElemIPv6Range);
@@ -529,4 +579,6 @@ do {                                                                    \
     ADD_RELOP_SPECIALIZED(ElemIPv6Net, net);
     ADD_RELOP2(ElemIPv6Net,ElemU32Range);
     ADD_SETBINOP(ElemSetIPv6Net, ElemIPv6Net);
+    // Special case set operation to make use of modifiers
+    disp.add<ElemIPv6Net, ElemSetIPv6Net, operations::net_set_match>(OpLe());
 }

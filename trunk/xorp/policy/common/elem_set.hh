@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.11 2008/07/23 05:11:26 pavlin Exp $
+// $XORP: xorp/policy/common/elem_set.hh,v 1.12 2008/08/06 08:11:29 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
@@ -23,6 +23,14 @@
 #include <string>
 #include <set>
 
+class ElemSet : public Element {
+public:
+    ElemSet(Hash hash) : Element(hash) {}
+    virtual ~ElemSet() {}
+
+    virtual void erase(const ElemSet&) = 0;
+};
+
 /**
  * @short A set of elements.
  *
@@ -30,7 +38,7 @@
  * will be lost, as elements will all be promoted to strings.
  */
 template <class T> 
-class ElemSetAny : public Element {
+class ElemSetAny : public ElemSet {
 public:
     typedef set<T> Set;
     typedef typename Set::iterator iterator;
@@ -172,6 +180,7 @@ public:
      * @param s elements to remove.
      */
     void erase(const ElemSetAny<T>& rhs);
+    void erase(const ElemSet& rhs);
 
     /**
      * Obtain iterator for set.
