@@ -1,0 +1,18 @@
+/* $XORP */
+
+test {
+    %command: "" %help: HELP;
+    %tag: HELP "Test policies";
+}
+
+test policy $(policy.policy-statement.*) <prefix> {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- $3 $4" %help: HELP;
+    %module: policy;
+    %tag: HELP "Test a routing policy";
+}
+
+test policy $(policy.policy-statement.*) <prefix> <route attributes> {
+    %command: "cli/tools/send_cli_processor_xrl -t policy -- $3 $4 $5" %help: HELP;
+    %module: policy;
+    %tag: HELP "Test a routing policy";
+}

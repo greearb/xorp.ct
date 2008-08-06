@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.15 2008/08/06 08:17:07 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.16 2008/08/06 08:23:25 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -244,7 +244,14 @@ public:
      */
     void set_proto_target(const string& protocol, const string& target);
 
+    string test_policy(const string& arg);
+    bool   test_policy(const string& policy, const string& prefix,
+		       const string& attributes, string& mods);
+    bool   test_policy(const string& policy, const RATTR& attrs, RATTR& mods);
+
 private:
+    void parse_attributes(const string& attr, RATTR& out);
+
     bool	    _running;
     uint32_t	    _commit_delay;
     ProtocolMap	    _pmap;

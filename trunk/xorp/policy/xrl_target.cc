@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.16 2008/07/23 05:11:22 pavlin Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.17 2008/08/06 08:23:25 abittau Exp $"
 
 #include "policy_module.h"
 
@@ -359,3 +359,31 @@ XrlPolicyTarget::finder_event_observer_0_1_xrl_target_death(
 
     return XrlCmdError::OKAY();
 }	
+
+XrlCmdError
+XrlPolicyTarget::cli_processor_0_1_process_command(
+				// Input values,
+				const string&   processor_name,
+				const string&   cli_term_name,
+				const uint32_t& cli_session_id,
+				const string&   command_name,
+				const string&   /* command_args */,
+				// Output values,
+				string&         ret_processor_name,
+				string&         ret_cli_term_name,
+				uint32_t&       ret_cli_session_id,
+				string&		ret_command_output)
+{
+    try {
+	ret_processor_name = processor_name;
+	ret_cli_term_name  = cli_term_name;
+	ret_cli_session_id = cli_session_id;
+
+	ret_command_output = _policy_target.test_policy(command_name);
+
+    } catch (const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}

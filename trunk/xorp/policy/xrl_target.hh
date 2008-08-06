@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/xrl_target.hh,v 1.13 2008/07/23 05:11:22 pavlin Exp $
+// $XORP: xorp/policy/xrl_target.hh,v 1.14 2008/08/06 08:23:25 abittau Exp $
 
 #ifndef __POLICY_XRL_TARGET_HH__
 #define __POLICY_XRL_TARGET_HH__
@@ -145,6 +145,19 @@ public:
         // Input values,
         const string&   target_class,
         const string&   target_instance);
+
+    XrlCmdError cli_processor_0_1_process_command(
+        // Input values,
+        const string&   processor_name,
+        const string&   cli_term_name,
+        const uint32_t& cli_session_id,
+        const string&   command_name,
+        const string&   command_args,
+        // Output values,
+        string&		ret_processor_name,
+        string&		ret_cli_term_name,
+        uint32_t&       ret_cli_session_id,
+        string& ret_command_output);
 
 private:
     PolicyTarget&   _policy_target;

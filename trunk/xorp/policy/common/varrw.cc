@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/varrw.cc,v 1.10 2008/07/23 05:11:27 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/varrw.cc,v 1.11 2008/08/06 08:07:15 abittau Exp $"
 
 #include "policy/policy_module.h"
 
@@ -90,4 +90,9 @@ void
 VarRW::enable_trace(bool on)
 {
     _do_trace = on;
+}
+
+void
+VarRW::sync()
+{
 }

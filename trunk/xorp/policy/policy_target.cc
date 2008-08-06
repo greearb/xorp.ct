@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.19 2008/08/06 08:17:06 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.20 2008/08/06 08:23:25 abittau Exp $"
 
 #include "policy_module.h"
 
@@ -200,4 +200,118 @@ void
 PolicyTarget::set_proto_target(const string& protocol, const string& target)
 {
     _pmap.set_xrl_target(protocol, target);
+}
+
+string
+PolicyTarget::test_policy(const string& args)
+{
+    string policy;
+    string prefix;
+    string attributes;
+
+    // We receive the following string:
+    // policyname prefix [route attributes]
+    // If present, route attributes are enclosed in quotes.
+
+    // parse policy
+    string::size_type i = args.find(' ', 0);
+    if (i == string::npos)
+	xorp_throw(PolicyException, "No policy specified");
+
+    policy = args.substr(0, i);
+
+    // parse prefix
+    i++;
+    string::size_type j = args.find(' ', i);
+    if (j == string::npos)
+	prefix = args.substr(i);
+    else {
+	prefix = args.substr(i, j - i);
+
+	j += 1;
+	if (args.find('"') != j)
+	    xorp_throw(PolicyException, "Enclose args in quotes");
+
+	string::size_type k = args.find_last_of('"');
+	if (j == k || k != (args.length() - 1))
+	    xorp_throw(PolicyException, "Missing last quote");
+
+	j++;
+	attributes = args.substr(j, k - j);
+    }
+
+    string route;
+    bool accepted = test_policy(policy, prefix, attributes, route);
+
+    ostringstream oss;
+
+    oss << "Policy decision: " << (accepted ? "accepted" : "rejected") << endl;
+    if (!route.empty())
+	oss << "Route modifications:" << endl
+	    << route;
+
+    return oss.str();
+}
+
+bool
+PolicyTarget::test_policy(const string& policy, const string& prefix,
+			  const string& attributes, string& mods)
+{
+    RATTR attrs;
+    RATTR mod;
+
+    // XXX lame IPv6 detection
+    if (prefix.find(':') != string::npos)
+	attrs["network6"] = prefix;
+    else
+	attrs["network4"] = prefix;
+
+    parse_attributes(attributes, attrs);
+
+    bool res = test_policy(policy, attrs, mod);
+
+    for (RATTR::iterator i = mod.begin(); i != mod.end(); ++i) {
+	mods += i->first;
+	mods += "\t";
+	mods += i->second;
+	mods += "\n";
+    }
+
+    return res;
+}
+
+bool
+PolicyTarget::test_policy(const string& policy, const RATTR& attrs, RATTR& mods)
+{
+    return _conf.test_policy(policy, attrs, mods);
+}
+
+void
+PolicyTarget::parse_attributes(const string& attr, RATTR& out)
+{
+    // format: --attributename=value
+    string::size_type i = 0;
+    string::size_type j = 0;
+
+    while ((j = attr.find("--", i)) != string::npos) {
+	j += 2;
+
+	// name
+	i = attr.find('=', j);
+	if (i == string::npos)
+	    xorp_throw(PolicyException, "Need a value in attribute list");
+
+	string name = attr.substr(j, i - j);
+
+	// value
+	string value;
+	i++;
+	j = attr.find(" --", i);
+	if (j == string::npos)
+	    value = attr.substr(i);
+	else
+	    value = attr.substr(i, j - i);
+
+	out[name] = value;
+    }
 }

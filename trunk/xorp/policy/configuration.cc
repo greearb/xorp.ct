@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.27 2008/08/06 08:25:49 abittau Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.28 2008/08/06 08:26:15 abittau Exp $"
 
 #include "libxorp/xorp.h"
 #include "policy_module.h"
 #include "configuration.hh"
 #include "visitor_dep.hh"
 #include "policy/common/policy_utils.hh"
+#include "visitor_test.hh"
 
 using namespace policy_utils;
 
@@ -568,6 +569,18 @@ Configuration::policy_modified(const string& policy)
     _modified_policies.insert(policy);
 
     _policies.policy_deps(policy, _modified_policies);
+}
+
+bool
+Configuration::test_policy(const string& policy, const RATTR& attr, RATTR& mods)
+{
+    PolicyStatement& ps = _policies.find(policy);
+
+    VisitorTest test(_sets, _policies, _varmap, attr, mods);
+
+    ps.accept(test);
+
+    return test.accepted();
 }
 
 IEMap::IEMap()

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/policy/Jamfile,v 1.4 2008/08/06 08:22:17 abittau Exp $
+# $XORP: xorp/policy/Jamfile,v 1.5 2008/08/06 08:24:10 abittau Exp $
 #
 
 SubDir TOP policy ;
@@ -15,9 +15,9 @@ Library libpolicy :
 	export_code_generator.cc filter_manager.cc parser.cc
 	policy_list.cc policy_map.cc policy_statement.cc
 	process_watch.cc protocol_map.cc semantic_varrw.cc
-	set_map.cc source_match_code_generator.cc term.cc
-	var_map.cc visitor_printer.cc visitor_semantic.cc visitor_dep.cc
-	xrl_target.cc
+	set_map.cc source_match_code_generator.cc term.cc test_varrw.cc
+	var_map.cc visitor_dep.cc visitor_printer.cc visitor_semantic.cc
+	visitor_test.cc xrl_target.cc
 	yacc.yy_policy_parser.cc
 	lex.yy_policy_parser.cc
 	;

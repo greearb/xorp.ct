@@ -51,9 +51,10 @@ am_libpolicy_la_OBJECTS = code.lo code_generator.lo code_list.lo \
 	configuration.lo export_code_generator.lo filter_manager.lo \
 	parser.lo policy_list.lo policy_map.lo policy_statement.lo \
 	process_watch.lo protocol_map.lo semantic_varrw.lo set_map.lo \
-	source_match_code_generator.lo term.lo var_map.lo \
-	visitor_printer.lo visitor_semantic.lo visitor_dep.lo \
-	xrl_target.lo yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
+	source_match_code_generator.lo term.lo test_varrw.lo \
+	var_map.lo visitor_dep.lo visitor_printer.lo \
+	visitor_semantic.lo visitor_test.lo xrl_target.lo \
+	yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
 libpolicy_la_OBJECTS = $(am_libpolicy_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -267,15 +268,17 @@ libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh \
 	policy_list.hh policy_map.hh policy_parser.hh \
 	policy_statement.hh process_watch.hh process_watch_base.hh \
 	protocol_map.hh pw_notifier.hh semantic_varrw.hh set_map.hh \
-	source_match_code_generator.hh term.hh var_map.hh visitor.hh \
-	visitor_printer.hh visitor_semantic.hh visitor_dep.hh \
-	xrl_target.hh code.cc code_generator.cc code_list.cc \
-	configuration.cc export_code_generator.cc filter_manager.cc \
-	parser.cc policy_list.cc policy_map.cc policy_statement.cc \
+	source_match_code_generator.hh term.hh test_varrw.hh \
+	var_map.hh visitor.hh visitor_dep.hh visitor_printer.hh \
+	visitor_semantic.hh visitor_test.hh xrl_target.hh code.cc \
+	code_generator.cc code_list.cc configuration.cc \
+	export_code_generator.cc filter_manager.cc parser.cc \
+	policy_list.cc policy_map.cc policy_statement.cc \
 	process_watch.cc protocol_map.cc semantic_varrw.cc set_map.cc \
-	source_match_code_generator.cc term.cc var_map.cc \
-	visitor_printer.cc visitor_semantic.cc visitor_dep.cc \
-	xrl_target.cc yacc.yy_policy_parser.h yacc.yy_policy_parser.cc \
+	source_match_code_generator.cc term.cc test_varrw.cc \
+	var_map.cc visitor_dep.cc visitor_printer.cc \
+	visitor_semantic.cc visitor_test.cc xrl_target.cc \
+	yacc.yy_policy_parser.h yacc.yy_policy_parser.cc \
 	lex.yy_policy_parser.cc
 
 ################################################################
@@ -380,10 +383,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/set_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/source_match_code_generator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/term.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/var_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor_dep.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor_printer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor_semantic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/visitor_test.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_policy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_target.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/yacc.yy_policy_parser.Plo@am__quote@
