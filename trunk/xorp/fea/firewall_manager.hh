@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/firewall_manager.hh,v 1.4 2008/04/28 15:56:28 pavlin Exp $
+// $XORP: xorp/fea/firewall_manager.hh,v 1.5 2008/07/23 05:10:08 pavlin Exp $
 
 #ifndef __FEA_FIREWALL_MANAGER_HH__
 #define __FEA_FIREWALL_MANAGER_HH__
@@ -302,6 +302,13 @@ public:
 			     bool&	more,
 			     string&	error_msg);
 
+    /**
+     * Delete browse state for a particular token.
+     *
+     * @param token the token for the state to delete.
+     */
+    void delete_browse_state(uint32_t token);
+
 private:
     /**
      * Update the firewall entries by pushing them into the underlying system.
@@ -352,13 +359,6 @@ private:
      * Generate a new token that is available.
      */
     void generate_token();
-
-    /**
-     * Delete browse state for a particular token.
-     *
-     * @param token the token for the state to delete.
-     */
-    void delete_browse_state(uint32_t token);
 
     FeaNode&				_fea_node;
     EventLoop&				_eventloop;
