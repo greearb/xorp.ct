@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acfirewall.m4,v 1.3 2008/04/26 00:59:40 pavlin Exp $
+dnl $XORP: xorp/config/acfirewall.m4,v 1.4 2008/08/07 00:42:43 pavlin Exp $
 dnl
 
 dnl
@@ -291,6 +291,7 @@ AC_TRY_COMPILE([
 ],
 [
     int mysockopt = IP_FW_ADD;
+    int opcode = O_IP4;
 ],
     [AC_DEFINE(HAVE_FIREWALL_IPFW2, 1,
 	       [Define to 1 if you have IPFW2 firewall support with atomic set])

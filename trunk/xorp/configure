@@ -39413,6 +39413,7 @@ main ()
 {
 
     int mysockopt = IP_FW_ADD;
+    int opcode = O_IP4;
 
   ;
   return 0;
