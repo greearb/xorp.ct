@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acfirewall.m4,v 1.2 2007/04/14 01:35:06 pavlin Exp $
+dnl $XORP: xorp/config/acfirewall.m4,v 1.3 2008/04/26 00:59:40 pavlin Exp $
 dnl
 
 dnl
@@ -14,7 +14,19 @@ dnl -----------------------------------------------
 
 AC_CHECK_HEADERS([string.h time.h unistd.h arpa/inet.h sys/param.h])
 AC_CHECK_HEADERS([sys/types.h sys/socket.h sys/errno.h sys/ioctl.h sys/time.h])
-AC_CHECK_HEADERS([netinet/in.h netinet/ip_compat.h])
+AC_CHECK_HEADERS([netinet/in.h])
+
+dnl XXX: Header files <netinet/ip_compat.h> might need <sys/types.h>
+dnl and <netinet/in.h>
+AC_CHECK_HEADERS([netinet/ip_compat.h], [], [],
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+])
 
 dnl XXX: Header files <net/if.h> might need <sys/types.h> and <sys/socket.h>
 AC_CHECK_HEADERS([net/if.h], [], [],
