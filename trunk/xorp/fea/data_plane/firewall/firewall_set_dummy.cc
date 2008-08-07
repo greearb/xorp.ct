@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_dummy.cc,v 1.3 2008/04/28 05:21:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_set_dummy.cc,v 1.4 2008/07/23 05:10:25 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -121,7 +121,6 @@ int
 FirewallSetDummy::set_table4(const list<FirewallEntry>& firewall_entry_list,
 			     string& error_msg)
 {
-    list<FirewallEntry>::const_iterator iter;
     list<FirewallEntry> empty_list;
 
     if (delete_all_entries4(error_msg) != XORP_OK)
@@ -145,7 +144,6 @@ int
 FirewallSetDummy::set_table6(const list<FirewallEntry>& firewall_entry_list,
 			     string& error_msg)
 {
-    list<FirewallEntry>::const_iterator iter;
     list<FirewallEntry> empty_list;
 
     if (delete_all_entries6(error_msg) != XORP_OK)
