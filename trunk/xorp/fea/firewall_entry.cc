@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/firewall_entry.cc,v 1.1 2008/04/26 00:59:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/firewall_entry.cc,v 1.2 2008/07/23 05:10:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -23,7 +23,7 @@
 
 static struct {
     FirewallEntry::Action	action;
-    const string		name;
+    string			name;
 } firewall_action_table[FirewallEntry::ACTION_MAX] = {
     { FirewallEntry::ACTION_ANY,	"any" },	// XXX: not used
     { FirewallEntry::ACTION_NONE,	"none" },
