@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timeval.cc,v 1.12 2008/01/04 03:16:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_timeval.cc,v 1.13 2008/07/23 05:10:56 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -180,6 +180,23 @@ test_timeval_operators()
 }
 
 static void
+test_timeval_type()
+{
+    TimeVal timeval_zero = TimeVal::ZERO();
+    TimeVal timeval_onesec = TimeVal(1, 0);
+    TimeVal timeval_oneusec = TimeVal(0, 1);
+    TimeVal timeval_max = TimeVal::MAXIMUM();
+
+    //
+    // Test TimeVal::is_zero()
+    //
+    verbose_assert(timeval_zero.is_zero() == true, "is_zero()");
+    verbose_assert(timeval_onesec.is_zero() == false, "is_zero()");
+    verbose_assert(timeval_oneusec.is_zero() == false, "is_zero()");
+    verbose_assert(timeval_max.is_zero() == false, "is_zero()");
+}
+
+static void
 test_timeval_random_uniform()
 {
     static const int TEST_INTERVAL = 30;
@@ -246,6 +263,7 @@ main(int argc, char * const argv[])
     try {
 	test_timeval_constants();
 	test_timeval_operators();
+	test_timeval_type();
 	test_timeval_random_uniform();
 	ret_value = failures() ? 1 : 0;
     } catch (...) {

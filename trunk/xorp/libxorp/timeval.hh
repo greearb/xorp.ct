@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.34 2008/01/04 03:16:44 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.35 2008/07/23 05:10:56 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -349,6 +349,13 @@ public:
      * by @ref d.
      */
     TimeVal operator/(const double& d) const;
+
+    /**
+     * Test if this time value is numerically zero.
+     *
+     * @return true if the address is numerically zero.
+     */
+    bool is_zero() const	{ return ((_sec == 0) && (_usec == 0)); }
 
 private:
     TimeVal(int i);		// Not implemented
