@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.16 2008/07/19 01:12:39 atanu Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.17 2008/07/23 02:24:55 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -306,6 +306,9 @@ parameters are set below the address node.
 now a directive, previously this would set the interface into lookback
 and advertise a host route. Since release 1.5 the default behaviour is
 to advertise the network not the host route.
+\item OSPFv2 supports a configuration option {\tt
+rfc1583-compatibility}, which changes the preference rules when
+choosing among multiple AS-external-LSAs advertising the same destination.
 \item OSPFv3 supports multiple addresses per interface/vif, therefore
 parameters are set below the vif node.
 \item OSPFv3 does not require any addresses to be configured in which
