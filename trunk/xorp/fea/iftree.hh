@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.66 2008/06/14 02:59:20 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.67 2008/07/23 05:10:10 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -425,8 +425,8 @@ public:
      *        and the item in the local tree is marked as "CREATED" or
      *        "CHANGED".
      *        unless it was marked earlier as "CREATED".
-     *        Also, if the item in the local tree is not "enabled", then
-     *        the state is still marked as not "enabled".
+     *        Also, if the item is disabled in the user config tree, it is
+     *        marked as "disabled" in the local tree.
      *
      * @param other the configuration tree to align state with.
      * @param user_config the user configuration tree to reference during
