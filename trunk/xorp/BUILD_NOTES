@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.104 2008/07/17 17:40:41 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.105 2008/07/24 02:00:34 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -388,6 +388,18 @@ gmake check
     - The code compiles, and the internal tests appear to succeed.
     - gcc-4.1 (GCC) 4.1.1-15 (Debian 4:4.1.1-15)
     - gcc-4.1 (GCC) 4.1.3 20070812 (prerelease) (Debian 4.1.2-15)
+
+  * Linux Debian-5.0 (lenny, unreleased) (2.6.25-2-686 and 2.6.26-1-686):
+    - You must install the following packages:
+      - gcc (e.g., gcc-4.3)
+      - g++ (e.g., g++-4.3)
+      - libssl-dev
+    - Optionally install the following packages:
+      - libpcap-dev
+        This package is needed for sending/receiving link layer data frames.
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (Debian 4.3.1-2) 4.3.1
+    - Tested on the following architectures: i386
 
   * Linux Gentoo 2006.1:
     - The code compiles, and the internal tests appear to succeed.
