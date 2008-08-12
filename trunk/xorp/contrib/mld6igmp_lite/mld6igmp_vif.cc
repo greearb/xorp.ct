@@ -18,7 +18,7 @@
 // Copyright (c) 2008 Huawei Technologies Co. Ltd
 //
 
-#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_vif.cc,v 1.3 2008/07/23 05:09:49 pavlin Exp $"
+#ident "$XORP: xorp/contrib/mld6igmp_lite/mld6igmp_vif.cc,v 1.4 2008/07/25 21:59:17 pavlin Exp $"
 
 
 //
@@ -1190,7 +1190,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     // Source address check.
     //
-    if (! src.is_unicast()) {
+    if (! (src.is_unicast() || (allow_src_zero_address && src.is_zero()))) {
 	//
 	// Source address must always be unicast.
 	// The kernel should have checked that, but just in case...
@@ -1214,7 +1214,8 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 		     src.af(), family());
     }
     // Source address must be directly connected
-    if (! mld6igmp_node().is_directly_connected(*this, src)) {
+    if (! (mld6igmp_node().is_directly_connected(*this, src)
+	   || (allow_src_zero_address && src.is_zero()))) {
 	error_msg = c_format("RX %s from %s to %s on vif %s: "
 			     "source must be directly connected",
 			     proto_message_type2ascii(message_type),

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.88 2008/01/04 03:16:52 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.89 2008/07/23 05:11:04 pavlin Exp $"
 
 
 //
@@ -1192,7 +1192,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     // Source address check.
     //
-    if (! src.is_unicast()) {
+    if (! (src.is_unicast() || (allow_src_zero_address && src.is_zero()))) {
 	//
 	// Source address must always be unicast.
 	// The kernel should have checked that, but just in case...
@@ -1216,7 +1216,8 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 		     src.af(), family());
     }
     // Source address must be directly connected
-    if (! mld6igmp_node().is_directly_connected(*this, src)) {
+    if (! (mld6igmp_node().is_directly_connected(*this, src)
+	   || (allow_src_zero_address && src.is_zero()))) {
 	error_msg = c_format("RX %s from %s to %s on vif %s: "
 			     "source must be directly connected",
 			     proto_message_type2ascii(message_type),
