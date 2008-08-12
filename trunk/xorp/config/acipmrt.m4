@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.10 2007/04/16 18:55:14 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.11 2007/04/17 01:10:50 pavlin Exp $
 dnl
 
 dnl
@@ -170,8 +170,8 @@ dnl -------------------------------------------------
 dnl Check for typical Linux multicast header files
 dnl -------------------------------------------------
 
-dnl XXX: Header file <linux/mroute.h> might need <sys/socket.h> and
-dnl and <linux/types.h>
+dnl XXX: Header file <linux/mroute.h> might need <sys/socket.h>
+dnl <linux/types.h> and <netinet/in.h>
 AC_CHECK_HEADERS([linux/types.h])
 AC_CHECK_HEADERS([linux/mroute.h], [], [],
 [
@@ -181,11 +181,14 @@ AC_CHECK_HEADERS([linux/mroute.h], [], [],
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 ])
 
 if test "${ipv6}" = "yes" ; then
-    dnl XXX: Header file <linux/mroute6.h> might need <sys/socket.h> and
-    dnl and <linux/types.h>
+    dnl XXX: Header file <linux/mroute6.h> might need <sys/socket.h>
+    dnl <linux/types.h> and <netinet/in.h>
     AC_CHECK_HEADERS([linux/mroute6.h], [], [],
 [
 #ifdef HAVE_SYS_SOCKET_H
@@ -193,6 +196,9 @@ if test "${ipv6}" = "yes" ; then
 #endif
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 ])
 fi

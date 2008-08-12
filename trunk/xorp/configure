@@ -36645,6 +36645,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 
 
 #include <$ac_header>
@@ -36711,6 +36714,9 @@ cat >>conftest.$ac_ext <<_ACEOF
 #endif
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
 #endif
 
 
