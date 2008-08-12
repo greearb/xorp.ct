@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.63 2008/07/23 05:10:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.64 2008/08/12 17:12:50 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1214,27 +1214,9 @@ MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 #else
 	int ret_value = -1;
 
-	//
-	// XXX: In case of Linux, MRT_DEL_VIF expects an argument
-	// of type "struct vifctl", while other systems expect
-	// an argument of type "vifi_t".
-	//
-	// TODO: note that currently (2004/06/09) Linux doesn't support
-	// IPv6 multicast routing, hence the above is a guess based on
-	// the difference in case of IPv4.
-	//
-#ifdef HOST_OS_LINUX
-	struct mif6ctl mc;
-	memset(&mc, 0, sizeof(mc));
-	mc.mif6c_mifi = mfea_vif->vif_index();
-	mc.mif6c_pifi = mfea_vif->pif_index();
-	ret_value = setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DEL_VIF,
-			       (void *)&mc, sizeof(mc));
-#else
 	mifi_t vifi = mfea_vif->vif_index();
 	ret_value = setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_DEL_MIF,
 			       (void *)&vifi, sizeof(vifi));
-#endif
 	if (ret_value < 0) {
 	    XLOG_ERROR("setsockopt(MRT6_DEL_MIF, vif %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
