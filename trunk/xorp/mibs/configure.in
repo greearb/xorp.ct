@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/mibs/configure.in,v 1.31 2008/07/21 14:14:19 bms Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.32 2008/07/23 15:20:18 bms Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -13,7 +13,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.31 2008/07/21 14:14:19 bms Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.32 2008/07/23 15:20:18 bms Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -251,6 +251,10 @@ if test "${net_snmp_found}" = "true";  then
     )
     if test "${ac_cv_net_snmp_usable}" != "yes" ; then
 	AC_MSG_WARN(net-snmp version too old)
+    fi
+    if test "${ac_cv_net_snmp_usable}" = "yes" ; then
+        NETSNMPLIBS=`${net_snmp_config} --agent-libs`
+        LIBS="${LIBS} $NETSNMPLIBS"
     fi
     if test "${ac_cv_net_snmp_broken_inline}" = "yes" ; then
 	AC_MSG_WARN(net-snmp version has broken inlining defines)
