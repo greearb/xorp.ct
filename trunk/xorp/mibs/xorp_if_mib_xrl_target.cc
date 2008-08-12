@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/xorp_if_mib_xrl_target.cc,v 1.10 2008/01/04 03:16:50 pavlin Exp $"
+#ident "$XORP: xorp/mibs/xorp_if_mib_xrl_target.cc,v 1.11 2008/07/23 05:11:02 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -73,7 +73,7 @@ XrlCmdError XrlXorpIfMibTarget::xorp_if_mib_0_1_load_mib(
     strncpy(mibmod->name, mod_name.c_str(), MAXNAME);
     mibmod->name[MAXNAME] = '\0';
     strncpy(mibmod->path, abs_path.c_str(), MAXPATH);
-    mibmod->name[MAXPATH] = '\0';
+    mibmod->path[MAXPATH] = '\0';
  
     dlmod_load_module(mibmod);
 
