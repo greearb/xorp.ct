@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.18 2008/01/04 03:16:54 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.19 2008/07/23 05:11:07 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -84,10 +84,20 @@
 #  include <linux/types.h>
 #  ifndef _LINUX_IN_H
 #    define _LINUX_IN_H		/*  XXX: a hack to exclude <linux/in.h> */
+#    define EXCLUDE_LINUX_IN_H
+#  endif
+#  ifndef __LINUX_PIM_H
+#    define __LINUX_PIM_H	/*  XXX: a hack to exclude <linux/pim.h> */
+#    define EXCLUDE_LINUX_PIM_H
+#  endif
 #    include <linux/mroute.h>
+#  ifdef EXCLUDE_LINUX_IN_H
 #    undef _LINUX_IN_H
-#  else
-#    include <linux/mroute.h>
+#    undef EXCLUDE_LINUX_IN_H
+#  endif
+#  ifdef EXCLUDE_LINUX_PIM_H
+#    undef __LINUX_PIM_H
+#    undef EXCLUDE_LINUX_PIM_H
 #  endif
 /*
  * XXX: Conditionally add missing definitions from the <linux/mroute.h>
