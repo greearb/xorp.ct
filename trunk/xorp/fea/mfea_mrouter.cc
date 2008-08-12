@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.62 2008/01/05 21:29:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.63 2008/07/23 05:10:11 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -98,10 +98,6 @@
 //
 // Local constants definitions
 //
-#define IO_BUF_SIZE		(64*1024)  // I/O buffer(s) size
-#define CMSG_BUF_SIZE		(10*1024)  // 'rcvcmsgbuf' and 'sndcmsgbuf'
-#define SO_RCV_BUF_SIZE_MIN	(48*1024)  // Min. socket buffer size
-#define SO_RCV_BUF_SIZE_MAX	(256*1024) // Desired socket buffer size
 
 //
 // Local structures/classes, typedefs and macros
@@ -134,55 +130,6 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
 {
     string error_msg;
 
-    // Allocate the buffers
-    _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
-    _sndbuf0 = new uint8_t[IO_BUF_SIZE];
-    _rcvbuf1 = new uint8_t[IO_BUF_SIZE];
-    _sndbuf1 = new uint8_t[IO_BUF_SIZE];
-    _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
-    _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
-
-    // Scatter/gatter array initialization
-    _rcviov[0].iov_base		= (caddr_t)_rcvbuf0;
-    _rcviov[1].iov_base		= (caddr_t)_rcvbuf1;
-    _rcviov[0].iov_len		= IO_BUF_SIZE;
-    _rcviov[1].iov_len		= IO_BUF_SIZE;
-    _sndiov[0].iov_base		= (caddr_t)_sndbuf0;
-    _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
-    _sndiov[0].iov_len		= 0;
-    _sndiov[1].iov_len		= 0;
-
-    // recvmsg() and sendmsg() related initialization
-#ifndef HOST_OS_WINDOWS
-    switch (family()) {
-    case AF_INET:
-	_rcvmh.msg_name		= (caddr_t)&_from4;
-	_sndmh.msg_name		= (caddr_t)&_to4;
-	_rcvmh.msg_namelen	= sizeof(_from4);
-	_sndmh.msg_namelen	= sizeof(_to4);
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	_rcvmh.msg_name		= (caddr_t)&_from6;
-	_sndmh.msg_name		= (caddr_t)&_to6;
-	_rcvmh.msg_namelen	= sizeof(_from6);
-	_sndmh.msg_namelen	= sizeof(_to6);
-	break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-    _rcvmh.msg_iov		= _rcviov;
-    _sndmh.msg_iov		= _sndiov;
-    _rcvmh.msg_iovlen		= 1;
-    _sndmh.msg_iovlen		= 1;
-    _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
-    _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
-    _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
-    _sndmh.msg_controllen	= 0;
-#endif // ! HOST_OS_WINDOWS
-
     //
     // Get the old state from the underlying system
     //
@@ -209,14 +156,6 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
 MfeaMrouter::~MfeaMrouter()
 {
     stop();
-    
-    // Free the buffers
-    delete[] _rcvbuf0;
-    delete[] _sndbuf0;
-    delete[] _rcvbuf1;
-    delete[] _sndbuf1;
-    delete[] _rcvcmsgbuf;
-    delete[] _sndcmsgbuf;
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.23 2008/01/05 21:29:03 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.24 2008/07/23 05:10:11 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -408,26 +408,6 @@ private:
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
     XorpFd	  _mrouter_socket; // The socket for multicast routing access
-    uint8_t*	  _rcvbuf0;	// Data buffer0 for receiving
-    uint8_t*	  _sndbuf0;	// Data buffer0 for sending
-    uint8_t*	  _rcvbuf1;	// Data buffer1 for receiving
-    uint8_t*	  _sndbuf1;	// Data buffer1 for sending
-    uint8_t*	  _rcvcmsgbuf;	// Control recv info (IPv6 only)
-    uint8_t*	  _sndcmsgbuf;	// Control send info (IPv6 only)
-
-    struct iovec	_rcviov[2]; // The rcvmh scatter/gatter array
-    struct iovec	_sndiov[2]; // The sndmh scatter/gatter array
-
-#ifndef HOST_OS_WINDOWS
-    struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()
-    struct msghdr	_sndmh;	// The msghdr structure used by sendmsg()
-    struct sockaddr_in  _from4;	// The source addr of recvmsg() msg (IPv4)
-    struct sockaddr_in  _to4;	// The dest.  addr of sendmsg() msg (IPv4)
-#ifdef HAVE_IPV6
-    struct sockaddr_in6 _from6;	// The source addr of recvmsg() msg (IPv6)
-    struct sockaddr_in6 _to6;	// The dest.  addr of sendmsg() msg (IPv6)
-#endif
-#endif // ! HOST_OS_WINDOWS
 
     //
     // Flags about various support by the advanced kernel multicast API:
