@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.210 2008/07/24 01:59:59 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.211 2008/07/24 02:01:50 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -10,6 +10,8 @@ Release 1.6-WIP (2008/??/??)
 ============================
   ALL:
     - XORP now builds on Linux CentOS 5.2.
+    - XORP now builds on Linux systems with kernel 2.6.26 which is the
+      first one to support IPv6 multicast routing.
 
   CONFIGURATION:
     - 
@@ -57,10 +59,12 @@ Release 1.6-WIP (2008/??/??)
     - 
 
   MLD/IGMP:
-    - 
+    - Bug fix when checking the source address of IGMP packet if the
+      source address is allowed to be 0.0.0.0.
 
   MLD/IGMP-Lite:
-    - 
+    - Bug fix when checking the source address of IGMP packet if the
+      source address is allowed to be 0.0.0.0.
 
   PIM-SM:
     - 
