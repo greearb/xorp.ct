@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.21 2008/07/19 00:52:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.22 2008/07/23 05:10:32 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -2418,6 +2418,7 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 	dst_address.copy_out(_to6);
 	system_adjust_sockaddr_in6_send(_to6, vifp->pif_index());
 	_sndmh.msg_namelen  = sizeof(_to6);
+	// XXX: _sndmh.msg_control and _sndmh.msg_controllen were setup earlier
 	break;
 #endif // HAVE_IPV6
     default:
