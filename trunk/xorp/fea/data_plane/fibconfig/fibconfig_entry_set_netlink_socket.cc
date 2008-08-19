@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.18 2008/05/08 22:46:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_netlink_socket.cc,v 1.19 2008/07/23 05:10:19 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -272,7 +272,7 @@ FibConfigEntrySetNetlinkSocket::add_entry(const FteX& fte)
 	    return (XORP_ERROR);
 	}
 	if_index = vifp->pif_index();
-	if (if_index != NULL)
+	if (if_index != 0)
 	    break;
 
 	XLOG_FATAL("Could not find interface index for interface %s vif %s",
