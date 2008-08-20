@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.28 2008/01/04 03:16:58 pavlin Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.29 2008/07/23 05:11:10 pavlin Exp $
 
 import getopt
 import sys
@@ -41,6 +41,7 @@ TESTS=[
     ['r11V3', True, 'v3'],
     ['r12V3', True, 'v3'],
     ['r13V3', True, 'v3'],
+    ['r14V3', True, 'v3'],
     ]
 
 def start_routing_interactive(verbose, protocol):
@@ -1259,6 +1260,108 @@ verify_routing_entry 3ffe:4725:c404::/64 fe80::8:800:200c:4250 4 false false
         return False
 
     return True
+
+# http://bugzilla.xorp.org/bugzilla/show_bug.cgi?id=770
+
+def r14V3(verbose, protocol):
+    """
+    If two or more routers AS boundary or area border routers had the
+    same link-local address then only one router would be installed in
+    the routing table. If the router that did not get its routes
+    installed was an AS boundary router then all AS-External-LSAs that it
+    introduced would not be installed in the routing table.
+    """
+
+    # RT1 is this router.
+    # RT2 is adjacent to RT1
+    # RTC is an AS boundary router that generates an AS-External-LSA
+
+    # external IPv6 connection
+    # |
+    # |
+    # | RTC                  RT2                     RT1
+    # Cisco --------------- XORP-1.5 -------------- XORP-1.5
+    # 195.113.144.2       147.229.255.254          147.229.9.41
+    #                  fe80::207:e9ff:fe1a:b2f<->fe80::230:48ff:fe87:d512
+
+    # Network           IPv6 prefix
+    # -----------------------------------
+    # External address	2000::/3
+
+    # Router	Interface   Interface ID   link-local address
+    # -------------------------------------------------------
+    # RT1	to RT2	    1		   fe80::230:48ff:fe87:d512
+    # RT2	to RT1	    2		   fe80::207:e9ff:fe1a:b2f
+    # RT2       to RTC      1              fe80:0001::1
+    # RTC	to RT2	    1		   fe80:0001::2
+
+    fp = start_routing_interactive(verbose, protocol)
+
+    RT2_ID = "147.229.255.254"
+#    RT2_ID = "247.229.255.254"
+    
+#    RTC_LINK_LOCAL= "fe80:0001::2"
+    RTC_LINK_LOCAL= "fe80::207:e9ff:fe1a:b2f"
+
+    RT1 = "RouterLsa V6-bit R-bit lsid 42.0.0.1 adv 147.229.9.41 \
+    p2p iid 1 nid 2 nrid %s metric 1 \
+    " % RT2_ID
+    
+    RT1_LINK = "LinkLsa lsid 0.0.0.1 adv 147.229.9.41 \
+    link-local-address fe80::230:48ff:fe87:d512 \
+    "
+
+    RT2 = "RouterLsa bit-E V6-bit R-bit lsid 42.0.0.1 adv %s \
+    p2p iid 1 nid 1 nrid 195.113.144.2 metric 1 \
+    p2p iid 2 nid 1 nrid 147.229.9.41 metric 1 \
+    " % RT2_ID
+
+    RT2_LINK1 = "LinkLsa lsid 0.0.0.1 adv %s \
+    link-local-address fe80:0001::2 \
+    " % RT2_ID
+
+    RT2_LINK2 = "LinkLsa lsid 0.0.0.2 adv %s \
+    link-local-address fe80::207:e9ff:fe1a:b2f \
+    " % RT2_ID
+
+    RTC = "RouterLsa bit-E V6-bit R-bit E-bit lsid 42.0.0.1 adv 195.113.144.2 \
+    p2p iid 1 nid 1 nrid %s metric 1 \
+    " % RT2_ID
+
+    RTC_LINK = "LinkLsa lsid 0.0.0.1 adv 195.113.144.2 \
+    link-local-address %s \
+    " % RTC_LINK_LOCAL
+
+    RTC_AS_EXTERNAL = "ASExternalLsa lsid 42.0.0.2 adv 195.113.144.2 \
+    metric 1 \
+    IPv6Prefix 2000::/3 \
+    "
+
+    command = """
+set_router_id  147.229.9.41  
+create 0.0.0.0 normal
+select 0.0.0.0
+replace %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+add %s
+compute 0.0.0.0
+verify_routing_table_size 1
+verify_routing_entry 2000::/3  fe80::207:e9ff:fe1a:b2f 3 false false
+""" % (RT1,RT1_LINK,
+       RT2,RT2_LINK1,RT2_LINK2,
+       RTC,RTC_LINK,RTC_AS_EXTERNAL)
+
+    print >>fp, command
+
+    if not fp.close():
+        return True
+    else:
+        return False
 
 def main():
     def usage():

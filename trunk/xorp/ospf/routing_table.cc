@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.67 2008/01/04 03:16:57 pavlin Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.68 2008/07/23 05:11:09 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -99,20 +99,27 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     XLOG_ASSERT(rt.get_directly_connected() || rt.get_nexthop() != A::ZERO());
     bool status = true;
 
+    // This router entry needs to be placed in the table.
+    // In the OSPFv2 IPv4 case the {router ID}/32 is also placed in
+    // the table as it has to be unique and makes for easy lookup.
+    // In the OSPFv3 case lookups of a router will be done by router
+    // ID only, so don't make an entry by net, plus there is no way of
+    // guaranteeing a unique net as the net will be a link-local address.
     if (rt.get_destination_type() == OspfTypes::Router) {
 	status = _adv.add_entry(area, rt.get_router_id(), rt);
-// 	switch(_ospf.get_version()) {
-// 	case OspfTypes::V2:
-// 	    break;
-// 	case OspfTypes::V3:
+	switch(_ospf.get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
 // 	    XLOG_ASSERT(!net.is_valid());
-// 	    if (net.is_valid()) {
-// 		XLOG_WARNING("Net should be zero %s", cstring(net));
-// 		status = false;
-// 	    }
+//  	    if (net.is_valid()) {
+//  		XLOG_WARNING("Net should be zero %s", cstring(net));
+//  		status = false;
+//  	    }
 // 	    return status;
-// 	    break;
-// 	}
+ 	    return true;
+	    break;
+	}
     }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
@@ -798,6 +805,9 @@ Adv<A>::lookup_entry(OspfTypes::AreaID area, uint32_t adv,
     if (i->second.end() == j)
 	return false;
     rt = j->second;
+
+    debug_msg("Found area %s adv %s\n", pr_id(area).c_str(),
+	   pr_id(adv).c_str());
 
     return true;
 }
