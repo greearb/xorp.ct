@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/ospf/test_routing1.py,v 1.29 2008/07/23 05:11:10 pavlin Exp $
+# $XORP: xorp/ospf/test_routing1.py,v 1.30 2008/08/20 01:34:03 atanu Exp $
 
 import getopt
 import sys
@@ -1300,8 +1300,7 @@ def r14V3(verbose, protocol):
     RT2_ID = "147.229.255.254"
 #    RT2_ID = "247.229.255.254"
     
-#    RTC_LINK_LOCAL= "fe80:0001::2"
-    RTC_LINK_LOCAL= "fe80::207:e9ff:fe1a:b2f"
+    RTC_LINK_LOCAL= "fe80:0001::2"
 
     RT1 = "RouterLsa V6-bit R-bit lsid 42.0.0.1 adv 147.229.9.41 \
     p2p iid 1 nid 2 nrid %s metric 1 \
