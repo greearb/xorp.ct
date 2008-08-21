@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.296 2008/03/19 22:42:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.297 2008/07/23 05:11:07 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4442,6 +4442,8 @@ AreaRouter<A>::routing_table_add_entry(RoutingTable<A>& routing_table,
     // misconfiguration or races a Network-LSA and a stub link in
     // a Router-LSA can point to the same network. Therefore it is
     // necessary to check that a route is not already in the table.
+    debug_msg("net %s\n%s\n", cstring(net), cstring(route_entry));
+
     RouteEntry<A> current_route_entry;
     if (routing_table.lookup_entry(_area, net, current_route_entry)) {
 	if (current_route_entry.get_cost() > route_entry.get_cost()) {
