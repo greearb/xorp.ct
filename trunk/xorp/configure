@@ -36642,11 +36642,19 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
+/*
+ * XXX: A hack to exclude <linux/in.h> that might be included by
+ * <linux/mroute.h>, because <linux/in.h> will conflict with <netinet/in.h>
+ * that was included earlier.
+ */
+#ifndef _LINUX_IN_H
+#define _LINUX_IN_H
 #endif
 
 
@@ -36712,11 +36720,11 @@ cat >>conftest.$ac_ext <<_ACEOF
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_LINUX_TYPES_H
-#include <linux/types.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 
 

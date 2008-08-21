@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.11 2007/04/17 01:10:50 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.12 2008/08/12 09:03:03 pavlin Exp $
 dnl
 
 dnl
@@ -171,34 +171,42 @@ dnl Check for typical Linux multicast header files
 dnl -------------------------------------------------
 
 dnl XXX: Header file <linux/mroute.h> might need <sys/socket.h>
-dnl <linux/types.h> and <netinet/in.h>
+dnl <netinet/in.h> and <linux/types.h>
 AC_CHECK_HEADERS([linux/types.h])
 AC_CHECK_HEADERS([linux/mroute.h], [], [],
 [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
 #ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
+/*
+ * XXX: A hack to exclude <linux/in.h> that might be included by
+ * <linux/mroute.h>, because <linux/in.h> will conflict with <netinet/in.h>
+ * that was included earlier.
+ */
+#ifndef _LINUX_IN_H
+#define _LINUX_IN_H
 #endif
 ])
 
 if test "${ipv6}" = "yes" ; then
     dnl XXX: Header file <linux/mroute6.h> might need <sys/socket.h>
-    dnl <linux/types.h> and <netinet/in.h>
+    dnl <netinet/in.h> and <linux/types.h> 
     AC_CHECK_HEADERS([linux/mroute6.h], [], [],
 [
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef HAVE_LINUX_TYPES_H
-#include <linux/types.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 ])
 fi
