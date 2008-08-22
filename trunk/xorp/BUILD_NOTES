@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.105 2008/07/24 02:00:34 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.106 2008/08/12 22:14:06 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -470,6 +470,18 @@ gmake check
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.2.3 (Ubuntu 4.2.3-2ubuntu7)
     - Tested on the following architectures: i386
+
+  * Linux openSUSE 11.0 (2.6.25.11-0.1-default):
+    - You must install the following packages:
+      - gcc
+      - g++
+      - libopenssl-devel
+    - Optionally install the following packages:
+      - libpcap-devel
+        This package is needed for sending/receiving link layer data frames.
+    - The code compiles, and the internal tests appear to succeed, except
+      test fea/test_fea_rawlink.sh (see XORP Bugzilla entry #771).
+    - gcc (SUSE Linux) 4.3.1 20080507 (prerelease) [gcc-4_3-branch revision 135036]
 
   * There is a known problem with building XORP on Linux with gcc-4.0.x
     and optimization enabled. It is a bug in gcc, see XORP Bugzilla #435
