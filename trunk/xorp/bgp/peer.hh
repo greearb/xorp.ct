@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.49 2008/01/04 03:15:21 pavlin Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.50 2008/07/23 05:09:34 pavlin Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -263,6 +263,7 @@ private:
     friend class BGPPeerList;
 
     void connect_to_peer(SocketClient::ConnectCallback cb) {
+	XLOG_ASSERT(_SocketClient);
 	_SocketClient->connect(cb);
     }
     void connect_to_peer_complete(bool success) {
