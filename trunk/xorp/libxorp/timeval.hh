@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.35 2008/07/23 05:10:56 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.36 2008/08/07 00:30:50 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -37,6 +37,7 @@
 class TimeVal {
 public:
     static const int32_t ONE_MILLION = 1000000;
+    static const int32_t ONE_THOUSAND = 1000;
 #ifdef HOST_OS_WINDOWS
     /*
      * The difference between the beginning of the Windows epoch
