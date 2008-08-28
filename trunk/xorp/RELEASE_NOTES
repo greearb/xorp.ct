@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.213 2008/08/12 22:14:06 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.214 2008/08/22 18:08:28 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -33,7 +33,8 @@ Release 1.6-WIP (2008/??/??)
     - 
 
   XORPSH:
-    - 
+    - Bug fix in the error messages when a top-level CLI command is
+      executed with incorrect extra arguments.
 
   POLICY:
     - 
