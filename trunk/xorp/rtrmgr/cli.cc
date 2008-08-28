@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.139 2008/01/04 03:17:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.140 2008/07/23 05:11:40 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -671,6 +671,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0, string& error_msg)
 				     error_msg);
 	if (exit_com == NULL)
 	    return (XORP_ERROR);
+	exit_com->set_global_name(token_line2vector("exit"));
 	exit_com->set_can_pipe(false);
 
 	// Quit Command
@@ -681,6 +682,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0, string& error_msg)
 				     error_msg);
 	if (quit_com == NULL)
 	    return (XORP_ERROR);
+	quit_com->set_global_name(token_line2vector("quit"));
 	quit_com->set_can_pipe(false);
     }
 
@@ -903,6 +905,7 @@ RouterCLI::add_static_configure_mode_commands(string& error_msg)
 			     error_msg);
     if (com1 == NULL)
 	return (XORP_ERROR);
+    com1->set_global_name(token_line2vector("commit"));
     com1->set_can_pipe(false);
 
     // Create command
@@ -910,6 +913,7 @@ RouterCLI::add_static_configure_mode_commands(string& error_msg)
 				     error_msg);
     if (_create_node == NULL)
 	return (XORP_ERROR);
+    _create_node->set_global_name(token_line2vector("create"));
     _create_node->set_can_pipe(false);
 
     // Delete command
@@ -917,6 +921,7 @@ RouterCLI::add_static_configure_mode_commands(string& error_msg)
 				     error_msg);
     if (_delete_node == NULL)
 	return (XORP_ERROR);
+    _delete_node->set_global_name(token_line2vector("delete"));
     _delete_node->set_can_pipe(false);
 
     // Edit command
@@ -985,6 +990,7 @@ RouterCLI::add_static_configure_mode_commands(string& error_msg)
     _run_node = com0->add_command("run", get_help_c("run"), false, error_msg);
     if (_run_node == NULL)
 	return (XORP_ERROR);
+    _run_node->set_global_name(token_line2vector("run"));
     _run_node->set_can_pipe(false);
     if (add_op_mode_commands(_run_node, error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -1000,6 +1006,7 @@ RouterCLI::add_static_configure_mode_commands(string& error_msg)
     _set_node = com0->add_command("set", get_help_c("set"), false, error_msg);
     if (_set_node == NULL)
 	return (XORP_ERROR);
+    _set_node->set_global_name(token_line2vector("set"));
     _set_node->set_can_pipe(false);
 
     // Show Command
@@ -1008,6 +1015,7 @@ RouterCLI::add_static_configure_mode_commands(string& error_msg)
 				   error_msg);
     if (_show_node == NULL)
 	return (XORP_ERROR);
+    _show_node->set_global_name(token_line2vector("show"));
     _show_node->set_can_pipe(true);
     com1 = _show_node->add_command("-all", get_help_c("show -all"), false,
 				   callback(this, &RouterCLI::show_func),
