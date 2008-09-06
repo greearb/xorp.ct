@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.22 2008/07/23 05:10:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.23 2008/08/12 18:43:28 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -1790,16 +1790,22 @@ IoIpSocket::send_packet(const string& if_name,
 			string& error_msg)
 {
     size_t	ip_hdr_len = 0;
+    int		ctllen = 0;
     int		int_val;
     int		ret_value = XORP_OK;
     const IfTreeInterface* ifp = NULL;
     const IfTreeVif* vifp = NULL;
+    struct cmsghdr* cmsgp;
     void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
     UNUSED(cmsg_data);
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
+
+    // Initialize state that might be modified later
+    _sndmh.msg_control = (caddr_t)_sndcmsgbuf;
+    _sndmh.msg_controllen = 0;
 
     ifp = iftree().find_interface(if_name);
     if (ifp == NULL) {
@@ -2032,6 +2038,53 @@ IoIpSocket::send_packet(const string& if_name,
 	}
 
 	//
+	// Use raw IP header
+	//
+
+	//
+	// First, estimate total length of ancillary data
+	//
+
+	// Space for IP_PKTINFO
+#ifdef IP_PKTINFO
+	ctllen += CMSG_SPACE(sizeof(struct in_pktinfo));
+#endif
+
+	//
+	// Now setup the ancillary data
+	//
+	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);		// XXX
+	_sndmh.msg_controllen = ctllen;
+	cmsgp = CMSG_FIRSTHDR(&_sndmh);
+
+#ifdef IP_PKTINFO
+	// XXX: Linux
+	{
+	    //
+	    // XXX: Linux ignores the source address in IP header for the
+	    // routing table lookup when the packet is sent with sendmsg(2).
+	    // The in_pktinfo logic below makes sure the kernel considers
+	    // the source address for the routing table lookup
+	    // (e.g., selecting the proper forwarding table when the system
+	    // is configured to use multiple forwarding tables), and for
+	    // setting the IP source route options.
+	    // See ip(7) for description of the usage of IP_PKTINFO
+	    // and struct in_pktinfo.
+	    //
+	    struct in_pktinfo *sndpktinfo;
+
+	    // Add the IP_PKTINFO ancillary data
+	    cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in_pktinfo));
+	    cmsgp->cmsg_level = SOL_IP;
+	    cmsgp->cmsg_type  = IP_PKTINFO;
+	    cmsg_data = CMSG_DATA(cmsgp);
+	    sndpktinfo = reinterpret_cast<struct in_pktinfo *>(cmsg_data);
+	    memset(sndpktinfo, 0, sizeof(*sndpktinfo));
+	    src_address.copy_out(sndpktinfo->ipi_spec_dst);
+	}
+#endif // IP_PKTINFO
+
+	//
 	// Set the IPv4 header
 	//
 	IpHeader4Writer ip4(_sndbuf);
@@ -2105,11 +2158,11 @@ IoIpSocket::send_packet(const string& if_name,
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	int ctllen = 0;
 	int hbhlen = 0;
-	struct cmsghdr *cmsgp;
 	struct in6_pktinfo *sndpktinfo;
-	
+
+	UNUSED(hbhlen);			// XXX: might be unused for older OSs
+
 	//
 	// XXX: unlikely IPv4, in IPv6 the 'header' is specified as
 	// ancillary data.
@@ -2118,11 +2171,12 @@ IoIpSocket::send_packet(const string& if_name,
 	//
 	// First, estimate total length of ancillary data
 	//
+
 	// Space for IPV6_PKTINFO
-	ctllen = CMSG_SPACE(sizeof(struct in6_pktinfo));
-	
+	ctllen += CMSG_SPACE(sizeof(struct in6_pktinfo));
+
+	// Space for Router Alert option
 	if (ip_router_alert) {
-	    // Space for Router Alert option
 #ifdef HAVE_RFC3542
 	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1) {
 		error_msg = c_format("inet6_opt_init(NULL) failed");
@@ -2148,15 +2202,15 @@ IoIpSocket::send_packet(const string& if_name,
 	    //
 	    hbhlen = inet6_option_space(sizeof(ra_opt6));
 	    ctllen += hbhlen;
-#else
-	    UNUSED(hbhlen);
 #endif
 #endif // ! HAVE_RFC3542
 	}
+
 	// Space for IPV6_TCLASS
 #ifdef IPV6_TCLASS 
 	ctllen += CMSG_SPACE(sizeof(int));
 #endif
+
 	// Space for IPV6_HOPLIMIT
 	ctllen += CMSG_SPACE(sizeof(int));
 
@@ -2174,12 +2228,11 @@ IoIpSocket::send_packet(const string& if_name,
 	    }
 	    ctllen += CMSG_SPACE(ext_headers_payload[i].size());
 	}
-
-	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);   // XXX
 	
 	//
 	// Now setup the ancillary data
 	//
+	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);		// XXX
 	_sndmh.msg_controllen = ctllen;
 	cmsgp = CMSG_FIRSTHDR(&_sndmh);
 	
@@ -2406,19 +2459,16 @@ IoIpSocket::proto_socket_transmit(const IfTreeInterface* ifp,
 #ifndef HOST_OS_WINDOWS    
 
     // Set some sendmsg()-related fields
+    if (_sndmh.msg_controllen == 0)
+	_sndmh.msg_control = NULL;
     switch (family()) {
     case AF_INET:
 	dst_address.copy_out(_to4);
-	_sndmh.msg_namelen	= sizeof(_to4);
-	_sndmh.msg_control	= NULL;
-	_sndmh.msg_controllen	= 0;
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
 	dst_address.copy_out(_to6);
 	system_adjust_sockaddr_in6_send(_to6, vifp->pif_index());
-	_sndmh.msg_namelen  = sizeof(_to6);
-	// XXX: _sndmh.msg_control and _sndmh.msg_controllen were setup earlier
 	break;
 #endif // HAVE_IPV6
     default:
