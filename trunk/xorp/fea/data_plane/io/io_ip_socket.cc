@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.23 2008/08/12 18:43:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.24 2008/09/06 04:40:02 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -268,7 +268,7 @@ IoIpSocket::IoIpSocket(FeaDataPlaneManager& fea_data_plane_manager,
     _sndiov[0].iov_len		= 0;
 
     // recvmsg() and sendmsg() related initialization
-#ifndef HOST_OS_WINDOWS    
+#ifndef HOST_OS_WINDOWS
     switch (family) {
     case AF_INET:
 	_rcvmh.msg_name		= (caddr_t)&_from4;
@@ -1804,8 +1804,10 @@ IoIpSocket::send_packet(const string& if_name,
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
     // Initialize state that might be modified later
+#ifndef HOST_OS_WINDOWS
     _sndmh.msg_control = (caddr_t)_sndcmsgbuf;
     _sndmh.msg_controllen = 0;
+#endif
 
     ifp = iftree().find_interface(if_name);
     if (ifp == NULL) {
