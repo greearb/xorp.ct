@@ -63,10 +63,10 @@ variable rebootkey
 	5 menuX !
 	clear
 	42 20 2 2 box
-	13 6 at-xy ." Welcome to the XORP LiveCD!"
-	printmenuitem ."  Boot LiveCD [default]" bootkey !
-	printmenuitem ."  Boot LiveCD without AT keyboard" bootnoatkey !
-	printmenuitem ."  Boot LiveCD without ISA serial ports" bootnoserial !
+	13 6 at-xy ." Welcome to XORP!"
+	printmenuitem ."  Boot [default]" bootkey !
+	printmenuitem ."  Boot without AT keyboard" bootnoatkey !
+	printmenuitem ."  Boot with legacy ISA serial ports" bootnoserial !
 	printmenuitem ."  Escape to loader prompt" escapekey !
 	printmenuitem ."  Reboot" rebootkey !
 	menuX @ 20 at-xy
@@ -122,6 +122,9 @@ set-current
 		dup -1 = if 0 boot then
 		dup 13 = if 0 boot then
 		dup bootkey @ = if
+			\ Force ISA sio hints to be disabled.
+                        s" 1" s" hint.sio.0.disabled" setenv
+                        s" 1" s" hint.sio.1.disabled" setenv
                         0 boot
                 then
 		dup bootnoatkey @ = if
@@ -131,8 +134,9 @@ set-current
 			0 boot
 		then
 		dup bootnoserial @ = if
-                        s" 1" s" hint.sio.0.disabled" setenv
-                        s" 1" s" hint.sio.1.disabled" setenv
+			\ Enable ISA sio hints only if explicitly told to.
+                        s" 0" s" hint.sio.0.disabled" setenv
+                        s" 0" s" hint.sio.1.disabled" setenv
 			0 boot
 		then
 		dup escapekey @ = if

@@ -4,13 +4,13 @@
 
 CFG_MOUNTPOINT="/cfg"
 CFG_DIR="/cfg/xorp.cfg"
-ETC_SAVE="dhclient.conf group host.conf hostid hosts inetd.conf master.passwd networks ntp ntp.conf passwd pf.conf ppp pwd.db rc.conf resolv.conf spwd.db ssh ssl sysctl.conf syslog.conf ttys local/xorp.conf"
+ETC_SAVE="dhclient.conf group nsswitch.conf hostid hosts inetd.conf master.passwd networks ntp ntp.conf passwd pf.conf ppp pwd.db rc.conf resolv.conf spwd.db ssh ssl sysctl.conf syslog.conf ttys local/xorp.conf"
 
 set -e
 
 cfgslice=`grep $CFG_MOUNTPOINT /etc/fstab | cut -d \  -f 1`
 
-echo "Mounting USB disk..."
+echo "Mounting USB config partition..."
 mount $CFG_MOUNTPOINT
 # mount returns 0 even if device didn't exist; need to check w/df
 dfline=$(df $CFG_MOUNTPOINT | tail +2)
@@ -29,7 +29,7 @@ else
     echo "ERROR: Config directory $CFG_DIR does not exist."
 fi
 
-echo "Unmounting USB disk..."
+echo "Unmounting USB config partition..."
 umount $CFG_MOUNTPOINT
 trap 1 2 15 EXIT
 

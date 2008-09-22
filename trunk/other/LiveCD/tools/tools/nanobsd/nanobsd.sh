@@ -57,6 +57,9 @@ NANO_PACKAGE_DIR=${NANO_SRC}/${NANO_TOOLS}/Pkg
 # Parallel Make
 NANO_PMAKE="make -j 3"
 
+# The default name for any image we create.
+NANO_IMGNAME=${NANO_IMGNAME:-"_.disk.full"}
+
 # Are we making a CDROM? If so, many assumptions change.
 NANO_CDROM=false
 
@@ -65,9 +68,6 @@ NANO_MKISOFS=${NANO_MKISOFS:="$(which mkisofs)"}
 
 # The default ISO volume ID.
 NANO_VOLID=${NANO_VOLID:-"NanoBSD"}
-
-# The default name for an *ISO* image.
-NANO_ISONAME=${NANO_ISONAME:-"_.cdrom.full"}
 
 # Options to put in make.conf during buildworld only
 CONF_BUILD=' '
@@ -95,6 +95,10 @@ NANO_CONF_DRIVE=${NANO_CONF_DRIVE:-"${NANO_DRIVE}s3"}
 
 # The type of the config file system.
 NANO_CONF_FSTYPE=${NANO_CONF_FSTYPE:-"ufs"}
+
+# Whether or not the config slice is optional.
+# XXX It seems this clobbers the CD build.
+#NANO_CONF_OPTIONAL=${NANO_CONF_OPTIONAL:-"false"}
 
 # Target media size in 512 bytes sectors
 NANO_MEDIASIZE=1000000
@@ -182,10 +186,15 @@ build_kernel ( ) (
 		cp ${NANO_KERNEL} ${NANO_SRC}/sys/${NANO_ARCH}/conf
 	fi
 
-	cd ${NANO_SRC}
+	(cd ${NANO_SRC};
+	# unset these just in case to avoid compiler complaints
+	# when cross-building
+	unset TARGET_CPUTYPE
+	unset TARGET_BIG_ENDIAN
 	${NANO_PMAKE} buildkernel \
 		__MAKE_CONF=${NANO_MAKE_CONF} KERNCONF=`basename ${NANO_KERNEL}` \
 		> ${MAKEOBJDIRPREFIX}/_.bk 2>&1
+	)
 )
 
 clean_world ( ) (
@@ -292,7 +301,9 @@ setup_nanobsd ( ) (
 	fi
 	echo "mount -t $NANO_CONF_FSTYPE $mountopts /dev/${NANO_CONF_DRIVE}" > conf/default/etc/remount
 
-	$NANO_CONF_OPTIONAL && touch conf/default/etc/remount_optional
+	if [ "$NANO_CONF_OPTIONAL" = "true" ]; then
+	    touch conf/default/etc/remount_optional
+	fi
 
 	# If NANO_CONF_SUBDIR is set, then the configuration data
 	# is in fact in a subdirectory of the NANO_CONF_DRIVE.
@@ -307,7 +318,9 @@ setup_nanobsd ( ) (
 	    touch conf/default/etc/remount_subdir
 	    echo $NANO_CONF_SUBDIR >> conf/default/etc/remount_subdir
 	    mkdir -p conf.tmp/default/etc
-	    $NANO_CONF_OPTIONAL && touch conf.tmp/default/etc/remount_optional
+	    if [ "$NANO_CONF_OPTIONAL" = "true" ]; then
+		touch conf.tmp/default/etc/remount_optional
+	    fi
 	fi
 
 	# Put /tmp on the /var ramdisk (could be symlink already)
@@ -338,8 +351,12 @@ setup_nanobsd_etc ( ) (
 	else
 	    echo "/dev/${NANO_DRIVE}s1a / ufs ro 1 1" > etc/fstab
 	fi
-
-	preen=2 ; $NANO_CONF_OPTIONAL && preen=0
+ 
+	if [ "$NANO_CONF_OPTIONAL" = "true" ]; then
+	    preen=0
+	else
+	    preen=2
+	fi
 	mountopts="rw,noauto"
 	if [ "x$NANO_CONF_FSOPTS" != "x" ]; then
 	    mountopts="${mountopts},$NANO_CONF_FSOPTS"
@@ -426,10 +443,14 @@ create_i386_diskimage ( ) (
 			    c - $1, "sectors" > "/dev/stderr"
 			exit 2
 		}
+
+		# Force slice 1 to be marked active. This is necessary
+		# for booting the image from a USB device to work.
+		print "a 1"
 	}
 	' > ${MAKEOBJDIRPREFIX}/_.fdisk
 
-	IMG=${MAKEOBJDIRPREFIX}/_.disk.full
+	IMG=${MAKEOBJDIRPREFIX}/${NANO_IMGNAME}
 	MNT=${MAKEOBJDIRPREFIX}/_.mnt
 	mkdir -p ${MNT}
 
@@ -467,11 +488,20 @@ create_i386_diskimage ( ) (
 			sed -i "" "s/${NANO_DRIVE}s1/${NANO_DRIVE}s2/g" $f
 		done
 		umount ${MNT}
-
 	fi
 	
 	# Create Config slice
 	newfs ${NANO_NEWFS} /dev/${MD}s3
+
+	# If subdir mode enabled for config slice, assume that the
+	# boot time remount is non-optional, and force the subdir to
+	# be created so that the nullfs mount will succeed.
+	if [ "x$NANO_CONF_SUBDIR" != "x" ]; then
+	    mount /dev/${MD}s3 ${MNT}
+	    mkdir -p ${MNT}/${NANO_CONF_SUBDIR}
+	    umount ${MNT}
+	fi
+
 	# XXX: fill from where ?
 
 	# Create Data slice, if any.
@@ -499,7 +529,7 @@ create_i386_cdimage ( ) (
 		echo "Ignoring NANO_IMAGES=${NANO_IMAGES}"
 	fi
 
-	IMG=${MAKEOBJDIRPREFIX}/${NANO_ISONAME}
+	IMG=${MAKEOBJDIRPREFIX}/${NANO_IMGNAME}
 	MNT=${MAKEOBJDIRPREFIX}/_.mnt
 	mkdir -p ${MNT}
 
@@ -546,6 +576,19 @@ FlashDevice () {
 		. ${NANO_SRC}/${NANO_TOOLS}/FlashDevice.sub
 	fi
 	sub_FlashDevice $1 $2
+}
+
+#######################################################################
+# USB disk geometries
+#
+
+UsbDevice () {
+	if [ -d ${NANO_TOOLS} ] ; then
+		. ${NANO_TOOLS}/UsbDevice.sub
+	else
+		. ${NANO_SRC}/${NANO_TOOLS}/UsbDevice.sub
+	fi
+	sub_UsbDevice $1 $2 $3
 }
 
 #######################################################################
@@ -741,6 +784,7 @@ export NANO_DATASIZE
 export NANO_DRIVE
 export NANO_HEADS
 export NANO_IMAGES
+export NANO_IMGNAME
 export NANO_MAKE_CONF
 export NANO_MEDIASIZE
 export NANO_NAME
@@ -787,7 +831,7 @@ prune_usr
 
 if $NANO_CDROM ; then
 	create_${NANO_ARCH}_cdimage
-	echo "# Created NanoBSD ISO image: ${MAKEOBJDIRPREFIX}/${NANO_ISONAME}"
+	echo "# Created NanoBSD ISO image: ${MAKEOBJDIRPREFIX}/${NANO_IMGNAME}"
 else
 	create_${NANO_ARCH}_diskimage
 fi
