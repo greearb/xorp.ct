@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.16 2008/01/04 03:16:26 pavlin Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.17 2008/07/23 05:10:44 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -93,7 +94,7 @@ public:
     /**
      * @return string representation of Xrl without arguments.
      */
-    string string_no_args() const;
+    const string& string_no_args() const;
 
     /**
      * @return the name of the command
@@ -157,6 +158,7 @@ private:
     string	_target;   // if protocol != finder, target = protocol params
     string	_command;
     mutable XrlArgs	_args; // XXX only for packed_bytes() and pack()
+    mutable string	_string_no_args;
 
     static const string _finder_protocol;
 };
@@ -166,15 +168,17 @@ typedef Xrl XrlTemplate;
 // ----------------------------------------------------------------------------
 // Inline methods
 
-#include "libxorp/c_format.hh"
-
-inline string
+inline const string&
 Xrl::string_no_args() const
 {
-    //    return _protocol + string(XrlToken::PROTO_TGT_SEP) + _target +
-    //	string(XrlToken::TGT_CMD_SEP) + _command;
-    return c_format("%s%s%s%s%s", _protocol.c_str(), XrlToken::PROTO_TGT_SEP,
-		    _target.c_str(), XrlToken::TGT_CMD_SEP, _command.c_str());
+    if (!_string_no_args.size())
+	_string_no_args =  _protocol 
+			 + string(XrlToken::PROTO_TGT_SEP) 
+			 + _target 
+			 + string(XrlToken::TGT_CMD_SEP)
+			 + _command;
+
+    return _string_no_args;
 }
 
 #endif // __LIBXIPC_XRL_HH__
