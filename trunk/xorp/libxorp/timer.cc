@@ -29,7 +29,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.42 2008/07/23 05:10:56 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.43 2008/09/23 07:59:41 abittau Exp $"
 
 
 #include "libxorp_module.h"
@@ -453,8 +453,7 @@ TimerList::expire_one(int worst_priority)
     static const TimeVal WAY_BACK_GAP(15, 0);
 
     TimeVal now;
-    
-    advance_time();
+
     current_time(now);
 
     struct Heap::heap_entry *n;
@@ -487,7 +486,6 @@ TimerList::expire_one(int worst_priority)
 	    // timer to invoke the hook.
 	    XorpTimer placeholder(t);
 	    t->expire(placeholder, 0);
-	    advance_time();
 	    return true;
 	}
     }
