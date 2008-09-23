@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.29 2008/09/23 08:00:33 abittau Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.30 2008/09/23 08:04:01 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -81,17 +81,21 @@ EventLoop::run()
 	last_warned = now;
     }
 
-    // Sorry for the obfuscated code.  It basically means the following:
-    // bool more = do_work(you_can_block);
-    // while (more)
-    //      more = do_work(you_cannot_block);
-    //
-    // I.e., on the first run you can block, if there's more work todo, do it
-    // but don't block.  -sorbo
-    bool more = false;
-    do {
-	more = do_work(!more);
-    } while (more);
+    // standard eventloop run
+    bool more = do_work(true);
+
+    // Aggressive eventloop runs.  Going through the eventloop from the start is
+    // expensive because we need to call time() and select().  If there's
+    // additional work to do, do it now rather than going through all the
+    // bureaucracy again.  Because we (sometimes) have an outdated time() and
+    // select() we could run low priority tasks instead of higher ones simply
+    // because we don't know about them yet (need to call time or select to
+    // detect them).  For this reason, we only do a few "aggressive" runs.do a
+    // few "aggressive" runs.do a few "aggressive" runs.do a few "aggressive"
+    // runs.  -sorbo.
+    int agressiveness = 5;
+    while (more && agressiveness--)
+	more = do_work(false);
 
     // select() could cause a large delay and will advance_time.  Re-read
     // current time.  Maybe we can get rid of advance_time if timeout to select
@@ -119,7 +123,7 @@ EventLoop::do_work(bool can_block)
     if (_win_dispatcher.ready())
 	selector_priority = _win_dispatcher.get_ready_priority();
 #else
-    selector_priority = _selector_list.get_ready_priority();
+    selector_priority = _selector_list.get_ready_priority(can_block);
 #endif
 
     if (!_task_list.empty())

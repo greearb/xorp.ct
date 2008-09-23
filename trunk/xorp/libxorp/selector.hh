@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.28 2008/09/23 08:00:33 abittau Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.29 2008/09/23 08:04:12 abittau Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -157,7 +157,7 @@ public:
      *
      * @return the priority of the highest priority ready file descriptor.
      */
-    int get_ready_priority();
+    int get_ready_priority(bool force);
 
     /**
      * Wait for a pending I/O events and invoke callbacks when they
@@ -222,7 +222,7 @@ protected:
     void callback_bad_descriptors();
 
 private:
-    int do_select(struct timeval* to);
+    int do_select(struct timeval* to, bool force);
 
     SelectorList(const SelectorList&);			// not implemented
     SelectorList& operator=(const SelectorList&);	// not implemented

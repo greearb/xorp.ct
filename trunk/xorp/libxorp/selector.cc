@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.44 2008/09/23 08:04:01 abittau Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.45 2008/09/23 08:04:12 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -318,10 +318,9 @@ SelectorList::ready()
 }
 
 int
-SelectorList::do_select(struct timeval* to)
+SelectorList::do_select(struct timeval* to, bool force)
 {
-    // Always use cached results if we haven't yet dealt with all fds
-    if (_testfds_n > 0)
+    if (!force && _testfds_n > 0)
         return _testfds_n;
 
     _maxpri_fd = _maxpri_sel = -1;
@@ -360,13 +359,13 @@ SelectorList::do_select(struct timeval* to)
 }
 
 int
-SelectorList::get_ready_priority()
+SelectorList::get_ready_priority(bool force)
 {
     struct timeval tv_zero;
     tv_zero.tv_sec = 0;
     tv_zero.tv_usec = 0;
 
-    if (do_select(&tv_zero) <= 0)
+    if (do_select(&tv_zero, force) <= 0)
 	return XorpTask::PRIORITY_INFINITY;
 
     if (_maxpri_fd != -1)
@@ -396,18 +395,18 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
     int n = 0;
 
     if (timeout == TimeVal::MAXIMUM())
-	n = do_select(NULL);
+	n = do_select(NULL, false);
     else {
 	struct timeval tv_to;
 	timeout.copy_out(tv_to);
 
-	n = do_select(&tv_to);
+	n = do_select(&tv_to, false);
     }
 
     if (n <= 0)
 	return 0;
 
-    get_ready_priority();
+    get_ready_priority(false);
 
     XLOG_ASSERT(_maxpri_fd != -1);
     XLOG_ASSERT(FD_ISSET(_maxpri_fd, &_testfds[_maxpri_sel]));
