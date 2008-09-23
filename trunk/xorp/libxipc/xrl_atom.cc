@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.33 2008/09/23 08:01:36 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.34 2008/09/23 08:02:10 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -1240,7 +1240,7 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
     }
     return packed_size;
 }
-extern void sampler(const char*);
+
 size_t
 XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 {
@@ -1254,9 +1254,7 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
     if (header & NAME_PRESENT) {
 	try {
-	    sampler("prename");
 	    size_t used = unpack_name(buffer + unpacked, buffer_bytes - unpacked);
-	    sampler("name");
 	    if (used == 0) {
 		debug_msg("Invalid name\n");
 		return 0;
