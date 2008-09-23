@@ -68,7 +68,7 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     s += "    if (!x) {\n"
     s += "        x = new Xrl(dst_xrl_target_name, \"%s\");\n" % ifqname
     for a in method.args():
-        s += "        x->args().add(\"%s\", %s);\n" % (a.name(), a.name())
+        s += "        x->args().add(XrlAtom(%s));\n" % (a.name())
     s += "    }\n"
     s += "\n"
     s += "    XLOG_ASSERT(::strcmp(dst_xrl_target_name, x->target().c_str()) == 0);\n"

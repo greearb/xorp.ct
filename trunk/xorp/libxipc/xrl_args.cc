@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.22 2008/09/23 08:01:56 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.23 2008/09/23 08:02:09 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -33,12 +33,18 @@
 XrlArgs&
 XrlArgs::add(const XrlAtom& xa) throw (XrlAtomFound)
 {
-    const_iterator p;
-    for (p = _args.begin(); p != _args.end(); ++p) {
-	if (p->name() == xa.name()) {
-	    throw XrlAtomFound();
+    if (!xa.name().empty()) {
+	const_iterator p;
+
+	for (p = _args.begin(); p != _args.end(); ++p) {
+	    if (p->name() == xa.name()) {
+		throw XrlAtomFound();
+	    }
 	}
+
+	_have_name = true;
     }
+
     _args.push_back(xa);
     return *this;
 }
@@ -55,6 +61,22 @@ XrlArgs::get(const XrlAtom& dataless) const throw (XrlAtomNotFound)
     }
     throw XrlAtomNotFound();
     return *p;
+}
+
+const XrlAtom&
+XrlArgs::get(unsigned idx, const char* name) const throw (XrlAtomNotFound)
+{
+    if (!_have_name)
+	return _args[idx];
+
+    for (const_iterator i = _args.begin(); i != _args.end(); ++i) {
+	const XrlAtom& a = *i;
+
+	if (a.name().compare(name) == 0)
+	    return a;
+    }
+
+    throw XrlAtomNotFound();
 }
 
 void
@@ -555,15 +577,7 @@ XrlArgs::operator==(const XrlArgs& t) const
 const XrlAtom&
 XrlArgs::operator[](uint32_t index) const
 {
-    const_iterator ai = _args.begin();
-    while (index != 0 && ai != _args.end()) {
-        index--;
-	++ai;
-    }
-    if (ai == _args.end()) {
-        throw out_of_range("XrlArgs");
-    }
-    return *ai;
+    return _args[index];
 }
 
 const XrlAtom&
@@ -603,6 +617,7 @@ XrlArgs::str() const
 }
 
 XrlArgs::XrlArgs(const char* serialized) throw (InvalidString)
+		: _have_name(false)
 {
     string s(serialized);
 
@@ -685,6 +700,7 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
     for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {
 	size_t atom_bytes = ci->pack(buffer + total_bytes,
 				     buffer_bytes - total_bytes);
+
 	if (atom_bytes == 0) {
 	    return 0;
 	}
@@ -694,25 +710,34 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
 }
 
 size_t
-XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes)
+XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes, XrlAtom* head)
 {
     uint32_t cnt;
     int added = 0;
     size_t used_bytes = unpack_header(cnt, buffer, buffer_bytes);
+    XrlAtom* atom;
+    _have_name = false;
 
     if (!used_bytes)
 	return 0;
 
     while (cnt != 0) {
-	_args.push_back(XrlAtom());
-	added++;
+	if (head) {
+	    atom = head;
+	    head = NULL;
+	} else {
+	    _args.push_back(XrlAtom());
+	    atom = &_args.back();
+	    added++;
+	}
 
-	XrlAtom& atom = _args.back();
-
-	size_t atom_bytes = atom.unpack(buffer + used_bytes,
-					buffer_bytes - used_bytes);
+	size_t atom_bytes = atom->unpack(buffer + used_bytes,
+					 buffer_bytes - used_bytes);
 	if (atom_bytes == 0)
 	    goto __error;
+
+	if (!_have_name && !atom->name().empty())
+	    _have_name = true;
 
 	used_bytes += atom_bytes;
 	--cnt;
@@ -758,14 +783,17 @@ size_t
 XrlArgs::fill(const uint8_t* in, size_t len)
 {
     size_t tot = len;
+    _have_name = false;
 
     for (ATOMS::iterator i = _args.begin(); i != _args.end(); ++i) {
 	XrlAtom& atom = *i;
 
 	size_t sz = atom.unpack(in, len);
-
 	if (sz == 0)
 	    return 0;
+
+	if (!_have_name && !atom.name().empty())
+	    _have_name = true;
 
 	XLOG_ASSERT(sz <= len);
 	in  += sz;

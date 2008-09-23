@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.34 2008/09/23 08:02:10 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.35 2008/09/23 08:02:26 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -1254,7 +1254,9 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
     if (header & NAME_PRESENT) {
 	try {
-	    size_t used = unpack_name(buffer + unpacked, buffer_bytes - unpacked);
+	    size_t used = unpack_name(buffer + unpacked,
+				      buffer_bytes - unpacked);
+
 	    if (used == 0) {
 		debug_msg("Invalid name\n");
 		return 0;
@@ -1264,7 +1266,8 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	    debug_msg("Unpacking failed:\n%s\n", bn.str().c_str());
 	    return 0;
 	}
-    }
+    } else
+	_atom_name.clear();
 
     if (header & DATA_PRESENT) {
 	int t = header & ~(NAME_PRESENT | DATA_PRESENT);

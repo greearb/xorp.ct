@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.24 2008/09/23 08:01:36 abittau Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.25 2008/09/23 08:02:10 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -26,16 +26,16 @@
 #include "libxorp/mac.hh"
 #include "libxorp/exceptions.hh"
 
-#include <list>
+#include <vector>
 
 #include "xrl_atom.hh"
 
 
 class XrlArgs {
 public:
-    typedef list<XrlAtom>   ATOMS;
-    typedef ATOMS::const_iterator const_iterator;
-    typedef ATOMS::iterator iterator;
+    typedef vector<XrlAtom>	    ATOMS;
+    typedef ATOMS::const_iterator   const_iterator;
+    typedef ATOMS::iterator	    iterator;
 
     // Exceptions
     struct BadArgs : public XorpException {
@@ -50,7 +50,7 @@ public:
     class XrlAtomFound { };
 
 public:
-    XrlArgs() {}
+    XrlArgs() : _have_name(false) {}
     explicit XrlArgs(const char* str) throw (InvalidString);
 
     ~XrlArgs() {}
@@ -59,6 +59,8 @@ public:
     XrlArgs& add(const XrlAtom& xa) throw (XrlAtomFound);
 
     const XrlAtom& get(const XrlAtom& dataless) const throw (XrlAtomNotFound);
+    const XrlAtom& get(unsigned idx, const char* name) const
+					    throw (XrlAtomNotFound);
 
     void remove(const XrlAtom& dataless) throw (XrlAtomNotFound);
 
@@ -267,10 +269,6 @@ public:
 
     const XrlAtom& item(const string& name) const throw (XrlAtomNotFound);
 
-    void push_front(const XrlAtom& xa);
-    const XrlAtom& front() throw (XrlAtomNotFound);
-    void pop_front() throw (XrlAtomNotFound);
-
     void push_back(const XrlAtom& xa);
     const XrlAtom& back() throw (XrlAtomNotFound);
     void pop_back() throw (XrlAtomNotFound);
@@ -310,7 +308,8 @@ public:
      *        used when packing.
      * @return number of bytes turned into atoms on success, 0 on failure.
      */
-    size_t unpack(const uint8_t* buffer, size_t buffer_bytes);
+    size_t unpack(const uint8_t* buffer, size_t buffer_bytes,
+		  XrlAtom* head = NULL);
 
     size_t fill(const uint8_t* buffer, size_t buffer_bytes);
 
@@ -326,6 +325,7 @@ protected:
     void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);
 
     ATOMS _args;
+    bool  _have_name;
 };
 
 
@@ -525,28 +525,6 @@ XrlArgs::item(const string& name) const throw (XrlAtomNotFound)
 }
 
 inline void
-XrlArgs::push_front(const XrlAtom& xa)
-{
-    _args.push_front(xa);
-}
-
-inline const XrlAtom&
-XrlArgs::front() throw (XrlAtomNotFound)
-{
-    if (_args.empty())
-	throw XrlAtomNotFound();
-    return _args.front();
-}
-
-inline void
-XrlArgs::pop_front() throw (XrlAtomNotFound)
-{
-    if (_args.empty())
-	throw XrlAtomNotFound();
-    _args.pop_front();
-}
-
-inline void
 XrlArgs::push_back(const XrlAtom& xa)
 {
     _args.push_back(xa);
@@ -572,10 +550,9 @@ template <class T>
 inline void
 XrlArgs::set_arg(int idx, const T& arg)
 {
-    const XrlAtom& a = (*this)[idx]; // XXX we might want a vector now
-    XrlAtom& atom = const_cast<XrlAtom&>(a);
+    XrlAtom& a = _args[idx];
 
-    atom.set(arg);
+    a.set(arg);
 }
 
 #endif // __LIBXIPC_XRL_ARGS_HH__

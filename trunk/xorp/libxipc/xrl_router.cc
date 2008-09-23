@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.59 2008/09/23 08:01:15 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.60 2008/09/23 08:02:10 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -531,7 +531,7 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     //
     // Finder directed Xrl - takes custom path through FinderClient.
     //
-    if (xrl.protocol() == "finder" && xrl.target().substr(0,6) == "finder") {
+    if (xrl.to_finder()) {
 	if (_fc->forward_finder_xrl(xrl, xcb)) {
 	    return true;
 	}
@@ -562,8 +562,12 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     // care about re-ordering between protocol families (at this time), but
     // we do within protocol families.
     //
-    string xrl_no_args = xrl.string_no_args();
-    const FinderDBEntry* fdbe = _fc->query_cache(xrl_no_args);
+    const string& xrl_no_args = xrl.string_no_args();
+    const FinderDBEntry* fdbe = xrl.resolved();
+    if (!fdbe) {
+	fdbe = _fc->query_cache(xrl_no_args);
+	xrl.set_resolved(fdbe);
+    }
     if (_dsl.empty() && fdbe) {
 	return send_resolved(xrl, fdbe, xcb, true);
     }

@@ -159,10 +159,12 @@ def target_handler_methods(cls, name, methods):
         s += xorp_indent(1) + "try {\n"
         s += xorp_indent(2) + "XrlCmdError e = %s(" % cpp_name(m.name())
         get_reqs = []
+	i = 0
         for a in m.args():
             get_reqs.append("\n" + xorp_indent(3) + \
-                            "xa_inputs.%s(\"%s\")" \
-                            % (a.accessor(), a.name()))
+                            "xa_inputs.get(%d, \"%s\").%s()" \
+                            % (i, a.name(), a.accessor()))
+	    i += 1
         ret_vals = []
         for r in m.rargs():
             ret_vals.append("\n" + xorp_indent(3) + "%s" % cpp_name(r.name()))

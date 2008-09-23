@@ -15,7 +15,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.62 2008/07/23 05:10:46 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.63 2008/09/23 08:02:10 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -228,7 +228,6 @@ STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
 
     string command;
     size_t cmdsz = Xrl::unpack_command(command, packed_xrl, packed_xrl_bytes);
-
     if (!cmdsz)
 	return e;
 
@@ -488,45 +487,53 @@ public:
 		 uint32_t	  sn,
 		 const Xrl&	  x,
 		 const Callback&  cb)
-	: _p(p), _sn(sn), _cb(cb), _keepalive(false)
+	: _p(p), _sn(sn), _b(_buffer), _cb(cb), _keepalive(false)
     {
 	size_t header_bytes = STCPPacketHeader::header_size();
 	size_t xrl_bytes = x.packed_bytes();
+	size_t total = header_bytes + xrl_bytes;
 
-	_b.resize(header_bytes + xrl_bytes);
+	if (total > sizeof(_buffer))
+	    _b = new uint8_t[total];
+
+	_size = total;
 
 	// Prepare header
-	STCPPacketHeader sph(&_b[0]);
+	STCPPacketHeader sph(_b);
 	sph.initialize(_sn, STCP_PT_REQUEST, XrlError::OKAY(), xrl_bytes);
 
 	// Pack XRL data
-	x.pack(&_b[0] + header_bytes, xrl_bytes);
+	x.pack(_b + header_bytes, xrl_bytes);
 
 	debug_msg("RequestState (%p - seqno %u)\n", this, XORP_UINT_CAST(sn));
 	debug_msg("RequestState Xrl = %s\n", x.str().c_str());
     }
 
     RequestState(XrlPFSTCPSender* p, uint32_t sn)
-	: _p(p), _sn(sn), _keepalive(true)
+	: _p(p), _sn(sn), _b(_buffer), _keepalive(true)
     {
 	size_t header_bytes = STCPPacketHeader::header_size();
-	_b.resize(header_bytes);
+
+	XLOG_ASSERT(sizeof(_buffer) >= header_bytes);
+
+	_size = header_bytes;
 
 	// Prepare header
-	STCPPacketHeader sph(&_b[0]);
+	STCPPacketHeader sph(_b);
 	sph.initialize(_sn, STCP_PT_HELO, XrlError::OKAY(), 0);
     }
 
     bool		has_seqno(uint32_t n) const { return _sn == n; }
     XrlPFSTCPSender*	parent() const		{ return _p; }
     uint32_t		seqno() const		{ return _sn; }
-    vector<uint8_t>&	buffer() 		{ return _b; }
+    uint8_t*		buffer() 		{ return _b; }
     Callback&		cb() 			{ return _cb; }
+    uint32_t		size() const		{ return _size; }
 
     bool is_keepalive() {
-	if (_b.size() < STCPPacketHeader::header_size())
+	if (size() < STCPPacketHeader::header_size())
 	    return false;
-	const STCPPacketHeader sph(&_b[0]);
+	const STCPPacketHeader sph(_b);
 	STCPPacketType pt = sph.type();
 	return pt == STCP_PT_HELO || pt == STCP_PT_HELO_ACK;
     }
@@ -534,6 +541,8 @@ public:
     ~RequestState()
     {
 	//	debug_msg("~RequestState (%p - seqno %u)\n", this, seqno());
+	if (_b != _buffer)
+	    delete [] _b;
     }
 
 private:
@@ -543,7 +552,9 @@ private:
 private:
     XrlPFSTCPSender*	_p;				// parent
     uint32_t		_sn;				// sequence number
-    vector<uint8_t>	_b;
+    uint8_t*		_b;
+    uint8_t		_buffer[256];	// XXX important performance parameter
+    uint32_t		_size;
     Callback		_cb;
     bool		_keepalive;
 };
@@ -755,10 +766,9 @@ void
 XrlPFSTCPSender::send_request(RequestState* rs)
 {
     _requests_waiting.push_back(rs);
-    const vector<uint8_t>& buffer = rs->buffer();
-    _active_bytes += buffer.size();
+    _active_bytes += rs->size();
     _active_requests ++;
-    _writer->add_buffer(&buffer[0], buffer.size(),
+    _writer->add_buffer(rs->buffer(), rs->size(),
 			callback(this, &XrlPFSTCPSender::update_writer));
     if (_writer->running() == false)
 	_writer->start();
@@ -769,7 +779,7 @@ XrlPFSTCPSender::dispose_request()
 {
     assert(_requests_sent.empty() == false);
     xassert(_requests_sent.size() + _requests_waiting.size() == _active_requests);
-    _active_bytes -= _requests_sent.front()->buffer().size();
+    _active_bytes -= _requests_sent.front()->size();
     _active_requests -= 1;
     _requests_sent.pop_front();
     xassert(_requests_waiting.size() == _writer->buffers_remaining());

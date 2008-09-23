@@ -1,18 +1,18 @@
 xrl_atom_type = {
-# <name used in xrls> : (<c++ type>, <xrlargs accessor method>)
-    'bool' :	('bool',		'get_bool'),
-    'i32' :	('int32_t',		'get_int32'),
-    'u32' :	('uint32_t',		'get_uint32'),
-    'ipv4' :	('IPv4',		'get_ipv4'),
-    'ipv4net' :	('IPv4Net',		'get_ipv4net'),
-    'ipv6' :	('IPv6',		'get_ipv6'),
-    'ipv6net' :	('IPv6Net',		'get_ipv6net'),
-    'mac' :	('Mac',   		'get_mac'),
-    'txt' :	('string',		'get_string'),
-    'list' :	('XrlAtomList', 	'get_list'),
-    'binary' :	('vector<uint8_t>',	'get_binary'),
-    'i64' :	('int64_t',		'get_int64'),
-    'u64' :	('uint64_t',		'get_uint64')
+# <name used in xrls> : (<c++ type>, <xrltom accessor method>)
+    'bool' :	('bool',		'boolean'),
+    'i32' :	('int32_t',		'int32'),
+    'u32' :	('uint32_t',		'uint32'),
+    'ipv4' :	('IPv4',		'ipv4'),
+    'ipv4net' :	('IPv4Net',		'ipv4net'),
+    'ipv6' :	('IPv6',		'ipv6'),
+    'ipv6net' :	('IPv6Net',		'ipv6net'),
+    'mac' :	('Mac',   		'mac'),
+    'txt' :	('string',		'text'),
+    'list' :	('XrlAtomList', 	'list'),
+    'binary' :	('vector<uint8_t>',	'binary'),
+    'i64' :	('int64_t',		'int64'),
+    'u64' :	('uint64_t',		'uint64')
 }
 
 class XrlArg:

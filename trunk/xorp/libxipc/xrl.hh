@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.20 2008/09/23 08:01:15 abittau Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.21 2008/09/23 08:02:09 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -24,6 +24,8 @@
 #include "xrl_atom.hh"
 #include "xrl_args.hh"
 #include "xrl_tokens.hh"
+
+struct FinderDBEntry;
 
 /**
  * XORP IPC request.
@@ -38,7 +40,8 @@ public:
 	const string&	command,
 	const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
+	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+	  _to_finder(-1), _resolved(NULL)
     {}
 
     /**
@@ -48,7 +51,8 @@ public:
 	const string&	command,
 	const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
+	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+	  _to_finder(-1), _resolved(NULL)
     {}
 
     /**
@@ -58,7 +62,8 @@ public:
 	const string& protocol_target,
 	const string& command)
 	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
+	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+	  _resolved(NULL)
     {}
 
     /**
@@ -67,7 +72,8 @@ public:
     Xrl(const string& target,
 	const string& command)
 	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
+	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+	  _resolved(NULL)
     {}
 
     /**
@@ -75,7 +81,8 @@ public:
      */
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
-    Xrl() : _sna_atom(0), _packed_bytes(0), _argp(&_args) {}
+    Xrl() : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
+            _resolved(NULL) {}
     ~Xrl();
 
     /**
@@ -158,18 +165,29 @@ public:
 
     static size_t unpack_command(string& cmd, const uint8_t* in, size_t len);
 
+    bool to_finder() const;
+
+    const FinderDBEntry* resolved() const { return _resolved; }
+    void set_resolved(const FinderDBEntry* r) const { _resolved = r; };
+
 private:
     const char* parse_xrl_path(const char* xrl_path);
 
 private:
-    string	_protocol;
-    string	_target;   // if protocol != finder, target = protocol params
-    string	_command;
-    mutable XrlArgs	_args; // XXX only for packed_bytes() and pack()
-    mutable string	_string_no_args;
-    mutable XrlAtom*	_sna_atom;
-    mutable size_t	_packed_bytes;
-    mutable XrlArgs*	_argp; // XXX shouldn't be mutable
+    // if protocol != finder, target = protocol params
+    string		_protocol;
+    string		_target;
+    string		_command;
+
+    // XXX we got a const problem.  Factor out all cached stuff into a struct
+    // and make that mutable.
+    mutable XrlArgs		    _args; // XXX packed_bytes() and pack()
+    mutable string		    _string_no_args;
+    mutable XrlAtom*		    _sna_atom;
+    mutable size_t		    _packed_bytes;
+    mutable XrlArgs*		    _argp; // XXX shouldn't be mutable
+    mutable int			    _to_finder;
+    mutable const FinderDBEntry*    _resolved; // XXX ditto
 
     static const string _finder_protocol;
 };

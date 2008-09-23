@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.18 2008/09/23 08:01:15 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.19 2008/09/23 08:02:09 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -33,6 +33,8 @@ Xrl::parse_xrl_path(const char* c_str)
     delete _sna_atom;
     _sna_atom = NULL;
     _packed_bytes = 0;
+    _to_finder = -1;
+    _resolved = NULL;
 
     // Extract protocol
     start = c_str;
@@ -68,7 +70,8 @@ Xrl::parse_xrl_path(const char* c_str)
 }
 
 Xrl::Xrl(const char* c_str) throw (InvalidString) 
-		: _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
+		: _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
+		  _to_finder(-1), _resolved(NULL)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);
@@ -141,20 +144,16 @@ Xrl::unpack(const uint8_t* buffer, size_t buffer_bytes)
 {
     args().clear();
 
-    size_t unpacked_bytes = args().unpack(buffer, buffer_bytes);
+    XrlAtom xa;
 
+    size_t unpacked_bytes = args().unpack(buffer, buffer_bytes, &xa);
     if (unpacked_bytes == 0)
 	return 0;
 
-    const XrlAtom& xa = args().front();
-    if (xa.type() != xrlatom_text || xa.has_data() == false) {
-	args().pop_front();
+    if (xa.type() != xrlatom_text || xa.has_data() == false)
 	return 0;
-    }
 
     parse_xrl_path(xa.text().c_str());
-
-    args().pop_front();
 
     return unpacked_bytes;
 }
@@ -224,4 +223,15 @@ Xrl::fill(const uint8_t* in, size_t len)
     _packed_bytes = 0;
 
     return args().fill(in, len);
+}
+
+bool
+Xrl::to_finder() const
+{
+    if (_to_finder == -1) {
+	_to_finder = (protocol() == _finder_protocol 
+	              && target().substr(0, 6) == _finder_protocol);
+    }
+
+    return _to_finder;
 }
