@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_task.cc,v 1.8 2008/09/23 08:04:40 abittau Exp $"
+#ident "$XORP: xorp/libxorp/test_task.cc,v 1.9 2008/09/23 08:05:30 abittau Exp $"
 
 //
 // Demo program to test tasks and event loops.
