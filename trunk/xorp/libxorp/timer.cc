@@ -29,7 +29,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.43 2008/09/23 07:59:41 abittau Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.44 2008/09/23 08:03:23 abittau Exp $"
 
 
 #include "libxorp_module.h"
@@ -462,7 +462,7 @@ TimerList::expire_one(int worst_priority)
 	 hi != _heaplist.end() && hi->first <= worst_priority;
 	 ++hi) {
 	Heap* heap = hi->second;
-	while ((n = heap->top()) != 0 && n->key < now) {
+	while ((n = heap->top()) != 0 && n->key <= now) {
 
 	    //
 	    // Throw a wobbly if we're a long way behind.
