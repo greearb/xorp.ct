@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.41 2008/03/21 21:41:01 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.42 2008/07/23 05:10:49 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -76,6 +76,8 @@ is_pseudo_error(const char* name, XorpFd fd, int error_num)
     }
     return false;
 }
+
+bool AsyncFileWriter::_writing = false;
 
 // ----------------------------------------------------------------------------
 AsyncFileOperator::~AsyncFileOperator()
@@ -369,6 +371,11 @@ AsyncFileWriter::AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce,
 				 int priority)
     : AsyncFileOperator(e, fd, priority)
 {
+#ifndef HOST_OS_WINDOWS
+    if (::signal(SIGPIPE, &AsyncFileWriter::sigpipe_handler) == SIG_ERR)
+	xorp_throw(InvalidString, "can't install signal handler"); // XXX
+#endif
+
     static const uint32_t max_coalesce = 16;
     _coalesce = (coalesce > MAX_IOVEC) ? MAX_IOVEC : coalesce;
     if (_coalesce > max_coalesce) {
@@ -384,6 +391,16 @@ AsyncFileWriter::~AsyncFileWriter()
 
     delete[] _iov;
     delete_pointers_list(_buffers);
+}
+
+void
+AsyncFileWriter::sigpipe_handler(int /* num */)
+{
+    if (_writing)
+	return;
+
+    // XXX call original signal handler
+    XLOG_ASSERT(false);
 }
 
 void
@@ -679,11 +696,11 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    if (done < 0)
 		_last_error = errno;
 	} else {
-	    saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+	    _writing = true;
 	    done = ::writev(_fd, _iov, (int)iov_cnt);
 	    if (done < 0)
 		_last_error = errno;
-	    signal(SIGPIPE, saved_sigpipe);
+	    _writing = false;
 	}
 	errno = 0;
 #endif // ! HOST_OS_WINDOWS

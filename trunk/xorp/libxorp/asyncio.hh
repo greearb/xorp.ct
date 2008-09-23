@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.30 2008/01/04 03:16:32 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.31 2008/07/23 05:10:49 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -416,11 +417,14 @@ protected:
 
     void write(XorpFd, IoEventType);
     void complete_transfer(ssize_t done);
+    static void sigpipe_handler(int sig);
 
     uint32_t		_coalesce;
     struct iovec* 	_iov;
     ref_ptr<int>	_dtoken;
     list<BufferInfo *> 	_buffers;
+
+    static bool		_writing;
 
 #ifdef HOST_OS_WINDOWS
     void disconnect(XorpFd fd, IoEventType type);
