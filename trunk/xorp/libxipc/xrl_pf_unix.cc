@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_unix.cc,v 1.1 2008/09/23 08:06:15 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_unix.cc,v 1.2 2008/09/23 19:58:18 abittau Exp $"
 
 #include "xrl_module.h"
 #include "xrl_pf_unix.hh"
@@ -25,8 +25,7 @@ const char* XrlPFUNIXListener::_protocol = "unix";
 XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
     : XrlPFSTCPListener(&e, xr)
 {
-    // XXX race, security.
-    string path = tmpnam(NULL);
+    string path = get_sock_path();
 
     _sock = comm_bind_unix(path.c_str(), COMM_SOCK_NONBLOCKING);
     if (!_sock.is_valid())
@@ -44,6 +43,27 @@ XrlPFUNIXListener::XrlPFUNIXListener(EventLoop& e, XrlDispatcher* xr)
     _eventloop.add_ioevent_cb(_sock, IOT_ACCEPT,
          callback(dynamic_cast<XrlPFSTCPListener*>(this),
                   &XrlPFSTCPListener::connect_hook));
+}
+
+string
+XrlPFUNIXListener::get_sock_path()
+{
+    // XXX race
+    string path;
+    string err;
+
+    FILE* f = xorp_make_temporary_file("/tmp", "unix", path, err);
+    if (!f)
+	xorp_throw(XrlPFConstructorError, err);
+
+    fclose(f);
+
+    // XXX we shouldn't be compiling this under windows
+#ifndef HOST_OS_WINDOWS
+    unlink(path.c_str());
+#endif
+
+    return path;
 }
 
 XrlPFUNIXListener::~XrlPFUNIXListener()
