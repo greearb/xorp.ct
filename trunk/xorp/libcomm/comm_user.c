@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.33 2008/09/23 08:06:15 abittau Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.34 2008/09/23 19:58:19 abittau Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -769,7 +769,7 @@ static int
 comm_unix_setup(struct sockaddr_un* s_un, const char* path)
 {
     if (strlen(path) >= sizeof(s_un->sun_path)) {
-	XLOG_ERROR("UNIX socket path too long: %s [sz %d max %d]",
+	XLOG_ERROR("UNIX socket path too long: %s [sz %u max %u]",
 		   path, strlen(path), sizeof(s_un->sun_path));
 	return -1;
     }

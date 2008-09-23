@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.12 2008/09/23 08:03:09 abittau Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.13 2008/09/23 19:57:04 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -243,10 +243,10 @@ SP::sampler_time()
     return ret;
 }
 
-#if defined(__i386__) && defined(__GNUC__)
+#ifdef __HAVE_TSC__
 // XXX watch out on SMP systems - make sure u're always reading the same tsc
-// (i.e., same core running the process).  Or disable smp.
-// -sorbo.
+// (i.e., same core running the process - set affinity.  On Linux use taskset).
+// Or disable smp.  -sorbo
 SP::SAMPLE
 SP::sampler_tsc(void)
 {   
@@ -256,16 +256,17 @@ SP::sampler_tsc(void)
 
     return tsc;
 }
-
-SP::SAMPLER SP::_sampler = SP::sampler_tsc;
-#else
-SP::SAMPLER SP::_sampler = SP::sampler_time;
-#endif // i386 && GNUC
+#endif // __HAVE_TSC__
 
 namespace SP {
     SAMPLE      _samples[SP_MAX_SAMPLES];
     const char* _desc[SP_MAX_SAMPLES];
     unsigned    _samplec;
+#ifdef __HAVE_TSC__
+    SAMPLER	_sampler = SP::sampler_tsc;
+#else
+    SAMPLER	_sampler = SP::sampler_time;
+#endif // __HAVE_TSC__
 }
 
 void
@@ -300,7 +301,7 @@ SP::print_samples()
     printf("Absolute time\tElapsed time\tPercentage\tDescription\n");
 
     for (unsigned i = 0; i < _samplec; i++) {
-        printf("%llu\t", _samples[i]);
+        printf("%llu\t", (long long unsigned) _samples[i]);
 
         if (i != 0) {
             SAMPLE a, b, diff;
@@ -312,14 +313,15 @@ SP::print_samples()
 
             diff = b - a;
 
-            printf("%12llu\t%10.2f\t", diff, (double) diff / total * 100.0);
+            printf("%12llu\t%10.2f\t",
+		   (long long unsigned) diff, (double) diff / total * 100.0);
         } else
             printf("\t\t\t\t");
 
         printf("%s\n", _desc[i]);
     }
 
-    printf("Total %llu\n", (SAMPLE) total);
+    printf("Total %llu\n", (long long unsigned) total);
     printf("\n");
 
     _samplec = 0;

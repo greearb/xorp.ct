@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.14 2008/09/23 08:03:09 abittau Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.15 2008/09/23 19:57:04 abittau Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -295,6 +295,7 @@ namespace SP {
 
     SAMPLE  sampler_time();
 #if defined(__i386__) && defined(__GNUC__)
+#define __HAVE_TSC__
     SAMPLE  sampler_tsc();
 #endif
 } // namespace SP
