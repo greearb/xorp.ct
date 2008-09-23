@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.30 2008/09/23 08:04:01 abittau Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.31 2008/09/23 08:04:25 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -90,9 +90,8 @@ EventLoop::run()
     // bureaucracy again.  Because we (sometimes) have an outdated time() and
     // select() we could run low priority tasks instead of higher ones simply
     // because we don't know about them yet (need to call time or select to
-    // detect them).  For this reason, we only do a few "aggressive" runs.do a
-    // few "aggressive" runs.do a few "aggressive" runs.do a few "aggressive"
-    // runs.  -sorbo.
+    // detect them).  For this reason, we only do a few "aggressive" runs.
+    // -sorbo.
     int agressiveness = 5;
     while (more && agressiveness--)
 	more = do_work(false);

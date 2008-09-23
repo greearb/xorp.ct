@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.35 2008/09/23 08:02:26 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.36 2008/09/23 08:02:40 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -828,7 +828,7 @@ XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes)
 	    xorp_throw(BadName, s);
 
     } else {
-	_atom_name = s;
+	_atom_name.assign(s, sz);
 
 	if (!valid_name(_atom_name))
 	    xorp_throw(BadName, s);
@@ -986,10 +986,12 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
     }
     const char* text = reinterpret_cast<const char*>(buffer + sizeof(len));
     try {
+	string s(text, len);
+
 	if (_type == xrlatom_no_type)
-	    _mac = new Mac(string(text, len));
+	    _mac = new Mac(s);
 	else
-	    _mac->copy_in(buffer + sizeof(len), len);
+	    _mac->copy_in(s);
     }
     catch (const InvalidString&) {
 	_mac = 0;
@@ -1106,8 +1108,7 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
 	_list = new XrlAtomList;
 
     for (size_t i = 0; i < nelem; i++) {
-	XrlAtom& tmp = _list->modify(i);
-	size_t unpacked = tmp.unpack(buffer + used, buffer_bytes - used);
+	size_t unpacked = _list->modify(i, buffer + used, buffer_bytes - used);
 	if (unpacked == 0) {
 	    // Failed to unpack item
 	    delete _list;

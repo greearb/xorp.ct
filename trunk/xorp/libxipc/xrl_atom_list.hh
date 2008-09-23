@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.11 2008/07/23 05:10:45 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.12 2008/09/23 08:02:10 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_LIST_HH__
 #define __LIBXIPC_XRL_ATOM_LIST_HH__
@@ -99,10 +99,13 @@ public:
      */
     XrlAtomList(const string& s);
 
-    XrlAtom& modify(size_t item);
-    void     set_size(size_t size);
+    size_t  modify(size_t item, const uint8_t* buf, size_t len);
+    void    set_size(size_t size);
 
 private:
+    void    check_type(const XrlAtom& xa) throw (BadAtomType);
+    void    do_append(const XrlAtom& xa);
+
     list<XrlAtom> _list;
     size_t	  _size;
 };

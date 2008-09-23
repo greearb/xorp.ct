@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.20 2008/09/23 08:02:40 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.21 2008/09/23 08:02:53 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -82,6 +82,34 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
 	    throw is;
 	}
     }
+}
+
+Xrl::Xrl(const Xrl& x)
+{
+    copy(x);
+}
+
+Xrl&
+Xrl::operator=(const Xrl& rhs)
+{
+    copy(rhs);
+
+    return *this;
+}
+
+void
+Xrl::copy(const Xrl& x)
+{
+    _protocol	    = x._protocol;
+    _target	    = x._target;
+    _command	    = x._command;
+    _args	    = x.args();
+    _string_no_args = x._string_no_args;
+    _sna_atom	    = NULL;
+    _packed_bytes   = 0; // XXX could use this, but we need to init sna
+    _argp	    = &_args;
+    _to_finder	    = x._to_finder;
+    _resolved	    = x._resolved;
 }
 
 Xrl::~Xrl()

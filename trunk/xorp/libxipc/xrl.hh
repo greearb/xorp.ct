@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.22 2008/09/23 08:02:40 abittau Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.23 2008/09/23 08:02:53 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -84,6 +84,9 @@ public:
     Xrl() : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
             _resolved(NULL) {}
     ~Xrl();
+
+    Xrl(const Xrl& xrl);
+    Xrl& operator=(const Xrl& rhs);
 
     /**
      * Render Xrl as a string
@@ -175,6 +178,7 @@ public:
 private:
     const char* parse_xrl_path(const char* xrl_path);
     void        clear_cache();
+    void	copy(const Xrl& xrl);
 
 private:
     // if protocol != finder, target = protocol params

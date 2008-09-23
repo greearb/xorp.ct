@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.11 2008/07/23 05:10:45 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_list.cc,v 1.12 2008/09/23 08:02:40 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -40,12 +40,24 @@ XrlAtomList::prepend(const XrlAtom& xa) throw (BadAtomType)
 void
 XrlAtomList::append(const XrlAtom& xa) throw (BadAtomType)
 {
+    check_type(xa);
+    do_append(xa);
+}
+
+void
+XrlAtomList::check_type(const XrlAtom& xa) throw (BadAtomType)
+{
     if (_list.empty() == false && _list.front().type() != xa.type()) {
 	// Atom being appended is of different type to head
 	xorp_throw(BadAtomType,
 		   c_format("Head type = %d, added type %d\n",
 			    _list.front().type(), xa.type()));
     }
+}
+
+void
+XrlAtomList::do_append(const XrlAtom& xa)
+{
     _list.push_back(xa);
     _size++;
 }
@@ -86,6 +98,7 @@ XrlAtomList::remove(size_t itemno) throw (InvalidIndex)
 	itemno--;
     }
     _list.erase(i);
+    _size--;
 }
 
 size_t XrlAtomList::size() const
@@ -152,12 +165,15 @@ XrlAtomList::XrlAtomList(const string& s) : _size(0)
 	append(XrlAtom(start));
 }
 
-XrlAtom&
-XrlAtomList::modify(size_t idx)
+size_t
+XrlAtomList::modify(size_t idx, const uint8_t* buf, size_t len)
 {
+    bool added = false;
+
     if (_list.size() <= idx) {
 	XLOG_ASSERT(idx == _list.size());
-	append(XrlAtom());
+	do_append(XrlAtom());
+	added = true;
 
     } else if (size() <= idx) {
 	XLOG_ASSERT(idx == size());
@@ -165,8 +181,26 @@ XrlAtomList::modify(size_t idx)
     }
 
     const XrlAtom& a = get(idx);
+    XrlAtom& atom = const_cast<XrlAtom&>(a); 
 
-    return const_cast<XrlAtom&>(a); 
+    size_t rc = atom.unpack(buf, len);
+
+    // gotta make sure the type is right, and that it was unpacked correctly
+    if (added) {
+	if (!rc)
+	    remove(idx);
+	else {
+	    try {
+		check_type(atom);
+	    } catch (const BadAtomType& ex) {
+		remove(idx);
+
+		throw ex;
+	    }
+	}
+    }
+
+    return rc;
 }
 
 void

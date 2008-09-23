@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_task.cc,v 1.6 2008/01/04 03:16:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_task.cc,v 1.7 2008/07/23 05:10:56 pavlin Exp $"
 
 //
 // Demo program to test tasks and event loops.
@@ -52,7 +53,20 @@ public:
 	XLOG_ASSERT(_eventloop.events_pending() == false);
 	debug_msg("counter1 = %d counter2 = %d counter3 = %d\n",
 		  _counter1, _counter2, _counter3);
-	return (_counter1 == 10 && _counter2 == 20 && _counter3 == 1);
+
+	// handler1 must be run exactly once
+	if (_counter3 != 1 || _counter1 == 0 || _counter2 == 0)
+	    return false;
+
+	// handler2 must run twice as frequently as handler1.  There could be an
+	// error of at most 2 because handler1 could have run and we could have
+	// stopped before getting a chance of running handler2.
+	int err = _counter1 * 2 - _counter2;
+	if (err > 2 || err < 0)
+	    return false;
+
+	// XXX could return true, but lets hardcode values for safety.
+	return (_counter1 == 62 && _counter2 == 123 && _counter3 == 1);
     }
 
     bool test_priority1() {
@@ -72,7 +86,17 @@ public:
 	XLOG_ASSERT(_eventloop.events_pending() == false);
 	debug_msg("counter1 = %d counter2 = %d counter3 = %d\n",
 		  _counter1, _counter2, _counter3);
-	return (_counter1 == 11 && _counter2 == 0 && _counter3 == 0);
+
+	// task 3 and 2 must be starved
+	if (_counter2 > 0 || _counter3 > 0)
+	    return false;
+
+	// task 1 must get all runs
+	if (_counter1 == 0)
+	    return false;
+
+	// XXX could return true.
+	return (_counter1 == 66 && _counter2 == 0 && _counter3 == 0);
     }
 
     bool test_priority2() {
@@ -92,7 +116,21 @@ public:
 	XLOG_ASSERT(_eventloop.events_pending() == false);
 	debug_msg("counter1 = %d counter2 = %d counter3 = %d\n",
 		  _counter1, _counter2, _counter3);
-	return (_counter1 == 10 && _counter2 == 5 && _counter3 == 1);
+
+	// task 1 and 3 must complete
+	if (_counter1 != 10 || _counter3 != 1)
+	    return false;
+
+	// task 2 must get the rest of the cycles
+	int cycles = 16;
+	cycles    *= 6; // runs per event loop
+	cycles    -= _counter1 + _counter3;
+
+	if (_counter2 != cycles)
+	    return false;
+
+	// XXX could return true
+	return (_counter1 == 10 && _counter2 == 85 && _counter3 == 1);
     }
 
     bool handler1() {
