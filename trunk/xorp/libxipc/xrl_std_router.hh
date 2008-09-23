@@ -13,13 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.19 2008/09/23 08:06:37 abittau Exp $
+// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.20 2008/09/23 08:06:55 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_STD_ROUTER_HH__
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
 
 #include "xrl_router.hh"
 #include "xrl_pf.hh"
+
+#define UNIX_SOCKET_DEFAULT true
 
 /**
  * @short Standard XRL transmission and reception point.
@@ -31,30 +33,35 @@
  */
 class XrlStdRouter : public XrlRouter {
 public:
-    XrlStdRouter(EventLoop& eventloop, const char* class_name);
-
-    XrlStdRouter(EventLoop&	eventloop,
-		 const char*	class_name,
-		 IPv4		finder_address);
+    XrlStdRouter(EventLoop& eventloop, const char* class_name,
+		 bool unix_socket = UNIX_SOCKET_DEFAULT);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 IPv4		finder_address,
-		 uint16_t	finder_port);
+		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
-		 const char*	finder_address);
+		 IPv4		finder_address,
+		 uint16_t	finder_port,
+		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
     XrlStdRouter(EventLoop&	eventloop,
 		 const char*	class_name,
 		 const char*	finder_address,
-		 uint16_t	finder_port);
+		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
+
+    XrlStdRouter(EventLoop&	eventloop,
+		 const char*	class_name,
+		 const char*	finder_address,
+		 uint16_t	finder_port,
+		 bool		unix_socket = UNIX_SOCKET_DEFAULT);
 
     ~XrlStdRouter();
 
 private:
-    void	   construct();
+    void	   construct(bool unix_socket);
     void	   create_unix_listener();
     XrlPFListener* create_listener();
 

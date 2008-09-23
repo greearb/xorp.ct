@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.15 2008/09/23 08:06:37 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.16 2008/09/23 08:06:55 abittau Exp $"
 
 #include "xrl_module.h"
 #include "xrl_std_router.hh"
@@ -64,55 +64,61 @@ destroy_listener(XrlPFListener*& l)
 // XrlStdRouter implementation
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name)
+			   const char*	class_name,
+			   bool		unix_socket)
     : XrlRouter(eventloop, class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
-    construct();    
-}
-
-XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
-			   const char*	class_name,
-			   IPv4		finder_address)
-    : XrlRouter(eventloop, class_name, finder_address,
-		FinderConstants::FINDER_DEFAULT_PORT())
-{
-    construct();
+    construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   const char*	class_name,
 			   IPv4		finder_address,
-			   uint16_t	finder_port)
-    : XrlRouter(eventloop, class_name, finder_address, finder_port)
+			   bool		unix_socket)
+    : XrlRouter(eventloop, class_name, finder_address,
+		FinderConstants::FINDER_DEFAULT_PORT())
 {
-    construct();
+    construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   const char*	class_name,
-			   const char*	finder_address)
-    : XrlRouter(eventloop, class_name, finder_address,
-		FinderConstants::FINDER_DEFAULT_PORT())
+			   IPv4		finder_address,
+			   uint16_t	finder_port,
+			   bool		unix_socket)
+    : XrlRouter(eventloop, class_name, finder_address, finder_port)
 {
-    construct();
+    construct(unix_socket);
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   const char*	class_name,
 			   const char*	finder_address,
-			   uint16_t	finder_port)
+			   bool		unix_socket)
+    : XrlRouter(eventloop, class_name, finder_address,
+		FinderConstants::FINDER_DEFAULT_PORT())
+{
+    construct(unix_socket);
+}
+
+XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
+			   const char*	class_name,
+			   const char*	finder_address,
+			   uint16_t	finder_port,
+			   bool		unix_socket)
     : XrlRouter(eventloop, class_name, finder_address, finder_port)
 {
-    construct();
+    construct(unix_socket);
 }
 
 void
-XrlStdRouter::construct()
+XrlStdRouter::construct(bool unix_socket)
 {
     _unix = _l = NULL;
 
-    create_unix_listener();
+    if (unix_socket)
+	create_unix_listener();
 
     _l = create_listener();
     add_listener(_l);
