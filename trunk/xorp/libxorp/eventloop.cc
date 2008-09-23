@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.27 2008/07/23 05:10:51 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.28 2008/09/23 07:59:41 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -95,9 +95,7 @@ EventLoop::run()
     if (_win_dispatcher.ready())
 	selector_priority = _win_dispatcher.get_ready_priority();
 #else
-    if (_selector_list.ready()) {
-	selector_priority = _selector_list.get_ready_priority();
-    }
+    selector_priority = _selector_list.get_ready_priority();
 #endif
 
     if (!_task_list.empty()) {

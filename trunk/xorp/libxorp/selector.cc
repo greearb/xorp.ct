@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.41 2008/01/04 03:16:39 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.42 2008/07/23 05:10:54 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -317,23 +317,26 @@ SelectorList::ready()
 }
 
 int
-SelectorList::get_ready_priority()
+SelectorList::do_select(struct timeval* to, bool force)
 {
-    fd_set testfds[SEL_MAX_IDX];
-    int n = 0;
+    // Use previous results from select if possible
+    if (!force) {
+	if (_testfds_n > 0)
+	    return _testfds_n;
+    }
 
-    memcpy(testfds, _fds, sizeof(_fds));
-    struct timeval tv_zero;
-    tv_zero.tv_sec = 0;
-    tv_zero.tv_usec = 0;
+    memcpy(_testfds, _fds, sizeof(_fds));
 
-    n = ::select(_maxfd + 1,
-		 &testfds[SEL_RD_IDX],
-		 &testfds[SEL_WR_IDX],
-		 &testfds[SEL_EX_IDX],
-		 &tv_zero);
+    _testfds_n = ::select(_maxfd + 1,
+		          &_testfds[SEL_RD_IDX],
+		          &_testfds[SEL_WR_IDX],
+		          &_testfds[SEL_EX_IDX],
+		          to);
 
-    if (n < 0) {
+    if (!to || to->tv_sec > 0)
+	    _clock->advance_time();
+
+    if (_testfds_n < 0) {
 	switch (errno) {
 	case EBADF:
 	    callback_bad_descriptors();
@@ -350,86 +353,68 @@ SelectorList::get_ready_priority()
 	    XLOG_ERROR("SelectorList::ready() failed: %s", strerror(errno));
 	    break;
 	}
-	return XorpTask::PRIORITY_INFINITY;
     }
-    if (n == 0)
+
+    return _testfds_n;
+}
+
+int
+SelectorList::get_ready_priority()
+{
+    struct timeval tv_zero;
+    tv_zero.tv_sec = 0;
+    tv_zero.tv_usec = 0;
+
+    if (do_select(&tv_zero, true) <= 0)
 	return XorpTask::PRIORITY_INFINITY;
 
     int max_priority = XorpTask::PRIORITY_INFINITY;
 
     for (int fd = 0; fd <= _maxfd; fd++) {
 	for (int sel_idx = 0; sel_idx < SEL_MAX_IDX; sel_idx++) {
-	    if (FD_ISSET(fd, &testfds[sel_idx])) {
+	    if (FD_ISSET(fd, &_testfds[sel_idx])) {
 		int p = _selector_entries[fd]._priority[sel_idx];
 		if (p < max_priority)
 		    max_priority = p;
 	    }
 	}
     }
+
     return max_priority;
 }
 
 int
 SelectorList::wait_and_dispatch(TimeVal& timeout)
 {
-    fd_set testfds[SEL_MAX_IDX];
     int n = 0;
 
-    memcpy(testfds, _fds, sizeof(_fds));
-
-    if (timeout == TimeVal::MAXIMUM()) {
-	n = ::select(_maxfd + 1,
-		     &testfds[SEL_RD_IDX],
-		     &testfds[SEL_WR_IDX],
-		     &testfds[SEL_EX_IDX],
-		     0);
-    } else {
+    // get_ready_priority() must be called before wait_and_dispatch() because
+    // we're using cached select results.  -sorbo
+    if (timeout == TimeVal::MAXIMUM())
+	n = do_select(NULL, false);
+    else {
 	struct timeval tv_to;
 	timeout.copy_out(tv_to);
-	n = ::select(_maxfd + 1,
-		     &testfds[SEL_RD_IDX],
-		     &testfds[SEL_WR_IDX],
-		     &testfds[SEL_EX_IDX],
-		     &tv_to);
+
+	n = do_select(&tv_to, false);
     }
 
-    _clock->advance_time();
-
-    if (n < 0) {
-	switch (errno) {
-	case EBADF:
-	    callback_bad_descriptors();
-	    break;
-	case EINVAL:
-	    XLOG_FATAL("Bad select argument (probably timeval)");
-	    break;
-	case EINTR:
-	    // The system call was interrupted by a signal, hence return
-	    // immediately to the event loop without printing an error.
-	    debug_msg("SelectorList::wait_and_dispatch() interrupted "
-		      "by a signal\n");
-	    break;
-	default:
-	    XLOG_ERROR("SelectorList::wait_and_dispatch() failed: %s",
-		       strerror(errno));
-	    break;
-	}
+    if (n <= 0)
 	return 0;
-    }
 
     for (int fd = 0; fd <= _maxfd; fd++) {
 	int mask = 0;
-	if (FD_ISSET(fd, &testfds[SEL_RD_IDX])) {
+	if (FD_ISSET(fd, &_testfds[SEL_RD_IDX])) {
 	    mask |= SEL_RD;
-	    FD_CLR(fd, &testfds[SEL_RD_IDX]);	// paranoia
+	    FD_CLR(fd, &_testfds[SEL_RD_IDX]);	// paranoia
 	}
-	if (FD_ISSET(fd, &testfds[SEL_WR_IDX])) {
+	if (FD_ISSET(fd, &_testfds[SEL_WR_IDX])) {
 	    mask |= SEL_WR;
-	    FD_CLR(fd, &testfds[SEL_WR_IDX]);	// paranoia
+	    FD_CLR(fd, &_testfds[SEL_WR_IDX]);	// paranoia
 	}
-	if (FD_ISSET(fd, &testfds[SEL_EX_IDX])) {
+	if (FD_ISSET(fd, &_testfds[SEL_EX_IDX])) {
 	    mask |= SEL_EX;
-	    FD_CLR(fd, &testfds[SEL_EX_IDX]);	// paranoia
+	    FD_CLR(fd, &_testfds[SEL_EX_IDX]);	// paranoia
 	}
 	if (mask) {
 	    _selector_entries[fd].run_hooks(SelectorMask(mask), fd);
@@ -437,9 +422,9 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
     }
 
     for (int i = 0; i <= _maxfd; i++) {
-	assert(!FD_ISSET(i, &testfds[SEL_RD_IDX]));	// paranoia
-	assert(!FD_ISSET(i, &testfds[SEL_WR_IDX]));	// paranoia
-	assert(!FD_ISSET(i, &testfds[SEL_EX_IDX]));	// paranoia
+	assert(!FD_ISSET(i, &_testfds[SEL_RD_IDX]));	// paranoia
+	assert(!FD_ISSET(i, &_testfds[SEL_WR_IDX]));	// paranoia
+	assert(!FD_ISSET(i, &_testfds[SEL_EX_IDX]));	// paranoia
     }
 
     return n;

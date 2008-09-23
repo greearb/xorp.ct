@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.26 2008/01/04 03:16:39 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.27 2008/07/23 05:10:54 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -221,6 +222,8 @@ protected:
     void callback_bad_descriptors();
 
 private:
+    int do_select(struct timeval* to, bool force);
+
     SelectorList(const SelectorList&);			// not implemented
     SelectorList& operator=(const SelectorList&);	// not implemented
 
@@ -251,6 +254,8 @@ private:
     ClockBase*		_clock;
     SelectorListObserverBase * _observer;
     fd_set		_fds[SEL_MAX_IDX];
+    fd_set		_testfds[SEL_MAX_IDX];
+    int			_testfds_n;
 
     vector<Node>	_selector_entries;
     int			_maxfd;
