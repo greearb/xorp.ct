@@ -15,7 +15,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.68 2008/09/23 19:56:47 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.69 2008/09/23 19:57:55 abittau Exp $"
 
 #include "libxorp/xorp.h"
 

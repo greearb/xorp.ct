@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxipc/xrl_pf_unix.hh,v 1.1 2008/09/23 08:06:16 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_PF_UNIX_HH__
 #define __LIBXIPC_XRL_PF_UNIX_HH__

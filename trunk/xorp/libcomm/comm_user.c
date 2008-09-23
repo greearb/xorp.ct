@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.32 2008/04/22 13:53:02 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.33 2008/09/23 08:06:15 abittau Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.

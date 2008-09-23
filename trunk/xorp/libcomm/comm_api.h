@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.33 2008/07/07 11:27:07 bms Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.34 2008/09/23 08:06:14 abittau Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
