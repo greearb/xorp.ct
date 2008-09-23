@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.26 2008/09/23 08:06:37 abittau Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.27 2008/09/23 19:56:07 abittau Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
