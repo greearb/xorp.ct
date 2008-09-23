@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,15 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.16 2008/01/04 03:16:26 pavlin Exp $"
-
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.17 2008/07/23 05:10:44 pavlin Exp $"
 
 //
 // Test XRLs receiver.
 //
 
 #include "xrl_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -35,9 +34,8 @@
 #endif
 
 #include "libxipc/xrl_std_router.hh"
-
 #include "xrl/targets/test_xrls_base.hh"
-
+#include "test_receiver.hh"
 
 //
 // This is a receiver program for testing XRL performance. It is used
@@ -60,175 +58,6 @@
 // Define to 1 to exit after end of transmission
 //
 #define RECEIVE_DO_EXIT			0
-
-
-//
-// Local functions prototypes
-//
-static	void usage(const char *argv0, int exit_value);
-
-class TestReceiver : public XrlTestXrlsTargetBase {
-public:
-    TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router)
-	: XrlTestXrlsTargetBase(xrl_router),
-	  _eventloop(eventloop),
-	  _received_xrls(0),
-	  _done(false)
-    {}
-    ~TestReceiver() {}
-
-    bool done() const { return _done; }
-
-    void print_xrl_received() const {
-#if PRINT_DEBUG
-    	printf(".");
-	if (! (_received_xrls % 10000))
-	    printf("Received %u\n", XORP_UINT_CAST(_received_xrls));
-#endif // PRINT_DEBUG
-    }
-
-private:
-    XrlCmdError common_0_1_get_target_name(
-	// Output values,
-	string&	name) {
-
-	name = "TestReceiver";
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError common_0_1_get_version(
-	// Output values,
-	string&	version) {
-
-	version = "0.1";
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError common_0_1_get_status(
-	// Output values,
-	uint32_t&	status,
-	string&	reason) {
-	return XrlCmdError::OKAY();
-
-	reason = "Ready";
-	status = PROC_READY;
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError common_0_1_shutdown() {
-	// TODO: XXX: PAVPAVPAV: implement it!
-	return XrlCmdError::OKAY();
-    }
-
-
-    XrlCmdError test_xrls_0_1_start_transmission() {
-	_received_xrls = 0;
-	TimerList::system_gettimeofday(&_start_time);
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError test_xrls_0_1_end_transmission() {
-	TimerList::system_gettimeofday(&_end_time);
-	print_statistics();
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError test_xrls_0_1_add_xrl0() {
-	print_xrl_received();
-	_received_xrls++;
-	return XrlCmdError::OKAY();
-    }
-
-    XrlCmdError test_xrls_0_1_add_xrl1(
-	// Input values,
-	const string&	data1) {
-	print_xrl_received();
-	_received_xrls++;
-	return XrlCmdError::OKAY();
-	UNUSED(data1);
-    }
-
-    XrlCmdError test_xrls_0_1_add_xrl2(
-	// Input values,
-	const string&	data1,
-	const string&	data2) {
-	print_xrl_received();
-	_received_xrls++;
-	return XrlCmdError::OKAY();
-	UNUSED(data1);
-	UNUSED(data2);
-    }
-
-    XrlCmdError test_xrls_0_1_add_xrl9(
-	// Input values,
-	const bool&	data1,
-	const int32_t&	data2,
-	const IPv4&	data3,
-	const IPv4Net&	data4,
-	const IPv6&	data5,
-	const IPv6Net&	data6,
-	const Mac&	data7,
-	const string&	data8,
-	const vector<uint8_t>& data9) {
-	print_xrl_received();
-	_received_xrls++;
-	return XrlCmdError::OKAY();
-	UNUSED(data1);
-	UNUSED(data2);
-	UNUSED(data3);
-	UNUSED(data4);
-	UNUSED(data5);
-	UNUSED(data6);
-	UNUSED(data7);
-	UNUSED(data8);
-	UNUSED(data9);
-    }
-
-    XrlCmdError
-    test_xrls_0_1_add_xrlx(const XrlAtomList &)
-    {
-	print_xrl_received();
-	_received_xrls++;
-	return XrlCmdError::OKAY();
-    }
-
-    void print_statistics() {
-	TimeVal delta_time = _end_time - _start_time;
-
-	if (_received_xrls == 0) {
-	    printf("No XRLs received\n");
-	    return;
-	}
-	if (delta_time == TimeVal::ZERO()) {
-	    printf("Received %u XRLs; delta-time = %s secs\n",
-		   XORP_UINT_CAST(_received_xrls), delta_time.str().c_str());
-	    return;
-	}
-
-	double double_time = delta_time.get_double();
-	double speed = _received_xrls;
-	speed /= double_time;
-
-	printf("Received %u XRLs; delta_time = %s secs; speed = %f XRLs/s\n",
-	       XORP_UINT_CAST(_received_xrls),
-	       delta_time.str().c_str(), speed);
-
-#if RECEIVE_DO_EXIT
-	// XXX: if enabled, then exit after all XRLs have been received.
-	if (_exit_timer.scheduled() == false)
-	    _exit_timer = _eventloop.set_flag_after_ms(60000, &_done);
-#endif
-
-	return;
-    }
-
-    EventLoop&	_eventloop;
-    TimeVal	_start_time;
-    TimeVal	_end_time;
-    size_t	_received_xrls;
-    XorpTimer	_exit_timer;
-    bool	_done;
-};
 
 /**
  * usage:

@@ -182,7 +182,7 @@ test_xrl_parser_DEPENDENCIES = ./libfinder.la ./libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
 am_test_xrl_receiver_OBJECTS = test_xrl_receiver.$(OBJEXT) \
-	test_xrls_base.$(OBJEXT)
+	test_receiver.$(OBJEXT) test_xrls_base.$(OBJEXT)
 test_xrl_receiver_OBJECTS = $(am_test_xrl_receiver_OBJECTS)
 test_xrl_receiver_LDADD = $(LDADD)
 test_xrl_receiver_DEPENDENCIES = ./libfinder.la ./libxipc.la \
@@ -192,7 +192,8 @@ am_test_xrl_router_OBJECTS = test_xrl_router.$(OBJEXT)
 test_xrl_router_OBJECTS = $(am_test_xrl_router_OBJECTS)
 test_xrl_router_DEPENDENCIES = libfinder.la $(LDADD)
 am_test_xrl_sender_OBJECTS = test_xrl_sender.$(OBJEXT) \
-	test_xrls_xif.$(OBJEXT) test_xrls_base.$(OBJEXT)
+	test_receiver.$(OBJEXT) test_xrls_xif.$(OBJEXT) \
+	test_xrls_base.$(OBJEXT)
 test_xrl_sender_OBJECTS = $(am_test_xrl_sender_OBJECTS)
 test_xrl_sender_LDADD = $(LDADD)
 test_xrl_sender_DEPENDENCIES = ./libfinder.la ./libxipc.la \
@@ -438,11 +439,12 @@ test_finder_events_SOURCES = test_finder_events.cc \
 test_finder_events_LDADD = libfinder.la $(LDADD)
 test_finder_to_SOURCES = test_finder_to.cc
 test_finder_to_LDADD = libfinder.la $(LDADD)
-test_xrl_receiver_SOURCES = test_xrl_receiver.cc \
-	$(top_srcdir)/xrl/targets/test_xrls_base.hh \
+test_xrl_receiver_SOURCES = test_xrl_receiver.cc test_receiver.cc \
+	test_receiver.hh $(top_srcdir)/xrl/targets/test_xrls_base.hh \
 	$(top_srcdir)/xrl/targets/test_xrls_base.cc
 # XXX: extra source files if both sender and receiver are within same binary
-test_xrl_sender_SOURCES = test_xrl_sender.cc \
+test_xrl_sender_SOURCES = test_xrl_sender.cc test_receiver.cc \
+	test_xrl_sender.hh \
 	$(top_srcdir)/xrl/interfaces/test_xrls_xif.hh \
 	$(top_srcdir)/xrl/interfaces/test_xrls_xif.cc \
 	$(top_srcdir)/xrl/targets/test_xrls_base.hh \
@@ -715,6 +717,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_header.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_inproc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_lemming.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_receiver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_stcp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_stcppf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_sudp.Po@am__quote@

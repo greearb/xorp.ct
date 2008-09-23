@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.45 2006/08/16 22:47:47 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.46 2007/04/17 21:40:48 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -84,11 +84,13 @@ test_finder_events_LDADD	 = libfinder.la $(LDADD)
 test_finder_to_SOURCES		 = test_finder_to.cc
 test_finder_to_LDADD		 = libfinder.la $(LDADD)
 
-test_xrl_receiver_SOURCES	 = test_xrl_receiver.cc
+test_xrl_receiver_SOURCES	 = test_xrl_receiver.cc test_receiver.cc
+test_xrl_receiver_SOURCES	+= test_receiver.hh
 test_xrl_receiver_SOURCES	+= $(top_srcdir)/xrl/targets/test_xrls_base.hh
 test_xrl_receiver_SOURCES	+= $(top_srcdir)/xrl/targets/test_xrls_base.cc
 
-test_xrl_sender_SOURCES		 = test_xrl_sender.cc
+test_xrl_sender_SOURCES		 = test_xrl_sender.cc test_receiver.cc
+test_xrl_sender_SOURCES		+= test_xrl_sender.hh
 test_xrl_sender_SOURCES		+= $(top_srcdir)/xrl/interfaces/test_xrls_xif.hh
 test_xrl_sender_SOURCES		+= $(top_srcdir)/xrl/interfaces/test_xrls_xif.cc
 # XXX: extra source files if both sender and receiver are within same binary
