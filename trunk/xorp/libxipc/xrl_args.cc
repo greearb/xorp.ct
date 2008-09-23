@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.20 2008/09/23 08:01:15 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.21 2008/09/23 08:01:36 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -558,7 +558,7 @@ XrlArgs::operator[](uint32_t index) const
     const_iterator ai = _args.begin();
     while (index != 0 && ai != _args.end()) {
         index--;
-	ai++;
+	++ai;
     }
     if (ai == _args.end()) {
         throw out_of_range("XrlArgs");
