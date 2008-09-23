@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.17 2008/07/23 05:10:44 pavlin Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.18 2008/09/23 08:00:48 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -38,7 +38,7 @@ public:
 	const string&	command,
 	const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _args(args)
+	  _args(args), _sna_atom(NULL)
     {}
 
     /**
@@ -48,7 +48,7 @@ public:
 	const string&	command,
 	const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _args(args)
+	  _args(args), _sna_atom(NULL)
     {}
 
     /**
@@ -57,7 +57,8 @@ public:
     Xrl(const string& protocol,
 	const string& protocol_target,
 	const string& command)
-	: _protocol(protocol), _target(protocol_target), _command(command)
+	: _protocol(protocol), _target(protocol_target), _command(command),
+	  _sna_atom(NULL)
     {}
 
     /**
@@ -65,7 +66,8 @@ public:
      */
     Xrl(const string& target,
 	const string& command)
-	: _protocol(_finder_protocol), _target(target), _command(command)
+	: _protocol(_finder_protocol), _target(target), _command(command),
+	  _sna_atom(NULL)
     {}
 
     /**
@@ -73,7 +75,7 @@ public:
      */
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
-    Xrl() {}
+    Xrl() : _sna_atom(0) {}
     ~Xrl();
 
     /**
@@ -159,6 +161,8 @@ private:
     string	_command;
     mutable XrlArgs	_args; // XXX only for packed_bytes() and pack()
     mutable string	_string_no_args;
+    mutable XrlAtom*	_sna_atom;
+    mutable size_t	_packed_bytes;
 
     static const string _finder_protocol;
 };

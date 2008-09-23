@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.17 2008/06/14 23:37:59 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.18 2008/07/23 05:10:44 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -631,9 +632,13 @@ static const uint32_t PACKING_CHECK_CODE = 0xcc;
 static const uint32_t PACKING_MAX_COUNT	 = 0x00ffffff;
 
 size_t
-XrlArgs::packed_bytes() const
+XrlArgs::packed_bytes(XrlAtom* head) const
 {
     size_t total_bytes = 0;
+
+    if (head)
+	total_bytes += head->packed_bytes();
+
     for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {
 	total_bytes += ci->packed_bytes();
     }
@@ -641,7 +646,7 @@ XrlArgs::packed_bytes() const
 }
 
 size_t
-XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes) const
+XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
 {
     size_t total_bytes = 0;
 
@@ -652,6 +657,9 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes) const
 
     // Pack header
     uint32_t cnt = _args.size();
+    if (head)
+	cnt++;
+
     if (cnt > PACKING_MAX_COUNT) {
 	// log a message, bounds hit
 	return 0;
@@ -661,6 +669,16 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes) const
     header = htonl(header);
     memcpy(buffer, &header, sizeof(header));
     total_bytes += sizeof(header);
+
+    if (head) {
+	size_t atom_bytes = head->pack(buffer + total_bytes,
+				       buffer_bytes - total_bytes);
+
+	if (atom_bytes == 0)
+	    return 0;
+
+	total_bytes += atom_bytes;
+    }
 
     // Pack atoms
     for (const_iterator ci = _args.begin(); ci != _args.end(); ++ci) {

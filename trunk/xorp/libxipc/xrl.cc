@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.15 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.16 2008/09/23 08:00:48 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
 #include "xrl.hh"
 #include "xrl_tokens.hh"
+#include "libxorp/xlog.h"
 
 const string Xrl::_finder_protocol = "finder";
 
@@ -29,6 +30,8 @@ Xrl::parse_xrl_path(const char* c_str)
 
     // void cached string representation
     _string_no_args = "";
+    delete _sna_atom;
+    _sna_atom = NULL;
 
     // Extract protocol
     start = c_str;
@@ -63,7 +66,7 @@ Xrl::parse_xrl_path(const char* c_str)
     return start;
 }
 
-Xrl::Xrl(const char* c_str) throw (InvalidString)
+Xrl::Xrl(const char* c_str) throw (InvalidString) : _sna_atom(NULL)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);
@@ -83,6 +86,7 @@ Xrl::Xrl(const char* c_str) throw (InvalidString)
 
 Xrl::~Xrl()
 {
+    delete _sna_atom;
 }
 
 string
@@ -112,25 +116,21 @@ Xrl::is_resolved() const
 size_t
 Xrl::packed_bytes() const
 {
-    // Use XrlAtom packing as it's well tested.  Push Xrl path
-    // components to front of args list, compute packed size, then pop
-    // it off again.
-    XrlAtom xa(this->string_no_args());
-    _args.push_front(xa);
-    size_t packed_bytes = _args.packed_bytes();
-    _args.pop_front();
-    return packed_bytes;
+    if (!_sna_atom) {
+	_sna_atom = new XrlAtom(this->string_no_args());
+
+	_packed_bytes = _args.packed_bytes(_sna_atom);
+    }
+
+    return _packed_bytes;
 }
 
 size_t
 Xrl::pack(uint8_t* buffer, size_t buffer_bytes) const
 {
-    // See comment in packed_bytes() for an explanation.
-    XrlAtom xa(this->string_no_args());
-    _args.push_front(xa);
-    size_t packed_bytes = _args.pack(buffer, buffer_bytes);
-    _args.pop_front();
-    return packed_bytes;
+    XLOG_ASSERT(_sna_atom);
+
+    return _args.pack(buffer, buffer_bytes, _sna_atom);
 }
 
 size_t

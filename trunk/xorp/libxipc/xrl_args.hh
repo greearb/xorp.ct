@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.21 2008/06/15 00:11:50 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.22 2008/07/23 05:10:44 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -284,7 +285,7 @@ public:
      * Get number of bytes needed to pack atoms contained within
      * instance.
      */
-    size_t packed_bytes() const;
+    size_t packed_bytes(XrlAtom* head = NULL) const;
 
     /**
      * Pack contained atoms into a byte array.  The size of the byte
@@ -295,7 +296,8 @@ public:
      * @param buffer_bytes size of buffer.
      * @return size of packed data on success, 0 on failure.
      */
-    size_t pack(uint8_t* buffer, size_t buffer_bytes) const;
+    size_t pack(uint8_t* buffer, size_t buffer_bytes,
+                XrlAtom* head = NULL) const;
 
     /**
      * Unpack atoms from byte array into instance.  The atoms are
