@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.14 2008/09/23 08:06:16 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.15 2008/09/23 08:06:37 abittau Exp $"
 
 #include "xrl_module.h"
 #include "xrl_std_router.hh"
@@ -26,17 +26,22 @@
 // ----------------------------------------------------------------------------
 // Helper methods
 
-static XrlPFListener*
-create_listener(EventLoop& e, XrlDispatcher* d)
+XrlPFListener*
+XrlStdRouter::create_listener()
 {
     const char* pf = getenv("XORP_PF");
+
     if (pf != NULL) {
 	switch (pf[0]) {
 	case 'i':
-	    return new XrlPFInProcListener(e, d);
+	    return new XrlPFInProcListener(_e, this);
 
 	case 'u':
-	    return new XrlPFSUDPListener(e, d);
+	    return new XrlPFSUDPListener(_e, this);
+
+	case 'x':
+	    XLOG_ASSERT(_unix == NULL);
+	    return new XrlPFUNIXListener(_e, this);
 
 	default:
 	    XLOG_ERROR("Unknown PF %s\n", pf);
@@ -44,7 +49,8 @@ create_listener(EventLoop& e, XrlDispatcher* d)
 	    break;
 	}
     }
-    return new XrlPFSTCPListener(e, d);
+
+    return new XrlPFSTCPListener(_e, this);
 }
 
 static void
@@ -108,7 +114,7 @@ XrlStdRouter::construct()
 
     create_unix_listener();
 
-    _l = create_listener(_e, this);
+    _l = create_listener();
     add_listener(_l);
 }
 

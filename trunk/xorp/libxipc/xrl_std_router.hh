@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.18 2008/07/23 05:10:47 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.19 2008/09/23 08:06:37 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_STD_ROUTER_HH__
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
@@ -54,8 +54,9 @@ public:
     ~XrlStdRouter();
 
 private:
-    void construct();
-    void create_unix_listener();
+    void	   construct();
+    void	   create_unix_listener();
+    XrlPFListener* create_listener();
 
     XrlPFListener* _unix;
     XrlPFListener* _l;
