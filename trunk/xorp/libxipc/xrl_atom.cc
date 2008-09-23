@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.31 2008/06/14 23:37:59 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.32 2008/07/23 05:10:44 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -416,7 +416,7 @@ XrlAtom::copy(const XrlAtom& xa)
 void
 XrlAtom::discard_dynamic()
 {
-    if (_have_data) {
+    if (_own && _have_data) {
         switch (_type) {
         case xrlatom_no_type:
 	case xrlatom_boolean:
@@ -1285,4 +1285,15 @@ XrlAtom::valid_type(const string& s)
 {
     XrlAtomType t = resolve_xrlatom_name(s.c_str());
     return (t != xrlatom_no_type);
+}
+
+void
+XrlAtom::abandon_data()
+{
+    bool have_data = _have_data;
+
+    discard_dynamic();
+
+    _own       = false;
+    _have_data = have_data;
 }

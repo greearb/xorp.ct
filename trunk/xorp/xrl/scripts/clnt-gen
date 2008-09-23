@@ -65,19 +65,20 @@ def implement_send_xrl(cls, method_no, method, ifqname):
 
     s += "    static Xrl* x = NULL;\n"
     s += "\n"
-    s += "    if (!x)\n"
+    s += "    if (!x) {\n"
     s += "        x = new Xrl(dst_xrl_target_name, \"%s\");\n" % ifqname
+    for a in method.args():
+        s += "        x->args().add(\"%s\", %s);\n" % (a.name(), a.name())
+    s += "    }\n"
     s += "\n"
     s += "    XLOG_ASSERT(::strcmp(dst_xrl_target_name, x->target().c_str()) == 0);\n"
     s += "\n"
+    i = 0
     for a in method.args():
-        s += "    x->args().add(\"%s\", %s);\n" % (a.name(), a.name())
+        s += "    x->args().set_arg(%d, %s);\n" % (i, a.name())
+	i += 1
     s += "\n"
-    s += "    bool rc = _sender->send(*x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
-    s += "\n"
-    s += "    x->args().clear();\n"
-    s += "\n"
-    s += "    return rc;\n"
+    s += "    return _sender->send(*x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
     s += "}\n\n"
 
     return s

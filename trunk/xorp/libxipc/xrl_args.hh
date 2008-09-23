@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.22 2008/07/23 05:10:44 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.23 2008/09/23 08:01:02 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -314,6 +314,9 @@ public:
     // String serialization methods
     string str() const;
 
+    template <class T>
+    void set_arg(int idx, const T& arg);
+
 protected:
     void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);
 
@@ -558,6 +561,16 @@ XrlArgs::pop_back() throw (XrlAtomNotFound)
     if (_args.empty())
 	throw XrlAtomNotFound();
     _args.pop_back();
+}
+
+template <class T>
+inline void
+XrlArgs::set_arg(int idx, const T& arg)
+{
+    const XrlAtom& a = (*this)[idx]; // XXX we might want a vector now
+    XrlAtom& atom = const_cast<XrlAtom&>(a);
+
+    atom.set(arg);
 }
 
 #endif // __LIBXIPC_XRL_ARGS_HH__

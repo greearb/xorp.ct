@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.16 2008/06/14 23:37:59 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.17 2008/07/23 05:10:45 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -110,20 +111,20 @@ public:
 	string _name;
     };
 
-    XrlAtom() : _type(xrlatom_no_type), _have_data(false) {}
+    XrlAtom() : _type(xrlatom_no_type), _have_data(false), _own(true) {}
     ~XrlAtom();
 
     // type but no data constructors
     XrlAtom(XrlAtomType t)
-	: _type(t), _have_data(false) {}
+	: _type(t), _have_data(false), _own(true) {}
 
     XrlAtom(const string& name, XrlAtomType t) throw (BadName)
-	: _type(t), _have_data(false) {
+	: _type(t), _have_data(false), _own(true) {
 	set_name(name);
     }
 
     XrlAtom(const char* name, XrlAtomType t) throw (BadName)
-	: _type(t), _have_data(false) {
+	: _type(t), _have_data(false), _own(true) {
 	set_name(name);
     }
 
@@ -144,69 +145,73 @@ public:
 
     // int32 constructors
     explicit XrlAtom(const int32_t& value)
-	: _type(xrlatom_int32), _have_data(true), _i32val(value) {}
+	: _type(xrlatom_int32), _have_data(true), _own(true), _i32val(value) {}
 
     XrlAtom(const char* name, int32_t value) throw (BadName)
-	: _type(xrlatom_int32), _have_data(true), _i32val(value) {
+	: _type(xrlatom_int32), _have_data(true), _own(true) ,_i32val(value) {
 	set_name(name);
     }
 
     // bool constructors
     explicit XrlAtom(const bool& value)
-	: _type(xrlatom_boolean), _have_data(true), _boolean(value) {}
+	: _type(xrlatom_boolean), _have_data(true),
+	  _own(true), _boolean(value) {}
 
     XrlAtom(const char* name, bool value) throw (BadName)
-	: _type(xrlatom_boolean), _have_data(true), _boolean(value) {
+	: _type(xrlatom_boolean), _have_data(true),
+	  _own(true), _boolean(value) {
 	set_name(name);
     }
 
     // uint32 constructors
     explicit XrlAtom(const uint32_t& value)
-	: _type(xrlatom_uint32), _have_data(true), _u32val(value) {}
+	: _type(xrlatom_uint32), _have_data(true), _own(true), _u32val(value) {}
 
     XrlAtom(const char* name, uint32_t value) throw (BadName)
-	: _type(xrlatom_uint32), _have_data(true), _u32val(value) {
+	: _type(xrlatom_uint32), _have_data(true), _own(true), _u32val(value) {
 	set_name(name);
     }
 
     // ipv4 constructors
     explicit XrlAtom(const IPv4& addr)
-	: _type(xrlatom_ipv4), _have_data(true),
+	: _type(xrlatom_ipv4), _have_data(true), _own(true),
 	_ipv4(new IPv4(addr)) {}
 
     XrlAtom(const char* name, const IPv4& addr) throw (BadName)
-	: _type(xrlatom_ipv4), _have_data(true), _ipv4(new IPv4(addr)) {
+	: _type(xrlatom_ipv4), _have_data(true), _own(true),
+	_ipv4(new IPv4(addr)) {
 	set_name(name);
     }
 
     // ipv4net constructors
     explicit XrlAtom(const IPv4Net& subnet)
-	: _type(xrlatom_ipv4net), _have_data(true),
+	: _type(xrlatom_ipv4net), _have_data(true), _own(true),
 	_ipv4net(new IPv4Net(subnet)) {}
 
     XrlAtom(const char* name, const IPv4Net& subnet) throw (BadName)
-	: _type(xrlatom_ipv4net), _have_data(true),
+	: _type(xrlatom_ipv4net), _have_data(true), _own(true),
 	_ipv4net(new IPv4Net(subnet)) {
 	set_name(name);
     }
 
     // ipv6 constructors
     explicit XrlAtom(const IPv6& addr)
-	: _type(xrlatom_ipv6), _have_data(true),
+	: _type(xrlatom_ipv6), _have_data(true), _own(true),
 	_ipv6(new IPv6(addr)) {}
 
     XrlAtom(const char* name, const IPv6& addr) throw (BadName)
-	: _type(xrlatom_ipv6), _have_data(true), _ipv6(new IPv6(addr)) {
+	: _type(xrlatom_ipv6), _have_data(true), _own(true),
+	  _ipv6(new IPv6(addr)) {
 	set_name(name);
     }
 
     // ipv6 net constructors
     explicit XrlAtom(const IPv6Net& subnet)
-	: _type(xrlatom_ipv6net), _have_data(true),
+	: _type(xrlatom_ipv6net), _have_data(true), _own(true),
 	_ipv6net(new IPv6Net(subnet)) {}
 
     XrlAtom(const char* name, const IPv6Net& subnet) throw (BadName)
-	: _type(xrlatom_ipv6net), _have_data(true),
+	: _type(xrlatom_ipv6net), _have_data(true), _own(true),
 	_ipv6net(new IPv6Net(subnet)) {
 	set_name(name);
     }
@@ -214,7 +219,7 @@ public:
     // IPvX constructors - there is no underlying IPvX type
     // data is cast to IPv4 or IPv6.
     XrlAtom(const char* name, const IPvX& ipvx) throw (BadName)
-	: _have_data(true)
+	: _have_data(true), _own(true)
     {
 	set_name(name);
 	if (ipvx.is_ipv4()) {
@@ -231,7 +236,7 @@ public:
     // IPvXNet constructors - there is no underlying IPvXNet type
     // data is cast to IPv4Net or IPv6Net.
     XrlAtom(const char* name, const IPvXNet& ipvxnet) throw (BadName)
-	: _have_data(true)
+	: _have_data(true), _own(true)
     {
 	set_name(name);
 	if (ipvxnet.is_ipv4()) {
@@ -247,72 +252,73 @@ public:
 
     // mac constructors
     explicit XrlAtom(const Mac& mac)
-	: _type(xrlatom_mac), _have_data(true),
+	: _type(xrlatom_mac), _have_data(true), _own(true),
 	_mac(new Mac(mac)) {}
 
     XrlAtom(const char* name, const Mac& mac) throw (BadName)
-	: _type(xrlatom_mac), _have_data(true),
+	: _type(xrlatom_mac), _have_data(true), _own(true),
 	_mac(new Mac(mac)) {
 	set_name(name);
     }
 
     // text constructors
     explicit XrlAtom(const string& txt)
-	: _type(xrlatom_text), _have_data(true),
+	: _type(xrlatom_text), _have_data(true), _own(true),
         _text(new string(txt)) {}
 
     XrlAtom(const char* name, const string& txt) throw (BadName)
-	: _type(xrlatom_text), _have_data(true),
+	: _type(xrlatom_text), _have_data(true), _own(true),
         _text(new string(txt)) {
 	set_name(name);
     }
 
    // list constructors
     explicit XrlAtom(const XrlAtomList& l)
-	: _type(xrlatom_list), _have_data(true),
+	: _type(xrlatom_list), _have_data(true), _own(true),
 	_list(new XrlAtomList(l)) {}
 
     XrlAtom(const char* name, const XrlAtomList& l) throw (BadName)
-	: _type(xrlatom_list), _have_data(true), _list(new XrlAtomList(l)) {
+	: _type(xrlatom_list), _have_data(true), _own(true),
+	_list(new XrlAtomList(l)) {
 	set_name(name);
     }
 
     // binary
     XrlAtom(const char* name, const vector<uint8_t>& data)
-	: _type(xrlatom_binary), _have_data(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true),
 	  _binary(new vector<uint8_t>(data)) {
 	set_name(name);
     }
 
     XrlAtom(const char* name, const uint8_t* data, size_t data_bytes)
-	: _type(xrlatom_binary), _have_data(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true),
 	  _binary(new vector<uint8_t>(data, data + data_bytes)) {
 	set_name(name);
     }
 
     XrlAtom(const vector<uint8_t>& data)
-	: _type(xrlatom_binary), _have_data(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true),
 	  _binary(new vector<uint8_t>(data)) {}
 
     XrlAtom(const uint8_t* data, size_t data_bytes)
-	: _type(xrlatom_binary), _have_data(true),
+	: _type(xrlatom_binary), _have_data(true), _own(true),
 	  _binary(new vector<uint8_t>(data, data + data_bytes)) {}
 
     // int64 constructors
     explicit XrlAtom(const int64_t& value)
-	: _type(xrlatom_int64), _have_data(true), _i64val(value) {}
+	: _type(xrlatom_int64), _have_data(true), _own(true), _i64val(value) {}
 
     XrlAtom(const char* name, int64_t value) throw (BadName)
-	: _type(xrlatom_int64), _have_data(true), _i64val(value) {
+	: _type(xrlatom_int64), _have_data(true), _own(true), _i64val(value) {
 	set_name(name);
     }
 
     // uint64 constructors
     explicit XrlAtom(const uint64_t& value)
-	: _type(xrlatom_uint64), _have_data(true), _u64val(value) {}
+	: _type(xrlatom_uint64), _have_data(true), _own(true), _u64val(value) {}
 
     XrlAtom(const char* name, uint64_t value) throw (BadName)
-	: _type(xrlatom_uint64), _have_data(true), _u64val(value) {
+	: _type(xrlatom_uint64), _have_data(true), _own(true), _u64val(value) {
 	set_name(name);
     }
 
@@ -356,6 +362,31 @@ public:
 
     // ... Your type's accessor method here ...
 
+    // set methods
+#define SET(type, var, p)		    \
+    void set(const type& arg)		    \
+    {					    \
+	abandon_data();			    \
+					    \
+	type& a = const_cast<type&>(arg);   \
+	var = p a;			    \
+    }
+
+    SET(int32_t, _i32val, )
+    SET(uint32_t, _u32val, )
+    SET(int64_t, _i64val, )
+    SET(uint64_t, _u64val, )
+    SET(bool, _boolean, )
+    SET(IPv4, _ipv4, &)
+    SET(IPv4Net, _ipv4net, &)
+    SET(IPv6, _ipv6, &)
+    SET(IPv6Net, _ipv6net, &)
+    SET(Mac, _mac, &)
+    SET(string, _text, &)
+    SET(XrlAtomList, _list, &)
+    SET(vector<uint8_t>, _binary, &);
+#undef SET
+
     // Equality tests
     bool operator==(const XrlAtom& x) const;
 
@@ -375,6 +406,7 @@ public:
 private:
 
     void discard_dynamic();
+    void abandon_data();
     void type_and_data_okay(const XrlAtomType& t) const
 	throw (NoData, WrongType);
 
@@ -413,6 +445,7 @@ private:
     XrlAtomType	_type;
     bool	_have_data;
     string	_atom_name;
+    bool	_own;
 
     union {
 	bool		 _boolean;
