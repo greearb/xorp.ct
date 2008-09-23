@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.43 2008/09/23 08:00:33 abittau Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.44 2008/09/23 08:04:01 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -318,11 +318,13 @@ SelectorList::ready()
 }
 
 int
-SelectorList::do_select(struct timeval* to, bool /* force */)
+SelectorList::do_select(struct timeval* to)
 {
     // Always use cached results if we haven't yet dealt with all fds
     if (_testfds_n > 0)
         return _testfds_n;
+
+    _maxpri_fd = _maxpri_sel = -1;
 
     memcpy(_testfds, _fds, sizeof(_fds));
 
@@ -364,8 +366,11 @@ SelectorList::get_ready_priority()
     tv_zero.tv_sec = 0;
     tv_zero.tv_usec = 0;
 
-    if (do_select(&tv_zero, true) <= 0)
+    if (do_select(&tv_zero) <= 0)
 	return XorpTask::PRIORITY_INFINITY;
+
+    if (_maxpri_fd != -1)
+	return _selector_entries[_maxpri_fd]._priority[_maxpri_sel];
 
     int max_priority = XorpTask::PRIORITY_INFINITY;
 
@@ -373,8 +378,11 @@ SelectorList::get_ready_priority()
 	for (int sel_idx = 0; sel_idx < SEL_MAX_IDX; sel_idx++) {
 	    if (FD_ISSET(fd, &_testfds[sel_idx])) {
 		int p = _selector_entries[fd]._priority[sel_idx];
-		if (p < max_priority)
+		if (p <= max_priority) {
 		    max_priority = p;
+		    _maxpri_fd   = fd;
+		    _maxpri_sel  = sel_idx;
+		}
 	    }
 	}
     }
@@ -387,50 +395,50 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
 {
     int n = 0;
 
-    // get_ready_priority() must be called before wait_and_dispatch() because
-    // we're using cached select results.  -sorbo
     if (timeout == TimeVal::MAXIMUM())
-	n = do_select(NULL, false);
+	n = do_select(NULL);
     else {
 	struct timeval tv_to;
 	timeout.copy_out(tv_to);
 
-	n = do_select(&tv_to, false);
+	n = do_select(&tv_to);
     }
 
     if (n <= 0)
 	return 0;
 
-    // XXX we should only dispatch the selector with highest priority and
-    // return.  -sorbo
-    for (int fd = 0; fd <= _maxfd; fd++) {
-	int mask = 0;
-	if (FD_ISSET(fd, &_testfds[SEL_RD_IDX])) {
-	    mask |= SEL_RD;
-	    FD_CLR(fd, &_testfds[SEL_RD_IDX]);	// paranoia
-	}
-	if (FD_ISSET(fd, &_testfds[SEL_WR_IDX])) {
-	    mask |= SEL_WR;
-	    FD_CLR(fd, &_testfds[SEL_WR_IDX]);	// paranoia
-	}
-	if (FD_ISSET(fd, &_testfds[SEL_EX_IDX])) {
-	    mask |= SEL_EX;
-	    FD_CLR(fd, &_testfds[SEL_EX_IDX]);	// paranoia
-	}
-	if (mask) {
-	    _selector_entries[fd].run_hooks(SelectorMask(mask), fd);
-	}
+    get_ready_priority();
+
+    XLOG_ASSERT(_maxpri_fd != -1);
+    XLOG_ASSERT(FD_ISSET(_maxpri_fd, &_testfds[_maxpri_sel]));
+    FD_CLR(_maxpri_fd, &_testfds[_maxpri_sel]);
+
+    SelectorMask sm;
+
+    switch (_maxpri_sel) {
+    case SEL_RD_IDX:
+	sm = SEL_RD;
+	break;
+
+    case SEL_WR_IDX:
+	sm = SEL_WR;
+	break;
+
+    case SEL_EX_IDX:
+	sm = SEL_EX;
+	break;
+
+    default:
+	XLOG_ASSERT(false);
     }
 
-    for (int i = 0; i <= _maxfd; i++) {
-	assert(!FD_ISSET(i, &_testfds[SEL_RD_IDX]));	// paranoia
-	assert(!FD_ISSET(i, &_testfds[SEL_WR_IDX]));	// paranoia
-	assert(!FD_ISSET(i, &_testfds[SEL_EX_IDX]));	// paranoia
-    }
+    _selector_entries[_maxpri_fd].run_hooks(sm, _maxpri_fd);
 
-    _testfds_n = 0;
+    _maxpri_fd = -1;
+    _testfds_n--;
+    XLOG_ASSERT(_testfds_n >= 0);
 
-    return n;
+    return 1; // XXX what does the return value mean?
 }
 
 int

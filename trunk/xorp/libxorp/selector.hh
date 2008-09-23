@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.27 2008/07/23 05:10:54 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.28 2008/09/23 08:00:33 abittau Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -222,7 +222,7 @@ protected:
     void callback_bad_descriptors();
 
 private:
-    int do_select(struct timeval* to, bool force);
+    int do_select(struct timeval* to);
 
     SelectorList(const SelectorList&);			// not implemented
     SelectorList& operator=(const SelectorList&);	// not implemented
@@ -256,6 +256,8 @@ private:
     fd_set		_fds[SEL_MAX_IDX];
     fd_set		_testfds[SEL_MAX_IDX];
     int			_testfds_n;
+    int			_maxpri_fd;
+    int			_maxpri_sel;
 
     vector<Node>	_selector_entries;
     int			_maxfd;
