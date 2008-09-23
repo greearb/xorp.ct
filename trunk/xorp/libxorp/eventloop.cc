@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.28 2008/09/23 07:59:41 abittau Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.29 2008/09/23 08:00:33 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -73,7 +73,7 @@ EventLoop::run()
     if (last_ev_run == 0)
 	last_ev_run = t.sec();
 
-    time_t now = t.sec();
+    time_t now  = t.sec();
     time_t diff = now - last_ev_run;
 
     if (now - last_warned > 0 && (diff > MAX_ALLOWED)) {
@@ -81,15 +81,39 @@ EventLoop::run()
 	last_warned = now;
     }
 
+    // Sorry for the obfuscated code.  It basically means the following:
+    // bool more = do_work(you_can_block);
+    // while (more)
+    //      more = do_work(you_cannot_block);
+    //
+    // I.e., on the first run you can block, if there's more work todo, do it
+    // but don't block.  -sorbo
+    bool more = false;
+    do {
+	more = do_work(!more);
+    } while (more);
+
+    // select() could cause a large delay and will advance_time.  Re-read
+    // current time.  Maybe we can get rid of advance_time if timeout to select
+    // is small, or get rid of advance_time at the top of event loop.  -sorbo
+    _timer_list.current_time(t);
+    last_ev_run = t.sec();
+}
+
+bool
+EventLoop::do_work(bool can_block)
+{
+    TimeVal t;
+
+    _timer_list.current_time(t);
     _timer_list.get_next_delay(t);
 
-    int timer_priority = XorpTask::PRIORITY_INFINITY;
+    int timer_priority	  = XorpTask::PRIORITY_INFINITY;
     int selector_priority = XorpTask::PRIORITY_INFINITY;
-    int task_priority = XorpTask::PRIORITY_INFINITY;
+    int task_priority	  = XorpTask::PRIORITY_INFINITY;
 
-    if (t == TimeVal::ZERO()) {
+    if (t == TimeVal::ZERO())
 	timer_priority = _timer_list.get_expired_priority();
-    }
 
 #ifdef HOST_OS_WINDOWS
     if (_win_dispatcher.ready())
@@ -98,9 +122,8 @@ EventLoop::run()
     selector_priority = _selector_list.get_ready_priority();
 #endif
 
-    if (!_task_list.empty()) {
+    if (!_task_list.empty())
 	task_priority = _task_list.get_runnable_priority();
-    }
 
     debug_msg("Priorities: timer = %d selector = %d task = %d\n",
 	      timer_priority, selector_priority, task_priority);
@@ -128,6 +151,9 @@ EventLoop::run()
 	_task_list.run();
 
     } else {
+	if (!can_block)
+	    return false;
+
 	// there's nothing immediate to run, so go to sleep until the
 	// next selector or timer goes off
 #ifdef HOST_OS_WINDOWS
@@ -135,13 +161,10 @@ EventLoop::run()
 #else
 	_selector_list.wait_and_dispatch(t);
 #endif
+	// XXX return false if you want to be conservative.  -sorbo.
     }
 
-    // select() could cause a large delay and will advance_time.  Re-read
-    // current time.  Maybe we can get rid of advance_time if timeout to select
-    // is small, or get rid of advance_time at the top of event loop.  -sorbo
-    _timer_list.current_time(t);
-    last_ev_run = t.sec();
+    return true;
 }
 
 bool

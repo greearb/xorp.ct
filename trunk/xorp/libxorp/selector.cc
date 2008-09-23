@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.42 2008/07/23 05:10:54 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.43 2008/09/23 08:00:33 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -177,7 +177,8 @@ SelectorList::Node::is_empty()
 // SelectorList implementation
 
 SelectorList::SelectorList(ClockBase *clock)
-    : _clock(clock), _observer(NULL), _maxfd(0), _descriptor_count(0)
+    : _clock(clock), _observer(NULL), _testfds_n(0), _maxfd(0),
+      _descriptor_count(0)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
@@ -317,13 +318,11 @@ SelectorList::ready()
 }
 
 int
-SelectorList::do_select(struct timeval* to, bool force)
+SelectorList::do_select(struct timeval* to, bool /* force */)
 {
-    // Use previous results from select if possible
-    if (!force) {
-	if (_testfds_n > 0)
-	    return _testfds_n;
-    }
+    // Always use cached results if we haven't yet dealt with all fds
+    if (_testfds_n > 0)
+        return _testfds_n;
 
     memcpy(_testfds, _fds, sizeof(_fds));
 
@@ -402,6 +401,8 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
     if (n <= 0)
 	return 0;
 
+    // XXX we should only dispatch the selector with highest priority and
+    // return.  -sorbo
     for (int fd = 0; fd <= _maxfd; fd++) {
 	int mask = 0;
 	if (FD_ISSET(fd, &_testfds[SEL_RD_IDX])) {
@@ -426,6 +427,8 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
 	assert(!FD_ISSET(i, &_testfds[SEL_WR_IDX]));	// paranoia
 	assert(!FD_ISSET(i, &_testfds[SEL_EX_IDX]));	// paranoia
     }
+
+    _testfds_n = 0;
 
     return n;
 }
