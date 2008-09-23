@@ -29,7 +29,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.41 2008/04/24 15:20:26 bms Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.42 2008/07/23 05:10:56 pavlin Exp $"
 
 
 #include "libxorp_module.h"
@@ -549,7 +549,6 @@ TimerList::get_next_delay(TimeVal& tv) const
 	return false;
     } else {
 	TimeVal now;
-	_clock->advance_time();
 	_clock->current_time(now);
 	if (t->key > now) {
 	    // next event is in the future
