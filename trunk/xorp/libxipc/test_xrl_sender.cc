@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.31 2008/09/23 19:57:04 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.32 2008/09/23 19:57:55 abittau Exp $"
 
 //
 // Test XRLs sender.
