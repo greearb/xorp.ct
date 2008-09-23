@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_task.cc,v 1.7 2008/07/23 05:10:56 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_task.cc,v 1.8 2008/09/23 08:04:40 abittau Exp $"
 
 //
 // Demo program to test tasks and event loops.
@@ -66,7 +66,7 @@ public:
 	    return false;
 
 	// XXX could return true, but lets hardcode values for safety.
-	return (_counter1 == 62 && _counter2 == 123 && _counter3 == 1);
+	return (_counter1 == 10 && _counter2 == 20 && _counter3 == 1);
     }
 
     bool test_priority1() {
@@ -96,7 +96,7 @@ public:
 	    return false;
 
 	// XXX could return true.
-	return (_counter1 == 66 && _counter2 == 0 && _counter3 == 0);
+	return (_counter1 == 11 && _counter2 == 0 && _counter3 == 0);
     }
 
     bool test_priority2() {
@@ -122,15 +122,16 @@ public:
 	    return false;
 
 	// task 2 must get the rest of the cycles
+	int aggressiveness = 0; // eventloop's aggressiveness
 	int cycles = 16;
-	cycles    *= 6; // runs per event loop
+	cycles    *= 1 + aggressiveness; // runs per event loop
 	cycles    -= _counter1 + _counter3;
 
 	if (_counter2 != cycles)
 	    return false;
 
 	// XXX could return true
-	return (_counter1 == 10 && _counter2 == 85 && _counter3 == 1);
+	return (_counter1 == 10 && _counter2 == 5 && _counter3 == 1);
     }
 
     bool handler1() {

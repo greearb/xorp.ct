@@ -13,7 +13,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/contrib/olsr/test_routing1.py,v 1.5 2008/07/23 05:09:53 pavlin Exp $
+# $XORP: xorp/contrib/olsr/test_routing1.py,v 1.6 2008/09/23 08:04:39 abittau Exp $
 
 import getopt
 import sys
@@ -728,7 +728,7 @@ wait 5
 wait 9
 
 # XXX needed with aggressive eventloop?
-wait 1
+#wait 1
 
 #######################################################
 # Verify that TCs are seen at either extremity.
