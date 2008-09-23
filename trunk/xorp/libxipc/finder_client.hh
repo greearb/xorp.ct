@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_client.hh,v 1.23 2008/01/04 03:16:21 pavlin Exp $
+// $XORP: xorp/libxipc/finder_client.hh,v 1.24 2008/07/23 05:10:41 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_CLIENT_HH__
 #define __LIBXIPC_FINDER_CLIENT_HH__
@@ -35,17 +36,21 @@ class FinderClientObserver;
  */
 struct FinderDBEntry
 {
+    typedef list<Xrl> XRLS;
+
     FinderDBEntry(const string& key);
     FinderDBEntry(const string& key, const string& value);
 
-    const string& key() const		{ return _key; }
+    const string&	key() const	{ return _key; }
     const list<string>& values() const	{ return _values; }
-    list<string>& values()		{ return _values; }
-    void clear();
+    list<string>&	values()	{ return _values; }
+    const XRLS&		xrls() const;
+    void		clear();
 
 protected:
     string	 _key;
     list<string> _values;
+    mutable XRLS _xrls;
 };
 
 /**

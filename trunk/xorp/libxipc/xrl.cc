@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.16 2008/09/23 08:00:48 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.17 2008/09/23 08:01:02 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -32,6 +32,7 @@ Xrl::parse_xrl_path(const char* c_str)
     _string_no_args = "";
     delete _sna_atom;
     _sna_atom = NULL;
+    _packed_bytes = 0;
 
     // Extract protocol
     start = c_str;
@@ -66,7 +67,8 @@ Xrl::parse_xrl_path(const char* c_str)
     return start;
 }
 
-Xrl::Xrl(const char* c_str) throw (InvalidString) : _sna_atom(NULL)
+Xrl::Xrl(const char* c_str) throw (InvalidString) 
+		: _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);
@@ -93,8 +95,8 @@ string
 Xrl::str() const
 {
     string s = string_no_args();
-    if (_args.size()) {
-	return s + string(XrlToken::CMD_ARGS_SEP) + _args.str();
+    if (args().size()) {
+	return s + string(XrlToken::CMD_ARGS_SEP) + args().str();
     }
     return s;
 }
@@ -116,10 +118,11 @@ Xrl::is_resolved() const
 size_t
 Xrl::packed_bytes() const
 {
-    if (!_sna_atom) {
-	_sna_atom = new XrlAtom(this->string_no_args());
+    if (!_packed_bytes) {
+	    if (!_sna_atom)
+		_sna_atom = new XrlAtom(this->string_no_args());
 
-	_packed_bytes = _args.packed_bytes(_sna_atom);
+	    _packed_bytes = args().packed_bytes(_sna_atom);
     }
 
     return _packed_bytes;
@@ -130,26 +133,35 @@ Xrl::pack(uint8_t* buffer, size_t buffer_bytes) const
 {
     XLOG_ASSERT(_sna_atom);
 
-    return _args.pack(buffer, buffer_bytes, _sna_atom);
+    return args().pack(buffer, buffer_bytes, _sna_atom);
 }
 
 size_t
 Xrl::unpack(const uint8_t* buffer, size_t buffer_bytes)
 {
-    _args.clear();
+    args().clear();
 
-    size_t unpacked_bytes = _args.unpack(buffer, buffer_bytes);
+    size_t unpacked_bytes = args().unpack(buffer, buffer_bytes);
+
     if (unpacked_bytes == 0)
 	return 0;
 
-    const XrlAtom& xa = _args.front();
+    const XrlAtom& xa = args().front();
     if (xa.type() != xrlatom_text || xa.has_data() == false) {
-	_args.pop_front();
+	args().pop_front();
 	return 0;
     }
 
     parse_xrl_path(xa.text().c_str());
-    _args.pop_front();
+
+    args().pop_front();
 
     return unpacked_bytes;
+}
+
+void
+Xrl::set_args(const Xrl& xrl) const
+{
+    _packed_bytes = 0;
+    _argp = &xrl._args;
 }

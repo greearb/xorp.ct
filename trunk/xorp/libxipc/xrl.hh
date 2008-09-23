@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.18 2008/09/23 08:00:48 abittau Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.19 2008/09/23 08:01:02 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -38,7 +38,7 @@ public:
 	const string&	command,
 	const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _args(args), _sna_atom(NULL)
+	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
     {}
 
     /**
@@ -48,7 +48,7 @@ public:
 	const string&	command,
 	const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _args(args), _sna_atom(NULL)
+	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
     {}
 
     /**
@@ -58,7 +58,7 @@ public:
 	const string& protocol_target,
 	const string& command)
 	: _protocol(protocol), _target(protocol_target), _command(command),
-	  _sna_atom(NULL)
+	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
     {}
 
     /**
@@ -67,7 +67,7 @@ public:
     Xrl(const string& target,
 	const string& command)
 	: _protocol(_finder_protocol), _target(target), _command(command),
-	  _sna_atom(NULL)
+	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args)
     {}
 
     /**
@@ -75,7 +75,7 @@ public:
      */
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
-    Xrl() : _sna_atom(0) {}
+    Xrl() : _sna_atom(0), _packed_bytes(0), _argp(&_args) {}
     ~Xrl();
 
     /**
@@ -106,12 +106,12 @@ public:
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    XrlArgs& args()				{ return _args; }
+    XrlArgs& args()				{ return *_argp; }
 
     /**
      * Retrieve list of arguments associated with the XRL.
      */
-    const XrlArgs& args() const			{ return _args; }
+    const XrlArgs& args() const			{ return *_argp; }
 
     /**
      * Test the equivalence of two XRL's.
@@ -152,6 +152,8 @@ public:
      */
     size_t unpack(const uint8_t* buffer, size_t buffer_bytes);
 
+    void set_args(const Xrl& x) const;
+
 private:
     const char* parse_xrl_path(const char* xrl_path);
 
@@ -163,6 +165,7 @@ private:
     mutable string	_string_no_args;
     mutable XrlAtom*	_sna_atom;
     mutable size_t	_packed_bytes;
+    mutable XrlArgs*	_argp; // XXX shouldn't be mutable
 
     static const string _finder_protocol;
 };

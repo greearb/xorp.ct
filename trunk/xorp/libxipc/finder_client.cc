@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.36 2008/03/10 20:14:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.37 2008/07/23 05:10:41 pavlin Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -96,6 +97,21 @@ inline void
 FinderDBEntry::clear()
 {
     _values.erase(_values.begin(), _values.end());
+    _xrls.clear();
+}
+
+const FinderDBEntry::XRLS&
+FinderDBEntry::xrls() const
+{
+    if (_xrls.size() != _values.size()) {
+	for (list<string>::const_iterator i = _values.begin();
+	     i != _values.end(); ++i) {
+
+	    _xrls.push_back(Xrl(i->c_str()));
+	}
+    }
+
+    return _xrls;
 }
 
 

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.57 2008/03/10 20:14:45 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.58 2008/07/23 05:10:46 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -378,7 +379,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 			 bool  direct_call)
 {
     try {
-	Xrl x(dbe->values().front().c_str());
+	const Xrl& x = dbe->xrls().front();
 
 	XrlPFSender* s = 0;
 	list<XrlPFSender*>::iterator i;
@@ -418,8 +419,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	_senders.push_back(s);
 
     __got_sender:
-	Xrl tmp(xrl);
-	x.args().swap(tmp.args());
+    	x.set_args(xrl);
 	if (s) {
 	    trace_xrl("Sending ", x);
 	    return s->send(x, direct_call,

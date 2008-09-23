@@ -63,10 +63,21 @@ def implement_send_xrl(cls, method_no, method, ifqname):
     s = "\nbool\n%s::send_%s(%s\n)\n{\n" \
         % (cls, cpp_name(method.name()), csv(atypes))
 
-    s += "    Xrl x(dst_xrl_target_name, \"%s\");\n" % ifqname
+    s += "    static Xrl* x = NULL;\n"
+    s += "\n"
+    s += "    if (!x)\n"
+    s += "        x = new Xrl(dst_xrl_target_name, \"%s\");\n" % ifqname
+    s += "\n"
+    s += "    XLOG_ASSERT(::strcmp(dst_xrl_target_name, x->target().c_str()) == 0);\n"
+    s += "\n"
     for a in method.args():
-        s += "    x.args().add(\"%s\", %s);\n" % (a.name(), a.name())
-    s += "    return _sender->send(x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
+        s += "    x->args().add(\"%s\", %s);\n" % (a.name(), a.name())
+    s += "\n"
+    s += "    bool rc = _sender->send(*x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
+    s += "\n"
+    s += "    x->args().clear();\n"
+    s += "\n"
+    s += "    return rc;\n"
     s += "}\n\n"
 
     return s

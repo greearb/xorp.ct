@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.18 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.19 2008/09/23 08:01:02 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -710,16 +710,18 @@ XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
     uint32_t cnt = header & PACKING_MAX_COUNT;
     size_t used_bytes = sizeof(header);
-    list<XrlAtom> atoms;
+    int added = 0;
 
     while (cnt != 0) {
-	atoms.push_back(XrlAtom());
-	XrlAtom& atom = atoms.back();
+	_args.push_back(XrlAtom());
+	added++;
+
+	XrlAtom& atom = _args.back();
+
 	size_t atom_bytes = atom.unpack(buffer + used_bytes,
 					buffer_bytes - used_bytes);
-	if (atom_bytes == 0) {
-	    return 0;
-	}
+	if (atom_bytes == 0)
+	    goto __error;
 
 	used_bytes += atom_bytes;
 	--cnt;
@@ -729,12 +731,15 @@ XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	    break;
 	}
     }
-    if (cnt != 0) {
+    if (cnt != 0)
 	// Unexpected truncation
-	return 0;
-    }
+	goto __error;
 
-    // Append atoms unpacked to existing atoms list
-    _args.splice(_args.end(), atoms);
     return used_bytes;
+
+__error:
+    while (added--)
+	_args.pop_back();
+
+    return 0;
 }
