@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.11 2008/07/23 05:10:53 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.12 2008/09/23 08:03:09 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
