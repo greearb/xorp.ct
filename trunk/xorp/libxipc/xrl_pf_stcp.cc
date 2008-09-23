@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -14,7 +15,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.61 2008/05/05 10:47:06 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.62 2008/07/23 05:10:46 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -127,6 +128,9 @@ public:
     bool response_pending() const;
 
 private:
+    XrlError do_dispatch(const uint8_t* packed_xrl, size_t packed_xrl_bytes,
+                         XrlArgs& response);
+
     XrlPFSTCPListener& _parent;
     XorpFd _sock;
 
@@ -212,36 +216,64 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
     _reader.set_trigger_bytes(STCPPacketHeader::header_size());
 }
 
+XrlError
+STCPRequestHandler::do_dispatch(const uint8_t* packed_xrl,
+			        size_t packed_xrl_bytes,
+			        XrlArgs& response)
+{
+    static XrlError e(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
+
+    const XrlDispatcher* d = _parent.dispatcher();
+    assert(d != 0);
+
+    string command;
+    size_t cmdsz = Xrl::unpack_command(command, packed_xrl, packed_xrl_bytes);
+
+    if (!cmdsz)
+	return e;
+
+    XrlDispatcher::XI* xi = d->lookup_xrl(command);
+    if (!xi)
+	return e;
+
+    Xrl& xrl = xi->_xrl;
+
+    try {
+	if (xi->_new) {
+	    if (xrl.unpack(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
+		return e;
+
+	    xi->_new = false;
+	} else {
+	    packed_xrl       += cmdsz;
+	    packed_xrl_bytes -= cmdsz;
+
+	    if (xrl.fill(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
+		return e;
+	}
+    } catch (...) {
+	return e;
+    }
+
+    return d->dispatch_xrl_fast(*xi, response);
+}
+
 void
 STCPRequestHandler::dispatch_request(uint32_t 		seqno,
 				     const uint8_t* 	packed_xrl,
 				     size_t 		packed_xrl_bytes)
 {
-    const XrlDispatcher* d = _parent.dispatcher();
-    assert(d != 0);
-
-    Xrl xrl;
-    bool unpack_failed = false;
-    try {
-	if (xrl.unpack(packed_xrl, packed_xrl_bytes) != packed_xrl_bytes)
-	    unpack_failed = true;
-    } catch (...) {
-	unpack_failed = true;
-    }
-
-    XrlError e;
     XrlArgs response;
+    XrlError e;
 
-    if (unpack_failed == false) {
-	e = d->dispatch_xrl(xrl.command(), xrl.args(), response);
-    } else {
-	e = XrlError(XrlError::INTERNAL_ERROR().error_code(), "corrupt xrl");
-    }
+    e = do_dispatch(packed_xrl, packed_xrl_bytes, response);
 
     size_t xrl_response_bytes = response.packed_bytes();
     size_t note_bytes = e.note().size();
 
-    _responses.push_back(ReplyPacket(STCPPacketHeader::header_size() + note_bytes + xrl_response_bytes));
+    _responses.push_back(ReplyPacket(STCPPacketHeader::header_size()
+			 + note_bytes + xrl_response_bytes));
+
     _responses_size++;
     ReplyPacket& r = _responses.back();
 
@@ -460,6 +492,7 @@ public:
     {
 	size_t header_bytes = STCPPacketHeader::header_size();
 	size_t xrl_bytes = x.packed_bytes();
+
 	_b.resize(header_bytes + xrl_bytes);
 
 	// Prepare header
@@ -709,7 +742,9 @@ XrlPFSTCPSender::send(const Xrl&	x,
 
     debug_msg("Seqno %u send %s\n", XORP_UINT_CAST(_current_seqno),
 	      x.str().c_str());
-    send_request(new RequestState(this, _current_seqno++, x, cb));
+
+    RequestState* rs = new RequestState(this, _current_seqno++, x, cb);
+    send_request(rs);
 
     xassert(_requests_waiting.size() + _requests_sent.size() == _active_requests);
 
@@ -725,9 +760,8 @@ XrlPFSTCPSender::send_request(RequestState* rs)
     _active_requests ++;
     _writer->add_buffer(&buffer[0], buffer.size(),
 			callback(this, &XrlPFSTCPSender::update_writer));
-    if (_writer->running() == false) {
+    if (_writer->running() == false)
 	_writer->start();
-    }
 }
 
 void

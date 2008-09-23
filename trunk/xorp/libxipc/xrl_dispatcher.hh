@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_dispatcher.hh,v 1.8 2008/01/04 03:16:27 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_dispatcher.hh,v 1.9 2008/07/23 05:10:45 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_DISPATCHER_HH__
 #define __LIBXIPC_XRL_DISPATCHER_HH__
@@ -21,13 +22,24 @@
 
 class XrlDispatcher : public XrlCmdMap {
 public:
+    struct XI {
+	XI(const XrlCmdEntry* c) : _cmd(c), _new(true) {}
+
+	Xrl		    _xrl;
+	const XrlCmdEntry*  _cmd;
+	bool		    _new;
+    };
+
     XrlDispatcher(const char* class_name)
 	: XrlCmdMap(class_name)
     {}
     virtual ~XrlDispatcher() {}
-    virtual XrlError dispatch_xrl(const string& method_name,
-				  const XrlArgs& in,
-				  XrlArgs& out) const;
+
+    virtual XI*	       lookup_xrl(const string& name) const;
+    virtual XrlError   dispatch_xrl(const string& method_name,
+				    const XrlArgs& in,
+				    XrlArgs& out) const;
+    XrlError	       dispatch_xrl_fast(const XI& xi, XrlArgs& out) const;
 };
 
 #endif // __LIBXIPC_XRL_DISPATCHER_HH__

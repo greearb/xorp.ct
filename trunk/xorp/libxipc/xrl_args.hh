@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.23 2008/09/23 08:01:02 abittau Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.24 2008/09/23 08:01:36 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
@@ -33,8 +33,9 @@
 
 class XrlArgs {
 public:
-    typedef list<XrlAtom>::const_iterator const_iterator;
-    typedef list<XrlAtom>::iterator iterator;
+    typedef list<XrlAtom>   ATOMS;
+    typedef ATOMS::const_iterator const_iterator;
+    typedef ATOMS::iterator iterator;
 
     // Exceptions
     struct BadArgs : public XorpException {
@@ -311,6 +312,10 @@ public:
      */
     size_t unpack(const uint8_t* buffer, size_t buffer_bytes);
 
+    size_t fill(const uint8_t* buffer, size_t buffer_bytes);
+
+    static size_t unpack_header(uint32_t& cnt, const uint8_t* in, size_t len);
+
     // String serialization methods
     string str() const;
 
@@ -320,7 +325,7 @@ public:
 protected:
     void check_not_found(const XrlAtom &xa) throw (XrlAtomFound);
 
-    list<XrlAtom> _args;
+    ATOMS _args;
 };
 
 

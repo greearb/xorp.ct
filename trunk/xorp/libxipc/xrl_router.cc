@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.58 2008/07/23 05:10:46 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.59 2008/09/23 08:01:15 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -282,6 +282,8 @@ XrlRouter::~XrlRouter()
     if (_icnt == 0)
 	XrlPFSenderFactory::shutdown();
 
+    for (XIM::iterator i = _xi_cache.begin(); i != _xi_cache.end(); ++i)
+	delete i->second;
 }
 
 bool
@@ -588,6 +590,29 @@ XrlRouter::dispatch_xrl(const string&	method_name,
     }
     debug_msg("Could not find mapping for %s\n", method_name.c_str());
     return XrlError::NO_SUCH_METHOD();
+}
+
+XrlDispatcher::XI*
+XrlRouter::lookup_xrl(const string& name) const
+{
+    // fast path
+    XIM::const_iterator i = _xi_cache.find(name);
+
+    if (i != _xi_cache.end())
+	return i->second;
+
+    // slow path
+    string resolved;
+    if (_fc->query_self(name, resolved) != true)
+	return NULL;
+
+    XI* xi = XrlDispatcher::lookup_xrl(resolved);
+    if (!xi)
+	return NULL;
+
+    _xi_cache[name] = xi;
+
+    return xi;
 }
 
 IPv4

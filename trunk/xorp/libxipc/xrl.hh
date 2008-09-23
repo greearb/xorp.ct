@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.19 2008/09/23 08:01:02 abittau Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.20 2008/09/23 08:01:15 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -153,6 +153,10 @@ public:
     size_t unpack(const uint8_t* buffer, size_t buffer_bytes);
 
     void set_args(const Xrl& x) const;
+
+    size_t fill(const uint8_t* buffer, size_t buffer_bytes);
+
+    static size_t unpack_command(string& cmd, const uint8_t* in, size_t len);
 
 private:
     const char* parse_xrl_path(const char* xrl_path);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.32 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.33 2008/09/23 08:01:36 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -816,7 +816,24 @@ XrlAtom::unpack_name(const uint8_t* buffer, size_t buffer_bytes)
 	return 0;
     }
     const char* s = reinterpret_cast<const char*>(buffer + sizeof(sz));
-    set_name(string(s, sz).c_str());
+
+    // if we're recycling the atom, just make sure the name is the same
+    int name_size = _atom_name.size();
+
+    if (name_size) {
+	if (name_size != sz)
+	    xorp_throw(BadName, s);
+
+	if (::memcmp(_atom_name.c_str(), s, name_size) != 0)
+	    xorp_throw(BadName, s);
+
+    } else {
+	_atom_name = s;
+
+	if (!valid_name(_atom_name))
+	    xorp_throw(BadName, s);
+    }
+
     return sizeof(sz) + sz;
 }
 
@@ -860,8 +877,14 @@ size_t
 XrlAtom::unpack_ipv4(const uint8_t* b)
 {
     uint32_t a;
-    memcpy(&a, b, sizeof(a));
-    _ipv4 = new IPv4(a);
+
+    // XXX ntohl ?
+    if (_type == xrlatom_no_type) {
+	memcpy(&a, b, sizeof(a));
+	_ipv4 = new IPv4(a);
+    } else
+	_ipv4->copy_in(b);
+
     return sizeof(a);
 }
 
@@ -880,7 +903,12 @@ XrlAtom::unpack_ipv4net(const uint8_t* b)
     uint32_t a;
     memcpy(&a, b, sizeof(a));
     IPv4 v(a);
-    _ipv4net = new IPv4Net(v, b[sizeof(a)]);
+
+    if (_type == xrlatom_no_type)
+	_ipv4net = new IPv4Net(v, b[sizeof(a)]);
+    else
+	*_ipv4net = IPv4Net(v, b[sizeof(a)]);
+
     return sizeof(a) + sizeof(uint8_t);
 }
 
@@ -896,8 +924,13 @@ size_t
 XrlAtom::unpack_ipv6(const uint8_t* buffer)
 {
     uint32_t a[4];
-    memcpy(a, buffer, sizeof(a));
-    _ipv6 = new IPv6(a);
+    
+    if (_type == xrlatom_no_type) {
+	memcpy(a, buffer, sizeof(a));
+	_ipv6 = new IPv6(a);
+    } else
+	_ipv6->copy_in(buffer);
+
     return sizeof(a);
 }
 
@@ -916,7 +949,12 @@ XrlAtom::unpack_ipv6net(const uint8_t* buffer)
     uint32_t a[4];
     memcpy(a, buffer, sizeof(a));
     IPv6 v(a);
-    _ipv6net = new IPv6Net(v, buffer[sizeof(a)]);
+
+    if (_type == xrlatom_no_type)
+	_ipv6net = new IPv6Net(v, buffer[sizeof(a)]);
+    else
+	*_ipv6net = IPv6Net(v, buffer[sizeof(a)]);
+
     return sizeof(a) + sizeof(uint8_t);
 }
 
@@ -948,7 +986,10 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
     }
     const char* text = reinterpret_cast<const char*>(buffer + sizeof(len));
     try {
-	_mac = new Mac(string(text, len));
+	if (_type == xrlatom_no_type)
+	    _mac = new Mac(string(text, len));
+	else
+	    _mac->copy_in(buffer + sizeof(len), len);
     }
     catch (const InvalidString&) {
 	_mac = 0;
@@ -986,8 +1027,45 @@ XrlAtom::unpack_text(const uint8_t* buffer, size_t buffer_bytes)
 	return 0;
     }
     const char *text = reinterpret_cast<const char*>(buffer + sizeof(len));
-    _text = new string(text, len);
+
+    if (_type == xrlatom_no_type)
+	_text = new string(text, len);
+    else
+	_text->assign(text, len);
+
     return sizeof(len) + len;
+}
+
+size_t
+XrlAtom::peek_text(const char*& t, uint32_t& tl, const uint8_t* buf, size_t len)
+{
+    // XrlAtom header
+    if (len == 0)
+	return 0;
+
+    if (*buf != (xrlatom_text | DATA_PRESENT)) {
+	return 0;
+    }
+
+    buf++;
+    len--;
+
+    // Text header
+    if (len < sizeof(tl))
+	return 0;
+
+    tl = *(reinterpret_cast<const uint32_t*>(buf));
+    tl = ntohl(tl);
+
+    buf += sizeof(tl);
+    len -= sizeof(tl);
+
+    if (len < tl)
+	return 0;
+
+    t = reinterpret_cast<const char*>(buf);
+
+    return 1 + sizeof(tl) + tl;
 }
 
 size_t
@@ -1023,10 +1101,12 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
     nelem = ntohl(nelem);
     used += sizeof(nelem);
 
-    _list = new XrlAtomList;
+    // check if we're overwriting
+    if (_type == xrlatom_no_type)
+	_list = new XrlAtomList;
 
     for (size_t i = 0; i < nelem; i++) {
-	XrlAtom tmp;
+	XrlAtom& tmp = _list->modify(i);
 	size_t unpacked = tmp.unpack(buffer + used, buffer_bytes - used);
 	if (unpacked == 0) {
 	    // Failed to unpack item
@@ -1036,8 +1116,9 @@ XrlAtom::unpack_list(const uint8_t* buffer, size_t buffer_bytes)
 	}
 	used += unpacked;
 	assert(used <= buffer_bytes);
-	_list->append(tmp);
     }
+    _list->set_size(nelem);
+
     return used;
 }
 
@@ -1066,6 +1147,10 @@ XrlAtom::unpack_binary(const uint8_t* buffer, size_t buffer_bytes)
 	_binary = 0;
 	return 0;
     }
+    
+    if (_type != xrlatom_no_type)
+	delete _binary;
+
     _binary = new vector<uint8_t>(buffer + sizeof(len),
 				  buffer + sizeof(len) + len);
     return sizeof(len) + len;
@@ -1155,7 +1240,7 @@ XrlAtom::pack(uint8_t* buffer, size_t buffer_bytes) const
     }
     return packed_size;
 }
-
+extern void sampler(const char*);
 size_t
 XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 {
@@ -1169,7 +1254,9 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
     if (header & NAME_PRESENT) {
 	try {
+	    sampler("prename");
 	    size_t used = unpack_name(buffer + unpacked, buffer_bytes - unpacked);
+	    sampler("name");
 	    if (used == 0) {
 		debug_msg("Invalid name\n");
 		return 0;
@@ -1186,7 +1273,9 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 	if (t < xrlatom_start || t > xrlatom_end) {
 	    debug_msg("Type %d invalid\n", t);
 	}
-	_type = XrlAtomType(t);
+
+	XrlAtomType old_type = _type;
+	XrlAtomType type = _type = XrlAtomType(t);
 	_have_data = true;
 
 	debug_msg("Unpacked %u remain %u\n",
@@ -1199,13 +1288,16 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 		      XORP_UINT_CAST(buffer_bytes),
 		      XORP_UINT_CAST(packed_bytes()), _type);
 	    _have_data = false;
+	    _type = old_type;
 	    return 0;
 	}
+	_type = old_type;
 
 	// unpack
 	size_t used = 0;
-	switch (_type) {
+	switch (type) {
 	case xrlatom_no_type:
+	    _type = old_type;
 	    return 0;
 	case xrlatom_boolean:
 	    used = unpack_boolean(buffer + unpacked);
@@ -1245,8 +1337,10 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 
 	    // ... Your type here ...
 	}
+	_type = type;
 
 	if (used == 0) {
+	    _type = xrlatom_no_type;
 	    debug_msg("Blow! Data unpacking failed\n");
 	    _have_data = 0;
 	    return 0;

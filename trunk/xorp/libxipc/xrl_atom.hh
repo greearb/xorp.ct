@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.17 2008/07/23 05:10:45 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.18 2008/09/23 08:01:36 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -402,6 +402,9 @@ public:
     static XrlAtomType lookup_type(const string& s) {
 	return resolve_type_c_str(s.c_str());
     }
+
+    static size_t peek_text(const char*& t, uint32_t& tl,
+			    const uint8_t* buf, size_t len);
 
 private:
 

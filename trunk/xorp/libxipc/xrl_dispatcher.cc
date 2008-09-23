@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.12 2008/01/04 03:16:27 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_dispatcher.cc,v 1.13 2008/07/23 05:10:45 pavlin Exp $"
 
 #include "ipc_module.h"
 
@@ -58,4 +59,20 @@ XrlDispatcher::dispatch_xrl(const string&  method_name,
 
     trace_xrl_dispatch("dispatch_xrl (valid) ", method_name);
     return c->dispatch(inputs, &outputs);
+}
+
+XrlDispatcher::XI*
+XrlDispatcher::lookup_xrl(const string& name) const
+{
+    const XrlCmdEntry* c = get_handler(name.c_str());
+    if (!c)
+	return NULL;
+
+    return new XI(c);
+}
+
+XrlError
+XrlDispatcher::dispatch_xrl_fast(const XI& xi, XrlArgs& outputs) const
+{
+    return xi._cmd->dispatch(xi._xrl.args(), &outputs);
 }

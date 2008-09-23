@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.10 2008/01/04 03:16:26 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom_list.hh,v 1.11 2008/07/23 05:10:45 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_LIST_HH__
 #define __LIBXIPC_XRL_ATOM_LIST_HH__
@@ -98,8 +99,12 @@ public:
      */
     XrlAtomList(const string& s);
 
+    XrlAtom& modify(size_t item);
+    void     set_size(size_t size);
+
 private:
     list<XrlAtom> _list;
+    size_t	  _size;
 };
 
 #endif // __LIBXIPC_XRL_ATOM_LIST_HH__

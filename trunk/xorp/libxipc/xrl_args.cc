@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.21 2008/09/23 08:01:36 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.22 2008/09/23 08:01:56 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -696,22 +696,12 @@ XrlArgs::pack(uint8_t* buffer, size_t buffer_bytes, XrlAtom* head) const
 size_t
 XrlArgs::unpack(const uint8_t* buffer, size_t buffer_bytes)
 {
-    // Unpack header
-    if (buffer_bytes < 4)
-	return 0;
-
-    uint32_t header;
-    memcpy(&header, buffer, sizeof(header));
-    header = ntohl(header);
-
-    // Check header sanity
-    if ((header >> 24) != PACKING_CHECK_CODE) {
-	return 0;
-    }
-
-    uint32_t cnt = header & PACKING_MAX_COUNT;
-    size_t used_bytes = sizeof(header);
+    uint32_t cnt;
     int added = 0;
+    size_t used_bytes = unpack_header(cnt, buffer, buffer_bytes);
+
+    if (!used_bytes)
+	return 0;
 
     while (cnt != 0) {
 	_args.push_back(XrlAtom());
@@ -743,4 +733,44 @@ __error:
 	_args.pop_back();
 
     return 0;
+}
+
+size_t
+XrlArgs::unpack_header(uint32_t& cnt, const uint8_t* in, size_t len)
+{
+    // Unpack header
+    if (len < 4)
+	return 0;
+
+    uint32_t header = *(reinterpret_cast<const uint32_t*>(in));
+    header = ntohl(header);
+
+    // Check header sanity
+    if ((header >> 24) != PACKING_CHECK_CODE)
+	return 0;
+
+    cnt = header & PACKING_MAX_COUNT;
+
+    return sizeof(header);
+}
+
+size_t
+XrlArgs::fill(const uint8_t* in, size_t len)
+{
+    size_t tot = len;
+
+    for (ATOMS::iterator i = _args.begin(); i != _args.end(); ++i) {
+	XrlAtom& atom = *i;
+
+	size_t sz = atom.unpack(in, len);
+
+	if (sz == 0)
+	    return 0;
+
+	XLOG_ASSERT(sz <= len);
+	in  += sz;
+	len -= sz;
+    }
+
+    return tot - len;
 }

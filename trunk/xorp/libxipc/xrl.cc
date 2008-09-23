@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.17 2008/09/23 08:01:02 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.18 2008/09/23 08:01:15 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -164,4 +164,64 @@ Xrl::set_args(const Xrl& xrl) const
 {
     _packed_bytes = 0;
     _argp = &xrl._args;
+}
+
+size_t
+Xrl::unpack_command(string& cmd, const uint8_t* in, size_t len)
+{
+    size_t rc, used = 0;
+    uint32_t cnt;
+    const char* t;
+    uint32_t tl;
+    const char* p = NULL;
+
+    used += XrlArgs::unpack_header(cnt, in, len);
+    if (!used)
+	return 0;
+
+    if (cnt == 0)
+	return 0;
+
+    // We now expect a text atom representing the XRL path.
+    in  += used;
+    len -= used;
+
+    rc = XrlAtom::peek_text(t, tl, in, len);
+    if (rc == 0)
+	return 0;
+
+    used += rc;
+
+    // OK now we parse out the command.  We can't use libc functions because the
+    // string aint 0 terminated.
+    cnt = 0;
+    for (uint32_t i = 0; i < tl; i++) {
+	if (cnt == 3) {
+	    p = t;
+	    cnt++;
+	}
+
+	if (cnt == 4) {
+	    if (*p++ == '?') // end of command
+		break;
+
+	} else if (*t++ == '/') // find start of command
+	    cnt++;
+    }
+    if (!p)
+	return 0;
+
+    // XXX we don't sanity check protocol & target
+
+    cmd.assign(t, p - t);
+
+    return used;
+}
+
+size_t
+Xrl::fill(const uint8_t* in, size_t len)
+{
+    _packed_bytes = 0;
+
+    return args().fill(in, len);
 }
