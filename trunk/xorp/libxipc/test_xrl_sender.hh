@@ -13,14 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/test_xrl_sender.hh,v 1.1 2008/09/23 07:57:43 abittau Exp $
+// $XORP: xorp/libxipc/test_xrl_sender.hh,v 1.2 2008/09/23 07:59:16 abittau Exp $
 
 #ifndef __LIBXIPC_TEST_XRL_SENDER_HH__
 #define __LIBXIPC_TEST_XRL_SENDER_HH__
-
-#define MAX_SAMPLES 24
-
-typedef uint64_t SAMPLE;
 
 class TestSender {
 public:
@@ -35,7 +31,6 @@ public:
     void clear();
     void start_transmission();
     void start_transmission_process();
-    void add_sample(const char* desc);
 
 private:
     bool transmit_xrl_next();
@@ -50,7 +45,6 @@ private:
     void send_single_cb(const XrlError& err);
     void end_transmission();
     void end_transmission_cb(const XrlError& xrl_error);
-    void print_samples();
 
     EventLoop&			_eventloop;
     XrlTestXrlsV0p1Client	_test_xrls_client;
@@ -64,9 +58,6 @@ private:
     size_t			_next_xrl_recv_id;
     bool			_sent_end_transmission;
     bool			_done;
-    unsigned			_samplec;
-    SAMPLE			_samples[MAX_SAMPLES];
-    const char*			_sampled[MAX_SAMPLES];
 
     // Data to send
     bool			_my_bool;

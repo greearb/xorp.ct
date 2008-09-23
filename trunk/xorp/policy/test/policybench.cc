@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/policybench.cc,v 1.7 2008/08/06 08:12:39 abittau Exp $"
+#ident "$XORP: xorp/policy/test/policybench.cc,v 1.8 2008/08/06 08:30:58 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "policy/common/policy_utils.hh"
@@ -89,24 +89,6 @@ struct conf {
     BGP_VARRW*	    c_bgp_varrw;
     BGP_ROUTES**    c_bgp_routes;
 } _conf;
-
-#if defined(__i386__) && defined(__GNUC__)
-static PolicyProfiler::TU get_time(void)
-{
-    uint64_t tsc;
-
-    // Not always increment on my box.  I hit the assert in
-    // PolicyProfiler::stop() [and it's not because of wrapping].
-    // -sorbo
-    __asm__ volatile (".byte 0x0f, 0x31" : "=A" (tsc));
-
-    return tsc;
-}
-#define GET_TIME get_time
-
-#else
-#define GET_TIME NULL
-#endif // i386 && GNUC
 
 void
 usage(const string& progname)
@@ -330,9 +312,6 @@ main(int argc, char* argv[])
     xlog_disable(XLOG_LEVEL_TRACE);
     xlog_add_default_output();
     xlog_start();
-
-    if (_conf.c_profiler)
-	PolicyProfiler::set_get_time(GET_TIME);
 
     try {
 	own();

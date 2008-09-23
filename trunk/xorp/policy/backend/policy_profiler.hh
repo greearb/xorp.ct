@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_profiler.hh,v 1.2 2008/08/06 08:06:07 abittau Exp $
+// $XORP: xorp/policy/backend/policy_profiler.hh,v 1.3 2008/08/06 08:30:57 abittau Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_PROFILER_HH__
 #define __POLICY_BACKEND_POLICY_PROFILER_HH__
@@ -21,10 +21,8 @@
 class PolicyProfiler {
 public:
     typedef uint64_t	TU;
-    typedef TU (*GT)(void);
 
     static const unsigned int MAX_SAMPLES = 128;
-    static void set_get_time(GT x);
 
     PolicyProfiler();
 
@@ -37,7 +35,6 @@ public:
 private:
     TU		_samples[MAX_SAMPLES];
     unsigned	_samplec;
-    static GT   _gt;
     bool	_stopped;
 };
 

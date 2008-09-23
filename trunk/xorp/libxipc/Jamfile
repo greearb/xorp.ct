@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxipc/Jamfile,v 1.3 2007/04/20 07:17:43 pavlin Exp $
+# $XORP: xorp/libxipc/Jamfile,v 1.4 2008/04/24 15:20:25 bms Exp $
 #
 
 SubDir TOP libxipc ;
@@ -100,10 +100,12 @@ if $(MAKE_CHECK) {
 	;
  MainFromObjects test_xrl_receiver :
 	test_xrl_receiver$(SUFOBJ)
+	test_receiver$(SUFOBJ)
 	test_xrls_base$(SUFOBJ)
 	;
  MainFromObjects test_xrl_sender :
 	test_xrl_sender$(SUFOBJ)
+	test_receiver$(SUFOBJ)
 	test_xrls_xif$(SUFOBJ)
 	test_xrls_base$(SUFOBJ)
 	;

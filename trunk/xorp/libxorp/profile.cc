@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.10 2008/05/15 00:52:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.11 2008/07/23 05:10:53 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -226,3 +227,109 @@ Profile::list() const
     return for_each(_profiles.begin(), _profiles.end(), List()).result();
 }
 
+// simple profiler
+SP::SAMPLE
+SP::sampler_time()
+{
+    TimeVal tv;
+
+    TimerList::system_gettimeofday(&tv);
+
+    SAMPLE ret = tv.secs();
+
+    ret *= (SAMPLE) 1000000;
+    ret += (SAMPLE) tv.usec();
+
+    return ret;
+}
+
+#if defined(__i386__) && defined(__GNUC__)
+// XXX watch out on SMP systems - make sure u're always reading the same tsc
+// (i.e., same core running the process).  Or disable smp.
+// -sorbo.
+SP::SAMPLE
+SP::sampler_tsc(void)
+{   
+    uint64_t tsc;
+
+    __asm__ volatile (".byte 0x0f, 0x31" : "=A" (tsc));
+
+    return tsc;
+}
+
+SP::SAMPLER SP::_sampler = SP::sampler_tsc;
+#else
+SP::SAMPLER SP::_sampler = SP::sampler_time;
+#endif // i386 && GNUC
+
+namespace SP {
+    SAMPLE      _samples[SP_MAX_SAMPLES];
+    const char* _desc[SP_MAX_SAMPLES];
+    unsigned    _samplec;
+}
+
+void
+SP::set_sampler(SAMPLER sampler)
+{
+    _sampler = sampler;
+}
+
+void
+SP::add_sample(const char* desc)
+{
+    if (!_sampler)
+	return;
+
+    XLOG_ASSERT(_samplec < SP_MAX_SAMPLES);
+
+    _samples[_samplec] = _sampler();
+    _desc[_samplec]    = desc;
+
+    _samplec++;
+}
+
+void
+SP::print_samples()
+{
+    if (!_samplec)
+	return;
+
+    double total = _samples[_samplec - 1] - _samples[0];
+
+    printf("\n");
+    printf("Absolute time\tElapsed time\tPercentage\tDescription\n");
+
+    for (unsigned i = 0; i < _samplec; i++) {
+        printf("%llu\t", _samples[i]);
+
+        if (i != 0) {
+            SAMPLE a, b, diff;
+
+            a = _samples[i - 1];
+            b = _samples[i];
+
+            XLOG_ASSERT(a <= b);
+
+            diff = b - a;
+
+            printf("%12llu\t%10.2f\t", diff, (double) diff / total * 100.0);
+        } else
+            printf("\t\t\t\t");
+
+        printf("%s\n", _desc[i]);
+    }
+
+    printf("Total %llu\n", (SAMPLE) total);
+    printf("\n");
+
+    _samplec = 0;
+}
+
+SP::SAMPLE
+SP::sample()
+{
+    if (_sampler)
+	return _sampler();
+
+    return 0;
+}

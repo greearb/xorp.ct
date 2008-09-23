@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_receiver.cc,v 1.1 2008/09/23 07:57:43 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_receiver.cc,v 1.2 2008/09/23 07:59:16 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -23,6 +23,7 @@
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
+#include "libxorp/profile.hh"
 #include "libxorp/status_codes.h"
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/targets/test_xrls_base.hh"
@@ -30,12 +31,14 @@
 
 #define TIMEOUT_EXIT_MS 20000
 
+using namespace SP;
+
 TestReceiver::TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router)
 	: XrlTestXrlsTargetBase(xrl_router),
 	  _eventloop(eventloop),
 	  _received_xrls(0),
 	  _done(false),
-	  _sampler(NULL)
+	  _sample(false)
 {
 }
 
@@ -50,9 +53,9 @@ TestReceiver::done() const
 }
 
 void
-TestReceiver::set_sampler(SAMPLER s)
+TestReceiver::enable_sampler()
 {
-    _sampler = s;
+    _sample = true;
 }
 
 void
@@ -181,8 +184,8 @@ TestReceiver::test_xrls_0_1_add_xrl9(
 XrlCmdError
 TestReceiver::test_xrls_0_1_add_xrlx(const XrlAtomList &)
 {
-    if (_sampler)
-	_sampler("XRL received");
+    if (_sample)
+	add_sample("XRL received");
 
     print_xrl_received();
     _received_xrls++;

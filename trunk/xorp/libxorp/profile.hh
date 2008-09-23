@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.12 2008/01/04 03:16:38 pavlin Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.13 2008/07/23 05:10:53 pavlin Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -279,5 +280,23 @@ class ProfileUtils {
     ProfileUtils(const ProfileUtils&);
 };
 #endif // PROFILE_UTILS_REQUIRED
+
+// simple but fast profiling support
+#define SP_MAX_SAMPLES	128
+
+namespace SP {
+    typedef uint64_t	SAMPLE;
+    typedef SAMPLE (*SAMPLER)(void);
+
+    void    set_sampler(SAMPLER sampler);
+    void    add_sample(const char* desc);
+    void    print_samples();
+    SAMPLE  sample();
+
+    SAMPLE  sampler_time();
+#if defined(__i386__) && defined(__GNUC__)
+    SAMPLE  sampler_tsc();
+#endif
+} // namespace SP
 
 #endif // __LIBXORP_TRACE_HH__

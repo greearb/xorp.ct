@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.23 2008/09/23 07:59:16 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.24 2008/09/23 08:02:53 abittau Exp $"
 
 //
 // Test XRLs sender.
@@ -28,6 +28,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/status_codes.h"
+#include "libxorp/profile.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -38,6 +39,8 @@
 #include "xrl/targets/test_xrls_base.hh"
 #include "test_receiver.hh"
 #include "test_xrl_sender.hh"
+
+using namespace SP;
 
 //
 // This is a sender program for testing XRL performance. It is used
@@ -111,48 +114,10 @@ static const char* send_methods[] = {
     "single"
 };
 
-// time source
-
-#if defined(__i386__) && defined(__GNUC__)
-// XXX watch out on SMP systems - make sure u're always reading the same tsc
-// (i.e., same core running the process).
-// -sorbo.
-static SAMPLE get_time(void)
-{
-    uint64_t tsc;
-
-    __asm__ volatile (".byte 0x0f, 0x31" : "=A" (tsc));
-
-    return tsc;
-}
-#else
-static SAMPLE get_time(void)
-{
-    TimeVal tv;
-
-    TimerList::system_gettimeofday(&tv);
-
-    SAMPLE ret = tv.secs();
-
-    ret *= (SAMPLE) 1000000;
-    ret += (SAMPLE) tv.usec();
-
-    return ret;
-}
-#define GET_TIME NULL
-#endif // i386 && GNUC
-
 //
 // Local functions prototypes
 //
 static	void usage(const char *argv0, int exit_value);
-
-static void sampler(const char* desc)
-{
-    XLOG_ASSERT(g_test_sender);
-
-    g_test_sender->add_sample(desc);
-}
 
 TestSender::TestSender(EventLoop& eventloop, XrlRouter* xrl_router,
 	               size_t max_xrl_id)
@@ -163,8 +128,7 @@ TestSender::TestSender(EventLoop& eventloop, XrlRouter* xrl_router,
 	  _next_xrl_send_id(0),
 	  _next_xrl_recv_id(0),
 	  _sent_end_transmission(false),
-	  _done(false),
-	  _samplec(0)
+	  _done(false)
 {
     _my_bool = false;
     _my_int = -100000000;
@@ -315,7 +279,6 @@ TestSender::transmit_xrl_next_pipeline()
 void
 TestSender::send_single()
 {
-    _samplec = 0;
     add_sample("start");
 
     XrlAtomList xal;
@@ -346,50 +309,6 @@ TestSender::send_single_cb(const XrlError& xrl_error)
 
     print_samples();
     end_transmission();
-}
-
-void
-TestSender::add_sample(const char* desc)
-{
-    XLOG_ASSERT(_samplec < MAX_SAMPLES);
-
-    _samples[_samplec] = get_time();
-    _sampled[_samplec] = desc;
-
-    _samplec++;
-}
-
-void
-TestSender::print_samples()
-{
-    XLOG_ASSERT(_samplec > 0);
-
-    double total = _samples[_samplec - 1] - _samples[0];
-
-    printf("Absolute time\tElapsed time\tPercentage\tDescription\n");
-
-    for (unsigned i = 0; i < _samplec; i++) {
-	printf("%llu\t", _samples[i]);
-
-	if (i != 0) {
-	    SAMPLE a, b, diff;
-
-	    a = _samples[i - 1];
-	    b = _samples[i];
-
-	    XLOG_ASSERT(a <= b);
-
-	    diff = b - a;
-
-	    printf("%12llu\t%10.2f\t", diff, (double) diff / total * 100.0);
-	} else
-	    printf("\t\t\t\t");
-
-	printf("%s\n", _sampled[i]);
-    }
-
-    printf("Total %llu\n", (SAMPLE) total);
-    printf("\n");
 }
 
 void
@@ -669,7 +588,7 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
 					 xrl_std_router_test_receiver);
 
 	if (g_send_method == SEND_METHOD_SINGLE)
-	    test_receiver->set_sampler(sampler);
+	    test_receiver->enable_sampler();
 
 	wait_until_xrl_router_is_ready(eventloop,
 				       *xrl_std_router_test_receiver);
