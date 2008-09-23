@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.21 2008/09/23 08:02:09 abittau Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.22 2008/09/23 08:02:40 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -170,8 +170,11 @@ public:
     const FinderDBEntry* resolved() const { return _resolved; }
     void set_resolved(const FinderDBEntry* r) const { _resolved = r; };
 
+    void set_target(const char* target);
+
 private:
     const char* parse_xrl_path(const char* xrl_path);
+    void        clear_cache();
 
 private:
     // if protocol != finder, target = protocol params

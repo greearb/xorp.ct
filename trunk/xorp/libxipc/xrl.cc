@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.19 2008/09/23 08:02:09 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.20 2008/09/23 08:02:40 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -29,12 +29,7 @@ Xrl::parse_xrl_path(const char* c_str)
     const char *sep, *start;
 
     // void cached string representation
-    _string_no_args = "";
-    delete _sna_atom;
-    _sna_atom = NULL;
-    _packed_bytes = 0;
-    _to_finder = -1;
-    _resolved = NULL;
+    clear_cache();
 
     // Extract protocol
     start = c_str;
@@ -234,4 +229,28 @@ Xrl::to_finder() const
     }
 
     return _to_finder;
+}
+
+void
+Xrl::set_target(const char* target)
+{
+    // XXX slowish - maybe we can use pointer value in some cases.
+    if (::strcmp(target, _target.c_str()) == 0)
+	return;
+
+    clear_cache();
+
+    _target.assign(target);
+}
+
+void
+Xrl::clear_cache()
+{
+    _string_no_args = "";
+    _packed_bytes   = 0;
+    _to_finder	    = -1;
+    _resolved	    = NULL;
+
+    delete _sna_atom;
+    _sna_atom = NULL;
 }

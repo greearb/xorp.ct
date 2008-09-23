@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.22 2008/09/23 07:57:43 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.23 2008/09/23 07:59:16 abittau Exp $"
 
 //
 // Test XRLs sender.
@@ -667,7 +667,9 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
 							finder_port);
 	test_receiver = new TestReceiver(eventloop,
 					 xrl_std_router_test_receiver);
-	test_receiver->set_sampler(sampler);
+
+	if (g_send_method == SEND_METHOD_SINGLE)
+	    test_receiver->set_sampler(sampler);
 
 	wait_until_xrl_router_is_ready(eventloop,
 				       *xrl_std_router_test_receiver);
