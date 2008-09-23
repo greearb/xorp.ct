@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.18 2008/01/04 03:16:45 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.19 2008/07/23 05:10:57 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -61,6 +61,9 @@
 #ifdef __cplusplus
 #define	XORP_UINT_CAST(x)	static_cast<unsigned int>(x)
 #define	XORP_INT_CAST(x)	static_cast<int>(x)
+#else
+#define	XORP_UINT_CAST(x)	(unsigned int)(x)
+#define	XORP_INT_CAST(x)	(int)(x)
 #endif
 
 /*
