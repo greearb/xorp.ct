@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.61 2008/09/23 08:02:40 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.62 2008/09/23 08:04:57 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -381,48 +381,17 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 			 bool  direct_call)
 {
     try {
-	const Xrl& x = dbe->xrls().front();
-
-	XrlPFSender* s = 0;
-	list<XrlPFSender*>::iterator i;
-	for (i = _senders.begin(); i != _senders.end(); ++i) {
-	    s = *i;
-
-	    if (s->protocol() != x.protocol() || s->address()  != x.target()) {
-		continue;
-	    }
-
-	    if (s->alive()) {
-		goto __got_sender;
-	    }
-
-	    XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\")",
-		      s->protocol(), s->address().c_str());
-	    XrlPFSenderFactory::destroy_sender(s);
-	    _senders.erase(i);
-	    _senders2.erase(xrl.target());
-	    break;
-	}
-
-	s = XrlPFSenderFactory::create_sender(_e, x.protocol().c_str(),
-					      x.target().c_str());
+	// XXX get rid of const
+	XrlPFSender* s = get_sender(xrl, const_cast<FinderDBEntry&>(*dbe));
 	if (s == 0) {
-	    XLOG_ERROR("Could not create XrlPFSender for protocol = \"%s\" "
-		       "address = \"%s\" ",
-		       x.protocol().c_str(), x.target().c_str());
-
 	    // Notify Finder client that result was bad.
 	    _fc->uncache_result(dbe);
 
 	    // Coerce finder client to check with Finder.
 	    return send(xrl, cb);
 	}
-	XLOG_ASSERT(s->protocol() == x.protocol());
-	XLOG_ASSERT(s->address()  == x.target());
-	_senders.push_back(s);
-	_senders2[xrl.target()] = s;
 
-    __got_sender:
+	const Xrl& x = dbe->xrls().front();
     	x.set_args(xrl);
 	if (s) {
 	    trace_xrl("Sending ", x);
@@ -434,6 +403,60 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	cb->dispatch(XrlError(INTERNAL_ERROR, "bad factory arguments"), 0);
     }
     return false;
+}
+
+XrlPFSender*
+XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry& dbe)
+{
+    const Xrl& x = dbe.xrls().front();
+    XrlPFSender* s = NULL;
+
+    // XXX store a pointer to sender in XRL object.
+    for (list<XrlPFSender*>::iterator i = _senders.begin();
+	 i != _senders.end(); ++i) {
+	s = *i;
+
+	if (s->protocol() != x.protocol() || s->address()  != x.target())
+	    continue;
+
+	if (s->alive())
+	    return s;
+
+	XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\")",
+		  s->protocol(), s->address().c_str());
+	XrlPFSenderFactory::destroy_sender(s);
+	_senders.erase(i);
+	_senders2.erase(xrl.target());
+	break;
+    }
+    s = NULL;
+
+    // create sender
+    while (dbe.xrls().size()) {
+	const Xrl& x = dbe.xrls().front();
+
+	s = XrlPFSenderFactory::create_sender(_e, x.protocol().c_str(),
+					      x.target().c_str());
+	if (s)
+	    break;
+
+	XLOG_ERROR("Could not create XrlPFSender for protocol = \"%s\" "
+		   "address = \"%s\" ",
+		   x.protocol().c_str(), x.target().c_str());
+
+	dbe.pop_front();
+    }
+    if (!s)
+	return NULL;
+
+    const Xrl& front = dbe.xrls().front();
+
+    XLOG_ASSERT(s->protocol() == front.protocol());
+    XLOG_ASSERT(s->address()  == front.target());
+    _senders.push_back(s);
+    _senders2[xrl.target()] = s;
+
+    return s;
 }
 
 void

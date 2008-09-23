@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.42 2008/09/23 08:02:10 abittau Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.43 2008/09/23 08:04:57 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -206,6 +206,7 @@ protected:
 
 private:
     XrlPFSender& get_sender(const string& target);
+    XrlPFSender* get_sender(const Xrl& xrl, FinderDBEntry& dbe);
 
 protected:
     EventLoop&			_e;

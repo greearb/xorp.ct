@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.17 2008/01/04 03:16:29 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_std_router.hh,v 1.18 2008/07/23 05:10:47 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_STD_ROUTER_HH__
 #define __LIBXIPC_XRL_STD_ROUTER_HH__
@@ -53,6 +54,10 @@ public:
     ~XrlStdRouter();
 
 private:
+    void construct();
+    void create_unix_listener();
+
+    XrlPFListener* _unix;
     XrlPFListener* _l;
 };
 

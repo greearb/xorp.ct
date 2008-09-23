@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.13 2008/07/23 05:10:47 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_std_router.cc,v 1.14 2008/09/23 08:06:16 abittau Exp $"
 
 #include "xrl_module.h"
 #include "xrl_std_router.hh"
@@ -37,9 +37,6 @@ create_listener(EventLoop& e, XrlDispatcher* d)
 
 	case 'u':
 	    return new XrlPFSUDPListener(e, d);
-
-	case 'x':
-	    return new XrlPFUNIXListener(e, d);
 
 	default:
 	    XLOG_ERROR("Unknown PF %s\n", pf);
@@ -65,8 +62,7 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
     : XrlRouter(eventloop, class_name,  FinderConstants::FINDER_DEFAULT_HOST(),
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
-    _l = create_listener(eventloop, this);
-    add_listener(_l);
+    construct();    
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
@@ -75,8 +71,7 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
     : XrlRouter(eventloop, class_name, finder_address,
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
-    _l = create_listener(eventloop, this);
-    add_listener(_l);
+    construct();
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
@@ -85,8 +80,7 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   uint16_t	finder_port)
     : XrlRouter(eventloop, class_name, finder_address, finder_port)
 {
-    _l = create_listener(eventloop, this);
-    add_listener(_l);
+    construct();
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
@@ -95,8 +89,7 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
     : XrlRouter(eventloop, class_name, finder_address,
 		FinderConstants::FINDER_DEFAULT_PORT())
 {
-    _l = create_listener(eventloop, this);
-    add_listener(_l);
+    construct();
 }
 
 XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
@@ -105,13 +98,33 @@ XrlStdRouter::XrlStdRouter(EventLoop&	eventloop,
 			   uint16_t	finder_port)
     : XrlRouter(eventloop, class_name, finder_address, finder_port)
 {
-    _l = create_listener(eventloop, this);
+    construct();
+}
+
+void
+XrlStdRouter::construct()
+{
+    _unix = _l = NULL;
+
+    create_unix_listener();
+
+    _l = create_listener(_e, this);
     add_listener(_l);
+}
+
+void
+XrlStdRouter::create_unix_listener()
+{
+#ifndef HOST_OS_WINDOWS
+    _unix = new XrlPFUNIXListener(_e, this);
+    add_listener(_unix);
+#endif // ! HOST_OS_WINDOWS
 }
 
 XrlStdRouter::~XrlStdRouter()
 {
-    // remove_listener(&_l);
+    if (_unix)
+	destroy_listener(_unix);
+
     destroy_listener(_l);
 }
-
