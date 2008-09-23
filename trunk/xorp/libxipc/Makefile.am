@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.47 2008/09/23 07:57:42 abittau Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.48 2008/09/23 08:06:15 abittau Exp $
 ##
 
 # Redefine the bin installation directory
