@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_dispatcher.hh,v 1.9 2008/07/23 05:10:45 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_dispatcher.hh,v 1.10 2008/09/23 08:02:10 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_DISPATCHER_HH__
 #define __LIBXIPC_XRL_DISPATCHER_HH__
