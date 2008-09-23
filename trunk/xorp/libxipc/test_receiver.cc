@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxipc/test_receiver.cc,v 1.1 2008/09/23 07:57:43 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -34,7 +34,8 @@ TestReceiver::TestReceiver(EventLoop& eventloop, XrlRouter* xrl_router)
 	: XrlTestXrlsTargetBase(xrl_router),
 	  _eventloop(eventloop),
 	  _received_xrls(0),
-	  _done(false)
+	  _done(false),
+	  _sampler(NULL)
 {
 }
 
@@ -46,6 +47,12 @@ bool
 TestReceiver::done() const
 {
     return _done;
+}
+
+void
+TestReceiver::set_sampler(SAMPLER s)
+{
+    _sampler = s;
 }
 
 void
@@ -174,6 +181,9 @@ TestReceiver::test_xrls_0_1_add_xrl9(
 XrlCmdError
 TestReceiver::test_xrls_0_1_add_xrlx(const XrlAtomList &)
 {
+    if (_sampler)
+	_sampler("XRL received");
+
     print_xrl_received();
     _received_xrls++;
     return XrlCmdError::OKAY();

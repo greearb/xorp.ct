@@ -13,10 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxipc/test_receiver.hh,v 1.1 2008/09/23 07:57:43 abittau Exp $
 
 #ifndef __LIBXIPC_TEST_RECEIVER_HH__
 #define __LIBXIPC_TEST_RECEIVER_HH__
+
+typedef void (*SAMPLER)(const char* desc);
 
 class TestReceiver : public XrlTestXrlsTargetBase {
 public:
@@ -25,6 +27,7 @@ public:
 
     bool done() const;
     void print_xrl_received() const;
+    void set_sampler(SAMPLER s);
 
 private:
     XrlCmdError common_0_1_get_target_name(
@@ -79,6 +82,7 @@ private:
     size_t	_received_xrls;
     XorpTimer	_exit_timer;
     bool	_done;
+    SAMPLER	_sampler;
 };
 
 #endif // __LIBXIPC_TEST_RECEIVER_HH__

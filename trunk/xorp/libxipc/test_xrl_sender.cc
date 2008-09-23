@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.21 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.22 2008/09/23 07:57:43 abittau Exp $"
 
 //
 // Test XRLs sender.
@@ -77,9 +77,13 @@
 //
 // Define the sending method
 //
-#define SEND_METHOD_PIPELINE		0
-#define SEND_METHOD_NO_PIPELINE		1
-#define SEND_METHOD_START_PIPELINE	2
+enum {
+    SEND_METHOD_PIPELINE = 0,
+    SEND_METHOD_NO_PIPELINE,
+    SEND_METHOD_START_PIPELINE,
+    SEND_METHOD_SINGLE
+};
+
 #define SEND_METHOD			SEND_METHOD_PIPELINE
 
 //
@@ -92,23 +96,63 @@
 //
 // Global variables
 //
-static uint32_t MAX_XRL_ID	= 10000;	// Number of Xrls in a test run
-static uint32_t XRL_PIPE_SIZE	= 40;		// Maximum in flight
-static uint32_t g_send_method   = SEND_METHOD_PIPELINE;
-static uint32_t g_send_style    = SEND_CMDLINE_VAR_XRL;
-static uint32_t g_atoms_per_xrl = 1;
-static bool     g_run_receiver	= false;
+static uint32_t    MAX_XRL_ID	   = 10000;	// Number of Xrls in a test run
+static uint32_t    XRL_PIPE_SIZE   = 40;	// Maximum in flight
+static uint32_t    g_send_method   = SEND_METHOD_PIPELINE;
+static uint32_t    g_send_style    = SEND_CMDLINE_VAR_XRL;
+static uint32_t    g_atoms_per_xrl = 1;
+static bool        g_run_receiver  = false;
+static TestSender* g_test_sender   = NULL;
 
-static const char* send_methods[3] = {
+static const char* send_methods[] = {
     "pipeline",
     "no pipeline",
-    "start pipeline"
+    "start pipeline",
+    "single"
 };
+
+// time source
+
+#if defined(__i386__) && defined(__GNUC__)
+// XXX watch out on SMP systems - make sure u're always reading the same tsc
+// (i.e., same core running the process).
+// -sorbo.
+static SAMPLE get_time(void)
+{
+    uint64_t tsc;
+
+    __asm__ volatile (".byte 0x0f, 0x31" : "=A" (tsc));
+
+    return tsc;
+}
+#else
+static SAMPLE get_time(void)
+{
+    TimeVal tv;
+
+    TimerList::system_gettimeofday(&tv);
+
+    SAMPLE ret = tv.secs();
+
+    ret *= (SAMPLE) 1000000;
+    ret += (SAMPLE) tv.usec();
+
+    return ret;
+}
+#define GET_TIME NULL
+#endif // i386 && GNUC
 
 //
 // Local functions prototypes
 //
 static	void usage(const char *argv0, int exit_value);
+
+static void sampler(const char* desc)
+{
+    XLOG_ASSERT(g_test_sender);
+
+    g_test_sender->add_sample(desc);
+}
 
 TestSender::TestSender(EventLoop& eventloop, XrlRouter* xrl_router,
 	               size_t max_xrl_id)
@@ -119,7 +163,8 @@ TestSender::TestSender(EventLoop& eventloop, XrlRouter* xrl_router,
 	  _next_xrl_send_id(0),
 	  _next_xrl_recv_id(0),
 	  _sent_end_transmission(false),
-	  _done(false)
+	  _done(false),
+	  _samplec(0)
 {
     _my_bool = false;
     _my_int = -100000000;
@@ -268,6 +313,86 @@ TestSender::transmit_xrl_next_pipeline()
 }
 
 void
+TestSender::send_single()
+{
+    _samplec = 0;
+    add_sample("start");
+
+    XrlAtomList xal;
+    add_sample("XRL Atom List Creation");
+
+    for (uint32_t i = 0; i < g_atoms_per_xrl; i++) {
+	XrlAtom atom(_my_int);
+	add_sample("XRL Atom creation");
+
+	xal.append(atom);
+	add_sample("XRL Atom addition");
+
+    }
+
+    bool rc = _test_xrls_client.send_add_xrlx(_receiver_target.c_str(), xal,
+		    callback(this, &TestSender::send_single_cb));
+
+    add_sample("XRL send");
+    XLOG_ASSERT(rc);
+}
+
+void
+TestSender::send_single_cb(const XrlError& xrl_error)
+{
+    add_sample("XRL send cb");
+
+    XLOG_ASSERT(xrl_error == XrlError::OKAY());
+
+    print_samples();
+    end_transmission();
+}
+
+void
+TestSender::add_sample(const char* desc)
+{
+    XLOG_ASSERT(_samplec < MAX_SAMPLES);
+
+    _samples[_samplec] = get_time();
+    _sampled[_samplec] = desc;
+
+    _samplec++;
+}
+
+void
+TestSender::print_samples()
+{
+    XLOG_ASSERT(_samplec > 0);
+
+    double total = _samples[_samplec - 1] - _samples[0];
+
+    printf("Absolute time\tElapsed time\tPercentage\tDescription\n");
+
+    for (unsigned i = 0; i < _samplec; i++) {
+	printf("%llu\t", _samples[i]);
+
+	if (i != 0) {
+	    SAMPLE a, b, diff;
+
+	    a = _samples[i - 1];
+	    b = _samples[i];
+
+	    XLOG_ASSERT(a <= b);
+
+	    diff = b - a;
+
+	    printf("%12llu\t%10.2f\t", diff, (double) diff / total * 100.0);
+	} else
+	    printf("\t\t\t\t");
+
+	printf("%s\n", _sampled[i]);
+    }
+
+    printf("Total %llu\n", (SAMPLE) total);
+    printf("\n");
+}
+
+void
 TestSender::start_transmission_cb(const XrlError& xrl_error)
 {
     printf("start_transmission_cb %s\n", xrl_error.str().c_str());
@@ -287,6 +412,15 @@ TestSender::start_transmission_cb(const XrlError& xrl_error)
 
     case SEND_METHOD_NO_PIPELINE:
 	send_next();
+	break;
+
+    case SEND_METHOD_SINGLE:
+	send_single();
+	break;
+
+    default:
+	cout << "Unknown send method " << g_send_method << endl;
+	abort();
 	break;
     }
 }
@@ -516,6 +650,8 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
 					    finder_hostname, finder_port);
     TestSender test_sender(eventloop, &xrl_std_router_test_sender,
 			   MAX_XRL_ID);
+    g_test_sender = &test_sender;
+
     xrl_std_router_test_sender.finalize();
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_test_sender);
 
@@ -531,6 +667,8 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
 							finder_port);
 	test_receiver = new TestReceiver(eventloop,
 					 xrl_std_router_test_receiver);
+	test_receiver->set_sampler(sampler);
+
 	wait_until_xrl_router_is_ready(eventloop,
 				       *xrl_std_router_test_receiver);
     }
