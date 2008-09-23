@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.30 2008/07/23 05:10:51 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.31 2008/09/23 08:04:01 abittau Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -331,6 +331,8 @@ public:
      */
     size_t descriptor_count() const;
 
+    void set_aggressiveness(int num);
+
 private:
     EventLoop(const EventLoop&);		// not implemented
     EventLoop& operator=(const EventLoop&);	// not implemented
@@ -341,6 +343,7 @@ private:
     ClockBase*		_clock;
     TimerList		_timer_list;
     TaskList		_task_list;
+    int			_aggressiveness;
 #ifdef HOST_OS_WINDOWS
     WinDispatcher	_win_dispatcher;
 #else

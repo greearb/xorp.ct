@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.31 2008/09/23 08:04:25 abittau Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.32 2008/09/23 08:04:40 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -36,7 +36,7 @@ int eventloop_instance_count;
 static time_t last_ev_run;
 
 EventLoop::EventLoop()
-    : _clock(new SystemClock), _timer_list(_clock),
+    : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(5),
 #ifdef HOST_OS_WINDOWS
       _win_dispatcher(_clock)
 #else
@@ -92,7 +92,7 @@ EventLoop::run()
     // because we don't know about them yet (need to call time or select to
     // detect them).  For this reason, we only do a few "aggressive" runs.
     // -sorbo.
-    int agressiveness = 5;
+    int agressiveness = _aggressiveness;
     while (more && agressiveness--)
 	more = do_work(false);
 
@@ -213,4 +213,10 @@ XorpTask
 EventLoop::new_task(const RepeatedTaskCallback& cb, int priority, int weight)
 {
     return _task_list.new_task(cb, priority, weight);
+}
+
+void
+EventLoop::set_aggressiveness(int num)
+{
+    _aggressiveness = num;
 }

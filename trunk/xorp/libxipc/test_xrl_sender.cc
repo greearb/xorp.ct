@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.25 2008/09/23 08:03:09 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.26 2008/09/23 08:04:57 abittau Exp $"
 
 //
 // Test XRLs sender.
@@ -100,15 +100,16 @@ enum {
 //
 // Global variables
 //
-static uint32_t    MAX_XRL_ID	   = 10000;	// Number of Xrls in a test run
-static uint32_t    XRL_PIPE_SIZE   = 40;	// Maximum in flight
-static uint32_t    g_send_method   = SEND_METHOD_PIPELINE;
-static uint32_t    g_send_style    = SEND_CMDLINE_VAR_XRL;
-static uint32_t    g_atoms_per_xrl = 1;
-static bool        g_run_receiver  = false;
-static TestSender* g_test_sender   = NULL;
-static char*	   g_param1        = NULL;
-static char*	   g_param2	   = NULL;
+static uint32_t    MAX_XRL_ID	    = 10000;	// Number of Xrls in a test run
+static uint32_t    XRL_PIPE_SIZE    = 40;	// Maximum in flight
+static uint32_t    g_send_method    = SEND_METHOD_PIPELINE;
+static uint32_t    g_send_style     = SEND_CMDLINE_VAR_XRL;
+static uint32_t    g_atoms_per_xrl  = 1;
+static bool        g_run_receiver   = false;
+static TestSender* g_test_sender    = NULL;
+static int         g_aggressiveness = -1;
+static char*	   g_param1         = NULL;
+static char*	   g_param2	    = NULL;
 
 static const char* send_methods[] = {
     "pipeline",
@@ -628,6 +629,7 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "           -m <M>                                : send method (see below)\n");
     fprintf(output, "           -n <count>                            : number of XrlAtoms in each Xrl call\n");
     fprintf(output, "           -r                                    : run receiver in same process\n");
+    fprintf(output, "           -a                                    : eventloop aggressiveness\n");
     fprintf(output, "           -1                                    : parameter 1\n");
     fprintf(output, "           -2                                    : parameter 2\n");
 
@@ -652,6 +654,9 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
     // Init stuff
     //
     EventLoop eventloop;
+
+    if (g_aggressiveness != -1)
+	eventloop.set_aggressiveness(g_aggressiveness);
 
     //
     // Sender
@@ -733,8 +738,12 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "F:hm:n:r1:2:")) != -1) {
+    while ((ch = getopt(argc, argv, "F:hm:n:ra:1:2:")) != -1) {
 	switch (ch) {
+	case 'a':
+	    g_aggressiveness = atoi(optarg);
+	    break;
+
 	case '1':
 	    g_param1 = optarg;
 	    break;

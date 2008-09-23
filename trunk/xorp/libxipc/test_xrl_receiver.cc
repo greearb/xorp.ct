@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.17 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_receiver.cc,v 1.18 2008/09/23 07:57:43 abittau Exp $"
 
 //
 // Test XRLs receiver.
@@ -59,6 +59,9 @@
 //
 #define RECEIVE_DO_EXIT			0
 
+// Parameters
+static int  g_aggressiveness = -1;
+
 /**
  * usage:
  * @argv0: Argument 0 when the program was called (the program name itself).
@@ -91,6 +94,7 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "Usage: %s [-F <finder_hostname>[:<finder_port>]]\n",
 	    progname);
     fprintf(output, "           -F <finder_hostname>[:<finder_port>]  : finder hostname and port\n");
+    fprintf(output, "           -a                                    : eventloop aggressiveness\n");
     fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "\n");
     fprintf(output, "Program name:   %s\n", progname);
@@ -109,6 +113,9 @@ test_xrls_receiver_main(const char* finder_hostname, uint16_t finder_port)
     // Init stuff
     //
     EventLoop eventloop;
+
+    if (g_aggressiveness != -1)
+	eventloop.set_aggressiveness(g_aggressiveness);
 
     //
     // Receiver
@@ -148,8 +155,12 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "F:h")) != -1) {
+    while ((ch = getopt(argc, argv, "F:ha:")) != -1) {
 	switch (ch) {
+	case 'a':
+	    g_aggressiveness = atoi(optarg);
+	    break;
+
 	case 'F':
 	    // Finder hostname and port
 	    finder_hostname = optarg;
