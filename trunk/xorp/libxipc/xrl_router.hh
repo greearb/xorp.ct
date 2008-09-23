@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.41 2008/07/23 05:10:47 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.42 2008/09/23 08:02:10 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -142,6 +142,9 @@ public:
 
     XI* lookup_xrl(const string& name) const;
 
+    void batch_start(const string& target);
+    void batch_stop(const string& target);
+
 protected:
     /**
      * Called when Finder connection is established.
@@ -166,12 +169,10 @@ protected:
      */
     virtual void finder_ready_event(const string& tgt_name);
 
-protected:
     XrlError dispatch_xrl(const string&	 method_name,
 			  const XrlArgs& inputs,
 			  XrlArgs&	 outputs) const;
 
-protected:
     /**
      * Resolve callback (slow path).
      *
@@ -203,6 +204,9 @@ protected:
 		    IPv4	finder_addr,
 		    uint16_t	finder_port);
 
+private:
+    XrlPFSender& get_sender(const string& target);
+
 protected:
     EventLoop&			_e;
     FinderClient*		_fc;
@@ -218,9 +222,11 @@ protected:
     static uint32_t		_icnt;			// instance count
 
 private:
-    typedef map<string, XI*>	XIM;
+    typedef map<string, XI*>		XIM;
+    typedef map<string, XrlPFSender*>	SENDERS;
 
     mutable XIM			_xi_cache;
+    SENDERS			_senders2;
 };
 
 /**

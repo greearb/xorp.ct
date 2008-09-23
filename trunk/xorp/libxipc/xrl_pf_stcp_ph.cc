@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.17 2008/01/04 03:16:29 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.18 2008/07/23 05:10:46 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -49,13 +50,14 @@ STCPPacketHeader::STCPPacketHeader(uint8_t* data)
       _major(_data + _major_offset),
       _minor(_data + _minor_offset),
       _seqno(_data + _seqno_offset),
+      _flags(_data + _flags_offset),
       _type(_data + _type_offset),
       _error_code(_data + _error_code_offset),
       _error_note_bytes(_data + _error_note_bytes_offset),
       _xrl_data_bytes(_data + _xrl_data_bytes_offset)
 {
     static_assert(STCPPacketHeader::SIZE == _fourcc_sizeof + _major_sizeof
-		  + _minor_sizeof + _seqno_sizeof + _type_sizeof
+		  + _minor_sizeof + _seqno_sizeof + _flags_sizeof + _type_sizeof
 		  + _error_code_sizeof + _error_note_bytes_sizeof
 		  + _xrl_data_bytes_sizeof);
     static_assert(STCPPacketHeader::SIZE ==
@@ -71,7 +73,8 @@ STCPPacketHeader::initialize(uint32_t		seqno,
     embed_32(_fourcc, PROTO_FOURCC);
     embed_8(_major, PROTO_MAJOR);
     embed_8(_minor, PROTO_MINOR);
-    embed_16(_type, type);
+    embed_8(_flags, 0);
+    embed_8(_type, type);
     embed_32(_seqno, seqno);
     embed_32(_error_code, xrl_err.error_code());
     embed_32(_error_note_bytes, xrl_err.note().size());
@@ -131,7 +134,7 @@ STCPPacketHeader::minor() const
 STCPPacketType
 STCPPacketHeader::type() const
 {
-    return STCPPacketType(extract_16(_type));
+    return STCPPacketType(extract_8(_type));
 }
 
 uint32_t
@@ -168,4 +171,21 @@ uint32_t
 STCPPacketHeader::frame_bytes() const
 {
     return header_size() + error_note_bytes() + payload_bytes();
+}
+
+bool
+STCPPacketHeader::batch() const
+{
+    return extract_8(_flags) & FLAG_BATCH_MASK;
+}
+
+void
+STCPPacketHeader::set_batch(bool batch)
+{
+    uint8_t flags = extract_8(_flags);
+
+    flags &= ~(1 << FLAG_BATCH_SHIFT);
+    flags |= batch << FLAG_BATCH_SHIFT;
+
+    embed_8(_flags, flags);
 }

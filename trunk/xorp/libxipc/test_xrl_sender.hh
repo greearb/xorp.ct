@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/test_xrl_sender.hh,v 1.2 2008/09/23 07:59:16 abittau Exp $
+// $XORP: xorp/libxipc/test_xrl_sender.hh,v 1.3 2008/09/23 08:03:09 abittau Exp $
 
 #ifndef __LIBXIPC_TEST_XRL_SENDER_HH__
 #define __LIBXIPC_TEST_XRL_SENDER_HH__
@@ -22,7 +22,7 @@ class TestSender {
 public:
     TestSender(EventLoop& eventloop, XrlRouter* xrl_router,
 	       size_t max_xrl_id);
-    
+
     ~TestSender();
 
     bool done() const;
@@ -31,10 +31,12 @@ public:
     void clear();
     void start_transmission();
     void start_transmission_process();
+    void send_batch();
 
 private:
-    bool transmit_xrl_next();
-    bool transmit_xrl_next_pipeline();
+    typedef void (TestSender::*CB)(const XrlError& err);
+
+    bool transmit_xrl_next(CB cb);
     void start_transmission_cb(const XrlError& xrl_error);
     void send_next();
     void send_next_cb(const XrlError& xrl_error);
@@ -45,8 +47,12 @@ private:
     void send_single_cb(const XrlError& err);
     void end_transmission();
     void end_transmission_cb(const XrlError& xrl_error);
+    void send_batch_do(unsigned xrls);
+    void send_batch_cb(const XrlError& xrl_error);
+    bool send_batch_task();
 
     EventLoop&			_eventloop;
+    XrlRouter&			_xrl_router;
     XrlTestXrlsV0p1Client	_test_xrls_client;
     string			_receiver_target;
     XorpTimer			_start_transmission_timer;
@@ -69,6 +75,15 @@ private:
     Mac				_my_mac;
     string			_my_string;
     vector<uint8_t>		_my_vector;
+
+    // batch state
+    XorpTask			_batch_task;
+    int				_batch_sent;
+    int				_batch_remaining;
+    int				_batch_per_run;
+    int				_batch_size;
+    unsigned			_batch_got;
+    unsigned			_batch_errors;
 };
 
 #endif // __LIBXIPC_TEST_XRL_SENDER_HH__

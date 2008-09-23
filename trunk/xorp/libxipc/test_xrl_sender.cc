@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.24 2008/09/23 08:02:53 abittau Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.25 2008/09/23 08:03:09 abittau Exp $"
 
 //
 // Test XRLs sender.
@@ -84,7 +84,8 @@ enum {
     SEND_METHOD_PIPELINE = 0,
     SEND_METHOD_NO_PIPELINE,
     SEND_METHOD_START_PIPELINE,
-    SEND_METHOD_SINGLE
+    SEND_METHOD_SINGLE,
+    SEND_METHOD_BATCH
 };
 
 #define SEND_METHOD			SEND_METHOD_PIPELINE
@@ -106,12 +107,15 @@ static uint32_t    g_send_style    = SEND_CMDLINE_VAR_XRL;
 static uint32_t    g_atoms_per_xrl = 1;
 static bool        g_run_receiver  = false;
 static TestSender* g_test_sender   = NULL;
+static char*	   g_param1        = NULL;
+static char*	   g_param2	   = NULL;
 
 static const char* send_methods[] = {
     "pipeline",
     "no pipeline",
     "start pipeline",
-    "single"
+    "single",
+    "batch"
 };
 
 //
@@ -122,6 +126,7 @@ static	void usage(const char *argv0, int exit_value);
 TestSender::TestSender(EventLoop& eventloop, XrlRouter* xrl_router,
 	               size_t max_xrl_id)
 	: _eventloop(eventloop),
+	  _xrl_router(*xrl_router),
 	  _test_xrls_client(xrl_router),
 	  _receiver_target("test_xrl_receiver"),
 	  _max_xrl_id(max_xrl_id),
@@ -208,13 +213,13 @@ TestSender::start_transmission_process()
 }
 
 bool
-TestSender::transmit_xrl_next()
+TestSender::transmit_xrl_next(CB cb)
 {
     switch (g_send_style) {
     case SEND_SHORT_XRL:
         return _test_xrls_client.send_add_xrl0(
 		    _receiver_target.c_str(),
-		    callback(this, &TestSender::send_next_cb));
+		    callback(this, cb));
 
     case SEND_LARGE_XRL:
         return _test_xrls_client.send_add_xrl9(
@@ -228,50 +233,16 @@ TestSender::transmit_xrl_next()
 		    _my_mac,
 		    _my_string,
 		    _my_vector,
-		    callback(this, &TestSender::send_next_cb));
+		    callback(this, cb));
 
     case SEND_CMDLINE_VAR_XRL:
         XrlAtomList xal;
         for (uint32_t i = 1; i < g_atoms_per_xrl; i++)
 	   xal.append(XrlAtom(_my_int));
-	    
+
 	return _test_xrls_client.send_add_xrlx(
 		    _receiver_target.c_str(), xal,
-		    callback(this, &TestSender::send_next_cb));
-    }
-    return false;
-}
-
-bool
-TestSender::transmit_xrl_next_pipeline()
-{
-    switch (g_send_style) {
-    case SEND_SHORT_XRL:
-        return _test_xrls_client.send_add_xrl0(
-		    _receiver_target.c_str(),
-		    callback(this, &TestSender::send_next_pipeline_cb));
-
-    case SEND_LARGE_XRL:
-        return _test_xrls_client.send_add_xrl9(
-		    _receiver_target.c_str(),
-		    _my_bool,
-		    _my_int,
-		    _my_ipv4,
-		    _my_ipv4net,
-		    _my_ipv6,
-		    _my_ipv6net,
-		    _my_mac,
-		    _my_string,
-		    _my_vector,
-		    callback(this, &TestSender::send_next_pipeline_cb));
-
-    case SEND_CMDLINE_VAR_XRL:
-        XrlAtomList xal;
-	for (uint32_t i = 1; i < g_atoms_per_xrl; i++)
-	    xal.append(XrlAtom(_my_int));
-	return _test_xrls_client.send_add_xrlx(
-		    _receiver_target.c_str(), xal,
-		    callback(this, &TestSender::send_next_pipeline_cb));
+		    callback(this, cb));
     }
     return false;
 }
@@ -337,11 +308,129 @@ TestSender::start_transmission_cb(const XrlError& xrl_error)
 	send_single();
 	break;
 
+    case SEND_METHOD_BATCH:
+	abort();
+	break;
+
     default:
 	cout << "Unknown send method " << g_send_method << endl;
 	abort();
 	break;
     }
+}
+
+void
+TestSender::send_batch()
+{
+    unsigned xrls = 100000;
+
+    // XXX get target into finder cache
+    bool rc = transmit_xrl_next(&TestSender::send_batch_cb);
+    XLOG_ASSERT(rc);
+    for (int i = 0; i < 5; i++)
+	_eventloop.run();
+
+    // parameters
+    _batch_per_run   = 1;
+    _batch_size	     = 1;
+
+    if (g_param1)
+	_batch_per_run = atoi(g_param1);
+
+    if (g_param2)
+	_batch_size = atoi(g_param2);
+
+    printf("Sending %d XRLs per eventloop run, batching each %d XRLs\n",
+	   _batch_per_run, _batch_size);
+
+    // own it
+    while (1) {
+	TimeVal a, b;
+
+	TimerList* t = TimerList::instance();
+	t->advance_time();
+	t->current_time(a);
+
+	send_batch_do(xrls);
+
+	t->advance_time();
+	t->current_time(b);
+
+	TimeVal diff = b - a;
+
+	double speed = xrls;
+	speed /= (double) diff.to_ms();
+	speed *= 1000.0;
+
+	printf("Sent %u XRLs speed %.0f XRLs/sec\n", xrls, speed);
+	if (_batch_errors)
+	    printf("Errors: %d\n", _batch_errors);
+    }
+}
+
+void
+TestSender::send_batch_do(unsigned xrls)
+{
+    _batch_remaining = xrls;
+    _batch_sent	     = 0;
+    _batch_got	     = 0;
+    _batch_errors    = 0;
+
+    _batch_task = _eventloop.new_task(
+		    callback(this, &TestSender::send_batch_task),
+		    XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
+
+    while (_batch_task.scheduled())
+	_eventloop.run();
+
+    while (_batch_got != xrls)
+	_eventloop.run();
+}
+
+bool
+TestSender::send_batch_task()
+{
+    if (_batch_remaining == 0)
+	return false;
+
+    // send only so many per eventloop run
+    for (int i = 0; i < _batch_per_run; i++) {
+	if (_batch_sent == 0)
+	    _xrl_router.batch_start(_receiver_target);
+
+	bool rc = transmit_xrl_next(&TestSender::send_batch_cb);
+	if (!rc) {
+	    _batch_errors++;
+	    break;
+	}
+
+	XLOG_ASSERT(rc);
+	_batch_remaining--;
+	_batch_sent++;
+
+	// batch X amount of XRLs
+	if (_batch_sent == _batch_size) {
+	    _xrl_router.batch_stop(_receiver_target);
+	    _batch_sent = 0;
+	}
+
+	if (!_batch_remaining) {
+	    if (_batch_sent)
+		_xrl_router.batch_stop(_receiver_target);
+
+	    break;
+	}
+    }
+
+    return true;
+}
+
+void
+TestSender::send_batch_cb(const XrlError& xrl_error)
+{
+    XLOG_ASSERT(xrl_error == XrlError::OKAY());
+
+    _batch_got++;
 }
 
 void
@@ -354,7 +443,7 @@ TestSender::send_next()
         return;
     }
 
-    success = transmit_xrl_next();
+    success = transmit_xrl_next(&TestSender::send_next_cb);
     if (success) {
         print_xrl_sent();
         _next_xrl_send_id++;
@@ -391,7 +480,7 @@ TestSender::send_next_start_pipeline()
         return;
     }
 
-    success = transmit_xrl_next_pipeline();
+    success = transmit_xrl_next(&TestSender::send_next_pipeline_cb);
 #if PRINT_DEBUG
     printf("send_next_start_pipeline() %s\n", success ? "pass" : "fail");
 #endif
@@ -426,7 +515,7 @@ TestSender::send_next_pipeline()
 	    return;
 	}
 
-	success = transmit_xrl_next_pipeline();
+	success = transmit_xrl_next(&TestSender::send_next_pipeline_cb);
 	if (success) {
 	    print_xrl_sent();
 	    _next_xrl_send_id++;
@@ -538,7 +627,9 @@ usage(const char *argv0, int exit_value)
     fprintf(output, "           -h                                    : usage (this message)\n");
     fprintf(output, "           -m <M>                                : send method (see below)\n");
     fprintf(output, "           -n <count>                            : number of XrlAtoms in each Xrl call\n");
-    fprintf(output, "           -r                                    : run receiver in same process");
+    fprintf(output, "           -r                                    : run receiver in same process\n");
+    fprintf(output, "           -1                                    : parameter 1\n");
+    fprintf(output, "           -2                                    : parameter 2\n");
 
     fprintf(output, "Send methods <M> :\n");
     for (uint32_t i = 0; i < sizeof(send_methods) / sizeof(send_methods[0]); i++)
@@ -594,6 +685,11 @@ test_xrls_sender_main(const char* finder_hostname, uint16_t finder_port)
 				       *xrl_std_router_test_receiver);
     }
 
+    if (g_send_method == SEND_METHOD_BATCH) {
+	test_sender.send_batch();
+	exit(0);
+    }
+
     //
     // Start transmission
     //
@@ -637,8 +733,16 @@ main(int argc, char *argv[])
     //
     // Get the program options
     //
-    while ((ch = getopt(argc, argv, "F:hm:n:r")) != -1) {
+    while ((ch = getopt(argc, argv, "F:hm:n:r1:2:")) != -1) {
 	switch (ch) {
+	case '1':
+	    g_param1 = optarg;
+	    break;
+
+	case '2':
+	    g_param2 = optarg;
+	    break;
+
 	case 'F':
 	    // Finder hostname and port
 	    finder_hostname = optarg;

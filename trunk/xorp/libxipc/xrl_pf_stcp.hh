@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.29 2008/04/22 21:14:29 bms Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.30 2008/07/23 05:10:46 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -71,17 +72,14 @@ public:
 	      bool 				direct_call,
 	      const XrlPFSender::SendCallback& 	cb);
 
-    bool sends_pending() const;
-
-    bool alive() const { return _sock.is_valid(); }
-
-    const char* protocol() const;
-
-    static const char* protocol_name()		{ return _protocol; }
-
-    void set_keepalive_ms(uint32_t t);
-
-    uint32_t keepalive_ms() const		{ return _keepalive_ms; }
+    bool	       sends_pending() const;
+    bool	       alive() const		    { return _sock.is_valid(); }
+    const char*	       protocol() const;
+    static const char* protocol_name()		    { return _protocol; }
+    void	       set_keepalive_ms(uint32_t t);
+    uint32_t	       keepalive_ms() const	    { return _keepalive_ms; }
+    void	       batch_start();
+    void	       batch_stop();
 
 private:
     void die(const char* reason, bool verbose = true);
@@ -135,6 +133,7 @@ private:
     // General stuff
     static const char*		 _protocol;
     static uint32_t		 _next_uid;
+    bool			 _batching;
 };
 
 #endif // __LIBXIPC_XRL_PF_STCP_HH__

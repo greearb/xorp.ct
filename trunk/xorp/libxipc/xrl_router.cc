@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.60 2008/09/23 08:02:10 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.61 2008/09/23 08:02:40 abittau Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -400,6 +400,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 		      s->protocol(), s->address().c_str());
 	    XrlPFSenderFactory::destroy_sender(s);
 	    _senders.erase(i);
+	    _senders2.erase(xrl.target());
 	    break;
 	}
 
@@ -419,6 +420,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 	XLOG_ASSERT(s->protocol() == x.protocol());
 	XLOG_ASSERT(s->address()  == x.target());
 	_senders.push_back(s);
+	_senders2[xrl.target()] = s;
 
     __got_sender:
     	x.set_args(xrl);
@@ -649,6 +651,35 @@ XrlRouter::finder_ready_event(const string& tgt_name)
 {
     UNUSED(tgt_name);
     debug_msg("Finder target ready event: \"%s\"\n", tgt_name.c_str());
+}
+
+void
+XrlRouter::batch_start(const string& target)
+{
+    XrlPFSender& sender = get_sender(target);
+
+    sender.batch_start();
+}
+
+void
+XrlRouter::batch_stop(const string& target)
+{
+    XrlPFSender& sender = get_sender(target);
+
+    sender.batch_stop();
+}
+
+XrlPFSender&
+XrlRouter::get_sender(const string& target)
+{
+    XrlPFSender* s = 0;
+
+    SENDERS::iterator i = _senders2.find(target);
+    XLOG_ASSERT(i != _senders2.end());
+
+    s = i->second;
+
+    return *s;
 }
 
 

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.15 2008/01/04 03:16:29 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.16 2008/07/23 05:10:46 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__
@@ -34,6 +35,10 @@ enum STCPPacketType {
     STCP_PT_REQUEST	= 0x02,
     STCP_PT_RESPONSE	= 0x03
 };
+
+// Flag masks
+#define FLAG_BATCH_MASK	 0x1
+#define FLAG_BATCH_SHIFT   0
 
 // STCP Packet Header.
 class STCPPacketHeader {
@@ -72,6 +77,9 @@ public:
     // Sum of header, error note, and payload bytes.
     uint32_t frame_bytes() const;
 
+    bool batch() const;
+    void set_batch(bool batch);
+
 private:
     //
     // The STCP packet header has the following content:
@@ -80,7 +88,8 @@ private:
     // major  (1 byte):  Major version
     // minor  (1 byte):  Minor version
     // seqno  (4 bytes): Sequence number
-    // type   (2 bytes): Type: bits [15:7] set to zero, [0:1] hello/req./resp.
+    // flags  (1 byte):  Bit 0 = batch.
+    // type   (1 byte):  Bits [0:1] hello/req./resp.
     // error_code (4 bytes): XrlError code
     // error_note_bytes (4 bytes): Length of note (if any) assoc. w/ code
     // xrl_data_bytes (4 bytes): Xrl return args data bytes
@@ -93,7 +102,8 @@ private:
     uint8_t* _major;		// Major version
     uint8_t* _minor;		// Minor version
     uint8_t* _seqno;		// Sequence number
-    uint8_t* _type;		// [15:7] Set to zero, [0:1] hello/req./resp.
+    uint8_t* _flags;		// Flags
+    uint8_t* _type;		// [0:1] hello/req./resp.
     uint8_t* _error_code;	// XrlError code
     uint8_t* _error_note_bytes;	// Length of note (if any) assoc. w/ code
     uint8_t* _xrl_data_bytes;	// Xrl return args data bytes
@@ -103,7 +113,8 @@ private:
     static const size_t _major_sizeof = 1;
     static const size_t _minor_sizeof = 1;
     static const size_t _seqno_sizeof = 4;
-    static const size_t _type_sizeof = 2;
+    static const size_t _flags_sizeof = 1;
+    static const size_t _type_sizeof = 1;
     static const size_t _error_code_sizeof = 4;
     static const size_t _error_note_bytes_sizeof = 4;
     static const size_t _xrl_data_bytes_sizeof = 4;
@@ -113,7 +124,8 @@ private:
     static const size_t _major_offset = _fourcc_offset + _fourcc_sizeof;
     static const size_t _minor_offset = _major_offset + _major_sizeof;
     static const size_t _seqno_offset = _minor_offset + _minor_sizeof;
-    static const size_t _type_offset = _seqno_offset + _seqno_sizeof;
+    static const size_t _flags_offset = _seqno_offset + _seqno_sizeof;
+    static const size_t _type_offset = _flags_offset + _flags_sizeof;
     static const size_t _error_code_offset = _type_offset + _type_sizeof;
     static const size_t _error_note_bytes_offset = _error_code_offset + _error_code_sizeof;
     static const size_t _xrl_data_bytes_offset = _error_note_bytes_offset + _error_note_bytes_sizeof;

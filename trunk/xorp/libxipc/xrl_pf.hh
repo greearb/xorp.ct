@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.30 2008/01/04 03:16:28 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.31 2008/07/23 05:10:46 pavlin Exp $
 
 // XRL Protocol Family Header
 
@@ -92,9 +93,12 @@ public:
     virtual bool send(const Xrl& 		xrl,
 		      bool 			direct_call,
 		      const SendCallback& 	cb) = 0;
-    virtual bool sends_pending() const = 0;
-    virtual const char* protocol() const = 0;
-    virtual bool alive() const = 0;
+
+    virtual bool	sends_pending() const = 0;
+    virtual const char*	protocol() const = 0;
+    virtual bool	alive() const = 0;
+    virtual void	batch_start() {}
+    virtual void	batch_stop() {}
 
     const string& address() const		{ return _address; }
     EventLoop& eventloop() const		{ return _eventloop; }
