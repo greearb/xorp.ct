@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.30 2008/07/23 05:10:46 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.31 2008/09/23 08:04:57 abittau Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -38,25 +38,27 @@ class XrlPFSTCPListener : public XrlPFListener {
 public:
     XrlPFSTCPListener(EventLoop& e, XrlDispatcher* xr = 0, uint16_t port = 0)
 	throw (XrlPFConstructorError);
-    ~XrlPFSTCPListener();
+    virtual ~XrlPFSTCPListener();
 
-    const char* address() const	{ return _address_slash_port.c_str(); }
-    const char* protocol() const { return _protocol; }
+    virtual const char* address() const	 { return _address_slash_port.c_str(); }
+    virtual const char* protocol() const { return _protocol; }
 
     void add_request_handler(STCPRequestHandler* h);
     void remove_request_handler(const STCPRequestHandler* h);
-
+    void connect_hook(XorpFd fd, IoEventType type);
     bool response_pending() const;
 
-private:
-    void connect_hook(XorpFd fd, IoEventType type);
+protected:
+    XrlPFSTCPListener(EventLoop* e, XrlDispatcher* xr = 0);
 
     XorpFd	_sock;
-    string _address_slash_port;
-    list<STCPRequestHandler*> _request_handlers;
+    string	_address_slash_port;
 
-    static const char* _protocol;
-    static const uint32_t _timeout_period;
+private:
+    list<STCPRequestHandler*>	_request_handlers;
+
+    static const char*		_protocol;
+    static const uint32_t	_timeout_period;
 };
 
 /**
@@ -66,20 +68,26 @@ class XrlPFSTCPSender : public XrlPFSender {
 public:
     XrlPFSTCPSender(EventLoop& e, const char* address = 0)
 	throw (XrlPFConstructorError);
+    XrlPFSTCPSender(EventLoop* e, const char* address = 0);
     virtual ~XrlPFSTCPSender();
 
     bool send(const Xrl& 			x,
 	      bool 				direct_call,
 	      const XrlPFSender::SendCallback& 	cb);
 
-    bool	       sends_pending() const;
-    bool	       alive() const		    { return _sock.is_valid(); }
-    const char*	       protocol() const;
-    static const char* protocol_name()		    { return _protocol; }
-    void	       set_keepalive_ms(uint32_t t);
-    uint32_t	       keepalive_ms() const	    { return _keepalive_ms; }
-    void	       batch_start();
-    void	       batch_stop();
+    bool	        sends_pending() const;
+    bool	        alive() const		    { return _sock.is_valid(); }
+    virtual const char* protocol() const;
+    static const char*  protocol_name()		    { return _protocol; }
+    void	        set_keepalive_ms(uint32_t t);
+    uint32_t	        keepalive_ms() const	    { return _keepalive_ms; }
+    void	        batch_start();
+    void	        batch_stop();
+
+protected:
+    void construct();
+
+    XorpFd _sock;
 
 private:
     void die(const char* reason, bool verbose = true);
@@ -106,7 +114,6 @@ private:
 
 private:
     uint32_t 			 _uid;
-    XorpFd			 _sock;
 
     // Transmission related
     AsyncFileWriter*		  _writer;

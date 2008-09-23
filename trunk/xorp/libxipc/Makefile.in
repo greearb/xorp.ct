@@ -63,7 +63,7 @@ am_libxipc_la_OBJECTS = hmac_md5.lo finder_client.lo \
 	xrl_dispatcher.lo xrl_error.lo xrl_parser.lo \
 	xrl_parser_input.lo xrl_pf.lo xrl_pf_factory.lo \
 	xrl_pf_inproc.lo xrl_pf_kill.lo xrl_pf_stcp.lo \
-	xrl_pf_stcp_ph.lo xrl_pf_sudp.lo xrl_router.lo \
+	xrl_pf_stcp_ph.lo xrl_pf_sudp.lo xrl_pf_unix.lo xrl_router.lo \
 	xrl_std_router.lo xrl_tokens.lo xuid.lo common_xif.lo \
 	finder_client_base.lo finder_xif.lo
 libxipc_la_OBJECTS = $(am_libxipc_la_OBJECTS)
@@ -463,9 +463,9 @@ libxipc_la_SOURCES = finder_module.h hmac_md5.h ipc_module.h \
 	xrl_dispatcher.hh xrl_error.hh xrl_parser.hh \
 	xrl_parser_input.hh xrl_pf.hh xrl_pf_factory.hh \
 	xrl_pf_inproc.hh xrl_pf_kill.hh xrl_pf_stcp.hh \
-	xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_router.hh xrl_sender.hh \
-	xrl_std_router.hh xrl_tokens.hh xuid.hh hmac_md5.c \
-	finder_client.cc finder_client_observer.cc \
+	xrl_pf_stcp_ph.hh xrl_pf_sudp.hh xrl_pf_unix.hh xrl_router.hh \
+	xrl_sender.hh xrl_std_router.hh xrl_tokens.hh xuid.hh \
+	hmac_md5.c finder_client.cc finder_client_observer.cc \
 	finder_client_xrl_target.cc finder_messenger.cc finder_msgs.cc \
 	finder_tcp.cc finder_tcp_messenger.cc header.cc hmac.cc \
 	permits.cc sockutil.cc xrl.cc xrl_args.cc xrl_atom.cc \
@@ -473,7 +473,7 @@ libxipc_la_SOURCES = finder_module.h hmac_md5.h ipc_module.h \
 	xrl_dispatcher.cc xrl_error.cc xrl_parser.cc \
 	xrl_parser_input.cc xrl_pf.cc xrl_pf_factory.cc \
 	xrl_pf_inproc.cc xrl_pf_kill.cc xrl_pf_stcp.cc \
-	xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_router.cc \
+	xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_pf_unix.cc xrl_router.cc \
 	xrl_std_router.cc xrl_tokens.cc xuid.cc \
 	$(top_srcdir)/xrl/interfaces/common_xif.hh \
 	$(top_srcdir)/xrl/interfaces/common_xif.cc \
@@ -748,6 +748,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_pf_stcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_pf_stcp_ph.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_pf_sudp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_pf_unix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_router.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_std_router.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xrl_tokens.Plo@am__quote@

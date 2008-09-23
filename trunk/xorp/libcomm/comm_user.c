@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.31 2007/11/18 02:26:00 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.32 2008/04/22 13:53:02 bms Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -760,3 +760,101 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
     return (XORP_BAD_SOCKET);
 #endif /* ! HAVE_IPV6 */
 }
+
+#ifndef HOST_OS_WINDOWS
+
+#include <sys/un.h>
+
+static int
+comm_unix_setup(struct sockaddr_un* s_un, const char* path)
+{
+    if (strlen(path) >= sizeof(s_un->sun_path)) {
+	XLOG_ERROR("UNIX socket path too long: %s [sz %d max %d]",
+		   path, strlen(path), sizeof(s_un->sun_path));
+	return -1;
+    }
+
+    memset(s_un, 0, sizeof(*s_un));
+    s_un->sun_family = AF_UNIX;
+    snprintf(s_un->sun_path, sizeof(s_un->sun_path), "%s", path);
+
+    return 0;
+}
+
+xsock_t
+comm_bind_unix(const char* path, int is_blocking)
+{
+    xsock_t		sock;
+    struct sockaddr_un 	s_un;
+
+    comm_init();
+
+    if (comm_unix_setup(&s_un, path) == -1)
+	return (XORP_BAD_SOCKET);
+
+    sock = comm_sock_open(s_un.sun_family, SOCK_STREAM, 0, is_blocking);
+    if (sock == XORP_BAD_SOCKET)
+	return (XORP_BAD_SOCKET);
+
+    if (bind(sock, (struct sockaddr*) &s_un, sizeof(s_un)) == -1) {
+	_comm_set_serrno();
+	XLOG_ERROR("Error binding UNIX socket.  Path: %s.  Error: %s",
+		   s_un.sun_path, comm_get_error_str(comm_get_last_error()));
+
+	comm_sock_close(sock);
+	return (XORP_BAD_SOCKET);
+    }
+
+    return (sock);
+}
+
+xsock_t
+comm_connect_unix(const char* path, int is_blocking)
+{
+    xsock_t		sock;
+    struct sockaddr_un 	s_un;
+
+    comm_init();
+
+    if (comm_unix_setup(&s_un, path) == -1)
+	return (XORP_BAD_SOCKET);
+
+    sock = comm_sock_open(s_un.sun_family, SOCK_STREAM, 0, is_blocking);
+    if (sock == XORP_BAD_SOCKET)
+	return (XORP_BAD_SOCKET);
+
+    if (connect(sock, (struct sockaddr*) &s_un, sizeof(s_un)) == -1) {
+	_comm_set_serrno();
+	if (is_blocking || comm_get_last_error() != EINPROGRESS) {
+	    XLOG_ERROR("Error connecting to unix socket.  Path: %s.  Error: %s",
+	       s_un.sun_path, comm_get_error_str(comm_get_last_error()));
+
+	    comm_sock_close(sock);
+
+	    return (XORP_BAD_SOCKET);
+	}
+    }
+
+    return (sock);
+}
+
+#else /* ! HOST_OS_WINDOWS */
+
+xsock_t
+comm_bind_unix(const char* path, int is_blocking)
+{
+    UNUSED(path);
+    UNUSED(is_blocking);
+
+    XLOG_ERROR("No UNIX sockets on Windows");
+
+    return (XORP_BAD_SOCKET);
+}
+
+sock_t
+comm_connect_unix(const char* path)
+{
+    return comm_bind_unix(path, 0);
+}
+
+#endif /* HOST_OS_WINDOWS */

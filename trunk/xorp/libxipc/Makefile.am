@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.46 2007/04/17 21:40:48 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.47 2008/09/23 07:57:42 abittau Exp $
 ##
 
 # Redefine the bin installation directory
@@ -132,6 +132,7 @@ libxipc_la_SOURCES += xrl_pf_kill.hh
 libxipc_la_SOURCES += xrl_pf_stcp.hh
 libxipc_la_SOURCES += xrl_pf_stcp_ph.hh
 libxipc_la_SOURCES += xrl_pf_sudp.hh
+libxipc_la_SOURCES += xrl_pf_unix.hh
 libxipc_la_SOURCES += xrl_router.hh
 libxipc_la_SOURCES += xrl_sender.hh
 libxipc_la_SOURCES += xrl_std_router.hh
@@ -168,6 +169,7 @@ libxipc_la_SOURCES += xrl_pf_kill.cc
 libxipc_la_SOURCES += xrl_pf_stcp.cc
 libxipc_la_SOURCES += xrl_pf_stcp_ph.cc
 libxipc_la_SOURCES += xrl_pf_sudp.cc
+libxipc_la_SOURCES += xrl_pf_unix.cc
 libxipc_la_SOURCES += xrl_router.cc
 libxipc_la_SOURCES += xrl_std_router.cc
 libxipc_la_SOURCES += xrl_tokens.cc

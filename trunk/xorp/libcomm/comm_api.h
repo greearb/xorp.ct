@@ -32,7 +32,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.32 2008/04/22 16:03:43 pavlin Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.33 2008/07/07 11:27:07 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -529,6 +529,8 @@ extern xsock_t	comm_bind_connect_udp6(const struct in6_addr *local_addr,
 				       int is_blocking,
 				       int *in_progress);
 
+extern xsock_t  comm_bind_unix(const char* path, int is_blocking);
+extern xsock_t  comm_connect_unix(const char* path, int is_blocking);
 
 /*
  * The low-level `sock' API.

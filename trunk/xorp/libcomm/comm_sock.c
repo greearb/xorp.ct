@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.45 2008/04/22 13:53:02 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.46 2008/04/22 16:03:43 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -117,7 +117,8 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
     }
 
     /* Enable TCP_NODELAY */
-    if (type == SOCK_STREAM && comm_set_nodelay(sock, 1) != XORP_OK) {
+    if (type == SOCK_STREAM && (domain == AF_INET || domain == AF_INET6) 
+        && comm_set_nodelay(sock, 1) != XORP_OK) {
 	_comm_set_serrno();
 	comm_sock_close(sock);
 	return (XORP_BAD_SOCKET);
@@ -721,10 +722,10 @@ xsock_t
 comm_sock_accept(xsock_t sock)
 {
     xsock_t sock_accept;
-    struct sockaddr_in addr;
+    struct sockaddr addr;
     socklen_t socklen = sizeof(addr);
 
-    sock_accept = accept(sock, (struct sockaddr *)&addr, &socklen);
+    sock_accept = accept(sock, &addr, &socklen);
     if (sock_accept == XORP_BAD_SOCKET) {
 	_comm_set_serrno();
 	XLOG_ERROR("Error accepting socket %d: %s",
@@ -741,7 +742,8 @@ comm_sock_accept(xsock_t sock)
 #endif
 
     /* Enable TCP_NODELAY */
-    if (comm_set_nodelay(sock_accept, 1) != XORP_OK) {
+    if ((addr.sa_family == AF_INET || addr.sa_family == AF_INET6)
+        && comm_set_nodelay(sock_accept, 1) != XORP_OK) {
 	comm_sock_close(sock_accept);
 	return (XORP_BAD_SOCKET);
     }

@@ -15,7 +15,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.64 2008/09/23 08:02:40 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.65 2008/09/23 08:04:57 abittau Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -416,6 +416,11 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
 			     callback(this, &XrlPFSTCPListener::connect_hook));
 }
 
+XrlPFSTCPListener::XrlPFSTCPListener(EventLoop* e, XrlDispatcher* x)
+    : XrlPFListener(*e, x)
+{
+}
+
 XrlPFSTCPListener::~XrlPFSTCPListener()
 {
     while (_request_handlers.empty() == false) {
@@ -636,11 +641,25 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
       _batching(false)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
+    construct();
+}
+
+XrlPFSTCPSender::XrlPFSTCPSender(EventLoop* e, const char* addr_slash_port)
+    : XrlPFSender(*e, addr_slash_port),
+      _uid(_next_uid++), _writer(NULL),
+      _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS),
+      _reader(NULL), _batching(false)
+{
+}
+
+void
+XrlPFSTCPSender::construct()
+{
     debug_msg("stcp sender (%p) fd = %s\n", this, _sock.str().c_str());
     if (!_sock.is_valid()) {
-	debug_msg("failed to connect to %s\n", addr_slash_port);
+	debug_msg("failed to connect to %s\n", address().c_str());
 	xorp_throw(XrlPFConstructorError,
-		   c_format("Could not connect to %s\n", addr_slash_port));
+		   c_format("Could not connect to %s\n", address().c_str()));
     }
 
     if (comm_sock_set_blocking(_sock, 0) != XORP_OK) {
@@ -653,14 +672,14 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
 			    comm_get_error_str(err)));
     }
 
-    _reader = new BufferedAsyncReader(e, _sock, 4 * 65536,
+    _reader = new BufferedAsyncReader(_eventloop, _sock, 4 * 65536,
 				      callback(this,
 					       &XrlPFSTCPSender::read_event));
 
     _reader->set_trigger_bytes(STCPPacketHeader::header_size());
     _reader->start();
 
-    _writer = new AsyncFileWriter(e, _sock, MAX_WRITES);
+    _writer = new AsyncFileWriter(_eventloop, _sock, MAX_WRITES);
 
     _current_seqno   = 0;
     _active_bytes    = 0;

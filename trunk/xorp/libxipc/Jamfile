@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxipc/Jamfile,v 1.4 2008/04/24 15:20:25 bms Exp $
+# $XORP: xorp/libxipc/Jamfile,v 1.5 2008/09/23 08:03:08 abittau Exp $
 #
 
 SubDir TOP libxipc ;
@@ -19,7 +19,7 @@ Library libxipc :
 	xrl_cmd_map.cc xrl_dispatcher.cc xrl_error.cc xrl_parser.cc
 	xrl_parser_input.cc
 	xrl_pf.cc xrl_pf_factory.cc xrl_pf_inproc.cc xrl_pf_kill.cc
-	xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc
+	xrl_pf_stcp.cc xrl_pf_stcp_ph.cc xrl_pf_sudp.cc xrl_pf_unix.cc
 	xrl_router.cc xrl_std_router.cc xrl_tokens.cc
 	xuid.cc
 	;

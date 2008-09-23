@@ -1,5 +1,5 @@
-
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.18 2008/01/04 03:16:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.19 2008/07/23 05:10:46 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -28,6 +28,7 @@
 #include "xrl_pf_sudp.hh"
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_kill.hh"
+#include "xrl_pf_unix.hh"
 
 
 // STCP senders are a special case.  Constructing an STCP sender has
@@ -50,7 +51,8 @@ XrlPFSenderFactory::create_sender(EventLoop&	eventloop,
 	    return new XrlPFInProcSender(eventloop, address);
 	} else if (strcmp(XrlPFKillSender::protocol_name(), protocol) == 0) {
 	    return new XrlPFKillSender(eventloop, address);
-	}
+	} else if (strcmp(XrlPFUNIXSender::protocol_name(), protocol) == 0)
+	    return new XrlPFUNIXSender(eventloop, address);
     } catch (XorpException& e) {
 	XLOG_ERROR("XrlPFSenderFactory::create failed: %s\n", e.str().c_str());
     }
