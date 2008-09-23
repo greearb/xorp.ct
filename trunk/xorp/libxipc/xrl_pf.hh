@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.31 2008/07/23 05:10:46 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.32 2008/09/23 08:04:57 abittau Exp $
 
 // XRL Protocol Family Header
 
