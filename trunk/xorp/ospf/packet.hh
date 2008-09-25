@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.41 2008/01/04 03:16:56 pavlin Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.42 2008/07/23 05:11:08 pavlin Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -27,12 +27,20 @@ class Packet {
     static const size_t STANDARD_HEADER_V2 = 24;
     static const size_t STANDARD_HEADER_V3 = 16;
 
+    static const size_t VERSION_OFFSET = 0;
+    static const size_t TYPE_OFFSET = 1;
+    static const size_t LEN_OFFSET = 2;
+    static const size_t ROUTER_ID_OFFSET = 4;
+    static const size_t AREA_ID_OFFSET = 8;
     static const size_t CHECKSUM_OFFSET = 12;
 
     // OSPFv2 only.
     static const size_t AUTH_TYPE_OFFSET = 14;
     static const size_t AUTH_PAYLOAD_OFFSET = 16;
     static const size_t AUTH_PAYLOAD_SIZE = 8;
+
+    // OSPFv3 only.
+    static const size_t INSTANCE_ID_OFFSET = 14;
 
     Packet(OspfTypes::Version version)
 	: _version(version), _auth_type(0), _instance_id(0)
@@ -268,6 +276,24 @@ class HelloPacket : public Packet {
 						// The same for OSPFv2
 						// and OSPFv3. How did
 						// that happen?
+
+
+    static const size_t DESIGNATED_ROUTER_OFFSET = 12;
+    static const size_t BACKUP_DESIGNATED_ROUTER_OFFSET = 16;
+
+    // OSPFv2
+    static const size_t NETWORK_MASK_OFFSET = 0;
+    static const size_t HELLO_INTERVAL_V2_OFFSET = 4;
+    static const size_t OPTIONS_V2_OFFSET = 6;
+    static const size_t ROUTER_PRIORITY_V2_OFFSET = 7;
+    static const size_t ROUTER_DEAD_INTERVAL_V2_OFFSET = 8;
+
+    // OSPFv3
+    static const size_t INTERFACE_ID_OFFSET = 0;
+    static const size_t ROUTER_PRIORITY_V3_OFFSET = 4;
+    static const size_t OPTIONS_V3_OFFSET = 4;
+    static const size_t HELLO_INTERVAL_V3_OFFSET = 8;
+    static const size_t ROUTER_DEAD_INTERVAL_V3_OFFSET = 10;
 
     HelloPacket(OspfTypes::Version version)
 	: Packet(version), _network_mask(0), _interface_id(0),

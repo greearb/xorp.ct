@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.46 2008/01/04 03:16:56 pavlin Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.47 2008/07/23 05:11:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -219,7 +219,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 	xorp_throw(InvalidPacket,
 		   c_format("Version mismatch expected %u received %u",
 			    get_version(),
-			    ptr[0] & 0xff));
+			    ptr[Packet::VERSION_OFFSET] & 0xff));
 	break;
     }
 
@@ -227,7 +227,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 	xorp_throw(InvalidPacket,
 		   c_format("Type mismatch expected %u received %u",
 			    get_type(),
-			    ptr[1]));
+			    ptr[Packet::TYPE_OFFSET]));
 
     // Make sure that at least the standard header length is present.
     switch(version) {
@@ -247,7 +247,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 
     // Verify that the length in the packet and the length of received
     // data match.
-    uint32_t packet_length = extract_16(&ptr[2]);
+    uint32_t packet_length = extract_16(&ptr[Packet::LEN_OFFSET]);
     if (packet_length != len) {
 	// If the frame is too small complain.
 	if (len < packet_length)
@@ -260,8 +260,8 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 	len = packet_length;	// Drop the length and continue.
     }
 
-    set_router_id(extract_32(&ptr[4]));
-    set_area_id(extract_32(&ptr[8]));
+    set_router_id(extract_32(&ptr[Packet::ROUTER_ID_OFFSET]));
+    set_area_id(extract_32(&ptr[Packet::AREA_ID_OFFSET]));
 
     // In OSPFv2 there is authentication info in the standard header.
     switch(version) {
@@ -275,7 +275,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 	memset(&ptr[Packet::AUTH_PAYLOAD_OFFSET], 0, sizeof(_auth));
 	break;
     case OspfTypes::V3:
-	set_instance_id(ptr[14]);
+	set_instance_id(ptr[Packet::INSTANCE_ID_OFFSET]);
 	// For OSPFv3 the checksum has already been verified.
 	return get_standard_header_length();
 	break;
@@ -328,18 +328,18 @@ Packet::encode_standard_header(uint8_t *ptr, size_t len)
 
     OspfTypes::Version version = get_version();
 
-    ptr[0] = version;
-    ptr[1] = get_type();
-    embed_16(&ptr[2], len);
-    embed_32(&ptr[4], get_router_id());
-    embed_32(&ptr[8], get_area_id());
+    ptr[Packet::VERSION_OFFSET] = version;
+    ptr[Packet::TYPE_OFFSET] = get_type();
+    embed_16(&ptr[Packet::LEN_OFFSET], len);
+    embed_32(&ptr[Packet::ROUTER_ID_OFFSET], get_router_id());
+    embed_32(&ptr[Packet::AREA_ID_OFFSET], get_area_id());
     
     switch(version) {
     case OspfTypes::V2:
 	embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], get_auth_type());
 	break;
     case OspfTypes::V3:
-	ptr[14] = get_instance_id();
+	ptr[Packet::INSTANCE_ID_OFFSET] = get_instance_id();
 	// For OSPFv3 the checksum will be written later.
 	return get_standard_header_length();
 	break;
@@ -441,10 +441,10 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
 	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
-			    XORP_UINT_CAST(2)));
+			    XORP_UINT_CAST(Packet::TYPE_OFFSET)));
 
     OspfTypes::Version version;
-    switch(ptr[0]) {
+    switch(ptr[Packet::VERSION_OFFSET]) {
     case 2:
 	version = OspfTypes::V2;
 	break;
@@ -453,12 +453,13 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
 	break;
     default:
 	xorp_throw(InvalidPacket,
-		   c_format("Unknown OSPF Version %u", ptr[0] & 0xff));
+		   c_format("Unknown OSPF Version %u",
+			    ptr[Packet::VERSION_OFFSET] & 0xff));
 	break;
     }
 
     map<OspfTypes::Type , Packet *>::iterator i;
-    uint8_t type = ptr[1];
+    uint8_t type = ptr[Packet::TYPE_OFFSET];
     Packet *packet = NULL;
     switch(version) {
     case OspfTypes::V2:
@@ -505,23 +506,34 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
 
     switch(version) {
     case OspfTypes::V2:
-	packet->set_network_mask(extract_32(&ptr[offset]));
-	packet->set_hello_interval(extract_16(&ptr[offset + 4]));
-	packet->set_options(ptr[offset + 6]);
-	packet->set_router_priority(ptr[offset + 7]);
-	packet->set_router_dead_interval(extract_32(&ptr[offset + 8]));
+	packet->set_network_mask(extract_32(&ptr[offset +
+					 HelloPacket::NETWORK_MASK_OFFSET]));
+	packet->set_hello_interval(extract_16(&ptr[offset +
+				   HelloPacket::HELLO_INTERVAL_V2_OFFSET]));
+	packet->set_options(ptr[offset + HelloPacket::OPTIONS_V2_OFFSET]);
+	packet->set_router_priority(ptr[offset +
+				HelloPacket::ROUTER_PRIORITY_V2_OFFSET]);
+	packet->set_router_dead_interval(extract_32(&ptr[offset +
+			 HelloPacket::ROUTER_DEAD_INTERVAL_V2_OFFSET]));
 	break;
     case OspfTypes::V3:
-	packet->set_interface_id(extract_32(&ptr[offset]));
-	packet->set_router_priority(ptr[offset + 4]);
-	packet->set_options(extract_32(&ptr[offset + 4]) & 0xffffff);
-	packet->set_hello_interval(extract_16(&ptr[offset + 8]));
-	packet->set_router_dead_interval(extract_16(&ptr[offset + 10]));
+	packet->set_interface_id(extract_32(&ptr[offset +
+					 HelloPacket::INTERFACE_ID_OFFSET]));
+	packet->set_router_priority(ptr[offset +
+				HelloPacket::ROUTER_PRIORITY_V3_OFFSET]);
+	packet->set_options(extract_32(&ptr[offset +
+			    HelloPacket::OPTIONS_V3_OFFSET]) & 0xffffff);
+	packet->set_hello_interval(extract_16(&ptr[offset +
+				   HelloPacket::HELLO_INTERVAL_V3_OFFSET]));
+	packet->set_router_dead_interval(extract_16(&ptr[offset +
+			 HelloPacket::ROUTER_DEAD_INTERVAL_V3_OFFSET]));
 	break;
     }
 
-     packet->set_designated_router(extract_32(&ptr[offset + 12]));
-     packet->set_backup_designated_router(extract_32(&ptr[offset + 16]));
+     packet->set_designated_router(extract_32(&ptr[offset +
+				   HelloPacket::DESIGNATED_ROUTER_OFFSET]));
+     packet->set_backup_designated_router(extract_32(&ptr[offset + 
+			    HelloPacket::BACKUP_DESIGNATED_ROUTER_OFFSET]));
 
     // If there is any more space in the packet extract the neighbours.
     int neighbours = (len - (offset + MINIMUM_LENGTH)) / 4;
@@ -554,26 +566,36 @@ HelloPacket::encode(vector<uint8_t>& pkt)
 
     switch(version) {
     case OspfTypes::V2:
-	embed_32(&ptr[offset], get_network_mask());
-	embed_16(&ptr[offset + 4], get_hello_interval());
-	ptr[offset + 6] = get_options();
-	ptr[offset + 7] = get_router_priority();
-	embed_32(&ptr[offset +8], get_router_dead_interval());
+	embed_32(&ptr[offset + HelloPacket::NETWORK_MASK_OFFSET],
+		 get_network_mask());
+	embed_16(&ptr[offset + HelloPacket::HELLO_INTERVAL_V2_OFFSET],
+		 get_hello_interval());
+	ptr[offset + HelloPacket::OPTIONS_V2_OFFSET] = get_options();
+	ptr[offset + HelloPacket::ROUTER_PRIORITY_V2_OFFSET] =
+	    get_router_priority();
+	embed_32(&ptr[offset + HelloPacket::ROUTER_DEAD_INTERVAL_V2_OFFSET],
+		 get_router_dead_interval());
 	break;
     case OspfTypes::V3:
-	embed_32(&ptr[offset], get_interface_id());
+	embed_32(&ptr[offset + HelloPacket::INTERFACE_ID_OFFSET],
+		 get_interface_id());
 	// Careful Options occupy 3 bytes, four bytes are written out
 	// and the top byte is overwritten by the router priority.
-	embed_32(&ptr[offset + 4], get_options());
-	ptr[offset + 4] = get_router_priority();
+	embed_32(&ptr[offset + HelloPacket::OPTIONS_V3_OFFSET], get_options());
+	ptr[offset + HelloPacket::ROUTER_PRIORITY_V3_OFFSET] =
+	    get_router_priority();
 
-	embed_16(&ptr[offset + 8], get_hello_interval());
-	embed_16(&ptr[offset + 10], get_router_dead_interval());
+	embed_16(&ptr[offset + HelloPacket::HELLO_INTERVAL_V3_OFFSET],
+		 get_hello_interval());
+	embed_16(&ptr[offset + HelloPacket::ROUTER_DEAD_INTERVAL_V3_OFFSET],
+		 get_router_dead_interval());
 	break;
     }
 
-    embed_32(&ptr[offset + 12], get_designated_router());
-    embed_32(&ptr[offset + 16], get_backup_designated_router());
+    embed_32(&ptr[offset + HelloPacket::DESIGNATED_ROUTER_OFFSET],
+	     get_designated_router());
+    embed_32(&ptr[offset + HelloPacket::BACKUP_DESIGNATED_ROUTER_OFFSET],
+	     get_backup_designated_router());
 
     list<OspfTypes::RouterID> &li = get_neighbours();
     list<OspfTypes::RouterID>::iterator i = li.begin();
