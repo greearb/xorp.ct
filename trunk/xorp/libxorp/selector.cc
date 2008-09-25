@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.49 2008/09/23 19:57:34 abittau Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.50 2008/09/23 19:57:39 abittau Exp $"
 
 #include "libxorp_module.h"
 
@@ -412,7 +412,7 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
     XLOG_ASSERT(FD_ISSET(_maxpri_fd, &_testfds[_maxpri_sel]));
     FD_CLR(_maxpri_fd, &_testfds[_maxpri_sel]);
 
-    SelectorMask sm;
+    SelectorMask sm = SEL_NONE;
 
     switch (_maxpri_sel) {
     case SEL_RD_IDX:
