@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.21 2008/06/14 04:15:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.22 2008/07/23 05:10:28 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -328,9 +328,9 @@ nlm_newlink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
 	    if (addr_size != sizeof(ea))
 		break;
 	    memcpy(&ea, addr_data, sizeof(ea));
-	    EtherMac ether_mac(ea);
-	    if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
-		ifp->set_mac(ether_mac);
+	    Mac mac(ea);
+	    if (is_newlink || (mac != ifp->mac()))
+		ifp->set_mac(mac);
 	    break;
 	}
 	default:

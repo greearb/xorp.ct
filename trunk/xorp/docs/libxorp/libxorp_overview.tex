@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.31 2008/07/18 02:34:51 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.32 2008/07/23 05:10:01 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -120,8 +120,7 @@ components (in alphabetical order):
   basic IP addresses (for IPv4, IPv6 and dual IPv4/6 address family
   respectively).
 
-  \item \emph{mac.hh: class Mac, class EtherMac}: Containers for
-  MAC types.
+  \item \emph{mac.hh: class Mac}: Container for MAC address.
 
   \item \emph{nexthop.hh}: Classes that contain routing next-hop
   information.
@@ -403,9 +402,8 @@ address that has either IPv4 or IPv6 address family.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{mac.hh}
 
-This file declares the following classes: \emph{class Mac, class
-EtherMac}. The first class is a generic container for any type of MAC.
-The second class is a container for Ethernet MAC address.
+This file declares the following class: \emph{class Mac}. 
+This class is a container for a 48-bit MAC address.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{nexthop.hh}

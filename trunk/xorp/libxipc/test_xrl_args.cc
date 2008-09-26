@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.18 2008/06/14 23:37:59 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.19 2008/07/23 05:10:44 pavlin Exp $"
 
 // test_xrl_args: String Serialization Tests
 
@@ -156,7 +156,7 @@ run_serialization_test()
 	XrlAtom("frank_ipv4net", IPv4Net("128.16.8.0/24")),
 	XrlAtom("some_ipv6",	 IPv6("fe80::20a:95ff:feda:7c7a")),
 	XrlAtom("an_ipv6net",	 IPv6Net("fe80::20a:95ff:feda:7c7a/128")),
-	XrlAtom("a_mac_addr",	 EtherMac("00:ab:10:11:12:13")),
+	XrlAtom("a_mac_addr",	 Mac("00:ab:10:11:12:13")),
 	XrlAtom("string",	 string("hello world, kippers, yum")),
 	XrlAtom("binary_data",	 test_binary),
 	XrlAtom("a_list",	 test_list),

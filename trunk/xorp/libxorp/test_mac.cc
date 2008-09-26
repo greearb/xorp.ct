@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.19 2008/05/23 18:37:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.20 2008/07/23 05:10:55 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -155,32 +155,51 @@ test_mac_valid_constructors(TestInfo& test_info)
     UNUSED(test_info);
 
     // Test values for Mac address: "11:22:33:44:55:66"
-    const string addr_string = "11:22:33:44:55:66";
+    const char* addr_string = "11:22:33:44:55:66";
     const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-    
+    struct ether_addr ether_addr;
+    struct sockaddr sa;
+
+    // Initialize the structures
+    memcpy(&ether_addr, ui8_addr, sizeof(ui8_addr));
+    memset(&sa, 0, sizeof(sa));
+    memcpy(sa.sa_data, ui8_addr, sizeof(ui8_addr));
+
     //
     // Default constructor.
     //
     Mac mac1;
     verbose_match(mac1.str(), Mac::ZERO().str());
-    
-    //
-    // Constructor from a string.
-    //
-    Mac mac2(addr_string);
-    verbose_match(mac2.str(), addr_string);
-    
-    //
-    // Constructor from another Mac address.
-    //
-    Mac mac3(mac2);
-    verbose_match(mac3.str(), addr_string);
 
     //
     // Constructor from a (uint8_t *) memory pointer.
     //
-    Mac mac4(ui8_addr, sizeof(ui8_addr));
+    Mac mac2(ui8_addr);
+    verbose_match(mac2.str(), addr_string);
+
+    //
+    // Constructor from a string.
+    //
+    Mac mac3(addr_string);
+    verbose_match(mac3.str(), addr_string);
+
+    //
+    // Constructor from ether_addr structure.
+    //
+    Mac mac4(ether_addr);
     verbose_match(mac4.str(), addr_string);
+
+    //
+    // Constructor from sockaddr structure.
+    //
+    Mac mac5(sa);
+    verbose_match(mac5.str(), addr_string);
+
+    //
+    // Constructor from another Mac address.
+    //
+    Mac mac6(mac2);
+    verbose_match(mac6.str(), addr_string);
 
     return (! failures());
 }
@@ -207,21 +226,6 @@ test_mac_invalid_constructors(TestInfo& test_info)
 	verbose_log("%s : OK\n", e.str().c_str());
     }
 
-    //
-    // Constructor from memory location with invalid length.
-    //
-    try {
-	// Memory location with invalid length.
-	const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-	Mac mac(ui8_addr, sizeof(ui8_addr) - 1);
-	verbose_log("Cannot catch Mac address with invalid length : FAIL\n");
-	incr_failures();
-	UNUSED(mac);
-    } catch (const BadMac& e) {
-	// The problem was caught
-	verbose_log("%s : OK\n", e.str().c_str());
-    }
-
     return (! failures());
 }
 
@@ -234,8 +238,15 @@ test_mac_valid_copy_in_out(TestInfo& test_info)
     UNUSED(test_info);
 
     // Test values for Mac address: "11:22:33:44:55:66"
-    const string addr_string = "11:22:33:44:55:66";
+    const char* addr_string = "11:22:33:44:55:66";
     const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+    struct ether_addr ether_addr;
+    struct sockaddr sa;
+
+    // Initialize the structures
+    memcpy(&ether_addr, ui8_addr, sizeof(ui8_addr));
+    memset(&sa, 0, sizeof(sa));
+    memcpy(sa.sa_data, ui8_addr, sizeof(ui8_addr));
 
     //
     // Copy the Mac raw address to specified memory location.
@@ -248,20 +259,56 @@ test_mac_valid_copy_in_out(TestInfo& test_info)
 		   "compare copy_out(uint8_t *) for Mac address");
 
     //
+    // Copy the Mac raw address to ether_addr structure.
+    //
+    Mac mac2(addr_string);
+    struct ether_addr mac2_ether_addr;
+    verbose_assert(mac2.copy_out(mac2_ether_addr) == 6,
+		   "copy_out(struct ether_addr) for Mac address");
+    verbose_assert(memcmp(&ui8_addr, &mac2_ether_addr, 6) == 0,
+		   "compare copy_out(struct ether_addr) for Mac address");
+
+    //
+    // Copy the Mac raw address to sockaddr structure.
+    //
+    Mac mac3(addr_string);
+    struct sockaddr mac3_sockaddr;
+    verbose_assert(mac3.copy_out(mac3_sockaddr) == 6,
+		   "copy_out(struct sockaddr) for Mac address");
+    verbose_assert(memcmp(&ui8_addr, &mac3_sockaddr.sa_data, 6) == 0,
+		   "compare copy_out(struct sockaddr) for Mac address");
+
+    //
     // Copy a raw address into Mac address.
     //
-    Mac mac2;
-    verbose_assert(mac2.copy_in(&ui8_addr[0], sizeof(ui8_addr)) == 6,
+    Mac mac4;
+    verbose_assert(mac4.copy_in(&ui8_addr[0]) == 6,
 		   "copy_in(uint8_t *) for Mac address");
-    verbose_match(mac2.str(), addr_string);
+    verbose_match(mac4.str(), addr_string);
+
+    //
+    // Copy an ether_addr struct address into Mac address.
+    //
+    Mac mac5;
+    verbose_assert(mac5.copy_in(ether_addr) == 6,
+		   "copy_in(struct ether_addr) for Mac address");
+    verbose_match(mac5.str(), addr_string);
+
+    //
+    // Copy a sockaddr struct address into Mac address.
+    //
+    Mac mac6;
+    verbose_assert(mac6.copy_in(sa) == 6,
+		   "copy_in(struct sockaddr) for Mac address");
+    verbose_match(mac6.str(), addr_string);
 
     //
     // Copy a string address into Mac address.
     //
-    Mac mac3;
-    verbose_assert(mac3.copy_in(addr_string) == 6,
-		   "copy_in(string) for Mac address");
-    verbose_match(mac3.str(), addr_string);
+    Mac mac7;
+    verbose_assert(mac7.copy_in(addr_string) == 6,
+		   "copy_in(char *) for Mac address");
+    verbose_match(mac7.str(), addr_string);
 
     return (! failures());
 }
@@ -287,21 +334,6 @@ test_mac_invalid_copy_in_out(TestInfo& test_info)
 	verbose_log("%s : OK\n", e.str().c_str());
     }
 
-    //
-    // Copy-in from memory location with invalid length.
-    //
-    try {
-	// Memory location with invalid length.
-	const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-	Mac mac;
-	mac.copy_in(ui8_addr, sizeof(ui8_addr) - 1);
-	verbose_log("Cannot catch Mac address with invalid length : FAIL\n");
-	incr_failures();
-    } catch (const BadMac& e) {
-	// The problem was caught
-	verbose_log("%s : OK\n", e.str().c_str());
-    }
-
     return (! failures());
 }
 
@@ -317,6 +349,11 @@ test_mac_operators(TestInfo& test_info)
     Mac mac_b("11:11:11:11:11:11");
 
     //
+    // Less-Than Operator
+    //
+    verbose_assert(mac_a < mac_b, "operator<");
+
+    //
     // Equality Operator
     //
     verbose_assert(mac_a == mac_a, "operator==");
@@ -327,11 +364,6 @@ test_mac_operators(TestInfo& test_info)
     //
     verbose_assert(!(mac_a != mac_a), "operator!=");
     verbose_assert(mac_a != mac_b, "operator!=");
-
-    //
-    // Less-Than Operator
-    //
-    verbose_assert(mac_a < mac_b, "operator<");
 
     return (! failures());
 }
@@ -374,6 +406,14 @@ test_mac_address_type(TestInfo& test_info)
     verbose_assert(mac_multicast.is_zero() == false, "is_zero()");
 
     //
+    // Test if an address is a valid unicast address.
+    //
+    verbose_assert(mac_empty.is_unicast() == true, "is_unicast()");
+    verbose_assert(mac_zero.is_unicast() == true, "is_unicast()");
+    verbose_assert(mac_unicast.is_unicast() == true, "is_unicast()");
+    verbose_assert(mac_multicast.is_unicast() == false, "is_unicast()");
+
+    //
     // Test if an address is a valid multicast address.
     //
     verbose_assert(mac_empty.is_multicast() == false, "is_multicast()");
@@ -393,6 +433,21 @@ test_mac_address_const(TestInfo& test_info)
     UNUSED(test_info);
 
     //
+    // Test the number of bits in address
+    //
+    verbose_assert(Mac::ADDR_BITLEN == 48, "ADDR_BITLEN");
+
+    //
+    // Test the number of bytes in address
+    //
+    verbose_assert(Mac::ADDR_BYTELEN == 6, "ADDR_BYTELEN");
+
+    //
+    // Test the multicast bit in the first octet of the address
+    //
+    verbose_assert(Mac::MULTICAST_BIT == 0x1, "MULTICAST_BIT");
+
+    //
     // Test pre-defined constant addresses
     //
     verbose_assert(Mac::ZERO() == Mac("00:00:00:00:00:00"), "ZERO()");
@@ -409,373 +464,6 @@ test_mac_address_const(TestInfo& test_info)
 		   "GMRP_MULTICAST()");
 
     verbose_assert(Mac::GVRP_MULTICAST() == Mac("01:80:c2:00:00:21"),
-		   "GVRP_MULTICAST()");
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac valid constructors.
- */
-bool
-test_ethermac_valid_constructors(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    // Test values for EtherMac address: "11:22:33:44:55:66"
-    const string addr_string = "11:22:33:44:55:66";
-    const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-    struct ether_addr ether_addr = { { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 } };
-    struct sockaddr sa;
-
-    memset(&sa, 0, sizeof(sa));
-    memcpy(&sa.sa_data, ui8_addr, sizeof(ui8_addr));
-
-    //
-    // Default constructor.
-    //
-    EtherMac ether_mac1;
-    verbose_match(ether_mac1.str(), Mac::ZERO().str());
-    
-    //
-    // Constructor from a string.
-    //
-    EtherMac ether_mac2(addr_string);
-    verbose_match(ether_mac2.str(), addr_string);
-    
-    //
-    // Constructor from another EtherMac address.
-    //
-    EtherMac ether_mac3(ether_mac2);
-    verbose_match(ether_mac3.str(), addr_string);
-
-    //
-    // Constructor from Mac address.
-    //
-    Mac mac4(addr_string);
-    EtherMac ether_mac4(mac4);
-    verbose_match(ether_mac4.str(), addr_string);
-
-    //
-    // Constructor from a (uint8_t *) memory pointer.
-    //
-    EtherMac ether_mac5(ui8_addr);
-    verbose_match(ether_mac5.str(), addr_string);
-
-    //
-    // Constructor from ether_addr structure.
-    //
-    EtherMac ether_mac6(ether_addr);
-    verbose_match(ether_mac6.str(), addr_string);
-
-    //
-    // Constructor from sockaddr structure.
-    //
-    EtherMac ether_mac7(sa);
-    verbose_match(ether_mac7.str(), addr_string);
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac invalid constructors.
- */
-bool
-test_ethermac_invalid_constructors(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    //
-    // Constructor from an invalid address string.
-    //
-    try {
-	// Invalid address string
-	EtherMac ether_mac("hello");
-	verbose_log("Cannot catch invalid EtherMac address \"hello\" : FAIL\n");
-	incr_failures();
-	UNUSED(ether_mac);
-    } catch (const InvalidString& e) {
-	// The problem was caught
-	verbose_log("%s : OK\n", e.str().c_str());
-    }
-
-    //
-    // XXX: We can't really have ether_addr with invalid address, hence
-    // we skip the test for constructor from invalid ether_addr address.
-    //
-
-    //
-    // XXX: We can't really have sockaddr with invalid address, hence
-    // we skip the test for constructor from invalid sockaddr address.
-    //
-
-    //
-    // XXX: Currently we don't support Mac addresses that are not EtherMac
-    // addresses, hence we skip the test for constructor from invalid
-    // Mac address.
-    //
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac valid copy in/out methods.
- */
-bool
-test_ethermac_valid_copy_in_out(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    // Test values for EtherMac address: "11:22:33:44:55:66"
-    const string addr_string = "11:22:33:44:55:66";
-    const uint8_t ui8_addr[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-    struct ether_addr ether_addr = { { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 } };
-    struct sockaddr sa;
-
-    memset(&sa, 0, sizeof(sa));
-    memcpy(&sa.sa_data, ui8_addr, sizeof(ui8_addr));
-
-    //
-    // Copy the EtherMac raw address to specified memory location.
-    //
-    EtherMac ether_mac1(addr_string);
-    uint8_t ether_mac1_uint8[6];
-    verbose_assert(ether_mac1.copy_out(&ether_mac1_uint8[0]) == 6,
-		   "copy_out(uint8_t *) for EtherMac address");
-    verbose_assert(memcmp(&ui8_addr, &ether_mac1_uint8[0], 6) == 0,
-		   "compare copy_out(uint8_t *) for EtherMac address");
-
-    //
-    // Copy the EtherMac raw address to ether_addr structure.
-    //
-    EtherMac ether_mac2(addr_string);
-    struct ether_addr ether_mac2_ether_addr;
-    verbose_assert(ether_mac2.copy_out(ether_mac2_ether_addr) == 6,
-		   "copy_out(ether_addr&) for EtherMac address");
-    verbose_assert(memcmp(&ui8_addr, &ether_mac2_ether_addr, 6) == 0,
-		   "compare copy_out(ether_addr&) for EtherMac address");
-
-    //
-    // Copy the EtherMac raw address to sockaddr structure.
-    //
-    EtherMac ether_mac3(addr_string);
-    struct sockaddr ether_mac3_sockaddr;
-    verbose_assert(ether_mac3.copy_out(ether_mac3_sockaddr) == 6,
-		   "copy_out(sockaddr&) for EtherMac address");
-    verbose_assert(memcmp(&ui8_addr, &ether_mac3_sockaddr.sa_data, 6) == 0,
-		   "compare copy_out(sockaddr&) for EtherMac address");
-
-    //
-    // Copy the EtherMac raw address to Mac address.
-    //
-    EtherMac ether_mac4(addr_string);
-    Mac ether_mac4_mac;
-    verbose_assert(ether_mac4.copy_out(ether_mac4_mac) == 6,
-		   "copy_out(mac&) for EtherMac address");
-    verbose_match(ether_mac4_mac.str(), addr_string);
-
-    //
-    // Copy a raw address into EtherMac address.
-    //
-    EtherMac ether_mac5;
-    verbose_assert(ether_mac5.copy_in(&ui8_addr[0]) == 6,
-		   "copy_in(uint8_t *) for EtherMac address");
-    verbose_match(ether_mac5.str(), addr_string);
-
-    //
-    // Copy a string address into EtherMac address.
-    //
-    EtherMac ether_mac6;
-    verbose_assert(ether_mac6.copy_in(addr_string) == 6,
-		   "copy_in(string) for EtherMac address");
-    verbose_match(ether_mac6.str(), addr_string);
-
-    //
-    // Copy a raw address from a ether_addr structure into EtherMac address.
-    //
-    EtherMac ether_mac7;
-    verbose_assert(ether_mac7.copy_in(ether_addr) == 6,
-		   "copy_in(ether_addr&) for EtherMac address");
-    verbose_match(ether_mac7.str(), addr_string);
-
-    //
-    // Copy a raw address from a sockaddr structure into EtherMac address.
-    //
-    EtherMac ether_mac8;
-    verbose_assert(ether_mac8.copy_in(ether_addr) == 6,
-		   "copy_in(sockaddr&) for EtherMac address");
-    verbose_match(ether_mac8.str(), addr_string);
-
-    //
-    // Copy a Mac address into EtherMac address.
-    //
-    EtherMac ether_mac9;
-    Mac ether_mac9_mac(addr_string);
-    verbose_assert(ether_mac9.copy_in(ether_mac9_mac) == 6,
-		   "copy_in(Mac&) for EtherMac address");
-    verbose_match(ether_mac9.str(), addr_string);
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac invalid copy in/out methods.
- */
-bool
-test_ethermac_invalid_copy_in_out(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    //
-    // Copy-in from invalid string.
-    //
-    try {
-	EtherMac ether_mac;
-	ether_mac.copy_in(string("hello"));
-	verbose_log("Cannot catch invalid EtherMac address \"hello\" : FAIL\n");
-	incr_failures();
-    } catch (const InvalidString& e) {
-	// The problem was caught
-	verbose_log("%s : OK\n", e.str().c_str());
-    }
-
-    //
-    // XXX: Currently we don't support Mac addresses that are not EtherMac
-    // addresses, hence we skip the test for copy-in from invalid
-    // Mac address.
-    //
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac operators.
- */
-bool
-test_ethermac_operators(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    EtherMac ether_mac_a("00:00:00:00:00:00");
-    EtherMac ether_mac_b("11:11:11:11:11:11");
-
-    //
-    // Equality Operator
-    //
-    verbose_assert(ether_mac_a == ether_mac_a, "operator==");
-    verbose_assert(!(ether_mac_a == ether_mac_b), "operator==");
-
-    //
-    // Not-Equal Operator
-    //
-    verbose_assert(!(ether_mac_a != ether_mac_a), "operator!=");
-    verbose_assert(ether_mac_a != ether_mac_b, "operator!=");
-
-    //
-    // Less-Than Operator
-    //
-    verbose_assert(ether_mac_a < ether_mac_b, "operator<");
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac address type.
- */
-bool
-test_ethermac_address_type(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    EtherMac ether_mac_default;			// Default (zero) address
-    EtherMac ether_mac_zero("00:00:00:00:00:00");	// Zero address
-    EtherMac ether_mac_unicast("00:11:11:11:11:11");	// Unicast
-    EtherMac ether_mac_multicast("01:22:22:22:22:22");	// Multicast
-
-    //
-    // Test the size of an address (in octets).
-    //
-    verbose_assert(ether_mac_default.addr_bytelen() == 6, "addr_bytelen()");
-    verbose_assert(ether_mac_zero.addr_bytelen() == 6, "addr_bytelen()");
-    verbose_assert(ether_mac_unicast.addr_bytelen() == 6, "addr_bytelen()");
-    verbose_assert(ether_mac_multicast.addr_bytelen() == 6, "addr_bytelen()");
-
-    //
-    // Test the size of an address (in bits).
-    //
-    verbose_assert(ether_mac_default.addr_bitlen() == 48, "addr_bitlen()");
-    verbose_assert(ether_mac_zero.addr_bitlen() == 48, "addr_bitlen()");
-    verbose_assert(ether_mac_unicast.addr_bitlen() == 48, "addr_bitlen()");
-    verbose_assert(ether_mac_multicast.addr_bitlen() == 48, "addr_bitlen()");
-
-    //
-    // Test if an address is numerically zero.
-    //
-    verbose_assert(ether_mac_default.is_zero() == true, "is_zero()");
-    verbose_assert(ether_mac_zero.is_zero() == true, "is_zero()");
-    verbose_assert(ether_mac_unicast.is_zero() == false, "is_zero()");
-    verbose_assert(ether_mac_multicast.is_zero() == false, "is_zero()");
-
-    //
-    // Test if an address is a valid multicast address.
-    //
-    verbose_assert(ether_mac_default.is_multicast() == false,
-		   "is_multicast()");
-    verbose_assert(ether_mac_zero.is_multicast() == false, "is_multicast()");
-    verbose_assert(ether_mac_unicast.is_multicast() == false,
-		   "is_multicast()");
-    verbose_assert(ether_mac_multicast.is_multicast() == true,
-		   "is_multicast()");
-
-    return (! failures());
-}
-
-/**
- * Test EtherMac address constant values.
- */
-bool
-test_ethermac_address_const(TestInfo& test_info)
-{
-    UNUSED(test_info);
-
-    //
-    // Test the number of bits in address
-    //
-    verbose_assert(EtherMac::ADDR_BITLEN == 48, "ADDR_BITLEN");
-
-    //
-    // Test the number of bytes in address
-    //
-    verbose_assert(EtherMac::ADDR_BYTELEN == 6, "ADDR_BYTELEN");
-
-    //
-    // Test the multicast bit in the first octet of the address
-    //
-    verbose_assert(EtherMac::MULTICAST_BIT == 1, "MULTICAST_BIT");
-
-    //
-    // Test pre-defined constant addresses
-    //
-    verbose_assert(EtherMac(Mac::ZERO()) == EtherMac("00:00:00:00:00:00"),
-		   "ZERO()");
-
-    verbose_assert(EtherMac(Mac::ALL_ONES()) == EtherMac("ff:ff:ff:ff:ff:ff"),
-		   "ALL_ONES()");
-
-    verbose_assert(EtherMac(Mac::STP_MULTICAST())
-		   == EtherMac("01:80:c2:00:00:00"),
-		   "STP_MULTICAST()");
-
-    verbose_assert(EtherMac(Mac::LLDP_MULTICAST())
-		   == EtherMac("01:80:c2:00:00:0e"),
-		   "LLDP_MULTICAST()");
-
-    verbose_assert(EtherMac(Mac::GMRP_MULTICAST())
-		   == EtherMac("01:80:c2:00:00:20"),
-		   "GMRP_MULTICAST()");
-
-    verbose_assert(EtherMac(Mac::GVRP_MULTICAST())
-		   == EtherMac("01:80:c2:00:00:21"),
 		   "GVRP_MULTICAST()");
 
     return (! failures());
@@ -841,34 +529,6 @@ main(int argc, char * const argv[])
 	{  "test_mac_address_const",
 	   callback(test_mac_address_const),
 	   true
-	},
-	{ "test_ethermac_valid_constructors",
-	  callback(test_ethermac_valid_constructors),
-	  true
-	},
-	{ "test_ethermac_invalid_constructors",
-	  callback(test_ethermac_invalid_constructors),
-	  true
-	},
-	{ "test_ethermac_valid_copy_in_out",
-	  callback(test_ethermac_valid_copy_in_out),
-	  true
-	},
-	{ "test_ethermac_invalid_copy_in_out",
-	  callback(test_ethermac_invalid_copy_in_out),
-	  true
-	},
-	{ "test_ethermac_operators",
-	  callback(test_ethermac_operators),
-	  true
-	},
-	{ "test_ethermac_address_type",
-	  callback(test_ethermac_address_type),
-	  true
-	},
-	{ "test_ethermac_address_const",
-	  callback(test_ethermac_address_const),
-	  true
 	}
     };
 

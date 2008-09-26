@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl.cc,v 1.15 2008/06/14 23:37:59 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl.cc,v 1.16 2008/07/23 05:10:44 pavlin Exp $"
 
 // test_xrl: String Serialization Tests
 
@@ -87,7 +87,7 @@ run_test()
 	},
 	{
 	    "Xrl named mac",
-	    XrlAtom("foo-ether", Mac("aa:bb:cc:dd:ee:ff"))
+	    XrlAtom("foo-mac", Mac("aa:bb:cc:dd:ee:ff"))
 	},
 	{
 	    "Xrl named string",

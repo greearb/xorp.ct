@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.20 2008/05/08 22:46:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_set_netlink_socket.cc,v 1.21 2008/07/23 05:10:30 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -631,18 +631,7 @@ IfConfigSetNetlinkSocket::set_interface_mac_address(const string& ifname,
 {
     struct ether_addr ether_addr;
 
-    // XXX: Hard-coded assumption that this is an Ethernet interface
-    try {
-	EtherMac ether_mac(mac);
-	if (ether_mac.copy_out(ether_addr) != EtherMac::ADDR_BYTELEN) {
-	    error_msg = c_format("Expected Ethernet MAC address, got \"%s\"",
-				 mac.str().c_str());
-	    return (XORP_ERROR);
-	}
-    } catch (const BadMac& bad_mac) {
-	error_msg = c_format("Invalid MAC address \"%s\"", mac.str().c_str());
-	return (XORP_ERROR);
-    }
+    mac.copy_out(ether_addr);
 
 #ifdef RTM_SETLINK
     static const size_t	buffer_size = sizeof(struct nlmsghdr)

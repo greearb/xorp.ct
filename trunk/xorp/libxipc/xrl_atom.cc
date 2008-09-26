@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.41 2008/09/23 19:56:47 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.42 2008/09/23 19:57:47 abittau Exp $"
 
 #include "xrl_module.h"
 
@@ -989,9 +989,9 @@ XrlAtom::unpack_mac(const uint8_t* buffer, size_t buffer_bytes)
 	string s(text, len);
 
 	if (_type == xrlatom_no_type)
-	    _mac = new Mac(s);
+	    _mac = new Mac(s.c_str());
 	else
-	    _mac->copy_in(s);
+	    _mac->copy_in(s.c_str());
     }
     catch (const InvalidString&) {
 	_mac = 0;

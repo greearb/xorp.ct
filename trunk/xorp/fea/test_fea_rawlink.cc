@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.3 2008/05/24 03:02:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_fea_rawlink.cc,v 1.4 2008/07/23 05:10:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -81,7 +81,7 @@ public:
 		IPv4 finder_host, uint16_t finder_port,
 		const string& ifname,
 		const string& vifname,
-		const EtherMac& src,
+		const Mac& src,
 		bool is_sender)
 	: _e(e),
 	  _fea_target_name(fea_target_name),
@@ -179,7 +179,7 @@ public:
      * @param ipg_ms interpacket gap in milliseconds.
      */
     void
-    start_sending(const EtherMac& dest, uint32_t bytes, uint32_t ipg_ms)
+    start_sending(const Mac& dest, uint32_t bytes, uint32_t ipg_ms)
     {
 	_t_snd = _e.new_periodic_ms(ipg_ms,
 				    callback(this,
@@ -198,7 +198,7 @@ public:
 
 protected:
     bool
-    send_data(EtherMac dest, uint32_t bytes)
+    send_data(Mac dest, uint32_t bytes)
     {
 	vector<uint8_t> d(bytes, FILLER_VALUE);
 
@@ -315,9 +315,8 @@ protected:
 	XLOG_ASSERT(if_name == _ifname);
 	XLOG_ASSERT(vif_name == _vifname);
 
-	// If Mac isn't an EtherMac, a BadMac exception will be thrown.
-	XLOG_ASSERT(EtherMac(dst_address) == _src);
-	XLOG_ASSERT(EtherMac(src_address) == _src);
+	XLOG_ASSERT(dst_address == _src);
+	XLOG_ASSERT(src_address == _src);
 	XLOG_ASSERT(ether_type == ETHER_TYPE);
 
 	// Now check the payload.
@@ -338,7 +337,7 @@ private:
     string	_ifname;
     string	_vifname;
 
-    EtherMac	_src;
+    Mac		_src;
     bool	_is_sender;
 
     uint32_t	_p_snd;		// packets sent
@@ -372,7 +371,7 @@ static void
 create_test_link(EventLoop*	pe,
 		 string		ifname,
 		 string		vifname,
-		 EtherMac	src,
+		 Mac		src,
 		 bool		is_sender,
 		 TestRawLink**	ppu)
 {
@@ -399,7 +398,7 @@ register_test_link(TestRawLink** ppu, bool *err)
 }
 
 static void
-start_sending(TestRawLink** ppu, EtherMac addr)
+start_sending(TestRawLink** ppu, Mac addr)
 {
     TestRawLink* pu = *ppu;
     pu->start_sending(addr, 512, 200);
@@ -487,7 +486,7 @@ test_main(IPv4 finder_host, uint16_t finder_port,
     string fea_target_name = "fea";
     vector<XorpTimer> ev;	// Vector for timed events
     bool eflag(false);		// Error flag set by timed events
-    EtherMac mac;
+    Mac mac;
 
     //
     // Wait for FEA bringup and pull the IfTree.

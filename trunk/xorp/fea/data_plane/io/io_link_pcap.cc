@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.12 2008/05/24 07:46:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.13 2008/07/23 05:10:33 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -433,22 +433,12 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     switch (_datalink_type) {
     case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
     {
-	EtherMac group_ether;
-
-	try {
-	    group_ether.copy_in(group);
-	} catch (BadMac& e) {
-	    error_msg = c_format("Invalid Ethernet group address: %s",
-				 e.str().c_str());
-	    return (XORP_ERROR);
-	}
-
 #if defined(HOST_OS_DRAGONFLYBSD) || defined(HOST_OS_FREEBSD)
 	{
 	    struct sockaddr_dl* sdl;
 	    struct ether_addr ether_addr;
 
-	    group_ether.copy_out(ether_addr);
+	    group.copy_out(ether_addr);
 	    sdl = reinterpret_cast<struct sockaddr_dl *>(sa);
 	    sdl->sdl_len = sizeof(*sdl);
 	    sdl->sdl_family = AF_LINK;
@@ -456,7 +446,7 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
 	    memcpy(LLADDR(sdl), &ether_addr, sizeof(ether_addr));
 	}
 #else
-	group_ether.copy_out(*sa);
+	group.copy_out(*sa);
 #endif
 	break;
     }
@@ -552,10 +542,10 @@ IoLinkPcap::recv_data()
 	}
 
 	// Extract the MAC destination and source address
-	dst_address.copy_in(ptr, EtherMac::ADDR_BYTELEN);
-	ptr += EtherMac::ADDR_BYTELEN;
-	src_address.copy_in(ptr, EtherMac::ADDR_BYTELEN);
-	ptr += EtherMac::ADDR_BYTELEN;
+	dst_address.copy_in(ptr);
+	ptr += Mac::ADDR_BYTELEN;
+	src_address.copy_in(ptr);
+	ptr += Mac::ADDR_BYTELEN;
 
 	//
 	// Extract the EtherType
@@ -676,28 +666,11 @@ IoLinkPcap::send_packet(const Mac& src_address,
 
 	//
 	// Prepare the Ethernet header.
-	// Note that we use the help of EtherMac to catch errors.
 	//
-	try {
-	    EtherMac dst_ether;
-	    dst_ether.copy_in(dst_address);
-	    dst_ether.copy_out(ptr);
-	    ptr += EtherMac::ADDR_BYTELEN;
-	} catch (BadMac& e) {
-	    error_msg = c_format("Invalid Ethernet destination address: %s",
-				 e.str().c_str());
-	    return (XORP_ERROR);
-	}
-	try {
-	    EtherMac src_ether;
-	    src_ether.copy_in(src_address);
-	    src_ether.copy_out(ptr);
-	    ptr += EtherMac::ADDR_BYTELEN;
-	} catch (BadMac& e) {
-	    error_msg = c_format("Invalid Ethernet source address: %s",
-				 e.str().c_str());
-	    return (XORP_ERROR);
-	}
+	dst_address.copy_out(ptr);
+	ptr += Mac::ADDR_BYTELEN;
+	src_address.copy_out(ptr);
+	ptr += Mac::ADDR_BYTELEN;
 
 	//
 	// The EtherType

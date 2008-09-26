@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.23 2008/06/14 02:59:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.24 2008/07/23 05:10:28 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -468,9 +468,9 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 		struct ether_addr ea;
 		memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 		       sdl->sdl_alen);
-		EtherMac ether_mac(ea);
-		if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
-		    ifp->set_mac(ether_mac);
+		Mac mac(ea);
+		if (is_newlink || (mac != ifp->mac()))
+		    ifp->set_mac(mac);
 		break;
 	    } else if (sdl->sdl_alen != 0) {
 		XLOG_ERROR("Address size %d uncatered for interface %s",
@@ -496,9 +496,9 @@ rtm_ifinfo_to_fea_cfg(const struct if_msghdr* ifm, IfTree& iftree,
 	    } else {
 		struct ether_addr ea;
 		memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
-		EtherMac ether_mac(ea);
-		if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
-		    ifp->set_mac(ether_mac);
+		Mac mac(ea);
+		if (is_newlink || (mac != ifp->mac()))
+		    ifp->set_mac(mac);
 		close(s);
 		break;
 	    }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.19 2008/06/14 04:15:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_getifaddrs.cc,v 1.20 2008/07/23 05:10:28 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -189,9 +189,9 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 			struct ether_addr ea;
 			memcpy(&ea, sdl->sdl_data + sdl->sdl_nlen,
 			       sdl->sdl_alen);
-			EtherMac ether_mac(ea);
-			if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
-			    ifp->set_mac(ether_mac);
+			Mac mac(ea);
+			if (is_newlink || (mac != ifp->mac()))
+			    ifp->set_mac(mac);
 			break;
 		    } else if (sdl->sdl_alen != 0) {
 			XLOG_ERROR("Address size %d uncatered for interface %s",
@@ -219,9 +219,9 @@ IfConfigGetGetifaddrs::parse_buffer_getifaddrs(IfConfig& ifconfig,
 		} else {
 		    struct ether_addr ea;
 		    memcpy(&ea, ifridx.ifr_hwaddr.sa_data, sizeof(ea));
-		    EtherMac ether_mac(ea);
-		    if (is_newlink || (ether_mac != EtherMac(ifp->mac())))
-			ifp->set_mac(ether_mac);
+		    Mac mac(ea);
+		    if (is_newlink || (mac != ifp->mac()))
+			ifp->set_mac(mac);
 		    close(s);
 		    break;
 		}

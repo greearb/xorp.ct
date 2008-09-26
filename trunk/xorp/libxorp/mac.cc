@@ -12,307 +12,55 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.26 2008/05/23 18:37:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.27 2008/07/23 05:10:52 pavlin Exp $"
 
-#include <vector>
+#include "libxorp/xorp.h"
+#include "libxorp/ether_compat.h" 
 
-#include "libxorp_module.h"
-#include "xorp.h"
-#include "xlog.h"
 #include "mac.hh"
-#include "ether_compat.h" 
 
-/* ------------------------------------------------------------------------- */
-/* Base Mac methods */
 
 Mac::Mac()
 {
-    *this = Mac::ZERO();
+    memset(_addr, 0, sizeof(_addr));
 }
 
-Mac::Mac(const uint8_t* from_uint8, size_t len) throw (BadMac)
+Mac::Mac(const uint8_t* from_uint8)
 {
-    copy_in(from_uint8, len);
+    copy_in(from_uint8);
 }
 
-Mac::Mac(const string& from_string) throw (InvalidString)
+Mac::Mac(const char* from_cstring) throw (InvalidString)
 {
-    copy_in(from_string);
+    copy_in(from_cstring);
+}
+
+Mac::Mac(const struct ether_addr& from_ether_addr)
+{
+    copy_in(from_ether_addr);
+}
+
+Mac::Mac(const struct sockaddr& from_sockaddr)
+{
+    copy_in(from_sockaddr);
 }
 
 size_t
 Mac::copy_out(uint8_t* to_uint8) const
 {
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether string is valid
-    // and use the corresponding copy_out() method.
-    //
-    // Add new MyMac::valid() and MyMac::normalize() methods here
-    // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep)) {
-	EtherMac ether_mac(_srep);
-	return (ether_mac.copy_out(to_uint8));
-    }
-
-    XLOG_UNREACHABLE();
-    return (static_cast<size_t>(-1));
+    memcpy(to_uint8, _addr, sizeof(_addr));
+    return (sizeof(_addr));
 }
 
 size_t
-Mac::copy_in(const uint8_t* from_uint8, size_t len) throw (BadMac)
+Mac::copy_out(struct ether_addr& to_ether_addr) const
 {
-    size_t ret_value = static_cast<size_t>(-1);
-
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether address length is valid
-    //
-    // Add new address length checks here
-    // ------------------------------------------------------------------------
-    do {
-	if (len == EtherMac::ADDR_BYTELEN) {
-	    EtherMac ether_mac(from_uint8);
-	    set_rep(ether_mac.str());
-	    ret_value = len;
-	    break;
-	}
-
-	xorp_throw(BadMac,
-		   c_format("Unknown Mac representation: length = %u",
-			    XORP_UINT_CAST(len)));
-	return (static_cast<size_t>(-1));
-    } while (false);
-
-    return (ret_value);
+    memcpy(&to_ether_addr, _addr, sizeof(_addr));
+    return (sizeof(_addr));
 }
 
 size_t
-Mac::copy_in(const string& from_string) throw (InvalidString)
-{
-    size_t ret_value = static_cast<size_t>(-1);
-
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether string is valid
-    //
-    // Add new MyMac::valid() methods here
-    // ------------------------------------------------------------------------
-    do {
-	if (EtherMac::valid(from_string)) {
-	    ret_value = EtherMac::ADDR_BYTELEN;
-	    break;
-	}
-	xorp_throw(InvalidString,
-		   c_format("Unknown Mac representation: %s",
-			    from_string.c_str()));
-	return (static_cast<size_t>(-1));
-    } while (false);
-
-    set_rep(from_string);
-    return (ret_value);
-}
-
-string
-Mac::normalized_str() const
-{
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether string is valid
-    // and return the corresponding normalized string.
-    //
-    // Add new MyMac::valid() and MyMac::normalize() methods here
-    // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep)) {
-	return EtherMac::normalize(_srep);
-    }
-
-    XLOG_UNREACHABLE();
-    return (_srep);
-}
-
-size_t
-Mac::addr_bytelen() const
-{
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether string is valid
-    // and return the corresponding size.
-    //
-    // Add new MyMac::valid() and MyMac::addr_bytelen() methods here
-    // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep)) {
-	return EtherMac::addr_bytelen();
-    }
-
-    XLOG_UNREACHABLE();
-    return (0);
-}
-
-uint32_t
-Mac::addr_bitlen() const
-{
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether string is valid
-    // and return the corresponding size.
-    //
-    // Add new MyMac::valid() and MyMac::addr_bitlen() methods here
-    // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep)) {
-	return EtherMac::addr_bitlen();
-    }
-
-    XLOG_UNREACHABLE();
-    return (0);
-}
-
-bool
-Mac::is_zero() const
-{
-    return (*this == ZERO());
-}
-
-bool
-Mac::is_multicast() const
-{
-    // ------------------------------------------------------------------------
-    // I M P O R T A N T !
-    //
-    // Check all known MAC instance classes for whether string is valid
-    //
-    // Add new MyMac::valid() methods here
-    // ------------------------------------------------------------------------
-    if (EtherMac::valid(_srep)) {
-	EtherMac ether_mac(_srep);
-	return (ether_mac.is_multicast());
-    }
-
-    return (false);
-}
-
-
-/* ------------------------------------------------------------------------- */
-/* EtherMac related methods */
-
-EtherMac::EtherMac(const uint8_t* from_uint8)
-{
-    copy_in(from_uint8);
-}
-
-EtherMac::EtherMac(const string& from_string) throw (InvalidString)
-{
-    if (valid(from_string)) {
-	set_rep(from_string);
-	return;
-    }
-
-    xorp_throw(InvalidString,
-	       c_format("Bad EtherMac representation: %s",
-			from_string.c_str()));
-}
-
-EtherMac::EtherMac(const Mac& from_mac) throw (BadMac)
-{
-    copy_in(from_mac);
-}
-
-EtherMac::EtherMac(const struct ether_addr& from_ether_addr) throw (BadMac)
-{
-    static_assert(sizeof(from_ether_addr) == ADDR_BYTELEN);
-
-    if (copy_in(from_ether_addr) != ADDR_BYTELEN) {
-	//
-	// Nobody agrees on name of fields within ether_addr structure...
-	// We probably don't care as this should never be reached.
-	//
-	const uint8_t* s = reinterpret_cast<const uint8_t*>(&from_ether_addr);
-	xorp_throw(BadMac, c_format("%2x:%2x:%2x:%2x:%2x:%2x",
-				    s[0], s[1], s[2], s[3], s[4], s[5]));
-    }
-}
-
-EtherMac::EtherMac(const struct sockaddr& from_sockaddr) throw (BadMac)
-{
-    if (copy_in(from_sockaddr) != ADDR_BYTELEN) {
-	const uint8_t* s = reinterpret_cast<const uint8_t*>(from_sockaddr.sa_data);
-	xorp_throw(BadMac, c_format("%2x:%2x:%2x:%2x:%2x:%2x",
-				    s[0], s[1], s[2], s[3], s[4], s[5]));
-    }
-}
-
-size_t
-EtherMac::copy_out(uint8_t* to_uint8) const
-{
-    struct ether_addr ether_addr;
-
-    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
-
-    if (copy_out(ether_addr) != sizeof(ether_addr))
-	return (static_cast<size_t>(-1));
-
-    memcpy(to_uint8, &ether_addr, sizeof(ether_addr));
-
-    return (ADDR_BYTELEN);
-}
-
-size_t
-EtherMac::copy_in(const uint8_t* from_uint8)
-{
-    struct ether_addr ether_addr;
-
-    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
-    memcpy(&ether_addr, from_uint8, sizeof(ether_addr));
-
-    return (copy_in(ether_addr));
-}
-
-size_t
-EtherMac::copy_out(struct ether_addr& to_ether_addr) const
-{
-    static_assert(sizeof(ether_addr) == ADDR_BYTELEN);
-
-    //
-    // XXX: work-around because of broken ether_aton() declarations that
-    // are missing the 'const' in the argument.
-    //
-    vector<char> buf(_srep.size() + 1);
-    strncpy(&buf[0], _srep.c_str(), buf.size() - 1);
-    buf[buf.size() - 1] = '\0';
-
-    const struct ether_addr* ep = ether_aton(&buf[0]);
-    if (ep != NULL) {
-	memcpy(&to_ether_addr, ep, sizeof(to_ether_addr));
-	return (sizeof(to_ether_addr));
-    }
-
-    return (static_cast<size_t>(-1));
-}
-
-size_t
-EtherMac::copy_in(const struct ether_addr& from_ether_addr)
-{
-    //
-    // XXX: we need to const_cast the ether_ntoa() argument,
-    // because on some OS (e.g., MacOS X 10.2.3) the ether_ntoa(3)
-    // declaration is broken.
-    //
-    const char* ap = ether_ntoa(const_cast<struct ether_addr *>(&from_ether_addr));
-    if (ap == NULL)
-	return (static_cast<size_t>(-1));
-
-    set_rep(ap);
-    return (ADDR_BYTELEN);
-}
-
-size_t
-EtherMac::copy_out(struct sockaddr& to_sockaddr) const
+Mac::copy_out(struct sockaddr& to_sockaddr) const
 {
     memset(&to_sockaddr, 0, sizeof(to_sockaddr));
 
@@ -330,96 +78,88 @@ EtherMac::copy_out(struct sockaddr& to_sockaddr) const
 }
 
 size_t
-EtherMac::copy_in(const struct sockaddr& from_sockaddr)
+Mac::copy_in(const uint8_t* from_uint8)
+{
+    memcpy(_addr, from_uint8, sizeof(_addr));
+    return (sizeof(_addr));
+}
+
+size_t
+Mac::copy_in(const struct ether_addr& from_ether_addr)
+{
+    memcpy(_addr, &from_ether_addr, sizeof(_addr));
+    return (sizeof(_addr));
+}
+
+size_t
+Mac::copy_in(const struct sockaddr& from_sockaddr)
 {
     const uint8_t* sa_data = reinterpret_cast<const uint8_t*>(from_sockaddr.sa_data);
     return (copy_in(sa_data));
 }
 
 size_t
-EtherMac::copy_out(Mac& to_mac) const
+Mac::copy_in(const char* from_cstring) throw (InvalidString)
 {
-    try {
-	to_mac.copy_in(str());
-	return (ADDR_BYTELEN);
-    } catch (const BadMac& e) {
-	// XXX: shouldn't happen
-	XLOG_FATAL("Invalid EtherMac address: %s", str().c_str());
-    }
+    if (from_cstring == NULL)
+	xorp_throw(InvalidString, "Null value");
 
-    return (static_cast<size_t>(-1));
-}
+    //
+    // XXX: We need to const_cast the ether_aton() argument, because
+    // on some OS (e.g., MacOS X 10.2.3 ?) the ether_aton(3) declaration
+    // is broken (missing "const" in the argument).
+    //
+    const struct ether_addr* ea = ether_aton(const_cast<char *>(from_cstring));
+    if (ea == NULL)
+	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
 
-size_t
-EtherMac::copy_in(const Mac& from_mac) throw (BadMac)
-{
-    string s = from_mac.str();
-
-    if (valid(s)) {
-	set_rep(s);
-	return (ADDR_BYTELEN);
-    }
-
-    xorp_throw(BadMac,
-	       c_format("Bad EtherMac representation: %s", s.c_str()));
-    return (static_cast<size_t>(-1));
+    return (copy_in(*ea));
 }
 
 bool
-EtherMac::valid(const string& s)
+Mac::operator<(const Mac& other) const
 {
-    //
-    // XXX: work-around because of broken ether_aton() declarations that
-    // are missing the 'const' in the argument.
-    //
-    vector<char> buf(s.size() + 1);
-    strncpy(&buf[0], s.c_str(), buf.size() - 1);
-    buf[buf.size() - 1] = '\0';
+    size_t i;
 
-    return (ether_aton(&buf[0]) != NULL);
+    for (i = 0; i < (sizeof(_addr) - 1); i++) {
+	// XXX: Loop ends intentionally one octet earlier
+        if (_addr[i] != other._addr[i])
+            break;
+    }
+    return (_addr[i] < other._addr[i]);
+}
+
+bool
+Mac::operator==(const Mac& other) const
+{
+    return (memcmp(_addr, other._addr, sizeof(_addr)) == 0);
+}
+
+bool
+Mac::operator!=(const Mac& other) const
+{
+    return (memcmp(_addr, other._addr, sizeof(_addr)) != 0);
 }
 
 string
-EtherMac::normalize(const string& s) throw (InvalidString)
+Mac::str() const
 {
-    //
-    // XXX: work-around because of broken ether_aton() declarations that
-    // are missing the 'const' in the argument.
-    //
-    vector<char> buf(s.size() + 1);
-    strncpy(&buf[0], s.c_str(), buf.size() - 1);
-    buf[buf.size() - 1] = '\0';
+    struct ether_addr ea;
 
-    //
-    // Convert the string with an EtherMAC address into
-    // an "struct ether_addr", and then back to a string.
-    // Thus, the string address representation is normalized
-    // to the system's internal preference. Example:
-    // "00:00:00:00:00:00" -> "0:0:0:0:0:0"
-    //
-    struct ether_addr* ep;
-    ep = ether_aton(&buf[0]);
-    if (ep == NULL) {
-	xorp_throw(InvalidString,
-		   c_format("Bad EtherMac representation: %s", s.c_str()));
-    }
-    char* ap = ether_ntoa(ep);
-    if (ap == NULL) {
-	xorp_throw(InvalidString,
-		   c_format("Internal error: bad EtherMac representation: %s",
-			    s.c_str()));
-    }
-    return (string(ap));
+    copy_out(ea);
+    return (ether_ntoa(&ea));	// XXX: implicitly create string return object
 }
 
 bool
-EtherMac::is_multicast() const
+Mac::is_unicast() const
 {
-    uint8_t addr[ADDR_BYTELEN];
+    return (! is_multicast());
+}
 
-    copy_out(addr);
-
-    return (addr[0] & MULTICAST_BIT);
+bool
+Mac::is_multicast() const
+{
+    return (_addr[0] & MULTICAST_BIT);
 }
 
 const Mac MacConstants::zero(Mac("00:00:00:00:00:00"));

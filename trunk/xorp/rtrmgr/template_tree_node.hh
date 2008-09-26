@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.51 2008/01/04 03:17:44 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.52 2008/07/23 05:11:44 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -440,8 +440,7 @@ public:
     bool type_match(const string& s, string& error_msg) const;
 
 private:
-    // XXX: really should be a MAC not an EtherMAC, but we'll fix this later
-    EtherMac* _default;
+    Mac* _default;
 };
 
 class UrlFileTemplate : public TemplateTreeNode {

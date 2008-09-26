@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.13 2008/06/14 02:59:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_get_iphelper.cc,v 1.14 2008/07/23 05:10:27 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -162,10 +162,9 @@ IfConfigGetIPHelper::read_config(IfTree& iftree)
 	    curAdapter->PhysicalAddressLength == sizeof(struct ether_addr)) {
 		struct ether_addr ea;
 		memcpy(&ea, curAdapter->PhysicalAddress, sizeof(ea));
-		EtherMac ether_mac(ea);
-		if (is_newlink || (ether_mac != EtherMac(ifp->mac()))) {
-		    ifp->set_mac(ether_mac);
-		}
+		Mac mac(ea);
+		if (is_newlink || (mac != ifp->mac()))
+		    ifp->set_mac(mac);
 	}
 
 	// MTU

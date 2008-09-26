@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.80 2008/01/04 03:17:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.81 2008/07/23 05:11:44 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -2063,7 +2063,7 @@ MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
 	return;
 
     try {
-	_default = new EtherMac(initializer.c_str());
+	_default = new Mac(initializer.c_str());
     } catch (InvalidString) {
 	error_msg = c_format("Bad MacAddr type value \"%s\".",
 			     initializer.c_str());
@@ -2099,7 +2099,7 @@ MacaddrTemplate::type_match(const string& s, string& error_msg) const
     }
 
     try {
-	EtherMac* mac = new EtherMac(tmp.c_str());
+	Mac* mac = new Mac(tmp.c_str());
 	delete mac;
     } catch (InvalidString) {
 	error_msg = "value must be an MAC address (six hex digits separated "
