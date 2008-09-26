@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.214 2008/08/22 18:08:28 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.215 2008/08/28 18:56:19 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -18,7 +18,8 @@ Release 1.6-WIP (2008/??/??)
     - 
 
   LIBXORP:
-    - 
+    - Class EtherMac is removed and is replaced/superseded by the
+      existing class Mac.
 
   LIBXIPC:
     - 
