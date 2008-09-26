@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.150 2008/02/12 21:57:31 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.151 2008/07/23 05:11:08 pavlin Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -82,7 +82,7 @@ class PeerOut {
      * @return prefix length of this interface.
      */
     uint16_t get_interface_prefix_length() const {
-	XLOG_ASSERT(0 != _interface_prefix_length);
+	XLOG_ASSERT(0 != _interface_prefix_length || VLINK == _interface);
 	return _interface_prefix_length;
     }
 
