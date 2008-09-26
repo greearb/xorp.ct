@@ -70,8 +70,14 @@
 /* Define to 1 if you have the `ether_aton' function. */
 #undef HAVE_ETHER_ATON
 
+/* Define to 1 if you have the `ether_aton_r' function. */
+#undef HAVE_ETHER_ATON_R
+
 /* Define to 1 if you have the `ether_ntoa' function. */
 #undef HAVE_ETHER_NTOA
+
+/* Define to 1 if you have the `ether_ntoa_r' function. */
+#undef HAVE_ETHER_NTOA_R
 
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H

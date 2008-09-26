@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.27 2008/07/23 05:10:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.28 2008/09/26 21:41:04 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/ether_compat.h" 
@@ -64,7 +64,7 @@ Mac::copy_out(struct sockaddr& to_sockaddr) const
 {
     memset(&to_sockaddr, 0, sizeof(to_sockaddr));
 
-#ifdef  HAVE_STRUCT_SOCKADDR_SA_LEN
+#ifdef HAVE_STRUCT_SOCKADDR_SA_LEN
     to_sockaddr.sa_len = sizeof(to_sockaddr);
 #endif
 #ifdef AF_LINK
@@ -101,19 +101,31 @@ Mac::copy_in(const struct sockaddr& from_sockaddr)
 size_t
 Mac::copy_in(const char* from_cstring) throw (InvalidString)
 {
+    const struct ether_addr* eap;
+
     if (from_cstring == NULL)
 	xorp_throw(InvalidString, "Null value");
+
+#ifdef HAVE_ETHER_ATON_R
+    struct ether_addr ea;
+
+    if (ether_aton_r(from_cstring, &ea) == NULL)
+	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
+    eap = &ea;
+
+#else // ! HAVE_ETHER_ATON_R
 
     //
     // XXX: We need to const_cast the ether_aton() argument, because
     // on some OS (e.g., MacOS X 10.2.3 ?) the ether_aton(3) declaration
     // is broken (missing "const" in the argument).
     //
-    const struct ether_addr* ea = ether_aton(const_cast<char *>(from_cstring));
-    if (ea == NULL)
+    eap = ether_aton(const_cast<char *>(from_cstring));
+    if (eap == NULL)
 	xorp_throw(InvalidString, c_format("Bad Mac \"%s\"", from_cstring));
+#endif // ! HAVE_ETHER_ATON_R
 
-    return (copy_in(*ea));
+    return (copy_in(*eap));
 }
 
 bool
@@ -147,7 +159,16 @@ Mac::str() const
     struct ether_addr ea;
 
     copy_out(ea);
+
+#ifdef HAVE_ETHER_NTOA_R
+    char str_buffer[sizeof "ff:ff:ff:ff:ff:ff"];
+
+    ether_ntoa_r(&ea, str_buffer);
+    return (str_buffer);	// XXX: implicitly create string return object
+
+#else // ! HAVE_ETHER_NTOA_R
     return (ether_ntoa(&ea));	// XXX: implicitly create string return object
+#endif // ! HAVE_ETHER_NTOA_R
 }
 
 bool

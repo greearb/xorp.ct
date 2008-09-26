@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.225 2008/07/21 14:14:15 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.226 2008/07/23 15:20:15 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.6-WIP], [feedback@xorp.org])
 AC_PREREQ(2.61)
-AC_REVISION([$XORP: xorp/configure.in,v 1.225 2008/07/21 14:14:15 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.226 2008/07/23 15:20:15 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -743,7 +743,10 @@ AC_CHECK_TYPES([struct ether_addr], [], [],
 #endif
 ])
 
-AC_CHECK_FUNCS([ether_ntoa ether_aton])
+dnl ----------------------------------------------
+dnl Check for Ethernet address conversion routines
+dnl ----------------------------------------------
+AC_CHECK_FUNCS([ether_ntoa ether_aton ether_ntoa_r ether_aton_r])
 AC_LANG_POP(C)
 
 dnl
