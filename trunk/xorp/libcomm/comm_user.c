@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.36 2008/09/23 21:25:50 atanu Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.37 2008/09/25 15:38:40 atanu Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -853,9 +853,9 @@ comm_bind_unix(const char* path, int is_blocking)
 }
 
 xsock_t
-comm_connect_unix(const char* path)
+comm_connect_unix(const char* path, int is_blocking)
 {
-    return comm_bind_unix(path, 0);
+    return comm_bind_unix(path, is_blocking);
 }
 
 #endif /* HOST_OS_WINDOWS */
