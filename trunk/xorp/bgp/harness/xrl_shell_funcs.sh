@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.10 2005/04/15 03:38:44 atanu Exp $
+# $XORP: xorp/bgp/harness/xrl_shell_funcs.sh,v 1.11 2007/12/10 23:26:34 mjh Exp $
 #
 
 CALLXRL=${CALLXRL:-../../libxipc/call_xrl -w 10}
@@ -20,9 +20,9 @@ coord()
 	return
     fi
 
-    # Only try five times for the operation to complete.
+    # Try ten times for the operation to complete, waiting 10 seconds
     local i
-    for i in 1 2 3 4 5
+    for i in 1 2 3 4 5 6 7 8 9 10
     do
 	if ! $CALLXRL "finder://coord/coord/0.1/pending" |grep true > /dev/null
 	then
@@ -31,6 +31,8 @@ coord()
 	echo "Operation in coordinator still pending try number: $i"
 	sleep 1
     done
+
+    echo "***OPERATION DID NOT COMPLETE. TRY INCREASING THE TIME IN PENDING***"
 
     return -1
 }
