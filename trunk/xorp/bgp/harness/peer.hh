@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/peer.hh,v 1.23 2008/01/04 03:15:34 pavlin Exp $
+// $XORP: xorp/bgp/harness/peer.hh,v 1.24 2008/07/23 05:09:43 pavlin Exp $
 
 #ifndef __BGP_HARNESS_PEER_HH__
 #define __BGP_HARNESS_PEER_HH__
@@ -110,6 +110,7 @@ protected:
 			    const size_t packets_to_send,
 			    const char *comment);
     void send_open();
+    void send_keepalive();
     
 private:
     EventLoop   *_eventloop;

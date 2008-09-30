@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.85 2008/01/04 03:15:33 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.86 2008/07/23 05:09:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1527,8 +1527,14 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    OpenPacket pac(buf, length);
 	    debug_msg(pac.str().c_str());
 	    
-	    if(_session && !_established && _passive)
-		send_open();
+	    if(_session && !_established) {
+		if(_passive) {
+		    send_open();
+		} else {
+		    send_keepalive();
+		    _established = true;
+		}
+	    }
 	    check_expect(&pac);
 	}
 	    break;
@@ -1542,11 +1548,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    ** Send any received keepalive right back.
 	    ** At the moment we are not bothering to maintain a timer
 	    ** to send keepalives. An incoming keepalive prompts a
-	    ** keepalive response. At the beginning of a conversation
-	    ** this keepalive response will cause the peer to go to
-	    ** established. As opens must have been exchanged for the
-	    ** peer to send a keepalive. 
-	    ** 
+	    ** keepalive response.
 	    */
 	    if(_keepalive || (_session && !_established)) {
 		XrlTestPeerV0p1Client test_peer(_xrlrouter);
@@ -1653,6 +1655,23 @@ Peer::send_open()
     debug_msg("OPEN Packet SENT len:%u\n%s", (uint32_t)len, bgpopen.str().c_str());
     _busy++;
     send_message(buf, len, callback(this, &Peer::xrl_callback, "open"));
+}
+
+void
+Peer::send_keepalive()
+{
+    /*
+    ** Create an keepalive packet and send it in.
+    */
+    KeepAlivePacket keepalive;
+    size_t len = BGPPacket::MAXPACKETSIZE;
+    uint8_t *buf = new uint8_t[BGPPacket::MAXPACKETSIZE];
+    
+    XLOG_ASSERT(keepalive.encode(buf, len, _peerdata));
+    debug_msg("KEEPALIVE Packet SENT\n");
+
+    _busy++;
+    send_message(buf, len, callback(this, &Peer::xrl_callback, "keepalive"));
 }
 
 /*
