@@ -1,7 +1,6 @@
 /*	$OpenBSD: inet_ntop.c,v 1.7 2005/08/06 20:30:03 espie Exp $	*/
 
-/*
- * Copyright (c) 1996 by Internet Software Consortium.
+/* Copyright (c) 1996 by Internet Software Consortium.
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +16,7 @@
  * SOFTWARE.
  */
 
-#ident "$XORP: xorp/libxorp/inet_ntop.c,v 1.5 2007/04/20 18:44:00 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/inet_ntop.c,v 1.6 2008/10/01 21:49:32 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
