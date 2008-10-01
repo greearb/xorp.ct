@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.15 2008/09/23 19:57:04 abittau Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.16 2008/09/23 20:20:04 abittau Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -300,4 +300,4 @@ namespace SP {
 #endif
 } // namespace SP
 
-#endif // __LIBXORP_TRACE_HH__
+#endif // __LIBXORP_PROFILE_HH__
