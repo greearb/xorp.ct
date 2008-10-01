@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.26 2008/01/04 03:16:44 pavlin Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.27 2008/07/23 05:10:57 pavlin Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -1015,4 +1015,5 @@ TriePreOrderIterator<A,Payload>::next()
 	    _stack.push(_cur->get_left());
     } while (_cur->has_payload() == false);	// found a good node.
 }
+
 #endif // __LIBXORP_TRIE_HH__

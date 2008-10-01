@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.18 2008/01/04 03:16:42 pavlin Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.19 2008/07/23 05:10:55 pavlin Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -401,4 +401,5 @@ private:
 	string _value;
     };
 };
+
 #endif // __LIBXORP_TEST_MAIN_HH__
