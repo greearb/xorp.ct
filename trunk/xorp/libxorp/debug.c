@@ -1,6 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
-/* Copyright (c) 2001-2008 XORP, Inc.
+/*
+ * Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -13,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.12 2008/01/04 03:16:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/debug.c,v 1.13 2008/07/23 05:10:51 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
