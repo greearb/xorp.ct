@@ -12,7 +12,7 @@
 // The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
-//
+
 // Portions of this code originally derived from:
 // timer.{cc,hh} -- portable timers. Linux kernel module uses Linux timers
 // Eddie Kohler
@@ -29,7 +29,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.47 2008/09/23 19:57:10 abittau Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.48 2008/09/23 19:57:23 abittau Exp $"
 
 
 #include "libxorp_module.h"

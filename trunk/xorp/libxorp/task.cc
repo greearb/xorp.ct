@@ -12,9 +12,8 @@
 // The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
-//
 
-#ident "$XORP: xorp/libxorp/task.cc,v 1.9 2008/04/24 15:20:26 bms Exp $"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.10 2008/07/23 05:10:54 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
