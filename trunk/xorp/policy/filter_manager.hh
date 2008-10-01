@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/filter_manager.hh,v 1.7 2008/01/04 03:17:09 pavlin Exp $
+// $XORP: xorp/policy/filter_manager.hh,v 1.8 2008/07/23 05:11:18 pavlin Exp $
 
 #ifndef __POLICY_FILTER_MANAGER_HH__
 #define __POLICY_FILTER_MANAGER_HH__
@@ -202,6 +202,5 @@ private:
     string _rib_name;
     ProtocolMap& _pmap;
 };
-
 
 #endif // __POLICY_FILTER_MANAGER_HH__

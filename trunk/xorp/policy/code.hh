@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code.hh,v 1.10 2008/07/23 05:11:17 pavlin Exp $
+// $XORP: xorp/policy/code.hh,v 1.11 2008/08/06 08:22:17 abittau Exp $
 
 #ifndef __POLICY_CODE_HH__
 #define __POLICY_CODE_HH__
