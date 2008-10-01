@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6net.hh,v 1.7 2008/01/04 03:16:36 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6net.hh,v 1.8 2008/07/23 05:10:52 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6NET_HH__
 #define __LIBXORP_IPV6NET_HH__
@@ -22,4 +22,4 @@
 
 typedef IPNet<IPv6> IPv6Net;
 
-#endif /* __LIBXORP_IPV6NET_HH__ */
+#endif // __LIBXORP_IPV6NET_HH__
