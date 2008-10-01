@@ -16,6 +16,8 @@
  * SOFTWARE.
  */
 
+#ident "$XORP$"
+
 #include "libxorp/xorp.h"
 
 #ifndef HAVE_INET_PTON
