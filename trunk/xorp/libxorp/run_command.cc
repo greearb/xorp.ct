@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.33 2008/01/04 03:16:39 pavlin Exp $
+#ident "$XORP$"
 
 #include "libxorp_module.h"
 
