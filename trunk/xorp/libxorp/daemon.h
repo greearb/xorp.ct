@@ -1,6 +1,7 @@
-/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
- * vim:set sts=4 ts=8:
- *
+/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
+
+/*
  * Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -15,7 +16,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/daemon.h,v 1.1 2008/06/17 08:29:41 bms Exp $
+ * $XORP: xorp/libxorp/daemon.h,v 1.2 2008/07/23 05:10:51 pavlin Exp $
  */
 
 #ifndef __LIBXORP_DAEMON_H__

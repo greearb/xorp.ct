@@ -1,6 +1,7 @@
-/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
- * vim:set sts=4 ts=8:
- *
+/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
+
+/*
  * Copyright (c) 2001-2008 XORP, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
@@ -14,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.17 2008/04/26 03:41:47 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.18 2008/07/23 05:10:53 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
