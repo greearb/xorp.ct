@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_xrl_target.cc,v 1.11 2008/01/04 03:16:49 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_xrl_target.cc,v 1.12 2008/07/23 05:11:01 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -75,9 +75,9 @@ XrlBgpMibTarget::bgp_mib_traps_0_1_send_bgp_established_trap(
     memset(&snmptrap_var, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&snmptrap_var, snmptrap_oid,
                        OID_LENGTH(snmptrap_oid));
+    snmptrap_var.type = ASN_OBJECT_ID;
     snmp_set_var_value(&snmptrap_var, (u_char *) bgp_established_trap_oid, 
 	sizeof(bgp_established_trap_oid));
-    snmptrap_var.type = ASN_OBJECT_ID;
     snmptrap_var.next_variable = &bgp_last_err_var;
 
     // Now the objects required for this specific trap
@@ -85,19 +85,19 @@ XrlBgpMibTarget::bgp_mib_traps_0_1_send_bgp_established_trap(
     memset(&bgp_last_err_var, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&bgp_last_err_var, bgp_peer_last_error_oid,
                        OID_LENGTH(bgp_peer_last_error_oid));
+    bgp_last_err_var.type = ASN_OCTET_STR;
     snmp_set_var_value(&bgp_last_err_var, 
 		       (const u_char *) bgp_last_error.c_str(), 
 		       bgp_last_error.size());
-    bgp_last_err_var.type = ASN_OCTET_STR;
     bgp_last_err_var.next_variable = &bgp_state_var;
 
     // bgpPeerState
     memset(&bgp_state_var, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&bgp_state_var, bgp_peer_state_oid,
                        OID_LENGTH(bgp_peer_state_oid));
+    bgp_state_var.type = ASN_INTEGER;
     snmp_set_var_value(&bgp_state_var, (const u_char *) &bgp_state, 
 		       sizeof(uint32_t));
-    bgp_state_var.type = ASN_INTEGER;
     bgp_state_var.next_variable = NULL;
 
     send_v2trap(&snmptrap_var);
@@ -124,10 +124,10 @@ XrlBgpMibTarget::bgp_mib_traps_0_1_send_bgp_backward_transition_trap(
     memset(&snmptrap_var, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&snmptrap_var, snmptrap_oid,
                        OID_LENGTH(snmptrap_oid));
+    snmptrap_var.type = ASN_OBJECT_ID;
     snmp_set_var_value(&snmptrap_var, 
 	(u_char *) bgp_backward_transition_trap_oid, 
 	sizeof(bgp_backward_transition_trap_oid));
-    snmptrap_var.type = ASN_OBJECT_ID;
     snmptrap_var.next_variable = &bgp_last_err_var;
 
     // Now the objects required for this specific trap
@@ -135,19 +135,19 @@ XrlBgpMibTarget::bgp_mib_traps_0_1_send_bgp_backward_transition_trap(
     memset(&bgp_last_err_var, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&bgp_last_err_var, bgp_peer_last_error_oid,
                        OID_LENGTH(bgp_peer_last_error_oid));
+    bgp_last_err_var.type = ASN_OCTET_STR;
     snmp_set_var_value(&bgp_last_err_var, 
 		       (const u_char *) bgp_last_error.c_str(), 
 		       bgp_last_error.size());
-    bgp_last_err_var.type = ASN_OCTET_STR;
     bgp_last_err_var.next_variable = &bgp_state_var;
 
     // bgpPeerState
     memset(&bgp_state_var, 0, sizeof(netsnmp_variable_list));
     snmp_set_var_objid(&bgp_state_var, bgp_peer_state_oid,
                        OID_LENGTH(bgp_peer_state_oid));
+    bgp_state_var.type = ASN_INTEGER;
     snmp_set_var_value(&bgp_state_var, (const u_char *) &bgp_state, 
 		       sizeof(uint32_t));
-    bgp_state_var.type = ASN_INTEGER;
     bgp_state_var.next_variable = NULL;
 
     send_v2trap(&snmptrap_var);
