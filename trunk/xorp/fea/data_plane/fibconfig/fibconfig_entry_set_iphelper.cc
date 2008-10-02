@@ -2,7 +2,8 @@
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
-// // Permission is hereby granted, free of charge, to any person obtaining a
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
 // to deal in the Software without restriction, subject to the conditions
 // listed in the XORP LICENSE file. These conditions include: you must
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.13 2008/05/08 22:46:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.14 2008/07/23 05:10:19 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
