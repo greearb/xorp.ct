@@ -16,8 +16,9 @@
  */
 
 /*
- * $XORP: xorp/contrib/olsr/olsr_module.h,v 1.1 2008/04/24 15:19:54 bms Exp $
+ * $XORP: xorp/contrib/olsr/olsr_module.h,v 1.2 2008/07/23 05:09:52 pavlin Exp $
  */
+
 /*
  * Module definitions.
  */
