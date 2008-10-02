@@ -115,7 +115,8 @@ def output_header(args, dbg):
     print \
 """/*
  * Copyright (c) 2001-2008 XORP, Inc.
- * See LICENSE file for licensing, conditions, and warranties on use.
+ * See the XORP LICENSE.lgpl file for licensing, conditions, and warranties
+ * on use.
  *
  * This file is PROGRAMMATICALLY GENERATED.
  *"""

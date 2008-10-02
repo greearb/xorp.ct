@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.18 2008/07/23 05:09:56 pavlin Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.19 2008/07/23 15:20:16 bms Exp $
  */
 
 !include LogicLib.nsh
@@ -139,6 +139,9 @@ Section "-Base"
   File /oname=BUILD_NOTES.txt ${SRCDIR}\BUILD_NOTES
   File /oname=ERRATA.txt ${SRCDIR}\ERRATA
   File /oname=LICENSE.txt ${SRCDIR}\LICENSE
+  File /oname=LICENSE.gpl.txt ${SRCDIR}\LICENSE.gpl
+  File /oname=LICENSE.lgpl.txt ${SRCDIR}\LICENSE.lgpl
+  File /oname=LICENSE.other.txt ${SRCDIR}\LICENSE.other
   File /oname=README.txt ${SRCDIR}\README
   File /oname=RELEASE_NOTES.txt ${SRCDIR}\RELEASE_NOTES
   File /oname=TODO.txt ${SRCDIR}\TODO

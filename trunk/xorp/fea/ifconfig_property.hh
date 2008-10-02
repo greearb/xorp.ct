@@ -2,17 +2,22 @@
 
 // Copyright (c) 2007-2008 XORP, Inc.
 //
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the "Software")
-// to deal in the Software without restriction, subject to the conditions
-// listed in the XORP LICENSE file. These conditions include: you must
-// preserve this copyright notice, and you cannot mention the copyright
-// holders in advertising related to the Software without their permission.
-// The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
-// notice is a summary of the XORP LICENSE file; the license in that file is
-// legally binding.
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License, Version 2, June
+// 1991 as published by the Free Software Foundation. Redistribution
+// and/or modification of this program under the terms of any other
+// version of the GNU General Public License is not permitted.
+// 
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more details,
+// see the GNU General Public License, Version 2, a copy of which can be
+// found in the XORP LICENSE.gpl file.
+// 
+// XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
+// http://xorp.net
 
-// $XORP: xorp/fea/ifconfig_property.hh,v 1.3 2008/01/04 03:15:45 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_property.hh,v 1.4 2008/07/23 05:10:09 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_PROPERTY_HH__
 #define __FEA_IFCONFIG_PROPERTY_HH__
