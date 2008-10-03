@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/c_format.hh,v 1.12 2008/07/23 05:10:50 pavlin Exp $
+// $XORP: xorp/libxorp/c_format.hh,v 1.13 2008/10/02 21:57:28 bms Exp $
 
 #ifndef __LIBXORP_C_FORMAT_HH__
 #define __LIBXORP_C_FORMAT_HH__
@@ -99,6 +99,21 @@ inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M) { return 13; }
 template <class A, class B, class C, class D, class E, class F, class G,
 	  class H, class I, class J, class K, class L, class M, class N>
 inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N) { return 14; }
+
+template <class A, class B, class C, class D, class E, class F, class G,
+	  class H, class I, class J, class K, class L, class M, class N,
+	  class O>
+inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O) { return 15; }
+
+template <class A, class B, class C, class D, class E, class F, class G,
+	  class H, class I, class J, class K, class L, class M, class N,
+	  class O, class P>
+inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P) { return 16; }
+
+template <class A, class B, class C, class D, class E, class F, class G,
+	  class H, class I, class J, class K, class L, class M, class N,
+	  class O, class P, class Q>
+inline int arg_count(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q) { return 17; }
 
 void c_format_validate(const char* fmt, int n);
 
