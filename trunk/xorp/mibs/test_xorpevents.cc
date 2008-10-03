@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.20 2008/07/23 05:11:02 pavlin Exp $"
+#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.21 2008/10/02 21:57:41 bms Exp $"
 
 
 #include <set>
@@ -300,6 +300,7 @@ fake_snmpd()
     } else {
 	fprintf(stderr,"fake_select timed out after %ld ms\n", tv.tv_sec*1000 +
 	    tv.tv_usec/1000);
+	tl.advance_time();
 	run_timer_callbacks(0,0);
     }
 }
@@ -315,26 +316,26 @@ run_test_1()
 {
     XorpTimer xt1, xt2, xt3;
     PeriodicTimerCallback ptcb1, ptcb2, ptcb3;
-    SnmpEventLoop& e1 = SnmpEventLoop::the_instance();
-    SnmpEventLoop& e2 = SnmpEventLoop::the_instance();
-    SnmpEventLoop& e3 = SnmpEventLoop::the_instance();
+    SnmpEventLoop& e = SnmpEventLoop::the_instance();
     int period_ms = 1200;
     fprintf(stderr,"Creating periodic events...\n");
     ptcb1 = callback(timer_callback1);
     ptcb2 = callback(timer_callback2);
     ptcb3 = callback(timer_callback3);
-    xt1 = e1.new_periodic_ms(period_ms, ptcb1);
-    xt2 = e2.new_periodic_ms(period_ms/2, ptcb2);
-    xt3 = e3.new_periodic_ms(period_ms/3, ptcb3);
+    xt1 = e.new_periodic_ms(period_ms, ptcb1);
+    xt2 = e.new_periodic_ms(period_ms/2, ptcb2);
+    xt3 = e.new_periodic_ms(period_ms/3, ptcb3);
     bool finito = false;
     const int test1_loops = 10;
     cb1_counter = cb2_counter = cb3_counter = 0;
-    XorpTimer t = e1.set_flag_after_ms((test1_loops) * period_ms, &finito);
-    while (finito == false) {
+    XorpTimer t = e.set_flag_after_ms((test1_loops) * period_ms, &finito);
+    while (finito == false ) {
 	fake_snmpd();
     }
-    if ((cb1_counter != cb2_counter/2) || (cb1_counter != cb3_counter/3)) 
+    if ((cb1_counter == 0) || (cb2_counter == 0) || (cb3_counter == 0) ||
+	(cb1_counter != cb2_counter/2) || (cb1_counter != cb3_counter/3)) {
 	exit(TEST_FAIL); 
+    }
     return;
 }
 
@@ -419,7 +420,8 @@ main(int /* argc */, char *argv[])
     // Initialize and start xlog
     //
     xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);         // Least verbose messages
+    xlog_set_verbose(XLOG_VERBOSE_LOW);
+
     // XXX: verbosity of the error messages temporary increased
     // xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
 
@@ -432,13 +434,13 @@ main(int /* argc */, char *argv[])
     xlog_disable(XLOG_LEVEL_WARNING);
     
     try {
-    run_test_1();
+        run_test_1();
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
 
     try {
-    run_test_2();
+        run_test_2();
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
