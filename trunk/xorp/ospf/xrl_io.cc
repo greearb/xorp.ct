@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.50 2008/07/23 05:11:10 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.51 2008/10/02 21:57:50 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1065,7 +1065,7 @@ template<>
 bool
 XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
 {
-    bool sent;
+    bool sent = false;
     bool unicast = true;
     bool multicast = false;
 
