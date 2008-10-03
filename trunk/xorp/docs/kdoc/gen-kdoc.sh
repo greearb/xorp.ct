@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.27 2008/07/09 08:40:40 bms Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.28 2008/07/23 03:32:05 pavlin Exp $
 #
 
 #
@@ -300,7 +300,7 @@ kdoc_libxorp()
     desc="XORP core type and utility library"
     html_start_page="index.html"
     files="libxorp/*.h libxorp/*.hh"
-    excludes="libxorp/callback.hh libxorp/callback_debug.hh libxorp/callback_nodebug.hh libxorp/old_trie.hh"
+    excludes="libxorp/callback.hh libxorp/callback_debug.hh libxorp/callback_nodebug.hh"
     xref=""
     kdocify
 }

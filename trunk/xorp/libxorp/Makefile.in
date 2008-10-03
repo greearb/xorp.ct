@@ -420,11 +420,11 @@ libxorp_la_SOURCES = libxorp_module.h daemon.h debug.h ether_compat.h \
 	callback_nodebug.hh callback_debug.hh clock.hh config_param.hh \
 	eventloop.hh exceptions.hh heap.hh ioevents.hh ipnet.hh \
 	ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh \
-	mac.hh nexthop.hh old_trie.hh popen.hh profile.hh range.hh \
-	ref_ptr.hh round_robin.hh run_command.hh safe_callback_obj.hh \
-	selector.hh service.hh task.hh time_slice.hh timespent.hh \
-	timer.hh timeval.hh tlv.hh token.hh tokenize.hh transaction.hh \
-	trie.hh utils.hh vif.hh win_dispatcher.hh daemon.c debug.c \
+	mac.hh nexthop.hh popen.hh profile.hh range.hh ref_ptr.hh \
+	round_robin.hh run_command.hh safe_callback_obj.hh selector.hh \
+	service.hh task.hh time_slice.hh timespent.hh timer.hh \
+	timeval.hh tlv.hh token.hh tokenize.hh transaction.hh trie.hh \
+	utils.hh vif.hh win_dispatcher.hh daemon.c debug.c \
 	ether_compat.c gai_strerror.c getopt.c inet_ntop.c inet_pton.c \
 	random.c strlcpy.c strptime.c utility.c win_io.c xlog.c \
 	asyncio.cc buffered_asyncio.cc c_format.cc callback.cc \

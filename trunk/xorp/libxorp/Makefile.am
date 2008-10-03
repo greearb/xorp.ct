@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.53 2007/04/22 01:57:09 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.54 2008/06/17 08:29:40 bms Exp $
 ##
 
 # -- Real Programs
@@ -136,7 +136,6 @@ libxorp_la_SOURCES += ipvx.hh
 libxorp_la_SOURCES += ipvxnet.hh
 libxorp_la_SOURCES += mac.hh
 libxorp_la_SOURCES += nexthop.hh
-libxorp_la_SOURCES += old_trie.hh
 libxorp_la_SOURCES += popen.hh
 libxorp_la_SOURCES += profile.hh
 libxorp_la_SOURCES += range.hh
