@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.36 2008/07/23 05:11:38 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.37 2008/10/02 21:58:19 bms Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -1153,7 +1153,7 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
     descriptions.append(XrlAtom("", string("Routes Active")));
     values.append(XrlAtom(peer->route_count()));
 
-    peer_last_active = peer->last_active().secs();
+    peer_last_active = peer->last_active().sec();
 
     return XrlCmdError::OKAY();
 }

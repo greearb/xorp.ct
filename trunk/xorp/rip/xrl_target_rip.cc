@@ -56,7 +56,7 @@ decode_time_string(EventLoop& eventloop, const string& time_string,
     //
     TimeVal now;
     eventloop.current_time(now);
-    time_t local_time = now.secs();
+    time_t local_time = now.sec();
     const struct tm* local_tm = localtime(&local_time);
     memcpy(&tm, local_tm, sizeof(tm));
 

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.62 2008/07/23 05:11:11 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.63 2008/10/02 21:57:50 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -64,7 +64,7 @@ decode_time_string(EventLoop& eventloop, const string& time_string,
     //
     TimeVal now;
     eventloop.current_time(now);
-    time_t local_time = now.secs();
+    time_t local_time = now.sec();
     const struct tm* local_tm = localtime(&local_time);
     memcpy(&tm, local_tm, sizeof(tm));
 

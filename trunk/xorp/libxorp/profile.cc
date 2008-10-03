@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/profile.cc,v 1.14 2008/09/23 20:20:04 abittau Exp $"
+#ident "$XORP: xorp/libxorp/profile.cc,v 1.15 2008/10/02 21:57:32 bms Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -241,7 +241,7 @@ SP::sampler_time()
 
     TimerList::system_gettimeofday(&tv);
 
-    SAMPLE ret = tv.secs();
+    SAMPLE ret = tv.sec();
 
     ret *= (SAMPLE) 1000000;
     ret += (SAMPLE) tv.usec();

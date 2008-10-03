@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.37 2008/08/25 21:51:38 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.38 2008/10/02 21:57:36 bms Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -123,20 +123,6 @@ public:
      * @return the number of microseconds.
      */
     int32_t usec() const	{ return _usec; }
-
-    /**
-     * Get the number of seconds.
-     *
-     * @return the number of seconds.
-     */
-    int32_t secs() const	{ return _sec; }
-
-    /**
-     * Get the number of microseconds.
-     *
-     * @return the number of microseconds.
-     */
-    int32_t usecs() const	{ return _usec; }
 
     /**
      * @return seconds and microseconds as a string.

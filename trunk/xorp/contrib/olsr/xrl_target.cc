@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/contrib/olsr/xrl_target.cc,v 1.2 2008/07/23 05:09:54 pavlin Exp $"
+#ident "$XORP: xorp/contrib/olsr/xrl_target.cc,v 1.3 2008/10/02 21:56:37 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -541,7 +541,7 @@ XrlOlsr4Target::olsr4_0_1_get_hello_interval(uint32_t& interval)
 {
     debug_msg("olsr4_0_1_get_hello_interval\n");
 
-    interval = _olsr.get_hello_interval().secs();
+    interval = _olsr.get_hello_interval().sec();
 
     return XrlCmdError::OKAY();
 }
@@ -563,7 +563,7 @@ XrlOlsr4Target::olsr4_0_1_get_refresh_interval(uint32_t& interval)
 {
     debug_msg("olsr4_0_1_get_refresh_interval\n");
 
-    interval = _olsr.get_refresh_interval().secs();
+    interval = _olsr.get_refresh_interval().sec();
 
     return XrlCmdError::OKAY();
 }
@@ -585,7 +585,7 @@ XrlOlsr4Target::olsr4_0_1_get_tc_interval(uint32_t& interval)
 {
     debug_msg("olsr4_0_1_get_tc_interval\n");
 
-    interval = _olsr.get_tc_interval().secs();
+    interval = _olsr.get_tc_interval().sec();
 
     return XrlCmdError::OKAY();
 }
@@ -607,7 +607,7 @@ XrlOlsr4Target::olsr4_0_1_get_mid_interval(uint32_t& interval)
 {
     debug_msg("olsr4_0_1_get_mid_interval\n");
 
-    interval = _olsr.get_mid_interval().secs();
+    interval = _olsr.get_mid_interval().sec();
 
     return XrlCmdError::OKAY();
 }
@@ -629,7 +629,7 @@ XrlOlsr4Target::olsr4_0_1_get_hna_interval(uint32_t& interval)
 {
     debug_msg("olsr4_0_1_get_hna_interval\n");
 
-    interval = _olsr.get_hna_interval().secs();
+    interval = _olsr.get_hna_interval().sec();
 
     return XrlCmdError::OKAY();
 }
@@ -651,7 +651,7 @@ XrlOlsr4Target::olsr4_0_1_get_dup_hold_time(uint32_t& dup_hold_time)
 {
     debug_msg("olsr4_0_1_set_dup_hold_time\n");
 
-    dup_hold_time = _olsr.get_dup_hold_time().secs();
+    dup_hold_time = _olsr.get_dup_hold_time().sec();
 
     return XrlCmdError::OKAY();
 }
@@ -935,9 +935,9 @@ XrlOlsr4Target::olsr4_0_1_get_link_info(
 	remote_addr = l1->remote_addr();
 	main_addr = l1->destination()->main_addr();
 	link_type = l1->link_type();
-	sym_time = l1->sym_time_remaining().secs();
-	asym_time = l1->asym_time_remaining().secs();
-	hold_time = l1->time_remaining().secs();
+	sym_time = l1->sym_time_remaining().sec();
+	asym_time = l1->asym_time_remaining().sec();
+	hold_time = l1->time_remaining().sec();
 
 	return XrlCmdError::OKAY();
     } catch (...) {}
@@ -1039,7 +1039,7 @@ XrlOlsr4Target::olsr4_0_1_get_twohop_link_info(
 	last_face_id = l2->face_id();
 	nexthop_addr = l2->nexthop()->main_addr();
 	dest_addr = l2->destination()->main_addr();
-	hold_time = l2->time_remaining().secs();
+	hold_time = l2->time_remaining().sec();
 
 	return XrlCmdError::OKAY();
     } catch (...) {}
@@ -1132,7 +1132,7 @@ XrlOlsr4Target::olsr4_0_1_get_mid_entry(
 	main_addr = mid->main_addr();
 	iface_addr = mid->iface_addr();
 	distance = mid->distance();
-	hold_time = mid->time_remaining().secs();
+	hold_time = mid->time_remaining().sec();
 
 	return XrlCmdError::OKAY();
     } catch (...) {}
@@ -1178,7 +1178,7 @@ XrlOlsr4Target::olsr4_0_1_get_tc_entry(
 	lasthop = tc->lasthop();
 	distance = tc->distance();
 	seqno = tc->seqno();
-	hold_time = tc->time_remaining().secs();
+	hold_time = tc->time_remaining().sec();
 
 	return XrlCmdError::OKAY();
     } catch (...) {}
@@ -1222,7 +1222,7 @@ XrlOlsr4Target::olsr4_0_1_get_hna_entry(
 	destination = er->dest();
 	lasthop = er->lasthop();
 	distance = er->distance();
-	hold_time = er->time_remaining().secs();
+	hold_time = er->time_remaining().sec();
 
 	return XrlCmdError::OKAY();
     } catch (...) {}

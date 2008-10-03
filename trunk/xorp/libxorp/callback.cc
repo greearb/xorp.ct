@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/callback.cc,v 1.12 2008/07/23 05:10:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/callback.cc,v 1.13 2008/10/02 21:57:28 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -88,7 +88,7 @@ trace_dispatch_leave()
     if (delta >= MAX_CALLBACK_DURATION) {
 	string s = c_format("Callback originating at %s:%d took "
 			    "%d.%06d seconds\n",
-			    e.file, e.line, delta.secs(), delta.usecs());
+			    e.file, e.line, delta.sec(), delta.usec());
 	if (xlog_is_running()) {
 	    XLOG_ERROR("%s", s.c_str());
 	} else {
