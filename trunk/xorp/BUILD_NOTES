@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.107 2008/08/22 18:08:28 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.108 2008/08/24 04:52:23 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -429,6 +429,8 @@ gmake check
     - Optionally install the following packages:
       - libpcap0.8-dev
         This package is needed for sending/receiving link layer data frames.
+      - snmpd and libsnmp-dev
+        Those packages are needed for SNMP support.
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.2 (Ubuntu 4.1.2-0ubuntu4)
     - Tested on the following architectures: i386, sparc64
@@ -446,6 +448,8 @@ gmake check
     - Optionally install the following packages:
       - libpcap0.8-dev
         This package is needed for sending/receiving link layer data frames.
+      - snmpd and libsnmp-dev
+        Those packages are needed for SNMP support.
       - iptables-dev
         This package is needed for configuring firewall rules using XORP.
     - The code compiles, and the internal tests appear to succeed.
@@ -465,6 +469,8 @@ gmake check
     - Optionally install the following packages:
       - libpcap0.8-dev
         This package is needed for sending/receiving link layer data frames.
+      - snmpd and libsnmp-dev
+        Those packages are needed for SNMP support.
       - iptables-dev
         This package is needed for configuring firewall rules using XORP.
     - The code compiles, and the internal tests appear to succeed.
