@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.25 2008/09/11 15:46:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.26 2008/10/02 21:57:11 bms Exp $"
 
 //
 // I/O IP raw communication support.
@@ -2061,10 +2061,13 @@ IoIpSocket::send_packet(const string& if_name,
 	// Now setup the ancillary data
 	//
 	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);		// XXX
+#ifndef HOST_OS_WINDOWS
 	_sndmh.msg_controllen = ctllen;
 	cmsgp = CMSG_FIRSTHDR(&_sndmh);
+#endif
 
 #ifdef IP_PKTINFO
+#ifndef HOST_OS_WINDOWS
 	// XXX: Linux
 	{
 	    //
@@ -2089,6 +2092,7 @@ IoIpSocket::send_packet(const string& if_name,
 	    memset(sndpktinfo, 0, sizeof(*sndpktinfo));
 	    src_address.copy_out(sndpktinfo->ipi_spec_dst);
 	}
+#endif // ! HOST_OS_WINDOWS
 #endif // IP_PKTINFO
 
 	//
