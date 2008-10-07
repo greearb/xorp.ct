@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.42 2008/07/08 15:41:23 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.43 2008/07/17 22:53:33 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -324,8 +324,7 @@
          http://www.xorp.org/snmp.html 
 
     - There might be a compilation error in the mibs directory on some
-      systems running on 64-bit machines (e.g., FreeBSD-6.x or FreeBSD-7.x on
-      amd64):
+      systems running on 64-bit machines (e.g., FreeBSD or Linux on amd64):
 
 g++ -shared   xorpevents.lo -Wl,--whole-archive ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -Wl,--no-whole-archive  ../libxipc/.libs/libxipc.a ../libxorp/.libs/libxorp.a ../libcomm/.libs/libcomm.a -lcrypto  -Wl,-soname -Wl,libnetsnmpxorp.so -o .libs/libnetsnmpxorp.so
 /usr/bin/ld: ../libxipc/.libs/libxipc.a(hmac_md5.o): relocation R_X86_64_32S can not be used when making a shared object; recompile with -fPIC
