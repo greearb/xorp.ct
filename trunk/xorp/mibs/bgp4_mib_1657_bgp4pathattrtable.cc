@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.25 2008/07/23 05:11:01 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.26 2008/10/02 21:57:40 bms Exp $"
 
 
 #include <stack>
@@ -466,7 +466,9 @@ bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx,
      */
     if(hdr) {
         netsnmp_assert(ctx->index.oids == NULL);
-        if(snmp_clone_mem( (void**)&ctx->index.oids, hdr->oids,
+
+	oid** oid_ptr = &(ctx->index.oids);
+        if(snmp_clone_mem( (void**)oid_ptr, hdr->oids,
                            hdr->len * sizeof(oid) )) {
             return -1;
         }
