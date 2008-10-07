@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.26 2008/10/02 21:57:11 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_ip_socket.cc,v 1.27 2008/10/06 20:31:58 pavlin Exp $"
 
 //
 // I/O IP raw communication support.
@@ -1804,6 +1804,7 @@ IoIpSocket::send_packet(const string& if_name,
     void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
+    UNUSED(cmsgp);
     UNUSED(cmsg_data);
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
