@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.61 2007/12/10 23:26:33 mjh Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.62 2008/04/25 19:10:01 atanu Exp $
 #
 
 #
@@ -880,8 +880,7 @@ test16()
     coord peer2 dump sent text ipv4 traffic $SENT
 
     # send in the saved file
-    UPDATES=
-    NOBLOCK=true coord peer2 send dump mrtd update $TFILE $UPDATES
+    NOBLOCK=true coord peer2 send dump mrtd update $TFILE
 
     # Wait for the whole feed to be sent it may not all have arrived at BGP
     bgp_peer_unchanged peer2
