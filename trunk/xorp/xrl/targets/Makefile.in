@@ -150,6 +150,9 @@ libtestsocket6_la_OBJECTS = $(am_libtestsocket6_la_OBJECTS)
 libtestxrlsbase_la_LIBADD =
 am_libtestxrlsbase_la_OBJECTS = test_xrls_base.lo
 libtestxrlsbase_la_OBJECTS = $(am_libtestxrlsbase_la_OBJECTS)
+libvrrpbase_la_LIBADD =
+am_libvrrpbase_la_OBJECTS = vrrp_base.lo
+libvrrpbase_la_OBJECTS = $(am_libvrrpbase_la_OBJECTS)
 libxorpifmibbase_la_LIBADD =
 am_libxorpifmibbase_la_OBJECTS = xorp_if_mib_base.lo
 libxorpifmibbase_la_OBJECTS = $(am_libxorpifmibbase_la_OBJECTS)
@@ -196,7 +199,8 @@ SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libtestfindereventsbase_la_SOURCES) \
 	$(libtestpeerbase_la_SOURCES) $(libtestsocket4_la_SOURCES) \
 	$(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) \
-	$(libxorpifmibbase_la_SOURCES) $(libxorpshbase_la_SOURCES)
+	$(libvrrpbase_la_SOURCES) $(libxorpifmibbase_la_SOURCES) \
+	$(libxorpshbase_la_SOURCES)
 DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libclibase_la_SOURCES) $(libcoordbase_la_SOURCES) \
 	$(libfeabase_la_SOURCES) $(libfeaifmgrmirrorbase_la_SOURCES) \
@@ -216,7 +220,8 @@ DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libtestfindereventsbase_la_SOURCES) \
 	$(libtestpeerbase_la_SOURCES) $(libtestsocket4_la_SOURCES) \
 	$(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) \
-	$(libxorpifmibbase_la_SOURCES) $(libxorpshbase_la_SOURCES)
+	$(libvrrpbase_la_SOURCES) $(libxorpifmibbase_la_SOURCES) \
+	$(libxorpshbase_la_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -376,7 +381,7 @@ tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt fea.tgt \
 	ripng.tgt rtrmgr.tgt show_distances.tgt show_routes.tgt \
 	static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt \
 	test_fea_rawlink.tgt test_finder_events.tgt test_peer.tgt \
-	test_socket4.tgt test_socket6.tgt test_xrls.tgt \
+	test_socket4.tgt test_socket6.tgt test_xrls.tgt vrrp.tgt \
 	xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
@@ -397,8 +402,8 @@ noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la \
 	libstaticroutesbase.la libtestbase.la \
 	libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la \
 	libtestpeerbase.la libtestfearawlink.la libtestsocket4.la \
-	libtestsocket6.la libtestxrlsbase.la libxorpifmibbase.la \
-	libxorpshbase.la
+	libtestsocket6.la libtestxrlsbase.la libvrrpbase.la \
+	libxorpifmibbase.la libxorpshbase.la
 
 # BGP
 libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
@@ -513,6 +518,9 @@ libtestsocket6_la_SOURCES = test_socket6_base.hh test_socket6_base.cc
 # TEST XRLS
 #
 libtestxrlsbase_la_SOURCES = test_xrls_base.hh test_xrls_base.cc
+
+# VRRP
+libvrrpbase_la_SOURCES = vrrp_base.hh vrrp_base.cc
 
 # XORP IF MIB
 libxorpifmibbase_la_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc
@@ -643,6 +651,8 @@ libtestsocket6.la: $(libtestsocket6_la_OBJECTS) $(libtestsocket6_la_DEPENDENCIES
 	$(CXXLINK)  $(libtestsocket6_la_OBJECTS) $(libtestsocket6_la_LIBADD) $(LIBS)
 libtestxrlsbase.la: $(libtestxrlsbase_la_OBJECTS) $(libtestxrlsbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libtestxrlsbase_la_OBJECTS) $(libtestxrlsbase_la_LIBADD) $(LIBS)
+libvrrpbase.la: $(libvrrpbase_la_OBJECTS) $(libvrrpbase_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libvrrpbase_la_OBJECTS) $(libvrrpbase_la_LIBADD) $(LIBS)
 libxorpifmibbase.la: $(libxorpifmibbase_la_OBJECTS) $(libxorpifmibbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libxorpifmibbase_la_OBJECTS) $(libxorpifmibbase_la_LIBADD) $(LIBS)
 libxorpshbase.la: $(libxorpshbase_la_OBJECTS) $(libxorpshbase_la_DEPENDENCIES) 
@@ -687,6 +697,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_socket4_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_socket6_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrls_base.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_if_mib_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorpsh_base.Plo@am__quote@
 
@@ -1075,6 +1086,9 @@ $(srcdir)/test_socket6_base.hh $(srcdir)/test_socket6_base.cc:		\
 $(srcdir)/test_xrls_base.hh $(srcdir)/test_xrls_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_xrls.xif
+$(srcdir)/vrrp_base.hh $(srcdir)/vrrp_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/vrrp.xif
 $(srcdir)/xorp_if_mib_base.hh $(srcdir)/xorp_if_mib_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/xorp_if_mib.xif

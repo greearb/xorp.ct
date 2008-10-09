@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.71 2008/04/26 00:59:50 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.72 2008/04/30 20:53:38 bms Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -45,6 +45,7 @@ tgt_files		+= test_peer.tgt
 tgt_files		+= test_socket4.tgt
 tgt_files		+= test_socket6.tgt
 tgt_files		+= test_xrls.tgt
+tgt_files		+= vrrp.tgt
 tgt_files		+= xorp_if_mib.tgt
 tgt_files		+= xorpsh.tgt
 
@@ -91,6 +92,7 @@ noinst_LTLIBRARIES	+= libtestfearawlink.la
 noinst_LTLIBRARIES	+= libtestsocket4.la
 noinst_LTLIBRARIES	+= libtestsocket6.la
 noinst_LTLIBRARIES	+= libtestxrlsbase.la
+noinst_LTLIBRARIES	+= libvrrpbase.la
 noinst_LTLIBRARIES	+= libxorpifmibbase.la
 noinst_LTLIBRARIES	+= libxorpshbase.la
 
@@ -369,6 +371,12 @@ libtestxrlsbase_la_SOURCES = test_xrls_base.hh test_xrls_base.cc
 $(srcdir)/test_xrls_base.hh $(srcdir)/test_xrls_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/test_xrls.xif
+
+# VRRP
+libvrrpbase_la_SOURCES = vrrp_base.hh vrrp_base.cc
+$(srcdir)/vrrp_base.hh $(srcdir)/vrrp_base.cc:				\
+		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/vrrp.xif
 
 # XORP IF MIB
 libxorpifmibbase_la_SOURCES = xorp_if_mib_base.hh xorp_if_mib_base.cc

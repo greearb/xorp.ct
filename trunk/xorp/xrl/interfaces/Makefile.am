@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.38 2008/04/24 15:20:35 bms Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.39 2008/04/26 00:59:49 pavlin Exp $
 ##
 
 ###############################################################################
@@ -244,6 +244,10 @@ libtestpeerxif_la_SOURCES = test_peer_xif.hh test_peer_xif.cc
 # Test XRLs Interface
 noinst_LTLIBRARIES += libtestxrlsxif.la
 libtestxrlsxif_la_SOURCES = test_xrls_xif.hh test_xrls_xif.cc
+
+# VRRP Interface
+noinst_LTLIBRARIES += libvrrpxif.la
+libvrrpxif_la_SOURCES = vrrp_xif.hh vrrp_xif.cc
 
 # XORP MIBS Interface
 noinst_LTLIBRARIES += libxorpifmibxif.la

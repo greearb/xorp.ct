@@ -1,0 +1,7 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "vrrp.xif"
+
+target vrrp implements		common/0.1,			\
+				vrrp/0.1

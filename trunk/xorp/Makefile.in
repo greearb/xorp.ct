@@ -221,7 +221,7 @@ ETAGS_ARGS = --c++
 # --- Conditional applications
 SUBDIRS = libxorp libcomm libxipc libproto mrt xrl libfeaclient cli \
 	policy utils fea rib bgp fib2mrib mld6igmp ospf pim rip rtrmgr \
-	static_routes policy/test etc contrib @MIBS@
+	static_routes vrrp policy/test etc contrib @MIBS@
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

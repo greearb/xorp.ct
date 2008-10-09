@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/interfaces/Jamfile,v 1.6 2008/04/24 15:20:35 bms Exp $
+# $XORP: xorp/xrl/interfaces/Jamfile,v 1.7 2008/04/26 00:59:49 pavlin Exp $
 #
 
 #
@@ -76,6 +76,7 @@ Library libstaticroutesxif : static_routes_xif.cc ;
 Library libtestxif : test_xif.cc ;
 Library libtestpeerxif : test_peer_xif.cc ;
 Library libtestxrlsxif : test_xrls_xif.cc ;
+Library libvrrpxif : vrrp_xif.cc ;
 Library libxorpifmibxif : xorp_if_mib_xif.cc ;
 
 XorpXrlXif <xrl!interfaces>bgp_xif.cc <xrl!interfaces>bgp_xif.hh : bgp.xif ;
@@ -137,4 +138,5 @@ XorpXrlXif <xrl!interfaces>static_routes_xif.cc <xrl!interfaces>static_routes_xi
 XorpXrlXif <xrl!interfaces>test_xif.cc <xrl!interfaces>test_xif.hh : test.xif ;
 XorpXrlXif <xrl!interfaces>test_peer_xif.cc <xrl!interfaces>test_peer_xif.hh : test_peer.xif ;
 XorpXrlXif <xrl!interfaces>test_xrls_xif.cc <xrl!interfaces>test_xrls_xif.hh : test_xrls.xif ;
+XorpXrlXif <xrl!interfaces>vrrp_xif.cc <xrl!interfaces>vrrp_xif.hh : vrrp.xif ;
 XorpXrlXif <xrl!interfaces>xorp_if_mib_xif.cc <xrl!interfaces>xorp_if_mib_xif.hh : xorp_if_mib.xif ;

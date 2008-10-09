@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.21 2007/04/18 01:27:41 pavlin Exp $
+## $XORP: xorp/Makefile.am,v 1.22 2008/08/06 08:12:50 abittau Exp $
 ##
 
 # --- Options
@@ -14,7 +14,7 @@ SUBDIRS += cli policy utils
 SUBDIRS += fea rib
 
 # --- Applications (directory ordering should not matter)
-SUBDIRS += bgp fib2mrib mld6igmp ospf pim rip rtrmgr static_routes
+SUBDIRS += bgp fib2mrib mld6igmp ospf pim rip rtrmgr static_routes vrrp
 
 # --- Tests that make use of protocol libraries
 SUBDIRS += policy/test

@@ -1,0 +1,41 @@
+/* $XORP$ */
+
+interface vrrp/0.1 {
+    add_vrid	    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32
+
+    delete_vrid	    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32
+
+    set_priority    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    & priority:u32			
+
+    set_interval    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    & interval:u32
+
+    set_preempt	    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    & preempt:bool
+
+    set_disable	    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    & disable:bool
+
+    add_ip	    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    & ip:ipv4
+    
+    delete_ip	    ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    & ip:ipv4
+}

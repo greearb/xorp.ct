@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/xrl/targets/Jamfile,v 1.6 2008/04/26 00:59:50 pavlin Exp $
+# $XORP: xorp/xrl/targets/Jamfile,v 1.7 2008/04/30 20:53:38 bms Exp $
 #
 
 SubDir TOP xrl targets ;
@@ -45,6 +45,7 @@ XorpXrlTgt <xrl!targets>test_peer_base.cc <xrl!targets>test_peer_base.hh <xrl!ta
 XorpXrlTgt <xrl!targets>test_socket4_base.cc <xrl!targets>test_socket4_base.hh <xrl!targets>test_socket4_base.xrls : test_socket4.tgt ;
 XorpXrlTgt <xrl!targets>test_socket6_base.cc <xrl!targets>test_socket6_base.hh <xrl!targets>test_socket6_base.xrls : test_socket6.tgt ;
 XorpXrlTgt <xrl!targets>test_xrls_base.cc <xrl!targets>test_xrls_base.hh <xrl!targets>test_xrls_base.xrls : test_xrls.tgt ;
+XorpXrlTgt <xrl!targets>vrrp_base.cc <xrl!targets>vrrp_base.hh <xrl!targets>vrrp_base.xrls : vrrp.tgt ;
 XorpXrlTgt <xrl!targets>xorp_if_mib_base.cc <xrl!targets>xorp_if_mib_base.hh <xrl!targets>xorp_if_mib_base.xrls : xorp_if_mib.tgt ;
 XorpXrlTgt <xrl!targets>xorpsh_base.cc <xrl!targets>xorpsh_base.hh <xrl!targets>xorpsh_base.xrls : xorpsh.tgt ;
 
@@ -81,6 +82,7 @@ Library libtestpeerbase : test_peer_base.cc ;
 Library libtestsocket4 : test_socket4_base.cc ;
 Library libtestsocket6base : test_socket6_base.cc ;
 Library libtestxrlsbase : test_xrls_base.cc ;
+Library libvrrpbase : vrrp_base.cc ;
 Library libxorpifmibbase : xorp_if_mib_base.cc ;
 Library libxorpshbase : xorpsh_base.cc ;
 
@@ -120,6 +122,7 @@ INSTALLABLE_XRLS =
 	test_socket4.xrls
 	test_socket6.xrls
 	test_xrls.xrls
+	vrrp.xrls
 	xorp_if_mib.xrls
 	xorpsh.xrls
 	;

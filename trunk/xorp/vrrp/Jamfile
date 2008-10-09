@@ -1,0 +1,26 @@
+#
+# $XORP$
+#
+
+SubDir TOP vrrp ;
+SubIncludeOnce TOP libxorp ;
+SubIncludeOnce TOP libcomm ;
+SubIncludeOnce TOP xrl interfaces ;
+SubIncludeOnce TOP xrl targets ;
+SubIncludeOnce TOP libxipc ;
+SubDir TOP vrrp ;
+
+Library libvrrp : 
+	vrrp.cc vrrp_target.cc
+	;
+
+Main xorp_vrrp : xorp_vrrp.cc ;
+LinkLibraries xorp_vrrp : 
+	libvrrp
+	libvrrpbase
+	libxipc
+	libcomm
+	libxorp
+	;
+
+InstallBin $(PREFIX)/vrrp : xorp_vrrp ;

@@ -234,6 +234,9 @@ libtestxif_la_OBJECTS = $(am_libtestxif_la_OBJECTS)
 libtestxrlsxif_la_LIBADD =
 am_libtestxrlsxif_la_OBJECTS = test_xrls_xif.lo
 libtestxrlsxif_la_OBJECTS = $(am_libtestxrlsxif_la_OBJECTS)
+libvrrpxif_la_LIBADD =
+am_libvrrpxif_la_OBJECTS = vrrp_xif.lo
+libvrrpxif_la_OBJECTS = $(am_libvrrpxif_la_OBJECTS)
 libxorpifmibxif_la_LIBADD =
 am_libxorpifmibxif_la_OBJECTS = xorp_if_mib_xif.lo
 libxorpifmibxif_la_OBJECTS = $(am_libxorpifmibxif_la_OBJECTS)
@@ -295,7 +298,7 @@ SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libsocket6userxif_la_SOURCES) $(libsocket6xif_la_SOURCES) \
 	$(libstaticroutesxif_la_SOURCES) $(libtestpeerxif_la_SOURCES) \
 	$(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) \
-	$(libxorpifmibxif_la_SOURCES)
+	$(libvrrpxif_la_SOURCES) $(libxorpifmibxif_la_SOURCES)
 DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libclimanagerxif_la_SOURCES) \
 	$(libcliprocessorxif_la_SOURCES) $(libcommonxif_la_SOURCES) \
@@ -333,7 +336,7 @@ DIST_SOURCES = $(libbgpmibtrapsxif_la_SOURCES) $(libbgpxif_la_SOURCES) \
 	$(libsocket6userxif_la_SOURCES) $(libsocket6xif_la_SOURCES) \
 	$(libstaticroutesxif_la_SOURCES) $(libtestpeerxif_la_SOURCES) \
 	$(libtestxif_la_SOURCES) $(libtestxrlsxif_la_SOURCES) \
-	$(libxorpifmibxif_la_SOURCES)
+	$(libvrrpxif_la_SOURCES) $(libxorpifmibxif_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -578,6 +581,8 @@ top_srcdir = @top_srcdir@
 
 # Test XRLs Interface
 
+# VRRP Interface
+
 # XORP MIBS Interface
 
 #
@@ -603,8 +608,8 @@ noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la \
 	libripxif.la libripngxif.la librtrmgrxif.la \
 	librtrmgr_clientxif.la libsocket4xif.la libsocket4userxif.la \
 	libsocket6xif.la libsocket6userxif.la libstaticroutesxif.la \
-	libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la \
-	libtestxif.la
+	libtestpeerxif.la libtestxrlsxif.la libvrrpxif.la \
+	libxorpifmibxif.la libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -671,6 +676,7 @@ libsocket6userxif_la_SOURCES = socket6_user_xif.hh socket6_user_xif.cc
 libstaticroutesxif_la_SOURCES = static_routes_xif.hh static_routes_xif.cc
 libtestpeerxif_la_SOURCES = test_peer_xif.hh test_peer_xif.cc
 libtestxrlsxif_la_SOURCES = test_xrls_xif.hh test_xrls_xif.cc
+libvrrpxif_la_SOURCES = vrrp_xif.hh vrrp_xif.cc
 libxorpifmibxif_la_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
 libtestxif_la_SOURCES = test_xif.hh test_xif.cc
 
@@ -840,6 +846,8 @@ libtestxif.la: $(libtestxif_la_OBJECTS) $(libtestxif_la_DEPENDENCIES)
 	$(CXXLINK)  $(libtestxif_la_OBJECTS) $(libtestxif_la_LIBADD) $(LIBS)
 libtestxrlsxif.la: $(libtestxrlsxif_la_OBJECTS) $(libtestxrlsxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libtestxrlsxif_la_OBJECTS) $(libtestxrlsxif_la_LIBADD) $(LIBS)
+libvrrpxif.la: $(libvrrpxif_la_OBJECTS) $(libvrrpxif_la_DEPENDENCIES) 
+	$(CXXLINK)  $(libvrrpxif_la_OBJECTS) $(libvrrpxif_la_LIBADD) $(LIBS)
 libxorpifmibxif.la: $(libxorpifmibxif_la_OBJECTS) $(libxorpifmibxif_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libxorpifmibxif_la_OBJECTS) $(libxorpifmibxif_la_LIBADD) $(LIBS)
 
@@ -907,6 +915,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_peer_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_xrls_xif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp_xif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_if_mib_xif.Plo@am__quote@
 
 .cc.o:
