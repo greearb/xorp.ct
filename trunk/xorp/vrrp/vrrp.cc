@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.4 2008/10/09 17:47:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.5 2008/10/09 17:49:57 abittau Exp $"
 
 #include <sstream>
 
@@ -337,14 +337,9 @@ VRRP::send_arps()
 void
 VRRP::send_arp(const IPv4& ip)
 {
-    vector<uint8_t> data(128, 0);
-    ARPHeader& arp = ARPHeader::assign(&data[0]);
+    PAYLOAD data;
 
-    arp.set_sender(_source_mac, ip);
-    arp.set_request(ip);
-
-    XLOG_ASSERT(arp.size() <= data.capacity());
-    data.resize(arp.size());
+    ARPHeader::make_gratitious(data, _source_mac, ip);
 
     _vif.send(_source_mac, bcast_mac, ETHERTYPE_ARP, data);
 }

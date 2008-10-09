@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.50 2008/10/09 17:48:01 abittau Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.51 2008/10/09 17:49:13 abittau Exp $"
 
 
 //
@@ -34,6 +34,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
+#include "libproto/packet.hh"
 
 #include "libxipc/xrl_std_router.hh"
 
@@ -2150,8 +2151,6 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
 	    XLOG_WARNING("Cannot remove multicast MAC %s", e.str().c_str());
 	}
     }
-
-    // XXX send gratitious ARP for my IPs (primary MAC changed)
 }
 
 void
@@ -2171,6 +2170,52 @@ XrlFeaTarget::set_mac(const string& ifname, const Mac& mac)
 
     if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY())
 	xorp_throw(FEAException, "Can't commit transaction");
+
+    send_gratitious_arps(ifname, mac);
+}
+
+void
+XrlFeaTarget::send_gratitious_arps(const string& ifname, const Mac& mac)
+{
+    IfTreeInterface* ifp = _ifconfig.merged_config().find_interface(ifname);
+    XLOG_ASSERT(ifp);
+
+    if (!ifp->enabled())
+	return;
+
+    for (IfTreeInterface::VifMap::iterator i = ifp->vifs().begin(); 
+	 i != ifp->vifs().end(); ++i) {
+
+	const string& vifname = i->first;
+	IfTreeVif* vifp	      = i->second;
+
+	if (!vifp->enabled())
+	    continue;
+
+	for (IfTreeVif::IPv4Map::iterator j = vifp->ipv4addrs().begin();
+	     j != vifp->ipv4addrs().end(); ++j) {
+
+	    const IPv4& ip    = j->first;
+	    IfTreeAddr4* addr = j->second;
+
+	    if (!addr->enabled())
+		continue;
+
+	    Mac bcast("FF:FF:FF:FF:FF:FF");
+	    ARPHeader::PAYLOAD data;
+
+	    ARPHeader::make_gratitious(data, mac, ip);
+
+	    XrlCmdError e = raw_link_0_1_send(ifname, vifname, mac, bcast,
+					      ETHERTYPE_ARP, data);
+	    if (e != XrlCmdError::OKAY())
+		xorp_throw(FEAException,
+			   c_format("Cannot send gratitious ARP: %s",
+				    e.str().c_str()));
+	}
+
+	// XXX IPv6?
+    }
 }
 
 XrlCmdError

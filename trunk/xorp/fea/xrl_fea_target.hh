@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.37 2008/10/09 17:48:01 abittau Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.38 2008/10/09 17:49:13 abittau Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -2677,6 +2677,7 @@ public:
 private:
     void add_remove_mac(bool add, const string& ifname, const Mac& mac);
     void set_mac(const string& ifname, const Mac& mac);
+    void send_gratitious_arps(const string& ifname, const Mac& mac);
 
     EventLoop&		_eventloop;	// The event loop to use
     FeaNode&		_fea_node;	// The corresponding FeaNode
