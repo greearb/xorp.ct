@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.4 2008/10/09 17:49:57 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.5 2008/10/09 17:52:40 abittau Exp $
 
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
@@ -24,10 +24,11 @@
 #include "libxorp/ipv4.hh"
 #include "libfeaclient/ifmgr_atoms.hh"
 #include "vrrp.hh"
+#include "vrrp_interface.hh"
 
 class VRRPTarget;
 
-class VRRPVif {
+class VRRPVif : public VRRPInterface {
 public:
     typedef set<uint8_t>    VRIDS;
 

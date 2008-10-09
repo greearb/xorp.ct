@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.6 2008/10/09 17:49:57 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.7 2008/10/09 17:52:40 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -35,20 +35,19 @@ public:
     VRRPTarget(XrlRouter& rtr);
     ~VRRPTarget();
 
-    bool running() const;
-    void tree_complete();
-    void updates_made();
-    void send(const string& ifname, const string& vifname,
-	      const Mac& src, const Mac& dst, uint32_t ether,
-	      const PAYLOAD& payload);
-    void join_mcast(const string& ifname, const string& vifname);
-    void leave_mcast(const string& ifname, const string& vifname);
-    void start_arps(const string& ifname, const string& vifname);
-    void stop_arps(const string& ifname, const string& vifname);
-    void add_mac(const string& ifname, const Mac& mac);
-    void delete_mac(const string& ifname, const Mac& mac);
-
-    static EventLoop& eventloop();
+    bool       running() const;
+    void       tree_complete();
+    void       updates_made();
+    void       send(const string& ifname, const string& vifname,
+		    const Mac& src, const Mac& dst, uint32_t ether,
+	            const PAYLOAD& payload);
+    void       join_mcast(const string& ifname, const string& vifname);
+    void       leave_mcast(const string& ifname, const string& vifname);
+    void       start_arps(const string& ifname, const string& vifname);
+    void       stop_arps(const string& ifname, const string& vifname);
+    void       add_mac(const string& ifname, const Mac& mac);
+    void       delete_mac(const string& ifname, const Mac& mac);
+    EventLoop& eventloop();
 
 protected:
     XrlCmdError common_0_1_get_target_name(
@@ -190,7 +189,6 @@ private:
     IFS			    _ifs;
     IfMgrXrlMirror	    _ifmgr;
     bool		    _ifmgr_setup;
-    static EventLoop*	    _eventloop;
     XrlRawLinkV0p1Client    _rawlink;
     XrlRawPacket4V0p1Client _rawipv4;
     XrlIfmgrV0p1Client	    _fea;

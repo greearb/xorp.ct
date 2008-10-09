@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.5 2008/10/09 17:49:57 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.6 2008/10/09 17:52:40 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -59,7 +59,7 @@ VRRPVif::add_vrid(uint32_t vrid)
 {
     XLOG_ASSERT(find_vrid(vrid) == NULL);
 
-    _vrrps[vrid] = new VRRP(*this, vrid);
+    _vrrps[vrid] = new VRRP(*this, _vt.eventloop(), vrid);
 }
 
 void

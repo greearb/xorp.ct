@@ -1,7 +1,9 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/vrrp/Makefile.am,v 1.4 2008/10/09 17:47:49 abittau Exp $
+## $XORP: xorp/vrrp/Makefile.am,v 1.5 2008/10/09 17:49:57 abittau Exp $
 ##
+
+SUBDIRS = . test
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
@@ -40,6 +42,7 @@ libvrrp_la_SOURCES		+= vrrp_vif.cc
 libvrrp_la_SOURCES		+= arpd.hh
 libvrrp_la_SOURCES		+= vrrp.hh
 libvrrp_la_SOURCES		+= vrrp_exception.hh
+libvrrp_la_SOURCES		+= vrrp_interface.hh
 libvrrp_la_SOURCES		+= vrrp_module.h
 libvrrp_la_SOURCES		+= vrrp_packet.hh
 libvrrp_la_SOURCES		+= vrrp_target.hh

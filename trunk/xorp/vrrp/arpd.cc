@@ -13,14 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/vrrp/arpd.cc,v 1.1 2008/10/09 17:49:57 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "arpd.hh"
 #include "vrrp_vif.hh"
 #include "libxorp/xlog.h"
 
-ARPd::ARPd(VRRPVif& vif) 
+ARPd::ARPd(VRRPInterface& vif) 
 		: _vif(vif),
 		  _running(false),
 		  _receiving(false)

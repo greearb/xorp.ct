@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.10 2008/07/23 05:09:59 pavlin Exp $
+// $XORP: xorp/vrrp/arpd.hh,v 1.1 2008/10/09 17:49:57 abittau Exp $
 
 #ifndef __VRRP_ARPD_HH__
 #define __VRRP_ARPD_HH__
@@ -22,12 +22,11 @@
 
 #include "libxorp/ipv4.hh"
 #include "vrrp_packet.hh"
-
-class VRRPVif;
+#include "vrrp_interface.hh"
 
 class ARPd {
 public:
-    ARPd(VRRPVif& vif);
+    ARPd(VRRPInterface& vif);
     ~ARPd();
 
     void clear();
@@ -44,11 +43,11 @@ private:
     void start_receiving();
     void stop_receiving();
 
-    VRRPVif&	_vif;
-    Mac		_mac;
-    IPS		_ips;
-    bool	_running;
-    bool	_receiving;
+    VRRPInterface&  _vif;
+    Mac		    _mac;
+    IPS		    _ips;
+    bool	    _running;
+    bool	    _receiving;
 };
 
 #endif // __VRRP_ARPD_HH__

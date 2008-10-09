@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp.hh,v 1.4 2008/10/09 17:49:57 abittau Exp $
+// $XORP: xorp/vrrp/vrrp.hh,v 1.5 2008/10/09 17:52:40 abittau Exp $
 
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
@@ -24,10 +24,9 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/timer.hh"
 #include "libxorp/mac.hh"
+#include "libxorp/eventloop.hh"
 #include "vrrp_packet.hh"
 #include "arpd.hh"
-
-class VRRPVif;
 
 #define MAX_VRRP_SIZE (20 + VRRP_MAX_PACKET_SIZE)
 
@@ -36,7 +35,7 @@ public:
     static const Mac mcast_mac;
     static const Mac bcast_mac;
 
-    VRRP(VRRPVif& vif, uint32_t vrid);
+    VRRP(VRRPInterface& vif, EventLoop& e, uint32_t vrid);
     ~VRRP();
 
     void	    set_priority(uint32_t priority);
@@ -52,7 +51,7 @@ public:
     void	    check_ownership();
     void	    recv(const IPv4& from, const VRRPHeader& vh);
     ARPd&	    arpd();
-    void	    get_info(string& state, IPv4& master);
+    void	    get_info(string& state, IPv4& master) const;
 
 private:
     enum State {
@@ -85,23 +84,23 @@ private:
     void recv_advertisement(const IPv4& from, uint32_t priority);
     bool check_ips(const VRRPHeader& vh);
 
-    IPv4	_last_adv;
-    VRRPVif&	_vif;
-    uint32_t	_vrid;
-    uint32_t	_priority;
-    uint32_t	_interval;
-    double	_skew_time;
-    double	_master_down_interval;
-    bool	_preempt;
-    IPS		_ips;
-    State	_state;
-    XorpTimer	_master_down_timer;
-    XorpTimer	_adver_timer;
-    bool	_own;
-    bool	_disable;
-    VRRPPacket	_adv_packet;
-    Mac		_source_mac;
-    ARPd	_arpd; // XXX use OS proxy arp mechanism?
+    IPv4	    _last_adv;
+    VRRPInterface&  _vif;
+    uint32_t	    _vrid;
+    uint32_t	    _priority;
+    uint32_t	    _interval;
+    double	    _skew_time;
+    double	    _master_down_interval;
+    bool	    _preempt;
+    IPS		    _ips;
+    State	    _state;
+    XorpTimer	    _master_down_timer;
+    XorpTimer	    _adver_timer;
+    bool	    _own;
+    bool	    _disable;
+    VRRPPacket	    _adv_packet;
+    Mac		    _source_mac;
+    ARPd	    _arpd; // XXX use OS proxy arp mechanism?
 };
 
 #endif // __VRRP_VRRP_HH__

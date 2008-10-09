@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/vrrp/Jamfile,v 1.4 2008/10/09 17:47:49 abittau Exp $
+# $XORP: xorp/vrrp/Jamfile,v 1.5 2008/10/09 17:49:57 abittau Exp $
 #
 
 SubDir TOP vrrp ;
@@ -33,3 +33,5 @@ LinkLibraries xorp_vrrp :
 	;
 
 InstallBin $(PREFIX)/vrrp : xorp_vrrp ;
+
+SubIncludeOnce TOP vrrp test ;

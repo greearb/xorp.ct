@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.6 2008/10/09 17:50:33 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.7 2008/10/09 17:52:39 abittau Exp $"
 
 #include <sstream>
 
@@ -44,7 +44,7 @@ out_of_range(const string& msg, const T& x)
 const Mac VRRP::mcast_mac = Mac("01:00:5E:00:00:12");
 const Mac VRRP::bcast_mac = Mac("FF:FF:FF:FF:FF:FF");
 
-VRRP::VRRP(VRRPVif& vif, uint32_t vrid)
+VRRP::VRRP(VRRPInterface& vif, EventLoop& e, uint32_t vrid)
 		: _vif(vif),
 		  _vrid(vrid),
 		  _priority(100),
@@ -64,8 +64,6 @@ VRRP::VRRP(VRRPVif& vif, uint32_t vrid)
     snprintf(tmp, sizeof(tmp), "00:00:5E:00:01:%X", (uint8_t) vrid);
     _source_mac = Mac(tmp);
     _arpd.set_mac(_source_mac);
-
-    EventLoop& e = VRRPTarget::eventloop();
 
     _master_down_timer = e.new_periodic_ms(0x29a,
 			    callback(this, &VRRP::master_down_expiry));
@@ -459,7 +457,7 @@ VRRP::arpd()
 }
 
 void
-VRRP::get_info(string& state, IPv4& master)
+VRRP::get_info(string& state, IPv4& master) const
 {
     typedef map<State, string> STATES;
     static STATES states;

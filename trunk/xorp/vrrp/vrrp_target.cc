@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.6 2008/10/09 17:49:57 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.7 2008/10/09 17:52:40 abittau Exp $"
 
 #include <sstream>
 
@@ -24,7 +24,6 @@
 
 const string VRRPTarget::vrrp_target_name   = "vrrp";
 const string VRRPTarget::fea_target_name    = "fea";
-EventLoop*   VRRPTarget::_eventloop	    = NULL;
 
 namespace {
 
@@ -57,8 +56,6 @@ VRRPTarget::VRRPTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
 		_fea(&rtr),
 		_xrls_pending(0)
 {
-    _eventloop = &rtr.eventloop();
-
     _ifmgr.attach_hint_observer(this);
 
     // When changing MAC, Linux brings the interface down and up.  This will
@@ -78,10 +75,7 @@ VRRPTarget::~VRRPTarget()
 EventLoop&
 VRRPTarget::eventloop()
 {
-    if (!_eventloop)
-	xorp_throw(VRRPException, "no eventloop");
-
-    return *_eventloop;
+    return _rtr.eventloop();
 }
 
 void
