@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp.hh,v 1.3 2008/10/09 17:46:27 abittau Exp $
+// $XORP: xorp/vrrp/vrrp.hh,v 1.4 2008/10/09 17:49:57 abittau Exp $
 
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
@@ -52,6 +52,7 @@ public:
     void	    check_ownership();
     void	    recv(const IPv4& from, const VRRPHeader& vh);
     ARPd&	    arpd();
+    void	    get_info(string& state, IPv4& master);
 
 private:
     enum State {
@@ -84,6 +85,7 @@ private:
     void recv_advertisement(const IPv4& from, uint32_t priority);
     bool check_ips(const VRRPHeader& vh);
 
+    IPv4	_last_adv;
     VRRPVif&	_vif;
     uint32_t	_vrid;
     uint32_t	_priority;

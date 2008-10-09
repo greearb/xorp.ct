@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.3 2008/10/09 17:47:49 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.4 2008/10/09 17:49:57 abittau Exp $
 
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
@@ -29,6 +29,8 @@ class VRRPTarget;
 
 class VRRPVif {
 public:
+    typedef set<uint8_t>    VRIDS;
+
     VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname);
     ~VRRPVif();
 
@@ -49,6 +51,7 @@ public:
     void	    start_arps();
     void	    stop_arps();
     void	    recv_arp(const Mac& src, const PAYLOAD& payload);
+    void	    get_vrids(VRIDS& vrids);
 
 private:
     typedef set<IPv4>		    IPS;

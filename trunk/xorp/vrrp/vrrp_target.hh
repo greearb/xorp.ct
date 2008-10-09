@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.5 2008/10/09 17:48:33 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.6 2008/10/09 17:49:57 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -119,6 +119,32 @@ protected:
         const string&   vifname,
         const uint32_t& vrid,
         const IPv4&     ip);
+
+    XrlCmdError vrrp_0_1_get_vrid_info(
+        // Input values,
+        const string&   ifname,
+        const string&   vifname,
+        const uint32_t& vrid,
+        // Output values,
+        string& state,
+        IPv4&   master);
+
+    XrlCmdError vrrp_0_1_get_vrids(
+        // Input values,
+        const string&   ifname,
+        const string&   vifname,
+        // Output values,
+        XrlAtomList&    vrids);
+
+    XrlCmdError vrrp_0_1_get_ifs(
+        // Output values,
+        XrlAtomList&    ifs);
+
+    XrlCmdError vrrp_0_1_get_vifs(
+        // Input values,
+        const string&   ifname,
+        // Output values,
+        XrlAtomList&    vifs);
 
     XrlCmdError raw_packet4_client_0_1_recv(
         // Input values,

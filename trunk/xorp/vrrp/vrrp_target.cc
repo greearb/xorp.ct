@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.5 2008/10/09 17:48:33 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.6 2008/10/09 17:49:57 abittau Exp $"
 
 #include <sstream>
 
@@ -545,6 +545,87 @@ VRRPTarget::vrrp_0_1_delete_ip(
     } catch(const VRRPException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+VRRPTarget::vrrp_0_1_get_vrid_info(
+        // Input values,
+        const string&   ifname,
+        const string&   vifname,
+        const uint32_t& vrid,
+        // Output values,
+        string& state,
+        IPv4&   master)
+{
+    try {
+	VRRP& v = find_vrid(ifname, vifname, vrid);
+
+	v.get_info(state, master);
+    } catch(const VRRPException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+VRRPTarget::vrrp_0_1_get_vrids(
+        // Input values,      
+        const string&   ifname,
+        const string&   vifname,
+        // Output values,     
+        XrlAtomList&    vrids)
+{
+    try {
+	VRRPVif* vif = find_vif(ifname, vifname);
+	if (!vif)
+	    xorp_throw(VRRPException, "unknown vif");
+
+	typedef VRRPVif::VRIDS VRIDS;
+
+	VRIDS tmp;
+	vif->get_vrids(tmp);
+
+	for (VRIDS::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+	    uint32_t vrid = *i;
+
+	    vrids.append(XrlAtom(vrid));
+	}
+    } catch(const VRRPException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+VRRPTarget::vrrp_0_1_get_ifs(
+        // Output values,
+        XrlAtomList&    ifs)
+{
+    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i)
+	ifs.append(XrlAtom(i->first));
+
+    return XrlCmdError::OKAY();
+}
+                            
+XrlCmdError
+VRRPTarget::vrrp_0_1_get_vifs(
+        // Input values,    
+        const string&   ifname,
+        // Output values,
+        XrlAtomList&    vifs)
+{
+    IFS::iterator i = _ifs.find(ifname);
+    if (i == _ifs.end())
+	return XrlCmdError::COMMAND_FAILED("Can't find interface");
+
+    VIFS* v = i->second;
+
+    for (VIFS::iterator i = v->begin(); i != v->end(); ++i)
+	vifs.append(XrlAtom(i->first));
 
     return XrlCmdError::OKAY();
 }

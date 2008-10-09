@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.4 2008/10/09 17:48:34 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.5 2008/10/09 17:49:57 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -273,4 +273,11 @@ VRRPVif::delete_mac(const Mac& mac)
     XLOG_ASSERT(_ifname == _vifname);
 
     _vt.delete_mac(_ifname, mac);
+}
+
+void
+VRRPVif::get_vrids(VRIDS& vrids)
+{
+    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i)
+	vrids.insert(i->first);
 }

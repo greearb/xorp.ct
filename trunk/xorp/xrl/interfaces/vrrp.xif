@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/interfaces/vrrp.xif,v 1.1 2008/10/09 17:40:59 abittau Exp $ */
 
 interface vrrp/0.1 {
     add_vrid	    ? ifname:txt			\
@@ -38,4 +38,19 @@ interface vrrp/0.1 {
 		    & vifname:txt			\
 		    & vrid:u32				\
 		    & ip:ipv4
+
+    get_ifs	    -> ifs:list
+
+    get_vifs	    ? ifname:txt			\
+		    -> vifs:list
+
+    get_vrids       ? ifname:txt			\
+		    & vifname:txt			\
+		    -> vrids:list
+
+    get_vrid_info   ? ifname:txt			\
+		    & vifname:txt			\
+		    & vrid:u32				\
+		    -> state:txt			\
+		    & master:ipv4
 }

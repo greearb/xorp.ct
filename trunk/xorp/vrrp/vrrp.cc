@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.5 2008/10/09 17:49:57 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.6 2008/10/09 17:50:33 abittau Exp $"
 
 #include <sstream>
 
@@ -376,6 +376,7 @@ VRRP::recv_advertisement(const IPv4& from, uint32_t priority)
 	break;
 
     case BACKUP:
+	_last_adv = from;
 	recv_adver_backup(priority);
 	break;
 
@@ -455,4 +456,24 @@ ARPd&
 VRRP::arpd()
 {
     return _arpd;
+}
+
+void
+VRRP::get_info(string& state, IPv4& master)
+{
+    typedef map<State, string> STATES;
+    static STATES states;
+
+    if (states.empty()) {
+	states[INITIALIZE] = "initialize";
+	states[MASTER]	   = "master";
+	states[BACKUP]     = "backup";
+    }
+
+    state = states.find(_state)->second;
+
+    if (_state == MASTER)
+	master = _vif.addr();
+    else
+	master = _last_adv;
 }

@@ -1,0 +1,19 @@
+/* $XORP */
+
+show vrrp {
+    %command: "cli/tools/cli_generic -i %i=finder://vrrp/vrrp/0.1/get_ifs -i %v=finder://vrrp/vrrp/0.1/get_vifs?ifname:txt=%i -i %k=finder://vrrp/vrrp/0.1/get_vrids?ifname:txt=%i&vifname:txt=%v -x finder://vrrp/vrrp/0.1/get_vrid_info?ifname:txt=%i&vifname:txt=%v&vrid:u32=%k -f Interface\\t%i\\nVif\\t\\t%v\\nVRID\\t\\t%k\\nState\\t\\t%0\\nMaster_IP\\t%1\\n -s \\n" %help: HELP;
+    %module: vrrp;
+    %tag: HELP "Show configured vrids";
+}
+
+show vrrp $(protocols.vrrp.interface.*) $(protocols.vrrp.interface.*.vif.*) {
+    %command: "cli/tools/cli_generic -i %k=finder://vrrp/vrrp/0.1/get_vrids?ifname:txt=$3&vifname:txt=$4 -a $3 -a $4 -x finder://vrrp/vrrp/0.1/get_vrid_info?ifname:txt=$3&vifname:txt=$4&vrid:u32=%k -a $3 -a $4 -f Interface\\t$3\\nVif\\t\\t$4\\nVRID\\t\\t%k\\nState\\t\\t%0\\nMaster_IP\\t%1\\n -a $3 -a $4 -s \\n" %help: HELP;
+    %module: vrrp;
+    %tag: HELP "Show configured vrids on an interface";
+}
+
+show vrrp $(protocols.vrrp.interface.*) $(protocols.vrrp.interface.*.vif.*) $(protocols.vrrp.interface.*.vif.*.vrid.*) {
+    %command: "cli/tools/cli_generic -x finder://vrrp/vrrp/0.1/get_vrid_info?ifname:txt=$3&vifname:txt=$4&vrid:u32=$5 -a $3 -a $4 -a $5 -f VRID\\t\\t$5\\nState\\t\\t%0\\nMaster_IP\\t%1\\n -a $5" %help: HELP;
+    %module: vrrp;
+    %tag: HELP "Show vrid details";
+}
