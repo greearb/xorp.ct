@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -18,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.13 2008/07/23 05:10:39 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.14 2008/10/02 21:57:17 bms Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -29,6 +30,7 @@
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/mac.hh"
 
 
 /**
@@ -879,6 +881,29 @@ private:
     uint8_t* _ip_hlim;		// Hop limit
     uint8_t* _ip_src;		// Source address
     uint8_t* _ip_dst;		// Destination address
+};
+
+struct ARPHeader {
+    enum Op {
+	ARP_REQUEST = 1,
+	ARP_REPLY
+    };
+    enum HwFmt {
+	HW_ETHER = 1
+    };
+
+    static ARPHeader& assign(uint8_t* data);
+    void	      set_sender(const Mac& mac, const IPv4& ip);
+    void	      set_request(const IPv4& ip);
+    void	      set_reply(const Mac& mac, const IPv4& ip);
+    uint32_t	      size();
+
+    uint16_t	ah_hw_fmt;
+    uint16_t	ah_proto_fmt;
+    uint8_t	ah_hw_len;
+    uint8_t	ah_proto_len;
+    uint16_t	ah_op;
+    uint8_t	ah_data[0];
 };
 
 #endif // __LIBPROTO_PACKET_HH__

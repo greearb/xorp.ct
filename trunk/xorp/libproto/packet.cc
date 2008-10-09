@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2006-2008 XORP, Inc.
 //
@@ -18,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/packet.cc,v 1.6 2008/07/23 05:10:39 pavlin Exp $"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.7 2008/10/02 21:57:17 bms Exp $"
 
 
 //
@@ -226,4 +227,54 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
     }
 
     return (XORP_OK);
+}
+
+ARPHeader&
+ARPHeader::assign(uint8_t* data)
+{
+    ARPHeader* h = reinterpret_cast<ARPHeader*>(data);
+
+    memset(h, 0, sizeof(*h));
+
+    return *h;
+}
+
+void
+ARPHeader::set_sender(const Mac& mac, const IPv4& ip)
+{
+    ah_hw_fmt = htons(HW_ETHER);
+    ah_hw_len = mac.copy_out(ah_data);
+
+    ah_proto_fmt = htons(ETHERTYPE_IP);
+    ah_proto_len = ip.copy_out(&ah_data[ah_hw_len]);
+}
+
+void
+ARPHeader::set_request(const IPv4& ip)
+{
+    XLOG_ASSERT(ah_op == 0);
+    XLOG_ASSERT(ah_proto_fmt == htons(ETHERTYPE_IP));
+
+    ah_op = htons(ARP_REQUEST);
+
+    ip.copy_out(&ah_data[ah_hw_len * 2 + ah_proto_len]);
+}
+
+void
+ARPHeader::set_reply(const Mac& mac, const IPv4& ip)
+{
+    XLOG_ASSERT(ah_op == 0);
+    XLOG_ASSERT(ah_hw_fmt    == htons(HW_ETHER));
+    XLOG_ASSERT(ah_proto_fmt == htons(ETHERTYPE_IP));
+
+    set_request(ip);
+    ah_op = htons(ARP_REPLY);
+
+    mac.copy_out(&ah_data[ah_hw_len + ah_proto_len]);
+}
+
+uint32_t
+ARPHeader::size()
+{
+    return sizeof(*this) + ah_hw_len * 2 + ah_proto_len * 2;
 }
