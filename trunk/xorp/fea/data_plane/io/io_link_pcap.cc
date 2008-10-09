@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2007-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.14 2008/09/26 21:41:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.15 2008/10/02 21:57:11 bms Exp $"
 
 //
 // I/O link raw communication support.
@@ -740,10 +741,31 @@ IoLinkPcap::send_packet(const Mac& src_address,
 			     if_name().c_str(),
 			     vif_name().c_str(),
 			     pcap_geterr(_pcap));
-	return (XORP_ERROR);
+
+	// maybe device was brought down invalidating the socket - try to
+	// reopen.  XXX is there a way to check "errno"?
+    	if (reopen_device() 
+	    && pcap_sendpacket(_pcap, _databuf, packet_size) == 0)
+	    error_msg = "";
+	else
+	    return (XORP_ERROR);
     }
 
     return (XORP_OK);
+}
+
+bool
+IoLinkPcap::reopen_device()
+{
+    string error_msg;
+
+    if (close_pcap_access(error_msg) != XORP_OK)
+	return false;
+
+    if (open_pcap_access(error_msg) != XORP_OK)
+	return false;
+
+    return true;
 }
 
 #endif // HAVE_PCAP

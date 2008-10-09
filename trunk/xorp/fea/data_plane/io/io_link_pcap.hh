@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2007-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.10 2008/07/23 05:10:33 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.11 2008/10/02 21:57:11 bms Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -167,6 +168,8 @@ private:
      * module to process it.
      */
     void	recv_data();
+
+    bool	reopen_device();
 
     // Private state
     XorpFd	_packet_fd;	// The file descriptor to send and recv packets
