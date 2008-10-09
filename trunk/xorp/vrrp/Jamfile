@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/vrrp/Jamfile,v 1.1 2008/10/09 17:40:58 abittau Exp $
+# $XORP: xorp/vrrp/Jamfile,v 1.2 2008/10/09 17:44:15 abittau Exp $
 #
 
 SubDir TOP vrrp ;
@@ -12,7 +12,7 @@ SubIncludeOnce TOP libxipc ;
 SubDir TOP vrrp ;
 
 Library libvrrp : 
-	vrrp.cc vrrp_target.cc vrrp_vif.cc
+	vrrp.cc vrrp_packet.cc vrrp_target.cc vrrp_vif.cc
 	;
 
 Main xorp_vrrp : xorp_vrrp.cc ;
@@ -22,8 +22,11 @@ LinkLibraries xorp_vrrp :
 	libfeaclient
 	libfeaifmgrmirrorxif
 	libfeaifmgrreplicatorxif
+	libfearawlinkxif
+	libfearawpkt4xif
 	libfeaifmgrmirrorbase
 	libxipc
+	libproto
 	libcomm
 	libxorp
 	;

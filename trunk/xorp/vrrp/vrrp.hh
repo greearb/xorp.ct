@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp.hh,v 1.1 2008/10/09 17:40:58 abittau Exp $
+// $XORP: xorp/vrrp/vrrp.hh,v 1.2 2008/10/09 17:44:16 abittau Exp $
 
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
@@ -23,11 +23,18 @@
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/timer.hh"
+#include "libxorp/mac.hh"
+#include "vrrp_packet.hh"
 
 class VRRPVif;
 
+#define MAX_VRRP_SIZE (20 + VRRP_MAX_PACKET_SIZE)
+
 class VRRP {
 public:
+    static const Mac mcast_mac;
+    static const Mac bcast_mac;
+
     VRRP(VRRPVif& vif, uint32_t vrid);
     ~VRRP();
 
@@ -42,7 +49,7 @@ public:
     void	    start();
     void	    stop();
     void	    check_ownership();
-    void	    recv_advertisement(const IPv4& from, uint32_t priority);
+    void	    recv(const IPv4& from, const VRRPHeader& vh);
 
 private:
     enum State {
@@ -62,6 +69,7 @@ private:
     void setup_timers(bool skew = false);
     void cancel_timers();
     void send_arps();
+    void send_arp(const IPv4& ip);
     void send_advertisement(uint32_t priority);
     void send_advertisement();
     void become_master();
@@ -70,6 +78,9 @@ private:
     bool adver_expiry();
     void recv_adver_master(const IPv4& from, uint32_t priority);
     void recv_adver_backup(uint32_t priority);
+    void prepare_advertisement(uint32_t priority);
+    void recv_advertisement(const IPv4& from, uint32_t priority);
+    bool check_ips(const VRRPHeader& vh);
 
     VRRPVif&	_vif;
     uint32_t	_vrid;
@@ -84,6 +95,8 @@ private:
     XorpTimer	_adver_timer;
     bool	_own;
     bool	_disable;
+    VRRPPacket	_adv_packet;
+    Mac		_source_mac;
 };
 
 #endif // __VRRP_VRRP_HH__

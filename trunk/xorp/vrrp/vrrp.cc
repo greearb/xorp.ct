@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.1 2008/10/09 17:40:58 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.2 2008/10/09 17:44:16 abittau Exp $"
 
 #include <sstream>
 
@@ -23,6 +23,7 @@
 #include "vrrp_exception.hh"
 #include "vrrp_vif.hh"
 #include "vrrp_target.hh"
+#include "vrrp_packet.hh"
 
 namespace {
 
@@ -39,6 +40,10 @@ out_of_range(const string& msg, const T& x)
 
 } // anonymous namespace
 
+// XXX init from VRRPPacket::mcast_group
+const Mac VRRP::mcast_mac = Mac("01:00:5E:00:00:12");
+const Mac VRRP::bcast_mac = Mac("FF:FF:FF:FF:FF:FF");
+
 VRRP::VRRP(VRRPVif& vif, uint32_t vrid)
 		: _vif(vif),
 		  _vrid(vrid),
@@ -53,6 +58,10 @@ VRRP::VRRP(VRRPVif& vif, uint32_t vrid)
 {
     if (_vrid < 1 || _vrid > 255)
 	out_of_range("VRID out of range", _vrid);
+
+    char tmp[64];
+    snprintf(tmp, sizeof(tmp), "00:00:5E:00:01:%X", (uint8_t) vrid);
+    _source_mac = Mac(tmp);
 
     EventLoop& e = VRRPTarget::eventloop();
 
@@ -196,6 +205,8 @@ VRRP::start()
     if (!_vif.ready())
 	return;
 
+    _vif.join_mcast();
+
     if (priority() == PRIORITY_OWN)
 	become_master();
     else
@@ -223,6 +234,8 @@ VRRP::stop()
 {
     if (!running())
 	return;
+
+    _vif.leave_mcast();
 
     cancel_timers();
 
@@ -256,12 +269,49 @@ VRRP::send_advertisement(uint32_t priority)
 {
     XLOG_ASSERT(priority <= PRIORITY_OWN);
     XLOG_ASSERT(_state == MASTER);
+
+    // XXX prepare only on change
+    prepare_advertisement(priority);
+
+    _vif.send(_source_mac, 
+	      mcast_mac,
+	      ETHERTYPE_IP,
+	      _adv_packet.data());
+}
+
+void
+VRRP::prepare_advertisement(uint32_t priority)
+{
+    _adv_packet.set_source(_vif.addr());
+    _adv_packet.set_vrid(_vrid);
+    _adv_packet.set_priority(priority);
+    _adv_packet.set_interval(_interval);
+    _adv_packet.set_ips(_ips);
+    _adv_packet.finalize();
 }
 
 void
 VRRP::send_arps()
 {
     XLOG_ASSERT(_state == MASTER);
+
+    for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i)
+	send_arp(*i);
+}
+
+void
+VRRP::send_arp(const IPv4& ip)
+{
+    vector<uint8_t> data(128, 0);
+    ARPHeader& arp = ARPHeader::assign(&data[0]);
+
+    arp.set_sender(_source_mac, ip);
+    arp.set_request(ip);
+
+    XLOG_ASSERT(arp.size() <= data.capacity());
+    data.resize(arp.size());
+
+    _vif.send(_source_mac, bcast_mac, ETHERTYPE_ARP, data);
 }
 
 bool
@@ -322,4 +372,51 @@ VRRP::recv_adver_master(const IPv4& from, uint32_t pri)
 	setup_timers();
     } else if (pri >= priority() || (pri == priority() && from > _vif.addr()))
 	become_backup();
+}
+
+void
+VRRP::recv(const IPv4& from, const VRRPHeader& vh)
+{
+    XLOG_ASSERT(vh.vh_vrid == _vrid);
+
+    if (!running())
+	xorp_throw(VRRPException, "VRRID not running");
+
+    if (priority() == PRIORITY_OWN)
+	xorp_throw(VRRPException, "I pwn VRRID but got advertisement");
+
+    if (vh.vh_auth != VRRPHeader::VRRP_AUTH_NONE)
+	xorp_throw(VRRPException, "Auth method not supported");
+
+    if (!check_ips(vh) && vh.vh_priority != PRIORITY_OWN)
+	xorp_throw(VRRPException, "Bad IPs");
+
+    if (vh.vh_interval != _interval)
+	xorp_throw(VRRPException, "Bad interval");
+
+    recv_advertisement(from, vh.vh_priority);
+}
+
+bool
+VRRP::check_ips(const VRRPHeader& vh)
+{
+    if (vh.vh_ipcount != _ips.size()) {
+	XLOG_WARNING("Mismatch in configured IPs (got %u have %u)",
+		     vh.vh_ipcount, _ips.size());
+
+	return false;
+    }
+
+    for (unsigned i = 0; i < vh.vh_ipcount; i++) {
+	IPv4 ip = vh.ip(i);
+
+	if (_ips.find(ip) == _ips.end()) {
+	    XLOG_WARNING("He's got %s configured but I don't",
+			 ip.str().c_str());
+
+	    return false;
+	}
+    }
+
+    return true;
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.1 2008/10/09 17:40:58 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.2 2008/10/09 17:44:16 abittau Exp $"
 
 #include <sstream>
 
@@ -47,10 +47,13 @@ vrid_error(const string& msg, const string& ifn, const string& vifn,
 } // anonymous namespace
 
 VRRPTarget::VRRPTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
+		_rtr(rtr),
 		_running(true),
 		_ifmgr(rtr.eventloop(), fea_target_name.c_str(),
 		       rtr.finder_address(), rtr.finder_port()),
-		_ifmgr_setup(false)
+		_ifmgr_setup(false),
+		_rawlink(&rtr),
+		_rawipv4(&rtr)
 {
     _eventloop = &rtr.eventloop();
 
@@ -172,7 +175,7 @@ VRRPTarget::find_vif(const string& ifn, const string& vifn, bool add)
 	if (!add)
 	    return NULL;
 
-	vif = new VRRPVif(ifn, vifn);
+	vif = new VRRPVif(*this, ifn, vifn);
 	v->insert(make_pair(vifn, vif));
 	added = true;
     } else
@@ -211,6 +214,73 @@ VRRPTarget::check_interfaces()
 	    vif->configure(_ifmgr.iftree());
 	}
     }
+}
+
+void
+VRRPTarget::send(const string& ifname, const string& vifname, const Mac& src,
+		 const Mac& dest, uint32_t ether, const PAYLOAD& payload)
+{
+    bool rc = _rawlink.send_send(fea_target_name.c_str(),
+				 ifname, vifname, src, dest, ether, payload,
+				 callback(this, &VRRPTarget::xrl_cb));
+
+    if (!rc)
+	XLOG_FATAL("Cannot send raw data");
+}
+
+void
+VRRPTarget::join_mcast(const string& ifname, const string& vifname)
+{
+    bool rc;
+    XrlRawPacket4V0p1Client::RegisterReceiverCB cb =
+				callback(this, &VRRPTarget::xrl_cb);
+
+    uint32_t proto = VRRPPacket::IPPROTO_VRRP;
+    const IPv4& ip = VRRPPacket::mcast_group;
+
+    rc = _rawipv4.send_register_receiver(fea_target_name.c_str(),
+				         _rtr.instance_name(), ifname,
+					 vifname, proto, false, cb);
+    if (!rc) {
+	XLOG_FATAL("Cannot register receiver");
+	return;
+    }
+    rc = _rawipv4.send_join_multicast_group(fea_target_name.c_str(),
+					    _rtr.instance_name(), ifname,
+					    vifname, proto, ip, cb);
+    if (!rc)
+	XLOG_FATAL("Cannot join mcast group");
+}
+
+void
+VRRPTarget::leave_mcast(const string& ifname, const string& vifname)
+{
+    bool rc;
+    XrlRawPacket4V0p1Client::RegisterReceiverCB cb =
+				callback(this, &VRRPTarget::xrl_cb);
+
+    uint32_t proto = VRRPPacket::IPPROTO_VRRP;
+    const IPv4& ip = VRRPPacket::mcast_group;
+
+    rc = _rawipv4.send_leave_multicast_group(fea_target_name.c_str(),
+					     _rtr.instance_name(), ifname,
+					     vifname, proto, ip, cb);
+    if (!rc) {
+	XLOG_FATAL("Cannot leave mcast group");
+	return;
+    }
+    rc = _rawipv4.send_unregister_receiver(fea_target_name.c_str(),
+					   _rtr.instance_name(), ifname,
+					       vifname, proto, cb);
+    if (!rc)
+	XLOG_FATAL("Cannot unregister receiver");
+}
+
+void
+VRRPTarget::xrl_cb(const XrlError& xrl_error)
+{
+    if (xrl_error != XrlError::OKAY())
+	XLOG_FATAL("XRL error: %s", xrl_error.str().c_str());
 }
 
 XrlCmdError
@@ -400,6 +470,56 @@ VRRPTarget::vrrp_0_1_delete_ip(
     } catch(const VRRPException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+VRRPTarget::raw_packet4_client_0_1_recv(
+        // Input values,
+        const string&   if_name,
+        const string&   vif_name,
+        const IPv4&     src_address,
+        const IPv4&     dst_address,
+        const uint32_t& ip_protocol,
+        const int32_t&  ip_ttl,
+        const int32_t&  ip_tos,
+        const bool&     ip_router_alert,
+        const bool&     ip_internet_control,
+        const vector<uint8_t>&  payload)
+{
+    UNUSED(ip_tos);
+    UNUSED(ip_router_alert);
+    UNUSED(ip_internet_control);
+
+    VRRPVif* vif = find_vif(if_name, vif_name);
+    if (!vif) {
+	XLOG_WARNING("Cannot find IF %s VIF %s",
+		     if_name.c_str(), vif_name.c_str());
+
+	return XrlCmdError::OKAY();
+    }
+
+    if (dst_address != VRRPPacket::mcast_group) {
+	XLOG_WARNING("Received stuff for unknown IP %s",
+		     dst_address.str().c_str());
+
+	return XrlCmdError::OKAY();
+    }
+
+    if (ip_protocol != VRRPPacket::IPPROTO_VRRP) {
+	XLOG_WARNING("Unknown protocol %u", ip_protocol);
+
+	return XrlCmdError::OKAY();
+    }
+
+    if (ip_ttl != 255) {
+	XLOG_WARNING("Bad TTL %d", ip_ttl);
+
+	return XrlCmdError::OKAY();
+    }
+
+    vif->recv(src_address, payload);
 
     return XrlCmdError::OKAY();
 }

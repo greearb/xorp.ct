@@ -13,16 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.1 2008/10/09 17:44:16 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
 #include "vrrp_vif.hh"
+#include "vrrp_target.hh"
+#include "vrrp_exception.hh"
 
-VRRPVif::VRRPVif(const string& ifname, const string& vifname) 
-	    : _ifname(ifname),
+VRRPVif::VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname)
+	    : _vt(vt),
+	      _ifname(ifname),
 	      _vifname(vifname),
-	      _ready(false)
+	      _ready(false),
+	      _join(0)
 {
 }
 
@@ -138,4 +142,63 @@ VRRPVif::addr() const
 
     // XXX we should use first configured address - not the lowest.
     return *(_ips.begin());
+}
+
+void
+VRRPVif::send(const Mac& src, const Mac& dst, uint32_t ether,
+	      const PAYLOAD& payload)
+{
+    XLOG_ASSERT(ready());
+
+    _vt.send(_ifname, _vifname, src, dst, ether, payload);
+}
+
+void
+VRRPVif::join_mcast()
+{
+    _join++;
+    XLOG_ASSERT(_join);
+
+    if (_join == 1)
+	_vt.join_mcast(_ifname, _vifname);
+}
+
+void
+VRRPVif::leave_mcast()
+{
+    XLOG_ASSERT(_join);
+    _join--;
+
+    if (_join > 0)
+	return;
+
+    _vt.leave_mcast(_ifname, _vifname);
+
+    // paranoia
+    int cnt = 0;
+    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
+	VRRP* v = i->second;
+
+	if (v->running())
+	    XLOG_ASSERT(++cnt == 1);
+    }
+}
+
+void
+VRRPVif::recv(const IPv4& from, const PAYLOAD& payload)
+{
+    try {
+	const VRRPHeader& vh = VRRPHeader::assign(payload);
+
+	VRRP* v = find_vrid(vh.vh_vrid);
+	if (!v) {
+	    XLOG_WARNING("Cannot find VRID %d", vh.vh_vrid);
+	    return;
+	}
+
+	v->recv(from, vh);
+
+    } catch (const VRRPException& e) {
+	XLOG_WARNING("VRRP packet error: %s", e.str().c_str());
+    }
 }

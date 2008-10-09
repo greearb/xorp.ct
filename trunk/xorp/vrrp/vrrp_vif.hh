@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.10 2008/07/23 05:09:59 pavlin Exp $
+// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.1 2008/10/09 17:44:16 abittau Exp $
 
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
@@ -25,9 +25,11 @@
 #include "libfeaclient/ifmgr_atoms.hh"
 #include "vrrp.hh"
 
+class VRRPTarget;
+
 class VRRPVif {
 public:
-    VRRPVif(const string& ifname, const string& vifname);
+    VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname);
     ~VRRPVif();
 
     bool	    own(const IPv4& addr);
@@ -37,6 +39,11 @@ public:
     bool	    ready() const;
     void	    configure(const IfMgrIfTree& conf);
     const IPv4&	    addr() const;
+    void	    send(const Mac& src, const Mac& dst, uint32_t ether,
+			 const PAYLOAD& payload);
+    void	    join_mcast();
+    void	    leave_mcast();
+    void	    recv(const IPv4& from, const PAYLOAD& payload);
 
 private:
     typedef set<IPv4>		    IPS;
@@ -45,11 +52,13 @@ private:
     void		    set_ready(bool ready);
     template <class T> bool is_enabled(const T* obj);
 
-    string  _ifname;
-    string  _vifname;
-    bool    _ready;	// is it configured?
-    IPS	    _ips;	// IPs assigned to this vif
-    VRRPS   _vrrps;	// VRRPs enabled on this vif
+    VRRPTarget&	_vt;
+    string	_ifname;
+    string	_vifname;
+    bool	_ready;	// is it configured?
+    IPS		_ips;	// IPs assigned to this vif
+    VRRPS	_vrrps;	// VRRPs enabled on this vif
+    uint32_t	_join;
 };
 
 #endif // __VRRP_VRRP_VIF_HH__

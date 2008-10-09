@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.1 2008/10/09 17:40:58 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.2 2008/10/09 17:44:16 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -21,6 +21,8 @@
 #include "libxipc/xrl_router.hh"
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "xrl/targets/vrrp_base.hh"
+#include "xrl/interfaces/fea_rawlink_xif.hh"
+#include "xrl/interfaces/fea_rawpkt4_xif.hh"
 #include "vrrp.hh"
 #include "vrrp_vif.hh"
 
@@ -35,6 +37,11 @@ public:
     bool running() const;
     void tree_complete();
     void updates_made();
+    void send(const string& ifname, const string& vifname,
+	      const Mac& src, const Mac& dst, uint32_t ether,
+	      const PAYLOAD& payload);
+    void join_mcast(const string& ifname, const string& vifname);
+    void leave_mcast(const string& ifname, const string& vifname);
 
     static EventLoop& eventloop();
 
@@ -108,6 +115,19 @@ protected:
         const uint32_t& vrid,
         const IPv4&     ip);
 
+    XrlCmdError raw_packet4_client_0_1_recv(
+        // Input values,
+        const string&   if_name,
+        const string&   vif_name,
+        const IPv4&     src_address,
+        const IPv4&     dst_address,
+        const uint32_t& ip_protocol,
+        const int32_t&  ip_ttl,
+        const int32_t&  ip_tos,
+        const bool&     ip_router_alert,
+        const bool&     ip_internet_control,
+        const vector<uint8_t>&  payload);
+
 private:
     typedef map<string, VRRPVif*>   VIFS; // vifname -> VRRPVif
     typedef map<string, VIFS*>	    IFS;  // ifname -> VIFS
@@ -123,12 +143,16 @@ private:
 			      uint32_t id);
     VRRPVif*	find_vif(const string& ifn, const string& vifn,
 			 bool add = false);
+    void	xrl_cb(const XrlError& xrl_error);
 
+    XrlRouter&		    _rtr;
     bool		    _running;
     IFS			    _ifs;
     IfMgrXrlMirror	    _ifmgr;
     bool		    _ifmgr_setup;
     static EventLoop*	    _eventloop;
+    XrlRawLinkV0p1Client    _rawlink;
+    XrlRawPacket4V0p1Client _rawipv4;
 };
 
 #endif // __VRRP_VRRP_TARGET_HH__
