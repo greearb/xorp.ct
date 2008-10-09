@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/fea_node.cc,v 1.19 2008/07/23 05:10:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea_node.cc,v 1.20 2008/10/02 21:56:45 bms Exp $"
 
 
 //
@@ -84,6 +84,11 @@ FeaNode::startup()
     if (_ifconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
     }
+#if 0
+    //
+    // XXX: The FirewallManager will be started only if needed
+    // when firewall rules are installed.
+    //
     if (_firewall_manager.start(error_msg) != XORP_OK) {
 	//
 	// XXX: Just print an error in case the firewall support
@@ -91,6 +96,7 @@ FeaNode::startup()
 	//
 	XLOG_ERROR("Cannot start FirewallManager: %s", error_msg.c_str());
     }
+#endif // 0
     if (_fibconfig.start(error_msg) != XORP_OK) {
 	XLOG_FATAL("Cannot start FibConfig: %s", error_msg.c_str());
     }

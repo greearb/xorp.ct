@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.6 2008/07/23 05:10:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/firewall_manager.cc,v 1.7 2008/10/02 21:56:46 bms Exp $"
 
 #include "fea_module.h"
 
@@ -80,6 +80,12 @@ FirewallManager::status(string& reason) const
 int
 FirewallManager::start_transaction(uint32_t& tid, string& error_msg)
 {
+    if (start(error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot start FirewallManager: %s",
+			     error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
     if (_ftm->start(tid) != true) {
 	error_msg = c_format("Resource limit on number of pending transactions hit");
 	return (XORP_ERROR);
