@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/vrrp/Makefile.am,v 1.2 2008/10/09 17:44:16 abittau Exp $
+## $XORP: xorp/vrrp/Makefile.am,v 1.3 2008/10/09 17:46:27 abittau Exp $
 ##
 
 # Redefine the bin installation directory
@@ -16,6 +16,7 @@ noinst_LTLIBRARIES = libvrrp.la
 LDADD            = $(noinst_LTLIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libvrrpbase.la
 LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfearawlinkxif.la

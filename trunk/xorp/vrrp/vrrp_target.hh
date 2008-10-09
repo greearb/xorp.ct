@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.2 2008/10/09 17:44:16 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.3 2008/10/09 17:46:27 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -23,6 +23,7 @@
 #include "xrl/targets/vrrp_base.hh"
 #include "xrl/interfaces/fea_rawlink_xif.hh"
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
+#include "xrl/interfaces/fea_ifmgr_xif.hh"
 #include "vrrp.hh"
 #include "vrrp_vif.hh"
 
@@ -42,6 +43,8 @@ public:
 	      const PAYLOAD& payload);
     void join_mcast(const string& ifname, const string& vifname);
     void leave_mcast(const string& ifname, const string& vifname);
+    void add_mac(const string& ifname, const Mac& mac);
+    void delete_mac(const string& ifname, const Mac& mac);
 
     static EventLoop& eventloop();
 
@@ -153,6 +156,7 @@ private:
     static EventLoop*	    _eventloop;
     XrlRawLinkV0p1Client    _rawlink;
     XrlRawPacket4V0p1Client _rawipv4;
+    XrlIfmgrV0p1Client	    _fea;
 };
 
 #endif // __VRRP_VRRP_TARGET_HH__

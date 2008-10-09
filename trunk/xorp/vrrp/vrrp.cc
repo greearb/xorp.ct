@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.2 2008/10/09 17:44:16 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.3 2008/10/09 17:46:27 abittau Exp $"
 
 #include <sstream>
 
@@ -217,6 +217,8 @@ void
 VRRP::become_master()
 {
     _state = MASTER;
+
+    _vif.add_mac(_source_mac);
     send_advertisement();
     send_arps();
     setup_timers();
@@ -225,7 +227,11 @@ VRRP::become_master()
 void
 VRRP::become_backup()
 {
+    if (_state == MASTER)
+	_vif.delete_mac(_source_mac);
+
     _state = BACKUP;
+
     setup_timers();
 }
 
@@ -239,8 +245,10 @@ VRRP::stop()
 
     cancel_timers();
 
-    if (_state == MASTER)
+    if (_state == MASTER) {
 	send_advertisement(PRIORITY_LEAVE);
+	_vif.delete_mac(_source_mac);
+    }
 
     _state = INITIALIZE;
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.2 2008/10/09 17:44:16 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.3 2008/10/09 17:46:27 abittau Exp $"
 
 #include <sstream>
 
@@ -53,7 +53,8 @@ VRRPTarget::VRRPTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
 		       rtr.finder_address(), rtr.finder_port()),
 		_ifmgr_setup(false),
 		_rawlink(&rtr),
-		_rawipv4(&rtr)
+		_rawipv4(&rtr),
+		_fea(&rtr)
 {
     _eventloop = &rtr.eventloop();
 
@@ -274,6 +275,22 @@ VRRPTarget::leave_mcast(const string& ifname, const string& vifname)
 					       vifname, proto, cb);
     if (!rc)
 	XLOG_FATAL("Cannot unregister receiver");
+}
+
+void
+VRRPTarget::add_mac(const string& ifname, const Mac& mac)
+{
+    if (!_fea.send_create_mac(fea_target_name.c_str(), ifname, mac,
+			      callback(this, &VRRPTarget::xrl_cb)))
+	XLOG_FATAL("Cannot add MAC");
+}
+
+void
+VRRPTarget::delete_mac(const string& ifname, const Mac& mac)
+{
+    if (!_fea.send_delete_mac(fea_target_name.c_str(), ifname, mac,
+			      callback(this, &VRRPTarget::xrl_cb)))
+	XLOG_FATAL("Cannot delete MAC");
 }
 
 void

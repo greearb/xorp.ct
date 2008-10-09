@@ -59,6 +59,7 @@ xorp_vrrp_LDADD = $(LDADD)
 xorp_vrrp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libvrrpbase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkxif.la \
@@ -234,6 +235,7 @@ noinst_LTLIBRARIES = libvrrp.la
 LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libvrrpbase.la \
 	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
 	$(top_builddir)/xrl/interfaces/libfearawlinkxif.la \

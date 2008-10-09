@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.1 2008/10/09 17:44:16 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.2 2008/10/09 17:46:27 abittau Exp $
 
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
@@ -44,6 +44,8 @@ public:
     void	    join_mcast();
     void	    leave_mcast();
     void	    recv(const IPv4& from, const PAYLOAD& payload);
+    void	    add_mac(const Mac& mac);
+    void	    delete_mac(const Mac& mac);
 
 private:
     typedef set<IPv4>		    IPS;

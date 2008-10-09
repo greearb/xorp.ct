@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/vrrp/Jamfile,v 1.2 2008/10/09 17:44:15 abittau Exp $
+# $XORP: xorp/vrrp/Jamfile,v 1.3 2008/10/09 17:46:27 abittau Exp $
 #
 
 SubDir TOP vrrp ;
@@ -20,6 +20,7 @@ LinkLibraries xorp_vrrp :
 	libvrrp
 	libvrrpbase
 	libfeaclient
+	libfeaifmgrxif
 	libfeaifmgrmirrorxif
 	libfeaifmgrreplicatorxif
 	libfearawlinkxif

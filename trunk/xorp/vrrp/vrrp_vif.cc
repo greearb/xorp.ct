@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.1 2008/10/09 17:44:16 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.2 2008/10/09 17:46:27 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -102,6 +102,11 @@ VRRPVif::configure(const IfMgrIfTree& conf)
 
 	if (addr.enabled())
 	    _ips.insert(addr.addr());
+    }
+
+    if (_ips.empty()) {
+	set_ready(false);
+	return;
     }
 
     set_ready(true);
@@ -201,4 +206,29 @@ VRRPVif::recv(const IPv4& from, const PAYLOAD& payload)
     } catch (const VRRPException& e) {
 	XLOG_WARNING("VRRP packet error: %s", e.str().c_str());
     }
+}
+
+void
+VRRPVif::add_mac(const Mac& mac)
+{
+    // XXX mac operations are per physical interface.  We musn't have multiple
+    // vifs tweaking the mac of the same physical inteface.  This is a
+    // rudimentary (and very conservative) way to check this.  Now all of VRRP
+    // works on a "per vif" basis, but that may be wrong - it might need to work
+    // on a "per if" basis.  I still don't quite know the relationship, in XORP
+    // terms, between if and vif.  (If it's like Linux's virtual IPs and eth0:X
+    // notation, then a vif isn't much more than an extra IP, and we should be
+    // working on a "per if" basis.)  -sorbo
+    XLOG_ASSERT(_ifname == _vifname);
+
+    _vt.add_mac(_ifname, mac);
+}
+
+void
+VRRPVif::delete_mac(const Mac& mac)
+{
+    // XXX see add mac
+    XLOG_ASSERT(_ifname == _vifname);
+
+    _vt.delete_mac(_ifname, mac);
 }
