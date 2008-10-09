@@ -13,23 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.1 2008/10/09 17:40:58 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
 
 #include "libxipc/xrl_router.hh"
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "xrl/targets/vrrp_base.hh"
 #include "vrrp.hh"
+#include "vrrp_vif.hh"
 
-class VRRPTarget : public XrlVrrpTargetBase {
+class VRRPTarget : public XrlVrrpTargetBase, public IfMgrHintObserver {
 public:
     static const string vrrp_target_name;
+    static const string fea_target_name;
 
     VRRPTarget(XrlRouter& rtr);
     ~VRRPTarget();
 
     bool running() const;
+    void tree_complete();
+    void updates_made();
+
+    static EventLoop& eventloop();
 
 protected:
     XrlCmdError common_0_1_get_target_name(
@@ -102,16 +109,26 @@ protected:
         const IPv4&     ip);
 
 private:
-    typedef map<VRRPKey, VRRP*>	VRRPS;
+    typedef map<string, VRRPVif*>   VIFS; // vifname -> VRRPVif
+    typedef map<string, VIFS*>	    IFS;  // ifname -> VIFS
 
-    void    shutdown();
-    void    insert(const string& ifn, const string& vifn, uint32_t id);
-    void    erase(const string& ifn, const string& vifn, uint32_t id);
-    VRRP&   find(const string& ifn, const string& vifn, uint32_t id);
-    VRRP*   find(const VRRPKey& key);
+    void	shutdown();
+    void	start();
+    void	check_interfaces();
+    void	check_vif(VRRPVif& vif);
+    void	add_vrid(const string& ifn, const string& vifn, uint32_t id);
+    void	delete_vrid(const string& ifn, const string& vifn, uint32_t id);
+    VRRP&	find_vrid(const string& ifn, const string& vifn, uint32_t id);
+    VRRP*	find_vrid_ptr(const string& ifn, const string& vifn,
+			      uint32_t id);
+    VRRPVif*	find_vif(const string& ifn, const string& vifn,
+			 bool add = false);
 
-    bool    _running;
-    VRRPS   _vrrps;
+    bool		    _running;
+    IFS			    _ifs;
+    IfMgrXrlMirror	    _ifmgr;
+    bool		    _ifmgr_setup;
+    static EventLoop*	    _eventloop;
 };
 
 #endif // __VRRP_VRRP_TARGET_HH__

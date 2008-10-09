@@ -13,24 +13,80 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.1 2008/10/09 17:40:58 abittau Exp $"
+
+#include <sstream>
 
 #include "vrrp_module.h"
 #include "libxorp/status_codes.h"
 #include "vrrp_target.hh"
 #include "vrrp_exception.hh"
 
-const string VRRPTarget::vrrp_target_name = "vrrp";
+const string VRRPTarget::vrrp_target_name   = "vrrp";
+const string VRRPTarget::fea_target_name    = "fea";
+EventLoop*   VRRPTarget::_eventloop	    = NULL;
+
+namespace {
+
+string
+vrid_error(const string& msg, const string& ifn, const string& vifn,
+	   uint32_t id)
+{
+    ostringstream oss;
+
+    oss << msg
+        << " (ifname " << ifn
+	<< " vifname " << vifn
+	<< " vrid " << id
+	<< ")"
+	;
+
+    return oss.str();
+}
+
+} // anonymous namespace
 
 VRRPTarget::VRRPTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
-		_running(true)
+		_running(true),
+		_ifmgr(rtr.eventloop(), fea_target_name.c_str(),
+		       rtr.finder_address(), rtr.finder_port()),
+		_ifmgr_setup(false)
 {
+    _eventloop = &rtr.eventloop();
+
+    _ifmgr.attach_hint_observer(this);
+
+    start();
 }
 
 VRRPTarget::~VRRPTarget()
 {
-    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i)
-	delete i->second;
+    _ifmgr.detach_hint_observer(this);
+
+    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) {
+	VIFS* v = i->second;
+
+	for (VIFS::iterator j = v->begin(); j != v->end(); ++j)
+	    delete j->second;
+
+	delete v;
+    }
+}
+
+EventLoop&
+VRRPTarget::eventloop()
+{
+    if (!_eventloop)
+	xorp_throw(VRRPException, "no eventloop");
+
+    return *_eventloop;
+}
+
+void
+VRRPTarget::start()
+{
+    if (_ifmgr.startup() != XORP_OK)
+	xorp_throw(VRRPException, "Can't startup fea mirror");
 }
 
 bool
@@ -42,55 +98,119 @@ VRRPTarget::running() const
 void
 VRRPTarget::shutdown()
 {
+    if (_ifmgr.shutdown() != XORP_OK)
+	xorp_throw(VRRPException, "Can't shutdown fea mirror");
+
     _running = false;
 }
 
 VRRP&
-VRRPTarget::find(const string& ifn, const string& vifn, uint32_t id)
+VRRPTarget::find_vrid(const string& ifn, const string& vifn, uint32_t id)
 {
-    VRRPKey key(ifn, vifn, id);
-
-    VRRP* v = find(key);
-
+    VRRP* v = find_vrid_ptr(ifn, vifn, id);
     if (!v)
-	xorp_throw(VRRPException, string("Cannot find: ") + key.str());
+	xorp_throw(VRRPException, vrid_error("Cannot find", ifn, vifn, id));
 
     return *v;
 }
 
 VRRP*
-VRRPTarget::find(const VRRPKey& k)
+VRRPTarget::find_vrid_ptr(const string& ifn, const string& vifn, uint32_t id)
 {
-    VRRPS::iterator i = _vrrps.find(k);
-
-    if (i == _vrrps.end())
+    VRRPVif* x = find_vif(ifn, vifn);
+    if (!x)
 	return NULL;
 
-    return i->second;
+    return x->find_vrid(id);
 }
 
 void
-VRRPTarget::insert(const string& ifn, const string& vifn, uint32_t id)
+VRRPTarget::add_vrid(const string& ifn, const string& vifn, uint32_t id)
 {
-    VRRPKey key(ifn, vifn, id);
+    if (find_vrid_ptr(ifn, vifn, id))
+	xorp_throw(VRRPException, vrid_error("Already exists", ifn, vifn, id));
 
-    if (find(key))
-	xorp_throw(VRRPException, string("Already exists: ") + key.str());
+    VRRPVif* x = find_vif(ifn, vifn, true);
+    XLOG_ASSERT(x);
 
-    _vrrps[key] = new VRRP(key);
+    x->add_vrid(id);
 }
 
 void
-VRRPTarget::erase(const string& ifn, const string& vifn, uint32_t id)
+VRRPTarget::delete_vrid(const string& ifn, const string& vifn, uint32_t id)
 {
-    VRRPKey key(ifn, vifn, id);
-
-    VRRP* v = find(key);
+    VRRP* v = find_vrid_ptr(ifn, vifn, id);
     if (!v)
-	xorp_throw(VRRPException, string("Cannot find: ") + key.str());
+	xorp_throw(VRRPException, vrid_error("Cannot find", ifn, vifn, id));
 
-    _vrrps.erase(key);
-    delete v;
+    VRRPVif* x = find_vif(ifn, vifn);
+    XLOG_ASSERT(x);
+
+    x->delete_vrid(id);
+}
+
+VRRPVif*
+VRRPTarget::find_vif(const string& ifn, const string& vifn, bool add)
+{
+    VIFS* v	    = NULL;
+    VRRPVif* vif    = NULL;
+    bool added	    = false;
+
+    IFS::iterator i = _ifs.find(ifn);
+    if (i == _ifs.end()) {
+	if (!add)
+	    return NULL;
+
+	v = new VIFS;
+	_ifs[ifn] = v;
+	added = true;
+    } else
+	v = i->second;
+
+    VIFS::iterator j = v->find(vifn);
+    if (j == v->end()) {
+	if (!add)
+	    return NULL;
+
+	vif = new VRRPVif(ifn, vifn);
+	v->insert(make_pair(vifn, vif));
+	added = true;
+    } else
+	vif = j->second;
+
+    if (added)
+	check_interfaces();
+
+    return vif;
+}
+
+void
+VRRPTarget::tree_complete()
+{
+    _ifmgr_setup = true;
+    check_interfaces();
+}
+
+void
+VRRPTarget::updates_made()
+{
+    check_interfaces();
+}
+
+void
+VRRPTarget::check_interfaces()
+{
+    XLOG_ASSERT(_ifmgr_setup);
+
+    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) {
+	VIFS* vifs = i->second;
+
+	for (VIFS::iterator j = vifs->begin(); j != vifs->end(); ++j) {
+	    VRRPVif* vif = j->second;
+
+	    vif->configure(_ifmgr.iftree());
+	}
+    }
 }
 
 XrlCmdError
@@ -146,7 +266,7 @@ VRRPTarget::vrrp_0_1_add_vrid(
         const uint32_t& vrid)
 {
     try {
-	insert(ifname, vifname, vrid);
+	add_vrid(ifname, vifname, vrid);
     } catch(const VRRPException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
@@ -162,7 +282,7 @@ VRRPTarget::vrrp_0_1_delete_vrid(
         const uint32_t& vrid)
 {
     try {
-	erase(ifname, vifname, vrid);
+	delete_vrid(ifname, vifname, vrid);
     } catch(const VRRPException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
@@ -179,7 +299,7 @@ VRRPTarget::vrrp_0_1_set_priority(
         const uint32_t& priority)
 {
     try {
-	VRRP& v = find(ifname, vifname, vrid);
+	VRRP& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_priority(priority);
     } catch(const VRRPException& e) {
@@ -198,7 +318,7 @@ VRRPTarget::vrrp_0_1_set_interval(
         const uint32_t& interval)
 {
     try {
-	VRRP& v = find(ifname, vifname, vrid);
+	VRRP& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_interval(interval);
     } catch(const VRRPException& e) {
@@ -217,7 +337,7 @@ VRRPTarget::vrrp_0_1_set_preempt(
         const bool&     preempt)
 {
     try {
-	VRRP& v = find(ifname, vifname, vrid);
+	VRRP& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_preempt(preempt);
     } catch(const VRRPException& e) {
@@ -236,7 +356,7 @@ VRRPTarget::vrrp_0_1_set_disable(
         const bool&     disable)
 {
     try {
-	VRRP& v = find(ifname, vifname, vrid);
+	VRRP& v = find_vrid(ifname, vifname, vrid);
 
 	v.set_disable(disable);
     } catch(const VRRPException& e) {
@@ -255,7 +375,7 @@ VRRPTarget::vrrp_0_1_add_ip(
         const IPv4&     ip)
 {
     try {
-	VRRP& v = find(ifname, vifname, vrid);
+	VRRP& v = find_vrid(ifname, vifname, vrid);
 
 	v.add_ip(ip);
     } catch(const VRRPException& e) {
@@ -274,7 +394,7 @@ VRRPTarget::vrrp_0_1_delete_ip(
         const IPv4&     ip)
 {
     try {
-	VRRP& v = find(ifname, vifname, vrid);
+	VRRP& v = find_vrid(ifname, vifname, vrid);
 
 	v.delete_ip(ip);
     } catch(const VRRPException& e) {

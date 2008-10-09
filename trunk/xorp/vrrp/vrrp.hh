@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.10 2008/07/23 05:09:59 pavlin Exp $
+// $XORP: xorp/vrrp/vrrp.hh,v 1.1 2008/10/09 17:40:58 abittau Exp $
 
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
@@ -22,41 +22,68 @@
 #include <string>
 
 #include "libxorp/ipv4.hh"
+#include "libxorp/timer.hh"
 
-class VRRPKey {
-public:
-    VRRPKey(const string& ifname, const string& vifname, uint32_t id);
-
-    bool    operator==(const VRRPKey& rhs) const;
-    bool    operator<(const VRRPKey& lfs) const;
-    string  str() const;
-
-private:
-    string	_ifname;
-    string	_vifname;
-    uint32_t	_vrid;
-};
+class VRRPVif;
 
 class VRRP {
 public:
-    VRRP(const VRRPKey& key);
+    VRRP(VRRPVif& vif, uint32_t vrid);
+    ~VRRP();
 
-    void set_priority(uint32_t priority);
-    void set_interval(uint32_t interval);
-    void set_preempt(bool preempt);
-    void set_disable(bool disable);
-    void add_ip(const IPv4& ip);
-    void delete_ip(const IPv4& ip);
+    void	    set_priority(uint32_t priority);
+    void	    set_interval(uint32_t interval);
+    void	    set_preempt(bool preempt);
+    void	    set_disable(bool disable);
+    void	    add_ip(const IPv4& ip);
+    void	    delete_ip(const IPv4& ip);
+    bool	    running() const;
+    uint32_t	    priority() const;
+    void	    start();
+    void	    stop();
+    void	    check_ownership();
+    void	    recv_advertisement(const IPv4& from, uint32_t priority);
 
 private:
+    enum State {
+	INITIALIZE = 0,
+	MASTER,
+	BACKUP
+    };
+
+    enum {
+	PRIORITY_LEAVE	= 0,
+	PRIORITY_OWN	= 255
+    };
+
     typedef set<IPv4>	IPS;
 
-    VRRPKey	_key;
+    void setup_intervals();
+    void setup_timers(bool skew = false);
+    void cancel_timers();
+    void send_arps();
+    void send_advertisement(uint32_t priority);
+    void send_advertisement();
+    void become_master();
+    void become_backup();
+    bool master_down_expiry();
+    bool adver_expiry();
+    void recv_adver_master(const IPv4& from, uint32_t priority);
+    void recv_adver_backup(uint32_t priority);
+
+    VRRPVif&	_vif;
+    uint32_t	_vrid;
     uint32_t	_priority;
     uint32_t	_interval;
+    double	_skew_time;
+    double	_master_down_interval;
     bool	_preempt;
-    bool	_disable;
     IPS		_ips;
+    State	_state;
+    XorpTimer	_master_down_timer;
+    XorpTimer	_adver_timer;
+    bool	_own;
+    bool	_disable;
 };
 
 #endif // __VRRP_VRRP_HH__

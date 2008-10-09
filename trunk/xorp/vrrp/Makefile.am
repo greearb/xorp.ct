@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/vrrp/Makefile.am,v 1.1 2008/10/09 17:40:58 abittau Exp $
 ##
 
 # Redefine the bin installation directory
@@ -15,6 +15,10 @@ noinst_LTLIBRARIES = libvrrp.la
 # -- Libraries and library flags to link the binary programs
 LDADD            = $(noinst_LTLIBRARIES)
 LDADD		+= $(top_builddir)/xrl/targets/libvrrpbase.la
+LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
@@ -25,11 +29,13 @@ xorp_vrrp_SOURCES		 = xorp_vrrp.cc
 # VRRP library
 libvrrp_la_SOURCES		 = vrrp.cc
 libvrrp_la_SOURCES		+= vrrp_target.cc
+libvrrp_la_SOURCES		+= vrrp_vif.cc
 
 libvrrp_la_SOURCES		+= vrrp.hh
 libvrrp_la_SOURCES		+= vrrp_exception.hh
 libvrrp_la_SOURCES		+= vrrp_module.h
 libvrrp_la_SOURCES		+= vrrp_target.hh
+libvrrp_la_SOURCES		+= vrrp_vif.hh
 
 ################################################################
 ##

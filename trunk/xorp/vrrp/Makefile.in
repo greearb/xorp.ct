@@ -47,7 +47,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libvrrp_la_LIBADD =
-am_libvrrp_la_OBJECTS = vrrp.lo vrrp_target.lo
+am_libvrrp_la_OBJECTS = vrrp.lo vrrp_target.lo vrrp_vif.lo
 libvrrp_la_OBJECTS = $(am_libvrrp_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
@@ -57,6 +57,10 @@ xorp_vrrp_OBJECTS = $(am_xorp_vrrp_OBJECTS)
 xorp_vrrp_LDADD = $(LDADD)
 xorp_vrrp_DEPENDENCIES = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libvrrpbase.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -225,6 +229,10 @@ noinst_LTLIBRARIES = libvrrp.la
 # -- Libraries and library flags to link the binary programs
 LDADD = $(noinst_LTLIBRARIES) \
 	$(top_builddir)/xrl/targets/libvrrpbase.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -233,8 +241,8 @@ LDADD = $(noinst_LTLIBRARIES) \
 xorp_vrrp_SOURCES = xorp_vrrp.cc
 
 # VRRP library
-libvrrp_la_SOURCES = vrrp.cc vrrp_target.cc vrrp.hh vrrp_exception.hh \
-	vrrp_module.h vrrp_target.hh
+libvrrp_la_SOURCES = vrrp.cc vrrp_target.cc vrrp_vif.cc vrrp.hh \
+	vrrp_exception.hh vrrp_module.h vrrp_target.hh vrrp_vif.hh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -322,6 +330,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp_target.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp_vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xorp_vrrp.Po@am__quote@
 
 .cc.o:
