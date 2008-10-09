@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.14 2008/10/02 21:57:17 bms Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.15 2008/10/09 17:45:42 abittau Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -883,7 +883,15 @@ private:
     uint8_t* _ip_dst;		// Destination address
 };
 
+class BadPacketException : public XorpReasonedException {
+public:
+    BadPacketException(const char* file, size_t line, const string& why = "")
+        : XorpReasonedException("BadPacketException", file, line, why) {}
+};
+
 struct ARPHeader {
+    typedef vector<uint8_t> PAYLOAD;
+
     enum Op {
 	ARP_REQUEST = 1,
 	ARP_REPLY
@@ -892,11 +900,15 @@ struct ARPHeader {
 	HW_ETHER = 1
     };
 
-    static ARPHeader& assign(uint8_t* data);
-    void	      set_sender(const Mac& mac, const IPv4& ip);
-    void	      set_request(const IPv4& ip);
-    void	      set_reply(const Mac& mac, const IPv4& ip);
-    uint32_t	      size();
+    static ARPHeader&	    assign(uint8_t* data);
+    static const ARPHeader& assign(const PAYLOAD& payload);
+    void		    set_sender(const Mac& mac, const IPv4& ip);
+    void		    set_request(const IPv4& ip);
+    void		    set_reply(const Mac& mac, const IPv4& ip);
+    uint32_t		    size();
+    bool		    is_request() const;
+    IPv4		    get_request() const;
+    void		    make_reply(PAYLOAD& out, const Mac& mac) const;
 
     uint16_t	ah_hw_fmt;
     uint16_t	ah_proto_fmt;

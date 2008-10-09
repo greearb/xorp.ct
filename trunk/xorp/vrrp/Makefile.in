@@ -47,7 +47,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libvrrp_la_LIBADD =
-am_libvrrp_la_OBJECTS = vrrp.lo vrrp_packet.lo vrrp_target.lo \
+am_libvrrp_la_OBJECTS = arpd.lo vrrp.lo vrrp_packet.lo vrrp_target.lo \
 	vrrp_vif.lo
 libvrrp_la_OBJECTS = $(am_libvrrp_la_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
@@ -250,9 +250,9 @@ LDADD = $(noinst_LTLIBRARIES) \
 xorp_vrrp_SOURCES = xorp_vrrp.cc
 
 # VRRP library
-libvrrp_la_SOURCES = vrrp.cc vrrp_packet.cc vrrp_target.cc vrrp_vif.cc \
-	vrrp.hh vrrp_exception.hh vrrp_module.h vrrp_packet.hh \
-	vrrp_target.hh vrrp_vif.hh
+libvrrp_la_SOURCES = arpd.cc vrrp.cc vrrp_packet.cc vrrp_target.cc \
+	vrrp_vif.cc arpd.hh vrrp.hh vrrp_exception.hh vrrp_module.h \
+	vrrp_packet.hh vrrp_target.hh vrrp_vif.hh
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -338,6 +338,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arpd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp_packet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vrrp_target.Plo@am__quote@

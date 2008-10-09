@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.3 2008/10/09 17:47:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.4 2008/10/09 17:48:34 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -26,7 +26,8 @@ VRRPVif::VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname)
 	      _ifname(ifname),
 	      _vifname(vifname),
 	      _ready(false),
-	      _join(0)
+	      _join(0),
+	      _arps(0)
 {
 }
 
@@ -193,6 +194,28 @@ VRRPVif::leave_mcast()
 }
 
 void
+VRRPVif::start_arps()
+{
+    _arps++;
+    XLOG_ASSERT(_arps);
+
+    if (_arps == 1)
+	_vt.start_arps(_ifname, _vifname);
+}
+
+void
+VRRPVif::stop_arps()
+{
+    XLOG_ASSERT(_arps);
+    _arps--;
+
+    if (_arps > 0)
+	return;
+
+    _vt.stop_arps(_ifname, _vifname);
+}
+
+void
 VRRPVif::recv(const IPv4& from, const PAYLOAD& payload)
 {
     try {
@@ -208,6 +231,22 @@ VRRPVif::recv(const IPv4& from, const PAYLOAD& payload)
 
     } catch (const VRRPException& e) {
 	XLOG_WARNING("VRRP packet error: %s", e.str().c_str());
+    }
+}
+
+void
+VRRPVif::recv_arp(const Mac& from, const PAYLOAD& payload)
+{
+    // XXX the arp object should be part of VRRPVif
+    for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
+	ARPd& arp = i->second->arpd();
+
+	try {
+	    arp.recv(from, payload);
+	} catch (const BadPacketException& e) {
+	    XLOG_WARNING("ARP packet error: %s", e.str().c_str());
+	    break;
+	}
     }
 }
 

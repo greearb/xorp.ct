@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.4 2008/10/09 17:47:49 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.5 2008/10/09 17:48:33 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -43,6 +43,8 @@ public:
 	      const PAYLOAD& payload);
     void join_mcast(const string& ifname, const string& vifname);
     void leave_mcast(const string& ifname, const string& vifname);
+    void start_arps(const string& ifname, const string& vifname);
+    void stop_arps(const string& ifname, const string& vifname);
     void add_mac(const string& ifname, const Mac& mac);
     void delete_mac(const string& ifname, const Mac& mac);
 
@@ -129,6 +131,15 @@ protected:
         const int32_t&  ip_tos,
         const bool&     ip_router_alert,
         const bool&     ip_internet_control,
+        const vector<uint8_t>&  payload);
+
+    XrlCmdError raw_link_client_0_1_recv(
+        // Input values,
+        const string&   if_name,
+        const string&   vif_name,
+        const Mac&      src_address,
+        const Mac&      dst_address,
+        const uint32_t& ether_type,
         const vector<uint8_t>&  payload);
 
 private:

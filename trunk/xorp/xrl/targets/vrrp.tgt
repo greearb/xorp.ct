@@ -1,9 +1,11 @@
-/* $XORP: xorp/xrl/targets/vrrp.tgt,v 1.1 2008/10/09 17:41:00 abittau Exp $ */
+/* $XORP: xorp/xrl/targets/vrrp.tgt,v 1.2 2008/10/09 17:46:28 abittau Exp $ */
 
 #include "common.xif"
 #include "vrrp.xif"
 #include "fea_rawpkt4_client.xif"
+#include "fea_rawlink_client.xif"
 
 target vrrp implements		common/0.1,			\
 				vrrp/0.1,			\
-				raw_packet4_client/0.1
+				raw_packet4_client/0.1,		\
+				raw_link_client/0.1

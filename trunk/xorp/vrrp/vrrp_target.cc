@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.4 2008/10/09 17:47:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.5 2008/10/09 17:48:33 abittau Exp $"
 
 #include <sstream>
 
@@ -299,6 +299,36 @@ VRRPTarget::leave_mcast(const string& ifname, const string& vifname)
 }
 
 void
+VRRPTarget::start_arps(const string& ifname, const string& vifname)
+{
+    string filter;
+
+    if (!_rawlink.send_register_receiver(fea_target_name.c_str(),
+					 _rtr.instance_name(),
+					 ifname, vifname, ETHERTYPE_ARP,
+					 filter, false, 
+					 callback(this, &VRRPTarget::xrl_cb)))
+	XLOG_FATAL("Cannot register arp receiver");
+
+    _xrls_pending++;
+}
+
+void
+VRRPTarget::stop_arps(const string& ifname, const string& vifname)
+{
+    string filter;
+
+    if (!_rawlink.send_unregister_receiver(fea_target_name.c_str(),
+					   _rtr.instance_name(),
+					   ifname, vifname, ETHERTYPE_ARP,
+					   filter,
+					   callback(this, &VRRPTarget::xrl_cb)))
+	XLOG_FATAL("Cannot unregister arp receiver");
+
+    _xrls_pending++;
+}
+
+void
 VRRPTarget::add_mac(const string& ifname, const Mac& mac)
 {
     if (!_fea.send_create_mac(fea_target_name.c_str(), ifname, mac,
@@ -565,6 +595,38 @@ VRRPTarget::raw_packet4_client_0_1_recv(
     }
 
     vif->recv(src_address, payload);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+VRRPTarget::raw_link_client_0_1_recv(
+        // Input values,
+        const string&   if_name,
+        const string&   vif_name,
+        const Mac&      src_address,
+        const Mac&      dst_address,
+        const uint32_t& ether_type,
+        const vector<uint8_t>&  payload)
+{
+    VRRPVif* vif = find_vif(if_name, vif_name);
+    if (!vif) {
+	XLOG_WARNING("Can't find VIF %s", if_name.c_str());
+
+	return XrlCmdError::OKAY();
+    }
+
+    if (ether_type != ETHERTYPE_ARP) {
+	XLOG_WARNING("Unknown ethertype %u", ether_type);
+
+	return XrlCmdError::OKAY();
+    }
+
+    // only arp requests for now
+    if (dst_address != VRRP::bcast_mac)
+	return XrlCmdError::OKAY();
+
+    vif->recv_arp(src_address, payload);
 
     return XrlCmdError::OKAY();
 }

@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/packet.cc,v 1.7 2008/10/02 21:57:17 bms Exp $"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.8 2008/10/09 17:45:42 abittau Exp $"
 
 
 //
@@ -237,6 +237,78 @@ ARPHeader::assign(uint8_t* data)
     memset(h, 0, sizeof(*h));
 
     return *h;
+}
+
+const ARPHeader&
+ARPHeader::assign(const PAYLOAD& payload)
+{
+    const ARPHeader* h = reinterpret_cast<const ARPHeader*>(&payload[0]);
+
+    unsigned size = sizeof(*h);
+
+    if (payload.size() < size)
+	xorp_throw(BadPacketException, "ARP packet too small");
+
+    size += h->ah_hw_len * 2 + h->ah_proto_len * 2;
+
+    if (payload.size() < size)
+	xorp_throw(BadPacketException, "ARP packet too small");
+
+    return *h;
+}
+
+bool
+ARPHeader::is_request() const
+{
+    return ntohs(ah_op) == ARP_REQUEST;
+}
+
+IPv4
+ARPHeader::get_request() const
+{
+    if (!is_request())
+	xorp_throw(BadPacketException, "Not an ARP request");
+
+    if (ntohs(ah_proto_fmt) != ETHERTYPE_IP)
+	xorp_throw(BadPacketException, "Not an IPv4 ARP");
+
+    IPv4 ip;
+
+    ip.copy_in(&ah_data[ah_hw_len * 2 + ah_proto_len]);
+
+    return ip;
+}
+
+void
+ARPHeader::make_reply(PAYLOAD& out, const Mac& mac) const
+{
+    // sanity checks
+    if (!is_request())
+	xorp_throw(BadPacketException, "Not an ARP request");
+
+    if (ntohs(ah_hw_fmt) != HW_ETHER)
+	xorp_throw(BadPacketException, "Not an ethernet ARP");
+
+    // allocate size
+    int size = sizeof(*this) + ah_hw_len * 2 + ah_proto_len * 2;
+    out.reserve(size);
+    out.resize(size);
+
+    // copy request into reply
+    memcpy(&out[0], this, size);
+
+    // make it a reply
+    ARPHeader& reply = const_cast<ARPHeader&>(ARPHeader::assign(out));
+    reply.ah_op = htons(ARP_REPLY);
+
+    // set the destination
+    size = ah_hw_len + ah_proto_len;
+    memcpy(&reply.ah_data[size], reply.ah_data, size);
+
+    // set the source
+    mac.copy_out(reply.ah_data);
+    size += ah_hw_len;
+    memcpy(&reply.ah_data[ah_hw_len], &ah_data[size], ah_proto_len);
 }
 
 void
