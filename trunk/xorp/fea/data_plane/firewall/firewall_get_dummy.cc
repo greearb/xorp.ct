@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/firewall/firewall_get_dummy.cc,v 1.2 2008/07/23 05:10:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/firewall/firewall_get_dummy.cc,v 1.3 2008/10/02 21:57:02 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -90,7 +90,7 @@ FirewallGetDummy::get_table4(list<FirewallEntry>& firewall_entry_list,
     firewall_set_dummy = dynamic_cast<FirewallSetDummy *>(fea_data_plane_manager().firewall_set());
     if (firewall_set_dummy == NULL) {
 	error_msg = c_format("Firewall plugin mismatch: expected "
-			     "dummy firewall set plugin mot found");
+			     "Dummy firewall set plugin mot found");
 	return (XORP_ERROR);
     }
 
@@ -114,7 +114,7 @@ FirewallGetDummy::get_table6(list<FirewallEntry>& firewall_entry_list,
     firewall_set_dummy = dynamic_cast<FirewallSetDummy *>(fea_data_plane_manager().firewall_set());
     if (firewall_set_dummy == NULL) {
 	error_msg = c_format("Firewall plugin mismatch: expected "
-			     "dummy firewall set plugin mot found");
+			     "Dummy firewall set plugin mot found");
 	return (XORP_ERROR);
     }
 
