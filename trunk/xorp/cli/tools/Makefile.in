@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = send_cli_processor_xrl$(EXEEXT)
+bin_PROGRAMS = send_cli_processor_xrl$(EXEEXT) cli_generic$(EXEEXT)
 TESTS =
 noinst_PROGRAMS =
 subdir = cli/tools
@@ -49,6 +49,11 @@ CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+am_cli_generic_OBJECTS = cli_generic.$(OBJEXT)
+cli_generic_OBJECTS = $(am_cli_generic_OBJECTS)
+cli_generic_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_send_cli_processor_xrl_OBJECTS = send_cli_processor_xrl.$(OBJEXT)
 send_cli_processor_xrl_OBJECTS = $(am_send_cli_processor_xrl_OBJECTS)
 send_cli_processor_xrl_DEPENDENCIES =  \
@@ -68,8 +73,9 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(send_cli_processor_xrl_SOURCES)
-DIST_SOURCES = $(send_cli_processor_xrl_SOURCES)
+SOURCES = $(cli_generic_SOURCES) $(send_cli_processor_xrl_SOURCES)
+DIST_SOURCES = $(cli_generic_SOURCES) \
+	$(send_cli_processor_xrl_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -216,6 +222,12 @@ send_cli_processor_xrl_LDADD =  \
 # -- Program Sources
 send_cli_processor_xrl_SOURCES = send_cli_processor_xrl.cc
 
+# -- cli generic
+cli_generic_SOURCES = cli_generic.cc
+cli_generic_LDADD = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 
 
@@ -289,6 +301,9 @@ clean-noinstPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+cli_generic$(EXEEXT): $(cli_generic_OBJECTS) $(cli_generic_DEPENDENCIES) 
+	@rm -f cli_generic$(EXEEXT)
+	$(CXXLINK) $(cli_generic_OBJECTS) $(cli_generic_LDADD) $(LIBS)
 send_cli_processor_xrl$(EXEEXT): $(send_cli_processor_xrl_OBJECTS) $(send_cli_processor_xrl_DEPENDENCIES) 
 	@rm -f send_cli_processor_xrl$(EXEEXT)
 	$(CXXLINK) $(send_cli_processor_xrl_OBJECTS) $(send_cli_processor_xrl_LDADD) $(LIBS)
@@ -299,6 +314,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cli_generic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/send_cli_processor_xrl.Po@am__quote@
 
 .cc.o:
