@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.48 2008/10/02 21:56:51 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.49 2008/10/09 17:47:01 abittau Exp $"
 
 
 //
@@ -55,6 +55,11 @@
 
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
 
+class FEAException : public XorpReasonedException {
+public:
+    FEAException(const char* file, size_t line, const string& why = "")
+        : XorpReasonedException("FEAException", file, line, why) {}
+};
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
@@ -2038,8 +2043,12 @@ XrlFeaTarget::ifmgr_0_1_create_mac(
     const string&   ifname,
     const Mac&      mac)
 {
-    UNUSED(ifname);
-    UNUSED(mac);
+    try {
+	add_remove_mac(true, ifname, mac);
+
+    } catch (const FEAException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -2050,10 +2059,65 @@ XrlFeaTarget::ifmgr_0_1_delete_mac(
     const string&   ifname,
     const Mac&      mac)
 {
-    UNUSED(ifname);
-    UNUSED(mac);
+    try {
+	add_remove_mac(false, ifname, mac);
+
+    } catch (const FEAException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
+}
+
+void
+XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
+{
+    // XXX this whole thing is a hack
+    typedef IfTreeInterface::MACS MACS;
+
+    // grab list of configured MACs from somewhere
+    IfTreeInterface* iface = _ifconfig.user_config().find_interface(ifname);
+    if (!iface)
+	xorp_throw(FEAException, "Unknown interface");
+
+    MACS& macs = iface->macs();
+
+    // sanity check the operation
+    if (macs.find(mac) == macs.end()) {
+	if (!add)
+	    xorp_throw(FEAException, "Can't find MAC");
+    } else if (add)
+	xorp_throw(FEAException, "MAC already added");
+
+    if (add && macs.size())
+	xorp_throw(FEAException, "Don't support multiple MACs per iface yet");
+
+    // spoof the current MAC address
+    uint32_t tid;
+    if (ifmgr_0_1_start_transaction(tid) != XrlCmdError::OKAY())
+	xorp_throw(FEAException, "Can't start transaction");
+
+    bool ok;
+    if (add)
+	ok = ifmgr_0_1_set_mac(tid, ifname, mac) == XrlCmdError::OKAY();
+    else
+	ok = ifmgr_0_1_restore_original_mac(tid, ifname) == XrlCmdError::OKAY();
+    
+    if (!ok) {
+	ifmgr_0_1_abort_transaction(tid);
+	xorp_throw(FEAException, "Can't do operation");
+    }
+
+    if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY())
+	xorp_throw(FEAException, "Can't commit transaction");
+
+    if (add)
+	macs.insert(mac);
+    else
+	macs.erase(mac);
+
+    // XXX send gratitious ARP.
+    // XXX add original MAC to multicast MACs.
 }
 
 XrlCmdError
