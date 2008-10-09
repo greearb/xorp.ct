@@ -416,8 +416,8 @@ libfea_data_plane_base_la_SOURCES = fea_data_plane_manager.hh \
 	io_link.hh io_tcpudp.hh fea_data_plane_manager.cc \
 	fibconfig_forwarding.cc ifconfig_property.cc io_ip.cc \
 	io_link.cc io_tcpudp.cc
-libfea_la_SOURCES = fea_module.h mfea_module.h fea_io.hh fea_node.hh \
-	fibconfig.hh fibconfig_entry_get.hh \
+libfea_la_SOURCES = fea_module.h mfea_module.h fea_exception.hh \
+	fea_io.hh fea_node.hh fibconfig.hh fibconfig_entry_get.hh \
 	fibconfig_entry_observer.hh fibconfig_entry_set.hh \
 	fibconfig_table_get.hh fibconfig_table_observer.hh \
 	fibconfig_table_set.hh fibconfig_transaction.hh \

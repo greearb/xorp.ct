@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.49 2008/10/09 17:47:01 abittau Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.50 2008/10/09 17:48:01 abittau Exp $"
 
 
 //
@@ -52,14 +52,9 @@
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
+#include "fea_exception.hh"
 
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
-
-class FEAException : public XorpReasonedException {
-public:
-    FEAException(const char* file, size_t line, const string& why = "")
-        : XorpReasonedException("FEAException", file, line, why) {}
-};
 
 XrlFeaTarget::XrlFeaTarget(EventLoop&			eventloop,
 			   FeaNode&			fea_node,
@@ -2073,51 +2068,109 @@ void
 XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
 {
     // XXX this whole thing is a hack
+    //
+    // There are two entities:
+    // 1) The MAC of the interface.
+    // 2) The multicast MACs of an interface.
+    //
+    // To "add" a MAC, we set the interface's MAC to the newly added MAC, and
+    // put the old MAC in the multicast ones.  To "delete", we kill a MAC from
+    // the multicast ones, and stick it as the primary MAC.
     typedef IfTreeInterface::MACS MACS;
 
-    // grab list of configured MACs from somewhere
+    // grab list of configured MACs from somewhere.  XXX this should be stored
+    // elsewhere in process related state - not user config / state.
     IfTreeInterface* iface = _ifconfig.user_config().find_interface(ifname);
     if (!iface)
 	xorp_throw(FEAException, "Unknown interface");
 
+    // these are the multicast MACs.
     MACS& macs = iface->macs();
 
-    // sanity check the operation
-    if (macs.find(mac) == macs.end()) {
-	if (!add)
-	    xorp_throw(FEAException, "Can't find MAC");
-    } else if (add)
-	xorp_throw(FEAException, "MAC already added");
+    // this is the real MAC.  
+    //
+    // Hopefully the user doesn't change it, else we're screwed.  To avoid the
+    // user changing mac problem, we just need proper datastructures - a stack
+    // of MACs.  We'll fix once we determine what we need, and this becomes less
+    // than a hack.
+    iface = _ifconfig.merged_config().find_interface(ifname);
+    XLOG_ASSERT(iface);
+    Mac current_mac = iface->mac();
 
+    // one MAC is ok, because we can change the primary MAC.  More MACs rely on
+    // the multicast trick.
     if (add && macs.size())
-	xorp_throw(FEAException, "Don't support multiple MACs per iface yet");
+	    xorp_throw(FEAException, "Can't find MAC");
 
-    // spoof the current MAC address
+    if (add) {
+	// sanity check
+	if (macs.find(mac) != macs.end() || current_mac == mac)
+	    xorp_throw(FEAException, "MAC already added");
+
+	if (macs.size())
+	    XLOG_WARNING("More than one MAC added - use at your own risk");
+
+	set_mac(ifname, mac);
+
+	// Add previous MAC as multicast one
+	macs.insert(current_mac);
+
+	try {
+	    _io_link_manager.add_multicast_mac(ifname, current_mac);
+	} catch (const FEAException& e) {
+	    XLOG_WARNING("Cannot add multicast MAC %s", e.str().c_str());
+	}
+    } else {
+	// remove
+	Mac candidate;
+
+	// removing current mac
+	if (mac == current_mac) {
+	    if (macs.empty())
+		xorp_throw(FEAException, "Trying to remove only MAC");
+
+	    candidate = *(macs.begin());
+
+	    // XXX should remove from multi first
+	    set_mac(ifname, candidate);
+	} else {
+	    MACS::iterator i = macs.find(mac);
+	    if (i == macs.end())
+		xorp_throw(FEAException, "Trying to remove unknown MAC");
+
+	    candidate = *i;
+	}
+
+	// Remove MAC from multicast list
+	macs.erase(candidate);
+
+	try {
+	    _io_link_manager.remove_multicast_mac(ifname, candidate);
+	} catch (const FEAException& e) {
+	    XLOG_WARNING("Cannot remove multicast MAC %s", e.str().c_str());
+	}
+    }
+
+    // XXX send gratitious ARP for my IPs (primary MAC changed)
+}
+
+void
+XrlFeaTarget::set_mac(const string& ifname, const Mac& mac)
+{
+    // XXX should delegate this to ifconfig, but perhaps lets see what we need
+    // exactly before polluting the rest of the code with this mac hack.  -sorbo
     uint32_t tid;
+
     if (ifmgr_0_1_start_transaction(tid) != XrlCmdError::OKAY())
 	xorp_throw(FEAException, "Can't start transaction");
 
-    bool ok;
-    if (add)
-	ok = ifmgr_0_1_set_mac(tid, ifname, mac) == XrlCmdError::OKAY();
-    else
-	ok = ifmgr_0_1_restore_original_mac(tid, ifname) == XrlCmdError::OKAY();
-    
-    if (!ok) {
+    if (ifmgr_0_1_set_mac(tid, ifname, mac) != XrlCmdError::OKAY()) {
 	ifmgr_0_1_abort_transaction(tid);
 	xorp_throw(FEAException, "Can't do operation");
     }
 
     if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY())
 	xorp_throw(FEAException, "Can't commit transaction");
-
-    if (add)
-	macs.insert(mac);
-    else
-	macs.erase(mac);
-
-    // XXX send gratitious ARP.
-    // XXX add original MAC to multicast MACs.
 }
 
 XrlCmdError

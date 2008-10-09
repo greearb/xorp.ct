@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.10 2008/10/02 21:56:48 bms Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.11 2008/10/09 17:45:03 abittau Exp $"
 
 #include "fea_module.h"
 
@@ -26,6 +26,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "fea_exception.hh"
 #include "fea_node.hh"
 #include "iftree.hh"
 #include "io_link_manager.hh"
@@ -123,6 +124,11 @@ public:
     void bye() {}
 
     int join_multicast_group(const Mac& group_address, string& error_msg) {
+	if (! group_address.is_multicast()) {
+	    error_msg = c_format("Cannot join group %s: not a multicast address"
+				 , group_address.str().c_str());
+	    return (XORP_ERROR);
+	}
 	if (_io_link_comm.join_multicast_group(group_address, receiver_name(),
 					       error_msg)
 	    != XORP_OK) {
@@ -325,11 +331,7 @@ IoLinkComm::join_multicast_group(const Mac&	group_address,
     //
     // Check the arguments
     //
-    if (! group_address.is_multicast()) {
-	error_msg = c_format("Cannot join group %s: not a multicast address",
-			     group_address.str().c_str());
-	return (XORP_ERROR);
-    }
+    // LinkVifInputFilter checks that the group address is multicast.
     if (receiver_name.empty()) {
 	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
 			     "empty receiver name",
@@ -644,14 +646,9 @@ IoLinkManager::erase_filters(CommTable& comm_table, FilterBag& filters,
     }
 }
 
-int
-IoLinkManager::send(const string&	if_name,
-		    const string&	vif_name,
-		    const Mac&		src_address,
-		    const Mac&		dst_address,
-		    uint16_t		ether_type,
-		    const vector<uint8_t>& payload,
-		    string&		error_msg)
+IoLinkComm&
+IoLinkManager::get_iolink(const string& if_name, const string& vif_name,
+			  uint16_t ether_type)
 {
     CommTableKey key(if_name, vif_name, ether_type, "");
 
@@ -682,11 +679,25 @@ IoLinkManager::send(const string&	if_name,
 
     XLOG_ASSERT(io_link_comm != NULL);
 
-    return (io_link_comm->send_packet(src_address,
-				      dst_address,
-				      ether_type,
-				      payload,
-				      error_msg));
+    return *io_link_comm;
+}
+
+int
+IoLinkManager::send(const string&	if_name,
+		    const string&	vif_name,
+		    const Mac&		src_address,
+		    const Mac&		dst_address,
+		    uint16_t		ether_type,
+		    const vector<uint8_t>& payload,
+		    string&		error_msg)
+{
+    IoLinkComm& io_link_comm = get_iolink(if_name, vif_name, ether_type);
+
+    return (io_link_comm.send_packet(src_address,
+				     dst_address,
+				     ether_type,
+				     payload,
+				     error_msg));
 }
 
 IoLinkComm&
@@ -721,6 +732,39 @@ IoLinkManager::add_iolink_txonly(const string&  if_name,
     XLOG_ASSERT(rc == XORP_OK);
 
     return *io_link_comm;
+}
+
+void
+IoLinkManager::add_multicast_mac(const string& if_name, const Mac& mac)
+{
+    add_remove_multicast_mac(true, if_name, mac);
+}
+
+void
+IoLinkManager::remove_multicast_mac(const string& if_name, const Mac& mac)
+{
+    add_remove_multicast_mac(false, if_name, mac);
+}
+
+void
+IoLinkManager::add_remove_multicast_mac(bool add, const string& if_name,
+				        const Mac& mac)
+{
+    string vif_name	 = if_name;
+    uint16_t ether_type  = ETHERTYPE_IP;
+    string receiver_name = "add_remove_mac";
+    string error_msg;
+    int rc;
+
+    IoLinkComm& io_link_comm = get_iolink(if_name, vif_name, ether_type);
+
+    if (add)
+	rc = io_link_comm.join_multicast_group(mac, receiver_name, error_msg);
+    else
+	rc = io_link_comm.leave_multicast_group(mac, receiver_name, error_msg);
+
+    if (rc != XORP_OK)
+	xorp_throw(FEAException, error_msg);
 }
 
 int

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.11 2008/10/02 21:56:48 bms Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.12 2008/10/09 17:45:04 abittau Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -636,6 +636,9 @@ public:
 	return _fea_data_plane_managers;
     }
 
+    void add_multicast_mac(const string& if_name, const Mac& mac);
+    void remove_multicast_mac(const string& if_name, const Mac& mac);
+
 private:
     class CommTableKey {
     public:
@@ -698,6 +701,12 @@ private:
 
     IoLinkComm& add_iolink_txonly(const string& if_name, const string& vif_name,
 				  uint16_t ether_type);
+
+    IoLinkComm& get_iolink(const string& if_name, const string& vif_name,
+			   uint16_t ether_type);
+
+    void	add_remove_multicast_mac(bool add, const string& if_name,
+					 const Mac& mac);
 
     FeaNode&		_fea_node;
     EventLoop&		_eventloop;
