@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2007-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.9 2008/07/23 05:10:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.10 2008/10/02 21:56:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -28,6 +29,43 @@
 #include "fea_node.hh"
 #include "iftree.hh"
 #include "io_link_manager.hh"
+
+// A filter that matches no packets - useful for TX only.
+class TxOnlyFilter : public IoLinkComm::InputFilter {
+public:
+    // a mac addr that will "never" match
+    static const string filter_mac;
+
+    TxOnlyFilter(IoLinkManager&	io_link_manager,
+		 const string&	receiver_name,
+		 const string&	if_name,
+		 const string&	vif_name,
+		 uint16_t	ether_type)
+	: IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
+				  vif_name, ether_type,
+				  "ether src " + filter_mac)
+    {}
+
+    void recv(const struct MacHeaderInfo& header,
+	      const vector<uint8_t>& payload)
+    {
+	Mac filter(filter_mac.c_str());
+
+	if (header.src_address == filter)
+	    return;
+
+	UNUSED(payload);
+
+	XLOG_ASSERT(false && "receiving data on a TX only filter");
+    }
+
+    void bye()
+    {
+	delete this;
+    }
+};
+
+const string TxOnlyFilter::filter_mac = "66:66:66:66:66:66";
 
 //
 // Filter class for checking incoming raw link-level packets and checking
@@ -538,6 +576,11 @@ IoLinkManager::IoLinkManager(FeaNode&		fea_node,
 IoLinkManager::~IoLinkManager()
 {
     erase_filters(_comm_table, _filters, _filters.begin(), _filters.end());
+
+    // erase any TX only entries
+    for (CommTable::iterator i = _comm_table.begin(); i != _comm_table.end();
+	 ++i)
+	delete i->second;
 }
 
 void
@@ -630,14 +673,13 @@ IoLinkManager::send(const string&	if_name,
 	}
     }
 
-    if (cti == _comm_table.end()) {
-	error_msg = c_format("EtherType protocol %u is not registered "
-			     "on interface %s vif %s",
-			     XORP_UINT_CAST(ether_type),
-			     if_name.c_str(), vif_name.c_str());
-	return (XORP_ERROR);
-    }
-    IoLinkComm* io_link_comm = cti->second;
+    IoLinkComm* io_link_comm = NULL;
+
+    if (cti == _comm_table.end())
+	io_link_comm = &add_iolink_txonly(if_name, vif_name, ether_type);
+    else
+	io_link_comm = cti->second;
+
     XLOG_ASSERT(io_link_comm != NULL);
 
     return (io_link_comm->send_packet(src_address,
@@ -645,6 +687,40 @@ IoLinkManager::send(const string&	if_name,
 				      ether_type,
 				      payload,
 				      error_msg));
+}
+
+IoLinkComm&
+IoLinkManager::add_iolink_txonly(const string&  if_name,
+				 const string&  vif_name,
+				 uint16_t       ether_type)
+{
+    // XXX ideally we'd configure the io plugins to do TX only, but what we do
+    // now is create a "txonlyfilter" - a filter that matches no packets and
+    // hopefully receives nothing.
+    string receiver_name  = "txonly";
+    string filter_program = "";
+
+    TxOnlyFilter* filter = new TxOnlyFilter(*this, receiver_name, if_name,
+					    vif_name, ether_type);
+    filter_program = filter->filter_program();
+
+    IoLinkComm* io_link_comm = NULL;
+    CommTableKey key(if_name, vif_name, ether_type, filter_program);
+    CommTable::iterator i = _comm_table.find(key);
+
+    if (_comm_table.find(key) != _comm_table.end())
+	io_link_comm = i->second;
+    else {
+	io_link_comm = new IoLinkComm(*this, iftree(), if_name, vif_name,
+				      ether_type, filter_program);
+	_comm_table[key] = io_link_comm;
+    }
+    XLOG_ASSERT(io_link_comm);
+
+    int rc = io_link_comm->add_filter(filter);
+    XLOG_ASSERT(rc == XORP_OK);
+
+    return *io_link_comm;
 }
 
 int

@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2007-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.10 2008/07/23 05:10:10 pavlin Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.11 2008/10/02 21:56:48 bms Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -694,6 +695,9 @@ private:
     void erase_filters(CommTable& comm_table, FilterBag& filters,
 		       const FilterBag::iterator& begin,
 		       const FilterBag::iterator& end);
+
+    IoLinkComm& add_iolink_txonly(const string& if_name, const string& vif_name,
+				  uint16_t ether_type);
 
     FeaNode&		_fea_node;
     EventLoop&		_eventloop;
