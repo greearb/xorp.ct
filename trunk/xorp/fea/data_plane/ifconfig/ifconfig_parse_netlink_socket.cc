@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.24 2008/10/02 21:57:06 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_netlink_socket.cc,v 1.25 2008/10/09 17:48:14 abittau Exp $"
 
 #include "fea/fea_module.h"
 
@@ -562,21 +562,11 @@ nlm_dellink_to_fea_cfg(IfTree& iftree, const struct ifinfomsg* ifinfomsg,
     //
     IfTreeInterface* ifp = iftree.find_interface(if_index);
     if (ifp != NULL) {
-	// We don't actually delete the interface because otherwise, on Linux at
-	// least, we lose its configuration when it resurrects.  When an
-	// interface resurrects, we only get notifications about addresses that
-	// changed, so if these didn't change, we'll never discover about them.
-	// So, we either don't delete the interface, or we pull the whole
-	// configuration again when a new interface comes up.  The latter is
-	// more expensive but safer.  I do the former for now (cheaper).
-	//
-	// Also, prior to this, we should have received a message that disabled
-	// the interface, hence the assert.  -sorbo
-	XLOG_ASSERT(!ifp->enabled());
+	ifp->mark(IfTree::DELETED);
     }
     IfTreeVif* vifp = iftree.find_vif(if_index);
     if (vifp != NULL) {
-	XLOG_ASSERT(!vifp->enabled());
+	vifp->mark(IfTree::DELETED);
     }
 }
 
