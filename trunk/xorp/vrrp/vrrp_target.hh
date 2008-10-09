@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.3 2008/10/09 17:46:27 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.4 2008/10/09 17:47:49 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -157,6 +157,7 @@ private:
     XrlRawLinkV0p1Client    _rawlink;
     XrlRawPacket4V0p1Client _rawipv4;
     XrlIfmgrV0p1Client	    _fea;
+    int			    _xrls_pending;
 };
 
 #endif // __VRRP_VRRP_TARGET_HH__

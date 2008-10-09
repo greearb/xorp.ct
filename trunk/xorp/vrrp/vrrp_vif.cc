@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.2 2008/10/09 17:46:27 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.3 2008/10/09 17:47:49 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -127,17 +127,20 @@ VRRPVif::is_enabled(const T* obj)
 void
 VRRPVif::set_ready(bool ready)
 {
-    _ready = ready;
+    if (ready)
+	_ready = ready;
 
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
 	VRRP* v = i->second;
 
-	if (_ready) {
+	if (ready) {
 	    v->check_ownership();
 	    v->start();
 	} else
 	    v->stop();
     }
+
+    _ready = ready;
 }
 
 const IPv4&

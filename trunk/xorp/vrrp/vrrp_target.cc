@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.3 2008/10/09 17:46:27 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.4 2008/10/09 17:47:49 abittau Exp $"
 
 #include <sstream>
 
@@ -54,27 +54,25 @@ VRRPTarget::VRRPTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
 		_ifmgr_setup(false),
 		_rawlink(&rtr),
 		_rawipv4(&rtr),
-		_fea(&rtr)
+		_fea(&rtr),
+		_xrls_pending(0)
 {
     _eventloop = &rtr.eventloop();
 
     _ifmgr.attach_hint_observer(this);
+
+    // When changing MAC, Linux brings the interface down and up.  This will
+    // cause VRRP to stop and start, which causes changing MACs yet again.  To
+    // avoid this loop, we delay configuration changes so we don't see the
+    // interface going down on a MAC change.
+    _ifmgr.delay_updates(1000);
 
     start();
 }
 
 VRRPTarget::~VRRPTarget()
 {
-    _ifmgr.detach_hint_observer(this);
-
-    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) {
-	VIFS* v = i->second;
-
-	for (VIFS::iterator j = v->begin(); j != v->end(); ++j)
-	    delete j->second;
-
-	delete v;
-    }
+    shutdown();
 }
 
 EventLoop&
@@ -96,14 +94,27 @@ VRRPTarget::start()
 bool
 VRRPTarget::running() const
 {
-    return _running;
+    return _running || _xrls_pending > 0;
 }
 
 void
 VRRPTarget::shutdown()
 {
-    if (_ifmgr.shutdown() != XORP_OK)
-	xorp_throw(VRRPException, "Can't shutdown fea mirror");
+    if (_running) {
+	_ifmgr.detach_hint_observer(this);
+	if (_ifmgr.shutdown() != XORP_OK)
+	    xorp_throw(VRRPException, "Can't shutdown fea mirror");
+    }
+
+    for (IFS::iterator i = _ifs.begin(); i != _ifs.end(); ++i) {
+	VIFS* v = i->second;
+
+	for (VIFS::iterator j = v->begin(); j != v->end(); ++j)
+	    delete j->second;
+
+	delete v;
+    }
+    _ifs.clear();
 
     _running = false;
 }
@@ -227,6 +238,8 @@ VRRPTarget::send(const string& ifname, const string& vifname, const Mac& src,
 
     if (!rc)
 	XLOG_FATAL("Cannot send raw data");
+
+    _xrls_pending++;
 }
 
 void
@@ -246,11 +259,15 @@ VRRPTarget::join_mcast(const string& ifname, const string& vifname)
 	XLOG_FATAL("Cannot register receiver");
 	return;
     }
+    _xrls_pending++;
+
     rc = _rawipv4.send_join_multicast_group(fea_target_name.c_str(),
 					    _rtr.instance_name(), ifname,
 					    vifname, proto, ip, cb);
     if (!rc)
 	XLOG_FATAL("Cannot join mcast group");
+
+    _xrls_pending++;
 }
 
 void
@@ -270,11 +287,15 @@ VRRPTarget::leave_mcast(const string& ifname, const string& vifname)
 	XLOG_FATAL("Cannot leave mcast group");
 	return;
     }
+    _xrls_pending++;
+
     rc = _rawipv4.send_unregister_receiver(fea_target_name.c_str(),
 					   _rtr.instance_name(), ifname,
 					       vifname, proto, cb);
     if (!rc)
 	XLOG_FATAL("Cannot unregister receiver");
+
+    _xrls_pending++;
 }
 
 void
@@ -283,6 +304,8 @@ VRRPTarget::add_mac(const string& ifname, const Mac& mac)
     if (!_fea.send_create_mac(fea_target_name.c_str(), ifname, mac,
 			      callback(this, &VRRPTarget::xrl_cb)))
 	XLOG_FATAL("Cannot add MAC");
+
+    _xrls_pending++;
 }
 
 void
@@ -291,11 +314,16 @@ VRRPTarget::delete_mac(const string& ifname, const Mac& mac)
     if (!_fea.send_delete_mac(fea_target_name.c_str(), ifname, mac,
 			      callback(this, &VRRPTarget::xrl_cb)))
 	XLOG_FATAL("Cannot delete MAC");
+
+    _xrls_pending++;
 }
 
 void
 VRRPTarget::xrl_cb(const XrlError& xrl_error)
 {
+    _xrls_pending--;
+    XLOG_ASSERT(_xrls_pending >= 0);
+
     if (xrl_error != XrlError::OKAY())
 	XLOG_FATAL("XRL error: %s", xrl_error.str().c_str());
 }
@@ -326,7 +354,7 @@ VRRPTarget::common_0_1_get_status(
         uint32_t&       status,
         string& reason)
 {
-    if (running()) {
+    if (_running) {
 	status = PROC_READY;
 	reason = "running";
     } else {
