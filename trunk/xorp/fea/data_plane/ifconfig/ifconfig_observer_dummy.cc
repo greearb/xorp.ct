@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.cc,v 1.10 2008/07/23 05:10:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_observer_dummy.cc,v 1.11 2008/10/02 21:57:05 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -64,8 +64,6 @@ IfConfigObserverDummy::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    // TODO: XXX: PAVPAVPAV: implement it!
-
     _is_running = true;
 
     return (XORP_OK);
@@ -75,8 +73,6 @@ int
 IfConfigObserverDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
-
-    // TODO: XXX: PAVPAVPAV: implement it!
 
     if (! _is_running)
 	return (XORP_OK);
@@ -92,4 +88,3 @@ IfConfigObserverDummy::receive_data(const vector<uint8_t>& buffer)
     // TODO: use it?
     UNUSED(buffer);
 }
-
