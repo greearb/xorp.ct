@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2007-2008 XORP, Inc.
 //
@@ -17,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.34 2008/07/23 05:10:12 pavlin Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.35 2008/10/02 21:56:51 bms Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -915,6 +916,16 @@ public:
 	const uint32_t& tid,
 	const string&	ifname,
 	const Mac&	mac);
+
+    XrlCmdError ifmgr_0_1_create_mac(
+        // Input values,
+        const string&   ifname,
+        const Mac&      mac);
+
+    XrlCmdError ifmgr_0_1_delete_mac(
+        // Input values,
+        const string&   ifname,
+        const Mac&      mac);
 
     XrlCmdError ifmgr_0_1_restore_original_mac(
 	// Input values,

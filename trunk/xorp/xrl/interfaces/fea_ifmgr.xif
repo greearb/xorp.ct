@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.26 2008/06/14 02:59:24 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.27 2008/06/15 00:19:55 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -118,6 +118,10 @@ interface ifmgr/0.1 {
 	set_interface_management ? tid:u32 & ifname:txt & management:bool
 
 	set_mac ? tid:u32 & ifname:txt & mac:mac
+
+	create_mac ? ifname:txt & mac:mac
+
+	delete_mac ? ifname:txt & mac:mac
 
 	restore_original_mac ? tid:u32 & ifname:txt
 
