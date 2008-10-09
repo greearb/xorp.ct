@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2008 XORP, Inc.
 //
@@ -18,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.20 2008/07/23 05:10:37 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.21 2008/10/02 21:57:16 bms Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -168,6 +169,8 @@ public:
      */
     bool detach_hint_observer(IfMgrHintObserver* o);
 
+    void delay_updates(uint32_t msec);
+
 protected:
     void finder_ready_event();
     void finder_disconnect_event();
@@ -197,6 +200,12 @@ protected:
     list<IfMgrHintObserver*>	_hint_observers;
 
     XorpTimer			_reg_timer;	// registration timer
+
+private:
+    void do_updates();
+
+    uint32_t			_updates_delay;
+    XorpTimer			_updates_timer;
 };
 
 #endif // __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
