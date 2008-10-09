@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.25 2008/09/26 21:41:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_routing_socket.cc,v 1.26 2008/10/02 21:57:06 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -218,6 +218,16 @@ IfConfigGetSysctl::parse_buffer_routing_socket(IfConfig& ifconfig,
     for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
 	ifm = align_data.payload_by_offset(offset);
 	if (ifm->ifm_version != RTM_VERSION) {
+#if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
+	    //
+	    // XXX: Silently ignore old messages.
+	    // The OpenBSD kernel sends each message twice, once as
+	    // RTM_VERSION and once as RTM_OVERSION, hence we need to ignore
+	    // the RTM_OVERSION duplicates.
+	    //
+	    if (ifm->ifm_version == RTM_OVERSION)
+		continue;
+#endif // RTM_OVERSION && HOST_OS_OPENBSD
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
 		       ifm->ifm_version);

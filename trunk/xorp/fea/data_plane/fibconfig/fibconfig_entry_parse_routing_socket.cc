@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc,v 1.15 2008/07/23 05:10:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_parse_routing_socket.cc,v 1.16 2008/10/02 21:56:57 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -67,7 +67,17 @@ FibConfigEntryGetRoutingSocket::parse_buffer_routing_socket(
 	bool filter_match = false;
 
 	rtm = align_data.payload_by_offset(offset);
-	if (RTM_VERSION != rtm->rtm_version) {
+	if (rtm->rtm_version != RTM_VERSION) {
+#if defined(RTM_OVERSION) && defined(HOST_OS_OPENBSD)
+	    //
+	    // XXX: Silently ignore old messages.
+	    // The OpenBSD kernel sends each message twice, once as
+	    // RTM_VERSION and once as RTM_OVERSION, hence we need to ignore
+	    // the RTM_OVERSION duplicates.
+	    //
+	    if (rtm->rtm_version == RTM_OVERSION)
+		continue;
+#endif // RTM_OVERSION && HOST_OS_OPENBSD
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,
 		       rtm->rtm_version);
