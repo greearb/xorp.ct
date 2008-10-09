@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.9 2008/10/09 18:03:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.10 2008/10/09 18:04:12 abittau Exp $"
 
 #include <sstream>
 
@@ -436,7 +436,7 @@ Vrrp::check_ips(const VrrpHeader& vh)
 {
     if (vh.vh_ipcount != _ips.size()) {
 	XLOG_WARNING("Mismatch in configured IPs (got %u have %u)",
-		     vh.vh_ipcount, _ips.size());
+		     vh.vh_ipcount, XORP_UINT_CAST(_ips.size()));
 
 	return false;
     }
