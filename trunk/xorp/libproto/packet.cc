@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/packet.cc,v 1.9 2008/10/09 17:49:56 abittau Exp $"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.10 2008/10/09 17:50:32 abittau Exp $"
 
 
 //
@@ -229,20 +229,20 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
     return (XORP_OK);
 }
 
-ARPHeader&
-ARPHeader::assign(uint8_t* data)
+ArpHeader&
+ArpHeader::assign(uint8_t* data)
 {
-    ARPHeader* h = reinterpret_cast<ARPHeader*>(data);
+    ArpHeader* h = reinterpret_cast<ArpHeader*>(data);
 
     memset(h, 0, sizeof(*h));
 
     return *h;
 }
 
-const ARPHeader&
-ARPHeader::assign(const PAYLOAD& payload)
+const ArpHeader&
+ArpHeader::assign(const PAYLOAD& payload)
 {
-    const ARPHeader* h = reinterpret_cast<const ARPHeader*>(&payload[0]);
+    const ArpHeader* h = reinterpret_cast<const ArpHeader*>(&payload[0]);
 
     unsigned size = sizeof(*h);
 
@@ -258,13 +258,13 @@ ARPHeader::assign(const PAYLOAD& payload)
 }
 
 bool
-ARPHeader::is_request() const
+ArpHeader::is_request() const
 {
     return ntohs(ah_op) == ARP_REQUEST;
 }
 
 IPv4
-ARPHeader::get_request() const
+ArpHeader::get_request() const
 {
     if (!is_request())
 	xorp_throw(BadPacketException, "Not an ARP request");
@@ -280,7 +280,7 @@ ARPHeader::get_request() const
 }
 
 void
-ARPHeader::make_reply(PAYLOAD& out, const Mac& mac) const
+ArpHeader::make_reply(PAYLOAD& out, const Mac& mac) const
 {
     // sanity checks
     if (!is_request())
@@ -298,7 +298,7 @@ ARPHeader::make_reply(PAYLOAD& out, const Mac& mac) const
     memcpy(&out[0], this, size);
 
     // make it a reply
-    ARPHeader& reply = const_cast<ARPHeader&>(ARPHeader::assign(out));
+    ArpHeader& reply = const_cast<ArpHeader&>(ArpHeader::assign(out));
     reply.ah_op = htons(ARP_REPLY);
 
     // set the destination
@@ -312,7 +312,7 @@ ARPHeader::make_reply(PAYLOAD& out, const Mac& mac) const
 }
 
 void
-ARPHeader::set_sender(const Mac& mac, const IPv4& ip)
+ArpHeader::set_sender(const Mac& mac, const IPv4& ip)
 {
     ah_hw_fmt = htons(HW_ETHER);
     ah_hw_len = mac.copy_out(ah_data);
@@ -322,7 +322,7 @@ ARPHeader::set_sender(const Mac& mac, const IPv4& ip)
 }
 
 void
-ARPHeader::set_request(const IPv4& ip)
+ArpHeader::set_request(const IPv4& ip)
 {
     XLOG_ASSERT(ah_op == 0);
     XLOG_ASSERT(ah_proto_fmt == htons(ETHERTYPE_IP));
@@ -333,7 +333,7 @@ ARPHeader::set_request(const IPv4& ip)
 }
 
 void
-ARPHeader::set_reply(const Mac& mac, const IPv4& ip)
+ArpHeader::set_reply(const Mac& mac, const IPv4& ip)
 {
     XLOG_ASSERT(ah_op == 0);
     XLOG_ASSERT(ah_hw_fmt    == htons(HW_ETHER));
@@ -346,19 +346,19 @@ ARPHeader::set_reply(const Mac& mac, const IPv4& ip)
 }
 
 uint32_t
-ARPHeader::size()
+ArpHeader::size()
 {
     return sizeof(*this) + ah_hw_len * 2 + ah_proto_len * 2;
 }
 
 void
-ARPHeader::make_gratitious(PAYLOAD& data, const Mac& mac, const IPv4& ip)
+ArpHeader::make_gratitious(PAYLOAD& data, const Mac& mac, const IPv4& ip)
 {
-    uint32_t sz = sizeof(ARPHeader) + 6 * 2 + 4 * 2;
+    uint32_t sz = sizeof(ArpHeader) + 6 * 2 + 4 * 2;
 
     data.resize(sz, 0);
 
-    ARPHeader& arp = ARPHeader::assign(&data[0]);
+    ArpHeader& arp = ArpHeader::assign(&data[0]);
 
     arp.set_sender(mac, ip);
     arp.set_request(ip);

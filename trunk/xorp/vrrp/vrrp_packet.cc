@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_packet.cc,v 1.1 2008/10/09 17:46:27 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_packet.cc,v 1.2 2008/10/09 18:03:49 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -26,15 +26,15 @@
 #include "vrrp_packet.hh"
 #include "vrrp_exception.hh"
 
-const IPv4 VRRPPacket::mcast_group = IPv4("224.0.0.18");
+const IPv4 VrrpPacket::mcast_group = IPv4("224.0.0.18");
 
-VRRPHeader&
-VRRPHeader::assign(uint8_t* data)
+VrrpHeader&
+VrrpHeader::assign(uint8_t* data)
 {
-    static_assert(sizeof(VRRPHeader) == 8);
-    static_assert(sizeof(VRRPAuth) == 8);
+    static_assert(sizeof(VrrpHeader) == 8);
+    static_assert(sizeof(VrrpAuth) == 8);
 
-    VRRPHeader* vh = reinterpret_cast<VRRPHeader*>(data);
+    VrrpHeader* vh = reinterpret_cast<VrrpHeader*>(data);
 
     vh->vh_v	    = VRRP_VERSION;
     vh->vh_type	    = VRRP_TYPE_ADVERTISEMENT;
@@ -48,40 +48,40 @@ VRRPHeader::assign(uint8_t* data)
     return *vh;
 }
 
-const VRRPHeader&
-VRRPHeader::assign(const PAYLOAD& p)
+const VrrpHeader&
+VrrpHeader::assign(const PAYLOAD& p)
 {
-    const VRRPHeader* vh = reinterpret_cast<const VRRPHeader*>(&p[0]);
+    const VrrpHeader* vh = reinterpret_cast<const VrrpHeader*>(&p[0]);
 
-    unsigned size = sizeof(*vh) + sizeof(VRRPAuth);
+    unsigned size = sizeof(*vh) + sizeof(VrrpAuth);
 
     if (p.size() < size)
-	xorp_throw(VRRPException, "packet too small");
+	xorp_throw(VrrpException, "packet too small");
 
     if (vh->vh_v != VRRP_VERSION)
-	xorp_throw(VRRPException, "unknown version");
+	xorp_throw(VrrpException, "unknown version");
 
     if (vh->vh_type != VRRP_TYPE_ADVERTISEMENT)
-	xorp_throw(VRRPException, "unknown type");
+	xorp_throw(VrrpException, "unknown type");
 
     size += sizeof(*vh->vh_addr) * vh->vh_ipcount;
     if (size != p.size())
-	xorp_throw(VRRPException, "bad size");
+	xorp_throw(VrrpException, "bad size");
 
     // checksum
-    VRRPHeader* tmp	= const_cast<VRRPHeader*>(vh);
+    VrrpHeader* tmp	= const_cast<VrrpHeader*>(vh);
     unsigned checksum	= vh->vh_sum;
     unsigned sz2	= tmp->finalize(); // XXX will overwrite auth
 
     XLOG_ASSERT(size == sz2);
     if (checksum != vh->vh_sum)
-	xorp_throw(VRRPException, "bad checksum");
+	xorp_throw(VrrpException, "bad checksum");
 
     return *vh;
 }
 
 void
-VRRPHeader::add_ip(const IPv4& ip)
+VrrpHeader::add_ip(const IPv4& ip)
 {
     XLOG_ASSERT(vh_ipcount < 255);
 
@@ -90,7 +90,7 @@ VRRPHeader::add_ip(const IPv4& ip)
 }
 
 IPv4
-VRRPHeader::ip(unsigned idx) const
+VrrpHeader::ip(unsigned idx) const
 {
     XLOG_ASSERT(idx < vh_ipcount);
 
@@ -101,13 +101,13 @@ VRRPHeader::ip(unsigned idx) const
 }
 
 uint32_t
-VRRPHeader::finalize()
+VrrpHeader::finalize()
 {
     uint32_t len = sizeof(*this);
 
     len += sizeof(*vh_addr) * vh_ipcount;
 
-    VRRPAuth* auth = reinterpret_cast<VRRPAuth*>((unsigned long) this + len);
+    VrrpAuth* auth = reinterpret_cast<VrrpAuth*>((unsigned long) this + len);
     memset(auth, 0, sizeof(*auth));
 
     len += sizeof(*auth);
@@ -118,10 +118,10 @@ VRRPHeader::finalize()
     return len;
 }
 
-VRRPPacket::VRRPPacket()
+VrrpPacket::VrrpPacket()
 		: _data(VRRP_MAX_PACKET_SIZE, 0),
 		  _ip(&_data[0]),
-		  _vrrp(VRRPHeader::assign(&_data[IP_HEADER_MIN_SIZE]))
+		  _vrrp(VrrpHeader::assign(&_data[IP_HEADER_MIN_SIZE]))
 {
     _data.resize(VRRP_MAX_PACKET_SIZE);
 
@@ -139,25 +139,25 @@ VRRPPacket::VRRPPacket()
 }
 
 void
-VRRPPacket::set_vrid(uint8_t vrid)
+VrrpPacket::set_vrid(uint8_t vrid)
 {
     _vrrp.vh_vrid = vrid;
 }
 
 void
-VRRPPacket::set_priority(uint8_t priority)
+VrrpPacket::set_priority(uint8_t priority)
 {
     _vrrp.vh_priority = priority;
 }
 
 void
-VRRPPacket::set_interval(uint8_t interval)
+VrrpPacket::set_interval(uint8_t interval)
 {
     _vrrp.vh_interval = interval;
 }
 
 void
-VRRPPacket::finalize()
+VrrpPacket::finalize()
 {
     uint32_t size = _vrrp.finalize();
 
@@ -177,32 +177,32 @@ VRRPPacket::finalize()
 }
 
 uint32_t
-VRRPPacket::size() const
+VrrpPacket::size() const
 {
     return _data.size();
 }
 
 const PAYLOAD&
-VRRPPacket::data() const
+VrrpPacket::data() const
 {
     return _data;
 }
 
 void
-VRRPPacket::clear_ips()
+VrrpPacket::clear_ips()
 {
     _vrrp.vh_ipcount = 0;
 }
 
 void
-VRRPPacket::add_ip(const IPv4& ip)
+VrrpPacket::add_ip(const IPv4& ip)
 {
     _data.resize(VRRP_MAX_PACKET_SIZE);
     _vrrp.add_ip(ip);
 }
 
 void
-VRRPPacket::set_source(const IPv4& ip)
+VrrpPacket::set_source(const IPv4& ip)
 {
     _ip.set_ip_src(ip);
 }

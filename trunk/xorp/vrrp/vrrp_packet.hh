@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_packet.hh,v 1.1 2008/10/09 17:46:27 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_packet.hh,v 1.2 2008/10/09 18:03:49 abittau Exp $
 
 #ifndef __VRRP_VRRP_PACKET_HH__
 #define __VRRP_VRRP_PACKET_HH__
@@ -28,7 +28,7 @@
 
 typedef vector<uint8_t> PAYLOAD;
 
-struct VRRPHeader {
+struct VrrpHeader {
     enum Versions {
 	VRRP_VERSION = 2
     };
@@ -39,8 +39,8 @@ struct VRRPHeader {
 	VRRP_AUTH_NONE = 0
     };
 
-    static VRRPHeader&	      assign(uint8_t* data);
-    static const VRRPHeader&  assign(const PAYLOAD& payload);
+    static VrrpHeader&	      assign(uint8_t* data);
+    static const VrrpHeader&  assign(const PAYLOAD& payload);
     uint32_t		      finalize();
     void		      add_ip(const IPv4& ip);
     IPv4		      ip(unsigned index) const;
@@ -63,16 +63,16 @@ struct VRRPHeader {
     struct in_addr  vh_addr[0];
 };
 
-struct VRRPAuth {
+struct VrrpAuth {
     uint8_t	    va_data[8];
 };
 
 #define IP_HEADER_MIN_SIZE	20
 #define VRRP_MAX_PACKET_SIZE	(IP_HEADER_MIN_SIZE			    \
-			         + sizeof(VRRPHeader) + sizeof(VRRPAuth)    \
+			         + sizeof(VrrpHeader) + sizeof(VrrpAuth)    \
 				 + sizeof(struct in_addr) * 255)
 
-class VRRPPacket {
+class VrrpPacket {
 public:
     enum {
 	IPPROTO_VRRP = 112
@@ -80,7 +80,7 @@ public:
 
     static const IPv4 mcast_group;
 
-    VRRPPacket();
+    VrrpPacket();
 
     void	    set_source(const IPv4& ip);
     void	    set_vrid(uint8_t vrid);
@@ -102,7 +102,7 @@ public:
 private:
     PAYLOAD		_data;
     IpHeader4Writer	_ip;
-    VRRPHeader&		_vrrp;
+    VrrpHeader&		_vrrp;
 };
 
 #endif // __VRRP_VRRP_PACKET_HH__

@@ -18,17 +18,17 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/fea_exception.hh,v 1.1 2008/10/09 17:49:12 abittau Exp $
+// $XORP: xorp/fea/fea_exception.hh,v 1.2 2008/10/09 18:03:48 abittau Exp $
 
 #ifndef __FEA_FEA_EXCEPTION_HH__
 #define __FEA_FEA_EXCEPTION_HH__
 
 #include "libxorp/exceptions.hh"
 
-class FEAException : public XorpReasonedException {
+class FeaException : public XorpReasonedException {
 public:
-    FEAException(const char* file, size_t line, const string& why = "")
-        : XorpReasonedException("FEAException", file, line, why) {}
+    FeaException(const char* file, size_t line, const string& why = "")
+        : XorpReasonedException("FeaException", file, line, why) {}
 };
 
 #endif // __FEA_FEA_EXCEPTION_HH__

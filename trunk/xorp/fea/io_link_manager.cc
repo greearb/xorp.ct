@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.11 2008/10/09 17:45:03 abittau Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.12 2008/10/09 17:49:12 abittau Exp $"
 
 #include "fea_module.h"
 
@@ -764,7 +764,7 @@ IoLinkManager::add_remove_multicast_mac(bool add, const string& if_name,
 	rc = io_link_comm.leave_multicast_group(mac, receiver_name, error_msg);
 
     if (rc != XORP_OK)
-	xorp_throw(FEAException, error_msg);
+	xorp_throw(FeaException, error_msg);
 }
 
 int

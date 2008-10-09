@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.16 2008/10/09 17:49:56 abittau Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.17 2008/10/09 17:50:32 abittau Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -889,7 +889,7 @@ public:
         : XorpReasonedException("BadPacketException", file, line, why) {}
 };
 
-struct ARPHeader {
+struct ArpHeader {
     typedef vector<uint8_t> PAYLOAD;
 
     enum Op {
@@ -900,8 +900,8 @@ struct ARPHeader {
 	HW_ETHER = 1
     };
 
-    static ARPHeader&	    assign(uint8_t* data);
-    static const ARPHeader& assign(const PAYLOAD& payload);
+    static ArpHeader&	    assign(uint8_t* data);
+    static const ArpHeader& assign(const PAYLOAD& payload);
     static void		    make_gratitious(PAYLOAD& payload, const Mac& mac,
 					    const IPv4& ip);
     void		    set_sender(const Mac& mac, const IPv4& ip);

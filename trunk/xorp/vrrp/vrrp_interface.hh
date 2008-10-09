@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_interface.hh,v 1.1 2008/10/09 17:55:52 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_interface.hh,v 1.2 2008/10/09 18:03:49 abittau Exp $
 
 #ifndef __VRRP_VRRP_INTERFACE_HH__
 #define __VRRP_VRRP_INTERFACE_HH__
@@ -30,9 +30,9 @@
 #include "libxorp/mac.hh"
 #include "vrrp_packet.hh"
 
-class VRRPInterface {
+class VrrpInterface {
 public:
-    virtual ~VRRPInterface() {}
+    virtual ~VrrpInterface() {}
 
     virtual bool	    own(const IPv4& addr) = 0;
     virtual bool	    ready() const = 0;

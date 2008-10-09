@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.6 2008/10/09 17:55:52 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_vif.hh,v 1.7 2008/10/09 18:03:50 abittau Exp $
 
 #ifndef __VRRP_VRRP_VIF_HH__
 #define __VRRP_VRRP_VIF_HH__
@@ -31,17 +31,17 @@
 #include "vrrp.hh"
 #include "vrrp_interface.hh"
 
-class VRRPTarget;
+class VrrpTarget;
 
-class VRRPVif : public VRRPInterface {
+class VrrpVif : public VrrpInterface {
 public:
     typedef set<uint8_t>    VRIDS;
 
-    VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname);
-    ~VRRPVif();
+    VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname);
+    ~VrrpVif();
 
     bool	    own(const IPv4& addr);
-    VRRP*	    find_vrid(uint32_t vrid);
+    Vrrp*	    find_vrid(uint32_t vrid);
     void	    add_vrid(uint32_t vrid);
     void	    delete_vrid(uint32_t vrid);
     bool	    ready() const;
@@ -61,12 +61,12 @@ public:
 
 private:
     typedef set<IPv4>		    IPS;
-    typedef map<uint32_t, VRRP*>    VRRPS;
+    typedef map<uint32_t, Vrrp*>    VRRPS;
 
     void		    set_ready(bool ready);
     template <class T> bool is_enabled(const T* obj);
 
-    VRRPTarget&	_vt;
+    VrrpTarget&	_vt;
     string	_ifname;
     string	_vifname;
     bool	_ready;	// is it configured?

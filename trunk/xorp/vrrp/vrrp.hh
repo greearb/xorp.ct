@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp.hh,v 1.6 2008/10/09 17:55:51 abittau Exp $
+// $XORP: xorp/vrrp/vrrp.hh,v 1.7 2008/10/09 18:03:49 abittau Exp $
 
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
@@ -35,13 +35,13 @@
 
 #define MAX_VRRP_SIZE (20 + VRRP_MAX_PACKET_SIZE)
 
-class VRRP {
+class Vrrp {
 public:
     static const Mac mcast_mac;
     static const Mac bcast_mac;
 
-    VRRP(VRRPInterface& vif, EventLoop& e, uint32_t vrid);
-    ~VRRP();
+    Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid);
+    ~Vrrp();
 
     void	    set_priority(uint32_t priority);
     void	    set_interval(uint32_t interval);
@@ -54,7 +54,7 @@ public:
     void	    start();
     void	    stop();
     void	    check_ownership();
-    void	    recv(const IPv4& from, const VRRPHeader& vh);
+    void	    recv(const IPv4& from, const VrrpHeader& vh);
     ARPd&	    arpd();
     void	    get_info(string& state, IPv4& master) const;
 
@@ -87,10 +87,10 @@ private:
     void recv_adver_backup(uint32_t priority);
     void prepare_advertisement(uint32_t priority);
     void recv_advertisement(const IPv4& from, uint32_t priority);
-    bool check_ips(const VRRPHeader& vh);
+    bool check_ips(const VrrpHeader& vh);
 
     IPv4	    _last_adv;
-    VRRPInterface&  _vif;
+    VrrpInterface&  _vif;
     uint32_t	    _vrid;
     uint32_t	    _priority;
     uint32_t	    _interval;
@@ -103,7 +103,7 @@ private:
     XorpTimer	    _adver_timer;
     bool	    _own;
     bool	    _disable;
-    VRRPPacket	    _adv_packet;
+    VrrpPacket	    _adv_packet;
     Mac		    _source_mac;
     ARPd	    _arpd; // XXX use OS proxy arp mechanism?
 };

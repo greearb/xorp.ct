@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.7 2008/10/09 17:55:52 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.8 2008/10/09 18:03:50 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -26,7 +26,7 @@
 #include "vrrp_target.hh"
 #include "vrrp_exception.hh"
 
-VRRPVif::VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname)
+VrrpVif::VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname)
 	    : _vt(vt),
 	      _ifname(ifname),
 	      _vifname(vifname),
@@ -36,20 +36,20 @@ VRRPVif::VRRPVif(VRRPTarget& vt, const string& ifname, const string& vifname)
 {
 }
 
-VRRPVif::~VRRPVif()
+VrrpVif::~VrrpVif()
 {
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i)
 	delete i->second;
 }
 
 bool
-VRRPVif::own(const IPv4& addr)
+VrrpVif::own(const IPv4& addr)
 {
     return _ips.find(addr) != _ips.end();
 }
 
-VRRP*
-VRRPVif::find_vrid(uint32_t vrid)
+Vrrp*
+VrrpVif::find_vrid(uint32_t vrid)
 {
     VRRPS::iterator i = _vrrps.find(vrid);
 
@@ -60,17 +60,17 @@ VRRPVif::find_vrid(uint32_t vrid)
 }
 
 void
-VRRPVif::add_vrid(uint32_t vrid)
+VrrpVif::add_vrid(uint32_t vrid)
 {
     XLOG_ASSERT(find_vrid(vrid) == NULL);
 
-    _vrrps[vrid] = new VRRP(*this, _vt.eventloop(), vrid);
+    _vrrps[vrid] = new Vrrp(*this, _vt.eventloop(), vrid);
 }
 
 void
-VRRPVif::delete_vrid(uint32_t vrid)
+VrrpVif::delete_vrid(uint32_t vrid)
 {
-    VRRP* v = find_vrid(vrid);
+    Vrrp* v = find_vrid(vrid);
     XLOG_ASSERT(v);
 
     _vrrps.erase(vrid);
@@ -79,13 +79,13 @@ VRRPVif::delete_vrid(uint32_t vrid)
 }
 
 bool
-VRRPVif::ready() const
+VrrpVif::ready() const
 {
     return _ready;
 }
 
 void
-VRRPVif::configure(const IfMgrIfTree& conf)
+VrrpVif::configure(const IfMgrIfTree& conf)
 {
     // check interface
     const IfMgrIfAtom* ifa = conf.find_interface(_ifname);
@@ -120,7 +120,7 @@ VRRPVif::configure(const IfMgrIfTree& conf)
 
 template <class T>
 bool
-VRRPVif::is_enabled(const T* obj)
+VrrpVif::is_enabled(const T* obj)
 {
     if (obj && obj->enabled())
 	return true;
@@ -131,13 +131,13 @@ VRRPVif::is_enabled(const T* obj)
 }
 
 void
-VRRPVif::set_ready(bool ready)
+VrrpVif::set_ready(bool ready)
 {
     if (ready)
 	_ready = ready;
 
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
-	VRRP* v = i->second;
+	Vrrp* v = i->second;
 
 	if (ready) {
 	    v->check_ownership();
@@ -150,7 +150,7 @@ VRRPVif::set_ready(bool ready)
 }
 
 const IPv4&
-VRRPVif::addr() const
+VrrpVif::addr() const
 {
     XLOG_ASSERT(_ips.size());
 
@@ -159,7 +159,7 @@ VRRPVif::addr() const
 }
 
 void
-VRRPVif::send(const Mac& src, const Mac& dst, uint32_t ether,
+VrrpVif::send(const Mac& src, const Mac& dst, uint32_t ether,
 	      const PAYLOAD& payload)
 {
     XLOG_ASSERT(ready());
@@ -168,7 +168,7 @@ VRRPVif::send(const Mac& src, const Mac& dst, uint32_t ether,
 }
 
 void
-VRRPVif::join_mcast()
+VrrpVif::join_mcast()
 {
     _join++;
     XLOG_ASSERT(_join);
@@ -178,7 +178,7 @@ VRRPVif::join_mcast()
 }
 
 void
-VRRPVif::leave_mcast()
+VrrpVif::leave_mcast()
 {
     XLOG_ASSERT(_join);
     _join--;
@@ -191,7 +191,7 @@ VRRPVif::leave_mcast()
     // paranoia
     int cnt = 0;
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
-	VRRP* v = i->second;
+	Vrrp* v = i->second;
 
 	if (v->running())
 	    XLOG_ASSERT(++cnt == 1);
@@ -199,7 +199,7 @@ VRRPVif::leave_mcast()
 }
 
 void
-VRRPVif::start_arps()
+VrrpVif::start_arps()
 {
     _arps++;
     XLOG_ASSERT(_arps);
@@ -209,7 +209,7 @@ VRRPVif::start_arps()
 }
 
 void
-VRRPVif::stop_arps()
+VrrpVif::stop_arps()
 {
     XLOG_ASSERT(_arps);
     _arps--;
@@ -221,12 +221,12 @@ VRRPVif::stop_arps()
 }
 
 void
-VRRPVif::recv(const IPv4& from, const PAYLOAD& payload)
+VrrpVif::recv(const IPv4& from, const PAYLOAD& payload)
 {
     try {
-	const VRRPHeader& vh = VRRPHeader::assign(payload);
+	const VrrpHeader& vh = VrrpHeader::assign(payload);
 
-	VRRP* v = find_vrid(vh.vh_vrid);
+	Vrrp* v = find_vrid(vh.vh_vrid);
 	if (!v) {
 	    XLOG_WARNING("Cannot find VRID %d", vh.vh_vrid);
 	    return;
@@ -234,15 +234,15 @@ VRRPVif::recv(const IPv4& from, const PAYLOAD& payload)
 
 	v->recv(from, vh);
 
-    } catch (const VRRPException& e) {
+    } catch (const VrrpException& e) {
 	XLOG_WARNING("VRRP packet error: %s", e.str().c_str());
     }
 }
 
 void
-VRRPVif::recv_arp(const Mac& from, const PAYLOAD& payload)
+VrrpVif::recv_arp(const Mac& from, const PAYLOAD& payload)
 {
-    // XXX the arp object should be part of VRRPVif
+    // XXX the arp object should be part of VrrpVif
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i) {
 	ARPd& arp = i->second->arpd();
 
@@ -256,7 +256,7 @@ VRRPVif::recv_arp(const Mac& from, const PAYLOAD& payload)
 }
 
 void
-VRRPVif::add_mac(const Mac& mac)
+VrrpVif::add_mac(const Mac& mac)
 {
     // XXX mac operations are per physical interface.  We musn't have multiple
     // vifs tweaking the mac of the same physical inteface.  This is a
@@ -272,7 +272,7 @@ VRRPVif::add_mac(const Mac& mac)
 }
 
 void
-VRRPVif::delete_mac(const Mac& mac)
+VrrpVif::delete_mac(const Mac& mac)
 {
     // XXX see add mac
     XLOG_ASSERT(_ifname == _vifname);
@@ -281,7 +281,7 @@ VRRPVif::delete_mac(const Mac& mac)
 }
 
 void
-VRRPVif::get_vrids(VRIDS& vrids)
+VrrpVif::get_vrids(VRIDS& vrids)
 {
     for (VRRPS::iterator i = _vrrps.begin(); i != _vrrps.end(); ++i)
 	vrids.insert(i->first);

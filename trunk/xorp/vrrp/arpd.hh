@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/arpd.hh,v 1.2 2008/10/09 17:55:51 abittau Exp $
+// $XORP: xorp/vrrp/arpd.hh,v 1.3 2008/10/09 18:03:49 abittau Exp $
 
 #ifndef __VRRP_ARPD_HH__
 #define __VRRP_ARPD_HH__
@@ -31,7 +31,7 @@
 
 class ARPd {
 public:
-    ARPd(VRRPInterface& vif);
+    ARPd(VrrpInterface& vif);
     ~ARPd();
 
     void clear();
@@ -48,7 +48,7 @@ private:
     void start_receiving();
     void stop_receiving();
 
-    VRRPInterface&  _vif;
+    VrrpInterface&  _vif;
     Mac		    _mac;
     IPS		    _ips;
     bool	    _running;

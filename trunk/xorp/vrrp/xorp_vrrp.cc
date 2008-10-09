@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/xorp_vrrp.cc,v 1.1 2008/10/09 17:40:58 abittau Exp $"
+#ident "$XORP: xorp/vrrp/xorp_vrrp.cc,v 1.2 2008/10/09 18:03:50 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xorp.h"
@@ -32,10 +32,10 @@ static void start()
 {
     EventLoop e;
 
-    XrlStdRouter rtr(e, VRRPTarget::vrrp_target_name.c_str(),
+    XrlStdRouter rtr(e, VrrpTarget::vrrp_target_name.c_str(),
 		     FinderConstants::FINDER_DEFAULT_HOST().str().c_str());
 
-    VRRPTarget vrrp(rtr);
+    VrrpTarget vrrp(rtr);
 
     wait_until_xrl_router_is_ready(e, rtr);
 
@@ -54,8 +54,8 @@ int main(int argc, char* argv[])
 
     try {
 	start();
-    } catch(const VRRPException& e) {
-	XLOG_FATAL("VRRPException: %s", e.str().c_str());
+    } catch(const VrrpException& e) {
+	XLOG_FATAL("VrrpException: %s", e.str().c_str());
     }
 
     xlog_stop();

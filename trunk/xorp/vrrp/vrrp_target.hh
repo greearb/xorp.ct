@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_target.hh,v 1.8 2008/10/09 17:55:52 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_target.hh,v 1.9 2008/10/09 18:03:50 abittau Exp $
 
 #ifndef __VRRP_VRRP_TARGET_HH__
 #define __VRRP_VRRP_TARGET_HH__
@@ -32,13 +32,13 @@
 #include "vrrp.hh"
 #include "vrrp_vif.hh"
 
-class VRRPTarget : public XrlVrrpTargetBase, public IfMgrHintObserver {
+class VrrpTarget : public XrlVrrpTargetBase, public IfMgrHintObserver {
 public:
     static const string vrrp_target_name;
     static const string fea_target_name;
 
-    VRRPTarget(XrlRouter& rtr);
-    ~VRRPTarget();
+    VrrpTarget(XrlRouter& rtr);
+    ~VrrpTarget();
 
     bool       running() const;
     void       tree_complete();
@@ -173,19 +173,19 @@ protected:
         const vector<uint8_t>&  payload);
 
 private:
-    typedef map<string, VRRPVif*>   VIFS; // vifname -> VRRPVif
+    typedef map<string, VrrpVif*>   VIFS; // vifname -> VrrpVif
     typedef map<string, VIFS*>	    IFS;  // ifname -> VIFS
 
     void	shutdown();
     void	start();
     void	check_interfaces();
-    void	check_vif(VRRPVif& vif);
+    void	check_vif(VrrpVif& vif);
     void	add_vrid(const string& ifn, const string& vifn, uint32_t id);
     void	delete_vrid(const string& ifn, const string& vifn, uint32_t id);
-    VRRP&	find_vrid(const string& ifn, const string& vifn, uint32_t id);
-    VRRP*	find_vrid_ptr(const string& ifn, const string& vifn,
+    Vrrp&	find_vrid(const string& ifn, const string& vifn, uint32_t id);
+    Vrrp*	find_vrid_ptr(const string& ifn, const string& vifn,
 			      uint32_t id);
-    VRRPVif*	find_vif(const string& ifn, const string& vifn,
+    VrrpVif*	find_vif(const string& ifn, const string& vifn,
 			 bool add = false);
     void	xrl_cb(const XrlError& xrl_error);
 

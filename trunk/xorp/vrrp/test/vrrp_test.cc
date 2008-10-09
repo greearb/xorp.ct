@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/test/vrrp_test.cc,v 1.1 2008/10/09 17:55:52 abittau Exp $"
+#ident "$XORP: xorp/vrrp/test/vrrp_test.cc,v 1.2 2008/10/09 18:03:50 abittau Exp $"
 
 #include "vrrp/vrrp_module.h"
 #include "vrrp/vrrp_exception.hh"
@@ -30,7 +30,7 @@ namespace {
 
 #define TEST_ASSERT(x)					    \
     if (!(x))						    \
-	xorp_throw(VRRPException, "Test assertion failed")
+	xorp_throw(VrrpException, "Test assertion failed")
 
 const string  INITIALIZE = "initialize";
 const string  MASTER     = "master";
@@ -56,9 +56,9 @@ struct Packet {
 typedef list<Packet*>   PACKETS;
 typedef set<IPv4>	IPS;
 
-class VRRPVifTest : public VRRPInterface {
+class VrrpVifTest : public VrrpInterface {
 public:
-    ~VRRPVifTest();
+    ~VrrpVifTest();
 
     bool	own(const IPv4& addr);
     bool	ready() const;
@@ -80,9 +80,9 @@ private:
     PACKETS _packets;
 };
 
-class VRRPInstance {
+class VrrpInstance {
 public:
-    VRRPInstance(uint32_t vrid);
+    VrrpInstance(uint32_t vrid);
 
     void   from_initialize_to_master();
     void   from_initialize_to_backup();
@@ -100,8 +100,8 @@ public:
 
 private:
     uint32_t	_vrid;
-    VRRPVifTest	_vif;
-    VRRP	_vrrp;
+    VrrpVifTest	_vif;
+    Vrrp	_vrrp;
     IPS		_ips;
     Mac		_source_mac;
     uint32_t	_interval;
@@ -110,92 +110,92 @@ private:
 
 /////////////////////////
 //
-// VRRPVifTest
+// VrrpVifTest
 //
 /////////////////////////
 
-VRRPVifTest::~VRRPVifTest()
+VrrpVifTest::~VrrpVifTest()
 {
     for (PACKETS::iterator i = _packets.begin(); i != _packets.end(); ++i)
 	delete *i;
 }
 
 bool
-VRRPVifTest::own(const IPv4& addr)
+VrrpVifTest::own(const IPv4& addr)
 {
     return _ips.find(addr) != _ips.end();
 }
 
 bool
-VRRPVifTest::ready() const
+VrrpVifTest::ready() const
 {
     return "I was born ready";
 }
 
 const IPv4&
-VRRPVifTest::addr() const
+VrrpVifTest::addr() const
 {
     return _addr;
 }
 
 void
-VRRPVifTest::send(const Mac& src, const Mac& dst, uint32_t ether,
+VrrpVifTest::send(const Mac& src, const Mac& dst, uint32_t ether,
 		  const PAYLOAD& payload)
 {
     _packets.push_back(new Packet(src, dst, ether, payload));
 }
 
 void
-VRRPVifTest::join_mcast()
+VrrpVifTest::join_mcast()
 {
 }
 
 void
-VRRPVifTest::leave_mcast()
+VrrpVifTest::leave_mcast()
 {
 }
 
 void
-VRRPVifTest::add_mac(const Mac& mac)
-{
-    UNUSED(mac);
-}
-
-void
-VRRPVifTest::delete_mac(const Mac& mac)
+VrrpVifTest::add_mac(const Mac& mac)
 {
     UNUSED(mac);
 }
 
 void
-VRRPVifTest::start_arps()
+VrrpVifTest::delete_mac(const Mac& mac)
+{
+    UNUSED(mac);
+}
+
+void
+VrrpVifTest::start_arps()
 {
 }
 
 void
-VRRPVifTest::stop_arps()
+VrrpVifTest::stop_arps()
 {
 }
 
 void
-VRRPVifTest::add_ip(const IPv4& ip)
+VrrpVifTest::add_ip(const IPv4& ip)
 {
     _ips.insert(ip);
 }
 
 PACKETS&
-VRRPVifTest::packets()
+VrrpVifTest::packets()
 {
     return _packets;
 }
 
 /////////////////////////
 //
-// VRRPInstance
+// VrrpInstance
 //
 /////////////////////////
 
-VRRPInstance::VRRPInstance(uint32_t vrid)
+VrrpInstance::VrrpInstance(uint32_t vrid)
 		    : _vrid(vrid),
 		      _vrrp(_vif, _eventloop, _vrid),
 		      _interval(1),
@@ -207,14 +207,14 @@ VRRPInstance::VRRPInstance(uint32_t vrid)
 }
 
 void
-VRRPInstance::add_ip(const IPv4& ip)
+VrrpInstance::add_ip(const IPv4& ip)
 {
     _ips.insert(ip);
     _vrrp.add_ip(ip);
 }
 
 string
-VRRPInstance::state()
+VrrpInstance::state()
 {
     IPv4 ip;
     string state;
@@ -225,7 +225,7 @@ VRRPInstance::state()
 }
 
 bool
-VRRPInstance::check_gratitious_arp(Packet& p, const IPv4& ip)
+VrrpInstance::check_gratitious_arp(Packet& p, const IPv4& ip)
 {
     if (p.ether != ETHERTYPE_ARP)
 	return false;
@@ -233,7 +233,7 @@ VRRPInstance::check_gratitious_arp(Packet& p, const IPv4& ip)
     TEST_ASSERT(p.src == _source_mac);
     TEST_ASSERT(p.dst == BROADCAST);
 
-    const ARPHeader& ah = ARPHeader::assign(p.payload);
+    const ArpHeader& ah = ArpHeader::assign(p.payload);
    
     TEST_ASSERT(ah.is_request());
     IPv4 tmp_ip = ah.get_request();
@@ -251,7 +251,7 @@ VRRPInstance::check_gratitious_arp(Packet& p, const IPv4& ip)
 }
 
 void
-VRRPInstance::check_gratitious_arp(const IPv4& ip)
+VrrpInstance::check_gratitious_arp(const IPv4& ip)
 {
     PACKETS& packets = _vif.packets();
 
@@ -268,7 +268,7 @@ VRRPInstance::check_gratitious_arp(const IPv4& ip)
 }
 
 bool
-VRRPInstance::check_advertisement(Packet& p)
+VrrpInstance::check_advertisement(Packet& p)
 {
     if (p.ether != ETHERTYPE_IP)
 	return false;
@@ -287,7 +287,7 @@ VRRPInstance::check_advertisement(Packet& p)
 
     // check VRRP
     PAYLOAD vrrp(p.payload.begin() + 20, p.payload.end());
-    const VRRPHeader& vh = VRRPHeader::assign(vrrp);
+    const VrrpHeader& vh = VrrpHeader::assign(vrrp);
 
     TEST_ASSERT(vh.vh_v	       == 2);
     TEST_ASSERT(vh.vh_type     == 1);
@@ -306,7 +306,7 @@ VRRPInstance::check_advertisement(Packet& p)
 }
 
 void
-VRRPInstance::check_advertisement()
+VrrpInstance::check_advertisement()
 {
     PACKETS& packets = _vif.packets();
 
@@ -323,7 +323,7 @@ VRRPInstance::check_advertisement()
 }
 
 void
-VRRPInstance::check_master_sent_packets()
+VrrpInstance::check_master_sent_packets()
 {
     for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i)
 	check_gratitious_arp(*i);
@@ -334,7 +334,7 @@ VRRPInstance::check_master_sent_packets()
 }
 
 void
-VRRPInstance::from_initialize_to_master()
+VrrpInstance::from_initialize_to_master()
 {
     /*
      * initialize -> master
@@ -367,7 +367,7 @@ VRRPInstance::from_initialize_to_master()
 }
 
 void
-VRRPInstance::from_master_to_initialize()
+VrrpInstance::from_master_to_initialize()
 {
     /*
        -  If a Shutdown event is received, then:
@@ -390,14 +390,14 @@ VRRPInstance::from_master_to_initialize()
 }
 
 void
-VRRPInstance::add_owned_ip(const IPv4& ip)
+VrrpInstance::add_owned_ip(const IPv4& ip)
 {
     _vif.add_ip(ip);
     add_ip(ip);
 }
 
 void
-VRRPInstance::from_initialize_to_backup()
+VrrpInstance::from_initialize_to_backup()
 {
     /*
      * initialize -> backup
@@ -422,7 +422,7 @@ VRRPInstance::from_initialize_to_backup()
 }
 
 void
-VRRPInstance::from_backup_to_initialize()
+VrrpInstance::from_backup_to_initialize()
 {
     /*
 	-  If a Shutdown event is received, then:
@@ -445,7 +445,7 @@ VRRPInstance::from_backup_to_initialize()
 }
 
 void
-VRRPInstance::from_backup_to_master()
+VrrpInstance::from_backup_to_master()
 {
     /*
       -  If the Master_Down_Timer fires, then:
@@ -478,7 +478,7 @@ VRRPInstance::from_backup_to_master()
 void
 from_initialize_to_master()
 {
-    VRRPInstance vi(1);
+    VrrpInstance vi(1);
 
     vi.add_owned_ip(IPv4("1.2.3.4"));
     vi.from_initialize_to_master();
@@ -487,7 +487,7 @@ from_initialize_to_master()
 void
 from_master_to_initialize()
 {
-    VRRPInstance vi(1);
+    VrrpInstance vi(1);
 
     vi.add_owned_ip(IPv4("1.2.3.4"));
     vi.from_initialize_to_master();
@@ -497,7 +497,7 @@ from_master_to_initialize()
 void
 from_initialize_to_backup()
 {
-    VRRPInstance vi(1);
+    VrrpInstance vi(1);
 
     vi.add_ip(IPv4("1.2.3.4"));
     vi.from_initialize_to_backup();
@@ -506,7 +506,7 @@ from_initialize_to_backup()
 void
 from_backup_to_initialize()
 {
-    VRRPInstance vi(1);
+    VrrpInstance vi(1);
 
     vi.add_ip(IPv4("1.2.3.4"));
     vi.from_initialize_to_backup();
@@ -516,7 +516,7 @@ from_backup_to_initialize()
 void
 from_backup_to_master()
 {
-    VRRPInstance vi(1);
+    VrrpInstance vi(1);
 
     vi.add_ip(IPv4("1.2.3.4"));
     vi.from_initialize_to_backup();
@@ -564,8 +564,8 @@ main(int argc, char* argv[])
 
     try {
 	go();
-    } catch(const VRRPException& e) {
-	cout << "VRRPException: " << e.str() << endl;
+    } catch(const VrrpException& e) {
+	cout << "VrrpException: " << e.str() << endl;
 	exit(1);
     }
 

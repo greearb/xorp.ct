@@ -18,14 +18,14 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/arpd.cc,v 1.2 2008/10/09 17:55:51 abittau Exp $"
+#ident "$XORP: xorp/vrrp/arpd.cc,v 1.3 2008/10/09 18:03:49 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "arpd.hh"
 #include "vrrp_vif.hh"
 #include "libxorp/xlog.h"
 
-ARPd::ARPd(VRRPInterface& vif) 
+ARPd::ARPd(VrrpInterface& vif) 
 		: _vif(vif),
 		  _running(false),
 		  _receiving(false)
@@ -114,7 +114,7 @@ ARPd::recv(const Mac& src, const PAYLOAD& payload)
     if (!_receiving)
 	return;
 
-    const ARPHeader& ah = ARPHeader::assign(payload);
+    const ArpHeader& ah = ArpHeader::assign(payload);
 
     if (!ah.is_request())
 	return;

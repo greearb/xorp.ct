@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.51 2008/10/09 17:49:13 abittau Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.52 2008/10/09 17:50:32 abittau Exp $"
 
 
 //
@@ -2042,7 +2042,7 @@ XrlFeaTarget::ifmgr_0_1_create_mac(
     try {
 	add_remove_mac(true, ifname, mac);
 
-    } catch (const FEAException& e) {
+    } catch (const FeaException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -2058,7 +2058,7 @@ XrlFeaTarget::ifmgr_0_1_delete_mac(
     try {
 	add_remove_mac(false, ifname, mac);
 
-    } catch (const FEAException& e) {
+    } catch (const FeaException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
 
@@ -2083,7 +2083,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
     // elsewhere in process related state - not user config / state.
     IfTreeInterface* iface = _ifconfig.user_config().find_interface(ifname);
     if (!iface)
-	xorp_throw(FEAException, "Unknown interface");
+	xorp_throw(FeaException, "Unknown interface");
 
     // these are the multicast MACs.
     MACS& macs = iface->macs();
@@ -2101,12 +2101,12 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
     // one MAC is ok, because we can change the primary MAC.  More MACs rely on
     // the multicast trick.
     if (add && macs.size())
-	    xorp_throw(FEAException, "Can't find MAC");
+	    xorp_throw(FeaException, "Can't find MAC");
 
     if (add) {
 	// sanity check
 	if (macs.find(mac) != macs.end() || current_mac == mac)
-	    xorp_throw(FEAException, "MAC already added");
+	    xorp_throw(FeaException, "MAC already added");
 
 	if (macs.size())
 	    XLOG_WARNING("More than one MAC added - use at your own risk");
@@ -2118,7 +2118,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
 
 	try {
 	    _io_link_manager.add_multicast_mac(ifname, current_mac);
-	} catch (const FEAException& e) {
+	} catch (const FeaException& e) {
 	    XLOG_WARNING("Cannot add multicast MAC %s", e.str().c_str());
 	}
     } else {
@@ -2128,7 +2128,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
 	// removing current mac
 	if (mac == current_mac) {
 	    if (macs.empty())
-		xorp_throw(FEAException, "Trying to remove only MAC");
+		xorp_throw(FeaException, "Trying to remove only MAC");
 
 	    candidate = *(macs.begin());
 
@@ -2137,7 +2137,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
 	} else {
 	    MACS::iterator i = macs.find(mac);
 	    if (i == macs.end())
-		xorp_throw(FEAException, "Trying to remove unknown MAC");
+		xorp_throw(FeaException, "Trying to remove unknown MAC");
 
 	    candidate = *i;
 	}
@@ -2147,7 +2147,7 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
 
 	try {
 	    _io_link_manager.remove_multicast_mac(ifname, candidate);
-	} catch (const FEAException& e) {
+	} catch (const FeaException& e) {
 	    XLOG_WARNING("Cannot remove multicast MAC %s", e.str().c_str());
 	}
     }
@@ -2161,15 +2161,15 @@ XrlFeaTarget::set_mac(const string& ifname, const Mac& mac)
     uint32_t tid;
 
     if (ifmgr_0_1_start_transaction(tid) != XrlCmdError::OKAY())
-	xorp_throw(FEAException, "Can't start transaction");
+	xorp_throw(FeaException, "Can't start transaction");
 
     if (ifmgr_0_1_set_mac(tid, ifname, mac) != XrlCmdError::OKAY()) {
 	ifmgr_0_1_abort_transaction(tid);
-	xorp_throw(FEAException, "Can't do operation");
+	xorp_throw(FeaException, "Can't do operation");
     }
 
     if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY())
-	xorp_throw(FEAException, "Can't commit transaction");
+	xorp_throw(FeaException, "Can't commit transaction");
 
     send_gratitious_arps(ifname, mac);
 }
@@ -2202,14 +2202,14 @@ XrlFeaTarget::send_gratitious_arps(const string& ifname, const Mac& mac)
 		continue;
 
 	    Mac bcast("FF:FF:FF:FF:FF:FF");
-	    ARPHeader::PAYLOAD data;
+	    ArpHeader::PAYLOAD data;
 
-	    ARPHeader::make_gratitious(data, mac, ip);
+	    ArpHeader::make_gratitious(data, mac, ip);
 
 	    XrlCmdError e = raw_link_0_1_send(ifname, vifname, mac, bcast,
 					      ETHERTYPE_ARP, data);
 	    if (e != XrlCmdError::OKAY())
-		xorp_throw(FEAException,
+		xorp_throw(FeaException,
 			   c_format("Cannot send gratitious ARP: %s",
 				    e.str().c_str()));
 	}
