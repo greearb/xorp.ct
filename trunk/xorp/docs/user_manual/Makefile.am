@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/user_manual/Makefile.am,v 1.9 2006/03/09 09:09:36 pavlin Exp $
+## $XORP: xorp/docs/user_manual/Makefile.am,v 1.10 2008/07/18 23:12:39 pavlin Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -31,6 +31,7 @@ user_manual_LATEX	+= static_routes.tex
 user_manual_LATEX	+= unicast_routing.tex
 user_manual_LATEX	+= user_manual.tex
 user_manual_LATEX	+= users.tex
+user_manual_LATEX	+= vrrp.tex
 
 user_manual_FIGURES	 = figs/cd1.ps
 user_manual_FIGURES	+= figs/cd2.ps
