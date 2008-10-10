@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.9 2008/10/09 18:03:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.10 2008/10/09 18:04:12 abittau Exp $"
 
 #include <sstream>
 
@@ -67,7 +67,7 @@ VrrpTarget::VrrpTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
     // cause VRRP to stop and start, which causes changing MACs yet again.  To
     // avoid this loop, we delay configuration changes so we don't see the
     // interface going down on a MAC change.
-    _ifmgr.delay_updates(1000);
+    _ifmgr.delay_updates(TimeVal(1, 0));
 
     start();
 }
