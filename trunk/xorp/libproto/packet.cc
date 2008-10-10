@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/packet.cc,v 1.13 2008/10/10 01:46:48 pavlin Exp $"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.14 2008/10/10 01:53:54 pavlin Exp $"
 
 
 //
@@ -167,10 +167,8 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 	first_ip.set_ip_off(first_ip.ip_off() | IpHeader4::FRAGMENT_FLAGS_IP_MF);
 	first_ip.set_ip_len(first_frag_len);
 	first_ip.set_ip_sum(0);
-	if (do_checksum) {
-	    first_ip.set_ip_sum(ntohs(inet_checksum(first_ip.data(),
-						    first_ip_hl)));
-	}
+	if (do_checksum)
+	    first_ip.compute_checksum();
 
 	// Add the first fragment
 	fragments.push_back(first_frag);
@@ -215,10 +213,8 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 	}
 
 	frag_ip4.set_ip_sum(0);
-	if (do_checksum) {
-	    frag_ip4.set_ip_sum(ntohs(inet_checksum(frag_ip4.data(),
-						    frag_ip_hl)));
-	}
+	if (do_checksum)
+	    frag_ip4.compute_checksum();
 
 	// Add the fragment
 	fragments.push_back(frag_buf);

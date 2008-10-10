@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_packet.cc,v 1.2 2008/10/09 18:03:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_packet.cc,v 1.3 2008/10/09 18:04:12 abittau Exp $"
 
 #include "vrrp_module.h"
 #include "libxorp/xlog.h"
@@ -163,11 +163,7 @@ VrrpPacket::finalize()
 
     size += IP_HEADER_MIN_SIZE;
     _ip.set_ip_len(size);
-    _ip.set_ip_sum(0);
-
-    // XXX set_ip_sum does htons but inet_checksum returns in network order.  We
-    // really need _ip.compute_checksum().
-    _ip.set_ip_sum(ntohs(inet_checksum(_ip.data(), IP_HEADER_MIN_SIZE)));
+    _ip.compute_checksum();
 
     XLOG_ASSERT(size <= VRRP_MAX_PACKET_SIZE);
     XLOG_ASSERT(_data.size() == _data.capacity() 

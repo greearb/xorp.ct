@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.39 2008/07/23 05:11:16 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.40 2008/10/02 21:57:55 bms Exp $"
 
 
 //
@@ -603,8 +603,7 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	ip4.set_ip_ttl(0);
 	ip4.set_ip_src(source_addr.get_ipv4());
 	ip4.set_ip_dst(group_addr.get_ipv4());
-	ip4.set_ip_sum(0);
-	ip4.set_ip_sum(ntohs(inet_checksum(ip4.data(), ip4.size())));
+	ip4.compute_checksum();
 	
 	BUFFER_PUT_DATA(ip_header4_buffer, buffer, IpHeader4::SIZE);
 	break;
