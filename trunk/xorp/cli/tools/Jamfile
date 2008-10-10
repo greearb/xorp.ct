@@ -1,16 +1,26 @@
 #
-# $XORP: xorp/cli/tools/Jamfile,v 1.1 2007/01/11 22:30:44 bms Exp $
+# $XORP: xorp/cli/tools/Jamfile,v 1.2 2007/04/20 07:17:41 pavlin Exp $
 #
 
 SubDir TOP cli tools ;
+
 SubIncludeOnce TOP libxorp ;
 SubIncludeOnce TOP libcomm ;
 SubIncludeOnce TOP xrl interfaces ;
 SubIncludeOnce TOP xrl targets ;
 SubIncludeOnce TOP libxipc ;
+
 SubDir TOP cli tools ;
 
+Main cli_generic : cli_generic.cc ;
 Main send_cli_processor_xrl : send_cli_processor_xrl.cc ;
+
+LinkLibraries cli_generic :
+	libxipc
+	libcomm
+	libxorp
+        ;
+
 LinkLibraries send_cli_processor_xrl :
 	libcliprocessorxif
 	libxipc
@@ -19,4 +29,4 @@ LinkLibraries send_cli_processor_xrl :
         ;
 
 # XXX: $(PREFIX)$(SUBDIR) introduces a period.
-InstallBin $(PREFIX)/cli/tools : send_cli_processor_xrl ;
+InstallBin $(PREFIX)/cli/tools : cli_generic send_cli_processor_xrl ;
