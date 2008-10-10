@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.15 2008/10/10 02:43:36 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.16 2008/10/10 03:09:42 pavlin Exp $"
 
 #include <sstream>
 
@@ -172,7 +172,8 @@ Vrrp::setup_timers(bool skew)
 
     case BACKUP:
 	_master_down_timer.schedule_after_ms(
-		(skew ? _skew_time : _master_down_interval) * 1000.0);
+	    static_cast<int>((skew ? _skew_time : _master_down_interval)
+			     * 1000.0));
 	break;
     }
 }
