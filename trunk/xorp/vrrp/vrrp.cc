@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.12 2008/10/10 01:15:19 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.13 2008/10/10 01:30:06 pavlin Exp $"
 
 #include <sstream>
 
@@ -49,22 +49,22 @@ out_of_range(const string& msg, const T& x)
 const Mac Vrrp::mcast_mac = Mac("01:00:5E:00:00:12");
 
 Vrrp::Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid)
-		: _vif(vif),
-		  _vrid(vrid),
-		  _priority(100),
-		  _interval(1),
-		  _skew_time(0),
-		  _master_down_interval(0),
-		  _preempt(true),
-		  _state(INITIALIZE),
-		  _own(false),
-		  _disable(true),
-		  _arpd(_vif)
+    : _vif(vif),
+      _vrid(vrid),
+      _priority(100),
+      _interval(1),
+      _skew_time(0),
+      _master_down_interval(0),
+      _preempt(true),
+      _state(INITIALIZE),
+      _own(false),
+      _disable(true),
+      _arpd(_vif)
 {
     if (_vrid < 1 || _vrid > 255)
 	out_of_range("VRID out of range", _vrid);
 
-    char tmp[64];
+    char tmp[sizeof "ff:ff:ff:ff:ff:ff"];
     snprintf(tmp, sizeof(tmp), "00:00:5E:00:01:%X", (uint8_t) vrid);
     _source_mac = Mac(tmp);
     _arpd.set_mac(_source_mac);
@@ -416,7 +416,7 @@ Vrrp::recv(const IPv4& from, const VrrpHeader& vh)
 	xorp_throw(VrrpException, "VRRID not running");
 
     if (priority() == PRIORITY_OWN)
-	xorp_throw(VrrpException, "I pwn VRRID but got advertisement");
+	xorp_throw(VrrpException, "I own VRRID but got advertisement");
 
     if (vh.vh_auth != VrrpHeader::VRRP_AUTH_NONE)
 	xorp_throw(VrrpException, "Auth method not supported");
