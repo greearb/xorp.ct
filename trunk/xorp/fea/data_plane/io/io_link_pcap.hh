@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.11 2008/10/02 21:57:11 bms Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.12 2008/10/09 17:50:19 abittau Exp $
 
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -169,7 +169,13 @@ private:
      */
     void	recv_data();
 
-    bool	reopen_device();
+    /**
+     * Reopen the pcap access.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		reopen_pcap_access(string& error_msg);
 
     // Private state
     XorpFd	_packet_fd;	// The file descriptor to send and recv packets

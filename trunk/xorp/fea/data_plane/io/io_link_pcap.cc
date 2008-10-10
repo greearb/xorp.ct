@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.15 2008/10/02 21:57:11 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.16 2008/10/09 17:50:18 abittau Exp $"
 
 //
 // I/O link raw communication support.
@@ -742,30 +742,34 @@ IoLinkPcap::send_packet(const Mac& src_address,
 			     vif_name().c_str(),
 			     pcap_geterr(_pcap));
 
-	// maybe device was brought down invalidating the socket - try to
-	// reopen.  XXX is there a way to check "errno"?
-    	if (reopen_device() 
-	    && pcap_sendpacket(_pcap, _databuf, packet_size) == 0)
+	//
+	// XXX: Maybe the device was brought down invalidating the
+	// socket - try to reopen.
+	// TODO: is there a way to check "errno"?
+	//
+	string dummy_error_msg;
+    	if ((reopen_pcap_access(dummy_error_msg) == XORP_OK)
+	    && (pcap_sendpacket(_pcap, _databuf, packet_size) == 0)) {
+	    // Success
 	    error_msg = "";
-	else
+	} else {
 	    return (XORP_ERROR);
+	}
     }
 
     return (XORP_OK);
 }
 
-bool
-IoLinkPcap::reopen_device()
+int
+IoLinkPcap::reopen_pcap_access(string& error_msg)
 {
-    string error_msg;
-
     if (close_pcap_access(error_msg) != XORP_OK)
-	return false;
+	return (XORP_ERROR);
 
     if (open_pcap_access(error_msg) != XORP_OK)
-	return false;
+	return (XORP_ERROR);
 
-    return true;
+    return (XORP_OK);
 }
 
 #endif // HAVE_PCAP
