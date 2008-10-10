@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.10 2008/10/09 18:04:12 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.11 2008/10/09 19:12:25 atanu Exp $"
 
 #include <sstream>
 
@@ -342,7 +342,7 @@ Vrrp::send_arp(const IPv4& ip)
 {
     PAYLOAD data;
 
-    ArpHeader::make_gratitious(data, _source_mac, ip);
+    ArpHeader::make_gratuitous(data, _source_mac, ip);
 
     _vif.send(_source_mac, bcast_mac, ETHERTYPE_ARP, data);
 }
