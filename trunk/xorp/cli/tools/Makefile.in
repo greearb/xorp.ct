@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-bin_PROGRAMS = send_cli_processor_xrl$(EXEEXT) cli_generic$(EXEEXT)
+bin_PROGRAMS = cli_generic$(EXEEXT) send_cli_processor_xrl$(EXEEXT)
 TESTS =
 noinst_PROGRAMS =
 subdir = cli/tools
@@ -213,16 +213,14 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -- Libraries and library flags to link the binary programs
+
+# -- Program Sources
+send_cli_processor_xrl_SOURCES = send_cli_processor_xrl.cc
 send_cli_processor_xrl_LDADD =  \
 	$(top_builddir)/xrl/interfaces/libcliprocessorxif.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
-
-# -- Program Sources
-send_cli_processor_xrl_SOURCES = send_cli_processor_xrl.cc
-
-# -- cli generic
 cli_generic_SOURCES = cli_generic.cc
 cli_generic_LDADD = $(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
