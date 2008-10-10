@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/cli/tools/cli_generic.cc,v 1.1 2008/10/09 17:51:24 abittau Exp $"
+#ident "$XORP: xorp/cli/tools/cli_generic.cc,v 1.2 2008/10/09 18:03:48 abittau Exp $"
 
 #include "cli/cli_module.h"
 #include "libxorp/xorp.h"
@@ -87,12 +87,12 @@ private:
 };
 
 CliGeneric::CliGeneric(XrlRouter& rtr) 
-		: _first(true),
-		  _last(NULL),
-		  _rtr(rtr),
-		  _running(false),
-		  _xrl_pending(false),
-		  _keys(NULL)
+    : _first(true),
+      _last(NULL),
+      _rtr(rtr),
+      _running(false),
+      _xrl_pending(false),
+      _keys(NULL)
 {
 }
 
