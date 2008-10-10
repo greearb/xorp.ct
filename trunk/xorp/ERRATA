@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.44 2008/10/07 00:35:25 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.45 2008/10/10 08:06:33 abittau Exp $
 #
 
 		XORP ERRATA
@@ -9,8 +9,8 @@
       machines. The simplest work-around is to rerun gmake or not to use
       the -j flag.
 
-    - The following compiler is known to be buggy, and should not be used
-      to compile XORP:
+    - The following compiler is known to be buggy, and should not be
+      used to compile XORP:
         gcc34 (GCC) 3.4.0 20040310 (prerelease) [FreeBSD]
       A newer compiler such as the following should be used instead:
         gcc34 (GCC) 3.4.2 20040827 (prerelease) [FreeBSD]
@@ -55,21 +55,24 @@
         http://www.xorp.org/bugzilla/query.cgi
 
   FEA/MFEA:
-    - On Linux with kernels prior to 2.6.24 and IPv6 support, interfaces fail to
-      be reconfigured properly if brought down and up again.  This occurs
-      because Linux's IPv6 subsystem (incorrectly) sends and RTM_DELLINK message
-      when an interface is brought down, and XORP accordingly deletes the
-      interface.  When the interface comes back up, a pristine interface is
-      created within XORP with no configuration.  Hence any IP addresses
-      associated to the interface are lost.
+    - On Linux with kernels prior to 2.6.24 and IPv6 support, interfaces
+      fail to be reconfigured properly if brought down and up again.
+      This occurs because Linux's IPv6 subsystem (incorrectly) sends and
+      RTM_DELLINK message when an interface is brought down, and XORP
+      accordingly deletes the interface. When the interface comes back
+      up, a pristine interface is created within XORP with no
+      configuration.  Hence any IP addresses associated to the interface
+      are lost.
 
-      To check for the bug, launch XORP, bring an interface down and up again,
-      and from xorpsh, do a show interfaces and check whether you see DISABLED
-      next to the IP addresses of the interface.  If so, you're hit by the bug.
+      To check for the bug, launch XORP, bring an interface down and up
+      again, and from xorpsh, do a show interfaces and check whether you
+      see DISABLED next to the IP addresses of the interface.  If so,
+      you're hit by the bug.
 
-      On Linux, a typical scenario where an interface is brought down and up
-      again is when changing its MAC address.  This means that XORP's MAC
-      configuration directive may not work correctly on affected systems.
+      On Linux, a typical scenario where an interface is brought down
+      and up again is when changing its MAC address.  This means that
+      XORP's MAC configuration directive may not work correctly on
+      affected systems.
 
     - On Linux with kernel 2.6 (e.g., RedHat FC2 with kernel
       2.6.5-1.358), some of the tests may fail (with or without an error
@@ -89,28 +92,32 @@
         https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=121697
 
     - On Linux with kernel older than linux-2.6.15-rc7 there is a
-      kernel bug that prevents the FEA to receive netlink(7) notifications
-      about added/deleted IPv6 network addresses and routes:
+      kernel bug that prevents the FEA to receive netlink(7)
+      notifications about added/deleted IPv6 network addresses and
+      routes:
 
         http://www.uwsg.indiana.edu/hypermail/linux/kernel/0512.2/2121.html
 
       Typically, this could be an issue only if someone is running
-      IPv6 PIM-SM on Linux, and only if the unicast routes may be modified
-      while XORP is running. In that case the fix would be to replace
-      "RTMGRP_IPV6_IFADDR" with "(RTMGRP_IPV6_IFADDR >> 1)" inside
-      fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc, and to
-      replace "RTMGRP_IPV6_ROUTE" with "(RTMGRP_IPV6_ROUTE >> 1)" inside
+      IPv6 PIM-SM on Linux, and only if the unicast routes may be
+      modified while XORP is running. In that case the fix would be to
+      replace "RTMGRP_IPV6_IFADDR" with "(RTMGRP_IPV6_IFADDR >> 1)"
+      inside
+      fea/data_plane/ifconfig/ifconfig_observer_netlink_socket.cc, and
+      to replace "RTMGRP_IPV6_ROUTE" with "(RTMGRP_IPV6_ROUTE >> 1)"
+      inside
       fea/data_plane/fibconfig/fibconfig_entry_observer_netlink_socket.cc
-      and fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc
+      and
+      fea/data_plane/fibconfig/fibconfig_table_observer_netlink_socket.cc
 
-    - On Linux, adding and deleting multiple IPv4 addresses per interface
-      may trigger an error: typically, if the primary IPv4 address
-      is deleted, the kernel automatically deletes all secondary IPv4
-      addresses on that interface. In Linux kernel 2.6.12 and later,
-      enabling the new sysctl net.ipv4.conf.all.promote_secondaries
+    - On Linux, adding and deleting multiple IPv4 addresses per
+      interface may trigger an error: typically, if the primary IPv4
+      address is deleted, the kernel automatically deletes all secondary
+      IPv4 addresses on that interface. In Linux kernel 2.6.12 and
+      later, enabling the new sysctl net.ipv4.conf.all.promote_secondaries
       (or one of the interface specific variants) can be used to
-      automatically promote one of the secondary addresses to become
-      the new primary address.
+      automatically promote one of the secondary addresses to become the
+      new primary address.
 
     - On Linux with kernel older than linux-2.6.17.11 there is a kernel
       bug related to modifying MAC addresses using the RTM_SETLINK
@@ -131,20 +138,20 @@
       feature, it is not used yet in XORP). Though, for those systems
       the link status should be read properly on startup.
 
-    - On Linux with kernel version linux-2.6.17 and older there is a kernel
-      bug which prevents adding an IPv6 address to an interface if the
-      interface is DOWN:
+    - On Linux with kernel version linux-2.6.17 and older there is a
+      kernel bug which prevents adding an IPv6 address to an interface
+      if the interface is DOWN:
         # ip link set eth1 down
         # ip addr add 3ffe:c00:0:0:1111:1111:1111:1111/64 dev eth1
         RTNETLINK answers: Network is down
         Exit 2
 
       As a result of that, XORP cannot be started with explicitly
-      configured IPv6 addresses on an interface if that interface is DOWN.
-      The problem has been fixed between linux-2.6.17 and linux-2.6.20.
-      If updating to a newer Linux kernel is not feasible, a possible
-      work-around is to explicitly set the interface status to UP before
-      adding/configuring IPv6 addresses to it. 
+      configured IPv6 addresses on an interface if that interface is
+      DOWN. The problem has been fixed between linux-2.6.17 and
+      linux-2.6.20. If updating to a newer Linux kernel is not feasible,
+      a possible work-around is to explicitly set the interface status
+      to UP before adding/configuring IPv6 addresses to it. 
 
     - On Linux systems up to year 2008 or so the following header files
       are not C++ friendly:
@@ -157,8 +164,8 @@
       To enable the Linux firewall compilation
       the following patches need should be applied to the above
       two files. Note that the patches are for Ubuntu Server-7.10,
-      so they might need slight adjustment for other Linux distributions.
-      After applying the patch rerun "./configure; gmake".
+      so they might need slight adjustment for other Linux
+      distributions. After applying the patch rerun "./configure; gmake".
 
 --- /usr/include/linux/netfilter_ipv4/ip_tables.h.org	2008-02-12 02:49:51.000000000 -0800
 +++ /usr/include/linux/netfilter_ipv4/ip_tables.h	2008-04-19 22:09:22.000000000 -0700
@@ -204,8 +211,8 @@
       shouldn't be sent. We believe this shouldn't affect the routing
       computation, but it does introduce more LSAs than necessary.
 
-    - There are several other known issues, but none of them is considered
-      critical. The list of known issues is available from:
+    - There are several other known issues, but none of them is
+      considered critical. The list of known issues is available from:
 
         http://www.xorp.org/bugzilla/query.cgi
 
@@ -241,8 +248,8 @@
 
       In addition, if the number of interfaces is notably larger (e.g.,
       on the order of 150), the maximum amount of socket option memory
-      buffer should be increased as well. E.g., to increase the value from
-      10240 (the default) to 200000, run as a root:
+      buffer should be increased as well. E.g., to increase the value
+      from 10240 (the default) to 200000, run as a root:
 
         sysctl -w net.core.optmem_max=200000
       or
@@ -298,9 +305,9 @@
       setsockopt(MRT_ADD_VIF, vif eth0.4) failed: Too many open files in system
 
       The reason for that error is that by default majority of the UNIX
-      kernels cannot support more than 32 interfaces enabled for multicast
-      forwarding (one interface is always used as the internal PIM Register
-      virtual interface).
+      kernels cannot support more than 32 interfaces enabled for
+      multicast forwarding (one interface is always used as the internal
+      PIM Register virtual interface).
 
       The solution is to increase the MAXVIFS limit in the kernel
       (typically defined in the "netinet/ip_mroute.h" (BSD) or the
