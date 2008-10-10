@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.69 2008/08/20 01:34:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.70 2008/10/02 21:57:48 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -152,18 +152,19 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 
     if (rt.get_destination_type() == OspfTypes::Router) {
 	status = _adv.replace_entry(area, rt.get_router_id(), rt);
-// 	switch(_ospf.get_version()) {
-// 	case OspfTypes::V2:
-// 	    break;
-// 	case OspfTypes::V3:
+ 	switch(_ospf.get_version()) {
+ 	case OspfTypes::V2:
+ 	    break;
+ 	case OspfTypes::V3:
 // 	    XLOG_ASSERT(!net.is_valid());
 // 	    if (net.is_valid()) {
 // 		XLOG_WARNING("Net should be zero %s", cstring(net));
 // 		status = false;
 // 	    }
 // 	    return status;
-// 	    break;
-// 	}
+	    return true;
+ 	    break;
+ 	}
     }
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
