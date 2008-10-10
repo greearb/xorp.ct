@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/packet.cc,v 1.10 2008/10/09 17:50:32 abittau Exp $"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.11 2008/10/09 18:04:11 abittau Exp $"
 
 
 //
@@ -346,13 +346,13 @@ ArpHeader::set_reply(const Mac& mac, const IPv4& ip)
 }
 
 uint32_t
-ArpHeader::size()
+ArpHeader::size() const
 {
     return sizeof(*this) + ah_hw_len * 2 + ah_proto_len * 2;
 }
 
 void
-ArpHeader::make_gratitious(PAYLOAD& data, const Mac& mac, const IPv4& ip)
+ArpHeader::make_gratuitous(PAYLOAD& data, const Mac& mac, const IPv4& ip)
 {
     uint32_t sz = sizeof(ArpHeader) + 6 * 2 + 4 * 2;
 

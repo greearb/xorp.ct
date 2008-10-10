@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.17 2008/10/09 17:50:32 abittau Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.18 2008/10/09 18:04:11 abittau Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -902,12 +902,12 @@ struct ArpHeader {
 
     static ArpHeader&	    assign(uint8_t* data);
     static const ArpHeader& assign(const PAYLOAD& payload);
-    static void		    make_gratitious(PAYLOAD& payload, const Mac& mac,
+    static void		    make_gratuitous(PAYLOAD& payload, const Mac& mac,
 					    const IPv4& ip);
     void		    set_sender(const Mac& mac, const IPv4& ip);
     void		    set_request(const IPv4& ip);
     void		    set_reply(const Mac& mac, const IPv4& ip);
-    uint32_t		    size();
+    uint32_t		    size() const;
     bool		    is_request() const;
     IPv4		    get_request() const;
     void		    make_reply(PAYLOAD& out, const Mac& mac) const;
