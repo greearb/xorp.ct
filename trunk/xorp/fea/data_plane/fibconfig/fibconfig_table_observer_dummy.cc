@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_dummy.cc,v 1.10 2008/07/23 05:10:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_observer_dummy.cc,v 1.11 2008/10/02 21:56:59 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -26,7 +26,6 @@
 #include "libxorp/debug.h"
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_table_observer.hh"
 
 #include "fibconfig_table_observer_dummy.hh"
 
@@ -67,8 +66,6 @@ FibConfigTableObserverDummy::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    // TODO: XXX: PAVPAVPAV: implement it!
-
     _is_running = true;
 
     return (XORP_OK);
@@ -78,8 +75,6 @@ int
 FibConfigTableObserverDummy::stop(string& error_msg)
 {
     UNUSED(error_msg);
-
-    // TODO: XXX: PAVPAVPAV: implement it!
 
     if (! _is_running)
 	return (XORP_OK);
