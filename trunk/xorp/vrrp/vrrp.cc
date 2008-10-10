@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.14 2008/10/10 02:33:02 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.15 2008/10/10 02:43:36 pavlin Exp $"
 
 #include <sstream>
 
@@ -243,14 +243,15 @@ Vrrp::become_backup()
 	_arpd.stop();
     }
 
-    /* TODO
-     *
-     * -  MUST NOT respond to ARP requests for the IP address(s) associated
-     *    with the virtual router.
-     *
-     * -  MUST NOT accept packets addressed to the IP address(es) associated
-     *    with the virtual router.
-     */
+    //
+    // TODO
+    //
+    // -  MUST NOT respond to ARP requests for the IP address(s) associated
+    //    with the virtual router.
+    //
+    // -  MUST NOT accept packets addressed to the IP address(es) associated
+    //    with the virtual router.
+    //
     for (IPS::iterator i = _ips.begin(); i != _ips.end(); ++i) {
 	const IPv4& ip = *i;
 

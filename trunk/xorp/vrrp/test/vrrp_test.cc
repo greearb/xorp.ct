@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/test/vrrp_test.cc,v 1.5 2008/10/10 02:28:13 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/test/vrrp_test.cc,v 1.6 2008/10/10 02:43:37 pavlin Exp $"
 
 #include "vrrp/vrrp_module.h"
 #include "libxorp/xorp.h"
@@ -337,20 +337,19 @@ VrrpInstance::check_master_sent_packets()
 void
 VrrpInstance::from_initialize_to_master()
 {
-    /*
-     * initialize -> master
-     *
-     * -  If the Priority = 255 (i.e., the router owns the IP address(es)
-     *    associated with the virtual router)
-     *
-     *    o  Send an ADVERTISEMENT
-     *    o  Broadcast a gratuitous ARP request containing the virtual
-     *       router MAC address for each IP address associated with the
-     *       virtual router.
-     *    o  Set the Adver_Timer to Advertisement_Interval
-     *    o  Transition to the {Master} state
-     *
-     */
+    //
+    // initialize -> master
+    //
+    // -  If the Priority = 255 (i.e., the router owns the IP address(es)
+    //    associated with the virtual router)
+    //
+    //    o  Send an ADVERTISEMENT
+    //    o  Broadcast a gratuitous ARP request containing the virtual
+    //       router MAC address for each IP address associated with the
+    //       virtual router.
+    //    o  Set the Adver_Timer to Advertisement_Interval
+    //    o  Transition to the {Master} state
+    //
 
     // check initial state
     TEST_ASSERT(state()	         == INITIALIZE);
@@ -370,13 +369,13 @@ VrrpInstance::from_initialize_to_master()
 void
 VrrpInstance::from_master_to_initialize()
 {
-    /*
-       -  If a Shutdown event is received, then:
-
-      o  Cancel the Adver_Timer
-      o  Send an ADVERTISEMENT with Priority = 0
-      o  Transition to the {Initialize} state
-    */
+    //
+    // -  If a Shutdown event is received, then:
+    //
+    //    o  Cancel the Adver_Timer
+    //    o  Send an ADVERTISEMENT with Priority = 0
+    //    o  Transition to the {Initialize} state
+    //
 
     TEST_ASSERT(state() == MASTER);
 
@@ -400,13 +399,13 @@ VrrpInstance::add_owned_ip(const IPv4& ip)
 void
 VrrpInstance::from_initialize_to_backup()
 {
-    /*
-     * initialize -> backup
-     *
-     *    o  Set the Master_Down_Timer to Master_Down_Interval
-     *    o  Transition to the {Backup} state
-     *
-     */
+    //
+    // initialize -> backup
+    //
+    //    o  Set the Master_Down_Timer to Master_Down_Interval
+    //    o  Transition to the {Backup} state
+    //
+    //
 
     // check initial state
     TEST_ASSERT(state()	         == INITIALIZE);
@@ -425,12 +424,12 @@ VrrpInstance::from_initialize_to_backup()
 void
 VrrpInstance::from_backup_to_initialize()
 {
-    /*
-	-  If a Shutdown event is received, then:
-
-	o  Cancel the Master_Down_Timer
-	o  Transition to the {Initialize} state
-     */
+    //
+    // -  If a Shutdown event is received, then:
+    //
+    //    o  Cancel the Master_Down_Timer
+    //    o  Transition to the {Initialize} state
+    //
 
     // check initial state
     TEST_ASSERT(state() == BACKUP);
@@ -448,16 +447,16 @@ VrrpInstance::from_backup_to_initialize()
 void
 VrrpInstance::from_backup_to_master()
 {
-    /*
-      -  If the Master_Down_Timer fires, then:
-
-      o  Send an ADVERTISEMENT
-      o  Broadcast a gratuitous ARP request containing the virtual
-         router MAC address for each IP address associated with the
-         virtual router
-      o  Set the Adver_Timer to Advertisement_Interval
-      o  Transition to the {Master} state
-     */
+    //
+    // -  If the Master_Down_Timer fires, then:
+    //
+    //    o Send an ADVERTISEMENT
+    //    o Broadcast a gratuitous ARP request containing the virtual
+    //      router MAC address for each IP address associated with the
+    //      virtual router
+    //    o Set the Adver_Timer to Advertisement_Interval
+    //    o Transition to the {Master} state
+    //
     TEST_ASSERT(state() == BACKUP);
 
     // XXX wait for Master_Down_Interval
