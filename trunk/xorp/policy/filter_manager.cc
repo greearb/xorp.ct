@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.20 2008/08/06 08:24:10 abittau Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.21 2008/10/02 21:57:58 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -123,7 +123,7 @@ FilterManager::policy_backend_cb(const XrlError& e)
 	debug_msg("[POLICY] XRL exception: %s\n", e.str().c_str());
 	error_msg = c_format("XRL policy_backend_cb() error: %s",
 			     e.str().c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 //	xorp_throw(FMException, error_msg); // XXX: what else can we do ?
     }	
 }
