@@ -18,21 +18,23 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.8 2008/10/09 18:03:50 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_vif.cc,v 1.9 2008/10/09 18:04:12 abittau Exp $"
 
 #include "vrrp_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
 #include "vrrp_vif.hh"
 #include "vrrp_target.hh"
 #include "vrrp_exception.hh"
 
 VrrpVif::VrrpVif(VrrpTarget& vt, const string& ifname, const string& vifname)
-	    : _vt(vt),
-	      _ifname(ifname),
-	      _vifname(vifname),
-	      _ready(false),
-	      _join(0),
-	      _arps(0)
+    : _vt(vt),
+      _ifname(ifname),
+      _vifname(vifname),
+      _ready(false),
+      _join(0),
+      _arps(0)
 {
 }
 

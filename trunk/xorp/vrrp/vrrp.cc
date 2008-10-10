@@ -18,12 +18,14 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.13 2008/10/10 01:30:06 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.14 2008/10/10 02:33:02 pavlin Exp $"
 
 #include <sstream>
 
 #include "vrrp_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
 #include "vrrp.hh"
 #include "vrrp_exception.hh"
 #include "vrrp_vif.hh"

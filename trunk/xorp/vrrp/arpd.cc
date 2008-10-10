@@ -18,17 +18,19 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/arpd.cc,v 1.3 2008/10/09 18:03:49 abittau Exp $"
+#ident "$XORP: xorp/vrrp/arpd.cc,v 1.4 2008/10/09 18:04:12 abittau Exp $"
 
 #include "vrrp_module.h"
-#include "arpd.hh"
-#include "vrrp_vif.hh"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
+#include "arpd.hh"
+#include "vrrp_vif.hh"
+
 ARPd::ARPd(VrrpInterface& vif) 
-		: _vif(vif),
-		  _running(false),
-		  _receiving(false)
+    : _vif(vif),
+      _running(false),
+      _receiving(false)
 {
 }
 

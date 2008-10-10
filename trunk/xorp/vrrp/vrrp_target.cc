@@ -18,12 +18,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.11 2008/10/10 01:14:02 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.12 2008/10/10 01:30:06 pavlin Exp $"
 
 #include <sstream>
 
 #include "vrrp_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
+
 #include "vrrp_target.hh"
 #include "vrrp_exception.hh"
 
@@ -50,16 +53,17 @@ vrid_error(const string& msg, const string& ifn, const string& vifn,
 
 } // anonymous namespace
 
-VrrpTarget::VrrpTarget(XrlRouter& rtr) : XrlVrrpTargetBase(&rtr),
-		_rtr(rtr),
-		_running(true),
-		_ifmgr(rtr.eventloop(), fea_target_name.c_str(),
-		       rtr.finder_address(), rtr.finder_port()),
-		_ifmgr_setup(false),
-		_rawlink(&rtr),
-		_rawipv4(&rtr),
-		_fea(&rtr),
-		_xrls_pending(0)
+VrrpTarget::VrrpTarget(XrlRouter& rtr)
+    : XrlVrrpTargetBase(&rtr),
+      _rtr(rtr),
+      _running(true),
+      _ifmgr(rtr.eventloop(), fea_target_name.c_str(),
+	     rtr.finder_address(), rtr.finder_port()),
+      _ifmgr_setup(false),
+      _rawlink(&rtr),
+      _rawipv4(&rtr),
+      _fea(&rtr),
+      _xrls_pending(0)
 {
     _ifmgr.attach_hint_observer(this);
 
