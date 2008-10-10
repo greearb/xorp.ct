@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.33 2008/10/02 21:57:16 bms Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.34 2008/10/09 17:48:23 abittau Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -1022,7 +1022,7 @@ IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
     : ServiceBase("FEA Interface Mirror"),
       _e(e), _finder_addr(finder_addr), _finder_port(finder_port),
       _dispatcher(_iftree), _rtarget(rtarget), _rtr(NULL), _xrl_tgt(NULL),
-      _updates_delay(0)
+      _updates_delay(TimeVal::ZERO())
 
 {
 }
@@ -1035,7 +1035,7 @@ IfMgrXrlMirror::IfMgrXrlMirror(EventLoop&	e,
     : ServiceBase("FEA Interface Mirror"),
       _e(e), _finder_hostname(finder_hostname), _finder_port(finder_port),
       _dispatcher(_iftree), _rtarget(rtarget), _rtr(NULL), _xrl_tgt(NULL),
-      _updates_delay(0)
+      _updates_delay(TimeVal::ZERO())
 {
 }
 
@@ -1131,15 +1131,15 @@ IfMgrXrlMirror::tree_complete()
 }
 
 void
-IfMgrXrlMirror::delay_updates(uint32_t msec)
+IfMgrXrlMirror::delay_updates(const TimeVal& delay)
 {
-    _updates_delay = msec;
+    _updates_delay = delay;
 }
 
 void
 IfMgrXrlMirror::updates_made()
 {
-    if (_updates_delay == 0) {
+    if (_updates_delay.is_zero()) {
 	do_updates();
 	return;
     }
@@ -1147,8 +1147,9 @@ IfMgrXrlMirror::updates_made()
     if (_updates_timer.scheduled())
 	return;
 
-    _updates_timer = _e.new_oneoff_after_ms(_updates_delay,
-			callback(this, &IfMgrXrlMirror::do_updates));
+    _updates_timer = _e.new_oneoff_after(
+	_updates_delay,
+	callback(this, &IfMgrXrlMirror::do_updates));
 }
 
 void

@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.21 2008/10/02 21:57:16 bms Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.22 2008/10/09 17:48:23 abittau Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
@@ -169,7 +169,12 @@ public:
      */
     bool detach_hint_observer(IfMgrHintObserver* o);
 
-    void delay_updates(uint32_t msec);
+    /**
+     * Delay the interface configuration tree updates.
+     *
+     * @param delay the delay.
+     */
+    void delay_updates(const TimeVal& delay);
 
 protected:
     void finder_ready_event();
@@ -202,9 +207,12 @@ protected:
     XorpTimer			_reg_timer;	// registration timer
 
 private:
+    /**
+     * Perform the interface configuration tree updates.
+     */
     void do_updates();
 
-    uint32_t			_updates_delay;
+    TimeVal			_updates_delay;
     XorpTimer			_updates_timer;
 };
 
