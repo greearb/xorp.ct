@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.21 2008/09/26 21:41:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_mac.cc,v 1.22 2008/10/02 21:57:34 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -459,6 +459,9 @@ test_mac_address_const(TestInfo& test_info)
     verbose_assert(Mac::ZERO() == Mac("00:00:00:00:00:00"), "ZERO()");
 
     verbose_assert(Mac::ALL_ONES() == Mac("ff:ff:ff:ff:ff:ff"), "ALL_ONES()");
+
+    verbose_assert(Mac::BROADCAST() == Mac("ff:ff:ff:ff:ff:ff"),
+		   "BROADCAST()");
 
     verbose_assert(Mac::STP_MULTICAST() == Mac("01:80:c2:00:00:00"),
 		   "STP_MULTICAST()");

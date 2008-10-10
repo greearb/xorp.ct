@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/mac.cc,v 1.29 2008/09/26 22:24:55 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/mac.cc,v 1.30 2008/10/02 21:57:31 bms Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/ether_compat.h" 
@@ -191,6 +191,7 @@ Mac::is_multicast() const
 
 const Mac MacConstants::zero(Mac("00:00:00:00:00:00"));
 const Mac MacConstants::all_ones(Mac("ff:ff:ff:ff:ff:ff"));
+const Mac MacConstants::broadcast(Mac("ff:ff:ff:ff:ff:ff"));
 const Mac MacConstants::stp_multicast(Mac("01:80:c2:00:00:00"));
 const Mac MacConstants::lldp_multicast(Mac("01:80:c2:00:00:0e"));
 const Mac MacConstants::gmrp_multicast(Mac("01:80:c2:00:00:20"));

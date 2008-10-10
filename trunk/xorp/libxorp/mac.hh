@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/mac.hh,v 1.30 2008/09/26 21:41:04 pavlin Exp $
+// $XORP: xorp/libxorp/mac.hh,v 1.31 2008/10/02 21:57:32 bms Exp $
 
 #ifndef __LIBXORP_MAC_HH__
 #define __LIBXORP_MAC_HH__
@@ -219,6 +219,7 @@ public:
      */
     static const Mac& ZERO();
     static const Mac& ALL_ONES();
+    static const Mac& BROADCAST();
     static const Mac& STP_MULTICAST();
     static const Mac& LLDP_MULTICAST();
     static const Mac& GMRP_MULTICAST();
@@ -231,6 +232,7 @@ private:
 struct MacConstants {
     static const Mac zero,
 	all_ones,
+	broadcast,
 	stp_multicast,
 	lldp_multicast,
 	gmrp_multicast,
@@ -243,6 +245,10 @@ inline const Mac& Mac::ZERO() {
 
 inline const Mac& Mac::ALL_ONES() {
     return MacConstants::all_ones;
+}
+
+inline const Mac& Mac::BROADCAST() {
+    return MacConstants::broadcast;
 }
 
 inline const Mac& Mac::STP_MULTICAST() {
