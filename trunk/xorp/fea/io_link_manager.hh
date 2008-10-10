@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_link_manager.hh,v 1.12 2008/10/09 17:45:04 abittau Exp $
+// $XORP: xorp/fea/io_link_manager.hh,v 1.13 2008/10/09 17:49:13 abittau Exp $
 
 #ifndef __FEA_IO_LINK_MANAGER_HH__
 #define __FEA_IO_LINK_MANAGER_HH__
@@ -636,8 +636,27 @@ public:
 	return _fea_data_plane_managers;
     }
 
-    void add_multicast_mac(const string& if_name, const Mac& mac);
-    void remove_multicast_mac(const string& if_name, const Mac& mac);
+    /**
+     * Add a multicast MAC address to an interface.
+     *
+     * @param if_name the interface name.
+     * @param mac the MAC address to add.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_multicast_mac(const string& if_name, const Mac& mac,
+			  string& error_msg);
+
+    /**
+     * Remove a multicast MAC address from an interface.
+     *
+     * @param if_name the interface name.
+     * @param mac the MAC address to remove.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int remove_multicast_mac(const string& if_name, const Mac& mac,
+			     string& error_msg);
 
 private:
     class CommTableKey {
@@ -699,14 +718,45 @@ private:
 		       const FilterBag::iterator& begin,
 		       const FilterBag::iterator& end);
 
-    IoLinkComm& add_iolink_txonly(const string& if_name, const string& vif_name,
-				  uint16_t ether_type);
+    /**
+     * Add a communication handler that can be used for raw link-level
+     * transmission only.
+     *
+     * @param if_name the interface name.
+     * @param vif_name the vif name.
+     * @param ether_type the EtherType protocol number.
+     * @return a reference to the transmission only communication handler.
+     */
+    IoLinkComm& add_iolink_comm_txonly(const string& if_name,
+				       const string& vif_name,
+				       uint16_t ether_type);
 
-    IoLinkComm& get_iolink(const string& if_name, const string& vif_name,
-			   uint16_t ether_type);
+    /**
+     * Find the communication handler for a given interface/vif name
+     * and EtherType.
+     *
+     * Note that if the handler is not found, a new one is created and
+     * returned.
+     *
+     * @param if_name the interface name.
+     * @param vif_name the vif name.
+     * @param ether_type the EtherType protocol number.
+     * @return a reference to the communication handler.
+     */
+    IoLinkComm& find_iolink_comm(const string& if_name, const string& vif_name,
+				 uint16_t ether_type);
 
-    void	add_remove_multicast_mac(bool add, const string& if_name,
-					 const Mac& mac);
+    /**
+     * Add/remove a multicast MAC address on an interface.
+     *
+     * @param add if true, then add the address, otherwise remove it.
+     * @param if_name the interface name.
+     * @param mac the MAC address to add/remove.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_remove_multicast_mac(bool add, const string& if_name,
+				 const Mac& mac, string& error_msg);
 
     FeaNode&		_fea_node;
     EventLoop&		_eventloop;

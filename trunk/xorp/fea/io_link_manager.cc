@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.12 2008/10/09 17:49:12 abittau Exp $"
+#ident "$XORP: xorp/fea/io_link_manager.cc,v 1.13 2008/10/09 18:04:11 abittau Exp $"
 
 #include "fea_module.h"
 
@@ -26,7 +26,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "fea_exception.hh"
 #include "fea_node.hh"
 #include "iftree.hh"
 #include "io_link_manager.hh"
@@ -34,8 +33,8 @@
 // A filter that matches no packets - useful for TX only.
 class TxOnlyFilter : public IoLinkComm::InputFilter {
 public:
-    // a mac addr that will "never" match
-    static const string filter_mac;
+    // A MAC address that will "never" match
+    static const Mac filter_mac;
 
     TxOnlyFilter(IoLinkManager&	io_link_manager,
 		 const string&	receiver_name,
@@ -44,20 +43,18 @@ public:
 		 uint16_t	ether_type)
 	: IoLinkComm::InputFilter(io_link_manager, receiver_name, if_name,
 				  vif_name, ether_type,
-				  "ether src " + filter_mac)
+				  "ether src " + filter_mac.str())
     {}
 
     void recv(const struct MacHeaderInfo& header,
 	      const vector<uint8_t>& payload)
     {
-	Mac filter(filter_mac.c_str());
-
-	if (header.src_address == filter)
-	    return;
-
 	UNUSED(payload);
 
-	XLOG_ASSERT(false && "receiving data on a TX only filter");
+	if (header.src_address == filter_mac)
+	    return;
+
+	XLOG_FATAL("Receiving data on a TX only filter");
     }
 
     void bye()
@@ -66,7 +63,7 @@ public:
     }
 };
 
-const string TxOnlyFilter::filter_mac = "66:66:66:66:66:66";
+const Mac TxOnlyFilter::filter_mac("66:66:66:66:66:66");
 
 //
 // Filter class for checking incoming raw link-level packets and checking
@@ -125,8 +122,9 @@ public:
 
     int join_multicast_group(const Mac& group_address, string& error_msg) {
 	if (! group_address.is_multicast()) {
-	    error_msg = c_format("Cannot join group %s: not a multicast address"
-				 , group_address.str().c_str());
+	    error_msg = c_format("Cannot join group %s: not a multicast "
+				 "address",
+				 group_address.str().c_str());
 	    return (XORP_ERROR);
 	}
 	if (_io_link_comm.join_multicast_group(group_address, receiver_name(),
@@ -579,7 +577,7 @@ IoLinkManager::~IoLinkManager()
 {
     erase_filters(_comm_table, _filters, _filters.begin(), _filters.end());
 
-    // erase any TX only entries
+    // Erase any TX only entries
     for (CommTable::iterator i = _comm_table.begin(); i != _comm_table.end();
 	 ++i)
 	delete i->second;
@@ -647,8 +645,8 @@ IoLinkManager::erase_filters(CommTable& comm_table, FilterBag& filters,
 }
 
 IoLinkComm&
-IoLinkManager::get_iolink(const string& if_name, const string& vif_name,
-			  uint16_t ether_type)
+IoLinkManager::find_iolink_comm(const string& if_name, const string& vif_name,
+				uint16_t ether_type)
 {
     CommTableKey key(if_name, vif_name, ether_type, "");
 
@@ -673,7 +671,7 @@ IoLinkManager::get_iolink(const string& if_name, const string& vif_name,
     IoLinkComm* io_link_comm = NULL;
 
     if (cti == _comm_table.end())
-	io_link_comm = &add_iolink_txonly(if_name, vif_name, ether_type);
+	io_link_comm = &add_iolink_comm_txonly(if_name, vif_name, ether_type);
     else
 	io_link_comm = cti->second;
 
@@ -691,7 +689,7 @@ IoLinkManager::send(const string&	if_name,
 		    const vector<uint8_t>& payload,
 		    string&		error_msg)
 {
-    IoLinkComm& io_link_comm = get_iolink(if_name, vif_name, ether_type);
+    IoLinkComm& io_link_comm = find_iolink_comm(if_name, vif_name, ether_type);
 
     return (io_link_comm.send_packet(src_address,
 				     dst_address,
@@ -701,13 +699,15 @@ IoLinkManager::send(const string&	if_name,
 }
 
 IoLinkComm&
-IoLinkManager::add_iolink_txonly(const string&  if_name,
-				 const string&  vif_name,
-				 uint16_t       ether_type)
+IoLinkManager::add_iolink_comm_txonly(const string&  if_name,
+				      const string&  vif_name,
+				      uint16_t       ether_type)
 {
-    // XXX ideally we'd configure the io plugins to do TX only, but what we do
-    // now is create a "txonlyfilter" - a filter that matches no packets and
-    // hopefully receives nothing.
+    //
+    // TODO: XXX: Ideally we'd configure the io plugins to do TX only, but
+    // what we do now is create a "txonlyfilter" - a filter that matches no
+    // packets and hopefully receives nothing.
+    //
     string receiver_name  = "txonly";
     string filter_program = "";
 
@@ -726,7 +726,7 @@ IoLinkManager::add_iolink_txonly(const string&  if_name,
 				      ether_type, filter_program);
 	_comm_table[key] = io_link_comm;
     }
-    XLOG_ASSERT(io_link_comm);
+    XLOG_ASSERT(io_link_comm != NULL);
 
     int rc = io_link_comm->add_filter(filter);
     XLOG_ASSERT(rc == XORP_OK);
@@ -734,37 +734,37 @@ IoLinkManager::add_iolink_txonly(const string&  if_name,
     return *io_link_comm;
 }
 
-void
-IoLinkManager::add_multicast_mac(const string& if_name, const Mac& mac)
+int
+IoLinkManager::add_multicast_mac(const string& if_name, const Mac& mac,
+				 string& error_msg)
 {
-    add_remove_multicast_mac(true, if_name, mac);
+    return (add_remove_multicast_mac(true, if_name, mac, error_msg));
 }
 
-void
-IoLinkManager::remove_multicast_mac(const string& if_name, const Mac& mac)
+int
+IoLinkManager::remove_multicast_mac(const string& if_name, const Mac& mac,
+				    string& error_msg)
 {
-    add_remove_multicast_mac(false, if_name, mac);
+    return (add_remove_multicast_mac(false, if_name, mac, error_msg));
 }
 
-void
+int
 IoLinkManager::add_remove_multicast_mac(bool add, const string& if_name,
-				        const Mac& mac)
+				        const Mac& mac, string& error_msg)
 {
     string vif_name	 = if_name;
     uint16_t ether_type  = ETHERTYPE_IP;
     string receiver_name = "add_remove_mac";
-    string error_msg;
     int rc;
 
-    IoLinkComm& io_link_comm = get_iolink(if_name, vif_name, ether_type);
+    IoLinkComm& io_link_comm = find_iolink_comm(if_name, vif_name, ether_type);
 
     if (add)
 	rc = io_link_comm.join_multicast_group(mac, receiver_name, error_msg);
     else
 	rc = io_link_comm.leave_multicast_group(mac, receiver_name, error_msg);
 
-    if (rc != XORP_OK)
-	xorp_throw(FeaException, error_msg);
+    return (rc);
 }
 
 int

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/xrl_fea_target.hh,v 1.38 2008/10/09 17:49:13 abittau Exp $
+// $XORP: xorp/fea/xrl_fea_target.hh,v 1.39 2008/10/09 17:50:32 abittau Exp $
 
 
 #ifndef __FEA_XRL_FEA_TARGET_HH__
@@ -2675,9 +2675,38 @@ public:
 	string&	info);
 
 private:
-    void add_remove_mac(bool add, const string& ifname, const Mac& mac);
-    void set_mac(const string& ifname, const Mac& mac);
-    void send_gratitious_arps(const string& ifname, const Mac& mac);
+    /**
+     * Add/remove a multicast MAC address on an interface.
+     *
+     * @param add if true, then add the address, otherwise remove it.
+     * @param ifname the interface name.
+     * @param mac the address to add/remove.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_remove_mac(bool add, const string& ifname, const Mac& mac,
+		       string& error_msg);
+
+    /**
+     * Set the MAC address on an interface.
+     *
+     * @param ifname the interface name.
+     * @param mac the address to set.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_mac(const string& ifname, const Mac& mac, string& error_msg);
+
+    /**
+     * Send gratuitous ARP packets for all IP addresses on on an interface.
+     *
+     * @param ifname the interface name.
+     * @param mac the MAC address that is to be updated.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int send_gratuitous_arps(const string& ifname, const Mac& mac,
+			    string& error_msg);
 
     EventLoop&		_eventloop;	// The event loop to use
     FeaNode&		_fea_node;	// The corresponding FeaNode

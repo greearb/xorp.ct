@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/iftree.hh,v 1.69 2008/10/02 21:56:48 bms Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.70 2008/10/09 17:48:01 abittau Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -537,7 +537,7 @@ private:
 class IfTreeInterface : public IfTreeItem {
 public:
     typedef map<const string, IfTreeVif*> VifMap;
-    typedef set<Mac>			  MACS;
+    typedef set<Mac>			  MacSet;
 
     IfTreeInterface(IfTree& iftree, const string& ifname);
     ~IfTreeInterface();
@@ -562,8 +562,8 @@ public:
     const Mac& mac() const		{ return _mac; }
     void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
 
-    MACS& macs()			{ return _macs; }
-    const MACS& macs() const		{ return _macs; }
+    MacSet& macs()			{ return _macs; }
+    const MacSet& macs() const		{ return _macs; }
 
     bool no_carrier() const		{ return _no_carrier; }
     void set_no_carrier(bool v)		{ _no_carrier = v; mark(CHANGED); }
@@ -782,7 +782,7 @@ private:
     uint64_t	_baudrate;		// The link baudrate
     uint32_t	_interface_flags;	// The system-specific interface flags
     VifMap	_vifs;
-    MACS	_macs; // XXX not part of user conf, but used by processes.
+    MacSet	_macs; // XXX: not part of user config, but used by processes
 };
 
 

@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.52 2008/10/09 17:50:32 abittau Exp $"
+#ident "$XORP: xorp/fea/xrl_fea_target.cc,v 1.53 2008/10/09 18:04:11 abittau Exp $"
 
 
 //
@@ -53,7 +53,6 @@
 #include "libfeaclient_bridge.hh"
 #include "profile_vars.hh"
 #include "xrl_fea_target.hh"
-#include "fea_exception.hh"
 
 #include "fea/data_plane/managers/fea_data_plane_manager_click.hh"
 
@@ -2039,12 +2038,10 @@ XrlFeaTarget::ifmgr_0_1_create_mac(
     const string&   ifname,
     const Mac&      mac)
 {
-    try {
-	add_remove_mac(true, ifname, mac);
+    string error_msg;
 
-    } catch (const FeaException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
+    if (add_remove_mac(true, ifname, mac, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
 }
@@ -2055,20 +2052,24 @@ XrlFeaTarget::ifmgr_0_1_delete_mac(
     const string&   ifname,
     const Mac&      mac)
 {
-    try {
-	add_remove_mac(false, ifname, mac);
+    string error_msg;
 
-    } catch (const FeaException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
+    if (add_remove_mac(false, ifname, mac, error_msg) != XORP_OK)
+	return XrlCmdError::COMMAND_FAILED(error_msg);
 
     return XrlCmdError::OKAY();
 }
 
-void
-XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
+int
+XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac,
+			     string& error_msg)
 {
-    // XXX this whole thing is a hack
+    IfTreeInterface* ifp;
+
+    //
+    // XXX: This whole thing is a hack.
+    //
+
     //
     // There are two entities:
     // 1) The MAC of the interface.
@@ -2077,111 +2078,185 @@ XrlFeaTarget::add_remove_mac(bool add, const string& ifname, const Mac& mac)
     // To "add" a MAC, we set the interface's MAC to the newly added MAC, and
     // put the old MAC in the multicast ones.  To "delete", we kill a MAC from
     // the multicast ones, and stick it as the primary MAC.
-    typedef IfTreeInterface::MACS MACS;
-
-    // grab list of configured MACs from somewhere.  XXX this should be stored
-    // elsewhere in process related state - not user config / state.
-    IfTreeInterface* iface = _ifconfig.user_config().find_interface(ifname);
-    if (!iface)
-	xorp_throw(FeaException, "Unknown interface");
-
-    // these are the multicast MACs.
-    MACS& macs = iface->macs();
-
-    // this is the real MAC.  
     //
-    // Hopefully the user doesn't change it, else we're screwed.  To avoid the
-    // user changing mac problem, we just need proper datastructures - a stack
-    // of MACs.  We'll fix once we determine what we need, and this becomes less
-    // than a hack.
-    iface = _ifconfig.merged_config().find_interface(ifname);
-    XLOG_ASSERT(iface);
-    Mac current_mac = iface->mac();
 
-    // one MAC is ok, because we can change the primary MAC.  More MACs rely on
-    // the multicast trick.
-    if (add && macs.size())
-	    xorp_throw(FeaException, "Can't find MAC");
+    //
+    // Grab the set of configured MACs from somewhere.
+    //
+    // XXX This set should be stored elsewhere in process related
+    // state - not the user config state.
+    //
+    ifp = _ifconfig.user_config().find_interface(ifname);
+    if (ifp == NULL) {
+	error_msg = c_format("Cannot %s MAC address %s on interface %s: "
+			     "unknown interface",
+			     (add) ? "add" : "remove",
+			     mac.str().c_str(), ifname.c_str());
+	return (XORP_ERROR);
+    }
+
+    // These are the multicast MACs.
+    IfTreeInterface::MacSet& macs = ifp->macs();
+
+    //
+    // This is the real MAC.  
+    //
+    // XXX: Hopefully the user doesn't change it, otherwise this creates a
+    // problem. To avoid the problem, we just need proper datastructures - a
+    // stack of MACs. This will be fixed once we determine what is needed,
+    // and this becomes less than a hack.
+    //
+    ifp = _ifconfig.merged_config().find_interface(ifname);
+    XLOG_ASSERT(ifp != NULL);
+    Mac current_mac = ifp->mac();
+
+    //
+    // One MAC is OK, because we can change the primary MAC.
+    // More MACs rely on the multicast trick.
+    //
+    if (add && macs.size()) {
+	error_msg = c_format("Cannot add MAC address %s on interface %s: "
+			     "too many MACs",
+			     mac.str().c_str(), ifname.c_str());
+	return (XORP_ERROR);
+    }
 
     if (add) {
-	// sanity check
-	if (macs.find(mac) != macs.end() || current_mac == mac)
-	    xorp_throw(FeaException, "MAC already added");
+	// Add the MAC
+
+	// Sanity check
+	if (macs.find(mac) != macs.end() || current_mac == mac) {
+	    error_msg = c_format("Cannot add MAC address %s on interface %s: "
+				 "MAC already added",
+				 mac.str().c_str(), ifname.c_str());
+	    return (XORP_ERROR);
+	}
 
 	if (macs.size())
 	    XLOG_WARNING("More than one MAC added - use at your own risk");
 
-	set_mac(ifname, mac);
+	if (set_mac(ifname, mac, error_msg) != XORP_OK) {
+	    error_msg = c_format("Cannot add MAC address %s on interface %s: %s",
+				 mac.str().c_str(), ifname.c_str(),
+				 error_msg.c_str());
+	    return (XORP_ERROR);
+	}
 
 	// Add previous MAC as multicast one
 	macs.insert(current_mac);
 
-	try {
-	    _io_link_manager.add_multicast_mac(ifname, current_mac);
-	} catch (const FeaException& e) {
-	    XLOG_WARNING("Cannot add multicast MAC %s", e.str().c_str());
+	if (_io_link_manager.add_multicast_mac(ifname, current_mac, error_msg)
+	    != XORP_OK) {
+	    XLOG_WARNING("Cannot add multicast MAC address %s "
+			 "on interface %s: %s",
+			 current_mac.str().c_str(), ifname.c_str(),
+			 error_msg.c_str());
 	}
     } else {
-	// remove
-	Mac candidate;
+	// Remove the MAC
+	Mac candidate_mac;
 
-	// removing current mac
+	// Removing current mac
 	if (mac == current_mac) {
-	    if (macs.empty())
-		xorp_throw(FeaException, "Trying to remove only MAC");
+	    if (macs.empty()) {
+		error_msg = c_format("Cannot remove MAC address %s "
+				     "on interface %s: last address",
+				     mac.str().c_str(), ifname.c_str());
+		return (XORP_ERROR);
+	    }
+	    candidate_mac = *(macs.begin());
 
-	    candidate = *(macs.begin());
-
-	    // XXX should remove from multi first
-	    set_mac(ifname, candidate);
+	    // XXX: should remove from multi first
+	    if (set_mac(ifname, candidate_mac, error_msg) != XORP_OK) {
+		error_msg = c_format("Cannot replace MAC address %s with %s "
+				     "on interface %s: %s",
+				     mac.str().c_str(),
+				     candidate_mac.str().c_str(),
+				     ifname.c_str(),
+				     error_msg.c_str());
+		return (XORP_ERROR);
+	    }
 	} else {
-	    MACS::iterator i = macs.find(mac);
-	    if (i == macs.end())
-		xorp_throw(FeaException, "Trying to remove unknown MAC");
-
-	    candidate = *i;
+	    IfTreeInterface::MacSet::iterator i = macs.find(mac);
+	    if (i == macs.end()) {
+		error_msg = c_format("Cannot remove MAC address %s on "
+				     "interface %s: unknown address",
+				     mac.str().c_str(), ifname.c_str());
+		return (XORP_ERROR);
+	    }
+	    candidate_mac = *i;
 	}
 
 	// Remove MAC from multicast list
-	macs.erase(candidate);
+	macs.erase(candidate_mac);
 
-	try {
-	    _io_link_manager.remove_multicast_mac(ifname, candidate);
-	} catch (const FeaException& e) {
-	    XLOG_WARNING("Cannot remove multicast MAC %s", e.str().c_str());
+	if (_io_link_manager.remove_multicast_mac(ifname, candidate_mac,
+						  error_msg)
+	    != XORP_OK) {
+	    XLOG_WARNING("Cannot remove multicast MAC address %s "
+			 "on interface %s: %s",
+			 candidate_mac.str().c_str(), ifname.c_str(),
+			 error_msg.c_str());
 	}
     }
+
+    return (XORP_OK);
 }
 
-void
-XrlFeaTarget::set_mac(const string& ifname, const Mac& mac)
+int
+XrlFeaTarget::set_mac(const string& ifname, const Mac& mac, string& error_msg)
 {
-    // XXX should delegate this to ifconfig, but perhaps lets see what we need
-    // exactly before polluting the rest of the code with this mac hack.  -sorbo
+    //
+    // TODO: XXX: We should delegate this to ifconfig, but perhaps lets see
+    // what we need exactly before polluting the rest of the code with
+    // this MAC hack.
+    //
     uint32_t tid;
 
-    if (ifmgr_0_1_start_transaction(tid) != XrlCmdError::OKAY())
-	xorp_throw(FeaException, "Can't start transaction");
+    if (ifmgr_0_1_start_transaction(tid) != XrlCmdError::OKAY()) {
+	error_msg = c_format("Cannot set MAC address %s on interface %s: "
+			     "cannot start the transaction",
+			     mac.str().c_str(), ifname.c_str());
+	return (XORP_ERROR);
+    }
 
     if (ifmgr_0_1_set_mac(tid, ifname, mac) != XrlCmdError::OKAY()) {
 	ifmgr_0_1_abort_transaction(tid);
-	xorp_throw(FeaException, "Can't do operation");
+	error_msg = c_format("Cannot set MAC address %s on interface %s: "
+			     "cannot perform the operation",
+			     mac.str().c_str(), ifname.c_str());
+	return (XORP_ERROR);
     }
 
-    if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY())
-	xorp_throw(FeaException, "Can't commit transaction");
+    if (ifmgr_0_1_commit_transaction(tid) != XrlCmdError::OKAY()) {
+	error_msg = c_format("Cannot set MAC address %s on interface %s: "
+			     "cannot commit the transaction",
+			     mac.str().c_str(), ifname.c_str());
+	return (XORP_ERROR);
+    }
 
-    send_gratitious_arps(ifname, mac);
+    if (send_gratuitous_arps(ifname, mac, error_msg) != XORP_OK) {
+	error_msg = c_format("Cannot set MAC address %s on interface %s: %s",
+			     mac.str().c_str(), ifname.c_str(),
+			     error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
 }
 
-void
-XrlFeaTarget::send_gratitious_arps(const string& ifname, const Mac& mac)
-{
+int
+XrlFeaTarget::send_gratuitous_arps(const string& ifname, const Mac& mac,
+				   string& error_msg)
+    {
     IfTreeInterface* ifp = _ifconfig.merged_config().find_interface(ifname);
-    XLOG_ASSERT(ifp);
 
-    if (!ifp->enabled())
-	return;
+    XLOG_ASSERT(ifp != NULL);
+
+    if (! ifp->enabled()) {
+	// TODO: Return success or an error?
+	return (XORP_OK);
+    }
 
     for (IfTreeInterface::VifMap::iterator i = ifp->vifs().begin(); 
 	 i != ifp->vifs().end(); ++i) {
@@ -2189,7 +2264,7 @@ XrlFeaTarget::send_gratitious_arps(const string& ifname, const Mac& mac)
 	const string& vifname = i->first;
 	IfTreeVif* vifp	      = i->second;
 
-	if (!vifp->enabled())
+	if (! vifp->enabled())
 	    continue;
 
 	for (IfTreeVif::IPv4Map::iterator j = vifp->ipv4addrs().begin();
@@ -2198,24 +2273,26 @@ XrlFeaTarget::send_gratitious_arps(const string& ifname, const Mac& mac)
 	    const IPv4& ip    = j->first;
 	    IfTreeAddr4* addr = j->second;
 
-	    if (!addr->enabled())
+	    if (! addr->enabled())
 		continue;
 
-	    Mac bcast("FF:FF:FF:FF:FF:FF");
 	    ArpHeader::PAYLOAD data;
+	    ArpHeader::make_gratuitous(data, mac, ip);
 
-	    ArpHeader::make_gratitious(data, mac, ip);
-
-	    XrlCmdError e = raw_link_0_1_send(ifname, vifname, mac, bcast,
+	    XrlCmdError e = raw_link_0_1_send(ifname, vifname, mac,
+					      Mac::BROADCAST(),
 					      ETHERTYPE_ARP, data);
 	    if (e != XrlCmdError::OKAY())
-		xorp_throw(FeaException,
-			   c_format("Cannot send gratitious ARP: %s",
-				    e.str().c_str()));
+		error_msg = c_format("Cannot send gratuitous ARP "
+				     "for MAC address %s on interface %s: %s",
+				     mac.str().c_str(), ifname.c_str(),
+				     e.str().c_str());
 	}
 
-	// XXX IPv6?
+	// TODO: XXX: IPv6?
     }
+
+    return (XORP_OK);
 }
 
 XrlCmdError

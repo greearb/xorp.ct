@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.106 2008/04/30 20:53:35 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.107 2008/10/09 17:49:12 abittau Exp $
 ##
 
 # Redefine the bin installation directory
@@ -93,7 +93,6 @@ libfea_data_plane_base_la_SOURCES	+= io_tcpudp.cc
 
 libfea_la_SOURCES	 = fea_module.h
 libfea_la_SOURCES	+= mfea_module.h
-libfea_la_SOURCES	+= fea_exception.hh
 libfea_la_SOURCES	+= fea_io.hh
 libfea_la_SOURCES	+= fea_node.hh
 libfea_la_SOURCES	+= fibconfig.hh
