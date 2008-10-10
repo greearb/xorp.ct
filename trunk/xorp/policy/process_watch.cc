@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/process_watch.cc,v 1.13 2008/10/02 21:58:00 bms Exp $"
+#ident "$XORP: xorp/policy/process_watch.cc,v 1.14 2008/10/10 01:54:58 paulz Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -47,7 +47,7 @@ ProcessWatch::register_cb(const XrlError& err)
 	error_msg = c_format("XRL register_cb() error: %s", err.str().c_str());
 	XLOG_ERROR("%s", error_msg.c_str());
 // 	xorp_throw(PWException, error_msg);
-    };
+    }
 }
 
 void 
