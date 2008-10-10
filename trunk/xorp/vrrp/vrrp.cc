@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.11 2008/10/09 19:12:25 atanu Exp $"
+#ident "$XORP: xorp/vrrp/vrrp.cc,v 1.12 2008/10/10 01:15:19 pavlin Exp $"
 
 #include <sstream>
 
@@ -47,7 +47,6 @@ out_of_range(const string& msg, const T& x)
 
 // XXX init from VrrpPacket::mcast_group
 const Mac Vrrp::mcast_mac = Mac("01:00:5E:00:00:12");
-const Mac Vrrp::bcast_mac = Mac("FF:FF:FF:FF:FF:FF");
 
 Vrrp::Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid)
 		: _vif(vif),
@@ -344,7 +343,7 @@ Vrrp::send_arp(const IPv4& ip)
 
     ArpHeader::make_gratuitous(data, _source_mac, ip);
 
-    _vif.send(_source_mac, bcast_mac, ETHERTYPE_ARP, data);
+    _vif.send(_source_mac, Mac::BROADCAST(), ETHERTYPE_ARP, data);
 }
 
 bool

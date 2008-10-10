@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.10 2008/10/09 18:04:12 abittau Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.11 2008/10/10 01:14:02 pavlin Exp $"
 
 #include <sstream>
 
@@ -703,7 +703,7 @@ VrrpTarget::raw_link_client_0_1_recv(
     }
 
     // only arp requests for now
-    if (dst_address != Vrrp::bcast_mac)
+    if (dst_address != Mac::BROADCAST())
 	return XrlCmdError::OKAY();
 
     vif->recv_arp(src_address, payload);

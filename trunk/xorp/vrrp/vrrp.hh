@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp.hh,v 1.7 2008/10/09 18:03:49 abittau Exp $
+// $XORP: xorp/vrrp/vrrp.hh,v 1.8 2008/10/09 18:04:12 abittau Exp $
 
 #ifndef __VRRP_VRRP_HH__
 #define __VRRP_VRRP_HH__
@@ -38,7 +38,6 @@
 class Vrrp {
 public:
     static const Mac mcast_mac;
-    static const Mac bcast_mac;
 
     Vrrp(VrrpInterface& vif, EventLoop& e, uint32_t vrid);
     ~Vrrp();
