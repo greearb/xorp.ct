@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/vrrp.tp,v 1.1 2008/10/09 17:40:58 abittau Exp $ */
 
 protocols {
     vrrp {
@@ -21,6 +21,7 @@ protocols {
 
 protocols {
     vrrp {
+	%help:    short "Configure VRRP";
 	%modinfo: provides		vrrp;
 	%modinfo: depends		rib;
 	%modinfo: depends		fea;
@@ -37,30 +38,40 @@ protocols {
 	}
 
 	interface @ {
+	    %help: short "Physical interface";
+
 	    vif @ {
+	        %help: short "Logical interface";
+
 		vrid @ {
+		    %help: short "Virtual router ID";
 		    %create: xrl "$(vrrp.targetname)/vrrp/0.1/add_vrid?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)";
 		    %delete: xrl "$(vrrp.targetname)/vrrp/0.1/delete_vrid?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)";
 		    %activate: xrl "$(vrrp.targetname)/vrrp/0.1/set_disable?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&disable:bool=$(@.disable)";
 
 		    disable {
+			%help: short "Disable this VRRP instance";
 		        %set: xrl "$(vrrp.targetname)/vrrp/0.1/set_disable?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&disable:bool=$(@)";
 		    }
 
 		    priority {
+			%help: short "The priority of the router when deciding to become master";
 			%allow-range: $(@) "1" "254" %help: "Router priority";
 		        %set: xrl "$(vrrp.targetname)/vrrp/0.1/set_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&priority:u32=$(@)";
 		    }
 
 		    interval {
+			%help: short "Interval in seconds between VRRP advertisements";
 		        %set: xrl "$(vrrp.targetname)/vrrp/0.1/set_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&interval:u32=$(@)";
 		    }
 
 		    preempt {
+			%help: short "Whether a higher priority backup preempts a lower priority master";
 		        %set: xrl "$(vrrp.targetname)/vrrp/0.1/set_preempt?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&preempt:bool=$(@)";
 		    }
 
 		    ip @ {
+			%help: short "IP associated with virtual router";
 		        %create: xrl "$(vrrp.targetname)/vrrp/0.1/add_ip?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&ip:ipv4=$(ip.@)";
 		        %delete: xrl "$(vrrp.targetname)/vrrp/0.1/delete_ip?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&vrid:u32=$(vrid.@)&ip:ipv4=$(ip.@)";
 		    }
