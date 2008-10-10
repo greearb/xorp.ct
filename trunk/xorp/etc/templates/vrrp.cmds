@@ -1,4 +1,4 @@
-/* $XORP */
+/* $XORP$ */
 
 show vrrp {
     %command: "cli/tools/cli_generic -i %i=finder://vrrp/vrrp/0.1/get_ifs -i %v=finder://vrrp/vrrp/0.1/get_vifs?ifname:txt=%i -i %k=finder://vrrp/vrrp/0.1/get_vrids?ifname:txt=%i&vifname:txt=%v -x finder://vrrp/vrrp/0.1/get_vrid_info?ifname:txt=%i&vifname:txt=%v&vrid:u32=%k -f Interface\\t%i\\nVif\\t\\t%v\\nVRID\\t\\t%k\\nState\\t\\t%0\\nMaster_IP\\t%1\\n -s \\n" %help: HELP;
