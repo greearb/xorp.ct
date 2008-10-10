@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/test_packet.cc,v 1.5 2008/07/23 05:10:40 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_packet.cc,v 1.6 2008/10/02 21:57:18 bms Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -166,7 +166,7 @@ test_ipv4_header(TestInfo& test_info)
     uint16_t ip_fragment_flags = 0xe000;
     uint8_t ip_ttl = 64;
     uint8_t ip_p = 100;
-    uint16_t ip_sum = 0xf123;
+    uint16_t ip_sum = 0x7acd;
     IPv4 ip_src("1.2.3.4");
     IPv4 ip_dst("5.6.7.8");
 
@@ -250,6 +250,10 @@ test_ipv4_header(TestInfo& test_info)
     //
     // Test the IPv4 packet header checksum
     //
+    verbose_assert(iph.ip_sum() == ip_sum, "IPv4 checksum");
+    // Set the checksum to garbage and compute it again
+    iphw.set_ip_sum(0xffff);
+    iphw.compute_checksum();
     verbose_assert(iph.ip_sum() == ip_sum, "IPv4 checksum");
 
     //

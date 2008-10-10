@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.18 2008/10/09 18:04:11 abittau Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.19 2008/10/10 01:11:03 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -600,6 +600,11 @@ public:
     void set_ip_sum(uint16_t v)		{ embed_16(_ip_sum, v); }
     void set_ip_src(const IPv4& v)	{ v.copy_out(_ip_src); }
     void set_ip_dst(const IPv4& v)	{ v.copy_out(_ip_dst); }
+
+    /**
+     * A method to compute and set the IP checksum.
+     */
+    void compute_checksum();
 
     /*
      * A method to embed the ip_len value by storing it in host order.

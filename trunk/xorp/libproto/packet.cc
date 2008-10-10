@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libproto/packet.cc,v 1.11 2008/10/09 18:04:11 abittau Exp $"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.12 2008/10/10 01:11:03 pavlin Exp $"
 
 
 //
@@ -227,6 +227,13 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
     }
 
     return (XORP_OK);
+}
+
+void
+IpHeader4Writer::compute_checksum()
+{
+    set_ip_sum(0);
+    set_ip_sum(ntohs(inet_checksum(data(), size())));
 }
 
 ArpHeader&
