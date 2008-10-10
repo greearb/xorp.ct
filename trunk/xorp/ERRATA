@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.43 2008/07/17 22:53:33 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.44 2008/10/07 00:35:25 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -55,6 +55,22 @@
         http://www.xorp.org/bugzilla/query.cgi
 
   FEA/MFEA:
+    - On Linux with kernels prior to 2.6.24 and IPv6 support, interfaces fail to
+      be reconfigured properly if brought down and up again.  This occurs
+      because Linux's IPv6 subsystem (incorrectly) sends and RTM_DELLINK message
+      when an interface is brought down, and XORP accordingly deletes the
+      interface.  When the interface comes back up, a pristine interface is
+      created within XORP with no configuration.  Hence any IP addresses
+      associated to the interface are lost.
+
+      To check for the bug, launch XORP, bring an interface down and up again,
+      and from xorpsh, do a show interfaces and check whether you see DISABLED
+      next to the IP addresses of the interface.  If so, you're hit by the bug.
+
+      On Linux, a typical scenario where an interface is brought down and up
+      again is when changing its MAC address.  This means that XORP's MAC
+      configuration directive may not work correctly on affected systems.
+
     - On Linux with kernel 2.6 (e.g., RedHat FC2 with kernel
       2.6.5-1.358), some of the tests may fail (with or without an error
       message), but no coredump image. Some of those failures can be
