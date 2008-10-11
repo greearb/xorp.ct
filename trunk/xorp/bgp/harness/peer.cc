@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.87 2008/09/30 15:28:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.88 2008/10/02 21:56:26 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1124,7 +1124,7 @@ text_traffic_dump(const uint8_t *buf, const size_t len,
     if(0 == fp)
 	XLOG_FATAL("fopen of %s failed: %s", fname.c_str(), strerror(errno));
 
-    fprintf(fp, bgppp(buf, len, peerdata).c_str());
+    fprintf(fp, "%s", bgppp(buf, len, peerdata).c_str());
     fclose(fp);
 }
 
@@ -1530,7 +1530,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    
 	    if(_session && !_established) {
 		if(_passive) {
@@ -1571,7 +1571,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	case MESSAGETYPEUPDATE: {
 	    debug_msg("UPDATE Packet RECEIVED\n");
 	    UpdatePacket pac(buf, length, _peerdata);
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    /*
 	    ** Save the update message in the receive trie.
 	    */
@@ -1582,7 +1582,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	case MESSAGETYPENOTIFICATION: {
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    NotificationPacket pac(buf, length);
-	    debug_msg(pac.str().c_str());
+	    debug_msg("%s", pac.str().c_str());
 	    check_expect(&pac);
 	}
 	    break;
