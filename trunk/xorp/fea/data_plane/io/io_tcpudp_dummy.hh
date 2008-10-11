@@ -17,15 +17,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.hh,v 1.9 2008/07/23 05:10:33 pavlin Exp $
-
+// $XORP: xorp/fea/data_plane/io/io_tcpudp_dummy.hh,v 1.10 2008/10/02 21:57:11 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_TCPUDP_DUMMY_HH__
 #define __FEA_DATA_PLANE_IO_IO_TCPUDP_DUMMY_HH__
 
-
 //
-// I/O TCP/UDP Dummy support.
+// I/O TCP/UDP communication support.
+//
+// The mechanism is Dummy (for testing purpose).
 //
 
 #include "fea/io_tcpudp.hh"

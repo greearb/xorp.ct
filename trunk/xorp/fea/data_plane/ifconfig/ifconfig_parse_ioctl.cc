@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.20 2008/09/26 21:41:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_parse_ioctl.cc,v 1.21 2008/10/02 21:57:06 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -51,7 +51,6 @@
 #endif
 
 #include "fea/ifconfig.hh"
-#include "fea/ifconfig_get.hh"
 #include "fea/data_plane/control_socket/system_utilities.hh"
 
 #include "ifconfig_get_ioctl.hh"

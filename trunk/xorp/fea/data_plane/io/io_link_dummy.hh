@@ -17,15 +17,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_link_dummy.hh,v 1.4 2008/07/23 05:10:33 pavlin Exp $
-
+// $XORP: xorp/fea/data_plane/io/io_link_dummy.hh,v 1.5 2008/10/02 21:57:11 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__
 #define __FEA_DATA_PLANE_IO_IO_LINK_DUMMY_HH__
 
-
 //
-// I/O Dummy Link raw support.
+// I/O link raw communication support.
+//
+// The mechanism is Dummy (for testing purpose).
 //
 
 #include <set>

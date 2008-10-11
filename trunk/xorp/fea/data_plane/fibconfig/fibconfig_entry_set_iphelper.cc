@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.15 2008/10/02 00:05:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_iphelper.cc,v 1.16 2008/10/02 21:56:57 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -35,7 +35,6 @@
 #endif
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_entry_set.hh"
 
 #include "fibconfig_entry_set_iphelper.hh"
 

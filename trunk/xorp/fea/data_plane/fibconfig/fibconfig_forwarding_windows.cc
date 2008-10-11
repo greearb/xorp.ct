@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_windows.cc,v 1.6 2008/07/23 05:10:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_forwarding_windows.cc,v 1.7 2008/10/02 21:56:58 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -36,7 +36,6 @@
 #endif
 
 #include "fea/fibconfig.hh"
-
 #include "fea/data_plane/control_socket/windows_rras_support.hh"
 
 #include "fibconfig_forwarding_windows.hh"

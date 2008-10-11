@@ -18,15 +18,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.12 2008/10/09 17:50:19 abittau Exp $
-
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.13 2008/10/10 01:17:50 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
 #define __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
 
-
 //
-// I/O link raw pcap(3)-based support.
+// I/O link raw communication support.
+//
+// The mechanism is pcap(3).
 //
 
 #include "libxorp/xorp.h"
@@ -37,7 +37,6 @@
 #endif
 
 #include "fea/io_link.hh"
-
 
 #ifndef HAVE_PCAP_H
 typedef void pcap_t;

@@ -17,15 +17,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.11 2008/07/23 05:10:32 pavlin Exp $
-
+// $XORP: xorp/fea/data_plane/io/io_ip_socket.hh,v 1.12 2008/10/02 21:57:11 bms Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
 #define __FEA_DATA_PLANE_IO_IO_IP_SOCKET_HH__
 
-
 //
-// I/O IP raw socket support.
+// I/O IP raw communication support.
+//
+// The mechanism is UNIX raw sockets.
 //
 
 #include "libxorp/xorp.h"

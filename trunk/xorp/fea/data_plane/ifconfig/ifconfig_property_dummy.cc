@@ -17,13 +17,15 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_property_dummy.cc,v 1.4 2008/10/02 21:57:06 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/ifconfig/ifconfig_property_dummy.cc,v 1.5 2008/10/09 00:58:13 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "fea/ifconfig.hh"
 
 #include "ifconfig_property_dummy.hh"
 

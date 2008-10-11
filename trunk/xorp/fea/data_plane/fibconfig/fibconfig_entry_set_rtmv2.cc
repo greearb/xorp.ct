@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.20 2008/07/23 05:10:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_rtmv2.cc,v 1.21 2008/10/02 21:56:57 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -37,7 +37,6 @@
 #endif
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_entry_set.hh"
 #ifdef HOST_OS_WINDOWS
 #include "fea/data_plane/control_socket/windows_rtm_pipe.hh"
 #include "fea/data_plane/control_socket/windows_rras_support.hh"

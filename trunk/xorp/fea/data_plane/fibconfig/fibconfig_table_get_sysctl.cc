@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.16 2008/07/23 05:10:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_table_get_sysctl.cc,v 1.17 2008/10/02 21:56:59 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -30,7 +30,6 @@
 #endif
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_table_get.hh"
 
 #include "fibconfig_table_get_sysctl.hh"
 

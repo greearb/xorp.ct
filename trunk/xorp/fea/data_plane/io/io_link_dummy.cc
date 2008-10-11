@@ -17,12 +17,12 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_dummy.cc,v 1.3 2008/07/23 05:10:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_dummy.cc,v 1.4 2008/10/02 21:57:11 bms Exp $"
 
 //
 // I/O link raw communication support.
 //
-// The mechanism is Dummy.
+// The mechanism is Dummy (for testing purpose).
 //
 
 #include "fea/fea_module.h"

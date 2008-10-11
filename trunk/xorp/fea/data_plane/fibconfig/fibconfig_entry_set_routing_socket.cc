@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.19 2008/07/23 05:10:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/fibconfig/fibconfig_entry_set_routing_socket.cc,v 1.20 2008/10/02 21:56:57 bms Exp $"
 
 #include "fea/fea_module.h"
 
@@ -33,7 +33,6 @@
 #endif
 
 #include "fea/fibconfig.hh"
-#include "fea/fibconfig_entry_set.hh"
 #include "fea/data_plane/control_socket/system_utilities.hh"
 
 #include "fibconfig_entry_set_routing_socket.hh"
