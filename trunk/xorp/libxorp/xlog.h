@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.19 2008/07/23 05:10:58 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.20 2008/10/02 21:57:37 bms Exp $
  */
 
 
@@ -106,12 +106,12 @@ typedef int (*xlog_output_func_t)(void *obj, xlog_level_t level,
 #  define _XLOG_MODULE_NAME XORP_MODULE_NAME
 #endif
 #define XLOG_FN(fn, fmt...)						\
-do {									\
+{									\
 	char xlog_where_buf[8000];					\
 	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s",	\
 		 __LINE__, __FILE__, __FUNCTION__);			\
-	xlog_##fn(_XLOG_MODULE_NAME, xlog_where_buf, fmt);		\
-} while (0)
+	fn(_XLOG_MODULE_NAME, xlog_where_buf, fmt);			\
+}
 
 /**
  * Initialize the log utility.
@@ -295,7 +295,7 @@ int	xlog_remove_default_output(void);
  */
 void	xlog_fatal(const char *module_name, const char *where,
 		   const char *format, ...) __printflike(3,4);
-#define XLOG_FATAL(fmt...)	XLOG_FN(fatal, fmt)
+#define XLOG_FATAL(fmt...)	XLOG_FN(xlog_fatal, fmt)
 
 /**
  * Write an ERROR message to the xlog output streams.
@@ -307,7 +307,7 @@ void	xlog_fatal(const char *module_name, const char *where,
  */
 void	xlog_error(const char *module_name, const char *where,
 		   const char *format, ...) __printflike(3,4);
-#define XLOG_ERROR(fmt...)	XLOG_FN(error, fmt)
+#define XLOG_ERROR(fmt...)	XLOG_FN(xlog_error, fmt)
 
 /**
  * Write a WARNING message to the xlog output streams.
@@ -319,7 +319,7 @@ void	xlog_error(const char *module_name, const char *where,
  */
 void	xlog_warning(const char *module_name, const char *where,
 		     const char *format, ...) __printflike(3,4);
-#define XLOG_WARNING(fmt...)	XLOG_FN(warning, fmt)
+#define XLOG_WARNING(fmt...)	XLOG_FN(xlog_warning, fmt)
 
 /**
  * Write an INFO message to the xlog output streams.
@@ -331,7 +331,7 @@ void	xlog_warning(const char *module_name, const char *where,
  */
 void	xlog_info(const char *module_name, const char *where,
 		  const char *format, ...) __printflike(3,4);
-#define XLOG_INFO(fmt...)	XLOG_FN(info, fmt)
+#define XLOG_INFO(fmt...)	XLOG_FN(xlog_info, fmt)
 
 /**
  * XORP replacement for assert(3).
