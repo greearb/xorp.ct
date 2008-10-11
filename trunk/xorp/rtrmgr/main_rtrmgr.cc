@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.77 2008/07/23 05:11:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.78 2008/10/02 21:58:22 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -108,7 +108,7 @@ usage(const char* argv0)
     fprintf(stderr, "Usage: %s [options]\n", xorp_basename(argv0));
     fprintf(stderr, "Options:\n");
     fprintf(stderr, "  -a <allowed host> Host allowed by the finder\n");
-    fprintf(stderr, "  -d        Run as a UNIX daemon (detach from tty)\n");
+    fprintf(stderr, "  -d        Run in daemon mode in background\n");
     fprintf(stderr, "  -l <file> Log to file <file>\n");
     fprintf(stderr, "  -L <facility.priority> Log to syslog facility\n");
     fprintf(stderr, "  -n <allowed net>  Subnet allowed by the finder\n");
@@ -123,7 +123,6 @@ usage(const char* argv0)
     fprintf(stderr, "  -q <secs> Set forced quit period\n");
     fprintf(stderr, "  -t <dir>  Specify templates directory\n");
     fprintf(stderr, "  -x <dir>  Specify Xrl targets directory\n");
-    fprintf(stderr, "  -d        Daemon mode, run in the background\n");
 }
 
 static void
