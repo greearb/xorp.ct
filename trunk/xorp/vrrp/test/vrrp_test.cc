@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/test/vrrp_test.cc,v 1.6 2008/10/10 02:43:37 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/test/vrrp_test.cc,v 1.7 2008/10/10 03:09:42 pavlin Exp $"
 
 #include "vrrp/vrrp_module.h"
 #include "libxorp/xorp.h"
@@ -299,7 +299,7 @@ VrrpInstance::check_advertisement(Packet& p)
     TEST_ASSERT(vh.vh_ipcount  == _ips.size());
 
     for (unsigned i = 0; i < vh.vh_ipcount; ++i) {
-	tmp_ip.copy_in((uint8_t*) &vh.vh_addr[i]);
+	tmp_ip.copy_in((const uint8_t*) &vh.vh_addr[i]);
 	TEST_ASSERT(_ips.find(tmp_ip) != _ips.end());
     }
 
