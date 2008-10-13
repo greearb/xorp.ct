@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.41 2008/09/23 19:58:10 abittau Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.42 2008/10/02 21:57:30 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -35,12 +35,6 @@
 //
 int eventloop_instance_count;
 
-//
-// Last call to EventLoop::run.  0 is a special value that indicates
-// EventLoop::run has not been called.
-//
-static time_t last_ev_run;
-
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
 #ifdef HOST_OS_WINDOWS
@@ -51,7 +45,6 @@ EventLoop::EventLoop()
 {
     XLOG_ASSERT(eventloop_instance_count == 0);
     eventloop_instance_count++;
-    last_ev_run = 0;
 }
 
 EventLoop::~EventLoop()
@@ -70,6 +63,7 @@ void
 EventLoop::run()
 {
     const time_t MAX_ALLOWED = 2;
+    static time_t last_ev_run = 0;
     static time_t last_warned;
     TimeVal t;
 
