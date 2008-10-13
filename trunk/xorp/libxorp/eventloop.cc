@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.43 2008/10/13 16:50:41 atanu Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.44 2008/10/13 17:57:11 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -45,6 +45,7 @@ EventLoop::EventLoop()
 #endif
 {
     XLOG_ASSERT(eventloop_instance_count == 0);
+    XLOG_ASSERT(_last_ev_run == 0);
     eventloop_instance_count++;
 }
 
