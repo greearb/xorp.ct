@@ -25,7 +25,7 @@
 //
 // Copyright (c) 1999-2000 Massachusetts Institute of Technology
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.49 2008/10/01 23:07:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.50 2008/10/02 21:57:35 bms Exp $"
 
 
 #include "libxorp_module.h"
@@ -136,20 +136,6 @@ TimerNode::schedule_after(const TimeVal& wait, int priority)
 
     _list->current_time(now);
     _expires = now + wait;
-    _priority = priority;
-    _list->schedule_node(this);
-}
-
-void
-TimerNode::schedule_after_ms(int ms, int priority)
-{
-    assert(_list);
-    unschedule();
-
-    TimeVal now, interval(ms / 1000, (ms % 1000) * 1000);
-
-    _list->current_time(now);
-    _expires = now + interval;
     _priority = priority;
     _list->schedule_node(this);
 }
@@ -334,29 +320,10 @@ TimerList::new_oneoff_after(const TimeVal& wait,
 }
 
 XorpTimer
-TimerList::new_oneoff_after_ms(int ms, const OneoffTimerCallback& cb,
-			    int priority)
-{
-    TimerNode* n = new OneoffTimerNode2(this, cb);
-    n->schedule_after_ms(ms, priority);
-    return XorpTimer(n);
-}
-
-XorpTimer
 TimerList::new_periodic(const TimeVal& wait,
 			const PeriodicTimerCallback& cb,
 			int priority)
 {
-    TimerNode* n = new PeriodicTimerNode2(this, cb, wait);
-    n->schedule_after(wait, priority);
-    return XorpTimer(n);
-}
-
-XorpTimer
-TimerList::new_periodic_ms(int ms, const PeriodicTimerCallback& cb,
-			   int priority)
-{
-    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
     TimerNode* n = new PeriodicTimerNode2(this, cb, wait);
     n->schedule_after(wait, priority);
     return XorpTimer(n);
@@ -387,16 +354,6 @@ TimerList::set_flag_after(const TimeVal& wait, bool *flag_ptr, bool to_value,
     *flag_ptr = false;
     return new_oneoff_after(wait, callback(set_flag_hook, flag_ptr, to_value), 
 			    priority);
-}
-
-XorpTimer
-TimerList::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value,
-			     int priority)
-{
-    assert(flag_ptr);
-    *flag_ptr = false;
-    return new_oneoff_after_ms(ms, callback(set_flag_hook, flag_ptr, to_value),
-			       priority);
 }
 
 int

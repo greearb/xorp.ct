@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.34 2008/09/23 19:58:02 abittau Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.35 2008/10/02 21:57:30 bms Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -374,7 +374,7 @@ EventLoop::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& ocb,
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_after(const TimeVal&	       wait,
+EventLoop::new_oneoff_after(const TimeVal& wait,
 			    const OneoffTimerCallback& ocb,
 			    int priority)
 {
@@ -385,7 +385,8 @@ inline XorpTimer
 EventLoop::new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
 			       int priority)
 {
-    return _timer_list.new_oneoff_after_ms(ms, ocb, priority);
+    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
+    return _timer_list.new_oneoff_after(wait, ocb, priority);
 }
 
 inline XorpTimer
@@ -396,10 +397,11 @@ EventLoop::new_periodic(const TimeVal& wait, const PeriodicTimerCallback& pcb,
 }
 
 inline XorpTimer
-EventLoop::new_periodic_ms(int period_ms, const PeriodicTimerCallback& pcb,
+EventLoop::new_periodic_ms(int ms, const PeriodicTimerCallback& pcb,
 			   int priority)
 {
-    return _timer_list.new_periodic_ms(period_ms, pcb, priority);
+    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
+    return _timer_list.new_periodic(wait, pcb, priority);
 }
 
 inline XorpTimer
@@ -417,7 +419,8 @@ EventLoop::set_flag_after(const TimeVal& wait, bool *flag_ptr, bool to_value)
 inline XorpTimer
 EventLoop::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value)
 {
-    return _timer_list.set_flag_after_ms(ms, flag_ptr, to_value);
+    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
+    return _timer_list.set_flag_after(wait, flag_ptr, to_value);
 }
 
 inline bool

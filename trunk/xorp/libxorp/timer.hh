@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/timer.hh,v 1.38 2008/10/01 22:44:49 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.39 2008/10/02 21:57:35 bms Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -199,22 +199,22 @@ private:
 <pre>
 TimerList timer_list;
 
-XorpTimer t = timer_list.new_oneoff_after_ms(100,
+XorpTimer t = timer_list.new_oneoff_after(TimeVal(0, 100000),
 			callback(some_function, some_arg));
 
-new_oneoff_after_ms(200, my_callback_b, my_parameter_a);
+new_oneoff_after(TimeVal(0, 200000), my_callback_b, my_parameter_a);
 
 while ( ! timer_list.empty() ) {
 	timer_list.run();
 }
 </pre>
  *
- * <code>my_callback_a</code> is called 100ms after the @ref XorpTimer
+ * <code>my_callback_a</code> is called 100000us after the @ref XorpTimer
  * object is created.
 
  * <code>my_callback_b</code> is never called
  * because no XorpTimer references the underlying element on the TimerList
- * after <code>TimerList::new_oneoff_after_ms()</code> is called.
+ * after <code>TimerList::new_oneoff_after()</code> is called.
  */
 class TimerList {
 public:
@@ -256,17 +256,6 @@ public:
 			       int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
-     * Create a XorpTimer that will be scheduled once.
-     *
-     * @param ms the relative time in milliseconds when the timer expires.
-     * @param ocb callback object that is invoked when timer expires.
-     *
-     * @return the @ref XorpTimer created.
-     */
-    XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
-				  int priority = XorpTask::PRIORITY_DEFAULT);
-
-    /**
      * Create a XorpTimer that will invoke a callback periodically.
      *
      * @param wait the period when the timer expires.
@@ -278,18 +267,6 @@ public:
     XorpTimer new_periodic(const TimeVal& wait,
 			   const PeriodicTimerCallback& pcb,
 			   int priority = XorpTask::PRIORITY_DEFAULT);
-
-    /**
-     * Create a XorpTimer that will invoke a callback periodically.
-     *
-     * @param ms the period in milliseconds when the timer expires.
-     * @param pcb user callback object that is invoked when timer expires.
-     * If the callback returns false the periodic XorpTimer is unscheduled.
-     *
-     * @return the @ref XorpTimer created.
-     */
-    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb,
-			      int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -320,21 +297,6 @@ public:
 			     bool*		flag_ptr,
 			     bool		to_value = true,
 			     int priority = XorpTask::PRIORITY_DEFAULT);
-
-    /**
-     * Create a XorpTimer to set a flag.
-     *
-     * @param ms the relative time in milliseconds when the timer expires.
-     *
-     * @param flag_ptr pointer to a boolean variable that is set to
-     * @ref to_value when the @ref XorpTimer expires.
-     *
-     * @return the @ref XorpTimer created.
-     */
-    XorpTimer set_flag_after_ms(int		ms,
-				bool*		flag_ptr,
-				bool		to_value = true,
-				int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Custom XorpTimer creation method.  The @ref XorpTimer object created
@@ -495,7 +457,6 @@ protected:
 
     void schedule_at(const TimeVal&, int priority);
     void schedule_after(const TimeVal& wait, int priority);
-    void schedule_after_ms(int x_ms, int priority);
     void reschedule_after(const TimeVal& wait);
     void unschedule();
     virtual void expire(XorpTimer&, void*);
@@ -586,16 +547,24 @@ XorpTimer::schedule_at(const TimeVal& t, int priority)
 }
 
 inline void
-XorpTimer::schedule_after_ms(int x_ms, int priority)
+XorpTimer::schedule_after(const TimeVal& wait, int priority)
 {
     assert(_node);
-    _node->schedule_after_ms(x_ms, priority);
+    _node->schedule_after(wait, priority);
+}
+
+inline void
+XorpTimer::schedule_after_ms(int ms, int priority)
+{
+    assert(_node);
+    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
+    _node->schedule_after(wait, priority);
 }
 
 inline void
 XorpTimer::schedule_now(int priority)
 {
-    schedule_after_ms(0, priority);
+    schedule_after(TimeVal::ZERO(), priority);
 }
 
 inline void
