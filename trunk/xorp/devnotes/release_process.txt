@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.71 2008/07/09 16:26:55 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.72 2008/07/23 05:09:58 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -154,6 +154,7 @@ the login shell is csh or tcsh):
         xorp/configure.in
         xorp/mibs/configure.in
  # Edit xorp/contrib/win32/installer/xorp.nsi and update PRODUCT_VERSION
+ # Edit xorp/etc/templates/xorpsh.cmds and update "show version" output.
 
  cd xorp
  ./bootstrap
