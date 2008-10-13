@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.70 2008/10/02 21:57:48 bms Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.71 2008/10/10 17:44:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -116,13 +116,8 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 	case OspfTypes::V2:
 	    break;
 	case OspfTypes::V3:
-// 	    XLOG_ASSERT(!net.is_valid());
-//  	    if (net.is_valid()) {
-//  		XLOG_WARNING("Net should be zero %s", cstring(net));
-//  		status = false;
-//  	    }
-// 	    return status;
- 	    return true;
+//  	    if (!net.is_valid())
+		return true;
 	    break;
 	}
     }
@@ -156,13 +151,8 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
  	case OspfTypes::V2:
  	    break;
  	case OspfTypes::V3:
-// 	    XLOG_ASSERT(!net.is_valid());
-// 	    if (net.is_valid()) {
-// 		XLOG_WARNING("Net should be zero %s", cstring(net));
-// 		status = false;
-// 	    }
-// 	    return status;
-	    return true;
+//  	    if (!net.is_valid())
+		return true;
  	    break;
  	}
     }

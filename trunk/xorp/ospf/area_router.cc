@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.298 2008/08/21 03:18:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.299 2008/10/02 21:57:46 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4448,6 +4448,17 @@ AreaRouter<A>::routing_table_add_entry(RoutingTable<A>& routing_table,
     // a Router-LSA can point to the same network. Therefore it is
     // necessary to check that a route is not already in the table.
     debug_msg("net %s\n%s\n", cstring(net), cstring(route_entry));
+
+    // If this is a router entry and the net is not valid
+    // unconditionally place an add_entry call that will cause the
+    // router to be indexed by router id.
+    if (route_entry.get_destination_type() == OspfTypes::Router &&
+	!net.is_valid()) {
+	routing_table.add_entry(_area, net, route_entry);
+	return;
+    }
+
+    XLOG_ASSERT(net.is_valid());
 
     RouteEntry<A> current_route_entry;
     if (routing_table.lookup_entry(_area, net, current_route_entry)) {
