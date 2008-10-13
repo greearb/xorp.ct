@@ -1,6 +1,11 @@
-/* $XORP: xorp/etc/templates/xorpsh.cmds,v 1.1 2004/06/02 03:49:43 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/xorpsh.cmds,v 1.2 2004/06/04 04:46:33 pavlin Exp $ */
 
 show {
     %command: "" %help: HELP;
     %tag: HELP "Display information about the system";
+}
+
+show version {
+    %command: "echo Version 1.6" %help: HELP;
+    %tag: HELP "Display system version";
 }
