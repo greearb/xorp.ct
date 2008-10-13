@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.42 2008/10/02 21:57:30 bms Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.43 2008/10/13 16:50:41 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -37,6 +37,7 @@ int eventloop_instance_count;
 
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
+      _last_ev_run(0),
 #ifdef HOST_OS_WINDOWS
       _win_dispatcher(_clock)
 #else
@@ -62,23 +63,21 @@ EventLoop::~EventLoop()
 void
 EventLoop::run()
 {
-    const time_t MAX_ALLOWED = 2;
-    static time_t last_ev_run = 0;
-    static time_t last_warned;
+    static const time_t MAX_ALLOWED = 2;
     TimeVal t;
 
     _timer_list.advance_time();
     _timer_list.current_time(t);
 
-    if (last_ev_run == 0)
-	last_ev_run = t.sec();
+    if (_last_ev_run == 0)
+	_last_ev_run = t.sec();
 
     time_t now  = t.sec();
-    time_t diff = now - last_ev_run;
+    time_t diff = now - _last_ev_run;
 
-    if (now - last_warned > 0 && (diff > MAX_ALLOWED)) {
+    if (now - _last_warned > 0 && (diff > MAX_ALLOWED)) {
 	XLOG_WARNING("%d seconds between calls to EventLoop::run", (int)diff);
-	last_warned = now;
+	_last_warned = now;
     }
 
     // standard eventloop run
@@ -100,7 +99,7 @@ EventLoop::run()
     // current time.  Maybe we can get rid of advance_time if timeout to select
     // is small, or get rid of advance_time at the top of event loop.  -sorbo
     _timer_list.current_time(t);
-    last_ev_run = t.sec();
+    _last_ev_run = t.sec();
 }
 
 bool

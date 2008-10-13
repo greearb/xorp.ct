@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.35 2008/10/02 21:57:30 bms Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.36 2008/10/13 00:45:58 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -350,6 +350,8 @@ private:
     TimerList		_timer_list;
     TaskList		_task_list;
     int			_aggressiveness;
+    time_t 		_last_ev_run;
+    time_t 		_last_warned;
 #ifdef HOST_OS_WINDOWS
     WinDispatcher	_win_dispatcher;
 #else
