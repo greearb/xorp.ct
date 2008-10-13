@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.23 2008/07/23 05:10:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.24 2008/10/02 21:57:22 bms Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -191,7 +191,7 @@ toggle_flag(bool* flag)
 static void
 run_test()
 {
-    static const uint32_t KEEPALIVE_MS = 2500;
+    static const TimeVal KEEPALIVE_TIME = TimeVal(2, 500);
     EventLoop eventloop;
 
     XrlDispatcher cmd_dispatcher("tester");
@@ -202,20 +202,21 @@ run_test()
 
     XrlPFSTCPListener listener(eventloop, &cmd_dispatcher);
     XrlPFSTCPSender s(eventloop, listener.address());
-    s.set_keepalive_ms(KEEPALIVE_MS);
+    s.set_keepalive_time(KEEPALIVE_TIME);
 
     tracef("listener address: %s\n", listener.address());
 
-    XorpTimer dp = eventloop.new_periodic_ms(500, callback(&print_twirl));
+    XorpTimer dp = eventloop.new_periodic(TimeVal(0, 500),
+					  callback(&print_twirl));
 
     bool run_tests = true;
-    XorpTimer rt = eventloop.new_periodic_ms(5 * KEEPALIVE_MS / 4,
-					     callback(&toggle_flag, &run_tests));
+    XorpTimer rt = eventloop.new_periodic(5 * KEEPALIVE_TIME / 4,
+					  callback(&toggle_flag, &run_tests));
 
     tracef("Testing XrlPFSTCP\n");
     bool stop = false;
-    XorpTimer stop_timer = eventloop.set_flag_after_ms(20 * KEEPALIVE_MS,
-						       &stop);
+    XorpTimer stop_timer = eventloop.set_flag_after(20 * KEEPALIVE_TIME,
+						    &stop);
 
     while (stop == false) {
 	assert(s.alive());

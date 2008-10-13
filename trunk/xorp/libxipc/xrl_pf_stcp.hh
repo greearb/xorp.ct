@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.34 2008/09/23 19:58:18 abittau Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.35 2008/10/02 21:57:25 bms Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -85,8 +85,8 @@ public:
     bool	        alive() const		    { return _sock.is_valid(); }
     virtual const char* protocol() const;
     static const char*  protocol_name()		    { return _protocol; }
-    void	        set_keepalive_ms(uint32_t t);
-    uint32_t	        keepalive_ms() const	    { return _keepalive_ms; }
+    void	        set_keepalive_time(const TimeVal& time);
+    const TimeVal&	keepalive_time() const	    { return _keepalive_time; }
     void	        batch_start();
     void	        batch_stop();
 
@@ -132,7 +132,7 @@ private:
     size_t			 _active_requests;
 
     // Tunable timer variables
-    uint32_t			 _keepalive_ms;
+    TimeVal			_keepalive_time;
 
     // Reception related
     BufferedAsyncReader*	 _reader;

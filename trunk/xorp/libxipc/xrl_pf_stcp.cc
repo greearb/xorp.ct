@@ -21,7 +21,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.70 2008/09/23 19:58:18 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.71 2008/10/02 21:57:25 bms Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -59,7 +59,8 @@
 const char* XrlPFSTCPSender::_protocol   = "stcp";
 const char* XrlPFSTCPListener::_protocol = "stcp";
 
-static const uint32_t 	DEFAULT_SENDER_KEEPALIVE_MS = 10000;
+static const TimeVal 	DEFAULT_SENDER_KEEPALIVE_TIME = TimeVal(10, 0);
+static const TimeVal	QUIET_LIFE_TIME = TimeVal(180, 0);   // 3 min
 
 // The maximum number of bytes worth of XRL buffered before send()
 // returns false.  Resource preservation.
@@ -93,11 +94,11 @@ public:
 	_responses_size(0)
     {
 	EventLoop& e = _parent.eventloop();
-	_life_timer = e.new_oneoff_after_ms(QUIET_LIFE_MS,
-					    callback(this,
-						     &STCPRequestHandler::die,
-						     "life timer expired",
-						     true));
+	_life_timer = e.new_oneoff_after(QUIET_LIFE_TIME,
+					 callback(this,
+						  &STCPRequestHandler::die,
+						  "life timer expired",
+						  true));
 	_reader.start();
 	debug_msg("STCPRequestHandler (%p) fd = %s\n",
 		  this, sock.str().c_str());
@@ -156,8 +157,6 @@ private:
 
     void parse_header(const uint8_t* buffer, size_t buffer_bytes);
     void parse_payload();
-
-    static const int QUIET_LIFE_MS = 180 * 1000;	// 3 minutes
 };
 
 void
@@ -368,7 +367,7 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 void
 STCPRequestHandler::postpone_death()
 {
-    _life_timer.schedule_after_ms(QUIET_LIFE_MS);
+    _life_timer.schedule_after(QUIET_LIFE_TIME);
 }
 
 void
@@ -643,7 +642,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     throw (XrlPFConstructorError)
     : XrlPFSender(e, addr_slash_port),
       _uid(_next_uid++),
-      _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS),
+      _keepalive_time(DEFAULT_SENDER_KEEPALIVE_TIME),
       _batching(false)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
@@ -653,7 +652,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
 XrlPFSTCPSender::XrlPFSTCPSender(EventLoop* e, const char* addr_slash_port)
     : XrlPFSender(*e, addr_slash_port),
       _uid(_next_uid++), _writer(NULL),
-      _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS),
+      _keepalive_time(DEFAULT_SENDER_KEEPALIVE_TIME),
       _reader(NULL), _batching(false)
 {
 }
@@ -975,17 +974,17 @@ XrlPFSTCPSender::protocol() const
 // Sender keepalive related
 
 void
-XrlPFSTCPSender::set_keepalive_ms(uint32_t t)
+XrlPFSTCPSender::set_keepalive_time(const TimeVal& time)
 {
-    _keepalive_ms = t;
+    _keepalive_time = time;
     start_keepalives();
 }
 
 void
 XrlPFSTCPSender::start_keepalives()
 {
-    _keepalive_timer = _eventloop.new_periodic_ms(
-	_keepalive_ms,
+    _keepalive_timer = _eventloop.new_periodic(
+	_keepalive_time,
 	callback(this, &XrlPFSTCPSender::send_keepalive),
 	XorpTask::PRIORITY_XRL_KEEPALIVE);
 }
@@ -1000,8 +999,8 @@ void
 XrlPFSTCPSender::defer_keepalives()
 {
     if (_keepalive_timer.scheduled()) {
-	_keepalive_timer.schedule_after_ms(_keepalive_ms,
-					   XorpTask::PRIORITY_XRL_KEEPALIVE);
+	_keepalive_timer.schedule_after(_keepalive_time,
+					XorpTask::PRIORITY_XRL_KEEPALIVE);
     }
 }
 
@@ -1011,8 +1010,7 @@ XrlPFSTCPSender::send_keepalive()
     TimeVal now;
 
     _eventloop.current_time(now);
-    if ((now - _keepalive_last_fired).to_ms() <
-	 static_cast<int32_t>(_keepalive_ms)) {
+    if (now - _keepalive_last_fired < _keepalive_time) {
 	// This keepalive timer has fired too soon. Rate-limit it.
 	debug_msg("Dropping keepalive due to rate-limiting\n");
 	return true;
