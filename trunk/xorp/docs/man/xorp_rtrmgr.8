@@ -3,7 +3,7 @@
 xorp_rtrmgr \(em XORP Router Manager 
 .SH "SYNOPSIS" 
 .PP 
-\fBxorp_rtrmgr\fR [\fB-a \fIallowed host\fR\fP]  [\fB-n \fIallowed net\fR\fP]  [\fB-b \fIfile\fR\fP]  [\fB-i \fIinterface\fR\fP]  [\fB-p \fIport\fR\fP]  [\fB-q \fIseconds\fR\fP]  [\fB-t \fIdirectory\fR\fP]  [\fB-x \fIdirectory\fR\fP]  [\fB-N\fP]  [\fB-h\fP]  [\fB-v\fP]  
+\fBxorp_rtrmgr\fR [\fB-a \fIallowed host\fR\fP]  [\fB-l \fIfile\fR\fP]  [\fB-L \fIsyslog facility\fR\fP]  [\fB-n \fIallowed net\fR\fP]  [\fB-b \fIfile\fR\fP]  [\fB-i \fIinterface\fR\fP]  [\fB-p \fIport\fR\fP]  [\fB-P \fIpidfile\fR\fP]  [\fB-q \fIseconds\fR\fP]  [\fB-t \fIdirectory\fR\fP]  [\fB-x \fIdirectory\fR\fP]  [\fB-N\fP]  [\fB-h\fP]  [\fB-v\fP]  [\fB-d\fP]  
 .SH "DESCRIPTION" 
 .PP 
 This manual page documents briefly the 
@@ -32,27 +32,35 @@ operator should use the XORP command shell
 .SH "OPTIONS" 
 .PP 
 \fBxorp_rtrmgr\fR allows the following options: 
-.IP "\fB-h\fP         " 10 
-Show summary of options. 
-.IP "\fB-v\fP         " 10 
-Print verbose information. 
 .IP "\fB-a \fIallowed host\fR\fP         " 10 
 Host allowed by the finder. 
-.IP "\fB-n \fIallowed net\fR\fP         " 10 
-Subnet allowed by the finder. 
 .IP "\fB-b \fIfile\fR\fP         " 10 
 Boot configuration file to load. 
+.IP "\fB-d\fP         " 10 
+Run in daemon mode in background.
+.IP "\fB-h\fP         " 10 
+Show summary of options. 
+.IP "\fB-i \fIinterface\fR\fP         " 10 
+Set or add an interface run Finder on. 
+.IP "\fB-l \fIfile\fR\fP         " 10 
+Log all the program information and errors to a file. 
+.IP "\fB-L \fIfacility.priority\fR\fP         " 10 
+Log all the program output to a given syslog facility. 
+.IP "\fB-n \fIallowed net\fR\fP         " 10 
+Subnet allowed by the finder. 
 .IP "\fB-N\fP         " 10 
 Load the configuration but do not execute XRLs and do not start 
 processes. 
-.IP "\fB-i \fIinterface\fR\fP         " 10 
-Set or add an interface run Finder on. 
 .IP "\fB-p \fIport\fR\fP         " 10 
 Set port to run Finder on. 
+.IP "\fB-P \fIfile\fR\fP         " 10 
+Write the process ID to a given file. 
 .IP "\fB-q \fIseconds\fR\fP         " 10 
 Set forced quit period. 
 .IP "\fB-t \fIdirectory\fR\fP         " 10 
 Specify templates directory. 
+.IP "\fB-v\fP         " 10 
+Print verbose information. 
 .IP "\fB-x \fIdirectory\fR\fP         " 10 
 Specify Xrl targets directory. 
 .SH "SEE ALSO" 
@@ -65,10 +73,9 @@ User Manual\fP available at
 xorp-doc package is installed. 
 .SH "AUTHOR" 
 .PP 
-XORP is Copyright (c) 2001-2008 XORP, Inc.
-Institute. 
+XORP is Copyright (c) 2001-2008 XORP, Inc. 
 .PP 
 This manual page was written by Javier Fernandez-Sanguino jfs@debian.org for the 
 \fBDebian\fP system (but may be used by others). For licensing details 
 please see \fB/usr/share/doc/xorp/copyright\fP. 
-.\" created by instant / docbook-to-man, Sat 25 Aug 2007, 02:37 
+.\" created by instant / docbook-to-man, Wed 15 Oct 2008, 03:22 

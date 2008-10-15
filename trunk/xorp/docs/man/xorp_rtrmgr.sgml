@@ -48,6 +48,10 @@
 
       <arg><option>-a <replaceable>allowed host</replaceable></option></arg>
 
+      <arg><option>-l <replaceable>file</replaceable></option></arg>
+
+      <arg><option>-L <replaceable>syslog facility</replaceable></option></arg>
+
       <arg><option>-n <replaceable>allowed net</replaceable></option></arg>
 
       <arg><option>-b <replaceable>file</replaceable></option></arg>
@@ -55,6 +59,8 @@
       <arg><option>-i <replaceable>interface</replaceable></option></arg>
 
       <arg><option>-p <replaceable>port</replaceable></option></arg>
+
+      <arg><option>-P <replaceable>pidfile</replaceable></option></arg>
 
       <arg><option>-q <replaceable>seconds</replaceable></option></arg>
 
@@ -67,6 +73,8 @@
       <arg><option>-h</option></arg>
 
       <arg><option>-v</option></arg>
+
+      <arg><option>-d</option></arg>
 
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -106,22 +114,6 @@
 
     <variablelist>
       <varlistentry>
-        <term><option>-h</option>
-        </term>
-        <listitem>
-          <para>Show summary of options.</para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term><option>-v</option>
-        </term>
-        <listitem>
-          <para>Print verbose information.</para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
         <term><option>-a <replaceable>allowed host</replaceable></option>
         </term>
         <listitem>
@@ -130,18 +122,58 @@
       </varlistentry>
 
       <varlistentry>
-        <term><option>-n <replaceable>allowed net</replaceable></option>
-        </term>
-        <listitem>
-          <para>Subnet allowed by the finder.</para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
         <term><option>-b <replaceable>file</replaceable></option>
         </term>
         <listitem>
           <para>Boot configuration file to load.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-d</option>
+        </term>
+        <listitem>
+          <para>Run in daemon mode in background.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-h</option>
+        </term>
+        <listitem>
+          <para>Show summary of options.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-i <replaceable>interface</replaceable></option>
+        </term>
+        <listitem>
+          <para>Set or add an interface run Finder on.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-l <replaceable>file</replaceable></option>
+        </term>
+        <listitem>
+          <para>Log all the program information and errors to a file.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-L <replaceable>facility.priority</replaceable></option>
+        </term>
+        <listitem>
+          <para>Log all the program output to a given syslog facility.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-n <replaceable>allowed net</replaceable></option>
+        </term>
+        <listitem>
+          <para>Subnet allowed by the finder.</para>
         </listitem>
       </varlistentry>
 
@@ -155,18 +187,18 @@
       </varlistentry>
 
       <varlistentry>
-        <term><option>-i <replaceable>interface</replaceable></option>
-        </term>
-        <listitem>
-          <para>Set or add an interface run Finder on.</para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
         <term><option>-p <replaceable>port</replaceable></option>
         </term>
         <listitem>
           <para>Set port to run Finder on.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-P <replaceable>file</replaceable></option>
+        </term>
+        <listitem>
+          <para>Write the process ID to a given file.</para>
         </listitem>
       </varlistentry>
 
@@ -183,6 +215,14 @@
         </term>
         <listitem>
           <para>Specify templates directory.</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><option>-v</option>
+        </term>
+        <listitem>
+          <para>Print verbose information.</para>
         </listitem>
       </varlistentry>
 
