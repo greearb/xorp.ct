@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.16 2008/10/09 17:50:18 abittau Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.17 2008/10/10 01:17:50 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -421,11 +421,14 @@ IoLinkPcap::join_leave_multicast_group(bool is_join, const Mac& group,
     // On NetBSD and OpenBSD we need to use ifreq.ifr_addr with sa_family
     // of AF_UNSPEC.
     //
-    uint8_t buffer[sizeof(struct ifreq) + sizeof(struct sockaddr_storage)];
-    struct ifreq* ifreq_p = reinterpret_cast<struct ifreq *>(&buffer[0]);
+    struct {
+	struct ifreq r;
+	struct sockaddr_storage s;
+    } buffer;
+    struct ifreq* ifreq_p = &buffer.r;
     struct sockaddr* sa = NULL;
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
     strlcpy(ifreq_p->ifr_name, vif_name().c_str(), sizeof(ifreq_p->ifr_name));
 #ifdef HAVE_STRUCT_IFREQ_IFR_HWADDR
     sa = &ifreq_p->ifr_hwaddr;
