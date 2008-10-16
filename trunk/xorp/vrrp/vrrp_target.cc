@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.12 2008/10/10 01:30:06 pavlin Exp $"
+#ident "$XORP: xorp/vrrp/vrrp_target.cc,v 1.13 2008/10/10 02:43:36 pavlin Exp $"
 
 #include <sstream>
 
@@ -252,7 +252,7 @@ VrrpTarget::join_mcast(const string& ifname, const string& vifname)
     XrlRawPacket4V0p1Client::RegisterReceiverCB cb =
 				callback(this, &VrrpTarget::xrl_cb);
 
-    uint32_t proto = VrrpPacket::IPPROTO_VRRP;
+    uint32_t proto = IPPROTO_VRRP;
     const IPv4& ip = VrrpPacket::mcast_group;
 
     rc = _rawipv4.send_register_receiver(fea_target_name.c_str(),
@@ -280,7 +280,7 @@ VrrpTarget::leave_mcast(const string& ifname, const string& vifname)
     XrlRawPacket4V0p1Client::RegisterReceiverCB cb =
 				callback(this, &VrrpTarget::xrl_cb);
 
-    uint32_t proto = VrrpPacket::IPPROTO_VRRP;
+    uint32_t proto = IPPROTO_VRRP;
     const IPv4& ip = VrrpPacket::mcast_group;
 
     rc = _rawipv4.send_leave_multicast_group(fea_target_name.c_str(),
@@ -666,7 +666,7 @@ VrrpTarget::raw_packet4_client_0_1_recv(
 	return XrlCmdError::OKAY();
     }
 
-    if (ip_protocol != VrrpPacket::IPPROTO_VRRP) {
+    if (ip_protocol != IPPROTO_VRRP) {
 	XLOG_WARNING("Unknown protocol %u", ip_protocol);
 
 	return XrlCmdError::OKAY();

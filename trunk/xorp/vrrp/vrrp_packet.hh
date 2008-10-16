@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/vrrp/vrrp_packet.hh,v 1.2 2008/10/09 18:03:49 abittau Exp $
+// $XORP: xorp/vrrp/vrrp_packet.hh,v 1.3 2008/10/09 18:04:12 abittau Exp $
 
 #ifndef __VRRP_VRRP_PACKET_HH__
 #define __VRRP_VRRP_PACKET_HH__
@@ -74,10 +74,6 @@ struct VrrpAuth {
 
 class VrrpPacket {
 public:
-    enum {
-	IPPROTO_VRRP = 112
-    };
-
     static const IPv4 mcast_group;
 
     VrrpPacket();
