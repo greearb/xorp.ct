@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libproto/packet.hh,v 1.19 2008/10/10 01:11:03 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.20 2008/10/10 01:46:48 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -32,6 +32,20 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/mac.hh"
 
+
+//
+// Network protocols related constants
+//
+#ifndef ETHERTYPE_IP
+#define ETHERTYPE_IP		0x0800	// IP protocol
+#endif
+#ifndef ETHERTYPE_ARP
+#define ETHERTYPE_ARP		0x0806	// Address Resolution Protocol
+#endif
+
+#ifndef IPPROTO_VRRP
+#define IPPROTO_VRRP		112	// Virtual Router Redundancy Protocol
+#endif
 
 /**
  * Extract an 8-bit number from the beginning of a buffer.
