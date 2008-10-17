@@ -21,7 +21,7 @@
  * http://xorp.net
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.29 2008/10/01 21:49:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.30 2008/10/02 21:57:37 bms Exp $"
 
 /*
  * Message logging utility.
@@ -84,7 +84,9 @@ static const char	*xlog_level_names[XLOG_LEVEL_MAX] = {
 				"ERROR",
 				"WARNING",
 				"INFO",
-				"TRACE"
+				"TRACE",
+				/* XXX: temp, to be removed; see Bugzilla entry 795 */
+				"RTRMGR_ONLY_NO_PREAMBLE",
 			};
 
 
@@ -169,6 +171,9 @@ xlog_init(const char *argv0, const char *preamble_message)
 	xlog_verbose_level[level] = XLOG_VERBOSE_LOW;		/* Default */
     }
     xlog_verbose_level[XLOG_LEVEL_FATAL] = XLOG_VERBOSE_HIGH;	/* XXX */
+    /* XXX: temp, to be removed; see Bugzilla entry 795 */
+    xlog_verbose_level[XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE] =
+	XLOG_VERBOSE_RTRMGR_ONLY_NO_PREAMBLE;
 
     init_flag = 1;
 
@@ -229,6 +234,9 @@ xlog_exit(void)
 	xlog_verbose_level[level] = XLOG_VERBOSE_LOW;		/* Default */
     }
     xlog_verbose_level[XLOG_LEVEL_FATAL] = XLOG_VERBOSE_HIGH;	/* XXX */
+    /* XXX: temp, to be removed; see Bugzilla entry 795 */
+    xlog_verbose_level[XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE] =
+	XLOG_VERBOSE_RTRMGR_ONLY_NO_PREAMBLE;
 
     /* Release the exit lock */
     xlog_exit_unlock();
@@ -381,6 +389,9 @@ xlog_set_verbose(xlog_verbose_t verbose_level)
     for (i = 0; i < XLOG_LEVEL_MAX; i++) {
 	if (i == XLOG_LEVEL_FATAL)
 	    continue;		/* XXX: XLOG_LEVEL_FATAL cannot be changed */
+	/* XXX: temp, to be removed; see Bugzilla entry 795 */
+	if (i == XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
+	    continue;
 	xlog_verbose_level[i] = verbose_level;
     }
 }
@@ -404,6 +415,10 @@ xlog_level_set_verbose(xlog_level_t log_level, xlog_verbose_t verbose_level)
 
     if (log_level == XLOG_LEVEL_FATAL)
 	return;			/* XXX: XLOG_LEVEL_FATAL cannot be changed */
+
+	/* XXX: temp, to be removed; see Bugzilla entry 795 */
+    if (log_level == XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
+	return;
 
     if (XLOG_VERBOSE_HIGH < verbose_level)
 	verbose_level = XLOG_VERBOSE_HIGH;
@@ -447,6 +462,8 @@ xlog_fn_abort(fatal, 	XLOG_LEVEL_FATAL)
 xlog_fn(error, 		XLOG_LEVEL_ERROR)
 xlog_fn(warning,	XLOG_LEVEL_WARNING)
 xlog_fn(info, 		XLOG_LEVEL_INFO)
+/* XXX: temp, to be removed; see Bugzilla entry 795 */
+xlog_fn(rtrmgr_only_no_preamble,	XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE)
 
 
 /*
@@ -606,6 +623,11 @@ xlog_record_va(xlog_level_t log_level, const char *module_name,
      * different when we write to more than one outputs.
      */
     switch (xlog_verbose_level[log_level]) {
+    case XLOG_VERBOSE_RTRMGR_ONLY_NO_PREAMBLE:	/* No log information */
+	/* XXX: temp, to be removed; see Bugzilla entry 795 */
+	x_asprintf(&buf_preamble_ptr, "");
+	break;
+	
     case XLOG_VERBOSE_LOW:	/* The minimum log information */
 	x_asprintf(&buf_preamble_ptr, "[ %s %s %s %s ] ",
 		   xlog_localtime2string_short(),
@@ -1299,6 +1321,10 @@ xlog_level_to_syslog_priority(xlog_level_t xloglevel)
 	return (LOG_WARNING);
 	break;
     case XLOG_LEVEL_INFO:
+	return (LOG_INFO);
+	break;
+    case XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE:
+	/* XXX: temp, to be removed; see Bugzilla entry 795 */
 	return (LOG_INFO);
 	break;
     default:

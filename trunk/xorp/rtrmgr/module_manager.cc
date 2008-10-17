@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.66 2008/07/23 05:11:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.67 2008/10/02 21:58:23 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -726,7 +726,8 @@ ModuleManager::Process::stdout_cb(RunCommand* run_command,
 {
     XLOG_ASSERT(run_command == _run_command);
     // XXX: output the message from the child process to stdout as-is
-    fprintf(stdout, "%s", output.c_str());
+    // XXX: temp, to be removed; see Bugzilla entry 795 */
+    XLOG_RTRMGR_ONLY_NO_PREAMBLE("%s", output.c_str());
 }
 
 void
@@ -735,7 +736,8 @@ ModuleManager::Process::stderr_cb(RunCommand* run_command,
 {
     XLOG_ASSERT(run_command == _run_command);
     // XXX: output the message from the child process to stderr as-is
-    fprintf(stderr, "%s", output.c_str());
+    // XXX: temp, to be removed; see Bugzilla entry 795 */
+    XLOG_RTRMGR_ONLY_NO_PREAMBLE("%s", output.c_str());
 }
 
 void

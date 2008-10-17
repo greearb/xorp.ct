@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.20 2008/10/02 21:57:37 bms Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.21 2008/10/11 01:39:05 paulz Exp $
  */
 
 
@@ -68,6 +68,7 @@ typedef enum {
     XLOG_LEVEL_WARNING,		/* 2 */
     XLOG_LEVEL_INFO,		/* 3 */
     XLOG_LEVEL_TRACE,		/* 4 */
+    XLOG_LEVEL_RTRMGR_ONLY_NO_PREAMBLE, /* 5 */	/* XXX: temp, to be removed; see Bugzilla entry 795 */
     XLOG_LEVEL_MAX
 } xlog_level_t;
 
@@ -79,6 +80,7 @@ typedef enum {
     XLOG_VERBOSE_LOW = 0,	/* 0 */
     XLOG_VERBOSE_MEDIUM,	/* 1 */
     XLOG_VERBOSE_HIGH,		/* 2 */
+    XLOG_VERBOSE_RTRMGR_ONLY_NO_PREAMBLE, /* 3 */ /* XXX: temp, to be removed; see Bugzilla entry 795 */
     XLOG_VERBOSE_MAX
 } xlog_verbose_t;
 
@@ -332,6 +334,21 @@ void	xlog_warning(const char *module_name, const char *where,
 void	xlog_info(const char *module_name, const char *where,
 		  const char *format, ...) __printflike(3,4);
 #define XLOG_INFO(fmt...)	XLOG_FN(xlog_info, fmt)
+
+/**
+ * Write a message without a preamble to the xlog output streams.
+ * Note that this mechanism is a temporary solution for the rtrmgr
+ * (see Bugzilla entry 795) and should not be used elsewhere.
+ *
+ * @param module_name the name of the module this message applies to.
+ * @param format the printf()-style format of the message to write.
+ * Note that a trailing newline is added if none is present.
+ * @param ... the arguments for @ref format.
+ */
+void	xlog_rtrmgr_only_no_preamble(const char *module_name,
+				     const char *where,
+				     const char *format, ...) __printflike(3,4);
+#define XLOG_RTRMGR_ONLY_NO_PREAMBLE(fmt...)	XLOG_FN(xlog_rtrmgr_only_no_preamble, fmt)
 
 /**
  * XORP replacement for assert(3).
