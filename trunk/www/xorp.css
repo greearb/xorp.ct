@@ -51,6 +51,13 @@ div#net {
   right: 10px;
 }
 
+/* Search bar */
+div#search {
+  position: absolute;
+  top: 35px;
+  right: 10px;
+}
+
 /* Open Source Open Routing Platform */
 div#open {
   position: absolute;
