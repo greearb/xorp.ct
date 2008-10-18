@@ -1,0 +1,203 @@
+How to install this example into the XORP build:
+
+1. Edit top level (../../) Makefile.am to include the line:
+-----------------------------------------------------------
+
+SUBDIRS += usermgr
+
+<PATCH>
+Index: Makefile.am
+===================================================================
+RCS file: /usr/local/www/data/cvs/xorp/Makefile.am,v
+retrieving revision 1.23
+diff -c -r1.23 Makefile.am
+*** Makefile.am 9 Oct 2008 17:40:57 -0000       1.23
+--- Makefile.am 18 Oct 2008 02:03:42 -0000
+***************
+*** 25,30 ****
+--- 25,33 ----
+  # --- Conditional applications
+  SUBDIRS += @MIBS@
+  
++ # --- Example process
++ SUBDIRS += usermgr
++ 
+  ################################################################
+  ##
+  ## Everything past here is useful to the maintainer, but probably not
+</PATCH>
+
+2. Edit the top level configure.in file to include the line:
+------------------------------------------------------------
+
+    usermgr/Makefile
+
+   in the AC_CONFIG_FILES array, (starts about line 1153).
+
+<PATCH>
+Index: configure.in
+===================================================================
+RCS file: /usr/local/www/data/cvs/xorp/configure.in,v
+retrieving revision 1.229
+diff -c -r1.229 configure.in
+*** configure.in        9 Oct 2008 17:55:51 -0000       1.229
+--- configure.in        18 Oct 2008 02:04:47 -0000
+***************
+*** 1221,1226 ****
+--- 1221,1227 ----
+      xrl/interfaces/Makefile
+      xrl/targets/Makefile
+      xrl/tests/Makefile
++     usermgr/Makefile
+  ])
+  
+  
+</PATCH>
+
+3. Copy usermgr.xif to $(TOP)/xrl/interfaces/
+---------------------------------------------
+
+4. Add the lines:
+-----------------
+
+# Usermgr Interface
+noinst_LTLIBRARIES += libusermgrxif.la
+libusermgrxif_la_SOURCES = usermgr_xif.hh usermgr_xif.cc
+
+   to the Makefile.am in $(TOP)/xrl/interfaces/
+
+<PATCH>
+Index: Makefile.am
+===================================================================
+RCS file: /usr/local/www/data/cvs/xorp/xrl/interfaces/Makefile.am,v
+retrieving revision 1.40
+diff -c -r1.40 Makefile.am
+*** Makefile.am 9 Oct 2008 17:40:59 -0000       1.40
+--- Makefile.am 18 Oct 2008 02:07:11 -0000
+***************
+*** 253,258 ****
+--- 253,262 ----
+  noinst_LTLIBRARIES += libxorpifmibxif.la
+  libxorpifmibxif_la_SOURCES = xorp_if_mib_xif.hh xorp_if_mib_xif.cc
+  
++ # Sample XORP process
++ noinst_LTLIBRARIES += libusermgrxif.la
++ libusermgrxif_la_SOURCES = usermgr_xif.hh usermgr_xif.cc
++ 
+  #
+  # Sample Test Client Interface
+  #
+</PATCH>
+
+5. copy the file usermgr.tgt to $(TOP)/xrl/targets/
+---------------------------------------------------
+
+6. Add the line:
+----------------
+
+tgt_files               += usermgr.tgt
+
+and
+
+noinst_LTLIBRARIES      += libusermgrbase.la
+
+and
+
+# USERMGR
+libusermgrbase_la_SOURCES = usermgr_base.hh usermgr_base.cc
+$(srcdir)/usermgr_base.hh $(srcdir)/usermgr_base.cc:                            \
+                $(INTERFACES_DIR)/common.xif                            \
+                $(INTERFACES_DIR)/usermgr.xif
+
+
+
+   to the Makefile.am in $(TOP)/xrl/targets/
+
+<PATCH>
+Index: Makefile.am
+===================================================================
+RCS file: /usr/local/www/data/cvs/xorp/xrl/targets/Makefile.am,v
+retrieving revision 1.73
+diff -c -r1.73 Makefile.am
+*** Makefile.am 9 Oct 2008 17:41:00 -0000       1.73
+--- Makefile.am 18 Oct 2008 02:10:39 -0000
+***************
+*** 48,53 ****
+--- 48,54 ----
+  tgt_files             += vrrp.tgt
+  tgt_files             += xorp_if_mib.tgt
+  tgt_files             += xorpsh.tgt
++ tgt_files               += usermgr.tgt
+  
+  # Automatically compute the list of the *.xrls files
+  xrls_files             = $(tgt_files:%.tgt=%.xrls)
+***************
+*** 95,100 ****
+--- 96,102 ----
+  noinst_LTLIBRARIES    += libvrrpbase.la
+  noinst_LTLIBRARIES    += libxorpifmibbase.la
+  noinst_LTLIBRARIES    += libxorpshbase.la
++ noinst_LTLIBRARIES      += libusermgrbase.la
+  
+  # BGP
+  libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
+***************
+*** 390,395 ****
+--- 392,404 ----
+                $(INTERFACES_DIR)/common.xif                            \
+                $(INTERFACES_DIR)/rtrmgr_client.xif
+  
++ # USERMGR
++ libusermgrbase_la_SOURCES = usermgr_base.hh usermgr_base.cc
++ $(srcdir)/usermgr_base.hh $(srcdir)/usermgr_base.cc:                    \
++                 $(INTERFACES_DIR)/common.xif                            \
++                 $(INTERFACES_DIR)/usermgr.xif
++ 
++ 
+  # Add your target's library sources like this:
+  # Test target
+  libtestbase_la_SOURCES = test_base.hh test_base.cc
+</PATCH>
+
+
+7. copy the file usermgr.tp to $(TOP)/etc/templates/
+----------------------------------------------------
+
+8. add the line:
+----------------
+
+data_DATA	+= usermgr.tp
+
+  to the Makefile.am in $(TOP)/etc/templates/
+
+<PATCH>
+Index: Makefile.am
+===================================================================
+RCS file: /usr/local/www/data/cvs/xorp/etc/templates/Makefile.am,v
+retrieving revision 1.23
+diff -c -r1.23 Makefile.am
+*** Makefile.am 26 Apr 2008 00:59:41 -0000      1.23
+--- Makefile.am 18 Oct 2008 02:11:36 -0000
+***************
+*** 32,37 ****
+--- 32,38 ----
+  data_DATA      += static_routes.tp
+  data_DATA      += xorpsh.cmds
+  data_DATA      += misc.cmds
++ data_DATA       += usermgr.tp
+  
+  if WITH_OLSR
+  data_DATA      += olsr4.cmds olsr4.tp
+</PATCH>
+
+9. copy this directory to $(TOP)/usermgr
+----------------------------------------
+
+Symbolic link will not work!
+
+
+10. bootstrap, configure and build.
+-----------------------------------
+# ./bootstrap
+# ./configure
+# make

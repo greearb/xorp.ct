@@ -1,0 +1,6 @@
+#include "common.xif"
+#include "usermgr.xif"
+
+target usermgr implements						\
+			common/0.1,					\
+			usermgr/0.1

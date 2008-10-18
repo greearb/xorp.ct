@@ -1,0 +1,18 @@
+interface usermgr/0.1 {
+	create_group ? group:txt				\
+		     & groupid:u32
+
+	delete_group ? group:txt
+
+	get_groups   -> groupname:list
+
+	create_user ? user:txt					\
+		    &  userid:u32
+
+	delete_user ? user:txt
+
+	get_users   -> username:list
+
+	trace ? tvar:txt					\
+		    & enable:bool
+}
