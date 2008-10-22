@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.26 2008/07/23 05:10:41 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.27 2008/10/02 21:57:20 bms Exp $"
 
 #include "finder_module.h"
 
@@ -103,9 +103,6 @@ finder_main(int argc, char* const argv[])
 #endif
     signal(SIGINT, finder_sig_handler);
     signal(SIGTERM, finder_sig_handler);
-#ifdef SIGPIPE
-    signal(SIGPIPE, finder_sig_handler);
-#endif
 
     int ch;
     while ((ch = getopt(argc, argv, "a:i:n:p:hv")) != -1) {

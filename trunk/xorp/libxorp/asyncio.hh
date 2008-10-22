@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.33 2008/09/23 19:57:16 abittau Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.34 2008/10/02 21:57:28 bms Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -423,14 +423,11 @@ protected:
 
     void write(XorpFd, IoEventType);
     void complete_transfer(ssize_t done);
-    static void sigpipe_handler(int sig);
 
     uint32_t		_coalesce;
     struct iovec* 	_iov;
     ref_ptr<int>	_dtoken;
     list<BufferInfo *> 	_buffers;
-
-    static bool		_writing;
 
 #ifdef HOST_OS_WINDOWS
     void disconnect(XorpFd fd, IoEventType type);

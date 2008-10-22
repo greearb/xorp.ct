@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.45 2008/10/13 18:18:02 atanu Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.46 2008/10/13 21:31:41 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -47,6 +47,15 @@ EventLoop::EventLoop()
     XLOG_ASSERT(eventloop_instance_count == 0);
     XLOG_ASSERT(_last_ev_run == 0);
     eventloop_instance_count++;
+
+    //
+    // XXX: Ignore SIGPIPE, because we always check the return code.
+    // If the program needs to install a SIGPIPE signal handler, the
+    // handler must be installed after the EventLoop instance is created.
+    //
+#ifdef SIGPIPE
+    signal(SIGPIPE, SIG_IGN);
+#endif
 }
 
 EventLoop::~EventLoop()

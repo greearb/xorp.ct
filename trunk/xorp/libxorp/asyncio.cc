@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.44 2008/09/23 19:57:16 abittau Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.45 2008/10/02 21:57:28 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -82,8 +82,6 @@ is_pseudo_error(const char* name, XorpFd fd, int error_num)
     }
     return false;
 }
-
-bool AsyncFileWriter::_writing = false;
 
 // ----------------------------------------------------------------------------
 AsyncFileOperator::~AsyncFileOperator()
@@ -377,11 +375,6 @@ AsyncFileWriter::AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce,
 				 int priority)
     : AsyncFileOperator(e, fd, priority)
 {
-#ifndef HOST_OS_WINDOWS
-    if (::signal(SIGPIPE, &AsyncFileWriter::sigpipe_handler) == SIG_ERR)
-	xorp_throw(InvalidString, "can't install signal handler"); // XXX
-#endif
-
     static const uint32_t max_coalesce = 16;
     _coalesce = (coalesce > MAX_IOVEC) ? MAX_IOVEC : coalesce;
     if (_coalesce > max_coalesce) {
@@ -397,16 +390,6 @@ AsyncFileWriter::~AsyncFileWriter()
 
     delete[] _iov;
     delete_pointers_list(_buffers);
-}
-
-void
-AsyncFileWriter::sigpipe_handler(int /* num */)
-{
-    if (_writing)
-	return;
-
-    // XXX call original signal handler
-    XLOG_ASSERT(false);
 }
 
 void
@@ -533,9 +516,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     ssize_t done = 0;
     int flags = 0;
     bool mod_signals = true;
-#ifndef HOST_OS_WINDOWS
-    sig_t saved_sigpipe = SIG_ERR;
-#endif
 
 #ifdef MSG_NOSIGNAL
     flags |= MSG_NOSIGNAL;
@@ -600,12 +580,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	//
 	XLOG_ASSERT(! dst_addr.is_zero());
 
-	if (mod_signals) {
-#ifndef HOST_OS_WINDOWS
-	    saved_sigpipe = signal(SIGPIPE, SIG_IGN);
-#endif
-	}
-
 	switch (dst_addr.af()) {
 	case AF_INET:
 	{
@@ -648,12 +622,6 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    _last_error = WSAGetLastError();
 #else
 	    _last_error = errno;
-#endif
-	}
-
-	if (mod_signals) {
-#ifndef HOST_OS_WINDOWS
-	    signal(SIGPIPE, saved_sigpipe);
 #endif
 	}
 
@@ -702,11 +670,9 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 	    if (done < 0)
 		_last_error = errno;
 	} else {
-	    _writing = true;
 	    done = ::writev(_fd, _iov, (int)iov_cnt);
 	    if (done < 0)
 		_last_error = errno;
-	    _writing = false;
 	}
 	errno = 0;
 #endif // ! HOST_OS_WINDOWS
@@ -737,7 +703,14 @@ void
 AsyncFileWriter::complete_transfer(ssize_t sdone)
 {
     if (sdone < 0) {
-	XLOG_ERROR("Write error %d\n", _last_error);
+	do {
+	    // XXX: don't print an error if the error code is EPIPE
+#ifdef EPIPE
+	    if (_last_error == EPIPE)
+		break;
+#endif
+	    XLOG_ERROR("Write error %d\n", _last_error);
+	} while (false);
 	stop();
 	BufferInfo* head = _buffers.front();
 	head->dispatch_callback(OS_ERROR);

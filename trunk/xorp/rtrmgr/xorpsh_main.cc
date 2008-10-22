@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.73 2008/07/31 13:13:46 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.74 2008/10/02 21:58:27 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -236,11 +236,6 @@ XorpShell::run(const string& commands, bool exit_on_error)
 	xorpsh_output_fd = FILENO(stdout);
     }
 #endif // ! HOST_OS_WINDOWS
-
-#ifdef SIGPIPE
-    // Trap SIGPIPE while we bring up the connection to the Finder.
-    signal(SIGPIPE, signal_handler);
-#endif
 
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
@@ -785,12 +780,6 @@ signal_handler(int signal_value)
     case SIGINT:
 	// Ignore Ctrl-C: it is used by the CLI to interrupt a command.
 	break;
-#ifdef SIGPIPE
-    case SIGPIPE:
-	// Ignore SIGPIPE: it may be generated when executing commands
-	// specified on the command line.
-	break;
-#endif
     default:
 	// XXX: anything else we have intercepted will terminate us.
 	is_interrupted = true;
