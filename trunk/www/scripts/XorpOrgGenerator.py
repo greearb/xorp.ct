@@ -102,10 +102,20 @@ def write_search_form():
     print """<form action="http://www.google.com/cse" id="cse-search-box">
         <input type="hidden" name="cx" value="017869558586786398708:zlic-3ntnvg" />
         <input type="hidden" name="ie" value="UTF-8" />
-        <input type="text" name="q" size="20" />
+        <input type="text" name="q" size="31" />
         <input type="submit" name="sa" value="Search" />
       </form>"""
     close_div("search")
+
+def write_google_tracker():
+    print """<script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            var pageTracker = _gat._getTracker("UA-231783-2");
+            pageTracker._trackPageview();
+          </script>"""
 
 def write_footer():
     open_div("footer")
@@ -145,6 +155,7 @@ def write_header(filename, headextras = []):
 def write_close():
 
     close_div("container")
+    write_google_tracker()
     print"""
 </body>
 </html>"""
