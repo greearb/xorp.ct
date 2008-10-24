@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.217 2008/10/09 07:38:00 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.218 2008/10/15 01:40:00 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -71,7 +71,8 @@ Release 1.6-WIP (2008/??/??)
       source address is allowed to be 0.0.0.0.
 
   PIM-SM:
-    - 
+    - Critical bug fix related to runtime creating or updating the PIM
+      Bootstrap configuration via xorpsh.
 
   FIB2MRIB:
     - 
