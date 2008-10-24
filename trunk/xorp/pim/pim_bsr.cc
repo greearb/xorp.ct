@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.53 2008/07/23 05:11:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.54 2008/10/02 21:57:52 bms Exp $"
 
 
 //
@@ -366,14 +366,30 @@ PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const
 BsrZone *
 PimBsr::add_config_bsr_zone(const BsrZone& bsr_zone, string& error_msg)
 {
+    BsrZone* old_bsr_zone = NULL;
+
     if (! can_add_config_bsr_zone(bsr_zone, error_msg))
 	return (NULL);
-    
-    BsrZone *new_bsr_zone = new BsrZone(*this, bsr_zone);
-    new_bsr_zone->set_config_bsr_zone(true);
-    _config_bsr_zone_list.push_back(new_bsr_zone);
-    
-    return (new_bsr_zone);
+
+    //
+    // Add or update the BSR zone
+    //
+    old_bsr_zone = find_config_bsr_zone(bsr_zone.zone_id());
+    if (old_bsr_zone == NULL) {
+	// Add a new BSR zone
+	BsrZone *new_bsr_zone = new BsrZone(*this, bsr_zone);
+	new_bsr_zone->set_config_bsr_zone(true);
+	_config_bsr_zone_list.push_back(new_bsr_zone);
+	return (new_bsr_zone);
+    }
+
+    //
+    // Update the existing BSR zone
+    //
+    if (old_bsr_zone->update_config_bsr_zone(bsr_zone, error_msg) != XORP_OK)
+	return (NULL);
+
+    return (old_bsr_zone);
 }
 
 // Return: a pointer to the BSR zone if it exists and there is no
@@ -1011,12 +1027,6 @@ PimBsr::can_add_config_bsr_zone(const BsrZone& bsr_zone,
 	}
     }
     
-    if (find_config_bsr_zone(bsr_zone.zone_id()) != NULL) {
-	error_msg = c_format("already have scope zone %s",
-			     cstring(bsr_zone.zone_id()));
-	return (false);
-    }
-    
     //
     // Check for consistency
     //
@@ -1024,12 +1034,26 @@ PimBsr::can_add_config_bsr_zone(const BsrZone& bsr_zone,
 	 iter_zone != _config_bsr_zone_list.end();
 	 ++iter_zone) {
 	BsrZone *config_bsr_zone = *iter_zone;
-	
+
+	//
+	// Check whether this is an update for an existing zone.
+	//
+	if (bsr_zone.i_am_candidate_bsr()) {
+	    if (config_bsr_zone->zone_id() == bsr_zone.zone_id()) {
+		// Same zone so it will be updated
+		continue;
+	    }
+	}
+
 	//
 	// Check that zones do not overlap
 	//
 	if (config_bsr_zone->i_am_candidate_bsr()
 	    && bsr_zone.i_am_candidate_bsr()) {
+	    if (config_bsr_zone->zone_id() == bsr_zone.zone_id()) {
+		// Same zone so it will be updated
+		continue;
+	    }
 	    if (config_bsr_zone->zone_id().is_overlap(bsr_zone.zone_id())) {
 		error_msg = c_format("overlapping zones %s and %s",
 				     cstring(config_bsr_zone->zone_id()),
@@ -1457,6 +1481,45 @@ BsrZone::set_test_bsr_zone(bool v)
 	_is_active_bsr_zone = false;
 	_is_expire_bsr_zone = false;
     }
+}
+
+int
+BsrZone::update_config_bsr_zone(const BsrZone& new_bsr_zone, string& error_msg)
+{
+    bool changed = false;
+
+    UNUSED(error_msg);
+
+    //
+    // Update all relevant fields
+    //
+    if ((i_am_candidate_bsr() != new_bsr_zone.i_am_candidate_bsr())
+	|| (_my_vif_index != new_bsr_zone.my_vif_index())
+	|| (my_bsr_addr() != new_bsr_zone.my_bsr_addr())
+	|| (my_bsr_priority() != new_bsr_zone.my_bsr_priority())) {
+	set_i_am_candidate_bsr(new_bsr_zone.i_am_candidate_bsr(),
+			       new_bsr_zone.my_vif_index(),
+			       new_bsr_zone.my_bsr_addr(),
+			       new_bsr_zone.my_bsr_priority());
+	changed = true;
+    }
+    if (is_my_bsr_addr_explicit() != new_bsr_zone.is_my_bsr_addr_explicit()) {
+	set_is_my_bsr_addr_explicit(new_bsr_zone.is_my_bsr_addr_explicit());
+	changed = true;
+    }
+    if (hash_mask_len() != new_bsr_zone.hash_mask_len()) {
+	_hash_mask_len = new_bsr_zone.hash_mask_len();
+	changed = true;
+    }
+
+    if (changed) {
+	//
+	// TODO: XXX: schedule a timer to send immediately the Bootstrap
+	// message with the updated information.
+	//
+    }
+
+    return (XORP_OK);
 }
 
 bool

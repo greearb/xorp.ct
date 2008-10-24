@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.21 2008/07/23 05:11:13 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.22 2008/10/02 21:57:52 bms Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -232,7 +232,16 @@ public:
     };
     bsr_zone_state_t bsr_zone_state() const	{ return (_bsr_zone_state); }
     void set_bsr_zone_state(bsr_zone_state_t v) { _bsr_zone_state = v;	}
-    
+
+    /**
+     * Update the configuration of a BSR zone.
+     *
+     * @param new_bsr_zone the BSR zone with the new configuration.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int update_config_bsr_zone(const BsrZone& new_bsr_zone, string& error_msg);
+
     bool	is_consistent(string& error_msg) const;
     bool	can_merge_rp_set(const BsrZone& bsr_zone,
 				 string& error_msg) const;
