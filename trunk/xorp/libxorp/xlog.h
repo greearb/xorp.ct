@@ -21,7 +21,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.21 2008/10/11 01:39:05 paulz Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.22 2008/10/17 00:53:44 pavlin Exp $
  */
 
 
@@ -108,12 +108,12 @@ typedef int (*xlog_output_func_t)(void *obj, xlog_level_t level,
 #  define _XLOG_MODULE_NAME XORP_MODULE_NAME
 #endif
 #define XLOG_FN(fn, fmt...)						\
-{									\
+do {									\
 	char xlog_where_buf[8000];					\
 	snprintf(xlog_where_buf, sizeof(xlog_where_buf), "+%d %s %s",	\
 		 __LINE__, __FILE__, __FUNCTION__);			\
 	fn(_XLOG_MODULE_NAME, xlog_where_buf, fmt);			\
-}
+} while (0)
 
 /**
  * Initialize the log utility.
