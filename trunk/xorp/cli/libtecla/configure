@@ -4547,7 +4547,7 @@ if test "${tecla_cv_gnu_ld_script+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
 
-    if (echo 'void dummy(void) {return;}' > dummy.c; $CC -c -fpic dummy.c; \
+    if (echo 'void dummy(void) {return;}' > dummy.c; $CC -c -fPIC dummy.c; \
          $LD -o dummy.so dummy.o -shared --version-script=$srcdir/libtecla.map) 1>&2 2>/dev/null; then
       tecla_cv_gnu_ld_script=yes
     else
@@ -4565,7 +4565,7 @@ echo "${ECHO_T}$tecla_cv_gnu_ld_script" >&6; }
   fi
 
   LINK_SHARED='$${LD} -o $$@ -soname libtecla$$(SUFFIX).so.'${MAJOR_VER}' -shared '$VERSION_OPT' $$(LIB_OBJECTS) $$(LIBS) -lc'
-  SHARED_CFLAGS="-fpic"
+  SHARED_CFLAGS="-fPIC"
   ;;
 *hpux*)
   SHARED_EXT=".${MAJOR_VER}"
@@ -4583,7 +4583,7 @@ esac
 
 
 if test "$GCC"_ = "yes"_ && test "$LINK_SHARED"_ != "_" ; then
-  SHARED_CFLAGS="-fpic"
+  SHARED_CFLAGS="-fPIC"
   case $target_os in
   sparc*solaris*) SHARED_CFLAGS="$SHARED_CFLAGS -mno-app-regs"
   esac
