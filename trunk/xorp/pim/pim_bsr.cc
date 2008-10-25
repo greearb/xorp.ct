@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.54 2008/10/02 21:57:52 bms Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.55 2008/10/24 00:07:45 pavlin Exp $"
 
 
 //
@@ -1924,8 +1924,8 @@ BsrZone::process_candidate_bsr(const BsrZone& cand_bsr_zone)
 	    set_bsr_zone_state(BsrZone::STATE_PENDING_BSR);
 	    set_i_am_candidate_bsr(config_bsr_zone->i_am_candidate_bsr(),
 				   config_bsr_zone->my_vif_index(),
-				   config_bsr_zone->bsr_addr(),
-				   config_bsr_zone->bsr_priority());
+				   config_bsr_zone->my_bsr_addr(),
+				   config_bsr_zone->my_bsr_priority());
 	    // Set BS Timer to BS Timeout
 	    TimeVal tv(PIM_BOOTSTRAP_BOOTSTRAP_TIMEOUT_DEFAULT, 0);
 	    _bsr_timer = pim_bsr().pim_node().eventloop().new_oneoff_after(
