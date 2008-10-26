@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_link.hh,v 1.4 2008/07/23 05:10:10 pavlin Exp $
+// $XORP: xorp/fea/io_link.hh,v 1.5 2008/10/02 21:56:48 bms Exp $
 
 
 #ifndef __FEA_IO_LINK_HH__
@@ -241,8 +241,41 @@ protected:
 			     uint16_t		ether_type,
 			     const vector<uint8_t>& payload);
 
+    /**
+     * Receved an Ethernet packet.
+     *
+     * @param packet the packet.
+     * @param packet_size the size of the packet.
+     */
+    void recv_ethernet_packet(const uint8_t* packet, size_t packet_size);
+
+    /**
+     * Prepare an Ethernet packet for transmission.
+     *
+     * @param src_address the MAC source address.
+     * @param dst_address the MAC destination address.
+     * @param ether_type the EtherType protocol number.
+     * @param payload the payload, everything after the MAC header.
+     * @param packet the return-by-reference packet prepared for transmission.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int prepare_ethernet_packet(const Mac& src_address,
+				const Mac& dst_address,
+				uint16_t ether_type,
+				const vector<uint8_t>& payload,
+				vector<uint8_t>& packet,
+				string& error_msg);
+
     // Misc other state
     bool	_is_running;
+    uint8_t*	_databuf;	// Data buffer for sending and receiving
+
+    // Misc. constants
+    static const size_t MAX_PACKET_SIZE = (64*1024);	// Max. packet size
+    static const uint16_t ETHERNET_HEADER_SIZE		= 14;
+    static const uint16_t ETHERNET_LENGTH_TYPE_THRESHOLD = 1536;
+    static const uint16_t ETHERNET_MIN_FRAME_SIZE	= 60;	// Excl. CRC
 
 private:
     IoLinkManager&	_io_link_manager;	// The I/O Link manager

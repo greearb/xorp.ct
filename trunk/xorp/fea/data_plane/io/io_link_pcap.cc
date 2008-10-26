@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.17 2008/10/10 01:17:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.18 2008/10/15 01:23:50 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -32,8 +32,6 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/mac.hh"
-
-#include "libproto/packet.hh"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -49,20 +47,6 @@
 
 #ifdef HAVE_PCAP
 
-//
-// Local constants definitions
-//
-#define IO_BUF_SIZE		(64*1024)  // I/O buffer(s) size
-
-//
-// Local structures/classes, typedefs and macros
-//
-
-//
-// Local variables
-//
-
-
 IoLinkPcap::IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
 		       const IfTree& iftree, const string& if_name,
 		       const string& vif_name, uint16_t ether_type,
@@ -71,8 +55,7 @@ IoLinkPcap::IoLinkPcap(FeaDataPlaneManager& fea_data_plane_manager,
 	     filter_program),
       _pcap(NULL),
       _datalink_type(-1),
-      _databuf(NULL),
-      _errbuf(NULL),
+      _pcap_errbuf(NULL),
       _multicast_sock(-1)
 {
 }
@@ -87,10 +70,8 @@ IoLinkPcap::~IoLinkPcap()
     }
 
     // Free the buffers
-    if (_databuf != NULL)
-	delete[] _databuf;
-    if (_errbuf != NULL)
-	delete[] _errbuf;
+    if (_pcap_errbuf != NULL)
+	delete[] _pcap_errbuf;
 }
 
 int
@@ -167,26 +148,26 @@ IoLinkPcap::open_pcap_access(string& error_msg)
 	return (XORP_OK);
 
     // Allocate the buffers
-    if (_databuf == NULL)
-	_databuf = new uint8_t[IO_BUF_SIZE];
-    if (_errbuf == NULL)
-	_errbuf = new char[PCAP_ERRBUF_SIZE];
+    if (_pcap_errbuf == NULL)
+	_pcap_errbuf = new char[PCAP_ERRBUF_SIZE];
 
     //
     // Open the pcap descriptor
     //
-    _errbuf[0] = '\0';
-    _pcap = pcap_open_live(vif_name().c_str(), IO_BUF_SIZE, 0, 1, _errbuf);
+    _pcap_errbuf[0] = '\0';
+    _pcap = pcap_open_live(vif_name().c_str(), MAX_PACKET_SIZE, 0, 1,
+			   _pcap_errbuf);
     if (_pcap == NULL) {
 	error_msg = c_format("Cannot open interface %s vif %s "
 			     "for pcap access: %s",
-			     if_name().c_str(), vif_name().c_str(), _errbuf);
+			     if_name().c_str(), vif_name().c_str(),
+			     _pcap_errbuf);
 	close_pcap_access(dummy_error_msg);
 	return (XORP_ERROR);
     }
-    if (_errbuf[0] != '\0') {
+    if (_pcap_errbuf[0] != '\0') {
 	XLOG_WARNING("Warning opening interface %s vif %s for pcap access: %s",
-		     if_name().c_str(), vif_name().c_str(), _errbuf);
+		     if_name().c_str(), vif_name().c_str(), _pcap_errbuf);
     }
 
     //
@@ -247,7 +228,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     //
     // Put the pcap descriptor in non-blocking mode
     //
-    if (pcap_setnonblock(_pcap, 1, _errbuf) != 0) {
+    if (pcap_setnonblock(_pcap, 1, _pcap_errbuf) != 0) {
 	error_msg = c_format("Cannot set interface %s vif %s in pcap "
 			     "non-blocking mode: %s",
 			     if_name().c_str(), vif_name().c_str(),
@@ -506,13 +487,9 @@ IoLinkPcap::ioevent_read_cb(XorpFd fd, IoEventType type)
 void
 IoLinkPcap::recv_data()
 {
-    size_t	payload_size = 0;
-    size_t	payload_offset = 0;
-    Mac		src_address;
-    Mac		dst_address;
-    uint16_t	ether_type = 0;
     struct pcap_pkthdr pcap_pkthdr;
     const u_char* packet;
+    size_t packet_size = 0;
 
     // Receive a packet
     packet = pcap_next(_pcap, &pcap_pkthdr);
@@ -522,6 +499,7 @@ IoLinkPcap::recv_data()
 	_recv_data_task.unschedule();
 	return;				// OK
     }
+    packet_size = pcap_pkthdr.caplen;
 
     //
     // XXX: Schedule a task to read again the data in case there are more
@@ -531,80 +509,11 @@ IoLinkPcap::recv_data()
 	callback(this, &IoLinkPcap::recv_data));
 
     //
-    // Decode the link-layer header
-    //
-    switch (_datalink_type) {
-    case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
-    {
-	const uint8_t* ptr = packet;
-
-	// Test the received packet size
-	if (pcap_pkthdr.caplen < ETHERNET_MIN_FRAME_SIZE) {
-	    XLOG_WARNING("Received packet on interface %s vif %s: "
-			 "data is too short "
-			 "(captured %u expecting at least %u octets)",
-			 if_name().c_str(),
-			 vif_name().c_str(),
-			 XORP_UINT_CAST(pcap_pkthdr.caplen),
-			 XORP_UINT_CAST(ETHERNET_MIN_FRAME_SIZE));
-	    return;			// Error
-	}
-
-	// Extract the MAC destination and source address
-	dst_address.copy_in(ptr);
-	ptr += Mac::ADDR_BYTELEN;
-	src_address.copy_in(ptr);
-	ptr += Mac::ADDR_BYTELEN;
-
-	//
-	// Extract the EtherType
-	//
-	// XXX: The EtherType field could be either type or length
-	// for Ethernet II (DIX) and IEEE 802.2 LLC frames correspondingly.
-	//
-	ether_type = extract_16(ptr);
-	ptr += sizeof(uint16_t);
-
-	if (ether_type < ETHERNET_LENGTH_TYPE_THRESHOLD) {
-	    //
-	    // This is a IEEE 802.2 LLC frame
-	    //
-
-	    //
-	    // XXX: Return the DSAP from the LLC header as an EtherType value.
-	    // Note that there is no colusion, because the DSAP values are
-	    // in the range [0, 255], while the EtherType values are in
-	    // the range [1536, 65535].
-	    //
-	    uint8_t dsap = extract_8(ptr);
-	    ether_type = dsap;
-
-	    //
-	    // XXX: Don't move the ptr, because we only peek into the LLC
-	    // header to get the DSAP value, but keep the header as
-	    // part of the payload to the user.
-	    //
-	}
-
-	// Calculate the payload offset and size
-	payload_offset = ptr - packet;
-	payload_size = pcap_pkthdr.caplen - payload_offset;
-	break;
-    }
-
-    default:
-	// XXX: The data link type on the interface is not supported
-	return;			// Error
-    }
-
-    //
     // Various checks
     //
     if (pcap_pkthdr.caplen < pcap_pkthdr.len) {
-	XLOG_WARNING("Received packet from %s to %s on interface %s vif %s: "
+	XLOG_WARNING("Received packet on interface %s vif %s: "
 		     "data is too short (captured %u expecting %u octets)",
-		     src_address.str().c_str(),
-		     dst_address.str().c_str(),
 		     if_name().c_str(),
 		     vif_name().c_str(),
 		     XORP_UINT_CAST(pcap_pkthdr.caplen),
@@ -612,20 +521,20 @@ IoLinkPcap::recv_data()
 	return;			// Error
     }
 
-    XLOG_TRACE(is_log_trace(),
-	       "Received link-level packet: "
-	       "src = %s dst = %s EtherType = 0x%x len = %u",
-	       src_address.str().c_str(),
-	       dst_address.str().c_str(),
-	       ether_type,
-	       XORP_UINT_CAST(pcap_pkthdr.caplen));
+    //
+    // Receive and process the packet
+    //
+    switch (_datalink_type) {
+    case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
+    {
+	recv_ethernet_packet(packet, packet_size);
+	break;
+    }
 
-    // Process the result
-    vector<uint8_t> payload(payload_size);
-    memcpy(&payload[0], packet + payload_offset, payload_size);
-    recv_packet(src_address, dst_address, ether_type, payload);
-
-    return;			// OK
+    default:
+	// XXX: The data link type on the interface is not supported
+	return;			// Error
+    }
 }
 
 int
@@ -635,35 +544,7 @@ IoLinkPcap::send_packet(const Mac& src_address,
 			const vector<uint8_t>& payload,
 			string& error_msg)
 {
-    size_t packet_size = 0;
-    const IfTreeInterface* ifp = NULL;
-    const IfTreeVif* vifp = NULL;
-
-    //
-    // Test whether the interface/vif is enabled
-    //
-    ifp = iftree().find_interface(if_name());
-    if (ifp == NULL) {
-	error_msg = c_format("No interface %s", if_name().c_str());
-	return (XORP_ERROR);
-    }
-    vifp = ifp->find_vif(vif_name());
-    if (vifp == NULL) {
-	error_msg = c_format("No interface %s vif %s",
-			     if_name().c_str(), vif_name().c_str());
-	return (XORP_ERROR);
-    }
-    if (! ifp->enabled()) {
-	error_msg = c_format("Interface %s is down",
-			     ifp->ifname().c_str());
-	return (XORP_ERROR);
-    }
-    if (! vifp->enabled()) {
-	error_msg = c_format("Interface %s vif %s is down",
-			     ifp->ifname().c_str(),
-			     vifp->vifname().c_str());
-	return (XORP_ERROR);
-    }
+    vector<uint8_t> packet;
 
     //
     // Prepare the packet for transmission
@@ -671,55 +552,11 @@ IoLinkPcap::send_packet(const Mac& src_address,
     switch (_datalink_type) {
     case DLT_EN10MB:		// Ethernet (10Mb, 100Mb, 1000Mb, and up)
     {
-	uint8_t* ptr = _databuf;
-
-	//
-	// Prepare the Ethernet header.
-	//
-	dst_address.copy_out(ptr);
-	ptr += Mac::ADDR_BYTELEN;
-	src_address.copy_out(ptr);
-	ptr += Mac::ADDR_BYTELEN;
-
-	//
-	// The EtherType
-	//
-	// XXX: The EtherType field could be either type or length
-	// for Ethernet II (DIX) and IEEE 802.2 LLC frames correspondingly.
-	//
-	if (ether_type < ETHERNET_LENGTH_TYPE_THRESHOLD) {
-	    // A IEEE 802.2 LLC frame, hence embed the length of the payload
-	    embed_16(ptr, payload.size());
-	    ptr += sizeof(uint16_t);
-	} else {
-	    // An Ethernet II (DIX frame), hence embed the EtherType itself
-	    embed_16(ptr, ether_type);
-	    ptr += sizeof(uint16_t);
-	}
-
-	//
-	// Calculate and test the packet size
-	//
-	packet_size = (ptr - _databuf) + payload.size();
-	if (packet_size > IO_BUF_SIZE) {
-	    error_msg = c_format("Sending packet from %s to %s EtherType %u"
-				 "on interface %s vif %s failed: "
-				 "too much data: %u octets (max = %u)",
-				 src_address.str().c_str(),
-				 dst_address.str().c_str(),
-				 ether_type,
-				 if_name().c_str(),
-				 vif_name().c_str(),
-				 XORP_UINT_CAST(packet_size),
-				 XORP_UINT_CAST(IO_BUF_SIZE));
+	if (prepare_ethernet_packet(src_address, dst_address, ether_type,
+				    payload, packet, error_msg)
+	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
-
-	//
-	// Copy the payload to the data buffer
-	//
-	memcpy(ptr, &payload[0], payload.size());
-
 	break;
     }
 
@@ -735,7 +572,7 @@ IoLinkPcap::send_packet(const Mac& src_address,
     //
     // Transmit the packet
     //
-    if (pcap_sendpacket(_pcap, _databuf, packet_size) != 0) {
+    if (pcap_sendpacket(_pcap, &packet[0], packet.size()) != 0) {
 	error_msg = c_format("Sending packet from %s to %s EtherType %u"
 			     "on interface %s vif %s failed: %s",
 			     src_address.str().c_str(),
@@ -752,7 +589,7 @@ IoLinkPcap::send_packet(const Mac& src_address,
 	//
 	string dummy_error_msg;
     	if ((reopen_pcap_access(dummy_error_msg) == XORP_OK)
-	    && (pcap_sendpacket(_pcap, _databuf, packet_size) == 0)) {
+	    && (pcap_sendpacket(_pcap, &packet[0], packet.size()) == 0)) {
 	    // Success
 	    error_msg = "";
 	} else {

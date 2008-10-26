@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.13 2008/10/10 01:17:50 pavlin Exp $
+// $XORP: xorp/fea/data_plane/io/io_link_pcap.hh,v 1.14 2008/10/11 04:20:19 pavlin Exp $
 
 #ifndef __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
 #define __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__
@@ -180,17 +180,10 @@ private:
     XorpFd	_packet_fd;	// The file descriptor to send and recv packets
     pcap_t*	_pcap;		// The pcap descriptor to send and recv packets
     int		_datalink_type;	// The pcap-defined DLT_* data link type
-
-    uint8_t*	_databuf;	// Data buffer for sending and receiving
-    char*	_errbuf;	// Buffer for error messages
+    char*	_pcap_errbuf;	// The pcap buffer for error messages
     int		_multicast_sock; // The socket to join L2 multicast groups
 
     XorpTask	_recv_data_task; // Task for receiving pending data
-
-    // Misc. constants
-    static const uint16_t ETHERNET_HEADER_SIZE		= 14;
-    static const uint16_t ETHERNET_LENGTH_TYPE_THRESHOLD = 1536;
-    static const uint16_t ETHERNET_MIN_FRAME_SIZE	= 60;	// Excl. CRC
 };
 
 #endif // __FEA_DATA_PLANE_IO_IO_LINK_PCAP_HH__

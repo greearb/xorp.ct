@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_dummy.cc,v 1.4 2008/10/02 21:57:11 bms Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_dummy.cc,v 1.5 2008/10/11 04:20:19 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -167,39 +167,23 @@ IoLinkDummy::send_packet(const Mac& src_address,
 			const vector<uint8_t>& payload,
 			string& error_msg)
 {
-    const IfTreeInterface* ifp = NULL;
-    const IfTreeVif* vifp = NULL;
+    vector<uint8_t> packet;
 
     //
-    // Test whether the interface/vif is enabled
+    // Prepare the packet for transmission
     //
-    ifp = iftree().find_interface(if_name());
-    if (ifp == NULL) {
-	error_msg = c_format("No interface %s", if_name().c_str());
-	return (XORP_ERROR);
-    }
-    vifp = ifp->find_vif(vif_name());
-    if (vifp == NULL) {
-	error_msg = c_format("No interface %s vif %s",
-			     if_name().c_str(), vif_name().c_str());
-	return (XORP_ERROR);
-    }
-    if (! ifp->enabled()) {
-	error_msg = c_format("Interface %s is down",
-			     ifp->ifname().c_str());
-	return (XORP_ERROR);
-    }
-    if (! vifp->enabled()) {
-	error_msg = c_format("Interface %s vif %s is down",
-			     ifp->ifname().c_str(),
-			     vifp->vifname().c_str());
+    // XXX: Assume this is an Ethernet packet
+    if (prepare_ethernet_packet(src_address, dst_address, ether_type,
+				payload, packet, error_msg)
+	!= XORP_OK) {
 	return (XORP_ERROR);
     }
 
-    UNUSED(src_address);
-    UNUSED(dst_address);
-    UNUSED(ether_type);
-    UNUSED(payload);
+    //
+    // Transmit the packet
+    //
+    // TODO: XXX: Nothing to do
+    // transmit_packet(port, &packet[0], packet.size());
 
     return (XORP_OK);
 }
