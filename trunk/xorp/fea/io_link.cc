@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/io_link.cc,v 1.4 2008/10/02 21:56:48 bms Exp $"
+#ident "$XORP: xorp/fea/io_link.cc,v 1.5 2008/10/26 23:25:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -205,7 +205,7 @@ IoLink::prepare_ethernet_packet(const Mac& src_address,
     //
     // Prepare the packet
     //
-    packet.resize(MAX_PACKET_SIZE);
+    packet.resize(L2_MAX_PACKET_SIZE);
     ptr = &packet[0];
 
     //

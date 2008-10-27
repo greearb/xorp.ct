@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/fea/io_link.hh,v 1.5 2008/10/02 21:56:48 bms Exp $
+// $XORP: xorp/fea/io_link.hh,v 1.6 2008/10/26 23:25:07 pavlin Exp $
 
 
 #ifndef __FEA_IO_LINK_HH__
@@ -269,10 +269,9 @@ protected:
 
     // Misc other state
     bool	_is_running;
-    uint8_t*	_databuf;	// Data buffer for sending and receiving
 
     // Misc. constants
-    static const size_t MAX_PACKET_SIZE = (64*1024);	// Max. packet size
+    static const uint32_t L2_MAX_PACKET_SIZE = (64*1024); // Max. packet size
     static const uint16_t ETHERNET_HEADER_SIZE		= 14;
     static const uint16_t ETHERNET_LENGTH_TYPE_THRESHOLD = 1536;
     static const uint16_t ETHERNET_MIN_FRAME_SIZE	= 60;	// Excl. CRC

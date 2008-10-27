@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.18 2008/10/15 01:23:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/data_plane/io/io_link_pcap.cc,v 1.19 2008/10/26 23:25:08 pavlin Exp $"
 
 //
 // I/O link raw communication support.
@@ -155,7 +155,7 @@ IoLinkPcap::open_pcap_access(string& error_msg)
     // Open the pcap descriptor
     //
     _pcap_errbuf[0] = '\0';
-    _pcap = pcap_open_live(vif_name().c_str(), MAX_PACKET_SIZE, 0, 1,
+    _pcap = pcap_open_live(vif_name().c_str(), L2_MAX_PACKET_SIZE, 0, 1,
 			   _pcap_errbuf);
     if (_pcap == NULL) {
 	error_msg = c_format("Cannot open interface %s vif %s "
