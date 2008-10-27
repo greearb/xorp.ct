@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.45 2008/10/02 21:57:28 bms Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.46 2008/10/22 00:26:47 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -515,7 +515,9 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     size_t total_bytes = 0;
     ssize_t done = 0;
     int flags = 0;
+#ifndef HOST_OS_WINDOWS
     bool mod_signals = true;
+#endif
 
 #ifdef MSG_NOSIGNAL
     flags |= MSG_NOSIGNAL;
