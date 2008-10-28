@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.22 2008/10/02 21:57:52 bms Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.23 2008/10/24 00:07:45 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -202,6 +202,7 @@ public:
     const IPvX&	bsr_addr() const	{ return (_bsr_addr);		}
     void	set_bsr_addr(const IPvX& v) { _bsr_addr = v; }
     uint8_t	bsr_priority() const	{ return (_bsr_priority);	}
+    void	set_bsr_priority(uint8_t v) { _bsr_priority = v;	}
     uint8_t	hash_mask_len() const	{ return (_hash_mask_len);	}
     uint16_t	fragment_tag() const	{ return (_fragment_tag);	}
     uint16_t	new_fragment_tag()	{ return (++_fragment_tag);	}

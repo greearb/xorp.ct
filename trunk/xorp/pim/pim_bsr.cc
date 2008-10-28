@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.55 2008/10/24 00:07:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.56 2008/10/25 00:12:24 pavlin Exp $"
 
 
 //
@@ -1501,6 +1501,8 @@ BsrZone::update_config_bsr_zone(const BsrZone& new_bsr_zone, string& error_msg)
 			       new_bsr_zone.my_vif_index(),
 			       new_bsr_zone.my_bsr_addr(),
 			       new_bsr_zone.my_bsr_priority());
+	set_bsr_addr(my_bsr_addr());
+	set_bsr_priority(my_bsr_priority());
 	changed = true;
     }
     if (is_my_bsr_addr_explicit() != new_bsr_zone.is_my_bsr_addr_explicit()) {
