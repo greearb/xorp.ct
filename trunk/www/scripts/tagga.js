@@ -21,7 +21,7 @@ if (document.getElementsByTagName) {
 	                        startListening(hrefs[l],"click",trackMailto);
 	                } else if (hrefs[l].hostname == location.host) {
 	                        var path = hrefs[l].pathname + hrefs[l].search;
-							var isDoc = path.match(/\.(?:doc|eps|jpg|png|svg|xls|ppt|pdf|xls|zip|txt|vsd|vxd|js|css|rar|exe|wma|mov|avi|wmv|mp3)($|\&|\?)/);
+							var isDoc = path.match(/\.(?:gz|ps|doc|eps|jpg|png|svg|xls|ppt|pdf|xls|zip|txt|vsd|vxd|js|css|rar|exe|wma|mov|avi|wmv|mp3)($|\&|\?)/);
 	                        if (isDoc) {
 	                                startListening(hrefs[l],"click",trackExternalLinks);
 	                        }
