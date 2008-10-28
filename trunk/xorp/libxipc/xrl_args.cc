@@ -19,13 +19,15 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.30 2008/09/23 19:56:48 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.31 2008/10/02 21:57:23 bms Exp $"
 
 #include "xrl_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "libproto/packet.hh"
 
 #include <functional>
 #include <stdexcept>
@@ -773,8 +775,7 @@ XrlArgs::unpack_header(uint32_t& cnt, const uint8_t* in, size_t len)
     if (len < 4)
 	return 0;
 
-    uint32_t header = *(reinterpret_cast<const uint32_t*>(in));
-    header = ntohl(header);
+    uint32_t header = extract_32(in);
 
     // Check header sanity
     if ((header >> 24) != PACKING_CHECK_CODE)

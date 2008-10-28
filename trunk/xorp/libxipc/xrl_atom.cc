@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.43 2008/09/26 21:41:04 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.44 2008/10/02 21:57:23 bms Exp $"
 
 #include "xrl_module.h"
 
@@ -27,6 +27,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/xlog.h"
+
+#include "libproto/packet.hh"
 
 #include <map>
 #include <string>
@@ -1062,8 +1064,7 @@ XrlAtom::peek_text(const char*& t, uint32_t& tl, const uint8_t* buf, size_t len)
     if (len < sizeof(tl))
 	return 0;
 
-    tl = *(reinterpret_cast<const uint32_t*>(buf));
-    tl = ntohl(tl);
+    tl = extract_32(buf);
 
     buf += sizeof(tl);
     len -= sizeof(tl);
