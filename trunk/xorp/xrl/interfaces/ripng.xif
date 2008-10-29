@@ -338,4 +338,14 @@ interface ripng/0.1 {
 					-> counter_descriptions:list	\
 					&  counter_values:list		\
 					&  peer_last_active:u32
+
+     /**
+      * Enable/Disable tracing.
+      *
+      * @param tvar trace variable.
+      * @param enable set to true to enable false to disable.
+      */
+     trace ? tvar:txt \
+	& enable:bool
+
 }

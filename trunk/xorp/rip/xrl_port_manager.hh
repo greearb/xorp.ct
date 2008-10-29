@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.19 2008/07/23 05:11:38 pavlin Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.20 2008/10/02 21:58:19 bms Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -27,6 +27,7 @@
 #include "port_manager.hh"
 
 #include "port.hh"
+#include "trace.hh"
 
 class XrlRouter;
 
@@ -168,6 +169,7 @@ public:
 				       const string&	vifname,
 				       const A&		addr) const;
 
+    Trace& packet_trace() { return _trace; }
 protected:
     //
     // IfMgrHintObserver methods
@@ -202,6 +204,9 @@ protected:
     XrlRouter& 				_xr;	// XrlRouter
     IfMgrXrlMirror& 			_ifm;	// Interface Mirror
     map<ServiceBase*, Port<A>*>	_dead_ports; // Ports awaiting io shutdown
+
+private:
+	Trace _trace;
 };
 
 #endif // __RIP_XRL_PORT_MANAGER_HH__

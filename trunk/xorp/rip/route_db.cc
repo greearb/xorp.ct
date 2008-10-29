@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.36 2008/07/23 05:11:36 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.37 2008/10/02 21:58:17 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -132,6 +132,10 @@ RouteDB<A>::delete_route(Route* r)
     if (iter != _rib_routes.end()) {
         r = iter->second;
 
+	XLOG_TRACE(trace()._routes,
+		  "Deleted route, but re-added from RIB routes: %s\n",
+		  r->net().str().c_str());
+
 	debug_msg("[RIP] Deleted route, but re-added from RIB routes: %s\n",
 		  r->net().str().c_str());
 
@@ -188,6 +192,9 @@ RouteDB<A>::do_filtering(Route* r)
 
 	debug_msg("[RIP] Running import filter on route %s\n",
 		  r->net().str().c_str());
+	XLOG_TRACE(trace()._routes,
+			"Running import filter on route %s\n",
+			r->net().str().c_str());
 
 	bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
 
@@ -198,6 +205,10 @@ RouteDB<A>::do_filtering(Route* r)
 
 	debug_msg("[RIP] Running source match filter on route %s\n",
 		  r->net().str().c_str());
+	XLOG_TRACE(trace()._routes,
+		  "Running source match filter on route %s\n",
+		  r->net().str().c_str());
+
 	_policy_filters.run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
 
 	return true;
@@ -332,6 +343,10 @@ RouteDB<A>::update_route(const Net&		net,
 
 	debug_msg("[RIP] Was filtered: %d, Accepted: %d\n",
 		  was_filtered, accepted);
+	XLOG_TRACE(trace()._routes,
+			"Was filtered: %d, Accepted: %d\n",
+			was_filtered, accepted);
+
 	
 	if (accepted) {
 	    if (was_filtered) {
@@ -623,6 +638,8 @@ RouteDB<A>::push_routes()
 	Route* r = (*i).second;
 
 	debug_msg("[RIP] Pushing RIB route %s\n", r->net().str().c_str());
+	XLOG_TRACE(trace()._routes,
+			  "Pushing RIB route %s\n", r->net().str().c_str());
 	
 	update_route(r->net(), r->nexthop(), r->ifname(), r->vifname(),
 		     r->cost(), r->tag(), _rib_origin, r->policytags(), true);
@@ -637,6 +654,8 @@ RouteDB<A>::add_rib_route(const Net& net, const Addr& nexthop,
 			  const PolicyTags& policytags)
 {
     debug_msg("[RIP] adding RIB route %s\n",net.str().c_str());
+    XLOG_TRACE(trace()._routes,
+			  "adding RIB route %s\n",net.str().c_str());
   
     _rib_origin = origin;
          
@@ -662,6 +681,8 @@ void
 RouteDB<A>::delete_rib_route(const Net& net)
 {
     debug_msg("[RIP] deleting RIB route %s\n",net.str().c_str());
+    XLOG_TRACE(trace()._routes,
+			  "deleting RIB route %s\n",net.str().c_str());
 
     typename RouteContainerNoRef::iterator i = _rib_routes.find(net);
 

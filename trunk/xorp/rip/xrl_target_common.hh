@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.37 2008/10/02 21:58:19 bms Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.38 2008/10/03 03:32:39 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -275,6 +275,8 @@ public:
 					   XrlAtomList&		descriptions,
 					   XrlAtomList&		values,
 					   uint32_t&		peer_last_pkt);
+
+    XrlCmdError trace(bool enable);
 
     XrlCmdError socketx_user_0_1_recv_event(const string&	sockid,
 					    const string&	if_name,
@@ -1154,6 +1156,16 @@ XrlRipCommonTarget<A>::ripx_0_1_get_peer_counters(
     values.append(XrlAtom(peer->route_count()));
 
     peer_last_active = peer->last_active().sec();
+
+    return XrlCmdError::OKAY();
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::trace(bool enable)
+{
+    _rip_system.route_trace().all(enable);
+    _xpm.packet_trace().all(enable);
 
     return XrlCmdError::OKAY();
 }

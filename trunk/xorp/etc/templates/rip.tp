@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.50 2008/08/06 08:24:08 abittau Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.51 2008/08/06 08:26:14 abittau Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -7,6 +7,13 @@
 protocols {
     rip {
 	targetname: txt = "rip";
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	    }
+	}
 	interface @: txt {
 	    vif @: txt {
 		address @: ipv4 {
@@ -86,6 +93,23 @@ protocols {
 	    %user-hidden: "XRL target name";
 	    %help:	short "XRL target name";
 	    %set:;
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short	"Configure all tracing operations";
+
+		    disable {
+			%help:	short	"Disable all tracing operations";
+			%set:	xrl "$(rip.targetname)/rip/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
+			%delete: xrl "$(rip.targetname)/rip/0.1/trace?tvar:txt=all&enable:bool=$(DEFAULT)";
+		    }
+
+		}
+	    }
 	}
 
 	interface @ {

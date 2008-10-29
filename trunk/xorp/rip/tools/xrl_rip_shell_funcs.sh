@@ -581,6 +581,17 @@ rip_rip_get_peer_counters()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+rip_rip_trace()
+{
+    if [ $# -ne 2 ] ; then
+        echo "Usage: rip_rip_trace <tvar:txt> <enable:bool>"
+        exit 1
+    fi
+
+    XRL="finder://rip/rip/0.1/trace?tvar:txt=$1&enable:bool=$2"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 rip_socket4_user_recv_event()
 {
     if [ $# -ne 6 ] ; then

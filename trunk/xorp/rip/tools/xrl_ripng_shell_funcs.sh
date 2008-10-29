@@ -537,6 +537,17 @@ ripng_ripng_get_peer_counters()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+ripng_ripng_trace()
+{
+    if [ $# -ne 2 ] ; then
+        echo "Usage: ripng_ripng_trace <tvar:txt> <enable:bool>"
+        exit 1
+    fi
+
+    XRL="finder://ripng/ripng/0.1/trace?tvar:txt=$1&enable:bool=$2"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 ripng_socket6_user_recv_event()
 {
     if [ $# -ne 6 ] ; then

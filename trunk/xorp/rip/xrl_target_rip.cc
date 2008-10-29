@@ -718,6 +718,22 @@ XrlRipTarget::rip_0_1_get_peer_counters(const string&	ifn,
 					   descs, vals, peer_last_active);
 }
 
+XrlCmdError
+XrlRipTarget::rip_0_1_trace(const string& tvar, const bool& enable)
+{
+    debug_msg("trace variable %s enable %s\n", tvar.c_str(),
+	      bool_c_str(enable));
+
+    if (tvar == "all") {
+	_ct->trace(enable);
+    } else {
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
+    } 
+
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError
 XrlRipTarget::socket4_user_0_1_recv_event(

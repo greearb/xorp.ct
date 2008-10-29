@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/route_db.hh,v 1.29 2008/07/23 05:11:36 pavlin Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.30 2008/10/02 21:58:17 bms Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -31,6 +31,7 @@
 #include "policy/backend/policy_filters.hh"
 
 #include "route_entry.hh"
+#include "trace.hh"
 
 
 class EventLoop;
@@ -211,6 +212,8 @@ public:
      */
     bool do_filtering(Route* r);
 
+    Trace& trace() { return _trace; }
+
 protected:
     RouteDB(const RouteDB&);			// not implemented
     RouteDB& operator=(const RouteDB&);		// not implemented
@@ -242,6 +245,9 @@ protected:
     RouteOrigin*	_rib_origin;
     
     friend class RouteWalker<A>;
+
+private:
+    Trace _trace;		// Trace variable
 };
 
 /**

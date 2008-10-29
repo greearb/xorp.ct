@@ -17,9 +17,10 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.31 2008/07/23 05:11:37 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.32 2008/10/02 21:58:19 bms Exp $"
 
 // #define DEBUG_LOGGING
+#include "rip_module.h"
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
@@ -400,6 +401,10 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
     typename PortManagerBase<A>::PortList::iterator i;
     Port<A>* p = NULL;
 
+    XLOG_TRACE(packet_trace()._packets,
+		  "Packet on %s from interface %s vif %s %s/%u %u bytes\n",
+	      sockid.c_str(), ifname.c_str(), vifname.c_str(),
+	      src_addr.str().c_str(), src_port, XORP_UINT_CAST(pdata.size()));
     debug_msg("Packet on %s from interface %s vif %s %s/%u %u bytes\n",
 	      sockid.c_str(), ifname.c_str(), vifname.c_str(),
 	      src_addr.str().c_str(), src_port, XORP_UINT_CAST(pdata.size()));
@@ -407,6 +412,11 @@ XrlPortManager<A>::deliver_packet(const string& 		sockid,
     i = find_if(pl.begin(), pl.end(),
 		is_port_for<A>(&sockid, &ifname, &vifname, &src_addr, &_ifm));
     if (i == this->ports().end()) {
+
+	XLOG_TRACE(packet_trace()._packets,
+		  "Discarding packet %s/%u %u bytes\n",
+		  src_addr.str().c_str(), src_port,
+		  XORP_UINT_CAST(pdata.size()));
 	debug_msg("Discarding packet %s/%u %u bytes\n",
 		  src_addr.str().c_str(), src_port,
 		  XORP_UINT_CAST(pdata.size()));

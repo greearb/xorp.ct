@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.29 2008/07/23 05:11:38 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_ripng.hh,v 1.30 2008/10/02 21:58:19 bms Exp $
 
 #ifndef __RIP_XRL_TARGET_RIPNG_HH__
 #define __RIP_XRL_TARGET_RIPNG_HH__
@@ -273,6 +273,9 @@ public:
 				XrlAtomList&	values,
 				uint32_t&	peer_last_active
 				);
+
+    XrlCmdError ripng_0_1_trace(const string& tvar,
+				const bool& enable);
 
     XrlCmdError socket6_user_0_1_recv_event(const string&	sockid,
 					    const string&	if_name,

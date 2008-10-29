@@ -18,13 +18,13 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/system.hh,v 1.14 2008/07/23 05:11:36 pavlin Exp $
+// $XORP: xorp/rip/system.hh,v 1.15 2008/10/02 21:58:17 bms Exp $
 
 #ifndef __RIP_SYSTEM_HH__
 #define __RIP_SYSTEM_HH__
 
 #include <map>
-
+#include "trace.hh"
 #include "route_db.hh"
 #include "port_manager.hh"
 
@@ -117,6 +117,8 @@ public:
      * @return reference to global policy filters.
      */
     PolicyFilters& policy_filters() { return _policy_filters; }
+
+    Trace& route_trace() { return _rtdb.trace(); }
 
 protected:
     System(const System&);				// Not implemented
