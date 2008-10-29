@@ -1,7 +1,11 @@
+#
+# $XORP$
+#
+
 How to install this example into the XORP build:
 
-1. Edit top level (../../) Makefile.am to include the line:
------------------------------------------------------------
+1. Edit top level (../../) Makefile.am to include the line
+----------------------------------------------------------
 
 SUBDIRS += usermgr
 
@@ -27,8 +31,8 @@ diff -c -r1.23 Makefile.am
   ## Everything past here is useful to the maintainer, but probably not
 </PATCH>
 
-2. Edit the top level configure.in file to include the line:
-------------------------------------------------------------
+2. Edit the top level configure.in file to include the line
+-----------------------------------------------------------
 
     usermgr/Makefile
 
@@ -57,8 +61,8 @@ diff -c -r1.229 configure.in
 3. Copy usermgr.xif to $(TOP)/xrl/interfaces/
 ---------------------------------------------
 
-4. Add the lines:
------------------
+4. Add the lines
+----------------
 
 # Usermgr Interface
 noinst_LTLIBRARIES += libusermgrxif.la
@@ -89,11 +93,11 @@ diff -c -r1.40 Makefile.am
   #
 </PATCH>
 
-5. copy the file usermgr.tgt to $(TOP)/xrl/targets/
+5. Copy the file usermgr.tgt to $(TOP)/xrl/targets/
 ---------------------------------------------------
 
-6. Add the line:
-----------------
+6. Add the line
+---------------
 
 tgt_files               += usermgr.tgt
 
@@ -160,11 +164,11 @@ diff -c -r1.73 Makefile.am
 </PATCH>
 
 
-7. copy the file usermgr.tp to $(TOP)/etc/templates/
+7. Copy the file usermgr.tp to $(TOP)/etc/templates/
 ----------------------------------------------------
 
-8. add the line:
-----------------
+8. Add the line
+---------------
 
 data_DATA	+= usermgr.tp
 
@@ -190,14 +194,14 @@ diff -c -r1.23 Makefile.am
   data_DATA      += olsr4.cmds olsr4.tp
 </PATCH>
 
-9. copy this directory to $(TOP)/usermgr
+9. Copy this directory to $(TOP)/usermgr
 ----------------------------------------
 
 Symbolic link will not work!
 
 
-10. bootstrap, configure and build.
+10. Bootstrap, configure and build
 -----------------------------------
 # ./bootstrap
 # ./configure
-# make
+# gmake

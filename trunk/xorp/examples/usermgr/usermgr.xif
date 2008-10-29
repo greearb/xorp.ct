@@ -1,18 +1,58 @@
+/* $XORP$ */
+
+/*
+ * XRL interface to the usermgr db
+ */
+
 interface usermgr/0.1 {
+	/*
+	 * Create a group.
+	 *
+	 * @param group: The group's name.
+	 * @param groupid: The group's id number.
+	 */
 	create_group ? group:txt				\
 		     & groupid:u32
 
+	/*
+	 * Delete a group.
+	 *
+	 * @param group: The group's name.
+	 */
 	delete_group ? group:txt
 
+	/*
+	 * Get all groups.
+	 */
 	get_groups   -> groupname:list
 
+	/*
+	 * Create an user.
+	 *
+	 * @param user: The user's name.
+	 * @param userid: The user's id number.
+	 */
 	create_user ? user:txt					\
 		    &  userid:u32
 
+	/*
+	 * Delete an user.
+	 *
+	 * @param user: The user's name.
+	 */
 	delete_user ? user:txt
 
+	/*
+	 * Get all users.
+	 */
 	get_users   -> username:list
 
+	/*
+	 * Set the trace level.
+	 *
+	 * @param tvar: The trace control variable name.
+	 * @param enable: enable if true, otherwise disable.
+	 */
 	trace ? tvar:txt					\
 		    & enable:bool
 }

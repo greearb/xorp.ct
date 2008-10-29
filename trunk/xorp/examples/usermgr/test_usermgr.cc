@@ -18,48 +18,51 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/devnotes/template_gpl.cc,v 1.1 2008/10/02 21:56:43 bms Exp $"
+#ident "$XORP: xorp/examples/usermgr/test_usermgr.cc,v 1.1 2008/10/18 02:41:50 paulz Exp $"
+
 /*
- * verify that the .hh file makes sense.
+ * Test the UserDB implementation.
  */
 
+#include "libxorp/xorp.h"
+#include "usermgr_module.h"
 #include "usermgr.hh"
 
 int
 main (int argc, char ** argv )
 {
-	UNUSED(argc);
-	UNUSED(argv);
-	UserDB theone;
+    UNUSED(argc);
+    UNUSED(argv);
+    UserDB theone;
 
-	/*
-	 * create some users and groups.
-	 */
-	theone.AddUser("george", 111);
-	theone.AddUser("hermoine", 106);
-	theone.AddUser("phillip", 106);
-	theone.AddUser("andrew", 106);
-	theone.AddGroup("group44", 106);
-	theone.AddGroup("fubarz", 106);
-	theone.AddGroup("muumuus", 106);
-	theone.AddGroup("tekeleks", 106);
-	theone.AddUser("geromino", 106);
-	theone.AddUser("vasili", 106);
-	theone.AddGroup("vinieski", 106);
-	theone.AddUser("ocupine", 106);
+    /*
+     * create some users and groups.
+     */
+    theone.add_user("george", 111);
+    theone.add_user("hermoine", 106);
+    theone.add_user("phillip", 126);
+    theone.add_user("andrew", 136);
+    theone.add_group("group44", 146);
+    theone.add_group("fubarz", 156);
+    theone.add_group("muumuus", 105);
+    theone.add_group("tekeleks", 155);
+    theone.add_user("geromino", 166);
+    theone.add_user("vasili", 606);
+    theone.add_group("vinieski", 666);
+    theone.add_user("ocupine", 166);
 
-	theone.describe();
+    theone.describe();
 
-	
-	/*
-	 * delete some of the users and groups.
-	 */
-	theone.DelGroup("fubarz");
-	theone.DelUser("andrew");
-	theone.DelUser("george");
-	theone.DelUser("ocupine");
+    
+    /*
+     * delete some of the users and groups.
+     */
+    theone.del_group("fubarz");
+    theone.del_user("andrew");
+    theone.del_user("george");
+    theone.del_user("ocupine");
 
-	theone.describe();
+    theone.describe();
 
-	return 0;
+    return 0;
 }

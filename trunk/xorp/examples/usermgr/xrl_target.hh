@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/usermgr/usermgr_target.hh,v 1.10 2008/10/09 18:04:12 abittau Exp $
+// $XORP: xorp/examples/usermgr/xrl_target.hh,v 1.1 2008/10/18 02:41:51 paulz Exp $
 
 #ifndef __USERMGR_USERMGR_TARGET_HH__
 #define __USERMGR_USERMGR_TARGET_HH__
@@ -84,7 +84,7 @@ public:
 
 private:
 
-    void		    shutdown(void);
+    void		    _shutdown(void);
     XrlRouter&              _rtr;
     bool                    _running;
     string		    _name;

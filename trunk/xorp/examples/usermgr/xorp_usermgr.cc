@@ -18,7 +18,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/devnotes/template_gpl.cc,v 1.1 2008/10/02 21:56:43 bms Exp $"
+#ident "$XORP: xorp/examples/usermgr/xorp_usermgr.cc,v 1.1 2008/10/18 02:41:51 paulz Exp $"
+
 #include <stdio.h>
 
 #include "usermgr_module.h"

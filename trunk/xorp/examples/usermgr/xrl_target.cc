@@ -18,7 +18,8 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/devnotes/template_gpl.cc,v 1.1 2008/10/02 21:56:43 bms Exp $"
+#ident "$XORP: xorp/examples/usermgr/xrl_target.cc,v 1.1 2008/10/18 02:41:51 paulz Exp $"
+
 #include "usermgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -29,8 +30,6 @@
 #include "usermgr.hh"
 #include <vector>
 
-#define DEBUG_INFO(args...)	{ if (_trace) XLOG_INFO(args); }
-
 bool
 UserMgrTarget::running() const
 {
@@ -38,13 +37,13 @@ UserMgrTarget::running() const
 }
 
 UserMgrTarget::UserMgrTarget(XrlRouter& rtr, UserDB userdb)
-	: XrlUsermgrTargetBase(&rtr),
-	  _rtr(rtr),
-	  _running(true),
-	  _name(rtr.class_name()),
-	  _xrls_pending(0),
-	  _userdb(userdb),
-	  _trace(false)
+    : XrlUsermgrTargetBase(&rtr),
+      _rtr(rtr),
+      _running(true),
+      _name(rtr.class_name()),
+      _xrls_pending(0),
+      _userdb(userdb),
+      _trace(false)
 {
 }
 
@@ -80,7 +79,7 @@ UserMgrTarget::common_0_1_get_status(uint32_t& status, string& reason)
 }
 
 void
-UserMgrTarget::shutdown(void)
+UserMgrTarget::_shutdown(void)
 {
     if (_running) {
         _running = false;
@@ -90,7 +89,7 @@ UserMgrTarget::shutdown(void)
 XrlCmdError
 UserMgrTarget::common_0_1_shutdown(void)
 {
-    shutdown();
+    _shutdown();
     return XrlCmdError::OKAY();
 }
 
@@ -100,8 +99,8 @@ UserMgrTarget::usermgr_0_1_create_group(
         const string&   group,
         const uint32_t& groupid)
 {
-    DEBUG_INFO("%s called with %s, %d.", __func__, group.c_str(), groupid);
-    _userdb.AddGroup(group, groupid);
+    XLOG_TRACE(_trace, "%s called with %s, %d.", __func__, group.c_str(), groupid);
+    _userdb.add_group(group, groupid);
     return XrlCmdError::OKAY();
 }
 
@@ -110,8 +109,8 @@ UserMgrTarget::usermgr_0_1_delete_group(
         // Input values,
         const string&   group)
 {
-    DEBUG_INFO("%s called with %s.", __func__, group.c_str());
-    _userdb.DelGroup(group);
+    XLOG_TRACE(_trace, "%s called with %s.", __func__, group.c_str());
+    _userdb.del_group(group);
     return XrlCmdError::OKAY();
 }
 
@@ -120,7 +119,7 @@ UserMgrTarget::usermgr_0_1_get_groups(
         // Output values,
         XrlAtomList&    groupnames )
 {
-    DEBUG_INFO("%s called.", __func__);
+    XLOG_TRACE(_trace, "%s called.", __func__);
     vector<string> names = _userdb.list_groups();    
     vector<string>::iterator pos = names.begin();
     for (; pos != names.end(); pos++) {
@@ -136,8 +135,8 @@ UserMgrTarget::usermgr_0_1_create_user(
         const string&   user,
         const uint32_t& userid)
 {
-    DEBUG_INFO("%s called with %s, %d.", __func__, user.c_str(), userid);
-    _userdb.AddUser(user, userid);
+    XLOG_TRACE(_trace, "%s called with %s, %d.", __func__, user.c_str(), userid);
+    _userdb.add_user(user, userid);
     return XrlCmdError::OKAY();
 }
 
@@ -146,8 +145,8 @@ UserMgrTarget::usermgr_0_1_delete_user(
         // Input values,
         const string&   user)
 {
-    DEBUG_INFO("%s called with %s.", __func__, user.c_str());
-    _userdb.DelUser(user);
+    XLOG_TRACE(_trace, "%s called with %s.", __func__, user.c_str());
+    _userdb.del_user(user);
     return XrlCmdError::OKAY();
 }
 
@@ -156,7 +155,7 @@ UserMgrTarget::usermgr_0_1_get_users(
         // Output values,
         XrlAtomList&    usernames )
 {
-    DEBUG_INFO("%s called.", __func__);
+    XLOG_TRACE(_trace, "%s called.", __func__);
     vector<string> names = _userdb.list_users();    
     vector<string>::iterator pos = names.begin();
     for (; pos != names.end(); pos++) {
@@ -174,8 +173,6 @@ UserMgrTarget::usermgr_0_1_trace(
 {
     if (tvar == "all") {
 	_trace = enable;
-    } else {
-	;
     }
     return XrlCmdError::OKAY();
 }

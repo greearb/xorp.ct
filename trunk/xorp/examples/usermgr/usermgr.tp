@@ -1,3 +1,4 @@
+/* $XORP$ */
 /* Data model */
     userdb {
         targetname: txt = "usermgr";
@@ -22,8 +23,8 @@
 
 /* Operations */
     userdb {
-        %help: short "Configure userdb entries.";
-        %help: long  "Create and manage users and user groups.";
+        %help: short "Configure userdb entries";
+        %help: long  "Create and manage users and user groups";
 	%modinfo:	provides	usermgr;
 	%modinfo:	depends		rtrmgr;
 	%modinfo:	path		"usermgr/xorp_usermgr";
@@ -39,16 +40,16 @@
         }
 
         group @: txt {
-            %help: short "Configure user groups.";
-            %help: long  "Create and manage user groups.";
+            %help: short "Configure user groups";
+            %help: long  "Create and manage user groups";
             %create:    xrl "$(userdb.targetname)/usermgr/0.1/create_group?group:txt=$(@)&groupid:u32=$(@.groupid)";
             %delete:    xrl "$(userdb.targetname)/usermgr/0.1/delete_group?group:txt=$(@)";
             %list:      xrl "$(userdb.targetname)/usermgr/0.1/get_groups->groupname:list";
 
         }
         user @: txt {
-            %help: short "Configure user entries.";
-            %help: long  "Create and manage users.";
+            %help: short "Configure user entries";
+            %help: long  "Create and manage users";
             %create:    xrl "$(userdb.targetname)/usermgr/0.1/create_user?user:txt=$(@)&userid:u32=$(@.userid)";
             %delete:    xrl "$(userdb.targetname)/usermgr/0.1/delete_user?user:txt=$(@)";
             %list:      xrl "$(userdb.targetname)/usermgr/0.1/get_users->username:list";
