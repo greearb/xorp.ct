@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.81 2008/07/23 05:11:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.82 2008/10/02 21:58:23 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -161,10 +161,15 @@ MasterConfigTree::~MasterConfigTree()
 {
     remove_tmp_config_file();
 
-    delete _task_manager;
+    if (_task_manager != NULL) {
+	delete _task_manager;
+	_task_manager = NULL;
+    }
 
-    if (_config_tree_copy != NULL)
+    if (_config_tree_copy != NULL) {
 	delete _config_tree_copy;
+	_config_tree_copy = NULL;
+    }
 }
 
 MasterConfigTree&
