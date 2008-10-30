@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.78 2008/10/02 21:58:22 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.79 2008/10/11 07:04:55 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -182,8 +182,22 @@ Rtrmgr::Rtrmgr(const string& template_dir,
       _quit_time(quit_time),
       _daemon_mode(daemon_mode),
       _ready(false),
-      _mct(NULL)
+      _mct(NULL),
+      _xrt(NULL)
 {
+}
+
+Rtrmgr::~Rtrmgr()
+{
+    // Delete allocated state
+    if (_mct != NULL) {
+	delete _mct;
+	_mct = NULL;
+    }
+    if (_xrt != NULL) {
+	delete _xrt;
+	_xrt = NULL;
+    }
 }
 
 int
@@ -349,6 +363,7 @@ Rtrmgr::run()
 	    eventloop.run();
 	}
 	delete _mct;
+	_mct = NULL;
     } catch (const InitError& e) {
 	XLOG_ERROR("rtrmgr shutting down due to an init error: %s",
 		   e.why().c_str());
@@ -362,6 +377,12 @@ Rtrmgr::run()
     while ((mmgr.is_shutdown_completed() != true)
 	   && eventloop.events_pending()) {
 	eventloop.run();
+    }
+
+    // Delete the XRL rtrmgr interface
+    if (_xrt != NULL) {
+	delete _xrt;
+	_xrt = NULL;
     }
 
     // Delete the template tree

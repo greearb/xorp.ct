@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.17 2008/07/23 05:11:41 pavlin Exp $
+// $XORP: xorp/rtrmgr/main_rtrmgr.hh,v 1.18 2008/10/02 21:58:22 bms Exp $
 
 #ifndef __RTRMGR_MAIN_RTRMGR_HH__
 #define __RTRMGR_MAIN_RTRMGR_HH__
@@ -44,6 +44,8 @@ public:
 	   bool verbose,
 	   int32_t quit_time,
 	   bool daemon_mode);
+    ~Rtrmgr();
+
     int run();
     bool ready() const;
     void module_status_changed(const string& module_name,
