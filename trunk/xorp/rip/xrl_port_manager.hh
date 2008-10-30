@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/rip/xrl_port_manager.hh,v 1.20 2008/10/02 21:58:19 bms Exp $
+// $XORP: xorp/rip/xrl_port_manager.hh,v 1.21 2008/10/29 21:59:39 andrewma Exp $
 
 #ifndef __RIP_XRL_PORT_MANAGER_HH__
 #define __RIP_XRL_PORT_MANAGER_HH__
@@ -206,7 +206,7 @@ protected:
     map<ServiceBase*, Port<A>*>	_dead_ports; // Ports awaiting io shutdown
 
 private:
-	Trace _trace;
+    Trace _trace;
 };
 
 #endif // __RIP_XRL_PORT_MANAGER_HH__

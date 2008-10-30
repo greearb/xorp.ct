@@ -729,7 +729,7 @@ XrlRipTarget::rip_0_1_trace(const string& tvar, const bool& enable)
     } else {
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
-    } 
+    }
 
     return XrlCmdError::OKAY();
 }
