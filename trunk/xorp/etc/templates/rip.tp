@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.51 2008/08/06 08:26:14 abittau Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.52 2008/10/29 21:59:38 andrewma Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -107,7 +107,6 @@ protocols {
 			%set:	xrl "$(rip.targetname)/rip/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
 			%delete: xrl "$(rip.targetname)/rip/0.1/trace?tvar:txt=all&enable:bool=$(DEFAULT)";
 		    }
-
 		}
 	    }
 	}
