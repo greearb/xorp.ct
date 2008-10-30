@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.44 2008/10/02 21:57:23 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.45 2008/10/28 13:25:11 bms Exp $"
 
 #include "xrl_module.h"
 
@@ -371,6 +371,7 @@ XrlAtom::copy(const XrlAtom& xa)
 
     _type = xa._type;
     _have_data = xa._have_data;
+    _own = true;
 
     if (_have_data) {
         switch (_type) {
@@ -490,7 +491,9 @@ XrlAtom::str() const
 }
 
 XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
-    : _type(xrlatom_no_type), _have_data(false)
+    : _type(xrlatom_no_type),
+      _have_data(false),
+      _own(true)
 {
 
     const char *start, *sep;
@@ -530,7 +533,9 @@ XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
 
 XrlAtom::XrlAtom(const string& name, XrlAtomType t,
 		 const string& serialized_data) throw (InvalidString)
-    : _type(t)
+    : _type(t),
+      _have_data(false),
+      _own(true)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());
@@ -540,7 +545,9 @@ XrlAtom::XrlAtom(const string& name, XrlAtomType t,
 
 XrlAtom::XrlAtom(const char* name, XrlAtomType t,
 		 const string& serialized_data) throw (InvalidString)
-    : _type(t)
+    : _type(t),
+      _have_data(false),
+      _own(true)
 {
     set_name(name);
     ssize_t bad_pos = data_from_c_str(serialized_data.c_str());

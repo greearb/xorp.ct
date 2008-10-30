@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.21 2008/09/23 19:56:31 abittau Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.22 2008/10/02 21:57:23 bms Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -332,7 +332,10 @@ public:
     // ... Your type's constructors here ...
 
     // Copy operations
-    XrlAtom(const XrlAtom& x) { copy(x); }
+    XrlAtom(const XrlAtom& x)
+	: _type(xrlatom_no_type), _have_data(false), _own(true) {
+	copy(x);
+    }
     XrlAtom& operator=(const XrlAtom& x) {
 	discard_dynamic(); copy(x); return *this;
     }
