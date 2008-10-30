@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.23 2008/07/23 05:11:45 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.24 2008/10/02 21:58:26 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -99,6 +99,7 @@ UserDB::load_password_file()
 #else // ! HOST_OS_WINDOWS
     struct passwd* pwent;
 
+    setpwent();			// XXX: Rewind the database
     pwent = getpwent();
     while (pwent != NULL) {
 	debug_msg("User: %s UID: %u\n", pwent->pw_name,
