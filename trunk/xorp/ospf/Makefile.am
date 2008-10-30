@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.27 2007/10/04 20:46:16 pavlin Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.28 2007/11/14 03:01:24 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -96,6 +96,7 @@ libospf_la_SOURCES  += peer_manager.hh
 libospf_la_SOURCES  += peer.hh
 libospf_la_SOURCES  += policy_varrw.hh
 libospf_la_SOURCES  += routing_table.hh
+libospf_la_SOURCES  += trace.hh
 libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 libospf_la_SOURCES  += vertex.hh

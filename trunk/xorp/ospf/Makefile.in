@@ -489,10 +489,11 @@ test_routing_interactive_SOURCES = test_args.hh test_build_lsa.hh \
 libospf_la_SOURCES = auth.hh area_router.hh exceptions.hh debug_io.hh \
 	delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh \
 	packet.hh peer_manager.hh peer.hh policy_varrw.hh \
-	routing_table.hh xrl_io.hh xrl_target.hh vertex.hh vlink.hh \
-	auth.cc area_router.cc external.cc fletcher_checksum.cc lsa.cc \
-	ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc \
-	routing_table.cc xrl_io.cc xrl_target.cc vlink.cc
+	routing_table.hh trace.hh xrl_io.hh xrl_target.hh vertex.hh \
+	vlink.hh auth.cc area_router.cc external.cc \
+	fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc \
+	peer.cc policy_varrw.cc routing_table.cc xrl_io.cc \
+	xrl_target.cc vlink.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.38 2005/08/31 22:45:45 zec Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.39 2007/08/09 00:47:02 pavlin Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -140,6 +140,7 @@ librip_la_SOURCES		+= rip_varrw.hh
 librip_la_SOURCES		+= route_db.hh
 librip_la_SOURCES		+= route_entry.hh
 librip_la_SOURCES		+= system.hh
+librip_la_SOURCES		+= trace.hh
 librip_la_SOURCES		+= update_queue.hh
 
 librip_la_SOURCES		+= auth.cc
@@ -177,6 +178,7 @@ libripng_la_SOURCES		+= rip_varrw.hh
 libripng_la_SOURCES		+= route_db.hh
 libripng_la_SOURCES		+= route_entry.hh
 libripng_la_SOURCES		+= system.hh
+libripng_la_SOURCES		+= trace.hh
 libripng_la_SOURCES		+= update_queue.hh
 
 libripng_la_SOURCES		+= output_table.cc

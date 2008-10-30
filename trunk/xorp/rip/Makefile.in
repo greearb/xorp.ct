@@ -438,7 +438,7 @@ librip_la_SOURCES = rip_module.h auth.hh constants.hh output.hh \
 	output_table.hh output_updates.hh packet_assembly.hh \
 	packet_queue.hh packets.hh peer.hh port.hh port_io.hh \
 	port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh \
-	rip_varrw.hh route_db.hh route_entry.hh system.hh \
+	rip_varrw.hh route_db.hh route_entry.hh system.hh trace.hh \
 	update_queue.hh auth.cc output_table.cc output_updates.cc \
 	packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc \
 	rip_varrw.cc route_db.cc route_entry.cc update_queue.cc
@@ -449,7 +449,7 @@ libripng_la_SOURCES = rip_module.h constants.hh output.hh \
 	output_table.hh output_updates.hh packet_assembly.hh \
 	packet_queue.hh packets.hh peer.hh port.hh port_io.hh \
 	port_manager.hh port_vars.hh redist.hh rib_notifier_base.hh \
-	rip_varrw.hh route_db.hh route_entry.hh system.hh \
+	rip_varrw.hh route_db.hh route_entry.hh system.hh trace.hh \
 	update_queue.hh output_table.cc output_updates.cc \
 	packet_queue.cc peer.cc port.cc redist.cc rib_notifier_base.cc \
 	rip_varrw.cc route_db.cc route_entry.cc update_queue.cc
