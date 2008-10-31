@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.24 2008/10/02 21:57:22 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.25 2008/10/13 02:06:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -191,7 +191,7 @@ toggle_flag(bool* flag)
 static void
 run_test()
 {
-    static const TimeVal KEEPALIVE_TIME = TimeVal(2, 500);
+    static const TimeVal KEEPALIVE_TIME = TimeVal(2, 500000);
     EventLoop eventloop;
 
     XrlDispatcher cmd_dispatcher("tester");
@@ -206,7 +206,7 @@ run_test()
 
     tracef("listener address: %s\n", listener.address());
 
-    XorpTimer dp = eventloop.new_periodic(TimeVal(0, 500),
+    XorpTimer dp = eventloop.new_periodic(TimeVal(0, 500000),
 					  callback(&print_twirl));
 
     bool run_tests = true;
