@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl.hh,v 1.31 2008/09/23 19:57:47 abittau Exp $
+// $XORP: xorp/libxipc/xrl.hh,v 1.32 2008/10/02 21:57:23 bms Exp $
 
 #ifndef __LIBXIPC_XRL_HH__
 #define __LIBXIPC_XRL_HH__
@@ -31,7 +31,7 @@
 #include "xrl_args.hh"
 #include "xrl_tokens.hh"
 
-struct FinderDBEntry;
+class XrlPFSender;
 
 /**
  * XORP IPC request.
@@ -47,7 +47,7 @@ public:
 	const XrlArgs&	args)
 	: _protocol(protocol), _target(protocol_target), _command(command),
 	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-	  _to_finder(-1), _resolved(NULL)
+	  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
     {}
 
     /**
@@ -58,7 +58,7 @@ public:
 	const XrlArgs&	args)
 	: _protocol(_finder_protocol), _target(target), _command(command),
 	  _args(args), _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-	  _to_finder(-1), _resolved(NULL)
+	  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
     {}
 
     /**
@@ -69,7 +69,7 @@ public:
 	const string& command)
 	: _protocol(protocol), _target(protocol_target), _command(command),
 	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-	  _resolved(NULL)
+	  _resolved(false), _resolved_sender(NULL)
     {}
 
     /**
@@ -79,7 +79,7 @@ public:
 	const string& command)
 	: _protocol(_finder_protocol), _target(target), _command(command),
 	  _sna_atom(NULL), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-	  _resolved(NULL)
+	  _resolved(false), _resolved_sender(NULL)
     {}
 
     /**
@@ -88,7 +88,7 @@ public:
     Xrl(const char* xrl_c_str) throw (InvalidString);
 
     Xrl() : _sna_atom(0), _packed_bytes(0), _argp(&_args), _to_finder(-1),
-            _resolved(NULL) {}
+            _resolved(false), _resolved_sender(NULL) {}
     ~Xrl();
 
     Xrl(const Xrl& xrl);
@@ -176,8 +176,11 @@ public:
 
     bool to_finder() const;
 
-    const FinderDBEntry* resolved() const { return _resolved; }
-    void set_resolved(const FinderDBEntry* r) const { _resolved = r; };
+    bool resolved() const { return _resolved; }
+    void set_resolved(bool r) const { _resolved = r; }
+
+    XrlPFSender *resolved_sender() const { return _resolved_sender; }
+    void set_resolved_sender(XrlPFSender *s) const { _resolved_sender = s; }
 
     void set_target(const char* target);
 
@@ -200,7 +203,8 @@ private:
     mutable size_t		    _packed_bytes;
     mutable XrlArgs*		    _argp; // XXX shouldn't be mutable
     mutable int			    _to_finder;
-    mutable const FinderDBEntry*    _resolved; // XXX ditto
+    mutable bool		    _resolved; // XXX ditto
+    mutable XrlPFSender*	    _resolved_sender; // XXX ditto
 
     static const string _finder_protocol;
 };

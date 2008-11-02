@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl.cc,v 1.29 2008/09/23 19:57:47 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl.cc,v 1.30 2008/10/02 21:57:23 bms Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -72,7 +72,7 @@ Xrl::parse_xrl_path(const char* c_str)
 
 Xrl::Xrl(const char* c_str) throw (InvalidString) 
 		: _sna_atom(NULL), _packed_bytes(0), _argp(&_args),
-		  _to_finder(-1), _resolved(NULL)
+		  _to_finder(-1), _resolved(false), _resolved_sender(NULL)
 {
     if (0 == c_str)
 	xorp_throw0(InvalidString);
@@ -116,6 +116,7 @@ Xrl::copy(const Xrl& x)
     _argp	    = &_args;
     _to_finder	    = x._to_finder;
     _resolved	    = x._resolved;
+    _resolved_sender	    = x._resolved_sender;
 }
 
 Xrl::~Xrl()
@@ -283,7 +284,8 @@ Xrl::clear_cache()
     _string_no_args = "";
     _packed_bytes   = 0;
     _to_finder	    = -1;
-    _resolved	    = NULL;
+    _resolved	    = false;
+    _resolved_sender = NULL;
 
     delete _sna_atom;
     _sna_atom = NULL;

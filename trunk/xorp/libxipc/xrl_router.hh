@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.47 2008/09/23 19:58:27 abittau Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.48 2008/10/02 21:57:26 bms Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
@@ -212,7 +212,7 @@ protected:
 
 private:
     XrlPFSender& get_sender(const string& target);
-    XrlPFSender* get_sender(const Xrl& xrl, FinderDBEntry& dbe);
+    XrlPFSender* get_sender(const Xrl& xrl, FinderDBEntry *dbe);
 
 protected:
     EventLoop&			_e;

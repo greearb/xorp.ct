@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.68 2008/09/23 19:58:27 abittau Exp $"
+#ident "$XORP: xorp/libxipc/xrl_router.cc,v 1.69 2008/10/02 21:57:25 bms Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/debug.h"
@@ -387,8 +387,7 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 			 bool  direct_call)
 {
     try {
-	// XXX get rid of const
-	XrlPFSender* s = get_sender(xrl, const_cast<FinderDBEntry&>(*dbe));
+	XrlPFSender* s = get_sender(xrl, const_cast<FinderDBEntry*>(dbe));
 	if (s == 0) {
 	    // Notify Finder client that result was bad.
 	    _fc->uncache_result(dbe);
@@ -412,12 +411,26 @@ XrlRouter::send_resolved(const Xrl&		xrl,
 }
 
 XrlPFSender*
-XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry& dbe)
+XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry* dbe)
 {
-    const Xrl& x = dbe.xrls().front();
+    const Xrl& x = dbe->xrls().front();
     XrlPFSender* s = NULL;
 
-    // XXX store a pointer to sender in XRL object.
+    // Use the cache pointer to the sender.
+    if (xrl.resolved()) {
+	s = xrl.resolved_sender();
+
+	if (s->alive())
+	    return s;
+
+	XLOG_ASSERT(s->protocol() == x.protocol());
+	XLOG_ASSERT(s->address()  == x.target());
+
+	xrl.set_resolved(false);
+	xrl.set_resolved_sender(NULL);
+    }
+
+    // Find a new sender.
     for (list<XrlPFSender*>::iterator i = _senders.begin();
 	 i != _senders.end(); ++i) {
 	s = *i;
@@ -425,8 +438,11 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry& dbe)
 	if (s->protocol() != x.protocol() || s->address()  != x.target())
 	    continue;
 
-	if (s->alive())
+	if (s->alive()) {
+	    xrl.set_resolved(true);
+	    xrl.set_resolved_sender(s);
 	    return s;
+	}
 
 	XLOG_INFO("Sender died (protocol = \"%s\", address = \"%s\")",
 		  s->protocol(), s->address().c_str());
@@ -435,11 +451,12 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry& dbe)
 	_senders2.erase(xrl.target());
 	break;
     }
+
     s = NULL;
 
     // create sender
-    while (dbe.xrls().size()) {
-	const Xrl& x = dbe.xrls().front();
+    while (dbe->xrls().size()) {
+	const Xrl& x = dbe->xrls().front();
 
 	s = XrlPFSenderFactory::create_sender(_e, x.protocol().c_str(),
 					      x.target().c_str());
@@ -450,17 +467,20 @@ XrlRouter::get_sender(const Xrl& xrl, FinderDBEntry& dbe)
 		   "address = \"%s\" ",
 		   x.protocol().c_str(), x.target().c_str());
 
-	dbe.pop_front();
+	dbe->pop_front();
     }
     if (!s)
 	return NULL;
 
-    const Xrl& front = dbe.xrls().front();
+    const Xrl& front = dbe->xrls().front();
 
     XLOG_ASSERT(s->protocol() == front.protocol());
     XLOG_ASSERT(s->address()  == front.target());
     _senders.push_back(s);
     _senders2[xrl.target()] = s;
+
+    xrl.set_resolved(true);
+    xrl.set_resolved_sender(s);
 
     return s;
 }
@@ -594,11 +614,8 @@ XrlRouter::send(const Xrl& xrl, const XrlCallback& user_cb)
     // we do within protocol families.
     //
     const string& xrl_no_args = xrl.string_no_args();
-    const FinderDBEntry* fdbe = xrl.resolved();
-    if (!fdbe) {
-	fdbe = _fc->query_cache(xrl_no_args);
-	xrl.set_resolved(fdbe);
-    }
+    // We can't cache this object.
+    const FinderDBEntry* fdbe = _fc->query_cache(xrl_no_args);
     if (_dsl.empty() && fdbe) {
 	return send_resolved(xrl, fdbe, xcb, true);
     }
