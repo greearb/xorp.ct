@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.9 2008/07/23 05:10:50 pavlin Exp $
+// $XORP: xorp/libxorp/buffered_asyncio.hh,v 1.10 2008/10/02 21:57:28 bms Exp $
 
 #ifndef __LIBXORP_BUFFERED_ASYNCIO_HH__
 #define __LIBXORP_BUFFERED_ASYNCIO_HH__
@@ -63,11 +63,13 @@ public:
      * @param fd the file descriptor.
      * @param reserve_bytes the number of bytes to reserve in the data buffer.
      * @param cb the callback to invoke.
+     * @param priority the task priority for the eventloop operations.
      */
     BufferedAsyncReader(EventLoop& 	e,
 			XorpFd 		fd,
 			size_t 		reserve_bytes,
-			const Callback& cb);
+			const Callback& cb,
+			int priority = XorpTask::PRIORITY_DEFAULT);
 
     ~BufferedAsyncReader();
 
@@ -166,6 +168,7 @@ private:
     vector<uint8_t>	_buffer;
     XorpTimer		_ready_timer;
     int			_last_error;
+    int			_priority;
 };
 
 #endif // __LIBXORP_BUFFERED_ASYNCIO_HH__

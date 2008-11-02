@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.15 2008/07/23 05:10:49 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.16 2008/10/02 21:57:28 bms Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -30,11 +30,13 @@
 extern bool is_pseudo_error(const char* name, XorpFd fd, int error_num);
 
 BufferedAsyncReader::BufferedAsyncReader(EventLoop& 		e,
-					 XorpFd 			fd,
+					 XorpFd 		fd,
 					 size_t 		reserve_bytes,
-					 const Callback& 	cb)
+					 const Callback& 	cb,
+					 int			priority)
     : _eventloop(e), _fd(fd), _cb(cb), _buffer(reserve_bytes),
-      _last_error(0)
+      _last_error(0),
+      _priority(priority)
 {
     _config.head 	  = &_buffer[0];
     _config.head_bytes 	  = 0;
@@ -122,14 +124,16 @@ BufferedAsyncReader::start()
 {
     if (_eventloop.add_ioevent_cb(_fd, IOT_READ,
 				  callback(this,
-					   &BufferedAsyncReader::io_event)) ==
+					   &BufferedAsyncReader::io_event),
+				  _priority) ==
 	false) {
 	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
     }
 #ifdef HOST_OS_WINDOWS
     if (_eventloop.add_ioevent_cb(_fd, IOT_DISCONNECT,
 				  callback(this,
-					   &BufferedAsyncReader::io_event)) ==
+					   &BufferedAsyncReader::io_event),
+				  _priority) ==
 	false) {
 	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
     }
