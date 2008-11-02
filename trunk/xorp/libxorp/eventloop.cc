@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.46 2008/10/13 21:31:41 atanu Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.47 2008/10/22 00:26:47 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -37,7 +37,7 @@ int eventloop_instance_count = 0;
 
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock), _aggressiveness(0),
-      _last_ev_run(0), _last_warned(0),
+      _last_ev_run(0), _last_warned(0), _is_debug(false),
 #ifdef HOST_OS_WINDOWS
       _win_dispatcher(_clock)
 #else

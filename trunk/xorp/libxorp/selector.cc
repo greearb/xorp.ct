@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.51 2008/09/25 15:33:24 atanu Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.52 2008/10/02 21:57:33 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -184,7 +184,8 @@ SelectorList::Node::is_empty()
 
 SelectorList::SelectorList(ClockBase *clock)
     : _clock(clock), _observer(NULL), _testfds_n(0), _maxfd(0),
-      _descriptor_count(0)
+      _descriptor_count(0),
+      _is_debug(false)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);

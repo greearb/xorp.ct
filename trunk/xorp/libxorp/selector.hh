@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/selector.hh,v 1.33 2008/09/23 19:57:39 abittau Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.34 2008/10/02 21:57:33 bms Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -113,6 +113,9 @@ public:
      * Destructor.
      */
     virtual ~SelectorList();
+
+    void set_debug(bool v) { _is_debug = v;}
+    bool is_debug() const { return (_is_debug); }
 
     /**
      * Add a hook for pending I/O operations on a callback.
@@ -268,6 +271,7 @@ private:
     vector<Node>	_selector_entries;
     int			_maxfd;
     size_t		_descriptor_count;
+    bool		_is_debug;
 };
 
 #endif // __LIBXORP_SELECTOR_HH__

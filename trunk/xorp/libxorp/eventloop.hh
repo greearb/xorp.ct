@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.37 2008/10/13 17:57:11 atanu Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.38 2008/10/13 18:18:02 atanu Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -112,6 +112,9 @@ public:
      * </pre>
      */
     void run();
+
+    void set_debug(bool v) { _is_debug = v; _selector_list.set_debug(v); }
+    bool is_debug() const { return (_is_debug); }
 
     /**
      * @return reference to the @ref TimerList used by the @ref
@@ -352,6 +355,7 @@ private:
     int			_aggressiveness;
     time_t 		_last_ev_run;	// 0 - Means run not called yet.
     time_t 		_last_warned;
+    bool		_is_debug;	// If true, debug enabled
 #ifdef HOST_OS_WINDOWS
     WinDispatcher	_win_dispatcher;
 #else
