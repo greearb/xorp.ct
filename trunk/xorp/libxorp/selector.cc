@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.52 2008/10/02 21:57:33 bms Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.53 2008/11/02 05:15:01 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -87,7 +87,7 @@ inline bool
 SelectorList::Node::add_okay(SelectorMask m, IoEventType type,
 			     const IoEventCb& cb, int priority)
 {
-    int i;
+    int idx = -1;
 
     // always OK to try to register for nothing
     if (!m)
@@ -98,24 +98,41 @@ SelectorList::Node::add_okay(SelectorMask m, IoEventType type,
     // 0. We understand all bits in 'mode'
     assert((m & (SEL_RD | SEL_WR | SEL_EX)) == m);
 
-    // 1. Check that bits in 'mode' are not already registered
-    for (i = 0; i < SEL_MAX_IDX; i++) {
+    // 1. Select event type index
+    switch (m) {
+    case SEL_RD:
+	idx = SEL_RD_IDX;
+	break;
+    case SEL_WR:
+	idx = SEL_WR_IDX;
+	break;
+    case SEL_EX:
+	idx = SEL_EX_IDX;
+	break;
+    default:
+	XLOG_FATAL("Cannot add selector mask 0x%x", m);
+	return false;
+    }
+    XLOG_ASSERT((idx >= 0) && (idx < SEL_MAX_IDX));
+
+    // 2. Check that bits in 'mode' are not already registered
+    // TODO: This is an overkill: we don't need to check the whole array,
+    // but only _mask[idx]
+    for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (_mask[i] & m) {
 	    return false;
 	}
     }
 
-    // 2. If not already registered, find empty slot and add entry.
+    // 2. Register in the selected slot and add entry.
     // XXX: TODO: Determine if the node we're about to add is for
     // an accept event, so we know how to map it back.
-    for (i = 0; i < SEL_MAX_IDX; i++) {
-	if (!_mask[i]) {
-	    _mask[i]	= m;
-	    _cb[i]	= IoEventCb(cb);
-	    _iot[i]	= type;
-	    _priority[i] = priority;
-	    return true;
-	}
+    if (!_mask[idx]) {
+	_mask[idx]	= m;
+	_cb[idx]	= IoEventCb(cb);
+	_iot[idx]	= type;
+	_priority[idx]	= priority;
+	return true;
     }
 
     assert(0);
