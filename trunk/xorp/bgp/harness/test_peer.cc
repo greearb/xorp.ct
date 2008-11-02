@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.52 2008/07/23 05:09:43 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.53 2008/10/02 21:56:26 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -387,7 +387,8 @@ TestPeer::connect(const string& host, const uint32_t& port,
    */
    if (0 != _coordinator.length() &&
        !_eventloop.add_ioevent_cb(s, IOT_READ,
-				callback(this, &TestPeer::receive))) {
+				  callback(this, &TestPeer::receive),
+				  XorpTask::PRIORITY_LOWEST)) {
 	comm_sock_close(s);
 	XLOG_WARNING("Failed to add socket %s to eventloop", s.str().c_str());
 	return false;
@@ -400,7 +401,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
         XLOG_FATAL("Failed to go non-blocking: %s", comm_get_last_error_str());
     }
     delete _async_writer;
-    _async_writer = new AsyncFileWriter(_eventloop, s);
+    _async_writer = new AsyncFileWriter(_eventloop, s, XorpTask::PRIORITY_LOWEST);
 
     _s = s;
 
@@ -452,8 +453,9 @@ TestPeer::listen(const string& host, const uint32_t& port,
     }
 
     if(!_eventloop.add_ioevent_cb(s, IOT_ACCEPT,
-				callback(this,
-					 &TestPeer::connect_attempt))) {
+				  callback(this,
+					   &TestPeer::connect_attempt),
+				  XorpTask::PRIORITY_LOWEST)) {
 	comm_sock_close(s);
 	error_string = c_format("Failed to add socket %s to eventloop",
 				s.str().c_str());
@@ -673,7 +675,8 @@ TestPeer::connect_attempt(XorpFd fd, IoEventType type)
    */
    if(0 != _coordinator.length() &&
        !_eventloop.add_ioevent_cb(connfd, IOT_READ,
-				callback(this, &TestPeer::receive))) {
+				  callback(this, &TestPeer::receive),
+				  XorpTask::PRIORITY_LOWEST)) {
 	comm_sock_close(connfd);
 	XLOG_WARNING("Failed to add socket %s to eventloop",
 			connfd.str().c_str());
@@ -687,7 +690,7 @@ TestPeer::connect_attempt(XorpFd fd, IoEventType type)
         XLOG_FATAL("Failed to go non-blocking: %s", comm_get_last_error_str());
     }
     delete _async_writer;
-   _async_writer = new AsyncFileWriter(_eventloop, connfd);
+   _async_writer = new AsyncFileWriter(_eventloop, connfd, XorpTask::PRIORITY_LOWEST);
 
    _s = connfd;
 }
