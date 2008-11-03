@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.29 2008/07/23 05:10:43 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.30 2008/10/02 21:57:22 bms Exp $"
 
 #include "finder_module.h"
 
@@ -89,7 +89,6 @@ do {									\
 } while(0)
 
 static int ready = 0;
-static bool observing = true;
 #define WAIT_FOR_CALLBACK() 						\
 do {									\
     ready++;								\
@@ -321,11 +320,6 @@ private:
 //
 
 static void
-no_op()
-{
-}
-
-static void
 create_observer(EventLoop*		     e,
 		FinderEventObserverPackage** pp,
 		IPv4			     addr,
@@ -406,7 +400,9 @@ assert_observer_class_instance_count(FinderEventObserverPackage** pp,
     FinderEventObserverPackage* p = *pp;
     XLOG_ASSERT(p != 0);
     uint32_t icnt = p->observer().instance_count(class_name);
-    XLOG_ASSERT(icnt == cnt);
+
+    if (icnt != cnt)
+	XLOG_FATAL("icnt %d != cnt %d", icnt, cnt);
 }
 
 static void
@@ -414,7 +410,8 @@ create_xrl_target(EventLoop*		e,
 		  IPv4			finder_addr,
 		  uint16_t		finder_port,
 		  const char*		class_name,
-		  list<AnXrlTarget*>* store)
+		  list<AnXrlTarget*>* store,
+		  bool observing)
 {
     if (observing) {
 	WAIT_FOR_CALLBACK();
@@ -427,9 +424,11 @@ create_xrl_target(EventLoop*		e,
 }
 
 static void
-remove_oldest_xrl_target(list<AnXrlTarget*>* store)
+remove_oldest_xrl_target(list<AnXrlTarget*>* store, bool observing)
 {
-    WAIT_FOR_CALLBACK();;
+    if (observing) {
+	WAIT_FOR_CALLBACK();
+    }
 
     XLOG_ASSERT(store != 0 && store->empty() == false);
     AnXrlTarget* a = store->front();
@@ -440,9 +439,11 @@ remove_oldest_xrl_target(list<AnXrlTarget*>* store)
 }
 
 static void
-remove_any_xrl_target(list<AnXrlTarget*>* store)
+remove_any_xrl_target(list<AnXrlTarget*>* store, bool observing)
 {
-    WAIT_FOR_CALLBACK();;
+    if (observing) {
+	WAIT_FOR_CALLBACK();
+    }
 
     uint32_t n = store->size();
     XLOG_ASSERT(n > 0);
@@ -470,33 +471,35 @@ assert_xrl_target_count(list<AnXrlTarget*>* store,
     XLOG_ASSERT(n == cnt);
 }
 
-//
-// Method to dispatch list of callbacks with each dispatch separated
-// by at least a fixed interval (tstep).
-//
-// Rationale: Originally this test just created a list of timers and
-// dispatched them but when the machine is loaded, the timer expiries
-// group together as the process plays catch-up when it gets some CPU
-// cycles.
-//
-static void
-drip_run(EventLoop& e, list<OneoffTimerCallback>& locb, bool delay = false)
-{
-    static const uint32_t tstep = 5000;
+// On a slow machine even allowed may not be sufficient. If a test
+// fails try reducing the burst count and increasing the allowed time.
+static const uint32_t allowed = 60 * 1000;	// Allowed time for test in ms
 
+static
+void
+toolong()
+{
+    XLOG_FATAL("The test has taken too long allowed %dms", allowed);
+}
+
+// A list of functions to call is passed in via locb and any function
+// that requires synchronisation with the next function should
+// increment "ready". The callback should decrement "ready" and the
+// next function in the list will be called. If the tests take too long
+// the timeout will fire and the test will fail.
+static void
+drip_run(EventLoop& e, list<OneoffTimerCallback>& locb)
+{
+    XorpTimer timeout = e.new_oneoff_after_ms(allowed, callback(&toolong));
+
+    int pos = 0;
     while (locb.empty() == false) {
-	XorpTimer pause = e.new_oneoff_after_ms(tstep, callback(&no_op));
-	while(pause.scheduled()) {
-	    if (!delay && 0 == ready)
-		    break;
+	while(0 != ready) {
 	    e.run();
 	}
-	verbose_log("Events: %u ready: %d scheduled: %d delay %d\n",
-		    XORP_UINT_CAST(e.timer_list_length()), ready,
-		    pause.scheduled(), delay);
-	if (0 != ready)
-	    XLOG_WARNING("ready is %d not zero", ready);
-	// XLOG_ASSERT(0 == ready);
+	verbose_log("Events: %u ready: %d cnt %d\n",
+		    XORP_UINT_CAST(e.timer_list_length()), ready, pos++);
+	XLOG_ASSERT(0 == ready);
 	locb.front()->dispatch();
 	locb.pop_front();
     }
@@ -593,19 +596,19 @@ test2(IPv4		finder_addr,
     for (uint32_t i = 0; i < burst_cnt; i++) {
 	locb.push_back(callback(create_xrl_target, &e,
 				finder_addr, finder_port,
-				"class_a", &tgt_store));
+				"class_a", &tgt_store, true));
 	locb.push_back(callback(assert_observer_class_instance_count,
 				&pfeo, "class_a", static_cast<uint32_t>(1u)));
-	locb.push_back(callback(remove_oldest_xrl_target, &tgt_store));
+	locb.push_back(callback(remove_oldest_xrl_target, &tgt_store, true));
 	locb.push_back(callback(assert_observer_class_instance_count,
 				&pfeo, "class_a", static_cast<uint32_t>(0u)));
     }
 
     locb.push_back(callback(create_xrl_target, &e, finder_addr, finder_port,
-			  "class_b", &tgt_store));
+			    "class_b", &tgt_store, false));
     locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
 			    "class_b", static_cast<uint32_t>(0u)));
-    locb.push_back(callback(remove_oldest_xrl_target, &tgt_store));
+    locb.push_back(callback(remove_oldest_xrl_target, &tgt_store, false));
     locb.push_back(callback(remove_watch_from_observer, &pfeo, "class_a"));
     locb.push_back(callback(assert_observer_not_watching, &pfeo, "class_a"));
     locb.push_back(callback(destroy_observer, &pfeo));
@@ -658,13 +661,13 @@ test3(IPv4		finder_addr,
 
     for (uint32_t i = 1; i <= burst_cnt; i++) {
 	locb.push_back(callback(create_xrl_target, &e, finder_addr,
-				finder_port, "class_a", &tgt_store));
+				finder_port, "class_a", &tgt_store, true));
 	locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
 		     "class_a", i));
     }
 
     for (uint32_t i = 1; i <= burst_cnt ; i++) {
-	locb.push_back(callback(remove_any_xrl_target, &tgt_store));
+	locb.push_back(callback(remove_any_xrl_target, &tgt_store, true));
 	locb.push_back(callback(assert_observer_class_instance_count, &pfeo,
 		     "class_a", burst_cnt - i));
     }
@@ -682,6 +685,7 @@ test3(IPv4		finder_addr,
     if (fs) delete fs;
 }
 
+#if	0
 static void
 test4(IPv4		finder_addr,
       uint16_t	 	finder_port,
@@ -757,6 +761,7 @@ test4(IPv4		finder_addr,
     // -- Begin cut-and-paste footer --
     if (fs) delete fs;
 }
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -776,9 +781,10 @@ test_main(IPv4		 finder_addr,
 	test2(finder_addr, finder_port, burst_cnt, use_internal_finder);
 	ready = 0;
 	test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
-	break;
+#if	0
 	ready = 0;
 	test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
+#endif
 	break;
     case 1:
 	test1(finder_addr, finder_port, burst_cnt, use_internal_finder);
@@ -789,9 +795,11 @@ test_main(IPv4		 finder_addr,
     case 3:
 	test3(finder_addr, finder_port, burst_cnt, use_internal_finder);
 	break;
+#if	0
     case 4:
 	test4(finder_addr, finder_port, burst_cnt, use_internal_finder);
 	break;
+#endif
     default:
 	XLOG_FATAL("Unknown test");
     }
@@ -894,7 +902,7 @@ main(int argc, char * const argv[])
     uint16_t	finder_port = 16600;	// over-ridden for external finder
     bool	use_internal_finder = true;
     int		reps = 1;
-    uint32_t	burst_cnt = 50;
+    uint32_t	burst_cnt = 25;
     uint32_t 	dtablesize;
 #ifdef HOST_OS_WINDOWS
     dtablesize = MAXIMUM_WAIT_OBJECTS - 4; // reserve 4 handles.
