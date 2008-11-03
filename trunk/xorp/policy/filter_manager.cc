@@ -18,7 +18,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.21 2008/10/02 21:57:58 bms Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.22 2008/10/10 01:54:58 paulz Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -290,9 +290,13 @@ FilterManager::birth(const string& protocol)
     // it might be better...
     flush_updates_now();
 
-    // XXX: protocol was just born, so no need to push routes for itself... we
-    // may remove the pushes from the queue since they are delayed.
-    _push_queue.erase(protocol);
+    // We still push routes even though this protocol was just brought up.
+    // The reason being that some routes could have already been processed by
+    // the time the protocol was born and the filters configured.  Some
+    // protocols (like BGP) avoid unnecessary flapping by waiting until this
+    // push is received.  Perhaps there should be an explicit mechanism for the
+    // policy manager to signal protocols that it's done with configuration
+    // rather than overloading the meaning of route push.
 }
 
 void 
