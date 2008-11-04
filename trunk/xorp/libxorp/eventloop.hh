@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.38 2008/10/13 18:18:02 atanu Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.39 2008/11/02 05:15:01 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -113,7 +113,13 @@ public:
      */
     void run();
 
-    void set_debug(bool v) { _is_debug = v; _selector_list.set_debug(v); }
+    void set_debug(bool v) {
+	_is_debug = v;
+#ifndef HOST_OS_WINDOWS
+	_selector_list.set_debug(v);
+#endif
+    }
+
     bool is_debug() const { return (_is_debug); }
 
     /**
