@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.18 2008/07/23 05:10:54 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.19 2008/10/02 21:57:33 bms Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -47,10 +47,13 @@ public:
      * @param eventloop the event loop.
      * @param command the command to execute.
      * @param real_command_name the real command name.
+     * @param task_priority the priority to read stdout and stderr.
      */
     RunCommandBase(EventLoop&		eventloop,
 		   const string&	command,
-		   const string&	real_command_name);
+		   const string&	real_command_name,
+		   int 	   		task_priority =
+		   XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Destructor.
@@ -151,6 +154,13 @@ public:
      * @return the signal that stopped the command.
      */
     int stop_signal() const { return _command_stop_signal; }
+
+    /**
+     * Get the priority to use when reading output from the command.
+     *
+     * @return the stdout and stderr priority.
+     */
+    int task_priority() const { return _task_priority; }
 
     /**
      * Get a reference to the ExecId object.
@@ -439,6 +449,8 @@ private:
 
     bool		_stdout_eof_received;
     bool		_stderr_eof_received;
+
+    int			_task_priority;
 };
 
 /**
@@ -463,6 +475,7 @@ public:
      * standard error.
      * @param done_cb the callback to call when the command is completed.
      * @param redirect_stderr_to_stdout if true redirect the stderr to stdout.
+     * @param task_priority the priority to read stdout and stderr.
      */
     RunCommand(EventLoop&			eventloop,
 	       const string&			command,
@@ -470,7 +483,8 @@ public:
 	       RunCommand::OutputCallback	stdout_cb,
 	       RunCommand::OutputCallback	stderr_cb,
 	       RunCommand::DoneCallback		done_cb,
-	       bool				redirect_stderr_to_stdout);
+	       bool				redirect_stderr_to_stdout,
+	       int task_priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Set the callback to dispatch when the program is stopped.
@@ -558,13 +572,15 @@ public:
      * @param stderr_cb the callback to call when there is data on the
      * standard error.
      * @param done_cb the callback to call when the command is completed.
+     * @param task_priority the priority to read stdout and stderr.
      */
     RunShellCommand(EventLoop&				eventloop,
 		    const string&			command,
 		    const string&			argument_string,
 		    RunShellCommand::OutputCallback	stdout_cb,
 		    RunShellCommand::OutputCallback	stderr_cb,
-		    RunShellCommand::DoneCallback	done_cb);
+		    RunShellCommand::DoneCallback	done_cb,
+		    int task_priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Set the callback to dispatch when the program is stopped.

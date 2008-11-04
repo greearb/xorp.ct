@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.68 2008/07/23 05:09:46 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.69 2008/10/02 21:56:29 bms Exp $"
 
 
 //
@@ -388,7 +388,8 @@ CliClient::start_connection(string& error_msg)
     if (cli_node().eventloop().add_ioevent_cb(
 	    input_fd(),
 	    IOT_READ,
-	    callback(this, &CliClient::client_read)) == false) {
+	    callback(this, &CliClient::client_read),
+	    XorpTask::PRIORITY_HIGHEST) == false) {
 	return (XORP_ERROR);
     }
   
@@ -721,7 +722,8 @@ CliClient::block_connection(bool is_blocked)
     }
 
     if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
-					    callback(this, &CliClient::client_read))
+					    callback(this, &CliClient::client_read),
+					      XorpTask::PRIORITY_HIGHEST)
 	== false)
 	return (XORP_ERROR);
 

@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/run_command.cc,v 1.35 2008/10/01 23:04:58 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/run_command.cc,v 1.36 2008/10/02 21:57:33 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -138,8 +138,9 @@ RunCommand::RunCommand(EventLoop&			eventloop,
 		       RunCommand::OutputCallback	stdout_cb,
 		       RunCommand::OutputCallback	stderr_cb,
 		       RunCommand::DoneCallback		done_cb,
-		       bool				redirect_stderr_to_stdout)
-    : RunCommandBase(eventloop, command, command),
+		       bool				redirect_stderr_to_stdout,
+		       int task_priority)
+    : RunCommandBase(eventloop, command, command, task_priority),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb),
@@ -153,8 +154,9 @@ RunShellCommand::RunShellCommand(EventLoop&		eventloop,
 				 const string&		argument_string,
 				 RunShellCommand::OutputCallback stdout_cb,
 				 RunShellCommand::OutputCallback stderr_cb,
-				 RunShellCommand::DoneCallback	 done_cb)
-    : RunCommandBase(eventloop, get_path_bshell(), command),
+				 RunShellCommand::DoneCallback	 done_cb,
+				 int task_priority)
+    : RunCommandBase(eventloop, get_path_bshell(), command, task_priority),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb)
@@ -171,7 +173,8 @@ RunShellCommand::RunShellCommand(EventLoop&		eventloop,
 
 RunCommandBase::RunCommandBase(EventLoop&		eventloop,
 			       const string&		command,
-			       const string&		real_command_name)
+			       const string&		real_command_name,
+			       int task_priority)
     : _eventloop(eventloop),
       _command(command),
       _real_command_name(real_command_name),
@@ -192,7 +195,8 @@ RunCommandBase::RunCommandBase(EventLoop&		eventloop,
       _command_term_signal(0),
       _command_stop_signal(0),
       _stdout_eof_received(false),
-      _stderr_eof_received(false)
+      _stderr_eof_received(false),
+      _task_priority(task_priority)
 {
     memset(_stdout_buffer, 0, BUF_SIZE);
     memset(_stderr_buffer, 0, BUF_SIZE);
@@ -345,7 +349,8 @@ RunCommandBase::execute()
 
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader(_eventloop,
-					      XorpFd(fileno(_stdout_stream)));
+					      XorpFd(fileno(_stdout_stream)),
+					      task_priority());
     _stdout_file_reader->add_buffer(
 	_stdout_buffer,
 	BUF_SIZE,
@@ -359,7 +364,8 @@ RunCommandBase::execute()
     }
 
     _stderr_file_reader = new AsyncFileReader(_eventloop,
-					      XorpFd(fileno(_stderr_stream)));
+					      XorpFd(fileno(_stderr_stream)),
+					      task_priority());
     _stderr_file_reader->add_buffer(
 	_stderr_buffer,
 	BUF_SIZE,

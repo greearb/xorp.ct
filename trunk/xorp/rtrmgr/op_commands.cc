@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.71 2008/07/23 05:11:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.72 2008/10/02 21:58:24 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,7 +100,8 @@ OpInstance::OpInstance(EventLoop&			eventloop,
 	    callback(this, &OpInstance::stdout_cb),
 	    callback(this, &OpInstance::stderr_cb),
 	    callback(this, &OpInstance::done_cb),
-	    true /* redirect_stderr_to_stdout */);
+	    true /* redirect_stderr_to_stdout */,
+	    XorpTask::PRIORITY_LOWEST);	// Give the user input highest priority
 	if (_run_command->execute() != XORP_OK) {
 	    // Create the string with the command name and its arguments
 	    string program_request = _executable_filename;

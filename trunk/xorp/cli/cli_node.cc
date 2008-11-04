@@ -17,7 +17,7 @@
 // XORP Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.42 2008/07/23 05:09:46 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.43 2008/10/02 21:56:29 bms Exp $"
 
 
 //
@@ -131,7 +131,8 @@ CliNode::start()
     if (_cli_port != 0) {
 	if (sock_serv_open().is_valid()) {
 	    eventloop().add_ioevent_cb(_cli_socket, IOT_ACCEPT,
-				       callback(this, &CliNode::accept_connection));
+				       callback(this, &CliNode::accept_connection),
+				       XorpTask::PRIORITY_HIGHEST);
 	}
     }
     
