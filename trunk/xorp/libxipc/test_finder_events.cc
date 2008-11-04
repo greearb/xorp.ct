@@ -18,7 +18,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.30 2008/10/02 21:57:22 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.31 2008/11/03 04:39:49 atanu Exp $"
 
 #include "finder_module.h"
 
@@ -503,6 +503,14 @@ drip_run(EventLoop& e, list<OneoffTimerCallback>& locb)
 	locb.front()->dispatch();
 	locb.pop_front();
     }
+
+    //
+    // XXX: Wait for 3 seconds so that the wrapper shell script that
+    // executes this test program can detect that the program was
+    // actually executed and still running (the script itself
+    // waits for 2 seconds).
+    //
+    e.timer_list().system_sleep(TimeVal(3,0));
 }
 
 
