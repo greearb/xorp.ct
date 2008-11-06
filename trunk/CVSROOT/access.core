@@ -1,5 +1,5 @@
 #
-# $XORP: CVSROOT/access.core,v 1.5 2008/10/15 21:22:52 atanu Exp $
+# $XORP: CVSROOT/access.core,v 1.6 2008/10/27 22:07:18 atanu Exp $
 #
 # Please try to keep the list of core developers
 # (www/html_src/people.html) in in sync with this.
@@ -23,12 +23,16 @@ bms		bms@freebsd.org
 fred		fred@fredbauer.com
 greenhal	adam@hiddennet.net
 hodson		hodson@icir.org
+llu		lixin.llu@xorp.net
 jcardona	cardona@alari.ch
+jtc		jt.conklin@xorp.net
 kohler		kohler@cs.ucla.edu
 mjh		M.Handley@cs.ucl.ac.uk
 paulz		paulz@icir.org
 pavlin		pavlin@icir.org
+ravij		ravi.jonnadula@xorp.net
 rchua		roy.chua@xorp.net
 rizzo		rizzo@iet.unipi.it
 schooley	t.schooley@cs.ucl.ac.uk
+strinh		susan.trinh@xorp.net
 zec		zec@tel.fer.hr
