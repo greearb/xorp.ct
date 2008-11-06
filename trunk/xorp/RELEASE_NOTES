@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.219 2008/10/24 00:14:13 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.220 2008/11/04 17:38:12 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -46,7 +46,11 @@ Release 1.6-WIP (2008/??/??)
     - Bug fix OpenBSD sendmsg() problem when transmitting IGMP packets.
 
   RIB:
-    - 
+    - Bug fix in the CLI command to consolidate the administrative distance 
+      keyword to just be 'distance'. There were 2 administrative distance 
+      keywords used; they were 'distance' and 'distances'. CLI commands to 
+      show the administrative distance were 'show route admin distance' and 
+      'show route admin distances'. The latter CLI command no longer exist. 
 
   RIP/RIPng:
     - 
