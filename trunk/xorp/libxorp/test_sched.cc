@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.1 2008/11/07 21:44:50 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -49,72 +49,88 @@ public:
 	: XorpReasonedException("TestException", file, line, why) {}
 };
 
-class SocketPair {
+class Socket {
 public:
-    SocketPair();
-    ~SocketPair();
+    Socket(const xsock_t& s);
+    ~Socket();
 
-    void     write(void *buf, unsigned len);
+    void     write_sync(unsigned len);
+    void     write(unsigned len);
     void     write_cb(AsyncFileWriter::Event ev, const uint8_t* buf,
 		      size_t len, size_t done);
     void     read(unsigned len);
     void     read_cb(AsyncFileReader::Event ev, const uint8_t* buf,
 		     size_t len, size_t done);
-    bool     have_new();
+    bool     did_read();
+    bool     did_write();
     unsigned readb();
+    unsigned writeb();
 
 private:
     typedef map<uint8_t*, unsigned> BUFFERS;	// data -> len
 
-    xsock_t	    _s[2];
+    uint8_t* create_buffer(unsigned len);
+    void     io_cb(AsyncFileOperator::Event ev, const uint8_t* buf, size_t len,
+		   size_t done);
+
+    xsock_t	    _s;
     AsyncFileReader *_reader;
     AsyncFileWriter *_writer;
     BUFFERS	    _buffers;
     unsigned	    _readb;
-    bool	    _have_new;
+    unsigned	    _writeb;
+    bool	    _did_read;
+    bool	    _did_write;
 };
 
-SocketPair::SocketPair()
-    : _reader(NULL),
+class SocketPair {
+public:
+    SocketPair();
+    ~SocketPair();
+
+    void	write_sync(unsigned len);
+    void	read(unsigned len);
+    bool	did_read();
+    unsigned	readb();
+    Socket&	s0();
+    Socket&	s1();
+
+private:
+    Socket* _s[2];
+};
+
+Socket::Socket(const xsock_t& s)
+    : _s(s),
+      _reader(NULL),
       _writer(NULL),
       _readb(0),
-      _have_new(false)
+      _writeb(0),
+      _did_read(false),
+      _did_write(false)
 {
-    if (comm_sock_pair(AF_UNIX, SOCK_STREAM, 0, _s) != XORP_OK)
-	xorp_throw(TestException, "comm_sock_pair()");
-
-    for (unsigned i = 0; i < 2; i++) {
-	if (comm_sock_set_blocking(_s[i], 0) != XORP_OK)
+    if (comm_sock_set_blocking(_s, 0) != XORP_OK)
 	    xorp_throw(TestException, "comm_sock_set_blocking()");
-    }
 
-    _reader = new AsyncFileReader(_eventloop, _s[0]);
-    _writer = new AsyncFileWriter(_eventloop, _s[1]);
+    _reader = new AsyncFileReader(_eventloop, _s);
+    _writer = new AsyncFileWriter(_eventloop, _s);
 }
 
-SocketPair::~SocketPair()
+Socket::~Socket()
 {
     delete _reader;
     delete _writer;
 
-    for (unsigned i = 0; i < 2; i++) {
-	if (comm_sock_close(_s[i]) != XORP_OK) {
-	    xorp_throw(TestException, "comm_sock_close()");
-	}
-    }
+    if (comm_sock_close(_s) != XORP_OK)
+	xorp_throw(TestException, "comm_sock_close()");
 
     for (BUFFERS::iterator i = _buffers.begin(); i != _buffers.end(); ++i)
 	delete [] i->first;
 }
 
 void
-SocketPair::write(void *buf, unsigned len)
+Socket::write_sync(unsigned len)
 {
-    XLOG_ASSERT(!_writer->running());
-
-    _writer->add_buffer(static_cast<const uint8_t*>(buf), len,
-			callback(this, &SocketPair::write_cb));
-    _writer->start();
+    write(len);
 
     // XXX need a watchdog in case we deadlock (i.e., TX queue fills).
     while (_writer->running())
@@ -122,17 +138,18 @@ SocketPair::write(void *buf, unsigned len)
 }
 
 void
-SocketPair::write_cb(AsyncFileWriter::Event ev, const uint8_t* buf,
-		     size_t len, size_t done)
+Socket::write(unsigned len)
 {
-    UNUSED(buf);
+    uint8_t* buf = create_buffer(len);
 
-    XLOG_ASSERT(ev == AsyncFileOperator::DATA);
-    XLOG_ASSERT(len == done);
+    _writer->add_buffer(buf, len, callback(this, &Socket::write_cb));
+
+    if (!_writer->running())
+	_writer->start();
 }
 
-void
-SocketPair::read(unsigned len)
+uint8_t*
+Socket::create_buffer(unsigned len)
 {
     uint8_t* buf = new uint8_t[len];
 
@@ -141,15 +158,43 @@ SocketPair::read(unsigned len)
 
     _buffers[buf] = len;
 
-    _reader->add_buffer(buf, len, callback(this, &SocketPair::read_cb));
+    return buf;
+}
+
+void
+Socket::write_cb(AsyncFileWriter::Event ev, const uint8_t* buf,
+		 size_t len, size_t done)
+{
+    io_cb(ev, buf, len, done);
+
+    _writeb    += done;
+    _did_write  = true;
+}
+
+void
+Socket::read(unsigned len)
+{
+    uint8_t* buf = create_buffer(len);
+
+    _reader->add_buffer(buf, len, callback(this, &Socket::read_cb));
 
     if (!_reader->running())
 	_reader->start();
 }
 
 void
-SocketPair::read_cb(AsyncFileReader::Event ev, const uint8_t* buf,
-		    size_t len, size_t done)
+Socket::read_cb(AsyncFileReader::Event ev, const uint8_t* buf,
+		size_t len, size_t done)
+{
+    io_cb(ev, buf, len, done);
+
+    _readb    += done;
+    _did_read  = true;
+}
+
+void
+Socket::io_cb(AsyncFileReader::Event ev, const uint8_t* buf,
+	      size_t len, size_t done)
 {
     XLOG_ASSERT(ev == AsyncFileOperator::DATA);
 
@@ -160,25 +205,93 @@ SocketPair::read_cb(AsyncFileReader::Event ev, const uint8_t* buf,
 
     delete i->first;
     _buffers.erase(i);
-
-    _readb    += done;
-    _have_new  = true;
 }
 
 bool
-SocketPair::have_new()
+Socket::did_read()
 {
-    bool x = _have_new;
+    bool x = _did_read;
 
-    _have_new = false;
+    _did_read = false;
+
+    return x;
+}
+
+bool
+Socket::did_write()
+{
+    bool x = _did_write;
+
+    _did_write = false;
 
     return x;
 }
 
 unsigned
-SocketPair::readb()
+Socket::readb()
 {
     return _readb;
+}
+
+unsigned
+Socket::writeb()
+{
+    return _writeb;
+}
+
+SocketPair::SocketPair()
+{
+    xsock_t s[2];
+
+    memset(_s, 0, sizeof(_s));
+
+    if (comm_sock_pair(AF_UNIX, SOCK_STREAM, 0, s) != XORP_OK)
+	xorp_throw(TestException, "comm_sock_pair()");
+
+    for (unsigned i = 0; i < 2; i++)
+	_s[i] = new Socket(s[i]);
+}
+
+SocketPair::~SocketPair()
+{
+    for (unsigned i = 0; i < 2; i++)
+	delete _s[i];
+}
+
+unsigned
+SocketPair::readb()
+{
+    return s0().readb();
+}
+
+Socket&
+SocketPair::s0()
+{
+    return *_s[0];
+}
+
+Socket&
+SocketPair::s1()
+{
+    return *_s[1];
+}
+
+bool
+SocketPair::did_read()
+{
+    return s0().did_read();
+}
+
+void
+SocketPair::write_sync(unsigned len)
+{
+    return s1().write_sync(len);
+}
+
+void
+SocketPair::read(unsigned len)
+{
+    return s0().read(len);
 }
 
 void
@@ -186,7 +299,7 @@ wait_for_read(SocketPair* s, const unsigned num)
 {
     while (1) {
 	for (unsigned i = 0; i < num; i++) {
-	    if (s[i].have_new())
+	    if (s[i].did_read())
 		return;
 	}
 
@@ -207,19 +320,19 @@ xprintf(const char *fmt, ...)
     va_end(ap);
 }
 
+// Two readers with same priority - see if one starves.
 void
-test_fd_2recv_starve(void)
+test_fd_2read_starve(void)
 {
     const unsigned num = 2;
     SocketPair s[num];
-    unsigned char crap[1024];
     unsigned times = 10;
 
     xprintf("Running %s\n", __FUNCTION__);
 
     // give both sockets stuff to read
     for (unsigned i = 0; i < num; i++)
-	s[i].write(crap, sizeof(crap));
+	s[i].write_sync(1024);
 
     // read stuff from both sockets
     for (unsigned i = 0; i < times; i++) {
@@ -244,10 +357,39 @@ test_fd_2recv_starve(void)
 #endif
 }
 
+// Reading & writing on the same FD - see if one operation starves.
+void
+test_fd_read_write_starve()
+{
+    SocketPair p;
+    unsigned times = 10;
+
+    xprintf("Running %s\n", __FUNCTION__);
+
+    // give it enough stuff to read
+    p.write_sync(1024);
+
+    // read & write on socket.
+    Socket& s = p.s0();
+    for (unsigned i = 0; i < times; i++) {
+	s.read(1);
+	s.write(1);
+
+	while (!s.did_read() && !s.did_write())
+	    _eventloop.run();
+    }
+
+    // check results
+    xprintf("Read %u Wrote %u\n", s.readb(), s.writeb());
+    TEST_ASSERT(s.readb()  != 0);
+    TEST_ASSERT(s.writeb() != 0);
+}
+
 void
 do_tests(void)
 {
-    test_fd_2recv_starve();
+    test_fd_2read_starve();
+    test_fd_read_write_starve();
 }
 
 } // anonymous namespace
