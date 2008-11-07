@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-// $XORP: xorp/libxorp/selector.hh,v 1.34 2008/10/02 21:57:33 bms Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.35 2008/11/02 05:15:01 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -267,6 +267,8 @@ private:
     int			_testfds_n;
     int			_maxpri_fd;
     int			_maxpri_sel;
+    int			_last_served_fd;
+    int			_last_served_sel;
 
     vector<Node>	_selector_entries;
     int			_maxfd;

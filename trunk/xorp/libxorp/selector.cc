@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.53 2008/11/02 05:15:01 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.54 2008/11/02 20:38:09 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -200,9 +200,8 @@ SelectorList::Node::is_empty()
 // SelectorList implementation
 
 SelectorList::SelectorList(ClockBase *clock)
-    : _clock(clock), _observer(NULL), _testfds_n(0), _maxfd(0),
-      _descriptor_count(0),
-      _is_debug(false)
+    : _clock(clock), _observer(NULL), _testfds_n(0), _last_served_fd(-1),
+      _last_served_sel(-1), _maxfd(0), _descriptor_count(0), _is_debug(false)
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
@@ -397,11 +396,35 @@ SelectorList::get_ready_priority(bool force)
 
     int max_priority = XorpTask::PRIORITY_INFINITY;
 
-    for (int fd = 0; fd <= _maxfd; fd++) {
+    //
+    // Test the priority of remaining events for the last served file
+    // descriptor.
+    //
+    if ((_last_served_fd >= 0) && (_last_served_fd <= _maxfd)) {
+	for (int sel_idx = _last_served_sel + 1;
+	     sel_idx < SEL_MAX_IDX;
+	     sel_idx++) {
+	    if (FD_ISSET(_last_served_fd, &_testfds[sel_idx])) {
+		int p = _selector_entries[_last_served_fd]._priority[sel_idx];
+		if (p < max_priority) {
+		    max_priority = p;
+		    _maxpri_fd   = _last_served_fd;
+		    _maxpri_sel  = sel_idx;
+		}
+	    }
+	}
+    }
+
+    for (int i = 0; i <= _maxfd; i++) {
+	//
+	// Use (_last_served_fd + 1) as a starting offset in the round-robin
+	// search for the next file descriptor with the best priority.
+	//
+	int fd = (i + _last_served_fd + 1) % (_maxfd + 1);
 	for (int sel_idx = 0; sel_idx < SEL_MAX_IDX; sel_idx++) {
 	    if (FD_ISSET(fd, &_testfds[sel_idx])) {
 		int p = _selector_entries[fd]._priority[sel_idx];
-		if (p <= max_priority) {
+		if (p < max_priority) {
 		    max_priority = p;
 		    _maxpri_fd   = fd;
 		    _maxpri_sel  = sel_idx;
@@ -409,6 +432,8 @@ SelectorList::get_ready_priority(bool force)
 	    }
 	}
     }
+
+    XLOG_ASSERT(_maxpri_fd != -1);
 
     return max_priority;
 }
@@ -457,6 +482,8 @@ SelectorList::wait_and_dispatch(TimeVal& timeout)
 
     _selector_entries[_maxpri_fd].run_hooks(sm, _maxpri_fd);
 
+    _last_served_fd = _maxpri_fd;
+    _last_served_sel = _maxpri_sel;
     _maxpri_fd = -1;
     _testfds_n--;
     XLOG_ASSERT(_testfds_n >= 0);
