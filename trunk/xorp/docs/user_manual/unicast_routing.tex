@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/unicast_routing.tex,v 1.12 2007/03/14 01:07:01 pavlin Exp $
+% $XORP: xorp/docs/user_manual/unicast_routing.tex,v 1.13 2008/07/18 18:40:36 pavlin Exp $
 %
 
 \chapter{Unicast Routing}
@@ -110,6 +110,42 @@ Hence, in the example above, the route learned from BGP will be prefered.
 
 Currently (July 2008), there is no way to modify these default
 administrative distances, but this capability will be added in the future.
+
+The administrative distances can be monitored using the operational mode 
+command {\stt show route admin distance ipv4 unicast}: \\
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xxxxxxxxxxxxxxxxx\=\kill
+user@hostname> {\bf show route admin distance ipv4 unicast}\\
+Protocol \>Administrative distance\\
+connected \>0\\
+static \>1\\
+eigrp-summary \>5\\
+ebgp \>20\\
+eigrp-internal \>90\\
+igrp \>100\\
+ospf \>110\\
+is-is \>115\\
+rip \>120\\
+eigrp-external \>170\\
+ibgp \>200\\
+fib2mrib \>254\\
+unknown \>255\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+The operational command for monitoring the IPv6 unicast administrative 
+distances is {\stt show route admin distance ipv6 unicast}.
+The operational commands for monitoring the multicast administrative 
+distances are {\stt show route admin distance ipv4 multicast}
+and {\stt show route admin distance ipv6 multicast}
+for IPv4 and IPv6 respectively.
 
 \subsection{Route Redistribution}
 
