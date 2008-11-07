@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.1 2008/11/07 21:44:50 abittau Exp $"
+#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.2 2008/11/07 21:48:41 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -65,10 +65,12 @@ public:
     bool     did_write();
     unsigned readb();
     unsigned writeb();
+    void     set_priority(int priority);
 
 private:
     typedef map<uint8_t*, unsigned> BUFFERS;	// data -> len
 
+    void     create_ops(int priority);
     uint8_t* create_buffer(unsigned len);
     void     io_cb(AsyncFileOperator::Event ev, const uint8_t* buf, size_t len,
 		   size_t done);
@@ -94,6 +96,7 @@ public:
     unsigned	readb();
     Socket&	s0();
     Socket&	s1();
+    void	set_priority(int priority);
 
 private:
     Socket* _s[2];
@@ -111,8 +114,7 @@ Socket::Socket(const xsock_t& s)
     if (comm_sock_set_blocking(_s, 0) != XORP_OK)
 	    xorp_throw(TestException, "comm_sock_set_blocking()");
 
-    _reader = new AsyncFileReader(_eventloop, _s);
-    _writer = new AsyncFileWriter(_eventloop, _s);
+    create_ops(XorpTask::PRIORITY_DEFAULT);
 }
 
 Socket::~Socket()
@@ -125,6 +127,28 @@ Socket::~Socket()
 
     for (BUFFERS::iterator i = _buffers.begin(); i != _buffers.end(); ++i)
 	delete [] i->first;
+}
+
+void
+Socket::set_priority(int priority)
+{
+    create_ops(priority);
+}
+
+void
+Socket::create_ops(int priority)
+{
+    delete _reader;
+    delete _writer;
+
+    if (_reader) {
+	XLOG_ASSERT(_writer);
+	XLOG_ASSERT(!_reader->running());
+	XLOG_ASSERT(!_writer->running());
+    }
+
+    _reader = new AsyncFileReader(_eventloop, _s, priority);
+    _writer = new AsyncFileWriter(_eventloop, _s, priority);
 }
 
 void
@@ -295,6 +319,13 @@ SocketPair::read(unsigned len)
 }
 
 void
+SocketPair::set_priority(int priority)
+{
+    for (unsigned i = 0; i < 2; i++)
+	_s[i]->set_priority(priority);
+}
+
+void
 wait_for_read(SocketPair* s, const unsigned num)
 {
     while (1) {
@@ -320,6 +351,27 @@ xprintf(const char *fmt, ...)
     va_end(ap);
 }
 
+void
+feed(SocketPair* s, unsigned num, unsigned len = 1024)
+{
+    for (unsigned i = 0; i < num; i++)
+	s[i].write_sync(len);
+}
+
+void
+eat(SocketPair* s, unsigned num, unsigned len = 1)
+{
+    for (unsigned i = 0; i < num; i++)
+	s[i].read(len);
+}
+
+void
+eat_and_wait(SocketPair* s, unsigned num, unsigned len = 1)
+{
+    eat(s, num, len);
+    wait_for_read(s, num);
+}
+
 // Two readers with same priority - see if one starves.
 void
 test_fd_2read_starve(void)
@@ -331,16 +383,11 @@ test_fd_2read_starve(void)
     xprintf("Running %s\n", __FUNCTION__);
 
     // give both sockets stuff to read
-    for (unsigned i = 0; i < num; i++)
-	s[i].write_sync(1024);
+    feed(s, num);
 
     // read stuff from both sockets
-    for (unsigned i = 0; i < times; i++) {
-	for (unsigned i = 0; i < num; i++)
-	    s[i].read(1);
-
-	wait_for_read(s, num);
-    }
+    for (unsigned i = 0; i < times; i++)
+	eat_and_wait(s, 2);
 
     // check what happened
     for (unsigned i = 0; i < num; i++) {
@@ -367,7 +414,7 @@ test_fd_read_write_starve()
     xprintf("Running %s\n", __FUNCTION__);
 
     // give it enough stuff to read
-    p.write_sync(1024);
+    feed(&p, 1);
 
     // read & write on socket.
     Socket& s = p.s0();
@@ -383,6 +430,56 @@ test_fd_read_write_starve()
     xprintf("Read %u Wrote %u\n", s.readb(), s.writeb());
     TEST_ASSERT(s.readb()  != 0);
     TEST_ASSERT(s.writeb() != 0);
+
+#if 0
+    // check fairness
+    XLOG_ASSERT((times & 1) == 0);
+    TEST_ASSERT(s.readb() == s.writeb());
+#endif
+}
+
+// There are two low priority readers, and both should get serviced round robin.
+// However, we introduce a high priority reader "every other round" and check
+// whether the low priority readers get starved.
+void
+test_fd_1high_2low_starve(void)
+{
+    const unsigned num = 2;
+    SocketPair s[num], high;
+    unsigned times = 10;
+
+    xprintf("Running %s\n", __FUNCTION__);
+
+    high.set_priority(XorpTask::PRIORITY_HIGH);
+
+    // give the sockets something to eat
+    feed(s, num);
+    feed(&high, 1);
+
+    // constantly have the low priority guys read, and introduce the high
+    // priority guy after each low priority event.
+    for (unsigned i = 0; i < times; i++) {
+	// read
+	eat_and_wait(s, num);
+
+	// OK our low priority dudes read something.  Lets get the high priority
+	// guy into the game to see if scheduling state gets "reset".
+	eat(&high, 1);
+	while (!high.did_read())
+	    _eventloop.run();
+
+	for (unsigned j = 0; j < num; j++) {
+	    XLOG_ASSERT(!s[0].did_read());
+	}
+    }
+
+    // see if any of the low priority guys got starved
+    for (unsigned i = 0; i < num; i++) {
+	unsigned x = s[i].readb();
+
+	xprintf("Socket %u read %u\n", i, x);
+	TEST_ASSERT(x != 0);
+    }
 }
 
 void
@@ -390,6 +487,7 @@ do_tests(void)
 {
     test_fd_2read_starve();
     test_fd_read_write_starve();
+    test_fd_1high_2low_starve();
 }
 
 } // anonymous namespace
