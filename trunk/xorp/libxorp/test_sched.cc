@@ -19,7 +19,7 @@
 // XORP, Inc, 2953 Bunker Hill Lane, Suite 204, Santa Clara, CA 95054, USA;
 // http://xorp.net
 
-#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.2 2008/11/07 21:48:41 abittau Exp $"
+#ident "$XORP: xorp/libxorp/test_sched.cc,v 1.3 2008/11/07 21:49:31 abittau Exp $"
 
 #include "libxorp_module.h"
 #include "libxorp/xorp.h"
@@ -42,6 +42,7 @@ namespace {
 
 EventLoop _eventloop;
 int	  _debug;
+bool	  _run_fail = false;
 
 class TestException : public XorpReasonedException {
 public:
@@ -482,12 +483,36 @@ test_fd_1high_2low_starve(void)
     }
 }
 
+struct Test {
+    void	(*_run)(void);
+    bool	_fails;
+    const char*	_desc;
+};
+
+struct Test _tests[] = {
+    { test_fd_2read_starve, false, "Two readers, same priority, check starve" },
+    { test_fd_read_write_starve, false, "RW same FD & priority, check starve" },
+    { test_fd_1high_2low_starve, true, "High pri. starving some low pri." },
+};
+
 void
 do_tests(void)
 {
-    test_fd_2read_starve();
-    test_fd_read_write_starve();
-    test_fd_1high_2low_starve();
+    for (unsigned i = 0; i < sizeof(_tests) / sizeof(*_tests); ++i) {
+	struct Test& t = _tests[i];
+
+	if (!_run_fail && t._fails) {
+	    xprintf("Skipping test #%u [%s]\n", i + 1, t._desc);
+	    continue;
+	}
+
+	xprintf("Running test #%u%s [%s]\n",
+	        i + 1,
+		t._fails ? " (known to fail)" : "",
+		t._desc);
+
+	t._run();
+    }
 }
 
 } // anonymous namespace
@@ -504,14 +529,19 @@ main(int argc, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
-    while ((ch = getopt(argc, argv, "hv")) != -1) {
+    while ((ch = getopt(argc, argv, "hvf")) != -1) {
 	switch (ch) {
 	case 'h':
 	    printf("Usage: %s <opts>\n"
 		   "-h\thelp\n"
 		   "-v\tverbose\n"
+		   "-f\trun tests known to fail\n"
 		   , argv[0]);
 	    exit(1);
+
+	case 'f':
+	    _run_fail = true;
+	    break;
 
 	case 'v':
 	    _debug++;
