@@ -42,11 +42,11 @@ check_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_ipvxnet$(EXEEXT) test_mac$(EXEEXT) \
 	test_observers$(EXEEXT) test_profile$(EXEEXT) \
 	test_ref_ptr$(EXEEXT) test_ref_trie$(EXEEXT) \
-	test_run_command$(EXEEXT) test_service$(EXEEXT) \
-	test_task$(EXEEXT) test_test_main$(EXEEXT) \
-	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
-	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
-	test_utils$(EXEEXT) test_vif$(EXEEXT)
+	test_run_command$(EXEEXT) test_sched$(EXEEXT) \
+	test_service$(EXEEXT) test_task$(EXEEXT) \
+	test_test_main$(EXEEXT) test_time_slice$(EXEEXT) \
+	test_timer$(EXEEXT) test_timeval$(EXEEXT) test_trie$(EXEEXT) \
+	test_types$(EXEEXT) test_utils$(EXEEXT) test_vif$(EXEEXT)
 subdir = libxorp
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -140,6 +140,10 @@ am_test_run_command_OBJECTS = test_run_command.$(OBJEXT)
 test_run_command_OBJECTS = $(am_test_run_command_OBJECTS)
 test_run_command_LDADD = $(LDADD)
 test_run_command_DEPENDENCIES = $(noinst_LTLIBRARIES)
+am_test_sched_OBJECTS = test_sched.$(OBJEXT)
+test_sched_OBJECTS = $(am_test_sched_OBJECTS)
+test_sched_DEPENDENCIES = $(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 am_test_service_OBJECTS = test_service.$(OBJEXT)
 test_service_OBJECTS = $(am_test_service_OBJECTS)
 test_service_LDADD = $(LDADD)
@@ -210,11 +214,12 @@ SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_mac_SOURCES) $(test_observers_SOURCES) \
 	$(test_profile_SOURCES) $(test_ref_ptr_SOURCES) \
 	$(test_ref_trie_SOURCES) $(test_run_command_SOURCES) \
-	$(test_service_SOURCES) $(test_task_SOURCES) \
-	$(test_test_main_SOURCES) $(test_time_slice_SOURCES) \
-	$(test_timer_SOURCES) $(test_timeval_SOURCES) \
-	$(test_trie_SOURCES) $(test_types_SOURCES) \
-	$(test_utils_SOURCES) $(test_vif_SOURCES)
+	$(test_sched_SOURCES) $(test_service_SOURCES) \
+	$(test_task_SOURCES) $(test_test_main_SOURCES) \
+	$(test_time_slice_SOURCES) $(test_timer_SOURCES) \
+	$(test_timeval_SOURCES) $(test_trie_SOURCES) \
+	$(test_types_SOURCES) $(test_utils_SOURCES) \
+	$(test_vif_SOURCES)
 DIST_SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_callback_SOURCES) $(test_config_param_SOURCES) \
 	$(test_heap_SOURCES) $(test_ipnet_SOURCES) \
@@ -224,11 +229,12 @@ DIST_SOURCES = $(libxorp_la_SOURCES) $(test_asyncio_SOURCES) \
 	$(test_mac_SOURCES) $(test_observers_SOURCES) \
 	$(test_profile_SOURCES) $(test_ref_ptr_SOURCES) \
 	$(test_ref_trie_SOURCES) $(test_run_command_SOURCES) \
-	$(test_service_SOURCES) $(test_task_SOURCES) \
-	$(test_test_main_SOURCES) $(test_time_slice_SOURCES) \
-	$(test_timer_SOURCES) $(test_timeval_SOURCES) \
-	$(test_trie_SOURCES) $(test_types_SOURCES) \
-	$(test_utils_SOURCES) $(test_vif_SOURCES)
+	$(test_sched_SOURCES) $(test_service_SOURCES) \
+	$(test_task_SOURCES) $(test_test_main_SOURCES) \
+	$(test_time_slice_SOURCES) $(test_timer_SOURCES) \
+	$(test_timeval_SOURCES) $(test_trie_SOURCES) \
+	$(test_types_SOURCES) $(test_utils_SOURCES) \
+	$(test_vif_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -372,10 +378,11 @@ TESTS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
 	test_ipvxnet$(EXEEXT) test_mac$(EXEEXT) \
 	test_observers$(EXEEXT) test_profile$(EXEEXT) \
 	test_ref_ptr$(EXEEXT) test_ref_trie$(EXEEXT) \
-	test_run_command.sh test_service$(EXEEXT) test_task$(EXEEXT) \
-	test_test_main$(EXEEXT) test_time_slice$(EXEEXT) \
-	test_timer$(EXEEXT) test_timeval$(EXEEXT) test_trie$(EXEEXT) \
-	test_types$(EXEEXT) test_utils$(EXEEXT) test_vif$(EXEEXT)
+	test_run_command.sh test_sched$(EXEEXT) test_service$(EXEEXT) \
+	test_task$(EXEEXT) test_test_main$(EXEEXT) \
+	test_time_slice$(EXEEXT) test_timer$(EXEEXT) \
+	test_timeval$(EXEEXT) test_trie$(EXEEXT) test_types$(EXEEXT) \
+	test_utils$(EXEEXT) test_vif$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libxorp.la
@@ -402,6 +409,7 @@ test_profile_SOURCES = test_profile.cc
 test_ref_ptr_SOURCES = test_ref_ptr.cc
 test_ref_trie_SOURCES = test_ref_trie.cc
 test_run_command_SOURCES = test_run_command.cc
+test_sched_SOURCES = test_sched.cc
 test_service_SOURCES = test_service.cc
 test_task_SOURCES = test_task.cc
 test_test_main_SOURCES = test_test_main.cc
@@ -412,6 +420,10 @@ test_trie_SOURCES = test_trie.cc
 test_types_SOURCES = test_types.cc
 test_utils_SOURCES = test_utils.cc
 test_vif_SOURCES = test_vif.cc
+
+# -- Test programs extra libraries
+test_sched_LDADD = $(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libxorp_la_SOURCES = libxorp_module.h daemon.h debug.h ether_compat.h \
@@ -571,6 +583,9 @@ test_ref_trie$(EXEEXT): $(test_ref_trie_OBJECTS) $(test_ref_trie_DEPENDENCIES)
 test_run_command$(EXEEXT): $(test_run_command_OBJECTS) $(test_run_command_DEPENDENCIES) 
 	@rm -f test_run_command$(EXEEXT)
 	$(CXXLINK) $(test_run_command_OBJECTS) $(test_run_command_LDADD) $(LIBS)
+test_sched$(EXEEXT): $(test_sched_OBJECTS) $(test_sched_DEPENDENCIES) 
+	@rm -f test_sched$(EXEEXT)
+	$(CXXLINK) $(test_sched_OBJECTS) $(test_sched_LDADD) $(LIBS)
 test_service$(EXEEXT): $(test_service_OBJECTS) $(test_service_DEPENDENCIES) 
 	@rm -f test_service$(EXEEXT)
 	$(CXXLINK) $(test_service_OBJECTS) $(test_service_LDADD) $(LIBS)
@@ -658,6 +673,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ref_ptr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_ref_trie.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_run_command.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_sched.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_service.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_task.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_test_main.Po@am__quote@

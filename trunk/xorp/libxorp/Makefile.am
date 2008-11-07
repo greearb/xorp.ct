@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.54 2008/06/17 08:29:40 bms Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.55 2008/10/03 03:15:37 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -25,6 +25,7 @@ check_PROGRAMS	+= test_profile
 check_PROGRAMS	+= test_ref_ptr
 check_PROGRAMS	+= test_ref_trie
 check_PROGRAMS	+= test_run_command
+check_PROGRAMS	+= test_sched
 check_PROGRAMS	+= test_service
 check_PROGRAMS	+= test_task
 check_PROGRAMS	+= test_test_main
@@ -55,6 +56,7 @@ TESTS	+= test_profile$(EXEEXT)
 TESTS	+= test_ref_ptr$(EXEEXT)
 TESTS	+= test_ref_trie$(EXEEXT)
 TESTS	+= test_run_command.sh
+TESTS	+= test_sched$(EXEEXT)
 TESTS	+= test_service$(EXEEXT)
 TESTS	+= test_task$(EXEEXT)
 TESTS	+= test_test_main$(EXEEXT)
@@ -91,6 +93,7 @@ test_profile_SOURCES	= test_profile.cc
 test_ref_ptr_SOURCES	= test_ref_ptr.cc
 test_ref_trie_SOURCES	= test_ref_trie.cc
 test_run_command_SOURCES = test_run_command.cc
+test_sched_SOURCES	= test_sched.cc
 test_service_SOURCES	= test_service.cc
 test_task_SOURCES	= test_task.cc
 test_test_main_SOURCES	= test_test_main.cc
@@ -101,6 +104,10 @@ test_trie_SOURCES	= test_trie.cc
 test_types_SOURCES	= test_types.cc
 test_utils_SOURCES	= test_utils.cc
 test_vif_SOURCES	= test_vif.cc
+
+# -- Test programs extra libraries
+test_sched_LDADD	= $(top_builddir)/libcomm/libcomm.la
+test_sched_LDADD       += $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
 libxorp_la_SOURCES  = libxorp_module.h

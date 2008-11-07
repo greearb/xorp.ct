@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/libxorp/Jamfile,v 1.2 2007/03/22 18:10:33 bms Exp $
+# $XORP: xorp/libxorp/Jamfile,v 1.3 2007/04/22 01:57:09 pavlin Exp $
 #
 
 SubDir TOP libxorp ;
@@ -22,6 +22,7 @@ REGRESSION_TESTS =
 	test_ref_ptr
 	test_ref_trie
 	test_run_command
+	test_sched
 	test_service
 	test_task
 	test_test_main
